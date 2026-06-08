@@ -1,0 +1,36 @@
+version: "0.1"
+language: en
+import:
+  - "@cspell/dict-ar/cspell-ext.json"
+dictionaries:
+  - ar
+words:
+  - codegen
+  - sonarjs
+  - scannerwork
+  - kiro
+  - flagcdn
+  - Qube
+  - sonarqube
+  - Dsonar
+  - Hijri
+  - tsvector
+  - tsquery
+  - dbname
+  - datname
+  - PGPORT
+  - trgm
+  - officedocument
+  - msword
+  - officedocument
+  - openxmlformats
+  - wordprocessingml
+  - spreadsheetml
+  - zcard
+  - UNLOGGED
+  - zremrangebyscore
+  - zadd
+  - Playload
+  - ILIKE
+  - codescene
+  - codescene

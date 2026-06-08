@@ -1,0 +1,86 @@
+import { type JWTPayload as JoseJWTPayload, jwtVerify, SignJWT } from "jose";
+
+// Validate JWT_SECRET is set in production
+if (process.env.NODE_ENV === "production" && !process.env.JWT_SECRET) {
+	throw new Error("JWT_SECRET must be set in production environment");
+}
+
+const JWT_SECRET =
+	process.env.JWT_SECRET || "your-secret-key-change-this-in-production";
+const JWT_ACCESS_TOKEN_EXPIRY = "15m"; // 15 minutes
+const JWT_REFRESH_TOKEN_EXPIRY = "7d"; // 7 days
+
+const secret = new TextEncoder().encode(JWT_SECRET);
+
+export interface CustomJWTPayload extends JoseJWTPayload {
+	userId: number;
+	email: string;
+	type: "access" | "refresh";
+}
+
+/**
+ * Generate an access token for a user
+ */
+export async function generateAccessToken(
+	userId: number,
+	email: string,
+): Promise<string> {
+	const token = await new SignJWT({
+		userId,
+		email,
+		type: "access" as const,
+	})
+		.setProtectedHeader({ alg: "HS256" })
+		.setIssuedAt()
+		.setExpirationTime(JWT_ACCESS_TOKEN_EXPIRY)
+		.sign(secret);
+
+	return token;
+}
+
+/**
+ * Generate a refresh token for a user
+ */
+export async function generateRefreshToken(
+	userId: number,
+	email: string,
+): Promise<string> {
+	const token = await new SignJWT({
+		userId,
+		email,
+		type: "refresh" as const,
+	})
+		.setProtectedHeader({ alg: "HS256" })
+		.setIssuedAt()
+		.setExpirationTime(JWT_REFRESH_TOKEN_EXPIRY)
+		.sign(secret);
+
+	return token;
+}
+
+/**
+ * Verify and decode a JWT token
+ */
+export async function verifyToken(
+	token: string,
+): Promise<CustomJWTPayload | null> {
+	try {
+		const { payload } = await jwtVerify(token, secret);
+		return payload as unknown as CustomJWTPayload;
+	} catch {
+		// Token verification failed - invalid or expired
+		return null;
+	}
+}
+
+/**
+ * Extract token from Authorization header
+ */
+export function extractTokenFromHeader(
+	authHeader: string | null,
+): string | null {
+	if (!authHeader?.startsWith("Bearer ")) {
+		return null;
+	}
+	return authHeader.substring(7);
+}

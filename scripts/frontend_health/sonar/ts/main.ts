@@ -1,0 +1,85 @@
+import { COLORS, logError, logInfo, logSuccess } from "./config";
+import { checkDocker, checkDockerCompose, startSonarQube } from "./docker";
+import { fetchAndDisplayResults, waitForAnalysisProcessing } from "./results";
+import { installScanner, runAnalysis } from "./scanner";
+import {
+	changeAdminPassword,
+	createProject,
+	generateToken,
+	waitForSonarQube,
+} from "./sonarqube-api";
+import { resetSetup } from "./state";
+
+function printHelp() {
+	globalThis.console.log(`
+${COLORS.BLUE}🔍 SonarQube Analysis Runner CLI${COLORS.NC}
+
+${COLORS.YELLOW}Usage:${COLORS.NC}
+  bun run sonar-scan [flags]
+
+${COLORS.YELLOW}Flags:${COLORS.NC}
+  --scan        Run full SonarQube analysis (setup, scan, and results)
+  --result      Fetch and display current analysis issues (no scan)
+  --full        Fetch and display analysis issues with duplication metrics (no scan)
+  --reset       Reset SonarQube setup state (clears state and reconfigures)
+  --help, -h    Display this help message
+
+${COLORS.YELLOW}Examples:${COLORS.NC}
+  bun run sonar-scan --scan
+  bun run sonar-scan --result
+  bun run sonar-scan --full
+  bun run sonar-scan --reset
+`);
+}
+
+async function main() {
+	const args = process.argv.slice(2);
+
+	if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
+		printHelp();
+		return;
+	}
+
+	if (args.includes("--reset")) {
+		resetSetup();
+		return;
+	}
+
+	globalThis.console.log("");
+	logInfo("🔍 SonarQube Analysis Runner");
+	globalThis.console.log("");
+
+	try {
+		if (args.includes("--scan")) {
+			checkDocker();
+			checkDockerCompose();
+			startSonarQube();
+			await waitForSonarQube();
+			await changeAdminPassword();
+			const token = await generateToken();
+			await createProject(token);
+			await installScanner();
+			const scanStartTime = runAnalysis(token);
+			await waitForAnalysisProcessing(token, scanStartTime);
+			await fetchAndDisplayResults(token, true);
+		} else if (args.includes("--result")) {
+			const token = await generateToken();
+			await fetchAndDisplayResults(token, false);
+		} else if (args.includes("--full")) {
+			const token = await generateToken();
+			await fetchAndDisplayResults(token, true);
+		} else {
+			logError("Invalid arguments. Use --help for usage information.");
+			process.exit(1);
+		}
+
+		globalThis.console.log("");
+		logSuccess("All done! 🎉");
+		globalThis.console.log("");
+	} catch (error) {
+		logError(error instanceof Error ? error.message : String(error));
+		process.exit(1);
+	}
+}
+
+void main();

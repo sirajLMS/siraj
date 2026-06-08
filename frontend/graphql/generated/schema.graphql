@@ -1,0 +1,679 @@
+enum AppLanguage {
+  ar
+  en
+}
+
+type BulkOperationFailure {
+  error: String
+  path: String
+}
+
+type BulkOperationResult {
+  failureCount: Int
+  failures: [BulkOperationFailure!]
+  message: String
+  success: Boolean
+  successCount: Int
+  successfulItems: [StorageObject!]
+}
+
+enum CountryCode {
+  AD
+  AE
+  AF
+  AG
+  AI
+  AL
+  AM
+  AO
+  AQ
+  AR
+  AS
+  AT
+  AU
+  AW
+  AX
+  AZ
+  BA
+  BB
+  BD
+  BE
+  BF
+  BG
+  BH
+  BI
+  BJ
+  BL
+  BM
+  BN
+  BO
+  BR
+  BS
+  BT
+  BV
+  BW
+  BY
+  BZ
+  CA
+  CC
+  CD
+  CF
+  CG
+  CH
+  CI
+  CK
+  CL
+  CM
+  CN
+  CO
+  CR
+  CU
+  CV
+  CW
+  CX
+  CY
+  CZ
+  DE
+  DJ
+  DK
+  DM
+  DO
+  DZ
+  EC
+  EE
+  EG
+  EH
+  ER
+  ES
+  ET
+  FI
+  FJ
+  FK
+  FM
+  FO
+  FR
+  GA
+  GB
+  GD
+  GE
+  GF
+  GG
+  GH
+  GI
+  GL
+  GM
+  GN
+  GP
+  GQ
+  GR
+  GS
+  GT
+  GU
+  GW
+  GY
+  HK
+  HM
+  HN
+  HR
+  HT
+  HU
+  ID
+  IE
+  IM
+  IN
+  IO
+  IQ
+  IR
+  IS
+  IT
+  JE
+  JM
+  JO
+  JP
+  KE
+  KG
+  KH
+  KI
+  KM
+  KN
+  KP
+  KR
+  KW
+  KY
+  KZ
+  LA
+  LB
+  LC
+  LI
+  LK
+  LR
+  LS
+  LT
+  LU
+  LV
+  LY
+  MA
+  MC
+  MD
+  ME
+  MF
+  MG
+  MH
+  MK
+  ML
+  MM
+  MN
+  MO
+  MP
+  MQ
+  MR
+  MS
+  MT
+  MU
+  MV
+  MW
+  MX
+  MY
+  MZ
+  NA
+  NC
+  NE
+  NF
+  NG
+  NI
+  NL
+  NO
+  NP
+  NR
+  NU
+  NZ
+  OM
+  PA
+  PE
+  PF
+  PG
+  PH
+  PK
+  PL
+  PM
+  PN
+  PR
+  PS
+  PT
+  PW
+  PY
+  QA
+  RE
+  RO
+  RS
+  RU
+  RW
+  SA
+  SB
+  SC
+  SD
+  SE
+  SG
+  SH
+  SI
+  SJ
+  SK
+  SL
+  SM
+  SN
+  SO
+  SR
+  SS
+  ST
+  SV
+  SX
+  SY
+  SZ
+  TC
+  TD
+  TF
+  TG
+  TH
+  TJ
+  TK
+  TL
+  TM
+  TN
+  TO
+  TR
+  TV
+  TW
+  TZ
+  UA
+  UG
+  US
+  UY
+  UZ
+  VA
+  VC
+  VE
+  VG
+  VI
+  VN
+  VU
+  WF
+  WS
+  XK
+  YE
+  YT
+  ZA
+  ZM
+  ZW
+}
+
+"""
+A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar Date
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+type DirectoryInfo implements StorageObject {
+  createdAt: DateTime
+  fileCount: Int
+  folderCount: Int
+  isFromBucket: Boolean
+  isProtected: Boolean
+  lastModified: DateTime
+  name: String
+  path: String!
+  permissions: DirectoryPermissions
+  protectChildren: Boolean
+  totalSize: Int
+}
+
+type DirectoryPermissions {
+  allowCreateSubDirs: Boolean
+  allowDelete: Boolean
+  allowDeleteFiles: Boolean
+  allowMove: Boolean
+  allowMoveFiles: Boolean
+  allowUploads: Boolean
+}
+
+input DirectoryPermissionsInput {
+  allowCreateSubDirs: Boolean!
+  allowDelete: Boolean!
+  allowDeleteFiles: Boolean!
+  allowMove: Boolean!
+  allowMoveFiles: Boolean!
+  allowUploads: Boolean!
+}
+
+input DirectoryPermissionsUpdateInput {
+  path: String!
+  permissions: DirectoryPermissionsInput!
+}
+
+"""A type representing a validated email address"""
+scalar Email
+
+type FileInfo implements StorageObject {
+  contentHash: String
+  contentType: String
+  createdAt: DateTime
+  directoryPath: String
+  fileType: FileType
+  isFromBucket: Boolean
+  isInUse: Boolean
+  isProtected: Boolean
+  isPublic: Boolean
+  lastModified: DateTime
+  mediaLink: String
+  name: String
+  path: String!
+  size: Int!
+  url: String!
+  usages: [FileUsageInfo!]
+}
+
+type FileOperationResult {
+  data: StorageObject
+  message: String
+  success: Boolean
+}
+
+input FileRenameInput {
+  currentPath: String!
+  newName: String!
+}
+
+enum FileSortField {
+  CREATED
+  MODIFIED
+  NAME
+  SIZE
+  TYPE
+}
+
+enum FileType {
+  ARCHIVE
+  AUDIO
+  DOCUMENT
+  FONT
+  IMAGE
+  OTHER
+  VIDEO
+}
+
+type FileTypeBreakdown {
+  count: Int
+  size: String
+  type: FileType
+}
+
+input FileUsageCheckInput {
+  path: String!
+}
+
+type FileUsageInfo {
+  createdAt: DateTime
+  filePath: String
+  id: String
+  referenceId: String
+  referenceTable: String
+  usageType: String
+}
+
+type FileUsageResult {
+  canDelete: Boolean
+  deleteBlockReason: String
+  isInUse: Boolean
+  usages: [FileUsageInfo!]
+}
+
+input FilesListInput {
+  contentTypes: [String!]
+  fileType: String
+  fileTypes: [FileType!]
+  includeDirectories: Boolean = true
+  limit: Int
+  offset: Int
+  path: String!
+  searchTerm: String
+  sortBy: FileSortField
+  sortDirection: OrderSortDirection
+}
+
+input FolderCreateInput {
+  path: String!
+  permissions: DirectoryPermissionsInput
+  protectChildren: Boolean
+  protected: Boolean
+}
+
+enum Gender {
+  FEMALE
+  MALE
+}
+
+"""A type representing arbitrary JSON values"""
+scalar JSON
+
+input LoginInput {
+  email: Email!
+  password: String!
+}
+
+type LoginResponse {
+  token: String
+  user: User
+}
+
+type Mutation {
+  copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
+  createFolder(input: FolderCreateInput!): FileOperationResult
+  createStudent(input: StudentCreateInput!): Student
+  deleteFile(path: String!): FileOperationResult
+  deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
+  deleteStudent(id: Int!): Student
+  login(input: LoginInput!): LoginResponse
+  logout: Boolean
+  moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult
+  partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
+  prepareUpload(input: UploadPreparationInput!): UploadPreparation
+  refreshToken: RefreshTokenResponse
+  renameFile(input: FileRenameInput!): FileOperationResult
+  setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
+  updateDirectoryPermissions(input: DirectoryPermissionsUpdateInput!): FileOperationResult
+}
+
+enum OrderSortDirection {
+  ASC
+  DESC
+}
+
+type PageInfo {
+  count: Int!
+  currentPage: Int!
+  firstItem: Int
+  hasMorePages: Boolean!
+  lastItem: Int
+  lastPage: Int!
+  perPage: Int!
+  total: Int!
+}
+
+input PaginationArgs {
+  first: Int = 10
+  last: Int
+  maxCount: Int = 100
+  page: Int
+  skip: Int
+}
+
+input PartialStudentUpdateInput {
+  dateOfBirth: DateTime
+  email: Email
+  gender: Gender
+  id: Int!
+  name: String
+  nationality: CountryCode
+  phoneNumber: PhoneNumber
+}
+
+"""A type representing a validated phone number"""
+scalar PhoneNumber
+
+type Query {
+  directoryChildren(
+    """Parent directory path (empty or null for root level)"""
+    path: String
+  ): [DirectoryInfo!]
+  fileInfo(path: String!): FileInfo
+  fileUsage(input: FileUsageCheckInput!): FileUsageResult
+  folderInfo(path: String!): DirectoryInfo
+  listFiles(input: FilesListInput!): StorageObjectList
+  me: User
+  searchFiles(
+    """File type filter (optional)"""
+    fileType: String
+
+    """
+    Folder to search in (optional, searches entire bucket if not specified)
+    """
+    folder: String
+
+    """Maximum number of results"""
+    limit: Int = 50
+    searchTerm: String!
+  ): StorageObjectList
+  storageStats(
+    """
+    Folder path to get stats for (optional, gets stats for entire bucket if not specified)
+    """
+    path: String
+  ): StorageStats
+  student(id: Int!): Student
+  students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
+  user(id: Int!): User
+  users: [User!]
+}
+
+type RefreshTokenResponse {
+  token: String
+  user: User
+}
+
+input StorageItemProtectionUpdateInput {
+  isProtected: Boolean!
+  path: String!
+  protectChildren: Boolean
+}
+
+input StorageItemsCopyInput {
+  destinationPath: String!
+  sourcePaths: [String!]!
+}
+
+input StorageItemsDeleteInput {
+  force: Boolean
+  paths: [String!]!
+}
+
+input StorageItemsMoveInput {
+  destinationPath: String!
+  sourcePaths: [String!]!
+}
+
+interface StorageObject {
+  isProtected: Boolean
+  name: String
+  path: String!
+}
+
+type StorageObjectList {
+  hasMore: Boolean!
+  items: [StorageObject!]
+  limit: Int!
+  offset: Int!
+  totalCount: Int!
+}
+
+type StorageStats {
+  directoryCount: Int
+  fileTypeBreakdown: [FileTypeBreakdown!]
+  totalFiles: Int
+  totalSize: String
+}
+
+"""A map of string keys to string values (Record<string, string>)"""
+scalar StringMap
+
+type Student {
+  createdAt: DateTime
+  dateOfBirth: DateTime
+  email: String
+  gender: Gender
+  id: Int!
+  name: String!
+  nationality: CountryCode
+  phoneNumber: PhoneNumber
+  updatedAt: DateTime
+}
+
+input StudentCreateInput {
+  dateOfBirth: DateTime
+  email: Email
+  gender: Gender
+  name: String!
+  nationality: CountryCode
+  phoneNumber: PhoneNumber
+}
+
+input StudentFilterArgs {
+  birthDate: DateTime
+  birthDateAfter: DateTime
+  birthDateBefore: DateTime
+  birthDateFrom: DateTime
+  birthDateIsEmpty: Boolean
+  birthDateIsNotEmpty: Boolean
+  birthDateNot: DateTime
+  birthDateOnOrAfter: DateTime
+  birthDateOnOrBefore: DateTime
+  birthDateTo: DateTime
+  createdAt: DateTime
+  createdAtAfter: DateTime
+  createdAtBefore: DateTime
+  createdAtFrom: DateTime
+  createdAtIsEmpty: Boolean
+  createdAtIsNotEmpty: Boolean
+  createdAtNot: DateTime
+  createdAtOnOrAfter: DateTime
+  createdAtOnOrBefore: DateTime
+  createdAtTo: DateTime
+  email: String
+  emailEndsWith: String
+  emailEquals: Email
+  emailIsEmpty: Boolean
+  emailIsNotEmpty: Boolean
+  emailNotContains: String
+  emailNotEquals: String
+  emailStartsWith: String
+  gender: Gender
+  name: String
+  nameEndsWith: String
+  nameEquals: String
+  nameIsEmpty: Boolean
+  nameIsNotEmpty: Boolean
+  nameNotContains: String
+  nameNotEquals: String
+  nameStartsWith: String
+  nationality: CountryCode
+  phoneNumber: PhoneNumber
+}
+
+input StudentsOrderByClause {
+  column: StudentsOrderByColumn!
+  order: OrderSortDirection = ASC
+}
+
+enum StudentsOrderByColumn {
+  CREATED_AT
+  DATE_OF_BIRTH
+  EMAIL
+  GENDER
+  ID
+  NAME
+  UPDATED_AT
+}
+
+type StudentsWithFiltersResponse {
+  data: [Student!]!
+  pageInfo: PageInfo!
+}
+
+type UploadPreparation {
+  id: String!
+  uploadType: UploadType!
+  url: String!
+}
+
+input UploadPreparationInput {
+  contentHash: String!
+  contentType: String!
+  fileSize: Int!
+  path: String!
+}
+
+enum UploadType {
+  SIGNED_URL
+  VERCEL_BLOB_CLIENT
+}
+
+type User {
+  createdAt: DateTime
+  email: String
+  emailVerifiedAt: DateTime
+  id: Int
+  name: String
+  updatedAt: DateTime
+}
