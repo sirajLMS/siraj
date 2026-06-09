@@ -1,2 +1,0 @@
-ALTER TABLE "admin_audit_logs" ALTER COLUMN "ip_address" SET DATA TYPE inet USING "ip_address"::inet;--> statement-breakpoint
-ALTER TABLE "sessions" ALTER COLUMN "ip_address" SET DATA TYPE inet USING "ip_address"::inet;

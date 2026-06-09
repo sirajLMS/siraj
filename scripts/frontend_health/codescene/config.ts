@@ -12,9 +12,28 @@ export const CONFIG = {
   CACHE_DIR: join(SCRIPT_DIR, ".cache"),
   TIMESTAMP_FILE: join(SCRIPT_DIR, ".cache", "file-timestamps.txt"),
   RESULTS_FILE: join(SCRIPT_DIR, ".cache", "results.txt"),
-  CS_TOKEN: process.env.CS_ACCESS_TOKEN || "",
+  TOKEN_FILE: join(SCRIPT_DIR, "token.txt"),
+  CS_TOKEN: "",
   CODESCENE_BIN: process.env.CODESCENE_BIN || "cs",
 };
+
+// 1. Try to load token from local file first (highest priority for persistence)
+if (fs.existsSync(CONFIG.TOKEN_FILE)) {
+  try {
+    const localToken = fs.readFileSync(CONFIG.TOKEN_FILE, "utf8").trim();
+    if (localToken) {
+      CONFIG.CS_TOKEN = localToken;
+      process.env.CS_ACCESS_TOKEN = localToken;
+    }
+  } catch {
+    // Ignore read errors
+  }
+}
+
+// 2. Fallback to environment if file was missing or empty
+if (!CONFIG.CS_TOKEN) {
+  CONFIG.CS_TOKEN = process.env.CS_ACCESS_TOKEN || "";
+}
 
 let resolvedCsBin: string | null = null;
 

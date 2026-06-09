@@ -109,13 +109,27 @@ ${COLORS.YELLOW}🔑 Token Setup Instructions:${COLORS.NC}
 }
 
 // cspell:ignore SETX setx
+function saveTokenLocal(token: string): boolean {
+  try {
+    const cacheDir = path.dirname(CONFIG.TOKEN_FILE);
+    if (!fs.existsSync(cacheDir)) {
+      fs.mkdirSync(cacheDir, { recursive: true });
+    }
+    fs.writeFileSync(CONFIG.TOKEN_FILE, token, "utf8");
+    return true;
+  } catch (error) {
+    logError(`Failed to save token locally: ${(error as Error).message}`);
+    return false;
+  }
+}
 
 function saveTokenWindows(token: string): boolean {
+  saveTokenLocal(token);
   const cmd = spawnSync(String.raw`C:\Windows\System32\cmd.exe`, ["/c", `setx CS_ACCESS_TOKEN "${token}"`], {
     encoding: "utf8",
   });
   if (cmd.status !== 0) {
-    logError("Failed to save token on Windows");
+    logError("Failed to save token to Windows Environment");
     globalThis.console.error(cmd.stderr);
     return false;
   }
@@ -123,6 +137,7 @@ function saveTokenWindows(token: string): boolean {
 }
 
 function saveTokenUnix(token: string): boolean {
+  saveTokenLocal(token);
   try {
     const home = process.env.HOME;
     if (home) {
@@ -173,13 +188,5 @@ export async function promptAndSaveToken(): Promise<boolean> {
   process.env.CS_ACCESS_TOKEN = trimmedToken;
   CONFIG.CS_TOKEN = trimmedToken;
   logSuccess("Token saved successfully.");
-  if (platform === "win32") {
-    globalThis.console.log(`\n${COLORS.YELLOW}⚠️ IMPORTANT (Windows):${COLORS.NC}`);
-    globalThis.console.log(`The token has been saved to your User environment variables.`);
-    globalThis.console.log(
-      `If you are using VS Code, you may need to ${COLORS.CYAN}RESTART VS CODE COMPLETELY${COLORS.NC}`
-    );
-    globalThis.console.log(`for new terminals to pick up the CS_ACCESS_TOKEN variable.\n`);
-  }
   return true;
 }

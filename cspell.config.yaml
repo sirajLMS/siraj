@@ -38,3 +38,4 @@ words:
   - plpgsql
   - tstzrange
   - rolname
+  - ciphertext

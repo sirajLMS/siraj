@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import { join } from "node:path";
 import { clearCache } from "./cache";
 import { runHealthCheck } from "./checker";
@@ -49,50 +50,96 @@ function checkVersion() {
   logSuccess(`CodeScene CLI installed: ${COLORS.BLUE}${version}${COLORS.NC}`);
 }
 
-async function configureToken() {
-  if (!CONFIG.CS_TOKEN && process.platform === "win32") {
-    // Attempt to read directly from User Environment to bypass VS Code terminal inheritance issues
-    const ps = spawnSync(
-      getPowershellCmd(),
-      ["-NoProfile", "-Command", "[Environment]::GetEnvironmentVariable('CS_ACCESS_TOKEN', 'User')"],
-      { encoding: "utf8" }
-    );
-    const regToken = ps.stdout?.trim();
-    if (ps.status === 0 && regToken) {
-      CONFIG.CS_TOKEN = regToken;
-      process.env.CS_ACCESS_TOKEN = regToken;
-      logInfo("Loaded token from Windows User Registry");
+function maskToken(token: string): string {
+  if (!token) return "(empty)";
+  if (token.length <= 8) return "********";
+  return `${token.slice(0, 4)}****${token.slice(-4)}`;
+}
+
+interface TokenSource {
+  token: string;
+  source: string;
+}
+
+function resolveTokenFromRegistry(): string | null {
+  if (process.platform !== "win32") return null;
+
+  const ps = spawnSync(
+    getPowershellCmd(),
+    ["-NoProfile", "-Command", "[Environment]::GetEnvironmentVariable('CS_ACCESS_TOKEN', 'User')"],
+    { encoding: "utf8" }
+  );
+  return ps.status === 0 ? ps.stdout?.trim() || null : null;
+}
+
+function getInitialTokenSource(): TokenSource {
+  if (CONFIG.CS_TOKEN) {
+    if (fs.existsSync(CONFIG.TOKEN_FILE)) {
+      const fileToken = fs.readFileSync(CONFIG.TOKEN_FILE, "utf8").trim();
+      if (fileToken === CONFIG.CS_TOKEN) {
+        return { token: CONFIG.CS_TOKEN, source: "Local File (token.txt)" };
+      }
     }
+    return { token: CONFIG.CS_TOKEN, source: "Environment" };
   }
 
-  if (!CONFIG.CS_TOKEN) {
-    const tokenSaved = await promptAndSaveToken();
-    if (!tokenSaved) {
-      logError("CS_ACCESS_TOKEN environment variable is not set");
-      showTokenInstructions();
-      process.exit(1);
-    }
+  const regToken = resolveTokenFromRegistry();
+  if (regToken) {
+    CONFIG.CS_TOKEN = regToken;
+    process.env.CS_ACCESS_TOKEN = regToken;
+    return { token: regToken, source: "Windows Registry" };
   }
-  logSuccess("CS_ACCESS_TOKEN is configured");
 
-  // Test token by checking a small file (the config file itself)
+  return { token: "", source: "None" };
+}
+
+function verifyToken(token: string): { isValid: boolean; output: string } {
   const csBin = resolveCodesceneBin();
   const testResult = spawnSync(csBin, ["check", join(SCRIPT_DIR, "config.ts")], {
     encoding: "utf8",
-    env: process.env,
+    env: { ...process.env, CS_ACCESS_TOKEN: token },
   });
   const testOutput = (testResult.stdout || "") + (testResult.stderr || "");
-  if (
-    testResult.status !== 0 ||
-    /unauthorized|invalid.*token|authentication.*failed|license.*failed/i.test(testOutput)
-  ) {
-    logError("CodeScene token appears to be invalid or license check failed");
-    if (testOutput) {
-      globalThis.console.log(`${COLORS.RED}CLI Output:${COLORS.NC}\n${testOutput}`);
+  const isValid =
+    testResult.status === 0 && !/unauthorized|invalid.*token|authentication.*failed|license.*failed/i.test(testOutput);
+  return { isValid, output: testOutput };
+}
+
+async function configureToken() {
+  const initial = getInitialTokenSource();
+
+  if (initial.token) {
+    logInfo(`Testing CS_ACCESS_TOKEN from ${initial.source} (${maskToken(initial.token)})...`);
+    const result = verifyToken(initial.token);
+    if (result.isValid) {
+      logSuccess(`Token from ${initial.source} is valid.`);
+      return;
+    }
+    logWarning(`Token from ${initial.source} is invalid or license check failed.`);
+    if (result.output) {
+      globalThis.console.log(`${COLORS.YELLOW}CLI Output:${COLORS.NC}\n${result.output}`);
+    }
+  }
+
+  const tokenSaved = await promptAndSaveToken();
+  if (!tokenSaved) {
+    logError("CS_ACCESS_TOKEN environment variable is not set");
+    showTokenInstructions();
+    process.exit(1);
+  }
+
+  logInfo(`Verifying new token (${maskToken(CONFIG.CS_TOKEN)})...`);
+  const newResult = verifyToken(CONFIG.CS_TOKEN);
+  if (!newResult.isValid) {
+    logError(`The new token provided is also invalid or license check failed (Token: ${maskToken(CONFIG.CS_TOKEN)})`);
+    if (newResult.output) {
+      globalThis.console.log(`${COLORS.RED}CLI Output:${COLORS.NC}\n${newResult.output}`);
     }
     showTokenInstructions();
     process.exit(1);
   }
+
+  logSuccess(`New token verified and ready to use (${maskToken(CONFIG.CS_TOKEN)})`);
 }
 
 async function main() {
@@ -113,7 +160,6 @@ async function main() {
   logInfo("🔍 CodeScene Health Checker");
   globalThis.console.log("");
 
-  // Check installation
   if (!isCsInstalled()) {
     logWarning("CodeScene CLI (cs) is not installed");
     if (!installCodeScene()) {
