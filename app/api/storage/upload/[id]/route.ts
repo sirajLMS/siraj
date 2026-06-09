@@ -230,7 +230,7 @@ async function processUpload(body: ReadableStream<Uint8Array> | null, signedUrl:
 
     return NextResponse.json(
       {
-        id: fileEntity.id.toString(),
+        id: fileEntity.id,
         path: signedUrl.filePath,
         size: stats.size,
         contentType: signedUrl.contentType,

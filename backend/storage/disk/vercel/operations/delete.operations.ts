@@ -62,7 +62,7 @@ async function deleteItem(
   if (dbFile) {
     await StorageDbRepository.deleteFile(itemPath);
   } else if (dbDirectory) {
-    await StorageDbRepository.deleteDirectory(dbDirectory.id.toString());
+    await StorageDbRepository.deleteDirectory(dbDirectory.id);
   }
 
   if (fileEntity) return fileEntity;

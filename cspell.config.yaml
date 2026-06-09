@@ -37,3 +37,4 @@ words:
   - iban
   - plpgsql
   - tstzrange
+  - rolname

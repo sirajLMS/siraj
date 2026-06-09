@@ -45,6 +45,7 @@ const eslintConfig = defineConfig([
     "*.log",
     "draft/**",
     "frontend/graphql/generated/**",
+    "scratch/**",
   ]),
   eslint.configs.recommended,
   sonarjs.configs.recommended,

@@ -113,7 +113,7 @@ New file: [`backend/db/schema/permissions.ts`](backend/db/schema/permissions.ts)
 | `view_assigned` | Filter by user's `teachers.id`                  |
 | `view_family`   | Filter by user's `parents.id` → linked students |
 
-Examples derived from [`siraj_lms_combined.txt`](siraj_lms_combined.txt):
+Examples derived from [`lms_combined.txt`](lms_combined.txt):
 
 - **Dashboard:** `dashboard.view`, `dashboard.metrics.view_all`
 - **Schedule:** `schedule.view_all`, `schedule.view_assigned`, `schedule.view_family`, `schedule.search_availability`, `schedule.manage_recurring`, `schedule.dst_migrate`

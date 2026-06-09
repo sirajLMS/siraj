@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const adminEmail = process.env.ADMIN_EMAIL;
     if (adminEmail && user.email !== adminEmail) {
       logger.warn("Unauthorized cleanup attempt - non-admin user", {
-        userId: user.id.toString(),
+        userId: user.id,
         email: user.email,
       });
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Step 3: Log the cleanup operation
     logger.info("Manual signed URL cleanup completed", {
       deletedCount,
-      triggeredBy: user.id.toString(),
+      triggeredBy: user.id,
     });
 
     return NextResponse.json({

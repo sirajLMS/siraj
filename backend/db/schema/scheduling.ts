@@ -30,6 +30,8 @@ import { students } from "./students";
 import { teachers } from "./teachers";
 import { users } from "./users";
 
+// NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
+// Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
 export const recurringSchedules = pgTable(
   "recurring_schedules",
   {
@@ -69,6 +71,8 @@ export const recurringScheduleDays = pgTable(
   table => [uniqueIndex("recurring_schedule_days_schedule_day_idx").on(table.recurringScheduleId, table.dayOfWeek)]
 );
 
+// NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
+// Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
 export const classInstances = pgTable(
   "class_instances",
   {
@@ -119,8 +123,12 @@ export const classInstances = pgTable(
     index("class_instances_class_type_idx").on(table.classType),
     index("class_instances_outcome_idx").on(table.outcome),
     index("class_instances_execution_state_idx").on(table.executionState),
-    index("class_instances_frozen_idx").on(table.isFrozen).where(sql`${table.isFrozen} = true`),
-    index("class_instances_rescheduled_idx").on(table.isRescheduled).where(sql`${table.isRescheduled} = true`),
+    index("class_instances_frozen_idx")
+      .on(table.isFrozen)
+      .where(sql`${table.isFrozen} = true`),
+    index("class_instances_rescheduled_idx")
+      .on(table.isRescheduled)
+      .where(sql`${table.isRescheduled} = true`),
     check(
       "class_instances_state_machine_chk",
       sql`

@@ -6,9 +6,9 @@ export const storageFiles = pgTable("storage_file", {
   isProtected: boolean("is_protected").notNull().default(false),
 });
 
-// NOTE: Tech Debt: file_usage uses a polymorphic reference pattern (reference_table + reference_id).
-// This prevents database-level foreign key constraints and cascading deletes.
-// Application layer must manually clean up these records when parent entities are deleted.
+// NOTE: PostgreSQL triggers enforce referential integrity and handle automatic cascading deletes.
+// The trigger 'trg_validate_file_usage' validates reference_table and reference_id.
+// Cascade delete triggers 'trg_cascade_file_usage_*' clean up usages when parent records are deleted.
 export const fileUsages = pgTable("file_usage", {
   id: uuid("id").defaultRandom().primaryKey(),
   filePath: varchar("file_path", { length: 1024 }).notNull(),

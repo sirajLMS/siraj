@@ -16,6 +16,8 @@ import { parents } from "./parents";
 import { students } from "./students";
 import { users } from "./users";
 
+// NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
+// Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
 export const invoices = pgTable(
   "invoices",
   {

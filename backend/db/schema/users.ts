@@ -12,6 +12,8 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
+// NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
+// Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),

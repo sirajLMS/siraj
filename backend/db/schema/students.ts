@@ -20,11 +20,8 @@ export const students = pgTable(
     status: studentStatusEnum("status").notNull(),
     classesTotal: integer("classes_total").notNull().default(0),
     classesRemaining: integer("classes_remaining").notNull().default(0),
-    // NOTE: hoursPerWeek is denormalized for fast parent dashboard queries.
-    // It must be recalculated (SUM(duration_minutes)/60 of active days) whenever:
-    // - recurring_schedule_days are added, removed, or toggled
-    // - recurring_schedules duration_minutes changes
-    // - schedules expire
+    // NOTE: PostgreSQL triggers automatically recalculate hoursPerWeek (SUM(duration_minutes)/60 of active days)
+    // whenever recurring_schedules or recurring_schedule_days are inserted, updated, or deleted.
     hoursPerWeek: numeric("hours_per_week", { precision: 5, scale: 2 }).notNull().default("0"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),

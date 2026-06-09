@@ -45,13 +45,13 @@ export const FileUsageInfoPothosObject = gqlSchemaBuilder.objectRef<Types.FileUs
   fields: t => ({
     id: t.field({
       type: "String",
-      resolve: usageInfo => usageInfo.id.toString(),
+      resolve: usageInfo => usageInfo.id,
     }),
     filePath: t.exposeString("filePath"),
     usageType: t.exposeString("usageType"),
     referenceId: t.field({
       type: "String",
-      resolve: usageInfo => usageInfo.referenceId.toString(),
+      resolve: usageInfo => usageInfo.referenceId,
     }),
     referenceTable: t.exposeString("referenceTable"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
