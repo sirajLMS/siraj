@@ -3,6 +3,7 @@ import { index, integer, numeric, pgTable, serial, timestamp, varchar } from "dr
 import { appLanguageEnum, genderEnum, studentStatusEnum } from "./enums";
 import { parents } from "./parents";
 import { teachers } from "./teachers";
+import { users } from "./users";
 
 export const students = pgTable(
   "students",
@@ -13,15 +14,20 @@ export const students = pgTable(
       .references(() => parents.id, { onDelete: "cascade" }),
     primaryTeacherId: integer("primary_teacher_id").references(() => teachers.id, { onDelete: "set null" }),
     name: varchar("name", { length: 255 }).notNull(),
-    dateOfBirth: timestamp("date_of_birth", { precision: 3 }),
+    dateOfBirth: timestamp("date_of_birth", { withTimezone: true, precision: 3 }),
     gender: genderEnum("gender"),
     language: appLanguageEnum("language"),
     status: studentStatusEnum("status").notNull(),
     classesTotal: integer("classes_total").notNull().default(0),
     classesRemaining: integer("classes_remaining").notNull().default(0),
+    // NOTE: hoursPerWeek is denormalized for fast parent dashboard queries.
+    // It must be recalculated (SUM(duration_minutes)/60 of active days) whenever:
+    // - recurring_schedule_days are added, removed, or toggled
+    // - recurring_schedules duration_minutes changes
+    // - schedules expire
     hoursPerWeek: numeric("hours_per_week", { precision: 5, scale: 2 }).notNull().default("0"),
-    createdAt: timestamp("created_at", { precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [
     index("students_parent_id_idx").on(table.parentId),
@@ -29,5 +35,25 @@ export const students = pgTable(
     index("students_status_idx").on(table.status),
     index("idx_students_name_fts").using("gin", sql`to_tsvector('simple', ${table.name})`),
     index("idx_students_name_trgm").using("gist", table.name.op("gist_trgm_ops")),
+  ]
+);
+
+export const teacherAssignments = pgTable(
+  "teacher_assignments",
+  {
+    id: serial("id").primaryKey(),
+    studentId: integer("student_id")
+      .notNull()
+      .references(() => students.id, { onDelete: "cascade" }),
+    teacherId: integer("teacher_id")
+      .notNull()
+      .references(() => teachers.id, { onDelete: "restrict" }),
+    assignedAt: timestamp("assigned_at", { withTimezone: true, precision: 3 }).notNull(),
+    assignedByUserId: integer("assigned_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    endedAt: timestamp("ended_at", { withTimezone: true, precision: 3 }),
+  },
+  table => [
+    index("teacher_assignments_student_id_idx").on(table.studentId),
+    index("teacher_assignments_teacher_id_idx").on(table.teacherId),
   ]
 );

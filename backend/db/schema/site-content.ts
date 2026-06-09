@@ -11,8 +11,8 @@ export const siteContent = pgTable(
     contentType: varchar("content_type", { length: 50 }).notNull().default("page"),
     isPublished: boolean("is_published").notNull().default(true),
     updatedByUserId: integer("updated_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [index("site_content_slug_idx").on(table.slug), index("site_content_type_idx").on(table.contentType)]
 );

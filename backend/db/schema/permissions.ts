@@ -22,8 +22,8 @@ export const permissionGroups = pgTable("permission_groups", {
   isSystem: boolean("is_system").notNull().default(false),
   slug: varchar("slug", { length: 100 }).notNull().unique(),
   createdByUserId: integer("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at", { precision: 3 }).notNull(),
-  updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
 });
 
 export const groupPermissions = pgTable(
@@ -51,7 +51,7 @@ export const userPermissionGroups = pgTable(
     groupId: integer("group_id")
       .notNull()
       .references(() => permissionGroups.id, { onDelete: "cascade" }),
-    assignedAt: timestamp("assigned_at", { precision: 3 }).notNull(),
+    assignedAt: timestamp("assigned_at", { withTimezone: true, precision: 3 }).notNull(),
     assignedByUserId: integer("assigned_by_user_id").references(() => users.id, { onDelete: "set null" }),
   },
   table => [

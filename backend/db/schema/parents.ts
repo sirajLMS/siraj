@@ -9,7 +9,7 @@ export const parents = pgTable(
     userId: integer("user_id")
       .notNull()
       .unique()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "restrict" }),
     status: parentStatusEnum("status").notNull(),
     phone: varchar("phone", { length: 50 }),
     nationality: countryCodeEnum("nationality"),
@@ -23,8 +23,8 @@ export const parents = pgTable(
     feeAmount: numeric("fee_amount", { precision: 12, scale: 2 }),
     paymentMethod: paymentMethodEnum("payment_method"),
     currency: varchar("currency", { length: 10 }),
-    createdAt: timestamp("created_at", { precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [index("parents_user_id_idx").on(table.userId), index("parents_status_idx").on(table.status)]
 );

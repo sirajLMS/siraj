@@ -21,7 +21,7 @@ export const invoices = pgTable(
     id: serial("id").primaryKey(),
     parentId: integer("parent_id")
       .notNull()
-      .references(() => parents.id, { onDelete: "cascade" }),
+      .references(() => parents.id, { onDelete: "restrict" }),
     studentId: integer("student_id").references(() => students.id, { onDelete: "set null" }),
     issueDate: date("issue_date").notNull(),
     dueDate: date("due_date").notNull(),
@@ -32,8 +32,8 @@ export const invoices = pgTable(
     invoiceType: invoiceTypeEnum("invoice_type").notNull(),
     createdByUserId: integer("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
     emailSentAt: timestamp("email_sent_at", { withTimezone: true, precision: 3 }),
-    createdAt: timestamp("created_at", { precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [
     index("invoices_parent_id_idx").on(table.parentId),
@@ -47,7 +47,7 @@ export const invoiceCoverageMonths = pgTable(
   {
     invoiceId: integer("invoice_id")
       .notNull()
-      .references(() => invoices.id, { onDelete: "cascade" }),
+      .references(() => invoices.id, { onDelete: "restrict" }),
     year: smallint("year").notNull(),
     month: smallint("month").notNull(),
   },

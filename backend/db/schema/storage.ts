@@ -6,13 +6,16 @@ export const storageFiles = pgTable("storage_file", {
   isProtected: boolean("is_protected").notNull().default(false),
 });
 
+// NOTE: Tech Debt: file_usage uses a polymorphic reference pattern (reference_table + reference_id).
+// This prevents database-level foreign key constraints and cascading deletes.
+// Application layer must manually clean up these records when parent entities are deleted.
 export const fileUsages = pgTable("file_usage", {
   id: bigserial("id", { mode: "bigint" }).primaryKey(),
   filePath: varchar("file_path", { length: 1024 }).notNull(),
   usageType: varchar("usage_type", { length: 100 }).notNull(),
   referenceId: bigint("reference_id", { mode: "bigint" }).notNull(),
   referenceTable: varchar("reference_table", { length: 100 }).notNull(),
-  createdAt: timestamp("created_at", { precision: 3 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
 });
 
 export const storageDirectories = pgTable("storage_directory", {
@@ -36,8 +39,8 @@ export const signedUrls = pgTable(
     contentType: varchar("content_type", { length: 255 }).notNull(),
     fileSize: bigint("file_size", { mode: "bigint" }).notNull(), // File size in bytes
     contentHash: varchar("content_hash", { length: 128 }).notNull(), // base64 or hex encoded hash
-    expiresAt: timestamp("expires_at", { precision: 3 }).notNull(),
-    createdAt: timestamp("created_at", { precision: 3 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     used: boolean("used").notNull().default(false),
   },
   table => [

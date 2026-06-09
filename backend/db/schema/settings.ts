@@ -10,7 +10,7 @@ export const systemSettings = pgTable(
     description: text("description").notNull(),
     category: varchar("category", { length: 100 }).notNull(),
     updatedByUserId: integer("updated_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [index("system_settings_category_idx").on(table.category)]
 );

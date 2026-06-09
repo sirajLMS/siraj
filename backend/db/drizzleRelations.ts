@@ -119,6 +119,10 @@ export const relations = defineRelations(schema, r => ({
       from: r.teachers.id,
       to: r.leaveQuotaUsage.teacherId,
     }),
+    bankingDetails: r.one.teacherBankingDetails({
+      from: r.teachers.id,
+      to: r.teacherBankingDetails.teacherId,
+    }),
   },
   parents: {
     user: r.one.users({
@@ -172,6 +176,24 @@ export const relations = defineRelations(schema, r => ({
     complaints: r.many.complaints({
       from: r.students.id,
       to: r.complaints.studentId,
+    }),
+    teacherAssignments: r.many.teacherAssignments({
+      from: r.students.id,
+      to: r.teacherAssignments.studentId,
+    }),
+  },
+  teacherAssignments: {
+    student: r.one.students({
+      from: r.teacherAssignments.studentId,
+      to: r.students.id,
+    }),
+    teacher: r.one.teachers({
+      from: r.teacherAssignments.teacherId,
+      to: r.teachers.id,
+    }),
+    assignedBy: r.one.users({
+      from: r.teacherAssignments.assignedByUserId,
+      to: r.users.id,
     }),
   },
   recurringSchedules: {
@@ -319,8 +341,18 @@ export const relations = defineRelations(schema, r => ({
       from: r.complaints.studentId,
       to: r.students.id,
     }),
-    respondedBy: r.one.users({
-      from: r.complaints.respondedByUserId,
+    responses: r.many.complaintResponses({
+      from: r.complaints.id,
+      to: r.complaintResponses.complaintId,
+    }),
+  },
+  complaintResponses: {
+    complaint: r.one.complaints({
+      from: r.complaintResponses.complaintId,
+      to: r.complaints.id,
+    }),
+    responder: r.one.users({
+      from: r.complaintResponses.responderUserId,
       to: r.users.id,
     }),
   },
@@ -345,6 +377,22 @@ export const relations = defineRelations(schema, r => ({
   siteContent: {
     updatedBy: r.one.users({
       from: r.siteContent.updatedByUserId,
+      to: r.users.id,
+    }),
+  },
+  teacherBankingDetails: {
+    teacher: r.one.teachers({
+      from: r.teacherBankingDetails.teacherId,
+      to: r.teachers.id,
+    }),
+  },
+  adminAuditLogs: {
+    actor: r.one.users({
+      from: r.adminAuditLogs.actorUserId,
+      to: r.users.id,
+    }),
+    target: r.one.users({
+      from: r.adminAuditLogs.targetUserId,
       to: r.users.id,
     }),
   },

@@ -72,8 +72,8 @@ export namespace SessionRepository {
     }
 
     // Check if session is expired
-    const now = Math.floor(Date.now() / 1000);
-    const isExpired = now - session.lastActivity > SESSION_TIMEOUT;
+    const now = BigInt(Math.floor(Date.now() / 1000));
+    const isExpired = Number(now - session.lastActivity) > SESSION_TIMEOUT;
 
     if (isExpired) {
       // Delete expired session
@@ -88,7 +88,7 @@ export namespace SessionRepository {
   };
 
   export const cleanupExpiredSessions = async (): Promise<void> => {
-    const cutoffTime = Math.floor(Date.now() / 1000) - SESSION_TIMEOUT;
+    const cutoffTime = BigInt(Math.floor(Date.now() / 1000) - SESSION_TIMEOUT);
     await db.delete(sessions).where(lte(sessions.lastActivity, cutoffTime));
   };
 }

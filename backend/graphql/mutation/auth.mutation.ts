@@ -102,7 +102,7 @@ gqlSchemaBuilder.mutationFields(t => ({
           createdAt: new Date().toISOString(),
           // Store session metadata only, not sensitive tokens
         }),
-        lastActivity: Math.floor(Date.now() / 1000),
+        lastActivity: BigInt(Math.floor(Date.now() / 1000)),
       });
 
       // Set httpOnly cookies for session and refresh token
@@ -158,7 +158,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       // Update session activity
       await SessionRepository.update({
         ...session,
-        lastActivity: Math.floor(Date.now() / 1000),
+        lastActivity: BigInt(Math.floor(Date.now() / 1000)),
       });
 
       // Refresh the cookies with new refresh token (token rotation)

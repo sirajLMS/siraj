@@ -1,3 +1,4 @@
+export * from "./audit";
 export * from "./billing";
 export * from "./cache";
 export * from "./communications";
@@ -10,5 +11,6 @@ export * from "./site-content";
 export * from "./staff";
 export * from "./storage";
 export * from "./students";
+export * from "./teacher-banking";
 export * from "./teachers";
 export * from "./users";

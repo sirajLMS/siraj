@@ -3,6 +3,7 @@ import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
   bigint,
   boolean,
+  check,
   date,
   index,
   integer,
@@ -36,17 +37,17 @@ export const recurringSchedules = pgTable(
     id: serial("id").primaryKey(),
     studentId: integer("student_id")
       .notNull()
-      .references(() => students.id, { onDelete: "cascade" }),
+      .references(() => students.id, { onDelete: "restrict" }),
     teacherId: integer("teacher_id")
       .notNull()
-      .references(() => teachers.id, { onDelete: "cascade" }),
+      .references(() => teachers.id, { onDelete: "restrict" }),
     durationMinutes: integer("duration_minutes").notNull(),
     defaultStartTime: time("default_start_time").notNull(),
     timezone: varchar("timezone", { length: 100 }).notNull(),
     effectiveFrom: date("effective_from"),
     effectiveUntil: date("effective_until"),
-    createdAt: timestamp("created_at", { precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [
     index("recurring_schedules_student_id_idx").on(table.studentId),
@@ -60,7 +61,7 @@ export const recurringScheduleDays = pgTable(
     id: serial("id").primaryKey(),
     recurringScheduleId: integer("recurring_schedule_id")
       .notNull()
-      .references(() => recurringSchedules.id, { onDelete: "cascade" }),
+      .references(() => recurringSchedules.id, { onDelete: "restrict" }),
     dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
     startTime: time("start_time").notNull(),
     isActive: boolean("is_active").notNull().default(true),
@@ -74,10 +75,10 @@ export const classInstances = pgTable(
     id: bigint("id", { mode: "bigint" }).primaryKey().generatedAlwaysAsIdentity(),
     studentId: integer("student_id")
       .notNull()
-      .references(() => students.id, { onDelete: "cascade" }),
+      .references(() => students.id, { onDelete: "restrict" }),
     teacherId: integer("teacher_id")
       .notNull()
-      .references(() => teachers.id, { onDelete: "cascade" }),
+      .references(() => teachers.id, { onDelete: "restrict" }),
     recurringScheduleId: integer("recurring_schedule_id").references(() => recurringSchedules.id, {
       onDelete: "set null",
     }),
@@ -99,27 +100,39 @@ export const classInstances = pgTable(
     forceActivatedByUserId: integer("force_activated_by_user_id").references(() => users.id, { onDelete: "set null" }),
     actualStartAt: timestamp("actual_start_at", { withTimezone: true, precision: 3 }),
     actualEndAt: timestamp("actual_end_at", { withTimezone: true, precision: 3 }),
+    quotaDeducted: boolean("quota_deducted").notNull().default(false),
     // Rate snapshot — captured at class completion, overridable by admin
     rateAmount: numeric("rate_amount", { precision: 12, scale: 2 }),
     rateCurrency: varchar("rate_currency", { length: 10 }),
     isRateOverridden: boolean("is_rate_overridden").notNull().default(false),
     remarks: text("remarks"),
     adminNotes: text("admin_notes"),
-    createdAt: timestamp("created_at", { precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [
     index("class_instances_scheduled_start_at_idx").on(table.scheduledStartAt),
     index("class_instances_teacher_scheduled_idx").on(table.teacherId, table.scheduledStartAt),
     index("class_instances_student_scheduled_idx").on(table.studentId, table.scheduledStartAt),
     index("class_instances_original_class_id_idx").on(table.originalClassId),
-    index("class_instances_metrics_idx").on(
-      table.executionState,
-      table.outcome,
-      table.isFrozen,
-      table.isRescheduled,
-      table.classType
+    index("class_instances_class_type_idx").on(table.classType),
+    index("class_instances_outcome_idx").on(table.outcome),
+    index("class_instances_execution_state_idx").on(table.executionState),
+    index("class_instances_frozen_idx").on(table.isFrozen).where(sql`${table.isFrozen} = true`),
+    index("class_instances_rescheduled_idx").on(table.isRescheduled).where(sql`${table.isRescheduled} = true`),
+    check(
+      "class_instances_state_machine_chk",
+      sql`
+        (${table.executionState} != 'COMPLETED' OR ${table.outcome} != 'PENDING') AND
+        (${table.executionState} != 'NOT_ACTIVATED' OR ${table.actualStartAt} IS NULL) AND
+        (${table.forceActivated} = false OR ${table.forceActivatedByUserId} IS NOT NULL) AND
+        (${table.outcome} != 'TAKEN' OR ${table.actualStartAt} IS NOT NULL) AND
+        (${table.isRateOverridden} = false OR ${table.rateAmount} IS NOT NULL)
+      `
     ),
+    // NOTE: Overlap prevention requires a raw SQL migration (requires btree_gist extension):
+    // ALTER TABLE class_instances ADD CONSTRAINT class_instances_no_overlap_chk
+    // EXCLUDE USING gist (teacher_id WITH =, tstzrange(scheduled_start_at, scheduled_end_at) WITH &&);
   ]
 );
 
@@ -129,32 +142,35 @@ export const classStatusEvents = pgTable(
     id: bigint("id", { mode: "bigint" }).primaryKey().generatedAlwaysAsIdentity(),
     classInstanceId: bigint("class_instance_id", { mode: "bigint" })
       .notNull()
-      .references(() => classInstances.id, { onDelete: "cascade" }),
+      .references(() => classInstances.id, { onDelete: "restrict" }),
     eventType: varchar("event_type", { length: 50 }).notNull(),
     fromState: jsonb("from_state"),
     toState: jsonb("to_state"),
     description: text("description"),
     actorUserId: integer("actor_user_id").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { precision: 3 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("class_status_events_class_instance_id_idx").on(table.classInstanceId)]
+  table => [
+    index("class_status_events_class_instance_id_idx").on(table.classInstanceId),
+    index("class_status_events_instance_created_idx").on(table.classInstanceId, table.createdAt),
+  ]
 );
 
 export const leaveRequests = pgTable(
   "leave_requests",
   {
-    id: serial("id").primaryKey(),
+    id: bigint("id", { mode: "bigint" }).primaryKey().generatedAlwaysAsIdentity(),
     classInstanceId: bigint("class_instance_id", { mode: "bigint" })
       .notNull()
-      .references(() => classInstances.id, { onDelete: "cascade" }),
+      .references(() => classInstances.id, { onDelete: "restrict" }),
     requestedByUserId: integer("requested_by_user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     requesterType: leaveRequesterTypeEnum("requester_type").notNull(),
     reason: text("reason"),
     status: leaveRequestStatusEnum("status").notNull(),
-    createdAt: timestamp("created_at", { precision: 3 }).notNull(),
-    processedAt: timestamp("processed_at", { precision: 3 }),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    processedAt: timestamp("processed_at", { withTimezone: true, precision: 3 }),
     processedByUserId: integer("processed_by_user_id").references(() => users.id, { onDelete: "set null" }),
   },
   table => [index("leave_requests_class_instance_id_idx").on(table.classInstanceId)]
@@ -164,8 +180,8 @@ export const leaveQuotaUsage = pgTable(
   "leave_quota_usage",
   {
     id: serial("id").primaryKey(),
-    teacherId: integer("teacher_id").references(() => teachers.id, { onDelete: "cascade" }),
-    studentId: integer("student_id").references(() => students.id, { onDelete: "cascade" }),
+    teacherId: integer("teacher_id").references(() => teachers.id, { onDelete: "restrict" }),
+    studentId: integer("student_id").references(() => students.id, { onDelete: "restrict" }),
     periodYear: smallint("period_year").notNull(),
     periodMonth: smallint("period_month").notNull(),
     usedCount: integer("used_count").notNull().default(0),
@@ -178,29 +194,33 @@ export const leaveQuotaUsage = pgTable(
     uniqueIndex("leave_quota_student_period_idx")
       .on(table.studentId, table.periodYear, table.periodMonth)
       .where(sql`${table.studentId} IS NOT NULL`),
+    check(
+      "leave_quota_usage_teacher_student_xor_chk",
+      sql`(${table.teacherId} IS NOT NULL AND ${table.studentId} IS NULL) OR (${table.teacherId} IS NULL AND ${table.studentId} IS NOT NULL)`
+    ),
   ]
 );
 
 export const dstMigrationRuns = pgTable("dst_migration_runs", {
-  id: serial("id").primaryKey(),
+  id: bigint("id", { mode: "bigint" }).primaryKey().generatedAlwaysAsIdentity(),
   runByUserId: integer("run_by_user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   offsetMinutes: integer("offset_minutes").notNull(),
   description: varchar("description", { length: 255 }),
-  createdAt: timestamp("created_at", { precision: 3 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
 });
 
 export const dstMigrationEntries = pgTable(
   "dst_migration_entries",
   {
-    id: serial("id").primaryKey(),
-    runId: integer("run_id")
+    id: bigint("id", { mode: "bigint" }).primaryKey().generatedAlwaysAsIdentity(),
+    runId: bigint("run_id", { mode: "bigint" })
       .notNull()
       .references(() => dstMigrationRuns.id, { onDelete: "cascade" }),
     classInstanceId: bigint("class_instance_id", { mode: "bigint" })
       .notNull()
-      .references(() => classInstances.id, { onDelete: "cascade" }),
+      .references(() => classInstances.id, { onDelete: "restrict" }),
     result: dstMigrationResultEnum("result").notNull(),
     conflictDetail: text("conflict_detail"),
   },
