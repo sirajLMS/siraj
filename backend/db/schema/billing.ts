@@ -12,6 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { invoiceStatusEnum, invoiceTypeEnum } from "./enums";
 import { parents } from "./parents";
+import { students } from "./students";
 import { users } from "./users";
 
 export const invoices = pgTable(
@@ -21,6 +22,7 @@ export const invoices = pgTable(
     parentId: integer("parent_id")
       .notNull()
       .references(() => parents.id, { onDelete: "cascade" }),
+    studentId: integer("student_id").references(() => students.id, { onDelete: "set null" }),
     issueDate: date("issue_date").notNull(),
     dueDate: date("due_date").notNull(),
     paidDate: date("paid_date"),
@@ -35,6 +37,7 @@ export const invoices = pgTable(
   },
   table => [
     index("invoices_parent_id_idx").on(table.parentId),
+    index("invoices_student_id_idx").on(table.studentId),
     index("invoices_status_due_date_idx").on(table.status, table.dueDate),
   ]
 );

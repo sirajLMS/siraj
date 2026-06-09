@@ -211,6 +211,14 @@ export const relations = defineRelations(schema, r => ({
       from: r.classInstances.recurringScheduleId,
       to: r.recurringSchedules.id,
     }),
+    originalClass: r.one.classInstances({
+      from: r.classInstances.originalClassId,
+      to: r.classInstances.id,
+    }),
+    rescheduledTo: r.many.classInstances({
+      from: r.classInstances.id,
+      to: r.classInstances.originalClassId,
+    }),
     statusEvents: r.many.classStatusEvents({
       from: r.classInstances.id,
       to: r.classStatusEvents.classInstanceId,
@@ -283,6 +291,10 @@ export const relations = defineRelations(schema, r => ({
       from: r.invoices.parentId,
       to: r.parents.id,
     }),
+    student: r.one.students({
+      from: r.invoices.studentId,
+      to: r.students.id,
+    }),
     createdBy: r.one.users({
       from: r.invoices.createdByUserId,
       to: r.users.id,
@@ -321,6 +333,18 @@ export const relations = defineRelations(schema, r => ({
   learningResources: {
     uploadedBy: r.one.users({
       from: r.learningResources.uploadedByUserId,
+      to: r.users.id,
+    }),
+  },
+  systemSettings: {
+    updatedBy: r.one.users({
+      from: r.systemSettings.updatedByUserId,
+      to: r.users.id,
+    }),
+  },
+  siteContent: {
+    updatedBy: r.one.users({
+      from: r.siteContent.updatedByUserId,
       to: r.users.id,
     }),
   },

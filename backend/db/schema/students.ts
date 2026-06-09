@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
+import { index, integer, numeric, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
 import { appLanguageEnum, genderEnum, studentStatusEnum } from "./enums";
 import { parents } from "./parents";
 import { teachers } from "./teachers";
@@ -19,6 +19,7 @@ export const students = pgTable(
     status: studentStatusEnum("status").notNull(),
     classesTotal: integer("classes_total").notNull().default(0),
     classesRemaining: integer("classes_remaining").notNull().default(0),
+    hoursPerWeek: numeric("hours_per_week", { precision: 5, scale: 2 }).notNull().default("0"),
     createdAt: timestamp("created_at", { precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
   },

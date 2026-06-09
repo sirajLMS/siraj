@@ -5,6 +5,8 @@ export * from "./enums";
 export * from "./parents";
 export * from "./permissions";
 export * from "./scheduling";
+export * from "./settings";
+export * from "./site-content";
 export * from "./staff";
 export * from "./storage";
 export * from "./students";

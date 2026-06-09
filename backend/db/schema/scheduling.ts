@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
   bigint,
   boolean,
@@ -6,6 +7,7 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgTable,
   serial,
   smallint,
@@ -19,6 +21,7 @@ import {
   classExecutionStateEnum,
   classOutcomeEnum,
   classTypeEnum,
+  dayOfWeekEnum,
   dstMigrationResultEnum,
   leaveRequesterTypeEnum,
   leaveRequestStatusEnum,
@@ -58,7 +61,7 @@ export const recurringScheduleDays = pgTable(
     recurringScheduleId: integer("recurring_schedule_id")
       .notNull()
       .references(() => recurringSchedules.id, { onDelete: "cascade" }),
-    dayOfWeek: smallint("day_of_week").notNull(),
+    dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
     startTime: time("start_time").notNull(),
     isActive: boolean("is_active").notNull().default(true),
   },
@@ -78,7 +81,9 @@ export const classInstances = pgTable(
     recurringScheduleId: integer("recurring_schedule_id").references(() => recurringSchedules.id, {
       onDelete: "set null",
     }),
-    originalClassId: bigint("original_class_id", { mode: "bigint" }),
+    originalClassId: bigint("original_class_id", { mode: "bigint" }).references((): AnyPgColumn => classInstances.id, {
+      onDelete: "set null",
+    }),
     scheduledStartAt: timestamp("scheduled_start_at", { withTimezone: true, precision: 3 }).notNull(),
     scheduledEndAt: timestamp("scheduled_end_at", { withTimezone: true, precision: 3 }).notNull(),
     durationMinutes: integer("duration_minutes").notNull(),
@@ -87,12 +92,17 @@ export const classInstances = pgTable(
     executionState: classExecutionStateEnum("execution_state").notNull().default("NOT_ACTIVATED"),
     isRescheduled: boolean("is_rescheduled").notNull().default(false),
     isFrozen: boolean("is_frozen").notNull().default(false),
+    zoomMeetingUrl: varchar("zoom_meeting_url", { length: 1024 }),
     activatedAt: timestamp("activated_at", { withTimezone: true, precision: 3 }),
     activatedByUserId: integer("activated_by_user_id").references(() => users.id, { onDelete: "set null" }),
     forceActivated: boolean("force_activated").notNull().default(false),
     forceActivatedByUserId: integer("force_activated_by_user_id").references(() => users.id, { onDelete: "set null" }),
     actualStartAt: timestamp("actual_start_at", { withTimezone: true, precision: 3 }),
     actualEndAt: timestamp("actual_end_at", { withTimezone: true, precision: 3 }),
+    // Rate snapshot — captured at class completion, overridable by admin
+    rateAmount: numeric("rate_amount", { precision: 12, scale: 2 }),
+    rateCurrency: varchar("rate_currency", { length: 10 }),
+    isRateOverridden: boolean("is_rate_overridden").notNull().default(false),
     remarks: text("remarks"),
     adminNotes: text("admin_notes"),
     createdAt: timestamp("created_at", { precision: 3 }).notNull(),
@@ -102,6 +112,7 @@ export const classInstances = pgTable(
     index("class_instances_scheduled_start_at_idx").on(table.scheduledStartAt),
     index("class_instances_teacher_scheduled_idx").on(table.teacherId, table.scheduledStartAt),
     index("class_instances_student_scheduled_idx").on(table.studentId, table.scheduledStartAt),
+    index("class_instances_original_class_id_idx").on(table.originalClassId),
     index("class_instances_metrics_idx").on(
       table.executionState,
       table.outcome,
@@ -140,6 +151,7 @@ export const leaveRequests = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     requesterType: leaveRequesterTypeEnum("requester_type").notNull(),
+    reason: text("reason"),
     status: leaveRequestStatusEnum("status").notNull(),
     createdAt: timestamp("created_at", { precision: 3 }).notNull(),
     processedAt: timestamp("processed_at", { precision: 3 }),
@@ -175,6 +187,7 @@ export const dstMigrationRuns = pgTable("dst_migration_runs", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   offsetMinutes: integer("offset_minutes").notNull(),
+  description: varchar("description", { length: 255 }),
   createdAt: timestamp("created_at", { precision: 3 }).notNull(),
 });
 
