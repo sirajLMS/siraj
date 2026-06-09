@@ -313,9 +313,7 @@ input DirectoryPermissionsUpdateInput {
   permissions: DirectoryPermissionsInput!
 }
 
-"""
-A type representing a validated email address
-"""
+"""A type representing a validated email address"""
 scalar Email
 
 type FileInfo implements StorageObject {
@@ -417,9 +415,7 @@ enum Gender {
   MALE
 }
 
-"""
-A type representing arbitrary JSON values
-"""
+"""A type representing arbitrary JSON values"""
 scalar JSON
 
 input LoginInput {
@@ -435,10 +431,9 @@ type LoginResponse {
 type Mutation {
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createFolder(input: FolderCreateInput!): FileOperationResult
-  createStudent(input: StudentCreateInput!): Student
   deleteFile(path: String!): FileOperationResult
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
-  deleteStudent(id: Int!): Student
+  deleteStudent(id: String!): Student
   login(input: LoginInput!): LoginResponse
   logout: Boolean
   moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult
@@ -475,25 +470,24 @@ input PaginationArgs {
 }
 
 input PartialStudentUpdateInput {
+  classesRemaining: Int
+  classesTotal: Int
   dateOfBirth: DateTime
-  email: Email
   gender: Gender
-  id: Int!
+  id: String!
+  language: AppLanguage
   name: String
-  nationality: CountryCode
-  phoneNumber: PhoneNumber
+  parentId: String
+  primaryTeacherId: String
+  status: StudentStatus
 }
 
-"""
-A type representing a validated phone number
-"""
+"""A type representing a validated phone number"""
 scalar PhoneNumber
 
 type Query {
   directoryChildren(
-    """
-    Parent directory path (empty or null for root level)
-    """
+    """Parent directory path (empty or null for root level)"""
     path: String
   ): [DirectoryInfo!]
   fileInfo(path: String!): FileInfo
@@ -502,9 +496,7 @@ type Query {
   listFiles(input: FilesListInput!): StorageObjectList
   me: User
   searchFiles(
-    """
-    File type filter (optional)
-    """
+    """File type filter (optional)"""
     fileType: String
 
     """
@@ -512,9 +504,7 @@ type Query {
     """
     folder: String
 
-    """
-    Maximum number of results
-    """
+    """Maximum number of results"""
     limit: Int = 50
     searchTerm: String!
   ): StorageObjectList
@@ -524,13 +514,9 @@ type Query {
     """
     path: String
   ): StorageStats
-  student(id: Int!): Student
-  students(
-    filterArgs: StudentFilterArgs
-    orderBy: [StudentsOrderByClause!]
-    paginationArgs: PaginationArgs
-  ): StudentsWithFiltersResponse!
-  user(id: Int!): User
+  student(id: String!): Student
+  students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
+  user(id: String!): User
   users: [User!]
 }
 
@@ -581,30 +567,34 @@ type StorageStats {
   totalSize: String
 }
 
-"""
-A map of string keys to string values (Record<string, string>)
-"""
+"""A map of string keys to string values (Record<string, string>)"""
 scalar StringMap
 
 type Student {
+  classesRemaining: Int!
+  classesTotal: Int!
   createdAt: DateTime
   dateOfBirth: DateTime
-  email: String
   gender: Gender
-  id: Int!
+  id: String!
+  language: AppLanguage
   name: String!
-  nationality: CountryCode
-  phoneNumber: PhoneNumber
+  parentId: String!
+  primaryTeacherId: String
+  status: StudentStatus!
   updatedAt: DateTime
 }
 
 input StudentCreateInput {
+  classesRemaining: Int
+  classesTotal: Int
   dateOfBirth: DateTime
-  email: Email
   gender: Gender
+  language: AppLanguage
   name: String!
-  nationality: CountryCode
-  phoneNumber: PhoneNumber
+  parentId: String!
+  primaryTeacherId: String
+  status: StudentStatus!
 }
 
 input StudentFilterArgs {
@@ -628,15 +618,8 @@ input StudentFilterArgs {
   createdAtOnOrAfter: DateTime
   createdAtOnOrBefore: DateTime
   createdAtTo: DateTime
-  email: String
-  emailEndsWith: String
-  emailEquals: Email
-  emailIsEmpty: Boolean
-  emailIsNotEmpty: Boolean
-  emailNotContains: String
-  emailNotEquals: String
-  emailStartsWith: String
   gender: Gender
+  language: AppLanguage
   name: String
   nameEndsWith: String
   nameEquals: String
@@ -645,8 +628,17 @@ input StudentFilterArgs {
   nameNotContains: String
   nameNotEquals: String
   nameStartsWith: String
-  nationality: CountryCode
-  phoneNumber: PhoneNumber
+  parentId: String
+  primaryTeacherId: String
+  status: StudentStatus
+}
+
+enum StudentStatus {
+  DEACTIVATED
+  ON_LEAVE
+  ON_TRIAL
+  REGULAR
+  SUSPENDED
 }
 
 input StudentsOrderByClause {
@@ -655,12 +647,15 @@ input StudentsOrderByClause {
 }
 
 enum StudentsOrderByColumn {
+  CLASSES_REMAINING
+  CLASSES_TOTAL
   CREATED_AT
   DATE_OF_BIRTH
-  EMAIL
   GENDER
   ID
   NAME
+  PARENT_ID
+  STATUS
   UPDATED_AT
 }
 
@@ -691,7 +686,7 @@ type User {
   createdAt: DateTime
   email: String
   emailVerifiedAt: DateTime
-  id: Int
+  id: String
   name: String
   updatedAt: DateTime
 }
