@@ -3,6 +3,8 @@ import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { formatBulkOperationResult } from "../../shared/bulk-operations.helper";
+import { loadDeleteEntities, validateDeletePermissions } from "../../shared/delete-operations.helper";
 import { getBlobs, isDirectory } from "../shared";
 import type { VercelContext } from "../types";
 import { fileInfoByPath } from "./file.operations";
@@ -19,24 +21,25 @@ export async function deleteFile(ctx: VercelContext, filePath: string): Promise<
       path: filePath,
     });
 
-    if (usageCheck.isInUse) {
-      return {
-        success: false,
-        message: usageCheck.deleteBlockReason || "File is in use",
-      };
-    }
-
     const dbFile = await StorageDbRepository.fileByPath(filePath);
-    if (dbFile?.isProtected === true) {
-      return { success: false, message: "File is protected from deletion" };
-    }
-
     const parentPath = filePath.substring(0, filePath.lastIndexOf("/"));
     const parentDir = await StorageDbRepository.directoryByPath(parentPath);
-    if (parentDir && !parentDir.allowDeleteFiles) {
+
+    try {
+      validateDeletePermissions(
+        false,
+        {
+          isInUse: usageCheck.isInUse,
+          deleteBlockReason: usageCheck.deleteBlockReason ?? null,
+        },
+        dbFile || undefined,
+        undefined,
+        parentDir || undefined
+      );
+    } catch (error) {
       return {
         success: false,
-        message: "File deletion not allowed in this directory",
+        message: error instanceof Error ? error.message : String(error),
       };
     }
 
@@ -86,15 +89,14 @@ export async function deleteItems(
   ctx: VercelContext,
   input: Types.StorageItemsDeleteInput
 ): Promise<Types.BulkOperationResult> {
-  let successCount = 0;
-  let failureCount = 0;
-  const failures: Array<{ path: string; error: string }> = [];
-  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
-
   const { dbFileMap, dbDirectoryMap, dbParentDirMap, usageCheckMap } = await loadDeleteEntities(
     input.paths,
     input.force || false
   );
+
+  let successCount = 0;
+  const failures: Array<{ path: string; error: string }> = [];
+  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
 
   for (const itemPath of input.paths) {
     try {
@@ -110,7 +112,6 @@ export async function deleteItems(
       successfulItems.push(result);
       successCount++;
     } catch (error) {
-      failureCount++;
       failures.push({
         path: itemPath,
         error: error instanceof Error ? error.message : String(error),
@@ -118,90 +119,7 @@ export async function deleteItems(
     }
   }
 
-  return {
-    success: failureCount === 0,
-    message:
-      failureCount === 0 ? "All items deleted successfully" : `${successCount} items deleted, ${failureCount} failed`,
-    successCount,
-    failureCount,
-    failures,
-    successfulItems,
-  };
-}
-
-async function loadDeleteEntities(paths: string[], force: boolean) {
-  const parentDirectories = [...new Set(paths.map(path => path.substring(0, path.lastIndexOf("/"))))];
-
-  const [dbFiles, dbDirectories, dbParentDirs, usageChecks] = await Promise.all([
-    StorageDbRepository.filesByPaths(paths),
-    StorageDbRepository.directoriesByPaths(paths),
-    StorageDbRepository.directoriesByPaths(parentDirectories),
-    force ? Promise.resolve([]) : checkFileUsages(paths),
-  ]);
-
-  const dbFileMap = new Map<string, Types.FileEntity>();
-  for (const file of dbFiles) {
-    dbFileMap.set(file.path, file);
-  }
-
-  const dbDirectoryMap = new Map<string, Types.DirectoryEntity>();
-  for (const dir of dbDirectories) {
-    dbDirectoryMap.set(dir.path, dir);
-  }
-
-  const dbParentDirMap = new Map<string, Types.DirectoryEntity>();
-  for (const dir of dbParentDirs) {
-    dbParentDirMap.set(dir.path, dir);
-  }
-
-  const usageCheckMap = new Map<string, { isInUse: boolean; deleteBlockReason: string | null | undefined }>();
-  for (const check of usageChecks) {
-    usageCheckMap.set(check.path, check);
-  }
-
-  return { dbFileMap, dbDirectoryMap, dbParentDirMap, usageCheckMap };
-}
-
-async function checkFileUsages(paths: string[]) {
-  return Promise.all(
-    paths.map(filePath =>
-      StorageDbRepository.checkFileUsage({ path: filePath })
-        .then(result => ({
-          path: filePath,
-          isInUse: result.isInUse,
-          deleteBlockReason: result.deleteBlockReason ?? null,
-        }))
-        .catch(() => ({
-          path: filePath,
-          isInUse: false,
-          deleteBlockReason: null,
-        }))
-    )
-  );
-}
-
-function validateDeletePermissions(
-  force: boolean,
-  usageCheck: { isInUse: boolean; deleteBlockReason: string | null | undefined } | undefined,
-  dbFile: Types.FileEntity | undefined,
-  dbDirectory: Types.DirectoryEntity | undefined,
-  parentDir: Types.DirectoryEntity | undefined
-) {
-  if (!force && usageCheck?.isInUse) {
-    throw new Error(usageCheck.deleteBlockReason || "File is currently in use");
-  }
-
-  if (dbFile?.isProtected === true || dbDirectory?.isProtected === true) {
-    throw new Error("Item is protected from deletion");
-  }
-
-  if (parentDir) {
-    const isFile = dbFile != null;
-    const canDelete = isFile ? parentDir.allowDeleteFiles : parentDir.allowDelete;
-    if (!canDelete) {
-      throw new Error("Deletion not allowed in parent directory");
-    }
-  }
+  return formatBulkOperationResult(successCount, failures, successfulItems, "deleted");
 }
 
 async function deleteItem(

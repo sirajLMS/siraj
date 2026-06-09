@@ -2,6 +2,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { format } from "node:util";
 
+import { formatTimestamp } from "./shared/date-utils";
+
 type LogLevel = "log" | "info" | "warn" | "error" | "debug";
 
 export abstract class BaseLogger {
@@ -18,19 +20,6 @@ export abstract class BaseLogger {
     this.writeToFileEnabled = writeToFileEnabled;
   }
 
-  private formatTimestamp(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
-  }
-
   protected async writeToFile(level: LogLevel, message: string): Promise<void> {
     if (!this.enabled) return;
 
@@ -42,7 +31,7 @@ export abstract class BaseLogger {
         // Directory might already exist, ignore error
       }
 
-      const timestamp = this.formatTimestamp();
+      const timestamp = formatTimestamp();
       const logLine = `[${timestamp}] [${level.toUpperCase()}] ${message}\n`;
 
       // Write to single log file based on key
@@ -61,7 +50,7 @@ export abstract class BaseLogger {
     // Use Node's util.format to handle all types automatically
     const message = format(...args);
 
-    const timestamp = this.formatTimestamp();
+    const timestamp = formatTimestamp();
 
     // Console output with timestamp
     const consoleArgs = [`[${timestamp}] [${level.toUpperCase()}]`, ...args];

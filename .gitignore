@@ -47,3 +47,4 @@ next-env.d.ts
 logs/
 
 .mcp.json
+code-health-rules.json

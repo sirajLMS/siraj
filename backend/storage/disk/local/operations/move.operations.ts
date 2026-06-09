@@ -4,48 +4,40 @@ import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { formatBulkOperationResult, validateBulkOperation } from "../../shared/bulk-operations.helper";
 import type { LocalContext } from "../types";
 import { ensureDirectory, getAbsolutePath } from "../utils";
-import { fileInfoByPath } from "./file.operations";
+import { fileExists, fileInfoByPath } from "./file.operations";
 import { directoryInfoByPath } from "./folder.operations";
 
 export async function moveItems(
   ctx: LocalContext,
   input: Types.StorageItemsMoveInput
 ): Promise<Types.BulkOperationResult> {
-  let successCount = 0;
-  const failures: Array<{ path: string; error: string }> = [];
-  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
-
-  const sourceExistenceChecks = await Promise.all(
-    input.sourcePaths.map(async sourcePath => {
-      try {
-        const absolutePath = getAbsolutePath(ctx.basePath, sourcePath);
-        await fs.access(absolutePath);
-        return { path: sourcePath, exists: true };
-      } catch {
-        return { path: sourcePath, exists: false };
-      }
-    })
+  const { validSources, failures, destDirAllowed } = await validateBulkOperation(
+    ctx,
+    input.sourcePaths,
+    input.destinationPath,
+    fileExists
   );
 
-  const validSources = sourceExistenceChecks
-    .filter(check => {
-      if (!check.exists) {
-        failures.push({ path: check.path, error: "Source path not found" });
-        return false;
-      }
-      return true;
-    })
-    .map(check => check.path);
+  let successCount = 0;
+  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
 
   if (validSources.length === 0) {
+    return formatBulkOperationResult(successCount, failures, successfulItems, "processed");
+  }
+
+  if (!destDirAllowed) {
     return {
-      success: failures.length === 0,
-      message: "No valid source files to move",
-      successCount,
-      failureCount: failures.length,
-      failures,
+      success: false,
+      message: "Uploads not allowed to destination directory",
+      successCount: 0,
+      failureCount: validSources.length,
+      failures: validSources.map(path => ({
+        path,
+        error: "Uploads not allowed to destination directory",
+      })),
       successfulItems,
     };
   }
@@ -57,11 +49,10 @@ export async function moveItems(
     sourceDirectoriesCount: sourceDirectories.length,
   });
 
-  const [dbFiles, dbDirectories, dbSourceDirs, dbDestDir] = await Promise.all([
+  const [dbFiles, dbDirectories, dbSourceDirs] = await Promise.all([
     StorageDbRepository.filesByPaths(validSources),
     StorageDbRepository.directoriesByPaths(validSources),
     StorageDbRepository.directoriesByPaths(sourceDirectories),
-    StorageDbRepository.directoryByPath(input.destinationPath),
   ]);
 
   const dbFileMap = new Map<string, Types.FileEntity>();
@@ -77,20 +68,6 @@ export async function moveItems(
   const dbSourceDirMap = new Map<string, Types.DirectoryEntity>();
   for (const dir of dbSourceDirs) {
     dbSourceDirMap.set(dir.path, dir);
-  }
-
-  if (dbDestDir && !dbDestDir.allowUploads) {
-    return {
-      success: false,
-      message: "Uploads not allowed to destination directory",
-      successCount: 0,
-      failureCount: validSources.length,
-      failures: validSources.map(path => ({
-        path,
-        error: "Uploads not allowed to destination directory",
-      })),
-      successfulItems,
-    };
   }
 
   for (const sourcePath of validSources) {
@@ -114,17 +91,7 @@ export async function moveItems(
     }
   }
 
-  return {
-    success: failures.length === 0,
-    message:
-      failures.length === 0
-        ? "All items processed successfully"
-        : `${successCount} items processed, ${failures.length} failed`,
-    successCount,
-    failureCount: failures.length,
-    failures,
-    successfulItems,
-  };
+  return formatBulkOperationResult(successCount, failures, successfulItems, "processed");
 }
 
 async function moveItem(

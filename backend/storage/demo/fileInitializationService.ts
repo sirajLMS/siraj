@@ -2,6 +2,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
+import { extToMime } from "@/utils/storage.utils";
 import { getStorageService, type StorageService } from "../storage.service";
 
 /**
@@ -270,50 +271,7 @@ export class FileInitializationService implements IFileInitializationService {
 
   getContentTypeFromFileName(fileName: string): string {
     const extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-
-    switch (extension) {
-      case "jpg":
-      case "jpeg":
-        return "image/jpeg";
-      case "png":
-        return "image/png";
-      case "gif":
-        return "image/gif";
-      case "webp":
-        return "image/webp";
-      case "pdf":
-        return "application/pdf";
-      case "doc":
-        return "application/msword";
-      case "docx":
-        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-      case "xls":
-        return "application/vnd.ms-excel";
-      case "xlsx":
-        return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-      case "txt":
-        return "text/plain";
-      case "zip":
-        return "application/zip";
-      case "rar":
-        return "application/vnd.rar";
-      case "mp4":
-        return "video/mp4";
-      case "mp3":
-        return "audio/mpeg";
-      case "wav":
-        return "audio/wav";
-      case "otf":
-        return "font/otf";
-      case "ttf":
-        return "font/ttf";
-      case "woff":
-        return "font/woff";
-      case "woff2":
-        return "font/woff2";
-      default:
-        return "image/jpeg";
-    }
+    return extToMime[extension] || "image/jpeg";
   }
 }
 

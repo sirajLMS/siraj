@@ -1,6 +1,7 @@
 import { Redis } from "@upstash/redis";
 import logger from "@/backend/lib/logger";
 import type { IRedisService } from "./IRedisService";
+import { buildRedisPipeline } from "./redis-utils";
 
 /**
  * Upstash Redis Adapter
@@ -58,13 +59,8 @@ export class UpstashRedisAdapter implements IRedisService {
     await this.client.del(key);
   }
 
-  async pipeline(commands: Array<{ command: string; args: string[] | number[] }>): Promise<unknown[]> {
-    const pipeline = this.client.pipeline();
-
-    for (const cmd of commands) {
-      (pipeline as unknown as Record<string, (...args: (string | number)[]) => unknown>)[cmd.command](...cmd.args);
-    }
-
+  async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
+    const pipeline = buildRedisPipeline(this.client.pipeline(), commands);
     const results = await pipeline.exec();
     return results;
   }

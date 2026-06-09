@@ -1,37 +1,28 @@
-import { StorageDbRepository } from "@/backend/db/repo";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { getValidSourcePaths } from "../shared";
+import { formatBulkOperationResult, validateBulkOperation } from "../../shared/bulk-operations.helper";
 import type { GcpContext } from "../types";
-import { fileInfoByPath } from "./file.operations";
+import { fileExists, fileInfoByPath } from "./file.operations";
 
 export async function copyItems(
   ctx: GcpContext,
   input: Types.StorageItemsCopyInput
 ): Promise<Types.BulkOperationResult> {
+  const { validSources, failures, destDirAllowed } = await validateBulkOperation(
+    ctx,
+    input.sourcePaths,
+    input.destinationPath,
+    fileExists
+  );
+
   let successCount = 0;
-  let failureCount = 0;
-  const failures: Array<{ path: string; error: string }> = [];
   const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
 
-  const validSourcesResult = await getValidSourcePaths(ctx, input.sourcePaths);
-  const validSources = validSourcesResult.validSources;
-  failureCount += validSourcesResult.failureCount;
-  failures.push(...validSourcesResult.failures);
-
   if (validSources.length === 0) {
-    return {
-      success: failureCount === 0,
-      message: "No valid source files to copy",
-      successCount,
-      failureCount,
-      failures,
-      successfulItems,
-    };
+    return formatBulkOperationResult(successCount, failures, successfulItems, "copied");
   }
 
-  const dbDestDir = await StorageDbRepository.directoryByPath(input.destinationPath);
-  if (dbDestDir && !dbDestDir.allowUploads) {
+  if (!destDirAllowed) {
     return {
       success: false,
       message: "Uploads not allowed to destination directory",
@@ -58,7 +49,6 @@ export async function copyItems(
         successfulItems.push(fileInfo);
       }
     } catch (error) {
-      failureCount++;
       failures.push({
         path: sourcePath,
         error: error instanceof Error ? error.message : String(error),
@@ -66,13 +56,5 @@ export async function copyItems(
     }
   }
 
-  return {
-    success: failureCount === 0,
-    message:
-      failureCount === 0 ? "All items copied successfully" : `${successCount} items copied, ${failureCount} failed`,
-    successCount,
-    failureCount,
-    failures,
-    successfulItems,
-  };
+  return formatBulkOperationResult(successCount, failures, successfulItems, "copied");
 }

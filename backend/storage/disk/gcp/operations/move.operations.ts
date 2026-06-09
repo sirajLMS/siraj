@@ -1,50 +1,42 @@
 import { StorageDbRepository } from "@/backend/db/repo";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { getValidSourcePaths } from "../shared";
+import { formatBulkOperationResult, validateBulkOperation } from "../../shared/bulk-operations.helper";
 import type { GcpContext, GenericOperationResult } from "../types";
-import { fileInfoByPath } from "./file.operations";
+import { fileExists, fileInfoByPath } from "./file.operations";
 import { directoryInfoByPath } from "./folder.operations";
 
 export async function moveItems(
   ctx: GcpContext,
   input: Types.StorageItemsMoveInput
 ): Promise<Types.BulkOperationResult> {
+  const { validSources, failures, destDirAllowed } = await validateBulkOperation(
+    ctx,
+    input.sourcePaths,
+    input.destinationPath,
+    fileExists
+  );
+
   let successCount = 0;
-  let failureCount = 0;
-  const failures: Array<{ path: string; error: string }> = [];
   const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
 
-  const validSourcesResult = await getValidSourcePaths(ctx, input.sourcePaths);
-  const validSources = validSourcesResult.validSources;
-  failureCount += validSourcesResult.failureCount;
-  failures.push(...validSourcesResult.failures);
-
   if (validSources.length === 0) {
-    return {
-      success: failureCount === 0,
-      message: "No valid source files to move",
-      successCount,
-      failureCount,
-      failures,
-      successfulItems,
-    };
+    return formatBulkOperationResult(successCount, failures, successfulItems, "moved");
   }
 
   const sourceDirectories = [...new Set(validSources.map(path => path.substring(0, path.lastIndexOf("/"))))];
 
-  const [dbFiles, dbDirectories, dbSourceDirs, dbDestDir] = await Promise.all([
+  const [dbFiles, dbDirectories, dbSourceDirs] = await Promise.all([
     StorageDbRepository.filesByPaths(validSources),
     StorageDbRepository.directoriesByPaths(validSources),
     StorageDbRepository.directoriesByPaths(sourceDirectories),
-    StorageDbRepository.directoryByPath(input.destinationPath),
   ]);
 
   const dbFileMap = new Map<string, Types.FileEntity>(dbFiles.map(f => [f.path, f]));
   const dbDirectoryMap = new Map<string, Types.DirectoryEntity>(dbDirectories.map(d => [d.path, d]));
   const dbSourceDirMap = new Map<string, Types.DirectoryEntity>(dbSourceDirs.map(d => [d.path, d]));
 
-  if (dbDestDir && !dbDestDir.allowUploads) {
+  if (!destDirAllowed) {
     return {
       success: false,
       message: "Uploads not allowed to destination directory",
@@ -72,7 +64,6 @@ export async function moveItems(
       successCount++;
       successfulItems.push(result.data);
     } else {
-      failureCount++;
       failures.push({
         path: sourcePath,
         error: result.message || "Unknown error",
@@ -80,15 +71,7 @@ export async function moveItems(
     }
   }
 
-  return {
-    success: failureCount === 0,
-    message:
-      failureCount === 0 ? "All items moved successfully" : `${successCount} items moved, ${failureCount} failed`,
-    successCount,
-    failureCount,
-    failures,
-    successfulItems,
-  };
+  return formatBulkOperationResult(successCount, failures, successfulItems, "moved");
 }
 
 async function moveSingleItem(

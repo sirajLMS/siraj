@@ -1,3 +1,4 @@
+import { formatTimestamp } from "@/lib/shared/date-utils";
 import type { ApiLogOptions, LogEntry, LoggerConfig, LogLevel } from "./types";
 
 type LogOptions = {
@@ -50,19 +51,6 @@ class ClientLogger {
     return colors[level] || "#888";
   }
 
-  private formatTimestamp(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    const milliseconds = String(now.getMilliseconds()).padStart(3, "0");
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
-  }
-
   private serializeForAPI(...args: unknown[]): string {
     // Convert args to a string for API logging only
     return args
@@ -86,7 +74,7 @@ class ClientLogger {
       sessionId: this.sessionId,
       level: options.level,
       message,
-      timestamp: this.formatTimestamp(),
+      timestamp: formatTimestamp(),
       caller: options.caller,
       sequence: options.sequence,
     };
@@ -126,7 +114,7 @@ class ClientLogger {
   private logToConsole(options: ApiLogOptions, ...args: unknown[]): void {
     if (!this.config.enabled) return;
 
-    const timestamp = this.formatTimestamp();
+    const timestamp = formatTimestamp();
     const color = this.getColorCode(options.level);
 
     // Console output with colors - let browser handle formatting naturally

@@ -1,8 +1,7 @@
 import type { GetFilesResponse } from "@google-cloud/storage";
-import { StorageDbRepository } from "@/backend/db/repo";
-import * as Types from "@/backend/types";
+import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { OrderSortDirection } from "@/lib/enum";
+import { loadListEntities, paginateStorageItems } from "../../shared/list-operations.helper";
 import { getFolderFileCounts } from "../shared";
 import type { GcpContext, GcsApiResponse } from "../types";
 import { cleanGcsPath } from "../utils";
@@ -37,21 +36,7 @@ export async function listFiles(ctx: GcpContext, input: Types.FilesListSearchInp
     }
   }
 
-  const [dbFiles, dbDirectories] = await Promise.all([
-    filePaths.length > 0 ? StorageDbRepository.filesByPaths(filePaths) : [],
-    dirPaths.length > 0 ? StorageDbRepository.directoriesByPaths(dirPaths) : [],
-  ]);
-
-  const dbFileMap = new Map<string, Types.FileEntity>();
-  for (const dbFile of dbFiles) {
-    dbFileMap.set(dbFile.path, dbFile);
-  }
-
-  const dbDirMap = new Map<string, Types.DirectoryEntity>();
-  for (const dbDir of dbDirectories) {
-    dbDirMap.set(dbDir.path, dbDir);
-  }
-
+  const { dbFileMap, dbDirMap } = await loadListEntities(filePaths, dirPaths);
   const folderFileCountMap = await getFolderFileCounts(ctx, apiResponse?.prefixes || [], dirPaths);
 
   for (const file of validFiles) {
@@ -79,41 +64,17 @@ export async function listFiles(ctx: GcpContext, input: Types.FilesListSearchInp
     }
   }
 
-  let filteredItems = items;
-  if (input.searchTerm && input.searchTerm.length > 0) {
-    const searchLower = input.searchTerm.toLowerCase();
-    filteredItems = items.filter(item => item.name.toLowerCase().includes(searchLower));
-  }
-
-  filteredItems = StorageUtils.filterStorageItems(filteredItems, {
-    includeDirectories: input.includeDirectories ?? null,
-    fileType: input.fileType ?? null,
-    fileTypes: input.fileTypes ?? null,
-    contentTypes: input.contentTypes ?? null,
-  });
-
-  const sortedItems = StorageUtils.sortItems(
-    filteredItems,
-    input.sortBy || Types.FileSortField.NAME,
-    input.sortDirection || OrderSortDirection.ASC
-  );
-
-  const totalCount = sortedItems.length;
-  const offset = input.offset || 0;
-  const limit = input.limit || 50;
-  const paginatedItems = sortedItems.slice(offset, offset + limit);
-  const hasMore = offset + limit < totalCount;
-
-  return {
-    items: paginatedItems,
-    totalCount,
-    hasMore,
-    offset,
-    limit,
-  };
+  return paginateStorageItems(items, input);
 }
 
-export async function fetchDirectoryChildren(ctx: GcpContext, path?: string): Promise<Types.DirectoryInfo[]> {
+export async function fetchDirectoryChildren(ctx: GcpContext, path?: string | null): Promise<Types.DirectoryInfo[]> {
+  return originalFetchDirectoryChildren(ctx, path);
+}
+
+// Keeping original fetchDirectoryChildren logic as it uses parentPath lookup
+import { StorageDbRepository } from "@/backend/db/repo";
+
+async function originalFetchDirectoryChildren(ctx: GcpContext, path?: string | null): Promise<Types.DirectoryInfo[]> {
   const searchPath = !path || path.length === 0 ? "public" : cleanGcsPath(path);
   const prefix = cleanGcsPath(searchPath, true);
 

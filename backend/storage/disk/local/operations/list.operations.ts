@@ -2,9 +2,9 @@ import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
-import * as Types from "@/backend/types";
+import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { OrderSortDirection } from "@/lib/enum";
+import { loadListEntities, paginateStorageItems } from "../../shared/list-operations.helper";
 import { processDirectory, processFile } from "../shared";
 import type { LocalContext } from "../types";
 import { cleanLocalPath, getAbsolutePath } from "../utils";
@@ -47,39 +47,7 @@ export async function listFiles(
     const processedItems = await processListFilesEntries(ctx, filePaths, dirPaths);
     items.push(...processedItems);
 
-    let filteredItems = items;
-    if (input.searchTerm && input.searchTerm.length > 0) {
-      const searchLower = input.searchTerm.toLowerCase();
-      filteredItems = items.filter(item => item.name.toLowerCase().includes(searchLower));
-    }
-
-    logger.info("[LocalAdapter] filteredItems", { filteredItems });
-    filteredItems = StorageUtils.filterStorageItems(filteredItems, {
-      includeDirectories: input.includeDirectories ?? null,
-      fileType: input.fileType ?? null,
-      fileTypes: input.fileTypes ?? null,
-      contentTypes: input.contentTypes ?? null,
-    });
-
-    const sortedItems = StorageUtils.sortItems(
-      filteredItems,
-      input.sortBy || Types.FileSortField.NAME,
-      input.sortDirection || OrderSortDirection.ASC
-    );
-
-    const totalCount = sortedItems.length;
-    const offset = input.offset || 0;
-    const limit = input.limit || 50;
-    const paginatedItems = sortedItems.slice(offset, offset + limit);
-    const hasMore = offset + limit < totalCount;
-
-    return {
-      items: paginatedItems,
-      totalCount,
-      hasMore,
-      offset,
-      limit,
-    };
+    return paginateStorageItems(items, input);
   } catch (error) {
     logger.error(`Failed to list files: ${input.path}`, error);
     return {
@@ -94,20 +62,7 @@ export async function listFiles(
 
 async function processListFilesEntries(ctx: LocalContext, filePaths: string[], dirPaths: string[]) {
   const items: Array<Types.FileInfo | Types.DirectoryInfo> = [];
-  const [dbFiles, dbDirectories] = await Promise.all([
-    filePaths.length > 0 ? StorageDbRepository.filesByPaths(filePaths) : [],
-    dirPaths.length > 0 ? StorageDbRepository.directoriesByPaths(dirPaths) : [],
-  ]);
-
-  const dbFileMap = new Map<string, Types.FileEntity>();
-  dbFiles.forEach(dbFile => {
-    dbFileMap.set(dbFile.path, dbFile);
-  });
-
-  const dbDirMap = new Map<string, Types.DirectoryEntity>();
-  dbDirectories.forEach(dbDir => {
-    dbDirMap.set(dbDir.path, dbDir);
-  });
+  const { dbFileMap, dbDirMap } = await loadListEntities(filePaths, dirPaths);
 
   for (const filePath of filePaths) {
     try {

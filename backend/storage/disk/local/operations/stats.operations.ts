@@ -4,6 +4,7 @@ import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 import { extToMime } from "@/utils/storage.utils";
+import { calculateTotalFiles, formatFileTypeBreakdown, updateFileTypeMap } from "../../shared/stats-operations.helper";
 import type { LocalContext } from "../types";
 import { getAbsolutePath } from "../utils";
 
@@ -35,14 +36,7 @@ export async function storageStatistics(ctx: LocalContext, searchPath?: string |
           const contentType = extToMime[ext] || "application/octet-stream";
 
           const fileType = StorageUtils.getFileTypeFromContentType(contentType);
-          const current = fileTypeMap.get(fileType) || {
-            count: 0,
-            size: BigInt(0),
-          };
-          fileTypeMap.set(fileType, {
-            count: current.count + 1,
-            size: current.size + size,
-          });
+          updateFileTypeMap(fileTypeMap, fileType, size);
         }
       }
     };
@@ -61,7 +55,7 @@ export async function storageStatistics(ctx: LocalContext, searchPath?: string |
         const contentType = extToMime[ext] || "application/octet-stream";
 
         const fileType = StorageUtils.getFileTypeFromContentType(contentType);
-        fileTypeMap.set(fileType, { count: 1, size });
+        updateFileTypeMap(fileTypeMap, fileType, size);
       }
     } catch {
       return {
@@ -72,18 +66,10 @@ export async function storageStatistics(ctx: LocalContext, searchPath?: string |
       };
     }
 
-    const fileTypeBreakdown = Array.from(fileTypeMap.entries()).map(([type, data]) => ({
-      type,
-      count: data.count,
-      size: data.size,
-    }));
-
-    const totalFiles = Array.from(fileTypeMap.values()).reduce((sum, data) => sum + data.count, 0);
-
     return {
-      totalFiles,
+      totalFiles: calculateTotalFiles(fileTypeMap),
       totalSize,
-      fileTypeBreakdown,
+      fileTypeBreakdown: formatFileTypeBreakdown(fileTypeMap),
       directoryCount: directories.size,
     };
   } catch (error) {

@@ -1,9 +1,9 @@
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
-import * as Types from "@/backend/types";
+import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { OrderSortDirection } from "@/lib/enum";
 import { extToMime } from "@/utils/storage.utils";
+import { loadListEntities, paginateStorageItems } from "../../shared/list-operations.helper";
 import { getBlobs } from "../shared";
 import type { VercelContext } from "../types";
 import { cleanVercelPath } from "../utils";
@@ -30,21 +30,7 @@ export async function listFiles(
     }
 
     const { filePaths, dirPaths } = identifyChildren(allBlobs, prefix, searchPath);
-
-    const [dbFiles, dbDirectories] = await Promise.all([
-      filePaths.length > 0 ? StorageDbRepository.filesByPaths(filePaths) : [],
-      dirPaths.length > 0 ? StorageDbRepository.directoriesByPaths(dirPaths) : [],
-    ]);
-
-    const dbFileMap = new Map<string, Types.FileEntity>();
-    for (const dbFile of dbFiles) {
-      dbFileMap.set(dbFile.path, dbFile);
-    }
-
-    const dbDirMap = new Map<string, Types.DirectoryEntity>();
-    for (const dbDir of dbDirectories) {
-      dbDirMap.set(dbDir.path, dbDir);
-    }
+    const { dbFileMap, dbDirMap } = await loadListEntities(filePaths, dirPaths);
 
     const blobMap = new Map<string, { size: number; uploadedAt: Date; url: string }>();
     for (const blob of allBlobs) {
@@ -53,21 +39,7 @@ export async function listFiles(
 
     items.push(...processFiles(filePaths, blobMap, dbFileMap), ...processDirectories(dirPaths, allBlobs, dbDirMap));
 
-    const filteredItems = filterAndSortItems(items, input);
-
-    const totalCount = filteredItems.length;
-    const offset = input.offset || 0;
-    const limit = input.limit || 50;
-    const paginatedItems = filteredItems.slice(offset, offset + limit);
-    const hasMore = offset + limit < totalCount;
-
-    return {
-      items: paginatedItems,
-      totalCount,
-      hasMore,
-      offset,
-      limit,
-    };
+    return paginateStorageItems(items, input);
   } catch (error) {
     logger.error(`Failed to list files: ${input.path}`, error);
     return {
@@ -183,31 +155,6 @@ function processDirectories(
   }
 
   return items;
-}
-
-function filterAndSortItems(
-  items: Array<Types.FileInfo | Types.DirectoryInfo>,
-  input: Types.FilesListSearchInput
-): Array<Types.FileInfo | Types.DirectoryInfo> {
-  let filteredItems = items;
-
-  if (input.searchTerm && input.searchTerm.length > 0) {
-    const searchLower = input.searchTerm.toLowerCase();
-    filteredItems = items.filter(item => item.name.toLowerCase().includes(searchLower));
-  }
-
-  filteredItems = StorageUtils.filterStorageItems(filteredItems, {
-    includeDirectories: input.includeDirectories ?? null,
-    fileType: input.fileType ?? null,
-    fileTypes: input.fileTypes ?? null,
-    contentTypes: input.contentTypes ?? null,
-  });
-
-  return StorageUtils.sortItems(
-    filteredItems,
-    input.sortBy || Types.FileSortField.NAME,
-    input.sortDirection || OrderSortDirection.ASC
-  );
 }
 
 export async function fetchDirectoryChildren(

@@ -4,7 +4,7 @@ import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 import type { GcpContext, GcsApiResponse } from "../types";
 
-export async function storageStatistics(ctx: GcpContext, path?: string): Promise<Types.StorageStats> {
+export async function storageStatistics(ctx: GcpContext, path?: string | null): Promise<Types.StorageStats> {
   try {
     const prefix = path ? `${path}/` : "";
     const [files] = await ctx.bucket.getFiles({ prefix });

@@ -3,39 +3,44 @@ import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { formatBulkOperationResult, validateBulkOperation } from "../../shared/bulk-operations.helper";
 import { getBlobs, isDirectory } from "../shared";
 import type { VercelContext } from "../types";
-import { fileInfoByPath } from "./file.operations";
+import { fileExists, fileInfoByPath } from "./file.operations";
 import { directoryInfoByPath } from "./folder.operations";
 
 export async function moveItems(
   ctx: VercelContext,
   input: Types.StorageItemsMoveInput
 ): Promise<Types.BulkOperationResult> {
-  let successCount = 0;
-  const failures: Array<{ path: string; error: string }> = [];
-  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
-
-  const validSources = await validateSourcesExist(ctx, input.sourcePaths, failures);
-
-  if (validSources.length === 0) {
-    return {
-      success: failures.length === 0,
-      message: failures.length === 0 ? "No valid source files to move" : "Failed to find source files",
-      successCount,
-      failureCount: failures.length,
-      failures,
-      successfulItems,
-    };
-  }
-
-  const { dbFileMap, dbDirectoryMap, dbSourceDirMap, dbDestDir } = await loadMoveEntities(
-    validSources,
-    input.destinationPath
+  const { validSources, failures, destDirAllowed } = await validateBulkOperation(
+    ctx,
+    input.sourcePaths,
+    input.destinationPath,
+    fileExists
   );
 
-  if (dbDestDir && !dbDestDir.allowUploads) {
-    return createBulkError(validSources, "Uploads not allowed to destination directory");
+  let successCount = 0;
+  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
+
+  if (validSources.length === 0) {
+    return formatBulkOperationResult(successCount, failures, successfulItems, "moved");
+  }
+
+  const { dbFileMap, dbDirectoryMap, dbSourceDirMap } = await loadMoveEntities(validSources);
+
+  if (!destDirAllowed) {
+    return {
+      success: false,
+      message: "Uploads not allowed to destination directory",
+      successCount: 0,
+      failureCount: validSources.length,
+      failures: validSources.map(path => ({
+        path,
+        error: "Uploads not allowed to destination directory",
+      })),
+      successfulItems,
+    };
   }
 
   for (const sourcePath of validSources) {
@@ -51,52 +56,16 @@ export async function moveItems(
     }
   }
 
-  return {
-    success: failures.length === 0,
-    message:
-      failures.length === 0 ? "All items moved successfully" : `${successCount} items moved, ${failures.length} failed`,
-    successCount,
-    failureCount: failures.length,
-    failures,
-    successfulItems,
-  };
+  return formatBulkOperationResult(successCount, failures, successfulItems, "moved");
 }
 
-async function validateSourcesExist(
-  ctx: VercelContext,
-  paths: string[],
-  failures: Array<{ path: string; error: string }>
-): Promise<string[]> {
-  const checks = await Promise.all(
-    paths.map(async path => {
-      try {
-        await head(path, { token: ctx.token });
-        return { path, exists: true };
-      } catch {
-        return { path, exists: false };
-      }
-    })
-  );
-
-  return checks
-    .filter(check => {
-      if (!check.exists) {
-        failures.push({ path: check.path, error: "Source path not found" });
-        return false;
-      }
-      return true;
-    })
-    .map(check => check.path);
-}
-
-async function loadMoveEntities(sources: string[], destinationPath: string) {
+async function loadMoveEntities(sources: string[]) {
   const sourceDirectories = [...new Set(sources.map(path => path.substring(0, path.lastIndexOf("/"))))];
 
-  const [dbFiles, dbDirectories, dbSourceDirs, dbDestDir] = await Promise.all([
+  const [dbFiles, dbDirectories, dbSourceDirs] = await Promise.all([
     StorageDbRepository.filesByPaths(sources),
     StorageDbRepository.directoriesByPaths(sources),
     StorageDbRepository.directoriesByPaths(sourceDirectories),
-    StorageDbRepository.directoryByPath(destinationPath),
   ]);
 
   const dbFileMap = new Map<string, Types.FileEntity>();
@@ -114,18 +83,7 @@ async function loadMoveEntities(sources: string[], destinationPath: string) {
     dbSourceDirMap.set(dir.path, dir);
   }
 
-  return { dbFileMap, dbDirectoryMap, dbSourceDirMap, dbDestDir };
-}
-
-function createBulkError(sources: string[], message: string): Types.BulkOperationResult {
-  return {
-    success: false,
-    message,
-    successCount: 0,
-    failureCount: sources.length,
-    failures: sources.map(path => ({ path, error: message })),
-    successfulItems: [],
-  };
+  return { dbFileMap, dbDirectoryMap, dbSourceDirMap };
 }
 
 async function moveItem(

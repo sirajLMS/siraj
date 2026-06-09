@@ -1,55 +1,31 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { StorageDbRepository } from "@/backend/db/repo";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { formatBulkOperationResult, validateBulkOperation } from "../../shared/bulk-operations.helper";
 import type { LocalContext } from "../types";
 import { ensureDirectory, getAbsolutePath } from "../utils";
-import { fileInfoByPath } from "./file.operations";
+import { fileExists, fileInfoByPath } from "./file.operations";
 
 export async function copyItems(
   ctx: LocalContext,
   input: Types.StorageItemsCopyInput
 ): Promise<Types.BulkOperationResult> {
-  let successCount = 0;
-  const failures: Array<{ path: string; error: string }> = [];
-  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
-
-  const sourceExistenceChecks = await Promise.all(
-    input.sourcePaths.map(async sourcePath => {
-      try {
-        const absolutePath = getAbsolutePath(ctx.basePath, sourcePath);
-        await fs.access(absolutePath);
-        return { path: sourcePath, exists: true };
-      } catch {
-        return { path: sourcePath, exists: false };
-      }
-    })
+  const { validSources, failures, destDirAllowed } = await validateBulkOperation(
+    ctx,
+    input.sourcePaths,
+    input.destinationPath,
+    fileExists
   );
 
-  const validSources = sourceExistenceChecks
-    .filter(check => {
-      if (!check.exists) {
-        failures.push({ path: check.path, error: "Source path not found" });
-        return false;
-      }
-      return true;
-    })
-    .map(check => check.path);
+  let successCount = 0;
+  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
 
   if (validSources.length === 0) {
-    return {
-      success: failures.length === 0,
-      message: "No valid source files to copy",
-      successCount,
-      failureCount: failures.length,
-      failures,
-      successfulItems,
-    };
+    return formatBulkOperationResult(successCount, failures, successfulItems, "processed");
   }
 
-  const dbDestDir = await StorageDbRepository.directoryByPath(input.destinationPath);
-  if (dbDestDir && !dbDestDir.allowUploads) {
+  if (!destDirAllowed) {
     return {
       success: false,
       message: "Uploads not allowed to destination directory",
@@ -95,17 +71,7 @@ export async function copyItems(
     }
   }
 
-  return {
-    success: failures.length === 0,
-    message:
-      failures.length === 0
-        ? "All items processed successfully"
-        : `${successCount} items processed, ${failures.length} failed`,
-    successCount,
-    failureCount: failures.length,
-    failures,
-    successfulItems,
-  };
+  return formatBulkOperationResult(successCount, failures, successfulItems, "processed");
 }
 
 async function copyDirectory(src: string, dest: string): Promise<void> {

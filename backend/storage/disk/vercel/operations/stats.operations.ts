@@ -2,6 +2,7 @@ import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 import { extToMime } from "@/utils/storage.utils";
+import { calculateTotalFiles, formatFileTypeBreakdown, updateFileTypeMap } from "../../shared/stats-operations.helper";
 import { getBlobs } from "../shared";
 import type { VercelContext } from "../types";
 
@@ -23,18 +24,10 @@ export async function storageStatistics(ctx: VercelContext, searchPath?: string 
 
     const { totalSize, fileTypeMap, directories } = processStorageStatisticsBlobs(allBlobs, prefix, targetPath);
 
-    const fileTypeBreakdown = Array.from(fileTypeMap.entries()).map(([type, data]) => ({
-      type,
-      count: data.count,
-      size: data.size,
-    }));
-
-    const totalFiles = Array.from(fileTypeMap.values()).reduce((sum, data) => sum + data.count, 0);
-
     return {
-      totalFiles,
+      totalFiles: calculateTotalFiles(fileTypeMap),
       totalSize,
-      fileTypeBreakdown,
+      fileTypeBreakdown: formatFileTypeBreakdown(fileTypeMap),
       directoryCount: directories.size,
     };
   } catch (error) {
@@ -65,11 +58,7 @@ function processStorageStatisticsBlobs(
     const contentType = extToMime[ext] || "application/octet-stream";
 
     const fileType = StorageUtils.getFileTypeFromContentType(contentType);
-    const current = fileTypeMap.get(fileType) || { count: 0, size: BigInt(0) };
-    fileTypeMap.set(fileType, {
-      count: current.count + 1,
-      size: current.size + size,
-    });
+    updateFileTypeMap(fileTypeMap, fileType, size);
 
     const relativePath = blob.pathname.startsWith(prefix) ? blob.pathname.slice(prefix.length) : blob.pathname;
 
