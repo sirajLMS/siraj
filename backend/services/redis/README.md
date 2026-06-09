@@ -99,7 +99,7 @@ async function checkRateLimit(userId: string): Promise<boolean> {
     return true;
   }
 
-  const count = parseInt(current, 10);
+  const count = Number.parseInt(current, 10);
   if (count >= 100) {
     return false; // Rate limit exceeded
   }

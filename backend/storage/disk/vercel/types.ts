@@ -1,4 +1,4 @@
 export interface VercelContext {
-	baseUrl: string;
-	token: string;
+  baseUrl: string;
+  token: string;
 }

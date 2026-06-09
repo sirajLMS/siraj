@@ -1,4 +1,4 @@
 export interface LocalContext {
-	basePath: string;
-	baseUrl: string;
+  basePath: string;
+  baseUrl: string;
 }

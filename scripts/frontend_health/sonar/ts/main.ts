@@ -3,15 +3,16 @@ import { checkDocker, checkDockerCompose, startSonarQube } from "./docker";
 import { fetchAndDisplayResults, waitForAnalysisProcessing } from "./results";
 import { installScanner, runAnalysis } from "./scanner";
 import {
-	changeAdminPassword,
-	createProject,
-	generateToken,
-	waitForSonarQube,
+  changeAdminPassword,
+  createProject,
+  generateToken,
+  waitForSonarQube,
+  writeConnectionInfo,
 } from "./sonarqube-api";
 import { resetSetup } from "./state";
 
 function printHelp() {
-	globalThis.console.log(`
+  globalThis.console.log(`
 ${COLORS.BLUE}🔍 SonarQube Analysis Runner CLI${COLORS.NC}
 
 ${COLORS.YELLOW}Usage:${COLORS.NC}
@@ -33,53 +34,56 @@ ${COLORS.YELLOW}Examples:${COLORS.NC}
 }
 
 async function main() {
-	const args = process.argv.slice(2);
+  const args = process.argv.slice(2);
 
-	if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
-		printHelp();
-		return;
-	}
+  if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
+    printHelp();
+    return;
+  }
 
-	if (args.includes("--reset")) {
-		resetSetup();
-		return;
-	}
+  if (args.includes("--reset")) {
+    resetSetup();
+    return;
+  }
 
-	globalThis.console.log("");
-	logInfo("🔍 SonarQube Analysis Runner");
-	globalThis.console.log("");
+  globalThis.console.log("");
+  logInfo("🔍 SonarQube Analysis Runner");
+  globalThis.console.log("");
 
-	try {
-		if (args.includes("--scan")) {
-			checkDocker();
-			checkDockerCompose();
-			startSonarQube();
-			await waitForSonarQube();
-			await changeAdminPassword();
-			const token = await generateToken();
-			await createProject(token);
-			await installScanner();
-			const scanStartTime = runAnalysis(token);
-			await waitForAnalysisProcessing(token, scanStartTime);
-			await fetchAndDisplayResults(token, true);
-		} else if (args.includes("--result")) {
-			const token = await generateToken();
-			await fetchAndDisplayResults(token, false);
-		} else if (args.includes("--full")) {
-			const token = await generateToken();
-			await fetchAndDisplayResults(token, true);
-		} else {
-			logError("Invalid arguments. Use --help for usage information.");
-			process.exit(1);
-		}
+  try {
+    if (args.includes("--scan")) {
+      checkDocker();
+      checkDockerCompose();
+      startSonarQube();
+      await waitForSonarQube();
+      await changeAdminPassword();
+      const token = await generateToken();
+      await createProject(token);
+      writeConnectionInfo(token);
+      await installScanner();
+      const scanStartTime = runAnalysis(token);
+      await waitForAnalysisProcessing(token, scanStartTime);
+      await fetchAndDisplayResults(token, true, "sonar-result.json");
+    } else if (args.includes("--result")) {
+      const token = await generateToken();
+      writeConnectionInfo(token);
+      await fetchAndDisplayResults(token, false, "sonar-result.json");
+    } else if (args.includes("--full")) {
+      const token = await generateToken();
+      writeConnectionInfo(token);
+      await fetchAndDisplayResults(token, true, "sonar-full.json");
+    } else {
+      logError("Invalid arguments. Use --help for usage information.");
+      process.exit(1);
+    }
 
-		globalThis.console.log("");
-		logSuccess("All done! 🎉");
-		globalThis.console.log("");
-	} catch (error) {
-		logError(error instanceof Error ? error.message : String(error));
-		process.exit(1);
-	}
+    globalThis.console.log("");
+    logSuccess("All done! 🎉");
+    globalThis.console.log("");
+  } catch (error) {
+    logError(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
 }
 
 void main();

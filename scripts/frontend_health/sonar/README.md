@@ -37,6 +37,28 @@ bun run scripts/frontend_health/sonar/ts/main.ts [flags]
 - `--reset`: Reset setup state.
 - `--help`: Show help message.
 
+## IDE Integration (SonarLint)
+
+To get real-time feedback in your IDE (e.g., VS Code with SonarLint extension), you can connect it to the local SonarQube server running in Docker.
+
+### Connection Details
+
+- **Server URL**: `http://localhost:9000`
+- **Connection Name**: `Local SonarQube` (or any name you prefer)
+- **Authentication**:
+  - **User Token**: Use the token found in `scripts/frontend_health/sonar/.sonar-token` (generated after the first scan).
+  - **Manual Login**:
+    - **Username**: `admin`
+    - **Password**: `Admin123!@#$` (Default set by script)
+
+### Setup in VS Code
+
+1. Install the **SonarLint** extension.
+2. Open Settings and search for `SonarLint: Connected Mode`.
+3. Add a connection to `SonarQube` with the URL `http://localhost:9000`.
+4. Provide the token from `.sonar-token`.
+5. Bind your local project to the SonarQube project key (found in `sonar-project.properties`).
+
 ## Configuration
 
 1. **Project Properties**: The script reads `sonar-project.properties` in the project root. See `sonar-project.properties.example` for reference.

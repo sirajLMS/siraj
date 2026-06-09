@@ -12,12 +12,23 @@ services:
       - sonarqube_logs:/opt/sonarqube/logs
     networks:
       - sonarnet
+
+    # 1. Resource limits added here
+    deploy:
+      resources:
+        limits:
+          cpus: "16.0"
+          memory: 8192M # Capped at 3GB instead of 4GB
+        reservations:
+          memory: 1536M # Reserves 1.5GB on startup
+
+    # 2. Optimized health check to handle temporary lags gently
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:9000/api/system/status"]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-      start_period: 60s
+      interval: 30s # Increased from 10s so it doesn't spam pings during high GC overhead
+      timeout: 10s # Increased from 5s to give the container time to answer if lagging
+      retries: 5 # Reduced retries because interval is longer
+      start_period: 120s # Increased from 60s because SonarQube's DB migrations can take over a minute
 
 volumes:
   sonarqube_data:

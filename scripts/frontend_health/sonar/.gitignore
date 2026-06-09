@@ -1,5 +1,6 @@
 # SonarQube generated files
 .sonar-token
+.sonar-connection.md
 .scannerwork/
 .sonar-state
 

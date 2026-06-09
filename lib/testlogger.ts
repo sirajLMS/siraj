@@ -1,9 +1,9 @@
 import { BaseLogger } from "./base-logger";
 
 class TestLogger extends BaseLogger {
-	constructor() {
-		super("test");
-	}
+  constructor() {
+    super("test");
+  }
 }
 
 // Create singleton instance

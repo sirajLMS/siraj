@@ -17,49 +17,39 @@ let initializationPromise: Promise<StorageService> | null = null;
  * Get the storage provider from environment variable
  */
 function getStorageProvider(): StorageProvider {
-	const provider = process.env.STORAGE_PROVIDER;
+  const provider = process.env.STORAGE_PROVIDER;
 
-	const validProviders: StorageProvider[] = [
-		"gcp",
-		"local",
-		"vercel",
-		"s3",
-		"r2",
-	];
-	if (!validProviders.includes(provider)) {
-		throw new Error(
-			`Invalid STORAGE_PROVIDER: ${provider}. Options: ${validProviders.join(", ")}`,
-		);
-	}
+  const validProviders: StorageProvider[] = ["gcp", "local", "vercel", "s3", "r2"];
+  if (!validProviders.includes(provider)) {
+    throw new Error(`Invalid STORAGE_PROVIDER: ${provider}. Options: ${validProviders.join(", ")}`);
+  }
 
-	return provider;
+  return provider;
 }
 
 /**
  * Create storage service instance based on provider
  */
-async function createService(
-	provider: StorageProvider,
-): Promise<StorageService> {
-	switch (provider) {
-		case "gcp":
-			return await createGcpAdapter();
+async function createService(provider: StorageProvider): Promise<StorageService> {
+  switch (provider) {
+    case "gcp":
+      return await createGcpAdapter();
 
-		case "local":
-			return await createLocalAdapter();
+    case "local":
+      return await createLocalAdapter();
 
-		case "vercel":
-			return createVercelAdapter();
+    case "vercel":
+      return createVercelAdapter();
 
-		case "s3":
-			throw new Error("S3 storage adapter not implemented yet");
+    case "s3":
+      throw new Error("S3 storage adapter not implemented yet");
 
-		case "r2":
-			throw new Error("R2 storage adapter not implemented yet");
+    case "r2":
+      throw new Error("R2 storage adapter not implemented yet");
 
-		default:
-			throw new Error(`Unsupported storage provider: ${provider}`);
-	}
+    default:
+      throw new Error(`Unsupported storage provider: ${provider}`);
+  }
 }
 
 /**
@@ -67,36 +57,34 @@ async function createService(
  * This is the main export that should be used throughout the application
  */
 export const getStorageService = async (): Promise<StorageService> => {
-	// If already fully initialized, return the instance immediately
-	if (instance) {
-		return instance;
-	}
+  // If already fully initialized, return the instance immediately
+  if (instance) {
+    return instance;
+  }
 
-	// If an initialization is already in progress, await its promise
-	// rather than creating a busy-wait loop.
-	if (!initializationPromise) {
-		initializationPromise = (async () => {
-			try {
-				const provider = getStorageProvider();
-				const service = await createService(provider);
+  // If an initialization is already in progress, await its promise
+  // rather than creating a busy-wait loop.
+  initializationPromise ??= (async () => {
+    try {
+      const provider = getStorageProvider();
+      const service = await createService(provider);
 
-				instance = service;
-				logger.info(`Storage service initialized with provider: ${provider}`);
+      instance = service;
+      logger.info(`Storage service initialized with provider: ${provider}`);
 
-				return instance;
-			} catch (error) {
-				// Reset promise on failure so subsequent calls can try again
-				initializationPromise = null;
-				logger.error("Failed to initialize storage service", error);
-				throw new Error(
-					`Failed to initialize storage service: ${error instanceof Error ? error.message : String(error)}`,
-					{ cause: error },
-				);
-			}
-		})();
-	}
+      return instance;
+    } catch (error) {
+      // Reset promise on failure so subsequent calls can try again
+      initializationPromise = null;
+      logger.error("Failed to initialize storage service", error);
+      throw new Error(
+        `Failed to initialize storage service: ${error instanceof Error ? error.message : String(error)}`,
+        { cause: error }
+      );
+    }
+  })();
 
-	return initializationPromise;
+  return initializationPromise;
 };
 
 /**
@@ -104,12 +92,10 @@ export const getStorageService = async (): Promise<StorageService> => {
  * Use this only when you're certain the service has been initialized
  */
 export const getStorageServiceSync = (): StorageService => {
-	if (!instance) {
-		throw new Error(
-			"Storage service not initialized. Call getStorageService() first.",
-		);
-	}
-	return instance;
+  if (!instance) {
+    throw new Error("Storage service not initialized. Call getStorageService() first.");
+  }
+  return instance;
 };
 
 /**
@@ -117,15 +103,15 @@ export const getStorageServiceSync = (): StorageService => {
  * The service will be automatically initialized on first use if not called explicitly
  */
 export const initializeStorageService = async (): Promise<StorageService> => {
-	return await getStorageService();
+  return await getStorageService();
 };
 
 /**
  * Reset the singleton instance (useful for testing)
  */
 export const resetStorageService = (): void => {
-	instance = null;
-	initializationPromise = null;
+  instance = null;
+  initializationPromise = null;
 };
 
 export * from "../types/storage.types";

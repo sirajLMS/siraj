@@ -313,7 +313,9 @@ input DirectoryPermissionsUpdateInput {
   permissions: DirectoryPermissionsInput!
 }
 
-"""A type representing a validated email address"""
+"""
+A type representing a validated email address
+"""
 scalar Email
 
 type FileInfo implements StorageObject {
@@ -415,7 +417,9 @@ enum Gender {
   MALE
 }
 
-"""A type representing arbitrary JSON values"""
+"""
+A type representing arbitrary JSON values
+"""
 scalar JSON
 
 input LoginInput {
@@ -480,12 +484,16 @@ input PartialStudentUpdateInput {
   phoneNumber: PhoneNumber
 }
 
-"""A type representing a validated phone number"""
+"""
+A type representing a validated phone number
+"""
 scalar PhoneNumber
 
 type Query {
   directoryChildren(
-    """Parent directory path (empty or null for root level)"""
+    """
+    Parent directory path (empty or null for root level)
+    """
     path: String
   ): [DirectoryInfo!]
   fileInfo(path: String!): FileInfo
@@ -494,7 +502,9 @@ type Query {
   listFiles(input: FilesListInput!): StorageObjectList
   me: User
   searchFiles(
-    """File type filter (optional)"""
+    """
+    File type filter (optional)
+    """
     fileType: String
 
     """
@@ -502,7 +512,9 @@ type Query {
     """
     folder: String
 
-    """Maximum number of results"""
+    """
+    Maximum number of results
+    """
     limit: Int = 50
     searchTerm: String!
   ): StorageObjectList
@@ -513,7 +525,11 @@ type Query {
     path: String
   ): StorageStats
   student(id: Int!): Student
-  students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
+  students(
+    filterArgs: StudentFilterArgs
+    orderBy: [StudentsOrderByClause!]
+    paginationArgs: PaginationArgs
+  ): StudentsWithFiltersResponse!
   user(id: Int!): User
   users: [User!]
 }
@@ -565,7 +581,9 @@ type StorageStats {
   totalSize: String
 }
 
-"""A map of string keys to string values (Record<string, string>)"""
+"""
+A map of string keys to string values (Record<string, string>)
+"""
 scalar StringMap
 
 type Student {

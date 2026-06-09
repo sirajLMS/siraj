@@ -8,60 +8,57 @@ import logger from "@/backend/lib/logger";
  * POST /api/storage/cleanup
  */
 export async function POST(request: NextRequest) {
-	try {
-		// Step 1: Check authentication - only authenticated users can trigger cleanup
-		const authHeader = request.headers.get("authorization");
-		const accessToken = extractTokenFromHeader(authHeader);
-		const payload = accessToken ? await verifyToken(accessToken) : null;
+  try {
+    // Step 1: Check authentication - only authenticated users can trigger cleanup
+    const authHeader = request.headers.get("authorization");
+    const accessToken = extractTokenFromHeader(authHeader);
+    const payload = accessToken ? await verifyToken(accessToken) : null;
 
-		if (payload?.type !== "access") {
-			logger.warn("Unauthorized cleanup attempt - no valid token");
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-		}
+    if (payload?.type !== "access") {
+      logger.warn("Unauthorized cleanup attempt - no valid token");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-		// Get user from database
-		const user = await UserRepository.findById(payload.userId);
+    // Get user from database
+    const user = await UserRepository.findById(payload.userId);
 
-		if (!user) {
-			logger.warn("Unauthorized cleanup attempt - user not found", {
-				userId: payload.userId,
-			});
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-		}
+    if (!user) {
+      logger.warn("Unauthorized cleanup attempt - user not found", {
+        userId: payload.userId,
+      });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-		// Check if user is admin by email (ADMIN_EMAIL environment variable)
-		const adminEmail = process.env.ADMIN_EMAIL;
-		if (adminEmail && user.email !== adminEmail) {
-			logger.warn("Unauthorized cleanup attempt - non-admin user", {
-				userId: user.id.toString(),
-				email: user.email,
-			});
-			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-		}
+    // Check if user is admin by email (ADMIN_EMAIL environment variable)
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail && user.email !== adminEmail) {
+      logger.warn("Unauthorized cleanup attempt - non-admin user", {
+        userId: user.id.toString(),
+        email: user.email,
+      });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
-		// Step 2: Delete expired signed URLs
-		const deletedCount = await SignedUrlRepository.deleteExpired();
+    // Step 2: Delete expired signed URLs
+    const deletedCount = await SignedUrlRepository.deleteExpired();
 
-		// Step 3: Log the cleanup operation
-		logger.info("Manual signed URL cleanup completed", {
-			deletedCount,
-			triggeredBy: user.id.toString(),
-		});
+    // Step 3: Log the cleanup operation
+    logger.info("Manual signed URL cleanup completed", {
+      deletedCount,
+      triggeredBy: user.id.toString(),
+    });
 
-		return NextResponse.json({
-			success: true,
-			deletedCount,
-			message: `Deleted ${deletedCount} expired signed URLs`,
-		});
-	} catch (error) {
-		logger.error("Failed to cleanup expired signed URLs", {
-			error: error instanceof Error ? error.message : String(error),
-			stack: error instanceof Error ? error.stack : undefined,
-		});
+    return NextResponse.json({
+      success: true,
+      deletedCount,
+      message: `Deleted ${deletedCount} expired signed URLs`,
+    });
+  } catch (error) {
+    logger.error("Failed to cleanup expired signed URLs", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
 
-		return NextResponse.json(
-			{ error: "Internal server error" },
-			{ status: 500 },
-		);
-	}
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

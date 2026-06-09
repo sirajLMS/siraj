@@ -64,7 +64,6 @@ Code Changes → CodeScene Diagnostics → TypeScript Check → Linting → Code
 - NEVER include repetitive endings like "- Ensured all changes comply with Bun package manager rules and maintain code quality standards."
 - Use imperative mood (e.g., "Add feature" not "Added feature" or "Adding feature")
 
-
 ## React & Next.js Patterns
 
 - **Event Types**: NEVER use `FormEvent` (deprecated/removed in React 19). Use `React.SubmitEvent` or `React.SyntheticEvent<HTMLFormElement>`.
@@ -74,7 +73,7 @@ Code Changes → CodeScene Diagnostics → TypeScript Check → Linting → Code
 
 ## MUI Breaking Changes (v9+)
 
-   - use mui-mcp server if available.
+- use mui-mcp server if available.
 
 - **Typography style props**: `fontWeight`, `textAlign`, `mb`, `mt`, etc. are NOT valid direct props. Always use `sx`: `<Typography sx={{ fontWeight: 700, mb: 1 }}>`.
 - **Stack layout props**: `alignItems`, `justifyContent`, `flexWrap`, `gap`, `mb`, `mt`, etc. must go in `sx`: `<Stack sx={{ alignItems: "center", justifyContent: "space-between" }}>`.

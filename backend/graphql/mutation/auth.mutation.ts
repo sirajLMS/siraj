@@ -1,210 +1,198 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { GraphQLError } from "graphql";
 import { SessionRepository, UserRepository } from "@/backend/db/repo";
-import {
-	generateAccessToken,
-	generateRefreshToken,
-	verifyToken,
-} from "@/backend/lib";
+import { generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
 import { comparePassword } from "@/backend/lib/auth/password";
 import logger from "@/backend/lib/logger";
 import type { SessionEntity, UserEntity } from "@/backend/types";
 import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import {
-	LoginInputPothosObject,
-	LoginResponsePothosObject,
-	RefreshTokenResponsePothosObject,
-} from "../pothos";
+import { LoginInputPothosObject, LoginResponsePothosObject, RefreshTokenResponsePothosObject } from "../pothos";
 
-function setAuthCookies(
-	ctx: BaseContext,
-	sessionId: string,
-	refreshToken: string,
-) {
-	if (!ctx.cookies) return;
+function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: string) {
+  if (!ctx.cookies) return;
 
-	const options = {
-		httpOnly: true,
-		secure: process.env.NODE_ENV === "production",
-		sameSite: "lax" as const,
-		maxAge: 60 * 60 * 24 * 7, // 7 days
-		path: "/",
-	};
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: "/",
+  };
 
-	ctx.cookies.set("session_id", sessionId, options);
-	ctx.cookies.set("refresh_token", refreshToken, options);
+  ctx.cookies.set("session_id", sessionId, options);
+  ctx.cookies.set("refresh_token", refreshToken, options);
 }
 
 async function resolveUserFromSession(
-	sessionId: string,
+  sessionId: string
 ): Promise<{ session: SessionEntity | null; user: UserEntity | null }> {
-	const session = await SessionRepository.validate(sessionId);
-	if (!session?.userId) return { session: session ?? null, user: null };
+  const session = await SessionRepository.validate(sessionId);
+  if (!session?.userId) return { session: session ?? null, user: null };
 
-	const user = (await UserRepository.findById(session.userId)) || null;
-	if (!user) {
-		logger.warn("[RefreshToken] Session found but user not found", {
-			userId: session.userId,
-		});
-	}
-	return { session, user };
+  const user = (await UserRepository.findById(session.userId)) || null;
+  if (!user) {
+    logger.warn("[RefreshToken] Session found but user not found", {
+      userId: session.userId,
+    });
+  }
+  return { session, user };
 }
 
 async function resolveUserFromRefreshToken(
-	refreshToken: string,
+  refreshToken: string
 ): Promise<{ session: SessionEntity | null; user: UserEntity | null }> {
-	const payload = await verifyToken(refreshToken);
-	if (payload?.type !== "refresh") return { session: null, user: null };
+  const payload = await verifyToken(refreshToken);
+  if (payload?.type !== "refresh") return { session: null, user: null };
 
-	const user = (await UserRepository.findById(payload.userId)) || null;
-	if (!user) return { session: null, user: null };
+  const user = (await UserRepository.findById(payload.userId)) || null;
+  if (!user) return { session: null, user: null };
 
-	const session = (await SessionRepository.findByUserId(user.id)) || null;
-	if (!session) {
-		logger.warn("[RefreshToken] User found but no session exists", {
-			userId: user.id,
-		});
-	}
-	return { session, user };
+  const session = (await SessionRepository.findByUserId(user.id)) || null;
+  if (!session) {
+    logger.warn("[RefreshToken] User found but no session exists", {
+      userId: user.id,
+    });
+  }
+  return { session, user };
 }
 
-gqlSchemaBuilder.mutationFields((t) => ({
-	login: t.field({
-		type: LoginResponsePothosObject,
-		args: {
-			input: t.arg({ type: LoginInputPothosObject, required: true }),
-		},
-		resolve: async (_parent, args, ctx) => {
-			const { email, password } = args.input;
+gqlSchemaBuilder.mutationFields(t => ({
+  login: t.field({
+    type: LoginResponsePothosObject,
+    args: {
+      input: t.arg({ type: LoginInputPothosObject, required: true }),
+    },
+    resolve: async (_parent, args, ctx) => {
+      const { email, password } = args.input;
 
-			let user: UserEntity | null;
-			try {
-				user = (await UserRepository.findByEmail(email.value)) ?? null;
-			} catch (err) {
-				logger.error(err);
-				return null;
-			}
+      let user: UserEntity | null;
+      try {
+        user = (await UserRepository.findByEmail(email.value)) ?? null;
+      } catch (err) {
+        logger.error(err);
+        return null;
+      }
 
-			if (!user) {
-				throw new GraphQLError("Invalid email or password", {
-					extensions: { code: "INVALID_CREDENTIALS" },
-				});
-			}
+      if (!user) {
+        throw new GraphQLError("Invalid email or password", {
+          extensions: { code: "INVALID_CREDENTIALS" },
+        });
+      }
 
-			// Verify password
-			const isPasswordValid = await comparePassword(password, user.password);
+      // Verify password
+      const isPasswordValid = await comparePassword(password, user.password);
 
-			if (!isPasswordValid) {
-				throw new GraphQLError("Invalid email or password", {
-					extensions: { code: "INVALID_CREDENTIALS" },
-				});
-			}
+      if (!isPasswordValid) {
+        throw new GraphQLError("Invalid email or password", {
+          extensions: { code: "INVALID_CREDENTIALS" },
+        });
+      }
 
-			// Generate tokens
-			const accessToken = await generateAccessToken(user.id, user.email);
-			const refreshToken = await generateRefreshToken(user.id, user.email);
+      // Generate tokens
+      const accessToken = await generateAccessToken(user.id, user.email);
+      const refreshToken = await generateRefreshToken(user.id, user.email);
 
-			// Create session in database
-			const sessionId = randomUUID();
-			await SessionRepository.create({
-				id: sessionId,
-				userId: user.id,
-				payload: JSON.stringify({
-					createdAt: new Date().toISOString(),
-					// Store session metadata only, not sensitive tokens
-				}),
-				lastActivity: Math.floor(Date.now() / 1000),
-			});
+      // Create session in database
+      const sessionId = randomUUID();
+      await SessionRepository.create({
+        id: sessionId,
+        userId: user.id,
+        payload: JSON.stringify({
+          createdAt: new Date().toISOString(),
+          // Store session metadata only, not sensitive tokens
+        }),
+        lastActivity: Math.floor(Date.now() / 1000),
+      });
 
-			// Set httpOnly cookies for session and refresh token
-			setAuthCookies(ctx, sessionId, refreshToken);
+      // Set httpOnly cookies for session and refresh token
+      setAuthCookies(ctx, sessionId, refreshToken);
 
-			return {
-				token: accessToken,
-				user,
-			};
-		},
-	}),
+      return {
+        token: accessToken,
+        user,
+      };
+    },
+  }),
 
-	refreshToken: t.field({
-		type: RefreshTokenResponsePothosObject,
-		resolve: async (_parent, _args, ctx) => {
-			// Try to get session ID from context (from cookie)
-			const sessionId = ctx.sessionId;
-			const refreshToken = ctx.refreshToken;
+  refreshToken: t.field({
+    type: RefreshTokenResponsePothosObject,
+    resolve: async (_parent, _args, ctx) => {
+      // Try to get session ID from context (from cookie)
+      const sessionId = ctx.sessionId;
+      const refreshToken = ctx.refreshToken;
 
-			if (!sessionId && !refreshToken) {
-				throw new GraphQLError("No authentication session found", {
-					extensions: { code: "UNAUTHENTICATED" },
-				});
-			}
+      if (!sessionId && !refreshToken) {
+        throw new GraphQLError("No authentication session found", {
+          extensions: { code: "UNAUTHENTICATED" },
+        });
+      }
 
-			let session: SessionEntity | null = null;
-			let user: UserEntity | null = null;
+      let session: SessionEntity | null = null;
+      let user: UserEntity | null = null;
 
-			// First try to validate using session ID (cookie-based)
-			if (sessionId) {
-				const result = await resolveUserFromSession(sessionId);
-				session = result.session;
-				user = result.user;
-			}
+      // First try to validate using session ID (cookie-based)
+      if (sessionId) {
+        const result = await resolveUserFromSession(sessionId);
+        session = result.session;
+        user = result.user;
+      }
 
-			// If session validation failed, try refresh token
-			if (!user && refreshToken) {
-				const result = await resolveUserFromRefreshToken(refreshToken);
-				session = result.session;
-				user = result.user;
-			}
+      // If session validation failed, try refresh token
+      if (!user && refreshToken) {
+        const result = await resolveUserFromRefreshToken(refreshToken);
+        session = result.session;
+        user = result.user;
+      }
 
-			if (!user || !session) {
-				throw new GraphQLError("Invalid session or refresh token", {
-					extensions: { code: "INVALID_TOKEN" },
-				});
-			}
+      if (!user || !session) {
+        throw new GraphQLError("Invalid session or refresh token", {
+          extensions: { code: "INVALID_TOKEN" },
+        });
+      }
 
-			// Generate new tokens (token rotation for security)
-			const newAccessToken = await generateAccessToken(user.id, user.email);
-			const newRefreshToken = await generateRefreshToken(user.id, user.email);
+      // Generate new tokens (token rotation for security)
+      const newAccessToken = await generateAccessToken(user.id, user.email);
+      const newRefreshToken = await generateRefreshToken(user.id, user.email);
 
-			// Update session activity
-			await SessionRepository.update({
-				...session,
-				lastActivity: Math.floor(Date.now() / 1000),
-			});
+      // Update session activity
+      await SessionRepository.update({
+        ...session,
+        lastActivity: Math.floor(Date.now() / 1000),
+      });
 
-			// Refresh the cookies with new refresh token (token rotation)
-			if (session.id) {
-				setAuthCookies(ctx, session.id, newRefreshToken);
-			}
+      // Refresh the cookies with new refresh token (token rotation)
+      if (session.id) {
+        setAuthCookies(ctx, session.id, newRefreshToken);
+      }
 
-			return {
-				token: newAccessToken,
-				user,
-			};
-		},
-	}),
+      return {
+        token: newAccessToken,
+        user,
+      };
+    },
+  }),
 
-	logout: t.field({
-		type: "Boolean",
-		authScopes: {
-			loggedIn: true,
-		},
-		resolve: async (_parent, _args, ctx) => {
-			if (!ctx.user) {
-				return false;
-			}
+  logout: t.field({
+    type: "Boolean",
+    authScopes: {
+      loggedIn: true,
+    },
+    resolve: async (_parent, _args, ctx) => {
+      if (!ctx.user) {
+        return false;
+      }
 
-			// Delete all sessions for the user
-			await SessionRepository.deleteByUserId(ctx.user.id);
+      // Delete all sessions for the user
+      await SessionRepository.deleteByUserId(ctx.user.id);
 
-			// Clear authentication cookies
-			if (ctx.cookies) {
-				ctx.cookies.delete("session_id");
-				ctx.cookies.delete("refresh_token");
-			}
+      // Clear authentication cookies
+      if (ctx.cookies) {
+        ctx.cookies.delete("session_id");
+        ctx.cookies.delete("refresh_token");
+      }
 
-			return true;
-		},
-	}),
+      return true;
+    },
+  }),
 }));

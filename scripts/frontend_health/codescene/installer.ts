@@ -1,57 +1,100 @@
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import os from "node:os";
-import { COLORS, logError, logInfo, logSuccess } from "./config";
+import path from "node:path";
+import { stdin as input, stdout as output } from "node:process";
+import * as readline from "node:readline/promises";
+import { COLORS, CONFIG, logError, logInfo, logSuccess } from "./config";
 
 export function isCsInstalled(): boolean {
-	const platform = os.platform();
-	const cmd = platform === "win32" ? "where" : "which";
-	const result = spawnSync(cmd, ["cs"]);
-	return result.status === 0;
+  const platform = os.platform();
+  const cmd = platform === "win32" ? String.raw`C:\Windows\System32\where.exe` : "/usr/bin/which";
+  const result = spawnSync(cmd, ["cs"], {
+    env: { ...process.env, PATH: process.env.PATH },
+  });
+  return result.status === 0;
 }
 
 export function installCodeScene(): boolean {
-	const platform = os.platform();
-	logInfo("📦 Installing CodeScene CLI...");
+  const platform = os.platform();
+  logInfo("📦 Installing CodeScene CLI...");
 
-	if (platform === "win32") {
-		logError("Automatic installation not supported on Windows.");
-		globalThis.console.log(
-			`Download binary from: ${COLORS.BLUE}https://codescene.io/docs/cli/index.html#${COLORS.NC}`,
-		);
-		return false;
-	}
+  if (platform === "win32") {
+    logInfo("Running Windows installer...");
+    // Run powershell to download and execute the installation script
+    const ps = spawnSync(
+      String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,
+      [
+        "-NoProfile",
+        "-Command",
+        String.raw`Invoke-WebRequest -Uri 'https://downloads.codescene.io/enterprise/cli/install-cs-tool.ps1' -OutFile install-cs-tool.ps1; .\\install-cs-tool.ps1; Remove-Item install-cs-tool.ps1`,
+      ],
+      { encoding: "utf8" }
+    );
 
-	logInfo("Running installer...");
-	// Equivalent to: echo "" | curl -fsSL ... | sh
-	const curl = spawnSync(
-		"curl",
-		[
-			"-fsSL",
-			"https://downloads.codescene.io/enterprise/cli/install-cs-tool.sh",
-		],
-		{ encoding: "utf8" },
-	);
-	if (curl.status !== 0) {
-		logError("Failed to download installer");
-		return false;
-	}
+    if (ps.status === 0) {
+      logSuccess("CodeScene CLI installed successfully");
+      // Add the newly installed CLI to the current process PATH
+      const csPath = String.raw`${process.env.USERPROFILE || process.env.HOME}\AppData\Local\Programs\CodeScene`;
+      process.env.PATH = `${csPath};${process.env.PATH}`;
+      return true;
+    } else {
+      logError("Installation failed");
+      globalThis.console.error(ps.stderr);
+      return false;
+    }
+  }
 
-	const sh = spawnSync("sh", [], { input: curl.stdout, encoding: "utf8" });
-	if (sh.status === 0) {
-		logSuccess("CodeScene CLI installed successfully");
-		return true;
-	}
+  logInfo("Running installer...");
+  // Equivalent to: echo "" | curl -fsSL ... | sh
+  const curl = spawnSync(
+    "/usr/bin/curl",
+    ["-fsSL", "https://downloads.codescene.io/enterprise/cli/install-cs-tool.sh"],
+    { encoding: "utf8" }
+  );
+  if (curl.status !== 0) {
+    logError("Failed to download installer");
+    return false;
+  }
 
-	logError("Installation failed");
-	return false;
+  const sh = spawnSync("/bin/sh", [], {
+    input: curl.stdout,
+    encoding: "utf8",
+  });
+  if (sh.status === 0) {
+    logSuccess("CodeScene CLI installed successfully");
+    return true;
+  }
+
+  logError("Installation failed");
+  return false;
 }
 
 export function showTokenInstructions(): void {
-	globalThis.console.log(`
+  const platform = os.platform();
+
+  if (platform === "win32") {
+    globalThis.console.log(`
+${COLORS.YELLOW}🔑 Token Setup Instructions (Windows):${COLORS.NC}
+
+1. Get your access token from your CodeScene administrator or generate one here:
+   ${COLORS.BLUE}https://codescene.io/users/me/pat${COLORS.NC}
+
+2. Set the CS_ACCESS_TOKEN environment variable:
+
+   PowerShell (Temporary):
+   ${COLORS.BLUE}$env:CS_ACCESS_TOKEN = "<your-access-token>"${COLORS.NC}
+
+   Command Prompt / Permanent:
+   ${COLORS.BLUE}SETX CS_ACCESS_TOKEN "<your-access-token>"${COLORS.NC}
+   (Note: SETX requires a new terminal window to take effect)
+`);
+  } else {
+    globalThis.console.log(`
 ${COLORS.YELLOW}🔑 Token Setup Instructions:${COLORS.NC}
 
-1. Get your access token from your CodeScene administrator
-   (Projects configuration page)
+1. Get your access token from your CodeScene administrator or generate one here:
+   ${COLORS.BLUE}https://codescene.io/users/me/pat${COLORS.NC}
 
 2. Set the CS_ACCESS_TOKEN environment variable:
 
@@ -62,4 +105,81 @@ ${COLORS.YELLOW}🔑 Token Setup Instructions:${COLORS.NC}
    ${COLORS.BLUE}echo 'export CS_ACCESS_TOKEN=<your-access-token>' >> ~/.bashrc${COLORS.NC}
    ${COLORS.BLUE}source ~/.bashrc${COLORS.NC}
 `);
+  }
+}
+
+// cspell:ignore SETX setx
+
+function saveTokenWindows(token: string): boolean {
+  const cmd = spawnSync(String.raw`C:\Windows\System32\cmd.exe`, ["/c", `setx CS_ACCESS_TOKEN "${token}"`], {
+    encoding: "utf8",
+  });
+  if (cmd.status !== 0) {
+    logError("Failed to save token on Windows");
+    globalThis.console.error(cmd.stderr);
+    return false;
+  }
+  return true;
+}
+
+function saveTokenUnix(token: string): boolean {
+  try {
+    const home = process.env.HOME;
+    if (home) {
+      const exportCmd = `\nexport CS_ACCESS_TOKEN=${token}\n`;
+      const bashrc = path.join(home, ".bashrc");
+      const zshrc = path.join(home, ".zshrc");
+
+      if (fs.existsSync(bashrc)) {
+        fs.appendFileSync(bashrc, exportCmd);
+      }
+      if (fs.existsSync(zshrc)) {
+        fs.appendFileSync(zshrc, exportCmd);
+      }
+    }
+    return true;
+  } catch (error) {
+    logError(`Failed to save token to shell config files: ${(error as Error).message}`);
+    return false;
+  }
+}
+
+export async function promptAndSaveToken(): Promise<boolean> {
+  if (!process.stdin.isTTY) {
+    return false;
+  }
+
+  globalThis.console.log(`\n${COLORS.YELLOW}CodeScene PAT is missing.${COLORS.NC}`);
+  globalThis.console.log(`Generate a PAT here: ${COLORS.BLUE}https://codescene.io/users/me/pat${COLORS.NC}\n`);
+
+  const rl = readline.createInterface({ input, output });
+  const token = await rl.question("Enter your CodeScene PAT (or press Enter to skip): ");
+  rl.close();
+
+  const trimmedToken = token.trim();
+  if (!trimmedToken) {
+    return false;
+  }
+
+  logInfo("Saving token permanently...");
+  const platform = os.platform();
+
+  const saved = platform === "win32" ? saveTokenWindows(trimmedToken) : saveTokenUnix(trimmedToken);
+
+  if (!saved) {
+    return false;
+  }
+
+  process.env.CS_ACCESS_TOKEN = trimmedToken;
+  CONFIG.CS_TOKEN = trimmedToken;
+  logSuccess("Token saved successfully.");
+  if (platform === "win32") {
+    globalThis.console.log(`\n${COLORS.YELLOW}⚠️ IMPORTANT (Windows):${COLORS.NC}`);
+    globalThis.console.log(`The token has been saved to your User environment variables.`);
+    globalThis.console.log(
+      `If you are using VS Code, you may need to ${COLORS.CYAN}RESTART VS CODE COMPLETELY${COLORS.NC}`
+    );
+    globalThis.console.log(`for new terminals to pick up the CS_ACCESS_TOKEN variable.\n`);
+  }
+  return true;
 }
