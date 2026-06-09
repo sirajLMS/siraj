@@ -10,9 +10,7 @@ gqlSchemaBuilder.queryFields(t => ({
       loggedIn: true,
     },
     resolve: async (_parent, _args, ctx) => {
-      if (!ctx.user) {
-        return null;
-      }
+      if (!ctx.user) return null;
 
       return await UserRepository.findById(ctx.user.id);
     },
@@ -25,7 +23,7 @@ gqlSchemaBuilder.queryFields(t => ({
       loggedIn: true,
     },
     args: {
-      id: t.arg.int({ required: true }),
+      id: t.arg.string({ required: true }),
     },
     resolve: async (_parent, args) => await UserRepository.findById(args.id),
   }),

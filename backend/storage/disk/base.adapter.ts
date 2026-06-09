@@ -11,7 +11,7 @@ export interface AdapterOperations<TContext> {
   deleteFile: (ctx: TContext, path: string) => Promise<Types.FileOperationResult>;
   directoryInfoByPath: (ctx: TContext, path: string) => Promise<Types.DirectoryInfo | null>;
   fileInfoByPath: (ctx: TContext, path: string) => Promise<Types.FileInfo | null>;
-  fileInfoByDbFileId: (ctx: TContext, id: bigint) => Promise<Types.FileInfo | null>;
+  fileInfoByDbFileId: (ctx: TContext, id: string) => Promise<Types.FileInfo | null>;
   storageStatistics: (ctx: TContext, path?: string | null) => Promise<Types.StorageStats>;
   fetchDirectoryChildren: (ctx: TContext, path?: string | null) => Promise<Types.DirectoryInfo[]>;
   moveItems: (ctx: TContext, input: Types.StorageItemsMoveInput) => Promise<Types.BulkOperationResult>;
@@ -61,7 +61,7 @@ export abstract class BaseAdapter<TContext> implements StorageService {
     return this.ops.fileInfoByPath(this.context, path);
   }
 
-  async fileInfoByDbFileId(id: bigint): Promise<Types.FileInfo | null> {
+  async fileInfoByDbFileId(id: string): Promise<Types.FileInfo | null> {
     return this.ops.fileInfoByDbFileId(this.context, id);
   }
 

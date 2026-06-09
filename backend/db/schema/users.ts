@@ -1,25 +1,26 @@
-import { bigint, boolean, index, integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { bigint, boolean, index, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true, precision: 3 }),
   password: varchar("password", { length: 255 }).notNull(),
-  rememberToken: varchar("remember_token", { length: 100 }),
+  rememberTokenHash: varchar("remember_token_hash", { length: 255 }),
   avatarFilePath: varchar("avatar_file_path", { length: 1024 }),
   isActive: boolean("is_active").notNull().default(true),
   isSuperAdmin: boolean("is_super_admin").notNull().default(false),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true, precision: 3 }),
   createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+  deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
 });
 
 export const sessions = pgTable(
   "sessions",
   {
-    id: varchar("id", { length: 255 }).primaryKey(),
-    userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+    hashedId: varchar("hashed_id", { length: 255 }).primaryKey(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
     ipAddress: varchar("ip_address", { length: 45 }),
     userAgent: text("user_agent"),
     payload: text("payload").notNull(),
@@ -35,9 +36,23 @@ export const passwordResetTokens = pgTable(
   "password_reset_tokens",
   {
     email: varchar("email", { length: 255 }).primaryKey(),
-    token: varchar("token", { length: 255 }).notNull(),
+    hashedToken: varchar("hashed_token", { length: 255 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [index("password_reset_tokens_expires_at_idx").on(table.expiresAt)]
+);
+
+export const authRateLimits = pgTable(
+  "auth_rate_limits",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ipAddress: varchar("ip_address", { length: 45 }),
+    email: varchar("email", { length: 255 }),
+    attempts: integer("attempts").notNull().default(1),
+    lockedUntil: timestamp("locked_until", { withTimezone: true, precision: 3 }),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+  },
+  table => [index("auth_rate_limits_ip_idx").on(table.ipAddress), index("auth_rate_limits_email_idx").on(table.email)]
 );

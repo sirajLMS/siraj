@@ -11,15 +11,15 @@ import {
 } from "../pothos";
 
 export const StudentPothosObject = gqlSchemaBuilder
-  .loadableObjectRef<Types.StudentDto, number>("Student", {
-    load: async (ids: number[]) => StudentRepository.loadByIds(ids),
+  .loadableObjectRef<Types.StudentDto, string>("Student", {
+    load: async (ids: string[]) => StudentRepository.loadByIds(ids),
     sort: s => s.id,
   })
   .implement({
     fields: t => ({
-      id: t.exposeInt("id", { nullable: false }),
-      parentId: t.exposeInt("parentId", { nullable: false }),
-      primaryTeacherId: t.exposeInt("primaryTeacherId", { nullable: true }),
+      id: t.exposeString("id", { nullable: false }),
+      parentId: t.exposeString("parentId", { nullable: false }),
+      primaryTeacherId: t.exposeString("primaryTeacherId", { nullable: true }),
       name: t.exposeString("name", { nullable: false }),
       gender: t.field({
         type: GenderPothosObject,
@@ -57,8 +57,8 @@ export const StudentCreateInputPothosObject = gqlSchemaBuilder
   .inputRef<Types.StudentCreateInput>("StudentCreateInput")
   .implement({
     fields: t => ({
-      parentId: t.int({ required: true }),
-      primaryTeacherId: t.int({ required: false }),
+      parentId: t.string({ required: true }),
+      primaryTeacherId: t.string({ required: false }),
       name: t.string({ required: true }),
       dateOfBirth: t.field({
         type: "DateTime",
@@ -85,9 +85,9 @@ export const PartialStudentUpdateInputPothosObject = gqlSchemaBuilder
   .inputRef<Types.PartialStudentUpdateInput>("PartialStudentUpdateInput")
   .implement({
     fields: t => ({
-      id: t.int({ required: true }),
-      parentId: t.int({ required: false }),
-      primaryTeacherId: t.int({ required: false }),
+      id: t.string({ required: true }),
+      parentId: t.string({ required: false }),
+      primaryTeacherId: t.string({ required: false }),
       name: t.string({ required: false }),
       dateOfBirth: t.field({
         type: "DateTime",
@@ -132,8 +132,8 @@ export const StudentFilterArgsPothosObject = gqlSchemaBuilder
       nameIsEmpty: t.boolean(),
       nameIsNotEmpty: t.boolean(),
 
-      parentId: t.int(),
-      primaryTeacherId: t.int(),
+      parentId: t.string(),
+      primaryTeacherId: t.string(),
       gender: t.field({ type: GenderPothosObject }),
       language: t.field({ type: AppLanguagePothosObject }),
       status: t.field({ type: StudentStatusPothosObject }),

@@ -65,7 +65,7 @@ export async function fileInfoByPath(ctx: LocalContext, filePath: string): Promi
   }
 }
 
-export async function fileInfoByDbFileId(ctx: LocalContext, id: bigint): Promise<Types.FileInfo | null> {
+export async function fileInfoByDbFileId(ctx: LocalContext, id: string): Promise<Types.FileInfo | null> {
   try {
     const dbFile = await StorageDbRepository.fileById(id);
     if (!dbFile) {

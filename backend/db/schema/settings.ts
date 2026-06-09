@@ -1,4 +1,4 @@
-import { index, integer, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 export const systemSettings = pgTable(
@@ -9,7 +9,7 @@ export const systemSettings = pgTable(
     dataType: varchar("data_type", { length: 20 }).notNull().default("string"),
     description: text("description").notNull(),
     category: varchar("category", { length: 100 }).notNull(),
-    updatedByUserId: integer("updated_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    updatedByUserId: uuid("updated_by_user_id").references(() => users.id, { onDelete: "set null" }),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [index("system_settings_category_idx").on(table.category)]

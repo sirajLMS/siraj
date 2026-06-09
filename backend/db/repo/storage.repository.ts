@@ -6,7 +6,7 @@ import type * as StorageTypes from "@/backend/types";
 
 export namespace StorageDbRepository {
   // File operations
-  export const fileById = async (id: bigint): Promise<StorageTypes.FileEntity | undefined> => {
+  export const fileById = async (id: string): Promise<StorageTypes.FileEntity | undefined> => {
     const result = await db.select().from(storageFiles).where(eq(storageFiles.id, id)).limit(1);
     return result[0];
   };
@@ -16,7 +16,7 @@ export namespace StorageDbRepository {
     return result[0];
   };
 
-  export const filesByIds = async (ids: bigint[]): Promise<StorageTypes.FileEntity[]> => {
+  export const filesByIds = async (ids: string[]): Promise<StorageTypes.FileEntity[]> => {
     if (ids.length === 0) return [];
     return await db.select().from(storageFiles).where(inArray(storageFiles.id, ids));
   };
@@ -44,7 +44,7 @@ export namespace StorageDbRepository {
 
   export const updateFile = async (
     file: StorageTypes.FileEntityInput & {
-      id: bigint;
+      id: string;
     }
   ): Promise<StorageTypes.FileEntity | undefined> => {
     const [updatedFile] = await db
@@ -208,7 +208,7 @@ export namespace StorageDbRepository {
   export const unregisterFileUsage = async (
     filePath: string,
     usageType: string,
-    referenceId: bigint
+    referenceId: string
   ): Promise<boolean> => {
     try {
       await db

@@ -6,9 +6,9 @@ export type StudentEntity = typeof students.$inferSelect;
 export type StudentEntityInput = typeof students.$inferInsert;
 
 export type StudentDto = {
-  id: number;
-  parentId: number;
-  primaryTeacherId: number | null;
+  id: string;
+  parentId: string;
+  primaryTeacherId: string | null;
   name: string;
   dateOfBirth: Date | null;
   gender: Gender | null;
@@ -21,8 +21,8 @@ export type StudentDto = {
 };
 
 export type StudentCreateInput = {
-  parentId: number;
-  primaryTeacherId?: number | null;
+  parentId: string;
+  primaryTeacherId?: string | null;
   name: string;
   dateOfBirth?: Date | null;
   gender?: Gender | null;
@@ -33,9 +33,9 @@ export type StudentCreateInput = {
 };
 
 export type PartialStudentUpdateInput = {
-  id: number;
-  parentId?: number | null;
-  primaryTeacherId?: number | null;
+  id: string;
+  parentId?: string | null;
+  primaryTeacherId?: string | null;
   name?: string | null;
   dateOfBirth?: Date | null;
   gender?: Gender | null;
@@ -60,8 +60,8 @@ export type StudentFilterArgs = {
   nameIsEmpty: boolean | null | undefined;
   nameIsNotEmpty: boolean | null | undefined;
 
-  parentId: number | null | undefined;
-  primaryTeacherId: number | null | undefined;
+  parentId: string | null | undefined;
+  primaryTeacherId: string | null | undefined;
   gender: Gender | null | undefined;
   language: AppLanguage | null | undefined;
   status: StudentStatus | null | undefined;

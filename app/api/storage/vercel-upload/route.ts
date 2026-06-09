@@ -11,7 +11,7 @@ export type VercelUploadUrlClientPlayload = {
   contentType: string;
 };
 
-async function getUserIdFromRequest(request: NextRequest): Promise<number | null> {
+async function getUserIdFromRequest(request: NextRequest): Promise<string | null> {
   const authHeader = request.headers.get("authorization");
   const accessToken = extractTokenFromHeader(authHeader);
 
@@ -27,7 +27,7 @@ async function getUserIdFromRequest(request: NextRequest): Promise<number | null
 function validateUploadPayload(
   pathName: string,
   clientPayload: VercelUploadUrlClientPlayload,
-  userId: number
+  userId: string
 ): NextResponse | null {
   if (!pathName) {
     logger.warn("Missing pathname in upload request", { userId });

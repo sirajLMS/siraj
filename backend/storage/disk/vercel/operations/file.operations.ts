@@ -86,7 +86,7 @@ export async function fileInfoByPath(ctx: VercelContext, filePath: string): Prom
   }
 }
 
-export async function fileInfoByDbFileId(ctx: VercelContext, id: bigint): Promise<Types.FileInfo | null> {
+export async function fileInfoByDbFileId(ctx: VercelContext, id: string): Promise<Types.FileInfo | null> {
   try {
     const dbFile = await StorageDbRepository.fileById(id);
     if (!dbFile) {

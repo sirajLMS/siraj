@@ -1,7 +1,6 @@
 import { sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
-  bigint,
   boolean,
   check,
   date,
@@ -10,12 +9,12 @@ import {
   jsonb,
   numeric,
   pgTable,
-  serial,
   smallint,
   text,
   time,
   timestamp,
   uniqueIndex,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import {
@@ -34,11 +33,11 @@ import { users } from "./users";
 export const recurringSchedules = pgTable(
   "recurring_schedules",
   {
-    id: serial("id").primaryKey(),
-    studentId: integer("student_id")
+    id: uuid("id").defaultRandom().primaryKey(),
+    studentId: uuid("student_id")
       .notNull()
       .references(() => students.id, { onDelete: "restrict" }),
-    teacherId: integer("teacher_id")
+    teacherId: uuid("teacher_id")
       .notNull()
       .references(() => teachers.id, { onDelete: "restrict" }),
     durationMinutes: integer("duration_minutes").notNull(),
@@ -48,6 +47,7 @@ export const recurringSchedules = pgTable(
     effectiveUntil: date("effective_until"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
   table => [
     index("recurring_schedules_student_id_idx").on(table.studentId),
@@ -58,8 +58,8 @@ export const recurringSchedules = pgTable(
 export const recurringScheduleDays = pgTable(
   "recurring_schedule_days",
   {
-    id: serial("id").primaryKey(),
-    recurringScheduleId: integer("recurring_schedule_id")
+    id: uuid("id").defaultRandom().primaryKey(),
+    recurringScheduleId: uuid("recurring_schedule_id")
       .notNull()
       .references(() => recurringSchedules.id, { onDelete: "restrict" }),
     dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
@@ -72,17 +72,17 @@ export const recurringScheduleDays = pgTable(
 export const classInstances = pgTable(
   "class_instances",
   {
-    id: bigint("id", { mode: "bigint" }).primaryKey().generatedAlwaysAsIdentity(),
-    studentId: integer("student_id")
+    id: uuid("id").defaultRandom().primaryKey(),
+    studentId: uuid("student_id")
       .notNull()
       .references(() => students.id, { onDelete: "restrict" }),
-    teacherId: integer("teacher_id")
+    teacherId: uuid("teacher_id")
       .notNull()
       .references(() => teachers.id, { onDelete: "restrict" }),
-    recurringScheduleId: integer("recurring_schedule_id").references(() => recurringSchedules.id, {
+    recurringScheduleId: uuid("recurring_schedule_id").references(() => recurringSchedules.id, {
       onDelete: "set null",
     }),
-    originalClassId: bigint("original_class_id", { mode: "bigint" }).references((): AnyPgColumn => classInstances.id, {
+    originalClassId: uuid("original_class_id").references((): AnyPgColumn => classInstances.id, {
       onDelete: "set null",
     }),
     scheduledStartAt: timestamp("scheduled_start_at", { withTimezone: true, precision: 3 }).notNull(),
@@ -95,9 +95,9 @@ export const classInstances = pgTable(
     isFrozen: boolean("is_frozen").notNull().default(false),
     zoomMeetingUrl: varchar("zoom_meeting_url", { length: 1024 }),
     activatedAt: timestamp("activated_at", { withTimezone: true, precision: 3 }),
-    activatedByUserId: integer("activated_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    activatedByUserId: uuid("activated_by_user_id").references(() => users.id, { onDelete: "set null" }),
     forceActivated: boolean("force_activated").notNull().default(false),
-    forceActivatedByUserId: integer("force_activated_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    forceActivatedByUserId: uuid("force_activated_by_user_id").references(() => users.id, { onDelete: "set null" }),
     actualStartAt: timestamp("actual_start_at", { withTimezone: true, precision: 3 }),
     actualEndAt: timestamp("actual_end_at", { withTimezone: true, precision: 3 }),
     quotaDeducted: boolean("quota_deducted").notNull().default(false),
@@ -109,6 +109,7 @@ export const classInstances = pgTable(
     adminNotes: text("admin_notes"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
   table => [
     index("class_instances_scheduled_start_at_idx").on(table.scheduledStartAt),
@@ -139,15 +140,15 @@ export const classInstances = pgTable(
 export const classStatusEvents = pgTable(
   "class_status_events",
   {
-    id: bigint("id", { mode: "bigint" }).primaryKey().generatedAlwaysAsIdentity(),
-    classInstanceId: bigint("class_instance_id", { mode: "bigint" })
+    id: uuid("id").defaultRandom().primaryKey(),
+    classInstanceId: uuid("class_instance_id")
       .notNull()
       .references(() => classInstances.id, { onDelete: "restrict" }),
     eventType: varchar("event_type", { length: 50 }).notNull(),
     fromState: jsonb("from_state"),
     toState: jsonb("to_state"),
     description: text("description"),
-    actorUserId: integer("actor_user_id").references(() => users.id, { onDelete: "set null" }),
+    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [
@@ -159,11 +160,11 @@ export const classStatusEvents = pgTable(
 export const leaveRequests = pgTable(
   "leave_requests",
   {
-    id: bigint("id", { mode: "bigint" }).primaryKey().generatedAlwaysAsIdentity(),
-    classInstanceId: bigint("class_instance_id", { mode: "bigint" })
+    id: uuid("id").defaultRandom().primaryKey(),
+    classInstanceId: uuid("class_instance_id")
       .notNull()
       .references(() => classInstances.id, { onDelete: "restrict" }),
-    requestedByUserId: integer("requested_by_user_id")
+    requestedByUserId: uuid("requested_by_user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     requesterType: leaveRequesterTypeEnum("requester_type").notNull(),
@@ -171,7 +172,7 @@ export const leaveRequests = pgTable(
     status: leaveRequestStatusEnum("status").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     processedAt: timestamp("processed_at", { withTimezone: true, precision: 3 }),
-    processedByUserId: integer("processed_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    processedByUserId: uuid("processed_by_user_id").references(() => users.id, { onDelete: "set null" }),
   },
   table => [index("leave_requests_class_instance_id_idx").on(table.classInstanceId)]
 );
@@ -179,9 +180,9 @@ export const leaveRequests = pgTable(
 export const leaveQuotaUsage = pgTable(
   "leave_quota_usage",
   {
-    id: serial("id").primaryKey(),
-    teacherId: integer("teacher_id").references(() => teachers.id, { onDelete: "restrict" }),
-    studentId: integer("student_id").references(() => students.id, { onDelete: "restrict" }),
+    id: uuid("id").defaultRandom().primaryKey(),
+    teacherId: uuid("teacher_id").references(() => teachers.id, { onDelete: "restrict" }),
+    studentId: uuid("student_id").references(() => students.id, { onDelete: "restrict" }),
     periodYear: smallint("period_year").notNull(),
     periodMonth: smallint("period_month").notNull(),
     usedCount: integer("used_count").notNull().default(0),
@@ -202,8 +203,8 @@ export const leaveQuotaUsage = pgTable(
 );
 
 export const dstMigrationRuns = pgTable("dst_migration_runs", {
-  id: bigint("id", { mode: "bigint" }).primaryKey().generatedAlwaysAsIdentity(),
-  runByUserId: integer("run_by_user_id")
+  id: uuid("id").defaultRandom().primaryKey(),
+  runByUserId: uuid("run_by_user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   offsetMinutes: integer("offset_minutes").notNull(),
@@ -214,11 +215,11 @@ export const dstMigrationRuns = pgTable("dst_migration_runs", {
 export const dstMigrationEntries = pgTable(
   "dst_migration_entries",
   {
-    id: bigint("id", { mode: "bigint" }).primaryKey().generatedAlwaysAsIdentity(),
-    runId: bigint("run_id", { mode: "bigint" })
+    id: uuid("id").defaultRandom().primaryKey(),
+    runId: uuid("run_id")
       .notNull()
       .references(() => dstMigrationRuns.id, { onDelete: "cascade" }),
-    classInstanceId: bigint("class_instance_id", { mode: "bigint" })
+    classInstanceId: uuid("class_instance_id")
       .notNull()
       .references(() => classInstances.id, { onDelete: "restrict" }),
     result: dstMigrationResultEnum("result").notNull(),

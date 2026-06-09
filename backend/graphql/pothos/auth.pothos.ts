@@ -7,14 +7,14 @@ const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserPothosDefinition>("Us
 // User type
 export const UserPothosObject = gqlSchemaBuilder.loadableObject<
   UserPothosDefinition | Error, // LoadResult
-  number, // Key
+  string, // Key
   [], // Interfaces
   typeof UserPothosObjectRef // NameOrRef
 >(UserPothosObjectRef, {
-  load: async (ids: number[]) => UserRepository.loadByIds(ids),
+  load: async (ids: string[]) => UserRepository.loadByIds(ids),
   sort: user => user.id,
   fields: t => ({
-    id: t.exposeInt("id"),
+    id: t.exposeString("id"),
     name: t.exposeString("name"),
     email: t.exposeString("email"),
     emailVerifiedAt: t.expose("emailVerifiedAt", {
@@ -44,7 +44,7 @@ export const LoginResponsePothosObject = gqlSchemaBuilder.objectRef<LoginRespons
     // user: t.expose("user", { type: UserPothosObject }),
     user: t.loadable({
       type: UserPothosObject,
-      load: (ids: number[], ctx) => UserPothosObject.getDataloader(ctx).loadMany(ids),
+      load: (ids: string[], ctx) => UserPothosObject.getDataloader(ctx).loadMany(ids),
       resolve: loginResponse => loginResponse.user.id,
     }),
   }),
@@ -58,7 +58,7 @@ export const RefreshTokenResponsePothosObject = gqlSchemaBuilder
       token: t.exposeString("token"),
       user: t.loadable({
         type: UserPothosObject,
-        load: (ids: number[], ctx) => UserPothosObject.getDataloader(ctx).loadMany(ids),
+        load: (ids: string[], ctx) => UserPothosObject.getDataloader(ctx).loadMany(ids),
         resolve: loginResponse => loginResponse.user.id,
       }),
     }),

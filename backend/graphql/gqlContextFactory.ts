@@ -34,7 +34,7 @@ export async function createGraphQLContext(): Promise<BaseContext> {
     logger.debug("[GraphQL Context] No auth cookies found in request");
   }
 
-  let userId: number | null = null;
+  let userId: string | null = null;
 
   // Verify access token if present
   if (accessToken) {

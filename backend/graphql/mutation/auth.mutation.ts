@@ -96,7 +96,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       // Create session in database
       const sessionId = randomUUID();
       await SessionRepository.create({
-        id: sessionId,
+        hashedId: sessionId,
         userId: user.id,
         payload: JSON.stringify({
           createdAt: new Date().toISOString(),
@@ -156,14 +156,14 @@ gqlSchemaBuilder.mutationFields(t => ({
       const newRefreshToken = await generateRefreshToken(user.id, user.email);
 
       // Update session activity
-      await SessionRepository.update({
+      const newSession = await SessionRepository.update({
         ...session,
         lastActivity: BigInt(Math.floor(Date.now() / 1000)),
       });
 
       // Refresh the cookies with new refresh token (token rotation)
-      if (session.id) {
-        setAuthCookies(ctx, session.id, newRefreshToken);
+      if (newSession.hashedId) {
+        setAuthCookies(ctx, newSession.hashedId, newRefreshToken);
       }
 
       return {

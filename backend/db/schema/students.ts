@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, numeric, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
+import { index, integer, numeric, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { appLanguageEnum, genderEnum, studentStatusEnum } from "./enums";
 import { parents } from "./parents";
 import { teachers } from "./teachers";
@@ -8,11 +8,11 @@ import { users } from "./users";
 export const students = pgTable(
   "students",
   {
-    id: serial("id").primaryKey(),
-    parentId: integer("parent_id")
+    id: uuid("id").defaultRandom().primaryKey(),
+    parentId: uuid("parent_id")
       .notNull()
       .references(() => parents.id, { onDelete: "cascade" }),
-    primaryTeacherId: integer("primary_teacher_id").references(() => teachers.id, { onDelete: "set null" }),
+    primaryTeacherId: uuid("primary_teacher_id").references(() => teachers.id, { onDelete: "set null" }),
     name: varchar("name", { length: 255 }).notNull(),
     dateOfBirth: timestamp("date_of_birth", { withTimezone: true, precision: 3 }),
     gender: genderEnum("gender"),
@@ -41,15 +41,15 @@ export const students = pgTable(
 export const teacherAssignments = pgTable(
   "teacher_assignments",
   {
-    id: serial("id").primaryKey(),
-    studentId: integer("student_id")
+    id: uuid("id").defaultRandom().primaryKey(),
+    studentId: uuid("student_id")
       .notNull()
       .references(() => students.id, { onDelete: "cascade" }),
-    teacherId: integer("teacher_id")
+    teacherId: uuid("teacher_id")
       .notNull()
       .references(() => teachers.id, { onDelete: "restrict" }),
     assignedAt: timestamp("assigned_at", { withTimezone: true, precision: 3 }).notNull(),
-    assignedByUserId: integer("assigned_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    assignedByUserId: uuid("assigned_by_user_id").references(() => users.id, { onDelete: "set null" }),
     endedAt: timestamp("ended_at", { withTimezone: true, precision: 3 }),
   },
   table => [

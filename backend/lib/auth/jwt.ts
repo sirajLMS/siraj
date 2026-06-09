@@ -12,7 +12,7 @@ const JWT_REFRESH_TOKEN_EXPIRY = "7d"; // 7 days
 const secret = new TextEncoder().encode(JWT_SECRET);
 
 export interface CustomJWTPayload extends JoseJWTPayload {
-  userId: number;
+  userId: string;
   email: string;
   type: "access" | "refresh";
 }
@@ -20,7 +20,7 @@ export interface CustomJWTPayload extends JoseJWTPayload {
 /**
  * Generate an access token for a user
  */
-export async function generateAccessToken(userId: number, email: string): Promise<string> {
+export async function generateAccessToken(userId: string, email: string): Promise<string> {
   const token = await new SignJWT({
     userId,
     email,
@@ -37,7 +37,7 @@ export async function generateAccessToken(userId: number, email: string): Promis
 /**
  * Generate a refresh token for a user
  */
-export async function generateRefreshToken(userId: number, email: string): Promise<string> {
+export async function generateRefreshToken(userId: string, email: string): Promise<string> {
   const token = await new SignJWT({
     userId,
     email,

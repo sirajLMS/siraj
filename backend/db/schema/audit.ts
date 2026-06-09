@@ -1,14 +1,25 @@
-import { index, integer, jsonb, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { index, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { users } from "./users";
+
+// NOTE: To make this table truly append-only, run the following SQL migration:
+// CREATE FUNCTION prevent_audit_modification() RETURNS trigger AS $$
+// BEGIN
+//     RAISE EXCEPTION 'Modifying or deleting audit logs is forbidden';
+// END;
+// $$ LANGUAGE plpgsql;
+//
+// CREATE TRIGGER prevent_audit_mod_trigger
+// BEFORE UPDATE OR DELETE ON admin_audit_logs
+// FOR EACH ROW EXECUTE FUNCTION prevent_audit_modification();
 
 export const adminAuditLogs = pgTable(
   "admin_audit_logs",
   {
-    id: serial("id").primaryKey(),
-    actorUserId: integer("actor_user_id")
+    id: uuid("id").defaultRandom().primaryKey(),
+    actorUserId: uuid("actor_user_id")
       .notNull()
       .references(() => users.id, { onDelete: "restrict" }),
-    targetUserId: integer("target_user_id").references(() => users.id, { onDelete: "restrict" }),
+    targetUserId: uuid("target_user_id").references(() => users.id, { onDelete: "restrict" }),
     action: varchar("action", { length: 100 }).notNull(),
     description: text("description"),
     previousState: jsonb("previous_state"),

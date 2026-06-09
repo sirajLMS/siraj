@@ -36,7 +36,7 @@ const _processStudentQuery = async (
 };
 
 export namespace StudentRepository {
-  export const findById = async (id: number): Promise<Types.StudentEntity | null | undefined> => {
+  export const findById = async (id: string): Promise<Types.StudentEntity | null | undefined> => {
     return await db.query.students.findFirst({
       where: { id: id },
     });
@@ -81,7 +81,7 @@ export namespace StudentRepository {
     }
   };
 
-  export const loadByIds = async (ids: number[]): Promise<(Types.StudentDto | Error)[]> => {
+  export const loadByIds = async (ids: string[]): Promise<(Types.StudentDto | Error)[]> => {
     if (ids.length === 0) return [];
 
     const foundStudents = await db.select().from(students).where(inArray(students.id, ids));
@@ -94,11 +94,11 @@ export namespace StudentRepository {
     return studentList;
   };
 
-  export const existsById = async (id: number): Promise<boolean> => {
+  export const existsById = async (id: string): Promise<boolean> => {
     return (await db.$count(students, eq(students.id, id))) > 0;
   };
 
-  export const allExistsByIds = async (ids: number[]): Promise<boolean> => {
+  export const allExistsByIds = async (ids: string[]): Promise<boolean> => {
     return (await db.$count(students, inArray(students.id, ids))) === ids.length;
   };
 
@@ -106,7 +106,7 @@ export namespace StudentRepository {
     return await db.$count(students);
   };
 
-  export const deleteById = async (id: number): Promise<Types.StudentEntity> => {
+  export const deleteById = async (id: string): Promise<Types.StudentEntity> => {
     const existingStudent = await findById(id);
     if (!existingStudent) {
       throw new Error(`Student ${id} not found`);

@@ -35,7 +35,7 @@ export async function fileInfoByPath(ctx: GcpContext, path: string): Promise<Typ
   }
 }
 
-export async function fileInfoByDbFileId(ctx: GcpContext, id: bigint): Promise<Types.FileInfo | null> {
+export async function fileInfoByDbFileId(ctx: GcpContext, id: string): Promise<Types.FileInfo | null> {
   try {
     const dbFile = await StorageDbRepository.fileById(id);
     if (!dbFile) {

@@ -44,12 +44,12 @@ export interface IFileInitializationService {
    * Files are automatically registered in the database when uploaded via StorageService
    * This method retrieves their database IDs for use in templates
    */
-  getTemplateCoverDemoFileIds(): Promise<bigint[]>;
+  getTemplateCoverDemoFileIds(): Promise<string[]>;
 
   /**
    * Register file usage for template covers
    */
-  registerTemplateFileUsage(templateId: number, fileId: bigint): Promise<void>;
+  registerTemplateFileUsage(templateId: string, fileId: string): Promise<void>;
 
   /**
    * Get content type from file name
@@ -202,12 +202,12 @@ export class FileInitializationService implements IFileInitializationService {
     }
   }
 
-  async getTemplateCoverDemoFileIds(): Promise<bigint[]> {
+  async getTemplateCoverDemoFileIds(): Promise<string[]> {
     const demoFiles = ["public/img/demo1.jpg", "public/img/demo2.jpg", "public/img/demo3.jpg", "public/img/demo4.jpg"];
 
     logger.info("   🔍 Checking for demo files and registering as needed...");
 
-    const fileIds: bigint[] = [];
+    const fileIds: string[] = [];
     const { StorageDbRepository } = await import("@/backend/db/repo");
 
     for (const filePath of demoFiles) {
@@ -216,7 +216,7 @@ export class FileInitializationService implements IFileInitializationService {
         const existingFile = await StorageDbRepository.fileByPath(filePath);
 
         if (existingFile) {
-          logger.info(`   ✅ Found demo file in database: ${filePath} (ID: ${String(existingFile.id)})`);
+          logger.info(`   ✅ Found demo file in database: ${filePath} (ID: ${existingFile.id})`);
           fileIds.push(existingFile.id);
           continue;
         }
@@ -231,7 +231,7 @@ export class FileInitializationService implements IFileInitializationService {
             true // isProtected = true for demo files
           );
 
-          logger.info(`   ✅ Registered demo file for use: ${filePath} (ID: ${String(fileEntity.id)})`);
+          logger.info(`   ✅ Registered demo file for use: ${filePath} (ID: ${fileEntity.id})`);
           fileIds.push(fileEntity.id);
         } else {
           logger.error(`   ❌ Demo file NOT found in bucket: ${filePath}`);
@@ -245,7 +245,7 @@ export class FileInitializationService implements IFileInitializationService {
     return fileIds;
   }
 
-  async registerTemplateFileUsage(templateId: number, fileId: bigint): Promise<void> {
+  async registerTemplateFileUsage(templateId: string, fileId: string): Promise<void> {
     try {
       const fileInfo = await this.storageService.fileInfoByDbFileId(fileId);
 
@@ -259,13 +259,13 @@ export class FileInitializationService implements IFileInitializationService {
         // - Register file usage with type "template_cover"
         // - Track reference to template ID and "templates" table
         // - This enables checking if files can be safely deleted
-        logger.info(`   📎 File ${String(fileId)} (${fileInfo.path}) will be used for template ${String(templateId)}`);
+        logger.info(`   📎 File ${fileId} (${fileInfo.path}) will be used for template ${templateId}`);
         logger.info(`   ℹ️  File usage tracking happens through template-file relationships`);
       } else {
-        logger.warn(`   ⚠️  File with ID ${String(fileId)} not found`);
+        logger.warn(`   ⚠️  File with ID ${fileId} not found`);
       }
     } catch (error) {
-      logger.error(`   ❌ Error accessing file ${String(fileId)}:`, error);
+      logger.error(`   ❌ Error accessing file ${fileId}:`, error);
     }
   }
 

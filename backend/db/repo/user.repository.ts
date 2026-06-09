@@ -12,7 +12,7 @@ export namespace UserRepository {
     return (await db.$count(users, eq(users.email, email))) > 0;
   };
 
-  export const findUserByIdOrThrow = async (id: number): Promise<UserEntity> => {
+  export const findUserByIdOrThrow = async (id: string): Promise<UserEntity> => {
     try {
       return await db
         .select()
@@ -28,7 +28,7 @@ export namespace UserRepository {
     }
   };
 
-  export const findById = async (id: number): Promise<UserEntity | null | undefined> => {
+  export const findById = async (id: string): Promise<UserEntity | null | undefined> => {
     try {
       return await db
         .select()
@@ -69,7 +69,7 @@ export namespace UserRepository {
     return await db.select().from(users).orderBy().limit(opts.limit).offset(opts.offset);
   };
 
-  export const loadByIds = async (ids: number[]): Promise<(UserEntity | Error)[]> => {
+  export const loadByIds = async (ids: string[]): Promise<(UserEntity | Error)[]> => {
     if (ids.length === 0) return [];
     const filteredUsers = await db.select().from(users).where(inArray(users.id, ids));
 
@@ -138,7 +138,7 @@ export namespace UserRepository {
           email: input.email.value,
           password: hashedPassword,
           emailVerifiedAt: now,
-          rememberToken: null,
+          rememberTokenHash: null,
           createdAt: now,
           updatedAt: now,
         })
@@ -150,7 +150,7 @@ export namespace UserRepository {
     }
   };
 
-  export const deleteUserById = async (id: number): Promise<UserEntity> => {
+  export const deleteUserById = async (id: string): Promise<UserEntity> => {
     const existingUser = await findUserByIdOrThrow(id);
 
     // Delete the user

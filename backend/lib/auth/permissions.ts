@@ -7,7 +7,7 @@ export type UserPermissionContext = {
   isSuperAdmin: boolean;
 };
 
-export async function resolveUserPermissions(userId: number): Promise<UserPermissionContext> {
+export async function resolveUserPermissions(userId: string): Promise<UserPermissionContext> {
   const user = await db.query.users.findFirst({
     columns: {
       id: true,
@@ -62,7 +62,7 @@ export async function resolveUserPermissions(userId: number): Promise<UserPermis
   };
 }
 
-export async function userHasPermission(userId: number, permissionKey: string): Promise<boolean> {
+export async function userHasPermission(userId: string, permissionKey: string): Promise<boolean> {
   const context = await resolveUserPermissions(userId);
   return context.isSuperAdmin || context.permissions.includes(permissionKey);
 }

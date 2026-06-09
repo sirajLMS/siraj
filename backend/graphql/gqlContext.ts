@@ -4,7 +4,7 @@ import { resolveUserPermissions } from "@/backend/lib/auth/permissions";
 export type BaseContext = {
   user:
     | {
-        id: number;
+        id: string;
       }
     | undefined;
   permissions: string[];
@@ -20,7 +20,7 @@ export type AuthContexts = {
   permission: BaseContext & { user: object };
 };
 
-export async function createContext({ userId }: { userId?: number | null }): Promise<BaseContext> {
+export async function createContext({ userId }: { userId?: string | null }): Promise<BaseContext> {
   if (!userId) {
     return {
       user: undefined,

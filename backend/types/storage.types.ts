@@ -21,10 +21,10 @@ export interface DirectoryPermissions {
 }
 
 export interface FileUsageInfo {
-  id: bigint;
+  id: string;
   filePath: string;
   usageType: string;
-  referenceId: bigint;
+  referenceId: string;
   referenceTable: string;
   createdAt: Date;
 }
@@ -50,7 +50,7 @@ export type DirectoryInfo = StorageObject &
     path: string;
     name: string;
     isProtected: boolean;
-    dbId?: bigint | null;
+    dbId?: string | null;
     permissions: DirectoryPermissions;
     protectChildren: boolean;
     isFromBucket: boolean;
@@ -79,7 +79,7 @@ export type FileInfo = Omit<FileEntity, "id"> &
     path: string;
     name: string;
     isProtected: boolean;
-    dbId?: bigint | null;
+    dbId?: string | null;
     isFromBucket: boolean;
     isInUse: boolean;
     usages: FileUsageInfo[];
@@ -152,7 +152,7 @@ export interface FileUsageCheckInput {
 export interface FileUsageRegisterInput {
   filePath: string;
   usageType: string;
-  referenceId: bigint;
+  referenceId: string;
   referenceTable: string;
 }
 

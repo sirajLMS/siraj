@@ -1,7 +1,7 @@
-import { bigint, bigserial, boolean, index, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { bigint, boolean, index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const storageFiles = pgTable("storage_file", {
-  id: bigserial("id", { mode: "bigint" }).primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   path: text("path").notNull().unique(),
   isProtected: boolean("is_protected").notNull().default(false),
 });
@@ -10,16 +10,16 @@ export const storageFiles = pgTable("storage_file", {
 // This prevents database-level foreign key constraints and cascading deletes.
 // Application layer must manually clean up these records when parent entities are deleted.
 export const fileUsages = pgTable("file_usage", {
-  id: bigserial("id", { mode: "bigint" }).primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   filePath: varchar("file_path", { length: 1024 }).notNull(),
   usageType: varchar("usage_type", { length: 100 }).notNull(),
-  referenceId: bigint("reference_id", { mode: "bigint" }).notNull(),
+  referenceId: uuid("reference_id").notNull(),
   referenceTable: varchar("reference_table", { length: 100 }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
 });
 
 export const storageDirectories = pgTable("storage_directory", {
-  id: bigserial("id", { mode: "bigint" }).primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   path: varchar("path", { length: 1024 }).notNull().unique(),
   allowUploads: boolean("allow_uploads").notNull().default(true),
   allowDelete: boolean("allow_delete").notNull().default(true),

@@ -9,7 +9,7 @@ gqlSchemaBuilder.queryFields(t => ({
     type: Pothos.StudentPothosObject,
     nullable: true,
     args: {
-      id: t.arg.int({ required: true }),
+      id: t.arg.string({ required: true }),
     },
     resolve: async (_query, args) =>
       await StudentRepository.findById(args.id).then(s => StudentUtils.mapEntityToDto(s)),

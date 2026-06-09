@@ -85,7 +85,7 @@ export async function seedPermissions(): Promise<void> {
     const groupId = insertedGroup.id;
     const permissionIds = group.permissionKeys
       .map(key => permissionByKey.get(key))
-      .filter((id): id is number => id !== undefined);
+      .filter((id): id is string => id !== undefined);
 
     await db.delete(groupPermissions).where(eq(groupPermissions.groupId, groupId));
 
@@ -100,7 +100,7 @@ export async function seedPermissions(): Promise<void> {
   }
 }
 
-export async function getPermissionIdsByKeys(keys: string[]): Promise<number[]> {
+export async function getPermissionIdsByKeys(keys: string[]): Promise<string[]> {
   const rows = await db.select({ id: permissions.id }).from(permissions).where(inArray(permissions.key, keys));
 
   return rows.map(r => r.id);

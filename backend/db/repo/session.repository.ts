@@ -6,12 +6,12 @@ import type { SessionEntity, SessionEntityInput } from "@/backend/types";
 const SESSION_TIMEOUT = 7 * 24 * 60 * 60; // 7 days in seconds
 
 export namespace SessionRepository {
-  export const findSessionById = async (id: string): Promise<SessionEntity | null> => {
+  export const findSessionById = async (hashedId: string): Promise<SessionEntity | null> => {
     try {
       return await db
         .select()
         .from(sessions)
-        .where(eq(sessions.id, id))
+        .where(eq(sessions.hashedId, hashedId))
         .then(res => {
           return res[0] ?? null;
         });
@@ -20,7 +20,7 @@ export namespace SessionRepository {
     }
   };
 
-  export const findByUserId = async (userId: number): Promise<SessionEntity | null> => {
+  export const findByUserId = async (userId: string): Promise<SessionEntity | null> => {
     try {
       return await db
         .select()
@@ -45,22 +45,26 @@ export namespace SessionRepository {
   };
 
   export const update = async (input: SessionEntityInput): Promise<SessionEntity> => {
-    const [updatedSession] = await db.update(sessions).set(input).where(eq(sessions.id, input.id)).returning();
+    const [updatedSession] = await db
+      .update(sessions)
+      .set(input)
+      .where(eq(sessions.hashedId, input.hashedId))
+      .returning();
 
     return updatedSession;
   };
 
-  export const deleteSessionById = async (id: string): Promise<SessionEntity | null> => {
-    const existingSession = await findSessionById(id);
+  export const deleteSessionById = async (hashedId: string): Promise<SessionEntity | null> => {
+    const existingSession = await findSessionById(hashedId);
 
     // Delete the session
-    await db.delete(sessions).where(eq(sessions.id, id));
+    await db.delete(sessions).where(eq(sessions.hashedId, hashedId));
 
     // Return the session data as a simple object
     return existingSession;
   };
 
-  export const deleteByUserId = async (userId: number): Promise<void> => {
+  export const deleteByUserId = async (userId: string): Promise<void> => {
     await db.delete(sessions).where(eq(sessions.userId, userId));
   };
 
@@ -82,7 +86,7 @@ export namespace SessionRepository {
     }
 
     // Update last activity
-    await db.update(sessions).set({ lastActivity: now }).where(eq(sessions.id, sessionId));
+    await db.update(sessions).set({ lastActivity: now }).where(eq(sessions.hashedId, sessionId));
 
     return session;
   };

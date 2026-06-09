@@ -57,7 +57,7 @@ export interface StorageService {
   /**
    * Get file information by database file ID
    */
-  fileInfoByDbFileId(id: bigint): Promise<Types.FileInfo | null>;
+  fileInfoByDbFileId(id: string): Promise<Types.FileInfo | null>;
 
   /**
    * Get storage statistics

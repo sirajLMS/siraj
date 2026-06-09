@@ -39,7 +39,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   deleteStudent: t.field({
     type: StudentPothosObject,
     args: {
-      id: t.arg.int({ required: true }),
+      id: t.arg.string({ required: true }),
     },
     resolve: async (_query, args) =>
       await StudentRepository.deleteById(args.id).then(s => StudentUtils.mapEntityToDto(s)),

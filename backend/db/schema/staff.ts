@@ -1,12 +1,12 @@
-import { index, integer, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
+import { index, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { accountStatusEnum } from "./enums";
 import { users } from "./users";
 
 export const staffProfiles = pgTable(
   "staff_profiles",
   {
-    id: serial("id").primaryKey(),
-    userId: integer("user_id")
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
       .notNull()
       .unique()
       .references(() => users.id, { onDelete: "restrict" }),
