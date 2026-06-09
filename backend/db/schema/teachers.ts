@@ -1,4 +1,5 @@
-import { date, index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { check, date, index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { encryptedText } from "./custom-types";
 import { accountStatusEnum, countryCodeEnum, genderEnum } from "./enums";
 import { users } from "./users";
@@ -31,5 +32,9 @@ export const teachers = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("teachers_user_id_idx").on(table.userId), index("teachers_status_idx").on(table.status)]
+  table => [
+    index("teachers_user_id_idx").on(table.userId),
+    index("teachers_status_idx").on(table.status),
+    check("teachers_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
+  ]
 );

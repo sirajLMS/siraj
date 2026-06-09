@@ -54,6 +54,7 @@ export const recurringSchedules = pgTable(
   table => [
     index("recurring_schedules_student_id_idx").on(table.studentId),
     index("recurring_schedules_teacher_id_idx").on(table.teacherId),
+    check("recurring_schedules_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
   ]
 );
 
@@ -139,9 +140,6 @@ export const classInstances = pgTable(
         (${table.isRateOverridden} = false OR ${table.rateAmount} IS NOT NULL)
       `
     ),
-    // NOTE: Overlap prevention requires a raw SQL migration (requires btree_gist extension):
-    // ALTER TABLE class_instances ADD CONSTRAINT class_instances_no_overlap_chk
-    // EXCLUDE USING gist (teacher_id WITH =, tstzrange(scheduled_start_at, scheduled_end_at) WITH &&);
   ]
 );
 

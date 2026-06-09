@@ -117,12 +117,17 @@ function processChangedFile(file: string, results: CheckResults): void {
     .split("\n")
     .map(l => l.trim())
     .filter(Boolean);
-  const issues = lines.filter(
-    line =>
+
+  // Filter for actual issues, ignoring the informational "Code health score" lines
+  const issues = lines.filter(line => {
+    const isScoreLine = /info:.*Code health score:/i.test(line);
+    if (isScoreLine) return false;
+    return (
       /^(warn|error|info|arn|err|nfo):/i.test(line) ||
       line.includes("License check failed") ||
       line.includes("unauthorized")
-  );
+    );
+  });
 
   const hasError = result.status !== 0 || issues.some(i => /^(error|err|license|unauthorized)/i.test(i));
   const hasWarning = issues.some(i => /^(warn|arn|info|nfo)/i.test(i));
