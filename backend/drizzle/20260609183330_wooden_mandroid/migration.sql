@@ -1,0 +1,1 @@
+ALTER TABLE "teachers" ALTER COLUMN "national_id" SET DATA TYPE text USING "national_id"::text;

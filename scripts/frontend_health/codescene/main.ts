@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { join } from "node:path";
 import { clearCache } from "./cache";
 import { runHealthCheck } from "./checker";
 import {
@@ -10,6 +11,7 @@ import {
   logSuccess,
   logWarning,
   resolveCodesceneBin,
+  SCRIPT_DIR,
 } from "./config";
 import { installCodeScene, isCsInstalled, promptAndSaveToken, showTokenInstructions } from "./installer";
 
@@ -73,15 +75,21 @@ async function configureToken() {
   }
   logSuccess("CS_ACCESS_TOKEN is configured");
 
-  // Test token
+  // Test token by checking a small file (the config file itself)
   const csBin = resolveCodesceneBin();
-  const testResult = spawnSync(csBin, ["check", "--help"], {
+  const testResult = spawnSync(csBin, ["check", join(SCRIPT_DIR, "config.ts")], {
     encoding: "utf8",
     env: process.env,
   });
   const testOutput = (testResult.stdout || "") + (testResult.stderr || "");
-  if (/unauthorized|invalid.*token|authentication.*failed/i.test(testOutput)) {
-    logError("CodeScene token appears to be invalid");
+  if (
+    testResult.status !== 0 ||
+    /unauthorized|invalid.*token|authentication.*failed|license.*failed/i.test(testOutput)
+  ) {
+    logError("CodeScene token appears to be invalid or license check failed");
+    if (testOutput) {
+      globalThis.console.log(`${COLORS.RED}CLI Output:${COLORS.NC}\n${testOutput}`);
+    }
     showTokenInstructions();
     process.exit(1);
   }

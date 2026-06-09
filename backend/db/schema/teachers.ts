@@ -1,4 +1,5 @@
 import { date, index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { encryptedText } from "./custom-types";
 import { accountStatusEnum, countryCodeEnum, genderEnum } from "./enums";
 import { users } from "./users";
 
@@ -12,7 +13,7 @@ export const teachers = pgTable(
       .references(() => users.id, { onDelete: "restrict" }),
     status: accountStatusEnum("status").notNull(),
     nationality: countryCodeEnum("nationality"),
-    nationalId: varchar("national_id", { length: 100 }),
+    nationalId: encryptedText("national_id"),
     phone: varchar("phone", { length: 50 }),
     dateOfBirth: date("date_of_birth"),
     gender: genderEnum("gender"),
@@ -22,7 +23,7 @@ export const teachers = pgTable(
     zoomLink: varchar("zoom_link", { length: 1024 }),
     zoomUsername: varchar("zoom_username", { length: 255 }),
     // NOTE: zoomPassword must be encrypted at the application level before saving
-    zoomPassword: text("zoom_password"),
+    zoomPassword: encryptedText("zoom_password"),
     countryCode: countryCodeEnum("country_code"),
     timezone: varchar("timezone", { length: 100 }).notNull(),
     hourlyRate: numeric("hourly_rate", { precision: 12, scale: 2 }),

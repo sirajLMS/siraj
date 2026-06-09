@@ -1,4 +1,5 @@
-import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { index, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+import { encryptedText } from "./custom-types";
 import { teachers } from "./teachers";
 
 export const teacherBankingDetails = pgTable(
@@ -10,12 +11,12 @@ export const teacherBankingDetails = pgTable(
       .unique()
       .references(() => teachers.id, { onDelete: "cascade" }),
     // NOTE: The following fields should be encrypted at the application level
-    beneficiaryName: text("beneficiary_name"),
-    bankName: text("bank_name"),
-    accountNumber: text("account_number"),
-    routingNumber: text("routing_number"),
-    swiftBic: text("swift_bic"),
-    iban: text("iban"),
+    beneficiaryName: encryptedText("beneficiary_name"),
+    bankName: encryptedText("bank_name"),
+    accountNumber: encryptedText("account_number"),
+    routingNumber: encryptedText("routing_number"),
+    swiftBic: encryptedText("swift_bic"),
+    iban: encryptedText("iban"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },

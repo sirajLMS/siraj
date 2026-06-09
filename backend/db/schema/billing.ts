@@ -1,5 +1,17 @@
-import { date, index, numeric, pgTable, primaryKey, smallint, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { invoiceStatusEnum, invoiceTypeEnum } from "./enums";
+import {
+  date,
+  index,
+  numeric,
+  pgTable,
+  primaryKey,
+  smallint,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
+import { invoiceStatusEnum, invoiceTypeEnum, paymentMethodEnum } from "./enums";
 import { parents } from "./parents";
 import { students } from "./students";
 import { users } from "./users";
@@ -11,7 +23,7 @@ export const invoices = pgTable(
     parentId: uuid("parent_id")
       .notNull()
       .references(() => parents.id, { onDelete: "restrict" }),
-    studentId: uuid("student_id").references(() => students.id, { onDelete: "set null" }),
+    studentId: uuid("student_id").references(() => students.id, { onDelete: "restrict" }),
     issueDate: date("issue_date").notNull(),
     dueDate: date("due_date").notNull(),
     paidDate: date("paid_date"),
@@ -42,4 +54,50 @@ export const invoiceCoverageMonths = pgTable(
     month: smallint("month").notNull(),
   },
   table => [primaryKey({ columns: [table.invoiceId, table.year, table.month] })]
+);
+
+export const payments = pgTable(
+  "payments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    invoiceId: uuid("invoice_id")
+      .notNull()
+      .references(() => invoices.id, { onDelete: "restrict" }),
+    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+    currency: varchar("currency", { length: 10 }).notNull(),
+    paymentDate: timestamp("payment_date", { withTimezone: true, precision: 3 }).notNull(),
+    paymentMethod: paymentMethodEnum("payment_method").notNull(),
+    transactionId: varchar("transaction_id", { length: 255 }),
+    gatewayResponse: text("gateway_response"),
+    refundedAmount: numeric("refunded_amount", { precision: 12, scale: 2 }).notNull().default("0.00"),
+    idempotencyKey: varchar("idempotency_key", { length: 255 }),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+  },
+  table => [
+    index("payments_invoice_id_idx").on(table.invoiceId),
+    index("payments_transaction_id_idx").on(table.transactionId),
+    uniqueIndex("payments_idempotency_key_unique_idx").on(table.idempotencyKey),
+  ]
+);
+
+export const currencyExchangeRates = pgTable(
+  "currency_exchange_rates",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fromCurrency: varchar("from_currency", { length: 10 }).notNull(),
+    toCurrency: varchar("to_currency", { length: 10 }).notNull(),
+    rate: numeric("rate", { precision: 12, scale: 6 }).notNull(),
+    effectiveDate: timestamp("effective_date", { withTimezone: true, precision: 3 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+  },
+  table => [
+    index("currency_exchange_rates_from_to_idx").on(table.fromCurrency, table.toCurrency),
+    uniqueIndex("currency_exchange_rates_effective_unique_idx").on(
+      table.fromCurrency,
+      table.toCurrency,
+      table.effectiveDate
+    ),
+  ]
 );

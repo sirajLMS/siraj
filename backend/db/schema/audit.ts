@@ -1,7 +1,7 @@
-import { index, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { index, inet, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
-// NOTE: To make this table truly append-only, run the following SQL migration:
+// NOTE: This table is truly append-only. The following SQL trigger has been deployed via migrations:
 // CREATE FUNCTION prevent_audit_modification() RETURNS trigger AS $$
 // BEGIN
 //     RAISE EXCEPTION 'Modifying or deleting audit logs is forbidden';
@@ -24,7 +24,7 @@ export const adminAuditLogs = pgTable(
     description: text("description"),
     previousState: jsonb("previous_state"),
     newState: jsonb("new_state"),
-    ipAddress: varchar("ip_address", { length: 45 }),
+    ipAddress: inet("ip_address"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [

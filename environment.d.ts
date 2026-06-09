@@ -25,6 +25,7 @@ declare global {
       // Database Configuration
       DB_PROVIDER?: "postgres" | "neon";
       DATABASE_URL: string;
+      DATABASE_ENCRYPTION_KEY: string;
 
       // JWT Configuration
       JWT_SECRET: string;

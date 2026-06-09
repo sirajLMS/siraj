@@ -110,28 +110,45 @@ function processChangedFile(file: string, results: CheckResults): void {
     globalThis.console.log(`${COLORS.RED}❌ ${file}${COLORS.NC}`);
     globalThis.console.log(`    Failed to run CodeScene CLI: ${result.error.message}`);
     saveResult(file, "error", result.error.message);
-  } else if (output.includes("warn:")) {
-    results.warningCount++;
-    results.warningFiles.push(file);
-    globalThis.console.log(`${COLORS.YELLOW}⚠️  ${file}${COLORS.NC}`);
-    const warnings = output
-      .split("\n")
-      .filter(line => line.includes("warn:"))
-      .map(l => `    ${l.trim()}`)
-      .join("\n");
-    globalThis.console.log(warnings);
-    saveResult(file, "warning", warnings);
-  } else if (output.includes("error:")) {
+    return;
+  }
+
+  const lines = output
+    .split("\n")
+    .map(l => l.trim())
+    .filter(Boolean);
+  const issues = lines.filter(
+    line =>
+      /^(warn|error|info|arn|err|nfo):/i.test(line) ||
+      line.includes("License check failed") ||
+      line.includes("unauthorized")
+  );
+
+  const hasError = result.status !== 0 || issues.some(i => /^(error|err|license|unauthorized)/i.test(i));
+  const hasWarning = issues.some(i => /^(warn|arn|info|nfo)/i.test(i));
+
+  if (hasError) {
     results.errorCount++;
     results.errorFiles.push(file);
     globalThis.console.log(`${COLORS.RED}❌ ${file}${COLORS.NC}`);
-    const errors = output
-      .split("\n")
-      .filter(line => line.includes("error:"))
-      .map(l => `    ${l.trim()}`)
-      .join("\n");
-    globalThis.console.log(errors);
-    saveResult(file, "error", errors);
+    if (issues.length > 0) {
+      issues.forEach(i => {
+        globalThis.console.log(`    ${i}`);
+      });
+      saveResult(file, "error", issues.join("\n"));
+    } else if (result.status !== 0) {
+      globalThis.console.log(`    Command failed with exit code ${result.status}`);
+      globalThis.console.log(`    Output: ${output.slice(0, 200)}${output.length > 200 ? "..." : ""}`);
+      saveResult(file, "error", output);
+    }
+  } else if (hasWarning) {
+    results.warningCount++;
+    results.warningFiles.push(file);
+    globalThis.console.log(`${COLORS.YELLOW}⚠️  ${file}${COLORS.NC}`);
+    issues.forEach(i => {
+      globalThis.console.log(`    ${i}`);
+    });
+    saveResult(file, "warning", issues.join("\n"));
   } else {
     results.perfectCount++;
     globalThis.console.log(`${COLORS.GREEN}✅ ${file}${COLORS.NC}`);

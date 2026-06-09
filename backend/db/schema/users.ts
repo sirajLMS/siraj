@@ -1,4 +1,16 @@
-import { bigint, boolean, index, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  bigint,
+  boolean,
+  index,
+  inet,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -21,7 +33,7 @@ export const sessions = pgTable(
   {
     hashedId: varchar("hashed_id", { length: 255 }).primaryKey(),
     userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
-    ipAddress: varchar("ip_address", { length: 45 }),
+    ipAddress: inet("ip_address"),
     userAgent: text("user_agent"),
     payload: text("payload").notNull(),
     lastActivity: bigint("last_activity", { mode: "bigint" }).notNull(),
@@ -35,24 +47,33 @@ export const sessions = pgTable(
 export const passwordResetTokens = pgTable(
   "password_reset_tokens",
   {
-    email: varchar("email", { length: 255 }).primaryKey(),
+    id: uuid("id").defaultRandom().primaryKey(),
+    email: varchar("email", { length: 255 }).notNull(),
     hashedToken: varchar("hashed_token", { length: 255 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("password_reset_tokens_expires_at_idx").on(table.expiresAt)]
+  table => [
+    index("password_reset_tokens_email_idx").on(table.email),
+    index("password_reset_tokens_expires_at_idx").on(table.expiresAt),
+    index("password_reset_tokens_token_idx").on(table.hashedToken),
+  ]
 );
 
 export const authRateLimits = pgTable(
   "auth_rate_limits",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    ipAddress: varchar("ip_address", { length: 45 }),
+    ipAddress: inet("ip_address"),
     email: varchar("email", { length: 255 }),
     attempts: integer("attempts").notNull().default(1),
     lockedUntil: timestamp("locked_until", { withTimezone: true, precision: 3 }),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("auth_rate_limits_ip_idx").on(table.ipAddress), index("auth_rate_limits_email_idx").on(table.email)]
+  table => [
+    index("auth_rate_limits_ip_idx").on(table.ipAddress),
+    index("auth_rate_limits_email_idx").on(table.email),
+    uniqueIndex("auth_rate_limits_ip_email_unique_idx").on(table.ipAddress, table.email),
+  ]
 );

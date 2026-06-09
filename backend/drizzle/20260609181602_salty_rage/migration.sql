@@ -399,7 +399,7 @@ CREATE TABLE "teachers" (
 --> statement-breakpoint
 CREATE TABLE "auth_rate_limits" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-	"ip_address" varchar(45),
+	"ip_address" inet,
 	"email" varchar(255),
 	"attempts" integer DEFAULT 1 NOT NULL,
 	"locked_until" timestamp(3) with time zone,
@@ -408,7 +408,8 @@ CREATE TABLE "auth_rate_limits" (
 );
 --> statement-breakpoint
 CREATE TABLE "password_reset_tokens" (
-	"email" varchar(255) PRIMARY KEY,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"email" varchar(255) NOT NULL,
 	"hashed_token" varchar(255) NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"expires_at" timestamp(3) with time zone NOT NULL
@@ -492,14 +493,17 @@ CREATE INDEX "teachers_user_id_idx" ON "teachers" ("user_id");--> statement-brea
 CREATE INDEX "teachers_status_idx" ON "teachers" ("status");--> statement-breakpoint
 CREATE INDEX "auth_rate_limits_ip_idx" ON "auth_rate_limits" ("ip_address");--> statement-breakpoint
 CREATE INDEX "auth_rate_limits_email_idx" ON "auth_rate_limits" ("email");--> statement-breakpoint
+CREATE UNIQUE INDEX "auth_rate_limits_ip_email_unique_idx" ON "auth_rate_limits" ("ip_address","email");--> statement-breakpoint
+CREATE INDEX "password_reset_tokens_email_idx" ON "password_reset_tokens" ("email");--> statement-breakpoint
 CREATE INDEX "password_reset_tokens_expires_at_idx" ON "password_reset_tokens" ("expires_at");--> statement-breakpoint
+CREATE INDEX "password_reset_tokens_token_idx" ON "password_reset_tokens" ("hashed_token");--> statement-breakpoint
 CREATE INDEX "sessions_user_id_index" ON "sessions" ("user_id");--> statement-breakpoint
 CREATE INDEX "sessions_last_activity_index" ON "sessions" ("last_activity");--> statement-breakpoint
 ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_target_user_id_users_id_fkey" FOREIGN KEY ("target_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "invoice_coverage_months" ADD CONSTRAINT "invoice_coverage_months_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "invoices" ADD CONSTRAINT "invoices_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "invoices" ADD CONSTRAINT "invoices_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_created_by_user_id_users_id_fkey" FOREIGN KEY ("created_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "complaint_responses" ADD CONSTRAINT "complaint_responses_complaint_id_complaints_id_fkey" FOREIGN KEY ("complaint_id") REFERENCES "complaints"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "complaint_responses" ADD CONSTRAINT "complaint_responses_responder_user_id_users_id_fkey" FOREIGN KEY ("responder_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
