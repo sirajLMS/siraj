@@ -39,3 +39,4 @@ words:
   - tstzrange
   - rolname
   - ciphertext
+  - recalc

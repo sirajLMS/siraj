@@ -5,6 +5,24 @@ import { parents } from "./parents";
 import { teachers } from "./teachers";
 import { users } from "./users";
 
+/**
+ * Students table.
+ * 
+ * Database-level Constraints & Triggers:
+ * - CHECK Constraint `students_classes_remaining_chk`: Enforces `classes_remaining >= 0`.
+ * - CHECK Constraint `students_classes_total_chk`: Enforces `classes_total >= 0`.
+ * - Triggers `trg_recalc_hours_recurring_schedules` and `trg_recalc_hours_recurring_schedule_days`:
+ *   Automatically recalculate `hours_per_week` (sum of duration of active schedule days) when schedules or schedule days change.
+ * 
+ * Row-Level Security (RLS) Policies:
+ * - Enabled on the `students` table.
+ * - Policies:
+ *   - `students_select_policy`: Restricts parent users to selecting only their own children.
+ *   - `students_insert_policy`: Restricts parent users to inserting student records only under their own parent ID.
+ *   - `students_update_policy`: Restricts parent users to updating only their own student records.
+ *   - `students_delete_policy`: Restricts parent users to deleting only their own student records.
+ *   Administrators or teachers (whose user IDs do not exist in the `parents` table) bypass these policies.
+ */
 export const students = pgTable(
   "students",
   {

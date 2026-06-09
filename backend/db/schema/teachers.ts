@@ -4,6 +4,13 @@ import { encryptedText } from "./custom-types";
 import { accountStatusEnum, countryCodeEnum, genderEnum } from "./enums";
 import { users } from "./users";
 
+/**
+ * Teachers table.
+ * 
+ * Database-level Constraints & Triggers:
+ * - CHECK Constraint `teachers_timezone_chk`: Enforces that the `timezone` matches a valid IANA timezone name
+ *   in `pg_timezone_names` (validated via helper function `is_valid_timezone(tz TEXT)`).
+ */
 export const teachers = pgTable(
   "teachers",
   {

@@ -3,6 +3,17 @@ import { index, pgTable, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-cor
 import { encryptedText } from "./custom-types";
 import { teachers } from "./teachers";
 
+/**
+ * Teacher Banking Details History table.
+ * Supports temporal versioning of banking records.
+ * 
+ * Database-level Constraints & Triggers:
+ * - Unique Index `teacher_banking_details_history_active_idx`: Enforces at most one active record (where `valid_until IS NULL`) per teacher.
+ * - Trigger `trg_enforce_teacher_banking_immutability` BEFORE UPDATE:
+ *   - Blocks modifying historically closed records (`valid_until IS NOT NULL`).
+ *   - Blocks direct modifications to core banking fields (`beneficiary_name`, `bank_name`, `account_number`, etc.) on active records.
+ *   - Modifying details requires setting `valid_until` to close/deactivate the old record and inserting a new active record.
+ */
 export const teacherBankingDetailsHistory = pgTable(
   "teacher_banking_details_history",
   {

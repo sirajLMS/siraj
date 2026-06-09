@@ -30,8 +30,16 @@ import { students } from "./students";
 import { teachers } from "./teachers";
 import { users } from "./users";
 
-// NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
-// Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
+/**
+ * Recurring Schedules table.
+ *
+ * Database-level Constraints & Triggers:
+ * - CHECK Constraint `recurring_schedules_timezone_chk`: Enforces that `timezone` matches a valid IANA timezone name (via `is_valid_timezone(timezone)`).
+ * - Trigger `trg_recalc_hours_recurring_schedules`: Recalculates student `hours_per_week` on schedule insertions, updates, or deletes.
+ *
+ * Row-Level Security (RLS) Policies:
+ * - Enabled for soft deletes: filters out records where `deleted_at IS NOT NULL` for SELECT/UPDATE.
+ */
 export const recurringSchedules = pgTable(
   "recurring_schedules",
   {
@@ -58,6 +66,12 @@ export const recurringSchedules = pgTable(
   ]
 );
 
+/**
+ * Recurring Schedule Days table.
+ *
+ * Database-level Constraints & Triggers:
+ * - Trigger `trg_recalc_hours_recurring_schedule_days`: Recalculates student `hours_per_week` on schedule day insertions, updates, or deletes.
+ */
 export const recurringScheduleDays = pgTable(
   "recurring_schedule_days",
   {
@@ -72,8 +86,27 @@ export const recurringScheduleDays = pgTable(
   table => [uniqueIndex("recurring_schedule_days_schedule_day_idx").on(table.recurringScheduleId, table.dayOfWeek)]
 );
 
-// NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
-// Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
+/**
+ * Class Instances table.
+ *
+ * Database-level Constraints & Triggers:
+ * - UNIQUE Index `class_instances_original_class_uniq_idx`: Partial unique index enforcing at most one active rescheduled instance per class.
+ * - CHECK Constraint `class_instances_state_machine_chk`: Validates allowed state transitions and values.
+ * - CHECK Constraint `class_instances_reschedule_not_self_chk`: Enforces `original_class_id IS NULL OR original_class_id != id` (cannot reschedule to self).
+ * - CHECK Constraint `class_instances_rescheduled_no_quota_chk`: Enforces `is_rescheduled = false OR quota_deducted = false`.
+ * - CHECK Constraint `class_instances_rescheduled_no_complete_chk`: Enforces `is_rescheduled = false OR (execution_state != 'COMPLETED' AND outcome != 'TAKEN')`.
+ * - Trigger `trg_enforce_class_rescheduling_rules` BEFORE INSERT OR UPDATE:
+ *   - Validates rescheduling rules (original class exists, is not completed/taken, is not already rescheduled).
+ *   - Automatically closes the original class and refunds its quota.
+ *   - Inherits rate from the original class if not overridden.
+ * - Trigger `trg_class_quota_deduction` AFTER INSERT OR UPDATE OR DELETE:
+ *   - Automatically decrements/increments `students.classes_remaining` when classes are completed/refunded.
+ * - Trigger `class_instances_overlap_trigger` BEFORE INSERT OR UPDATE:
+ *   - Blocks overlapping bookings for the teacher, student, or Zoom URL during the scheduled time period.
+ *
+ * Row-Level Security (RLS) Policies:
+ * - Enabled for soft deletes: filters out records where `deleted_at IS NOT NULL` for SELECT/UPDATE.
+ */
 export const classInstances = pgTable(
   "class_instances",
   {
@@ -124,12 +157,8 @@ export const classInstances = pgTable(
     index("class_instances_class_type_idx").on(table.classType),
     index("class_instances_outcome_idx").on(table.outcome),
     index("class_instances_execution_state_idx").on(table.executionState),
-    index("class_instances_frozen_idx")
-      .on(table.isFrozen)
-      .where(sql`${table.isFrozen} = true`),
-    index("class_instances_rescheduled_idx")
-      .on(table.isRescheduled)
-      .where(sql`${table.isRescheduled} = true`),
+    index("class_instances_frozen_idx").on(table.isFrozen).where(sql`${table.isFrozen} = true`),
+    index("class_instances_rescheduled_idx").on(table.isRescheduled).where(sql`${table.isRescheduled} = true`),
     uniqueIndex("class_instances_original_class_uniq_idx")
       .on(table.originalClassId)
       .where(sql`${table.originalClassId} IS NOT NULL AND ${table.deletedAt} IS NULL`),
@@ -198,6 +227,16 @@ export const leaveRequests = pgTable(
   table => [index("leave_requests_class_instance_id_idx").on(table.classInstanceId)]
 );
 
+/**
+ * Leave Quota Usage table.
+ * Tracks student and teacher leave usage per calendar month.
+ *
+ * Database-level Constraints & Triggers:
+ * - CHECK Constraint `leave_quota_usage_teacher_student_xor_chk`: Enforces XOR relationship (must associate with either a teacher or a student, but not both).
+ * - Trigger `trg_enforce_leave_quota_limits` BEFORE INSERT OR UPDATE:
+ *   - Dynamically resolves maximum allowed monthly leaves from `system_settings` (via keys `teacher_max_leaves` or `student_max_leaves`, defaulting to 2 if not found).
+ *   - Blocks inserts/updates if the `used_count` exceeds the allowed limit.
+ */
 export const leaveQuotaUsage = pgTable(
   "leave_quota_usage",
   {
