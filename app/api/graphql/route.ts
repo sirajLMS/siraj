@@ -1,9 +1,9 @@
 import { ApolloServer } from "@apollo/server";
-import { ApolloServerPluginLandingPageDisabled } from "@apollo/backend/plugin/disabled";
+import { ApolloServerPluginLandingPageDisabled } from "@apollo/server/plugin/disabled";
 import {
 	ApolloServerPluginLandingPageLocalDefault,
 	// ApolloServerPluginLandingPageProductionDefault,
-} from "@apollo/backend/plugin/landingPage/default";
+} from "@apollo/server/plugin/landingPage/default";
 import { startServerAndCreateNextHandler } from "@as-integrations/next";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
