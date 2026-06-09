@@ -1,4 +1,12 @@
-import type { passwordResetTokens, roles, sessions, userRoles, users } from "@/backend/db/schema";
+import type {
+  groupPermissions,
+  passwordResetTokens,
+  permissionGroups,
+  permissions,
+  sessions,
+  userPermissionGroups,
+  users,
+} from "@/backend/db/schema";
 import type { Email } from "@/backend/lib/email";
 import type { PageInfo } from "./pagination.types";
 
@@ -6,8 +14,8 @@ export type UserEntity = typeof users.$inferSelect;
 export type UserEntityInput = typeof users.$inferInsert;
 
 export type UserPothosDefinition = UserEntity & {
-  roles?: RolePothosDefinition[];
-  userRoles?: UserRolePothosDefinition[];
+  permissionGroups?: PermissionGroupPothosDefinition[];
+  userPermissionGroups?: UserPermissionGroupPothosDefinition[];
   sessions?: SessionPothosDefinition[];
 };
 
@@ -34,25 +42,37 @@ export type PaginatedUsersResponse = {
   pageInfo: PageInfo;
 };
 
-// roles
-export type RoleEntity = typeof userRoles.$inferSelect;
-export type RoleEntityInput = typeof userRoles.$inferInsert;
+export type PermissionEntity = typeof permissions.$inferSelect;
+export type PermissionEntityInput = typeof permissions.$inferInsert;
 
-export type RolePothosDefinition = RoleEntity & {
-  users: UserPothosDefinition[];
-  userRoles?: UserRolePothosDefinition[];
+export type PermissionGroupEntity = typeof permissionGroups.$inferSelect;
+export type PermissionGroupEntityInput = typeof permissionGroups.$inferInsert;
+
+export type PermissionGroupPothosDefinition = PermissionGroupEntity & {
+  permissions?: PermissionPothosDefinition[];
+  groupPermissions?: GroupPermissionPothosDefinition[];
 };
 
-// user roles
-export type UserRoleEntity = typeof roles.$inferSelect;
-export type UserRoleEntityInput = typeof roles.$inferInsert;
+export type PermissionPothosDefinition = PermissionEntity & {
+  permissionGroups?: PermissionGroupPothosDefinition[];
+};
 
-export type UserRolePothosDefinition = UserRoleEntity & {
+export type GroupPermissionEntity = typeof groupPermissions.$inferSelect;
+export type GroupPermissionEntityInput = typeof groupPermissions.$inferInsert;
+
+export type GroupPermissionPothosDefinition = GroupPermissionEntity & {
+  permissionGroup?: PermissionGroupPothosDefinition;
+  permission?: PermissionPothosDefinition;
+};
+
+export type UserPermissionGroupEntity = typeof userPermissionGroups.$inferSelect;
+export type UserPermissionGroupEntityInput = typeof userPermissionGroups.$inferInsert;
+
+export type UserPermissionGroupPothosDefinition = UserPermissionGroupEntity & {
   user?: UserPothosDefinition;
-  role?: RolePothosDefinition;
+  permissionGroup?: PermissionGroupPothosDefinition;
 };
 
-// sessions
 export type SessionEntity = typeof sessions.$inferSelect;
 export type SessionEntityInput = typeof sessions.$inferInsert;
 
@@ -60,11 +80,9 @@ export type SessionPothosDefinition = SessionEntity & {
   user?: UserPothosDefinition;
 };
 
-// password reset tokens
 export type PasswordResetTokenSelectType = typeof passwordResetTokens.$inferSelect;
 export type PasswordResetTokenInsertInput = typeof passwordResetTokens.$inferInsert;
 
-// login
 export type LoginInput = {
   email: Email;
   password: string;

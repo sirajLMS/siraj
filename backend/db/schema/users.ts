@@ -1,4 +1,4 @@
-import { index, integer, pgTable, primaryKey, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -7,37 +7,23 @@ export const users = pgTable("users", {
   emailVerifiedAt: timestamp("email_verified_at", { precision: 3 }),
   password: varchar("password", { length: 255 }).notNull(),
   rememberToken: varchar("remember_token", { length: 100 }),
+  avatarFilePath: varchar("avatar_file_path", { length: 1024 }),
+  isActive: boolean("is_active").notNull().default(true),
+  isSuperAdmin: boolean("is_super_admin").notNull().default(false),
+  lastLoginAt: timestamp("last_login_at", { precision: 3 }),
   createdAt: timestamp("created_at", { precision: 3 }).notNull(),
   updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
 });
-
-export const roles = pgTable("roles", {
-  id: integer("id").primaryKey(),
-  name: text("name").notNull().unique(),
-});
-
-export const userRoles = pgTable(
-  "user_roles",
-  {
-    userId: integer("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    roleId: integer("role_id")
-      .notNull()
-      .references(() => roles.id, { onDelete: "cascade" }),
-  },
-  t => [primaryKey({ columns: [t.userId, t.roleId] })]
-);
 
 export const sessions = pgTable(
   "sessions",
   {
     id: varchar("id", { length: 255 }).primaryKey(),
-    userId: integer("userId"),
-    ipAddress: varchar("ipAddress", { length: 45 }),
-    userAgent: text("userAgent"),
+    userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+    ipAddress: varchar("ip_address", { length: 45 }),
+    userAgent: text("user_agent"),
     payload: text("payload").notNull(),
-    lastActivity: integer("lastActivity").notNull(),
+    lastActivity: integer("last_activity").notNull(),
   },
   table => [
     index("sessions_user_id_index").on(table.userId),
@@ -45,7 +31,7 @@ export const sessions = pgTable(
   ]
 );
 
-export const passwordResetTokens = pgTable("passwordResetTokens", {
+export const passwordResetTokens = pgTable("password_reset_tokens", {
   email: varchar("email", { length: 255 }).primaryKey(),
   token: varchar("token", { length: 255 }).notNull(),
   createdAt: timestamp("created_at", { precision: 3 }),

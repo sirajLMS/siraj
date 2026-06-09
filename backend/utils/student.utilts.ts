@@ -1,5 +1,4 @@
-import { PhoneNumber } from "@/backend/lib";
-import type { CountryCode, Gender } from "@/lib/enum";
+import type { AppLanguage, Gender, StudentStatus } from "@/lib/enum";
 import type { StudentDto, StudentEntity } from "../types";
 
 export namespace StudentUtils {
@@ -16,12 +15,15 @@ export namespace StudentUtils {
     }
     return {
       id: entity.id,
+      parentId: entity.parentId,
+      primaryTeacherId: entity.primaryTeacherId,
       name: entity.name,
-      email: entity.email,
-      phoneNumber: entity.phoneNumber ? new PhoneNumber(entity.phoneNumber) : null,
-      nationality: entity.nationality ? (entity.nationality as CountryCode) : null,
-      gender: entity.gender ? (entity.gender as Gender) : null,
       dateOfBirth: entity.dateOfBirth,
+      gender: entity.gender ? (entity.gender as Gender) : null,
+      language: entity.language ? (entity.language as AppLanguage) : null,
+      status: entity.status as StudentStatus,
+      classesTotal: entity.classesTotal,
+      classesRemaining: entity.classesRemaining,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };

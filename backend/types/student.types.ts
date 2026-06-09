@@ -1,6 +1,5 @@
 import type { students } from "@/backend/db/schema";
-import type { CountryCode, Gender, OrderSortDirection } from "@/lib/enum";
-import type { Email, PhoneNumber } from "../lib";
+import type { AppLanguage, Gender, OrderSortDirection, StudentStatus } from "@/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
 export type StudentEntity = typeof students.$inferSelect;
@@ -8,33 +7,42 @@ export type StudentEntityInput = typeof students.$inferInsert;
 
 export type StudentDto = {
   id: number;
+  parentId: number;
+  primaryTeacherId: number | null;
   name: string;
-  email?: string | null;
-  phoneNumber?: PhoneNumber | null;
-  dateOfBirth?: Date | null;
-  gender?: Gender | null;
-  nationality?: CountryCode | null;
+  dateOfBirth: Date | null;
+  gender: Gender | null;
+  language: AppLanguage | null;
+  status: StudentStatus;
+  classesTotal: number;
+  classesRemaining: number;
   createdAt: Date;
   updatedAt: Date;
 };
 
 export type StudentCreateInput = {
+  parentId: number;
+  primaryTeacherId?: number | null;
   name: string;
-  email?: Email | null;
-  phoneNumber?: PhoneNumber | null;
   dateOfBirth?: Date | null;
   gender?: Gender | null;
-  nationality?: CountryCode | null;
+  language?: AppLanguage | null;
+  status: StudentStatus;
+  classesTotal?: number;
+  classesRemaining?: number;
 };
 
 export type PartialStudentUpdateInput = {
   id: number;
+  parentId?: number | null;
+  primaryTeacherId?: number | null;
   name?: string | null;
-  email?: Email | null;
-  phoneNumber?: PhoneNumber | null;
   dateOfBirth?: Date | null;
   gender?: Gender | null;
-  nationality?: CountryCode | null;
+  language?: AppLanguage | null;
+  status?: StudentStatus | null;
+  classesTotal?: number | null;
+  classesRemaining?: number | null;
 };
 
 export type StudentsWithFiltersResponse = {
@@ -52,18 +60,11 @@ export type StudentFilterArgs = {
   nameIsEmpty: boolean | null | undefined;
   nameIsNotEmpty: boolean | null | undefined;
 
-  email: string | null | undefined;
-  emailNotContains: string | null | undefined;
-  emailEquals: Email | null | undefined;
-  emailNotEquals: string | null | undefined;
-  emailStartsWith: string | null | undefined;
-  emailEndsWith: string | null | undefined;
-  emailIsEmpty: boolean | null | undefined;
-  emailIsNotEmpty: boolean | null | undefined;
-
-  phoneNumber: PhoneNumber | null | undefined;
+  parentId: number | null | undefined;
+  primaryTeacherId: number | null | undefined;
   gender: Gender | null | undefined;
-  nationality: CountryCode | null | undefined;
+  language: AppLanguage | null | undefined;
+  status: StudentStatus | null | undefined;
 
   createdAt: Date | null | undefined;
   createdAtNot: Date | null | undefined;
@@ -88,9 +89,6 @@ export type StudentFilterArgs = {
   birthDateIsNotEmpty: boolean | null | undefined;
 };
 
-/**
- * Represents a clause for ordering student results.
- */
 export type StudentsOrderByClause = {
   column: StudentsOrderByColumn;
   order: OrderSortDirection | null | undefined;
@@ -99,9 +97,12 @@ export type StudentsOrderByClause = {
 export enum StudentsOrderByColumn {
   ID = "ID",
   NAME = "NAME",
-  EMAIL = "EMAIL",
+  PARENT_ID = "PARENT_ID",
   DATE_OF_BIRTH = "DATE_OF_BIRTH",
   GENDER = "GENDER",
+  STATUS = "STATUS",
+  CLASSES_TOTAL = "CLASSES_TOTAL",
+  CLASSES_REMAINING = "CLASSES_REMAINING",
   CREATED_AT = "CREATED_AT",
   UPDATED_AT = "UPDATED_AT",
 }

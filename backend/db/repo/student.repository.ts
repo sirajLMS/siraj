@@ -48,12 +48,15 @@ export namespace StudentRepository {
     });
 
     const insertInput: Types.StudentEntityInput = {
+      parentId: input.parentId,
+      primaryTeacherId: input.primaryTeacherId ?? null,
       name: input.name,
-      email: input.email?.value,
-      phoneNumber: input.phoneNumber?.number,
       dateOfBirth: input.dateOfBirth,
       gender: input.gender,
-      nationality: input.nationality,
+      language: input.language,
+      status: input.status,
+      classesTotal: input.classesTotal ?? 0,
+      classesRemaining: input.classesRemaining ?? 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -125,12 +128,16 @@ export namespace StudentRepository {
 
     const updateInput: Types.StudentEntityInput = {
       id: input.id,
+      parentId: input.parentId ?? existingStudent.parentId,
+      primaryTeacherId:
+        input.primaryTeacherId === null ? null : (input.primaryTeacherId ?? existingStudent.primaryTeacherId),
       name: input.name ?? existingStudent.name,
-      email: input.email === null ? null : (input.email?.value ?? existingStudent.email),
-      phoneNumber: input.phoneNumber === null ? null : (input.phoneNumber?.number ?? existingStudent.phoneNumber),
       dateOfBirth: input.dateOfBirth === null ? null : (input.dateOfBirth ?? existingStudent.dateOfBirth),
       gender: input.gender === null ? null : (input.gender ?? existingStudent.gender),
-      nationality: input.nationality === null ? null : (input.nationality ?? existingStudent.nationality),
+      language: input.language === null ? null : (input.language ?? existingStudent.language),
+      status: input.status ?? existingStudent.status,
+      classesTotal: input.classesTotal ?? existingStudent.classesTotal,
+      classesRemaining: input.classesRemaining ?? existingStudent.classesRemaining,
       createdAt: existingStudent.createdAt,
       updatedAt: new Date(),
     };

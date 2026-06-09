@@ -2,7 +2,13 @@ import { StudentRepository } from "@/backend/db/repo/student.repository";
 import * as Types from "@/backend/types";
 import { OrderSortDirection } from "@/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { CountryCodePothosObject, GenderPothosObject, OrderSortDirectionPothosObject, PageInfoObject } from "../pothos";
+import {
+  AppLanguagePothosObject,
+  GenderPothosObject,
+  OrderSortDirectionPothosObject,
+  PageInfoObject,
+  StudentStatusPothosObject,
+} from "../pothos";
 
 export const StudentPothosObject = gqlSchemaBuilder
   .loadableObjectRef<Types.StudentDto, number>("Student", {
@@ -12,30 +18,30 @@ export const StudentPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       id: t.exposeInt("id", { nullable: false }),
+      parentId: t.exposeInt("parentId", { nullable: false }),
+      primaryTeacherId: t.exposeInt("primaryTeacherId", { nullable: true }),
       name: t.exposeString("name", { nullable: false }),
-      email: t.exposeString("email", {
-        nullable: true,
-      }),
-      phoneNumber: t.expose("phoneNumber", {
-        type: "PhoneNumber",
-        nullable: true,
-      }),
       gender: t.field({
         type: GenderPothosObject,
         nullable: true,
         resolve: s => s.gender,
       }),
+      language: t.field({
+        type: AppLanguagePothosObject,
+        nullable: true,
+        resolve: s => s.language,
+      }),
+      status: t.field({
+        type: StudentStatusPothosObject,
+        nullable: false,
+        resolve: s => s.status,
+      }),
+      classesTotal: t.exposeInt("classesTotal", { nullable: false }),
+      classesRemaining: t.exposeInt("classesRemaining", { nullable: false }),
       dateOfBirth: t.expose("dateOfBirth", {
         type: "DateTime",
         nullable: true,
       }),
-
-      nationality: t.field({
-        type: CountryCodePothosObject,
-        nullable: true,
-        resolve: s => s.nationality,
-      }),
-
       createdAt: t.expose("createdAt", {
         type: "DateTime",
         nullable: true,
@@ -51,15 +57,9 @@ export const StudentCreateInputPothosObject = gqlSchemaBuilder
   .inputRef<Types.StudentCreateInput>("StudentCreateInput")
   .implement({
     fields: t => ({
+      parentId: t.int({ required: true }),
+      primaryTeacherId: t.int({ required: false }),
       name: t.string({ required: true }),
-      email: t.field({
-        type: "Email",
-        required: false,
-      }),
-      phoneNumber: t.field({
-        type: "PhoneNumber",
-        required: false,
-      }),
       dateOfBirth: t.field({
         type: "DateTime",
         required: false,
@@ -68,10 +68,16 @@ export const StudentCreateInputPothosObject = gqlSchemaBuilder
         type: GenderPothosObject,
         required: false,
       }),
-      nationality: t.field({
-        type: CountryCodePothosObject,
+      language: t.field({
+        type: AppLanguagePothosObject,
         required: false,
       }),
+      status: t.field({
+        type: StudentStatusPothosObject,
+        required: true,
+      }),
+      classesTotal: t.int({ required: false }),
+      classesRemaining: t.int({ required: false }),
     }),
   });
 
@@ -80,15 +86,9 @@ export const PartialStudentUpdateInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       id: t.int({ required: true }),
+      parentId: t.int({ required: false }),
+      primaryTeacherId: t.int({ required: false }),
       name: t.string({ required: false }),
-      email: t.field({
-        type: "Email",
-        required: false,
-      }),
-      phoneNumber: t.field({
-        type: "PhoneNumber",
-        required: false,
-      }),
       dateOfBirth: t.field({
         type: "DateTime",
         required: false,
@@ -97,10 +97,16 @@ export const PartialStudentUpdateInputPothosObject = gqlSchemaBuilder
         type: GenderPothosObject,
         required: false,
       }),
-      nationality: t.field({
-        type: CountryCodePothosObject,
+      language: t.field({
+        type: AppLanguagePothosObject,
         required: false,
       }),
+      status: t.field({
+        type: StudentStatusPothosObject,
+        required: false,
+      }),
+      classesTotal: t.int({ required: false }),
+      classesRemaining: t.int({ required: false }),
     }),
   });
 
@@ -126,18 +132,11 @@ export const StudentFilterArgsPothosObject = gqlSchemaBuilder
       nameIsEmpty: t.boolean(),
       nameIsNotEmpty: t.boolean(),
 
-      email: t.string(),
-      emailNotContains: t.string(),
-      emailEquals: t.field({ type: "Email", required: false }),
-      emailNotEquals: t.string(),
-      emailStartsWith: t.string(),
-      emailEndsWith: t.string(),
-      emailIsEmpty: t.boolean(),
-      emailIsNotEmpty: t.boolean(),
-
-      phoneNumber: t.field({ type: "PhoneNumber" }),
+      parentId: t.int(),
+      primaryTeacherId: t.int(),
       gender: t.field({ type: GenderPothosObject }),
-      nationality: t.field({ type: CountryCodePothosObject }),
+      language: t.field({ type: AppLanguagePothosObject }),
+      status: t.field({ type: StudentStatusPothosObject }),
 
       createdAt: t.field({ type: "DateTime" }),
       createdAtNot: t.field({ type: "DateTime" }),

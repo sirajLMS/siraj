@@ -1,4 +1,4 @@
-import { AppLanguage, CountryCode, Gender, OrderSortDirection } from "@/lib/enum";
+import { AppLanguage, CountryCode, Gender, OrderSortDirection, StudentStatus } from "@/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 export const OrderSortDirectionPothosObject = gqlSchemaBuilder.enumType(OrderSortDirection, {
@@ -15,4 +15,8 @@ export const CountryCodePothosObject = gqlSchemaBuilder.enumType(CountryCode, {
 
 export const AppLanguagePothosObject = gqlSchemaBuilder.enumType(AppLanguage, {
   name: "AppLanguage",
+});
+
+export const StudentStatusPothosObject = gqlSchemaBuilder.enumType(StudentStatus, {
+  name: "StudentStatus",
 });

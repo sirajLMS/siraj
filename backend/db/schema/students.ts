@@ -1,25 +1,32 @@
 import { sql } from "drizzle-orm";
-import { index, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
-import { countryCodeEnum, genderEnum } from "./enums";
+import { index, integer, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
+import { appLanguageEnum, genderEnum, studentStatusEnum } from "./enums";
+import { parents } from "./parents";
+import { teachers } from "./teachers";
 
 export const students = pgTable(
-  "student",
+  "students",
   {
     id: serial("id").primaryKey(),
+    parentId: integer("parent_id")
+      .notNull()
+      .references(() => parents.id, { onDelete: "cascade" }),
+    primaryTeacherId: integer("primary_teacher_id").references(() => teachers.id, { onDelete: "set null" }),
     name: varchar("name", { length: 255 }).notNull(),
-    email: varchar("email", { length: 255 }),
-    phoneNumber: varchar("phone_number", { length: 255 }),
     dateOfBirth: timestamp("date_of_birth", { precision: 3 }),
     gender: genderEnum("gender"),
-    nationality: countryCodeEnum("nationality"),
+    language: appLanguageEnum("language"),
+    status: studentStatusEnum("status").notNull(),
+    classesTotal: integer("classes_total").notNull().default(0),
+    classesRemaining: integer("classes_remaining").notNull().default(0),
     createdAt: timestamp("created_at", { precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
   },
   table => [
-    // GIN index for Full-Text Search on 'name' column
+    index("students_parent_id_idx").on(table.parentId),
+    index("students_primary_teacher_id_idx").on(table.primaryTeacherId),
+    index("students_status_idx").on(table.status),
     index("idx_students_name_fts").using("gin", sql`to_tsvector('simple', ${table.name})`),
-
-    // GiST index for faster LIKE/ILIKE on name using pg_trgm
     index("idx_students_name_trgm").using("gist", table.name.op("gist_trgm_ops")),
   ]
 );

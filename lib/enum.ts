@@ -18,6 +18,102 @@ export enum Gender {
   FEMALE = "FEMALE",
 }
 
+export enum AccountStatus {
+  ACTIVATED = "ACTIVATED",
+  DEACTIVATED = "DEACTIVATED",
+}
+
+export enum ParentStatus {
+  ACTIVATED = "ACTIVATED",
+  DEACTIVATED = "DEACTIVATED",
+  REGULAR = "REGULAR",
+  ON_LEAVE = "ON_LEAVE",
+  SUSPENDED = "SUSPENDED",
+  ON_TRIAL = "ON_TRIAL",
+}
+
+export enum StudentStatus {
+  REGULAR = "REGULAR",
+  ON_LEAVE = "ON_LEAVE",
+  SUSPENDED = "SUSPENDED",
+  ON_TRIAL = "ON_TRIAL",
+  DEACTIVATED = "DEACTIVATED",
+}
+
+export enum ClassType {
+  REGULAR = "REGULAR",
+  TRIAL = "TRIAL",
+  ADVANCE = "ADVANCE",
+}
+
+export enum ClassOutcome {
+  PENDING = "PENDING",
+  TAKEN = "TAKEN",
+  ABSENT = "ABSENT",
+  LEAVE = "LEAVE",
+}
+
+export enum ClassExecutionState {
+  NOT_ACTIVATED = "NOT_ACTIVATED",
+  ACTIVATED = "ACTIVATED",
+  RUNNING = "RUNNING",
+  COMPLETED = "COMPLETED",
+}
+
+export enum InvoiceStatus {
+  UNPAID = "UNPAID",
+  PAID = "PAID",
+}
+
+export enum InvoiceType {
+  PER_CLASSES = "PER_CLASSES",
+}
+
+export enum PaymentMethod {
+  PAYPAL = "PAYPAL",
+  BANK_ACCOUNT = "BANK_ACCOUNT",
+}
+
+export enum ComplaintCategory {
+  REGARDING_TEACHER = "REGARDING_TEACHER",
+  REGARDING_SYSTEM = "REGARDING_SYSTEM",
+  OTHER = "OTHER",
+}
+
+export enum ComplaintStatus {
+  UNANSWERED = "UNANSWERED",
+  ANSWERED = "ANSWERED",
+}
+
+export enum LeaveRequestStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  RESCHEDULED = "RESCHEDULED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum LeaveRequesterType {
+  TEACHER = "TEACHER",
+  PARENT = "PARENT",
+  ADMIN = "ADMIN",
+}
+
+export enum DayOfWeek {
+  MONDAY = "MONDAY",
+  TUESDAY = "TUESDAY",
+  WEDNESDAY = "WEDNESDAY",
+  THURSDAY = "THURSDAY",
+  FRIDAY = "FRIDAY",
+  SATURDAY = "SATURDAY",
+  SUNDAY = "SUNDAY",
+}
+
+export enum DstMigrationResult {
+  UPDATED = "UPDATED",
+  CONFLICT = "CONFLICT",
+  UNCHANGED = "UNCHANGED",
+}
+
 export enum CountryCode {
   SA = "SA",
   PS = "PS",

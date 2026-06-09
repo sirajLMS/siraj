@@ -42,13 +42,13 @@ async function dispatchAction(key: string): Promise<number> {
     case "2":
       return runBunCommand(["run", "backend/db/scripts/drizzleSeed.ts"]);
     case "3":
-      return runBunCommand(["drizzle-kit", "generate"]);
+      return runBunCommand(["drizzle-kit", "generate", "--ignore-conflicts"]);
     case "4":
       return runBunCommand(["drizzle-kit", "drop"]);
     case "5":
       return runBunCommand(["run", "backend/db/scripts/migrate.ts"]);
     case "6":
-      return runBunCommand(["drizzle-kit", "push"]);
+      return runBunCommand(["drizzle-kit", "push", "--force"]);
     case "7":
       return runBunCommand(["drizzle-kit", "studio"]);
     default:

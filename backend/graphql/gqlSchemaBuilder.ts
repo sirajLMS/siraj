@@ -18,8 +18,8 @@ export interface PothosTypes {
   Context: BaseContext;
   AuthScopes: {
     loggedIn: boolean;
-    admin: boolean;
-    role: string;
+    permission: string;
+    superAdmin: boolean;
   };
   AuthContexts: AuthContexts;
   Scalars: {
@@ -55,8 +55,8 @@ export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
   scopeAuth: {
     authScopes: ctx => ({
       loggedIn: !!ctx.user,
-      admin: ctx.roles.includes("admin"),
-      role: (role: string) => ctx.roles.includes(role),
+      permission: (key: string) => ctx.isSuperAdmin || ctx.permissions.includes(key),
+      superAdmin: ctx.isSuperAdmin,
     }),
   },
   errors: {

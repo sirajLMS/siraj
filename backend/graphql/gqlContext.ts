@@ -1,5 +1,5 @@
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
-import { db } from "@/backend/db/drizzleDb";
+import { resolveUserPermissions } from "@/backend/lib/auth/permissions";
 
 export type BaseContext = {
   user:
@@ -7,7 +7,9 @@ export type BaseContext = {
         id: number;
       }
     | undefined;
-  roles: string[];
+  permissions: string[];
+  permissionGroups: string[];
+  isSuperAdmin: boolean;
   refreshToken: string | undefined;
   sessionId: string | undefined;
   cookies?: ResponseCookies;
@@ -15,34 +17,28 @@ export type BaseContext = {
 
 export type AuthContexts = {
   loggedIn: BaseContext & { user: object };
-  role: BaseContext & { user: object };
+  permission: BaseContext & { user: object };
 };
 
 export async function createContext({ userId }: { userId?: number | null }): Promise<BaseContext> {
   if (!userId) {
     return {
       user: undefined,
-      roles: [],
+      permissions: [],
+      permissionGroups: [],
+      isSuperAdmin: false,
       refreshToken: undefined,
       sessionId: undefined,
     };
   }
 
-  const user = await db.query.users.findFirst({
-    columns: {
-      id: true,
-    },
-    with: {
-      roles: true,
-    },
-    where: {
-      id: userId,
-    },
-  });
+  const permissionContext = await resolveUserPermissions(userId);
 
   return {
-    user: user ?? undefined,
-    roles: user?.roles.map(role => role.name) ?? [],
+    user: { id: userId },
+    permissions: permissionContext.permissions,
+    permissionGroups: permissionContext.permissionGroups,
+    isSuperAdmin: permissionContext.isSuperAdmin,
     refreshToken: undefined,
     sessionId: undefined,
   };

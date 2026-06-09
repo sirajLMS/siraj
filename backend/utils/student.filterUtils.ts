@@ -1,4 +1,4 @@
-import { asc, desc, eq, gt, gte, isNull, like, lt, lte, not, notLike, or } from "drizzle-orm";
+import { asc, desc, eq, gt, gte, isNull, like, lt, lte, not, notLike } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
 import { fullTextSearch } from "@/backend/db/query.extensions";
 import { students } from "@/backend/db/schema";
@@ -10,7 +10,6 @@ export namespace StudentFilterUtils {
     if (!args) return qb;
 
     qb = applyNameFilters(qb, args);
-    qb = applyEmailFilters(qb, args);
     qb = applyOtherFilters(qb, args);
     qb = applyCreatedAtFilters(qb, args);
     qb = applyBirthDateFilters(qb, args);
@@ -51,43 +50,21 @@ export namespace StudentFilterUtils {
     return qb;
   }
 
-  function applyEmailFilters<T extends PgSelect>(qb: T, args: Types.StudentFilterArgs): T {
-    if (args.email) {
-      qb = qb.where(like(students.email, `%${args.email}%`));
-    }
-    if (args.emailNotContains) {
-      qb = qb.where(notLike(students.email, `%${args.emailNotContains}%`));
-    }
-    if (args.emailEquals?.value) {
-      qb = qb.where(eq(students.email, args.emailEquals.value));
-    }
-    if (args.emailNotEquals) {
-      qb = qb.where(not(eq(students.email, args.emailNotEquals)));
-    }
-    if (args.emailStartsWith) {
-      qb = qb.where(like(students.email, `${args.emailStartsWith}%`));
-    }
-    if (args.emailEndsWith) {
-      qb = qb.where(like(students.email, `%${args.emailEndsWith}`));
-    }
-    if (args.emailIsEmpty) {
-      qb = qb.where(or(eq(students.email, ""), isNull(students.email)));
-    }
-    if (args.emailIsNotEmpty) {
-      qb = qb.where(not(isNull(students.email)));
-    }
-    return qb;
-  }
-
   function applyOtherFilters<T extends PgSelect>(qb: T, args: Types.StudentFilterArgs): T {
-    if (args.phoneNumber?.number) {
-      qb = qb.where(like(students.phoneNumber, `%${args.phoneNumber.number}%`));
+    if (args.parentId) {
+      qb = qb.where(eq(students.parentId, args.parentId));
+    }
+    if (args.primaryTeacherId) {
+      qb = qb.where(eq(students.primaryTeacherId, args.primaryTeacherId));
     }
     if (args.gender) {
       qb = qb.where(eq(students.gender, args.gender));
     }
-    if (args.nationality) {
-      qb = qb.where(eq(students.nationality, args.nationality));
+    if (args.language) {
+      qb = qb.where(eq(students.language, args.language));
+    }
+    if (args.status) {
+      qb = qb.where(eq(students.status, args.status));
     }
     return qb;
   }
@@ -167,9 +144,11 @@ export namespace StudentFilterUtils {
       let column:
         | typeof students.id
         | typeof students.name
-        | typeof students.email
+        | typeof students.parentId
         | typeof students.dateOfBirth
         | typeof students.gender
+        | typeof students.status
+        | typeof students.classesTotal
         | typeof students.createdAt;
       switch (clause.column) {
         case Types.StudentsOrderByColumn.ID:
@@ -178,14 +157,23 @@ export namespace StudentFilterUtils {
         case Types.StudentsOrderByColumn.NAME:
           column = students.name;
           break;
-        case Types.StudentsOrderByColumn.EMAIL:
-          column = students.email;
+        case Types.StudentsOrderByColumn.PARENT_ID:
+          column = students.parentId;
           break;
         case Types.StudentsOrderByColumn.DATE_OF_BIRTH:
           column = students.dateOfBirth;
           break;
         case Types.StudentsOrderByColumn.GENDER:
           column = students.gender;
+          break;
+        case Types.StudentsOrderByColumn.STATUS:
+          column = students.status;
+          break;
+        case Types.StudentsOrderByColumn.CLASSES_TOTAL:
+          column = students.classesTotal;
+          break;
+        case Types.StudentsOrderByColumn.CLASSES_REMAINING:
+          column = students.classesRemaining;
           break;
         case Types.StudentsOrderByColumn.CREATED_AT:
           column = students.createdAt;
