@@ -119,9 +119,9 @@ export const relations = defineRelations(schema, r => ({
       from: r.teachers.id,
       to: r.leaveQuotaUsage.teacherId,
     }),
-    bankingDetails: r.one.teacherBankingDetails({
+    bankingDetails: r.many.teacherBankingDetailsHistory({
       from: r.teachers.id,
-      to: r.teacherBankingDetails.teacherId,
+      to: r.teacherBankingDetailsHistory.teacherId,
     }),
   },
   parents: {
@@ -380,9 +380,9 @@ export const relations = defineRelations(schema, r => ({
       to: r.users.id,
     }),
   },
-  teacherBankingDetails: {
+  teacherBankingDetailsHistory: {
     teacher: r.one.teachers({
-      from: r.teacherBankingDetails.teacherId,
+      from: r.teacherBankingDetailsHistory.teacherId,
       to: r.teachers.id,
     }),
   },

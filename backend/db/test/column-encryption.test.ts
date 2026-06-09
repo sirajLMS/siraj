@@ -2,9 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
-import type { TeacherBankingDetailsInsertInput, TeacherEntityInput } from "../../types";
+import type { TeacherBankingDetailsHistoryInsertInput, TeacherEntityInput } from "../../types";
 import { db } from "../drizzleDb";
-import { teacherBankingDetails, teachers, users } from "../schema";
+import { teacherBankingDetailsHistory, teachers, users } from "../schema";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -68,7 +68,7 @@ describe("Column-Level Encryption", () => {
       const plainBeneficiaryName = "Teacher Beneficiary Name";
       const plainIban = "US12345678901234567890";
 
-      const bankingInput: TeacherBankingDetailsInsertInput = {
+      const bankingInput: TeacherBankingDetailsHistoryInsertInput = {
         teacherId: teacher.id,
         beneficiaryName: plainBeneficiaryName,
         iban: plainIban,
@@ -76,7 +76,7 @@ describe("Column-Level Encryption", () => {
         updatedAt: now,
       };
 
-      const [banking] = await tx.insert(teacherBankingDetails).values(bankingInput).returning();
+      const [banking] = await tx.insert(teacherBankingDetailsHistory).values(bankingInput).returning();
       expect(banking).toBeDefined();
 
       // 4. Query raw values directly from database via SQL to verify ciphertext format (iv:ciphertext:tag)
@@ -99,7 +99,7 @@ describe("Column-Level Encryption", () => {
       expect(rawNationalId.split(":")).toHaveLength(3);
 
       const rawBankingResult = await tx.execute(
-        sql`SELECT beneficiary_name, iban FROM teacher_banking_details WHERE id = ${banking.id}`
+        sql`SELECT beneficiary_name, iban FROM teacher_banking_details_history WHERE id = ${banking.id}`
       );
       const bankingRows =
         "rows" in rawBankingResult ? rawBankingResult.rows : (rawBankingResult as unknown as Record<string, unknown>[]);
@@ -126,7 +126,7 @@ describe("Column-Level Encryption", () => {
 
       const [drizzleBanking] = await tx
         .select()
-        .from(teacherBankingDetails)
+        .from(teacherBankingDetailsHistory)
         .where(sql`id = ${banking.id}`);
       expect(drizzleBanking).toBeDefined();
       expect(drizzleBanking.beneficiaryName).toBe(plainBeneficiaryName);

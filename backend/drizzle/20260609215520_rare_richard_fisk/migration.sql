@@ -1,2 +1,0 @@
-ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_timezone_chk" CHECK (is_valid_timezone("timezone"));--> statement-breakpoint
-ALTER TABLE "teachers" ADD CONSTRAINT "teachers_timezone_chk" CHECK (is_valid_timezone("timezone"));

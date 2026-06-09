@@ -130,6 +130,9 @@ export const classInstances = pgTable(
     index("class_instances_rescheduled_idx")
       .on(table.isRescheduled)
       .where(sql`${table.isRescheduled} = true`),
+    uniqueIndex("class_instances_original_class_uniq_idx")
+      .on(table.originalClassId)
+      .where(sql`${table.originalClassId} IS NOT NULL AND ${table.deletedAt} IS NULL`),
     check(
       "class_instances_state_machine_chk",
       sql`
@@ -139,6 +142,18 @@ export const classInstances = pgTable(
         (${table.outcome} != 'TAKEN' OR ${table.actualStartAt} IS NOT NULL) AND
         (${table.isRateOverridden} = false OR ${table.rateAmount} IS NOT NULL)
       `
+    ),
+    check(
+      "class_instances_reschedule_not_self_chk",
+      sql`${table.originalClassId} IS NULL OR ${table.originalClassId} != ${table.id}`
+    ),
+    check(
+      "class_instances_rescheduled_no_quota_chk",
+      sql`${table.isRescheduled} = false OR ${table.quotaDeducted} = false`
+    ),
+    check(
+      "class_instances_rescheduled_no_complete_chk",
+      sql`${table.isRescheduled} = false OR (${table.executionState} != 'COMPLETED' AND ${table.outcome} != 'TAKEN')`
     ),
   ]
 );
@@ -192,7 +207,6 @@ export const leaveQuotaUsage = pgTable(
     periodYear: smallint("period_year").notNull(),
     periodMonth: smallint("period_month").notNull(),
     usedCount: integer("used_count").notNull().default(0),
-    maxAllowed: integer("max_allowed").notNull().default(2),
   },
   table => [
     uniqueIndex("leave_quota_teacher_period_idx")

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, numeric, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { check, index, integer, numeric, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { appLanguageEnum, genderEnum, studentStatusEnum } from "./enums";
 import { parents } from "./parents";
 import { teachers } from "./teachers";
@@ -32,6 +32,8 @@ export const students = pgTable(
     index("students_status_idx").on(table.status),
     index("idx_students_name_fts").using("gin", sql`to_tsvector('simple', ${table.name})`),
     index("idx_students_name_trgm").using("gist", table.name.op("gist_trgm_ops")),
+    check("students_classes_remaining_chk", sql`${table.classesRemaining} >= 0`),
+    check("students_classes_total_chk", sql`${table.classesTotal} >= 0`),
   ]
 );
 

@@ -215,7 +215,10 @@ CREATE TABLE "class_instances" (
         ("force_activated" = false OR "force_activated_by_user_id" IS NOT NULL) AND
         ("outcome" != 'TAKEN' OR "actual_start_at" IS NOT NULL) AND
         ("is_rate_overridden" = false OR "rate_amount" IS NOT NULL)
-      )
+      ),
+	CONSTRAINT "class_instances_reschedule_not_self_chk" CHECK ("original_class_id" IS NULL OR "original_class_id" != "id"),
+	CONSTRAINT "class_instances_rescheduled_no_quota_chk" CHECK ("is_rescheduled" = false OR "quota_deducted" = false),
+	CONSTRAINT "class_instances_rescheduled_no_complete_chk" CHECK ("is_rescheduled" = false OR ("execution_state" != 'COMPLETED' AND "outcome" != 'TAKEN'))
 );
 --> statement-breakpoint
 CREATE TABLE "class_status_events" (
@@ -252,7 +255,6 @@ CREATE TABLE "leave_quota_usage" (
 	"period_year" smallint NOT NULL,
 	"period_month" smallint NOT NULL,
 	"used_count" integer DEFAULT 0 NOT NULL,
-	"max_allowed" integer DEFAULT 2 NOT NULL,
 	CONSTRAINT "leave_quota_usage_teacher_student_xor_chk" CHECK (("teacher_id" IS NOT NULL AND "student_id" IS NULL) OR ("teacher_id" IS NULL AND "student_id" IS NOT NULL))
 );
 --> statement-breakpoint
@@ -287,7 +289,8 @@ CREATE TABLE "recurring_schedules" (
 	"effective_until" date,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL,
-	"deleted_at" timestamp(3) with time zone
+	"deleted_at" timestamp(3) with time zone,
+	CONSTRAINT "recurring_schedules_timezone_chk" CHECK (is_valid_timezone("timezone"))
 );
 --> statement-breakpoint
 CREATE TABLE "system_settings" (
@@ -374,7 +377,9 @@ CREATE TABLE "students" (
 	"classes_remaining" integer DEFAULT 0 NOT NULL,
 	"hours_per_week" numeric(5,2) DEFAULT '0' NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
-	"updated_at" timestamp(3) with time zone NOT NULL
+	"updated_at" timestamp(3) with time zone NOT NULL,
+	CONSTRAINT "students_classes_remaining_chk" CHECK ("classes_remaining" >= 0),
+	CONSTRAINT "students_classes_total_chk" CHECK ("classes_total" >= 0)
 );
 --> statement-breakpoint
 CREATE TABLE "teacher_assignments" (
@@ -386,15 +391,17 @@ CREATE TABLE "teacher_assignments" (
 	"ended_at" timestamp(3) with time zone
 );
 --> statement-breakpoint
-CREATE TABLE "teacher_banking_details" (
+CREATE TABLE "teacher_banking_details_history" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-	"teacher_id" uuid NOT NULL UNIQUE,
+	"teacher_id" uuid NOT NULL,
 	"beneficiary_name" text,
 	"bank_name" text,
 	"account_number" text,
 	"routing_number" text,
 	"swift_bic" text,
 	"iban" text,
+	"valid_from" timestamp(3) with time zone DEFAULT clock_timestamp() NOT NULL,
+	"valid_until" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );
@@ -419,7 +426,8 @@ CREATE TABLE "teachers" (
 	"hourly_rate" numeric(12,2),
 	"rate_currency" varchar(10),
 	"created_at" timestamp(3) with time zone NOT NULL,
-	"updated_at" timestamp(3) with time zone NOT NULL
+	"updated_at" timestamp(3) with time zone NOT NULL,
+	CONSTRAINT "teachers_timezone_chk" CHECK (is_valid_timezone("timezone"))
 );
 --> statement-breakpoint
 CREATE TABLE "auth_rate_limits" (
@@ -496,6 +504,7 @@ CREATE INDEX "class_instances_outcome_idx" ON "class_instances" ("outcome");--> 
 CREATE INDEX "class_instances_execution_state_idx" ON "class_instances" ("execution_state");--> statement-breakpoint
 CREATE INDEX "class_instances_frozen_idx" ON "class_instances" ("is_frozen") WHERE "is_frozen" = true;--> statement-breakpoint
 CREATE INDEX "class_instances_rescheduled_idx" ON "class_instances" ("is_rescheduled") WHERE "is_rescheduled" = true;--> statement-breakpoint
+CREATE UNIQUE INDEX "class_instances_original_class_uniq_idx" ON "class_instances" ("original_class_id") WHERE "original_class_id" IS NOT NULL AND "deleted_at" IS NULL;--> statement-breakpoint
 CREATE INDEX "class_status_events_class_instance_id_idx" ON "class_status_events" ("class_instance_id");--> statement-breakpoint
 CREATE INDEX "class_status_events_instance_created_idx" ON "class_status_events" ("class_instance_id","created_at");--> statement-breakpoint
 CREATE INDEX "dst_migration_entries_run_id_idx" ON "dst_migration_entries" ("run_id");--> statement-breakpoint
@@ -518,7 +527,8 @@ CREATE INDEX "idx_students_name_fts" ON "students" USING gin (to_tsvector('simpl
 CREATE INDEX "idx_students_name_trgm" ON "students" USING gist ("name" gist_trgm_ops);--> statement-breakpoint
 CREATE INDEX "teacher_assignments_student_id_idx" ON "teacher_assignments" ("student_id");--> statement-breakpoint
 CREATE INDEX "teacher_assignments_teacher_id_idx" ON "teacher_assignments" ("teacher_id");--> statement-breakpoint
-CREATE INDEX "teacher_banking_details_teacher_id_idx" ON "teacher_banking_details" ("teacher_id");--> statement-breakpoint
+CREATE INDEX "teacher_banking_details_history_teacher_id_idx" ON "teacher_banking_details_history" ("teacher_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "teacher_banking_details_history_active_idx" ON "teacher_banking_details_history" ("teacher_id") WHERE "valid_until" IS NULL;--> statement-breakpoint
 CREATE INDEX "teachers_user_id_idx" ON "teachers" ("user_id");--> statement-breakpoint
 CREATE INDEX "teachers_status_idx" ON "teachers" ("status");--> statement-breakpoint
 CREATE INDEX "auth_rate_limits_ip_idx" ON "auth_rate_limits" ("ip_address");--> statement-breakpoint
@@ -576,6 +586,6 @@ ALTER TABLE "students" ADD CONSTRAINT "students_primary_teacher_id_teachers_id_f
 ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_assigned_by_user_id_users_id_fkey" FOREIGN KEY ("assigned_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "teacher_banking_details" ADD CONSTRAINT "teacher_banking_details_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "teacher_banking_details_history" ADD CONSTRAINT "teacher_banking_details_history_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "teachers" ADD CONSTRAINT "teachers_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;

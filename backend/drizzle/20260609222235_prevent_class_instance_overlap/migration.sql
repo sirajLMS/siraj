@@ -1,4 +1,3 @@
--- 1. Create a function to check for overlapping class instances
 CREATE OR REPLACE FUNCTION check_class_instance_overlap()
 RETURNS TRIGGER AS $$
 BEGIN
