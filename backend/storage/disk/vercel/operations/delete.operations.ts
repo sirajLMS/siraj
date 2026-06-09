@@ -2,61 +2,21 @@ import { del, head } from "@vercel/blob";
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
-import { StorageUtils } from "@/backend/utils";
-import { formatBulkOperationResult } from "../../shared/bulk-operations.helper";
-import { loadDeleteEntities, validateDeletePermissions } from "../../shared/delete-operations.helper";
+import { executeBulkDelete, executeDeleteFile, validateDeletePermissions } from "../../shared/delete-operations.helper";
 import { getBlobs, isDirectory } from "../shared";
 import type { VercelContext } from "../types";
 import { fileInfoByPath } from "./file.operations";
 import { directoryInfoByPath } from "./folder.operations";
 
 export async function deleteFile(ctx: VercelContext, filePath: string): Promise<Types.FileOperationResult> {
-  try {
-    const validationError = await StorageUtils.validatePath(filePath);
-    if (validationError) {
-      return { success: false, message: validationError };
-    }
-
-    const usageCheck = await StorageDbRepository.checkFileUsage({
-      path: filePath,
-    });
-
-    const dbFile = await StorageDbRepository.fileByPath(filePath);
-    const parentPath = filePath.substring(0, filePath.lastIndexOf("/"));
-    const parentDir = await StorageDbRepository.directoryByPath(parentPath);
-
-    try {
-      validateDeletePermissions(
-        false,
-        {
-          isInUse: usageCheck.isInUse,
-          deleteBlockReason: usageCheck.deleteBlockReason ?? null,
-        },
-        dbFile || undefined,
-        undefined,
-        parentDir || undefined
-      );
-    } catch (error) {
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : String(error),
-      };
-    }
-
+  return executeDeleteFile(filePath, async () => {
     let blobUrl: string;
     try {
       const blobInfo = await head(filePath, { token: ctx.token });
       blobUrl = blobInfo.url;
     } catch (error) {
       logger.warn(`File not found in Vercel Blob: ${filePath}`, error);
-
-      try {
-        await StorageDbRepository.deleteFile(filePath);
-      } catch (dbError) {
-        logger.warn(`Failed to delete file from database: ${filePath}`, dbError);
-      }
-
-      return { success: false, message: "File not found" };
+      throw new Error("File not found", { cause: error });
     }
 
     logger.info("🗑️ deleteFile: Deleting from Vercel Blob", {
@@ -67,80 +27,26 @@ export async function deleteFile(ctx: VercelContext, filePath: string): Promise<
     await del(blobUrl, { token: ctx.token });
 
     logger.info("🗑️ deleteFile: Deleted from Vercel Blob successfully");
-
-    try {
-      await StorageDbRepository.deleteFile(filePath);
-      logger.info("🗑️ deleteFile: Deleted from database successfully");
-    } catch (error) {
-      logger.warn(`Failed to delete file from database: ${filePath}`, error);
-    }
-
-    return { success: true, message: "File deleted successfully" };
-  } catch (error) {
-    logger.error(`Failed to delete file: ${filePath}`, error);
-    return {
-      success: false,
-      message: `Failed to delete file: ${error instanceof Error ? error.message : String(error)}`,
-    };
-  }
+  });
 }
 
 export async function deleteItems(
   ctx: VercelContext,
   input: Types.StorageItemsDeleteInput
 ): Promise<Types.BulkOperationResult> {
-  const { dbFileMap, dbDirectoryMap, dbParentDirMap, usageCheckMap } = await loadDeleteEntities(
-    input.paths,
-    input.force || false
-  );
-
-  let successCount = 0;
-  const failures: Array<{ path: string; error: string }> = [];
-  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
-
-  for (const itemPath of input.paths) {
-    try {
-      const result = await deleteItem(
-        ctx,
-        itemPath,
-        input.force || false,
-        dbFileMap,
-        dbDirectoryMap,
-        dbParentDirMap,
-        usageCheckMap
-      );
-      successfulItems.push(result);
-      successCount++;
-    } catch (error) {
-      failures.push({
-        path: itemPath,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-  }
-
-  return formatBulkOperationResult(successCount, failures, successfulItems, "deleted");
+  return executeBulkDelete(ctx, input, deleteItem);
 }
 
 async function deleteItem(
   ctx: VercelContext,
   itemPath: string,
   force: boolean,
-  dbFileMap: Map<string, Types.FileEntity>,
-  dbDirectoryMap: Map<string, Types.DirectoryEntity>,
-  dbParentDirMap: Map<string, Types.DirectoryEntity>,
-  usageCheckMap: Map<string, { isInUse: boolean; deleteBlockReason: string | null | undefined }>
+  dbFile: Types.FileEntity | undefined,
+  dbDirectory: Types.DirectoryEntity | undefined,
+  parentDir: Types.DirectoryEntity | undefined,
+  usageCheck: { isInUse: boolean; deleteBlockReason: string | null | undefined } | undefined
 ): Promise<Types.FileInfo | Types.DirectoryInfo> {
-  const dbFile = dbFileMap.get(itemPath);
-  const dbDirectory = dbDirectoryMap.get(itemPath);
-
-  validateDeletePermissions(
-    force,
-    usageCheckMap.get(itemPath),
-    dbFile,
-    dbDirectory,
-    dbParentDirMap.get(itemPath.substring(0, itemPath.lastIndexOf("/")))
-  );
+  validateDeletePermissions(force, usageCheck, dbFile, dbDirectory, parentDir);
 
   const fileEntity = await fileInfoByPath(ctx, itemPath);
   const folderEntity = fileEntity ? null : await directoryInfoByPath(ctx, itemPath);

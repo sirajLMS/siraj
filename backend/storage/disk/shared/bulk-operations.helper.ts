@@ -49,6 +49,71 @@ export async function validateBulkOperation<TContext>(
 }
 
 /**
+ * Orchestrates a bulk operation (copy, move, etc.) with validation and error handling
+ */
+export async function executeBulkOperation<TContext, TExtraData = void>(params: {
+  ctx: TContext;
+  sourcePaths: string[];
+  destinationPath: string;
+  existsFn: (ctx: TContext, path: string) => Promise<boolean>;
+  processFn: (
+    ctx: TContext,
+    sourcePath: string,
+    extraData: TExtraData
+  ) => Promise<Types.FileInfo | Types.DirectoryInfo | null>;
+  beforeProcess?: (ctx: TContext, validSources: string[]) => Promise<TExtraData>;
+  operationName: string;
+}): Promise<Types.BulkOperationResult> {
+  const { ctx, sourcePaths, destinationPath, existsFn, processFn, beforeProcess, operationName } = params;
+  const { validSources, failures, destDirAllowed } = await validateBulkOperation(
+    ctx,
+    sourcePaths,
+    destinationPath,
+    existsFn
+  );
+
+  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
+  let successCount = 0;
+
+  if (validSources.length === 0) {
+    return formatBulkOperationResult(successCount, failures, successfulItems, operationName);
+  }
+
+  if (!destDirAllowed) {
+    return {
+      success: false,
+      message: "Uploads not allowed to destination directory",
+      successCount: 0,
+      failureCount: validSources.length,
+      failures: validSources.map(path => ({
+        path,
+        error: "Uploads not allowed to destination directory",
+      })),
+      successfulItems,
+    };
+  }
+
+  const extraData = beforeProcess ? await beforeProcess(ctx, validSources) : (undefined as unknown as TExtraData);
+
+  for (const sourcePath of validSources) {
+    try {
+      const result = await processFn(ctx, sourcePath, extraData);
+      if (result) {
+        successfulItems.push(result);
+      }
+      successCount++;
+    } catch (error) {
+      failures.push({
+        path: sourcePath,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  return formatBulkOperationResult(successCount, failures, successfulItems, operationName);
+}
+
+/**
  * Formats the final result of a bulk operation
  */
 export function formatBulkOperationResult(

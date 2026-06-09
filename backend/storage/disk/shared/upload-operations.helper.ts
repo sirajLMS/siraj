@@ -1,6 +1,6 @@
 import { SignedUrlRepository, StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
-import * as Types from "@/backend/types";
+import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 import { STORAGE_CONFIG, StorageValidationError } from "../storage.service.interface";
 

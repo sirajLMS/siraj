@@ -2,7 +2,7 @@ import { copy, head } from "@vercel/blob";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { formatBulkOperationResult, validateBulkOperation } from "../../shared/bulk-operations.helper";
+import { executeBulkOperation } from "../../shared/bulk-operations.helper";
 import { getBlobs, isDirectory } from "../shared";
 import type { VercelContext } from "../types";
 import { fileExists, fileInfoByPath } from "./file.operations";
@@ -11,36 +11,13 @@ export async function copyItems(
   ctx: VercelContext,
   input: Types.StorageItemsCopyInput
 ): Promise<Types.BulkOperationResult> {
-  const { validSources, failures, destDirAllowed } = await validateBulkOperation(
+  return executeBulkOperation({
     ctx,
-    input.sourcePaths,
-    input.destinationPath,
-    fileExists
-  );
-
-  let successCount = 0;
-  const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
-
-  if (validSources.length === 0) {
-    return formatBulkOperationResult(successCount, failures, successfulItems, "copied");
-  }
-
-  if (!destDirAllowed) {
-    return {
-      success: false,
-      message: "Uploads not allowed to destination directory",
-      successCount: 0,
-      failureCount: validSources.length,
-      failures: validSources.map(path => ({
-        path,
-        error: "Uploads not allowed to destination directory",
-      })),
-      successfulItems,
-    };
-  }
-
-  for (const sourcePath of validSources) {
-    try {
+    sourcePaths: input.sourcePaths,
+    destinationPath: input.destinationPath,
+    existsFn: fileExists,
+    operationName: "copied",
+    processFn: async (ctx, sourcePath) => {
       const fileName = StorageUtils.extractFileName(sourcePath);
       const destPath = `${input.destinationPath.replace(/\/$/, "")}/${fileName}`;
 
@@ -52,21 +29,9 @@ export async function copyItems(
         await copySingleFile(ctx, sourcePath, destPath);
       }
 
-      const fileInfo = await fileInfoByPath(ctx, destPath);
-      if (fileInfo) {
-        successfulItems.push(fileInfo);
-      }
-
-      successCount++;
-    } catch (error) {
-      failures.push({
-        path: sourcePath,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-  }
-
-  return formatBulkOperationResult(successCount, failures, successfulItems, "copied");
+      return await fileInfoByPath(ctx, destPath);
+    },
+  });
 }
 
 async function copySingleFile(ctx: VercelContext, sourcePath: string, destPath: string): Promise<void> {
