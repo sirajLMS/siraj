@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import { testLogger } from "../../../lib/testlogger";
 import { StudentStatus } from "../../../lib/enum";
+import { testLogger } from "../../../lib/testlogger";
 import type { ParentEntity, StudentEntity, StudentStatusHistorySelectType, UserEntity } from "../../types";
 import { db } from "../drizzleDb";
-import { parents, students, studentStatusHistory, users } from "../schema";
+import { parents, studentStatusHistory, students, users } from "../schema";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -85,11 +85,29 @@ describe("Student Status Transitions & History", () => {
       const now = new Date();
       const email = `parent-valid-${randomUUID()}@example.com`;
 
-      const [user] = (await tx.insert(users).values({ name: "Parent", email, password: "password", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [parent] = (await tx.insert(parents).values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now }).returning()) as [ParentEntity];
-      const [student] = (await tx.insert(students).values({ parentId: parent.id, name: "Student", status: StudentStatus.ON_TRIAL, createdAt: now, updatedAt: now }).returning()) as [StudentEntity];
+      const [user] = (await tx
+        .insert(users)
+        .values({ name: "Parent", email, password: "password", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [parent] = (await tx
+        .insert(parents)
+        .values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now })
+        .returning()) as [ParentEntity];
+      const [student] = (await tx
+        .insert(students)
+        .values({
+          parentId: parent.id,
+          name: "Student",
+          status: StudentStatus.ON_TRIAL,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning()) as [StudentEntity];
 
-      await tx.update(students).set({ status: StudentStatus.REGULAR, updatedAt: new Date() }).where(eq(students.id, student.id));
+      await tx
+        .update(students)
+        .set({ status: StudentStatus.REGULAR, updatedAt: new Date() })
+        .where(eq(students.id, student.id));
 
       const history = (await tx
         .select()
@@ -110,9 +128,18 @@ describe("Student Status Transitions & History", () => {
       const now = new Date();
       const email = `parent-invalid-${randomUUID()}@example.com`;
 
-      const [user] = (await tx.insert(users).values({ name: "Parent", email, password: "password", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [parent] = (await tx.insert(parents).values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now }).returning()) as [ParentEntity];
-      const [student] = (await tx.insert(students).values({ parentId: parent.id, name: "Student", status: StudentStatus.REGULAR, createdAt: now, updatedAt: now }).returning()) as [StudentEntity];
+      const [user] = (await tx
+        .insert(users)
+        .values({ name: "Parent", email, password: "password", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [parent] = (await tx
+        .insert(parents)
+        .values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now })
+        .returning()) as [ParentEntity];
+      const [student] = (await tx
+        .insert(students)
+        .values({ parentId: parent.id, name: "Student", status: StudentStatus.REGULAR, createdAt: now, updatedAt: now })
+        .returning()) as [StudentEntity];
 
       try {
         await tx.update(students).set({ status: StudentStatus.ON_TRIAL }).where(eq(students.id, student.id));
@@ -132,9 +159,24 @@ describe("Student Status Transitions & History", () => {
       const now = new Date();
       const email = `parent-terminal-${randomUUID()}@example.com`;
 
-      const [user] = (await tx.insert(users).values({ name: "Parent", email, password: "password", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [parent] = (await tx.insert(parents).values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now }).returning()) as [ParentEntity];
-      const [student] = (await tx.insert(students).values({ parentId: parent.id, name: "Student", status: StudentStatus.GRADUATED, createdAt: now, updatedAt: now }).returning()) as [StudentEntity];
+      const [user] = (await tx
+        .insert(users)
+        .values({ name: "Parent", email, password: "password", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [parent] = (await tx
+        .insert(parents)
+        .values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now })
+        .returning()) as [ParentEntity];
+      const [student] = (await tx
+        .insert(students)
+        .values({
+          parentId: parent.id,
+          name: "Student",
+          status: StudentStatus.GRADUATED,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning()) as [StudentEntity];
 
       try {
         await tx.update(students).set({ status: StudentStatus.REGULAR }).where(eq(students.id, student.id));
@@ -155,14 +197,32 @@ describe("Student Status Transitions & History", () => {
       const emailP = `parent-actor-${randomUUID()}@example.com`;
       const emailA = `admin-actor-${randomUUID()}@example.com`;
 
-      const [userP] = (await tx.insert(users).values({ name: "Parent", email: emailP, password: "password", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [userA] = (await tx.insert(users).values({ name: "Admin", email: emailA, password: "password", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [parent] = (await tx.insert(parents).values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now }).returning()) as [ParentEntity];
+      const [userP] = (await tx
+        .insert(users)
+        .values({ name: "Parent", email: emailP, password: "password", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [userA] = (await tx
+        .insert(users)
+        .values({ name: "Admin", email: emailA, password: "password", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [parent] = (await tx
+        .insert(parents)
+        .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
+        .returning()) as [ParentEntity];
 
       // Set session actor
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userA.id}, true)`);
 
-      const [student] = (await tx.insert(students).values({ parentId: parent.id, name: "Student", status: StudentStatus.ON_TRIAL, createdAt: now, updatedAt: now }).returning()) as [StudentEntity];
+      const [student] = (await tx
+        .insert(students)
+        .values({
+          parentId: parent.id,
+          name: "Student",
+          status: StudentStatus.ON_TRIAL,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning()) as [StudentEntity];
 
       const history = (await tx
         .select()

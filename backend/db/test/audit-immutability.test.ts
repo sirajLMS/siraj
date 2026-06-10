@@ -60,7 +60,10 @@ describe("Audit Log Immutability", () => {
       // 3. Attempt UPDATE on the audit log record (should fail)
       let updateDidThrow = false;
       try {
-        await tx.update(adminAuditLogs).set({ description: "Modified description" }).where(sql`id = ${auditRecord.id}`);
+        await tx
+          .update(adminAuditLogs)
+          .set({ description: "Modified description" })
+          .where(sql`id = ${auditRecord.id}`);
       } catch (error) {
         updateDidThrow = true;
         const errorMessage = String(error);

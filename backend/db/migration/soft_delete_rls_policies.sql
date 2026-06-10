@@ -15,6 +15,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ALTER TABLE "users" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "users" FORCE ROW LEVEL SECURITY;
 
+DROP TRIGGER IF EXISTS trg_soft_delete_users ON "users";
 CREATE TRIGGER trg_soft_delete_users
 BEFORE DELETE ON "users"
 FOR EACH ROW EXECUTE FUNCTION soft_delete_row_trigger_fn();
@@ -32,6 +33,7 @@ CREATE POLICY users_delete_policy ON "users" FOR DELETE USING (true);
 ALTER TABLE "recurring_schedules" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "recurring_schedules" FORCE ROW LEVEL SECURITY;
 
+DROP TRIGGER IF EXISTS trg_soft_delete_recurring_schedules ON "recurring_schedules";
 CREATE TRIGGER trg_soft_delete_recurring_schedules
 BEFORE DELETE ON "recurring_schedules"
 FOR EACH ROW EXECUTE FUNCTION soft_delete_row_trigger_fn();
@@ -49,6 +51,7 @@ CREATE POLICY recurring_schedules_delete_policy ON "recurring_schedules" FOR DEL
 ALTER TABLE "class_instances" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "class_instances" FORCE ROW LEVEL SECURITY;
 
+DROP TRIGGER IF EXISTS trg_soft_delete_class_instances ON "class_instances";
 CREATE TRIGGER trg_soft_delete_class_instances
 BEFORE DELETE ON "class_instances"
 FOR EACH ROW EXECUTE FUNCTION soft_delete_row_trigger_fn();
@@ -66,6 +69,7 @@ CREATE POLICY class_instances_delete_policy ON "class_instances" FOR DELETE USIN
 ALTER TABLE "complaints" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "complaints" FORCE ROW LEVEL SECURITY;
 
+DROP TRIGGER IF EXISTS trg_soft_delete_complaints ON "complaints";
 CREATE TRIGGER trg_soft_delete_complaints
 BEFORE DELETE ON "complaints"
 FOR EACH ROW EXECUTE FUNCTION soft_delete_row_trigger_fn();
@@ -83,6 +87,7 @@ CREATE POLICY complaints_delete_policy ON "complaints" FOR DELETE USING (true);
 ALTER TABLE "learning_resources" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "learning_resources" FORCE ROW LEVEL SECURITY;
 
+DROP TRIGGER IF EXISTS trg_soft_delete_learning_resources ON "learning_resources";
 CREATE TRIGGER trg_soft_delete_learning_resources
 BEFORE DELETE ON "learning_resources"
 FOR EACH ROW EXECUTE FUNCTION soft_delete_row_trigger_fn();
@@ -100,6 +105,7 @@ CREATE POLICY learning_resources_delete_policy ON "learning_resources" FOR DELET
 ALTER TABLE "invoices" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "invoices" FORCE ROW LEVEL SECURITY;
 
+DROP TRIGGER IF EXISTS trg_soft_delete_invoices ON "invoices";
 CREATE TRIGGER trg_soft_delete_invoices
 BEFORE DELETE ON "invoices"
 FOR EACH ROW EXECUTE FUNCTION soft_delete_row_trigger_fn();

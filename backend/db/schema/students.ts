@@ -1,7 +1,20 @@
 import { sql } from "drizzle-orm";
-import { check, index, integer, numeric, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  index,
+  integer,
+  numeric,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { appLanguageEnum, genderEnum, studentStatusEnum } from "./enums";
 import { parents } from "./parents";
+import { classInstances } from "./scheduling";
 import { teachers } from "./teachers";
 import { users } from "./users";
 
@@ -76,6 +89,44 @@ export const studentStatusHistory = pgTable(
   table => [
     index("student_status_history_student_id_idx").on(table.studentId),
     index("student_status_history_changed_by_user_id_idx").on(table.changedByUserId),
+  ]
+);
+
+/**
+ * Student Progress table.
+ * Records academic progress, topics covered, and homework for specific class instances.
+ *
+ * Row-Level Security (RLS) Policies:
+ * - Enabled on the `student_progress` table.
+ * - Policies:
+ *   - `student_progress_teacher_policy`: Allows teachers to manage progress for students they teach.
+ *   - `student_progress_parent_policy`: Allows parents to view progress for their children if `parent_visible` is true.
+ */
+export const studentProgress = pgTable(
+  "student_progress",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    studentId: uuid("student_id")
+      .notNull()
+      .references(() => students.id, { onDelete: "cascade" }),
+    classInstanceId: uuid("class_instance_id")
+      .notNull()
+      .references(() => classInstances.id, { onDelete: "restrict" }),
+    teacherId: uuid("teacher_id")
+      .notNull()
+      .references(() => teachers.id, { onDelete: "restrict" }),
+    topicsCovered: text("topics_covered").notNull(),
+    homeworkAssigned: text("homework_assigned"),
+    notes: text("notes"),
+    parentVisible: boolean("parent_visible").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+  },
+  table => [
+    index("student_progress_student_id_idx").on(table.studentId),
+    index("student_progress_class_instance_id_idx").on(table.classInstanceId),
+    index("student_progress_teacher_id_idx").on(table.teacherId),
+    uniqueIndex("student_progress_student_class_uniq_idx").on(table.studentId, table.classInstanceId),
   ]
 );
 

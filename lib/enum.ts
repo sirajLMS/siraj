@@ -113,6 +113,18 @@ export enum DstMigrationResult {
   UNCHANGED = "UNCHANGED",
 }
 
+export enum NotificationChannel {
+  EMAIL = "EMAIL",
+  SMS = "SMS",
+  PUSH = "PUSH",
+}
+
+export enum NotificationEventType {
+  CLASS_REMINDER = "CLASS_REMINDER",
+  INVOICE_GENERATED = "INVOICE_GENERATED",
+  COMPLAINT_RESPONSE = "COMPLAINT_RESPONSE",
+}
+
 export enum CountryCode {
   SA = "SA",
   PS = "PS",

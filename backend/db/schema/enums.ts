@@ -14,6 +14,8 @@ import {
   InvoiceType,
   LeaveRequesterType,
   LeaveRequestStatus,
+  NotificationChannel,
+  NotificationEventType,
   ParentStatus,
   PaymentMethod,
   StudentStatus,
@@ -51,6 +53,10 @@ export const complaintStatusEnum = createPgEnumFromEnum("complaint_status", Comp
 export const leaveRequestStatusEnum = createPgEnumFromEnum("leave_request_status", LeaveRequestStatus);
 
 export const leaveRequesterTypeEnum = createPgEnumFromEnum("leave_requester_type", LeaveRequesterType);
+
+export const notificationChannelEnum = createPgEnumFromEnum("notification_channel", NotificationChannel);
+
+export const notificationEventTypeEnum = createPgEnumFromEnum("notification_event_type", NotificationEventType);
 
 export const dayOfWeekEnum = createPgEnumFromEnum("day_of_week", DayOfWeek);
 

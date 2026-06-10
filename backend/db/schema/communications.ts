@@ -1,8 +1,41 @@
-import { boolean, index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { complaintCategoryEnum, complaintStatusEnum } from "./enums";
+import { boolean, index, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  complaintCategoryEnum,
+  complaintStatusEnum,
+  notificationChannelEnum,
+  notificationEventTypeEnum,
+} from "./enums";
 import { parents } from "./parents";
 import { students } from "./students";
 import { users } from "./users";
+
+/**
+ * User Notification Preferences table.
+ * Controls granular opt-in/opt-out for various communication channels and events.
+ *
+ * Row-Level Security (RLS) Policies:
+ * - Enabled on the `user_notification_preferences` table.
+ * - Policies:
+ *   - `notification_preferences_access_policy`: Ensures users can only view, insert, update, or delete their own preferences.
+ */
+export const userNotificationPreferences = pgTable(
+  "user_notification_preferences",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    channel: notificationChannelEnum("channel").notNull(),
+    eventType: notificationEventTypeEnum("event_type").notNull(),
+    enabled: boolean("enabled").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+  },
+  table => [
+    index("user_notification_preferences_user_id_idx").on(table.userId),
+    uniqueIndex("user_notification_preferences_unique_idx").on(table.userId, table.channel, table.eventType),
+  ]
+);
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.

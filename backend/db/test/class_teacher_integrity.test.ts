@@ -33,13 +33,28 @@ describe("Class Teacher Assignment Integrity", () => {
     testLogger.info("Testing class creation with assigned teacher...");
     await runInRollback(async tx => {
       const now = new Date();
-      
+
       // Setup: Parent, Student, Teacher
-      const [userP] = (await tx.insert(users).values({ name: "Parent", email: `p-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [parent] = (await tx.insert(parents).values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now }).returning()) as [ParentEntity];
-      const [userT] = (await tx.insert(users).values({ name: "Teacher", email: `t-${randomUUID()}@x.com`, password: "t", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [teacher] = (await tx.insert(teachers).values({ userId: userT.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now }).returning()) as [TeacherEntity];
-      const [student] = (await tx.insert(students).values({ parentId: parent.id, name: "Student", status: "ON_TRIAL", createdAt: now, updatedAt: now }).returning()) as [StudentEntity];
+      const [userP] = (await tx
+        .insert(users)
+        .values({ name: "Parent", email: `p-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [parent] = (await tx
+        .insert(parents)
+        .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
+        .returning()) as [ParentEntity];
+      const [userT] = (await tx
+        .insert(users)
+        .values({ name: "Teacher", email: `t-${randomUUID()}@x.com`, password: "t", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [teacher] = (await tx
+        .insert(teachers)
+        .values({ userId: userT.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
+        .returning()) as [TeacherEntity];
+      const [student] = (await tx
+        .insert(students)
+        .values({ parentId: parent.id, name: "Student", status: "ON_TRIAL", createdAt: now, updatedAt: now })
+        .returning()) as [StudentEntity];
 
       // Assign Teacher
       await tx.insert(teacherAssignments).values({
@@ -74,12 +89,27 @@ describe("Class Teacher Assignment Integrity", () => {
     testLogger.info("Testing class creation with non-assigned teacher...");
     await runInRollback(async tx => {
       const now = new Date();
-      
-      const [userP] = (await tx.insert(users).values({ name: "Parent", email: `p-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [parent] = (await tx.insert(parents).values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now }).returning()) as [ParentEntity];
-      const [userT] = (await tx.insert(users).values({ name: "Teacher", email: `t-${randomUUID()}@x.com`, password: "t", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [teacher] = (await tx.insert(teachers).values({ userId: userT.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now }).returning()) as [TeacherEntity];
-      const [student] = (await tx.insert(students).values({ parentId: parent.id, name: "Student", status: "ON_TRIAL", createdAt: now, updatedAt: now }).returning()) as [StudentEntity];
+
+      const [userP] = (await tx
+        .insert(users)
+        .values({ name: "Parent", email: `p-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [parent] = (await tx
+        .insert(parents)
+        .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
+        .returning()) as [ParentEntity];
+      const [userT] = (await tx
+        .insert(users)
+        .values({ name: "Teacher", email: `t-${randomUUID()}@x.com`, password: "t", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [teacher] = (await tx
+        .insert(teachers)
+        .values({ userId: userT.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
+        .returning()) as [TeacherEntity];
+      const [student] = (await tx
+        .insert(students)
+        .values({ parentId: parent.id, name: "Student", status: "ON_TRIAL", createdAt: now, updatedAt: now })
+        .returning()) as [StudentEntity];
 
       // DO NOT assign teacher
 
@@ -111,14 +141,35 @@ describe("Class Teacher Assignment Integrity", () => {
     testLogger.info("Testing class update to non-assigned teacher...");
     await runInRollback(async tx => {
       const now = new Date();
-      
-      const [userP] = (await tx.insert(users).values({ name: "Parent", email: `p-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [parent] = (await tx.insert(parents).values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now }).returning()) as [ParentEntity];
-      const [userT1] = (await tx.insert(users).values({ name: "T1", email: `t1-${randomUUID()}@x.com`, password: "t", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [teacher1] = (await tx.insert(teachers).values({ userId: userT1.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now }).returning()) as [TeacherEntity];
-      const [userT2] = (await tx.insert(users).values({ name: "T2", email: `t2-${randomUUID()}@x.com`, password: "t", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [teacher2] = (await tx.insert(teachers).values({ userId: userT2.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now }).returning()) as [TeacherEntity];
-      const [student] = (await tx.insert(students).values({ parentId: parent.id, name: "Student", status: "ON_TRIAL", createdAt: now, updatedAt: now }).returning()) as [StudentEntity];
+
+      const [userP] = (await tx
+        .insert(users)
+        .values({ name: "Parent", email: `p-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [parent] = (await tx
+        .insert(parents)
+        .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
+        .returning()) as [ParentEntity];
+      const [userT1] = (await tx
+        .insert(users)
+        .values({ name: "T1", email: `t1-${randomUUID()}@x.com`, password: "t", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [teacher1] = (await tx
+        .insert(teachers)
+        .values({ userId: userT1.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
+        .returning()) as [TeacherEntity];
+      const [userT2] = (await tx
+        .insert(users)
+        .values({ name: "T2", email: `t2-${randomUUID()}@x.com`, password: "t", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [teacher2] = (await tx
+        .insert(teachers)
+        .values({ userId: userT2.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
+        .returning()) as [TeacherEntity];
+      const [student] = (await tx
+        .insert(students)
+        .values({ parentId: parent.id, name: "Student", status: "ON_TRIAL", createdAt: now, updatedAt: now })
+        .returning()) as [StudentEntity];
 
       // Assign only Teacher 1
       await tx.insert(teacherAssignments).values({ studentId: student.id, teacherId: teacher1.id, assignedAt: now });
@@ -126,16 +177,19 @@ describe("Class Teacher Assignment Integrity", () => {
       const startTime = new Date(now.getTime() + 3600000);
       const endTime = new Date(startTime.getTime() + 3600000);
 
-      const [classInst] = (await tx.insert(classInstances).values({
-        studentId: student.id,
-        teacherId: teacher1.id,
-        scheduledStartAt: startTime,
-        scheduledEndAt: endTime,
-        durationMinutes: 60,
-        classType: "REGULAR",
-        createdAt: now,
-        updatedAt: now,
-      }).returning()) as [ClassInstanceEntity];
+      const [classInst] = (await tx
+        .insert(classInstances)
+        .values({
+          studentId: student.id,
+          teacherId: teacher1.id,
+          scheduledStartAt: startTime,
+          scheduledEndAt: endTime,
+          durationMinutes: 60,
+          classType: "REGULAR",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning()) as [ClassInstanceEntity];
 
       try {
         // Try updating to Teacher 2
@@ -155,12 +209,27 @@ describe("Class Teacher Assignment Integrity", () => {
     await runInRollback(async tx => {
       const now = new Date();
       const past = new Date(now.getTime() - 86400000); // 1 day ago
-      
-      const [userP] = (await tx.insert(users).values({ name: "Parent", email: `p-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [parent] = (await tx.insert(parents).values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now }).returning()) as [ParentEntity];
-      const [userT] = (await tx.insert(users).values({ name: "Teacher", email: `t-${randomUUID()}@x.com`, password: "t", createdAt: now, updatedAt: now }).returning()) as [UserEntity];
-      const [teacher] = (await tx.insert(teachers).values({ userId: userT.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now }).returning()) as [TeacherEntity];
-      const [student] = (await tx.insert(students).values({ parentId: parent.id, name: "Student", status: "ON_TRIAL", createdAt: now, updatedAt: now }).returning()) as [StudentEntity];
+
+      const [userP] = (await tx
+        .insert(users)
+        .values({ name: "Parent", email: `p-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [parent] = (await tx
+        .insert(parents)
+        .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
+        .returning()) as [ParentEntity];
+      const [userT] = (await tx
+        .insert(users)
+        .values({ name: "Teacher", email: `t-${randomUUID()}@x.com`, password: "t", createdAt: now, updatedAt: now })
+        .returning()) as [UserEntity];
+      const [teacher] = (await tx
+        .insert(teachers)
+        .values({ userId: userT.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
+        .returning()) as [TeacherEntity];
+      const [student] = (await tx
+        .insert(students)
+        .values({ parentId: parent.id, name: "Student", status: "ON_TRIAL", createdAt: now, updatedAt: now })
+        .returning()) as [StudentEntity];
 
       // Assign Teacher but end it in the past
       await tx.insert(teacherAssignments).values({

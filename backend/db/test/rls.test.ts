@@ -118,7 +118,10 @@ describe("Row Level Security and Soft Delete", () => {
         testLogger.info(`Attempting to update deleted_at to non-null value under RLS for user: ${email}`);
         let updateError: unknown = null;
         try {
-          await tx.update(users).set({ deletedAt: now }).where(sql`id = ${user.id}`);
+          await tx
+            .update(users)
+            .set({ deletedAt: now })
+            .where(sql`id = ${user.id}`);
         } catch (e) {
           updateError = e;
         }
@@ -159,13 +162,19 @@ describe("Row Level Security and Soft Delete", () => {
     // 3. Verify user is hidden from SELECT under RLS role
     await db.transaction(async tx => {
       await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
-      const selectedUsers = await tx.select().from(users).where(sql`id = ${user.id}`);
+      const selectedUsers = await tx
+        .select()
+        .from(users)
+        .where(sql`id = ${user.id}`);
       testLogger.info(`Select count under RLS role: ${selectedUsers.length}`);
       expect(selectedUsers.length).toBe(0);
     });
 
     // 4. Verify user STILL exists in database with deleted_at set (queried as superuser)
-    const [superuserSelect] = await db.select().from(users).where(sql`id = ${user.id}`);
+    const [superuserSelect] = await db
+      .select()
+      .from(users)
+      .where(sql`id = ${user.id}`);
     expect(superuserSelect).toBeDefined();
     expect(superuserSelect.deletedAt).not.toBeNull();
     testLogger.info(`User in database has deleted_at = ${superuserSelect.deletedAt}`);
@@ -174,17 +183,26 @@ describe("Row Level Security and Soft Delete", () => {
     await db.transaction(async tx => {
       await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
       testLogger.info(`Executing second DELETE as RLS role for user: ${user.id} (should be 0 rows)`);
-      const res = await tx.delete(users).where(sql`id = ${user.id}`).returning();
+      const res = await tx
+        .delete(users)
+        .where(sql`id = ${user.id}`)
+        .returning();
       expect(res.length).toBe(0);
     });
 
     // 6. Perform DELETE as superuser (which bypasses RLS and can find the soft-deleted row)
     testLogger.info(`Executing DELETE as superuser for user: ${user.id}`);
-    const res = await db.delete(users).where(sql`id = ${user.id}`).returning();
+    const res = await db
+      .delete(users)
+      .where(sql`id = ${user.id}`)
+      .returning();
     expect(res.length).toBe(1);
 
     // 7. Verify user is now completely gone from the database (even for superuser)
-    const superuserSelectAfter = await db.select().from(users).where(sql`id = ${user.id}`);
+    const superuserSelectAfter = await db
+      .select()
+      .from(users)
+      .where(sql`id = ${user.id}`);
     expect(superuserSelectAfter.length).toBe(0);
     testLogger.info("User permanently hard-deleted after delete by superuser.");
   });

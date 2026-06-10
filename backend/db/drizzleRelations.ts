@@ -181,6 +181,24 @@ export const relations = defineRelations(schema, r => ({
       from: r.students.id,
       to: r.teacherAssignments.studentId,
     }),
+    progressLogs: r.many.studentProgress({
+      from: r.students.id,
+      to: r.studentProgress.studentId,
+    }),
+  },
+  studentProgress: {
+    student: r.one.students({
+      from: r.studentProgress.studentId,
+      to: r.students.id,
+    }),
+    classInstance: r.one.classInstances({
+      from: r.studentProgress.classInstanceId,
+      to: r.classInstances.id,
+    }),
+    teacher: r.one.teachers({
+      from: r.studentProgress.teacherId,
+      to: r.teachers.id,
+    }),
   },
   teacherAssignments: {
     student: r.one.students({

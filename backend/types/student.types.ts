@@ -1,4 +1,4 @@
-import type { students, studentStatusHistory } from "@/backend/db/schema";
+import type { studentStatusHistory, students } from "@/backend/db/schema";
 import type { AppLanguage, Gender, OrderSortDirection, StudentStatus } from "@/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
@@ -7,6 +7,9 @@ export type StudentEntityInput = typeof students.$inferInsert;
 
 export type StudentStatusHistorySelectType = typeof studentStatusHistory.$inferSelect;
 export type StudentStatusHistoryInput = typeof studentStatusHistory.$inferInsert;
+
+export type StudentProgressSelectType = typeof studentProgress.$inferSelect;
+export type StudentProgressInsertType = typeof studentProgress.$inferInsert;
 
 export type StudentDto = {
   id: string;
@@ -109,4 +112,3 @@ export enum StudentsOrderByColumn {
   CREATED_AT = "CREATED_AT",
   UPDATED_AT = "UPDATED_AT",
 }
-
