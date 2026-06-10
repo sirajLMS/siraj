@@ -8,3 +8,4 @@ export * from "./scheduling.types";
 export * from "./storage.types";
 export * from "./student.types";
 export * from "./teacher.types";
+export * from "./teacher-availability.types";

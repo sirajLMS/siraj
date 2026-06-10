@@ -9,4 +9,6 @@ export { SignedUrlRepository } from "./signedUrl.repository";
 
 export { StorageDbRepository } from "./storage.repository";
 export { StudentRepository } from "./student.repository";
+export { TeacherAvailabilityRepository } from "./teacher-availability.repository";
+export { TeacherBankingRepository } from "./teacher-banking.repository";
 export { UserRepository } from "./user.repository";

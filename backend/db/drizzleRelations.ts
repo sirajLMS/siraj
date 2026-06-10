@@ -123,6 +123,22 @@ export const relations = defineRelations(schema, r => ({
       from: r.teachers.id,
       to: r.teacherBankingDetailsHistory.teacherId,
     }),
+    payments: r.many.teacherPayments({
+      from: r.teachers.id,
+      to: r.teacherPayments.teacherId,
+    }),
+    availabilityWindows: r.many.teacherAvailabilityWindows({
+      from: r.teachers.id,
+      to: r.teacherAvailabilityWindows.teacherId,
+    }),
+    recurringUnavailability: r.many.teacherRecurringUnavailability({
+      from: r.teachers.id,
+      to: r.teacherRecurringUnavailability.teacherId,
+    }),
+    vacationRequests: r.many.teacherVacationRequests({
+      from: r.teachers.id,
+      to: r.teacherVacationRequests.teacherId,
+    }),
   },
   parents: {
     user: r.one.users({
@@ -412,6 +428,50 @@ export const relations = defineRelations(schema, r => ({
     teacher: r.one.teachers({
       from: r.teacherBankingDetailsHistory.teacherId,
       to: r.teachers.id,
+    }),
+    verifiedBy: r.one.users({
+      from: r.teacherBankingDetailsHistory.verifiedByUserId,
+      to: r.users.id,
+    }),
+    payments: r.many.teacherPayments({
+      from: r.teacherBankingDetailsHistory.id,
+      to: r.teacherPayments.bankingDetailsHistoryId,
+    }),
+  },
+  teacherPayments: {
+    teacher: r.one.teachers({
+      from: r.teacherPayments.teacherId,
+      to: r.teachers.id,
+    }),
+    bankingDetails: r.one.teacherBankingDetailsHistory({
+      from: r.teacherPayments.bankingDetailsHistoryId,
+      to: r.teacherBankingDetailsHistory.id,
+    }),
+  },
+  teacherAvailabilityWindows: {
+    teacher: r.one.teachers({
+      from: r.teacherAvailabilityWindows.teacherId,
+      to: r.teachers.id,
+    }),
+  },
+  teacherRecurringUnavailability: {
+    teacher: r.one.teachers({
+      from: r.teacherRecurringUnavailability.teacherId,
+      to: r.teachers.id,
+    }),
+  },
+  teacherVacationRequests: {
+    teacher: r.one.teachers({
+      from: r.teacherVacationRequests.teacherId,
+      to: r.teachers.id,
+    }),
+    requestedBy: r.one.users({
+      from: r.teacherVacationRequests.requestedByUserId,
+      to: r.users.id,
+    }),
+    processedBy: r.one.users({
+      from: r.teacherVacationRequests.processedByUserId,
+      to: r.users.id,
     }),
   },
   adminAuditLogs: {

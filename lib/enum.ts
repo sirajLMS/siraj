@@ -98,6 +98,13 @@ export enum LeaveRequesterType {
   ADMIN = "ADMIN",
 }
 
+export enum VacationRequestStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+  CANCELLED = "CANCELLED",
+}
+
 export enum DayOfWeek {
   MONDAY = "MONDAY",
   TUESDAY = "TUESDAY",
@@ -124,6 +131,7 @@ export enum NotificationEventType {
   CLASS_REMINDER = "CLASS_REMINDER",
   INVOICE_GENERATED = "INVOICE_GENERATED",
   COMPLAINT_RESPONSE = "COMPLAINT_RESPONSE",
+  BANKING_DETAILS_CHANGED = "BANKING_DETAILS_CHANGED",
 }
 
 export enum NotificationDeliveryStatus {

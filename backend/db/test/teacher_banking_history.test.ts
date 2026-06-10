@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
 import type { TeacherBankingDetailsHistorySelectType, TeacherEntity, UserEntity } from "../../types";
 import { db } from "../drizzleDb";
+import { TeacherBankingRepository } from "../repo/teacher-banking.repository";
 import { teacherBankingDetailsHistory, teachers, users } from "../schema";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -56,41 +57,27 @@ describe("Teacher Banking Details Versioning & History", () => {
         })
         .returning()) as [TeacherEntity];
 
-      const [banking1] = (await tx
-        .insert(teacherBankingDetailsHistory)
-        .values({
+      const banking1 = await TeacherBankingRepository.submitBankingDetails(
+        {
           teacherId: teacher.id,
           beneficiaryName: "Original Name",
           bankName: "First Bank",
           accountNumber: "111111",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherBankingDetailsHistorySelectType];
+        },
+        tx
+      );
 
-      // Sleep briefly
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      const closeTime = new Date();
-      // Close the old record
-      await tx
-        .update(teacherBankingDetailsHistory)
-        .set({ validUntil: closeTime, updatedAt: closeTime })
-        .where(eq(teacherBankingDetailsHistory.id, banking1.id));
-
-      // Insert new record
-      const [banking2] = (await tx
-        .insert(teacherBankingDetailsHistory)
-        .values({
+      const banking2 = await TeacherBankingRepository.submitBankingDetails(
+        {
           teacherId: teacher.id,
           beneficiaryName: "Original Name",
           bankName: "Second Bank",
           accountNumber: "111111",
-          validFrom: closeTime,
-          createdAt: closeTime,
-          updatedAt: closeTime,
-        })
-        .returning()) as [TeacherBankingDetailsHistorySelectType];
+        },
+        tx
+      );
 
       const dbRows = (await tx
         .select()
@@ -151,23 +138,18 @@ describe("Teacher Banking Details Versioning & History", () => {
           teacherId: teacher.id,
           beneficiaryName: "Original Name",
           bankName: "First Bank",
-          validUntil: now, // Pre-closed record
+          validUntil: now,
           createdAt: now,
           updatedAt: now,
         })
         .returning()) as [TeacherBankingDetailsHistorySelectType];
 
       try {
-        await tx
-          .update(teacherBankingDetailsHistory)
-          .set({ beneficiaryName: "Cheater Name" })
-          .where(eq(teacherBankingDetailsHistory.id, banking.id))
-          .execute();
+        await TeacherBankingRepository.updateBankingDetails(banking.id, { beneficiaryName: "Cheater Name" }, tx);
         expect(true).toBe(false);
       } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toContain("Cannot modify historical banking records");
+        const err = error as Error;
+        expect(err.message).toContain("Cannot modify historical banking records");
       }
     });
     testLogger.info("Historical closed record immutability test passed.");
@@ -201,28 +183,21 @@ describe("Teacher Banking Details Versioning & History", () => {
         })
         .returning()) as [TeacherEntity];
 
-      const [banking] = (await tx
-        .insert(teacherBankingDetailsHistory)
-        .values({
+      const banking = await TeacherBankingRepository.submitBankingDetails(
+        {
           teacherId: teacher.id,
           beneficiaryName: "Original Name",
           bankName: "First Bank",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherBankingDetailsHistorySelectType];
+        },
+        tx
+      );
 
       try {
-        await tx
-          .update(teacherBankingDetailsHistory)
-          .set({ beneficiaryName: "Cheater Name" })
-          .where(eq(teacherBankingDetailsHistory.id, banking.id))
-          .execute();
+        await TeacherBankingRepository.updateBankingDetails(banking.id, { beneficiaryName: "Cheater Name" }, tx);
         expect(true).toBe(false);
       } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toContain("Cannot modify banking fields directly");
+        const err = error as Error;
+        expect(err.message).toContain("Cannot modify banking fields directly");
       }
     });
     testLogger.info("Active record banking fields immutability test passed.");
@@ -256,29 +231,22 @@ describe("Teacher Banking Details Versioning & History", () => {
         })
         .returning()) as [TeacherEntity];
 
-      const [banking] = (await tx
-        .insert(teacherBankingDetailsHistory)
-        .values({
+      const banking = await TeacherBankingRepository.submitBankingDetails(
+        {
           teacherId: teacher.id,
           beneficiaryName: "Constant Name",
           bankName: "Constant Bank",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherBankingDetailsHistorySelectType];
+        },
+        tx
+      );
 
-      // Update updatedAt without changing any banking details
-      await tx
-        .update(teacherBankingDetailsHistory)
-        .set({ updatedAt: new Date() })
-        .where(eq(teacherBankingDetailsHistory.id, banking.id));
+      await TeacherBankingRepository.updateNonBankingFields(banking.id, { updatedAt: new Date() }, tx);
 
       const dbRows = (await tx
         .select()
         .from(teacherBankingDetailsHistory)
         .where(eq(teacherBankingDetailsHistory.teacherId, teacher.id))) as TeacherBankingDetailsHistorySelectType[];
 
-      // No new version should have been created
       expect(dbRows.length).toBe(1);
       expect(dbRows[0].validUntil).toBeNull();
     });
@@ -313,7 +281,6 @@ describe("Teacher Banking Details Versioning & History", () => {
         })
         .returning()) as [TeacherEntity];
 
-      // Insert first active record
       await tx
         .insert(teacherBankingDetailsHistory)
         .values({
@@ -324,7 +291,6 @@ describe("Teacher Banking Details Versioning & History", () => {
         })
         .execute();
 
-      // Inserting second active record directly should violate unique constraint
       try {
         await tx
           .insert(teacherBankingDetailsHistory)
@@ -335,7 +301,7 @@ describe("Teacher Banking Details Versioning & History", () => {
             updatedAt: now,
           })
           .execute();
-        expect(true).toBe(false); // Should not reach here
+        expect(true).toBe(false);
       } catch (error) {
         const err = error as Error & { cause?: { message?: string } };
         const message = err.cause?.message || err.message || "";

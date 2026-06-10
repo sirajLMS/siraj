@@ -21,6 +21,7 @@ import {
   ParentStatus,
   PaymentMethod,
   StudentStatus,
+  VacationRequestStatus,
 } from "@/lib/enum";
 import { createPgEnumFromEnum } from "../../utils/db.utils";
 
@@ -55,6 +56,8 @@ export const complaintStatusEnum = createPgEnumFromEnum("complaint_status", Comp
 export const leaveRequestStatusEnum = createPgEnumFromEnum("leave_request_status", LeaveRequestStatus);
 
 export const leaveRequesterTypeEnum = createPgEnumFromEnum("leave_requester_type", LeaveRequesterType);
+
+export const vacationRequestStatusEnum = createPgEnumFromEnum("vacation_request_status", VacationRequestStatus);
 
 export const notificationChannelEnum = createPgEnumFromEnum("notification_channel", NotificationChannel);
 

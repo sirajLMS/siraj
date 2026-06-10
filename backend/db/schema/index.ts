@@ -11,6 +11,7 @@ export * from "./site-content";
 export * from "./staff";
 export * from "./storage";
 export * from "./students";
+export * from "./teacher-availability";
 export * from "./teacher-banking";
 export * from "./teachers";
 export * from "./timezones";

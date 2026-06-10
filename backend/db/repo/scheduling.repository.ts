@@ -1,5 +1,6 @@
 import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
 import { classInstances, students, teacherAssignments } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
 
@@ -140,6 +141,12 @@ export namespace SchedulingRepository {
     const runner = async (t: DBTransaction) => {
       await acquireLocks(t, input.teacherId, input.studentId);
       await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt);
+      await TeacherAvailabilityRepository.validateBookingAvailability(
+        input.teacherId,
+        input.scheduledStartAt,
+        input.scheduledEndAt,
+        t
+      );
       await checkOverlaps(
         t,
         input.studentId,
@@ -192,6 +199,7 @@ export namespace SchedulingRepository {
 
       if (!isBeingSoftDeleted) {
         await validateTeacherAssignment(t, studentId, teacherId, startTime);
+        await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, startTime, endTime, t);
         await checkOverlaps(t, studentId, teacherId, startTime, endTime, zoomUrl, id);
       }
 
@@ -264,6 +272,12 @@ export namespace SchedulingRepository {
         newInstanceInput.studentId,
         newInstanceInput.teacherId,
         newInstanceInput.scheduledStartAt
+      );
+      await TeacherAvailabilityRepository.validateBookingAvailability(
+        newInstanceInput.teacherId,
+        newInstanceInput.scheduledStartAt,
+        newInstanceInput.scheduledEndAt,
+        t
       );
       await checkOverlaps(
         t,
