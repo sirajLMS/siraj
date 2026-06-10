@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { count, eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
+import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { users } from "@/backend/db/schema";
 import { PaginationArgsDefault } from "@/backend/graphql/pothos";
 import logger from "@/backend/lib/logger";
@@ -150,13 +151,8 @@ export namespace UserRepository {
     }
   };
 
-  export const deleteUserById = async (id: string): Promise<UserEntity> => {
-    const existingUser = await findUserByIdOrThrow(id);
-
-    // Delete the user
-    await db.delete(users).where(eq(users.id, id));
-
-    // Return the user data as a simple object
-    return existingUser;
+  export const deleteUserById = async (id: string, actorUserId?: string | null): Promise<UserEntity> => {
+    const { entity } = await SoftDeleteRepository.softDeleteUser(id, actorUserId);
+    return entity;
   };
 }

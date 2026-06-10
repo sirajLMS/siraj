@@ -25,7 +25,9 @@ export type AuditEntityType =
   | "PARENT"
   | "CLASS_INSTANCE"
   | "RECURRING_SCHEDULE"
-  | "LEAVE_REQUEST";
+  | "LEAVE_REQUEST"
+  | "COMPLAINT"
+  | "LEARNING_RESOURCE";
 
 /**
  * Action types for audit logs

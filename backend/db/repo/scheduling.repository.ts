@@ -1,5 +1,6 @@
 import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
+import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
 import { classInstances, students, teacherAssignments } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
@@ -233,7 +234,7 @@ export namespace SchedulingRepository {
           .where(eq(students.id, existing.studentId));
       }
 
-      const [deleted] = await t.delete(classInstances).where(eq(classInstances.id, id)).returning();
+      const { entity: deleted } = await SoftDeleteRepository.softDeleteClassInstance(id, null, t);
       return deleted;
     };
 

@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import { db } from "../drizzleDb";
+import { SoftDeleteRepository } from "../repo";
 import { parents, recurringScheduleDays, recurringSchedules, students, teachers, users } from "../schema";
 
 describe("hoursPerWeek Recalculation Triggers", () => {
@@ -236,10 +237,9 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       .where(sql`id = ${testStudent.id}`);
     expect(Number(studentBeforeSoftDelete.hoursPerWeek)).toBe(1.5);
 
-    // 7. Schedule Soft Delete: Set deleted_at on schedule (via RLS / soft delete triggers)
+    // 7. Schedule Soft Delete via repository (no SECURITY DEFINER trigger)
     testLogger.info("Soft-deleting recurring schedule...");
-    // Running delete will trigger BEFORE DELETE soft_delete_row_trigger_fn
-    await db.delete(recurringSchedules).where(sql`id = ${schedule.id}`);
+    await SoftDeleteRepository.softDeleteRecurringSchedule(schedule.id);
 
     // Verify hoursPerWeek = 0.00 (since schedule is soft-deleted, rs.deleted_at IS NULL condition excludes it)
     const [studentAfterSoftDelete] = await db

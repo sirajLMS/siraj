@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
 import type { UserEntity } from "../../types";
 import { db } from "../drizzleDb";
-import { StorageDbRepository } from "../repo";
+import { SoftDeleteRepository, StorageDbRepository } from "../repo";
 import { storageFiles, userFiles, users } from "../schema";
 
 describe("Consolidated File Usage Integrity (Junction Tables)", () => {
@@ -120,15 +120,15 @@ describe("Consolidated File Usage Integrity (Junction Tables)", () => {
     let isInUse = await StorageDbRepository.isFileInUse(cascadePath);
     expect(isInUse).toBe(true);
 
-    // 4. Hard delete the temp user (note: first delete is soft delete in our system)
-    await db.delete(users).where(eq(users.id, tempUser.id)); // Soft delete
+    // 4. Soft delete the temp user via repository
+    await SoftDeleteRepository.softDeleteUser(tempUser.id);
 
     // Usage should still exist after soft delete (as user record is still there)
     isInUse = await StorageDbRepository.isFileInUse(cascadePath);
     expect(isInUse).toBe(true);
 
     // Hard delete
-    await db.delete(users).where(eq(users.id, tempUser.id));
+    await SoftDeleteRepository.hardDelete("users", tempUser.id);
 
     // 5. Verify that the junction record is now gone (native cascade delete)
     isInUse = await StorageDbRepository.isFileInUse(cascadePath);

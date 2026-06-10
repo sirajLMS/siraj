@@ -5,6 +5,7 @@ export * from "./communications.types";
 export * from "./pagination.types";
 export * from "./parent.types";
 export * from "./scheduling.types";
+export * from "./soft-delete.types";
 export * from "./storage.types";
 export * from "./student.types";
 export * from "./teacher.types";
