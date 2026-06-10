@@ -36,6 +36,7 @@ export enum StudentStatus {
   SUSPENDED = "SUSPENDED",
   ON_TRIAL = "ON_TRIAL",
   DEACTIVATED = "DEACTIVATED",
+  GRADUATED = "GRADUATED",
 }
 
 export enum ClassType {

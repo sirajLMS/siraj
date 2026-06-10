@@ -160,10 +160,7 @@ describe("Polymorphic Foreign Key Integrity", () => {
     await db.delete(users).where(sql`id = ${tempUser.id}`);
 
     // Verify that the file usages still exist because the user is only soft-deleted (not hard-deleted)
-    const afterSoft1 = await db
-      .select()
-      .from(fileUsages)
-      .where(sql`id = ${usage1.id}`);
+    const afterSoft1 = await db.select().from(fileUsages).where(sql`id = ${usage1.id}`);
     expect(afterSoft1.length).toBe(1);
 
     // 4. Delete the temp user again (second delete performs hard delete)
@@ -171,14 +168,8 @@ describe("Polymorphic Foreign Key Integrity", () => {
     await db.delete(users).where(sql`id = ${tempUser.id}`);
 
     // 5. Verify that the file usages are now gone (cascade delete triggered)
-    const remaining1 = await db
-      .select()
-      .from(fileUsages)
-      .where(sql`id = ${usage1.id}`);
-    const remaining2 = await db
-      .select()
-      .from(fileUsages)
-      .where(sql`id = ${usage2.id}`);
+    const remaining1 = await db.select().from(fileUsages).where(sql`id = ${usage1.id}`);
+    const remaining2 = await db.select().from(fileUsages).where(sql`id = ${usage2.id}`);
 
     expect(remaining1.length).toBe(0);
     expect(remaining2.length).toBe(0);

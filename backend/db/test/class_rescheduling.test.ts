@@ -313,10 +313,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         .returning()) as [ClassInstanceEntity];
 
       // Student classes remaining should be 4 now
-      const [studentAfterOriginal] = await tx
-        .select()
-        .from(students)
-        .where(eq(students.id, student.id));
+      const [studentAfterOriginal] = await tx.select().from(students).where(eq(students.id, student.id));
       expect(studentAfterOriginal.classesRemaining).toBe(4);
 
       // 2. Reschedule to new class (which also has quota_deducted = true)
@@ -337,20 +334,14 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         .returning();
 
       // Check original class was updated by trigger
-      const [updatedOriginal] = await tx
-        .select()
-        .from(classInstances)
-        .where(eq(classInstances.id, original.id));
+      const [updatedOriginal] = await tx.select().from(classInstances).where(eq(classInstances.id, original.id));
 
       expect(updatedOriginal.isRescheduled).toBe(true);
       expect(updatedOriginal.quotaDeducted).toBe(false);
 
       // Student classes remaining should still be 4
       // (1 deducted for original, refunded because rescheduled, and 1 deducted for new class)
-      const [studentAfterReschedule] = await tx
-        .select()
-        .from(students)
-        .where(eq(students.id, student.id));
+      const [studentAfterReschedule] = await tx.select().from(students).where(eq(students.id, student.id));
       expect(studentAfterReschedule.classesRemaining).toBe(4);
     });
     testLogger.info("Original class updates and quota refund test passed.");

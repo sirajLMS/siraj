@@ -71,10 +71,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 4. Create Triggers
+DROP TRIGGER IF EXISTS trg_recalc_hours_recurring_schedules ON recurring_schedules;
 CREATE TRIGGER trg_recalc_hours_recurring_schedules
 AFTER INSERT OR UPDATE OR DELETE ON recurring_schedules
 FOR EACH ROW EXECUTE FUNCTION trg_fn_recurring_schedules_hours_recalc();
 
+DROP TRIGGER IF EXISTS trg_recalc_hours_recurring_schedule_days ON recurring_schedule_days;
 CREATE TRIGGER trg_recalc_hours_recurring_schedule_days
 AFTER INSERT OR UPDATE OR DELETE ON recurring_schedule_days
 FOR EACH ROW EXECUTE FUNCTION trg_fn_recurring_schedule_days_hours_recalc();

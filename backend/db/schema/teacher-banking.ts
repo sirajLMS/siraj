@@ -6,7 +6,7 @@ import { teachers } from "./teachers";
 /**
  * Teacher Banking Details History table.
  * Supports temporal versioning of banking records.
- * 
+ *
  * Database-level Constraints & Triggers:
  * - Unique Index `teacher_banking_details_history_active_idx`: Enforces at most one active record (where `valid_until IS NULL`) per teacher.
  * - Trigger `trg_enforce_teacher_banking_immutability` BEFORE UPDATE:
@@ -28,9 +28,7 @@ export const teacherBankingDetailsHistory = pgTable(
     routingNumber: encryptedText("routing_number"),
     swiftBic: encryptedText("swift_bic"),
     iban: encryptedText("iban"),
-    validFrom: timestamp("valid_from", { withTimezone: true, precision: 3 })
-      .default(sql`clock_timestamp()`)
-      .notNull(),
+    validFrom: timestamp("valid_from", { withTimezone: true, precision: 3 }).default(sql`clock_timestamp()`).notNull(),
     validUntil: timestamp("valid_until", { withTimezone: true, precision: 3 }),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
@@ -42,4 +40,3 @@ export const teacherBankingDetailsHistory = pgTable(
       .where(sql`${table.validUntil} IS NULL`),
   ]
 );
-

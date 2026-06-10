@@ -20,6 +20,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_enforce_teacher_banking_immutability ON teacher_banking_details_history;
 CREATE TRIGGER trg_enforce_teacher_banking_immutability
 BEFORE UPDATE ON teacher_banking_details_history
 FOR EACH ROW EXECUTE FUNCTION enforce_teacher_banking_immutability();

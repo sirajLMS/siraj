@@ -2,13 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
-import type {
-  LeaveQuotaUsageEntity,
-  ParentEntity,
-  StudentEntity,
-  TeacherEntity,
-  UserEntity,
-} from "../../types";
+import type { LeaveQuotaUsageEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import { db } from "../drizzleDb";
 import { leaveQuotaUsage, parents, students, systemSettings, teachers, users } from "../schema";
 
@@ -437,19 +431,11 @@ describe("Leave Quota Limits Trigger", () => {
         .returning()) as [LeaveQuotaUsageEntity];
 
       // Update to 2 leaves (allowed under default limit of 2)
-      await tx
-        .update(leaveQuotaUsage)
-        .set({ usedCount: 2 })
-        .where(eq(leaveQuotaUsage.id, teacherQuota.id))
-        .execute();
+      await tx.update(leaveQuotaUsage).set({ usedCount: 2 }).where(eq(leaveQuotaUsage.id, teacherQuota.id)).execute();
 
       // Update to 3 leaves (blocked under default limit of 2)
       try {
-        await tx
-          .update(leaveQuotaUsage)
-          .set({ usedCount: 3 })
-          .where(eq(leaveQuotaUsage.id, teacherQuota.id))
-          .execute();
+        await tx.update(leaveQuotaUsage).set({ usedCount: 3 }).where(eq(leaveQuotaUsage.id, teacherQuota.id)).execute();
         expect(true).toBe(false);
       } catch (error) {
         const err = error as Error & { cause?: { message?: string } };

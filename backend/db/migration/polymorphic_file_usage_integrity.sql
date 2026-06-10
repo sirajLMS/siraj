@@ -66,47 +66,58 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 4. Attach validation trigger to file_usage
+DROP TRIGGER IF EXISTS trg_validate_file_usage ON "file_usage";
 CREATE TRIGGER trg_validate_file_usage
 BEFORE INSERT OR UPDATE ON "file_usage"
 FOR EACH ROW EXECUTE FUNCTION validate_file_usage_reference();
 
 -- 5. Attach cascade delete triggers to parent tables
+DROP TRIGGER IF EXISTS trg_cascade_file_usage_users ON "users";
 CREATE TRIGGER trg_cascade_file_usage_users
 AFTER DELETE ON "users"
 FOR EACH ROW EXECUTE FUNCTION cascade_delete_file_usages();
 
+DROP TRIGGER IF EXISTS trg_cascade_file_usage_teachers ON "teachers";
 CREATE TRIGGER trg_cascade_file_usage_teachers
 AFTER DELETE ON "teachers"
 FOR EACH ROW EXECUTE FUNCTION cascade_delete_file_usages();
 
+DROP TRIGGER IF EXISTS trg_cascade_file_usage_students ON "students";
 CREATE TRIGGER trg_cascade_file_usage_students
 AFTER DELETE ON "students"
 FOR EACH ROW EXECUTE FUNCTION cascade_delete_file_usages();
 
+DROP TRIGGER IF EXISTS trg_cascade_file_usage_parents ON "parents";
 CREATE TRIGGER trg_cascade_file_usage_parents
 AFTER DELETE ON "parents"
 FOR EACH ROW EXECUTE FUNCTION cascade_delete_file_usages();
 
+DROP TRIGGER IF EXISTS trg_cascade_file_usage_invoices ON "invoices";
 CREATE TRIGGER trg_cascade_file_usage_invoices
 AFTER DELETE ON "invoices"
 FOR EACH ROW EXECUTE FUNCTION cascade_delete_file_usages();
 
+DROP TRIGGER IF EXISTS trg_cascade_file_usage_complaints ON "complaints";
 CREATE TRIGGER trg_cascade_file_usage_complaints
 AFTER DELETE ON "complaints"
 FOR EACH ROW EXECUTE FUNCTION cascade_delete_file_usages();
 
+DROP TRIGGER IF EXISTS trg_cascade_file_usage_learning_resources ON "learning_resources";
 CREATE TRIGGER trg_cascade_file_usage_learning_resources
 AFTER DELETE ON "learning_resources"
 FOR EACH ROW EXECUTE FUNCTION cascade_delete_file_usages();
 
+DROP TRIGGER IF EXISTS trg_cascade_file_usage_staff_profiles ON "staff_profiles";
 CREATE TRIGGER trg_cascade_file_usage_staff_profiles
 AFTER DELETE ON "staff_profiles"
 FOR EACH ROW EXECUTE FUNCTION cascade_delete_file_usages();
 
+DROP TRIGGER IF EXISTS trg_cascade_file_usage_recurring_schedules ON "recurring_schedules";
 CREATE TRIGGER trg_cascade_file_usage_recurring_schedules
 AFTER DELETE ON "recurring_schedules"
 FOR EACH ROW EXECUTE FUNCTION cascade_delete_file_usages();
 
+DROP TRIGGER IF EXISTS trg_cascade_file_usage_class_instances ON "class_instances";
 CREATE TRIGGER trg_cascade_file_usage_class_instances
 AFTER DELETE ON "class_instances"
 FOR EACH ROW EXECUTE FUNCTION cascade_delete_file_usages();

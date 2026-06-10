@@ -7,13 +7,15 @@ import { users } from "./users";
 
 /**
  * Students table.
- * 
+ *
  * Database-level Constraints & Triggers:
  * - CHECK Constraint `students_classes_remaining_chk`: Enforces `classes_remaining >= 0`.
  * - CHECK Constraint `students_classes_total_chk`: Enforces `classes_total >= 0`.
  * - Triggers `trg_recalc_hours_recurring_schedules` and `trg_recalc_hours_recurring_schedule_days`:
  *   Automatically recalculate `hours_per_week` (sum of duration of active schedule days) when schedules or schedule days change.
- * 
+ * - Trigger `trg_enforce_student_status_transition`: Enforces valid state machine transitions for student status
+ *   and logs transitions to `student_status_history`.
+ *
  * Row-Level Security (RLS) Policies:
  * - Enabled on the `students` table.
  * - Policies:
@@ -52,6 +54,28 @@ export const students = pgTable(
     index("idx_students_name_trgm").using("gist", table.name.op("gist_trgm_ops")),
     check("students_classes_remaining_chk", sql`${table.classesRemaining} >= 0`),
     check("students_classes_total_chk", sql`${table.classesTotal} >= 0`),
+  ]
+);
+
+/**
+ * Student Status History table.
+ * Records all status transitions for students for auditing and state machine enforcement.
+ */
+export const studentStatusHistory = pgTable(
+  "student_status_history",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    studentId: uuid("student_id")
+      .notNull()
+      .references(() => students.id, { onDelete: "cascade" }),
+    oldStatus: studentStatusEnum("old_status"),
+    newStatus: studentStatusEnum("new_status").notNull(),
+    changedByUserId: uuid("changed_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+  },
+  table => [
+    index("student_status_history_student_id_idx").on(table.studentId),
+    index("student_status_history_changed_by_user_id_idx").on(table.changedByUserId),
   ]
 );
 

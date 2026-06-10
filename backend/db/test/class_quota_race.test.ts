@@ -342,9 +342,7 @@ describe("Class Quota System Constraints & Triggers", () => {
     const results = await resultPromises;
 
     const successes = results.filter(r => r.status === "fulfilled");
-    const failures = results.filter(
-      (r): r is PromiseRejectedResult => r.status === "rejected"
-    );
+    const failures = results.filter((r): r is PromiseRejectedResult => r.status === "rejected");
 
     // Exactly one insertion should succeed, and one should fail
     expect(successes.length).toBe(1);

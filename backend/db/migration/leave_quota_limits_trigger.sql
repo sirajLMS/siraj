@@ -30,6 +30,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_enforce_leave_quota_limits ON leave_quota_usage;
 CREATE TRIGGER trg_enforce_leave_quota_limits
 BEFORE INSERT OR UPDATE ON leave_quota_usage
 FOR EACH ROW EXECUTE FUNCTION enforce_leave_quota_limits();

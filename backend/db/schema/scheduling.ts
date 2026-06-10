@@ -103,6 +103,9 @@ export const recurringScheduleDays = pgTable(
  *   - Automatically decrements/increments `students.classes_remaining` when classes are completed/refunded.
  * - Trigger `class_instances_overlap_trigger` BEFORE INSERT OR UPDATE:
  *   - Blocks overlapping bookings for the teacher, student, or Zoom URL during the scheduled time period.
+ * - Trigger `trg_enforce_class_teacher_assignment` BEFORE INSERT OR UPDATE:
+ *   - Enforces that the teacher assigned to the class instance is also officially assigned to the student
+ *     in the `teacher_assignments` table at the time of the class.
  *
  * Row-Level Security (RLS) Policies:
  * - Enabled for soft deletes: filters out records where `deleted_at IS NOT NULL` for SELECT/UPDATE.

@@ -11,6 +11,7 @@ $$ LANGUAGE plpgsql STABLE;
 ALTER TABLE "students" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "students" FORCE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS students_select_policy ON "students";
 CREATE POLICY students_select_policy ON "students"
 FOR SELECT
 USING (
@@ -19,6 +20,7 @@ USING (
     parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())
 );
 
+DROP POLICY IF EXISTS students_insert_policy ON "students";
 CREATE POLICY students_insert_policy ON "students"
 FOR INSERT
 WITH CHECK (
@@ -27,6 +29,7 @@ WITH CHECK (
     parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())
 );
 
+DROP POLICY IF EXISTS students_update_policy ON "students";
 CREATE POLICY students_update_policy ON "students"
 FOR UPDATE
 USING (
@@ -40,6 +43,7 @@ WITH CHECK (
     parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())
 );
 
+DROP POLICY IF EXISTS students_delete_policy ON "students";
 CREATE POLICY students_delete_policy ON "students"
 FOR DELETE
 USING (

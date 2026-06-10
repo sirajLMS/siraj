@@ -64,6 +64,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_enforce_class_rescheduling_rules ON class_instances;
 CREATE TRIGGER trg_enforce_class_rescheduling_rules
 BEFORE INSERT OR UPDATE ON class_instances
 FOR EACH ROW EXECUTE FUNCTION enforce_class_rescheduling_rules();

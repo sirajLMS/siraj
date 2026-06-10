@@ -34,6 +34,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_class_quota_deduction ON class_instances;
 CREATE TRIGGER trg_class_quota_deduction
 AFTER INSERT OR UPDATE OR DELETE ON class_instances
 FOR EACH ROW EXECUTE FUNCTION handle_class_quota_deduction();
