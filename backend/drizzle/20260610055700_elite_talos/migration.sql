@@ -10,7 +10,7 @@ CREATE TYPE "day_of_week" AS ENUM('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 
 CREATE TYPE "dst_migration_result" AS ENUM('UPDATED', 'CONFLICT', 'UNCHANGED');--> statement-breakpoint
 CREATE TYPE "gender" AS ENUM('MALE', 'FEMALE');--> statement-breakpoint
 CREATE TYPE "invoice_status" AS ENUM('UNPAID', 'PAID');--> statement-breakpoint
-CREATE TYPE "invoice_type" AS ENUM('PER_CLASSES');--> statement-breakpoint
+CREATE TYPE "invoice_type" AS ENUM('PER_CLASSES', 'MONTHLY');--> statement-breakpoint
 CREATE TYPE "leave_request_status" AS ENUM('PENDING', 'APPROVED', 'RESCHEDULED', 'CANCELLED');--> statement-breakpoint
 CREATE TYPE "leave_requester_type" AS ENUM('TEACHER', 'PARENT', 'ADMIN');--> statement-breakpoint
 CREATE TYPE "notification_channel" AS ENUM('EMAIL', 'SMS', 'PUSH');--> statement-breakpoint
@@ -30,12 +30,35 @@ CREATE TABLE "admin_audit_logs" (
 	"created_at" timestamp(3) with time zone NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "currency_exchange_audit_logs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"from_currency" varchar(10) NOT NULL,
+	"to_currency" varchar(10) NOT NULL,
+	"old_rate" numeric(12,6),
+	"new_rate" numeric(12,6) NOT NULL,
+	"source" varchar(50) NOT NULL,
+	"changed_by_user_id" uuid,
+	"created_at" timestamp(3) with time zone NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "currency_exchange_rates" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"from_currency" varchar(10) NOT NULL,
 	"to_currency" varchar(10) NOT NULL,
 	"rate" numeric(12,6) NOT NULL,
+	"source" varchar(50),
+	"provider_response" jsonb,
 	"effective_date" timestamp(3) with time zone NOT NULL,
+	"created_at" timestamp(3) with time zone NOT NULL,
+	"updated_at" timestamp(3) with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "currency_hedges" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"currency" varchar(10) NOT NULL,
+	"amount" numeric(12,2) NOT NULL,
+	"hedge_type" varchar(20) NOT NULL,
+	"notes" text,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
 );
@@ -58,6 +81,8 @@ CREATE TABLE "invoices" (
 	"currency" varchar(10) NOT NULL,
 	"status" "invoice_status" NOT NULL,
 	"invoice_type" "invoice_type" NOT NULL,
+	"exchange_rate_snapshot" numeric(12,6),
+	"exchange_rate_source" varchar(50),
 	"created_by_user_id" uuid,
 	"email_sent_at" timestamp(3) with time zone,
 	"idempotency_key" varchar(255) NOT NULL,
@@ -76,6 +101,8 @@ CREATE TABLE "payments" (
 	"transaction_id" varchar(255),
 	"gateway_response" text,
 	"refunded_amount" numeric(12,2) DEFAULT '0.00' NOT NULL,
+	"exchange_rate_snapshot" numeric(12,6),
+	"exchange_rate_source" varchar(50),
 	"idempotency_key" varchar(255) NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
@@ -603,8 +630,10 @@ CREATE TABLE "users" (
 CREATE INDEX "admin_audit_logs_actor_idx" ON "admin_audit_logs" ("actor_user_id");--> statement-breakpoint
 CREATE INDEX "admin_audit_logs_target_idx" ON "admin_audit_logs" ("target_user_id");--> statement-breakpoint
 CREATE INDEX "admin_audit_logs_action_idx" ON "admin_audit_logs" ("action");--> statement-breakpoint
+CREATE INDEX "currency_exchange_audit_from_to_idx" ON "currency_exchange_audit_logs" ("from_currency","to_currency");--> statement-breakpoint
 CREATE INDEX "currency_exchange_rates_from_to_idx" ON "currency_exchange_rates" ("from_currency","to_currency");--> statement-breakpoint
 CREATE UNIQUE INDEX "currency_exchange_rates_effective_unique_idx" ON "currency_exchange_rates" ("from_currency","to_currency","effective_date");--> statement-breakpoint
+CREATE INDEX "currency_hedges_currency_idx" ON "currency_hedges" ("currency");--> statement-breakpoint
 CREATE INDEX "invoices_parent_id_idx" ON "invoices" ("parent_id");--> statement-breakpoint
 CREATE INDEX "invoices_student_id_idx" ON "invoices" ("student_id");--> statement-breakpoint
 CREATE INDEX "invoices_status_due_date_idx" ON "invoices" ("status","due_date");--> statement-breakpoint
@@ -706,6 +735,7 @@ CREATE INDEX "sessions_user_id_index" ON "sessions" ("user_id");--> statement-br
 CREATE INDEX "sessions_last_activity_index" ON "sessions" ("last_activity");--> statement-breakpoint
 ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_target_user_id_users_id_fkey" FOREIGN KEY ("target_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "currency_exchange_audit_logs" ADD CONSTRAINT "currency_exchange_audit_logs_changed_by_user_id_users_id_fkey" FOREIGN KEY ("changed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "invoice_coverage_months" ADD CONSTRAINT "invoice_coverage_months_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint

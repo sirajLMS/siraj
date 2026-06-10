@@ -1,8 +1,8 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "5ca6bc80-b5bf-40bc-8f68-2d1941e8984c",
-  "prevIds": ["44dbb43e-8918-40af-a94b-d6a9f0556054"],
+  "id": "14bda9f8-0cec-460f-9b82-f57c9849025a",
+  "prevIds": ["82306c5c-2d50-41c5-a3c8-6725e172440c"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
@@ -324,7 +324,7 @@
       "schema": "public"
     },
     {
-      "values": ["PER_CLASSES"],
+      "values": ["PER_CLASSES", "MONTHLY"],
       "name": "invoice_type",
       "entityType": "enums",
       "schema": "public"
@@ -379,7 +379,19 @@
     },
     {
       "isRlsEnabled": false,
+      "name": "currency_exchange_audit_logs",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
       "name": "currency_exchange_rates",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "currency_hedges",
       "entityType": "tables",
       "schema": "public"
     },
@@ -811,6 +823,110 @@
       "name": "id",
       "entityType": "columns",
       "schema": "public",
+      "table": "currency_exchange_audit_logs"
+    },
+    {
+      "type": "varchar(10)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "from_currency",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_exchange_audit_logs"
+    },
+    {
+      "type": "varchar(10)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "to_currency",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_exchange_audit_logs"
+    },
+    {
+      "type": "numeric(12,6)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "old_rate",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_exchange_audit_logs"
+    },
+    {
+      "type": "numeric(12,6)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "new_rate",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_exchange_audit_logs"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "source",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_exchange_audit_logs"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "changed_by_user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_exchange_audit_logs"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_exchange_audit_logs"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
       "table": "currency_exchange_rates"
     },
     {
@@ -853,6 +969,32 @@
       "table": "currency_exchange_rates"
     },
     {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "source",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_exchange_rates"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "provider_response",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_exchange_rates"
+    },
+    {
       "type": "timestamp(3) with time zone",
       "typeSchema": null,
       "notNull": true,
@@ -890,6 +1032,97 @@
       "entityType": "columns",
       "schema": "public",
       "table": "currency_exchange_rates"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_hedges"
+    },
+    {
+      "type": "varchar(10)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "currency",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_hedges"
+    },
+    {
+      "type": "numeric(12,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "amount",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_hedges"
+    },
+    {
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "hedge_type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_hedges"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "notes",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_hedges"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_hedges"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "currency_hedges"
     },
     {
       "type": "uuid",
@@ -1056,6 +1289,32 @@
       "generated": null,
       "identity": null,
       "name": "invoice_type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoices"
+    },
+    {
+      "type": "numeric(12,6)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "exchange_rate_snapshot",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "invoices"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "exchange_rate_source",
       "entityType": "columns",
       "schema": "public",
       "table": "invoices"
@@ -1251,6 +1510,32 @@
       "generated": null,
       "identity": null,
       "name": "refunded_amount",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "payments"
+    },
+    {
+      "type": "numeric(12,6)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "exchange_rate_snapshot",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "payments"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "exchange_rate_source",
       "entityType": "columns",
       "schema": "public",
       "table": "payments"
@@ -6073,6 +6358,34 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
+      "name": "currency_exchange_audit_from_to_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "currency_exchange_audit_logs"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "from_currency",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "to_currency",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
       "name": "currency_exchange_rates_from_to_idx",
       "entityType": "indexes",
       "schema": "public",
@@ -6112,6 +6425,27 @@
       "entityType": "indexes",
       "schema": "public",
       "table": "currency_exchange_rates"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "currency",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "currency_hedges_currency_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "currency_hedges"
     },
     {
       "nameExplicit": true,
@@ -8356,6 +8690,19 @@
     },
     {
       "nameExplicit": false,
+      "columns": ["changed_by_user_id"],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "currency_exchange_audit_logs_changed_by_user_id_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "currency_exchange_audit_logs"
+    },
+    {
+      "nameExplicit": false,
       "columns": ["invoice_id"],
       "schemaTo": "public",
       "tableTo": "invoices",
@@ -9390,9 +9737,25 @@
     {
       "columns": ["id"],
       "nameExplicit": false,
+      "name": "currency_exchange_audit_logs_pkey",
+      "schema": "public",
+      "table": "currency_exchange_audit_logs",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
       "name": "currency_exchange_rates_pkey",
       "schema": "public",
       "table": "currency_exchange_rates",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "currency_hedges_pkey",
+      "schema": "public",
+      "table": "currency_hedges",
       "entityType": "pks"
     },
     {

@@ -66,6 +66,7 @@ export enum InvoiceStatus {
 
 export enum InvoiceType {
   PER_CLASSES = "PER_CLASSES",
+  MONTHLY = "MONTHLY",
 }
 
 export enum PaymentMethod {

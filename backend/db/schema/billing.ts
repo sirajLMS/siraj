@@ -1,6 +1,7 @@
 import {
   date,
   index,
+  jsonb,
   numeric,
   pgTable,
   primaryKey,
@@ -33,6 +34,8 @@ export const invoices = pgTable(
     currency: varchar("currency", { length: 10 }).notNull(),
     status: invoiceStatusEnum("status").notNull(),
     invoiceType: invoiceTypeEnum("invoice_type").notNull(),
+    exchangeRateSnapshot: numeric("exchange_rate_snapshot", { precision: 12, scale: 6 }),
+    exchangeRateSource: varchar("exchange_rate_source", { length: 50 }),
     createdByUserId: uuid("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
     emailSentAt: timestamp("email_sent_at", { withTimezone: true, precision: 3 }),
     idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
@@ -74,6 +77,8 @@ export const payments = pgTable(
     transactionId: varchar("transaction_id", { length: 255 }),
     gatewayResponse: text("gateway_response"),
     refundedAmount: numeric("refunded_amount", { precision: 12, scale: 2 }).notNull().default("0.00"),
+    exchangeRateSnapshot: numeric("exchange_rate_snapshot", { precision: 12, scale: 6 }),
+    exchangeRateSource: varchar("exchange_rate_source", { length: 50 }),
     idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
@@ -92,6 +97,8 @@ export const currencyExchangeRates = pgTable(
     fromCurrency: varchar("from_currency", { length: 10 }).notNull(),
     toCurrency: varchar("to_currency", { length: 10 }).notNull(),
     rate: numeric("rate", { precision: 12, scale: 6 }).notNull(),
+    source: varchar("source", { length: 50 }),
+    providerResponse: jsonb("provider_response"),
     effectiveDate: timestamp("effective_date", { withTimezone: true, precision: 3 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
@@ -104,4 +111,41 @@ export const currencyExchangeRates = pgTable(
       table.effectiveDate
     ),
   ]
+);
+
+/**
+ * Currency Exchange Audit Logs table.
+ * Records all changes to exchange rates for financial auditing.
+ */
+export const currencyExchangeAuditLogs = pgTable(
+  "currency_exchange_audit_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fromCurrency: varchar("from_currency", { length: 10 }).notNull(),
+    toCurrency: varchar("to_currency", { length: 10 }).notNull(),
+    oldRate: numeric("old_rate", { precision: 12, scale: 6 }),
+    newRate: numeric("new_rate", { precision: 12, scale: 6 }).notNull(),
+    source: varchar("source", { length: 50 }).notNull(),
+    changedByUserId: uuid("changed_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+  },
+  table => [index("currency_exchange_audit_from_to_idx").on(table.fromCurrency, table.toCurrency)]
+);
+
+/**
+ * Currency Hedges table.
+ * Tracks platform exposure to different currencies for risk management.
+ */
+export const currencyHedges = pgTable(
+  "currency_hedges",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    currency: varchar("currency", { length: 10 }).notNull(),
+    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+    hedgeType: varchar("hedge_type", { length: 20 }).notNull(), // e.g., 'LONG', 'SHORT'
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+  },
+  table => [index("currency_hedges_currency_idx").on(table.currency)]
 );

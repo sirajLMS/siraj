@@ -343,10 +343,20 @@ export const relations = defineRelations(schema, r => ({
       from: r.invoices.id,
       to: r.invoiceCoverageMonths.invoiceId,
     }),
+    payments: r.many.payments({
+      from: r.invoices.id,
+      to: r.payments.invoiceId,
+    }),
   },
   invoiceCoverageMonths: {
     invoice: r.one.invoices({
       from: r.invoiceCoverageMonths.invoiceId,
+      to: r.invoices.id,
+    }),
+  },
+  payments: {
+    invoice: r.one.invoices({
+      from: r.payments.invoiceId,
       to: r.invoices.id,
     }),
   },
@@ -411,6 +421,12 @@ export const relations = defineRelations(schema, r => ({
     }),
     target: r.one.users({
       from: r.adminAuditLogs.targetUserId,
+      to: r.users.id,
+    }),
+  },
+  currencyExchangeAuditLogs: {
+    changedBy: r.one.users({
+      from: r.currencyExchangeAuditLogs.changedByUserId,
       to: r.users.id,
     }),
   },
