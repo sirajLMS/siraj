@@ -85,13 +85,15 @@ describe("Billing Safeguards & Exchange Rates", () => {
       if (typeof testUser !== "undefined") {
         await db.delete(currencyExchangeAuditLogs).where(eq(currencyExchangeAuditLogs.changedByUserId, testUser.id));
       }
-      await db.delete(currencyExchangeRates).where(sql`source IN ('TEST_API', 'TEST_SNAPSHOT_API') OR (from_currency = 'GBP' AND to_currency = 'USD')`);
+      await db
+        .delete(currencyExchangeRates)
+        .where(sql`source IN ('TEST_API', 'TEST_SNAPSHOT_API') OR (from_currency = 'GBP' AND to_currency = 'USD')`);
 
       // Delete users explicitly by ID
       const userIdsToDelete = [];
       if (typeof testUser !== "undefined") userIdsToDelete.push(testUser.id);
       if (typeof testParent !== "undefined") userIdsToDelete.push(testParent.userId);
-      
+
       if (userIdsToDelete.length > 0) {
         await db.delete(users).where(sql`id IN ${userIdsToDelete}`);
       }

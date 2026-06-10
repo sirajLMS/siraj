@@ -30,6 +30,8 @@ export const users = pgTable("users", {
   deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
 });
 
+// DEPRECATED: Legacy sessions table - sessions are now stored in Redis
+// This table is kept for backwards compatibility and stores minimal metadata
 export const sessions = pgTable(
   "sessions",
   {
@@ -45,6 +47,42 @@ export const sessions = pgTable(
     index("sessions_last_activity_index").on(table.lastActivity),
   ]
 );
+
+// New session metadata table - stores minimal tracking info in PostgreSQL
+// Actual session data is stored in Redis with TTL
+export const sessionMetadata = pgTable(
+  "session_metadata",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    sessionId: varchar("session_id", { length: 255 }).notNull().unique(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    deviceType: varchar("device_type", { length: 50 }),
+    deviceName: varchar("device_name", { length: 255 }),
+    ipAddress: inet("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    lastActivityAt: timestamp("last_activity_at", { withTimezone: true, precision: 3 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
+  },
+  table => [
+    index("session_metadata_user_id_idx").on(table.userId),
+    index("session_metadata_expires_at_idx").on(table.expiresAt),
+    index("session_metadata_device_type_idx").on(table.deviceType),
+    index("session_metadata_session_id_idx").on(table.sessionId),
+  ]
+);
+
+// Session configuration per role - defines TTL and concurrent session limits
+export const sessionConfig = pgTable("session_config", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  roleName: varchar("role_name", { length: 100 }).notNull().unique(),
+  ttlSeconds: integer("ttl_seconds").notNull().default(604800), // 7 days default
+  maxConcurrentSessions: integer("max_concurrent_sessions").notNull().default(5),
+  createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+});
 
 export const passwordResetTokens = pgTable(
   "password_reset_tokens",

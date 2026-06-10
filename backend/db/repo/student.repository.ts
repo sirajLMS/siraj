@@ -7,6 +7,9 @@ import * as Types from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
 import { OrderSortDirection } from "@/lib/enum";
 
+// Extract the transaction type from Drizzle
+type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
 const _processStudentQuery = async (
   query: PgSelect,
   paginationArgs?: Types.PaginationArgs | null,
@@ -74,6 +77,14 @@ const _processStudentQuery = async (
 };
 
 export namespace StudentRepository {
+  /**
+   * Helper to acquire an advisory lock for a student
+   * to prevent concurrent updates to classes_remaining.
+   */
+  async function acquireStudentLock(tx: DBTransaction, studentId: string): Promise<void> {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('student_' || ${studentId}::text))`);
+  }
+
   export const findById = async (id: string): Promise<Types.StudentEntity | null | undefined> => {
     return await db.query.students.findFirst({
       where: { id: id },
@@ -205,5 +216,117 @@ export namespace StudentRepository {
       .$dynamic();
 
     return await _processStudentQuery(baseQuery as unknown as PgSelect, paginationArgs, orderBy, filters);
+  };
+
+  /**
+   * Deducts classes_remaining for a student with optimistic locking.
+   * Uses advisory locks to prevent race conditions.
+   *
+   * @param studentId - The student's ID
+   * @param amount - Number of classes to deduct (default: 1)
+   * @param expectedVersion - Expected version for optimistic locking (optional)
+   * @param tx - Optional transaction context
+   * @returns Updated student entity
+   * @throws Error if student not found, insufficient classes, or version mismatch
+   */
+  export const deductClasses = async (
+    studentId: string,
+    amount: number = 1,
+    expectedVersion?: number,
+    tx?: DBTransaction
+  ): Promise<Types.StudentEntity> => {
+    const runner = async (t: DBTransaction) => {
+      // Acquire advisory lock to prevent concurrent modifications
+      await acquireStudentLock(t, studentId);
+
+      // Fetch current student state
+      const results = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
+      if (results.length === 0) {
+        throw new Error(`Student ${studentId} not found`);
+      }
+      const current = results[0];
+
+      // Optimistic locking: check version if provided
+      if (expectedVersion !== undefined && current.version !== expectedVersion) {
+        throw new Error(
+          `Version mismatch for student ${studentId}. Expected ${expectedVersion}, got ${current.version}. Please retry.`
+        );
+      }
+
+      // Check sufficient quota
+      if (current.classesRemaining < amount) {
+        throw new Error(
+          `Insufficient classes for student ${studentId}. Remaining: ${current.classesRemaining}, Required: ${amount}`
+        );
+      }
+
+      // Update with version increment
+      const [updated] = await t
+        .update(students)
+        .set({
+          classesRemaining: sql`${students.classesRemaining} - ${amount}`,
+          version: sql`${students.version} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(students.id, studentId))
+        .returning();
+
+      return updated;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  /**
+   * Adds classes_remaining for a student with optimistic locking.
+   * Uses advisory locks to prevent race conditions.
+   *
+   * @param studentId - The student's ID
+   * @param amount - Number of classes to add (default: 1)
+   * @param expectedVersion - Expected version for optimistic locking (optional)
+   * @param tx - Optional transaction context
+   * @returns Updated student entity
+   * @throws Error if student not found or version mismatch
+   */
+  export const addClasses = async (
+    studentId: string,
+    amount: number = 1,
+    expectedVersion?: number,
+    tx?: DBTransaction
+  ): Promise<Types.StudentEntity> => {
+    const runner = async (t: DBTransaction) => {
+      // Acquire advisory lock to prevent concurrent modifications
+      await acquireStudentLock(t, studentId);
+
+      // Fetch current student state
+      const results = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
+      if (results.length === 0) {
+        throw new Error(`Student ${studentId} not found`);
+      }
+      const current = results[0];
+
+      // Optimistic locking: check version if provided
+      if (expectedVersion !== undefined && current.version !== expectedVersion) {
+        throw new Error(
+          `Version mismatch for student ${studentId}. Expected ${expectedVersion}, got ${current.version}. Please retry.`
+        );
+      }
+
+      // Update with version increment
+      const [updated] = await t
+        .update(students)
+        .set({
+          classesRemaining: sql`${students.classesRemaining} + ${amount}`,
+          classesTotal: sql`${students.classesTotal} + ${amount}`,
+          version: sql`${students.version} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(students.id, studentId))
+        .returning();
+
+      return updated;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
   };
 }

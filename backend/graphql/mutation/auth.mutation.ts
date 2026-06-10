@@ -48,6 +48,7 @@ async function resolveUserFromRefreshToken(
   const user = (await UserRepository.findById(payload.userId)) || null;
   if (!user) return { session: null, user: null };
 
+  // eslint-disable-next-line sonarjs/deprecation, @typescript-eslint/no-deprecated -- TODO: Update to use specific session ID from token
   const session = (await SessionRepository.findByUserId(user.id)) || null;
   if (!session) {
     logger.warn("[RefreshToken] User found but no session exists", {
@@ -123,7 +124,6 @@ gqlSchemaBuilder.mutationFields(t => ({
           createdAt: new Date().toISOString(),
           // Store session metadata only, not sensitive tokens
         }),
-        lastActivity: BigInt(Math.floor(Date.now() / 1000)),
       });
 
       // Set httpOnly cookies for session and refresh token
@@ -179,7 +179,6 @@ gqlSchemaBuilder.mutationFields(t => ({
       // Update session activity
       const newSession = await SessionRepository.update({
         ...session,
-        lastActivity: BigInt(Math.floor(Date.now() / 1000)),
       });
 
       // Refresh the cookies with new refresh token (token rotation)

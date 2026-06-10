@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, type SQL, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
   currencyExchangeAuditLogs,
@@ -16,6 +16,14 @@ type InvoiceCreateInput = Omit<Types.InvoiceInsertInput, "id" | "createdAt" | "u
 type PaymentRecordInput = Omit<Types.PaymentInsertInput, "id" | "createdAt" | "updatedAt">;
 
 export namespace BillingRepository {
+  /**
+   * Helper to acquire an advisory lock for an invoice
+   * to prevent concurrent payment updates.
+   */
+  async function acquireInvoiceLock(tx: DBTransaction, invoiceId: string): Promise<void> {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('invoice_' || ${invoiceId}::text))`);
+  }
+
   /**
    * Fetches the latest exchange rate for a currency pair.
    * Throws if rate is older than 24 hours (Stale Rate Alert).
@@ -88,7 +96,7 @@ export namespace BillingRepository {
       await t.insert(currencyExchangeAuditLogs).values({
         fromCurrency: input.fromCurrency,
         toCurrency: input.toCurrency,
-        oldRate: results.length > 0 ? (oldRate.rate) : null,
+        oldRate: results.length > 0 ? oldRate.rate : null,
         newRate: input.rate,
         source: input.source || "MANUAL",
         changedByUserId,
@@ -184,5 +192,66 @@ export namespace BillingRepository {
     if (results.length === 0) return 2;
     const setting = results[0];
     return parseInt(setting.value, 10);
+  };
+
+  /**
+   * Updates invoice status with optimistic locking.
+   * Uses advisory locks to prevent concurrent payment updates.
+   *
+   * @param invoiceId - The invoice's ID
+   * @param newStatus - New invoice status
+   * @param paidDate - Payment date (optional, required for 'PAID' status)
+   * @param expectedVersion - Expected version for optimistic locking (optional)
+   * @param tx - Optional transaction context
+   * @returns Updated invoice entity
+   * @throws Error if invoice not found or version mismatch
+   */
+  export const updateInvoiceStatus = async (
+    invoiceId: string,
+    newStatus: string,
+    paidDate?: Date | null,
+    expectedVersion?: number,
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceSelectType> => {
+    const runner = async (t: DBTransaction) => {
+      // Acquire advisory lock to prevent concurrent modifications
+      await acquireInvoiceLock(t, invoiceId);
+
+      // Fetch current invoice state
+      const results = await t.select().from(invoices).where(eq(invoices.id, invoiceId)).limit(1);
+      if (results.length === 0) {
+        throw new Error(`Invoice ${invoiceId} not found`);
+      }
+      const current = results[0];
+
+      // Optimistic locking: check version if provided
+      if (expectedVersion !== undefined && current.version !== expectedVersion) {
+        throw new Error(
+          `Version mismatch for invoice ${invoiceId}. Expected ${expectedVersion}, got ${current.version}. Please retry.`
+        );
+      }
+
+      // Update with version increment
+      const updateData: {
+        status: Types.InvoiceSelectType["status"];
+        paidDate?: string | null;
+        version: SQL;
+        updatedAt: Date;
+      } = {
+        status: newStatus,
+        version: sql`${invoices.version} + 1`,
+        updatedAt: new Date(),
+      };
+
+      if (paidDate !== undefined) {
+        updateData.paidDate = paidDate ? paidDate.toISOString().split("T")[0] : null;
+      }
+
+      const [updated] = await t.update(invoices).set(updateData).where(eq(invoices.id, invoiceId)).returning();
+
+      return updated;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
   };
 }

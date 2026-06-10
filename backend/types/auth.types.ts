@@ -5,6 +5,8 @@ import type {
   passwordResetTokens,
   permissionGroups,
   permissions,
+  sessionConfig,
+  sessionMetadata,
   sessions,
   userPermissionGroups,
   users,
@@ -80,6 +82,25 @@ export type SessionEntityInput = typeof sessions.$inferInsert;
 
 export type SessionPothosDefinition = SessionEntity & {
   user?: UserPothosDefinition;
+};
+
+export type SessionMetadataEntity = typeof sessionMetadata.$inferSelect;
+export type SessionMetadataEntityInput = typeof sessionMetadata.$inferInsert;
+
+export type SessionConfigEntity = typeof sessionConfig.$inferSelect;
+export type SessionConfigEntityInput = typeof sessionConfig.$inferInsert;
+
+// Redis session data structure
+export type RedisSessionData = {
+  userId: string;
+  hashedId: string;
+  payload: string;
+  ipAddress?: string;
+  userAgent?: string;
+  deviceType?: string;
+  deviceName?: string;
+  createdAt: string; // ISO string
+  lastActivityAt: string; // ISO string
 };
 
 export type PasswordResetTokenSelectType = typeof passwordResetTokens.$inferSelect;

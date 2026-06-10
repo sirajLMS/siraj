@@ -1,6 +1,7 @@
 import {
   date,
   index,
+  integer,
   jsonb,
   numeric,
   pgTable,
@@ -34,6 +35,7 @@ export const invoices = pgTable(
     currency: varchar("currency", { length: 10 }).notNull(),
     status: invoiceStatusEnum("status").notNull(),
     invoiceType: invoiceTypeEnum("invoice_type").notNull(),
+    version: integer("version").notNull().default(0),
     exchangeRateSnapshot: numeric("exchange_rate_snapshot", { precision: 12, scale: 6 }),
     exchangeRateSource: varchar("exchange_rate_source", { length: 50 }),
     createdByUserId: uuid("created_by_user_id").references(() => users.id, { onDelete: "set null" }),

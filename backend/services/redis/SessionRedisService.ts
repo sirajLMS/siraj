@@ -1,0 +1,250 @@
+// cspell:ignore: SADD, SREM, smembers, SCARD
+import logger from "@/backend/lib/logger";
+import type { RedisSessionData } from "@/backend/types";
+import type { IRedisService } from "./IRedisService";
+
+/**
+ * Session Redis Service
+ * Manages session storage and operations in Redis with TTL support
+ */
+export class SessionRedisService {
+  private readonly keyPrefix = "session:";
+  private readonly userSessionsKeyPrefix = "user_sessions:";
+
+  constructor(private readonly redis: IRedisService) {}
+
+  /**
+   * Generate Redis key for session
+   */
+  private getSessionKey(sessionId: string): string {
+    return `${this.keyPrefix}${sessionId}`;
+  }
+
+  /**
+   * Generate Redis key for user's session list
+   */
+  private getUserSessionsKey(userId: string): string {
+    return `${this.userSessionsKeyPrefix}${userId}`;
+  }
+
+  /**
+   * Store session in Redis with TTL
+   */
+  async setSession(sessionId: string, data: RedisSessionData, ttlSeconds: number): Promise<void> {
+    const key = this.getSessionKey(sessionId);
+    const value = JSON.stringify(data);
+
+    await this.redis.set(key, value, { ex: ttlSeconds });
+
+    // Add session ID to user's session set (for tracking concurrent sessions)
+    const userSessionsKey = this.getUserSessionsKey(data.userId);
+
+    // cspell:disable-next-line -- Redis commands
+    const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
+
+    if (nativeClient && typeof nativeClient === "object") {
+      const sAdd = (nativeClient as Record<string, unknown>).sadd;
+      const expire = (nativeClient as Record<string, unknown>).expire;
+
+      if (typeof sAdd === "function" && typeof expire === "function") {
+        await sAdd.call(nativeClient, userSessionsKey, sessionId);
+        await expire.call(nativeClient, userSessionsKey, ttlSeconds);
+      }
+    }
+
+    logger.debug(`Session ${sessionId} stored in Redis for user ${data.userId}`);
+  }
+
+  /**
+   * Get session from Redis
+   */
+  async getSession(sessionId: string): Promise<RedisSessionData | null> {
+    const key = this.getSessionKey(sessionId);
+    const value = await this.redis.get(key);
+
+    if (!value) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(value) as RedisSessionData;
+    } catch (error) {
+      logger.error(`Failed to parse session data for ${sessionId}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Update session's last activity timestamp and extend TTL
+   */
+  async touchSession(sessionId: string, ttlSeconds: number): Promise<boolean> {
+    const session = await this.getSession(sessionId);
+
+    if (!session) {
+      return false;
+    }
+
+    // Update last activity
+    session.lastActivityAt = new Date().toISOString();
+
+    // Re-store with new TTL
+    await this.setSession(sessionId, session, ttlSeconds);
+
+    return true;
+  }
+
+  /**
+   * Delete a specific session
+   */
+  async deleteSession(sessionId: string): Promise<void> {
+    const session = await this.getSession(sessionId);
+
+    if (session) {
+      // Remove from user's session set
+      const userSessionsKey = this.getUserSessionsKey(session.userId);
+
+      // Use native Redis client for DEL and SREM
+      const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
+
+      if (nativeClient && typeof nativeClient === "object") {
+        const del = (nativeClient as Record<string, unknown>).del;
+        // cspell:disable-next-line -- Redis command
+        const sRem = (nativeClient as Record<string, unknown>).srem;
+
+        if (typeof del === "function" && typeof sRem === "function") {
+          await del.call(nativeClient, this.getSessionKey(sessionId));
+          await sRem.call(nativeClient, userSessionsKey, sessionId);
+        }
+      }
+
+      logger.debug(`Session ${sessionId} deleted from Redis`);
+    } else {
+      await this.redis.del(this.getSessionKey(sessionId));
+    }
+  }
+
+  /**
+   * Get all session IDs for a user
+   */
+  async getUserSessions(userId: string): Promise<string[]> {
+    const userSessionsKey = this.getUserSessionsKey(userId);
+
+    // cspell:disable-next-line -- Redis commands
+    // Use native Redis client to call SMEMBERS directly
+    const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
+
+    if (!nativeClient || typeof nativeClient !== "object") {
+      logger.error("Could not access native Redis client");
+      return [];
+    }
+
+    // Check if smembers method exists
+    const sMembers = (nativeClient as Record<string, unknown>).smembers as
+      | ((key: string) => Promise<unknown>)
+      | undefined;
+    if (typeof sMembers === "function") {
+      const result = await sMembers.call(nativeClient, userSessionsKey);
+      return Array.isArray(result) ? (result as string[]) : [];
+    }
+
+    // cspell:disable-next-line -- Redis command
+    logger.error("smembers command not available on Redis client");
+    return [];
+  }
+
+  /**
+   * Delete all sessions for a user (logout everywhere)
+   */
+  async deleteUserSessions(userId: string): Promise<number> {
+    const sessionIds = await this.getUserSessions(userId);
+
+    if (sessionIds.length === 0) {
+      return 0;
+    }
+
+    // Delete all session keys and the user sessions set
+    const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
+
+    if (nativeClient && typeof nativeClient === "object") {
+      const del = (nativeClient as Record<string, unknown>).del;
+
+      if (typeof del === "function") {
+        const keysToDelete = [...sessionIds.map(id => this.getSessionKey(id)), this.getUserSessionsKey(userId)];
+
+        await del.call(nativeClient, ...keysToDelete);
+      }
+    }
+
+    logger.info(`Deleted ${sessionIds.length} sessions for user ${userId}`);
+
+    return sessionIds.length;
+  }
+
+  /**
+   * Count active sessions for a user
+   */
+  async countUserSessions(userId: string): Promise<number> {
+    const userSessionsKey = this.getUserSessionsKey(userId);
+
+    // Use native Redis client for SCARD
+    // cspell:disable-next-line -- Redis commands
+    const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
+
+    if (nativeClient && typeof nativeClient === "object") {
+      // cspell:disable-next-line -- Redis command
+      const sCard = (nativeClient as Record<string, unknown>).scard as ((key: string) => Promise<unknown>) | undefined;
+
+      if (typeof sCard === "function") {
+        const count = await sCard.call(nativeClient, userSessionsKey);
+        return Number(count) || 0;
+      }
+    }
+
+    return 0;
+  }
+
+  /**
+   * Enforce concurrent session limit by removing oldest sessions
+   */
+  async enforceConcurrentLimit(userId: string, maxSessions: number): Promise<void> {
+    const sessionIds = await this.getUserSessions(userId);
+
+    // Trim to maxSessions - 1 to make room for the session about to be inserted
+    const allowedBeforeInsert = maxSessions - 1;
+    if (sessionIds.length <= allowedBeforeInsert) {
+      return;
+    }
+
+    // Get all sessions with their creation times
+    const sessionsWithTime: Array<{ id: string; createdAt: Date }> = [];
+
+    for (const sessionId of sessionIds) {
+      const session = await this.getSession(sessionId);
+      if (session) {
+        sessionsWithTime.push({
+          id: sessionId,
+          createdAt: new Date(session.createdAt),
+        });
+      }
+    }
+
+    // Sort by creation time (oldest first)
+    sessionsWithTime.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+    // Delete oldest sessions to bring count down to allowedBeforeInsert
+    const sessionsToDelete = sessionsWithTime.length - allowedBeforeInsert;
+    const deletePromises = sessionsWithTime.slice(0, sessionsToDelete).map(s => this.deleteSession(s.id));
+
+    await Promise.all(deletePromises);
+
+    logger.info(`Deleted ${sessionsToDelete} old sessions for user ${userId} to enforce limit of ${maxSessions}`);
+  }
+
+  /**
+   * Get session TTL in seconds
+   */
+  async getSessionTTL(sessionId: string): Promise<number> {
+    const key = this.getSessionKey(sessionId);
+    return await this.redis.ttl(key);
+  }
+}

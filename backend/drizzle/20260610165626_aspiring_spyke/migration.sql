@@ -30,6 +30,23 @@ CREATE TABLE "admin_audit_logs" (
 	"created_at" timestamp(3) with time zone NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "audit_logs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"actor_user_id" uuid,
+	"actor_type" varchar(50) NOT NULL,
+	"entity_type" varchar(100) NOT NULL,
+	"entity_id" varchar(255) NOT NULL,
+	"action" varchar(100) NOT NULL,
+	"description" text,
+	"previous_state" jsonb,
+	"new_state" jsonb,
+	"changes" jsonb,
+	"ip_address" inet,
+	"user_agent" text,
+	"metadata" jsonb,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "currency_exchange_audit_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"from_currency" varchar(10) NOT NULL,
@@ -81,6 +98,7 @@ CREATE TABLE "invoices" (
 	"currency" varchar(10) NOT NULL,
 	"status" "invoice_status" NOT NULL,
 	"invoice_type" "invoice_type" NOT NULL,
+	"version" integer DEFAULT 0 NOT NULL,
 	"exchange_rate_snapshot" numeric(12,6),
 	"exchange_rate_source" varchar(50),
 	"created_by_user_id" uuid,
@@ -520,6 +538,7 @@ CREATE TABLE "students" (
 	"status" "student_status" NOT NULL,
 	"classes_total" integer DEFAULT 0 NOT NULL,
 	"classes_remaining" integer DEFAULT 0 NOT NULL,
+	"version" integer DEFAULT 0 NOT NULL,
 	"hours_per_week" numeric(5,2) DEFAULT '0' NOT NULL,
 	"idempotency_key" varchar(255) NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
@@ -602,6 +621,28 @@ CREATE TABLE "password_reset_tokens" (
 	"expires_at" timestamp(3) with time zone NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "session_config" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"role_name" varchar(100) NOT NULL UNIQUE,
+	"ttl_seconds" integer DEFAULT 604800 NOT NULL,
+	"max_concurrent_sessions" integer DEFAULT 5 NOT NULL,
+	"created_at" timestamp(3) with time zone NOT NULL,
+	"updated_at" timestamp(3) with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "session_metadata" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"session_id" varchar(255) NOT NULL UNIQUE,
+	"user_id" uuid NOT NULL,
+	"device_type" varchar(50),
+	"device_name" varchar(255),
+	"ip_address" inet,
+	"user_agent" text,
+	"created_at" timestamp(3) with time zone NOT NULL,
+	"last_activity_at" timestamp(3) with time zone NOT NULL,
+	"expires_at" timestamp(3) with time zone NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "sessions" (
 	"hashed_id" varchar(255) PRIMARY KEY,
 	"user_id" uuid,
@@ -630,6 +671,13 @@ CREATE TABLE "users" (
 CREATE INDEX "admin_audit_logs_actor_idx" ON "admin_audit_logs" ("actor_user_id");--> statement-breakpoint
 CREATE INDEX "admin_audit_logs_target_idx" ON "admin_audit_logs" ("target_user_id");--> statement-breakpoint
 CREATE INDEX "admin_audit_logs_action_idx" ON "admin_audit_logs" ("action");--> statement-breakpoint
+CREATE INDEX "audit_logs_actor_user_id_idx" ON "audit_logs" ("actor_user_id");--> statement-breakpoint
+CREATE INDEX "audit_logs_entity_type_idx" ON "audit_logs" ("entity_type");--> statement-breakpoint
+CREATE INDEX "audit_logs_entity_id_idx" ON "audit_logs" ("entity_id");--> statement-breakpoint
+CREATE INDEX "audit_logs_entity_type_id_idx" ON "audit_logs" ("entity_type","entity_id");--> statement-breakpoint
+CREATE INDEX "audit_logs_action_idx" ON "audit_logs" ("action");--> statement-breakpoint
+CREATE INDEX "audit_logs_created_at_idx" ON "audit_logs" ("created_at");--> statement-breakpoint
+CREATE INDEX "audit_logs_actor_type_idx" ON "audit_logs" ("actor_type");--> statement-breakpoint
 CREATE INDEX "currency_exchange_audit_from_to_idx" ON "currency_exchange_audit_logs" ("from_currency","to_currency");--> statement-breakpoint
 CREATE INDEX "currency_exchange_rates_from_to_idx" ON "currency_exchange_rates" ("from_currency","to_currency");--> statement-breakpoint
 CREATE UNIQUE INDEX "currency_exchange_rates_effective_unique_idx" ON "currency_exchange_rates" ("from_currency","to_currency","effective_date");--> statement-breakpoint
@@ -731,10 +779,15 @@ CREATE UNIQUE INDEX "auth_rate_limits_ip_email_unique_idx" ON "auth_rate_limits"
 CREATE INDEX "password_reset_tokens_email_idx" ON "password_reset_tokens" ("email");--> statement-breakpoint
 CREATE INDEX "password_reset_tokens_expires_at_idx" ON "password_reset_tokens" ("expires_at");--> statement-breakpoint
 CREATE INDEX "password_reset_tokens_token_idx" ON "password_reset_tokens" ("hashed_token");--> statement-breakpoint
+CREATE INDEX "session_metadata_user_id_idx" ON "session_metadata" ("user_id");--> statement-breakpoint
+CREATE INDEX "session_metadata_expires_at_idx" ON "session_metadata" ("expires_at");--> statement-breakpoint
+CREATE INDEX "session_metadata_device_type_idx" ON "session_metadata" ("device_type");--> statement-breakpoint
+CREATE INDEX "session_metadata_session_id_idx" ON "session_metadata" ("session_id");--> statement-breakpoint
 CREATE INDEX "sessions_user_id_index" ON "sessions" ("user_id");--> statement-breakpoint
 CREATE INDEX "sessions_last_activity_index" ON "sessions" ("last_activity");--> statement-breakpoint
 ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_target_user_id_users_id_fkey" FOREIGN KEY ("target_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "currency_exchange_audit_logs" ADD CONSTRAINT "currency_exchange_audit_logs_changed_by_user_id_users_id_fkey" FOREIGN KEY ("changed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "invoice_coverage_months" ADD CONSTRAINT "invoice_coverage_months_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;--> statement-breakpoint
@@ -812,4 +865,5 @@ ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_assigned_b
 ALTER TABLE "teacher_banking_details_history" ADD CONSTRAINT "teacher_banking_details_history_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "teachers" ADD CONSTRAINT "teachers_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "teachers" ADD CONSTRAINT "teachers_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");--> statement-breakpoint
+ALTER TABLE "session_metadata" ADD CONSTRAINT "session_metadata_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;

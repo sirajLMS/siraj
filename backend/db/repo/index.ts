@@ -1,3 +1,4 @@
+export { AuditRepository } from "./audit.repository";
 export { BillingRepository } from "./billing.repository";
 export { CacheDbRepository } from "./cache.repository";
 export { RateLimitRepository } from "./ratelimit.repository";
