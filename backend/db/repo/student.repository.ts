@@ -23,6 +23,9 @@ const _processStudentQuery = async (
   if (paginationArgs?.after) {
     try {
       const decoded = Buffer.from(paginationArgs.after, "base64").toString("utf8");
+      // Cursor encodes { createdAt, id } — both are immutable (createdAt is set once, id is a UUID primary key).
+      // The DB-level trigger in student_created_at_immutability prevents createdAt from being updated,
+      // ensuring cursors remain permanently stable.
       const cursorObj = JSON.parse(decoded) as { createdAt?: string; id?: string };
       if (cursorObj.createdAt && cursorObj.id) {
         const cursorDate = new Date(cursorObj.createdAt);
@@ -45,7 +48,15 @@ const _processStudentQuery = async (
     }
   }
 
-  processedQuery = queryWithPagination(processedQuery, paginationArgs);
+  // For cursor-based pagination, only apply LIMIT (not offset)
+  // For offset-based pagination, apply both LIMIT and OFFSET
+  if (paginationArgs?.after) {
+    // Cursor-based: only limit, no offset
+    processedQuery = processedQuery.limit(paginationArgs.perPage);
+  } else {
+    // Offset-based: use the standard queryWithPagination
+    processedQuery = queryWithPagination(processedQuery, paginationArgs);
+  }
 
   const results = await (processedQuery as unknown as Promise<{ student: Types.StudentEntity; total: number }[]>);
 
@@ -62,6 +73,8 @@ const _processStudentQuery = async (
   if (items.length > 0) {
     const firstItem = items[0];
     const lastItem = items.at(-1);
+    // Cursor encodes createdAt + id for stable keyset pagination.
+    // createdAt is immutable (enforced by DB trigger), id is a UUID primary key.
     pageInfo.startCursor = Buffer.from(
       JSON.stringify({ createdAt: firstItem.createdAt.toISOString(), id: firstItem.id })
     ).toString("base64");

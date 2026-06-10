@@ -138,7 +138,17 @@ export namespace StudentFilterUtils {
   }
 
   export function applyOrdering<T extends PgSelect>(qb: T, orderBy?: Types.StudentsOrderByClause[] | null): T {
-    if (!orderBy || orderBy.length === 0) return qb;
+    if (!orderBy || orderBy.length === 0) {
+      // Default: order by id for stable pagination
+      return qb.orderBy(asc(students.id));
+    }
+
+    // Collect all ordering expressions to apply in a single orderBy() call
+    // (Drizzle replaces ORDER BY when chaining .orderBy(), doesn't accumulate)
+    const orderExpressions: ReturnType<typeof asc | typeof desc>[] = [];
+
+    // Track the primary sort direction to use for id tie-breaker (undefined = ASC default)
+    let primaryIsDesc: boolean | undefined;
 
     orderBy.forEach(clause => {
       let column:
@@ -177,6 +187,8 @@ export namespace StudentFilterUtils {
           break;
         case Types.StudentsOrderByColumn.CREATED_AT:
           column = students.createdAt;
+          // Track if primary sort is DESC for id tie-breaker
+          primaryIsDesc = clause.order === OrderSortDirection.DESC;
           break;
         case Types.StudentsOrderByColumn.UPDATED_AT:
           column = students.updatedAt;
@@ -184,8 +196,14 @@ export namespace StudentFilterUtils {
         default:
           return;
       }
-      qb = qb.orderBy(clause.order === OrderSortDirection.ASC ? asc(column) : desc(column));
+      orderExpressions.push(clause.order === OrderSortDirection.ASC ? asc(column) : desc(column));
     });
-    return qb;
+
+    // Always add id as final sort key for stable pagination cursors, using same direction as primary sort
+    // Default to ASC if no primary direction was set
+    orderExpressions.push(primaryIsDesc ? desc(students.id) : asc(students.id));
+
+    // Apply all orderings in a single call
+    return qb.orderBy(...orderExpressions);
   }
 }

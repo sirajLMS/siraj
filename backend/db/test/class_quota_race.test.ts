@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { Gender } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
 import type { UserEntity } from "../../types/auth.types";
@@ -9,7 +9,7 @@ import type { StudentEntity } from "../../types/student.types";
 import type { TeacherEntity } from "../../types/teacher.types";
 import { db } from "../drizzleDb";
 import { SchedulingRepository } from "../repo";
-import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
+import { parents, students, teacherAssignments, teachers, users } from "../schema";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -407,8 +407,37 @@ describe("Class Quota System Constraints & Triggers", () => {
     expect(finalStudents[0].classesRemaining).toBe(0);
 
     // Clean up created records since they were outside runInRollback
-    await db.delete(classInstances).where(eq(classInstances.studentId, student.id));
+    // Delete in correct order to avoid foreign key violations
+    try {
+      // 1. Soft delete class instances first (set deleted_at), then hard delete
+      //    This is required because of the soft_delete_row_trigger_fn trigger
+      await db.execute(sql.raw(`UPDATE class_instances SET deleted_at = NOW() WHERE student_id = '${student.id}'`));
+      await db.execute(sql.raw(`DELETE FROM class_instances WHERE student_id = '${student.id}'`));
+      testLogger.info(`Force deleted class_instances for race student`);
 
-    testLogger.info("Race condition test passed.");
+      // 2. Delete teacher assignments
+      await db.delete(teacherAssignments).where(eq(teacherAssignments.studentId, student.id));
+
+      // 3. Delete the student
+      await db.delete(students).where(eq(students.id, student.id));
+
+      // 4. Delete teacher and parent
+      await db.delete(teachers).where(eq(teachers.id, teacher.id));
+      await db.delete(parents).where(eq(parents.id, parent.id));
+
+      // 5. Delete users
+      await db.delete(users).where(eq(users.id, parentUser.id));
+      await db.delete(users).where(eq(users.id, teacherUser.id));
+
+      testLogger.info("Race condition test passed with cleanup completed.");
+    } catch (cleanupError) {
+      testLogger.error("Cleanup failed:", cleanupError);
+      // Log what remains for debugging
+      const remainingInstances = await db.execute(
+        sql.raw(`SELECT id, student_id, created_at, deleted_at FROM class_instances WHERE student_id = '${student.id}'`)
+      );
+      testLogger.error(`Remaining class_instances: ${JSON.stringify(remainingInstances.rows)}`);
+      throw cleanupError;
+    }
   });
 });
