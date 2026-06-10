@@ -126,6 +126,20 @@ export enum NotificationEventType {
   COMPLAINT_RESPONSE = "COMPLAINT_RESPONSE",
 }
 
+export enum NotificationDeliveryStatus {
+  PENDING = "PENDING",
+  SENT = "SENT",
+  DELIVERED = "DELIVERED",
+  OPENED = "OPENED",
+  FAILED = "FAILED",
+}
+
+export enum DevicePlatform {
+  IOS = "IOS",
+  ANDROID = "ANDROID",
+  WEB = "WEB",
+}
+
 export enum CountryCode {
   SA = "SA",
   PS = "PS",

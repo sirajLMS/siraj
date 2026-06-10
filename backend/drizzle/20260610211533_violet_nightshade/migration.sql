@@ -7,6 +7,7 @@ CREATE TYPE "complaint_category" AS ENUM('REGARDING_TEACHER', 'REGARDING_SYSTEM'
 CREATE TYPE "complaint_status" AS ENUM('UNANSWERED', 'ANSWERED');--> statement-breakpoint
 CREATE TYPE "country_code" AS ENUM('SA', 'PS', 'YE', 'SY', 'EG', 'KW', 'QA', 'OM', 'BH', 'LB', 'JO', 'IQ', 'LY', 'AE', 'TN', 'DZ', 'MA', 'SD', 'ID', 'MR', 'SO', 'KM', 'DJ', 'ER', 'SS', 'EH', 'AD', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DK', 'DM', 'DO', 'EC', 'EE', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'IE', 'IM', 'IN', 'IO', 'IR', 'IS', 'IT', 'JE', 'JM', 'JP', 'KE', 'KG', 'KH', 'KI', 'KN', 'KP', 'KR', 'KY', 'KZ', 'LA', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PT', 'PW', 'PY', 'RE', 'RO', 'RS', 'RU', 'RW', 'SB', 'SC', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SR', 'ST', 'SV', 'SX', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TO', 'TR', 'TV', 'TW', 'TZ', 'UA', 'UG', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'XK', 'YT', 'ZA', 'ZM', 'ZW');--> statement-breakpoint
 CREATE TYPE "day_of_week" AS ENUM('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY');--> statement-breakpoint
+CREATE TYPE "device_platform" AS ENUM('IOS', 'ANDROID', 'WEB');--> statement-breakpoint
 CREATE TYPE "dst_migration_result" AS ENUM('UPDATED', 'CONFLICT', 'UNCHANGED');--> statement-breakpoint
 CREATE TYPE "gender" AS ENUM('MALE', 'FEMALE');--> statement-breakpoint
 CREATE TYPE "invoice_status" AS ENUM('UNPAID', 'PAID');--> statement-breakpoint
@@ -14,6 +15,7 @@ CREATE TYPE "invoice_type" AS ENUM('PER_CLASSES', 'MONTHLY');--> statement-break
 CREATE TYPE "leave_request_status" AS ENUM('PENDING', 'APPROVED', 'RESCHEDULED', 'CANCELLED');--> statement-breakpoint
 CREATE TYPE "leave_requester_type" AS ENUM('TEACHER', 'PARENT', 'ADMIN');--> statement-breakpoint
 CREATE TYPE "notification_channel" AS ENUM('EMAIL', 'SMS', 'PUSH');--> statement-breakpoint
+CREATE TYPE "notification_delivery_status" AS ENUM('PENDING', 'SENT', 'DELIVERED', 'OPENED', 'FAILED');--> statement-breakpoint
 CREATE TYPE "notification_event_type" AS ENUM('CLASS_REMINDER', 'INVOICE_GENERATED', 'COMPLAINT_RESPONSE');--> statement-breakpoint
 CREATE TYPE "parent_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL');--> statement-breakpoint
 CREATE TYPE "payment_method" AS ENUM('PAYPAL', 'BANK_ACCOUNT');--> statement-breakpoint
@@ -169,6 +171,26 @@ CREATE TABLE "learning_resources" (
 	"deleted_at" timestamp(3) with time zone
 );
 --> statement-breakpoint
+CREATE TABLE "notification_deliveries" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"user_id" uuid NOT NULL,
+	"device_token_id" uuid,
+	"channel" "notification_channel" NOT NULL,
+	"event_type" "notification_event_type" NOT NULL,
+	"status" "notification_delivery_status" DEFAULT 'PENDING'::"notification_delivery_status" NOT NULL,
+	"title" varchar(255),
+	"body" text,
+	"provider_message_id" varchar(255),
+	"failure_reason" text,
+	"webhook_payload" jsonb,
+	"sent_at" timestamp(3) with time zone,
+	"delivered_at" timestamp(3) with time zone,
+	"opened_at" timestamp(3) with time zone,
+	"failed_at" timestamp(3) with time zone,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "suggestions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"parent_id" uuid NOT NULL,
@@ -176,6 +198,18 @@ CREATE TABLE "suggestions" (
 	"body" text NOT NULL,
 	"email_sent_at" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "user_device_tokens" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"user_id" uuid NOT NULL,
+	"token" varchar(512) NOT NULL,
+	"platform" "device_platform" NOT NULL,
+	"device_name" varchar(255),
+	"is_active" boolean DEFAULT true NOT NULL,
+	"last_used_at" timestamp(3) with time zone,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "user_notification_preferences" (
@@ -695,7 +729,15 @@ CREATE INDEX "complaint_responses_complaint_id_idx" ON "complaint_responses" ("c
 CREATE INDEX "complaints_status_idx" ON "complaints" ("status");--> statement-breakpoint
 CREATE INDEX "complaints_parent_id_idx" ON "complaints" ("parent_id");--> statement-breakpoint
 CREATE INDEX "learning_resources_deleted_at_idx" ON "learning_resources" ("deleted_at");--> statement-breakpoint
+CREATE INDEX "notification_deliveries_user_id_idx" ON "notification_deliveries" ("user_id");--> statement-breakpoint
+CREATE INDEX "notification_deliveries_status_idx" ON "notification_deliveries" ("status");--> statement-breakpoint
+CREATE INDEX "notification_deliveries_event_type_idx" ON "notification_deliveries" ("event_type");--> statement-breakpoint
+CREATE INDEX "notification_deliveries_channel_idx" ON "notification_deliveries" ("channel");--> statement-breakpoint
+CREATE INDEX "notification_deliveries_created_at_idx" ON "notification_deliveries" ("created_at");--> statement-breakpoint
+CREATE INDEX "notification_deliveries_provider_message_id_idx" ON "notification_deliveries" ("provider_message_id");--> statement-breakpoint
 CREATE INDEX "suggestions_parent_id_idx" ON "suggestions" ("parent_id");--> statement-breakpoint
+CREATE INDEX "user_device_tokens_user_id_idx" ON "user_device_tokens" ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "user_device_tokens_token_unique_idx" ON "user_device_tokens" ("token");--> statement-breakpoint
 CREATE INDEX "user_notification_preferences_user_id_idx" ON "user_notification_preferences" ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "user_notification_preferences_unique_idx" ON "user_notification_preferences" ("user_id","channel","event_type");--> statement-breakpoint
 CREATE INDEX "parents_user_id_idx" ON "parents" ("user_id");--> statement-breakpoint
@@ -799,7 +841,10 @@ ALTER TABLE "complaint_responses" ADD CONSTRAINT "complaint_responses_responder_
 ALTER TABLE "complaints" ADD CONSTRAINT "complaints_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "complaints" ADD CONSTRAINT "complaints_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "learning_resources" ADD CONSTRAINT "learning_resources_uploaded_by_user_id_users_id_fkey" FOREIGN KEY ("uploaded_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "notification_deliveries" ADD CONSTRAINT "notification_deliveries_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "notification_deliveries" ADD CONSTRAINT "notification_deliveries_wsuupd9kUEsX_fkey" FOREIGN KEY ("device_token_id") REFERENCES "user_device_tokens"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "user_device_tokens" ADD CONSTRAINT "user_device_tokens_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "user_notification_preferences" ADD CONSTRAINT "user_notification_preferences_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "parents" ADD CONSTRAINT "parents_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "group_permissions" ADD CONSTRAINT "group_permissions_group_id_permission_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "permission_groups"("id") ON DELETE CASCADE;--> statement-breakpoint

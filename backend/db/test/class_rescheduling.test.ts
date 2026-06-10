@@ -828,12 +828,54 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
     testLogger.info("Testing rescheduled no quota check constraint...");
     await runInRollback(async tx => {
       const now = new Date();
-      const parentsResult: ParentEntity[] = await tx.select().from(parents).limit(1);
+      const [parentUser] = await tx
+        .insert(users)
+        .values({
+          name: "noQuota Parent",
+          email: `parent-noQuota-${randomUUID()}@example.com`,
+          password: "password",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      const [parent] = await tx
+        .insert(parents)
+        .values({
+          userId: parentUser.id,
+          status: "REGULAR",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      const [teacherUser] = await tx
+        .insert(users)
+        .values({
+          name: "noQuota Teacher",
+          email: `teacher-noQuota-${randomUUID()}@example.com`,
+          password: "password",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      const [teacher] = await tx
+        .insert(teachers)
+        .values({
+          userId: teacherUser.id,
+          status: "ACTIVATED",
+          timezone: "UTC",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
       const [student] = await tx
         .insert(students)
         .values({
-          parentId: parentsResult[0].id,
-          name: "NoQuota Student",
+          parentId: parent.id,
+          name: "noQuota Student",
           gender: Gender.FEMALE,
           status: "REGULAR",
           createdAt: now,
@@ -841,9 +883,6 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           idempotencyKey: randomUUID(),
         })
         .returning();
-
-      const teachersResult: TeacherEntity[] = await tx.select().from(teachers).limit(1);
-      const teacher = teachersResult[0];
 
       try {
         await tx.insert(classInstances).values({
@@ -873,12 +912,54 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
     testLogger.info("Testing rescheduled no complete check constraint...");
     await runInRollback(async tx => {
       const now = new Date();
-      const parentsResult: ParentEntity[] = await tx.select().from(parents).limit(1);
+      const [parentUser] = await tx
+        .insert(users)
+        .values({
+          name: "noComplete Parent",
+          email: `parent-noComplete-${randomUUID()}@example.com`,
+          password: "password",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      const [parent] = await tx
+        .insert(parents)
+        .values({
+          userId: parentUser.id,
+          status: "REGULAR",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      const [teacherUser] = await tx
+        .insert(users)
+        .values({
+          name: "noComplete Teacher",
+          email: `teacher-noComplete-${randomUUID()}@example.com`,
+          password: "password",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      const [teacher] = await tx
+        .insert(teachers)
+        .values({
+          userId: teacherUser.id,
+          status: "ACTIVATED",
+          timezone: "UTC",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
       const [student] = await tx
         .insert(students)
         .values({
-          parentId: parentsResult[0].id,
-          name: "NoComplete Student",
+          parentId: parent.id,
+          name: "noComplete Student",
           gender: Gender.MALE,
           status: "REGULAR",
           createdAt: now,
@@ -886,9 +967,6 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           idempotencyKey: randomUUID(),
         })
         .returning();
-
-      const teachersResult: TeacherEntity[] = await tx.select().from(teachers).limit(1);
-      const teacher = teachersResult[0];
 
       try {
         await tx.insert(classInstances).values({

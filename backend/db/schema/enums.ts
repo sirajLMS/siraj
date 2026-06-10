@@ -8,6 +8,7 @@ import {
   ComplaintStatus,
   CountryCode,
   DayOfWeek,
+  DevicePlatform,
   DstMigrationResult,
   Gender,
   InvoiceStatus,
@@ -15,6 +16,7 @@ import {
   LeaveRequesterType,
   LeaveRequestStatus,
   NotificationChannel,
+  NotificationDeliveryStatus,
   NotificationEventType,
   ParentStatus,
   PaymentMethod,
@@ -57,6 +59,13 @@ export const leaveRequesterTypeEnum = createPgEnumFromEnum("leave_requester_type
 export const notificationChannelEnum = createPgEnumFromEnum("notification_channel", NotificationChannel);
 
 export const notificationEventTypeEnum = createPgEnumFromEnum("notification_event_type", NotificationEventType);
+
+export const notificationDeliveryStatusEnum = createPgEnumFromEnum(
+  "notification_delivery_status",
+  NotificationDeliveryStatus
+);
+
+export const devicePlatformEnum = createPgEnumFromEnum("device_platform", DevicePlatform);
 
 export const dayOfWeekEnum = createPgEnumFromEnum("day_of_week", DayOfWeek);
 
