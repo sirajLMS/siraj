@@ -1,10 +1,11 @@
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, lt, or, sql } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { students } from "@/backend/db/schema";
-import type * as Types from "@/backend/types";
+import * as Types from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
+import { OrderSortDirection } from "@/lib/enum";
 
 const _processStudentQuery = async (
   query: PgSelect,
@@ -15,6 +16,32 @@ const _processStudentQuery = async (
   let processedQuery = query;
   processedQuery = StudentFilterUtils.applyFilters(processedQuery, filters);
   processedQuery = StudentFilterUtils.applyOrdering(processedQuery, orderBy);
+
+  if (paginationArgs?.after) {
+    try {
+      const decoded = Buffer.from(paginationArgs.after, "base64").toString("utf8");
+      const cursorObj = JSON.parse(decoded) as { createdAt?: string; id?: string };
+      if (cursorObj.createdAt && cursorObj.id) {
+        const cursorDate = new Date(cursorObj.createdAt);
+        const cursorId = cursorObj.id;
+        const isDesc = orderBy?.some(
+          o => o.column === Types.StudentsOrderByColumn.CREATED_AT && o.order === OrderSortDirection.DESC
+        );
+        if (isDesc) {
+          processedQuery = processedQuery.where(
+            or(lt(students.createdAt, cursorDate), and(eq(students.createdAt, cursorDate), lt(students.id, cursorId)))
+          );
+        } else {
+          processedQuery = processedQuery.where(
+            or(gt(students.createdAt, cursorDate), and(eq(students.createdAt, cursorDate), gt(students.id, cursorId)))
+          );
+        }
+      }
+    } catch {
+      // Ignore invalid cursor
+    }
+  }
+
   processedQuery = queryWithPagination(processedQuery, paginationArgs);
 
   const results = await (processedQuery as unknown as Promise<{ student: Types.StudentEntity; total: number }[]>);
@@ -28,6 +55,17 @@ const _processStudentQuery = async (
     .filter((s): s is Types.StudentDto => s !== null);
 
   const pageInfo = PaginationUtils.buildPageInfoFromArgs(paginationArgs, items.length, total);
+
+  if (items.length > 0) {
+    const firstItem = items[0];
+    const lastItem = items.at(-1);
+    pageInfo.startCursor = Buffer.from(
+      JSON.stringify({ createdAt: firstItem.createdAt.toISOString(), id: firstItem.id })
+    ).toString("base64");
+    pageInfo.endCursor = Buffer.from(
+      JSON.stringify({ createdAt: lastItem?.createdAt.toISOString(), id: lastItem?.id })
+    ).toString("base64");
+  }
 
   return {
     data: items,

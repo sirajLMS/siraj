@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import { Gender } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
 import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import { db } from "../drizzleDb";
-import { classInstances, parents, students, teachers, users } from "../schema";
+import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -83,6 +84,7 @@ describe("Class Quota System Constraints & Triggers", () => {
         .values({
           parentId: parent.id,
           name: "Quota Student",
+          gender: Gender.MALE,
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
@@ -90,6 +92,12 @@ describe("Class Quota System Constraints & Triggers", () => {
           updatedAt: now,
         })
         .returning()) as [StudentEntity];
+
+      await tx.insert(teacherAssignments).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        assignedAt: now,
+      });
 
       // 1. Insert class with quota_deducted = true
       const [instance1] = (await tx
@@ -217,6 +225,7 @@ describe("Class Quota System Constraints & Triggers", () => {
         .values({
           parentId: parent.id,
           name: "Block Student",
+          gender: Gender.FEMALE,
           status: "REGULAR",
           classesTotal: 5,
           classesRemaining: 0,
@@ -224,6 +233,12 @@ describe("Class Quota System Constraints & Triggers", () => {
           updatedAt: now,
         })
         .returning()) as [StudentEntity];
+
+      await tx.insert(teacherAssignments).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        assignedAt: now,
+      });
 
       try {
         await tx
@@ -305,6 +320,7 @@ describe("Class Quota System Constraints & Triggers", () => {
       .values({
         parentId: parent.id,
         name: "Race Student",
+        gender: Gender.MALE,
         status: "REGULAR",
         classesTotal: 10,
         classesRemaining: 1,
@@ -312,6 +328,12 @@ describe("Class Quota System Constraints & Triggers", () => {
         updatedAt: now,
       })
       .returning()) as [StudentEntity];
+
+    await db.insert(teacherAssignments).values({
+      studentId: student.id,
+      teacherId: teacher.id,
+      assignedAt: now,
+    });
 
     // Execute two concurrent insertions targeting the same student
     const resultPromises = Promise.allSettled([

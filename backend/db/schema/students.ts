@@ -67,6 +67,10 @@ export const students = pgTable(
     index("idx_students_name_trgm").using("gist", table.name.op("gist_trgm_ops")),
     check("students_classes_remaining_chk", sql`${table.classesRemaining} >= 0`),
     check("students_classes_total_chk", sql`${table.classesTotal} >= 0`),
+    index("students_pagination_idx").on(table.createdAt, table.id),
+    index("idx_students_filter_mobile").on(table.status, table.primaryTeacherId, table.dateOfBirth),
+    index("idx_students_parent_status").on(table.parentId, table.status),
+    index("idx_students_status_created").on(table.status, table.createdAt),
   ]
 );
 

@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
+import { Gender } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
 import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import { db } from "../drizzleDb";
-import { classInstances, parents, students, teachers, users } from "../schema";
+import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -83,6 +84,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         .values({
           parentId: parent.id,
           name: "Rescheduled Student",
+          gender: Gender.MALE,
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
@@ -90,6 +92,12 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           updatedAt: now,
         })
         .returning()) as [StudentEntity];
+
+      await tx.insert(teacherAssignments).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        assignedAt: now,
+      });
 
       // Insert original class with specific rate
       const [original] = (await tx
@@ -185,6 +193,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         .values({
           parentId: parent.id,
           name: "Rescheduled Student",
+          gender: Gender.MALE,
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
@@ -192,6 +201,12 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           updatedAt: now,
         })
         .returning()) as [StudentEntity];
+
+      await tx.insert(teacherAssignments).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        assignedAt: now,
+      });
 
       const [original] = (await tx
         .insert(classInstances)
@@ -288,6 +303,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         .values({
           parentId: parent.id,
           name: "Rescheduled Student",
+          gender: Gender.MALE,
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
@@ -295,6 +311,12 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           updatedAt: now,
         })
         .returning()) as [StudentEntity];
+
+      await tx.insert(teacherAssignments).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        assignedAt: now,
+      });
 
       // 1. Insert original class with quota deducted
       const [original] = (await tx
@@ -402,6 +424,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         .values({
           parentId: parent.id,
           name: "Rescheduled Student",
+          gender: Gender.MALE,
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
@@ -409,6 +432,12 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           updatedAt: now,
         })
         .returning()) as [StudentEntity];
+
+      await tx.insert(teacherAssignments).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        assignedAt: now,
+      });
 
       // 1. Create a class that is completed/taken
       const [original] = (await tx
@@ -510,6 +539,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         .values({
           parentId: parent.id,
           name: "Rescheduled Student",
+          gender: Gender.MALE,
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
@@ -517,6 +547,12 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           updatedAt: now,
         })
         .returning()) as [StudentEntity];
+
+      await tx.insert(teacherAssignments).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        assignedAt: now,
+      });
 
       const [original] = (await tx
         .insert(classInstances)
@@ -629,6 +665,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         .values({
           parentId: parent.id,
           name: "Rescheduled Student",
+          gender: Gender.MALE,
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
@@ -636,6 +673,12 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           updatedAt: now,
         })
         .returning()) as [StudentEntity];
+
+      await tx.insert(teacherAssignments).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        assignedAt: now,
+      });
 
       const [original] = (await tx
         .insert(classInstances)
@@ -754,6 +797,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         .values({
           parentId: parent.id,
           name: "Rescheduled Student",
+          gender: Gender.MALE,
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
@@ -761,6 +805,12 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           updatedAt: now,
         })
         .returning()) as [StudentEntity];
+
+      await tx.insert(teacherAssignments).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        assignedAt: now,
+      });
 
       const [original] = (await tx
         .insert(classInstances)
@@ -849,6 +899,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         .values({
           parentId: parent.id,
           name: "Rescheduled Student",
+          gender: Gender.MALE,
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
@@ -856,6 +907,12 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           updatedAt: now,
         })
         .returning()) as [StudentEntity];
+
+      await tx.insert(teacherAssignments).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        assignedAt: now,
+      });
 
       const [original] = (await tx
         .insert(classInstances)
@@ -944,6 +1001,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         .values({
           parentId: parent.id,
           name: "Rescheduled Student",
+          gender: Gender.MALE,
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
@@ -951,6 +1009,12 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           updatedAt: now,
         })
         .returning()) as [StudentEntity];
+
+      await tx.insert(teacherAssignments).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        assignedAt: now,
+      });
 
       const [original] = (await tx
         .insert(classInstances)

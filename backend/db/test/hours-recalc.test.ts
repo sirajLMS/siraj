@@ -113,10 +113,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
     const now = new Date();
 
     // 1. Initial State: Check that student starts with 0 hours per week
-    const [initialStudent] = await db
-      .select()
-      .from(students)
-      .where(sql`id = ${testStudent.id}`);
+    const [initialStudent] = await db.select().from(students).where(sql`id = ${testStudent.id}`);
     expect(Number(initialStudent.hoursPerWeek)).toBe(0);
     testLogger.info("Verified initial student hoursPerWeek = 0.00");
 
@@ -136,10 +133,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       .returning();
 
     // Verify hoursPerWeek is still 0
-    const [studentAfterSchedule] = await db
-      .select()
-      .from(students)
-      .where(sql`id = ${testStudent.id}`);
+    const [studentAfterSchedule] = await db.select().from(students).where(sql`id = ${testStudent.id}`);
     expect(Number(studentAfterSchedule.hoursPerWeek)).toBe(0);
     testLogger.info("Verified hoursPerWeek is 0 after schedule insert with no days.");
 
@@ -166,40 +160,25 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       .returning();
 
     // Verify hoursPerWeek = (60 * 2) / 60.0 = 2.00
-    const [studentAfterDays] = await db
-      .select()
-      .from(students)
-      .where(sql`id = ${testStudent.id}`);
+    const [studentAfterDays] = await db.select().from(students).where(sql`id = ${testStudent.id}`);
     expect(Number(studentAfterDays.hoursPerWeek)).toBe(2);
     testLogger.info("Verified hoursPerWeek = 2.00 after inserting two active days.");
 
     // 4. Day Deactivation: Set WEDNESDAY isActive = false
     testLogger.info("Deactivating WEDNESDAY schedule day...");
-    await db
-      .update(recurringScheduleDays)
-      .set({ isActive: false })
-      .where(sql`id = ${dayWednesday.id}`);
+    await db.update(recurringScheduleDays).set({ isActive: false }).where(sql`id = ${dayWednesday.id}`);
 
     // Verify hoursPerWeek = (60 * 1) / 60.0 = 1.00
-    const [studentAfterDeactivate] = await db
-      .select()
-      .from(students)
-      .where(sql`id = ${testStudent.id}`);
+    const [studentAfterDeactivate] = await db.select().from(students).where(sql`id = ${testStudent.id}`);
     expect(Number(studentAfterDeactivate.hoursPerWeek)).toBe(1);
     testLogger.info("Verified hoursPerWeek = 1.00 after deactivating WEDNESDAY.");
 
     // 5. Duration Update: Update schedule duration to 45 minutes
     testLogger.info("Updating schedule duration to 45 minutes...");
-    await db
-      .update(recurringSchedules)
-      .set({ durationMinutes: 45 })
-      .where(sql`id = ${schedule.id}`);
+    await db.update(recurringSchedules).set({ durationMinutes: 45 }).where(sql`id = ${schedule.id}`);
 
     // Verify hoursPerWeek = (45 * 1) / 60.0 = 0.75
-    const [studentAfterDurationUpdate] = await db
-      .select()
-      .from(students)
-      .where(sql`id = ${testStudent.id}`);
+    const [studentAfterDurationUpdate] = await db.select().from(students).where(sql`id = ${testStudent.id}`);
     expect(Number(studentAfterDurationUpdate.hoursPerWeek)).toBe(0.75);
     testLogger.info("Verified hoursPerWeek = 0.75 after duration update.");
 
@@ -208,10 +187,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
     await db.delete(recurringScheduleDays).where(sql`id = ${dayMonday.id}`);
 
     // Verify hoursPerWeek = 0.00
-    const [studentAfterDeleteDay] = await db
-      .select()
-      .from(students)
-      .where(sql`id = ${testStudent.id}`);
+    const [studentAfterDeleteDay] = await db.select().from(students).where(sql`id = ${testStudent.id}`);
     expect(Number(studentAfterDeleteDay.hoursPerWeek)).toBe(0);
     testLogger.info("Verified hoursPerWeek = 0.00 after deleting all active days.");
 
@@ -223,16 +199,10 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       startTime: "10:00:00",
       isActive: true,
     });
-    await db
-      .update(recurringScheduleDays)
-      .set({ isActive: true })
-      .where(sql`id = ${dayWednesday.id}`);
+    await db.update(recurringScheduleDays).set({ isActive: true }).where(sql`id = ${dayWednesday.id}`);
 
     // Verify hoursPerWeek = (45 * 2) / 60.0 = 1.50
-    const [studentBeforeSoftDelete] = await db
-      .select()
-      .from(students)
-      .where(sql`id = ${testStudent.id}`);
+    const [studentBeforeSoftDelete] = await db.select().from(students).where(sql`id = ${testStudent.id}`);
     expect(Number(studentBeforeSoftDelete.hoursPerWeek)).toBe(1.5);
 
     // 7. Schedule Soft Delete: Set deleted_at on schedule (via RLS / soft delete triggers)
@@ -241,10 +211,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
     await db.delete(recurringSchedules).where(sql`id = ${schedule.id}`);
 
     // Verify hoursPerWeek = 0.00 (since schedule is soft-deleted, rs.deleted_at IS NULL condition excludes it)
-    const [studentAfterSoftDelete] = await db
-      .select()
-      .from(students)
-      .where(sql`id = ${testStudent.id}`);
+    const [studentAfterSoftDelete] = await db.select().from(students).where(sql`id = ${testStudent.id}`);
     expect(Number(studentAfterSoftDelete.hoursPerWeek)).toBe(0);
     testLogger.info("Verified hoursPerWeek = 0.00 after soft-deleting the schedule.");
   });

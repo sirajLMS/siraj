@@ -1,4 +1,4 @@
-import type { studentStatusHistory, students } from "@/backend/db/schema";
+import type { studentProgress, studentStatusHistory, students } from "@/backend/db/schema";
 import type { AppLanguage, Gender, OrderSortDirection, StudentStatus } from "@/lib/enum";
 import type { PageInfo } from "./pagination.types";
 

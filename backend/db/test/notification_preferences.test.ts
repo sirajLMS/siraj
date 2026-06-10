@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test";
+// cspell:ignore: notif
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { NotificationChannel, NotificationEventType } from "../../../lib/enum";
@@ -29,6 +30,32 @@ async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<
 }
 
 describe("User Notification Preferences", () => {
+  beforeAll(async () => {
+    await db.execute(sql`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'test_rls_user_notif') THEN
+          CREATE ROLE test_rls_user_notif WITH LOGIN PASSWORD 'test_rls_pass';
+        END IF;
+      END
+      $$;
+      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO test_rls_user_notif;
+      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO test_rls_user_notif;
+    `);
+  });
+
+  afterAll(async () => {
+    try {
+      await db.execute(sql`
+        REASSIGN OWNED BY test_rls_user_notif TO postgres;
+        DROP OWNED BY test_rls_user_notif;
+        DROP ROLE IF EXISTS test_rls_user_notif;
+      `);
+    } catch {
+      testLogger.warn("Failed to drop RLS test role for notif");
+    }
+  });
+
   test("Can insert and retrieve preferences", async () => {
     testLogger.info("Testing preference insertion...");
     await runInRollback(async tx => {
@@ -130,6 +157,9 @@ describe("User Notification Preferences", () => {
         eventType: NotificationEventType.INVOICE_GENERATED,
         enabled: true,
       });
+
+      // Switch to unprivileged role for RLS tests
+      await tx.execute(sql`SET LOCAL ROLE test_rls_user_notif`);
 
       // Set session actor to User A
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userA.id}, true)`);

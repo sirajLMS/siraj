@@ -13,6 +13,8 @@ export const PageInfoObject = PageInfoRef.implement({
     lastPage: t.exposeInt("lastPage", { nullable: false }),
     perPage: t.exposeInt("perPage", { nullable: false }),
     total: t.exposeInt("total", { nullable: false }),
+    startCursor: t.exposeString("startCursor", { nullable: true }),
+    endCursor: t.exposeString("endCursor", { nullable: true }),
   }),
 });
 
@@ -24,6 +26,8 @@ export const PaginationArgsDefault = {
 type PaginationArgs = {
   first: number | null;
   skip: number | null;
+  after: string | null;
+  before: string | null;
   last: number | null;
   page: number | null;
   maxCount: number | null;
@@ -35,6 +39,8 @@ export const PaginationArgsObject = PaginationArgsRef.implement({
   fields: t => ({
     first: t.int({ defaultValue: PaginationArgsDefault.first }),
     skip: t.int(),
+    after: t.string(),
+    before: t.string(),
     last: t.int(),
     page: t.int(),
     maxCount: t.int({ defaultValue: PaginationArgsDefault.maxCount }),

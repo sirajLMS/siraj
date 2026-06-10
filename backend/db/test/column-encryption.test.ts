@@ -116,18 +116,12 @@ describe("Column-Level Encryption", () => {
       expect(rawIban.split(":")).toHaveLength(3);
 
       // 5. Query values via Drizzle select to verify automatic decryption
-      const [drizzleTeacher] = await tx
-        .select()
-        .from(teachers)
-        .where(sql`id = ${teacher.id}`);
+      const [drizzleTeacher] = await tx.select().from(teachers).where(sql`id = ${teacher.id}`);
       expect(drizzleTeacher).toBeDefined();
       expect(drizzleTeacher.zoomPassword).toBe(plainZoomPassword);
       expect(drizzleTeacher.nationalId).toBe(plainNationalId);
 
-      const [drizzleBanking] = await tx
-        .select()
-        .from(teacherBankingDetailsHistory)
-        .where(sql`id = ${banking.id}`);
+      const [drizzleBanking] = await tx.select().from(teacherBankingDetailsHistory).where(sql`id = ${banking.id}`);
       expect(drizzleBanking).toBeDefined();
       expect(drizzleBanking.beneficiaryName).toBe(plainBeneficiaryName);
       expect(drizzleBanking.iban).toBe(plainIban);

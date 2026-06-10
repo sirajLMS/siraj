@@ -7,6 +7,8 @@ export type PageInfo = {
   lastPage: number;
   perPage: number;
   total: number;
+  startCursor?: string | null;
+  endCursor?: string | null;
 };
 
 export class PaginationArgs {

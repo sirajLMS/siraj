@@ -1,10 +1,11 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
+import { Gender } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import { db } from "../drizzleDb";
-import { classInstances, parents, students, teachers, users } from "../schema";
+import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
 
 describe("Class Instances Overlap Prevention", () => {
   let parentUser: UserEntity | null = null;
@@ -56,6 +57,7 @@ describe("Class Instances Overlap Prevention", () => {
         parentId: testParent.id,
         primaryTeacherId: testTeacher1.id,
         name: "Overlap Student 1",
+        gender: Gender.MALE,
         status: "REGULAR",
         createdAt: now,
         updatedAt: now,
@@ -67,11 +69,19 @@ describe("Class Instances Overlap Prevention", () => {
         parentId: testParent.id,
         primaryTeacherId: testTeacher1.id,
         name: "Overlap Student 2",
+        gender: Gender.FEMALE,
         status: "REGULAR",
         createdAt: now,
         updatedAt: now,
       })
       .returning();
+
+    await db.insert(teacherAssignments).values([
+      { studentId: testStudent1.id, teacherId: testTeacher1.id, assignedAt: now },
+      { studentId: testStudent1.id, teacherId: testTeacher2.id, assignedAt: now },
+      { studentId: testStudent2.id, teacherId: testTeacher1.id, assignedAt: now },
+      { studentId: testStudent2.id, teacherId: testTeacher2.id, assignedAt: now },
+    ]);
 
     testLogger.info("Setup complete.");
   });
