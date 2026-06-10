@@ -86,6 +86,7 @@ describe("Student Progress Tracking", () => {
           name: "Student",
           gender: Gender.MALE,
           status: "REGULAR",
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -105,6 +106,7 @@ describe("Student Progress Tracking", () => {
           scheduledEndAt: new Date(startTime.getTime() + 3600000),
           durationMinutes: 60,
           classType: "REGULAR",
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -161,6 +163,7 @@ describe("Student Progress Tracking", () => {
           name: "S",
           gender: Gender.FEMALE,
           status: "REGULAR",
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -177,6 +180,7 @@ describe("Student Progress Tracking", () => {
           scheduledEndAt: now,
           durationMinutes: 60,
           classType: "REGULAR",
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -233,6 +237,7 @@ describe("Student Progress Tracking", () => {
           name: "Student",
           gender: Gender.MALE,
           status: "REGULAR",
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -249,6 +254,7 @@ describe("Student Progress Tracking", () => {
           scheduledEndAt: now,
           durationMinutes: 60,
           classType: "REGULAR",
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })

@@ -56,6 +56,7 @@ export const students = pgTable(
     // NOTE: PostgreSQL triggers automatically recalculate hoursPerWeek (SUM(duration_minutes)/60 of active days)
     // whenever recurring_schedules or recurring_schedule_days are inserted, updated, or deleted.
     hoursPerWeek: numeric("hours_per_week", { precision: 5, scale: 2 }).notNull().default("0"),
+    idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
@@ -65,6 +66,7 @@ export const students = pgTable(
     index("students_status_idx").on(table.status),
     index("idx_students_name_fts").using("gin", sql`to_tsvector('simple', ${table.name})`),
     index("idx_students_name_trgm").using("gist", table.name.op("gist_trgm_ops")),
+    uniqueIndex("students_idempotency_key_unique_idx").on(table.idempotencyKey),
     check("students_classes_remaining_chk", sql`${table.classesRemaining} >= 0`),
     check("students_classes_total_chk", sql`${table.classesTotal} >= 0`),
     index("students_pagination_idx").on(table.createdAt, table.id),

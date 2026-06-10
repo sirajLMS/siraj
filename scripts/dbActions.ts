@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
-import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { basename, extname, join } from "node:path";
+import { existsSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { createInterface, type Interface } from "node:readline";
 
 /**
@@ -63,6 +63,18 @@ async function generateCustomMigration(sqlFilePath: string, customName: string):
  * Performs a clean generation of migrations.
  */
 async function cleanGenerate(): Promise<number> {
+  // 0. Clear existing migrations for a truly clean start
+  globalThis.console.log("Clearing existing migrations in backend/drizzle...");
+  const drizzleDir = "./backend/drizzle";
+  if (existsSync(drizzleDir)) {
+    const rm = spawn(
+      "powershell.exe",
+      ["-NoProfile", "-Command", `Remove-Item -Path "${drizzleDir}" -Recurse -Force`],
+      { stdio: "inherit" }
+    );
+    await new Promise(resolve => rm.on("close", resolve));
+  }
+
   // 1. Reset Database (Attempted)
   globalThis.console.log("Attempting to reset database (ignoring connection errors)...");
   // We run resetDb.ts but don't check the exit code yet.
@@ -79,15 +91,34 @@ async function cleanGenerate(): Promise<number> {
   code = await runBunCommand(["drizzle-kit", "generate", "--ignore-conflicts"]);
   if (code !== 0) return code;
 
-  // 4. Other migrations
+  // 4. Combine all other migrations into a single temporary file
   const migrationsDir = "backend/db/migration";
-  const files = readdirSync(migrationsDir).filter(f => f.endsWith(".sql") && f !== "1-extensions.sql");
+  const customFiles = readdirSync(migrationsDir)
+    .filter(f => f.endsWith(".sql") && f !== "1-extensions.sql")
+    .sort((a, b) => a.localeCompare(b));
 
-  for (const file of files) {
-    const name = basename(file, extname(file));
-    globalThis.console.log(`\nGenerating custom migration for ${file}...`);
-    code = await generateCustomMigration(join(migrationsDir, file), name);
-    if (code !== 0) return code;
+  if (customFiles.length > 0) {
+    globalThis.console.log(`\nCombining ${customFiles.length} custom migrations into one...`);
+    const tempCombinedFile = join(migrationsDir, "temp_combined_custom.sql_ignore");
+
+    try {
+      let combinedContent = "";
+      for (const file of customFiles) {
+        const content = readFileSync(join(migrationsDir, file), "utf8");
+        combinedContent += `-- Source: ${file}\n${content}\n\n`;
+      }
+
+      writeFileSync(tempCombinedFile, combinedContent);
+
+      globalThis.console.log("Generating single custom migration for all custom logic...");
+      code = await generateCustomMigration(tempCombinedFile, "combined_custom_logic");
+      if (code !== 0) return code;
+    } finally {
+      if (existsSync(tempCombinedFile)) {
+        globalThis.console.log("Cleaning up temporary migration file...");
+        unlinkSync(tempCombinedFile);
+      }
+    }
   }
 
   // 5. Apply migrations

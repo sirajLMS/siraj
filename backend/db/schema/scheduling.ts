@@ -28,6 +28,7 @@ import {
 } from "./enums";
 import { students } from "./students";
 import { teachers } from "./teachers";
+import { timezones } from "./timezones";
 import { users } from "./users";
 
 /**
@@ -52,7 +53,9 @@ export const recurringSchedules = pgTable(
       .references(() => teachers.id, { onDelete: "restrict" }),
     durationMinutes: integer("duration_minutes").notNull(),
     defaultStartTime: time("default_start_time").notNull(),
+    timezoneId: integer("timezone_id").references(() => timezones.id),
     timezone: varchar("timezone", { length: 100 }).notNull(),
+    utcOffsetSnapshot: integer("utc_offset_snapshot"), // Offset in minutes at time of schedule creation/update
     effectiveFrom: date("effective_from"),
     effectiveUntil: date("effective_until"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
@@ -62,6 +65,7 @@ export const recurringSchedules = pgTable(
   table => [
     index("recurring_schedules_student_id_idx").on(table.studentId),
     index("recurring_schedules_teacher_id_idx").on(table.teacherId),
+    index("recurring_schedules_timezone_id_idx").on(table.timezoneId),
     check("recurring_schedules_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
   ]
 );
@@ -95,17 +99,9 @@ export const recurringScheduleDays = pgTable(
  * - CHECK Constraint `class_instances_reschedule_not_self_chk`: Enforces `original_class_id IS NULL OR original_class_id != id` (cannot reschedule to self).
  * - CHECK Constraint `class_instances_rescheduled_no_quota_chk`: Enforces `is_rescheduled = false OR quota_deducted = false`.
  * - CHECK Constraint `class_instances_rescheduled_no_complete_chk`: Enforces `is_rescheduled = false OR (execution_state != 'COMPLETED' AND outcome != 'TAKEN')`.
- * - Trigger `trg_enforce_class_rescheduling_rules` BEFORE INSERT OR UPDATE:
- *   - Validates rescheduling rules (original class exists, is not completed/taken, is not already rescheduled).
- *   - Automatically closes the original class and refunds its quota.
- *   - Inherits rate from the original class if not overridden.
- * - Trigger `trg_class_quota_deduction` AFTER INSERT OR UPDATE OR DELETE:
- *   - Automatically decrements/increments `students.classes_remaining` when classes are completed/refunded.
- * - Trigger `class_instances_overlap_trigger` BEFORE INSERT OR UPDATE:
- *   - Blocks overlapping bookings for the teacher, student, or Zoom URL during the scheduled time period.
- * - Trigger `trg_enforce_class_teacher_assignment` BEFORE INSERT OR UPDATE:
- *   - Enforces that the teacher assigned to the class instance is also officially assigned to the student
- *     in the `teacher_assignments` table at the time of the class.
+ *
+ * NOTE: High-level business rules (Quota deduction, Overlap prevention, Teacher assignment integrity, Rescheduling logic)
+ * are now enforced in the application layer via `SchedulingRepository` to reduce database trigger depth and deadlock risk (Issue #10).
  *
  * Row-Level Security (RLS) Policies:
  * - Enabled for soft deletes: filters out records where `deleted_at IS NOT NULL` for SELECT/UPDATE.
@@ -128,6 +124,9 @@ export const classInstances = pgTable(
     }),
     scheduledStartAt: timestamp("scheduled_start_at", { withTimezone: true, precision: 3 }).notNull(),
     scheduledEndAt: timestamp("scheduled_end_at", { withTimezone: true, precision: 3 }).notNull(),
+    bookingTimezoneId: integer("booking_timezone_id").references(() => timezones.id),
+    bookingTimezone: varchar("booking_timezone", { length: 100 }), // Snapshot of IANA ID at booking
+    bookingUtcOffset: integer("booking_utc_offset"), // Snapshot of UTC offset in minutes at booking
     durationMinutes: integer("duration_minutes").notNull(),
     classType: classTypeEnum("class_type").notNull(),
     outcome: classOutcomeEnum("outcome").notNull().default("PENDING"),
@@ -148,6 +147,7 @@ export const classInstances = pgTable(
     isRateOverridden: boolean("is_rate_overridden").notNull().default(false),
     remarks: text("remarks"),
     adminNotes: text("admin_notes"),
+    idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
@@ -159,6 +159,7 @@ export const classInstances = pgTable(
     index("class_instances_original_class_id_idx").on(table.originalClassId),
     index("class_instances_class_type_idx").on(table.classType),
     index("class_instances_outcome_idx").on(table.outcome),
+    uniqueIndex("class_instances_idempotency_key_unique_idx").on(table.idempotencyKey),
     index("class_instances_execution_state_idx").on(table.executionState),
     index("class_instances_frozen_idx").on(table.isFrozen).where(sql`${table.isFrozen} = true`),
     index("class_instances_rescheduled_idx").on(table.isRescheduled).where(sql`${table.isRescheduled} = true`),

@@ -1,16 +1,18 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
 import type { UserEntity } from "../../types";
 import { db } from "../drizzleDb";
-import { fileUsages, users } from "../schema";
+import { StorageDbRepository } from "../repo";
+import { storageFiles, userFiles, users } from "../schema";
 
-describe("Polymorphic Foreign Key Integrity", () => {
+describe("Consolidated File Usage Integrity (Junction Tables)", () => {
   let testUser: UserEntity | null = null;
+  const testPath = `/uploads/test-file-${randomUUID()}.png`;
 
   beforeAll(async () => {
-    testLogger.info("Setting up parent records for polymorphic FK tests...");
+    testLogger.info("Setting up parent records for file usage tests...");
     // Create a test user as a valid reference parent
     const email = `poly-parent-${randomUUID()}@example.com`;
     const now = new Date();
@@ -29,94 +31,71 @@ describe("Polymorphic Foreign Key Integrity", () => {
   });
 
   afterAll(async () => {
-    testLogger.info("Cleaning up polymorphic FK test records...");
+    testLogger.info("Cleaning up file usage test records...");
     if (testUser) {
-      // Clean up the user (should also trigger cascade delete on file_usage if any remain)
-      await db.delete(users).where(sql`id = ${testUser.id}`);
-      testLogger.info("Test user cleaned up.");
+      await db.delete(users).where(eq(users.id, testUser.id));
     }
+    await db.delete(storageFiles).where(eq(storageFiles.path, testPath));
   });
 
-  test("Inserting file_usage with valid reference table and reference ID succeeds", async () => {
+  test("Registering file usage through repository creates junction record", async () => {
     if (!testUser) throw new Error("testUser is not initialized");
-    const now = new Date();
-    testLogger.info(`Inserting valid file_usage for user: ${testUser.id}`);
 
-    const [usage] = await db
-      .insert(fileUsages)
-      .values({
-        filePath: "/uploads/avatar-valid.png",
-        usageType: "avatar",
-        referenceId: testUser.id,
-        referenceTable: "users",
-        createdAt: now,
-      })
-      .returning();
+    testLogger.info(`Registering usage for user: ${testUser.id}`);
 
+    const result = await StorageDbRepository.registerFileUsage({
+      filePath: testPath,
+      usageType: "avatar",
+      referenceId: testUser.id,
+      referenceTable: "users",
+    });
+
+    expect(result.success).toBe(true);
+
+    // Verify junction record exists
+    const [usage] = await db.select().from(userFiles).where(eq(userFiles.userId, testUser.id));
     expect(usage).toBeDefined();
-    expect(usage.referenceId).toBe(testUser.id);
-    expect(usage.referenceTable).toBe("users");
 
-    // Clean up
-    await db.delete(fileUsages).where(sql`id = ${usage.id}`);
-    testLogger.info("Valid file_usage test passed and cleaned up.");
-  });
-
-  test("Inserting file_usage with non-existent reference ID fails", async () => {
-    const now = new Date();
-    const fakeId = randomUUID();
-    testLogger.info(`Attempting to insert file_usage with non-existent reference ID: ${fakeId}`);
-
-    let error: unknown = null;
-    try {
-      await db.insert(fileUsages).values({
-        filePath: "/uploads/avatar-invalid.png",
-        usageType: "avatar",
-        referenceId: fakeId,
-        referenceTable: "users",
-        createdAt: now,
-      });
-    } catch (e) {
-      error = e;
+    // Verify storage_file entry was created
+    const file = await StorageDbRepository.fileByPath(testPath);
+    expect(file).toBeDefined();
+    if (file) {
+      expect(usage.fileId).toBe(file.id);
     }
 
-    expect(error).not.toBeNull();
-    // Verify the error message matches the trigger validation failure
-    const errMsg =
-      (error as { message?: string; cause?: { message?: string } }).cause?.message || (error as Error).message || "";
-    expect(errMsg).toContain("does not exist in table");
-    testLogger.info("Insertion with non-existent reference ID failed as expected.");
+    testLogger.info("Register usage test passed.");
   });
 
-  test("Inserting file_usage with invalid reference table name fails", async () => {
+  test("isFileInUse correctly identifies usage across junction tables", async () => {
+    const isInUse = await StorageDbRepository.isFileInUse(testPath);
+    expect(isInUse).toBe(true);
+
+    const usages = await StorageDbRepository.getFileUsages(testPath);
+    expect(usages.length).toBe(1);
+    expect(usages[0].referenceTable).toBe("users");
+    if (testUser) {
+      expect(usages[0].referenceId).toBe(testUser.id);
+    }
+
+    testLogger.info("isFileInUse and getFileUsages tests passed.");
+  });
+
+  test("Unregistering file usage removes junction record", async () => {
     if (!testUser) throw new Error("testUser is not initialized");
-    const now = new Date();
-    testLogger.info("Attempting to insert file_usage with invalid reference table: non_existent_table");
 
-    let error: unknown = null;
-    try {
-      await db.insert(fileUsages).values({
-        filePath: "/uploads/avatar-invalid.png",
-        usageType: "avatar",
-        referenceId: testUser.id,
-        referenceTable: "non_existent_table",
-        createdAt: now,
-      });
-    } catch (e) {
-      error = e;
-    }
+    const success = await StorageDbRepository.unregisterFileUsage(testPath, "avatar", testUser.id);
+    expect(success).toBe(true);
 
-    expect(error).not.toBeNull();
-    const errMsg =
-      (error as { message?: string; cause?: { message?: string } }).cause?.message || (error as Error).message || "";
-    expect(errMsg).toContain("Invalid reference table");
-    testLogger.info("Insertion with invalid reference table failed as expected.");
+    const isInUse = await StorageDbRepository.isFileInUse(testPath);
+    expect(isInUse).toBe(false);
+
+    testLogger.info("Unregister usage test passed.");
   });
 
-  test("Deleting parent row cascades and deletes associated file_usage records", async () => {
-    const now = new Date();
-    // 1. Create a temporary user to test cascade delete
+  test("Deleting parent row cascades and deletes associated junction records", async () => {
+    // 1. Create a temporary user
     const email = `poly-cascade-${randomUUID()}@example.com`;
+    const now = new Date();
     const [tempUser] = await db
       .insert(users)
       .values({
@@ -128,51 +107,36 @@ describe("Polymorphic Foreign Key Integrity", () => {
       })
       .returning();
 
-    testLogger.info(`Created temp user for cascade delete: ${tempUser.id}`);
+    // 2. Register usage
+    const cascadePath = `/uploads/cascade-${randomUUID()}.png`;
+    await StorageDbRepository.registerFileUsage({
+      filePath: cascadePath,
+      usageType: "avatar",
+      referenceId: tempUser.id,
+      referenceTable: "users",
+    });
 
-    // 2. Create multiple file usages pointing to the temp user
-    const [usage1] = await db
-      .insert(fileUsages)
-      .values({
-        filePath: "/uploads/avatar-temp.png",
-        usageType: "avatar",
-        referenceId: tempUser.id,
-        referenceTable: "users",
-        createdAt: now,
-      })
-      .returning();
+    // 3. Verify usage exists
+    let isInUse = await StorageDbRepository.isFileInUse(cascadePath);
+    expect(isInUse).toBe(true);
 
-    const [usage2] = await db
-      .insert(fileUsages)
-      .values({
-        filePath: "/uploads/doc-temp.pdf",
-        usageType: "document",
-        referenceId: tempUser.id,
-        referenceTable: "users",
-        createdAt: now,
-      })
-      .returning();
+    // 4. Hard delete the temp user (note: first delete is soft delete in our system)
+    await db.delete(users).where(eq(users.id, tempUser.id)); // Soft delete
 
-    testLogger.info(`Created file usages: ${usage1.id}, ${usage2.id}`);
+    // Usage should still exist after soft delete (as user record is still there)
+    isInUse = await StorageDbRepository.isFileInUse(cascadePath);
+    expect(isInUse).toBe(true);
 
-    // 3. Delete the temp user (first delete converts it to soft delete)
-    testLogger.info(`Deleting temp user ${tempUser.id} (first delete - soft delete)...`);
-    await db.delete(users).where(sql`id = ${tempUser.id}`);
+    // Hard delete
+    await db.delete(users).where(eq(users.id, tempUser.id));
 
-    // Verify that the file usages still exist because the user is only soft-deleted (not hard-deleted)
-    const afterSoft1 = await db.select().from(fileUsages).where(sql`id = ${usage1.id}`);
-    expect(afterSoft1.length).toBe(1);
+    // 5. Verify that the junction record is now gone (native cascade delete)
+    isInUse = await StorageDbRepository.isFileInUse(cascadePath);
+    expect(isInUse).toBe(false);
 
-    // 4. Delete the temp user again (second delete performs hard delete)
-    testLogger.info(`Deleting temp user ${tempUser.id} again (second delete - hard delete)...`);
-    await db.delete(users).where(sql`id = ${tempUser.id}`);
+    // Cleanup storage_file
+    await db.delete(storageFiles).where(eq(storageFiles.path, cascadePath));
 
-    // 5. Verify that the file usages are now gone (cascade delete triggered)
-    const remaining1 = await db.select().from(fileUsages).where(sql`id = ${usage1.id}`);
-    const remaining2 = await db.select().from(fileUsages).where(sql`id = ${usage2.id}`);
-
-    expect(remaining1.length).toBe(0);
-    expect(remaining2.length).toBe(0);
-    testLogger.info("Polymorphic cascade delete verified successfully upon hard delete.");
+    testLogger.info("Cascade delete verified successfully.");
   });
 });

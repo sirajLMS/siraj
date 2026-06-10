@@ -12,6 +12,7 @@ import { graphQLSchema } from "@/backend/graphql/gqlSchema";
 import logger from "@/backend/lib/logger";
 import { checkRateLimit, getClientIdentifier, graphqlRateLimiter } from "@/backend/lib/ratelimit";
 import { ApolloCacheAdapter } from "@/backend/services/cache";
+import { IdempotencyService } from "@/backend/services/idempotency.service";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -104,11 +105,57 @@ async function withRateLimit(
 }
 
 /**
+ * Idempotency middleware wrapper
+ * Prevents duplicate mutations within 24 hours
+ */
+async function withIdempotency(
+  request: NextRequest,
+  handler: (req: NextRequest) => Promise<Response>
+): Promise<Response> {
+  const idempotencyKey = request.headers.get("x-idempotency-key");
+
+  // Only apply to POST requests with an idempotency key
+  if (request.method !== "POST" || !idempotencyKey) {
+    return handler(request);
+  }
+
+  // We use the client identifier (IP/etc) to scope the idempotency key
+  const identifier = getClientIdentifier(request);
+
+  const isNew = await IdempotencyService.checkAndMark(idempotencyKey, identifier);
+
+  if (!isNew) {
+    logger.warn(`Duplicate request detected with idempotency key: ${idempotencyKey} for ${identifier}`);
+    return NextResponse.json(
+      {
+        errors: [
+          {
+            message: "Duplicate request detected. This operation has already been processed.",
+            extensions: {
+              code: "DUPLICATE_REQUEST",
+            },
+          },
+        ],
+      },
+      { status: 409 }
+    );
+  }
+
+  try {
+    return await handler(request);
+  } catch (error) {
+    // On server error, release the key to allow retry
+    await IdempotencyService.release(idempotencyKey, identifier);
+    throw error;
+  }
+}
+
+/**
  * POST handler for GraphQL mutations
- * Applies rate limiting
+ * Applies rate limiting and idempotency
  */
 export async function POST(request: NextRequest) {
-  return withRateLimit(request, handler);
+  return withRateLimit(request, req => withIdempotency(req, handler));
 }
 
 /**

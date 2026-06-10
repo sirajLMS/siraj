@@ -1,4 +1,6 @@
 export { CacheDbRepository } from "./cache.repository";
+export { RateLimitRepository } from "./ratelimit.repository";
+export { SchedulingRepository } from "./scheduling.repository";
 export { SessionRepository } from "./session.repository";
 export { SignedUrlRepository } from "./signedUrl.repository";
 

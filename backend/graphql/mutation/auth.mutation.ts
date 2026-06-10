@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { GraphQLError } from "graphql";
-import { SessionRepository, UserRepository } from "@/backend/db/repo";
+import { RateLimitRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
 import { generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
 import { comparePassword } from "@/backend/lib/auth/password";
 import logger from "@/backend/lib/logger";
@@ -65,6 +65,15 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, args, ctx) => {
       const { email, password } = args.input;
+      const ipAddress = ctx.ipAddress || "unknown";
+
+      // 1. Check if already locked
+      const isLocked = await RateLimitRepository.isLocked(ipAddress, email.value);
+      if (isLocked) {
+        throw new GraphQLError("Too many login attempts. Please try again later.", {
+          extensions: { code: "TOO_MANY_ATTEMPTS" },
+        });
+      }
 
       let user: UserEntity | null;
       try {
@@ -75,19 +84,31 @@ gqlSchemaBuilder.mutationFields(t => ({
       }
 
       if (!user) {
+        // Still record attempt even if user doesn't exist to prevent enumeration
+        await RateLimitRepository.recordAttempt(ipAddress, email.value);
         throw new GraphQLError("Invalid email or password", {
           extensions: { code: "INVALID_CREDENTIALS" },
         });
       }
 
-      // Verify password
+      // 2. Verify password
       const isPasswordValid = await comparePassword(password, user.password);
 
       if (!isPasswordValid) {
+        // Record failed attempt
+        const result = await RateLimitRepository.recordAttempt(ipAddress, email.value);
+        if (result.isLocked) {
+          throw new GraphQLError("Too many login attempts. Your account has been temporarily locked.", {
+            extensions: { code: "TOO_MANY_ATTEMPTS" },
+          });
+        }
         throw new GraphQLError("Invalid email or password", {
           extensions: { code: "INVALID_CREDENTIALS" },
         });
       }
+
+      // 3. Successful login - reset attempts
+      await RateLimitRepository.resetAttempts(ipAddress, email.value);
 
       // Generate tokens
       const accessToken = await generateAccessToken(user.id, user.email);

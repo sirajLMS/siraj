@@ -64,6 +64,7 @@ describe("Invoice Referential Integrity", () => {
           parentId: parentRecord.id,
           name: "Invoice Test Student",
           status: "REGULAR",
+          idempotencyKey: `stud-${uniqueSuffix}`,
           createdAt: now,
           updatedAt: now,
         })
@@ -79,6 +80,7 @@ describe("Invoice Referential Integrity", () => {
         currency: "USD",
         status: "UNPAID",
         invoiceType: "PER_CLASSES",
+        idempotencyKey: `inv-${uniqueSuffix}`,
         createdAt: now,
         updatedAt: now,
       };

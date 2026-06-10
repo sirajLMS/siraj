@@ -72,6 +72,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
         primaryTeacherId: testTeacher.id,
         name: "Recalculation Student",
         status: "REGULAR",
+        idempotencyKey: randomUUID(),
         createdAt: now,
         updatedAt: now,
       })

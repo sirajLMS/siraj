@@ -36,6 +36,7 @@ export type StudentCreateInput = {
   status: StudentStatus;
   classesTotal?: number;
   classesRemaining?: number;
+  idempotencyKey: string;
 };
 
 export type PartialStudentUpdateInput = {

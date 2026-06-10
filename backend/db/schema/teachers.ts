@@ -1,7 +1,8 @@
 import { sql } from "drizzle-orm";
-import { check, date, index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { check, date, index, integer, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { encryptedText } from "./custom-types";
 import { accountStatusEnum, countryCodeEnum, genderEnum } from "./enums";
+import { timezones } from "./timezones";
 import { users } from "./users";
 
 /**
@@ -33,6 +34,7 @@ export const teachers = pgTable(
     // NOTE: zoomPassword must be encrypted at the application level before saving
     zoomPassword: encryptedText("zoom_password"),
     countryCode: countryCodeEnum("country_code"),
+    timezoneId: integer("timezone_id").references(() => timezones.id),
     timezone: varchar("timezone", { length: 100 }).notNull(),
     hourlyRate: numeric("hourly_rate", { precision: 12, scale: 2 }),
     rateCurrency: varchar("rate_currency", { length: 10 }),
@@ -42,6 +44,7 @@ export const teachers = pgTable(
   table => [
     index("teachers_user_id_idx").on(table.userId),
     index("teachers_status_idx").on(table.status),
+    index("teachers_timezone_id_idx").on(table.timezoneId),
     check("teachers_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
   ]
 );

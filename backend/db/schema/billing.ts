@@ -35,6 +35,7 @@ export const invoices = pgTable(
     invoiceType: invoiceTypeEnum("invoice_type").notNull(),
     createdByUserId: uuid("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
     emailSentAt: timestamp("email_sent_at", { withTimezone: true, precision: 3 }),
+    idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
@@ -43,6 +44,7 @@ export const invoices = pgTable(
     index("invoices_parent_id_idx").on(table.parentId),
     index("invoices_student_id_idx").on(table.studentId),
     index("invoices_status_due_date_idx").on(table.status, table.dueDate),
+    uniqueIndex("invoices_idempotency_key_unique_idx").on(table.idempotencyKey),
   ]
 );
 
@@ -72,7 +74,7 @@ export const payments = pgTable(
     transactionId: varchar("transaction_id", { length: 255 }),
     gatewayResponse: text("gateway_response"),
     refundedAmount: numeric("refunded_amount", { precision: 12, scale: 2 }).notNull().default("0.00"),
-    idempotencyKey: varchar("idempotency_key", { length: 255 }),
+    idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },

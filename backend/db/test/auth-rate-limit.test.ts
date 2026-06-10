@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { testLogger } from "../../../lib/testlogger";
-import type { AuthRateLimitInsertInput } from "../../types";
+import type { AuthRateLimitEntityInput } from "../../types";
 import { db } from "../drizzleDb";
 import { authRateLimits } from "../schema";
 import { IP_ADDRESS } from "./const";
@@ -35,7 +35,7 @@ describe("Authentication Rate Limiting", () => {
       const ipAddress = IP_ADDRESS;
       const now = new Date();
 
-      const rateLimitInput1: AuthRateLimitInsertInput = {
+      const rateLimitInput1: AuthRateLimitEntityInput = {
         email,
         ipAddress,
         attempts: 1,
@@ -43,7 +43,7 @@ describe("Authentication Rate Limiting", () => {
         updatedAt: now,
       };
 
-      const rateLimitInput2: AuthRateLimitInsertInput = {
+      const rateLimitInput2: AuthRateLimitEntityInput = {
         email,
         ipAddress,
         attempts: 2,

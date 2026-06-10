@@ -50,7 +50,7 @@ logs/
 .mcp.json
 code-health-rules.json
 
-
+*.sql_ignore
 *.log
 
 scratch/

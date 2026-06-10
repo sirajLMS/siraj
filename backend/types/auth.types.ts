@@ -100,8 +100,8 @@ export type RefreshTokenResponse = {
   user: UserPothosDefinition;
 };
 
-export type AuthRateLimitSelectType = typeof authRateLimits.$inferSelect;
-export type AuthRateLimitInsertInput = typeof authRateLimits.$inferInsert;
+export type AuthRateLimitEntity = typeof authRateLimits.$inferSelect;
+export type AuthRateLimitEntityInput = typeof authRateLimits.$inferInsert;
 
 export type AdminAuditLogSelectType = typeof adminAuditLogs.$inferSelect;
 export type AdminAuditLogInsertInput = typeof adminAuditLogs.$inferInsert;

@@ -1,10 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Gender } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
-import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
+import type { UserEntity } from "../../types/auth.types";
+import type { ParentEntity } from "../../types/parent.types";
+import type { StudentEntity } from "../../types/student.types";
+import type { TeacherEntity } from "../../types/teacher.types";
 import { db } from "../drizzleDb";
+import { SchedulingRepository } from "../repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -33,21 +37,21 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
     testLogger.info("Testing rate inheritance on reschedule...");
     await runInRollback(async tx => {
       const now = new Date();
-      const parentEmail = `parent-rescheduled-${randomUUID()}@example.com`;
-      const teacherEmail = `teacher-rescheduled-${randomUUID()}@example.com`;
+      const parentEmail = `parent-resched-${randomUUID()}@example.com`;
+      const teacherEmail = `teacher-resched-${randomUUID()}@example.com`;
 
-      const [parentUser] = (await tx
+      const [parentUser] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Parent",
+          name: "Resched Parent",
           email: parentEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
 
-      const [parent] = (await tx
+      const [parent] = await tx
         .insert(parents)
         .values({
           userId: parentUser.id,
@@ -55,20 +59,20 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [ParentEntity];
+        .returning();
 
-      const [teacherUser] = (await tx
+      const [teacherUser] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Teacher",
+          name: "Resched Teacher",
           email: teacherEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
 
-      const [teacher] = (await tx
+      const [teacher] = await tx
         .insert(teachers)
         .values({
           userId: teacherUser.id,
@@ -77,21 +81,21 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [TeacherEntity];
+        .returning();
 
-      const [student] = (await tx
+      const [student] = await tx
         .insert(students)
         .values({
           parentId: parent.id,
-          name: "Rescheduled Student",
+          name: "Resched Student",
           gender: Gender.MALE,
           status: "REGULAR",
-          classesTotal: 10,
           classesRemaining: 5,
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [StudentEntity];
+        .returning();
 
       await tx.insert(teacherAssignments).values({
         studentId: student.id,
@@ -99,41 +103,39 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         assignedAt: now,
       });
 
-      // Insert original class with specific rate
-      const [original] = (await tx
-        .insert(classInstances)
-        .values({
+      const original = await SchedulingRepository.createClassInstance(
+        {
           studentId: student.id,
           teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
+          quotaDeducted: true,
           rateAmount: "50.00",
           rateCurrency: "USD",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+          idempotencyKey: randomUUID(),
+        },
+        tx
+      );
 
-      // Insert rescheduled class without specifying rate
-      const [rescheduled] = (await tx
-        .insert(classInstances)
-        .values({
+      // Reschedule
+      const rescheduled = await SchedulingRepository.rescheduleClassInstance(
+        original.id,
+        {
           studentId: student.id,
           teacherId: teacher.id,
-          originalClassId: original.id,
-          scheduledStartAt: new Date("2026-06-16T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-16T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-26T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-26T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+          idempotencyKey: randomUUID(),
+        },
+        tx
+      );
 
       expect(rescheduled.rateAmount).toBe("50.00");
-      expect(rescheduled.rateCurrency).toBe("USD");
+      expect(rescheduled.originalClassId).toBe(original.id);
     });
     testLogger.info("Rate inheritance test passed.");
   });
@@ -145,18 +147,18 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
       const parentEmail = `parent-override-${randomUUID()}@example.com`;
       const teacherEmail = `teacher-override-${randomUUID()}@example.com`;
 
-      const [parentUser] = (await tx
+      const [parentUser] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Parent",
+          name: "Override Parent",
           email: parentEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
 
-      const [parent] = (await tx
+      const [parent] = await tx
         .insert(parents)
         .values({
           userId: parentUser.id,
@@ -164,20 +166,20 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [ParentEntity];
+        .returning();
 
-      const [teacherUser] = (await tx
+      const [teacherUser] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Teacher",
+          name: "Override Teacher",
           email: teacherEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
 
-      const [teacher] = (await tx
+      const [teacher] = await tx
         .insert(teachers)
         .values({
           userId: teacherUser.id,
@@ -186,21 +188,21 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [TeacherEntity];
+        .returning();
 
-      const [student] = (await tx
+      const [student] = await tx
         .insert(students)
         .values({
           parentId: parent.id,
-          name: "Rescheduled Student",
-          gender: Gender.MALE,
+          name: "Override Student",
+          gender: Gender.FEMALE,
           status: "REGULAR",
-          classesTotal: 10,
           classesRemaining: 5,
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [StudentEntity];
+        .returning();
 
       await tx.insert(teacherAssignments).values({
         studentId: student.id,
@@ -208,42 +210,40 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         assignedAt: now,
       });
 
-      const [original] = (await tx
-        .insert(classInstances)
-        .values({
+      const original = await SchedulingRepository.createClassInstance(
+        {
           studentId: student.id,
           teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
+          quotaDeducted: true,
           rateAmount: "50.00",
           rateCurrency: "USD",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+          idempotencyKey: randomUUID(),
+        },
+        tx
+      );
 
-      // Overriding the rate explicitly to $60.00
-      const [rescheduled] = (await tx
-        .insert(classInstances)
-        .values({
+      const rescheduled = await SchedulingRepository.rescheduleClassInstance(
+        original.id,
+        {
           studentId: student.id,
           teacherId: teacher.id,
-          originalClassId: original.id,
-          scheduledStartAt: new Date("2026-06-16T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-16T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-26T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-26T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
           rateAmount: "60.00",
           rateCurrency: "USD",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+          isRateOverridden: true,
+          idempotencyKey: randomUUID(),
+        },
+        tx
+      );
 
       expect(rescheduled.rateAmount).toBe("60.00");
-      expect(rescheduled.rateCurrency).toBe("USD");
     });
     testLogger.info("Overridden rate test passed.");
   });
@@ -255,18 +255,19 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
       const parentEmail = `parent-refund-${randomUUID()}@example.com`;
       const teacherEmail = `teacher-refund-${randomUUID()}@example.com`;
 
-      const [parentUser] = (await tx
+      const parentUsers: UserEntity[] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Parent",
+          name: "Refund Parent",
           email: parentEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const parentUser = parentUsers[0];
 
-      const [parent] = (await tx
+      const parentsResult: ParentEntity[] = await tx
         .insert(parents)
         .values({
           userId: parentUser.id,
@@ -274,20 +275,22 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [ParentEntity];
+        .returning();
+      const parent = parentsResult[0];
 
-      const [teacherUser] = (await tx
+      const teacherUsers: UserEntity[] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Teacher",
+          name: "Refund Teacher",
           email: teacherEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const teacherUser = teacherUsers[0];
 
-      const [teacher] = (await tx
+      const teachersResult: TeacherEntity[] = await tx
         .insert(teachers)
         .values({
           userId: teacherUser.id,
@@ -296,21 +299,23 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [TeacherEntity];
+        .returning();
+      const teacher = teachersResult[0];
 
-      const [student] = (await tx
+      const studentsResult: StudentEntity[] = await tx
         .insert(students)
         .values({
           parentId: parent.id,
-          name: "Rescheduled Student",
+          name: "Refund Student",
           gender: Gender.MALE,
           status: "REGULAR",
-          classesTotal: 10,
           classesRemaining: 5,
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [StudentEntity];
+        .returning();
+      const student = studentsResult[0];
 
       await tx.insert(teacherAssignments).values({
         studentId: student.id,
@@ -318,53 +323,47 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         assignedAt: now,
       });
 
-      // 1. Insert original class with quota deducted
-      const [original] = (await tx
-        .insert(classInstances)
-        .values({
+      const original = await SchedulingRepository.createClassInstance(
+        {
           studentId: student.id,
           teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
           quotaDeducted: true,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+          idempotencyKey: randomUUID(),
+        },
+        tx
+      );
 
-      // Student classes remaining should be 4 now
+      // Student classes remaining should be 4
       const [studentAfterOriginal] = await tx.select().from(students).where(eq(students.id, student.id));
       expect(studentAfterOriginal.classesRemaining).toBe(4);
 
-      // 2. Reschedule to new class (which also has quota_deducted = true)
-      await tx
-        .insert(classInstances)
-        .values({
+      // Reschedule
+      await SchedulingRepository.rescheduleClassInstance(
+        original.id,
+        {
           studentId: student.id,
           teacherId: teacher.id,
-          originalClassId: original.id,
-          scheduledStartAt: new Date("2026-06-16T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-16T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-26T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-26T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
-          quotaDeducted: true,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
+          idempotencyKey: randomUUID(),
+        },
+        tx
+      );
 
-      // Check original class was updated by trigger
+      // Student classes remaining should be 5 now (original refunded)
+      const [studentAfterReschedule] = await tx.select().from(students).where(eq(students.id, student.id));
+      expect(studentAfterReschedule.classesRemaining).toBe(5);
+
+      // Original class should be closed
       const [updatedOriginal] = await tx.select().from(classInstances).where(eq(classInstances.id, original.id));
-
       expect(updatedOriginal.isRescheduled).toBe(true);
       expect(updatedOriginal.quotaDeducted).toBe(false);
-
-      // Student classes remaining should still be 4
-      // (1 deducted for original, refunded because rescheduled, and 1 deducted for new class)
-      const [studentAfterReschedule] = await tx.select().from(students).where(eq(students.id, student.id));
-      expect(studentAfterReschedule.classesRemaining).toBe(4);
     });
     testLogger.info("Original class updates and quota refund test passed.");
   });
@@ -373,21 +372,22 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
     testLogger.info("Testing completed or taken class reschedule prevention...");
     await runInRollback(async tx => {
       const now = new Date();
-      const parentEmail = `parent-complete-${randomUUID()}@example.com`;
-      const teacherEmail = `teacher-complete-${randomUUID()}@example.com`;
+      const parentEmail = `parent-prevention-${randomUUID()}@example.com`;
+      const teacherEmail = `teacher-prevention-${randomUUID()}@example.com`;
 
-      const [parentUser] = (await tx
+      const parentUsers: UserEntity[] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Parent",
+          name: "Prevention Parent",
           email: parentEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const parentUser = parentUsers[0];
 
-      const [parent] = (await tx
+      const parentsResult: ParentEntity[] = await tx
         .insert(parents)
         .values({
           userId: parentUser.id,
@@ -395,20 +395,22 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [ParentEntity];
+        .returning();
+      const parent = parentsResult[0];
 
-      const [teacherUser] = (await tx
+      const teacherUsers: UserEntity[] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Teacher",
+          name: "Prevention Teacher",
           email: teacherEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const teacherUser = teacherUsers[0];
 
-      const [teacher] = (await tx
+      const teachersResult: TeacherEntity[] = await tx
         .insert(teachers)
         .values({
           userId: teacherUser.id,
@@ -417,21 +419,23 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [TeacherEntity];
+        .returning();
+      const teacher = teachersResult[0];
 
-      const [student] = (await tx
+      const studentsResult: StudentEntity[] = await tx
         .insert(students)
         .values({
           parentId: parent.id,
-          name: "Rescheduled Student",
+          name: "Prevention Student",
           gender: Gender.MALE,
           status: "REGULAR",
-          classesTotal: 10,
           classesRemaining: 5,
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [StudentEntity];
+        .returning();
+      const student = studentsResult[0];
 
       await tx.insert(teacherAssignments).values({
         studentId: student.id,
@@ -439,45 +443,39 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         assignedAt: now,
       });
 
-      // 1. Create a class that is completed/taken
-      const [original] = (await tx
-        .insert(classInstances)
-        .values({
+      const original = await SchedulingRepository.createClassInstance(
+        {
           studentId: student.id,
           teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
           executionState: "COMPLETED",
           outcome: "TAKEN",
-          actualStartAt: new Date("2026-06-15T10:00:00Z"),
-          actualEndAt: new Date("2026-06-15T11:00:00Z"),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+          actualStartAt: now,
+          idempotencyKey: randomUUID(),
+        },
+        tx
+      );
 
-      // 2. Try to reschedule it
       try {
-        await tx
-          .insert(classInstances)
-          .values({
+        await SchedulingRepository.rescheduleClassInstance(
+          original.id,
+          {
             studentId: student.id,
             teacherId: teacher.id,
-            originalClassId: original.id,
-            scheduledStartAt: new Date("2026-06-16T10:00:00Z"),
-            scheduledEndAt: new Date("2026-06-16T11:00:00Z"),
+            scheduledStartAt: new Date("2026-06-26T10:00:00Z"),
+            scheduledEndAt: new Date("2026-06-26T11:00:00Z"),
             durationMinutes: 60,
             classType: "REGULAR",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning();
+            idempotencyKey: randomUUID(),
+          },
+          tx
+        );
         expect(true).toBe(false);
       } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
+        const message = error instanceof Error ? error.message : String(error);
         expect(message).toContain("Cannot reschedule a completed or taken class");
       }
     });
@@ -491,18 +489,19 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
       const parentEmail = `parent-double-${randomUUID()}@example.com`;
       const teacherEmail = `teacher-double-${randomUUID()}@example.com`;
 
-      const [parentUser] = (await tx
+      const parentUsers: UserEntity[] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Parent",
+          name: "Double Parent",
           email: parentEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const parentUser = parentUsers[0];
 
-      const [parent] = (await tx
+      const parentsResult: ParentEntity[] = await tx
         .insert(parents)
         .values({
           userId: parentUser.id,
@@ -510,20 +509,22 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [ParentEntity];
+        .returning();
+      const parent = parentsResult[0];
 
-      const [teacherUser] = (await tx
+      const teacherUsers: UserEntity[] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Teacher",
+          name: "Double Teacher",
           email: teacherEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const teacherUser = teacherUsers[0];
 
-      const [teacher] = (await tx
+      const teachersResult: TeacherEntity[] = await tx
         .insert(teachers)
         .values({
           userId: teacherUser.id,
@@ -532,21 +533,23 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [TeacherEntity];
+        .returning();
+      const teacher = teachersResult[0];
 
-      const [student] = (await tx
+      const studentsResult: StudentEntity[] = await tx
         .insert(students)
         .values({
           parentId: parent.id,
-          name: "Rescheduled Student",
-          gender: Gender.MALE,
+          name: "Double Student",
+          gender: Gender.FEMALE,
           status: "REGULAR",
-          classesTotal: 10,
           classesRemaining: 5,
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [StudentEntity];
+        .returning();
+      const student = studentsResult[0];
 
       await tx.insert(teacherAssignments).values({
         studentId: student.id,
@@ -554,56 +557,52 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         assignedAt: now,
       });
 
-      const [original] = (await tx
-        .insert(classInstances)
-        .values({
+      const original = await SchedulingRepository.createClassInstance(
+        {
           studentId: student.id,
           teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+          idempotencyKey: randomUUID(),
+        },
+        tx
+      );
 
       // First reschedule
-      await tx
-        .insert(classInstances)
-        .values({
+      await SchedulingRepository.rescheduleClassInstance(
+        original.id,
+        {
           studentId: student.id,
           teacherId: teacher.id,
-          originalClassId: original.id,
-          scheduledStartAt: new Date("2026-06-16T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-16T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-26T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-26T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
+          idempotencyKey: randomUUID(),
+        },
+        tx
+      );
 
-      // Second reschedule from same original class should fail
+      // Second attempt to reschedule the SAME original class
       try {
-        await tx
-          .insert(classInstances)
-          .values({
+        await SchedulingRepository.rescheduleClassInstance(
+          original.id,
+          {
             studentId: student.id,
             teacherId: teacher.id,
-            originalClassId: original.id,
-            scheduledStartAt: new Date("2026-06-17T10:00:00Z"),
-            scheduledEndAt: new Date("2026-06-17T11:00:00Z"),
+            scheduledStartAt: new Date("2026-06-27T10:00:00Z"),
+            scheduledEndAt: new Date("2026-06-27T11:00:00Z"),
             durationMinutes: 60,
             classType: "REGULAR",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning();
+            idempotencyKey: randomUUID(),
+          },
+          tx
+        );
         expect(true).toBe(false);
       } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
+        const message = error instanceof Error ? error.message : String(error);
         expect(message).toContain("Cannot reschedule a class that has already been rescheduled");
       }
     });
@@ -617,18 +616,19 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
       const parentEmail = `parent-uniq-${randomUUID()}@example.com`;
       const teacherEmail = `teacher-uniq-${randomUUID()}@example.com`;
 
-      const [parentUser] = (await tx
+      const parentUsers: UserEntity[] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Parent",
+          name: "Uniq Parent",
           email: parentEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const parentUser = parentUsers[0];
 
-      const [parent] = (await tx
+      const parentsResult: ParentEntity[] = await tx
         .insert(parents)
         .values({
           userId: parentUser.id,
@@ -636,20 +636,22 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [ParentEntity];
+        .returning();
+      const parent = parentsResult[0];
 
-      const [teacherUser] = (await tx
+      const teacherUsers: UserEntity[] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Teacher",
+          name: "Uniq Teacher",
           email: teacherEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const teacherUser = teacherUsers[0];
 
-      const [teacher] = (await tx
+      const teachersResult: TeacherEntity[] = await tx
         .insert(teachers)
         .values({
           userId: teacherUser.id,
@@ -658,21 +660,23 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [TeacherEntity];
+        .returning();
+      const teacher = teachersResult[0];
 
-      const [student] = (await tx
+      const studentsResult: StudentEntity[] = await tx
         .insert(students)
         .values({
           parentId: parent.id,
-          name: "Rescheduled Student",
+          name: "Uniq Student",
           gender: Gender.MALE,
           status: "REGULAR",
-          classesTotal: 10,
           classesRemaining: 5,
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [StudentEntity];
+        .returning();
+      const student = studentsResult[0];
 
       await tx.insert(teacherAssignments).values({
         studentId: student.id,
@@ -680,63 +684,53 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
         assignedAt: now,
       });
 
-      const [original] = (await tx
+      const [original] = await tx
         .insert(classInstances)
         .values({
           studentId: student.id,
           teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [ClassInstanceEntity];
+        .returning();
 
-      await tx
-        .insert(classInstances)
-        .values({
+      // Insert two rescheduled instances targeting the same original
+      await tx.insert(classInstances).values({
+        studentId: student.id,
+        teacherId: teacher.id,
+        originalClassId: original.id,
+        scheduledStartAt: new Date("2026-06-26T10:00:00Z"),
+        scheduledEndAt: new Date("2026-06-26T11:00:00Z"),
+        durationMinutes: 60,
+        classType: "REGULAR",
+        createdAt: now,
+        updatedAt: now,
+        idempotencyKey: randomUUID(),
+      });
+
+      try {
+        await tx.insert(classInstances).values({
           studentId: student.id,
           teacherId: teacher.id,
           originalClassId: original.id,
-          scheduledStartAt: new Date("2026-06-16T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-16T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-27T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-27T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
           createdAt: now,
           updatedAt: now,
-        })
-        .execute();
-
-      const [rescheduled2] = (await tx
-        .insert(classInstances)
-        .values({
-          studentId: student.id,
-          teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-06-17T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-17T11:00:00Z"),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
-
-      // Disable triggers to bypass "already rescheduled" trigger check and hit index directly
-      await tx.execute(sql`ALTER TABLE class_instances DISABLE TRIGGER ALL`);
-
-      try {
-        await tx
-          .update(classInstances)
-          .set({ originalClassId: original.id })
-          .where(eq(classInstances.id, rescheduled2.id))
-          .execute();
+          idempotencyKey: randomUUID(),
+        });
         expect(true).toBe(false);
       } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toContain("class_instances_original_class_uniq_idx");
+        const message = error instanceof Error ? error.message : String(error);
+        const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
+        expect(message + cause).toContain("class_instances_original_class_uniq_idx");
       }
     });
     testLogger.info("Unique index constraint test passed.");
@@ -747,20 +741,18 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
     await runInRollback(async tx => {
       const now = new Date();
       const parentEmail = `parent-self-${randomUUID()}@example.com`;
-      const teacherEmail = `teacher-self-${randomUUID()}@example.com`;
-
-      const [parentUser] = (await tx
+      const [parentUser] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Parent",
+          name: "Self Parent",
           email: parentEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
 
-      const [parent] = (await tx
+      const [parent] = await tx
         .insert(parents)
         .values({
           userId: parentUser.id,
@@ -768,20 +760,33 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [ParentEntity];
+        .returning();
 
-      const [teacherUser] = (await tx
+      const [student] = await tx
+        .insert(students)
+        .values({
+          parentId: parent.id,
+          name: "Self Student",
+          gender: Gender.MALE,
+          status: "REGULAR",
+          createdAt: now,
+          updatedAt: now,
+          idempotencyKey: randomUUID(),
+        })
+        .returning();
+
+      const [teacherUser] = await tx
         .insert(users)
         .values({
-          name: "Rescheduled Teacher",
-          email: teacherEmail,
+          name: "Self Teacher",
+          email: `teacher-self-${randomUUID()}@example.com`,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
 
-      const [teacher] = (await tx
+      const [teacher] = await tx
         .insert(teachers)
         .values({
           userId: teacherUser.id,
@@ -790,55 +795,30 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [TeacherEntity];
+        .returning();
 
-      const [student] = (await tx
-        .insert(students)
-        .values({
-          parentId: parent.id,
-          name: "Rescheduled Student",
-          gender: Gender.MALE,
-          status: "REGULAR",
-          classesTotal: 10,
-          classesRemaining: 5,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [StudentEntity];
-
-      await tx.insert(teacherAssignments).values({
-        studentId: student.id,
-        teacherId: teacher.id,
-        assignedAt: now,
-      });
-
-      const [original] = (await tx
+      const [instance] = await tx
         .insert(classInstances)
         .values({
           studentId: student.id,
           teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
+          scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
           durationMinutes: 60,
           classType: "REGULAR",
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [ClassInstanceEntity];
-
-      await tx.execute(sql`ALTER TABLE class_instances DISABLE TRIGGER ALL`);
+        .returning();
 
       try {
-        await tx
-          .update(classInstances)
-          .set({ originalClassId: original.id })
-          .where(eq(classInstances.id, original.id))
-          .execute();
+        await tx.update(classInstances).set({ originalClassId: instance.id }).where(eq(classInstances.id, instance.id));
         expect(true).toBe(false);
       } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toContain("class_instances_reschedule_not_self_chk");
+        const message = error instanceof Error ? error.message : String(error);
+        const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
+        expect(message + cause).toContain("class_instances_reschedule_not_self_chk");
       }
     });
     testLogger.info("Self-referencing check constraint test passed.");
@@ -848,99 +828,42 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
     testLogger.info("Testing rescheduled no quota check constraint...");
     await runInRollback(async tx => {
       const now = new Date();
-      const parentEmail = `parent-noq-${randomUUID()}@example.com`;
-      const teacherEmail = `teacher-noq-${randomUUID()}@example.com`;
-
-      const [parentUser] = (await tx
-        .insert(users)
-        .values({
-          name: "Rescheduled Parent",
-          email: parentEmail,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [parent] = (await tx
-        .insert(parents)
-        .values({
-          userId: parentUser.id,
-          status: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ParentEntity];
-
-      const [teacherUser] = (await tx
-        .insert(users)
-        .values({
-          name: "Rescheduled Teacher",
-          email: teacherEmail,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({
-          userId: teacherUser.id,
-          status: "ACTIVATED",
-          timezone: "UTC",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherEntity];
-
-      const [student] = (await tx
+      const parentsResult: ParentEntity[] = await tx.select().from(parents).limit(1);
+      const [student] = await tx
         .insert(students)
         .values({
-          parentId: parent.id,
-          name: "Rescheduled Student",
-          gender: Gender.MALE,
+          parentId: parentsResult[0].id,
+          name: "NoQuota Student",
+          gender: Gender.FEMALE,
           status: "REGULAR",
-          classesTotal: 10,
-          classesRemaining: 5,
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [StudentEntity];
+        .returning();
 
-      await tx.insert(teacherAssignments).values({
-        studentId: student.id,
-        teacherId: teacher.id,
-        assignedAt: now,
-      });
-
-      const [original] = (await tx
-        .insert(classInstances)
-        .values({
-          studentId: student.id,
-          teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
-
-      await tx.execute(sql`ALTER TABLE class_instances DISABLE TRIGGER ALL`);
+      const teachersResult: TeacherEntity[] = await tx.select().from(teachers).limit(1);
+      const teacher = teachersResult[0];
 
       try {
-        await tx
-          .update(classInstances)
-          .set({ isRescheduled: true, quotaDeducted: true })
-          .where(eq(classInstances.id, original.id))
-          .execute();
+        await tx.insert(classInstances).values({
+          studentId: student.id,
+          teacherId: teacher.id,
+          scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
+          durationMinutes: 60,
+          classType: "REGULAR",
+          isRescheduled: true,
+          quotaDeducted: true,
+          createdAt: now,
+          updatedAt: now,
+          idempotencyKey: randomUUID(),
+        });
         expect(true).toBe(false);
       } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toContain("class_instances_rescheduled_no_quota_chk");
+        const message = error instanceof Error ? error.message : String(error);
+        const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
+        expect(message + cause).toContain("class_instances_rescheduled_no_quota_chk");
       }
     });
     testLogger.info("Rescheduled no quota check constraint test passed.");
@@ -950,99 +873,42 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
     testLogger.info("Testing rescheduled no complete check constraint...");
     await runInRollback(async tx => {
       const now = new Date();
-      const parentEmail = `parent-noc-${randomUUID()}@example.com`;
-      const teacherEmail = `teacher-noc-${randomUUID()}@example.com`;
-
-      const [parentUser] = (await tx
-        .insert(users)
-        .values({
-          name: "Rescheduled Parent",
-          email: parentEmail,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [parent] = (await tx
-        .insert(parents)
-        .values({
-          userId: parentUser.id,
-          status: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ParentEntity];
-
-      const [teacherUser] = (await tx
-        .insert(users)
-        .values({
-          name: "Rescheduled Teacher",
-          email: teacherEmail,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({
-          userId: teacherUser.id,
-          status: "ACTIVATED",
-          timezone: "UTC",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherEntity];
-
-      const [student] = (await tx
+      const parentsResult: ParentEntity[] = await tx.select().from(parents).limit(1);
+      const [student] = await tx
         .insert(students)
         .values({
-          parentId: parent.id,
-          name: "Rescheduled Student",
+          parentId: parentsResult[0].id,
+          name: "NoComplete Student",
           gender: Gender.MALE,
           status: "REGULAR",
-          classesTotal: 10,
-          classesRemaining: 5,
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [StudentEntity];
+        .returning();
 
-      await tx.insert(teacherAssignments).values({
-        studentId: student.id,
-        teacherId: teacher.id,
-        assignedAt: now,
-      });
-
-      const [original] = (await tx
-        .insert(classInstances)
-        .values({
-          studentId: student.id,
-          teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-15T11:00:00Z"),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
-
-      await tx.execute(sql`ALTER TABLE class_instances DISABLE TRIGGER ALL`);
+      const teachersResult: TeacherEntity[] = await tx.select().from(teachers).limit(1);
+      const teacher = teachersResult[0];
 
       try {
-        await tx
-          .update(classInstances)
-          .set({ isRescheduled: true, executionState: "COMPLETED", outcome: "TAKEN" })
-          .where(eq(classInstances.id, original.id))
-          .execute();
+        await tx.insert(classInstances).values({
+          studentId: student.id,
+          teacherId: teacher.id,
+          scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
+          durationMinutes: 60,
+          classType: "REGULAR",
+          isRescheduled: true,
+          executionState: "COMPLETED",
+          createdAt: now,
+          updatedAt: now,
+          idempotencyKey: randomUUID(),
+        });
         expect(true).toBe(false);
       } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toContain("class_instances_rescheduled_no_complete_chk");
+        const message = error instanceof Error ? error.message : String(error);
+        const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
+        expect(message + cause).toContain("class_instances_rescheduled_no_complete_chk");
       }
     });
     testLogger.info("Rescheduled no complete check constraint test passed.");

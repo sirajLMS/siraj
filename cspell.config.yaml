@@ -40,3 +40,11 @@ words:
   - rolname
   - ciphertext
   - recalc
+  - sess
+  - xact
+  - hashtext
+  - iana
+  - resched
+  - sched
+  - nonassign
+  - updateassign

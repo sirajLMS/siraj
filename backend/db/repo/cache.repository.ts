@@ -1,15 +1,27 @@
 import { eq, lt } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { cache } from "@/backend/db/schema/cache";
+import { rateLimitCache, sessionCache } from "@/backend/db/schema/cache";
 import logger from "@/backend/lib/logger";
 
 export namespace CacheDbRepository {
+  /**
+   * Determine which table to use based on key prefix
+   * Rate limiting keys go to UNLOGGED table
+   */
+  const getTable = (key: string) => {
+    if (key.startsWith("ratelimit:") || key.startsWith("auth:")) {
+      return rateLimitCache;
+    }
+    return sessionCache;
+  };
+
   /**
    * Get cache entry by key
    */
   export const get = async (key: string): Promise<{ value: string; expiresAt: Date } | null> => {
     try {
-      const result = await db.select().from(cache).where(eq(cache.key, key)).limit(1);
+      const table = getTable(key);
+      const result = await db.select().from(table).where(eq(table.key, key)).limit(1);
 
       if (result.length === 0 || !result[0]) {
         return null;
@@ -29,7 +41,7 @@ export namespace CacheDbRepository {
         expiresAt: entry.expiresAt,
       };
     } catch (error) {
-      logger.error("Failed to get cache entry:", error);
+      logger.error(`Failed to get cache entry for key ${key}:`, error);
       return null;
     }
   };
@@ -39,22 +51,23 @@ export namespace CacheDbRepository {
    */
   export const set = async (key: string, value: string, expiresAt: Date): Promise<void> => {
     try {
+      const table = getTable(key);
       await db
-        .insert(cache)
+        .insert(table)
         .values({
           key,
           value,
           expiresAt,
         })
         .onConflictDoUpdate({
-          target: cache.key,
+          target: table.key,
           set: {
             value,
             expiresAt,
           },
         });
     } catch (error) {
-      logger.error("Failed to set cache entry:", error);
+      logger.error(`Failed to set cache entry for key ${key}:`, error);
       throw error;
     }
   };
@@ -79,7 +92,7 @@ export namespace CacheDbRepository {
       await set(key, newValue.toString(), existing.expiresAt);
       return newValue;
     } catch (error) {
-      logger.error("Failed to increment cache value:", error);
+      logger.error(`Failed to increment cache value for key ${key}:`, error);
       throw error;
     }
   };
@@ -89,10 +102,11 @@ export namespace CacheDbRepository {
    */
   export const del = async (key: string): Promise<boolean> => {
     try {
-      await db.delete(cache).where(eq(cache.key, key));
+      const table = getTable(key);
+      await db.delete(table).where(eq(table.key, key));
       return true;
     } catch (error) {
-      logger.error("Failed to delete cache entry:", error);
+      logger.error(`Failed to delete cache entry for key ${key}:`, error);
       return false;
     }
   };
@@ -111,22 +125,28 @@ export namespace CacheDbRepository {
       const diffMs = entry.expiresAt.getTime() - now.getTime();
       return Math.max(0, Math.floor(diffMs / 1000));
     } catch (error) {
-      logger.error("Failed to get TTL:", error);
+      logger.error(`Failed to get TTL for key ${key}:`, error);
       return -1;
     }
   };
 
   /**
-   * Delete expired entries
+   * Delete expired entries from both tables
    */
   export const deleteExpired = async (): Promise<number> => {
     try {
       const now = new Date();
-      const result = await db.delete(cache).where(lt(cache.expiresAt, now)).returning();
 
-      const deletedCount = result.length;
+      const [rateLimitResult, sessionResult] = await Promise.all([
+        db.delete(rateLimitCache).where(lt(rateLimitCache.expiresAt, now)).returning(),
+        db.delete(sessionCache).where(lt(sessionCache.expiresAt, now)).returning(),
+      ]);
+
+      const deletedCount = rateLimitResult.length + sessionResult.length;
       if (deletedCount > 0) {
-        logger.log(`Cleaned up ${deletedCount} expired cache entries`);
+        logger.log(
+          `Cleaned up ${deletedCount} expired cache entries (${rateLimitResult.length} rate limit, ${sessionResult.length} session)`
+        );
       }
 
       return deletedCount;
@@ -137,11 +157,11 @@ export namespace CacheDbRepository {
   };
 
   /**
-   * Check if cache table is accessible (ping equivalent)
+   * Check if cache tables are accessible
    */
   export const ping = async (): Promise<boolean> => {
     try {
-      await db.select().from(cache).limit(1);
+      await Promise.all([db.select().from(rateLimitCache).limit(1), db.select().from(sessionCache).limit(1)]);
       return true;
     } catch (error) {
       logger.error("Cache ping failed:", error);

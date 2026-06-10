@@ -62,6 +62,7 @@ describe("Student Status Transitions & History", () => {
           parentId: parent.id,
           name: "Test Student",
           status: StudentStatus.ON_TRIAL,
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -99,6 +100,7 @@ describe("Student Status Transitions & History", () => {
           parentId: parent.id,
           name: "Student",
           status: StudentStatus.ON_TRIAL,
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -138,7 +140,14 @@ describe("Student Status Transitions & History", () => {
         .returning()) as [ParentEntity];
       const [student] = (await tx
         .insert(students)
-        .values({ parentId: parent.id, name: "Student", status: StudentStatus.REGULAR, createdAt: now, updatedAt: now })
+        .values({
+          parentId: parent.id,
+          name: "Student",
+          status: StudentStatus.REGULAR,
+          idempotencyKey: randomUUID(),
+          createdAt: now,
+          updatedAt: now,
+        })
         .returning()) as [StudentEntity];
 
       try {
@@ -173,6 +182,7 @@ describe("Student Status Transitions & History", () => {
           parentId: parent.id,
           name: "Student",
           status: StudentStatus.GRADUATED,
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -219,6 +229,7 @@ describe("Student Status Transitions & History", () => {
           parentId: parent.id,
           name: "Student",
           status: StudentStatus.ON_TRIAL,
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })

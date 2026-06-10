@@ -1,19 +1,34 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { fileUsages, storageDirectories, storageFiles } from "@/backend/db/schema/storage";
+import {
+  classInstanceFiles,
+  complaintFiles,
+  invoiceFiles,
+  learningResourceFiles,
+  parentFiles,
+  recurringScheduleFiles,
+  staffProfileFiles,
+  storageDirectories,
+  storageFiles,
+  studentFiles,
+  teacherFiles,
+  userFiles,
+} from "@/backend/db/schema/storage";
 import logger from "@/backend/lib/logger";
 import type * as StorageTypes from "@/backend/types";
 
 export namespace StorageDbRepository {
   // File operations
-  export const fileById = async (id: string): Promise<StorageTypes.FileEntity | undefined> => {
-    const result = await db.select().from(storageFiles).where(eq(storageFiles.id, id)).limit(1);
-    return result[0];
+  export const fileById = async (id: string): Promise<StorageTypes.FileEntity | null> => {
+    const results = await db.select().from(storageFiles).where(eq(storageFiles.id, id)).limit(1);
+    if (results.length === 0) return null;
+    return results[0];
   };
 
-  export const fileByPath = async (path: string): Promise<StorageTypes.FileEntity | undefined> => {
-    const result = await db.select().from(storageFiles).where(eq(storageFiles.path, path)).limit(1);
-    return result[0];
+  export const fileByPath = async (path: string): Promise<StorageTypes.FileEntity | null> => {
+    const results = await db.select().from(storageFiles).where(eq(storageFiles.path, path)).limit(1);
+    if (results.length === 0) return null;
+    return results[0];
   };
 
   export const filesByIds = async (ids: string[]): Promise<StorageTypes.FileEntity[]> => {
@@ -25,8 +40,9 @@ export namespace StorageDbRepository {
     if (paths.length === 0) return [];
     return await db.select().from(storageFiles).where(inArray(storageFiles.path, paths));
   };
+
   export const createFile = async (path: string, isProtected: boolean = false): Promise<StorageTypes.FileEntity> => {
-    const [file] = await db
+    const results = await db
       .insert(storageFiles)
       .values({
         path,
@@ -39,7 +55,7 @@ export namespace StorageDbRepository {
         },
       })
       .returning();
-    return file;
+    return results[0];
   };
 
   export const updateFile = async (
@@ -47,7 +63,7 @@ export namespace StorageDbRepository {
       id: string;
     }
   ): Promise<StorageTypes.FileEntity | undefined> => {
-    const [updatedFile] = await db
+    const results = await db
       .update(storageFiles)
       .set({
         path: file.path,
@@ -55,7 +71,8 @@ export namespace StorageDbRepository {
       })
       .where(eq(storageFiles.id, file.id))
       .returning();
-    return updatedFile;
+    if (results.length === 0) return undefined;
+    return results[0];
   };
 
   export const deleteFile = async (path: string): Promise<boolean> => {
@@ -72,7 +89,7 @@ export namespace StorageDbRepository {
   export const directoryByPath = async (path: string): Promise<StorageTypes.DirectoryEntity | null> => {
     try {
       const result = await db.select().from(storageDirectories).where(eq(storageDirectories.path, path)).limit(1);
-      if (result.length === 0 || !result[0]) {
+      if (result.length === 0) {
         return null;
       }
       return result[0];
@@ -109,7 +126,7 @@ export namespace StorageDbRepository {
       allowMoveFiles: true,
     };
 
-    const [directory] = await db
+    const results = await db
       .insert(storageDirectories)
       .values({
         path: input.path,
@@ -123,13 +140,13 @@ export namespace StorageDbRepository {
         protectChildren: input.protectChildren || false,
       })
       .returning();
-    return directory;
+    return results[0];
   };
 
   export const updateDirectory = async (
     directory: StorageTypes.DirectoryEntity
   ): Promise<StorageTypes.DirectoryEntity | undefined> => {
-    const [updatedDirectory] = await db
+    const results = await db
       .update(storageDirectories)
       .set({
         path: directory.path,
@@ -144,7 +161,8 @@ export namespace StorageDbRepository {
       })
       .where(eq(storageDirectories.id, directory.id))
       .returning();
-    return updatedDirectory;
+    if (results.length === 0) return undefined;
+    return results[0];
   };
 
   export const deleteDirectory = async (path: string): Promise<boolean> => {
@@ -158,52 +176,259 @@ export namespace StorageDbRepository {
   };
 
   // File usage operations
-  export const getFileUsages = async (filePath: string): Promise<StorageTypes.FileUsageEntity[]> => {
-    return await db.select().from(fileUsages).where(eq(fileUsages.filePath, filePath));
+  export const getFileUsages = async (filePath: string): Promise<StorageTypes.FileUsageInfo[]> => {
+    const file = await fileByPath(filePath);
+    if (!file) return [];
+
+    const allUsages: StorageTypes.FileUsageInfo[] = [];
+
+    // Explicitly query each table to remain 100% type-safe without 'any' or casting
+    const queries = [
+      db
+        .select()
+        .from(userFiles)
+        .where(eq(userFiles.fileId, file.id))
+        .then(rows =>
+          rows.map(r => ({
+            id: r.id,
+            filePath: file.path,
+            usageType: r.usageType,
+            referenceId: r.userId,
+            referenceTable: "users",
+            createdAt: r.createdAt,
+          }))
+        ),
+      db
+        .select()
+        .from(teacherFiles)
+        .where(eq(teacherFiles.fileId, file.id))
+        .then(rows =>
+          rows.map(r => ({
+            id: r.id,
+            filePath: file.path,
+            usageType: r.usageType,
+            referenceId: r.teacherId,
+            referenceTable: "teachers",
+            createdAt: r.createdAt,
+          }))
+        ),
+      db
+        .select()
+        .from(studentFiles)
+        .where(eq(studentFiles.fileId, file.id))
+        .then(rows =>
+          rows.map(r => ({
+            id: r.id,
+            filePath: file.path,
+            usageType: r.usageType,
+            referenceId: r.studentId,
+            referenceTable: "students",
+            createdAt: r.createdAt,
+          }))
+        ),
+      db
+        .select()
+        .from(parentFiles)
+        .where(eq(parentFiles.fileId, file.id))
+        .then(rows =>
+          rows.map(r => ({
+            id: r.id,
+            filePath: file.path,
+            usageType: r.usageType,
+            referenceId: r.parentId,
+            referenceTable: "parents",
+            createdAt: r.createdAt,
+          }))
+        ),
+      db
+        .select()
+        .from(invoiceFiles)
+        .where(eq(invoiceFiles.fileId, file.id))
+        .then(rows =>
+          rows.map(r => ({
+            id: r.id,
+            filePath: file.path,
+            usageType: r.usageType,
+            referenceId: r.invoiceId,
+            referenceTable: "invoices",
+            createdAt: r.createdAt,
+          }))
+        ),
+      db
+        .select()
+        .from(complaintFiles)
+        .where(eq(complaintFiles.fileId, file.id))
+        .then(rows =>
+          rows.map(r => ({
+            id: r.id,
+            filePath: file.path,
+            usageType: r.usageType,
+            referenceId: r.complaintId,
+            referenceTable: "complaints",
+            createdAt: r.createdAt,
+          }))
+        ),
+      db
+        .select()
+        .from(learningResourceFiles)
+        .where(eq(learningResourceFiles.fileId, file.id))
+        .then(rows =>
+          rows.map(r => ({
+            id: r.id,
+            filePath: file.path,
+            usageType: r.usageType,
+            referenceId: r.learningResourceId,
+            referenceTable: "learning_resources",
+            createdAt: r.createdAt,
+          }))
+        ),
+      db
+        .select()
+        .from(staffProfileFiles)
+        .where(eq(staffProfileFiles.fileId, file.id))
+        .then(rows =>
+          rows.map(r => ({
+            id: r.id,
+            filePath: file.path,
+            usageType: r.usageType,
+            referenceId: r.staffProfileId,
+            referenceTable: "staff_profiles",
+            createdAt: r.createdAt,
+          }))
+        ),
+      db
+        .select()
+        .from(recurringScheduleFiles)
+        .where(eq(recurringScheduleFiles.fileId, file.id))
+        .then(rows =>
+          rows.map(r => ({
+            id: r.id,
+            filePath: file.path,
+            usageType: r.usageType,
+            referenceId: r.recurringScheduleId,
+            referenceTable: "recurring_schedules",
+            createdAt: r.createdAt,
+          }))
+        ),
+      db
+        .select()
+        .from(classInstanceFiles)
+        .where(eq(classInstanceFiles.fileId, file.id))
+        .then(rows =>
+          rows.map(r => ({
+            id: r.id,
+            filePath: file.path,
+            usageType: r.usageType,
+            referenceId: r.classInstanceId,
+            referenceTable: "class_instances",
+            createdAt: r.createdAt,
+          }))
+        ),
+    ];
+
+    const results = await Promise.all(queries);
+    for (const batch of results) {
+      allUsages.push(...batch);
+    }
+
+    return allUsages;
   };
 
   export const isFileInUse = async (filePath: string): Promise<boolean> => {
-    const usages = await getFileUsages(filePath);
-    return usages.length > 0;
+    const file = await fileByPath(filePath);
+    if (!file) return false;
+
+    const tables = [
+      userFiles,
+      teacherFiles,
+      studentFiles,
+      parentFiles,
+      invoiceFiles,
+      complaintFiles,
+      learningResourceFiles,
+      staffProfileFiles,
+      recurringScheduleFiles,
+      classInstanceFiles,
+    ];
+
+    // Check all junction tables for at least one record
+    for (const table of tables) {
+      const results = await db.select({ id: table.id }).from(table).where(eq(table.fileId, file.id)).limit(1);
+      if (results.length > 0) return true;
+    }
+
+    return false;
   };
 
   export const registerFileUsage = async (
     input: StorageTypes.FileUsageRegisterInput
   ): Promise<StorageTypes.FileOperationResult> => {
     try {
-      // Check if file exists in DB, if not, add it
-      const fileEntity = await fileByPath(input.filePath);
-      if (!fileEntity) {
-        try {
-          await createFile(input.filePath);
-          logger.info(`📁 Registered file in DB upon first usage: ${input.filePath}`);
-        } catch (error) {
-          return {
-            success: false,
-            message: `Failed to register file from bucket: ${error}`,
-          };
-        }
-      }
+      const { referenceTable, referenceId, usageType, filePath } = input;
 
-      await db.insert(fileUsages).values({
-        filePath: input.filePath,
-        usageType: input.usageType,
-        referenceId: input.referenceId,
-        referenceTable: input.referenceTable,
-        createdAt: new Date(),
-      });
+      // Register file in DB (handles conflict if already exists)
+      const file = await createFile(filePath);
+      const fileId = file.id;
 
-      return {
-        success: true,
-        message: "File usage registered successfully",
-      };
+      const createdAt = new Date();
+      await performJunctionInsert(referenceTable, fileId, referenceId, usageType, createdAt);
+
+      return { success: true, message: "File usage registered successfully" };
     } catch (error) {
-      return {
-        success: false,
-        message: `Failed to register file usage: ${error}`,
-      };
+      return { success: false, message: `Failed to register file usage: ${error}` };
     }
   };
+
+  /**
+   * Helper to perform the actual junction table insertion in a type-safe way.
+   * This reduces cognitive complexity of the main method.
+   */
+  async function performJunctionInsert(
+    table: string,
+    fileId: string,
+    refId: string,
+    type: string,
+    createdAt: Date
+  ): Promise<void> {
+    switch (table) {
+      case "users":
+        await db.insert(userFiles).values({ fileId, userId: refId, usageType: type, createdAt });
+        break;
+      case "teachers":
+        await db.insert(teacherFiles).values({ fileId, teacherId: refId, usageType: type, createdAt });
+        break;
+      case "students":
+        await db.insert(studentFiles).values({ fileId, studentId: refId, usageType: type, createdAt });
+        break;
+      case "parents":
+        await db.insert(parentFiles).values({ fileId, parentId: refId, usageType: type, createdAt });
+        break;
+      case "invoices":
+        await db.insert(invoiceFiles).values({ fileId, invoiceId: refId, usageType: type, createdAt });
+        break;
+      case "complaints":
+        await db.insert(complaintFiles).values({ fileId, complaintId: refId, usageType: type, createdAt });
+        break;
+      case "learning_resources":
+        await db
+          .insert(learningResourceFiles)
+          .values({ fileId, learningResourceId: refId, usageType: type, createdAt });
+        break;
+      case "staff_profiles":
+        await db.insert(staffProfileFiles).values({ fileId, staffProfileId: refId, usageType: type, createdAt });
+        break;
+      case "recurring_schedules":
+        await db
+          .insert(recurringScheduleFiles)
+          .values({ fileId, recurringScheduleId: refId, usageType: type, createdAt });
+        break;
+      case "class_instances":
+        await db.insert(classInstanceFiles).values({ fileId, classInstanceId: refId, usageType: type, createdAt });
+        break;
+      default:
+        throw new Error(`Unsupported table: ${table}`);
+    }
+  }
 
   export const unregisterFileUsage = async (
     filePath: string,
@@ -211,15 +436,100 @@ export namespace StorageDbRepository {
     referenceId: string
   ): Promise<boolean> => {
     try {
-      await db
-        .delete(fileUsages)
-        .where(
-          and(
-            eq(fileUsages.filePath, filePath),
-            eq(fileUsages.usageType, usageType),
-            eq(fileUsages.referenceId, referenceId)
-          )
-        );
+      const file = await fileByPath(filePath);
+      if (!file) return true; // Already gone or not tracked
+
+      const fileId = file.id;
+
+      await Promise.all([
+        db
+          .delete(userFiles)
+          .where(
+            and(eq(userFiles.fileId, fileId), eq(userFiles.usageType, usageType), eq(userFiles.userId, referenceId))
+          ),
+        db
+          .delete(teacherFiles)
+          .where(
+            and(
+              eq(teacherFiles.fileId, fileId),
+              eq(teacherFiles.usageType, usageType),
+              eq(teacherFiles.teacherId, referenceId)
+            )
+          ),
+        db
+          .delete(studentFiles)
+          .where(
+            and(
+              eq(studentFiles.fileId, fileId),
+              eq(studentFiles.usageType, usageType),
+              eq(studentFiles.studentId, referenceId)
+            )
+          ),
+        db
+          .delete(parentFiles)
+          .where(
+            and(
+              eq(parentFiles.fileId, fileId),
+              eq(parentFiles.usageType, usageType),
+              eq(parentFiles.parentId, referenceId)
+            )
+          ),
+        db
+          .delete(invoiceFiles)
+          .where(
+            and(
+              eq(invoiceFiles.fileId, fileId),
+              eq(invoiceFiles.usageType, usageType),
+              eq(invoiceFiles.invoiceId, referenceId)
+            )
+          ),
+        db
+          .delete(complaintFiles)
+          .where(
+            and(
+              eq(complaintFiles.fileId, fileId),
+              eq(complaintFiles.usageType, usageType),
+              eq(complaintFiles.complaintId, referenceId)
+            )
+          ),
+        db
+          .delete(learningResourceFiles)
+          .where(
+            and(
+              eq(learningResourceFiles.fileId, fileId),
+              eq(learningResourceFiles.usageType, usageType),
+              eq(learningResourceFiles.learningResourceId, referenceId)
+            )
+          ),
+        db
+          .delete(staffProfileFiles)
+          .where(
+            and(
+              eq(staffProfileFiles.fileId, fileId),
+              eq(staffProfileFiles.usageType, usageType),
+              eq(staffProfileFiles.staffProfileId, referenceId)
+            )
+          ),
+        db
+          .delete(recurringScheduleFiles)
+          .where(
+            and(
+              eq(recurringScheduleFiles.fileId, fileId),
+              eq(recurringScheduleFiles.usageType, usageType),
+              eq(recurringScheduleFiles.recurringScheduleId, referenceId)
+            )
+          ),
+        db
+          .delete(classInstanceFiles)
+          .where(
+            and(
+              eq(classInstanceFiles.fileId, fileId),
+              eq(classInstanceFiles.usageType, usageType),
+              eq(classInstanceFiles.classInstanceId, referenceId)
+            )
+          ),
+      ]);
+
       return true;
     } catch (error) {
       logger.error("Failed to unregister file usage:", error);
@@ -232,23 +542,17 @@ export namespace StorageDbRepository {
     input: StorageTypes.FileUsageCheckInput
   ): Promise<StorageTypes.FileUsageResult> => {
     try {
-      const isInUse = await isFileInUse(input.path);
-      const usages = isInUse ? await getFileUsages(input.path) : [];
+      const usages = await getFileUsages(input.path);
+      const isInUse = usages.length > 0;
 
       return {
         isInUse,
-        usages: usages.map(usage => ({
-          id: usage.id,
-          filePath: usage.filePath,
-          usageType: usage.usageType,
-          referenceId: usage.referenceId,
-          referenceTable: usage.referenceTable,
-          createdAt: usage.createdAt,
-        })),
+        usages,
         canDelete: !isInUse,
         deleteBlockReason: isInUse ? "File is currently being used" : undefined,
       };
-    } catch {
+    } catch (err) {
+      logger.error("Error checking file usage:", err);
       return {
         isInUse: false,
         usages: [],

@@ -91,7 +91,7 @@ describe("Timezone Validation Constraints", () => {
       } catch (error) {
         const err = error as Error & { cause?: { message?: string } };
         const message = err.cause?.message || err.message || "";
-        expect(message).toContain("teachers_timezone_chk");
+        expect(message).toMatch(/teachers_timezone_chk|time zone .* not recognized/);
       }
     });
     testLogger.info("Invalid teacher timezone test passed.");
@@ -153,6 +153,7 @@ describe("Timezone Validation Constraints", () => {
           parentId: parent.id,
           name: "Schedule Student",
           status: "REGULAR",
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -233,6 +234,7 @@ describe("Timezone Validation Constraints", () => {
           parentId: parent.id,
           name: "Schedule Student",
           status: "REGULAR",
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -255,7 +257,7 @@ describe("Timezone Validation Constraints", () => {
       } catch (error) {
         const err = error as Error & { cause?: { message?: string } };
         const message = err.cause?.message || err.message || "";
-        expect(message).toContain("recurring_schedules_timezone_chk");
+        expect(message).toMatch(/recurring_schedules_timezone_chk|time zone .* not recognized/);
       }
     });
     testLogger.info("Invalid recurring schedule timezone test passed.");

@@ -78,6 +78,7 @@ export const StudentCreateInputPothosObject = gqlSchemaBuilder
       }),
       classesTotal: t.int({ required: false }),
       classesRemaining: t.int({ required: false }),
+      idempotencyKey: t.string({ required: true }),
     }),
   });
 

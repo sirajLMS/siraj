@@ -179,7 +179,7 @@ export namespace StorageUtils {
     return result;
   };
 
-  export const combineFileData = (bucketFile: Types.BucketFile, dbEntity?: Types.FileEntity): Types.FileInfo => {
+  export const combineFileData = (bucketFile: Types.BucketFile, dbEntity?: Types.FileEntity | null): Types.FileInfo => {
     const usages: Types.FileUsageInfo[] = [];
     const isProtected = dbEntity?.isProtected || false;
 

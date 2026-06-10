@@ -13,4 +13,5 @@ export * from "./storage";
 export * from "./students";
 export * from "./teacher-banking";
 export * from "./teachers";
+export * from "./timezones";
 export * from "./users";

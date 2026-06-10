@@ -1,4 +1,4 @@
-import type { fileUsages, storageDirectories, storageFiles } from "@/backend/db/schema/storage";
+import type { storageDirectories, storageFiles } from "@/backend/db/schema/storage";
 import type { OrderSortDirection } from "@/lib/enum";
 
 // Type aliases to match Kotlin entities
@@ -7,9 +7,6 @@ export type FileEntityInput = typeof storageFiles.$inferInsert;
 
 export type DirectoryEntity = typeof storageDirectories.$inferSelect;
 export type DirectoryEntityInput = typeof storageDirectories.$inferInsert;
-
-export type FileUsageEntity = typeof fileUsages.$inferSelect;
-export type FileUsageEntityInput = typeof fileUsages.$inferInsert;
 
 export interface DirectoryPermissions {
   allowUploads: boolean;

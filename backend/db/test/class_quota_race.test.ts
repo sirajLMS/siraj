@@ -3,8 +3,12 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { Gender } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
-import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
+import type { UserEntity } from "../../types/auth.types";
+import type { ParentEntity } from "../../types/parent.types";
+import type { StudentEntity } from "../../types/student.types";
+import type { TeacherEntity } from "../../types/teacher.types";
 import { db } from "../drizzleDb";
+import { SchedulingRepository } from "../repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -36,7 +40,7 @@ describe("Class Quota System Constraints & Triggers", () => {
       const parentEmail = `parent-quota-${randomUUID()}@example.com`;
       const teacherEmail = `teacher-quota-${randomUUID()}@example.com`;
 
-      const [parentUser] = (await tx
+      const parentUsers: UserEntity[] = await tx
         .insert(users)
         .values({
           name: "Quota Parent",
@@ -45,9 +49,10 @@ describe("Class Quota System Constraints & Triggers", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const parentUser = parentUsers[0];
 
-      const [parent] = (await tx
+      const parentsResult: ParentEntity[] = await tx
         .insert(parents)
         .values({
           userId: parentUser.id,
@@ -55,9 +60,10 @@ describe("Class Quota System Constraints & Triggers", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [ParentEntity];
+        .returning();
+      const parent = parentsResult[0];
 
-      const [teacherUser] = (await tx
+      const teacherUsers: UserEntity[] = await tx
         .insert(users)
         .values({
           name: "Quota Teacher",
@@ -66,9 +72,10 @@ describe("Class Quota System Constraints & Triggers", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const teacherUser = teacherUsers[0];
 
-      const [teacher] = (await tx
+      const teachersResult: TeacherEntity[] = await tx
         .insert(teachers)
         .values({
           userId: teacherUser.id,
@@ -77,9 +84,10 @@ describe("Class Quota System Constraints & Triggers", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [TeacherEntity];
+        .returning();
+      const teacher = teachersResult[0];
 
-      const [student] = (await tx
+      const studentsResult: StudentEntity[] = await tx
         .insert(students)
         .values({
           parentId: parent.id,
@@ -90,8 +98,10 @@ describe("Class Quota System Constraints & Triggers", () => {
           classesRemaining: 5,
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [StudentEntity];
+        .returning();
+      const student = studentsResult[0];
 
       await tx.insert(teacherAssignments).values({
         studentId: student.id,
@@ -100,9 +110,8 @@ describe("Class Quota System Constraints & Triggers", () => {
       });
 
       // 1. Insert class with quota_deducted = true
-      const [instance1] = (await tx
-        .insert(classInstances)
-        .values({
+      const instance1 = await SchedulingRepository.createClassInstance(
+        {
           studentId: student.id,
           teacherId: teacher.id,
           scheduledStartAt: new Date("2026-06-15T10:00:00Z"),
@@ -110,21 +119,22 @@ describe("Class Quota System Constraints & Triggers", () => {
           durationMinutes: 60,
           classType: "REGULAR",
           quotaDeducted: true,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+          idempotencyKey: randomUUID(),
+        },
+        tx
+      );
 
       // Fetch student to verify classesRemaining decremented to 4
-      const [updatedStudent1] = (await tx.select().from(students).where(eq(students.id, student.id)).limit(1)) as [
-        StudentEntity,
-      ];
-      expect(updatedStudent1.classesRemaining).toBe(4);
+      const studentsAfter1: StudentEntity[] = await tx
+        .select()
+        .from(students)
+        .where(eq(students.id, student.id))
+        .limit(1);
+      expect(studentsAfter1[0].classesRemaining).toBe(4);
 
       // 2. Insert class with quota_deducted = false
-      const [instance2] = (await tx
-        .insert(classInstances)
-        .values({
+      const instance2 = await SchedulingRepository.createClassInstance(
+        {
           studentId: student.id,
           teacherId: teacher.id,
           scheduledStartAt: new Date("2026-06-16T10:00:00Z"),
@@ -132,40 +142,48 @@ describe("Class Quota System Constraints & Triggers", () => {
           durationMinutes: 60,
           classType: "REGULAR",
           quotaDeducted: false,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+          idempotencyKey: randomUUID(),
+        },
+        tx
+      );
 
       // Fetch student to verify classesRemaining remains 4
-      const [updatedStudent2] = (await tx.select().from(students).where(eq(students.id, student.id)).limit(1)) as [
-        StudentEntity,
-      ];
-      expect(updatedStudent2.classesRemaining).toBe(4);
+      const studentsAfter2: StudentEntity[] = await tx
+        .select()
+        .from(students)
+        .where(eq(students.id, student.id))
+        .limit(1);
+      expect(studentsAfter2[0].classesRemaining).toBe(4);
 
       // 3. Update class2 to quota_deducted = true
-      await tx.update(classInstances).set({ quotaDeducted: true }).where(eq(classInstances.id, instance2.id));
+      await SchedulingRepository.updateClassInstance(instance2.id, { quotaDeducted: true }, tx);
 
-      const [updatedStudent3] = (await tx.select().from(students).where(eq(students.id, student.id)).limit(1)) as [
-        StudentEntity,
-      ];
-      expect(updatedStudent3.classesRemaining).toBe(3);
+      const studentsAfter3: StudentEntity[] = await tx
+        .select()
+        .from(students)
+        .where(eq(students.id, student.id))
+        .limit(1);
+      expect(studentsAfter3[0].classesRemaining).toBe(3);
 
       // 4. Update class1 to quota_deducted = false (refund)
-      await tx.update(classInstances).set({ quotaDeducted: false }).where(eq(classInstances.id, instance1.id));
+      await SchedulingRepository.updateClassInstance(instance1.id, { quotaDeducted: false }, tx);
 
-      const [updatedStudent4] = (await tx.select().from(students).where(eq(students.id, student.id)).limit(1)) as [
-        StudentEntity,
-      ];
-      expect(updatedStudent4.classesRemaining).toBe(4);
+      const studentsAfter4: StudentEntity[] = await tx
+        .select()
+        .from(students)
+        .where(eq(students.id, student.id))
+        .limit(1);
+      expect(studentsAfter4[0].classesRemaining).toBe(4);
 
       // 5. Soft delete class2 (refunds the quota)
-      await tx.update(classInstances).set({ deletedAt: now }).where(eq(classInstances.id, instance2.id));
+      await SchedulingRepository.updateClassInstance(instance2.id, { deletedAt: now }, tx);
 
-      const [updatedStudent5] = (await tx.select().from(students).where(eq(students.id, student.id)).limit(1)) as [
-        StudentEntity,
-      ];
-      expect(updatedStudent5.classesRemaining).toBe(5);
+      const studentsAfter5: StudentEntity[] = await tx
+        .select()
+        .from(students)
+        .where(eq(students.id, student.id))
+        .limit(1);
+      expect(studentsAfter5[0].classesRemaining).toBe(5);
     });
     testLogger.info("Deduction and refund tests passed.");
   });
@@ -177,7 +195,7 @@ describe("Class Quota System Constraints & Triggers", () => {
       const parentEmail = `parent-block-${randomUUID()}@example.com`;
       const teacherEmail = `teacher-block-${randomUUID()}@example.com`;
 
-      const [parentUser] = (await tx
+      const parentUsers: UserEntity[] = await tx
         .insert(users)
         .values({
           name: "Block Parent",
@@ -186,9 +204,10 @@ describe("Class Quota System Constraints & Triggers", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const parentUser = parentUsers[0];
 
-      const [parent] = (await tx
+      const parentsResult: ParentEntity[] = await tx
         .insert(parents)
         .values({
           userId: parentUser.id,
@@ -196,20 +215,22 @@ describe("Class Quota System Constraints & Triggers", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [ParentEntity];
+        .returning();
+      const parent = parentsResult[0];
 
-      const [teacherUser] = (await tx
+      const teacherUsers: UserEntity[] = await tx
         .insert(users)
         .values({
-          name: "Block Teacher",
+          name: "Quota Teacher",
           email: teacherEmail,
           password: "password",
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [UserEntity];
+        .returning();
+      const teacherUser = teacherUsers[0];
 
-      const [teacher] = (await tx
+      const teachersResult: TeacherEntity[] = await tx
         .insert(teachers)
         .values({
           userId: teacherUser.id,
@@ -218,9 +239,10 @@ describe("Class Quota System Constraints & Triggers", () => {
           createdAt: now,
           updatedAt: now,
         })
-        .returning()) as [TeacherEntity];
+        .returning();
+      const teacher = teachersResult[0];
 
-      const [student] = (await tx
+      const studentsResult: StudentEntity[] = await tx
         .insert(students)
         .values({
           parentId: parent.id,
@@ -231,8 +253,10 @@ describe("Class Quota System Constraints & Triggers", () => {
           classesRemaining: 0,
           createdAt: now,
           updatedAt: now,
+          idempotencyKey: randomUUID(),
         })
-        .returning()) as [StudentEntity];
+        .returning();
+      const student = studentsResult[0];
 
       await tx.insert(teacherAssignments).values({
         studentId: student.id,
@@ -241,9 +265,8 @@ describe("Class Quota System Constraints & Triggers", () => {
       });
 
       try {
-        await tx
-          .insert(classInstances)
-          .values({
+        await SchedulingRepository.createClassInstance(
+          {
             studentId: student.id,
             teacherId: teacher.id,
             scheduledStartAt: new Date("2026-06-15T12:00:00Z"),
@@ -251,27 +274,27 @@ describe("Class Quota System Constraints & Triggers", () => {
             durationMinutes: 60,
             classType: "REGULAR",
             quotaDeducted: true,
-            createdAt: now,
-            updatedAt: now,
-          })
-          .execute();
+            idempotencyKey: randomUUID(),
+          },
+          tx
+        );
         expect(true).toBe(false); // Should not reach here
       } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toContain("students_classes_remaining_chk");
+        const message = error instanceof Error ? error.message : String(error);
+        const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
+        expect(message + cause).toContain("students_classes_remaining_chk");
       }
     });
     testLogger.info("Block booking on zero quota passed.");
   });
 
-  test("Prevents concurrent race conditions via CHECK constraint", async () => {
+  test("Prevents concurrent race conditions via Advisory Locks", async () => {
     testLogger.info("Testing concurrent race condition prevention...");
     const now = new Date();
     const parentEmail = `parent-race-${randomUUID()}@example.com`;
     const teacherEmail = `teacher-race-${randomUUID()}@example.com`;
 
-    const [parentUser] = (await db
+    const parentUsers: UserEntity[] = await db
       .insert(users)
       .values({
         name: "Race Parent",
@@ -280,9 +303,10 @@ describe("Class Quota System Constraints & Triggers", () => {
         createdAt: now,
         updatedAt: now,
       })
-      .returning()) as [UserEntity];
+      .returning();
+    const parentUser = parentUsers[0];
 
-    const [parent] = (await db
+    const parentsResult: ParentEntity[] = await db
       .insert(parents)
       .values({
         userId: parentUser.id,
@@ -290,9 +314,10 @@ describe("Class Quota System Constraints & Triggers", () => {
         createdAt: now,
         updatedAt: now,
       })
-      .returning()) as [ParentEntity];
+      .returning();
+    const parent = parentsResult[0];
 
-    const [teacherUser] = (await db
+    const teacherUsers: UserEntity[] = await db
       .insert(users)
       .values({
         name: "Race Teacher",
@@ -301,9 +326,10 @@ describe("Class Quota System Constraints & Triggers", () => {
         createdAt: now,
         updatedAt: now,
       })
-      .returning()) as [UserEntity];
+      .returning();
+    const teacherUser = teacherUsers[0];
 
-    const [teacher] = (await db
+    const teachersResult: TeacherEntity[] = await db
       .insert(teachers)
       .values({
         userId: teacherUser.id,
@@ -312,10 +338,11 @@ describe("Class Quota System Constraints & Triggers", () => {
         createdAt: now,
         updatedAt: now,
       })
-      .returning()) as [TeacherEntity];
+      .returning();
+    const teacher = teachersResult[0];
 
     // Student has exactly 1 remaining class
-    const [student] = (await db
+    const studentsResult: StudentEntity[] = await db
       .insert(students)
       .values({
         parentId: parent.id,
@@ -326,8 +353,10 @@ describe("Class Quota System Constraints & Triggers", () => {
         classesRemaining: 1,
         createdAt: now,
         updatedAt: now,
+        idempotencyKey: randomUUID(),
       })
-      .returning()) as [StudentEntity];
+      .returning();
+    const student = studentsResult[0];
 
     await db.insert(teacherAssignments).values({
       studentId: student.id,
@@ -337,7 +366,7 @@ describe("Class Quota System Constraints & Triggers", () => {
 
     // Execute two concurrent insertions targeting the same student
     const resultPromises = Promise.allSettled([
-      db.insert(classInstances).values({
+      SchedulingRepository.createClassInstance({
         studentId: student.id,
         teacherId: teacher.id,
         scheduledStartAt: new Date("2026-06-15T15:00:00Z"),
@@ -345,10 +374,9 @@ describe("Class Quota System Constraints & Triggers", () => {
         durationMinutes: 60,
         classType: "REGULAR",
         quotaDeducted: true,
-        createdAt: now,
-        updatedAt: now,
+        idempotencyKey: randomUUID(),
       }),
-      db.insert(classInstances).values({
+      SchedulingRepository.createClassInstance({
         studentId: student.id,
         teacherId: teacher.id,
         scheduledStartAt: new Date("2026-06-15T16:00:00Z"),
@@ -356,8 +384,7 @@ describe("Class Quota System Constraints & Triggers", () => {
         durationMinutes: 60,
         classType: "REGULAR",
         quotaDeducted: true,
-        createdAt: now,
-        updatedAt: now,
+        idempotencyKey: randomUUID(),
       }),
     ]);
 
@@ -370,19 +397,16 @@ describe("Class Quota System Constraints & Triggers", () => {
     expect(successes.length).toBe(1);
     expect(failures.length).toBe(1);
 
-    const failReason = failures[0].reason as Error & { cause?: { message?: string } };
-    const errMsg = failReason.cause?.message || failReason.message || "";
-    expect(errMsg).toContain("students_classes_remaining_chk");
+    const failReason: unknown = failures[0].reason;
+    const message = failReason instanceof Error ? failReason.message : String(failReason);
+    const cause = failReason instanceof Error && failReason.cause instanceof Error ? failReason.cause.message : "";
+    expect(message + cause).toContain("students_classes_remaining_chk");
 
     // Verify final state in DB has classesRemaining = 0
-    const [finalStudent] = (await db.select().from(students).where(eq(students.id, student.id)).limit(1)) as [
-      StudentEntity,
-    ];
-    expect(finalStudent.classesRemaining).toBe(0);
+    const finalStudents: StudentEntity[] = await db.select().from(students).where(eq(students.id, student.id)).limit(1);
+    expect(finalStudents[0].classesRemaining).toBe(0);
 
     // Clean up created records since they were outside runInRollback
-    // Note: We skip hard-deleting students, teachers, and users because
-    // the soft-deleted class_instances still reference them via ON DELETE RESTRICT foreign keys.
     await db.delete(classInstances).where(eq(classInstances.studentId, student.id));
 
     testLogger.info("Race condition test passed.");

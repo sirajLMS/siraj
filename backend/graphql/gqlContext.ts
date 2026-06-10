@@ -12,6 +12,7 @@ export type BaseContext = {
   isSuperAdmin: boolean;
   refreshToken: string | undefined;
   sessionId: string | undefined;
+  ipAddress?: string;
   cookies?: ResponseCookies;
 };
 

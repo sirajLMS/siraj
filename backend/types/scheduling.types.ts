@@ -1,4 +1,10 @@
-import type { classInstances, leaveQuotaUsage, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
+import type {
+  classInstances,
+  leaveQuotaUsage,
+  recurringScheduleDays,
+  recurringSchedules,
+  timezones,
+} from "@/backend/db/schema";
 
 export type RecurringScheduleEntity = typeof recurringSchedules.$inferSelect;
 export type RecurringScheduleInsertInput = typeof recurringSchedules.$inferInsert;
@@ -11,3 +17,6 @@ export type ClassInstanceInsertInput = typeof classInstances.$inferInsert;
 
 export type LeaveQuotaUsageEntity = typeof leaveQuotaUsage.$inferSelect;
 export type LeaveQuotaUsageInsertInput = typeof leaveQuotaUsage.$inferInsert;
+
+export type TimezoneEntity = typeof timezones.$inferSelect;
+export type TimezoneInsertInput = typeof timezones.$inferInsert;

@@ -86,6 +86,7 @@ describe("Leave Quota Limits Trigger", () => {
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -204,6 +205,7 @@ describe("Leave Quota Limits Trigger", () => {
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })
@@ -340,6 +342,7 @@ describe("Leave Quota Limits Trigger", () => {
           status: "REGULAR",
           classesTotal: 10,
           classesRemaining: 5,
+          idempotencyKey: randomUUID(),
           createdAt: now,
           updatedAt: now,
         })

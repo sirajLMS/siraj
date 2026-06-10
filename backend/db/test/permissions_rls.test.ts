@@ -101,6 +101,7 @@ describe("Row Level Security for Students", () => {
             parentId: parentA.id,
             name: "Student A",
             status: "REGULAR",
+            idempotencyKey: randomUUID(),
             createdAt: now,
             updatedAt: now,
           })
@@ -113,6 +114,7 @@ describe("Row Level Security for Students", () => {
             parentId: parentB.id,
             name: "Student B",
             status: "REGULAR",
+            idempotencyKey: randomUUID(),
             createdAt: now,
             updatedAt: now,
           })
@@ -204,6 +206,7 @@ describe("Row Level Security for Students", () => {
             parentId: parentA.id,
             name: "Student A",
             status: "REGULAR",
+            idempotencyKey: randomUUID(),
             createdAt: now,
             updatedAt: now,
           })
@@ -216,6 +219,7 @@ describe("Row Level Security for Students", () => {
             parentId: parentB.id,
             name: "Student B",
             status: "REGULAR",
+            idempotencyKey: randomUUID(),
             createdAt: now,
             updatedAt: now,
           })
@@ -315,6 +319,7 @@ describe("Row Level Security for Students", () => {
             parentId: parentA.id,
             name: "Student A",
             status: "REGULAR",
+            idempotencyKey: randomUUID(),
             createdAt: now,
             updatedAt: now,
           })
@@ -327,6 +332,7 @@ describe("Row Level Security for Students", () => {
             parentId: parentB.id,
             name: "Student B",
             status: "REGULAR",
+            idempotencyKey: randomUUID(),
             createdAt: now,
             updatedAt: now,
           })

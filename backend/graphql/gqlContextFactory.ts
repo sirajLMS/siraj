@@ -44,6 +44,11 @@ export async function createGraphQLContext(): Promise<BaseContext> {
     }
   }
 
+  // Extract IP address
+  const forwardedFor = headersList.get("x-forwarded-for");
+  const realIp = headersList.get("x-real-ip");
+  const ipAddress = realIp || forwardedFor?.split(",")[0]?.trim() || "unknown";
+
   // Create base context with user information
   const baseContext = await createContext({ userId });
 
@@ -51,6 +56,7 @@ export async function createGraphQLContext(): Promise<BaseContext> {
     ...baseContext,
     refreshToken,
     sessionId,
+    ipAddress,
     cookies: cookieStore,
   };
 }
