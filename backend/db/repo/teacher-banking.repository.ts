@@ -36,6 +36,9 @@ export namespace TeacherBankingRepository {
     if (record.validUntil !== null) {
       throw new Error("Cannot modify historical banking records");
     }
+    if (record.verifiedAt !== null) {
+      throw new Error("Cannot modify verified banking records");
+    }
   }
 
   export const getActiveBankingDetails = async (

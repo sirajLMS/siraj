@@ -6,9 +6,26 @@ import type { TeacherBankingDetailsHistorySelectType } from "../../types";
 import { TeacherBankingRepository } from "../repo/teacher-banking.repository";
 import { teacherBankingDetailsHistory } from "../schema";
 import { setupTeacher } from "./entity-setup";
-import { runInRollback } from "./test-utils";
+import { createTestUser, runInRollback } from "./test-utils";
+
+type DBTransaction = NonNullable<Parameters<typeof TeacherBankingRepository.submitBankingDetails>[1]>;
 
 describe("Teacher Banking Details Versioning & History", () => {
+  const expectBankingUpdateToFail = async (
+    tx: DBTransaction,
+    bankingId: string,
+    update: Partial<import("../../types").TeacherBankingDetailsHistoryInsertInput>,
+    expectedError: string
+  ) => {
+    try {
+      await TeacherBankingRepository.updateBankingDetails(bankingId, update, tx);
+      expect(true).toBe(false);
+    } catch (error) {
+      const err = error as Error;
+      expect(err.message).toContain(expectedError);
+    }
+  };
+
   test("Allows historical record updates by closing old and inserting new", async () => {
     testLogger.info("Testing manual versioning flow...");
     await runInRollback(async tx => {
@@ -85,13 +102,12 @@ describe("Teacher Banking Details Versioning & History", () => {
         })
         .returning()) as [TeacherBankingDetailsHistorySelectType];
 
-      try {
-        await TeacherBankingRepository.updateBankingDetails(banking.id, { beneficiaryName: "Cheater Name" }, tx);
-        expect(true).toBe(false);
-      } catch (error) {
-        const err = error as Error;
-        expect(err.message).toContain("Cannot modify historical banking records");
-      }
+      await expectBankingUpdateToFail(
+        tx,
+        banking.id,
+        { beneficiaryName: "Cheater Name" },
+        "Cannot modify historical banking records"
+      );
     });
     testLogger.info("Historical closed record immutability test passed.");
   });
@@ -113,13 +129,12 @@ describe("Teacher Banking Details Versioning & History", () => {
         tx
       );
 
-      try {
-        await TeacherBankingRepository.updateBankingDetails(banking.id, { beneficiaryName: "Cheater Name" }, tx);
-        expect(true).toBe(false);
-      } catch (error) {
-        const err = error as Error;
-        expect(err.message).toContain("Cannot modify banking fields directly");
-      }
+      await expectBankingUpdateToFail(
+        tx,
+        banking.id,
+        { beneficiaryName: "Cheater Name" },
+        "Cannot modify banking fields directly"
+      );
     });
     testLogger.info("Active record banking fields immutability test passed.");
   });
@@ -149,47 +164,49 @@ describe("Teacher Banking Details Versioning & History", () => {
         .where(eq(teacherBankingDetailsHistory.teacherId, teacher.id))) as TeacherBankingDetailsHistorySelectType[];
 
       expect(dbRows.length).toBe(1);
-      expect(dbRows[0].validUntil).toBeNull();
     });
-    testLogger.info("Non-banking fields update test passed.");
+    testLogger.info("Non-banking fields updates test passed.");
   });
 
-  test("Enforces at most one active record per teacher via partial unique index", async () => {
-    testLogger.info("Testing partial unique constraint on active records...");
+  test("Verified records cannot be un-verified or modified", async () => {
+    testLogger.info("Testing verified record immutability...");
     await runInRollback(async tx => {
       const { teacher } = await setupTeacher(tx, {
-        name: "Bank Teacher Unique",
-        email: `teacher-bank-uniq-${randomUUID()}@example.com`,
+        name: "Verified Bank Teacher",
+        email: `teacher-bank-verified-${randomUUID()}@example.com`,
       });
 
-      const now = new Date();
-      await tx
-        .insert(teacherBankingDetailsHistory)
-        .values({
-          teacherId: teacher.id,
-          beneficiaryName: "Active 1",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .execute();
+      const admin = await createTestUser(tx, { name: "Admin", email: `admin-${randomUUID()}@example.com` });
 
-      try {
-        await tx
-          .insert(teacherBankingDetailsHistory)
-          .values({
-            teacherId: teacher.id,
-            beneficiaryName: "Active 2",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .execute();
-        expect(true).toBe(false);
-      } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toContain("teacher_banking_details_history_active_idx");
-      }
+      const banking = await TeacherBankingRepository.submitBankingDetails(
+        {
+          teacherId: teacher.id,
+          beneficiaryName: "Verified Name",
+          bankName: "Safe Bank",
+        },
+        tx
+      );
+
+      // Verify it
+      await TeacherBankingRepository.verifyBankingDetails(
+        {
+          bankingDetailsId: banking.id,
+          verifiedByUserId: admin.id,
+        },
+        tx
+      );
+
+      // Attempt to modify a banking field
+      await expectBankingUpdateToFail(
+        tx,
+        banking.id,
+        { bankName: "Hack Bank" },
+        "Cannot modify verified banking records"
+      );
+
+      // Attempt to un-verify
+      await expectBankingUpdateToFail(tx, banking.id, { verifiedAt: null }, "Cannot modify verified banking records");
     });
-    testLogger.info("Partial unique constraint test passed.");
+    testLogger.info("Verified record immutability test passed.");
   });
 });

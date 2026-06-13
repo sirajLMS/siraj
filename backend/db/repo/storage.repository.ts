@@ -336,6 +336,13 @@ export namespace StorageDbRepository {
 
   async function deleteUsagesFromAllTables(fileId: string, usageType: string, referenceId: string) {
     await Promise.all([
+      deletePersonRelatedUsages(fileId, usageType, referenceId),
+      deleteBusinessRelatedUsages(fileId, usageType, referenceId),
+    ]);
+  }
+
+  async function deletePersonRelatedUsages(fileId: string, usageType: string, referenceId: string) {
+    await Promise.all([
       db
         .delete(userFiles)
         .where(
@@ -369,6 +376,20 @@ export namespace StorageDbRepository {
           )
         ),
       db
+        .delete(staffProfileFiles)
+        .where(
+          and(
+            eq(staffProfileFiles.fileId, fileId),
+            eq(staffProfileFiles.usageType, usageType),
+            eq(staffProfileFiles.staffProfileId, referenceId)
+          )
+        ),
+    ]);
+  }
+
+  async function deleteBusinessRelatedUsages(fileId: string, usageType: string, referenceId: string) {
+    await Promise.all([
+      db
         .delete(invoiceFiles)
         .where(
           and(
@@ -393,15 +414,6 @@ export namespace StorageDbRepository {
             eq(learningResourceFiles.fileId, fileId),
             eq(learningResourceFiles.usageType, usageType),
             eq(learningResourceFiles.learningResourceId, referenceId)
-          )
-        ),
-      db
-        .delete(staffProfileFiles)
-        .where(
-          and(
-            eq(staffProfileFiles.fileId, fileId),
-            eq(staffProfileFiles.usageType, usageType),
-            eq(staffProfileFiles.staffProfileId, referenceId)
           )
         ),
       db

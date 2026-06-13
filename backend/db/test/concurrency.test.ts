@@ -79,6 +79,24 @@ async function expectRepositoryError(fn: () => Promise<unknown>, expectedError: 
   }
 }
 
+async function verifyOptimisticLock(
+  initialVersion: number,
+  firstUpdate: () => Promise<unknown>,
+  secondUpdate: () => Promise<unknown>,
+  verifyState: () => Promise<void>
+) {
+  testLogger.info(`Initial version: ${initialVersion}`);
+
+  // First update succeeds
+  await firstUpdate();
+
+  // Second update with stale version should fail
+  await expectRepositoryError(secondUpdate, "Version mismatch");
+
+  // Verify final state
+  await verifyState();
+}
+
 describe("Concurrency Control Tests", () => {
   describe("Student Classes Remaining - Concurrency Control", () => {
     it("should correctly handle multiple sequential class bookings", async () => {
@@ -131,22 +149,16 @@ describe("Concurrency Control Tests", () => {
         // Setup
         const { testStudent } = await setupStudentTest(tx, "Optimistic Lock Test");
 
-        const initialVersion = testStudent.version;
-        testLogger.info(`Initial version: ${initialVersion}`);
-
-        // First update succeeds
-        await StudentRepository.deductClasses(testStudent.id, 1, initialVersion, tx);
-
-        // Second update with stale version should fail
-        await expectRepositoryError(
-          () => StudentRepository.deductClasses(testStudent.id, 1, initialVersion, tx),
-          "Version mismatch"
+        await verifyOptimisticLock(
+          testStudent.version,
+          () => StudentRepository.deductClasses(testStudent.id, 1, testStudent.version, tx),
+          () => StudentRepository.deductClasses(testStudent.id, 1, testStudent.version, tx),
+          async () => {
+            const [finalStudent] = await tx.select().from(students).where(eq(students.id, testStudent.id));
+            expect(finalStudent.classesRemaining).toBe(9); // Only one deduction succeeded
+            expect(finalStudent.version).toBe(1);
+          }
         );
-
-        // Verify state
-        const [finalStudent] = await tx.select().from(students).where(eq(students.id, testStudent.id));
-        expect(finalStudent.classesRemaining).toBe(9); // Only one deduction succeeded
-        expect(finalStudent.version).toBe(1);
       });
     });
 
@@ -201,22 +213,16 @@ describe("Concurrency Control Tests", () => {
         // Setup
         const { testInvoice } = await setupInvoiceTest(tx, "Invoice Optimistic Test");
 
-        const initialVersion = testInvoice.version;
-        testLogger.info(`Initial version: ${initialVersion}`);
-
-        // First update succeeds
-        await BillingRepository.updateInvoiceStatus(testInvoice.id, "PAID", new Date(), initialVersion, tx);
-
-        // Second update with stale version should fail
-        await expectRepositoryError(
-          () => BillingRepository.updateInvoiceStatus(testInvoice.id, "OVERDUE", null, initialVersion, tx),
-          "Version mismatch"
+        await verifyOptimisticLock(
+          testInvoice.version,
+          () => BillingRepository.updateInvoiceStatus(testInvoice.id, "PAID", new Date(), testInvoice.version, tx),
+          () => BillingRepository.updateInvoiceStatus(testInvoice.id, "OVERDUE", null, testInvoice.version, tx),
+          async () => {
+            const [finalInvoice] = await tx.select().from(invoices).where(eq(invoices.id, testInvoice.id));
+            expect(finalInvoice.status).toBe("PAID"); // Only first update succeeded
+            expect(finalInvoice.version).toBe(1);
+          }
         );
-
-        // Verify state
-        const [finalInvoice] = await tx.select().from(invoices).where(eq(invoices.id, testInvoice.id));
-        expect(finalInvoice.status).toBe("PAID"); // Only first update succeeded
-        expect(finalInvoice.version).toBe(1);
       });
     });
   });

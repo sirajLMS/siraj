@@ -154,6 +154,16 @@ async function expectStudentQuota(tx: DbTransaction, studentId: string, expected
   expect(student.classesRemaining).toBe(expected);
 }
 
+async function expectViolation(
+  tx: DbTransaction,
+  prefix: string,
+  constraint: string,
+  action: (tx: DbTransaction, studentId: string, teacherId: string) => Promise<unknown>
+) {
+  const { student, teacher } = await setupTestData(tx, { prefix });
+  await expectConstraintViolation(() => action(tx, student.id, teacher.id), constraint);
+}
+
 describe("Class Rescheduling Business Rules & Constraints", () => {
   test("Allows rescheduling and inherits rate from original class", async () => {
     testLogger.info("Testing rate inheritance on reschedule...");
@@ -246,16 +256,13 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
   test("Enforces unique index on original_class_id", async () => {
     testLogger.info("Testing unique index on original_class_id with disabled triggers...");
     await runInRollback(async tx => {
-      const { teacher, student } = await setupTestData(tx, { prefix: "uniq" });
-      const original = await insertClassInstance(tx, { studentId: student.id, teacherId: teacher.id });
+      await expectViolation(tx, "uniq", "class_instances_original_class_uniq_idx", async (tx, sid, tid) => {
+        const original = await insertClassInstance(tx, { studentId: sid, teacherId: tid });
 
-      // Insert two rescheduled instances targeting the same original
-      await insertClassInstance(tx, { studentId: student.id, teacherId: teacher.id, originalClassId: original.id });
-
-      await expectConstraintViolation(
-        () => insertClassInstance(tx, { studentId: student.id, teacherId: teacher.id, originalClassId: original.id }),
-        "class_instances_original_class_uniq_idx"
-      );
+        // Insert two rescheduled instances targeting the same original
+        await insertClassInstance(tx, { studentId: sid, teacherId: tid, originalClassId: original.id });
+        await insertClassInstance(tx, { studentId: sid, teacherId: tid, originalClassId: original.id });
+      });
     });
     testLogger.info("Unique index constraint test passed.");
   });
@@ -263,38 +270,36 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
   test("Enforces self-referencing check constraint", async () => {
     testLogger.info("Testing self-referencing check constraint...");
     await runInRollback(async tx => {
-      const { teacher, student } = await setupTestData(tx, { prefix: "self" });
-      const instance = await insertClassInstance(tx, { studentId: student.id, teacherId: teacher.id });
-
-      await expectConstraintViolation(
-        () => tx.update(classInstances).set({ originalClassId: instance.id }).where(eq(classInstances.id, instance.id)),
-        "class_instances_reschedule_not_self_chk"
-      );
+      await expectViolation(tx, "self", "class_instances_reschedule_not_self_chk", async (tx, sid, tid) => {
+        const instance = await insertClassInstance(tx, { studentId: sid, teacherId: tid });
+        await tx.update(classInstances).set({ originalClassId: instance.id }).where(eq(classInstances.id, instance.id));
+      });
     });
     testLogger.info("Self-referencing check constraint test passed.");
   });
 
-  test("Enforces rescheduled no quota check constraint", async () => {
-    testLogger.info("Testing rescheduled no quota check constraint...");
-    await runInRollback(async tx => {
-      const { teacher, student } = await setupTestData(tx, { prefix: "noQuota" });
-      await expectConstraintViolation(
-        () => insertRescheduledInstance(tx, student.id, teacher.id, { quotaDeducted: true }),
-        "class_instances_rescheduled_no_quota_chk"
-      );
-    });
-    testLogger.info("Rescheduled no quota check constraint test passed.");
-  });
+  const rescheduledConstraintTests = [
+    {
+      name: "Enforces rescheduled no quota check constraint",
+      prefix: "noQuota",
+      overrides: { quotaDeducted: true },
+      constraint: "class_instances_rescheduled_no_quota_chk",
+    },
+    {
+      name: "Enforces rescheduled no complete check constraint",
+      prefix: "noComplete",
+      overrides: { executionState: "COMPLETED" },
+      constraint: "class_instances_rescheduled_no_complete_chk",
+    },
+  ];
 
-  test("Enforces rescheduled no complete check constraint", async () => {
-    testLogger.info("Testing rescheduled no complete check constraint...");
-    await runInRollback(async tx => {
-      const { teacher, student } = await setupTestData(tx, { prefix: "noComplete" });
-      await expectConstraintViolation(
-        () => insertRescheduledInstance(tx, student.id, teacher.id, { executionState: "COMPLETED" }),
-        "class_instances_rescheduled_no_complete_chk"
+  for (const { name, prefix, overrides, constraint } of rescheduledConstraintTests) {
+    test(name, async () => {
+      testLogger.info(`Testing ${name.toLowerCase()}...`);
+      await runInRollback(tx =>
+        expectViolation(tx, prefix, constraint, (tx, sid, tid) => insertRescheduledInstance(tx, sid, tid, overrides))
       );
+      testLogger.info(`${name} test passed.`);
     });
-    testLogger.info("Rescheduled no complete check constraint test passed.");
-  });
+  }
 });

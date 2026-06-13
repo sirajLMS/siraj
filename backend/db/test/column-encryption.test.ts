@@ -108,18 +108,12 @@ async function verifyDrizzleDecryption(
   bankingId: string,
   plainValues: { zoomPassword: string; nationalId: string; beneficiaryName: string; iban: string }
 ) {
-  const [drizzleTeacher] = await tx
-    .select()
-    .from(teachers)
-    .where(sql`id = ${teacherId}`);
+  const [drizzleTeacher] = await tx.select().from(teachers).where(sql`id = ${teacherId}`);
   expect(drizzleTeacher).toBeDefined();
   expect(drizzleTeacher.zoomPassword).toBe(plainValues.zoomPassword);
   expect(drizzleTeacher.nationalId).toBe(plainValues.nationalId);
 
-  const [drizzleBanking] = await tx
-    .select()
-    .from(teacherBankingDetailsHistory)
-    .where(sql`id = ${bankingId}`);
+  const [drizzleBanking] = await tx.select().from(teacherBankingDetailsHistory).where(sql`id = ${bankingId}`);
   expect(drizzleBanking).toBeDefined();
   expect(drizzleBanking.beneficiaryName).toBe(plainValues.beneficiaryName);
   expect(drizzleBanking.iban).toBe(plainValues.iban);
