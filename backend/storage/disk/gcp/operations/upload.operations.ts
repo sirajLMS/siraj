@@ -6,6 +6,9 @@ import { StorageUtils } from "@/backend/utils";
 import { STORAGE_CONFIG, StorageValidationError } from "../../storage.service.interface";
 import type { GcpContext } from "../types";
 
+/**
+ * Prepares a signed URL for a direct client upload to GCP
+ */
 export async function prepareUpload(
   ctx: GcpContext,
   input: Types.UploadPreparationInput
@@ -61,6 +64,41 @@ export async function prepareUpload(
   }
 }
 
+/**
+ * Check if upload is allowed to the specified directory
+ */
+async function checkUploadPermissions(ctx: GcpContext, directoryPath: string): Promise<string | null> {
+  if (directoryPath.length === 0) return null;
+
+  const dbDirectory = await StorageDbRepository.directoryByPath(directoryPath);
+
+  if (dbDirectory) {
+    return dbDirectory.allowUploads ? null : "Uploads not allowed in this directory";
+  }
+
+  try {
+    const folderBlob = `${directoryPath}/`;
+    const [exists] = await ctx.bucket.file(folderBlob).exists();
+    if (!exists) return "Directory does not exist";
+  } catch {
+    return "Directory does not exist";
+  }
+
+  return null;
+}
+
+/**
+ * Get FileInfo for a newly uploaded file
+ */
+async function getUploadedFileInfo(ctx: GcpContext, path: string, dbFile: Types.FileEntity): Promise<Types.FileInfo> {
+  const [metadata] = await ctx.bucket.file(path).getMetadata();
+  const bucketFile = StorageUtils.blobToFileInfo(metadata, ctx.gcpBaseUrl);
+  return StorageUtils.combineFileData(bucketFile, dbFile);
+}
+
+/**
+ * Upload a file directly to GCP from a buffer
+ */
 export async function uploadFile(
   ctx: GcpContext,
   path: string,
@@ -76,55 +114,20 @@ export async function uploadFile(
       contentType,
     });
     if (uploadErr) {
-      return {
-        success: false,
-        message: uploadErr,
-        data: null,
-      };
+      return { success: false, message: uploadErr, data: null };
     }
 
     const directoryPath = path.substring(0, path.lastIndexOf("/"));
-
-    const dbDirectory = await StorageDbRepository.directoryByPath(directoryPath);
-
-    if (dbDirectory) {
-      if (!dbDirectory.allowUploads) {
-        return {
-          success: false,
-          message: "Uploads not allowed in this directory",
-          data: null,
-        };
-      }
-    } else {
-      let bucketDirExists = false;
-      try {
-        const folderBlob = `${directoryPath}/`;
-        const file = ctx.bucket.file(folderBlob);
-        const [exists] = await file.exists();
-        bucketDirExists = exists;
-      } catch {
-        bucketDirExists = false;
-      }
-
-      if (!bucketDirExists && directoryPath.length > 0) {
-        return {
-          success: false,
-          message: "Directory does not exist",
-          data: null,
-        };
-      }
+    const permissionErr = await checkUploadPermissions(ctx, directoryPath);
+    if (permissionErr) {
+      return { success: false, message: permissionErr, data: null };
     }
 
     const file = ctx.bucket.file(path);
-    await file.save(buffer, {
-      contentType: contentType,
-    });
+    await file.save(buffer, { contentType });
 
     const fileEntity = await StorageDbRepository.createFile(path, false);
-
-    const [metadata] = await file.getMetadata();
-    const bucketFile = StorageUtils.blobToFileInfo(metadata, ctx.gcpBaseUrl);
-    const fileInfo = StorageUtils.combineFileData(bucketFile, fileEntity);
+    const fileInfo = await getUploadedFileInfo(ctx, path, fileEntity);
 
     return {
       success: true,

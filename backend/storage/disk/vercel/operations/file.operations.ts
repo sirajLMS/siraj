@@ -126,74 +126,71 @@ export async function fileInfoByDbFileId(ctx: VercelContext, id: string): Promis
   }
 }
 
+/**
+ * Move a Vercel blob from one path to another by copying and then deleting
+ */
+async function moveVercelBlob(ctx: VercelContext, fromUrl: string, toPath: string): Promise<{ url: string }> {
+  const newBlob = await copy(fromUrl, toPath, {
+    token: ctx.token,
+    access: "public",
+  });
+
+  try {
+    await del(fromUrl, { token: ctx.token });
+    return newBlob;
+  } catch (error) {
+    logger.error("Failed to delete original after copy, rolling back", error);
+    await del(newBlob.url, { token: ctx.token }).catch((rollbackError: unknown) => {
+      logger.error("Rollback of copied blob failed", rollbackError);
+    });
+    throw error;
+  }
+}
+
+/**
+ * Update file path in the database
+ */
+async function updateDbFilePath(oldPath: string, newPath: string): Promise<Types.FileEntity | undefined> {
+  try {
+    const dbFile = await StorageDbRepository.fileByPath(oldPath);
+    if (!dbFile) return undefined;
+
+    return await StorageDbRepository.updateFile({
+      ...dbFile,
+      path: newPath,
+    });
+  } catch (error) {
+    logger.warn(`Failed to update file in database: ${oldPath}`, error);
+    return undefined;
+  }
+}
+
 export async function renameFile(ctx: VercelContext, input: Types.FileRenameInput): Promise<Types.FileOperationResult> {
   try {
-    const pathValidationError = await StorageUtils.validatePath(input.currentPath);
-    if (pathValidationError) {
-      return { success: false, message: pathValidationError };
-    }
+    const pathErr = StorageUtils.validatePath(input.currentPath);
+    if (pathErr) return { success: false, message: pathErr };
 
-    const nameValidationError = await StorageUtils.validateFileName(input.newName);
-    if (nameValidationError) {
-      return { success: false, message: nameValidationError };
-    }
+    const nameErr = StorageUtils.validateFileName(input.newName);
+    if (nameErr) return { success: false, message: nameErr };
 
     const directoryPath = StorageUtils.extractDirectoryPath(input.currentPath);
     const newPath = `${directoryPath}/${input.newName}`;
 
-    let originalBlob: Awaited<ReturnType<typeof head>> | undefined;
+    let originalBlob: Awaited<ReturnType<typeof head>>;
     try {
       originalBlob = await head(input.currentPath, { token: ctx.token });
     } catch {
-      return {
-        success: false,
-        message: `File not found: ${input.currentPath}`,
-      };
+      return { success: false, message: `File not found: ${input.currentPath}` };
     }
 
-    logger.info("📋 renameFile: Copying blob to new path", {
-      from: input.currentPath,
-      to: newPath,
-    });
+    logger.info(`Renaming blob: ${input.currentPath} -> ${newPath}`);
+    const newBlob = await moveVercelBlob(ctx, originalBlob.url, newPath);
 
-    const newBlob = await copy(originalBlob.url, newPath, {
-      token: ctx.token,
-      access: "public",
-    });
-
-    logger.info("📋 renameFile: Copy successful", { newUrl: newBlob.url });
-    logger.info("🗑️ renameFile: Deleting original blob", {
-      path: input.currentPath,
-    });
-
-    try {
-      await del(originalBlob.url, { token: ctx.token });
-      logger.info("🗑️ renameFile: Original blob deleted");
-    } catch (deleteError) {
-      logger.error("Failed to delete original after copy", deleteError);
-      try {
-        await del(newBlob.url, { token: ctx.token });
-        logger.info("Rollback successful: deleted copied blob");
-      } catch (rollbackError) {
-        logger.error("Failed to rollback copy", rollbackError);
-      }
-      throw deleteError;
-    }
-
-    let fileEntity: Types.FileEntity | undefined;
-    try {
-      const dbFile = await StorageDbRepository.fileByPath(input.currentPath);
-      if (dbFile) {
-        const updatedFile = { ...dbFile, path: newPath };
-        fileEntity = await StorageDbRepository.updateFile(updatedFile);
-      }
-    } catch (error) {
-      logger.warn(`Failed to update file in database: ${input.currentPath}`, error);
-    }
+    const fileEntity = await updateDbFilePath(input.currentPath, newPath);
 
     const ext = newPath.split(".").pop()?.toLowerCase() || "";
     const contentType = extToMime[ext] || "application/octet-stream";
-    const uploadedAt = new Date();
+    const now = new Date();
 
     const bucketFile: Types.BucketFile = {
       path: newPath,
@@ -201,20 +198,18 @@ export async function renameFile(ctx: VercelContext, input: Types.FileRenameInpu
       size: BigInt(originalBlob.size),
       contentType,
       contentHash: undefined,
-      createdAt: uploadedAt,
-      lastModified: uploadedAt,
+      createdAt: now,
+      lastModified: now,
       url: newBlob.url,
       mediaLink: newBlob.url,
       fileType: StorageUtils.getFileTypeFromContentType(contentType),
       isPublic: newPath.startsWith("public"),
     };
 
-    const fileInfo = StorageUtils.combineFileData(bucketFile, fileEntity);
-
     return {
       success: true,
       message: "File renamed successfully",
-      data: fileInfo,
+      data: StorageUtils.combineFileData(bucketFile, fileEntity),
     };
   } catch (error) {
     logger.error(`Failed to rename file: ${input.currentPath}`, error);

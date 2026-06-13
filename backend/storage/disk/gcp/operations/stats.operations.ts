@@ -1,37 +1,19 @@
-import type { GetFilesResponse } from "@google-cloud/storage";
+import type { File, GetFilesResponse } from "@google-cloud/storage";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { formatFileTypeBreakdown, updateFileTypeMap } from "../../shared/stats-operations.helper";
 import type { GcpContext, GcsApiResponse } from "../types";
 
+/**
+ * Get storage statistics for a GCP bucket path
+ */
 export async function storageStatistics(ctx: GcpContext, path?: string | null): Promise<Types.StorageStats> {
   try {
     const prefix = path ? `${path}/` : "";
     const [files] = await ctx.bucket.getFiles({ prefix });
 
-    let totalSize = BigInt(0);
-    const fileTypeMap = new Map<Types.FileTypes, { count: number; size: bigint }>();
-
-    for (const file of files) {
-      const size = BigInt(file.metadata.size || 0);
-      totalSize += size;
-
-      const fileType = StorageUtils.getFileTypeFromContentType(file.metadata.contentType);
-      const current = fileTypeMap.get(fileType) || {
-        count: 0,
-        size: BigInt(0),
-      };
-      fileTypeMap.set(fileType, {
-        count: current.count + 1,
-        size: current.size + size,
-      });
-    }
-
-    const fileTypeBreakdown = Array.from(fileTypeMap.entries()).map(([type, data]) => ({
-      type,
-      count: data.count,
-      size: data.size,
-    }));
+    const { totalSize, fileTypeMap } = processGcsFiles(files);
 
     const response: GetFilesResponse = await ctx.bucket.getFiles({
       prefix,
@@ -43,7 +25,7 @@ export async function storageStatistics(ctx: GcpContext, path?: string | null): 
     return {
       totalFiles: files.length,
       totalSize,
-      fileTypeBreakdown,
+      fileTypeBreakdown: formatFileTypeBreakdown(fileTypeMap),
       directoryCount,
     };
   } catch (error) {
@@ -55,4 +37,22 @@ export async function storageStatistics(ctx: GcpContext, path?: string | null): 
       directoryCount: 0,
     };
   }
+}
+
+/**
+ * Process GCS files to aggregate size and type statistics
+ */
+function processGcsFiles(files: File[]) {
+  let totalSize = BigInt(0);
+  const fileTypeMap = new Map<Types.FileTypes, { count: number; size: bigint }>();
+
+  for (const file of files) {
+    const size = BigInt(file.metadata.size || 0);
+    totalSize += size;
+
+    const fileType = StorageUtils.getFileTypeFromContentType(file.metadata.contentType);
+    updateFileTypeMap(fileTypeMap, fileType, size);
+  }
+
+  return { totalSize, fileTypeMap };
 }

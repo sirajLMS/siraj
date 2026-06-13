@@ -6,16 +6,22 @@ import type * as Types from "@/backend/types";
 // Extract the transaction type from Drizzle
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
+/**
+ * Helper to execute a function within a transaction if provided, or a new one otherwise
+ */
+async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTransaction) => Promise<T>): Promise<T> {
+  return tx ? await fn(tx) : await db.transaction((t: DBTransaction) => fn(t));
+}
+
 export namespace AuditRepository {
   /**
    * Create an audit log entry.
-   * Supports both standalone and transactional usage.
    */
   export const createAuditLog = async (
     input: Types.CreateAuditLogInput,
     tx?: DBTransaction
   ): Promise<Types.AuditLogEntity> => {
-    const runner = async (t: DBTransaction) => {
+    return runInTransaction(tx, async t => {
       const [created] = await t
         .insert(auditLogs)
         .values({
@@ -36,9 +42,7 @@ export namespace AuditRepository {
         .returning();
 
       return created;
-    };
-
-    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+    });
   };
 
   /**
@@ -48,33 +52,27 @@ export namespace AuditRepository {
     filters: Types.AuditLogFilterInput,
     tx?: DBTransaction
   ): Promise<Types.AuditLogQueryResult> => {
-    const runner = async (t: DBTransaction) => {
+    return runInTransaction(tx, async t => {
       const conditions = [];
 
       if (filters.actorUserId) {
         conditions.push(eq(auditLogs.actorUserId, filters.actorUserId));
       }
-
       if (filters.actorType) {
         conditions.push(eq(auditLogs.actorType, filters.actorType));
       }
-
       if (filters.entityType) {
         conditions.push(eq(auditLogs.entityType, filters.entityType));
       }
-
       if (filters.entityId) {
         conditions.push(eq(auditLogs.entityId, filters.entityId));
       }
-
       if (filters.action) {
         conditions.push(eq(auditLogs.action, filters.action));
       }
-
       if (filters.startDate) {
         conditions.push(gte(auditLogs.createdAt, filters.startDate));
       }
-
       if (filters.endDate) {
         conditions.push(lte(auditLogs.createdAt, filters.endDate));
       }
@@ -98,12 +96,10 @@ export namespace AuditRepository {
 
       return {
         logs,
-        total: total,
+        total,
         hasMore: offset + logs.length < total,
       };
-    };
-
-    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+    });
   };
 
   /**
@@ -115,16 +111,8 @@ export namespace AuditRepository {
     limit: number = 50,
     tx?: DBTransaction
   ): Promise<Types.AuditLogEntity[]> => {
-    const runner = async (t: DBTransaction) => {
-      return await t
-        .select()
-        .from(auditLogs)
-        .where(and(eq(auditLogs.entityType, entityType), eq(auditLogs.entityId, entityId)))
-        .orderBy(desc(auditLogs.createdAt))
-        .limit(limit);
-    };
-
-    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+    const result = await queryAuditLogs({ entityType, entityId, limit }, tx);
+    return result.logs;
   };
 
   /**
@@ -135,30 +123,16 @@ export namespace AuditRepository {
     limit: number = 50,
     tx?: DBTransaction
   ): Promise<Types.AuditLogEntity[]> => {
-    const runner = async (t: DBTransaction) => {
-      return await t
-        .select()
-        .from(auditLogs)
-        .where(eq(auditLogs.actorUserId, actorUserId))
-        .orderBy(desc(auditLogs.createdAt))
-        .limit(limit);
-    };
-
-    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+    const result = await queryAuditLogs({ actorUserId, limit }, tx);
+    return result.logs;
   };
 
   /**
    * Get recent audit logs across the system.
    */
-  export const getRecentAuditLogs = async (
-    limit: number = 100,
-    tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity[]> => {
-    const runner = async (t: DBTransaction) => {
-      return await t.select().from(auditLogs).orderBy(desc(auditLogs.createdAt)).limit(limit);
-    };
-
-    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  export const getRecentAuditLogs = async (limit: number = 100, tx?: DBTransaction): Promise<Types.AuditLogEntity[]> => {
+    const result = await queryAuditLogs({ limit }, tx);
+    return result.logs;
   };
 
   /**
@@ -169,7 +143,7 @@ export namespace AuditRepository {
     endDate: Date,
     tx?: DBTransaction
   ): Promise<{ entityType: string; action: string; count: number }[]> => {
-    const runner = async (t: DBTransaction) => {
+    return runInTransaction(tx, async t => {
       const results = await t
         .select({
           entityType: auditLogs.entityType,
@@ -186,14 +160,11 @@ export namespace AuditRepository {
         action: r.action,
         count: r.count,
       }));
-    };
-
-    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+    });
   };
 
   /**
    * Helper function to compute changes between old and new state.
-   * Returns an object with only the fields that changed.
    */
   export const computeChanges = (
     previousState: Record<string, unknown> | null,
@@ -220,14 +191,19 @@ export namespace AuditRepository {
   /**
    * Convenience method to log student status changes.
    */
+  export interface StudentStatusChangeInput {
+    studentId: string;
+    oldStatus: string;
+    newStatus: string;
+    actorUserId: string | null;
+    description?: string;
+  }
+
   export const logStudentStatusChange = async (
-    studentId: string,
-    oldStatus: string,
-    newStatus: string,
-    actorUserId: string | null,
-    description?: string,
+    input: StudentStatusChangeInput,
     tx?: DBTransaction
   ): Promise<Types.AuditLogEntity> => {
+    const { studentId, oldStatus, newStatus, actorUserId, description } = input;
     return await createAuditLog(
       {
         actorUserId,
@@ -247,15 +223,17 @@ export namespace AuditRepository {
   /**
    * Convenience method to log invoice modifications.
    */
-  export const logInvoiceChange = async (
-    invoiceId: string,
-    action: Types.AuditAction,
-    previousState: Record<string, unknown> | null,
-    newState: Record<string, unknown> | null,
-    actorUserId: string | null,
-    description?: string,
-    tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity> => {
+  export interface InvoiceChangeInput {
+    invoiceId: string;
+    action: Types.AuditAction;
+    previousState: Record<string, unknown> | null;
+    newState: Record<string, unknown> | null;
+    actorUserId: string | null;
+    description?: string;
+  }
+
+  export const logInvoiceChange = async (input: InvoiceChangeInput, tx?: DBTransaction): Promise<Types.AuditLogEntity> => {
+    const { invoiceId, action, previousState, newState, actorUserId, description } = input;
     return await createAuditLog(
       {
         actorUserId,
@@ -275,14 +253,16 @@ export namespace AuditRepository {
   /**
    * Convenience method to log payment refunds.
    */
-  export const logPaymentRefund = async (
-    paymentId: string,
-    refundAmount: number,
-    currency: string,
-    actorUserId: string | null,
-    reason?: string,
-    tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity> => {
+  export interface PaymentRefundInput {
+    paymentId: string;
+    refundAmount: number;
+    currency: string;
+    actorUserId: string | null;
+    reason?: string;
+  }
+
+  export const logPaymentRefund = async (input: PaymentRefundInput, tx?: DBTransaction): Promise<Types.AuditLogEntity> => {
+    const { paymentId, refundAmount, currency, actorUserId, reason } = input;
     return await createAuditLog(
       {
         actorUserId,
@@ -304,15 +284,20 @@ export namespace AuditRepository {
   /**
    * Convenience method to log permission changes.
    */
+  export interface PermissionChangeInput {
+    userId: string;
+    action: "GRANT" | "REVOKE";
+    permissionOrGroupId: string;
+    permissionType: "PERMISSION" | "PERMISSION_GROUP";
+    actorUserId: string | null;
+    description?: string;
+  }
+
   export const logPermissionChange = async (
-    userId: string,
-    action: "GRANT" | "REVOKE",
-    permissionOrGroupId: string,
-    permissionType: "PERMISSION" | "PERMISSION_GROUP",
-    actorUserId: string | null,
-    description?: string,
+    input: PermissionChangeInput,
     tx?: DBTransaction
   ): Promise<Types.AuditLogEntity> => {
+    const { userId, action, permissionOrGroupId, permissionType, actorUserId, description } = input;
     return await createAuditLog(
       {
         actorUserId,
@@ -334,17 +319,21 @@ export namespace AuditRepository {
   /**
    * Convenience method to log exchange rate updates.
    */
+  export interface ExchangeRateUpdateInput {
+    rateId: string;
+    fromCurrency: string;
+    toCurrency: string;
+    oldRate: number | null;
+    newRate: number;
+    actorUserId: string | null;
+    source?: string;
+  }
+
   export const logExchangeRateUpdate = async (
-    rateId: string,
-    fromCurrency: string,
-    toCurrency: string,
-    oldRate: number | null,
-    newRate: number,
-    actorUserId: string | null,
-    source?: string,
+    input: ExchangeRateUpdateInput,
     tx?: DBTransaction
   ): Promise<Types.AuditLogEntity> => {
-    // 1. Extract the rate display text to avoid nested template literals
+    const { rateId, fromCurrency, toCurrency, oldRate, newRate, actorUserId, source } = input;
     const rateDisplay = oldRate ? `${oldRate} → ${newRate}` : newRate;
 
     return await createAuditLog(
@@ -354,7 +343,6 @@ export namespace AuditRepository {
         entityType: "EXCHANGE_RATE",
         entityId: rateId,
         action: oldRate ? "UPDATE" : "CREATE",
-        // 2. Use the clean variable here
         description: `Exchange rate ${fromCurrency}/${toCurrency}: ${rateDisplay}`,
         previousState: oldRate ? { rate: oldRate } : null,
         newState: { rate: newRate },
@@ -371,14 +359,19 @@ export namespace AuditRepository {
   /**
    * Convenience method to log system settings changes.
    */
+  export interface SystemSettingChangeInput {
+    settingKey: string;
+    oldValue: unknown;
+    newValue: unknown;
+    actorUserId: string | null;
+    description?: string;
+  }
+
   export const logSystemSettingChange = async (
-    settingKey: string,
-    oldValue: unknown,
-    newValue: unknown,
-    actorUserId: string | null,
-    description?: string,
+    input: SystemSettingChangeInput,
     tx?: DBTransaction
   ): Promise<Types.AuditLogEntity> => {
+    const { settingKey, oldValue, newValue, actorUserId, description } = input;
     return await createAuditLog(
       {
         actorUserId,

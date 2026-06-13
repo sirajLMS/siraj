@@ -255,7 +255,11 @@ export namespace SessionRepository {
       };
 
       // Store in Redis
-      await redisService.setSession(input.hashedId, redisSessionData, config.ttlSeconds);
+      await redisService.setSession({
+        sessionId: input.hashedId,
+        data: redisSessionData,
+        ttlSeconds: config.ttlSeconds,
+      });
 
       // Store metadata in PostgreSQL
       await t.insert(sessionMetadata).values({

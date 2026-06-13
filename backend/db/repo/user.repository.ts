@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { count, eq, inArray } from "drizzle-orm";
+import { count, eq, inArray, type SQL } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { users } from "@/backend/db/schema";
@@ -9,52 +9,37 @@ import type { PaginatedUsersResponseSelectType, PaginationArgs, UserCreateInput,
 import { AuthUtils } from "@/backend/utils";
 
 export namespace UserRepository {
+  /**
+   * Internal helper to find a single user by a condition
+   */
+  async function findOne(condition: SQL | undefined): Promise<UserEntity | null> {
+    try {
+      const results = await db.select().from(users).where(condition).limit(1);
+      return results[0] ?? null;
+    } catch (error) {
+      logger.error("Error finding user:", error);
+      return null;
+    }
+  }
+
   export const existsByEmail = async (email: string): Promise<boolean> => {
     return (await db.$count(users, eq(users.email, email))) > 0;
   };
 
   export const findUserByIdOrThrow = async (id: string): Promise<UserEntity> => {
-    try {
-      return await db
-        .select()
-        .from(users)
-        .where(eq(users.id, id))
-        .then(res => {
-          const t = res[0];
-          return t;
-        });
-    } catch (e) {
-      logger.error("findUserByIdOrThrow error:", e);
-      throw e;
+    const user = await findById(id);
+    if (!user) {
+      throw new Error(`User with ID ${id} not found`);
     }
+    return user;
   };
 
-  export const findById = async (id: string): Promise<UserEntity | null | undefined> => {
-    try {
-      return await db
-        .select()
-        .from(users)
-        .where(eq(users.id, id))
-        .then(res => {
-          return res[0];
-        });
-    } catch {
-      return null;
-    }
+  export const findById = async (id: string): Promise<UserEntity | null> => {
+    return findOne(eq(users.id, id));
   };
 
-  export const findByEmail = async (email: string): Promise<UserEntity | null | undefined> => {
-    try {
-      return await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .then(res => {
-          return res[0];
-        });
-    } catch {
-      return null;
-    }
+  export const findByEmail = async (email: string): Promise<UserEntity | null> => {
+    return findOne(eq(users.email, email));
   };
 
   export const usersTotalCount = async (): Promise<number> => {
@@ -67,19 +52,17 @@ export namespace UserRepository {
   };
 
   export const findUsers = async (opts: { limit: number; offset: number }): Promise<UserEntity[]> => {
-    return await db.select().from(users).orderBy().limit(opts.limit).offset(opts.offset);
+    return await db.select().from(users).orderBy(users.createdAt).limit(opts.limit).offset(opts.offset);
   };
 
   export const loadByIds = async (ids: string[]): Promise<(UserEntity | Error)[]> => {
     if (ids.length === 0) return [];
     const filteredUsers = await db.select().from(users).where(inArray(users.id, ids));
 
-    const userList: (UserEntity | Error)[] = ids.map(id => {
+    return ids.map(id => {
       const matchingUser = filteredUsers.find(c => c.id === id);
-      if (!matchingUser) return new Error(`User ${id} not found`);
-      return matchingUser;
+      return matchingUser || new Error(`User ${id} not found`);
     });
-    return userList;
   };
 
   export const findUsersPaginated = async (
@@ -89,43 +72,38 @@ export namespace UserRepository {
 
     const total = await usersTotalCount();
 
-    // Figure out pagination
     const perPage = Math.min(first ?? PaginationArgsDefault.first, maxCount ?? PaginationArgsDefault.maxCount);
     const currentPage = page ?? (skip ? Math.floor(skip / perPage) + 1 : 1);
     const offset = (currentPage - 1) * perPage;
 
-    const users = await findUsers({
+    const usersList = await findUsers({
       limit: perPage,
       offset,
     });
 
-    const length = users.length;
+    const length = usersList.length;
     const lastPage = Math.ceil(total / perPage);
-    const hasMorePages = currentPage < lastPage;
 
-    const result: PaginatedUsersResponseSelectType = {
-      data: users,
+    return {
+      data: usersList,
       pageInfo: {
         count: length,
         currentPage,
         firstItem: length > 0 ? offset + 1 : null,
         lastItem: length > 0 ? offset + length : null,
-        hasMorePages,
+        hasMorePages: currentPage < lastPage,
         lastPage,
         perPage,
         total,
       },
     };
-
-    return result;
   };
 
   export const create = async (input: UserCreateInput): Promise<UserEntity> => {
-    await existsByEmail(input.email.value).then(exists => {
-      if (exists) {
-        throw new Error(`User with email ${input.email.value} already exists`);
-      }
-    });
+    const exists = await existsByEmail(input.email.value);
+    if (exists) {
+      throw new Error(`User with email ${input.email.value} already exists`);
+    }
 
     AuthUtils.validateUserName(input.name);
     const now = new Date();
@@ -139,7 +117,6 @@ export namespace UserRepository {
           email: input.email.value,
           password: hashedPassword,
           emailVerifiedAt: now,
-          rememberTokenHash: null,
           createdAt: now,
           updatedAt: now,
         })

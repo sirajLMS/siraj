@@ -42,17 +42,22 @@ export namespace SchedulingRepository {
   }
 
   /**
+   * Parameters for overlap checking
+   */
+  interface OverlapCheckParams {
+    studentId: string;
+    teacherId: string;
+    startTime: Date;
+    endTime: Date;
+    zoomUrl?: string | null;
+    excludeId?: string;
+  }
+
+  /**
    * Checks for overlapping class instances for the teacher, student, or zoom URL.
    */
-  async function checkOverlaps(
-    tx: DBTransaction,
-    studentId: string,
-    teacherId: string,
-    startTime: Date,
-    endTime: Date,
-    zoomUrl: string | null | undefined,
-    excludeId?: string
-  ) {
+  async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParams) {
+    const { studentId, teacherId, startTime, endTime, zoomUrl, excludeId } = params;
     const overlapCondition = sql`(${classInstances.scheduledStartAt}, ${classInstances.scheduledEndAt}) OVERLAPS (${startTime}, ${endTime})`;
 
     const teacherOverlaps = await tx
@@ -148,14 +153,13 @@ export namespace SchedulingRepository {
         input.scheduledEndAt,
         t
       );
-      await checkOverlaps(
-        t,
-        input.studentId,
-        input.teacherId,
-        input.scheduledStartAt,
-        input.scheduledEndAt,
-        input.zoomMeetingUrl
-      );
+      await checkOverlaps(t, {
+        studentId: input.studentId,
+        teacherId: input.teacherId,
+        startTime: input.scheduledStartAt,
+        endTime: input.scheduledEndAt,
+        zoomUrl: input.zoomMeetingUrl,
+      });
 
       if (input.quotaDeducted) {
         await t
@@ -201,7 +205,14 @@ export namespace SchedulingRepository {
       if (!isBeingSoftDeleted) {
         await validateTeacherAssignment(t, studentId, teacherId, startTime);
         await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, startTime, endTime, t);
-        await checkOverlaps(t, studentId, teacherId, startTime, endTime, zoomUrl, id);
+        await checkOverlaps(t, {
+          studentId,
+          teacherId,
+          startTime,
+          endTime,
+          zoomUrl,
+          excludeId: id,
+        });
       }
 
       await adjustQuotaOnUpdate(t, existing, input, isBeingSoftDeleted);
@@ -280,14 +291,13 @@ export namespace SchedulingRepository {
         newInstanceInput.scheduledEndAt,
         t
       );
-      await checkOverlaps(
-        t,
-        newInstanceInput.studentId,
-        newInstanceInput.teacherId,
-        newInstanceInput.scheduledStartAt,
-        newInstanceInput.scheduledEndAt,
-        newInstanceInput.zoomMeetingUrl
-      );
+      await checkOverlaps(t, {
+        studentId: newInstanceInput.studentId,
+        teacherId: newInstanceInput.teacherId,
+        startTime: newInstanceInput.scheduledStartAt,
+        endTime: newInstanceInput.scheduledEndAt,
+        zoomUrl: newInstanceInput.zoomMeetingUrl,
+      });
 
       const [created] = await t
         .insert(classInstances)

@@ -238,13 +238,25 @@ export namespace NotificationRepository {
     return results[0] ?? null;
   };
 
+  /**
+   * Input for handling a delivery webhook
+   */
+  export interface DeliveryWebhookInput {
+    providerMessageId: string;
+    status: NotificationDeliveryStatus;
+    webhookPayload?: Record<string, unknown> | null;
+    failureReason?: string | null;
+  }
+
+  /**
+   * Processes a webhook from a notification provider to update delivery status
+   */
   export const handleDeliveryWebhook = async (
-    providerMessageId: string,
-    status: NotificationDeliveryStatus,
-    webhookPayload?: Record<string, unknown> | null,
-    failureReason?: string | null,
+    input: DeliveryWebhookInput,
     tx?: DBTransaction
   ): Promise<Types.NotificationDeliverySelectType> => {
+    const { providerMessageId, status, webhookPayload, failureReason } = input;
+
     const runner = async (t: DBTransaction) => {
       const delivery = await getDeliveryByProviderMessageId(providerMessageId, t);
       if (!delivery) {

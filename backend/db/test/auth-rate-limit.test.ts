@@ -4,7 +4,7 @@ import { testLogger } from "../../../lib/testlogger";
 import type { AuthRateLimitEntityInput } from "../../types";
 import { db } from "../drizzleDb";
 import { authRateLimits } from "../schema";
-import { IP_ADDRESS } from "./const";
+import { IP_ADDRESS_1 } from "./const";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -32,7 +32,7 @@ describe("Authentication Rate Limiting", () => {
     testLogger.info("Starting authentication rate limit unique constraint test...");
     await runInRollback(async tx => {
       const email = `rate-${randomUUID()}@example.com`;
-      const ipAddress = IP_ADDRESS;
+      const ipAddress = IP_ADDRESS_1;
       const now = new Date();
 
       const rateLimitInput1: AuthRateLimitEntityInput = {

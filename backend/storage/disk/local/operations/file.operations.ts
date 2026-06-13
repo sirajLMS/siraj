@@ -9,6 +9,38 @@ import { processFile } from "../shared";
 import type { LocalContext } from "../types";
 import { calculateFileHash, ensureDirectory, getAbsolutePath } from "../utils";
 
+/**
+ * Ensures a database record exists for a file on disk
+ */
+async function ensureFileDbRecord(filePath: string): Promise<void> {
+  try {
+    const dbFile = await StorageDbRepository.fileByPath(filePath);
+    if (dbFile) return;
+
+    await StorageDbRepository.createFile(filePath, false);
+    logger.info(`Created database record for existing file: ${filePath}`);
+  } catch (error) {
+    logger.warn(`Failed to create database record for file: ${filePath}`, error);
+  }
+}
+
+/**
+ * Logs a warning if a directory on disk is missing a database record
+ */
+async function logMissingDirectoryRecord(filePath: string): Promise<void> {
+  try {
+    const dbDirectory = await StorageDbRepository.directoryByPath(filePath);
+    if (!dbDirectory) {
+      logger.info(`Directory exists on disk without DB record: ${filePath}`);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Check if a file exists on disk and has a database record
+ */
 export async function fileExists(ctx: LocalContext, filePath: string): Promise<boolean> {
   try {
     const absolutePath = getAbsolutePath(ctx.basePath, filePath);
@@ -16,23 +48,12 @@ export async function fileExists(ctx: LocalContext, filePath: string): Promise<b
     const stats = await fs.stat(absolutePath);
 
     if (stats.isFile()) {
-      const dbFile = await StorageDbRepository.fileByPath(filePath);
-      if (!dbFile) {
-        try {
-          await StorageDbRepository.createFile(filePath, false);
-          logger.info(`Created database record for existing file: ${filePath}`);
-        } catch (error) {
-          logger.warn(`Failed to create database record for file: ${filePath}`, error);
-        }
-      }
+      await ensureFileDbRecord(filePath);
       return true;
     }
 
     if (stats.isDirectory()) {
-      const dbDirectory = await StorageDbRepository.directoryByPath(filePath);
-      if (!dbDirectory) {
-        logger.info(`Directory exists on disk without DB record: ${filePath}`);
-      }
+      await logMissingDirectoryRecord(filePath);
       return true;
     }
 
@@ -93,15 +114,11 @@ export async function fileInfoByDbFileId(ctx: LocalContext, id: string): Promise
 
 export async function renameFile(ctx: LocalContext, input: Types.FileRenameInput): Promise<Types.FileOperationResult> {
   try {
-    const pathValidationError = await StorageUtils.validatePath(input.currentPath);
-    if (pathValidationError) {
-      return { success: false, message: pathValidationError };
-    }
+    const pathErr = StorageUtils.validatePath(input.currentPath);
+    if (pathErr) return { success: false, message: pathErr };
 
-    const nameValidationError = await StorageUtils.validateFileName(input.newName);
-    if (nameValidationError) {
-      return { success: false, message: nameValidationError };
-    }
+    const nameErr = StorageUtils.validateFileName(input.newName);
+    if (nameErr) return { success: false, message: nameErr };
 
     const directoryPath = StorageUtils.extractDirectoryPath(input.currentPath);
     const newPath = `${directoryPath}/${input.newName}`;
@@ -116,8 +133,7 @@ export async function renameFile(ctx: LocalContext, input: Types.FileRenameInput
     try {
       const dbFile = await StorageDbRepository.fileByPath(input.currentPath);
       if (dbFile) {
-        const updatedFile = { ...dbFile, path: newPath };
-        fileEntity = await StorageDbRepository.updateFile(updatedFile);
+        fileEntity = await StorageDbRepository.updateFile({ ...dbFile, path: newPath });
       }
     } catch (error) {
       logger.warn(`Failed to update file in database: ${input.currentPath}`, error);
@@ -142,12 +158,11 @@ export async function renameFile(ctx: LocalContext, input: Types.FileRenameInput
       fileType: StorageUtils.getFileTypeFromContentType(contentType),
       isPublic: newPath.startsWith("public"),
     };
-    const fileInfo = StorageUtils.combineFileData(bucketFile, fileEntity);
 
     return {
       success: true,
       message: "File renamed successfully",
-      data: fileInfo,
+      data: StorageUtils.combineFileData(bucketFile, fileEntity),
     };
   } catch (error) {
     logger.error(`Failed to rename file: ${input.currentPath}`, error);

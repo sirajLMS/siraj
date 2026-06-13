@@ -21,14 +21,12 @@ export namespace StorageDbRepository {
   // File operations
   export const fileById = async (id: string): Promise<StorageTypes.FileEntity | null> => {
     const results = await db.select().from(storageFiles).where(eq(storageFiles.id, id)).limit(1);
-    if (results.length === 0) return null;
-    return results[0];
+    return results[0] ?? null;
   };
 
   export const fileByPath = async (path: string): Promise<StorageTypes.FileEntity | null> => {
     const results = await db.select().from(storageFiles).where(eq(storageFiles.path, path)).limit(1);
-    if (results.length === 0) return null;
-    return results[0];
+    return results[0] ?? null;
   };
 
   export const filesByIds = async (ids: string[]): Promise<StorageTypes.FileEntity[]> => {
@@ -44,24 +42,17 @@ export namespace StorageDbRepository {
   export const createFile = async (path: string, isProtected: boolean = false): Promise<StorageTypes.FileEntity> => {
     const results = await db
       .insert(storageFiles)
-      .values({
-        path,
-        isProtected,
-      })
+      .values({ path, isProtected })
       .onConflictDoUpdate({
         target: storageFiles.path,
-        set: {
-          isProtected,
-        },
+        set: { isProtected },
       })
       .returning();
     return results[0];
   };
 
   export const updateFile = async (
-    file: StorageTypes.FileEntityInput & {
-      id: string;
-    }
+    file: StorageTypes.FileEntityInput & { id: string }
   ): Promise<StorageTypes.FileEntity | undefined> => {
     const results = await db
       .update(storageFiles)
@@ -71,7 +62,6 @@ export namespace StorageDbRepository {
       })
       .where(eq(storageFiles.id, file.id))
       .returning();
-    if (results.length === 0) return undefined;
     return results[0];
   };
 
@@ -89,10 +79,7 @@ export namespace StorageDbRepository {
   export const directoryByPath = async (path: string): Promise<StorageTypes.DirectoryEntity | null> => {
     try {
       const result = await db.select().from(storageDirectories).where(eq(storageDirectories.path, path)).limit(1);
-      if (result.length === 0) {
-        return null;
-      }
-      return result[0];
+      return result[0] ?? null;
     } catch (err) {
       logger.error("Failed to find directory by path:", err);
       return null;
@@ -126,7 +113,7 @@ export namespace StorageDbRepository {
       allowMoveFiles: true,
     };
 
-    const results = await db
+    const [created] = await db
       .insert(storageDirectories)
       .values({
         path: input.path,
@@ -140,13 +127,13 @@ export namespace StorageDbRepository {
         protectChildren: input.protectChildren || false,
       })
       .returning();
-    return results[0];
+    return created;
   };
 
   export const updateDirectory = async (
     directory: StorageTypes.DirectoryEntity
   ): Promise<StorageTypes.DirectoryEntity | undefined> => {
-    const results = await db
+    const [updated] = await db
       .update(storageDirectories)
       .set({
         path: directory.path,
@@ -161,8 +148,7 @@ export namespace StorageDbRepository {
       })
       .where(eq(storageDirectories.id, directory.id))
       .returning();
-    if (results.length === 0) return undefined;
-    return results[0];
+    return updated;
   };
 
   export const deleteDirectory = async (path: string): Promise<boolean> => {
@@ -180,158 +166,36 @@ export namespace StorageDbRepository {
     const file = await fileByPath(filePath);
     if (!file) return [];
 
-    const allUsages: StorageTypes.FileUsageInfo[] = [];
+    const fId = file.id;
+    const fPath = file.path;
 
-    // Explicitly query each table to remain 100% type-safe without 'any' or casting
-    const queries = [
-      db
-        .select()
-        .from(userFiles)
-        .where(eq(userFiles.fileId, file.id))
-        .then(rows =>
-          rows.map(r => ({
-            id: r.id,
-            filePath: file.path,
-            usageType: r.usageType,
-            referenceId: r.userId,
-            referenceTable: "users",
-            createdAt: r.createdAt,
-          }))
-        ),
-      db
-        .select()
-        .from(teacherFiles)
-        .where(eq(teacherFiles.fileId, file.id))
-        .then(rows =>
-          rows.map(r => ({
-            id: r.id,
-            filePath: file.path,
-            usageType: r.usageType,
-            referenceId: r.teacherId,
-            referenceTable: "teachers",
-            createdAt: r.createdAt,
-          }))
-        ),
-      db
-        .select()
-        .from(studentFiles)
-        .where(eq(studentFiles.fileId, file.id))
-        .then(rows =>
-          rows.map(r => ({
-            id: r.id,
-            filePath: file.path,
-            usageType: r.usageType,
-            referenceId: r.studentId,
-            referenceTable: "students",
-            createdAt: r.createdAt,
-          }))
-        ),
-      db
-        .select()
-        .from(parentFiles)
-        .where(eq(parentFiles.fileId, file.id))
-        .then(rows =>
-          rows.map(r => ({
-            id: r.id,
-            filePath: file.path,
-            usageType: r.usageType,
-            referenceId: r.parentId,
-            referenceTable: "parents",
-            createdAt: r.createdAt,
-          }))
-        ),
-      db
-        .select()
-        .from(invoiceFiles)
-        .where(eq(invoiceFiles.fileId, file.id))
-        .then(rows =>
-          rows.map(r => ({
-            id: r.id,
-            filePath: file.path,
-            usageType: r.usageType,
-            referenceId: r.invoiceId,
-            referenceTable: "invoices",
-            createdAt: r.createdAt,
-          }))
-        ),
-      db
-        .select()
-        .from(complaintFiles)
-        .where(eq(complaintFiles.fileId, file.id))
-        .then(rows =>
-          rows.map(r => ({
-            id: r.id,
-            filePath: file.path,
-            usageType: r.usageType,
-            referenceId: r.complaintId,
-            referenceTable: "complaints",
-            createdAt: r.createdAt,
-          }))
-        ),
-      db
-        .select()
-        .from(learningResourceFiles)
-        .where(eq(learningResourceFiles.fileId, file.id))
-        .then(rows =>
-          rows.map(r => ({
-            id: r.id,
-            filePath: file.path,
-            usageType: r.usageType,
-            referenceId: r.learningResourceId,
-            referenceTable: "learning_resources",
-            createdAt: r.createdAt,
-          }))
-        ),
-      db
-        .select()
-        .from(staffProfileFiles)
-        .where(eq(staffProfileFiles.fileId, file.id))
-        .then(rows =>
-          rows.map(r => ({
-            id: r.id,
-            filePath: file.path,
-            usageType: r.usageType,
-            referenceId: r.staffProfileId,
-            referenceTable: "staff_profiles",
-            createdAt: r.createdAt,
-          }))
-        ),
-      db
-        .select()
-        .from(recurringScheduleFiles)
-        .where(eq(recurringScheduleFiles.fileId, file.id))
-        .then(rows =>
-          rows.map(r => ({
-            id: r.id,
-            filePath: file.path,
-            usageType: r.usageType,
-            referenceId: r.recurringScheduleId,
-            referenceTable: "recurring_schedules",
-            createdAt: r.createdAt,
-          }))
-        ),
-      db
-        .select()
-        .from(classInstanceFiles)
-        .where(eq(classInstanceFiles.fileId, file.id))
-        .then(rows =>
-          rows.map(r => ({
-            id: r.id,
-            filePath: file.path,
-            usageType: r.usageType,
-            referenceId: r.classInstanceId,
-            referenceTable: "class_instances",
-            createdAt: r.createdAt,
-          }))
-        ),
+    const [
+      users, teachers, students_res, parents, invoices, complaints, resources, staff, schedules, instances
+    ] = await Promise.all([
+      db.select().from(userFiles).where(eq(userFiles.fileId, fId)),
+      db.select().from(teacherFiles).where(eq(teacherFiles.fileId, fId)),
+      db.select().from(studentFiles).where(eq(studentFiles.fileId, fId)),
+      db.select().from(parentFiles).where(eq(parentFiles.fileId, fId)),
+      db.select().from(invoiceFiles).where(eq(invoiceFiles.fileId, fId)),
+      db.select().from(complaintFiles).where(eq(complaintFiles.fileId, fId)),
+      db.select().from(learningResourceFiles).where(eq(learningResourceFiles.fileId, fId)),
+      db.select().from(staffProfileFiles).where(eq(staffProfileFiles.fileId, fId)),
+      db.select().from(recurringScheduleFiles).where(eq(recurringScheduleFiles.fileId, fId)),
+      db.select().from(classInstanceFiles).where(eq(classInstanceFiles.fileId, fId)),
+    ]);
+
+    return [
+      ...users.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.userId, referenceTable: "users", createdAt: r.createdAt })),
+      ...teachers.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.teacherId, referenceTable: "teachers", createdAt: r.createdAt })),
+      ...students_res.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.studentId, referenceTable: "students", createdAt: r.createdAt })),
+      ...parents.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.parentId, referenceTable: "parents", createdAt: r.createdAt })),
+      ...invoices.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.invoiceId, referenceTable: "invoices", createdAt: r.createdAt })),
+      ...complaints.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.complaintId, referenceTable: "complaints", createdAt: r.createdAt })),
+      ...resources.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.learningResourceId, referenceTable: "learning_resources", createdAt: r.createdAt })),
+      ...staff.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.staffProfileId, referenceTable: "staff_profiles", createdAt: r.createdAt })),
+      ...schedules.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.recurringScheduleId, referenceTable: "recurring_schedules", createdAt: r.createdAt })),
+      ...instances.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.classInstanceId, referenceTable: "class_instances", createdAt: r.createdAt })),
     ];
-
-    const results = await Promise.all(queries);
-    for (const batch of results) {
-      allUsages.push(...batch);
-    }
-
-    return allUsages;
   };
 
   export const isFileInUse = async (filePath: string): Promise<boolean> => {
@@ -339,19 +203,10 @@ export namespace StorageDbRepository {
     if (!file) return false;
 
     const tables = [
-      userFiles,
-      teacherFiles,
-      studentFiles,
-      parentFiles,
-      invoiceFiles,
-      complaintFiles,
-      learningResourceFiles,
-      staffProfileFiles,
-      recurringScheduleFiles,
-      classInstanceFiles,
+      userFiles, teacherFiles, studentFiles, parentFiles, invoiceFiles,
+      complaintFiles, learningResourceFiles, staffProfileFiles, recurringScheduleFiles, classInstanceFiles
     ];
 
-    // Check all junction tables for at least one record
     for (const table of tables) {
       const results = await db.select({ id: table.id }).from(table).where(eq(table.fileId, file.id)).limit(1);
       if (results.length > 0) return true;
@@ -366,12 +221,14 @@ export namespace StorageDbRepository {
     try {
       const { referenceTable, referenceId, usageType, filePath } = input;
 
-      // Register file in DB (handles conflict if already exists)
       const file = await createFile(filePath);
-      const fileId = file.id;
-
-      const createdAt = new Date();
-      await performJunctionInsert(referenceTable, fileId, referenceId, usageType, createdAt);
+      await performJunctionInsert({
+        table: referenceTable,
+        fileId: file.id,
+        refId: referenceId,
+        type: usageType,
+        createdAt: new Date(),
+      });
 
       return { success: true, message: "File usage registered successfully" };
     } catch (error) {
@@ -379,17 +236,19 @@ export namespace StorageDbRepository {
     }
   };
 
+  interface JunctionInsertParams {
+    table: string;
+    fileId: string;
+    refId: string;
+    type: string;
+    createdAt: Date;
+  }
+
   /**
    * Helper to perform the actual junction table insertion in a type-safe way.
-   * This reduces cognitive complexity of the main method.
    */
-  async function performJunctionInsert(
-    table: string,
-    fileId: string,
-    refId: string,
-    type: string,
-    createdAt: Date
-  ): Promise<void> {
+  async function performJunctionInsert(params: JunctionInsertParams): Promise<void> {
+    const { table, fileId, refId, type, createdAt } = params;
     switch (table) {
       case "users":
         await db.insert(userFiles).values({ fileId, userId: refId, usageType: type, createdAt });
@@ -410,17 +269,13 @@ export namespace StorageDbRepository {
         await db.insert(complaintFiles).values({ fileId, complaintId: refId, usageType: type, createdAt });
         break;
       case "learning_resources":
-        await db
-          .insert(learningResourceFiles)
-          .values({ fileId, learningResourceId: refId, usageType: type, createdAt });
+        await db.insert(learningResourceFiles).values({ fileId, learningResourceId: refId, usageType: type, createdAt });
         break;
       case "staff_profiles":
         await db.insert(staffProfileFiles).values({ fileId, staffProfileId: refId, usageType: type, createdAt });
         break;
       case "recurring_schedules":
-        await db
-          .insert(recurringScheduleFiles)
-          .values({ fileId, recurringScheduleId: refId, usageType: type, createdAt });
+        await db.insert(recurringScheduleFiles).values({ fileId, recurringScheduleId: refId, usageType: type, createdAt });
         break;
       case "class_instances":
         await db.insert(classInstanceFiles).values({ fileId, classInstanceId: refId, usageType: type, createdAt });
@@ -437,97 +292,21 @@ export namespace StorageDbRepository {
   ): Promise<boolean> => {
     try {
       const file = await fileByPath(filePath);
-      if (!file) return true; // Already gone or not tracked
+      if (!file) return true;
 
       const fileId = file.id;
 
       await Promise.all([
-        db
-          .delete(userFiles)
-          .where(
-            and(eq(userFiles.fileId, fileId), eq(userFiles.usageType, usageType), eq(userFiles.userId, referenceId))
-          ),
-        db
-          .delete(teacherFiles)
-          .where(
-            and(
-              eq(teacherFiles.fileId, fileId),
-              eq(teacherFiles.usageType, usageType),
-              eq(teacherFiles.teacherId, referenceId)
-            )
-          ),
-        db
-          .delete(studentFiles)
-          .where(
-            and(
-              eq(studentFiles.fileId, fileId),
-              eq(studentFiles.usageType, usageType),
-              eq(studentFiles.studentId, referenceId)
-            )
-          ),
-        db
-          .delete(parentFiles)
-          .where(
-            and(
-              eq(parentFiles.fileId, fileId),
-              eq(parentFiles.usageType, usageType),
-              eq(parentFiles.parentId, referenceId)
-            )
-          ),
-        db
-          .delete(invoiceFiles)
-          .where(
-            and(
-              eq(invoiceFiles.fileId, fileId),
-              eq(invoiceFiles.usageType, usageType),
-              eq(invoiceFiles.invoiceId, referenceId)
-            )
-          ),
-        db
-          .delete(complaintFiles)
-          .where(
-            and(
-              eq(complaintFiles.fileId, fileId),
-              eq(complaintFiles.usageType, usageType),
-              eq(complaintFiles.complaintId, referenceId)
-            )
-          ),
-        db
-          .delete(learningResourceFiles)
-          .where(
-            and(
-              eq(learningResourceFiles.fileId, fileId),
-              eq(learningResourceFiles.usageType, usageType),
-              eq(learningResourceFiles.learningResourceId, referenceId)
-            )
-          ),
-        db
-          .delete(staffProfileFiles)
-          .where(
-            and(
-              eq(staffProfileFiles.fileId, fileId),
-              eq(staffProfileFiles.usageType, usageType),
-              eq(staffProfileFiles.staffProfileId, referenceId)
-            )
-          ),
-        db
-          .delete(recurringScheduleFiles)
-          .where(
-            and(
-              eq(recurringScheduleFiles.fileId, fileId),
-              eq(recurringScheduleFiles.usageType, usageType),
-              eq(recurringScheduleFiles.recurringScheduleId, referenceId)
-            )
-          ),
-        db
-          .delete(classInstanceFiles)
-          .where(
-            and(
-              eq(classInstanceFiles.fileId, fileId),
-              eq(classInstanceFiles.usageType, usageType),
-              eq(classInstanceFiles.classInstanceId, referenceId)
-            )
-          ),
+        db.delete(userFiles).where(and(eq(userFiles.fileId, fileId), eq(userFiles.usageType, usageType), eq(userFiles.userId, referenceId))),
+        db.delete(teacherFiles).where(and(eq(teacherFiles.fileId, fileId), eq(teacherFiles.usageType, usageType), eq(teacherFiles.teacherId, referenceId))),
+        db.delete(studentFiles).where(and(eq(studentFiles.fileId, fileId), eq(studentFiles.usageType, usageType), eq(studentFiles.studentId, referenceId))),
+        db.delete(parentFiles).where(and(eq(parentFiles.fileId, fileId), eq(parentFiles.usageType, usageType), eq(parentFiles.parentId, referenceId))),
+        db.delete(invoiceFiles).where(and(eq(invoiceFiles.fileId, fileId), eq(invoiceFiles.usageType, usageType), eq(invoiceFiles.invoiceId, referenceId))),
+        db.delete(complaintFiles).where(and(eq(complaintFiles.fileId, fileId), eq(complaintFiles.usageType, usageType), eq(complaintFiles.complaintId, referenceId))),
+        db.delete(learningResourceFiles).where(and(eq(learningResourceFiles.fileId, fileId), eq(learningResourceFiles.usageType, usageType), eq(learningResourceFiles.learningResourceId, referenceId))),
+        db.delete(staffProfileFiles).where(and(eq(staffProfileFiles.fileId, fileId), eq(staffProfileFiles.usageType, usageType), eq(staffProfileFiles.staffProfileId, referenceId))),
+        db.delete(recurringScheduleFiles).where(and(eq(recurringScheduleFiles.fileId, fileId), eq(recurringScheduleFiles.usageType, usageType), eq(recurringScheduleFiles.recurringScheduleId, referenceId))),
+        db.delete(classInstanceFiles).where(and(eq(classInstanceFiles.fileId, fileId), eq(classInstanceFiles.usageType, usageType), eq(classInstanceFiles.classInstanceId, referenceId))),
       ]);
 
       return true;
@@ -538,9 +317,7 @@ export namespace StorageDbRepository {
   };
 
   // Business logic methods
-  export const checkFileUsage = async (
-    input: StorageTypes.FileUsageCheckInput
-  ): Promise<StorageTypes.FileUsageResult> => {
+  export const checkFileUsage = async (input: StorageTypes.FileUsageCheckInput): Promise<StorageTypes.FileUsageResult> => {
     try {
       const usages = await getFileUsages(input.path);
       const isInUse = usages.length > 0;
@@ -567,14 +344,9 @@ export namespace StorageDbRepository {
   ): Promise<StorageTypes.FileOperationResult> => {
     try {
       const directory = await directoryByPath(input.path);
-      if (!directory) {
-        return {
-          success: false,
-          message: "Directory not found",
-        };
-      }
+      if (!directory) return { success: false, message: "Directory not found" };
 
-      const updatedDirectory = {
+      const updated = await updateDirectory({
         ...directory,
         allowUploads: input.permissions.allowUploads,
         allowDelete: input.permissions.allowDelete,
@@ -582,9 +354,7 @@ export namespace StorageDbRepository {
         allowCreateSubDirs: input.permissions.allowCreateSubDirs,
         allowDeleteFiles: input.permissions.allowDeleteFiles,
         allowMoveFiles: input.permissions.allowMoveFiles,
-      };
-
-      const updated = await updateDirectory(updatedDirectory);
+      });
 
       return {
         success: !!updated,
@@ -602,44 +372,31 @@ export namespace StorageDbRepository {
     input: StorageTypes.StorageItemProtectionUpdateInput
   ): Promise<StorageTypes.FileOperationResult> => {
     try {
-      // Check if it's a file
       const file = await fileByPath(input.path);
       if (file) {
-        const updatedFile = {
-          ...file,
-          isProtected: input.isProtected,
-        };
-        const updated = await updateFile(updatedFile);
+        const updated = await updateFile({ ...file, isProtected: input.isProtected });
         return {
           success: !!updated,
           message: updated ? "File protection updated successfully" : "Failed to update file protection",
         };
       }
 
-      // Check if it's a directory
       const directory = await directoryByPath(input.path);
       if (directory) {
-        const updatedDirectory = {
+        const updated = await updateDirectory({
           ...directory,
           isProtected: input.isProtected,
           protectChildren: input.protectChildren || false,
-        };
-        const updated = await updateDirectory(updatedDirectory);
+        });
         return {
           success: !!updated,
           message: updated ? "Directory protection updated successfully" : "Failed to update directory protection",
         };
       }
 
-      return {
-        success: false,
-        message: "File or directory not found",
-      };
+      return { success: false, message: "File or directory not found" };
     } catch (error) {
-      return {
-        success: false,
-        message: `Failed to set protection: ${error}`,
-      };
+      return { success: false, message: `Failed to set protection: ${error}` };
     }
   };
 }

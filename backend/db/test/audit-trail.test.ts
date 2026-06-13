@@ -18,7 +18,7 @@ import type * as Types from "../../types";
 import { db } from "../drizzleDb";
 import { AuditRepository } from "../repo";
 import { auditLogs, users } from "../schema";
-import { IP_ADDRESS } from "./const";
+import { IP_ADDRESS_1 } from "./const";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -113,7 +113,7 @@ describe("Audit Trail System", () => {
       entityId: "00000000-0000-0000-0000-000000000003",
       action: "REFUND",
       description: "Automatic refund processed",
-      ipAddress: IP_ADDRESS,
+      ipAddress: IP_ADDRESS_1,
       userAgent: "Mozilla/5.0",
       metadata: {
         refundAmount: 50,
@@ -126,7 +126,7 @@ describe("Audit Trail System", () => {
 
     expect(auditLog.actorType).toBe("SYSTEM");
     expect(auditLog.actorUserId).toBeNull();
-    expect(auditLog.ipAddress).toBe(IP_ADDRESS);
+    expect(auditLog.ipAddress).toBe(IP_ADDRESS_1);
     expect(auditLog.metadata).toEqual({
       refundAmount: 50,
       currency: "USD",
@@ -216,13 +216,13 @@ describe("Audit Trail System", () => {
   test("should log student status change", async () => {
     const studentId = "00000000-0000-0000-0000-000000000007";
 
-    const auditLog = await AuditRepository.logStudentStatusChange(
+    const auditLog = await AuditRepository.logStudentStatusChange({
       studentId,
-      "ACTIVE",
-      "INACTIVE",
-      testUser1.id,
-      "Student requested suspension"
-    );
+      oldStatus: "ACTIVE",
+      newStatus: "INACTIVE",
+      actorUserId: testUser1.id,
+      description: "Student requested suspension",
+    });
 
     expect(auditLog.entityType).toBe("STUDENT");
     expect(auditLog.action).toBe("STATUS_CHANGE");
@@ -234,14 +234,14 @@ describe("Audit Trail System", () => {
   test("should log invoice change", async () => {
     const invoiceId = "00000000-0000-0000-0000-000000000008";
 
-    const auditLog = await AuditRepository.logInvoiceChange(
+    const auditLog = await AuditRepository.logInvoiceChange({
       invoiceId,
-      "UPDATE",
-      { amount: 100, status: "PENDING" },
-      { amount: 100, status: "PAID" },
-      testUser1.id,
-      "Invoice payment confirmed"
-    );
+      action: "UPDATE",
+      previousState: { amount: 100, status: "PENDING" },
+      newState: { amount: 100, status: "PAID" },
+      actorUserId: testUser1.id,
+      description: "Invoice payment confirmed",
+    });
 
     expect(auditLog.entityType).toBe("INVOICE");
     expect(auditLog.action).toBe("UPDATE");
@@ -252,13 +252,13 @@ describe("Audit Trail System", () => {
   test("should log payment refund", async () => {
     const paymentId = "00000000-0000-0000-0000-000000000009";
 
-    const auditLog = await AuditRepository.logPaymentRefund(
+    const auditLog = await AuditRepository.logPaymentRefund({
       paymentId,
-      50.0,
-      "USD",
-      testUser1.id,
-      "Customer requested refund"
-    );
+      refundAmount: 50.0,
+      currency: "USD",
+      actorUserId: testUser1.id,
+      reason: "Customer requested refund",
+    });
 
     expect(auditLog.entityType).toBe("PAYMENT");
     expect(auditLog.action).toBe("REFUND");
@@ -271,14 +271,14 @@ describe("Audit Trail System", () => {
   });
 
   test("should log permission change", async () => {
-    const auditLog = await AuditRepository.logPermissionChange(
-      testUser2.id,
-      "GRANT",
-      "00000000-0000-0000-0000-00000000000a",
-      "PERMISSION_GROUP",
-      testUser1.id,
-      "Added admin role"
-    );
+    const auditLog = await AuditRepository.logPermissionChange({
+      userId: testUser2.id,
+      action: "GRANT",
+      permissionOrGroupId: "00000000-0000-0000-0000-00000000000a",
+      permissionType: "PERMISSION_GROUP",
+      actorUserId: testUser1.id,
+      description: "Added admin role",
+    });
 
     expect(auditLog.entityType).toBe("PERMISSION_GROUP");
     expect(auditLog.action).toBe("GRANT");
@@ -289,7 +289,15 @@ describe("Audit Trail System", () => {
   test("should log exchange rate update", async () => {
     const rateId = "00000000-0000-0000-0000-00000000000b";
 
-    const auditLog = await AuditRepository.logExchangeRateUpdate(rateId, "USD", "EUR", 0.85, 0.87, testUser1.id, "ECB");
+    const auditLog = await AuditRepository.logExchangeRateUpdate({
+      rateId,
+      fromCurrency: "USD",
+      toCurrency: "EUR",
+      oldRate: 0.85,
+      newRate: 0.87,
+      actorUserId: testUser1.id,
+      source: "ECB",
+    });
 
     expect(auditLog.entityType).toBe("EXCHANGE_RATE");
     expect(auditLog.action).toBe("UPDATE");
@@ -299,13 +307,13 @@ describe("Audit Trail System", () => {
   });
 
   test("should log system setting change", async () => {
-    const auditLog = await AuditRepository.logSystemSettingChange(
-      "max_students_per_teacher",
-      10,
-      15,
-      testUser1.id,
-      "Increased capacity"
-    );
+    const auditLog = await AuditRepository.logSystemSettingChange({
+      settingKey: "max_students_per_teacher",
+      oldValue: 10,
+      newValue: 15,
+      actorUserId: testUser1.id,
+      description: "Increased capacity",
+    });
 
     expect(auditLog.entityType).toBe("SYSTEM_SETTING");
     expect(auditLog.action).toBe("UPDATE");

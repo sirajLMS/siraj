@@ -164,10 +164,12 @@ describe("Notification Delivery Tracking", () => {
       );
 
       const webhookDelivery = await NotificationRepository.handleDeliveryWebhook(
-        providerMessageId,
-        NotificationDeliveryStatus.DELIVERED,
-        { event: "delivery_confirmed" },
-        null,
+        {
+          providerMessageId,
+          status: NotificationDeliveryStatus.DELIVERED,
+          webhookPayload: { event: "delivery_confirmed" },
+          failureReason: null,
+        },
         tx
       );
 

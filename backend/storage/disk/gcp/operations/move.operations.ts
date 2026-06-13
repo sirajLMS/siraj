@@ -6,6 +6,9 @@ import type { GcpContext, GenericOperationResult } from "../types";
 import { fileExists, fileInfoByPath } from "./file.operations";
 import { directoryInfoByPath } from "./folder.operations";
 
+/**
+ * Move multiple items in GCP storage
+ */
 export async function moveItems(
   ctx: GcpContext,
   input: Types.StorageItemsMoveInput
@@ -51,14 +54,13 @@ export async function moveItems(
   }
 
   for (const sourcePath of validSources) {
-    const result: GenericOperationResult<Types.FileInfo | Types.DirectoryInfo> = await moveSingleItem(
-      ctx,
+    const result: GenericOperationResult<Types.FileInfo | Types.DirectoryInfo> = await moveSingleItem(ctx, {
       sourcePath,
-      input.destinationPath,
-      dbFileMap.get(sourcePath),
-      dbDirectoryMap.get(sourcePath),
-      dbSourceDirMap.get(sourcePath.substring(0, sourcePath.lastIndexOf("/")))
-    );
+      destinationPath: input.destinationPath,
+      dbFile: dbFileMap.get(sourcePath),
+      dbDirectory: dbDirectoryMap.get(sourcePath),
+      dbSourceDir: dbSourceDirMap.get(sourcePath.substring(0, sourcePath.lastIndexOf("/"))),
+    });
 
     if (result.success && result.data) {
       successCount++;
@@ -74,14 +76,26 @@ export async function moveItems(
   return formatBulkOperationResult(successCount, failures, successfulItems, "moved");
 }
 
+/**
+ * Options for moving a single item
+ */
+interface MoveSingleItemOptions {
+  sourcePath: string;
+  destinationPath: string;
+  dbFile?: Types.FileEntity;
+  dbDirectory?: Types.DirectoryEntity;
+  dbSourceDir?: Types.DirectoryEntity;
+}
+
+/**
+ * Move a single file or directory in GCS and update database
+ */
 async function moveSingleItem(
   ctx: GcpContext,
-  sourcePath: string,
-  destinationPath: string,
-  dbFile: Types.FileEntity | undefined,
-  dbDirectory: Types.DirectoryEntity | undefined,
-  dbSourceDir: Types.DirectoryEntity | undefined
+  options: MoveSingleItemOptions
 ): Promise<GenericOperationResult<Types.FileInfo | Types.DirectoryInfo>> {
+  const { sourcePath, destinationPath, dbFile, dbDirectory, dbSourceDir } = options;
+
   try {
     const sourceDir = sourcePath.substring(0, sourcePath.lastIndexOf("/"));
     if (dbSourceDir && !dbSourceDir.allowMove) {

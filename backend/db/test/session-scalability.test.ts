@@ -6,6 +6,7 @@ import { testLogger } from "../../../lib/testlogger";
 import { db } from "../drizzleDb";
 import { SessionRepository } from "../repo";
 import { users } from "../schema";
+import { IP_ADDRESS_1, IP_ADDRESS_2 } from "./const";
 
 // Load Redis-specific environment configuration for tests
 config({ path: ".env.redis", override: true });
@@ -122,8 +123,7 @@ describe("Session Scalability and Redis Integration", () => {
             hashedId: sessionId,
             userId: user.id,
             payload: JSON.stringify({ test: "data" }),
-            // eslint-disable-next-line sonarjs/no-hardcoded-ip -- Test fixture
-            ipAddress: "192.168.1.1",
+            ipAddress: IP_ADDRESS_1,
             userAgent: "Mozilla/5.0",
             deviceType: "desktop",
             deviceName: "Test Device",
@@ -161,8 +161,7 @@ describe("Session Scalability and Redis Integration", () => {
             hashedId: sessionId,
             userId: user.id,
             payload: JSON.stringify({ role: "admin" }),
-            // eslint-disable-next-line sonarjs/no-hardcoded-ip -- Test fixture
-            ipAddress: "10.0.0.1",
+            ipAddress: IP_ADDRESS_2,
             userAgent: "Test Agent",
           },
           tx
@@ -173,8 +172,7 @@ describe("Session Scalability and Redis Integration", () => {
         expect(retrieved).not.toBeNull();
         expect(retrieved?.hashedId).toBe(sessionId);
         expect(retrieved?.userId).toBe(user.id);
-        // eslint-disable-next-line sonarjs/no-hardcoded-ip -- Test expectation
-        expect(retrieved?.ipAddress).toBe("10.0.0.1");
+        expect(retrieved?.ipAddress).toBe(IP_ADDRESS_2);
 
         testLogger.info(`Session ${sessionId} retrieved from Redis`);
 

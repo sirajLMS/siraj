@@ -8,37 +8,58 @@ import { calculateTotalFiles, formatFileTypeBreakdown, updateFileTypeMap } from 
 import type { LocalContext } from "../types";
 import { getAbsolutePath } from "../utils";
 
+interface StatsState {
+  totalSize: bigint;
+  fileTypeMap: Map<Types.FileTypes, { count: number; size: bigint }>;
+  directories: Set<string>;
+}
+
+/**
+ * Process a single file to update statistics state
+ */
+async function processFileStats(filePath: string, fileName: string, state: StatsState): Promise<void> {
+  const stats = await fs.stat(filePath);
+  const size = BigInt(stats.size);
+  state.totalSize += size;
+
+  const ext = path.extname(fileName).toLowerCase().slice(1);
+  const contentType = extToMime[ext] || "application/octet-stream";
+
+  const fileType = StorageUtils.getFileTypeFromContentType(contentType);
+  updateFileTypeMap(state.fileTypeMap, fileType, size);
+}
+
+/**
+ * Recursively walk a directory to collect statistics
+ */
+async function walkDirectory(dirPath: string, relativePath: string, state: StatsState): Promise<void> {
+  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const entryAbsolutePath = path.join(dirPath, entry.name);
+    const entryRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
+
+    if (entry.isDirectory()) {
+      state.directories.add(entryRelativePath);
+      await walkDirectory(entryAbsolutePath, entryRelativePath, state);
+    } else if (entry.isFile()) {
+      await processFileStats(entryAbsolutePath, entry.name, state);
+    }
+  }
+}
+
+/**
+ * Get storage statistics for a local path
+ */
 export async function storageStatistics(ctx: LocalContext, searchPath?: string | null): Promise<Types.StorageStats> {
   try {
     const targetPath = searchPath || "";
     const absolutePath = getAbsolutePath(ctx.basePath, targetPath);
 
-    let totalSize = BigInt(0);
-    const fileTypeMap = new Map<Types.FileTypes, { count: number; size: bigint }>();
-    const directories = new Set<string>();
-
-    const walkDirectory = async (dirPath: string, relativePath: string) => {
-      const entries = await fs.readdir(dirPath, { withFileTypes: true });
-
-      for (const entry of entries) {
-        const entryAbsolutePath = path.join(dirPath, entry.name);
-        const entryRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
-
-        if (entry.isDirectory()) {
-          directories.add(entryRelativePath);
-          await walkDirectory(entryAbsolutePath, entryRelativePath);
-        } else if (entry.isFile()) {
-          const stats = await fs.stat(entryAbsolutePath);
-          const size = BigInt(stats.size);
-          totalSize += size;
-
-          const ext = path.extname(entry.name).toLowerCase().slice(1);
-          const contentType = extToMime[ext] || "application/octet-stream";
-
-          const fileType = StorageUtils.getFileTypeFromContentType(contentType);
-          updateFileTypeMap(fileTypeMap, fileType, size);
-        }
-      }
+    const state: StatsState = {
+      totalSize: BigInt(0),
+      fileTypeMap: new Map<Types.FileTypes, { count: number; size: bigint }>(),
+      directories: new Set<string>(),
     };
 
     try {
@@ -46,16 +67,9 @@ export async function storageStatistics(ctx: LocalContext, searchPath?: string |
       const stats = await fs.stat(absolutePath);
 
       if (stats.isDirectory()) {
-        await walkDirectory(absolutePath, "");
+        await walkDirectory(absolutePath, "", state);
       } else if (stats.isFile()) {
-        const size = BigInt(stats.size);
-        totalSize = size;
-
-        const ext = path.extname(targetPath).toLowerCase().slice(1);
-        const contentType = extToMime[ext] || "application/octet-stream";
-
-        const fileType = StorageUtils.getFileTypeFromContentType(contentType);
-        updateFileTypeMap(fileTypeMap, fileType, size);
+        await processFileStats(absolutePath, targetPath, state);
       }
     } catch {
       return {
@@ -67,10 +81,10 @@ export async function storageStatistics(ctx: LocalContext, searchPath?: string |
     }
 
     return {
-      totalFiles: calculateTotalFiles(fileTypeMap),
-      totalSize,
-      fileTypeBreakdown: formatFileTypeBreakdown(fileTypeMap),
-      directoryCount: directories.size,
+      totalFiles: calculateTotalFiles(state.fileTypeMap),
+      totalSize: state.totalSize,
+      fileTypeBreakdown: formatFileTypeBreakdown(state.fileTypeMap),
+      directoryCount: state.directories.size,
     };
   } catch (error) {
     logger.error("Failed to get storage statistics", error);

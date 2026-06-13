@@ -9,7 +9,6 @@ const storagePath = process.env.LOCAL_STORAGE_PATH || "./storage/";
 
 /**
  * Convert relative user path to secure absolute filesystem path
- * Prevents path traversal attacks
  */
 function getAbsolutePath(relativePath: string): string {
   const basePath = path.resolve(process.cwd(), storagePath);
@@ -49,32 +48,77 @@ function parseRange(rangeHeader: string, fileSize: number): { start: number; end
 }
 
 /**
+ * Reconstruct relative file path from route params
+ */
+async function getRelativePath(params: Promise<{ path?: string[] }>): Promise<string | null> {
+  const resolvedParams = await params;
+  return resolvedParams.path ? resolvedParams.path.join("/") : null;
+}
+
+/**
+ * Options for generating a range response
+ */
+interface RangeResponseOptions {
+  absolutePath: string;
+  rangeHeader: string;
+  fileSize: number;
+  contentType: string;
+  lastModified: string;
+}
+
+/**
+ * Generate a partial content response for range requests
+ */
+function createRangeResponse(options: RangeResponseOptions): NextResponse {
+  const { absolutePath, rangeHeader, fileSize, contentType, lastModified } = options;
+  const range = parseRange(rangeHeader, fileSize);
+
+  if (!range) {
+    return new NextResponse(null, {
+      status: 416,
+      headers: { "Content-Range": `bytes */${fileSize}` },
+    });
+  }
+
+  const { start, end } = range;
+  const chunkSize = end - start + 1;
+  const stream = createReadStream(absolutePath, { start, end });
+
+  return new NextResponse(stream as unknown as BodyInit, {
+    status: 206,
+    headers: {
+      "Content-Type": contentType,
+      "Content-Length": chunkSize.toString(),
+      "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+      "Accept-Ranges": "bytes",
+      "Cache-Control": "public, max-age=31536000, immutable",
+      "Last-Modified": lastModified,
+    },
+  });
+}
+
+/**
  * Handle file downloads and streaming
  * GET /api/storage/files/[[...path]]
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path?: string[] }> }) {
   try {
-    // Step 1: Await params and reconstruct relative file path
-    const resolvedParams = await params;
-    const relativePath = resolvedParams.path ? resolvedParams.path.join("/") : "";
+    const relativePath = await getRelativePath(params);
 
     if (!relativePath) {
       return NextResponse.json({ error: "File path is required" }, { status: 400 });
     }
 
-    // Step 2: Secure path resolution
+    // Secure path resolution
     let absolutePath: string;
     try {
       absolutePath = getAbsolutePath(relativePath);
     } catch (error) {
-      logger.warn("Path traversal attempt detected", {
-        path: relativePath,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.warn("Path traversal attempt detected", { path: relativePath, error });
       return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
     }
 
-    // Step 3: Check if file exists
+    // Check if file exists
     try {
       await fs.access(absolutePath);
     } catch {
@@ -82,60 +126,25 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    // Step 4: Check permissions (privacy not implemented in local storage yet)
-
-    // Step 5: Get file stats
     const stats = statSync(absolutePath);
     const fileSize = stats.size;
     const contentType = getContentType(relativePath);
+    const lastModified = stats.mtime.toUTCString();
 
-    // Step 6: Handle range requests
+    // Handle range requests
     const rangeHeader = request.headers.get("range");
-
     if (rangeHeader) {
-      const range = parseRange(rangeHeader, fileSize);
-
-      if (!range) {
-        return new NextResponse(null, {
-          status: 416,
-          headers: {
-            "Content-Range": `bytes */${fileSize}`,
-          },
-        });
-      }
-
-      const { start, end } = range;
-      const chunkSize = end - start + 1;
-      const stream = createReadStream(absolutePath, { start, end });
-
-      logger.info("Streaming partial content", {
-        path: relativePath,
-        start,
-        end,
-        chunkSize,
-      });
-
-      return new NextResponse(stream as unknown as BodyInit, {
-        status: 206,
-        headers: {
-          "Content-Type": contentType,
-          "Content-Length": chunkSize.toString(),
-          "Content-Range": `bytes ${start}-${end}/${fileSize}`,
-          "Accept-Ranges": "bytes",
-          "Cache-Control": "public, max-age=31536000, immutable",
-          "Last-Modified": stats.mtime.toUTCString(),
-        },
+      return createRangeResponse({
+        absolutePath,
+        rangeHeader,
+        fileSize,
+        contentType,
+        lastModified,
       });
     }
 
-    // Step 7: Stream full file
+    // Stream full file
     const stream = createReadStream(absolutePath);
-
-    logger.info("Streaming full file", {
-      path: relativePath,
-      size: fileSize,
-    });
-
     return new NextResponse(stream as unknown as BodyInit, {
       status: 200,
       headers: {
@@ -143,15 +152,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         "Content-Length": fileSize.toString(),
         "Accept-Ranges": "bytes",
         "Cache-Control": "public, max-age=31536000, immutable",
-        "Last-Modified": stats.mtime.toUTCString(),
+        "Last-Modified": lastModified,
       },
     });
   } catch (error) {
-    logger.error("Unexpected error in file serving handler", {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-
+    logger.error("Unexpected error in file serving handler", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

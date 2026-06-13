@@ -91,7 +91,9 @@ export class FileInitializationService implements IFileInitializationService {
     }
   }
 
-  // Placeholder implementations for other methods
+  /**
+   * Initialize required directories and upload demo files
+   */
   async initializeFileSystem(): Promise<void> {
     logger.info("🗂️  Initializing file system...");
 
@@ -104,6 +106,9 @@ export class FileInitializationService implements IFileInitializationService {
     logger.info("✅ File system initialization completed");
   }
 
+  /**
+   * Create required directories in the storage system
+   */
   async createRequiredDirectories(): Promise<void> {
     const requiredDirectories: Types.FolderCreateInput[] = [
       { path: "public", protected: true },
@@ -116,6 +121,9 @@ export class FileInitializationService implements IFileInitializationService {
     }
   }
 
+  /**
+   * Upload demo template files from resources
+   */
   async uploadDemoTemplateFiles(): Promise<void> {
     const demoFiles = ["demo1.jpg", "demo2.jpg", "demo3.jpg", "demo4.jpg"];
 
@@ -128,6 +136,9 @@ export class FileInitializationService implements IFileInitializationService {
     await this.verifyDemoFilesInDatabase();
   }
 
+  /**
+   * Upload a demo file if it doesn't exist in storage
+   */
   async uploadDemoFileIfNotExists(fileName: string): Promise<void> {
     const bucketPath = `public/img/${fileName}`;
 
@@ -160,7 +171,8 @@ export class FileInitializationService implements IFileInitializationService {
         logger.error(`   ❌ Failed to upload demo file ${fileName}: ${result.message}`);
       }
     } catch (error) {
-      if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      const isNotFound = error instanceof Error && (error as NodeJS.ErrnoException).code === "ENOENT";
+      if (isNotFound) {
         logger.error(`   ❌ Resource not found: ${fileName}`);
       } else {
         logger.error(`   ❌ Failed to upload demo file ${fileName}:`, error);
@@ -168,24 +180,15 @@ export class FileInitializationService implements IFileInitializationService {
     }
   }
 
+  /**
+   * Verify that all demo files are properly accessible in the bucket
+   */
   async verifyDemoFilesInDatabase(): Promise<void> {
     const demoFiles = [
-      {
-        fileName: "demo1.jpg",
-        bucketPath: "public/img/demo1.jpg",
-      },
-      {
-        fileName: "demo2.jpg",
-        bucketPath: "public/img/demo2.jpg",
-      },
-      {
-        fileName: "demo3.jpg",
-        bucketPath: "public/img/demo3.jpg",
-      },
-      {
-        fileName: "demo4.jpg",
-        bucketPath: "public/img/demo4.jpg",
-      },
+      { fileName: "demo1.jpg", bucketPath: "public/img/demo1.jpg" },
+      { fileName: "demo2.jpg", bucketPath: "public/img/demo2.jpg" },
+      { fileName: "demo3.jpg", bucketPath: "public/img/demo3.jpg" },
+      { fileName: "demo4.jpg", bucketPath: "public/img/demo4.jpg" },
     ];
 
     for (const { fileName, bucketPath } of demoFiles) {
@@ -202,6 +205,9 @@ export class FileInitializationService implements IFileInitializationService {
     }
   }
 
+  /**
+   * Get demo files that are available for templates
+   */
   async getTemplateCoverDemoFileIds(): Promise<string[]> {
     const demoFiles = ["public/img/demo1.jpg", "public/img/demo2.jpg", "public/img/demo3.jpg", "public/img/demo4.jpg"];
 
@@ -245,20 +251,14 @@ export class FileInitializationService implements IFileInitializationService {
     return fileIds;
   }
 
+  /**
+   * Register file usage for template covers
+   */
   async registerTemplateFileUsage(templateId: string, fileId: string): Promise<void> {
     try {
       const fileInfo = await this.storageService.fileInfoByDbFileId(fileId);
 
       if (fileInfo) {
-        // NOTE: File usage registration through StorageService.registerFileUsage()
-        // is not yet implemented in the StorageService interface.
-        // Currently, file usage tracking happens when templates reference the files
-        // in the database through foreign key relationships.
-        //
-        // Expected future behavior (to match Kotlin implementation):
-        // - Register file usage with type "template_cover"
-        // - Track reference to template ID and "templates" table
-        // - This enables checking if files can be safely deleted
         logger.info(`   📎 File ${fileId} (${fileInfo.path}) will be used for template ${templateId}`);
         logger.info(`   ℹ️  File usage tracking happens through template-file relationships`);
       } else {
@@ -269,6 +269,9 @@ export class FileInitializationService implements IFileInitializationService {
     }
   }
 
+  /**
+   * Get content type from file name extension
+   */
   getContentTypeFromFileName(fileName: string): string {
     const extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
     return extToMime[extension] || "image/jpeg";

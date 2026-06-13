@@ -14,8 +14,6 @@ export async function listFiles(
 ): Promise<Types.StorageObjectList> {
   try {
     const searchPath = cleanVercelPath(input.path || "");
-    const items: Array<Types.FileInfo | Types.DirectoryInfo> = [];
-
     const prefix = searchPath ? `${searchPath}/` : "";
     const allBlobs = await getBlobs(ctx, prefix);
 
@@ -31,13 +29,12 @@ export async function listFiles(
 
     const { filePaths, dirPaths } = identifyChildren(allBlobs, prefix, searchPath);
     const { dbFileMap, dbDirMap } = await loadListEntities(filePaths, dirPaths);
+    const blobMap = createBlobMap(allBlobs);
 
-    const blobMap = new Map<string, { size: number; uploadedAt: Date; url: string }>();
-    for (const blob of allBlobs) {
-      blobMap.set(blob.pathname, blob);
-    }
-
-    items.push(...processFiles(filePaths, blobMap, dbFileMap), ...processDirectories(dirPaths, allBlobs, dbDirMap));
+    const items: Array<Types.FileInfo | Types.DirectoryInfo> = [
+      ...processFiles(filePaths, blobMap, dbFileMap),
+      ...processDirectories(dirPaths, allBlobs, dbDirMap),
+    ];
 
     return paginateStorageItems(items, input);
   } catch (error) {
@@ -52,6 +49,19 @@ export async function listFiles(
   }
 }
 
+/**
+ * Creates a map of pathnames to blob metadata for efficient lookup
+ */
+function createBlobMap(
+  allBlobs: Array<{ pathname: string; size: number; uploadedAt: Date; url: string }>
+): Map<string, { pathname: string; size: number; uploadedAt: Date; url: string }> {
+  const blobMap = new Map<string, { pathname: string; size: number; uploadedAt: Date; url: string }>();
+  for (const blob of allBlobs) {
+    blobMap.set(blob.pathname, blob);
+  }
+  return blobMap;
+}
+
 function identifyChildren(
   allBlobs: Array<{ pathname: string }>,
   prefix: string,
@@ -62,7 +72,6 @@ function identifyChildren(
 
   for (const blob of allBlobs) {
     const relativePath = blob.pathname.startsWith(prefix) ? blob.pathname.slice(prefix.length) : blob.pathname;
-
     const slashIndex = relativePath.indexOf("/");
 
     if (slashIndex === -1) {
@@ -111,8 +120,7 @@ function processFiles(
       };
 
       const dbFile = dbFileMap.get(filePath);
-      const fileInfo = StorageUtils.combineFileData(bucketFile, dbFile);
-      items.push(fileInfo);
+      items.push(StorageUtils.combineFileData(bucketFile, dbFile));
     } catch (error) {
       logger.warn(`Failed to process file: ${filePath}`, error);
     }
@@ -133,7 +141,6 @@ function processDirectories(
       const dbDir = dbDirMap.get(dirPath);
       const dirPrefix = `${dirPath}/`;
       const filesInDir = allBlobs.filter(blob => blob.pathname.startsWith(dirPrefix));
-      const fileCount = filesInDir.length;
 
       const uploadDates = filesInDir.map(b => b.uploadedAt);
       const createdAt = uploadDates.length > 0 ? new Date(Math.min(...uploadDates.map(d => d.getTime()))) : new Date();
@@ -147,8 +154,7 @@ function processDirectories(
         isPublic: dirPath.startsWith("public"),
       };
 
-      const dirInfo = StorageUtils.combineDirectoryData(bucketDir, dbDir, fileCount);
-      items.push(dirInfo);
+      items.push(StorageUtils.combineDirectoryData(bucketDir, dbDir, filesInDir.length));
     } catch (error) {
       logger.warn(`Failed to process directory: ${dirPath}`, error);
     }
@@ -162,30 +168,16 @@ export async function fetchDirectoryChildren(
   searchPath?: string | null
 ): Promise<Types.DirectoryInfo[]> {
   try {
-    const targetPath = !searchPath || searchPath.length === 0 ? "" : searchPath;
+    const targetPath = searchPath || "";
     const prefix = targetPath ? `${targetPath}/` : "";
 
     const dbDirectories = await StorageDbRepository.directoriesByParentPath(targetPath);
-    const dbDirectoriesByPath = new Map<string, Types.DirectoryEntity>();
-    for (const dir of dbDirectories) {
-      dbDirectoriesByPath.set(dir.path, dir);
-    }
+    const dbDirectoriesByPath = new Map(dbDirectories.map(dir => [dir.path, dir]));
+
+    const allBlobs = await getBlobs(ctx, prefix);
+    const childDirPaths = identifyChildDirectories(allBlobs, prefix, targetPath);
 
     const directories: Types.DirectoryInfo[] = [];
-    const allBlobs = await getBlobs(ctx, prefix);
-    const childDirPaths = new Set<string>();
-
-    for (const blob of allBlobs) {
-      const relativePath = blob.pathname.startsWith(prefix) ? blob.pathname.slice(prefix.length) : blob.pathname;
-
-      const firstSlashIndex = relativePath.indexOf("/");
-      if (firstSlashIndex !== -1) {
-        const childDirName = relativePath.substring(0, firstSlashIndex);
-        const childDirPath = targetPath ? `${targetPath}/${childDirName}` : childDirName;
-        childDirPaths.add(childDirPath);
-      }
-    }
-
     for (const dirPath of childDirPaths) {
       try {
         directories.push(processChildDirectory(dirPath, allBlobs, dbDirectoriesByPath));
@@ -201,13 +193,36 @@ export async function fetchDirectoryChildren(
   }
 }
 
+/**
+ * Identifies immediate child directories from a list of blobs
+ */
+function identifyChildDirectories(
+  allBlobs: Array<{ pathname: string }>,
+  prefix: string,
+  targetPath: string
+): Set<string> {
+  const childDirPaths = new Set<string>();
+
+  for (const blob of allBlobs) {
+    const relativePath = blob.pathname.startsWith(prefix) ? blob.pathname.slice(prefix.length) : blob.pathname;
+    const firstSlashIndex = relativePath.indexOf("/");
+
+    if (firstSlashIndex !== -1) {
+      const childDirName = relativePath.substring(0, firstSlashIndex);
+      const childDirPath = targetPath ? `${targetPath}/${childDirName}` : childDirName;
+      childDirPaths.add(childDirPath);
+    }
+  }
+
+  return childDirPaths;
+}
+
 function processChildDirectory(
   dirPath: string,
   allBlobs: Array<{ pathname: string; uploadedAt: Date }>,
   dbDirectoriesByPath: Map<string, Types.DirectoryEntity>
 ): Types.DirectoryInfo {
   const dbDir = dbDirectoriesByPath.get(dirPath);
-
   const dirPrefix = `${dirPath}/`;
   const filesInDir = allBlobs.filter(blob => blob.pathname.startsWith(dirPrefix));
 
@@ -222,6 +237,5 @@ function processChildDirectory(
     isPublic: dirPath.startsWith("public"),
   };
 
-  const fileCount = filesInDir.length;
-  return StorageUtils.combineDirectoryData(bucketDir, dbDir, fileCount);
+  return StorageUtils.combineDirectoryData(bucketDir, dbDir, filesInDir.length);
 }

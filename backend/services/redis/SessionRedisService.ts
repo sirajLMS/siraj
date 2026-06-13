@@ -4,6 +4,15 @@ import type { RedisSessionData } from "@/backend/types";
 import type { IRedisService } from "./IRedisService";
 
 /**
+ * Options for storing a session in Redis
+ */
+export interface SetSessionOptions {
+  sessionId: string;
+  data: RedisSessionData;
+  ttlSeconds: number;
+}
+
+/**
  * Session Redis Service
  * Manages session storage and operations in Redis with TTL support
  */
@@ -30,7 +39,8 @@ export class SessionRedisService {
   /**
    * Store session in Redis with TTL
    */
-  async setSession(sessionId: string, data: RedisSessionData, ttlSeconds: number): Promise<void> {
+  async setSession(options: SetSessionOptions): Promise<void> {
+    const { sessionId, data, ttlSeconds } = options;
     const key = this.getSessionKey(sessionId);
     const value = JSON.stringify(data);
 
@@ -88,7 +98,7 @@ export class SessionRedisService {
     session.lastActivityAt = new Date().toISOString();
 
     // Re-store with new TTL
-    await this.setSession(sessionId, session, ttlSeconds);
+    await this.setSession({ sessionId, data: session, ttlSeconds });
 
     return true;
   }
@@ -130,7 +140,6 @@ export class SessionRedisService {
     const userSessionsKey = this.getUserSessionsKey(userId);
 
     // cspell:disable-next-line -- Redis commands
-    // Use native Redis client to call SMEMBERS directly
     const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
 
     if (!nativeClient || typeof nativeClient !== "object") {
@@ -187,7 +196,6 @@ export class SessionRedisService {
     const userSessionsKey = this.getUserSessionsKey(userId);
 
     // Use native Redis client for SCARD
-    // cspell:disable-next-line -- Redis commands
     const nativeClient = (this.redis as unknown as { getNativeClient?: () => unknown }).getNativeClient?.();
 
     if (nativeClient && typeof nativeClient === "object") {

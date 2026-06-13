@@ -4,48 +4,50 @@ import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
 import logger from "@/backend/lib/logger";
 
 /**
+ * Validates that the request is from an admin user
+ */
+async function authenticateAdmin(request: NextRequest): Promise<{ userId: string } | NextResponse> {
+  const authHeader = request.headers.get("authorization");
+  const accessToken = extractTokenFromHeader(authHeader);
+  const payload = accessToken ? await verifyToken(accessToken) : null;
+
+  if (payload?.type !== "access") {
+    logger.warn("Unauthorized cleanup attempt - no valid token");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const user = await UserRepository.findById(payload.userId);
+  if (!user) {
+    logger.warn("Unauthorized cleanup attempt - user not found", { userId: payload.userId });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (adminEmail && user.email !== adminEmail) {
+    logger.warn("Unauthorized cleanup attempt - non-admin user", { userId: user.id, email: user.email });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  return { userId: user.id };
+}
+
+/**
  * Manual cleanup endpoint for expired signed URLs
  * POST /api/storage/cleanup
  */
 export async function POST(request: NextRequest) {
   try {
-    // Step 1: Check authentication - only authenticated users can trigger cleanup
-    const authHeader = request.headers.get("authorization");
-    const accessToken = extractTokenFromHeader(authHeader);
-    const payload = accessToken ? await verifyToken(accessToken) : null;
-
-    if (payload?.type !== "access") {
-      logger.warn("Unauthorized cleanup attempt - no valid token");
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authResult = await authenticateAdmin(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
 
-    // Get user from database
-    const user = await UserRepository.findById(payload.userId);
-
-    if (!user) {
-      logger.warn("Unauthorized cleanup attempt - user not found", {
-        userId: payload.userId,
-      });
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if user is admin by email (ADMIN_EMAIL environment variable)
-    const adminEmail = process.env.ADMIN_EMAIL;
-    if (adminEmail && user.email !== adminEmail) {
-      logger.warn("Unauthorized cleanup attempt - non-admin user", {
-        userId: user.id,
-        email: user.email,
-      });
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    // Step 2: Delete expired signed URLs
+    // Delete expired signed URLs
     const deletedCount = await SignedUrlRepository.deleteExpired();
 
-    // Step 3: Log the cleanup operation
     logger.info("Manual signed URL cleanup completed", {
       deletedCount,
-      triggeredBy: user.id,
+      triggeredBy: authResult.userId,
     });
 
     return NextResponse.json({

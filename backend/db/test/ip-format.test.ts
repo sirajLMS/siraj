@@ -4,7 +4,7 @@ import { testLogger } from "../../../lib/testlogger";
 import type { AdminAuditLogInsertInput, SessionEntityInput } from "../../types";
 import { db } from "../drizzleDb";
 import { adminAuditLogs, sessions, users } from "../schema";
-import { IP_ADDRESS } from "./const";
+import { IP_ADDRESS_1 } from "./const";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -50,13 +50,13 @@ describe("IP Address Formatting", () => {
       const validSession: SessionEntityInput = {
         hashedId: `session-${randomUUID()}`,
         userId: user.id,
-        ipAddress: IP_ADDRESS,
+        ipAddress: IP_ADDRESS_1,
         payload: "sessionPayload",
         lastActivity: 1000n,
       };
       const [insertedSession] = await tx.insert(sessions).values(validSession).returning();
       expect(insertedSession).toBeDefined();
-      expect(insertedSession.ipAddress).toBe(IP_ADDRESS);
+      expect(insertedSession.ipAddress).toBe(IP_ADDRESS_1);
     });
 
     // Test 2: Invalid IP address insertion in sessions

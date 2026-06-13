@@ -9,6 +9,9 @@ import { processDirectory, processFile } from "../shared";
 import type { LocalContext } from "../types";
 import { cleanLocalPath, getAbsolutePath } from "../utils";
 
+/**
+ * List files and directories in a local path
+ */
 export async function listFiles(
   ctx: LocalContext,
   input: Types.FilesListSearchInput
@@ -16,8 +19,6 @@ export async function listFiles(
   try {
     const searchPath = cleanLocalPath(input.path || "");
     const absolutePath = getAbsolutePath(ctx.basePath, searchPath);
-
-    const items: Array<Types.FileInfo | Types.DirectoryInfo> = [];
 
     let entries: Dirent[];
     try {
@@ -32,20 +33,8 @@ export async function listFiles(
       };
     }
 
-    const filePaths: string[] = [];
-    const dirPaths: string[] = [];
-
-    for (const entry of entries) {
-      const itemPath = searchPath ? `${searchPath}/${entry.name}` : entry.name;
-      if (entry.isFile()) {
-        filePaths.push(itemPath);
-      } else if (entry.isDirectory()) {
-        dirPaths.push(itemPath);
-      }
-    }
-
-    const processedItems = await processListFilesEntries(ctx, filePaths, dirPaths);
-    items.push(...processedItems);
+    const { filePaths, dirPaths } = classifyEntries(entries, searchPath);
+    const items = await processListFilesEntries(ctx, filePaths, dirPaths);
 
     return paginateStorageItems(items, input);
   } catch (error) {
@@ -60,7 +49,30 @@ export async function listFiles(
   }
 }
 
-async function processListFilesEntries(ctx: LocalContext, filePaths: string[], dirPaths: string[]) {
+/**
+ * Classify directory entries into files and directories
+ */
+function classifyEntries(entries: Dirent[], searchPath: string): { filePaths: string[]; dirPaths: string[] } {
+  const filePaths: string[] = [];
+  const dirPaths: string[] = [];
+
+  for (const entry of entries) {
+    const itemPath = searchPath ? `${searchPath}/${entry.name}` : entry.name;
+    if (entry.isFile()) {
+      filePaths.push(itemPath);
+    } else if (entry.isDirectory()) {
+      dirPaths.push(itemPath);
+    }
+  }
+
+  return { filePaths, dirPaths };
+}
+
+async function processListFilesEntries(
+  ctx: LocalContext,
+  filePaths: string[],
+  dirPaths: string[]
+): Promise<Array<Types.FileInfo | Types.DirectoryInfo>> {
   const items: Array<Types.FileInfo | Types.DirectoryInfo> = [];
   const { dbFileMap, dbDirMap } = await loadListEntities(filePaths, dirPaths);
 
@@ -85,12 +97,15 @@ async function processListFilesEntries(ctx: LocalContext, filePaths: string[], d
   return items;
 }
 
+/**
+ * Fetch child directories for a given path
+ */
 export async function fetchDirectoryChildren(
   ctx: LocalContext,
   searchPath?: string | null
 ): Promise<Types.DirectoryInfo[]> {
   try {
-    const targetPath = !searchPath || searchPath.length === 0 ? "" : searchPath;
+    const targetPath = searchPath || "";
     const absolutePath = getAbsolutePath(ctx.basePath, targetPath);
 
     const dbDirectories = await StorageDbRepository.directoriesByParentPath(targetPath);
@@ -103,19 +118,12 @@ export async function fetchDirectoryChildren(
 
       for (const entry of entries) {
         if (entry.isDirectory()) {
-          const dirPath = targetPath ? `${targetPath}/${entry.name}` : entry.name;
-          const absoluteDirPath = getAbsolutePath(ctx.basePath, dirPath);
-          const stats = await fs.stat(absoluteDirPath);
-          const dbDir = dbDirectoriesByPath.get(dirPath);
-
-          const bucketDir: Types.BucketDirectory = {
-            path: dirPath,
-            createdAt: stats.birthtime,
-            lastModified: stats.mtime,
-            isPublic: dirPath.startsWith("public"),
-          };
-
-          directories.push(StorageUtils.combineDirectoryData(bucketDir, dbDir));
+          try {
+            const dirInfo = await processLocalDirectoryEntry(ctx, entry.name, targetPath, dbDirectoriesByPath);
+            directories.push(dirInfo);
+          } catch (error) {
+            logger.warn(`Failed to process directory entry: ${entry.name}`, error);
+          }
         }
       }
     } catch (error) {
@@ -127,4 +135,28 @@ export async function fetchDirectoryChildren(
     logger.error(`Failed to fetch directory children: ${searchPath}`, error);
     return [];
   }
+}
+
+/**
+ * Process a single directory entry to create a DirectoryInfo object
+ */
+async function processLocalDirectoryEntry(
+  ctx: LocalContext,
+  entryName: string,
+  targetPath: string,
+  dbDirectoriesByPath: Map<string, Types.DirectoryEntity>
+): Promise<Types.DirectoryInfo> {
+  const dirPath = targetPath ? `${targetPath}/${entryName}` : entryName;
+  const absoluteDirPath = getAbsolutePath(ctx.basePath, dirPath);
+  const stats = await fs.stat(absoluteDirPath);
+  const dbDir = dbDirectoriesByPath.get(dirPath);
+
+  const bucketDir: Types.BucketDirectory = {
+    path: dirPath,
+    createdAt: stats.birthtime,
+    lastModified: stats.mtime,
+    isPublic: dirPath.startsWith("public"),
+  };
+
+  return StorageUtils.combineDirectoryData(bucketDir, dbDir);
 }

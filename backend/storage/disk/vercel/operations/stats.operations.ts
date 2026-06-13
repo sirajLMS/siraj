@@ -41,6 +41,34 @@ export async function storageStatistics(ctx: VercelContext, searchPath?: string 
   }
 }
 
+/**
+ * Infer content type from file path extension
+ */
+function getContentTypeFromPath(pathname: string): string {
+  const ext = pathname.split(".").pop()?.toLowerCase() || "";
+  return extToMime[ext] || "application/octet-stream";
+}
+
+/**
+ * Add all parent directories of a file path to the set of directories
+ */
+function aggregateDirectories(directories: Set<string>, pathname: string, prefix: string, targetPath: string): void {
+  const relativePath = pathname.startsWith(prefix) ? pathname.slice(prefix.length) : pathname;
+  const lastSlashIndex = relativePath.lastIndexOf("/");
+
+  if (lastSlashIndex === -1) return;
+
+  const dirPath = relativePath.substring(0, lastSlashIndex);
+  const fullDirPath = targetPath ? `${targetPath}/${dirPath}` : dirPath;
+
+  const parts = fullDirPath.split("/");
+  let currentPath = "";
+  for (const part of parts) {
+    currentPath = currentPath ? `${currentPath}/${part}` : part;
+    directories.add(currentPath);
+  }
+}
+
 function processStorageStatisticsBlobs(
   allBlobs: Array<{ size: number | bigint; pathname: string }>,
   prefix: string,
@@ -54,26 +82,11 @@ function processStorageStatisticsBlobs(
     const size = BigInt(blob.size);
     totalSize += size;
 
-    const ext = blob.pathname.split(".").pop()?.toLowerCase() || "";
-    const contentType = extToMime[ext] || "application/octet-stream";
-
+    const contentType = getContentTypeFromPath(blob.pathname);
     const fileType = StorageUtils.getFileTypeFromContentType(contentType);
     updateFileTypeMap(fileTypeMap, fileType, size);
 
-    const relativePath = blob.pathname.startsWith(prefix) ? blob.pathname.slice(prefix.length) : blob.pathname;
-
-    const lastSlashIndex = relativePath.lastIndexOf("/");
-    if (lastSlashIndex !== -1) {
-      const dirPath = relativePath.substring(0, lastSlashIndex);
-      const fullDirPath = targetPath ? `${targetPath}/${dirPath}` : dirPath;
-
-      const parts = fullDirPath.split("/");
-      let currentPath = "";
-      for (const part of parts) {
-        currentPath = currentPath ? `${currentPath}/${part}` : part;
-        directories.add(currentPath);
-      }
-    }
+    aggregateDirectories(directories, blob.pathname, prefix, targetPath);
   }
 
   return { totalSize, fileTypeMap, directories };
