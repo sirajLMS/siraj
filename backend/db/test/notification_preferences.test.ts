@@ -5,51 +5,27 @@ import { and, eq, sql } from "drizzle-orm";
 import { NotificationChannel, NotificationEventType } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
 import type { UserEntity, UserNotificationPreferenceSelectType } from "../../types";
-import { db } from "../drizzleDb";
 import { userNotificationPreferences, users } from "../schema";
-import { runInRollback } from "./test-utils";
+import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "./test-utils";
 
 describe("User Notification Preferences", () => {
+  const RLS_ROLE = "test_rls_user_notif";
+
   beforeAll(async () => {
-    await db.execute(sql`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'test_rls_user_notif') THEN
-          CREATE ROLE test_rls_user_notif WITH LOGIN PASSWORD 'test_rls_pass';
-        END IF;
-      END
-      $$;
-      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO test_rls_user_notif;
-      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO test_rls_user_notif;
-    `);
+    await setupRlsRole(RLS_ROLE);
   });
 
   afterAll(async () => {
-    try {
-      await db.execute(sql`
-        REASSIGN OWNED BY test_rls_user_notif TO postgres;
-        DROP OWNED BY test_rls_user_notif;
-        DROP ROLE IF EXISTS test_rls_user_notif;
-      `);
-    } catch {
-      testLogger.warn("Failed to drop RLS test role for notif");
-    }
+    await teardownRlsRole(RLS_ROLE);
   });
 
   test("Can insert and retrieve preferences", async () => {
     testLogger.info("Testing preference insertion...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const [user] = (await tx
-        .insert(users)
-        .values({
-          name: "Test User",
-          email: `user-${randomUUID()}@example.com`,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
+      const user = await createTestUser(tx, {
+        name: "Test User",
+        email: `user-${randomUUID()}@example.com`,
+      });
 
       await tx.insert(userNotificationPreferences).values({
         userId: user.id,
@@ -119,16 +95,8 @@ describe("User Notification Preferences", () => {
   test("RLS prevents users from seeing others' preferences", async () => {
     testLogger.info("Testing RLS on notification preferences...");
     await runInRollback(async tx => {
-      const now = new Date();
-      // Use different names and emails
-      const [userA] = (await tx
-        .insert(users)
-        .values({ name: "UserA", email: `a-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [userB] = (await tx
-        .insert(users)
-        .values({ name: "UserB", email: `b-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
+      const userA = await createTestUser(tx, { name: "UserA" });
+      const userB = await createTestUser(tx, { name: "UserB" });
 
       // User B creates a preference
       await tx.insert(userNotificationPreferences).values({

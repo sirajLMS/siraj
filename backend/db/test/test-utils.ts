@@ -1,5 +1,8 @@
+import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
+import type { UserEntity } from "../../types";
 import { db } from "../drizzleDb";
+import { users } from "../schema";
 
 export type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -27,6 +30,30 @@ export async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): P
   if (assertionError) {
     throw assertionError;
   }
+}
+
+/**
+ * Creates a test user in the database.
+ * @param tx Database transaction
+ * @param overrides Optional field overrides
+ */
+export async function createTestUser(
+  tx: DbTransaction,
+  overrides: Partial<typeof users.$inferInsert> = {}
+): Promise<UserEntity> {
+  const now = new Date();
+  const [user] = (await tx
+    .insert(users)
+    .values({
+      name: overrides.name || "Test User",
+      email: overrides.email || `user-${randomUUID()}@example.com`,
+      password: overrides.password || "password",
+      createdAt: overrides.createdAt || now,
+      updatedAt: overrides.updatedAt || now,
+      ...overrides,
+    })
+    .returning()) as [UserEntity];
+  return user;
 }
 
 /**
@@ -70,5 +97,5 @@ export async function teardownRlsRole(roleName: string = "test_rls_user"): Promi
 }
 
 function quoteIdent(ident: string): string {
-  return `"${ident.replace(/"/g, '""')}"`;
+  return `"${ident.replaceAll('"', '""')}"`;
 }

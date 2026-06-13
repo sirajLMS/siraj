@@ -2,39 +2,20 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
-import type { TeacherBankingDetailsHistorySelectType, TeacherEntity, UserEntity } from "../../types";
+import type { TeacherBankingDetailsHistorySelectType } from "../../types";
 import { TeacherBankingRepository } from "../repo/teacher-banking.repository";
-import { teacherBankingDetailsHistory, teachers, users } from "../schema";
+import { teacherBankingDetailsHistory } from "../schema";
+import { setupTeacher } from "./entity-setup";
 import { runInRollback } from "./test-utils";
 
 describe("Teacher Banking Details Versioning & History", () => {
   test("Allows historical record updates by closing old and inserting new", async () => {
     testLogger.info("Testing manual versioning flow...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const email = `teacher-bank-${randomUUID()}@example.com`;
-
-      const [user] = (await tx
-        .insert(users)
-        .values({
-          name: "Bank Teacher",
-          email,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({
-          userId: user.id,
-          status: "ACTIVATED",
-          timezone: "UTC",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherEntity];
+      const { teacher } = await setupTeacher(tx, {
+        name: "Bank Teacher",
+        email: `teacher-bank-${randomUUID()}@example.com`,
+      });
 
       const banking1 = await TeacherBankingRepository.submitBankingDetails(
         {
@@ -86,31 +67,12 @@ describe("Teacher Banking Details Versioning & History", () => {
   test("Prevents direct updates to historically closed records", async () => {
     testLogger.info("Testing historical closed record immutability...");
     await runInRollback(async tx => {
+      const { teacher } = await setupTeacher(tx, {
+        name: "Closed Bank Teacher",
+        email: `teacher-bank-closed-${randomUUID()}@example.com`,
+      });
+
       const now = new Date();
-      const email = `teacher-bank-closed-${randomUUID()}@example.com`;
-
-      const [user] = (await tx
-        .insert(users)
-        .values({
-          name: "Closed Bank Teacher",
-          email,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({
-          userId: user.id,
-          status: "ACTIVATED",
-          timezone: "UTC",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherEntity];
-
       const [banking] = (await tx
         .insert(teacherBankingDetailsHistory)
         .values({
@@ -137,30 +99,10 @@ describe("Teacher Banking Details Versioning & History", () => {
   test("Prevents direct updates to banking fields of active records", async () => {
     testLogger.info("Testing active record banking fields immutability...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const email = `teacher-bank-active-${randomUUID()}@example.com`;
-
-      const [user] = (await tx
-        .insert(users)
-        .values({
-          name: "Active Bank Teacher",
-          email,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({
-          userId: user.id,
-          status: "ACTIVATED",
-          timezone: "UTC",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherEntity];
+      const { teacher } = await setupTeacher(tx, {
+        name: "Active Bank Teacher",
+        email: `teacher-bank-active-${randomUUID()}@example.com`,
+      });
 
       const banking = await TeacherBankingRepository.submitBankingDetails(
         {
@@ -185,30 +127,10 @@ describe("Teacher Banking Details Versioning & History", () => {
   test("Allows updating non-banking fields without creating a new historical version", async () => {
     testLogger.info("Testing non-banking fields updates...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const email = `teacher-bank-noop-${randomUUID()}@example.com`;
-
-      const [user] = (await tx
-        .insert(users)
-        .values({
-          name: "Bank Teacher Noop",
-          email,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({
-          userId: user.id,
-          status: "ACTIVATED",
-          timezone: "UTC",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherEntity];
+      const { teacher } = await setupTeacher(tx, {
+        name: "Bank Teacher Noop",
+        email: `teacher-bank-noop-${randomUUID()}@example.com`,
+      });
 
       const banking = await TeacherBankingRepository.submitBankingDetails(
         {
@@ -235,31 +157,12 @@ describe("Teacher Banking Details Versioning & History", () => {
   test("Enforces at most one active record per teacher via partial unique index", async () => {
     testLogger.info("Testing partial unique constraint on active records...");
     await runInRollback(async tx => {
+      const { teacher } = await setupTeacher(tx, {
+        name: "Bank Teacher Unique",
+        email: `teacher-bank-uniq-${randomUUID()}@example.com`,
+      });
+
       const now = new Date();
-      const email = `teacher-bank-uniq-${randomUUID()}@example.com`;
-
-      const [user] = (await tx
-        .insert(users)
-        .values({
-          name: "Bank Teacher Unique",
-          email,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({
-          userId: user.id,
-          status: "ACTIVATED",
-          timezone: "UTC",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherEntity];
-
       await tx
         .insert(teacherBankingDetailsHistory)
         .values({

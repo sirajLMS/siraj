@@ -20,6 +20,27 @@ const createPermissions = (
   }));
 };
 
+/**
+ * Common account-related actions (list, create, edit)
+ */
+const ACCOUNT_ACTIONS = (
+  label: string,
+  type: "profiles" | "accounts" = "profiles",
+  pluralLabel?: string
+): [string, string][] => [
+  ["list", `List ${pluralLabel || label + "s"}`],
+  ["create", `Create ${label} accounts`],
+  ["edit", `Edit ${label} ${type}`],
+];
+
+/**
+ * Common list and delete actions
+ */
+const LIST_DELETE_ACTIONS = (pluralLabel: string): [string, string][] => [
+  ["list", `List ${pluralLabel}`],
+  ["delete", `Delete ${pluralLabel}`],
+];
+
 export const PERMISSION_CATALOG: PermissionSeed[] = [
   ...createPermissions("Dashboard", "dashboard", [
     ["view", "View dashboard"],
@@ -48,17 +69,11 @@ export const PERMISSION_CATALOG: PermissionSeed[] = [
   ]),
 
   ...createPermissions("Teachers", "teachers", [
-    ["list", "List teachers"],
-    ["create", "Create teacher accounts"],
-    ["edit", "Edit teacher profiles"],
+    ...ACCOUNT_ACTIONS("teacher"),
     ["manage_schedule", "Manage teacher schedules"],
   ]),
 
-  ...createPermissions("Parents", "parents", [
-    ["list", "List parents"],
-    ["create", "Create parent accounts"],
-    ["edit", "Edit parent profiles"],
-  ]),
+  ...createPermissions("Parents", "parents", ACCOUNT_ACTIONS("parent")),
 
   ...createPermissions("Students", "students", [
     ["list", "List students"],
@@ -69,32 +84,25 @@ export const PERMISSION_CATALOG: PermissionSeed[] = [
   ]),
 
   ...createPermissions("Billing", "invoices", [
-    ["list", "List invoices"],
+    ...LIST_DELETE_ACTIONS("invoices"),
     ["create", "Create invoices"],
     ["mark_paid", "Mark invoice as paid"],
     ["edit", "Edit invoices"],
-    ["delete", "Delete invoices"],
   ]),
 
   ...createPermissions("Resources", "resources", [
-    ["list", "List learning resources"],
+    ...LIST_DELETE_ACTIONS("learning resources"),
     ["upload", "Upload learning resources"],
-    ["delete", "Delete learning resources"],
   ]),
 
   ...createPermissions("Reports", "reports", [["generate", "Generate reports"]]),
 
   ...createPermissions("Communications", "complaints", [
-    ["list", "List complaints"],
+    ...LIST_DELETE_ACTIONS("complaints"),
     ["respond", "Respond to complaints"],
-    ["delete", "Delete complaints"],
   ]),
 
-  ...createPermissions("Administration", "staff", [
-    ["list", "List staff accounts"],
-    ["create", "Create staff accounts"],
-    ["edit", "Edit staff accounts"],
-  ]),
+  ...createPermissions("Administration", "staff", ACCOUNT_ACTIONS("staff", "accounts", "staff accounts")),
 
   ...createPermissions("Administration", "permission_groups", [
     ["manage", "Manage permission groups"],

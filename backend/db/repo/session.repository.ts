@@ -301,12 +301,12 @@ export namespace SessionRepository {
     const runner = async (t: DBTransaction) => {
       const existingSession = await findSessionById(hashedId);
       if (existingSession) {
-        if (!redisSessionsEnabled()) {
-          await t.delete(sessions).where(eq(sessions.hashedId, hashedId));
-        } else {
+        if (redisSessionsEnabled()) {
           const redisService = getSessionRedisService();
           await redisService.deleteSession(hashedId);
           await t.delete(sessionMetadata).where(eq(sessionMetadata.sessionId, hashedId));
+        } else {
+          await t.delete(sessions).where(eq(sessions.hashedId, hashedId));
         }
 
         logger.info(`Deleted session ${hashedId}`);

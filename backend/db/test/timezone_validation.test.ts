@@ -1,99 +1,15 @@
 import { describe, expect, test } from "bun:test";
-import { randomUUID } from "node:crypto";
 import { testLogger } from "../../../lib/testlogger";
-import type { ParentEntity, RecurringScheduleEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
-import { parents, recurringSchedules, students, teachers, users } from "../schema";
-import { type DbTransaction, runInRollback } from "./test-utils";
-
-async function setupBaseEntities(tx: DbTransaction, now: Date) {
-  const parentEmail = `parent-tz-${randomUUID()}@example.com`;
-  const teacherEmail = `teacher-tz-sch-${randomUUID()}@example.com`;
-
-  const [parentUser] = (await tx
-    .insert(users)
-    .values({
-      name: "Schedule Parent User",
-      email: parentEmail,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
-
-  const [parent] = (await tx
-    .insert(parents)
-    .values({
-      userId: parentUser.id,
-      status: "REGULAR",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [ParentEntity];
-
-  const [teacherUser] = (await tx
-    .insert(users)
-    .values({
-      name: "Schedule Teacher User",
-      email: teacherEmail,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
-
-  const [teacher] = (await tx
-    .insert(teachers)
-    .values({
-      userId: teacherUser.id,
-      status: "ACTIVATED",
-      timezone: "UTC",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [TeacherEntity];
-
-  const [student] = (await tx
-    .insert(students)
-    .values({
-      parentId: parent.id,
-      name: "Schedule Student",
-      status: "REGULAR",
-      idempotencyKey: randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [StudentEntity];
-
-  return { teacher, student };
-}
+import type { RecurringScheduleEntity } from "../../types";
+import { recurringSchedules, teachers } from "../schema";
+import { setupStudent, setupTeacher } from "./entity-setup";
+import { runInRollback } from "./test-utils";
 
 describe("Timezone Validation Constraints", () => {
   test("Allows valid timezones for teachers", async () => {
     testLogger.info("Testing valid timezones for teachers...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const email = `teacher-tz-${randomUUID()}@example.com`;
-      const [user] = (await tx
-        .insert(users)
-        .values({
-          name: "Valid Teacher User",
-          email,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({
-          userId: user.id,
-          status: "ACTIVATED",
-          timezone: "America/New_York",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherEntity];
+      const { teacher } = await setupTeacher(tx, { name: "Valid Teacher User" }, { timezone: "America/New_York" });
 
       expect(teacher).toBeDefined();
       expect(teacher.timezone).toBe("America/New_York");
@@ -104,18 +20,7 @@ describe("Timezone Validation Constraints", () => {
   test("Prevents invalid timezones for teachers", async () => {
     testLogger.info("Testing invalid timezones for teachers...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const email = `teacher-tz-inv-${randomUUID()}@example.com`;
-      const [user] = (await tx
-        .insert(users)
-        .values({
-          name: "Invalid Teacher User",
-          email,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
+      const { user } = await setupTeacher(tx, { name: "Invalid Teacher User" });
 
       try {
         await tx
@@ -124,8 +29,8 @@ describe("Timezone Validation Constraints", () => {
             userId: user.id,
             status: "ACTIVATED",
             timezone: "Invalid/Timezone_Name",
-            createdAt: now,
-            updatedAt: now,
+            createdAt: new Date(),
+            updatedAt: new Date(),
           })
           .execute();
         expect(true).toBe(false); // Should not be reached
@@ -141,8 +46,8 @@ describe("Timezone Validation Constraints", () => {
   test("Allows valid timezones for recurring schedules", async () => {
     testLogger.info("Testing valid timezones for recurring schedules...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const { teacher, student } = await setupBaseEntities(tx, now);
+      const { student } = await setupStudent(tx, { name: "Schedule Parent User" }, {}, { name: "Schedule Student" });
+      const { teacher } = await setupTeacher(tx, { name: "Schedule Teacher User" });
 
       const [schedule] = (await tx
         .insert(recurringSchedules)
@@ -152,8 +57,8 @@ describe("Timezone Validation Constraints", () => {
           durationMinutes: 60,
           defaultStartTime: "09:00:00",
           timezone: "Europe/London",
-          createdAt: now,
-          updatedAt: now,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         })
         .returning()) as [RecurringScheduleEntity];
 
@@ -166,8 +71,8 @@ describe("Timezone Validation Constraints", () => {
   test("Prevents invalid timezones for recurring schedules", async () => {
     testLogger.info("Testing invalid timezones for recurring schedules...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const { teacher, student } = await setupBaseEntities(tx, now);
+      const { student } = await setupStudent(tx, { name: "Schedule Parent User" }, {}, { name: "Schedule Student" });
+      const { teacher } = await setupTeacher(tx, { name: "Schedule Teacher User" });
 
       try {
         await tx
@@ -178,8 +83,8 @@ describe("Timezone Validation Constraints", () => {
             durationMinutes: 60,
             defaultStartTime: "09:00:00",
             timezone: "NotATimezone",
-            createdAt: now,
-            updatedAt: now,
+            createdAt: new Date(),
+            updatedAt: new Date(),
           })
           .execute();
         expect(true).toBe(false); // Should not be reached

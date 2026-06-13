@@ -59,7 +59,7 @@ export namespace TeacherBankingRepository {
     tx?: DBTransaction
   ): Promise<Types.TeacherBankingDetailsHistorySelectType | null> => {
     const active = await getActiveBankingDetails(teacherId, tx);
-    if (!active || active.verifiedAt === null) {
+    if (active?.verifiedAt === null) {
       return null;
     }
     return active;

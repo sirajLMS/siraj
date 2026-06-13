@@ -10,52 +10,28 @@ import {
 } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
 import type { UserEntity } from "../../types";
-import { db } from "../drizzleDb";
 import { NotificationRepository } from "../repo/notification.repository";
 import { notificationDeliveries, userDeviceTokens, users } from "../schema";
-import { runInRollback } from "./test-utils";
+import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "./test-utils";
 
 describe("Notification Delivery Tracking", () => {
+  const RLS_ROLE = "test_rls_user_notif_delivery";
+
   beforeAll(async () => {
-    await db.execute(sql`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'test_rls_user_notif_delivery') THEN
-          CREATE ROLE test_rls_user_notif_delivery WITH LOGIN PASSWORD 'test_rls_pass';
-        END IF;
-      END
-      $$;
-      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO test_rls_user_notif_delivery;
-      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO test_rls_user_notif_delivery;
-    `);
+    await setupRlsRole(RLS_ROLE);
   });
 
   afterAll(async () => {
-    try {
-      await db.execute(sql`
-        REASSIGN OWNED BY test_rls_user_notif_delivery TO postgres;
-        DROP OWNED BY test_rls_user_notif_delivery;
-        DROP ROLE IF EXISTS test_rls_user_notif_delivery;
-      `);
-    } catch {
-      testLogger.warn("Failed to drop RLS test role for notification delivery tracking");
-    }
+    await teardownRlsRole(RLS_ROLE);
   });
 
   test("Registers device tokens and tracks delivery lifecycle", async () => {
     testLogger.info("Testing device token registration and delivery lifecycle...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const [user] = (await tx
-        .insert(users)
-        .values({
-          name: "Delivery Test User",
-          email: `delivery-${randomUUID()}@example.com`,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
+      const user = await createTestUser(tx, {
+        name: "Delivery Test User",
+        email: `delivery-${randomUUID()}@example.com`,
+      });
 
       const pushToken = `fcm-token-${randomUUID()}`;
       const deviceToken = await NotificationRepository.registerDeviceToken(
@@ -222,15 +198,8 @@ describe("Notification Delivery Tracking", () => {
   test("RLS prevents users from seeing others' deliveries and tokens", async () => {
     testLogger.info("Testing RLS on notification delivery tracking...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const [userA] = (await tx
-        .insert(users)
-        .values({ name: "UserA", email: `a-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [userB] = (await tx
-        .insert(users)
-        .values({ name: "UserB", email: `b-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
+      const userA = await createTestUser(tx, { name: "UserA" });
+      const userB = await createTestUser(tx, { name: "UserB" });
 
       await NotificationRepository.registerDeviceToken(
         {

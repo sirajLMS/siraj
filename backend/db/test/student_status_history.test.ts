@@ -3,49 +3,21 @@ import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { StudentStatus } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
-import type { ParentEntity, StudentEntity, StudentStatusHistorySelectType, UserEntity } from "../../types";
-import { parents, studentStatusHistory, students, users } from "../schema";
+import type { StudentStatusHistorySelectType } from "../../types";
+import { studentStatusHistory, students } from "../schema";
+import { createTestUser, setupStudent } from "./entity-setup";
 import { runInRollback } from "./test-utils";
 
 describe("Student Status Transitions & History", () => {
   test("Initial student creation logs status history with null old status", async () => {
     testLogger.info("Testing initial status history log...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const email = `parent-${randomUUID()}@example.com`;
-
-      const [user] = (await tx
-        .insert(users)
-        .values({
-          name: "Test Parent",
-          email,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [parent] = (await tx
-        .insert(parents)
-        .values({
-          userId: user.id,
-          status: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ParentEntity];
-
-      const [student] = (await tx
-        .insert(students)
-        .values({
-          parentId: parent.id,
-          name: "Test Student",
-          status: StudentStatus.ON_TRIAL,
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [StudentEntity];
+      const { student } = await setupStudent(
+        tx,
+        { name: "Test Parent", email: `parent-${randomUUID()}@example.com` },
+        {},
+        { name: "Test Student", status: StudentStatus.ON_TRIAL }
+      );
 
       const history = (await tx
         .select()
@@ -62,28 +34,12 @@ describe("Student Status Transitions & History", () => {
   test("Valid transition (ON_TRIAL -> REGULAR) succeeds and logs history", async () => {
     testLogger.info("Testing valid status transition...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const email = `parent-valid-${randomUUID()}@example.com`;
-
-      const [user] = (await tx
-        .insert(users)
-        .values({ name: "Parent", email, password: "password", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [parent] = (await tx
-        .insert(parents)
-        .values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now })
-        .returning()) as [ParentEntity];
-      const [student] = (await tx
-        .insert(students)
-        .values({
-          parentId: parent.id,
-          name: "Student",
-          status: StudentStatus.ON_TRIAL,
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [StudentEntity];
+      const { student } = await setupStudent(
+        tx,
+        { name: "Parent", email: `parent-valid-${randomUUID()}@example.com` },
+        {},
+        { name: "Student", status: StudentStatus.ON_TRIAL }
+      );
 
       await tx
         .update(students)
@@ -106,28 +62,12 @@ describe("Student Status Transitions & History", () => {
   test("Invalid transition (REGULAR -> ON_TRIAL) is blocked by trigger", async () => {
     testLogger.info("Testing invalid status transition enforcement...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const email = `parent-invalid-${randomUUID()}@example.com`;
-
-      const [user] = (await tx
-        .insert(users)
-        .values({ name: "Parent", email, password: "password", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [parent] = (await tx
-        .insert(parents)
-        .values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now })
-        .returning()) as [ParentEntity];
-      const [student] = (await tx
-        .insert(students)
-        .values({
-          parentId: parent.id,
-          name: "Student",
-          status: StudentStatus.REGULAR,
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [StudentEntity];
+      const { student } = await setupStudent(
+        tx,
+        { name: "Parent", email: `parent-invalid-${randomUUID()}@example.com` },
+        {},
+        { name: "Student", status: StudentStatus.REGULAR }
+      );
 
       try {
         await tx.update(students).set({ status: StudentStatus.ON_TRIAL }).where(eq(students.id, student.id));
@@ -144,28 +84,12 @@ describe("Student Status Transitions & History", () => {
   test("Terminal state (GRADUATED) cannot be changed", async () => {
     testLogger.info("Testing terminal status enforcement...");
     await runInRollback(async tx => {
-      const now = new Date();
-      const email = `parent-terminal-${randomUUID()}@example.com`;
-
-      const [user] = (await tx
-        .insert(users)
-        .values({ name: "Parent", email, password: "password", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [parent] = (await tx
-        .insert(parents)
-        .values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now })
-        .returning()) as [ParentEntity];
-      const [student] = (await tx
-        .insert(students)
-        .values({
-          parentId: parent.id,
-          name: "Student",
-          status: StudentStatus.GRADUATED,
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [StudentEntity];
+      const { student } = await setupStudent(
+        tx,
+        { name: "Parent", email: `parent-terminal-${randomUUID()}@example.com` },
+        {},
+        { name: "Student", status: StudentStatus.GRADUATED }
+      );
 
       try {
         await tx.update(students).set({ status: StudentStatus.REGULAR }).where(eq(students.id, student.id));
@@ -182,37 +106,20 @@ describe("Student Status Transitions & History", () => {
   test("Captures actor user ID in history if available in session", async () => {
     testLogger.info("Testing actor capture in status history...");
     await runInRollback(async tx => {
-      const now = new Date();
       const emailP = `parent-actor-${randomUUID()}@example.com`;
       const emailA = `admin-actor-${randomUUID()}@example.com`;
 
-      const [userP] = (await tx
-        .insert(users)
-        .values({ name: "Parent", email: emailP, password: "password", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [userA] = (await tx
-        .insert(users)
-        .values({ name: "Admin", email: emailA, password: "password", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [parent] = (await tx
-        .insert(parents)
-        .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
-        .returning()) as [ParentEntity];
+      const userA = await createTestUser(tx, { name: "Admin", email: emailA });
 
       // Set session actor
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userA.id}, true)`);
 
-      const [student] = (await tx
-        .insert(students)
-        .values({
-          parentId: parent.id,
-          name: "Student",
-          status: StudentStatus.ON_TRIAL,
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [StudentEntity];
+      const { student } = await setupStudent(
+        tx,
+        { name: "Parent", email: emailP },
+        {},
+        { name: "Student", status: StudentStatus.ON_TRIAL }
+      );
 
       const history = (await tx
         .select()

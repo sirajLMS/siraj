@@ -140,12 +140,10 @@ async function expectConstraintViolation(fn: () => Promise<unknown>, constraintN
     await fn();
     expect(true).toBe(false);
   } catch (error) {
-    const causeStr =
-      error instanceof Error && error.cause
-        ? error.cause instanceof Error
-          ? error.cause.message
-          : JSON.stringify(error.cause)
-        : "";
+    let causeStr = "";
+    if (error instanceof Error && error.cause) {
+      causeStr = error.cause instanceof Error ? error.cause.message : JSON.stringify(error.cause);
+    }
     const fullError = causeStr ? `${String(error)}: ${causeStr}` : String(error);
     expect(fullError).toContain(constraintName);
   }

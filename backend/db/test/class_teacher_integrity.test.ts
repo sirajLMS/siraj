@@ -8,79 +8,79 @@ import { SchedulingRepository } from "../repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
 import { type DbTransaction, runInRollback } from "./test-utils";
 
-describe("Class Teacher Assignment Integrity", () => {
-  async function createTestUser(tx: DbTransaction, name: string, email: string) {
-    const now = new Date();
-    const [user] = (await tx
-      .insert(users)
-      .values({
-        name,
-        email,
-        password: "password",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning()) as [UserEntity];
-    return { user, now };
-  }
+async function createTestUser(tx: DbTransaction, name: string, email: string) {
+  const now = new Date();
+  const [user] = (await tx
+    .insert(users)
+    .values({
+      name,
+      email,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [UserEntity];
+  return { user, now };
+}
 
-  async function createTestParent(tx: DbTransaction, name: string, email: string) {
-    const { user, now } = await createTestUser(tx, name, email);
-    const [parent] = (await tx
-      .insert(parents)
-      .values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now })
-      .returning()) as [ParentEntity];
-    return parent;
-  }
+async function createTestParent(tx: DbTransaction, name: string, email: string) {
+  const { user, now } = await createTestUser(tx, name, email);
+  const [parent] = (await tx
+    .insert(parents)
+    .values({ userId: user.id, status: "REGULAR", createdAt: now, updatedAt: now })
+    .returning()) as [ParentEntity];
+  return parent;
+}
 
-  async function createTestTeacher(tx: DbTransaction, name: string, email: string) {
-    const { user, now } = await createTestUser(tx, name, email);
-    const [teacher] = (await tx
-      .insert(teachers)
-      .values({ userId: user.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
-      .returning()) as [TeacherEntity];
-    return teacher;
-  }
+async function createTestTeacher(tx: DbTransaction, name: string, email: string) {
+  const { user, now } = await createTestUser(tx, name, email);
+  const [teacher] = (await tx
+    .insert(teachers)
+    .values({ userId: user.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
+    .returning()) as [TeacherEntity];
+  return teacher;
+}
 
-  async function createTestStudent(tx: DbTransaction, parentId: string, name: string, gender: Gender = Gender.MALE) {
-    const now = new Date();
-    const [student] = (await tx
-      .insert(students)
-      .values({
-        parentId,
-        name,
-        gender,
-        status: "REGULAR",
-        createdAt: now,
-        updatedAt: now,
-        idempotencyKey: randomUUID(),
-      })
-      .returning()) as [StudentEntity];
-
-    return student;
-  }
-
-  function getClassParams(studentId: string, teacherId: string) {
-    return {
-      studentId,
-      teacherId,
-      scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
-      scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
-      durationMinutes: 60,
-      classType: "REGULAR" as const,
+async function createTestStudent(tx: DbTransaction, parentId: string, name: string, gender: Gender = Gender.MALE) {
+  const now = new Date();
+  const [student] = (await tx
+    .insert(students)
+    .values({
+      parentId,
+      name,
+      gender,
+      status: "REGULAR",
+      createdAt: now,
+      updatedAt: now,
       idempotencyKey: randomUUID(),
-    };
-  }
+    })
+    .returning()) as [StudentEntity];
 
-  async function expectClassCreationToFail(tx: DbTransaction, studentId: string, teacherId: string) {
-    try {
-      await SchedulingRepository.createClassInstance(getClassParams(studentId, teacherId), tx);
-      expect(true).toBe(false); // Should fail
-    } catch (error) {
-      expect((error as Error).message).toContain("is not assigned to student");
-    }
-  }
+  return student;
+}
 
+function getClassParams(studentId: string, teacherId: string) {
+  return {
+    studentId,
+    teacherId,
+    scheduledStartAt: new Date("2026-06-25T10:00:00Z"),
+    scheduledEndAt: new Date("2026-06-25T11:00:00Z"),
+    durationMinutes: 60,
+    classType: "REGULAR" as const,
+    idempotencyKey: randomUUID(),
+  };
+}
+
+async function expectClassCreationToFail(tx: DbTransaction, studentId: string, teacherId: string) {
+  try {
+    await SchedulingRepository.createClassInstance(getClassParams(studentId, teacherId), tx);
+    expect(true).toBe(false); // Should fail
+  } catch (error) {
+    expect((error as Error).message).toContain("is not assigned to student");
+  }
+}
+
+describe("Class Teacher Assignment Integrity", () => {
   test("Creating a class with an assigned teacher succeeds", async () => {
     testLogger.info("Testing class creation with assigned teacher...");
     await runInRollback(async tx => {
