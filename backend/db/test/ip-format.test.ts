@@ -28,13 +28,12 @@ async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<
 }
 
 describe("IP Address Formatting", () => {
-  test("Validates and restricts IP addresses using native inet type in sessions and audit logs", async () => {
-    testLogger.info("Starting IP format constraint validation test...");
+  const now = new Date();
 
-    const now = new Date();
+  test("Valid IPv4 insertion in sessions", async () => {
+    testLogger.info("Testing valid IPv4 insertion in sessions...");
     const email = `ip-test-${randomUUID()}@example.com`;
 
-    // Test 1: Valid IPv4 insertion in sessions
     await runInRollback(async tx => {
       const [user] = await tx
         .insert(users)
@@ -58,14 +57,18 @@ describe("IP Address Formatting", () => {
       expect(insertedSession).toBeDefined();
       expect(insertedSession.ipAddress).toBe(IP_ADDRESS_1);
     });
+  });
 
-    // Test 2: Invalid IP address insertion in sessions
+  test("Invalid IP address insertion in sessions", async () => {
+    testLogger.info("Testing invalid IP address insertion in sessions...");
+    const email = `ip-test-2-${randomUUID()}@example.com`;
+
     await runInRollback(async tx => {
       const [user] = await tx
         .insert(users)
         .values({
           name: "IP Test User 2",
-          email: `ip-test-2-${randomUUID()}@example.com`,
+          email,
           password: "securePassword",
           createdAt: now,
           updatedAt: now,
@@ -94,14 +97,18 @@ describe("IP Address Formatting", () => {
       }
       expect(sessionDidThrow).toBe(true);
     });
+  });
 
-    // Test 3: Valid IPv6 insertion in audit logs
+  test("Valid IPv6 insertion in audit logs", async () => {
+    testLogger.info("Testing valid IPv6 insertion in audit logs...");
+    const email = `ip-test-3-${randomUUID()}@example.com`;
+
     await runInRollback(async tx => {
       const [user] = await tx
         .insert(users)
         .values({
           name: "IP Test User 3",
-          email: `ip-test-3-${randomUUID()}@example.com`,
+          email,
           password: "securePassword",
           createdAt: now,
           updatedAt: now,
@@ -119,14 +126,18 @@ describe("IP Address Formatting", () => {
       expect(insertedAudit).toBeDefined();
       expect(insertedAudit.ipAddress).toBe("2001:db8::1");
     });
+  });
 
-    // Test 4: Invalid IP address insertion in audit logs
+  test("Invalid IP address insertion in audit logs", async () => {
+    testLogger.info("Testing invalid IP address insertion in audit logs...");
+    const email = `ip-test-4-${randomUUID()}@example.com`;
+
     await runInRollback(async tx => {
       const [user] = await tx
         .insert(users)
         .values({
           name: "IP Test User 4",
-          email: `ip-test-4-${randomUUID()}@example.com`,
+          email,
           password: "securePassword",
           createdAt: now,
           updatedAt: now,
@@ -147,11 +158,8 @@ describe("IP Address Formatting", () => {
       } catch (error) {
         auditDidThrow = true;
         testLogger.info(`Caught expected error: ${error}`);
-        // The insert failed, which is what we expect - inet validation is working
       }
       expect(auditDidThrow).toBe(true);
     });
-
-    testLogger.info("Successfully validated IP address format constraints.");
   });
 });

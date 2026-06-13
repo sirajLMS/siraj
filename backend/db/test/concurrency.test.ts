@@ -20,45 +20,86 @@ async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<
   }
 }
 
+const getCommonDates = () => ({ createdAt: new Date(), updatedAt: new Date() });
+
+async function setupBaseTest(tx: DbTransaction, suffix: string) {
+  const [testUser] = await tx
+    .insert(users)
+    .values({
+      name: `${suffix} User`,
+      email: `${suffix.toLowerCase().replace(/\s+/g, "-")}-test@example.com`,
+      password: "hash",
+      ...getCommonDates(),
+    })
+    .returning();
+
+  const [testParent] = await tx
+    .insert(parents)
+    .values({
+      userId: testUser.id,
+      status: "REGULAR",
+      ...getCommonDates(),
+    })
+    .returning();
+
+  return { testUser, testParent };
+}
+
+async function setupStudentTest(tx: DbTransaction, suffix: string, classesTotal = 10) {
+  const { testParent } = await setupBaseTest(tx, suffix);
+  const [testStudent] = await tx
+    .insert(students)
+    .values({
+      parentId: testParent.id,
+      name: `${suffix} Student`,
+      status: "REGULAR",
+      classesTotal,
+      classesRemaining: classesTotal,
+      idempotencyKey: `student-${Date.now()}-${suffix.replace(/\s+/g, "-")}`,
+      ...getCommonDates(),
+    })
+    .returning();
+  return { testStudent };
+}
+
+async function setupInvoiceTest(tx: DbTransaction, suffix: string) {
+  const { testParent } = await setupBaseTest(tx, suffix);
+  const [testInvoice] = await tx
+    .insert(invoices)
+    .values({
+      parentId: testParent.id,
+      issueDate: "2024-01-01",
+      dueDate: "2024-01-31",
+      amount: "100.00",
+      currency: "USD",
+      status: "UNPAID",
+      invoiceType: "MONTHLY",
+      idempotencyKey: `invoice-${Date.now()}-${suffix.replace(/\s+/g, "-")}`,
+      ...getCommonDates(),
+    })
+    .returning();
+  return { testInvoice };
+}
+
+async function expectRepositoryError(fn: () => Promise<any>, expectedError: string) {
+  try {
+    await fn();
+    throw new Error(`Expected error "${expectedError}" but none was thrown`);
+  } catch (error) {
+    expect(error).toBeInstanceOf(Error);
+    if (error instanceof Error) {
+      expect(error.message).toContain(expectedError);
+      testLogger.info(`Caught expected error: ${error.message}`);
+    }
+  }
+}
+
 describe("Concurrency Control Tests", () => {
   describe("Student Classes Remaining - Concurrency Control", () => {
     it("should correctly handle multiple sequential class bookings", async () => {
       await runInRollback(async tx => {
         // Setup: Create test user, parent, and student
-        const [testUser] = await tx
-          .insert(users)
-          .values({
-            name: "Concurrency Test User",
-            email: "concurrency-test@example.com",
-            password: "hash",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testParent] = await tx
-          .insert(parents)
-          .values({
-            userId: testUser.id,
-            status: "REGULAR",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testStudent] = await tx
-          .insert(students)
-          .values({
-            parentId: testParent.id,
-            name: "Concurrency Test Student",
-            status: "REGULAR",
-            classesTotal: 10,
-            classesRemaining: 10,
-            idempotencyKey: `student-${Date.now()}`,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
+        const { testStudent } = await setupStudentTest(tx, "Concurrency Test");
 
         testLogger.info(`Created student with ID: ${testStudent.id}, classesRemaining: 10`);
 
@@ -81,40 +122,7 @@ describe("Concurrency Control Tests", () => {
     it("should handle sequential booking and refund operations correctly", async () => {
       await runInRollback(async tx => {
         // Setup
-        const [testUser] = await tx
-          .insert(users)
-          .values({
-            name: "Booking Refund Test User",
-            email: "booking-refund-test@example.com",
-            password: "hash",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testParent] = await tx
-          .insert(parents)
-          .values({
-            userId: testUser.id,
-            status: "REGULAR",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testStudent] = await tx
-          .insert(students)
-          .values({
-            parentId: testParent.id,
-            name: "Booking Refund Test",
-            status: "REGULAR",
-            classesTotal: 10,
-            classesRemaining: 10,
-            idempotencyKey: `student-${Date.now()}`,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
+        const { testStudent } = await setupStudentTest(tx, "Booking Refund Test");
 
         testLogger.info(`Initial classesRemaining: 10`);
 
@@ -136,40 +144,7 @@ describe("Concurrency Control Tests", () => {
     it("should enforce optimistic locking with version mismatch", async () => {
       await runInRollback(async tx => {
         // Setup
-        const [testUser] = await tx
-          .insert(users)
-          .values({
-            name: "Optimistic Lock Test User",
-            email: "optimistic-lock-test@example.com",
-            password: "hash",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testParent] = await tx
-          .insert(parents)
-          .values({
-            userId: testUser.id,
-            status: "REGULAR",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testStudent] = await tx
-          .insert(students)
-          .values({
-            parentId: testParent.id,
-            name: "Optimistic Lock Test",
-            status: "REGULAR",
-            classesTotal: 10,
-            classesRemaining: 10,
-            idempotencyKey: `student-${Date.now()}`,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
+        const { testStudent } = await setupStudentTest(tx, "Optimistic Lock Test");
 
         const initialVersion = testStudent.version;
         testLogger.info(`Initial version: ${initialVersion}`);
@@ -178,16 +153,10 @@ describe("Concurrency Control Tests", () => {
         await StudentRepository.deductClasses(testStudent.id, 1, initialVersion, tx);
 
         // Second update with stale version should fail
-        try {
-          await StudentRepository.deductClasses(testStudent.id, 1, initialVersion, tx);
-          throw new Error("Should have thrown version mismatch error");
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-          if (error instanceof Error) {
-            expect(error.message).toContain("Version mismatch");
-            testLogger.info(`Correctly caught version mismatch: ${error.message}`);
-          }
-        }
+        await expectRepositoryError(
+          () => StudentRepository.deductClasses(testStudent.id, 1, initialVersion, tx),
+          "Version mismatch"
+        );
 
         // Verify state
         const [finalStudent] = await tx.select().from(students).where(eq(students.id, testStudent.id));
@@ -199,54 +168,15 @@ describe("Concurrency Control Tests", () => {
     it("should prevent booking when insufficient classes available", async () => {
       await runInRollback(async tx => {
         // Setup
-        const [testUser] = await tx
-          .insert(users)
-          .values({
-            name: "Insufficient Classes Test User",
-            email: "insufficient-classes-test@example.com",
-            password: "hash",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testParent] = await tx
-          .insert(parents)
-          .values({
-            userId: testUser.id,
-            status: "REGULAR",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testStudent] = await tx
-          .insert(students)
-          .values({
-            parentId: testParent.id,
-            name: "Insufficient Classes Test",
-            status: "REGULAR",
-            classesTotal: 2,
-            classesRemaining: 2,
-            idempotencyKey: `student-${Date.now()}`,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
+        const { testStudent } = await setupStudentTest(tx, "Insufficient Classes Test", 2);
 
         testLogger.info(`Initial classesRemaining: 2`);
 
         // Try to deduct 3 classes (should fail)
-        try {
-          await StudentRepository.deductClasses(testStudent.id, 3, undefined, tx);
-          throw new Error("Should have thrown insufficient classes error");
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-          if (error instanceof Error) {
-            expect(error.message).toContain("Insufficient classes");
-            testLogger.info(`Correctly prevented over-booking: ${error.message}`);
-          }
-        }
+        await expectRepositoryError(
+          () => StudentRepository.deductClasses(testStudent.id, 3, undefined, tx),
+          "Insufficient classes"
+        );
 
         // Verify state unchanged
         const [finalStudent] = await tx.select().from(students).where(eq(students.id, testStudent.id));
@@ -260,42 +190,7 @@ describe("Concurrency Control Tests", () => {
     it("should prevent race conditions when updating invoice status", async () => {
       await runInRollback(async tx => {
         // Setup
-        const [testUser] = await tx
-          .insert(users)
-          .values({
-            name: "Invoice Concurrency Test User",
-            email: "invoice-concurrency-test@example.com",
-            password: "hash",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testParent] = await tx
-          .insert(parents)
-          .values({
-            userId: testUser.id,
-            status: "REGULAR",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testInvoice] = await tx
-          .insert(invoices)
-          .values({
-            parentId: testParent.id,
-            issueDate: "2024-01-01",
-            dueDate: "2024-01-31",
-            amount: "100.00",
-            currency: "USD",
-            status: "UNPAID",
-            invoiceType: "MONTHLY",
-            idempotencyKey: `invoice-${Date.now()}`,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
+        const { testInvoice } = await setupInvoiceTest(tx, "Invoice Concurrency Test");
 
         testLogger.info(`Created invoice with ID: ${testInvoice.id}, status: UNPAID`);
 
@@ -319,42 +214,7 @@ describe("Concurrency Control Tests", () => {
     it("should enforce optimistic locking on invoice updates", async () => {
       await runInRollback(async tx => {
         // Setup
-        const [testUser] = await tx
-          .insert(users)
-          .values({
-            name: "Invoice Optimistic Test User",
-            email: "invoice-optimistic-test@example.com",
-            password: "hash",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testParent] = await tx
-          .insert(parents)
-          .values({
-            userId: testUser.id,
-            status: "REGULAR",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
-
-        const [testInvoice] = await tx
-          .insert(invoices)
-          .values({
-            parentId: testParent.id,
-            issueDate: "2024-01-01",
-            dueDate: "2024-01-31",
-            amount: "100.00",
-            currency: "USD",
-            status: "UNPAID",
-            invoiceType: "MONTHLY",
-            idempotencyKey: `invoice-${Date.now()}`,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .returning();
+        const { testInvoice } = await setupInvoiceTest(tx, "Invoice Optimistic Test");
 
         const initialVersion = testInvoice.version;
         testLogger.info(`Initial version: ${initialVersion}`);
@@ -363,16 +223,9 @@ describe("Concurrency Control Tests", () => {
         await BillingRepository.updateInvoiceStatus(testInvoice.id, "PAID", new Date(), initialVersion, tx);
 
         // Second update with stale version should fail
-        try {
-          await BillingRepository.updateInvoiceStatus(testInvoice.id, "OVERDUE", null, initialVersion, tx);
-          throw new Error("Should have thrown version mismatch error");
-        } catch (error) {
-          expect(error).toBeInstanceOf(Error);
-          if (error instanceof Error) {
-            expect(error.message).toContain("Version mismatch");
-            testLogger.info(`Correctly caught version mismatch: ${error.message}`);
-          }
-        }
+        await expectVersionMismatch(() =>
+          BillingRepository.updateInvoiceStatus(testInvoice.id, "OVERDUE", null, initialVersion, tx)
+        );
 
         // Verify state
         const [finalInvoice] = await tx.select().from(invoices).where(eq(invoices.id, testInvoice.id));

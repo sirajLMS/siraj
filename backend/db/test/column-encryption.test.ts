@@ -8,6 +8,103 @@ import { teacherBankingDetailsHistory, teachers, users } from "../schema";
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
+async function createTestUser(tx: DbTransaction, uniqueSuffix: string, now: Date) {
+  const email = `teacher-${uniqueSuffix}@example.com`;
+  const [user] = await tx
+    .insert(users)
+    .values({
+      name: "Crypto Teacher",
+      email,
+      password: "securePassword",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+  return user;
+}
+
+async function insertTeacherDetails(args: { tx: DbTransaction; userId: string; plainZoomPassword: string; plainNationalId: string; now: Date }) {
+  const { tx, userId, plainZoomPassword, plainNationalId, now } = args;
+  const teacherInput: TeacherEntityInput = {
+    userId,
+    status: "ACTIVATED",
+    timezone: "UTC",
+    zoomPassword: plainZoomPassword,
+    nationalId: plainNationalId,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const [teacher] = await tx.insert(teachers).values(teacherInput).returning();
+  expect(teacher).toBeDefined();
+  return teacher;
+}
+
+async function insertBankingDetails(args: { tx: DbTransaction; teacherId: string; plainBeneficiaryName: string; plainIban: string; now: Date }) {
+  const { tx, teacherId, plainBeneficiaryName, plainIban, now } = args;
+  const bankingInput: TeacherBankingDetailsHistoryInsertInput = {
+    teacherId,
+    beneficiaryName: plainBeneficiaryName,
+    iban: plainIban,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const [banking] = await tx.insert(teacherBankingDetailsHistory).values(bankingInput).returning();
+  expect(banking).toBeDefined();
+  return banking;
+}
+
+function verifyCiphertext(value: unknown, plaintext: string) {
+  const valStr = String(value);
+  expect(valStr).not.toBe(plaintext);
+  expect(valStr.split(":")).toHaveLength(3);
+}
+
+async function verifyRawEncryption(tx: DbTransaction, teacherId: string, bankingId: string, plainValues: { zoomPassword: string; nationalId: string; beneficiaryName: string; iban: string }) {
+  // Verify teacher encryption
+  const rawTeacherResult = await tx.execute(
+    sql`SELECT zoom_password, national_id FROM teachers WHERE id = ${teacherId}`
+  );
+  const teacherRows =
+    "rows" in rawTeacherResult ? (rawTeacherResult.rows) : (rawTeacherResult as unknown as Record<string, unknown>[]);
+  const rawTeacherRow = teacherRows[0];
+  expect(rawTeacherRow).toBeDefined();
+
+  verifyCiphertext(rawTeacherRow.zoom_password, plainValues.zoomPassword);
+  verifyCiphertext(rawTeacherRow.national_id, plainValues.nationalId);
+
+  // Verify banking encryption
+  const rawBankingResult = await tx.execute(
+    sql`SELECT beneficiary_name, iban FROM teacher_banking_details_history WHERE id = ${bankingId}`
+  );
+  const bankingRows =
+    "rows" in rawBankingResult ? (rawBankingResult.rows) : (rawBankingResult as unknown as Record<string, unknown>[]);
+  const rawBankingRow = bankingRows[0];
+  expect(rawBankingRow).toBeDefined();
+
+  verifyCiphertext(rawBankingRow.beneficiary_name, plainValues.beneficiaryName);
+  verifyCiphertext(rawBankingRow.iban, plainValues.iban);
+}
+
+async function verifyDrizzleDecryption(tx: DbTransaction, teacherId: string, bankingId: string, plainValues: { zoomPassword: string; nationalId: string; beneficiaryName: string; iban: string }) {
+  const [drizzleTeacher] = await tx
+    .select()
+    .from(teachers)
+    .where(sql`id = ${teacherId}`);
+  expect(drizzleTeacher).toBeDefined();
+  expect(drizzleTeacher.zoomPassword).toBe(plainValues.zoomPassword);
+  expect(drizzleTeacher.nationalId).toBe(plainValues.nationalId);
+
+  const [drizzleBanking] = await tx
+    .select()
+    .from(teacherBankingDetailsHistory)
+    .where(sql`id = ${bankingId}`);
+  expect(drizzleBanking).toBeDefined();
+  expect(drizzleBanking.beneficiaryName).toBe(plainValues.beneficiaryName);
+  expect(drizzleBanking.iban).toBe(plainValues.iban);
+}
+
 async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
   let assertionError: unknown = null;
   try {
@@ -34,103 +131,39 @@ describe("Column-Level Encryption", () => {
       const now = new Date();
       const uniqueSuffix = randomUUID();
 
-      // 1. Create a user
-      const email = `teacher-${uniqueSuffix}@example.com`;
-      const [user] = await tx
-        .insert(users)
-        .values({
-          name: "Crypto Teacher",
-          email,
-          password: "securePassword",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-
-      // 2. Insert teacher details (zoomPassword and nationalId should be encrypted)
-      const plainZoomPassword = "SecretZoomPassword123!";
-      const plainNationalId = "NID-999-888-777";
-
-      const teacherInput: TeacherEntityInput = {
-        userId: user.id,
-        status: "ACTIVATED",
-        timezone: "UTC",
-        zoomPassword: plainZoomPassword,
-        nationalId: plainNationalId,
-        createdAt: now,
-        updatedAt: now,
+      const plainValues = {
+        zoomPassword: "SecretZoomPassword123!",
+        nationalId: "NID-999-888-777",
+        beneficiaryName: "Teacher Beneficiary Name",
+        iban: "US12345678901234567890",
       };
 
-      const [teacher] = await tx.insert(teachers).values(teacherInput).returning();
-      expect(teacher).toBeDefined();
+      // 1. Create a user
+      const user = await createTestUser(tx, uniqueSuffix, now);
+
+      // 2. Insert teacher details
+      const teacher = await insertTeacherDetails({
+        tx,
+        userId: user.id,
+        plainZoomPassword: plainValues.zoomPassword,
+        plainNationalId: plainValues.nationalId,
+        now,
+      });
 
       // 3. Insert teacher banking details
-      const plainBeneficiaryName = "Teacher Beneficiary Name";
-      const plainIban = "US12345678901234567890";
-
-      const bankingInput: TeacherBankingDetailsHistoryInsertInput = {
+      const banking = await insertBankingDetails({
+        tx,
         teacherId: teacher.id,
-        beneficiaryName: plainBeneficiaryName,
-        iban: plainIban,
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      const [banking] = await tx.insert(teacherBankingDetailsHistory).values(bankingInput).returning();
-      expect(banking).toBeDefined();
+        plainBeneficiaryName: plainValues.beneficiaryName,
+        plainIban: plainValues.iban,
+        now,
+      });
 
       // 4. Query raw values directly from database via SQL to verify ciphertext format (iv:ciphertext:tag)
-      const rawTeacherResult = await tx.execute(
-        sql`SELECT zoom_password, national_id FROM teachers WHERE id = ${teacher.id}`
-      );
-      const teacherRows =
-        "rows" in rawTeacherResult ? rawTeacherResult.rows : (rawTeacherResult as unknown as Record<string, unknown>[]);
-      const rawTeacherRow = teacherRows[0];
-      expect(rawTeacherRow).toBeDefined();
-
-      const rawZoomPassword = String(rawTeacherRow.zoom_password);
-      const rawNationalId = String(rawTeacherRow.national_id);
-
-      // Verify that raw database values are formatted as iv:ciphertext:tag and not equal to plaintext
-      expect(rawZoomPassword).not.toBe(plainZoomPassword);
-      expect(rawZoomPassword.split(":")).toHaveLength(3);
-
-      expect(rawNationalId).not.toBe(plainNationalId);
-      expect(rawNationalId.split(":")).toHaveLength(3);
-
-      const rawBankingResult = await tx.execute(
-        sql`SELECT beneficiary_name, iban FROM teacher_banking_details_history WHERE id = ${banking.id}`
-      );
-      const bankingRows =
-        "rows" in rawBankingResult ? rawBankingResult.rows : (rawBankingResult as unknown as Record<string, unknown>[]);
-      const rawBankingRow = bankingRows[0];
-      expect(rawBankingRow).toBeDefined();
-
-      const rawBeneficiaryName = String(rawBankingRow.beneficiary_name);
-      const rawIban = String(rawBankingRow.iban);
-
-      expect(rawBeneficiaryName).not.toBe(plainBeneficiaryName);
-      expect(rawBeneficiaryName.split(":")).toHaveLength(3);
-
-      expect(rawIban).not.toBe(plainIban);
-      expect(rawIban.split(":")).toHaveLength(3);
+      await verifyRawEncryption(tx, teacher.id, banking.id, plainValues);
 
       // 5. Query values via Drizzle select to verify automatic decryption
-      const [drizzleTeacher] = await tx
-        .select()
-        .from(teachers)
-        .where(sql`id = ${teacher.id}`);
-      expect(drizzleTeacher).toBeDefined();
-      expect(drizzleTeacher.zoomPassword).toBe(plainZoomPassword);
-      expect(drizzleTeacher.nationalId).toBe(plainNationalId);
-
-      const [drizzleBanking] = await tx
-        .select()
-        .from(teacherBankingDetailsHistory)
-        .where(sql`id = ${banking.id}`);
-      expect(drizzleBanking).toBeDefined();
-      expect(drizzleBanking.beneficiaryName).toBe(plainBeneficiaryName);
-      expect(drizzleBanking.iban).toBe(plainIban);
+      await verifyDrizzleDecryption(tx, teacher.id, banking.id, plainValues);
 
       testLogger.info("Successfully verified column-level encryption and decryption.");
     });
