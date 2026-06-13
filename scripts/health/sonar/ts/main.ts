@@ -63,15 +63,15 @@ async function main() {
       await installScanner();
       const scanStartTime = runAnalysis(token);
       await waitForAnalysisProcessing(token, scanStartTime);
-      await fetchAndDisplayResults(token, true, "sonar-result.json");
+      await fetchAndDisplayResults({ token, includeDuplications: true, outputFilename: "sonar-result.json" });
     } else if (args.includes("--result")) {
       const token = await generateToken();
       writeConnectionInfo(token);
-      await fetchAndDisplayResults(token, false, "sonar-result.json");
+      await fetchAndDisplayResults({ token, includeDuplications: false, outputFilename: "sonar-result.json" });
     } else if (args.includes("--full")) {
       const token = await generateToken();
       writeConnectionInfo(token);
-      await fetchAndDisplayResults(token, true, "sonar-full.json");
+      await fetchAndDisplayResults({ token, includeDuplications: true, outputFilename: "sonar-full.json" });
     } else {
       logError("Invalid arguments. Use --help for usage information.");
       process.exit(1);

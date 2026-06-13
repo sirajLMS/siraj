@@ -97,6 +97,31 @@ const SEVERITY_COLORS: Record<string, string> = {
   info: COLORS.BLUE,
 };
 
+async function isAnalysisReady(options: {
+  authHeader: string;
+  scanStartTime: number;
+}): Promise<{ ready: boolean; date?: string }> {
+  try {
+    const response = await fetch(
+      `${CONFIG.SONAR_HOST}/api/project_analyses/search?project=${CONFIG.PROJECT_KEY}&ps=1`,
+      { headers: { Authorization: options.authHeader } }
+    );
+
+    if (!response.ok) return { ready: false };
+
+    const data = (await response.json()) as { analyses: Array<{ date: string }> };
+    if (data.analyses.length === 0) return { ready: false };
+
+    const analysisDate = data.analyses[0].date;
+    const analysisTimestamp = new Date(analysisDate).getTime();
+
+    return { ready: analysisTimestamp >= options.scanStartTime, date: analysisDate };
+  } catch (err) {
+    logWarning(`Error while checking analysis: ${err instanceof Error ? err.message : String(err)}`);
+    return { ready: false };
+  }
+}
+
 export async function waitForAnalysisProcessing(token: string, scanStartTime: number): Promise<void> {
   logInfo("Waiting for analysis to be processed...");
 
@@ -104,30 +129,10 @@ export async function waitForAnalysisProcessing(token: string, scanStartTime: nu
   const authHeader = `Basic ${btoa(token + ":")}`;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      const response = await fetch(
-        `${CONFIG.SONAR_HOST}/api/project_analyses/search?project=${CONFIG.PROJECT_KEY}&ps=1`,
-        {
-          headers: { Authorization: authHeader },
-        }
-      );
-
-      if (response.ok) {
-        const data = (await response.json()) as {
-          analyses: Array<{ date: string }>;
-        };
-        if (data.analyses.length > 0) {
-          const analysisDate = data.analyses[0].date;
-          const analysisTimestamp = new Date(analysisDate).getTime();
-
-          if (analysisTimestamp >= scanStartTime) {
-            logSuccess(`Fresh analysis results are ready (analyzed at: ${analysisDate})`);
-            return;
-          }
-        }
-      }
-    } catch (err) {
-      logWarning(`Error while waiting for analysis: ${err instanceof Error ? err.message : String(err)}`);
+    const { ready, date } = await isAnalysisReady({ authHeader, scanStartTime });
+    if (ready) {
+      logSuccess(`Fresh analysis results are ready (analyzed at: ${date})`);
+      return;
     }
 
     process.stdout.write(".");
@@ -138,11 +143,14 @@ export async function waitForAnalysisProcessing(token: string, scanStartTime: nu
   logWarning("Analysis results may not be fully processed yet, but continuing...");
 }
 
-export async function fetchAndDisplayResults(
-  token: string,
-  includeDuplications = true,
-  outputFilename = "sonar-result.json"
-): Promise<void> {
+interface FetchResultsOptions {
+  token: string;
+  includeDuplications?: boolean;
+  outputFilename?: string;
+}
+
+export async function fetchAndDisplayResults(options: FetchResultsOptions): Promise<void> {
+  const { token, includeDuplications = true, outputFilename = "sonar-result.json" } = options;
   logInfo("Fetching analysis results...");
 
   try {
@@ -327,7 +335,7 @@ async function fetchAndPrintDuplicatedBlocks(token: string): Promise<Duplication
 
     const duplicationDetails = [];
     for (const file of filesWithDuplications) {
-      const details = await printFileDuplicationDetails(file, authHeader);
+      const details = await printFileDuplicationDetails({ file, authHeader });
       if (details) duplicationDetails.push(details);
     }
     return duplicationDetails;
@@ -337,10 +345,11 @@ async function fetchAndPrintDuplicatedBlocks(token: string): Promise<Duplication
   }
 }
 
-async function printFileDuplicationDetails(
-  file: { key: string; path: string; measures: SonarMeasure[] },
-  authHeader: string
-): Promise<DuplicationFileDetails | null> {
+async function printFileDuplicationDetails(options: {
+  file: { key: string; path: string; measures: SonarMeasure[] };
+  authHeader: string;
+}): Promise<DuplicationFileDetails | null> {
+  const { file, authHeader } = options;
   const blockCount = file.measures.find(m => m.metric === "duplicated_blocks")?.value || "0";
   globalThis.console.log(`${COLORS.NC}${file.path} ${COLORS.YELLOW}(${blockCount} duplicated blocks)${COLORS.NC}`);
 
@@ -411,7 +420,7 @@ function printIssues(issues: SonarIssue[]): void {
 
     globalThis.console.log(`\n${COLORS.NC}${filePath}`);
     for (const issue of fileIssues) {
-      globalThis.console.log(formatIssue(issue, filePath));
+      globalThis.console.log(formatIssue({ issue, filePath }));
     }
   }
 
@@ -452,7 +461,8 @@ function groupIssuesByFile(issues: SonarIssue[]): Map<string, SonarIssue[]> {
   return grouped;
 }
 
-function formatIssue(issue: SonarIssue, filePath: string): string {
+function formatIssue(options: { issue: SonarIssue; filePath: string }): string {
+  const { issue, filePath } = options;
   const severity = SEVERITY_MAP[issue.severity] ?? "warning";
   const symbol = SEVERITY_SYMBOLS[severity] ?? "•";
   const color = SEVERITY_COLORS[severity] ?? COLORS.NC;

@@ -457,15 +457,19 @@ enum OrderSortDirection {
 type PageInfo {
   count: Int!
   currentPage: Int!
+  endCursor: String
   firstItem: Int
   hasMorePages: Boolean!
   lastItem: Int
   lastPage: Int!
   perPage: Int!
+  startCursor: String
   total: Int!
 }
 
 input PaginationArgs {
+  after: String
+  before: String
   first: Int = 10
   last: Int
   maxCount: Int = 100
@@ -608,6 +612,7 @@ input StudentCreateInput {
   classesTotal: Int
   dateOfBirth: DateTime
   gender: Gender
+  idempotencyKey: String!
   language: AppLanguage
   name: String!
   parentId: String!
@@ -653,6 +658,7 @@ input StudentFilterArgs {
 
 enum StudentStatus {
   DEACTIVATED
+  GRADUATED
   ON_LEAVE
   ON_TRIAL
   REGULAR

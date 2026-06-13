@@ -36,6 +36,46 @@ function getTsConfigIgnores(): string[] {
   return [];
 }
 
+export function checkSingleFile(filePath: string): void {
+  const absolutePath =
+    filePath.startsWith("/") || /^[A-Za-z]:\\/.test(filePath) ? filePath : join(PROJECT_ROOT, filePath);
+  const relPath = absolutePath.replace(PROJECT_ROOT + "/", "").replace(PROJECT_ROOT + "\\", "");
+
+  const csBin = resolveCodesceneBin();
+  const result = spawnSync(csBin, ["check", absolutePath], {
+    encoding: "utf8",
+    env: process.env,
+  });
+  const output = (result.stdout || "") + (result.stderr || "");
+  globalThis.console.log(output);
+
+  if (result.error) {
+    logError(`Failed to run CodeScene CLI: ${result.error.message}`);
+    process.exit(1);
+  }
+
+  const issues = output
+    .split("\n")
+    .map(l => l.trim())
+    .filter(line => {
+      if (/info:.*Code health score:/i.test(line)) return false;
+      return /^(warn|error|info|arn|err|nfo):/i.test(line) || /License check failed|unauthorized/i.test(line);
+    });
+
+  const hasError = result.status !== 0 || issues.some(i => /^(error|err|license|unauthorized)/i.test(i));
+  const hasWarning = issues.some(i => /^(warn|arn|info|nfo)/i.test(i));
+
+  if (hasError) {
+    logError(`${relPath}: errors found`);
+    process.exit(1);
+  } else if (hasWarning) {
+    globalThis.console.log(`${COLORS.YELLOW}⚠️  ${relPath}: warnings found${COLORS.NC}`);
+    process.exit(1);
+  } else {
+    logSuccess(`${relPath}: perfect health ✨`);
+  }
+}
+
 export async function runHealthCheck(forceFull = false): Promise<void> {
   ensureCacheDir();
 
@@ -216,5 +256,12 @@ function printSummary(results: CheckResults): void {
     errorFiles.forEach(f => {
       globalThis.console.log(`  - ${f}`);
     });
+  }
+
+  if (warning > 0 || error > 0) {
+    globalThis.console.log(
+      `\n${COLORS.YELLOW}💡 Run 'bun run codescene --file <file>' for detailed analysis${COLORS.NC}`
+    );
+    globalThis.console.log(`${COLORS.YELLOW}💡 Run 'bun run codescene --scan --full' to force full check${COLORS.NC}`);
   }
 }

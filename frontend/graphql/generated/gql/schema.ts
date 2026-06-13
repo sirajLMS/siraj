@@ -520,15 +520,19 @@ export type PageInfo = {
   __typename?: "PageInfo";
   count: Scalars["Int"]["output"];
   currentPage: Scalars["Int"]["output"];
+  endCursor: Maybe<Scalars["String"]["output"]>;
   firstItem: Maybe<Scalars["Int"]["output"]>;
   hasMorePages: Scalars["Boolean"]["output"];
   lastItem: Maybe<Scalars["Int"]["output"]>;
   lastPage: Scalars["Int"]["output"];
   perPage: Scalars["Int"]["output"];
+  startCursor: Maybe<Scalars["String"]["output"]>;
   total: Scalars["Int"]["output"];
 };
 
 export type PaginationArgs = {
+  after: InputMaybe<Scalars["String"]["input"]>;
+  before: InputMaybe<Scalars["String"]["input"]>;
   first: InputMaybe<Scalars["Int"]["input"]>;
   last: InputMaybe<Scalars["Int"]["input"]>;
   maxCount: InputMaybe<Scalars["Int"]["input"]>;
@@ -681,6 +685,7 @@ export type StudentCreateInput = {
   classesTotal: InputMaybe<Scalars["Int"]["input"]>;
   dateOfBirth: InputMaybe<Scalars["DateTime"]["input"]>;
   gender: InputMaybe<Gender>;
+  idempotencyKey: Scalars["String"]["input"];
   language: InputMaybe<AppLanguage>;
   name: Scalars["String"]["input"];
   parentId: Scalars["String"]["input"];
@@ -726,6 +731,7 @@ export type StudentFilterArgs = {
 
 export enum StudentStatus {
   Deactivated = "DEACTIVATED",
+  Graduated = "GRADUATED",
   OnLeave = "ON_LEAVE",
   OnTrial = "ON_TRIAL",
   Regular = "REGULAR",

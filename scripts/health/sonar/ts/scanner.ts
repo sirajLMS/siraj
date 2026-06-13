@@ -3,38 +3,77 @@ import { existsSync, mkdirSync, unlinkSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import { join } from "node:path";
 import { CONFIG, logInfo, logSuccess, logWarning, PROJECT_ROOT } from "./config";
-import { markStepCompleted } from "./state";
+import { isStepCompleted, markStepCompleted } from "./state";
 
 function getSearchCmd(): string {
   return os.platform() === "win32" ? String.raw`C:\Windows\System32\where.exe` : "/usr/bin/which";
 }
 
-function getPowershellCmd(): string {
-  return String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`;
+function getScannerOsName(platform: NodeJS.Platform): string {
+  if (platform === "win32") {
+    return "windows";
+  }
+
+  if (platform === "darwin") {
+    return "macosx";
+  }
+
+  return "linux";
+}
+
+function getScannerPath(platform: NodeJS.Platform, osName: string): { binDir: string; path: string } {
+  const binDir = join(CONFIG.SCANNER_DIR, `sonar-scanner-${CONFIG.SCANNER_VERSION}-${osName}-x64`, "bin");
+  const extension = platform === "win32" ? ".bat" : "";
+
+  return {
+    binDir,
+    path: join(binDir, `sonar-scanner${extension}`),
+  };
+}
+
+function hasScannerInPath(): boolean {
+  const whichResult = spawnSync(getSearchCmd(), ["sonar-scanner"], {
+    env: { ...process.env, PATH: process.env.PATH },
+  });
+
+  return whichResult.status === 0;
+}
+
+function unzipScanner(platform: NodeJS.Platform, zipPath: string): void {
+  if (platform === "win32") {
+    const unzipResult = spawnSync("tar", ["-xf", zipPath, "-C", CONFIG.SCANNER_DIR], {
+      stdio: "inherit",
+    });
+    if (unzipResult.status !== 0) {
+      throw new Error(`Failed to unzip scanner`);
+    }
+    return;
+  }
+
+  const unzipResult = spawnSync("/usr/bin/unzip", ["-o", "-q", zipPath, "-d", CONFIG.SCANNER_DIR]);
+  if (unzipResult.status !== 0) {
+    throw new Error(`Failed to unzip scanner: ${unzipResult.stderr?.toString() || "Unknown error"}`);
+  }
 }
 
 export async function installScanner(): Promise<void> {
-  const platform = os.platform();
-  const arch = "x64"; // Assuming x64 for now as in the bash script
-  const osName = platform === "darwin" ? "macosx" : "linux";
-  const scannerBinDir = join(
-    CONFIG.SCANNER_DIR,
-    `sonar-scanner-${CONFIG.SCANNER_VERSION}-${platform === "darwin" ? "macosx" : "linux"}-x64`,
-    "bin"
-  );
-  const scannerPath = join(scannerBinDir, `sonar-scanner${platform === "win32" ? ".bat" : ""}`);
+  if (isStepCompleted("scanner_installed")) {
+    logSuccess("sonar-scanner is already installed");
+    return;
+  }
 
-  if (existsSync(scannerPath)) {
+  const platform = os.platform();
+  const arch = "x64";
+  const osName = getScannerOsName(platform);
+  const scanner = getScannerPath(platform, osName);
+
+  if (existsSync(scanner.path)) {
     logSuccess("sonar-scanner is already installed");
     markStepCompleted("scanner_installed");
     return;
   }
 
-  // Check if it's in PATH
-  const whichResult = spawnSync(getSearchCmd(), ["sonar-scanner"], {
-    env: { ...process.env, PATH: process.env.PATH },
-  });
-  if (whichResult.status === 0) {
+  if (hasScannerInPath()) {
     logSuccess("sonar-scanner is already in PATH");
     markStepCompleted("scanner_installed");
     return;
@@ -59,16 +98,7 @@ export async function installScanner(): Promise<void> {
   writeFileSync(zipPath, Buffer.from(buffer));
 
   logInfo("Unzipping...");
-  // Use system unzip or powershell Expand-Archive
-  if (platform === "win32") {
-    spawnSync(getPowershellCmd(), [
-      "-NoProfile",
-      "-Command",
-      `Expand-Archive -Path "${zipPath}" -DestinationPath "${CONFIG.SCANNER_DIR}" -Force`,
-    ]);
-  } else {
-    spawnSync("/usr/bin/unzip", ["-o", "-q", zipPath, "-d", CONFIG.SCANNER_DIR]);
-  }
+  unzipScanner(platform, zipPath);
 
   try {
     unlinkSync(zipPath);
@@ -84,15 +114,11 @@ export function runAnalysis(token: string): number {
   logInfo("Running SonarQube analysis...");
 
   const platform = os.platform();
-  const scannerBinDir = join(
-    CONFIG.SCANNER_DIR,
-    `sonar-scanner-${CONFIG.SCANNER_VERSION}-${platform === "darwin" ? "macosx" : "linux"}-x64`,
-    "bin"
-  );
-  const scannerPath = join(scannerBinDir, `sonar-scanner${platform === "win32" ? ".bat" : ""}`);
+  const osName = getScannerOsName(platform);
+  const scanner = getScannerPath(platform, osName);
 
-  let finalScannerPath = scannerPath;
-  if (!existsSync(scannerPath)) {
+  let finalScannerPath = scanner.path;
+  if (!existsSync(scanner.path)) {
     // Try to resolve from PATH securely
     const whichResult = spawnSync(getSearchCmd(), ["sonar-scanner"], {
       env: { ...process.env, PATH: process.env.PATH },
@@ -109,7 +135,7 @@ export function runAnalysis(token: string): number {
     stdio: "inherit",
     env: {
       ...process.env,
-      PATH: `${scannerBinDir}${platform === "win32" ? ";" : ":"}${process.env.PATH}`,
+      PATH: `${scanner.binDir}${platform === "win32" ? ";" : ":"}${process.env.PATH}`,
     },
   });
 
