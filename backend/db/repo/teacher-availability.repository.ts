@@ -276,26 +276,27 @@ export namespace TeacherAvailabilityRepository {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
-  export const validateBookingAvailability = async (
-    teacherId: string,
-    startTime: Date,
-    endTime: Date,
-    tx?: DBTransaction
-  ): Promise<void> => {
-    const t = tx ?? db;
-    const bookingDate = getUtcDateString(startTime);
-    const bookingDay = getUtcDayOfWeek(startTime);
-    const bookingStartMinutes = timeToMinutes(dateToTimeString(startTime));
-    const bookingEndMinutes = timeToMinutes(dateToTimeString(endTime));
+  /**
+   * Input for booking availability validation
+   */
+  export interface BookingAvailabilityInput {
+    teacherId: string;
+    startTime: Date;
+    endTime: Date;
+  }
 
+  /**
+   * Checks for approved vacations that overlap with the booking time
+   */
+  async function checkVacationConflicts(t: DBTransaction | typeof db, input: BookingAvailabilityInput): Promise<void> {
     const approvedVacations = await t
       .select({ id: teacherVacationRequests.id })
       .from(teacherVacationRequests)
       .where(
         and(
-          eq(teacherVacationRequests.teacherId, teacherId),
+          eq(teacherVacationRequests.teacherId, input.teacherId),
           eq(teacherVacationRequests.status, VacationRequestStatus.APPROVED),
-          sql`(${teacherVacationRequests.startAt}, ${teacherVacationRequests.endAt}) OVERLAPS (${startTime}, ${endTime})`
+          sql`(${teacherVacationRequests.startAt}, ${teacherVacationRequests.endAt}) OVERLAPS (${input.startTime}, ${input.endTime})`
         )
       )
       .limit(1);
@@ -303,60 +304,84 @@ export namespace TeacherAvailabilityRepository {
     if (approvedVacations.length > 0) {
       throw new Error("Teacher is on approved vacation during the requested time");
     }
+  }
 
-    const unavailabilityPatterns = await t
+  /**
+   * Checks for recurring unavailability patterns that overlap with the booking time
+   */
+  async function checkRecurringUnavailability(
+    t: DBTransaction | typeof db,
+    input: BookingAvailabilityInput,
+    bookingDate: string,
+    bookingDay: DayOfWeek,
+    bookingStartMinutes: number,
+    bookingEndMinutes: number
+  ): Promise<void> {
+    const patterns = await t
       .select()
       .from(teacherRecurringUnavailability)
       .where(
-        and(
-          eq(teacherRecurringUnavailability.teacherId, teacherId),
-          eq(teacherRecurringUnavailability.dayOfWeek, bookingDay)
-        )
+        and(eq(teacherRecurringUnavailability.teacherId, input.teacherId), eq(teacherRecurringUnavailability.dayOfWeek, bookingDay))
       );
 
-    for (const pattern of unavailabilityPatterns) {
+    for (const pattern of patterns) {
       if (!isWithinEffectiveRange(bookingDate, pattern.effectiveFrom, pattern.effectiveUntil)) {
         continue;
       }
 
-      if (
-        timesOverlap(
-          bookingStartMinutes,
-          bookingEndMinutes,
-          timeToMinutes(pattern.startTime),
-          timeToMinutes(pattern.endTime)
-        )
-      ) {
+      if (timesOverlap(bookingStartMinutes, bookingEndMinutes, timeToMinutes(pattern.startTime), timeToMinutes(pattern.endTime))) {
         throw new Error("Teacher has a recurring unavailability during the requested time");
       }
     }
+  }
 
-    const availabilityWindows = await t
+  /**
+   * Validates if the requested time falls within teacher availability windows
+   */
+  async function validateAvailabilityWindows(
+    t: DBTransaction | typeof db,
+    input: BookingAvailabilityInput,
+    bookingDate: string,
+    bookingDay: DayOfWeek,
+    bookingStartMinutes: number,
+    bookingEndMinutes: number
+  ): Promise<void> {
+    const windows = await t
       .select()
       .from(teacherAvailabilityWindows)
-      .where(eq(teacherAvailabilityWindows.teacherId, teacherId));
+      .where(eq(teacherAvailabilityWindows.teacherId, input.teacherId));
 
-    if (availabilityWindows.length === 0) {
-      return;
-    }
+    if (windows.length === 0) return;
 
-    const matchesWindow = availabilityWindows.some(window => {
-      if ((window.dayOfWeek as DayOfWeek) !== bookingDay) {
-        return false;
-      }
-      if (!isWithinEffectiveRange(bookingDate, window.effectiveFrom, window.effectiveUntil)) {
-        return false;
-      }
-      return isWithinTimeWindow(
-        bookingStartMinutes,
-        bookingEndMinutes,
-        timeToMinutes(window.startTime),
-        timeToMinutes(window.endTime)
-      );
+    const matches = windows.some(window => {
+      if ((window.dayOfWeek as DayOfWeek) !== bookingDay) return false;
+      if (!isWithinEffectiveRange(bookingDate, window.effectiveFrom, window.effectiveUntil)) return false;
+      return isWithinTimeWindow(bookingStartMinutes, bookingEndMinutes, timeToMinutes(window.startTime), timeToMinutes(window.endTime));
     });
 
-    if (!matchesWindow) {
+    if (!matches) {
       throw new Error("Requested time is outside teacher availability windows");
     }
+  }
+
+  /**
+   * Comprehensive validation of a teacher's availability for a specific booking
+   */
+  export const validateBookingAvailability = async (
+    teacherId: string,
+    startTime: Date,
+    endTime: Date,
+    tx?: DBTransaction
+  ): Promise<void> => {
+    const t = tx ?? db;
+    const input: BookingAvailabilityInput = { teacherId, startTime, endTime };
+    const bookingDate = getUtcDateString(startTime);
+    const bookingDay = getUtcDayOfWeek(startTime);
+    const bookingStartMinutes = timeToMinutes(dateToTimeString(startTime));
+    const bookingEndMinutes = timeToMinutes(dateToTimeString(endTime));
+
+    await checkVacationConflicts(t, input);
+    await checkRecurringUnavailability(t, input, bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes);
+    await validateAvailabilityWindows(t, input, bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes);
   };
 }

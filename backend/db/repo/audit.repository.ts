@@ -46,6 +46,32 @@ export namespace AuditRepository {
   };
 
   /**
+   * Internal helper for convenience logging methods
+   */
+  async function createTypedAuditLog(
+    tx: DBTransaction | undefined,
+    input: {
+      actorUserId: string | null;
+      entityType: Types.AuditEntityType;
+      entityId: string;
+      action: Types.AuditAction;
+      description?: string | null;
+      previousState?: Record<string, unknown> | null;
+      newState?: Record<string, unknown> | null;
+      changes?: Record<string, unknown> | null;
+      metadata?: Record<string, unknown> | null;
+    }
+  ): Promise<Types.AuditLogEntity> {
+    return await createAuditLog(
+      {
+        ...input,
+        actorType: input.actorUserId ? "USER" : "SYSTEM",
+      },
+      tx
+    );
+  }
+
+  /**
    * Query audit logs with filters and pagination.
    */
   export const queryAuditLogs = async (
@@ -55,34 +81,18 @@ export namespace AuditRepository {
     return runInTransaction(tx, async t => {
       const conditions = [];
 
-      if (filters.actorUserId) {
-        conditions.push(eq(auditLogs.actorUserId, filters.actorUserId));
-      }
-      if (filters.actorType) {
-        conditions.push(eq(auditLogs.actorType, filters.actorType));
-      }
-      if (filters.entityType) {
-        conditions.push(eq(auditLogs.entityType, filters.entityType));
-      }
-      if (filters.entityId) {
-        conditions.push(eq(auditLogs.entityId, filters.entityId));
-      }
-      if (filters.action) {
-        conditions.push(eq(auditLogs.action, filters.action));
-      }
-      if (filters.startDate) {
-        conditions.push(gte(auditLogs.createdAt, filters.startDate));
-      }
-      if (filters.endDate) {
-        conditions.push(lte(auditLogs.createdAt, filters.endDate));
-      }
+      if (filters.actorUserId) conditions.push(eq(auditLogs.actorUserId, filters.actorUserId));
+      if (filters.actorType) conditions.push(eq(auditLogs.actorType, filters.actorType));
+      if (filters.entityType) conditions.push(eq(auditLogs.entityType, filters.entityType));
+      if (filters.entityId) conditions.push(eq(auditLogs.entityId, filters.entityId));
+      if (filters.action) conditions.push(eq(auditLogs.action, filters.action));
+      if (filters.startDate) conditions.push(gte(auditLogs.createdAt, filters.startDate));
+      if (filters.endDate) conditions.push(lte(auditLogs.createdAt, filters.endDate));
 
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-      // Get total count
       const [{ total }] = await t.select({ total: count() }).from(auditLogs).where(whereClause);
 
-      // Get logs with pagination
       const limit = filters.limit ?? 50;
       const offset = filters.offset ?? 0;
 
@@ -170,18 +180,13 @@ export namespace AuditRepository {
     previousState: Record<string, unknown> | null,
     newState: Record<string, unknown> | null
   ): Record<string, unknown> | null => {
-    if (!previousState || !newState) {
-      return null;
-    }
+    if (!previousState || !newState) return null;
 
     const changes: Record<string, unknown> = {};
 
     for (const key in newState) {
       if (previousState[key] !== newState[key]) {
-        changes[key] = {
-          from: previousState[key],
-          to: newState[key],
-        };
+        changes[key] = { from: previousState[key], to: newState[key] };
       }
     }
 
@@ -189,7 +194,7 @@ export namespace AuditRepository {
   };
 
   /**
-   * Convenience method to log student status changes.
+   * Student status change log input
    */
   export interface StudentStatusChangeInput {
     studentId: string;
@@ -204,24 +209,20 @@ export namespace AuditRepository {
     tx?: DBTransaction
   ): Promise<Types.AuditLogEntity> => {
     const { studentId, oldStatus, newStatus, actorUserId, description } = input;
-    return await createAuditLog(
-      {
-        actorUserId,
-        actorType: actorUserId ? "USER" : "SYSTEM",
-        entityType: "STUDENT",
-        entityId: studentId,
-        action: "STATUS_CHANGE",
-        description: description ?? `Status changed from ${oldStatus} to ${newStatus}`,
-        previousState: { status: oldStatus },
-        newState: { status: newStatus },
-        changes: { status: { from: oldStatus, to: newStatus } },
-      },
-      tx
-    );
+    return await createTypedAuditLog(tx, {
+      actorUserId,
+      entityType: "STUDENT",
+      entityId: studentId,
+      action: "STATUS_CHANGE",
+      description: description ?? `Status changed from ${oldStatus} to ${newStatus}`,
+      previousState: { status: oldStatus },
+      newState: { status: newStatus },
+      changes: { status: { from: oldStatus, to: newStatus } },
+    });
   };
 
   /**
-   * Convenience method to log invoice modifications.
+   * Invoice change log input
    */
   export interface InvoiceChangeInput {
     invoiceId: string;
@@ -234,24 +235,20 @@ export namespace AuditRepository {
 
   export const logInvoiceChange = async (input: InvoiceChangeInput, tx?: DBTransaction): Promise<Types.AuditLogEntity> => {
     const { invoiceId, action, previousState, newState, actorUserId, description } = input;
-    return await createAuditLog(
-      {
-        actorUserId,
-        actorType: actorUserId ? "USER" : "SYSTEM",
-        entityType: "INVOICE",
-        entityId: invoiceId,
-        action,
-        description,
-        previousState,
-        newState,
-        changes: computeChanges(previousState, newState),
-      },
-      tx
-    );
+    return await createTypedAuditLog(tx, {
+      actorUserId,
+      entityType: "INVOICE",
+      entityId: invoiceId,
+      action,
+      description,
+      previousState,
+      newState,
+      changes: computeChanges(previousState, newState),
+    });
   };
 
   /**
-   * Convenience method to log payment refunds.
+   * Payment refund log input
    */
   export interface PaymentRefundInput {
     paymentId: string;
@@ -263,26 +260,18 @@ export namespace AuditRepository {
 
   export const logPaymentRefund = async (input: PaymentRefundInput, tx?: DBTransaction): Promise<Types.AuditLogEntity> => {
     const { paymentId, refundAmount, currency, actorUserId, reason } = input;
-    return await createAuditLog(
-      {
-        actorUserId,
-        actorType: actorUserId ? "USER" : "SYSTEM",
-        entityType: "PAYMENT",
-        entityId: paymentId,
-        action: "REFUND",
-        description: reason ?? `Refund of ${refundAmount} ${currency}`,
-        metadata: {
-          refundAmount,
-          currency,
-          reason,
-        },
-      },
-      tx
-    );
+    return await createTypedAuditLog(tx, {
+      actorUserId,
+      entityType: "PAYMENT",
+      entityId: paymentId,
+      action: "REFUND",
+      description: reason ?? `Refund of ${refundAmount} ${currency}`,
+      metadata: { refundAmount, currency, reason },
+    });
   };
 
   /**
-   * Convenience method to log permission changes.
+   * Permission change log input
    */
   export interface PermissionChangeInput {
     userId: string;
@@ -298,26 +287,19 @@ export namespace AuditRepository {
     tx?: DBTransaction
   ): Promise<Types.AuditLogEntity> => {
     const { userId, action, permissionOrGroupId, permissionType, actorUserId, description } = input;
-    return await createAuditLog(
-      {
-        actorUserId,
-        actorType: actorUserId ? "USER" : "SYSTEM",
-        entityType: permissionType === "PERMISSION" ? "PERMISSION" : "PERMISSION_GROUP",
-        entityId: permissionOrGroupId,
-        action,
-        description:
-          description ?? `${action === "GRANT" ? "Granted" : "Revoked"} ${permissionType.toLowerCase()} for user`,
-        metadata: {
-          targetUserId: userId,
-          permissionType,
-        },
-      },
-      tx
-    );
+    return await createTypedAuditLog(tx, {
+      actorUserId,
+      entityType: permissionType === "PERMISSION" ? "PERMISSION" : "PERMISSION_GROUP",
+      entityId: permissionOrGroupId,
+      action,
+      description:
+        description ?? `${action === "GRANT" ? "Granted" : "Revoked"} ${permissionType.toLowerCase()} for user`,
+      metadata: { targetUserId: userId, permissionType },
+    });
   };
 
   /**
-   * Convenience method to log exchange rate updates.
+   * Exchange rate update log input
    */
   export interface ExchangeRateUpdateInput {
     rateId: string;
@@ -336,28 +318,20 @@ export namespace AuditRepository {
     const { rateId, fromCurrency, toCurrency, oldRate, newRate, actorUserId, source } = input;
     const rateDisplay = oldRate ? `${oldRate} → ${newRate}` : newRate;
 
-    return await createAuditLog(
-      {
-        actorUserId,
-        actorType: actorUserId ? "USER" : "SYSTEM",
-        entityType: "EXCHANGE_RATE",
-        entityId: rateId,
-        action: oldRate ? "UPDATE" : "CREATE",
-        description: `Exchange rate ${fromCurrency}/${toCurrency}: ${rateDisplay}`,
-        previousState: oldRate ? { rate: oldRate } : null,
-        newState: { rate: newRate },
-        metadata: {
-          fromCurrency,
-          toCurrency,
-          source,
-        },
-      },
-      tx
-    );
+    return await createTypedAuditLog(tx, {
+      actorUserId,
+      entityType: "EXCHANGE_RATE",
+      entityId: rateId,
+      action: oldRate ? "UPDATE" : "CREATE",
+      description: `Exchange rate ${fromCurrency}/${toCurrency}: ${rateDisplay}`,
+      previousState: oldRate ? { rate: oldRate } : null,
+      newState: { rate: newRate },
+      metadata: { fromCurrency, toCurrency, source },
+    });
   };
 
   /**
-   * Convenience method to log system settings changes.
+   * System setting change log input
    */
   export interface SystemSettingChangeInput {
     settingKey: string;
@@ -372,19 +346,15 @@ export namespace AuditRepository {
     tx?: DBTransaction
   ): Promise<Types.AuditLogEntity> => {
     const { settingKey, oldValue, newValue, actorUserId, description } = input;
-    return await createAuditLog(
-      {
-        actorUserId,
-        actorType: actorUserId ? "USER" : "SYSTEM",
-        entityType: "SYSTEM_SETTING",
-        entityId: settingKey,
-        action: "UPDATE",
-        description: description ?? `System setting '${settingKey}' changed`,
-        previousState: { value: oldValue },
-        newState: { value: newValue },
-        changes: { value: { from: oldValue, to: newValue } },
-      },
-      tx
-    );
+    return await createTypedAuditLog(tx, {
+      actorUserId,
+      entityType: "SYSTEM_SETTING",
+      entityId: settingKey,
+      action: "UPDATE",
+      description: description ?? `System setting '${settingKey}' changed`,
+      previousState: { value: oldValue },
+      newState: { value: newValue },
+      changes: { value: { from: oldValue, to: newValue } },
+    });
   };
 }

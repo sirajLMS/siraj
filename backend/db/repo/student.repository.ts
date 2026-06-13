@@ -23,9 +23,6 @@ const _processStudentQuery = async (
   if (paginationArgs?.after) {
     try {
       const decoded = Buffer.from(paginationArgs.after, "base64").toString("utf8");
-      // Cursor encodes { createdAt, id } — both are immutable (createdAt is set once, id is a UUID primary key).
-      // The DB-level trigger in student_created_at_immutability prevents createdAt from being updated,
-      // ensuring cursors remain permanently stable.
       const cursorObj = JSON.parse(decoded) as { createdAt?: string; id?: string };
       if (cursorObj.createdAt && cursorObj.id) {
         const cursorDate = new Date(cursorObj.createdAt);
@@ -44,17 +41,13 @@ const _processStudentQuery = async (
         }
       }
     } catch {
-      // Ignore invalid cursor
+      /* ignore invalid cursor */
     }
   }
 
-  // For cursor-based pagination, only apply LIMIT (not offset)
-  // For offset-based pagination, apply both LIMIT and OFFSET
   if (paginationArgs?.after) {
-    // Cursor-based: only limit, no offset
     processedQuery = processedQuery.limit(paginationArgs.perPage);
   } else {
-    // Offset-based: use the standard queryWithPagination
     processedQuery = queryWithPagination(processedQuery, paginationArgs);
   }
 
@@ -62,10 +55,7 @@ const _processStudentQuery = async (
 
   const total = results[0]?.total ?? 0;
   const items: Types.StudentDto[] = results
-    .map(r => {
-      const s: Types.StudentEntity = r.student;
-      return StudentUtils.mapEntityToDto(s);
-    })
+    .map(r => StudentUtils.mapEntityToDto(r.student))
     .filter((s): s is Types.StudentDto => s !== null);
 
   const pageInfo = PaginationUtils.buildPageInfoFromArgs(paginationArgs, items.length, total);
@@ -73,8 +63,6 @@ const _processStudentQuery = async (
   if (items.length > 0) {
     const firstItem = items[0];
     const lastItem = items.at(-1);
-    // Cursor encodes createdAt + id for stable keyset pagination.
-    // createdAt is immutable (enforced by DB trigger), id is a UUID primary key.
     pageInfo.startCursor = Buffer.from(
       JSON.stringify({ createdAt: firstItem.createdAt.toISOString(), id: firstItem.id })
     ).toString("base64");
@@ -83,16 +71,12 @@ const _processStudentQuery = async (
     ).toString("base64");
   }
 
-  return {
-    data: items,
-    pageInfo: pageInfo,
-  };
+  return { data: items, pageInfo };
 };
 
 export namespace StudentRepository {
   /**
    * Helper to acquire an advisory lock for a student
-   * to prevent concurrent updates to classes_remaining.
    */
   async function acquireStudentLock(tx: DBTransaction, studentId: string): Promise<void> {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('student_' || ${studentId}::text))`);
@@ -105,9 +89,8 @@ export namespace StudentRepository {
   };
 
   export const create = async (input: Types.StudentCreateInput): Promise<Types.StudentEntity> => {
-    await StudentUtils.validateName(input.name).then(err => {
-      if (err) throw new Error(err);
-    });
+    const err = await StudentUtils.validateName(input.name);
+    if (err) throw new Error(err);
 
     const insertInput: Types.StudentEntityInput = {
       parentId: input.parentId,
@@ -133,10 +116,8 @@ export namespace StudentRepository {
 
   export const createList = async (input: Types.StudentCreateInput[]): Promise<Types.StudentEntity[]> => {
     if (input.length === 0) return [];
-
     try {
-      const result = await Promise.all(input.map(item => create(item)));
-      return result;
+      return await Promise.all(input.map(item => create(item)));
     } catch (error) {
       throw new Error(`Failed to create students: ${error instanceof Error ? error.message : "Unknown error"}`, {
         cause: error,
@@ -146,15 +127,12 @@ export namespace StudentRepository {
 
   export const loadByIds = async (ids: string[]): Promise<(Types.StudentDto | Error)[]> => {
     if (ids.length === 0) return [];
-
     const foundStudents = await db.select().from(students).where(inArray(students.id, ids));
 
-    const studentList: (Types.StudentDto | Error)[] = ids.map(id => {
+    return ids.map(id => {
       const s = foundStudents.find(c => c.id === id);
-      if (!s) return new Error(`Student ${id} not found`);
-      return StudentUtils.mapEntityToDto(s) as Types.StudentDto;
+      return s ? (StudentUtils.mapEntityToDto(s) as Types.StudentDto) : new Error(`Student ${id} not found`);
     });
-    return studentList;
   };
 
   export const existsById = async (id: string): Promise<boolean> => {
@@ -171,18 +149,14 @@ export namespace StudentRepository {
 
   export const deleteById = async (id: string): Promise<Types.StudentEntity> => {
     const existingStudent = await findById(id);
-    if (!existingStudent) {
-      throw new Error(`Student ${id} not found`);
-    }
+    if (!existingStudent) throw new Error(`Student ${id} not found`);
     await db.delete(students).where(eq(students.id, id));
     return existingStudent;
   };
 
   export const partiallyUpdate = async (input: Types.PartialStudentUpdateInput): Promise<Types.StudentEntity> => {
     const existingStudent = await findById(input.id);
-    if (!existingStudent) {
-      throw new Error(`Student ${input.id} not found`);
-    }
+    if (!existingStudent) throw new Error(`Student ${input.id} not found`);
 
     if (input.name) {
       const nameErr = await StudentUtils.validateName(input.name);
@@ -208,7 +182,6 @@ export namespace StudentRepository {
 
     try {
       const [updatedStudent] = await db.update(students).set(updateInput).where(eq(students.id, input.id)).returning();
-
       return updatedStudent;
     } catch {
       throw new Error(`Failed to update student with ID ${input.id}.`);
@@ -231,114 +204,63 @@ export namespace StudentRepository {
     return await _processStudentQuery(baseQuery as unknown as PgSelect, paginationArgs, orderBy, filters);
   };
 
-  /**
-   * Deducts classes_remaining for a student with optimistic locking.
-   * Uses advisory locks to prevent race conditions.
-   *
-   * @param studentId - The student's ID
-   * @param amount - Number of classes to deduct (default: 1)
-   * @param expectedVersion - Expected version for optimistic locking (optional)
-   * @param tx - Optional transaction context
-   * @returns Updated student entity
-   * @throws Error if student not found, insufficient classes, or version mismatch
-   */
+  async function adjustClassesQuota(
+    t: DBTransaction,
+    studentId: string,
+    updateFn: (current: Types.StudentEntity) => Record<string, unknown>,
+    expectedVersion?: number
+  ): Promise<Types.StudentEntity> {
+    await acquireStudentLock(t, studentId);
+
+    const results = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
+    if (results.length === 0) throw new Error(`Student ${studentId} not found`);
+    const current = results[0];
+
+    if (expectedVersion !== undefined && current.version !== expectedVersion) {
+      throw new Error(`Version mismatch for student ${studentId}. Expected ${expectedVersion}, got ${current.version}.`);
+    }
+
+    const [updated] = await t
+      .update(students)
+      .set({
+        ...updateFn(current),
+        version: sql`${students.version} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(students.id, studentId))
+      .returning();
+
+    return updated;
+  }
+
   export const deductClasses = async (
     studentId: string,
     amount: number = 1,
     expectedVersion?: number,
     tx?: DBTransaction
   ): Promise<Types.StudentEntity> => {
-    const runner = async (t: DBTransaction) => {
-      // Acquire advisory lock to prevent concurrent modifications
-      await acquireStudentLock(t, studentId);
-
-      // Fetch current student state
-      const results = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
-      if (results.length === 0) {
-        throw new Error(`Student ${studentId} not found`);
-      }
-      const current = results[0];
-
-      // Optimistic locking: check version if provided
-      if (expectedVersion !== undefined && current.version !== expectedVersion) {
-        throw new Error(
-          `Version mismatch for student ${studentId}. Expected ${expectedVersion}, got ${current.version}. Please retry.`
-        );
-      }
-
-      // Check sufficient quota
-      if (current.classesRemaining < amount) {
-        throw new Error(
-          `Insufficient classes for student ${studentId}. Remaining: ${current.classesRemaining}, Required: ${amount}`
-        );
-      }
-
-      // Update with version increment
-      const [updated] = await t
-        .update(students)
-        .set({
-          classesRemaining: sql`${students.classesRemaining} - ${amount}`,
-          version: sql`${students.version} + 1`,
-          updatedAt: new Date(),
-        })
-        .where(eq(students.id, studentId))
-        .returning();
-
-      return updated;
-    };
+    const runner = async (t: DBTransaction) => 
+      adjustClassesQuota(t, studentId, (current) => {
+        if (current.classesRemaining < amount) {
+          throw new Error(`Insufficient classes for student ${studentId}. Remaining: ${current.classesRemaining}, Required: ${amount}`);
+        }
+        return { classesRemaining: sql`${students.classesRemaining} - ${amount}` };
+      }, expectedVersion);
 
     return tx ? runner(tx) : db.transaction(runner);
   };
 
-  /**
-   * Adds classes_remaining for a student with optimistic locking.
-   * Uses advisory locks to prevent race conditions.
-   *
-   * @param studentId - The student's ID
-   * @param amount - Number of classes to add (default: 1)
-   * @param expectedVersion - Expected version for optimistic locking (optional)
-   * @param tx - Optional transaction context
-   * @returns Updated student entity
-   * @throws Error if student not found or version mismatch
-   */
   export const addClasses = async (
     studentId: string,
     amount: number = 1,
     expectedVersion?: number,
     tx?: DBTransaction
   ): Promise<Types.StudentEntity> => {
-    const runner = async (t: DBTransaction) => {
-      // Acquire advisory lock to prevent concurrent modifications
-      await acquireStudentLock(t, studentId);
-
-      // Fetch current student state
-      const results = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
-      if (results.length === 0) {
-        throw new Error(`Student ${studentId} not found`);
-      }
-      const current = results[0];
-
-      // Optimistic locking: check version if provided
-      if (expectedVersion !== undefined && current.version !== expectedVersion) {
-        throw new Error(
-          `Version mismatch for student ${studentId}. Expected ${expectedVersion}, got ${current.version}. Please retry.`
-        );
-      }
-
-      // Update with version increment
-      const [updated] = await t
-        .update(students)
-        .set({
-          classesRemaining: sql`${students.classesRemaining} + ${amount}`,
-          classesTotal: sql`${students.classesTotal} + ${amount}`,
-          version: sql`${students.version} + 1`,
-          updatedAt: new Date(),
-        })
-        .where(eq(students.id, studentId))
-        .returning();
-
-      return updated;
-    };
+    const runner = async (t: DBTransaction) =>
+      adjustClassesQuota(t, studentId, () => ({
+        classesRemaining: sql`${students.classesRemaining} + ${amount}`,
+        classesTotal: sql`${students.classesTotal} + ${amount}`,
+      }), expectedVersion);
 
     return tx ? runner(tx) : db.transaction(runner);
   };

@@ -202,9 +202,7 @@ export async function checkRateLimit(
     }
 
     if (isDev) {
-      logger.warn(
-        `Rate limit would have been exceeded for identifier: ${identifier} (development mode, not enforced)`
-      );
+      logger.warn(`Rate limit would have been exceeded for identifier: ${identifier} (development mode, not enforced)`);
       // Always allow in development
       return { success: true, limit, remaining, reset };
     }

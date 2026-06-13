@@ -18,15 +18,68 @@ type PaymentRecordInput = Omit<Types.PaymentInsertInput, "id" | "createdAt" | "u
 export namespace BillingRepository {
   /**
    * Helper to acquire an advisory lock for an invoice
-   * to prevent concurrent payment updates.
    */
   async function acquireInvoiceLock(tx: DBTransaction, invoiceId: string): Promise<void> {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('invoice_' || ${invoiceId}::text))`);
   }
 
   /**
+   * Helper to resolve exchange rate snapshot for billing entities
+   */
+  async function resolveExchangeRateSnapshot(
+    t: DBTransaction | typeof db,
+    currency: string,
+    snapshot?: string | null,
+    source?: string | null
+  ): Promise<{ snapshot: string | null; source: string | null }> {
+    if (snapshot || currency === "USD") {
+      return { snapshot: snapshot ?? null, source: source ?? null };
+    }
+
+    const rate = await getLatestExchangeRate(currency, "USD", t as DBTransaction);
+    return {
+      snapshot: rate.rate,
+      source: rate.source || "SYSTEM_AUTO",
+    };
+  }
+
+  /**
+   * Internal helper to create a billing entity (invoice or payment) with exchange rate
+   */
+  async function createBillingEntity<R>(
+    t: DBTransaction,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    table: any,
+    input: { currency: string; exchangeRateSnapshot?: string | null; exchangeRateSource?: string | null } & Record<
+      string,
+      unknown
+    >
+  ): Promise<R> {
+    const { snapshot, source } = await resolveExchangeRateSnapshot(
+      t,
+      input.currency,
+      input.exchangeRateSnapshot,
+      input.exchangeRateSource
+    );
+
+     
+    const results = await t
+      .insert(table)
+      .values({
+        ...input,
+        exchangeRateSnapshot: snapshot,
+        exchangeRateSource: source,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (results as any[])[0] as R;
+  }
+
+  /**
    * Fetches the latest exchange rate for a currency pair.
-   * Throws if rate is older than 24 hours (Stale Rate Alert).
    */
   export const getLatestExchangeRate = async (
     fromCurrency: string,
@@ -50,8 +103,6 @@ export namespace BillingRepository {
 
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     if (latest.effectiveDate < twentyFourHoursAgo) {
-      // In a real app, this might trigger a background refresh or an alert
-      // For now, we follow the mandate to detect stale rates
       throw new Error(`Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24h)`);
     }
 
@@ -67,7 +118,6 @@ export namespace BillingRepository {
     tx?: DBTransaction
   ): Promise<Types.CurrencyExchangeRateSelectType> => {
     const runner = async (t: DBTransaction) => {
-      // Get existing rate for audit
       const results = await t
         .select()
         .from(currencyExchangeRates)
@@ -82,7 +132,6 @@ export namespace BillingRepository {
 
       const oldRate = results[0];
 
-      // Insert new rate
       const [newRate] = await t
         .insert(currencyExchangeRates)
         .values({
@@ -92,7 +141,6 @@ export namespace BillingRepository {
         })
         .returning();
 
-      // Audit Log
       await t.insert(currencyExchangeAuditLogs).values({
         fromCurrency: input.fromCurrency,
         toCurrency: input.toCurrency,
@@ -111,36 +159,13 @@ export namespace BillingRepository {
 
   /**
    * Creates an invoice with a mandatory exchange rate snapshot if currency != 'USD'.
-   * Assumes USD is the base currency for hedging.
    */
   export const createInvoice = async (
     input: InvoiceCreateInput,
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType> => {
-    const runner = async (t: DBTransaction) => {
-      let rateSnapshot = input.exchangeRateSnapshot;
-      let rateSource = input.exchangeRateSource;
-
-      if (!rateSnapshot && input.currency !== "USD") {
-        const rate = await getLatestExchangeRate(input.currency, "USD", t);
-        rateSnapshot = rate.rate;
-        rateSource = rate.source || "SYSTEM_AUTO";
-      }
-
-      const [created] = await t
-        .insert(invoices)
-        .values({
-          ...input,
-          exchangeRateSnapshot: rateSnapshot,
-          exchangeRateSource: rateSource,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning();
-
-      return created;
-    };
-
+    const runner = async (t: DBTransaction) =>
+      createBillingEntity<Types.InvoiceSelectType>(t, invoices, input);
     return tx ? runner(tx) : db.transaction(runner);
   };
 
@@ -151,30 +176,8 @@ export namespace BillingRepository {
     input: PaymentRecordInput,
     tx?: DBTransaction
   ): Promise<Types.PaymentSelectType> => {
-    const runner = async (t: DBTransaction) => {
-      let rateSnapshot = input.exchangeRateSnapshot;
-      let rateSource = input.exchangeRateSource;
-
-      if (!rateSnapshot && input.currency !== "USD") {
-        const rate = await getLatestExchangeRate(input.currency, "USD", t);
-        rateSnapshot = rate.rate;
-        rateSource = rate.source || "SYSTEM_AUTO";
-      }
-
-      const [created] = await t
-        .insert(payments)
-        .values({
-          ...input,
-          exchangeRateSnapshot: rateSnapshot,
-          exchangeRateSource: rateSource,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning();
-
-      return created;
-    };
-
+    const runner = async (t: DBTransaction) =>
+      createBillingEntity<Types.PaymentSelectType>(t, payments, input);
     return tx ? runner(tx) : db.transaction(runner);
   };
 
@@ -190,21 +193,11 @@ export namespace BillingRepository {
       .limit(1);
 
     if (results.length === 0) return 2;
-    const setting = results[0];
-    return parseInt(setting.value, 10);
+    return parseInt(results[0].value, 10);
   };
 
   /**
    * Updates invoice status with optimistic locking.
-   * Uses advisory locks to prevent concurrent payment updates.
-   *
-   * @param invoiceId - The invoice's ID
-   * @param newStatus - New invoice status
-   * @param paidDate - Payment date (optional, required for 'PAID' status)
-   * @param expectedVersion - Expected version for optimistic locking (optional)
-   * @param tx - Optional transaction context
-   * @returns Updated invoice entity
-   * @throws Error if invoice not found or version mismatch
    */
   export const updateInvoiceStatus = async (
     invoiceId: string,
@@ -214,24 +207,20 @@ export namespace BillingRepository {
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType> => {
     const runner = async (t: DBTransaction) => {
-      // Acquire advisory lock to prevent concurrent modifications
       await acquireInvoiceLock(t, invoiceId);
 
-      // Fetch current invoice state
       const results = await t.select().from(invoices).where(eq(invoices.id, invoiceId)).limit(1);
       if (results.length === 0) {
         throw new Error(`Invoice ${invoiceId} not found`);
       }
       const current = results[0];
 
-      // Optimistic locking: check version if provided
       if (expectedVersion !== undefined && current.version !== expectedVersion) {
         throw new Error(
           `Version mismatch for invoice ${invoiceId}. Expected ${expectedVersion}, got ${current.version}. Please retry.`
         );
       }
 
-      // Update with version increment
       const updateData: {
         status: Types.InvoiceSelectType["status"];
         paidDate?: string | null;

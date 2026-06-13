@@ -21,10 +21,7 @@ function validateHeaders(request: NextRequest, signedUrl: SignedUrlData): NextRe
   const contentMd5 = request.headers.get("content-md5");
 
   if (contentType !== signedUrl.contentType) {
-    return NextResponse.json(
-      { error: `Content-Type mismatch. Expected: ${signedUrl.contentType}` },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: `Content-Type mismatch. Expected: ${signedUrl.contentType}` }, { status: 400 });
   }
 
   if (contentLength && BigInt(contentLength) > signedUrl.fileSize) {

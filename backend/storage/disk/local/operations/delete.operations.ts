@@ -26,7 +26,10 @@ export async function deleteItems(
   return executeBulkDelete(ctx, input, processDelete);
 }
 
-async function processDelete(ctx: LocalContext, params: DeleteFnParams): Promise<Types.FileInfo | Types.DirectoryInfo | null> {
+async function processDelete(
+  ctx: LocalContext,
+  params: DeleteFnParams
+): Promise<Types.FileInfo | Types.DirectoryInfo | null> {
   const { itemPath, force, dbFile, dbDirectory, parentDir, usageCheck } = params;
 
   validateDeletePermissions({ force, usageCheck, dbFile, dbDirectory, parentDir });

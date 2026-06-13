@@ -24,8 +24,6 @@ let sessionRedisService: SessionRedisService | null = null;
 
 /**
  * Whether sessions should use Redis.
- * Mirrors the CACHE_PROVIDER env var — when set to "postgres" the whole system
- * runs without Redis, so sessions fall back to the legacy PostgreSQL table.
  */
 function redisSessionsEnabled(): boolean {
   return process.env.CACHE_PROVIDER !== "postgres";
@@ -40,28 +38,24 @@ function getSessionRedisService(): SessionRedisService {
 
 export namespace SessionRepository {
   /**
-   * Acquire advisory lock for a user to prevent race conditions in session operations
+   * Acquire advisory lock for a user
    */
   async function acquireUserLock(tx: DBTransaction, userId: string): Promise<void> {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('session_user_' || ${userId}::text))`);
   }
 
   /**
-   * Get session configuration for a role (or use defaults)
+   * Get session configuration for a role
    */
   export const getSessionConfig = async (
     roleName: string = "default",
     tx?: DBTransaction
   ): Promise<SessionConfigEntity> => {
     const runner = tx || db;
-
     const configs = await runner.select().from(sessionConfig).where(eq(sessionConfig.roleName, roleName)).limit(1);
 
-    if (configs.length > 0) {
-      return configs[0];
-    }
+    if (configs.length > 0) return configs[0];
 
-    // Return default configuration
     return {
       id: "default",
       roleName: "default",
@@ -92,30 +86,19 @@ export namespace SessionRepository {
           })
           .where(eq(sessionConfig.roleName, input.roleName))
           .returning();
-
         return updated;
       }
 
       const [created] = await t
         .insert(sessionConfig)
-        .values({
-          ...input,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
+        .values({ ...input, createdAt: new Date(), updatedAt: new Date() })
         .returning();
-
       return created;
     };
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  /**
-   * Find session by ID.
-   * When CACHE_PROVIDER=redis: checks Redis first, falls back to legacy PostgreSQL table.
-   * When CACHE_PROVIDER=postgres: reads directly from legacy PostgreSQL sessions table.
-   */
   export const findSessionById = async (hashedId: string): Promise<SessionEntity | null> => {
     try {
       if (redisSessionsEnabled()) {
@@ -134,7 +117,6 @@ export namespace SessionRepository {
         }
       }
 
-      // Fallback: legacy PostgreSQL sessions table
       return await db
         .select()
         .from(sessions)
@@ -146,17 +128,12 @@ export namespace SessionRepository {
     }
   };
 
-  /**
-   * Find all active sessions for a user.
-   * Returns Redis sessions when CACHE_PROVIDER=redis, empty array otherwise.
-   */
   export const findSessionsByUserId = async (userId: string): Promise<RedisSessionData[]> => {
     try {
       if (!redisSessionsEnabled()) return [];
 
       const redisService = getSessionRedisService();
       const sessionIds = await redisService.getUserSessions(userId);
-
       const sessionPromises = sessionIds.map(id => redisService.getSession(id));
       const found = await Promise.all(sessionPromises);
 
@@ -167,19 +144,11 @@ export namespace SessionRepository {
     }
   };
 
-  /**
-   * Find first session by user ID (for backward compatibility)
-   * @deprecated Use findSessionsByUserId or findSessionById instead
-   */
   export const findByUserId = async (userId: string): Promise<SessionEntity | null> => {
-    const sessions = await findSessionsByUserId(userId);
+    const sessionsList = await findSessionsByUserId(userId);
+    if (sessionsList.length === 0) return null;
 
-    if (sessions.length === 0) {
-      return null;
-    }
-
-    // Return the most recently active session (using toSorted for immutability)
-    const sortedSessions = sessions.toSorted(
+    const sortedSessions = sessionsList.toSorted(
       (a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime()
     );
     const mostRecent = sortedSessions[0];
@@ -194,74 +163,65 @@ export namespace SessionRepository {
     };
   };
 
+  export interface SessionCreationOptions extends Omit<SessionEntityInput, "lastActivity"> {
+    deviceType?: string;
+    deviceName?: string;
+    roleName?: string;
+  }
+
+  /**
+   * Internal helper to create session in PostgreSQL only
+   */
+  async function createPostgresSession(t: DBTransaction | typeof db, input: SessionCreationOptions): Promise<SessionEntity> {
+    const now = BigInt(Math.floor(Date.now() / 1000));
+    const [created] = await t
+      .insert(sessions)
+      .values({
+        hashedId: input.hashedId,
+        userId: input.userId,
+        ipAddress: input.ipAddress || null,
+        userAgent: input.userAgent || null,
+        payload: input.payload,
+        lastActivity: now,
+      })
+      .returning();
+    return created;
+  }
+
   /**
    * Create a new session.
-   * When CACHE_PROVIDER=redis: stores session data in Redis + metadata in PostgreSQL.
-   * When CACHE_PROVIDER=postgres: falls back to the legacy PostgreSQL sessions table.
    */
-  export const create = async (
-    input: Omit<SessionEntityInput, "lastActivity"> & {
-      deviceType?: string;
-      deviceName?: string;
-      roleName?: string;
-    },
-    tx?: DBTransaction
-  ): Promise<SessionEntity> => {
+  export const create = async (input: SessionCreationOptions, tx?: DBTransaction): Promise<SessionEntity> => {
     const runner = async (t: DBTransaction) => {
-      if (!input.userId) {
-        throw new Error("userId is required for session creation");
-      }
+      if (!input.userId) throw new Error("userId is required for session creation");
 
-      if (!redisSessionsEnabled()) {
-        // PG-only fallback — write to legacy sessions table
-        const now = BigInt(Math.floor(Date.now() / 1000));
-        const [created] = await t
-          .insert(sessions)
-          .values({
-            hashedId: input.hashedId,
-            userId: input.userId,
-            ipAddress: input.ipAddress || null,
-            userAgent: input.userAgent || null,
-            payload: input.payload,
-            lastActivity: now,
-          })
-          .returning();
-        return created;
-      }
+      if (!redisSessionsEnabled()) return await createPostgresSession(t, input);
 
       await acquireUserLock(t, input.userId);
-
-      // Get session configuration
       const config = await getSessionConfig(input.roleName || "default", t);
 
-      // Enforce concurrent session limit
       const redisService = getSessionRedisService();
       await redisService.enforceConcurrentLimit(input.userId, config.maxConcurrentSessions);
 
       const now = new Date();
       const expiresAt = new Date(now.getTime() + config.ttlSeconds * 1000);
 
-      // Create Redis session data
-      const redisSessionData: RedisSessionData = {
-        userId: input.userId,
-        hashedId: input.hashedId,
-        payload: input.payload,
-        ipAddress: input.ipAddress?.toString(),
-        userAgent: input.userAgent || undefined,
-        deviceType: input.deviceType,
-        deviceName: input.deviceName,
-        createdAt: now.toISOString(),
-        lastActivityAt: now.toISOString(),
-      };
-
-      // Store in Redis
       await redisService.setSession({
         sessionId: input.hashedId,
-        data: redisSessionData,
+        data: {
+          userId: input.userId,
+          hashedId: input.hashedId,
+          payload: input.payload,
+          ipAddress: input.ipAddress?.toString(),
+          userAgent: input.userAgent || undefined,
+          deviceType: input.deviceType,
+          deviceName: input.deviceName,
+          createdAt: now.toISOString(),
+          lastActivityAt: now.toISOString(),
+        },
         ttlSeconds: config.ttlSeconds,
       });
 
-      // Store metadata in PostgreSQL
       await t.insert(sessionMetadata).values({
         sessionId: input.hashedId,
         userId: input.userId,
@@ -275,7 +235,6 @@ export namespace SessionRepository {
       });
 
       logger.info(`Created session ${input.hashedId} for user ${input.userId}`);
-
       return {
         hashedId: input.hashedId,
         userId: input.userId,
@@ -290,22 +249,18 @@ export namespace SessionRepository {
   };
 
   /**
-   * Update session (touch last activity and extend TTL).
-   * When CACHE_PROVIDER=postgres: updates the legacy sessions table directly.
+   * Update session.
    */
   export const update = async (
     input: Omit<SessionEntityInput, "lastActivity"> & { roleName?: string },
     tx?: DBTransaction
   ): Promise<SessionEntity> => {
     const runner = async (t: DBTransaction) => {
-      if (!input.userId) {
-        throw new Error("userId is required for session update");
-      }
+      if (!input.userId) throw new Error("userId is required for session update");
 
       const now = new Date();
 
       if (!redisSessionsEnabled()) {
-        // PG-only fallback
         const returning = await t
           .update(sessions)
           .set({ lastActivity: BigInt(Math.floor(now.getTime() / 1000)) })
@@ -315,27 +270,19 @@ export namespace SessionRepository {
         return returning[0];
       }
 
-      // Get session configuration
       const config = await getSessionConfig(input.roleName || "default", t);
-
-      // Update in Redis
       const redisService = getSessionRedisService();
       const success = await redisService.touchSession(input.hashedId, config.ttlSeconds);
 
-      if (!success) {
-        throw new Error(`Session ${input.hashedId} not found`);
-      }
+      if (!success) throw new Error(`Session ${input.hashedId} not found`);
 
-      // Update metadata in PostgreSQL
       const expiresAt = new Date(now.getTime() + config.ttlSeconds * 1000);
-
       await t
         .update(sessionMetadata)
         .set({ lastActivityAt: now, expiresAt })
         .where(eq(sessionMetadata.sessionId, input.hashedId));
 
       logger.debug(`Updated session ${input.hashedId}`);
-
       return {
         hashedId: input.hashedId,
         userId: input.userId,
@@ -349,17 +296,10 @@ export namespace SessionRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  /**
-   * Delete a session by ID.
-   * When CACHE_PROVIDER=postgres: deletes from legacy sessions table only.
-   */
   export const deleteSessionById = async (hashedId: string, tx?: DBTransaction): Promise<SessionEntity | null> => {
     const runner = async (t: DBTransaction) => {
       const existingSession = await findSessionById(hashedId);
-
-      if (!existingSession) {
-        return null;
-      }
+      if (!existingSession) return null;
 
       if (!redisSessionsEnabled()) {
         await t.delete(sessions).where(eq(sessions.hashedId, hashedId));
@@ -376,10 +316,6 @@ export namespace SessionRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  /**
-   * Delete all sessions for a user (logout everywhere).
-   * When CACHE_PROVIDER=postgres: deletes from legacy sessions table only.
-   */
   export const deleteByUserId = async (userId: string, tx?: DBTransaction): Promise<number> => {
     const runner = async (t: DBTransaction) => {
       if (!redisSessionsEnabled()) {
@@ -388,7 +324,6 @@ export namespace SessionRepository {
       }
 
       await acquireUserLock(t, userId);
-
       const redisService = getSessionRedisService();
       const deletedCount = await redisService.deleteUserSessions(userId);
 
@@ -402,13 +337,11 @@ export namespace SessionRepository {
   };
 
   /**
-   * Validate session and update last activity.
-   * When CACHE_PROVIDER=postgres: validates against the legacy sessions table with TTL check.
+   * Validate session.
    */
   export const validate = async (sessionId: string, roleName: string = "default"): Promise<SessionEntity | null> => {
     try {
       if (!redisSessionsEnabled()) {
-        // PG-only path: reuse the legacy TTL logic (7-day cutoff against lastActivity)
         const session = await findSessionById(sessionId);
         if (!session) return null;
 
@@ -422,22 +355,16 @@ export namespace SessionRepository {
         }
 
         await db.update(sessions).set({ lastActivity: now }).where(eq(sessions.hashedId, sessionId));
-
         return { ...session, lastActivity: now };
       }
 
       const redisService = getSessionRedisService();
       const session = await redisService.getSession(sessionId);
-
-      if (!session) {
-        return null;
-      }
+      if (!session) return null;
 
       const config = await getSessionConfig(roleName);
-
       await redisService.touchSession(sessionId, config.ttlSeconds);
 
-      // Update metadata in PostgreSQL (non-transactional for performance)
       const now = new Date();
       const expiresAt = new Date(now.getTime() + config.ttlSeconds * 1000);
 
@@ -460,27 +387,17 @@ export namespace SessionRepository {
     }
   };
 
-  /**
-   * Cleanup expired session metadata from PostgreSQL
-   * Redis handles expiration automatically with TTL
-   */
   export const cleanupExpiredSessions = async (): Promise<number> => {
     const result = await db.delete(sessionMetadata).where(lte(sessionMetadata.expiresAt, new Date())).returning();
-
     logger.info(`Cleaned up ${result.length} expired session metadata records`);
-
     return result.length;
   };
 
-  /**
-   * Get all session metadata for a user
-   */
   export const getUserSessionMetadata = async (
     userId: string,
     tx?: DBTransaction
   ): Promise<SessionMetadataEntity[]> => {
     const runner = tx || db;
-
     return await runner
       .select()
       .from(sessionMetadata)
@@ -488,17 +405,11 @@ export namespace SessionRepository {
       .orderBy(sql`${sessionMetadata.lastActivityAt} DESC`);
   };
 
-  /**
-   * Count active sessions for a user
-   */
   export const countUserSessions = async (userId: string): Promise<number> => {
     const redisService = getSessionRedisService();
     return await redisService.countUserSessions(userId);
   };
 
-  /**
-   * Get session TTL in seconds
-   */
   export const getSessionTTL = async (sessionId: string): Promise<number> => {
     const redisService = getSessionRedisService();
     return await redisService.getSessionTTL(sessionId);

@@ -21,7 +21,7 @@ export interface EnvironmentConfig {
  * Generic helper to get an environment variable with validation
  */
 function getEnumEnv<T extends string>(name: string, allowed: T[], defaultValue: T): T {
-  const value = (process.env[name])?.toLowerCase() as T | undefined;
+  const value = process.env[name]?.toLowerCase() as T | undefined;
   if (!value) return defaultValue;
 
   if (!allowed.includes(value)) {

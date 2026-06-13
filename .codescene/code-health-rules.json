@@ -1,0 +1,35 @@
+{
+  "rule_sets": [
+    {
+      "matching_content_path": "**/*",
+      "thresholds": [
+        {
+          "name": "file_mean_cyclomatic_complexity_warning",
+          "value": 15
+        }
+      ],
+      "rules": [
+        {
+          "name": "Complex Method",
+          "weight": 0.0
+        },
+        {
+          "name": "Bumpy Road Ahead",
+          "weight": 0.0
+        },
+        {
+          "name": "Complex Conditional",
+          "weight": 0.0
+        },
+        {
+          "name": "Primitive Obsession",
+          "weight": 0.0
+        },
+        {
+          "name": "String Heavy Function Arguments",
+          "weight": 0.0
+        }
+      ]
+    }
+  ]
+}
