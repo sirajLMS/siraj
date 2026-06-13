@@ -1,7 +1,12 @@
 import fs from "node:fs/promises";
 import { StorageDbRepository } from "@/backend/db/repo";
 import type * as Types from "@/backend/types";
-import { executeBulkDelete, executeDeleteFile, validateDeletePermissions } from "../../shared/delete-operations.helper";
+import {
+  type DeleteFnParams,
+  executeBulkDelete,
+  executeDeleteFile,
+  validateDeletePermissions,
+} from "../../shared/delete-operations.helper";
 import type { LocalContext } from "../types";
 import { getAbsolutePath } from "../utils";
 import { fileInfoByPath } from "./file.operations";
@@ -21,16 +26,10 @@ export async function deleteItems(
   return executeBulkDelete(ctx, input, processDelete);
 }
 
-async function processDelete(
-  ctx: LocalContext,
-  itemPath: string,
-  force: boolean,
-  dbFile: Types.FileEntity | undefined,
-  dbDirectory: Types.DirectoryEntity | undefined,
-  parentDir: Types.DirectoryEntity | undefined,
-  usageCheck: { isInUse: boolean; deleteBlockReason: string | null | undefined } | undefined
-): Promise<Types.FileInfo | Types.DirectoryInfo | null> {
-  validateDeletePermissions(force, usageCheck, dbFile, dbDirectory, parentDir);
+async function processDelete(ctx: LocalContext, params: DeleteFnParams): Promise<Types.FileInfo | Types.DirectoryInfo | null> {
+  const { itemPath, force, dbFile, dbDirectory, parentDir, usageCheck } = params;
+
+  validateDeletePermissions({ force, usageCheck, dbFile, dbDirectory, parentDir });
 
   const fileEntity = await fileInfoByPath(ctx, itemPath);
   const folderEntity = fileEntity ? null : await directoryInfoByPath(ctx, itemPath);

@@ -15,7 +15,11 @@ export async function prepareUploadHelper(
     const cleanedPath = normalizePath(input.path);
     const mimeType = input.contentType;
 
-    const validationError = await StorageUtils.validateUpload(cleanedPath, input.fileSize, mimeType);
+    const validationError = StorageUtils.validateUpload({
+      path: cleanedPath,
+      size: input.fileSize,
+      contentType: mimeType,
+    });
     if (validationError) {
       throw new StorageValidationError(validationError);
     }
@@ -66,7 +70,11 @@ export async function uploadFileHelper(
     const cleanedFilePath = normalizePath(filePath);
     const fileSize = buffer.byteLength;
 
-    const validationError = await StorageUtils.validateUpload(filePath, fileSize, contentType);
+    const validationError = StorageUtils.validateUpload({
+      path: filePath,
+      size: fileSize,
+      contentType,
+    });
     if (validationError) {
       return { success: false, message: validationError, data: null };
     }

@@ -8,7 +8,7 @@ import { directoryInfoByPath } from "./folder.operations";
 
 export async function deleteFile(ctx: GcpContext, path: string): Promise<Types.FileOperationResult> {
   try {
-    const pathErr = await StorageUtils.validatePath(path);
+    const pathErr = StorageUtils.validatePath(path);
     if (pathErr) {
       return {
         success: false,
@@ -75,15 +75,14 @@ export async function deleteItems(
   const context = await getDeleteContext(input.paths, input.force || false);
 
   for (const path of input.paths) {
-    const result: GenericOperationResult<Types.FileInfo | Types.DirectoryInfo> = await deleteSingleItem(
-      ctx,
+    const result: GenericOperationResult<Types.FileInfo | Types.DirectoryInfo> = await deleteSingleItem(ctx, {
       path,
-      input.force || false,
-      context.dbFileMap.get(path),
-      context.dbDirectoryMap.get(path),
-      context.dbParentDirMap.get(path.substring(0, path.lastIndexOf("/"))),
-      context.usageCheckMap.get(path)
-    );
+      force: input.force || false,
+      dbFile: context.dbFileMap.get(path),
+      dbDirectory: context.dbDirectoryMap.get(path),
+      parentDir: context.dbParentDirMap.get(path.substring(0, path.lastIndexOf("/"))),
+      usageCheck: context.usageCheckMap.get(path),
+    });
 
     if (result.success && result.data) {
       successCount++;
@@ -139,13 +138,17 @@ async function getDeleteContext(paths: string[], force: boolean) {
 
 async function deleteSingleItem(
   ctx: GcpContext,
-  path: string,
-  force: boolean,
-  dbFile: Types.FileEntity | undefined,
-  dbDirectory: Types.DirectoryEntity | undefined,
-  parentDir: Types.DirectoryEntity | undefined,
-  usageCheck: Types.FileUsageResult | undefined
+  params: {
+    path: string;
+    force: boolean;
+    dbFile?: Types.FileEntity;
+    dbDirectory?: Types.DirectoryEntity;
+    parentDir?: Types.DirectoryEntity;
+    usageCheck?: Types.FileUsageResult;
+  }
 ): Promise<GenericOperationResult<Types.FileInfo | Types.DirectoryInfo>> {
+  const { path, force, dbFile, dbDirectory, parentDir, usageCheck } = params;
+
   try {
     if (!force && usageCheck?.isInUse) {
       return {

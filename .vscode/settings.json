@@ -1,7 +1,7 @@
 {
   "typescript.native-preview.tsdk": "node_modules\\@typescript\\native-preview",
   "sonarlint.connectedMode.project": {
-    "connectionId": "Local SonarQube",
+    "connectionId": "docker",
     "projectKey": "siraj"
   }
 }

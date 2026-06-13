@@ -108,41 +108,7 @@ export class PostgresCacheAdapter implements ICacheService {
         const results: unknown[] = [];
 
         for (const cmd of commands) {
-          switch (cmd.command) {
-            case "zremrangebyscore":
-              // For rate limiting: remove old entries
-              // This is a no-op for PostgreSQL cache as we handle expiration differently
-              results.push(0);
-              break;
-
-            case "zadd": {
-              // For rate limiting: add new entry
-              const [key, score, member] = cmd.args as [string, number, string];
-              const expiresAt = new Date(score + 3600000); // 1 hour from score
-              await CacheDbRepository.set(key, member, expiresAt);
-              results.push(1);
-              break;
-            }
-
-            case "zcard": {
-              // For rate limiting: count entries
-              const entry = await CacheDbRepository.get(cmd.args[0] as string);
-              results.push(entry ? 1 : 0);
-              break;
-            }
-
-            case "expire": {
-              // Set expiration
-              const [expKey, expSeconds] = cmd.args as [string, number];
-              await this.expire(expKey, expSeconds);
-              results.push(1);
-              break;
-            }
-
-            default:
-              logger.warn(`Unsupported pipeline command: ${cmd.command}`);
-              results.push(null);
-          }
+          results.push(await this.executePipelineCommand(cmd));
         }
 
         return results;
@@ -150,6 +116,43 @@ export class PostgresCacheAdapter implements ICacheService {
     } catch (error) {
       logger.error("Postgres cache pipeline error:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Execute a single command within a pipeline
+   */
+  private async executePipelineCommand(cmd: { command: string; args: (string | number)[] }): Promise<unknown> {
+    switch (cmd.command) {
+      case "zremrangebyscore":
+        // For rate limiting: remove old entries
+        // This is a no-op for PostgreSQL cache as we handle expiration differently
+        return 0;
+
+      case "zadd": {
+        // For rate limiting: add new entry
+        const [key, score, member] = cmd.args as [string, number, string];
+        const expiresAt = new Date(score + 3600000); // 1 hour from score
+        await CacheDbRepository.set(key, member, expiresAt);
+        return 1;
+      }
+
+      case "zcard": {
+        // For rate limiting: count entries
+        const entry = await CacheDbRepository.get(cmd.args[0] as string);
+        return entry ? 1 : 0;
+      }
+
+      case "expire": {
+        // Set expiration
+        const [expKey, expSeconds] = cmd.args as [string, number];
+        await this.expire(expKey, expSeconds);
+        return 1;
+      }
+
+      default:
+        logger.warn(`Unsupported pipeline command: ${cmd.command}`);
+        return null;
     }
   }
 

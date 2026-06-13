@@ -2,7 +2,12 @@ import { del, head } from "@vercel/blob";
 import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
-import { executeBulkDelete, executeDeleteFile, validateDeletePermissions } from "../../shared/delete-operations.helper";
+import {
+  type DeleteFnParams,
+  executeBulkDelete,
+  executeDeleteFile,
+  validateDeletePermissions,
+} from "../../shared/delete-operations.helper";
 import { getBlobs, isDirectory } from "../shared";
 import type { VercelContext } from "../types";
 import { fileInfoByPath } from "./file.operations";
@@ -37,16 +42,10 @@ export async function deleteItems(
   return executeBulkDelete(ctx, input, deleteItem);
 }
 
-async function deleteItem(
-  ctx: VercelContext,
-  itemPath: string,
-  force: boolean,
-  dbFile: Types.FileEntity | undefined,
-  dbDirectory: Types.DirectoryEntity | undefined,
-  parentDir: Types.DirectoryEntity | undefined,
-  usageCheck: { isInUse: boolean; deleteBlockReason: string | null | undefined } | undefined
-): Promise<Types.FileInfo | Types.DirectoryInfo> {
-  validateDeletePermissions(force, usageCheck, dbFile, dbDirectory, parentDir);
+async function deleteItem(ctx: VercelContext, params: DeleteFnParams): Promise<Types.FileInfo | Types.DirectoryInfo> {
+  const { itemPath, force, dbFile, dbDirectory, parentDir, usageCheck } = params;
+
+  validateDeletePermissions({ force, usageCheck, dbFile, dbDirectory, parentDir });
 
   const fileEntity = await fileInfoByPath(ctx, itemPath);
   const folderEntity = fileEntity ? null : await directoryInfoByPath(ctx, itemPath);

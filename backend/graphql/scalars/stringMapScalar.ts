@@ -1,6 +1,26 @@
 import { GraphQLError, GraphQLScalarType, Kind, type ValueNode } from "graphql";
 
 /**
+ * Validates that a value is a Record<string, string>
+ */
+function validateStringMap(value: unknown): Record<string, string> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new GraphQLError("StringMap must be an object");
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  // Validate all values are strings
+  for (const [key, val] of Object.entries(obj)) {
+    if (typeof val !== "string") {
+      throw new GraphQLError(`StringMap values must be strings. Key "${key}" has value of type ${typeof val}`);
+    }
+  }
+
+  return obj as Record<string, string>;
+}
+
+/**
  * StringMap scalar for Record<string, string>
  * Validates that all keys and values are strings
  */
@@ -9,39 +29,11 @@ export const StringMapScalar = new GraphQLScalarType({
   description: "A map of string keys to string values (Record<string, string>)",
 
   serialize(value: unknown): Record<string, string> {
-    // Validate output
-    if (typeof value !== "object" || value === null || Array.isArray(value)) {
-      throw new GraphQLError("StringMap must be an object");
-    }
-
-    const obj = value as Record<string, unknown>;
-
-    // Validate all values are strings
-    for (const [key, val] of Object.entries(obj)) {
-      if (typeof val !== "string") {
-        throw new GraphQLError(`StringMap values must be strings. Key "${key}" has value of type ${typeof val}`);
-      }
-    }
-
-    return obj as Record<string, string>;
+    return validateStringMap(value);
   },
 
   parseValue(value: unknown): Record<string, string> {
-    // Validate input from variables
-    if (typeof value !== "object" || value === null || Array.isArray(value)) {
-      throw new GraphQLError("StringMap must be an object");
-    }
-
-    const obj = value as Record<string, unknown>;
-
-    // Validate all values are strings
-    for (const [key, val] of Object.entries(obj)) {
-      if (typeof val !== "string") {
-        throw new GraphQLError(`StringMap values must be strings. Key "${key}" has value of type ${typeof val}`);
-      }
-    }
-
-    return obj as Record<string, string>;
+    return validateStringMap(value);
   },
 
   parseLiteral(ast: ValueNode): Record<string, string> {

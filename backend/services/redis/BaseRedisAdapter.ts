@@ -33,21 +33,21 @@ export abstract class BaseRedisAdapter<TClient> implements IRedisService {
 
   async set(key: string, value: string, options?: { ex?: number; px?: number }): Promise<void> {
     const client = this.clientRef;
+    const isIoRedis = typeof client.quit === "function";
+
     if (options?.ex) {
-      if (typeof client.quit === "function") {
-        await client.set(key, value, "EX", options.ex);
-      } else {
-        await client.set(key, value, { ex: options.ex });
-      }
-    } else if (options?.px) {
-      if (typeof client.quit === "function") {
-        await client.set(key, value, "PX", options.px);
-      } else {
-        await client.set(key, value, { px: options.px });
-      }
-    } else {
-      await client.set(key, value);
+      const args = isIoRedis ? ["EX", options.ex] : [{ ex: options.ex }];
+      await client.set(key, value, ...args);
+      return;
     }
+
+    if (options?.px) {
+      const args = isIoRedis ? ["PX", options.px] : [{ px: options.px }];
+      await client.set(key, value, ...args);
+      return;
+    }
+
+    await client.set(key, value);
   }
 
   async incr(key: string): Promise<number> {
@@ -69,28 +69,21 @@ export abstract class BaseRedisAdapter<TClient> implements IRedisService {
   }
 
   async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
-    const pipeline = buildRedisPipeline(this.clientRef.pipeline(), commands);
-    const results = await pipeline.exec();
+    const results = await buildRedisPipeline(this.clientRef.pipeline(), commands).exec();
 
     if (!results) return [];
 
-    // ioredis returns results as [error, result][]
-    // Upstash returns results as result[]
-    // We unify this by mapping ioredis results to throw on error
     const isIoRedis = typeof this.clientRef.on === "function";
+    if (!isIoRedis) return results;
 
-    if (isIoRedis && Array.isArray(results)) {
-      return results.map((res: unknown) => {
-        if (Array.isArray(res) && res.length === 2) {
-          const [err, result] = res as [unknown, unknown];
-          if (err) throw err;
-          return result;
-        }
-        return res;
-      });
-    }
-
-    return results;
+    return results.map((res: unknown) => {
+      if (Array.isArray(res) && res.length === 2) {
+        const [err, result] = res as [unknown, unknown];
+        if (err) throw err;
+        return result;
+      }
+      return res;
+    });
   }
 
   async ping(): Promise<boolean> {

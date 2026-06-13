@@ -6,58 +6,62 @@ import { STORAGE_CONFIG } from "../storage/disk/storage.service.interface";
 
 export namespace StorageUtils {
   const PATH_PATTERN = /^[a-zA-Z0-9._/\- ()]+$/;
-  export const validatePath = (path: string): Promise<string | null> => {
-    let err: string | null = null;
+  export const validatePath = (path: string): string | null => {
     if (!path || path.trim().length === 0) {
-      err = "Path cannot be empty";
+      return "Path cannot be empty";
     }
     if (path.includes("..") || path.includes("//")) {
-      err = "Path contains invalid directory traversal patterns";
+      return "Path contains invalid directory traversal patterns";
     }
     if (!PATH_PATTERN.test(path)) {
-      err = "Path contains invalid characters";
+      return "Path contains invalid characters";
     }
     if (path.length > 1024) {
-      err = "Path is too long (max 1024 characters)";
+      return "Path is too long (max 1024 characters)";
     }
-    return Promise.resolve(err);
+    return null;
   };
 
   // Allow common file name characters: letters, numbers, spaces, parentheses, brackets, underscores, hyphens, periods
   const FILE_NAME_PATTERN = /^[a-zA-Z0-9._\-\s()[\]]+$/;
-  export const validateFileName = (fileName: string): Promise<string | null> => {
-    let err: string | null = null;
+  export const validateFileName = (fileName: string): string | null => {
     if (!fileName || fileName.trim().length === 0) {
-      err = "File name cannot be empty";
+      return "File name cannot be empty";
     }
     if (!FILE_NAME_PATTERN.test(fileName)) {
-      err = "File name contains invalid characters";
+      return "File name contains invalid characters";
     }
     if (fileName.length > 255) {
-      err = "File name is too long (max 255 characters)";
+      return "File name is too long (max 255 characters)";
     }
-    return Promise.resolve(err);
+    return null;
   };
 
-  export const validateFileSize = (size: number): Promise<string | null> => {
-    let err: string | null = null;
+  export const validateFileSize = (size: number): string | null => {
     if (size > STORAGE_CONFIG.MAX_FILE_SIZE) {
-      err = `File size exceeds maximum allowed size (${STORAGE_CONFIG.MAX_FILE_SIZE / 1024 / 1024}MB)`;
+      return `File size exceeds maximum allowed size (${STORAGE_CONFIG.MAX_FILE_SIZE / 1024 / 1024}MB)`;
     }
-    return Promise.resolve(err);
+    return null;
   };
 
-  export const validateUpload = async (path: string, size: number, contentType: string): Promise<string | null> => {
+  export interface UploadValidationOptions {
+    path: string;
+    size: number;
+    contentType: string;
+  }
+
+  export const validateUpload = (options: UploadValidationOptions): string | null => {
+    const { path, size, contentType } = options;
     const errors: string[] = [];
 
     const fileName = path.slice(path.lastIndexOf("/") + 1);
-    const fileNameErr = await validateFileName(fileName);
+    const fileNameErr = validateFileName(fileName);
     if (fileNameErr) errors.push(fileNameErr);
 
-    const pathErr = await validatePath(path);
+    const pathErr = validatePath(path);
     if (pathErr) errors.push(pathErr);
 
-    const sizeErr = await validateFileSize(size);
+    const sizeErr = validateFileSize(size);
     if (sizeErr) errors.push(sizeErr);
 
     if (!isAllowedMimeType(contentType)) {

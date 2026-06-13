@@ -148,7 +148,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     // Step 3: Validate upload request
-    const validationError = await StorageUtils.validateUpload(pathName, fileSize, contentType);
+    const validationError = StorageUtils.validateUpload({
+      path: pathName,
+      size: fileSize,
+      contentType,
+    });
 
     if (validationError) {
       logger.warn("Upload validation failed", {

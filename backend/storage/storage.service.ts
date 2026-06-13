@@ -31,25 +31,20 @@ function getStorageProvider(): StorageProvider {
  * Create storage service instance based on provider
  */
 async function createService(provider: StorageProvider): Promise<StorageService> {
-  switch (provider) {
-    case "gcp":
-      return await createGcpAdapter();
-
-    case "local":
-      return await createLocalAdapter();
-
-    case "vercel":
-      return createVercelAdapter();
-
-    case "s3":
+  const adapters: Record<StorageProvider, () => Promise<StorageService> | StorageService> = {
+    gcp: createGcpAdapter,
+    local: createLocalAdapter,
+    vercel: createVercelAdapter,
+    s3: () => {
       throw new Error("S3 storage adapter not implemented yet");
-
-    case "r2":
+    },
+    r2: () => {
       throw new Error("R2 storage adapter not implemented yet");
+    },
+  };
 
-    default:
-      throw new Error(`Unsupported storage provider: ${provider}`);
-  }
+  const creator = adapters[provider];
+  return await creator();
 }
 
 /**

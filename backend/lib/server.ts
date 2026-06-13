@@ -1,12 +1,12 @@
-function getNextDevServerUrl(): string {
-  const envUrl = process.env.NEXT_PUBLIC_BASE_URL;
-  if (process.env.NODE_ENV === "production" && !envUrl) {
-    throw new Error("NEXT_PUBLIC_BASE_URL must be set in production mode");
+function trimTrailingSlashes(str: string): string {
+  let end = str.length;
+  while (end > 0 && str[end - 1] === "/") {
+    end--;
   }
+  return str.substring(0, end);
+}
 
-  const url = envUrl ?? "http://localhost:3000";
-
-  // Validate URL format
+function validateBaseUrl(url: string): URL {
   try {
     const parsedUrl = new URL(url);
 
@@ -20,12 +20,7 @@ function getNextDevServerUrl(): string {
       throw new Error("NEXT_PUBLIC_BASE_URL must include a valid hostname");
     }
 
-    // Return the URL without trailing slashes (port is preserved by URL constructor)
-    let pathname = parsedUrl.pathname;
-    while (pathname.endsWith("/")) {
-      pathname = pathname.slice(0, -1);
-    }
-    return `${parsedUrl.protocol}//${parsedUrl.host}${pathname}`;
+    return parsedUrl;
   } catch (error) {
     if (error instanceof TypeError) {
       throw new Error(
@@ -37,16 +32,27 @@ function getNextDevServerUrl(): string {
   }
 }
 
+function getNextDevServerUrl(): string {
+  const envUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  if (process.env.NODE_ENV === "production" && !envUrl) {
+    throw new Error("NEXT_PUBLIC_BASE_URL must be set in production mode");
+  }
+
+  const url = envUrl ?? "http://localhost:3000";
+  const parsedUrl = validateBaseUrl(url);
+
+  // Return the URL without trailing slashes (port is preserved by URL constructor)
+  const pathname = trimTrailingSlashes(parsedUrl.pathname);
+
+  return `${parsedUrl.protocol}//${parsedUrl.host}${pathname}`;
+}
+
 export const NEXT_PUBLIC_BASE_URL = getNextDevServerUrl();
 
 export function getGraphQLEndpoint(): string {
   const GRAPHQL_PATH = "/api/graphql";
-  let baseUrl = NEXT_PUBLIC_BASE_URL;
-  while (baseUrl.endsWith("/")) {
-    baseUrl = baseUrl.slice(0, -1);
-  }
-  const graphqlEndpoint = `${baseUrl}${GRAPHQL_PATH}`;
-  return graphqlEndpoint;
+  const baseUrl = trimTrailingSlashes(NEXT_PUBLIC_BASE_URL);
+  return `${baseUrl}${GRAPHQL_PATH}`;
 }
 
 export const GRAPHQL_ENDPOINT = getGraphQLEndpoint();

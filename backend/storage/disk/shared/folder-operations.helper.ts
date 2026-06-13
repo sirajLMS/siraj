@@ -5,6 +5,54 @@ import { StorageUtils } from "@/backend/utils";
 import { StorageValidationError } from "../storage.service.interface";
 
 /**
+ * Check if the parent directory allows creating subdirectories
+ */
+async function checkParentPermissions(fullPath: string): Promise<Types.FileOperationResult | null> {
+  const parentPath = fullPath.substring(0, fullPath.lastIndexOf("/"));
+  if (parentPath.length === 0) return null;
+
+  const parentDir = await StorageDbRepository.directoryByPath(parentPath);
+  if (parentDir && !parentDir.allowCreateSubDirs) {
+    return {
+      success: false,
+      message: "Creating subdirectories not allowed in parent directory",
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Creates a directory record in the database if needed, or returns a basic info object
+ */
+async function createDirectoryRecord(fullPath: string, input: Types.FolderCreateInput): Promise<Types.DirectoryInfo> {
+  const hasCustomPermissions = input.permissions != null || input.protected === true || input.protectChildren === true;
+
+  if (!hasCustomPermissions) {
+    return StorageUtils.createDirectoryFromPath(fullPath);
+  }
+
+  try {
+    const directoryEntity = await StorageDbRepository.createDirectory({
+      ...input,
+      path: fullPath,
+    });
+
+    const bucketDir: Types.BucketDirectory = {
+      path: fullPath,
+      createdAt: new Date(),
+      lastModified: new Date(),
+      isPublic: fullPath.startsWith("public"),
+    };
+
+    return StorageUtils.combineDirectoryData(bucketDir, directoryEntity);
+  } catch (error) {
+    logger.warn(`Failed to save folder permissions in DB: ${error instanceof Error ? error.message : String(error)}`);
+    return StorageUtils.createDirectoryFromPath(fullPath);
+  }
+}
+
+/**
  * Common logic for creating a folder across different storage providers
  */
 export async function createFolderHelper(
@@ -14,54 +62,18 @@ export async function createFolderHelper(
   try {
     const fullPath = normalizePath(input.path);
 
-    const validationError = await StorageUtils.validatePath(fullPath);
+    const validationError = StorageUtils.validatePath(fullPath);
     if (validationError) {
       throw new StorageValidationError(validationError);
     }
 
-    const parentPath = fullPath.substring(0, fullPath.lastIndexOf("/"));
-    if (parentPath.length > 0) {
-      const parentDir = await StorageDbRepository.directoryByPath(parentPath);
-      if (parentDir && !parentDir.allowCreateSubDirs) {
-        return {
-          success: false,
-          message: "Creating subdirectories not allowed in parent directory",
-        };
-      }
-    }
+    const permissionResult = await checkParentPermissions(fullPath);
+    if (permissionResult) return permissionResult;
 
     // Call adapter-specific creation logic
     await createOnStorageFn(fullPath);
 
-    const hasCustomPermissions =
-      input.permissions != null || input.protected === true || input.protectChildren === true;
-
-    let newDirectoryInfo: Types.DirectoryInfo;
-
-    if (hasCustomPermissions) {
-      try {
-        const directoryEntity = await StorageDbRepository.createDirectory({
-          ...input,
-          path: fullPath,
-        });
-
-        const bucketDir: Types.BucketDirectory = {
-          path: fullPath,
-          createdAt: new Date(),
-          lastModified: new Date(),
-          isPublic: fullPath.startsWith("public"),
-        };
-
-        newDirectoryInfo = StorageUtils.combineDirectoryData(bucketDir, directoryEntity);
-      } catch (error) {
-        logger.warn(
-          `Failed to save folder permissions in DB: ${error instanceof Error ? error.message : String(error)}`
-        );
-        newDirectoryInfo = StorageUtils.createDirectoryFromPath(fullPath);
-      }
-    } else {
-      newDirectoryInfo = StorageUtils.createDirectoryFromPath(fullPath);
-    }
+    const newDirectoryInfo = await createDirectoryRecord(fullPath, input);
 
     return {
       success: true,

@@ -16,7 +16,11 @@ export async function prepareUpload(
       fileSize: input.fileSize,
     });
 
-    const uploadErr = await StorageUtils.validateUpload(input.path, input.fileSize, input.contentType);
+    const uploadErr = StorageUtils.validateUpload({
+      path: input.path,
+      size: input.fileSize,
+      contentType: input.contentType,
+    });
     if (uploadErr) {
       throw new StorageValidationError(uploadErr);
     }
@@ -66,7 +70,11 @@ export async function uploadFile(
   try {
     const fileSize = buffer.byteLength;
 
-    const uploadErr = await StorageUtils.validateUpload(path, fileSize, contentType);
+    const uploadErr = StorageUtils.validateUpload({
+      path,
+      size: fileSize,
+      contentType,
+    });
     if (uploadErr) {
       return {
         success: false,

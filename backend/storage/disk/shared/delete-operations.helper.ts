@@ -5,15 +5,22 @@ import { StorageUtils } from "@/backend/utils";
 import { formatBulkOperationResult } from "./bulk-operations.helper";
 
 /**
+ * Options for validating delete permissions
+ */
+export interface DeletePermissionOptions {
+  force: boolean;
+  usageCheck?: { isInUse: boolean; deleteBlockReason: string | null | undefined };
+  dbFile?: Types.FileEntity;
+  dbDirectory?: Types.DirectoryEntity;
+  parentDir?: Types.DirectoryEntity;
+}
+
+/**
  * Validates if an item can be deleted based on usage and protection status
  */
-export function validateDeletePermissions(
-  force: boolean,
-  usageCheck: { isInUse: boolean; deleteBlockReason: string | null | undefined } | undefined,
-  dbFile: Types.FileEntity | undefined,
-  dbDirectory: Types.DirectoryEntity | undefined,
-  parentDir: Types.DirectoryEntity | undefined
-): void {
+export function validateDeletePermissions(options: DeletePermissionOptions): void {
+  const { force, usageCheck, dbFile, dbDirectory, parentDir } = options;
+
   if (!force && usageCheck?.isInUse) {
     throw new Error(usageCheck.deleteBlockReason || "File is currently in use");
   }
@@ -39,7 +46,7 @@ export async function prepareDeleteFile(filePath: string): Promise<{
   dbFile?: Types.FileEntity | null;
   parentDir?: Types.DirectoryEntity | null;
 }> {
-  const validationError = await StorageUtils.validatePath(filePath);
+  const validationError = StorageUtils.validatePath(filePath);
   if (validationError) {
     return { error: validationError };
   }
@@ -53,16 +60,15 @@ export async function prepareDeleteFile(filePath: string): Promise<{
   const parentDir = await StorageDbRepository.directoryByPath(parentPath);
 
   try {
-    validateDeletePermissions(
-      false,
-      {
+    validateDeletePermissions({
+      force: false,
+      usageCheck: {
         isInUse: usageCheck.isInUse,
         deleteBlockReason: usageCheck.deleteBlockReason ?? null,
       },
-      dbFile || undefined,
-      undefined,
-      parentDir || undefined
-    );
+      dbFile: dbFile || undefined,
+      parentDir: parentDir || undefined,
+    });
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : String(error),
@@ -140,6 +146,18 @@ export async function loadDeleteEntities(paths: string[], force: boolean) {
 }
 
 /**
+ * Parameters for the bulk delete function callback
+ */
+export interface DeleteFnParams {
+  itemPath: string;
+  force: boolean;
+  dbFile?: Types.FileEntity;
+  dbDirectory?: Types.DirectoryEntity;
+  parentDir?: Types.DirectoryEntity;
+  usageCheck?: { isInUse: boolean; deleteBlockReason: string | null | undefined };
+}
+
+/**
  * Shared implementation for bulk delete operations
  */
 export async function executeBulkDelete<
@@ -148,15 +166,7 @@ export async function executeBulkDelete<
 >(
   ctx: TContext,
   input: Types.StorageItemsDeleteInput,
-  deleteFn: (
-    ctx: TContext,
-    itemPath: string,
-    force: boolean,
-    dbFile: Types.FileEntity | undefined,
-    dbDirectory: Types.DirectoryEntity | undefined,
-    parentDir: Types.DirectoryEntity | undefined,
-    usageCheck: { isInUse: boolean; deleteBlockReason: string | null | undefined } | undefined
-  ) => Promise<TResult>
+  deleteFn: (ctx: TContext, params: DeleteFnParams) => Promise<TResult>
 ): Promise<Types.BulkOperationResult> {
   const { dbFileMap, dbDirectoryMap, dbParentDirMap, usageCheckMap } = await loadDeleteEntities(
     input.paths,
@@ -170,15 +180,14 @@ export async function executeBulkDelete<
   for (const itemPath of input.paths) {
     try {
       const parentPath = itemPath.substring(0, itemPath.lastIndexOf("/"));
-      const result = await deleteFn(
-        ctx,
+      const result = await deleteFn(ctx, {
         itemPath,
-        input.force || false,
-        dbFileMap.get(itemPath),
-        dbDirectoryMap.get(itemPath),
-        dbParentDirMap.get(parentPath),
-        usageCheckMap.get(itemPath)
-      );
+        force: input.force || false,
+        dbFile: dbFileMap.get(itemPath),
+        dbDirectory: dbDirectoryMap.get(itemPath),
+        parentDir: dbParentDirMap.get(parentPath),
+        usageCheck: usageCheckMap.get(itemPath),
+      });
 
       if (result != null) {
         successfulItems.push(result);
