@@ -111,7 +111,10 @@ describe("Row Level Security for Students", () => {
         // 5. Query as Parent A
         await tx.execute(sql`SET LOCAL app.current_user_id = ${parentAUser.id}`);
 
-        const parentAView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
+        const parentAView = await tx
+          .select()
+          .from(students)
+          .where(sql`id IN (${studentA.id}, ${studentB.id})`);
 
         expect(parentAView.length).toBe(1);
         expect(parentAView[0].id).toBe(studentA.id);
@@ -119,7 +122,10 @@ describe("Row Level Security for Students", () => {
         // 6. Query as Parent B
         await tx.execute(sql`SET LOCAL app.current_user_id = ${parentBUser.id}`);
 
-        const parentBView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
+        const parentBView = await tx
+          .select()
+          .from(students)
+          .where(sql`id IN (${studentA.id}, ${studentB.id})`);
 
         expect(parentBView.length).toBe(1);
         expect(parentBView[0].id).toBe(studentB.id);
@@ -185,7 +191,10 @@ describe("Row Level Security for Students", () => {
         const adminUserId = randomUUID();
         await tx.execute(sql`SET LOCAL app.current_user_id = ${adminUserId}`);
 
-        const adminView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
+        const adminView = await tx
+          .select()
+          .from(students)
+          .where(sql`id IN (${studentA.id}, ${studentB.id})`);
 
         // Admin should see both students since they are not a parent
         expect(adminView.length).toBe(2);

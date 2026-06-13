@@ -382,7 +382,10 @@ describe("Audit Trail System", () => {
       // Attempt to update should fail
       let updateThrew = false;
       try {
-        await tx.update(auditLogs).set({ description: "Modified description" }).where(sql`id = ${auditLog.id}`);
+        await tx
+          .update(auditLogs)
+          .set({ description: "Modified description" })
+          .where(sql`id = ${auditLog.id}`);
       } catch {
         // The trigger prevents the operation - any error means it worked
         // We just verify that an error was thrown, not the specific message

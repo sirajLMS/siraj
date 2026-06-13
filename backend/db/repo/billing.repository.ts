@@ -73,7 +73,7 @@ export namespace BillingRepository {
       })
       .returning();
 
-    return (results)[0] as R;
+    return results[0] as R;
   }
 
   /**

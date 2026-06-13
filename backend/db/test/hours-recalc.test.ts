@@ -20,7 +20,10 @@ describe("hoursPerWeek Recalculation Triggers", () => {
 
   async function verifyStudentHours(expected: number) {
     if (!testStudent) throw new Error("testStudent not initialized");
-    const [student] = await db.select().from(students).where(sql`id = ${testStudent.id}`);
+    const [student] = await db
+      .select()
+      .from(students)
+      .where(sql`id = ${testStudent.id}`);
     expect(Number(student.hoursPerWeek)).toBe(expected);
   }
 
@@ -175,7 +178,10 @@ describe("hoursPerWeek Recalculation Triggers", () => {
 
   test("Day Deactivation: Set WEDNESDAY isActive = false", async () => {
     testLogger.info("Deactivating WEDNESDAY schedule day...");
-    await db.update(recurringScheduleDays).set({ isActive: false }).where(sql`id = ${dayWednesdayId}`);
+    await db
+      .update(recurringScheduleDays)
+      .set({ isActive: false })
+      .where(sql`id = ${dayWednesdayId}`);
 
     await verifyStudentHours(1);
     testLogger.info("Verified hoursPerWeek = 1.00 after deactivating WEDNESDAY.");
@@ -183,7 +189,10 @@ describe("hoursPerWeek Recalculation Triggers", () => {
 
   test("Duration Update: Update schedule duration to 45 minutes", async () => {
     testLogger.info("Updating schedule duration to 45 minutes...");
-    await db.update(recurringSchedules).set({ durationMinutes: 45 }).where(sql`id = ${scheduleId}`);
+    await db
+      .update(recurringSchedules)
+      .set({ durationMinutes: 45 })
+      .where(sql`id = ${scheduleId}`);
 
     await verifyStudentHours(0.75);
     testLogger.info("Verified hoursPerWeek = 0.75 after duration update.");
@@ -205,7 +214,10 @@ describe("hoursPerWeek Recalculation Triggers", () => {
       startTime: "10:00:00",
       isActive: true,
     });
-    await db.update(recurringScheduleDays).set({ isActive: true }).where(sql`id = ${dayWednesdayId}`);
+    await db
+      .update(recurringScheduleDays)
+      .set({ isActive: true })
+      .where(sql`id = ${dayWednesdayId}`);
 
     await verifyStudentHours(1.5);
 

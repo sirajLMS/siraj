@@ -34,20 +34,24 @@ export async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): P
  * @param roleName Name of the role to create
  */
 export async function setupRlsRole(roleName: string = "test_rls_user"): Promise<void> {
-  await db.execute(sql`
+  const quotedRole = quoteIdent(roleName);
+
+  await db.execute(
+    sql.raw(`
     DO $$
     BEGIN
-      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = ${sql.raw(`'${roleName}'`)}) THEN
-        EXECUTE 'CREATE ROLE ' || quote_ident(${roleName}) || ' WITH LOGIN PASSWORD ''test_rls_pass''';
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '${roleName}') THEN
+        EXECUTE 'CREATE ROLE ${quotedRole} WITH LOGIN PASSWORD ''test_rls_pass''';
       END IF;
     END
-    $$;
-    
-    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${sql.raw(quoteIdent(roleName))};
-    GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${sql.raw(quoteIdent(roleName))};
-    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${sql.raw(quoteIdent(roleName))};
-    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${sql.raw(quoteIdent(roleName))};
-  `);
+    $$
+  `)
+  );
+
+  await db.execute(sql.raw(`GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${quotedRole}`));
+  await db.execute(sql.raw(`GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${quotedRole}`));
+  await db.execute(sql.raw(`ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${quotedRole}`));
+  await db.execute(sql.raw(`ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${quotedRole}`));
 }
 
 /**
@@ -55,12 +59,11 @@ export async function setupRlsRole(roleName: string = "test_rls_user"): Promise<
  * @param roleName Name of the role to drop
  */
 export async function teardownRlsRole(roleName: string = "test_rls_user"): Promise<void> {
+  const quotedRole = quoteIdent(roleName);
   try {
-    await db.execute(sql`
-      REASSIGN OWNED BY ${sql.raw(quoteIdent(roleName))} TO postgres;
-      DROP OWNED BY ${sql.raw(quoteIdent(roleName))};
-      DROP ROLE IF EXISTS ${sql.raw(quoteIdent(roleName))};
-    `);
+    await db.execute(sql.raw(`REASSIGN OWNED BY ${quotedRole} TO postgres`));
+    await db.execute(sql.raw(`DROP OWNED BY ${quotedRole}`));
+    await db.execute(sql.raw(`DROP ROLE IF EXISTS ${quotedRole}`));
   } catch {
     // Ignore errors during teardown
   }

@@ -30,7 +30,9 @@ export const teacherBankingDetailsHistory = pgTable(
     routingNumber: encryptedText("routing_number"),
     swiftBic: encryptedText("swift_bic"),
     iban: encryptedText("iban"),
-    validFrom: timestamp("valid_from", { withTimezone: true, precision: 3 }).default(sql`clock_timestamp()`).notNull(),
+    validFrom: timestamp("valid_from", { withTimezone: true, precision: 3 })
+      .default(sql`clock_timestamp()`)
+      .notNull(),
     validUntil: timestamp("valid_until", { withTimezone: true, precision: 3 }),
     verifiedAt: timestamp("verified_at", { withTimezone: true, precision: 3 }),
     verifiedByUserId: uuid("verified_by_user_id").references(() => users.id, { onDelete: "set null" }),

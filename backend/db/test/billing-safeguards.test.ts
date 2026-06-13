@@ -8,8 +8,8 @@ import { BillingRepository } from "../repo";
 import { currencyExchangeAuditLogs, currencyExchangeRates, invoices, parents, systemSettings, users } from "../schema";
 
 describe("Billing Safeguards & Exchange Rates", () => {
-  let testUser: Types.UserEntity;
-  let testParent: Types.ParentEntity;
+  let testUser: Types.UserEntity | undefined;
+  let testParent: Types.ParentEntity | undefined;
 
   beforeAll(async () => {
     testLogger.info("Setting up billing test data...");
@@ -105,6 +105,8 @@ describe("Billing Safeguards & Exchange Rates", () => {
   });
 
   test("Exchange rate update creates audit log entry", async () => {
+    if (!testUser) throw new Error("Test user not initialized");
+
     const from = "EGP";
     const to = "USD";
     const rateValue = "50.000000";
@@ -166,6 +168,8 @@ describe("Billing Safeguards & Exchange Rates", () => {
   });
 
   test("Invoices automatically snapshot exchange rate when currency is not USD", async () => {
+    if (!testParent) throw new Error("Test parent not initialized");
+
     const from = "EUR";
     const to = "USD";
     const rateValue = "1.080000";
