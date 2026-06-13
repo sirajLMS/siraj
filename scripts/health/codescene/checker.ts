@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { glob } from "glob";
 import { ensureCacheDir, getCachedMtime, getCachedResult, getFileMtime, saveResult, updateCachedMtime } from "./cache";
 import { COLORS, logError, logInfo, logSuccess, PROJECT_ROOT, resolveCodesceneBin } from "./config";
@@ -39,10 +39,12 @@ function getTsConfigIgnores(): string[] {
 export function checkSingleFile(filePath: string): void {
   const absolutePath =
     filePath.startsWith("/") || /^[A-Za-z]:\\/.test(filePath) ? filePath : join(PROJECT_ROOT, filePath);
-  const relPath = absolutePath.replace(PROJECT_ROOT + "/", "").replace(PROJECT_ROOT + "\\", "");
+  // Ensure we use relative path for CodeScene matching
+  const relPath = relative(PROJECT_ROOT, absolutePath);
 
   const csBin = resolveCodesceneBin();
-  const result = spawnSync(csBin, ["check", absolutePath], {
+  const result = spawnSync(csBin, ["check", relPath], {
+    cwd: PROJECT_ROOT,
     encoding: "utf8",
     env: process.env,
   });
@@ -138,11 +140,13 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
 function processChangedFile(file: string, results: CheckResults): void {
   const filePath = join(PROJECT_ROOT, file);
   const csBin = resolveCodesceneBin();
-  const result = spawnSync(csBin, ["check", filePath], {
+  const result = spawnSync(csBin, ["check", file], {
+    cwd: PROJECT_ROOT,
     encoding: "utf8",
     env: process.env,
   });
   const output = (result.stdout || "") + (result.stderr || "");
+
 
   if (result.error) {
     results.errorCount++;

@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { clearCache } from "./cache";
 import { checkSingleFile, runHealthCheck } from "./checker";
 import {
@@ -11,6 +11,7 @@ import {
   logInfo,
   logSuccess,
   logWarning,
+  PROJECT_ROOT,
   resolveCodesceneBin,
   SCRIPT_DIR,
 } from "./config";
@@ -97,7 +98,9 @@ function getInitialTokenSource(): TokenSource {
 
 function verifyToken(token: string): { isValid: boolean; output: string } {
   const csBin = resolveCodesceneBin();
-  const testResult = spawnSync(csBin, ["check", join(SCRIPT_DIR, "config.ts")], {
+  const testFileRel = relative(PROJECT_ROOT, join(SCRIPT_DIR, "config.ts"));
+  const testResult = spawnSync(csBin, ["check", testFileRel], {
+    cwd: PROJECT_ROOT,
     encoding: "utf8",
     env: { ...process.env, CS_ACCESS_TOKEN: token },
   });
