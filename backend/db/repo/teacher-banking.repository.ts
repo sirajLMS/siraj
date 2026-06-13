@@ -167,11 +167,11 @@ export namespace TeacherBankingRepository {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
-  export const updateNonBankingFields = async (
+  async function updateRecord(
     bankingDetailsId: string,
-    updates: Partial<Pick<Types.TeacherBankingDetailsHistoryInsertInput, "updatedAt">>,
+    updates: Partial<Types.TeacherBankingDetailsHistoryInsertInput>,
     tx?: DBTransaction
-  ): Promise<Types.TeacherBankingDetailsHistorySelectType> => {
+  ): Promise<Types.TeacherBankingDetailsHistorySelectType> {
     const runner = async (t: DBTransaction) => {
       const results = await t
         .select()
@@ -191,6 +191,7 @@ export namespace TeacherBankingRepository {
       const [updated] = await t
         .update(teacherBankingDetailsHistory)
         .set({
+          ...updates,
           updatedAt: updates.updatedAt ?? new Date(),
         })
         .where(eq(teacherBankingDetailsHistory.id, bankingDetailsId))
@@ -200,6 +201,14 @@ export namespace TeacherBankingRepository {
     };
 
     return tx ? runner(tx) : db.transaction(runner);
+  }
+
+  export const updateNonBankingFields = async (
+    bankingDetailsId: string,
+    updates: Partial<Pick<Types.TeacherBankingDetailsHistoryInsertInput, "updatedAt">>,
+    tx?: DBTransaction
+  ): Promise<Types.TeacherBankingDetailsHistorySelectType> => {
+    return updateRecord(bankingDetailsId, updates, tx);
   };
 
   export const updateBankingDetails = async (
@@ -207,32 +216,7 @@ export namespace TeacherBankingRepository {
     updates: Partial<Types.TeacherBankingDetailsHistoryInsertInput>,
     tx?: DBTransaction
   ): Promise<Types.TeacherBankingDetailsHistorySelectType> => {
-    const runner = async (t: DBTransaction) => {
-      const results = await t
-        .select()
-        .from(teacherBankingDetailsHistory)
-        .where(eq(teacherBankingDetailsHistory.id, bankingDetailsId))
-        .limit(1);
-
-      if (results.length === 0) {
-        throw new Error(`Banking details ${bankingDetailsId} not found`);
-      }
-
-      const record = results[0];
-      await acquireBankingLock(t, record.teacherId);
-      assertRecordIsMutable(record);
-      assertNoBankingFieldChanges(record, updates);
-
-      const [updated] = await t
-        .update(teacherBankingDetailsHistory)
-        .set(updates)
-        .where(eq(teacherBankingDetailsHistory.id, bankingDetailsId))
-        .returning();
-
-      return updated;
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
+    return updateRecord(bankingDetailsId, updates, tx);
   };
 
   export const createTeacherPayment = async (

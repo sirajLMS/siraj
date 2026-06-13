@@ -1,24 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
-import { db } from "../drizzleDb";
 import { BillingRepository, StudentRepository } from "../repo";
 import { invoices, parents, students, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  try {
-    await db.transaction(async tx => {
-      await fn(tx);
-      throw new Error("ROLLBACK");
-    });
-  } catch (error) {
-    if (error instanceof Error && error.message !== "ROLLBACK") {
-      throw error;
-    }
-  }
-}
+import { type DbTransaction, runInRollback } from "./test-utils";
 
 const getCommonDates = () => ({ createdAt: new Date(), updatedAt: new Date() });
 

@@ -187,7 +187,10 @@ export namespace AuditRepository {
   /**
    * Get recent audit logs across the system.
    */
-  export const getRecentAuditLogs = async (limit: number = 100, tx?: DBTransaction): Promise<Types.AuditLogEntity[]> => {
+  export const getRecentAuditLogs = async (
+    limit: number = 100,
+    tx?: DBTransaction
+  ): Promise<Types.AuditLogEntity[]> => {
     const result = await queryAuditLogs({ limit }, tx);
     return result.logs;
   };
@@ -275,7 +278,10 @@ export namespace AuditRepository {
     description?: string;
   }
 
-  export const logInvoiceChange = async (input: InvoiceChangeInput, tx?: DBTransaction): Promise<Types.AuditLogEntity> => {
+  export const logInvoiceChange = async (
+    input: InvoiceChangeInput,
+    tx?: DBTransaction
+  ): Promise<Types.AuditLogEntity> => {
     const { invoiceId, action, previousState, newState, actorUserId, description } = input;
     return await logStateTransition(tx, {
       actorUserId,
@@ -299,7 +305,10 @@ export namespace AuditRepository {
     reason?: string;
   }
 
-  export const logPaymentRefund = async (input: PaymentRefundInput, tx?: DBTransaction): Promise<Types.AuditLogEntity> => {
+  export const logPaymentRefund = async (
+    input: PaymentRefundInput,
+    tx?: DBTransaction
+  ): Promise<Types.AuditLogEntity> => {
     const { paymentId, refundAmount, currency, actorUserId, reason } = input;
     return await createTypedAuditLog(tx, {
       actorUserId,

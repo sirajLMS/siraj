@@ -30,9 +30,7 @@ function redisSessionsEnabled(): boolean {
 }
 
 function getSessionRedisService(): SessionRedisService {
-  if (!sessionRedisService) {
-    sessionRedisService = new SessionRedisService(getRedisService());
-  }
+  sessionRedisService ??= new SessionRedisService(getRedisService());
   return sessionRedisService;
 }
 
@@ -172,7 +170,10 @@ export namespace SessionRepository {
   /**
    * Internal helper to create session in PostgreSQL only
    */
-  async function createPostgresSession(t: DBTransaction | typeof db, input: SessionCreationOptions): Promise<SessionEntity> {
+  async function createPostgresSession(
+    t: DBTransaction | typeof db,
+    input: SessionCreationOptions
+  ): Promise<SessionEntity> {
     const now = BigInt(Math.floor(Date.now() / 1000));
     const [created] = await t
       .insert(sessions)
@@ -299,18 +300,19 @@ export namespace SessionRepository {
   export const deleteSessionById = async (hashedId: string, tx?: DBTransaction): Promise<SessionEntity | null> => {
     const runner = async (t: DBTransaction) => {
       const existingSession = await findSessionById(hashedId);
-      if (!existingSession) return null;
+      if (existingSession) {
+        if (!redisSessionsEnabled()) {
+          await t.delete(sessions).where(eq(sessions.hashedId, hashedId));
+        } else {
+          const redisService = getSessionRedisService();
+          await redisService.deleteSession(hashedId);
+          await t.delete(sessionMetadata).where(eq(sessionMetadata.sessionId, hashedId));
+        }
 
-      if (!redisSessionsEnabled()) {
-        await t.delete(sessions).where(eq(sessions.hashedId, hashedId));
-      } else {
-        const redisService = getSessionRedisService();
-        await redisService.deleteSession(hashedId);
-        await t.delete(sessionMetadata).where(eq(sessionMetadata.sessionId, hashedId));
+        logger.info(`Deleted session ${hashedId}`);
+        return existingSession;
       }
-
-      logger.info(`Deleted session ${hashedId}`);
-      return existingSession;
+      return null;
     };
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));

@@ -321,7 +321,10 @@ export namespace TeacherAvailabilityRepository {
       .select()
       .from(teacherRecurringUnavailability)
       .where(
-        and(eq(teacherRecurringUnavailability.teacherId, input.teacherId), eq(teacherRecurringUnavailability.dayOfWeek, bookingDay))
+        and(
+          eq(teacherRecurringUnavailability.teacherId, input.teacherId),
+          eq(teacherRecurringUnavailability.dayOfWeek, bookingDay)
+        )
       );
 
     for (const pattern of patterns) {
@@ -329,7 +332,14 @@ export namespace TeacherAvailabilityRepository {
         continue;
       }
 
-      if (timesOverlap(bookingStartMinutes, bookingEndMinutes, timeToMinutes(pattern.startTime), timeToMinutes(pattern.endTime))) {
+      if (
+        timesOverlap(
+          bookingStartMinutes,
+          bookingEndMinutes,
+          timeToMinutes(pattern.startTime),
+          timeToMinutes(pattern.endTime)
+        )
+      ) {
         throw new Error("Teacher has a recurring unavailability during the requested time");
       }
     }
@@ -356,7 +366,12 @@ export namespace TeacherAvailabilityRepository {
     const matches = windows.some(window => {
       if ((window.dayOfWeek as DayOfWeek) !== bookingDay) return false;
       if (!isWithinEffectiveRange(bookingDate, window.effectiveFrom, window.effectiveUntil)) return false;
-      return isWithinTimeWindow(bookingStartMinutes, bookingEndMinutes, timeToMinutes(window.startTime), timeToMinutes(window.endTime));
+      return isWithinTimeWindow(
+        bookingStartMinutes,
+        bookingEndMinutes,
+        timeToMinutes(window.startTime),
+        timeToMinutes(window.endTime)
+      );
     });
 
     if (!matches) {

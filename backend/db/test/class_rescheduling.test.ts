@@ -3,30 +3,9 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { Gender } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
-import { db } from "../drizzleDb";
 import { SchedulingRepository } from "../repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { type DbTransaction, runInRollback } from "./test-utils";
 
 async function createTestUser(tx: DbTransaction, name: string, email: string, now: Date) {
   const [user] = await tx
@@ -161,9 +140,12 @@ async function expectConstraintViolation(fn: () => Promise<unknown>, constraintN
     await fn();
     expect(true).toBe(false);
   } catch (error) {
-    const causeStr = error instanceof Error && error.cause
-      ? (error.cause instanceof Error ? error.cause.message : JSON.stringify(error.cause))
-      : "";
+    const causeStr =
+      error instanceof Error && error.cause
+        ? error.cause instanceof Error
+          ? error.cause.message
+          : JSON.stringify(error.cause)
+        : "";
     const fullError = causeStr ? `${String(error)}: ${causeStr}` : String(error);
     expect(fullError).toContain(constraintName);
   }
@@ -273,8 +255,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
       await insertClassInstance(tx, { studentId: student.id, teacherId: teacher.id, originalClassId: original.id });
 
       await expectConstraintViolation(
-        () =>
-          insertClassInstance(tx, { studentId: student.id, teacherId: teacher.id, originalClassId: original.id }),
+        () => insertClassInstance(tx, { studentId: student.id, teacherId: teacher.id, originalClassId: original.id }),
         "class_instances_original_class_uniq_idx"
       );
     });

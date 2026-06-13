@@ -2,30 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { testLogger } from "../../../lib/testlogger";
 import type { AuthRateLimitEntityInput } from "../../types";
-import { db } from "../drizzleDb";
 import { authRateLimits } from "../schema";
 import { IP_ADDRESS_1 } from "./const";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { runInRollback } from "./test-utils";
 
 describe("Authentication Rate Limiting", () => {
   test("Composite unique constraint on IP and email prevents duplicates", async () => {

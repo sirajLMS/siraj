@@ -3,30 +3,9 @@ import { randomUUID } from "node:crypto";
 import { NotificationEventType } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
 import type { TeacherEntity, UserEntity } from "../../types";
-import { db } from "../drizzleDb";
 import { TeacherBankingRepository } from "../repo/teacher-banking.repository";
 import { teachers, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { type DbTransaction, runInRollback } from "./test-utils";
 
 async function createTeacherWithAdmin(tx: DbTransaction): Promise<{
   teacher: TeacherEntity;

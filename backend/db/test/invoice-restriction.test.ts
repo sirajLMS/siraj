@@ -3,29 +3,8 @@ import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
 import type { InvoiceInsertInput } from "../../types";
-import { db } from "../drizzleDb";
 import { invoices, parents, students, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { runInRollback } from "./test-utils";
 
 describe("Invoice Referential Integrity", () => {
   test("Deleting a student with associated invoices is blocked by restrict constraint", async () => {

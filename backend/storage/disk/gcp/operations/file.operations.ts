@@ -61,7 +61,7 @@ export async function fileInfoByDbFileId(ctx: GcpContext, id: string): Promise<T
 
 export async function renameFile(ctx: GcpContext, input: Types.FileRenameInput): Promise<Types.FileOperationResult> {
   try {
-    const pathErr = await StorageUtils.validatePath(input.currentPath);
+    const pathErr = StorageUtils.validatePath(input.currentPath);
     if (pathErr) {
       return {
         success: false,
@@ -69,7 +69,7 @@ export async function renameFile(ctx: GcpContext, input: Types.FileRenameInput):
       };
     }
 
-    const nameErr = await StorageUtils.validateFileName(input.newName);
+    const nameErr = StorageUtils.validateFileName(input.newName);
     if (nameErr) {
       return {
         success: false,

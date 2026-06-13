@@ -72,7 +72,7 @@ describe("Billing Safeguards & Exchange Rates", () => {
   afterAll(async () => {
     testLogger.info("Cleaning up billing test data...");
     try {
-      if (typeof testParent !== "undefined") {
+      if (testParent !== undefined) {
         // Hard delete invoices for this parent
         await db.update(invoices).set({ deletedAt: new Date() }).where(eq(invoices.parentId, testParent.id));
         await db.delete(invoices).where(eq(invoices.parentId, testParent.id));
@@ -82,7 +82,7 @@ describe("Billing Safeguards & Exchange Rates", () => {
       }
 
       // Delete exchange rates and audit logs created during tests (using testUser.id for audit logs)
-      if (typeof testUser !== "undefined") {
+      if (testUser !== undefined) {
         await db.delete(currencyExchangeAuditLogs).where(eq(currencyExchangeAuditLogs.changedByUserId, testUser.id));
       }
       await db
@@ -91,8 +91,8 @@ describe("Billing Safeguards & Exchange Rates", () => {
 
       // Delete users explicitly by ID
       const userIdsToDelete = [];
-      if (typeof testUser !== "undefined") userIdsToDelete.push(testUser.id);
-      if (typeof testParent !== "undefined") userIdsToDelete.push(testParent.userId);
+      if (testUser !== undefined) userIdsToDelete.push(testUser.id);
+      if (testParent !== undefined) userIdsToDelete.push(testParent.userId);
 
       if (userIdsToDelete.length > 0) {
         await db.delete(users).where(sql`id IN ${userIdsToDelete}`);

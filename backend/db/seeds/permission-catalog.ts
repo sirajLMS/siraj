@@ -109,10 +109,13 @@ export const SYSTEM_PERMISSION_GROUP_SLUGS = {
   STAFF_DEFAULT: "staff_default",
 } as const;
 
+const COMMON_DASHBOARD_PERMISSIONS = ["dashboard.view"] as const;
+const COMMON_CLASS_PERMISSIONS = ["classes.view_details"] as const;
+
 export const TEACHER_DEFAULT_PERMISSION_KEYS = [
-  "dashboard.view",
+  ...COMMON_DASHBOARD_PERMISSIONS,
   "schedule.view_assigned",
-  "classes.view_details",
+  ...COMMON_CLASS_PERMISSIONS,
   "classes.activate",
   "classes.start",
   "classes.mark_absent",
@@ -121,18 +124,18 @@ export const TEACHER_DEFAULT_PERMISSION_KEYS = [
 ] as const;
 
 export const PARENT_DEFAULT_PERMISSION_KEYS = [
-  "dashboard.view",
+  ...COMMON_DASHBOARD_PERMISSIONS,
   "schedule.view_family",
-  "classes.view_details",
+  ...COMMON_CLASS_PERMISSIONS,
   "classes.request_leave",
   "complaints.list",
 ] as const;
 
 export const STAFF_DEFAULT_PERMISSION_KEYS = [
-  "dashboard.view",
+  ...COMMON_DASHBOARD_PERMISSIONS,
   "dashboard.metrics.view_all",
   "schedule.view_all",
-  "classes.view_details",
+  ...COMMON_CLASS_PERMISSIONS,
   "teachers.list",
   "parents.list",
   "students.list",

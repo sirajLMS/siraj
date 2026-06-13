@@ -1,4 +1,5 @@
 import { and, desc, eq, type SQL, sql } from "drizzle-orm";
+import type { PgTable } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
 import {
   currencyExchangeAuditLogs,
@@ -48,8 +49,7 @@ export namespace BillingRepository {
    */
   async function createBillingEntity<R>(
     t: DBTransaction,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    table: any,
+    table: PgTable,
     input: { currency: string; exchangeRateSnapshot?: string | null; exchangeRateSource?: string | null } & Record<
       string,
       unknown
@@ -62,7 +62,6 @@ export namespace BillingRepository {
       input.exchangeRateSource
     );
 
-     
     const results = await t
       .insert(table)
       .values({
@@ -74,8 +73,7 @@ export namespace BillingRepository {
       })
       .returning();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (results as any[])[0] as R;
+    return (results)[0] as R;
   }
 
   /**
@@ -164,8 +162,7 @@ export namespace BillingRepository {
     input: InvoiceCreateInput,
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType> => {
-    const runner = async (t: DBTransaction) =>
-      createBillingEntity<Types.InvoiceSelectType>(t, invoices, input);
+    const runner = async (t: DBTransaction) => createBillingEntity<Types.InvoiceSelectType>(t, invoices, input);
     return tx ? runner(tx) : db.transaction(runner);
   };
 
@@ -176,8 +173,7 @@ export namespace BillingRepository {
     input: PaymentRecordInput,
     tx?: DBTransaction
   ): Promise<Types.PaymentSelectType> => {
-    const runner = async (t: DBTransaction) =>
-      createBillingEntity<Types.PaymentSelectType>(t, payments, input);
+    const runner = async (t: DBTransaction) => createBillingEntity<Types.PaymentSelectType>(t, payments, input);
     return tx ? runner(tx) : db.transaction(runner);
   };
 
@@ -193,7 +189,7 @@ export namespace BillingRepository {
       .limit(1);
 
     if (results.length === 0) return 2;
-    return parseInt(results[0].value, 10);
+    return Number.parseInt(results[0].value, 10);
   };
 
   /**

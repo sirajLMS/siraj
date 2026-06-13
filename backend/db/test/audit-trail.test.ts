@@ -254,7 +254,7 @@ describe("Audit Trail System", () => {
 
     const auditLog = await AuditRepository.logPaymentRefund({
       paymentId,
-      refundAmount: 50.0,
+      refundAmount: 50,
       currency: "USD",
       actorUserId: testUser1.id,
       reason: "Customer requested refund",
@@ -263,7 +263,7 @@ describe("Audit Trail System", () => {
     expect(auditLog.entityType).toBe("PAYMENT");
     expect(auditLog.action).toBe("REFUND");
     expect(auditLog.metadata).toEqual({
-      refundAmount: 50.0,
+      refundAmount: 50,
       currency: "USD",
       reason: "Customer requested refund",
     });
@@ -382,10 +382,7 @@ describe("Audit Trail System", () => {
       // Attempt to update should fail
       let updateThrew = false;
       try {
-        await tx
-          .update(auditLogs)
-          .set({ description: "Modified description" })
-          .where(sql`id = ${auditLog.id}`);
+        await tx.update(auditLogs).set({ description: "Modified description" }).where(sql`id = ${auditLog.id}`);
       } catch {
         // The trigger prevents the operation - any error means it worked
         // We just verify that an error was thrown, not the specific message

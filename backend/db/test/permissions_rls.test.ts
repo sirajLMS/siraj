@@ -5,8 +5,7 @@ import { testLogger } from "../../../lib/testlogger";
 import type { ParentEntity, StudentEntity, UserEntity } from "../../types";
 import { db } from "../drizzleDb";
 import { parents, students, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import { type DbTransaction, setupRlsRole, teardownRlsRole } from "./test-utils";
 
 /**
  * Helper to setup common test data for RLS tests
@@ -91,36 +90,11 @@ async function setupTestData(tx: DbTransaction) {
 
 describe("Row Level Security for Students", () => {
   beforeAll(async () => {
-    testLogger.info("Setting up RLS test role...");
-    await db.execute(sql`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'test_rls_user') THEN
-          CREATE ROLE test_rls_user WITH LOGIN PASSWORD 'test_rls_pass';
-        END IF;
-      END
-      $$;
-      
-      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO test_rls_user;
-      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO test_rls_user;
-      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO test_rls_user;
-      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO test_rls_user;
-    `);
-    testLogger.info("RLS test role set up successfully.");
+    await setupRlsRole();
   });
 
   afterAll(async () => {
-    testLogger.info("Cleaning up RLS test role...");
-    try {
-      await db.execute(sql`
-        REASSIGN OWNED BY test_rls_user TO postgres;
-        DROP OWNED BY test_rls_user;
-        DROP ROLE IF EXISTS test_rls_user;
-      `);
-      testLogger.info("RLS test role cleaned up.");
-    } catch (error) {
-      testLogger.warn("Failed to drop RLS test role:", error);
-    }
+    await teardownRlsRole();
   });
 
   test("Allows parents to see only their own students", async () => {
@@ -137,10 +111,7 @@ describe("Row Level Security for Students", () => {
         // 5. Query as Parent A
         await tx.execute(sql`SET LOCAL app.current_user_id = ${parentAUser.id}`);
 
-        const parentAView = await tx
-          .select()
-          .from(students)
-          .where(sql`id IN (${studentA.id}, ${studentB.id})`);
+        const parentAView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
 
         expect(parentAView.length).toBe(1);
         expect(parentAView[0].id).toBe(studentA.id);
@@ -148,10 +119,7 @@ describe("Row Level Security for Students", () => {
         // 6. Query as Parent B
         await tx.execute(sql`SET LOCAL app.current_user_id = ${parentBUser.id}`);
 
-        const parentBView = await tx
-          .select()
-          .from(students)
-          .where(sql`id IN (${studentA.id}, ${studentB.id})`);
+        const parentBView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
 
         expect(parentBView.length).toBe(1);
         expect(parentBView[0].id).toBe(studentB.id);
@@ -217,10 +185,7 @@ describe("Row Level Security for Students", () => {
         const adminUserId = randomUUID();
         await tx.execute(sql`SET LOCAL app.current_user_id = ${adminUserId}`);
 
-        const adminView = await tx
-          .select()
-          .from(students)
-          .where(sql`id IN (${studentA.id}, ${studentB.id})`);
+        const adminView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
 
         // Admin should see both students since they are not a parent
         expect(adminView.length).toBe(2);

@@ -4,29 +4,8 @@ import { eq, sql } from "drizzle-orm";
 import { StudentStatus } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
 import type { ParentEntity, StudentEntity, StudentStatusHistorySelectType, UserEntity } from "../../types";
-import { db } from "../drizzleDb";
 import { parents, studentStatusHistory, students, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { runInRollback } from "./test-utils";
 
 describe("Student Status Transitions & History", () => {
   test("Initial student creation logs status history with null old status", async () => {

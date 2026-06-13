@@ -2,29 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { testLogger } from "../../../lib/testlogger";
 import type { ParentEntity, RecurringScheduleEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
-import { db } from "../drizzleDb";
 import { parents, recurringSchedules, students, teachers, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { type DbTransaction, runInRollback } from "./test-utils";
 
 async function setupBaseEntities(tx: DbTransaction, now: Date) {
   const parentEmail = `parent-tz-${randomUUID()}@example.com`;

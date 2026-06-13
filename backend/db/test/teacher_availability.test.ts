@@ -2,30 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { DayOfWeek, Gender, VacationRequestStatus } from "../../../lib/enum";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
-import { db } from "../drizzleDb";
 import { SchedulingRepository, TeacherAvailabilityRepository } from "../repo";
 import { parents, students, teacherAssignments, teachers, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { type DbTransaction, runInRollback } from "./test-utils";
 
 async function createTestUser(tx: DbTransaction, name: string, emailPrefix: string): Promise<UserEntity> {
   const now = new Date();

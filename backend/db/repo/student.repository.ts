@@ -217,7 +217,9 @@ export namespace StudentRepository {
     const current = results[0];
 
     if (expectedVersion !== undefined && current.version !== expectedVersion) {
-      throw new Error(`Version mismatch for student ${studentId}. Expected ${expectedVersion}, got ${current.version}.`);
+      throw new Error(
+        `Version mismatch for student ${studentId}. Expected ${expectedVersion}, got ${current.version}.`
+      );
     }
 
     const [updated] = await t
@@ -239,13 +241,20 @@ export namespace StudentRepository {
     expectedVersion?: number,
     tx?: DBTransaction
   ): Promise<Types.StudentEntity> => {
-    const runner = async (t: DBTransaction) => 
-      adjustClassesQuota(t, studentId, (current) => {
-        if (current.classesRemaining < amount) {
-          throw new Error(`Insufficient classes for student ${studentId}. Remaining: ${current.classesRemaining}, Required: ${amount}`);
-        }
-        return { classesRemaining: sql`${students.classesRemaining} - ${amount}` };
-      }, expectedVersion);
+    const runner = async (t: DBTransaction) =>
+      adjustClassesQuota(
+        t,
+        studentId,
+        current => {
+          if (current.classesRemaining < amount) {
+            throw new Error(
+              `Insufficient classes for student ${studentId}. Remaining: ${current.classesRemaining}, Required: ${amount}`
+            );
+          }
+          return { classesRemaining: sql`${students.classesRemaining} - ${amount}` };
+        },
+        expectedVersion
+      );
 
     return tx ? runner(tx) : db.transaction(runner);
   };
@@ -257,10 +266,15 @@ export namespace StudentRepository {
     tx?: DBTransaction
   ): Promise<Types.StudentEntity> => {
     const runner = async (t: DBTransaction) =>
-      adjustClassesQuota(t, studentId, () => ({
-        classesRemaining: sql`${students.classesRemaining} + ${amount}`,
-        classesTotal: sql`${students.classesTotal} + ${amount}`,
-      }), expectedVersion);
+      adjustClassesQuota(
+        t,
+        studentId,
+        () => ({
+          classesRemaining: sql`${students.classesRemaining} + ${amount}`,
+          classesTotal: sql`${students.classesTotal} + ${amount}`,
+        }),
+        expectedVersion
+      );
 
     return tx ? runner(tx) : db.transaction(runner);
   };

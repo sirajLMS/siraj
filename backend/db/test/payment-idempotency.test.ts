@@ -4,29 +4,8 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { testLogger } from "../../../lib/testlogger";
 import type { InvoiceInsertInput, PaymentInsertInput } from "../../types";
-import { db } from "../drizzleDb";
 import { invoices, parents, payments, students, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { type DbTransaction, runInRollback } from "./test-utils";
 
 async function createTestParent(args: { tx: DbTransaction; suffix: string; now: Date }) {
   const { tx, suffix, now } = args;
@@ -55,12 +34,7 @@ async function createTestParent(args: { tx: DbTransaction; suffix: string; now: 
   return parentRecord;
 }
 
-async function createTestStudent(args: {
-  tx: DbTransaction;
-  parentId: string;
-  suffix: string;
-  now: Date;
-}) {
+async function createTestStudent(args: { tx: DbTransaction; parentId: string; suffix: string; now: Date }) {
   const { tx, parentId, suffix, now } = args;
   const [studentRecord] = await tx
     .insert(students)

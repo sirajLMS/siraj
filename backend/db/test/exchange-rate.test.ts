@@ -1,29 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { testLogger } from "../../../lib/testlogger";
 import type { CurrencyExchangeRateInsertInput } from "../../types";
-import { db } from "../drizzleDb";
 import { currencyExchangeRates } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { runInRollback } from "./test-utils";
 
 describe("Currency Exchange Rates", () => {
   test("Composite unique constraint prevents duplicate rates for same effective date", async () => {

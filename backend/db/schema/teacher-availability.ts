@@ -5,26 +5,33 @@ import { timezones } from "./timezones";
 import { users } from "./users";
 
 /**
+ * Common columns for teacher availability-related tables.
+ */
+const commonAvailabilityColumns = {
+  id: uuid("id").defaultRandom().primaryKey(),
+  teacherId: uuid("teacher_id")
+    .notNull()
+    .references(() => teachers.id, { onDelete: "cascade" }),
+  dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
+  startTime: time("start_time").notNull(),
+  endTime: time("end_time").notNull(),
+  timezoneId: integer("timezone_id").references(() => timezones.id),
+  timezone: varchar("timezone", { length: 100 }).notNull(),
+  utcOffsetSnapshot: integer("utc_offset_snapshot"),
+  effectiveFrom: date("effective_from"),
+  effectiveUntil: date("effective_until"),
+  createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+};
+
+/**
  * Teacher Availability Windows table.
  * Defines recurring weekly time slots when a teacher is available for booking.
  */
 export const teacherAvailabilityWindows = pgTable(
   "teacher_availability_windows",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    teacherId: uuid("teacher_id")
-      .notNull()
-      .references(() => teachers.id, { onDelete: "cascade" }),
-    dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
-    startTime: time("start_time").notNull(),
-    endTime: time("end_time").notNull(),
-    timezoneId: integer("timezone_id").references(() => timezones.id),
-    timezone: varchar("timezone", { length: 100 }).notNull(),
-    utcOffsetSnapshot: integer("utc_offset_snapshot"),
-    effectiveFrom: date("effective_from"),
-    effectiveUntil: date("effective_until"),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    ...commonAvailabilityColumns,
   },
   table => [
     index("teacher_availability_windows_teacher_id_idx").on(table.teacherId),
@@ -39,21 +46,8 @@ export const teacherAvailabilityWindows = pgTable(
 export const teacherRecurringUnavailability = pgTable(
   "teacher_recurring_unavailability",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    teacherId: uuid("teacher_id")
-      .notNull()
-      .references(() => teachers.id, { onDelete: "cascade" }),
-    dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
-    startTime: time("start_time").notNull(),
-    endTime: time("end_time").notNull(),
-    timezoneId: integer("timezone_id").references(() => timezones.id),
-    timezone: varchar("timezone", { length: 100 }).notNull(),
-    utcOffsetSnapshot: integer("utc_offset_snapshot"),
-    effectiveFrom: date("effective_from"),
-    effectiveUntil: date("effective_until"),
+    ...commonAvailabilityColumns,
     reason: text("reason"),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [
     index("teacher_recurring_unavailability_teacher_id_idx").on(table.teacherId),

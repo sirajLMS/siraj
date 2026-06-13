@@ -161,12 +161,8 @@ export const classInstances = pgTable(
     index("class_instances_outcome_idx").on(table.outcome),
     uniqueIndex("class_instances_idempotency_key_unique_idx").on(table.idempotencyKey),
     index("class_instances_execution_state_idx").on(table.executionState),
-    index("class_instances_frozen_idx")
-      .on(table.isFrozen)
-      .where(sql`${table.isFrozen} = true`),
-    index("class_instances_rescheduled_idx")
-      .on(table.isRescheduled)
-      .where(sql`${table.isRescheduled} = true`),
+    index("class_instances_frozen_idx").on(table.isFrozen).where(sql`${table.isFrozen} = true`),
+    index("class_instances_rescheduled_idx").on(table.isRescheduled).where(sql`${table.isRescheduled} = true`),
     uniqueIndex("class_instances_original_class_uniq_idx")
       .on(table.originalClassId)
       .where(sql`${table.originalClassId} IS NOT NULL AND ${table.deletedAt} IS NULL`),

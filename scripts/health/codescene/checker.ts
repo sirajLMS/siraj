@@ -147,7 +147,6 @@ function processChangedFile(file: string, results: CheckResults): void {
   });
   const output = (result.stdout || "") + (result.stderr || "");
 
-
   if (result.error) {
     results.errorCount++;
     results.errorFiles.push(file);
@@ -266,6 +265,8 @@ function printSummary(results: CheckResults): void {
     globalThis.console.log(
       `\n${COLORS.YELLOW}💡 Run 'bun run codescene --file <file>' for detailed analysis${COLORS.NC}`
     );
-    globalThis.console.log(`${COLORS.YELLOW}💡 Run 'bun run codescene --scan --no-cache' to bypass incremental analysis${COLORS.NC}`);
+    globalThis.console.log(
+      `${COLORS.YELLOW}💡 Run 'bun run codescene --scan --no-cache' to force a full check (bypasses incremental cache)${COLORS.NC}`
+    );
   }
 }

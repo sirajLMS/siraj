@@ -336,16 +336,92 @@ export namespace StorageDbRepository {
 
   async function deleteUsagesFromAllTables(fileId: string, usageType: string, referenceId: string) {
     await Promise.all([
-      db.delete(userFiles).where(and(eq(userFiles.fileId, fileId), eq(userFiles.usageType, usageType), eq(userFiles.userId, referenceId))),
-      db.delete(teacherFiles).where(and(eq(teacherFiles.fileId, fileId), eq(teacherFiles.usageType, usageType), eq(teacherFiles.teacherId, referenceId))),
-      db.delete(studentFiles).where(and(eq(studentFiles.fileId, fileId), eq(studentFiles.usageType, usageType), eq(studentFiles.studentId, referenceId))),
-      db.delete(parentFiles).where(and(eq(parentFiles.fileId, fileId), eq(parentFiles.usageType, usageType), eq(parentFiles.parentId, referenceId))),
-      db.delete(invoiceFiles).where(and(eq(invoiceFiles.fileId, fileId), eq(invoiceFiles.usageType, usageType), eq(invoiceFiles.invoiceId, referenceId))),
-      db.delete(complaintFiles).where(and(eq(complaintFiles.fileId, fileId), eq(complaintFiles.usageType, usageType), eq(complaintFiles.complaintId, referenceId))),
-      db.delete(learningResourceFiles).where(and(eq(learningResourceFiles.fileId, fileId), eq(learningResourceFiles.usageType, usageType), eq(learningResourceFiles.learningResourceId, referenceId))),
-      db.delete(staffProfileFiles).where(and(eq(staffProfileFiles.fileId, fileId), eq(staffProfileFiles.usageType, usageType), eq(staffProfileFiles.staffProfileId, referenceId))),
-      db.delete(recurringScheduleFiles).where(and(eq(recurringScheduleFiles.fileId, fileId), eq(recurringScheduleFiles.usageType, usageType), eq(recurringScheduleFiles.recurringScheduleId, referenceId))),
-      db.delete(classInstanceFiles).where(and(eq(classInstanceFiles.fileId, fileId), eq(classInstanceFiles.usageType, usageType), eq(classInstanceFiles.classInstanceId, referenceId))),
+      db
+        .delete(userFiles)
+        .where(
+          and(eq(userFiles.fileId, fileId), eq(userFiles.usageType, usageType), eq(userFiles.userId, referenceId))
+        ),
+      db
+        .delete(teacherFiles)
+        .where(
+          and(
+            eq(teacherFiles.fileId, fileId),
+            eq(teacherFiles.usageType, usageType),
+            eq(teacherFiles.teacherId, referenceId)
+          )
+        ),
+      db
+        .delete(studentFiles)
+        .where(
+          and(
+            eq(studentFiles.fileId, fileId),
+            eq(studentFiles.usageType, usageType),
+            eq(studentFiles.studentId, referenceId)
+          )
+        ),
+      db
+        .delete(parentFiles)
+        .where(
+          and(
+            eq(parentFiles.fileId, fileId),
+            eq(parentFiles.usageType, usageType),
+            eq(parentFiles.parentId, referenceId)
+          )
+        ),
+      db
+        .delete(invoiceFiles)
+        .where(
+          and(
+            eq(invoiceFiles.fileId, fileId),
+            eq(invoiceFiles.usageType, usageType),
+            eq(invoiceFiles.invoiceId, referenceId)
+          )
+        ),
+      db
+        .delete(complaintFiles)
+        .where(
+          and(
+            eq(complaintFiles.fileId, fileId),
+            eq(complaintFiles.usageType, usageType),
+            eq(complaintFiles.complaintId, referenceId)
+          )
+        ),
+      db
+        .delete(learningResourceFiles)
+        .where(
+          and(
+            eq(learningResourceFiles.fileId, fileId),
+            eq(learningResourceFiles.usageType, usageType),
+            eq(learningResourceFiles.learningResourceId, referenceId)
+          )
+        ),
+      db
+        .delete(staffProfileFiles)
+        .where(
+          and(
+            eq(staffProfileFiles.fileId, fileId),
+            eq(staffProfileFiles.usageType, usageType),
+            eq(staffProfileFiles.staffProfileId, referenceId)
+          )
+        ),
+      db
+        .delete(recurringScheduleFiles)
+        .where(
+          and(
+            eq(recurringScheduleFiles.fileId, fileId),
+            eq(recurringScheduleFiles.usageType, usageType),
+            eq(recurringScheduleFiles.recurringScheduleId, referenceId)
+          )
+        ),
+      db
+        .delete(classInstanceFiles)
+        .where(
+          and(
+            eq(classInstanceFiles.fileId, fileId),
+            eq(classInstanceFiles.usageType, usageType),
+            eq(classInstanceFiles.classInstanceId, referenceId)
+          )
+        ),
     ]);
   }
 

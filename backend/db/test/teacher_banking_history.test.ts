@@ -3,30 +3,9 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
 import type { TeacherBankingDetailsHistorySelectType, TeacherEntity, UserEntity } from "../../types";
-import { db } from "../drizzleDb";
 import { TeacherBankingRepository } from "../repo/teacher-banking.repository";
 import { teacherBankingDetailsHistory, teachers, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { runInRollback } from "./test-utils";
 
 describe("Teacher Banking Details Versioning & History", () => {
   test("Allows historical record updates by closing old and inserting new", async () => {

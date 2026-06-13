@@ -197,8 +197,8 @@ export namespace SchedulingRepository {
       const teacherId = input.teacherId ?? existing.teacherId;
       const startTime = input.scheduledStartAt ?? existing.scheduledStartAt;
       const endTime = input.scheduledEndAt ?? existing.scheduledEndAt;
-      const zoomUrl = input.zoomMeetingUrl !== undefined ? input.zoomMeetingUrl : existing.zoomMeetingUrl;
-      const isBeingSoftDeleted = input.deletedAt !== undefined && input.deletedAt !== null;
+      const zoomUrl = input.zoomMeetingUrl === undefined ? existing.zoomMeetingUrl : input.zoomMeetingUrl;
+      const isBeingSoftDeleted = Boolean(input.deletedAt);
 
       await acquireLocks(t, teacherId, studentId);
 

@@ -4,30 +4,9 @@ import { eq } from "drizzle-orm";
 import { Gender } from "../../../lib/enum";
 import { testLogger } from "../../../lib/testlogger";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
-import { db } from "../drizzleDb";
 import { SchedulingRepository } from "../repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { type DbTransaction, runInRollback } from "./test-utils";
 
 describe("Class Teacher Assignment Integrity", () => {
   async function createTestUser(tx: DbTransaction, name: string, email: string) {
@@ -141,7 +120,11 @@ describe("Class Teacher Assignment Integrity", () => {
     testLogger.info("Testing class update to non-assigned teacher...");
     await runInRollback(async tx => {
       const now = new Date();
-      const parent = await createTestParent(tx, "UpdateAssign Parent", `parent-updateassign-${randomUUID()}@example.com`);
+      const parent = await createTestParent(
+        tx,
+        "UpdateAssign Parent",
+        `parent-updateassign-${randomUUID()}@example.com`
+      );
       const teacher1 = await createTestTeacher(tx, "Teacher 1", `teacher1-${randomUUID()}@example.com`);
       const teacher2 = await createTestTeacher(tx, "Teacher 2", `teacher2-${randomUUID()}@example.com`);
       const student = await createTestStudent(tx, parent.id, "UpdateAssign Student");

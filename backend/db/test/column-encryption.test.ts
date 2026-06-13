@@ -3,10 +3,8 @@ import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
 import type { TeacherBankingDetailsHistoryInsertInput, TeacherEntityInput } from "../../types";
-import { db } from "../drizzleDb";
 import { teacherBankingDetailsHistory, teachers, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import { type DbTransaction, runInRollback } from "./test-utils";
 
 async function createTestUser(tx: DbTransaction, uniqueSuffix: string, now: Date) {
   const email = `teacher-${uniqueSuffix}@example.com`;
@@ -23,7 +21,13 @@ async function createTestUser(tx: DbTransaction, uniqueSuffix: string, now: Date
   return user;
 }
 
-async function insertTeacherDetails(args: { tx: DbTransaction; userId: string; plainZoomPassword: string; plainNationalId: string; now: Date }) {
+async function insertTeacherDetails(args: {
+  tx: DbTransaction;
+  userId: string;
+  plainZoomPassword: string;
+  plainNationalId: string;
+  now: Date;
+}) {
   const { tx, userId, plainZoomPassword, plainNationalId, now } = args;
   const teacherInput: TeacherEntityInput = {
     userId,
@@ -40,7 +44,13 @@ async function insertTeacherDetails(args: { tx: DbTransaction; userId: string; p
   return teacher;
 }
 
-async function insertBankingDetails(args: { tx: DbTransaction; teacherId: string; plainBeneficiaryName: string; plainIban: string; now: Date }) {
+async function insertBankingDetails(args: {
+  tx: DbTransaction;
+  teacherId: string;
+  plainBeneficiaryName: string;
+  plainIban: string;
+  now: Date;
+}) {
   const { tx, teacherId, plainBeneficiaryName, plainIban, now } = args;
   const bankingInput: TeacherBankingDetailsHistoryInsertInput = {
     teacherId,
@@ -61,13 +71,18 @@ function verifyCiphertext(value: unknown, plaintext: string) {
   expect(valStr.split(":")).toHaveLength(3);
 }
 
-async function verifyRawEncryption(tx: DbTransaction, teacherId: string, bankingId: string, plainValues: { zoomPassword: string; nationalId: string; beneficiaryName: string; iban: string }) {
+async function verifyRawEncryption(
+  tx: DbTransaction,
+  teacherId: string,
+  bankingId: string,
+  plainValues: { zoomPassword: string; nationalId: string; beneficiaryName: string; iban: string }
+) {
   // Verify teacher encryption
   const rawTeacherResult = await tx.execute(
     sql`SELECT zoom_password, national_id FROM teachers WHERE id = ${teacherId}`
   );
   const teacherRows =
-    "rows" in rawTeacherResult ? (rawTeacherResult.rows) : (rawTeacherResult as unknown as Record<string, unknown>[]);
+    "rows" in rawTeacherResult ? rawTeacherResult.rows : (rawTeacherResult as unknown as Record<string, unknown>[]);
   const rawTeacherRow = teacherRows[0];
   expect(rawTeacherRow).toBeDefined();
 
@@ -79,7 +94,7 @@ async function verifyRawEncryption(tx: DbTransaction, teacherId: string, banking
     sql`SELECT beneficiary_name, iban FROM teacher_banking_details_history WHERE id = ${bankingId}`
   );
   const bankingRows =
-    "rows" in rawBankingResult ? (rawBankingResult.rows) : (rawBankingResult as unknown as Record<string, unknown>[]);
+    "rows" in rawBankingResult ? rawBankingResult.rows : (rawBankingResult as unknown as Record<string, unknown>[]);
   const rawBankingRow = bankingRows[0];
   expect(rawBankingRow).toBeDefined();
 
@@ -87,41 +102,21 @@ async function verifyRawEncryption(tx: DbTransaction, teacherId: string, banking
   verifyCiphertext(rawBankingRow.iban, plainValues.iban);
 }
 
-async function verifyDrizzleDecryption(tx: DbTransaction, teacherId: string, bankingId: string, plainValues: { zoomPassword: string; nationalId: string; beneficiaryName: string; iban: string }) {
-  const [drizzleTeacher] = await tx
-    .select()
-    .from(teachers)
-    .where(sql`id = ${teacherId}`);
+async function verifyDrizzleDecryption(
+  tx: DbTransaction,
+  teacherId: string,
+  bankingId: string,
+  plainValues: { zoomPassword: string; nationalId: string; beneficiaryName: string; iban: string }
+) {
+  const [drizzleTeacher] = await tx.select().from(teachers).where(sql`id = ${teacherId}`);
   expect(drizzleTeacher).toBeDefined();
   expect(drizzleTeacher.zoomPassword).toBe(plainValues.zoomPassword);
   expect(drizzleTeacher.nationalId).toBe(plainValues.nationalId);
 
-  const [drizzleBanking] = await tx
-    .select()
-    .from(teacherBankingDetailsHistory)
-    .where(sql`id = ${bankingId}`);
+  const [drizzleBanking] = await tx.select().from(teacherBankingDetailsHistory).where(sql`id = ${bankingId}`);
   expect(drizzleBanking).toBeDefined();
   expect(drizzleBanking.beneficiaryName).toBe(plainValues.beneficiaryName);
   expect(drizzleBanking.iban).toBe(plainValues.iban);
-}
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
 }
 
 describe("Column-Level Encryption", () => {

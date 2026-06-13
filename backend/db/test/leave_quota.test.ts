@@ -3,29 +3,8 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { testLogger } from "../../../lib/testlogger";
 import type { LeaveQuotaUsageEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
-import { db } from "../drizzleDb";
 import { leaveQuotaUsage, parents, students, systemSettings, teachers, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { type DbTransaction, runInRollback } from "./test-utils";
 
 async function createTestTeacher(tx: DbTransaction, name: string, email: string): Promise<TeacherEntity> {
   const now = new Date();
@@ -107,7 +86,7 @@ async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
 
 async function insertLeaveQuota(
   tx: DbTransaction,
-  params: { teacherId?: string; studentId?: string; year: number; month: number; count: number },
+  params: { teacherId?: string; studentId?: string; year: number; month: number; count: number }
 ): Promise<LeaveQuotaUsageEntity> {
   const [quota] = (await tx
     .insert(leaveQuotaUsage)
@@ -184,7 +163,7 @@ async function verifyCustomLeaveLimit(params: {
 async function runWithEntity(
   tx: DbTransaction,
   type: "teacher" | "student",
-  fn: (id: { teacherId?: string; studentId?: string }) => Promise<unknown>,
+  fn: (id: { teacherId?: string; studentId?: string }) => Promise<unknown>
 ) {
   if (type === "teacher") {
     await withTeacher(tx, async teacher => {
@@ -216,7 +195,7 @@ describe("Leave Quota Limits Trigger", () => {
     test(`Blocks inserting ${role} leave quota usage exceeding the default limit of two`, async () => {
       testLogger.info(`Testing default ${role} leave limit check (failure)...`);
       await runInRollback(tx =>
-        runWithEntity(tx, role, id => testInsertQuota({ tx, id, count, shouldSucceed: false })),
+        runWithEntity(tx, role, id => testInsertQuota({ tx, id, count, shouldSucceed: false }))
       );
       testLogger.info(`Default ${role} leave limit check (failure) passed.`);
     });
@@ -251,8 +230,8 @@ describe("Leave Quota Limits Trigger", () => {
             limit,
             countWithin: valid,
             countExceed: invalid,
-          }),
-        ),
+          })
+        )
       );
       testLogger.info(`Custom ${role} leave limit check passed.`);
     });
@@ -270,7 +249,7 @@ describe("Leave Quota Limits Trigger", () => {
 
         // Update to 3 leaves (blocked under default limit of 2)
         await expectLeaveQuotaExceeded(() =>
-          tx.update(leaveQuotaUsage).set({ usedCount: 3 }).where(eq(leaveQuotaUsage.id, quota.id)).execute(),
+          tx.update(leaveQuotaUsage).set({ usedCount: 3 }).where(eq(leaveQuotaUsage.id, quota.id)).execute()
         );
       });
     });

@@ -6,29 +6,8 @@ import { testLogger } from "../../../lib/testlogger";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import type { ClassInstanceEntity } from "../../types/scheduling.types";
 import type { StudentProgressSelectType } from "../../types/student.types";
-import { db } from "../drizzleDb";
 import { classInstances, parents, studentProgress, students, teacherAssignments, teachers, users } from "../schema";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
-  let assertionError: unknown = null;
-  try {
-    await db.transaction(async tx => {
-      try {
-        await fn(tx);
-      } catch (error) {
-        assertionError = error;
-      }
-      tx.rollback();
-    });
-  } catch {
-    // Ignore expected Drizzle transaction rollback error
-  }
-  if (assertionError) {
-    throw assertionError;
-  }
-}
+import { type DbTransaction, runInRollback, setupRlsRole, teardownRlsRole } from "./test-utils";
 
 async function setupTestEnvironment(tx: DbTransaction, now: Date) {
   const [userP] = (await tx
@@ -93,30 +72,14 @@ async function setupTestEnvironment(tx: DbTransaction, now: Date) {
 }
 
 describe("Student Progress Tracking", () => {
+  const ROLE_NAME = "test_rls_user_prog";
+
   beforeAll(async () => {
-    await db.execute(sql`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'test_rls_user_prog') THEN
-          CREATE ROLE test_rls_user_prog WITH LOGIN PASSWORD 'test_rls_pass';
-        END IF;
-      END
-      $$;
-      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO test_rls_user_prog;
-      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO test_rls_user_prog;
-    `);
+    await setupRlsRole(ROLE_NAME);
   });
 
   afterAll(async () => {
-    try {
-      await db.execute(sql`
-        REASSIGN OWNED BY test_rls_user_prog TO postgres;
-        DROP OWNED BY test_rls_user_prog;
-        DROP ROLE IF EXISTS test_rls_user_prog;
-      `);
-    } catch {
-      testLogger.warn("Failed to drop RLS test role for prog");
-    }
+    await teardownRlsRole(ROLE_NAME);
   });
 
   test("Teacher can log progress for their student", async () => {
@@ -196,7 +159,7 @@ describe("Student Progress Tracking", () => {
       });
 
       // Switch to unprivileged role for RLS tests
-      await tx.execute(sql`SET LOCAL ROLE test_rls_user_prog`);
+      await tx.execute(sql`SET LOCAL ROLE ${sql.raw(ROLE_NAME)}`);
 
       // Set actor to Parent
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userP.id}, true)`);
