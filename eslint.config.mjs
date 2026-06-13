@@ -46,6 +46,7 @@ const eslintConfig = defineConfig([
     "draft/**",
     "frontend/graphql/generated/**",
     "scratch/**",
+    "**/unRefactored_tests/**",
   ]),
   eslint.configs.recommended,
   sonarjs.configs.recommended,

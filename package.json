@@ -25,7 +25,7 @@
     "codescene": "bun run scripts/health/codescene/main.ts --scan",
     "sonar-scan": "bun run scripts/health/sonar/ts/main.ts --scan",
     "sonar-result": "bun run scripts/health/sonar/ts/main.ts --result",
-    "sonar-full": "bun run scripts/health/sonar/ts/main.ts --full",
+    "sonar-duplications": "bun run scripts/health/sonar/ts/main.ts --with-duplications",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",

@@ -27,13 +27,13 @@ ${COLORS.YELLOW}Usage:${COLORS.NC}
 ${COLORS.YELLOW}Flags:${COLORS.NC}
   --scan        Run code health check on all TypeScript files
   --file <path> Check a single file
-  --full        Force full check of all files (ignore incremental cache)
+  --no-cache    Force full check of all files (ignore incremental cache)
   --reset       Clear incremental cache
   --help, -h    Display this help message
 
 ${COLORS.YELLOW}Examples:${COLORS.NC}
   bun run codescene --scan
-  bun run codescene --scan --full
+  bun run codescene --scan --no-cache
   bun run codescene --file src/components/MyComponent.tsx
   bun run codescene --reset
 `);
@@ -184,11 +184,11 @@ async function main() {
     }
     checkSingleFile(filePath);
   } else if (args.includes("--scan")) {
-    const forceFull = args.includes("--full");
-    if (forceFull) {
+    const noCache = args.includes("--no-cache");
+    if (noCache) {
       logInfo("Running full check (ignoring cache)");
     }
-    await runHealthCheck(forceFull);
+    await runHealthCheck(noCache);
   } else {
     logError("Invalid arguments. Use --help for usage information.");
     process.exit(1);

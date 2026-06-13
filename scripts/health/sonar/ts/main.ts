@@ -21,14 +21,14 @@ ${COLORS.YELLOW}Usage:${COLORS.NC}
 ${COLORS.YELLOW}Flags:${COLORS.NC}
   --scan        Run full SonarQube analysis (setup, scan, and results)
   --result      Fetch and display current analysis issues (no scan)
-  --full        Fetch and display analysis issues with duplication metrics (no scan)
+  --with-duplications Fetch and display analysis issues with duplication metrics (no scan)
   --reset       Reset SonarQube setup state (clears state and reconfigures)
   --help, -h    Display this help message
 
 ${COLORS.YELLOW}Examples:${COLORS.NC}
   bun run sonar-scan --scan
   bun run sonar-scan --result
-  bun run sonar-scan --full
+  bun run sonar-scan --with-duplications
   bun run sonar-scan --reset
 `);
 }
@@ -68,7 +68,7 @@ async function main() {
       const token = await generateToken();
       writeConnectionInfo(token);
       await fetchAndDisplayResults({ token, includeDuplications: false, outputFilename: "sonar-result.json" });
-    } else if (args.includes("--full")) {
+    } else if (args.includes("--with-duplications")) {
       const token = await generateToken();
       writeConnectionInfo(token);
       await fetchAndDisplayResults({ token, includeDuplications: true, outputFilename: "sonar-full.json" });

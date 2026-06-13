@@ -81,7 +81,7 @@ async function setupInvoiceTest(tx: DbTransaction, suffix: string) {
   return { testInvoice };
 }
 
-async function expectRepositoryError(fn: () => Promise<any>, expectedError: string) {
+async function expectRepositoryError(fn: () => Promise<unknown>, expectedError: string) {
   try {
     await fn();
     throw new Error(`Expected error "${expectedError}" but none was thrown`);
@@ -223,8 +223,9 @@ describe("Concurrency Control Tests", () => {
         await BillingRepository.updateInvoiceStatus(testInvoice.id, "PAID", new Date(), initialVersion, tx);
 
         // Second update with stale version should fail
-        await expectVersionMismatch(() =>
-          BillingRepository.updateInvoiceStatus(testInvoice.id, "OVERDUE", null, initialVersion, tx)
+        await expectRepositoryError(
+          () => BillingRepository.updateInvoiceStatus(testInvoice.id, "OVERDUE", null, initialVersion, tx),
+          "Version mismatch"
         );
 
         // Verify state

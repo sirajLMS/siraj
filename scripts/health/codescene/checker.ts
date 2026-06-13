@@ -266,6 +266,6 @@ function printSummary(results: CheckResults): void {
     globalThis.console.log(
       `\n${COLORS.YELLOW}💡 Run 'bun run codescene --file <file>' for detailed analysis${COLORS.NC}`
     );
-    globalThis.console.log(`${COLORS.YELLOW}💡 Run 'bun run codescene --scan --full' to force full check${COLORS.NC}`);
+    globalThis.console.log(`${COLORS.YELLOW}💡 Run 'bun run codescene --scan --no-cache' to bypass incremental analysis${COLORS.NC}`);
   }
 }

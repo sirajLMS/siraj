@@ -295,23 +295,27 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
     testLogger.info("Self-referencing check constraint test passed.");
   });
 
-  test("Enforces rescheduled business rule check constraints", async () => {
-    testLogger.info("Testing rescheduled business rule check constraints...");
+  test("Enforces rescheduled no quota check constraint", async () => {
+    testLogger.info("Testing rescheduled no quota check constraint...");
     await runInRollback(async tx => {
-      const { teacher, student } = await setupTestData(tx, { prefix: "rules" });
-
-      // No quota check
+      const { teacher, student } = await setupTestData(tx, { prefix: "noQuota" });
       await expectConstraintViolation(
         () => insertRescheduledInstance(tx, student.id, teacher.id, { quotaDeducted: true }),
         "class_instances_rescheduled_no_quota_chk"
       );
+    });
+    testLogger.info("Rescheduled no quota check constraint test passed.");
+  });
 
-      // No complete check
+  test("Enforces rescheduled no complete check constraint", async () => {
+    testLogger.info("Testing rescheduled no complete check constraint...");
+    await runInRollback(async tx => {
+      const { teacher, student } = await setupTestData(tx, { prefix: "noComplete" });
       await expectConstraintViolation(
         () => insertRescheduledInstance(tx, student.id, teacher.id, { executionState: "COMPLETED" }),
         "class_instances_rescheduled_no_complete_chk"
       );
     });
-    testLogger.info("Rescheduled business rule check constraints tests passed.");
+    testLogger.info("Rescheduled no complete check constraint test passed.");
   });
 });

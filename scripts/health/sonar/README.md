@@ -19,7 +19,7 @@ Available via `npm` or `bun run`:
 
 - **Run Analysis**: `bun run sonar-scan` (or `bun run sonar-scan --scan`)
 - **Fetch Issues Only**: `bun run sonar-result`
-- **Full Report**: `bun run sonar-full`
+- **Full Report (with duplications)**: `bun run sonar-duplications`
 - **Reset State**: `bun run sonar-scan --reset`
 - **Help**: `bun run sonar-scan --help`
 
@@ -28,12 +28,12 @@ Available via `npm` or `bun run`:
 If running the script directly with Bun:
 
 ```bash
-bun run scripts/frontend_health/sonar/ts/main.ts [flags]
+bun run scripts/health/sonar/ts/main.ts [flags]
 ```
 
 - `--scan`: Run full analysis (setup, scan, and results).
 - `--result`: Fetch and display issues only.
-- `--full`: Fetch and display issues with duplication metrics.
+- `--with-duplications`: Fetch and display issues with duplication metrics.
 - `--reset`: Reset setup state.
 - `--help`: Show help message.
 

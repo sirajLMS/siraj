@@ -39,5 +39,5 @@
     "dist/types/**/*.ts",
     "dist/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "draft", "frontend/graphql/generated"]
+  "exclude": ["node_modules", "draft", "frontend/graphql/generated", "**/unRefactored_tests"]
 }
