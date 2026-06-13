@@ -30,6 +30,68 @@ async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<
   }
 }
 
+async function setupTestEnvironment(tx: DbTransaction, now: Date) {
+  const [userP] = (await tx
+    .insert(users)
+    .values({
+      name: "Parent",
+      email: `p-${randomUUID()}@x.com`,
+      password: "p",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [UserEntity];
+  const [parent] = (await tx
+    .insert(parents)
+    .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
+    .returning()) as [ParentEntity];
+  const [userT] = (await tx
+    .insert(users)
+    .values({
+      name: "Teacher",
+      email: `t-${randomUUID()}@x.com`,
+      password: "t",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [UserEntity];
+  const [teacher] = (await tx
+    .insert(teachers)
+    .values({ userId: userT.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
+    .returning()) as [TeacherEntity];
+  const [student] = (await tx
+    .insert(students)
+    .values({
+      parentId: parent.id,
+      name: "Student",
+      gender: Gender.MALE,
+      status: "REGULAR",
+      idempotencyKey: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [StudentEntity];
+
+  await tx.insert(teacherAssignments).values({ studentId: student.id, teacherId: teacher.id, assignedAt: now });
+
+  const [classInst] = (await tx
+    .insert(classInstances)
+    .values({
+      studentId: student.id,
+      teacherId: teacher.id,
+      scheduledStartAt: now,
+      scheduledEndAt: now,
+      durationMinutes: 60,
+      classType: "REGULAR",
+      idempotencyKey: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [ClassInstanceEntity];
+
+  return { userP, parent, userT, teacher, student, classInst };
+}
+
 describe("Student Progress Tracking", () => {
   beforeAll(async () => {
     await db.execute(sql`
@@ -62,55 +124,7 @@ describe("Student Progress Tracking", () => {
     await runInRollback(async tx => {
       const now = new Date();
 
-      // Setup
-      const [userP] = (await tx
-        .insert(users)
-        .values({ name: "Parent", email: `p-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [parent] = (await tx
-        .insert(parents)
-        .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
-        .returning()) as [ParentEntity];
-      const [userT] = (await tx
-        .insert(users)
-        .values({ name: "Teacher", email: `t-${randomUUID()}@x.com`, password: "t", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({ userId: userT.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
-        .returning()) as [TeacherEntity];
-      const [student] = (await tx
-        .insert(students)
-        .values({
-          parentId: parent.id,
-          name: "Student",
-          gender: Gender.MALE,
-          status: "REGULAR",
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [StudentEntity];
-
-      // Assign teacher
-      await tx.insert(teacherAssignments).values({ studentId: student.id, teacherId: teacher.id, assignedAt: now });
-
-      // Create class instance
-      const startTime = new Date(now.getTime() + 3600000);
-      const [classInst] = (await tx
-        .insert(classInstances)
-        .values({
-          studentId: student.id,
-          teacherId: teacher.id,
-          scheduledStartAt: startTime,
-          scheduledEndAt: new Date(startTime.getTime() + 3600000),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+      const { userT, teacher, student, classInst } = await setupTestEnvironment(tx, now);
 
       // Set actor to Teacher
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userT.id}, true)`);
@@ -140,51 +154,7 @@ describe("Student Progress Tracking", () => {
     testLogger.info("Testing unique constraint on student progress...");
     await runInRollback(async tx => {
       const now = new Date();
-      const [userT] = (await tx
-        .insert(users)
-        .values({ name: "T", email: `t-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({ userId: userT.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
-        .returning()) as [TeacherEntity];
-      const [userP] = (await tx
-        .insert(users)
-        .values({ name: "P", email: `p-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [parent] = (await tx
-        .insert(parents)
-        .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
-        .returning()) as [ParentEntity];
-      const [student] = (await tx
-        .insert(students)
-        .values({
-          parentId: parent.id,
-          name: "S",
-          gender: Gender.FEMALE,
-          status: "REGULAR",
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [StudentEntity];
-
-      await tx.insert(teacherAssignments).values({ studentId: student.id, teacherId: teacher.id, assignedAt: now });
-
-      const [classInst] = (await tx
-        .insert(classInstances)
-        .values({
-          studentId: student.id,
-          teacherId: teacher.id,
-          scheduledStartAt: now,
-          scheduledEndAt: now,
-          durationMinutes: 60,
-          classType: "REGULAR",
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+      const { teacher, student, classInst } = await setupTestEnvironment(tx, now);
 
       await tx.insert(studentProgress).values({
         studentId: student.id,
@@ -214,51 +184,7 @@ describe("Student Progress Tracking", () => {
     testLogger.info("Testing parent RLS for progress...");
     await runInRollback(async tx => {
       const now = new Date();
-      const [userP] = (await tx
-        .insert(users)
-        .values({ name: "Parent", email: `p-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [parent] = (await tx
-        .insert(parents)
-        .values({ userId: userP.id, status: "REGULAR", createdAt: now, updatedAt: now })
-        .returning()) as [ParentEntity];
-      const [userT] = (await tx
-        .insert(users)
-        .values({ name: "Teacher", email: `t-${randomUUID()}@x.com`, password: "p", createdAt: now, updatedAt: now })
-        .returning()) as [UserEntity];
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({ userId: userT.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now })
-        .returning()) as [TeacherEntity];
-      const [student] = (await tx
-        .insert(students)
-        .values({
-          parentId: parent.id,
-          name: "Student",
-          gender: Gender.MALE,
-          status: "REGULAR",
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [StudentEntity];
-
-      await tx.insert(teacherAssignments).values({ studentId: student.id, teacherId: teacher.id, assignedAt: now });
-
-      const [classInst] = (await tx
-        .insert(classInstances)
-        .values({
-          studentId: student.id,
-          teacherId: teacher.id,
-          scheduledStartAt: now,
-          scheduledEndAt: now,
-          durationMinutes: 60,
-          classType: "REGULAR",
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ClassInstanceEntity];
+      const { userP, userT, teacher, student, classInst } = await setupTestEnvironment(tx, now);
 
       // Insert one visible record
       await tx.insert(studentProgress).values({

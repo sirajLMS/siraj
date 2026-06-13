@@ -48,7 +48,7 @@ async function resolveUserFromRefreshToken(
   const user = (await UserRepository.findById(payload.userId)) || null;
   if (!user) return { session: null, user: null };
 
-  // eslint-disable-next-line sonarjs/deprecation, @typescript-eslint/no-deprecated -- TODO: Update to use specific session ID from token
+   
   const session = (await SessionRepository.findByUserId(user.id)) || null;
   if (!session) {
     logger.warn("[RefreshToken] User found but no session exists", {

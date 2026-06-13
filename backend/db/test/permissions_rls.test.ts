@@ -6,6 +6,89 @@ import type { ParentEntity, StudentEntity, UserEntity } from "../../types";
 import { db } from "../drizzleDb";
 import { parents, students, users } from "../schema";
 
+type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/**
+ * Helper to setup common test data for RLS tests
+ */
+async function setupTestData(tx: DbTransaction) {
+  const now = new Date();
+  const parentAEmail = `parent-a-${randomUUID()}@example.com`;
+  const parentBEmail = `parent-b-${randomUUID()}@example.com`;
+
+  // 1. Create Parent A
+  const [parentAUser] = (await tx
+    .insert(users)
+    .values({
+      name: "Parent A",
+      email: parentAEmail,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [UserEntity];
+
+  const [parentA] = (await tx
+    .insert(parents)
+    .values({
+      userId: parentAUser.id,
+      status: "REGULAR",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [ParentEntity];
+
+  // 2. Create Parent B
+  const [parentBUser] = (await tx
+    .insert(users)
+    .values({
+      name: "Parent B",
+      email: parentBEmail,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [UserEntity];
+
+  const [parentB] = (await tx
+    .insert(parents)
+    .values({
+      userId: parentBUser.id,
+      status: "REGULAR",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [ParentEntity];
+
+  // 3. Create Student A (for Parent A)
+  const [studentA] = (await tx
+    .insert(students)
+    .values({
+      parentId: parentA.id,
+      name: "Student A",
+      status: "REGULAR",
+      idempotencyKey: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [StudentEntity];
+
+  // 4. Create Student B (for Parent B)
+  const [studentB] = (await tx
+    .insert(students)
+    .values({
+      parentId: parentB.id,
+      name: "Student B",
+      status: "REGULAR",
+      idempotencyKey: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [StudentEntity];
+
+  return { parentAUser, parentBUser, studentA, studentB };
+}
+
 describe("Row Level Security for Students", () => {
   beforeAll(async () => {
     testLogger.info("Setting up RLS test role...");
@@ -46,79 +129,7 @@ describe("Row Level Security for Students", () => {
     // We run in transaction to use SET LOCAL and auto-rollback to keep DB clean
     await db
       .transaction(async tx => {
-        const now = new Date();
-        const parentAEmail = `parent-a-${randomUUID()}@example.com`;
-        const parentBEmail = `parent-b-${randomUUID()}@example.com`;
-
-        // 1. Create Parent A
-        const [parentAUser] = (await tx
-          .insert(users)
-          .values({
-            name: "Parent A",
-            email: parentAEmail,
-            password: "password",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [UserEntity];
-
-        const [parentA] = (await tx
-          .insert(parents)
-          .values({
-            userId: parentAUser.id,
-            status: "REGULAR",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [ParentEntity];
-
-        // 2. Create Parent B
-        const [parentBUser] = (await tx
-          .insert(users)
-          .values({
-            name: "Parent B",
-            email: parentBEmail,
-            password: "password",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [UserEntity];
-
-        const [parentB] = (await tx
-          .insert(parents)
-          .values({
-            userId: parentBUser.id,
-            status: "REGULAR",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [ParentEntity];
-
-        // 3. Create Student A (for Parent A)
-        const [studentA] = (await tx
-          .insert(students)
-          .values({
-            parentId: parentA.id,
-            name: "Student A",
-            status: "REGULAR",
-            idempotencyKey: randomUUID(),
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [StudentEntity];
-
-        // 4. Create Student B (for Parent B)
-        const [studentB] = (await tx
-          .insert(students)
-          .values({
-            parentId: parentB.id,
-            name: "Student B",
-            status: "REGULAR",
-            idempotencyKey: randomUUID(),
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [StudentEntity];
+        const { parentAUser, parentBUser, studentA, studentB } = await setupTestData(tx);
 
         // Switch to the non-superuser RLS role
         await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
@@ -157,79 +168,7 @@ describe("Row Level Security for Students", () => {
 
     await db
       .transaction(async tx => {
-        const now = new Date();
-        const parentAEmail = `parent-a-${randomUUID()}@example.com`;
-        const parentBEmail = `parent-b-${randomUUID()}@example.com`;
-
-        // 1. Create Parent A
-        const [parentAUser] = (await tx
-          .insert(users)
-          .values({
-            name: "Parent A",
-            email: parentAEmail,
-            password: "password",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [UserEntity];
-
-        const [parentA] = (await tx
-          .insert(parents)
-          .values({
-            userId: parentAUser.id,
-            status: "REGULAR",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [ParentEntity];
-
-        // 2. Create Parent B
-        const [parentBUser] = (await tx
-          .insert(users)
-          .values({
-            name: "Parent B",
-            email: parentBEmail,
-            password: "password",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [UserEntity];
-
-        const [parentB] = (await tx
-          .insert(parents)
-          .values({
-            userId: parentBUser.id,
-            status: "REGULAR",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [ParentEntity];
-
-        // 3. Create Student A (for Parent A)
-        const [studentA] = (await tx
-          .insert(students)
-          .values({
-            parentId: parentA.id,
-            name: "Student A",
-            status: "REGULAR",
-            idempotencyKey: randomUUID(),
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [StudentEntity];
-
-        // 4. Create Student B (for Parent B)
-        const [studentB] = (await tx
-          .insert(students)
-          .values({
-            parentId: parentB.id,
-            name: "Student B",
-            status: "REGULAR",
-            idempotencyKey: randomUUID(),
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [StudentEntity];
+        const { parentAUser, studentA, studentB } = await setupTestData(tx);
 
         await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
         await tx.execute(sql`SET LOCAL app.current_user_id = ${parentAUser.id}`);
@@ -270,79 +209,7 @@ describe("Row Level Security for Students", () => {
 
     await db
       .transaction(async tx => {
-        const now = new Date();
-        const parentAEmail = `parent-a-${randomUUID()}@example.com`;
-        const parentBEmail = `parent-b-${randomUUID()}@example.com`;
-
-        // 1. Create Parent A
-        const [parentAUser] = (await tx
-          .insert(users)
-          .values({
-            name: "Parent A",
-            email: parentAEmail,
-            password: "password",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [UserEntity];
-
-        const [parentA] = (await tx
-          .insert(parents)
-          .values({
-            userId: parentAUser.id,
-            status: "REGULAR",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [ParentEntity];
-
-        // 2. Create Parent B
-        const [parentBUser] = (await tx
-          .insert(users)
-          .values({
-            name: "Parent B",
-            email: parentBEmail,
-            password: "password",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [UserEntity];
-
-        const [parentB] = (await tx
-          .insert(parents)
-          .values({
-            userId: parentBUser.id,
-            status: "REGULAR",
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [ParentEntity];
-
-        // 3. Create Student A
-        const [studentA] = (await tx
-          .insert(students)
-          .values({
-            parentId: parentA.id,
-            name: "Student A",
-            status: "REGULAR",
-            idempotencyKey: randomUUID(),
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [StudentEntity];
-
-        // 4. Create Student B
-        const [studentB] = (await tx
-          .insert(students)
-          .values({
-            parentId: parentB.id,
-            name: "Student B",
-            status: "REGULAR",
-            idempotencyKey: randomUUID(),
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning()) as [StudentEntity];
+        const { studentA, studentB } = await setupTestData(tx);
 
         await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
 

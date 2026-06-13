@@ -28,6 +28,80 @@ async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<
   }
 }
 
+async function createTestParent(args: { tx: DbTransaction; suffix: string; now: Date }) {
+  const { tx, suffix, now } = args;
+  const parentEmail = `parent-${suffix}@example.com`;
+  const [parentUser] = await tx
+    .insert(users)
+    .values({
+      name: "Idempotency Test Parent",
+      email: parentEmail,
+      password: "securePassword",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+
+  const [parentRecord] = await tx
+    .insert(parents)
+    .values({
+      userId: parentUser.id,
+      status: "REGULAR",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+
+  return parentRecord;
+}
+
+async function createTestStudent(args: {
+  tx: DbTransaction;
+  parentId: string;
+  suffix: string;
+  now: Date;
+}) {
+  const { tx, parentId, suffix, now } = args;
+  const [studentRecord] = await tx
+    .insert(students)
+    .values({
+      parentId,
+      name: "Idempotency Test Student",
+      status: "REGULAR",
+      idempotencyKey: `stud-${suffix}`,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+
+  return studentRecord;
+}
+
+async function createTestInvoice(args: {
+  tx: DbTransaction;
+  parentId: string;
+  studentId: string;
+  suffix: string;
+  now: Date;
+}) {
+  const { tx, parentId, studentId, suffix, now } = args;
+  const invoiceInput: InvoiceInsertInput = {
+    parentId,
+    studentId,
+    issueDate: "2026-06-09",
+    dueDate: "2026-06-16",
+    amount: "100.00",
+    currency: "USD",
+    status: "UNPAID",
+    invoiceType: "PER_CLASSES",
+    idempotencyKey: `inv-${suffix}`,
+    createdAt: now,
+    updatedAt: now,
+  };
+  const [invoiceRecord] = await tx.insert(invoices).values(invoiceInput).returning();
+  return invoiceRecord;
+}
+
 describe("Payment Idempotency", () => {
   test("Unique idempotency key constraint blocks duplicate payment records", async () => {
     testLogger.info("Starting payment idempotency constraint test...");
@@ -35,57 +109,20 @@ describe("Payment Idempotency", () => {
       const now = new Date();
       const uniqueSuffix = randomUUID();
 
-      // 1. Create parent user and parent record
-      const parentEmail = `parent-${uniqueSuffix}@example.com`;
-      const [parentUser] = await tx
-        .insert(users)
-        .values({
-          name: "Idempotency Test Parent",
-          email: parentEmail,
-          password: "securePassword",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-
-      const [parentRecord] = await tx
-        .insert(parents)
-        .values({
-          userId: parentUser.id,
-          status: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-
-      // 2. Create student record
-      const [studentRecord] = await tx
-        .insert(students)
-        .values({
-          parentId: parentRecord.id,
-          name: "Idempotency Test Student",
-          status: "REGULAR",
-          idempotencyKey: `stud-${uniqueSuffix}`,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-
-      // 3. Create invoice record
-      const invoiceInput: InvoiceInsertInput = {
+      const parentRecord = await createTestParent({ tx, suffix: uniqueSuffix, now });
+      const studentRecord = await createTestStudent({
+        tx,
+        parentId: parentRecord.id,
+        suffix: uniqueSuffix,
+        now,
+      });
+      const invoiceRecord = await createTestInvoice({
+        tx,
         parentId: parentRecord.id,
         studentId: studentRecord.id,
-        issueDate: "2026-06-09",
-        dueDate: "2026-06-16",
-        amount: "100.00",
-        currency: "USD",
-        status: "UNPAID",
-        invoiceType: "PER_CLASSES",
-        idempotencyKey: `inv-${uniqueSuffix}`,
-        createdAt: now,
-        updatedAt: now,
-      };
-      const [invoiceRecord] = await tx.insert(invoices).values(invoiceInput).returning();
+        suffix: uniqueSuffix,
+        now,
+      });
 
       // 4. Insert first payment record
       const idempotencyKey = `idemp-${uniqueSuffix}`;

@@ -26,6 +26,68 @@ async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<
   }
 }
 
+async function setupBaseEntities(tx: DbTransaction, now: Date) {
+  const parentEmail = `parent-tz-${randomUUID()}@example.com`;
+  const teacherEmail = `teacher-tz-sch-${randomUUID()}@example.com`;
+
+  const [parentUser] = (await tx
+    .insert(users)
+    .values({
+      name: "Schedule Parent User",
+      email: parentEmail,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [UserEntity];
+
+  const [parent] = (await tx
+    .insert(parents)
+    .values({
+      userId: parentUser.id,
+      status: "REGULAR",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [ParentEntity];
+
+  const [teacherUser] = (await tx
+    .insert(users)
+    .values({
+      name: "Schedule Teacher User",
+      email: teacherEmail,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [UserEntity];
+
+  const [teacher] = (await tx
+    .insert(teachers)
+    .values({
+      userId: teacherUser.id,
+      status: "ACTIVATED",
+      timezone: "UTC",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [TeacherEntity];
+
+  const [student] = (await tx
+    .insert(students)
+    .values({
+      parentId: parent.id,
+      name: "Schedule Student",
+      status: "REGULAR",
+      idempotencyKey: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [StudentEntity];
+
+  return { teacher, student };
+}
+
 describe("Timezone Validation Constraints", () => {
   test("Allows valid timezones for teachers", async () => {
     testLogger.info("Testing valid timezones for teachers...");
@@ -101,63 +163,7 @@ describe("Timezone Validation Constraints", () => {
     testLogger.info("Testing valid timezones for recurring schedules...");
     await runInRollback(async tx => {
       const now = new Date();
-      const parentEmail = `parent-tz-${randomUUID()}@example.com`;
-      const teacherEmail = `teacher-tz-sch-${randomUUID()}@example.com`;
-
-      const [parentUser] = (await tx
-        .insert(users)
-        .values({
-          name: "Schedule Parent User",
-          email: parentEmail,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [parent] = (await tx
-        .insert(parents)
-        .values({
-          userId: parentUser.id,
-          status: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ParentEntity];
-
-      const [teacherUser] = (await tx
-        .insert(users)
-        .values({
-          name: "Schedule Teacher User",
-          email: teacherEmail,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({
-          userId: teacherUser.id,
-          status: "ACTIVATED",
-          timezone: "UTC",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherEntity];
-
-      const [student] = (await tx
-        .insert(students)
-        .values({
-          parentId: parent.id,
-          name: "Schedule Student",
-          status: "REGULAR",
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [StudentEntity];
+      const { teacher, student } = await setupBaseEntities(tx, now);
 
       const [schedule] = (await tx
         .insert(recurringSchedules)
@@ -182,63 +188,7 @@ describe("Timezone Validation Constraints", () => {
     testLogger.info("Testing invalid timezones for recurring schedules...");
     await runInRollback(async tx => {
       const now = new Date();
-      const parentEmail = `parent-tz-inv-${randomUUID()}@example.com`;
-      const teacherEmail = `teacher-tz-sch-inv-${randomUUID()}@example.com`;
-
-      const [parentUser] = (await tx
-        .insert(users)
-        .values({
-          name: "Schedule Parent User",
-          email: parentEmail,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [parent] = (await tx
-        .insert(parents)
-        .values({
-          userId: parentUser.id,
-          status: "REGULAR",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [ParentEntity];
-
-      const [teacherUser] = (await tx
-        .insert(users)
-        .values({
-          name: "Schedule Teacher User",
-          email: teacherEmail,
-          password: "password",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [UserEntity];
-
-      const [teacher] = (await tx
-        .insert(teachers)
-        .values({
-          userId: teacherUser.id,
-          status: "ACTIVATED",
-          timezone: "UTC",
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [TeacherEntity];
-
-      const [student] = (await tx
-        .insert(students)
-        .values({
-          parentId: parent.id,
-          name: "Schedule Student",
-          status: "REGULAR",
-          idempotencyKey: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning()) as [StudentEntity];
+      const { teacher, student } = await setupBaseEntities(tx, now);
 
       try {
         await tx

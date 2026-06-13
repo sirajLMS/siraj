@@ -48,19 +48,21 @@ export namespace AuditRepository {
   /**
    * Internal helper for convenience logging methods
    */
+  type TypedAuditLogInput = {
+    actorUserId: string | null;
+    entityType: Types.AuditEntityType;
+    entityId: string;
+    action: Types.AuditAction;
+    description?: string | null;
+    previousState?: Record<string, unknown> | null;
+    newState?: Record<string, unknown> | null;
+    changes?: Record<string, unknown> | null;
+    metadata?: Record<string, unknown> | null;
+  };
+
   async function createTypedAuditLog(
     tx: DBTransaction | undefined,
-    input: {
-      actorUserId: string | null;
-      entityType: Types.AuditEntityType;
-      entityId: string;
-      action: Types.AuditAction;
-      description?: string | null;
-      previousState?: Record<string, unknown> | null;
-      newState?: Record<string, unknown> | null;
-      changes?: Record<string, unknown> | null;
-      metadata?: Record<string, unknown> | null;
-    }
+    input: TypedAuditLogInput
   ): Promise<Types.AuditLogEntity> {
     return await createAuditLog(
       {
@@ -69,6 +71,51 @@ export namespace AuditRepository {
       },
       tx
     );
+  }
+
+  /**
+   * Internal helper for logging state transitions with automatic change computation
+   */
+  async function logStateTransition(
+    tx: DBTransaction | undefined,
+    input: Omit<TypedAuditLogInput, "changes"> & {
+      previousState: Record<string, unknown> | null;
+      newState: Record<string, unknown> | null;
+    }
+  ): Promise<Types.AuditLogEntity> {
+    return await createTypedAuditLog(tx, {
+      ...input,
+      changes: computeChanges(input.previousState, input.newState),
+    });
+  }
+
+  /**
+   * Internal helper for logging a change to a single field
+   */
+  async function logSingleFieldChange(
+    tx: DBTransaction | undefined,
+    input: {
+      actorUserId: string | null;
+      entityType: Types.AuditEntityType;
+      entityId: string;
+      action: Types.AuditAction;
+      description: string;
+      field: string;
+      oldValue: unknown;
+      newValue: unknown;
+      metadata?: Record<string, unknown> | null;
+    }
+  ): Promise<Types.AuditLogEntity> {
+    return await logStateTransition(tx, {
+      actorUserId: input.actorUserId,
+      entityType: input.entityType,
+      entityId: input.entityId,
+      action: input.action,
+      description: input.description,
+      previousState: { [input.field]: input.oldValue },
+      newState: { [input.field]: input.newValue },
+      metadata: input.metadata,
+    });
   }
 
   /**
@@ -204,22 +251,17 @@ export namespace AuditRepository {
     description?: string;
   }
 
-  export const logStudentStatusChange = async (
-    input: StudentStatusChangeInput,
-    tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity> => {
-    const { studentId, oldStatus, newStatus, actorUserId, description } = input;
-    return await createTypedAuditLog(tx, {
-      actorUserId,
+  export const logStudentStatusChange = (input: StudentStatusChangeInput, tx?: DBTransaction) =>
+    logSingleFieldChange(tx, {
+      actorUserId: input.actorUserId,
       entityType: "STUDENT",
-      entityId: studentId,
+      entityId: input.studentId,
       action: "STATUS_CHANGE",
-      description: description ?? `Status changed from ${oldStatus} to ${newStatus}`,
-      previousState: { status: oldStatus },
-      newState: { status: newStatus },
-      changes: { status: { from: oldStatus, to: newStatus } },
+      description: input.description ?? `Status changed from ${input.oldStatus} to ${input.newStatus}`,
+      field: "status",
+      oldValue: input.oldStatus,
+      newValue: input.newStatus,
     });
-  };
 
   /**
    * Invoice change log input
@@ -235,7 +277,7 @@ export namespace AuditRepository {
 
   export const logInvoiceChange = async (input: InvoiceChangeInput, tx?: DBTransaction): Promise<Types.AuditLogEntity> => {
     const { invoiceId, action, previousState, newState, actorUserId, description } = input;
-    return await createTypedAuditLog(tx, {
+    return await logStateTransition(tx, {
       actorUserId,
       entityType: "INVOICE",
       entityId: invoiceId,
@@ -243,7 +285,6 @@ export namespace AuditRepository {
       description,
       previousState,
       newState,
-      changes: computeChanges(previousState, newState),
     });
   };
 
@@ -318,14 +359,15 @@ export namespace AuditRepository {
     const { rateId, fromCurrency, toCurrency, oldRate, newRate, actorUserId, source } = input;
     const rateDisplay = oldRate ? `${oldRate} → ${newRate}` : newRate;
 
-    return await createTypedAuditLog(tx, {
+    return await logSingleFieldChange(tx, {
       actorUserId,
       entityType: "EXCHANGE_RATE",
       entityId: rateId,
       action: oldRate ? "UPDATE" : "CREATE",
       description: `Exchange rate ${fromCurrency}/${toCurrency}: ${rateDisplay}`,
-      previousState: oldRate ? { rate: oldRate } : null,
-      newState: { rate: newRate },
+      field: "rate",
+      oldValue: oldRate,
+      newValue: newRate,
       metadata: { fromCurrency, toCurrency, source },
     });
   };
@@ -341,20 +383,15 @@ export namespace AuditRepository {
     description?: string;
   }
 
-  export const logSystemSettingChange = async (
-    input: SystemSettingChangeInput,
-    tx?: DBTransaction
-  ): Promise<Types.AuditLogEntity> => {
-    const { settingKey, oldValue, newValue, actorUserId, description } = input;
-    return await createTypedAuditLog(tx, {
-      actorUserId,
+  export const logSystemSettingChange = (input: SystemSettingChangeInput, tx?: DBTransaction) =>
+    logSingleFieldChange(tx, {
+      actorUserId: input.actorUserId,
       entityType: "SYSTEM_SETTING",
-      entityId: settingKey,
+      entityId: input.settingKey,
       action: "UPDATE",
-      description: description ?? `System setting '${settingKey}' changed`,
-      previousState: { value: oldValue },
-      newState: { value: newValue },
-      changes: { value: { from: oldValue, to: newValue } },
+      description: input.description ?? `System setting '${input.settingKey}' changed`,
+      field: "value",
+      oldValue: input.oldValue,
+      newValue: input.newValue,
     });
-  };
 }

@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { DayOfWeek, Gender, VacationRequestStatus } from "../../../lib/enum";
-import { testLogger } from "../../../lib/testlogger";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import { db } from "../drizzleDb";
 import { SchedulingRepository, TeacherAvailabilityRepository } from "../repo";
@@ -28,6 +27,21 @@ async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<
   }
 }
 
+async function createTestUser(tx: DbTransaction, name: string, emailPrefix: string): Promise<UserEntity> {
+  const now = new Date();
+  const [user] = (await tx
+    .insert(users)
+    .values({
+      name,
+      email: `${emailPrefix}-${randomUUID()}@example.com`,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [UserEntity];
+  return user;
+}
+
 async function createBookingFixture(tx: DbTransaction): Promise<{
   teacher: TeacherEntity;
   student: StudentEntity;
@@ -36,38 +50,9 @@ async function createBookingFixture(tx: DbTransaction): Promise<{
 }> {
   const now = new Date();
 
-  const [teacherUser] = (await tx
-    .insert(users)
-    .values({
-      name: "Availability Teacher",
-      email: `teacher-avail-${randomUUID()}@example.com`,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
-
-  const [adminUser] = (await tx
-    .insert(users)
-    .values({
-      name: "Availability Admin",
-      email: `admin-avail-${randomUUID()}@example.com`,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
-
-  const [parentUser] = (await tx
-    .insert(users)
-    .values({
-      name: "Availability Parent",
-      email: `parent-avail-${randomUUID()}@example.com`,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
+  const teacherUser = await createTestUser(tx, "Availability Teacher", "teacher-avail");
+  const adminUser = await createTestUser(tx, "Availability Admin", "admin-avail");
+  const parentUser = await createTestUser(tx, "Availability Parent", "parent-avail");
 
   const [parent] = (await tx
     .insert(parents)
@@ -113,12 +98,80 @@ async function createBookingFixture(tx: DbTransaction): Promise<{
   return { teacher, student, teacherUser, adminUser };
 }
 
-describe("Teacher Availability & Vacation Workflow", () => {
-  test("Allows booking within defined availability window", async () => {
-    testLogger.info("Testing booking within availability window...");
-    await runInRollback(async tx => {
-      const { teacher, student } = await createBookingFixture(tx);
+async function createTestClassInstance(args: {
+  tx: DbTransaction;
+  studentId: string;
+  teacherId: string;
+  start: string | Date;
+  end: string | Date;
+}) {
+  const { tx, studentId, teacherId, start, end } = args;
+  return SchedulingRepository.createClassInstance(
+    {
+      studentId,
+      teacherId,
+      scheduledStartAt: typeof start === "string" ? new Date(start) : start,
+      scheduledEndAt: typeof end === "string" ? new Date(end) : end,
+      durationMinutes: 60,
+      classType: "REGULAR",
+      quotaDeducted: false,
+      idempotencyKey: randomUUID(),
+    },
+    tx
+  );
+}
 
+async function expectBookingToFail(args: {
+  tx: DbTransaction;
+  studentId: string;
+  teacherId: string;
+  start: string;
+  end: string;
+  expectedError: string;
+}) {
+  const { tx, studentId, teacherId, start, end, expectedError } = args;
+  try {
+    await createTestClassInstance({ tx, studentId, teacherId, start, end });
+    expect(true).toBe(false);
+  } catch (error) {
+    const err = error as Error;
+    expect(err.message).toContain(expectedError);
+  }
+}
+
+async function submitTestVacation(args: {
+  tx: DbTransaction;
+  teacherId: string;
+  userId: string;
+  start: string;
+  end: string;
+  reason?: string;
+}) {
+  return TeacherAvailabilityRepository.submitVacationRequest(
+    {
+      teacherId: args.teacherId,
+      requestedByUserId: args.userId,
+      startAt: new Date(args.start),
+      endAt: new Date(args.end),
+      timezone: "UTC",
+      reason: args.reason,
+    },
+    args.tx
+  );
+}
+
+async function runTestInFixture(
+  fn: (tx: DbTransaction, fixture: Awaited<ReturnType<typeof createBookingFixture>>) => Promise<void>
+) {
+  await runInRollback(async tx => {
+    const fixture = await createBookingFixture(tx);
+    await fn(tx, fixture);
+  });
+}
+
+describe("Teacher Availability & Vacation Workflow", () => {
+  test("Allows booking within defined availability window", () =>
+    runTestInFixture(async (tx, { teacher, student }) => {
       await TeacherAvailabilityRepository.addAvailabilityWindow(
         {
           teacherId: teacher.id,
@@ -130,30 +183,19 @@ describe("Teacher Availability & Vacation Workflow", () => {
         tx
       );
 
-      const booking = await SchedulingRepository.createClassInstance(
-        {
-          studentId: student.id,
-          teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-06-24T10:00:00Z"),
-          scheduledEndAt: new Date("2026-06-24T11:00:00Z"),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          quotaDeducted: false,
-          idempotencyKey: randomUUID(),
-        },
-        tx
-      );
+      const booking = await createTestClassInstance({
+        tx,
+        studentId: student.id,
+        teacherId: teacher.id,
+        start: "2026-06-24T10:00:00Z",
+        end: "2026-06-24T11:00:00Z",
+      });
 
       expect(booking.id).toBeDefined();
-    });
-    testLogger.info("Availability window booking test passed.");
-  });
+    }));
 
-  test("Blocks booking outside defined availability windows", async () => {
-    testLogger.info("Testing booking outside availability window...");
-    await runInRollback(async tx => {
-      const { teacher, student } = await createBookingFixture(tx);
-
+  test("Blocks booking outside defined availability windows", () =>
+    runTestInFixture(async (tx, { teacher, student }) => {
       await TeacherAvailabilityRepository.addAvailabilityWindow(
         {
           teacherId: teacher.id,
@@ -165,34 +207,18 @@ describe("Teacher Availability & Vacation Workflow", () => {
         tx
       );
 
-      try {
-        await SchedulingRepository.createClassInstance(
-          {
-            studentId: student.id,
-            teacherId: teacher.id,
-            scheduledStartAt: new Date("2026-06-24T14:00:00Z"),
-            scheduledEndAt: new Date("2026-06-24T15:00:00Z"),
-            durationMinutes: 60,
-            classType: "REGULAR",
-            quotaDeducted: false,
-            idempotencyKey: randomUUID(),
-          },
-          tx
-        );
-        expect(true).toBe(false);
-      } catch (error) {
-        const err = error as Error;
-        expect(err.message).toContain("outside teacher availability windows");
-      }
-    });
-    testLogger.info("Outside availability window test passed.");
-  });
+      await expectBookingToFail({
+        tx,
+        studentId: student.id,
+        teacherId: teacher.id,
+        start: "2026-06-24T14:00:00Z",
+        end: "2026-06-24T15:00:00Z",
+        expectedError: "outside teacher availability windows",
+      });
+    }));
 
-  test("Blocks booking during recurring unavailability pattern", async () => {
-    testLogger.info("Testing recurring unavailability block...");
-    await runInRollback(async tx => {
-      const { teacher, student } = await createBookingFixture(tx);
-
+  test("Blocks booking during recurring unavailability pattern", () =>
+    runTestInFixture(async (tx, { teacher, student }) => {
       await TeacherAvailabilityRepository.addRecurringUnavailability(
         {
           teacherId: teacher.id,
@@ -205,61 +231,36 @@ describe("Teacher Availability & Vacation Workflow", () => {
         tx
       );
 
-      try {
-        await SchedulingRepository.createClassInstance(
-          {
-            studentId: student.id,
-            teacherId: teacher.id,
-            scheduledStartAt: new Date("2026-06-26T12:30:00Z"),
-            scheduledEndAt: new Date("2026-06-26T13:30:00Z"),
-            durationMinutes: 60,
-            classType: "REGULAR",
-            quotaDeducted: false,
-            idempotencyKey: randomUUID(),
-          },
-          tx
-        );
-        expect(true).toBe(false);
-      } catch (error) {
-        const err = error as Error;
-        expect(err.message).toContain("recurring unavailability");
-      }
-    });
-    testLogger.info("Recurring unavailability test passed.");
-  });
+      await expectBookingToFail({
+        tx,
+        studentId: student.id,
+        teacherId: teacher.id,
+        start: "2026-06-26T12:30:00Z",
+        end: "2026-06-26T13:30:00Z",
+        expectedError: "recurring unavailability",
+      });
+    }));
 
-  test("Blocks booking during approved vacation but not pending vacation", async () => {
-    testLogger.info("Testing vacation request workflow...");
-    await runInRollback(async tx => {
-      const { teacher, student, teacherUser, adminUser } = await createBookingFixture(tx);
-
-      const vacation = await TeacherAvailabilityRepository.submitVacationRequest(
-        {
-          teacherId: teacher.id,
-          requestedByUserId: teacherUser.id,
-          startAt: new Date("2026-07-01T00:00:00Z"),
-          endAt: new Date("2026-07-10T23:59:59Z"),
-          timezone: "UTC",
-          reason: "Summer vacation",
-        },
-        tx
-      );
+  test("Blocks booking during approved vacation but not pending vacation", () =>
+    runTestInFixture(async (tx, { teacher, student, teacherUser, adminUser }) => {
+      const vacation = await submitTestVacation({
+        tx,
+        teacherId: teacher.id,
+        userId: teacherUser.id,
+        start: "2026-07-01T00:00:00Z",
+        end: "2026-07-10T23:59:59Z",
+        reason: "Summer vacation",
+      });
 
       expect(vacation.status).toBe(VacationRequestStatus.PENDING);
 
-      const pendingBooking = await SchedulingRepository.createClassInstance(
-        {
-          studentId: student.id,
-          teacherId: teacher.id,
-          scheduledStartAt: new Date("2026-07-05T10:00:00Z"),
-          scheduledEndAt: new Date("2026-07-05T11:00:00Z"),
-          durationMinutes: 60,
-          classType: "REGULAR",
-          quotaDeducted: false,
-          idempotencyKey: randomUUID(),
-        },
-        tx
-      );
+      const pendingBooking = await createTestClassInstance({
+        tx,
+        studentId: student.id,
+        teacherId: teacher.id,
+        start: "2026-07-05T10:00:00Z",
+        end: "2026-07-05T11:00:00Z",
+      });
 
       expect(pendingBooking.id).toBeDefined();
 
@@ -273,44 +274,25 @@ describe("Teacher Availability & Vacation Workflow", () => {
 
       expect(approved.status).toBe(VacationRequestStatus.APPROVED);
 
-      try {
-        await SchedulingRepository.createClassInstance(
-          {
-            studentId: student.id,
-            teacherId: teacher.id,
-            scheduledStartAt: new Date("2026-07-06T10:00:00Z"),
-            scheduledEndAt: new Date("2026-07-06T11:00:00Z"),
-            durationMinutes: 60,
-            classType: "REGULAR",
-            quotaDeducted: false,
-            idempotencyKey: randomUUID(),
-          },
-          tx
-        );
-        expect(true).toBe(false);
-      } catch (error) {
-        const err = error as Error;
-        expect(err.message).toContain("approved vacation");
-      }
-    });
-    testLogger.info("Vacation workflow test passed.");
-  });
+      await expectBookingToFail({
+        tx,
+        studentId: student.id,
+        teacherId: teacher.id,
+        start: "2026-07-06T10:00:00Z",
+        end: "2026-07-06T11:00:00Z",
+        expectedError: "approved vacation",
+      });
+    }));
 
-  test("Supports vacation rejection and cancellation workflow", async () => {
-    testLogger.info("Testing vacation rejection and cancellation...");
-    await runInRollback(async tx => {
-      const { teacher, teacherUser, adminUser } = await createBookingFixture(tx);
-
-      const vacation = await TeacherAvailabilityRepository.submitVacationRequest(
-        {
-          teacherId: teacher.id,
-          requestedByUserId: teacherUser.id,
-          startAt: new Date("2026-08-01T00:00:00Z"),
-          endAt: new Date("2026-08-05T23:59:59Z"),
-          timezone: "UTC",
-        },
-        tx
-      );
+  test("Supports vacation rejection and cancellation workflow", () =>
+    runTestInFixture(async (tx, { teacher, teacherUser, adminUser }) => {
+      const vacation = await submitTestVacation({
+        tx,
+        teacherId: teacher.id,
+        userId: teacherUser.id,
+        start: "2026-08-01T00:00:00Z",
+        end: "2026-08-05T23:59:59Z",
+      });
 
       const rejected = await TeacherAvailabilityRepository.rejectVacationRequest(
         {
@@ -322,20 +304,15 @@ describe("Teacher Availability & Vacation Workflow", () => {
 
       expect(rejected.status).toBe(VacationRequestStatus.REJECTED);
 
-      const secondVacation = await TeacherAvailabilityRepository.submitVacationRequest(
-        {
-          teacherId: teacher.id,
-          requestedByUserId: teacherUser.id,
-          startAt: new Date("2026-09-01T00:00:00Z"),
-          endAt: new Date("2026-09-05T23:59:59Z"),
-          timezone: "UTC",
-        },
-        tx
-      );
+      const secondVacation = await submitTestVacation({
+        tx,
+        teacherId: teacher.id,
+        userId: teacherUser.id,
+        start: "2026-09-01T00:00:00Z",
+        end: "2026-09-05T23:59:59Z",
+      });
 
       const cancelled = await TeacherAvailabilityRepository.cancelVacationRequest(secondVacation.id, tx);
       expect(cancelled.status).toBe(VacationRequestStatus.CANCELLED);
-    });
-    testLogger.info("Vacation rejection and cancellation test passed.");
-  });
+    }));
 });

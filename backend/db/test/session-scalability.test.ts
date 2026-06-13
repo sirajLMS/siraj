@@ -41,6 +41,30 @@ async function createTestUser(tx: DbTransaction, email: string) {
   return user;
 }
 
+// Helper to create test session
+async function setupTestSession(
+  tx: DbTransaction,
+  emailPrefix: string,
+  overrides: Partial<Parameters<typeof SessionRepository.create>[0]> = {}
+) {
+  const user = await createTestUser(tx, `${emailPrefix}-${randomUUID()}@example.com`);
+  const sessionId = overrides.hashedId || `session-${randomUUID()}`;
+
+  const session = await SessionRepository.create(
+    {
+      hashedId: sessionId,
+      userId: user.id,
+      payload: JSON.stringify({ test: "data" }),
+      ipAddress: IP_ADDRESS_1,
+      userAgent: "Mozilla/5.0",
+      ...overrides,
+    },
+    tx
+  );
+
+  return { user, sessionId, session };
+}
+
 describe("Session Scalability and Redis Integration", () => {
   let redisService: ReturnType<typeof getRedisService>;
 
@@ -115,21 +139,10 @@ describe("Session Scalability and Redis Integration", () => {
   describe("Redis Session Storage", () => {
     it("should create session in Redis and store metadata in PostgreSQL", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `redis-test-${randomUUID()}@example.com`);
-        const sessionId = `session-${randomUUID()}`;
-
-        const session = await SessionRepository.create(
-          {
-            hashedId: sessionId,
-            userId: user.id,
-            payload: JSON.stringify({ test: "data" }),
-            ipAddress: IP_ADDRESS_1,
-            userAgent: "Mozilla/5.0",
-            deviceType: "desktop",
-            deviceName: "Test Device",
-          },
-          tx
-        );
+        const { user, sessionId, session } = await setupTestSession(tx, "redis-test", {
+          deviceType: "desktop",
+          deviceName: "Test Device",
+        });
 
         expect(session.hashedId).toBe(sessionId);
         expect(session.userId).toBe(user.id);
@@ -153,19 +166,11 @@ describe("Session Scalability and Redis Integration", () => {
 
     it("should retrieve session from Redis", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `redis-retrieve-${randomUUID()}@example.com`);
-        const sessionId = `session-${randomUUID()}`;
-
-        await SessionRepository.create(
-          {
-            hashedId: sessionId,
-            userId: user.id,
-            payload: JSON.stringify({ role: "admin" }),
-            ipAddress: IP_ADDRESS_2,
-            userAgent: "Test Agent",
-          },
-          tx
-        );
+        const { user, sessionId } = await setupTestSession(tx, "redis-retrieve", {
+          payload: JSON.stringify({ role: "admin" }),
+          ipAddress: IP_ADDRESS_2,
+          userAgent: "Test Agent",
+        });
 
         const retrieved = await SessionRepository.findSessionById(sessionId);
 
@@ -183,17 +188,7 @@ describe("Session Scalability and Redis Integration", () => {
 
     it("should update session last activity and extend TTL", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `redis-update-${randomUUID()}@example.com`);
-        const sessionId = `session-${randomUUID()}`;
-
-        await SessionRepository.create(
-          {
-            hashedId: sessionId,
-            userId: user.id,
-            payload: JSON.stringify({ test: "data" }),
-          },
-          tx
-        );
+        const { user, sessionId } = await setupTestSession(tx, "redis-update");
 
         // Wait a moment
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -219,17 +214,7 @@ describe("Session Scalability and Redis Integration", () => {
 
     it("should validate session and update last activity", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `redis-validate-${randomUUID()}@example.com`);
-        const sessionId = `session-${randomUUID()}`;
-
-        await SessionRepository.create(
-          {
-            hashedId: sessionId,
-            userId: user.id,
-            payload: JSON.stringify({ test: "data" }),
-          },
-          tx
-        );
+        const { user, sessionId } = await setupTestSession(tx, "redis-validate");
 
         const validated = await SessionRepository.validate(sessionId);
 
@@ -254,17 +239,7 @@ describe("Session Scalability and Redis Integration", () => {
 
     it("should delete session from Redis and PostgreSQL", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `redis-delete-${randomUUID()}@example.com`);
-        const sessionId = `session-${randomUUID()}`;
-
-        await SessionRepository.create(
-          {
-            hashedId: sessionId,
-            userId: user.id,
-            payload: JSON.stringify({ test: "data" }),
-          },
-          tx
-        );
+        const { sessionId } = await setupTestSession(tx, "redis-delete");
 
         const deleted = await SessionRepository.deleteSessionById(sessionId, tx);
 
@@ -619,17 +594,7 @@ describe("Session Scalability and Redis Integration", () => {
 
     it("should filter out expired metadata", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `expired-metadata-${randomUUID()}@example.com`);
-
-        const sessionId = `session-${randomUUID()}`;
-        await SessionRepository.create(
-          {
-            hashedId: sessionId,
-            userId: user.id,
-            payload: JSON.stringify({ test: "data" }),
-          },
-          tx
-        );
+        const { user, sessionId } = await setupTestSession(tx, "expired-metadata");
 
         // Verify metadata exists
         const metadata = await SessionRepository.getUserSessionMetadata(user.id, tx);
@@ -646,17 +611,7 @@ describe("Session Scalability and Redis Integration", () => {
   describe("Session TTL", () => {
     it("should get session TTL from Redis", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `ttl-test-${randomUUID()}@example.com`);
-        const sessionId = `session-${randomUUID()}`;
-
-        await SessionRepository.create(
-          {
-            hashedId: sessionId,
-            userId: user.id,
-            payload: JSON.stringify({ test: "data" }),
-          },
-          tx
-        );
+        const { sessionId } = await setupTestSession(tx, "ttl-test");
 
         const ttl = await SessionRepository.getSessionTTL(sessionId);
 

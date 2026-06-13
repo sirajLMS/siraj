@@ -169,9 +169,25 @@ export namespace StorageDbRepository {
     const fId = file.id;
     const fPath = file.path;
 
-    const [
-      users, teachers, students_res, parents, invoices, complaints, resources, staff, schedules, instances
-    ] = await Promise.all([
+    const [users, teachers, students_res, parents, invoices, complaints, resources, staff, schedules, instances] =
+      await fetchAllUsages(fId);
+
+    return [
+      ...users.map(r => mapRowToUsage(r, fPath, r.userId, "users")),
+      ...teachers.map(r => mapRowToUsage(r, fPath, r.teacherId, "teachers")),
+      ...students_res.map(r => mapRowToUsage(r, fPath, r.studentId, "students")),
+      ...parents.map(r => mapRowToUsage(r, fPath, r.parentId, "parents")),
+      ...invoices.map(r => mapRowToUsage(r, fPath, r.invoiceId, "invoices")),
+      ...complaints.map(r => mapRowToUsage(r, fPath, r.complaintId, "complaints")),
+      ...resources.map(r => mapRowToUsage(r, fPath, r.learningResourceId, "learning_resources")),
+      ...staff.map(r => mapRowToUsage(r, fPath, r.staffProfileId, "staff_profiles")),
+      ...schedules.map(r => mapRowToUsage(r, fPath, r.recurringScheduleId, "recurring_schedules")),
+      ...instances.map(r => mapRowToUsage(r, fPath, r.classInstanceId, "class_instances")),
+    ];
+  };
+
+  async function fetchAllUsages(fId: string) {
+    return Promise.all([
       db.select().from(userFiles).where(eq(userFiles.fileId, fId)),
       db.select().from(teacherFiles).where(eq(teacherFiles.fileId, fId)),
       db.select().from(studentFiles).where(eq(studentFiles.fileId, fId)),
@@ -183,28 +199,39 @@ export namespace StorageDbRepository {
       db.select().from(recurringScheduleFiles).where(eq(recurringScheduleFiles.fileId, fId)),
       db.select().from(classInstanceFiles).where(eq(classInstanceFiles.fileId, fId)),
     ]);
+  }
 
-    return [
-      ...users.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.userId, referenceTable: "users", createdAt: r.createdAt })),
-      ...teachers.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.teacherId, referenceTable: "teachers", createdAt: r.createdAt })),
-      ...students_res.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.studentId, referenceTable: "students", createdAt: r.createdAt })),
-      ...parents.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.parentId, referenceTable: "parents", createdAt: r.createdAt })),
-      ...invoices.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.invoiceId, referenceTable: "invoices", createdAt: r.createdAt })),
-      ...complaints.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.complaintId, referenceTable: "complaints", createdAt: r.createdAt })),
-      ...resources.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.learningResourceId, referenceTable: "learning_resources", createdAt: r.createdAt })),
-      ...staff.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.staffProfileId, referenceTable: "staff_profiles", createdAt: r.createdAt })),
-      ...schedules.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.recurringScheduleId, referenceTable: "recurring_schedules", createdAt: r.createdAt })),
-      ...instances.map(r => ({ id: r.id, filePath: fPath, usageType: r.usageType, referenceId: r.classInstanceId, referenceTable: "class_instances", createdAt: r.createdAt })),
-    ];
-  };
+  function mapRowToUsage(
+    r: { id: string; usageType: string; createdAt: Date },
+    filePath: string,
+    referenceId: string,
+    referenceTable: string
+  ): StorageTypes.FileUsageInfo {
+    return {
+      id: r.id,
+      filePath,
+      usageType: r.usageType,
+      referenceId,
+      referenceTable,
+      createdAt: r.createdAt,
+    };
+  }
 
   export const isFileInUse = async (filePath: string): Promise<boolean> => {
     const file = await fileByPath(filePath);
     if (!file) return false;
 
     const tables = [
-      userFiles, teacherFiles, studentFiles, parentFiles, invoiceFiles,
-      complaintFiles, learningResourceFiles, staffProfileFiles, recurringScheduleFiles, classInstanceFiles
+      userFiles,
+      teacherFiles,
+      studentFiles,
+      parentFiles,
+      invoiceFiles,
+      complaintFiles,
+      learningResourceFiles,
+      staffProfileFiles,
+      recurringScheduleFiles,
+      classInstanceFiles,
     ];
 
     for (const table of tables) {
@@ -269,13 +296,17 @@ export namespace StorageDbRepository {
         await db.insert(complaintFiles).values({ fileId, complaintId: refId, usageType: type, createdAt });
         break;
       case "learning_resources":
-        await db.insert(learningResourceFiles).values({ fileId, learningResourceId: refId, usageType: type, createdAt });
+        await db
+          .insert(learningResourceFiles)
+          .values({ fileId, learningResourceId: refId, usageType: type, createdAt });
         break;
       case "staff_profiles":
         await db.insert(staffProfileFiles).values({ fileId, staffProfileId: refId, usageType: type, createdAt });
         break;
       case "recurring_schedules":
-        await db.insert(recurringScheduleFiles).values({ fileId, recurringScheduleId: refId, usageType: type, createdAt });
+        await db
+          .insert(recurringScheduleFiles)
+          .values({ fileId, recurringScheduleId: refId, usageType: type, createdAt });
         break;
       case "class_instances":
         await db.insert(classInstanceFiles).values({ fileId, classInstanceId: refId, usageType: type, createdAt });
@@ -294,20 +325,7 @@ export namespace StorageDbRepository {
       const file = await fileByPath(filePath);
       if (!file) return true;
 
-      const fileId = file.id;
-
-      await Promise.all([
-        db.delete(userFiles).where(and(eq(userFiles.fileId, fileId), eq(userFiles.usageType, usageType), eq(userFiles.userId, referenceId))),
-        db.delete(teacherFiles).where(and(eq(teacherFiles.fileId, fileId), eq(teacherFiles.usageType, usageType), eq(teacherFiles.teacherId, referenceId))),
-        db.delete(studentFiles).where(and(eq(studentFiles.fileId, fileId), eq(studentFiles.usageType, usageType), eq(studentFiles.studentId, referenceId))),
-        db.delete(parentFiles).where(and(eq(parentFiles.fileId, fileId), eq(parentFiles.usageType, usageType), eq(parentFiles.parentId, referenceId))),
-        db.delete(invoiceFiles).where(and(eq(invoiceFiles.fileId, fileId), eq(invoiceFiles.usageType, usageType), eq(invoiceFiles.invoiceId, referenceId))),
-        db.delete(complaintFiles).where(and(eq(complaintFiles.fileId, fileId), eq(complaintFiles.usageType, usageType), eq(complaintFiles.complaintId, referenceId))),
-        db.delete(learningResourceFiles).where(and(eq(learningResourceFiles.fileId, fileId), eq(learningResourceFiles.usageType, usageType), eq(learningResourceFiles.learningResourceId, referenceId))),
-        db.delete(staffProfileFiles).where(and(eq(staffProfileFiles.fileId, fileId), eq(staffProfileFiles.usageType, usageType), eq(staffProfileFiles.staffProfileId, referenceId))),
-        db.delete(recurringScheduleFiles).where(and(eq(recurringScheduleFiles.fileId, fileId), eq(recurringScheduleFiles.usageType, usageType), eq(recurringScheduleFiles.recurringScheduleId, referenceId))),
-        db.delete(classInstanceFiles).where(and(eq(classInstanceFiles.fileId, fileId), eq(classInstanceFiles.usageType, usageType), eq(classInstanceFiles.classInstanceId, referenceId))),
-      ]);
+      await deleteUsagesFromAllTables(file.id, usageType, referenceId);
 
       return true;
     } catch (error) {
@@ -316,8 +334,25 @@ export namespace StorageDbRepository {
     }
   };
 
+  async function deleteUsagesFromAllTables(fileId: string, usageType: string, referenceId: string) {
+    await Promise.all([
+      db.delete(userFiles).where(and(eq(userFiles.fileId, fileId), eq(userFiles.usageType, usageType), eq(userFiles.userId, referenceId))),
+      db.delete(teacherFiles).where(and(eq(teacherFiles.fileId, fileId), eq(teacherFiles.usageType, usageType), eq(teacherFiles.teacherId, referenceId))),
+      db.delete(studentFiles).where(and(eq(studentFiles.fileId, fileId), eq(studentFiles.usageType, usageType), eq(studentFiles.studentId, referenceId))),
+      db.delete(parentFiles).where(and(eq(parentFiles.fileId, fileId), eq(parentFiles.usageType, usageType), eq(parentFiles.parentId, referenceId))),
+      db.delete(invoiceFiles).where(and(eq(invoiceFiles.fileId, fileId), eq(invoiceFiles.usageType, usageType), eq(invoiceFiles.invoiceId, referenceId))),
+      db.delete(complaintFiles).where(and(eq(complaintFiles.fileId, fileId), eq(complaintFiles.usageType, usageType), eq(complaintFiles.complaintId, referenceId))),
+      db.delete(learningResourceFiles).where(and(eq(learningResourceFiles.fileId, fileId), eq(learningResourceFiles.usageType, usageType), eq(learningResourceFiles.learningResourceId, referenceId))),
+      db.delete(staffProfileFiles).where(and(eq(staffProfileFiles.fileId, fileId), eq(staffProfileFiles.usageType, usageType), eq(staffProfileFiles.staffProfileId, referenceId))),
+      db.delete(recurringScheduleFiles).where(and(eq(recurringScheduleFiles.fileId, fileId), eq(recurringScheduleFiles.usageType, usageType), eq(recurringScheduleFiles.recurringScheduleId, referenceId))),
+      db.delete(classInstanceFiles).where(and(eq(classInstanceFiles.fileId, fileId), eq(classInstanceFiles.usageType, usageType), eq(classInstanceFiles.classInstanceId, referenceId))),
+    ]);
+  }
+
   // Business logic methods
-  export const checkFileUsage = async (input: StorageTypes.FileUsageCheckInput): Promise<StorageTypes.FileUsageResult> => {
+  export const checkFileUsage = async (
+    input: StorageTypes.FileUsageCheckInput
+  ): Promise<StorageTypes.FileUsageResult> => {
     try {
       const usages = await getFileUsages(input.path);
       const isInUse = usages.length > 0;
