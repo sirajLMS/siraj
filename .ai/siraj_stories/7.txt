@@ -1,0 +1,81 @@
+Siraj LMS - Video Specifications (Part 8: 00:00 - 02:02)
+
+1. Schedule Management - Deleting Classes & Clearing Schedules
+
+User Stories
+
+As an Admin, I want to delete a specific recurring class from a teacher's schedule so that I can correct scheduling errors or remove obsolete assignments.
+
+As an Admin, I want to clear a teacher's entire weekly schedule with a single action so that I can quickly reset their availability from scratch.
+
+As an Admin, I want the system to prompt me for confirmation before deleting a schedule so that I don't accidentally erase important data.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin clicks the small delete icon (trash can) on a specific scheduled class block within the teacher's weekly grid.
+
+Expected Input: Mouse click event.
+
+Expected Result: A confirmation view mounts displaying the message: "Are you sure that you want to delete this class?" with "YES" and "NO" buttons. Clicking "YES" removes the class from the database and re-renders the grid.
+
+Action Taken: Admin clicks the primary delete button (red trash can icon) at the top right of the weekly schedule header.
+
+Expected Input: Mouse click event.
+
+Expected Result: A global confirmation view mounts displaying: "Are you sure that you want to delete the schedule?". Clicking "YES" completely clears all classes assigned to that specific teacher for the week.
+
+2. Teacher Profile Management
+
+User Stories
+
+As an Admin, I want to edit a teacher's comprehensive profile so that I can update their personal details, salary arrangements, and virtual meeting links.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin navigates to the Teachers Directory and clicks the "Options" icon (person with a gear/pencil) in a specific teacher's row.
+
+Expected Input: Mouse click event.
+
+Expected Result: The system routes to the "Edit Teacher Profile" page. This page mounts a large form categorized into sections including Teacher Information (Name, Email, National ID, Phone, Age, Gender), Salary Details (Amount, Currency, Bank Info), and Official Details (Zoom Link, Zoom Username/Password, Country, Timezone).
+
+3. Global Bulk Action - Daylight Saving Time (DST) Update
+
+User Stories
+
+As a System Administrator, I want to run a global "Update Schedules" script so that the system automatically shifts all recurring classes to account for Summer/Winter Daylight Saving Time changes across different timezones.
+
+As an Admin, I want the system to generate a conflict report after a DST update so that I can manually resolve any classes that now overlap due to the time shift.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin navigates to the Teachers Directory and clicks the "Update Schedules" button located above the main table.
+
+Expected Input: Mouse click event.
+
+Expected Result: The system executes a bulk update algorithm across all schedules to adjust for Daylight Saving Time. The Admin is redirected to a "Daylight saving time" results page.
+
+Action Taken: Admin reviews the "Daylight saving time" report page.
+
+Expected Input: None (Page Load).
+
+Expected Result: The system renders a detailed execution report categorized into distinct sections:
+
+Updated: Lists classes successfully shifted without conflict.
+
+Error: Lists classes that failed to update due to scheduling collisions (e.g., the newly calculated time overlaps with another existing class). It details the teacher, the original time, and the conflicting new time.
+
+Checked / Empty: Lists schedules that required no changes or had no active classes to update.
+
+4. Parents Directory Overview
+
+User Stories
+
+As an Admin, I want to view a "Parents List" directory so that I can see all registered parent accounts and their aggregated system statuses (Regular, On Leave, Suspended, etc.).
+
+Actions & Expected Outcomes
+
+Action Taken: Admin clicks the "Parents" link from the main sidebar navigation.
+
+Expected Input: Mouse click event.
+
+Expected Result: The system navigates to the Parents Directory. The top of the page renders metric cards summarizing parent statuses (Activated, Deactivated, Regular, On Leave, Suspended, On Trial). A searchable data table renders below containing columns for #, Image, Name, Email, Time, Status, Unpaid Invoices, and Options.

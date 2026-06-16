@@ -1,0 +1,67 @@
+Siraj LMS - Video Specifications (Part 2: 00:00 - 02:01)
+
+1. Admin Dashboard - Global Search & Cross-Timezone Views
+
+User Stories
+
+As an Admin, I want to use a global search bar on the daily schedule so that I can instantly locate a specific class by typing a student or teacher's name.
+
+As an Admin, I want the schedule table to display the class time localized to my timezone, the teacher's timezone, and the student's timezone so that I can manage scheduling without doing manual timezone conversions.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin types a partial or full name (e.g., "fay") into the "Search" input field above the class table.
+
+Expected Input: String character input.
+
+Expected Result: The schedule table dynamically filters its rows in real-time to display only records where the Teacher or Student name matches the input string.
+
+Action Taken: Admin views a specific class row in the table.
+
+Expected Input: None.
+
+Expected Result: The row displays three distinct time columns: Your Time (calculated based on the Admin's system/browser locale), Teacher Time (calculated based on the Teacher's stored timezone), and Student Time (calculated based on the Student's stored timezone).
+
+2. Student Class History & Detailed Session View
+
+User Stories
+
+As an Admin, I want to click on a specific date within a student's monthly history calendar so that I can inspect the granular details of that day's class session.
+
+As an Admin, I want to view an "Actions" toolbar within the class details view so that I can oversee or override the actions available to the teacher for that session.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin clicks on a populated date cell (e.g., "29th") within the Student's "Class History" monthly grid.
+
+Expected Input: Mouse click on a valid date cell link.
+
+Expected Result: The system navigates to the "Class Details" view (/history-details.php), fetching and displaying the session metadata: Student Name, Teacher Name, Date, Start-End Time, Duration, Class Status, Remarks, and Description.
+
+Action Taken: Admin reviews the "Actions" toolbar at the top of the Class Details page.
+
+Expected Input: None.
+
+Expected Result: A toolbar is rendered containing action buttons (Activate/Play, Stop, User, Delete/Cancel) mirroring the control panel available to the teacher during a live session. A timezone disclaimer note is also prominently displayed.
+
+3. Teacher Dashboard & Time-Bound Class Activation Logic
+
+User Stories
+
+As a Teacher, I want to view my personalized daily schedule upon logging in so that I know exactly which students I am teaching and when.
+
+As a System Administrator, I want the system to enforce a strict time window for class activation (e.g., allowing activation only 5 minutes before and during the scheduled time) so that teachers cannot accidentally or maliciously start classes out of schedule.
+
+Actions & Expected Outcomes
+
+Action Taken: User logs in using Teacher credentials.
+
+Expected Input: Valid Teacher Username/Password.
+
+Expected Result: The system authenticates the user and routes them to the Teacher Dashboard (/teacher-home). The table renders a personalized view showing only that teacher's assigned classes, with columns including a Zoom integration icon and an "Activate" action button.
+
+Action Taken: Teacher clicks the "Activate" button (red play icon) on a class record that is outside the permitted time window (e.g., a class scheduled for 1:00 AM clicked at 12:40 PM).
+
+Expected Input: Mouse click on the Activate button.
+
+Expected Result: The system evaluates the current server/local time against the scheduled class time window. Because the request falls outside the allowed buffer (5 minutes before to the end of the duration), the activation is blocked, and an inline error banner/toast is displayed stating: "YOU MISSED THE CLASS TIME".

@@ -1,0 +1,67 @@
+Siraj LMS - Video Specifications (Part 7: 00:00 - 02:02)
+
+1. Teachers Directory & Quick Actions
+
+User Stories
+
+As an Admin, I want to view a comprehensive list of all teachers in the system so that I can manage their accounts, view their contact information, and access their personal schedules.
+
+As an Admin, I want to see a top-level summary of active versus deactivated teachers so that I have a quick understanding of my available workforce.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin clicks the "Teachers" link from the main sidebar navigation menu.
+
+Expected Input: Mouse click event.
+
+Expected Result: The system navigates to the Teachers Directory (/teachers.php). The page renders top metric cards showing "Activated" (e.g., 13) and "Deactivated" (e.g., 0) teacher counts. A data table is populated below containing columns for: #, Image, Name, Email, Zoom (Link/Icon), Schedule (Action Icon), and Options (Action Icons).
+
+Action Taken: Admin clicks the "Schedule" action icon (calendar symbol) in the row corresponding to a specific teacher (e.g., Abdullah Fekry).
+
+Expected Input: Mouse click event (passing Teacher ID).
+
+Expected Result: The system routes the Admin to that specific teacher's dedicated Weekly Schedule view.
+
+2. Teacher Weekly Schedule View
+
+User Stories
+
+As an Admin, I want to view a specific teacher's entire weekly schedule in a calendar grid format so that I can easily visualize their daily workload and availability.
+
+As an Admin, I want to see a calculated total of "Weekly hours worked" for the teacher so that I can monitor their workload capacity and payroll estimates.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin views the teacher's Weekly Schedule page.
+
+Expected Input: None (Page Load).
+
+Expected Result: The page renders a header with the teacher's name (e.g., "Abdullah Fekry's Schedule") and a metric badge displaying "Weekly hours worked" (e.g., 15:00). A large weekly grid (Monday through Sunday) is rendered, with vertical time slots. Existing scheduled classes populate the grid as colored blocks detailing the Student Name and Class Duration.
+
+3. Adding & Configuring New Classes
+
+User Stories
+
+As an Admin, I want to assign a new student to a teacher's schedule by selecting the student, time, duration, and recurring days so that the system automatically builds the class routine.
+
+As an Admin, I want the ability to set a custom time override for a specific day within a recurring schedule so that I can accommodate students with irregular weekly availability (e.g., 1:00 AM on Monday, but 3:00 AM on Wednesday).
+
+Actions & Expected Outcomes
+
+Action Taken: Admin clicks the prominent "+" (Add) button located at the top right of the teacher's schedule grid.
+
+Expected Input: Mouse click event.
+
+Expected Result: An "Add Class" form or modal mounts over the UI. The form contains the following inputs: Students (Dropdown list), Time (Time picker), Duration (Hours and Minutes selectors), and Days (Checkboxes for Mon-Sun).
+
+Action Taken: Admin clicks the smaller "+" icon next to a specific day checkbox (e.g., next to "Tuesday").
+
+Expected Input: Mouse click event.
+
+Expected Result: A dynamic time input field appears specifically for that day, allowing the admin to set a custom time that overrides the primary Time set at the top of the form.
+
+Action Taken: Admin fills out the form (e.g., selects Student "Warda", sets Time to 01:00 AM, Duration to 3 Hours, selects days Monday, Wednesday, Thursday) and clicks the "ADD" submit button.
+
+Expected Input: Student ID, Time String, Duration Object, Days Array.
+
+Expected Result: The system validates and saves the new recurring class schedule to the database. The modal unmounts, an "Added Successfully" notification appears, and the weekly schedule grid automatically updates to display the newly created class blocks in the designated time slots.

@@ -1,0 +1,59 @@
+Siraj LMS - Video Specifications (Part 13: 00:00 - 01:56)
+
+1. Learning Resources Management (Upload & Delete)
+
+User Stories
+
+As an Admin, I want to select and upload a document from my local device into the Learning Resources repository so that official materials are available to the teaching staff.
+
+As an Admin, I want to delete an existing resource from the repository so that obsolete or incorrect materials are permanently removed from the system.
+
+As an Admin, I want the system to prompt me for confirmation before deleting a resource so that I don't accidentally erase important academy files.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin navigates to the "Resources" module, inputs a "Doc Name", clicks "Choose A Document" to select a file from their device, and clicks "UPLOAD".
+
+Expected Input: Document Name (String), File Object (e.g., a .pdf file).
+
+Expected Result: The file is uploaded to the server, a database record is created, and the UI re-renders to display the newly added document as a visible card/grid item with a delete icon.
+
+Action Taken: Admin clicks the "Delete" action icon (red trash can) on a specific resource card.
+
+Expected Input: Mouse click event.
+
+Expected Result: A confirmation prompt mounts displaying: "Are you sure that you want to delete this resource?" with "YES" and "NO" buttons.
+
+Action Taken: Admin clicks "YES" on the confirmation prompt.
+
+Expected Input: Mouse click event.
+
+Expected Result: The system permanently deletes the file from storage and removes the record from the database. The UI updates to remove the resource card.
+
+2. Custom Reports Generation & Financial Aggregation
+
+User Stories
+
+As an Admin, I want to generate a custom performance and payroll report across a specific date range so that I can audit academy operations for the month.
+
+As an Admin, I want to group the report data dynamically (e.g., "Group by Date" or "Group by Teacher") so that I can view aggregated metrics in a layout that best suits my current accounting needs.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin clicks the "Report" link from the main sidebar navigation menu.
+
+Expected Input: Mouse click event.
+
+Expected Result: The system routes to the Reports interface, mounting a query form containing fields for: From date, To date, Teacher selection, and Report Type.
+
+Action Taken: Admin sets a date range using the From and To date pickers, selects "All" (or a specific teacher) from the Teacher dropdown, selects a Report Type (e.g., "Group by Date"), and clicks "SUBMIT".
+
+Expected Input: From date string (e.g., 10/01/2024), To date string (e.g., 10/30/2024), Teacher selection ID, Report Type string.
+
+Expected Result: The system executes an aggregation query based on the parameters and renders a detailed data table.
+
+Action Taken: Admin views the generated report data table.
+
+Expected Input: None.
+
+Expected Result: The table displays aggregated performance and financial statistics. The columns specifically include: Teacher Name, Taken (Count), Absent (Count), Leave (Count), Pending (Count), Hours (Total calculated duration), Paid (EGP), and Paid (USD). A total summary row is also rendered at the bottom of the table.

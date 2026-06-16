@@ -1,0 +1,87 @@
+Siraj LMS - Video Specifications (Part 14: 00:00 - 02:01)
+
+1. Global Account Creation - Teachers
+
+User Stories
+
+As an Admin, I want to use a comprehensive "Add Teacher" form to provision a new staff member so that they can access the Teacher portal and be assigned to students.
+
+As an Admin, I want to input the teacher's dedicated virtual meeting credentials (Zoom Link/Password) and detailed banking information (SWIFT, IBAN) during account creation so that their operational and payroll profile is completely set up from day one.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin navigates to the sidebar, clicks "Add Account" to expand the sub-menu, and selects "Teacher".
+
+Expected Input: Mouse click events.
+
+Expected Result: The system routes to the Add Teacher page (/add-teacher.php). A long, multi-section form mounts.
+
+Action Taken: Admin views the categorized form sections.
+
+Expected Input: None (Scroll event).
+
+Expected Result: The form displays distinct operational categories required for a teacher account:
+
+Personal Info: Name, Email, Nationality, National ID, Phones, Mobile, Age, Gender, Qualifications, Address.
+
+Official Details: Skype ID, Zoom (Link, Pass, Username, Password), Country, Timezone.
+
+Salary Details: Salary Amount, Currency, Beneficiary Name, Bank Name, Account Number, Bank Address, Routing Number, Bank Country, Account Type, SWIFT/BIC code, IBAN.
+
+2. Global Account Creation - Parents
+
+User Stories
+
+As an Admin, I want to create a new "Parent" account and define their default billing preferences so that the system knows how to auto-generate their future invoices and handle their financial transactions.
+
+As an Admin, I want to capture a parent's social media and communication links (Skype, WhatsApp) during signup so that teachers have alternative ways to reach them.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin navigates to the sidebar under "Add Account" and selects "Parent".
+
+Expected Input: Mouse click event.
+
+Expected Result: The system routes to the Add Parent page (/add-parent.php). The form mounts sections for Parent Information, Social Media, and crucially, Fees Details.
+
+Action Taken: Admin configures the "Fees Details" section of the form.
+
+Expected Input: Dropdown selections.
+
+Expected Result: The Admin must configure the parent's Invoice Type (e.g., Per Classes), Payment Method (e.g., Paypal, Bank Account), and localized Currency (e.g., $, €, £, CAD, AUD). Submitting the form registers the parent with these specific billing rules.
+
+3. Global Account Creation - Managers (Admin Staff)
+
+User Stories
+
+As a System Administrator, I want to provision new backend "Manager" accounts so that I can delegate administrative tasks to new staff members.
+
+As a System Administrator, I want to assign a specific privilege tier (Admin vs. Manager) during account creation so that the new user only has access to the modules appropriate for their role.
+
+Actions & Expected Outcomes
+
+Action Taken: Admin navigates to the sidebar under "Add Account" and selects "Manager".
+
+Expected Input: Mouse click event.
+
+Expected Result: The system routes to the Add Manager page (/add-manager.php). The form mounts.
+
+Action Taken: Admin fills in the manager details and selects the account tier.
+
+Expected Input: Standard credentials (Name, Email, Phone, National ID, Password), and a specific Account Type radio toggle selection (Admin / Manager).
+
+Expected Result: Clicking "SIGNUP" registers the administrative user with the defined backend permissions based on the chosen Account Type.
+
+4. Authentication Error Validation
+
+User Stories
+
+As a user, I want the system to clearly inform me with an error message if I attempt to log in with an unregistered account or incorrect credentials so that I know my authentication attempt failed.
+
+Actions & Expected Outcomes
+
+Action Taken: An unauthenticated user navigates to the login screen, selects the "Parent" role tab, inputs an invalid/unregistered username (e.g., trying to log in as "admin" on the parent portal), and clicks "SIGNIN".
+
+Expected Input: Invalid Username string, Password string.
+
+Expected Result: The system checks the specific Parent database table, fails to find a matching record, blocks the login redirect, and renders an inline error warning: "PLEASE CHECK THE ERRORS: The user doesn't exist."
