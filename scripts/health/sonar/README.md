@@ -19,7 +19,7 @@ Available via `npm` or `bun run`:
 
 - **Run Analysis**: `bun run sonar-scan` (or `bun run sonar-scan --scan`)
 - **Fetch Issues Only**: `bun run sonar-result`
-- **Full Report (with duplications)**: `bun run sonar-duplications`
+- **Full Report**: `bun run sonar-full`
 - **Reset State**: `bun run sonar-scan --reset`
 - **Help**: `bun run sonar-scan --help`
 
@@ -28,14 +28,27 @@ Available via `npm` or `bun run`:
 If running the script directly with Bun:
 
 ```bash
-bun run scripts/health/sonar/ts/main.ts [flags]
+bun run scripts/frontend_health/sonar/ts/main.ts [flags]
 ```
 
 - `--scan`: Run full analysis (setup, scan, and results).
 - `--result`: Fetch and display issues only.
-- `--with-duplications`: Fetch and display issues with duplication metrics.
+- `--full`: Fetch and display issues with duplication metrics.
 - `--reset`: Reset setup state.
 - `--help`: Show help message.
+
+## Workflow Integration
+
+This tool is designed to work in tandem with the project's **Quality Gate** and **Sonar Manager**.
+
+### Mandatory Remediation Workflow:
+1.  **Initial Scan**: `bun quality-gate` runs `sonar-scan` once to identify issues.
+2.  **State Lock**: If issues are found, `quality-gate` transfers ownership of the state file to `sonar-manager` and exits.
+3.  **Remediation**: You **MUST NOT** run `sonar-scan` again manually. Use `bun scripts/sonar-manager.ts` to list and clear issues.
+4.  **Ownership Return**: Once all issues are cleared using `sonar-manager`, it automatically returns ownership to `quality-gate`.
+5.  **Final Verification**: Rerun `bun quality-gate` to empirically verify the clean state.
+
+**Why this matters**: `sonar-scan` is an expensive Docker-based operation. `sonar-manager` allows for instantaneous, file-based issue resolution tracking without redundant full scans.
 
 ## IDE Integration (SonarLint)
 

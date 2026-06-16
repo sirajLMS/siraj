@@ -30,6 +30,10 @@
     "types": ["bun"]
   },
   "include": [
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
+    ".storybook/*.ts",
+    ".storybook/*.tsx",
     "next-env.d.ts",
     "**/*.d.ts",
     "**/*.ts",
@@ -39,5 +43,5 @@
     "dist/types/**/*.ts",
     "dist/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "draft", "frontend/graphql/generated", "**/unRefactored_tests"]
+  "exclude": ["node_modules", "draft", "frontend/graphql/generated", "**/unRefactored_tests", "**/.ai"]
 }

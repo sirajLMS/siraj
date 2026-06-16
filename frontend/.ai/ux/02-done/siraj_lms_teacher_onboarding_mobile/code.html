@@ -1,0 +1,539 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Teacher Onboarding - Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary": "#ffffff",
+              "secondary-fixed": "#d8e3fb",
+              "on-secondary-container": "#586377",
+              "on-secondary": "#ffffff",
+              "surface-container-highest": "#e0e3e5",
+              "surface-tint": "#2e6767",
+              "on-primary-fixed-variant": "#104f4f",
+              primary: "#003535",
+              "on-primary-fixed": "#002020",
+              "on-primary": "#ffffff",
+              secondary: "#545f73",
+              "outline-variant": "#bfc8c8",
+              "tertiary-fixed-dim": "#4fdbc8",
+              tertiary: "#00352f",
+              "surface-container-low": "#f2f4f6",
+              "on-surface": "#191c1e",
+              "border-subtle": "#E2E8F0",
+              "tertiary-container": "#004e46",
+              "primary-fixed": "#b4edec",
+              "inverse-primary": "#98d1d0",
+              "secondary-fixed-dim": "#bcc7de",
+              "surface-container": "#eceef0",
+              background: "#f7f9fb",
+              "secondary-container": "#d5e0f8",
+              error: "#ba1a1a",
+              "inverse-surface": "#2d3133",
+              "on-secondary-fixed": "#111c2d",
+              "on-surface-variant": "#404848",
+              "sidebar-bg": "#0F3D3D",
+              "surface-container-lowest": "#ffffff",
+              "surface-bright": "#f7f9fb",
+              "tertiary-fixed": "#71f8e4",
+              "error-container": "#ffdad6",
+              "primary-fixed-dim": "#98d1d0",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-secondary-fixed-variant": "#3c475a",
+              surface: "#f7f9fb",
+              outline: "#707978",
+              "inverse-on-surface": "#eff1f3",
+              "surface-variant": "#e0e3e5",
+              "primary-container": "#0d4d4d",
+              "on-primary-container": "#85bdbc",
+              "on-error-container": "#93000a",
+              "on-background": "#191c1e",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#33c7b4",
+              "surface-container-high": "#e6e8ea",
+              "surface-dim": "#d8dadc",
+              "navbar-teal": "#135E5E",
+              "on-tertiary-fixed": "#00201c",
+              "text-muted": "#64748B",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              gutter: "1.5rem",
+              "card-padding": "1.5rem",
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+              "auth-width": "420px",
+              "navbar-height": "64px",
+            },
+            fontFamily: {
+              "headline-lg": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "label-md": ["Inter"],
+              "title-lg": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Hanken Grotesk", sans-serif;
+        background-color: #f7f9fb;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .input-focus-ring:focus {
+        outline: none;
+        border-color: #135e5e;
+        box-shadow: 0 0 0 2px rgba(19, 94, 94, 0.1);
+      }
+      .form-section-header {
+        background-color: #135e5e;
+        color: white;
+        padding: 12px 16px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.875rem;
+      }
+      .scroll-container {
+        padding-top: 64px;
+        padding-bottom: 84px;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="text-on-surface">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 w-full z-50 bg-navbar-teal flex items-center justify-between px-6 h-navbar-height w-full shadow-sm"
+    >
+      <div class="flex items-center gap-4">
+        <button class="text-on-primary active:scale-95 transition-transform">
+          <span class="material-symbols-outlined" data-icon="menu">menu</span>
+        </button>
+        <h1 class="font-headline-md text-headline-md-mobile font-bold text-on-primary">Teacher Onboarding</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="text-on-primary active:scale-95 transition-transform">
+          <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+        </button>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="scroll-container min-h-screen">
+      <form class="flex flex-col gap-6 p-4" id="onboardingForm">
+        <!-- Banner Image Section -->
+        <div class="w-full h-32 rounded-xl overflow-hidden relative mb-2">
+          <img
+            class="w-full h-full object-cover"
+            data-alt="A professional and clean educational setting with high-quality wooden desks and bright morning light streaming through large windows. The atmosphere is academic and calm, using a palette of deep teals and soft whites to align with the Siraj LMS brand identity. The focus is on a modern learning environment that suggests productivity and institutional excellence."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLtBlow0WA-ovKU55uLE5tUlcY4AGHWx29mJDjhzqSCZH3cb4QqsfngD1ofodOQLMvEOLyd7hSndjmnjQSCeMM5dp9p2gR25hnpMfip8ELr8FTgsm4_pdTbSEAXcAc-z2ZAbtVWDJNvuDHhqX-CxBBFWc9JrUGGANsD4_-Y8jtYaS6zNjsz20LxH5XsFC_8j_MbCSC664wSLpTqsWvHSvVWX6sROXXK-sadwk_3oQ_3yXlKyOgfMl1qwK0CM"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+          <div class="absolute bottom-4 left-4 text-white">
+            <p class="font-label-md text-label-md opacity-90">Join our faculty</p>
+            <p class="font-title-lg text-title-lg">Registration Form</p>
+          </div>
+        </div>
+        <!-- Teacher Information Section -->
+        <section class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-border-subtle">
+          <div class="form-section-header">Teacher Information</div>
+          <div class="p-5 flex flex-col gap-5">
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                >Full Name <span class="text-error">*</span></label
+              >
+              <input
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                placeholder="e.g. Johnathan Doe"
+                required=""
+                type="text"
+              />
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                >Email Address <span class="text-error">*</span></label
+              >
+              <input
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                placeholder="john.doe@university.edu"
+                required=""
+                type="email"
+              />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                  >Nationality <span class="text-error">*</span></label
+                >
+                <select
+                  class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                  required=""
+                >
+                  <option value="">Select</option>
+                  <option value="us">American</option>
+                  <option value="uk">British</option>
+                  <option value="ca">Canadian</option>
+                  <option value="ae">Emirati</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                  >National ID <span class="text-error">*</span></label
+                >
+                <input
+                  class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                  placeholder="ID Number"
+                  required=""
+                  type="text"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                >Phone/Mobile <span class="text-error">*</span></label
+              >
+              <input
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                placeholder="+1 (555) 000-0000"
+                required=""
+                type="tel"
+              />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-label-md text-label-md text-on-surface-variant mb-2">Age</label>
+                <input
+                  class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                  placeholder="25"
+                  type="number"
+                />
+              </div>
+              <div class="flex flex-col">
+                <label class="block font-label-md text-label-md text-on-surface-variant mb-2">Gender</label>
+                <div class="flex items-center gap-4 h-[46px]">
+                  <label class="flex items-center gap-2 font-body-md text-body-md">
+                    <input class="text-navbar-teal focus:ring-navbar-teal" name="gender" type="radio" value="male" />
+                    Male
+                  </label>
+                  <label class="flex items-center gap-2 font-body-md text-body-md">
+                    <input class="text-navbar-teal focus:ring-navbar-teal" name="gender" type="radio" value="female" />
+                    Female
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2">Home Address</label>
+              <textarea
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                placeholder="Street, Building, Apartment..."
+                rows="3"
+              ></textarea>
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                >Qualifications <span class="text-error">*</span></label
+              >
+              <input
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                placeholder="e.g. MA in Education"
+                required=""
+                type="text"
+              />
+            </div>
+          </div>
+        </section>
+        <!-- Official Details Section -->
+        <section class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-border-subtle">
+          <div class="form-section-header">Official Details</div>
+          <div class="p-5 flex flex-col gap-5">
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2">Skype ID</label>
+              <input
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                placeholder="live:skype_id"
+                type="text"
+              />
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2">Zoom Personal Link</label>
+              <input
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                placeholder="https://zoom.us/j/..."
+                type="url"
+              />
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                >Country <span class="text-error">*</span></label
+              >
+              <select
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                required=""
+              >
+                <option value="">Select Country</option>
+                <option value="us">United States</option>
+                <option value="uk">United Kingdom</option>
+                <option value="uae">United Arab Emirates</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-label-md text-label-md text-on-surface-variant mb-2">Zoom Username</label>
+                <input
+                  class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                  type="text"
+                />
+              </div>
+              <div>
+                <label class="block font-label-md text-label-md text-on-surface-variant mb-2">Zoom Password</label>
+                <input
+                  class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                  type="password"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                >Primary Timezone <span class="text-error">*</span></label
+              >
+              <select
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                required=""
+              >
+                <option value="">Select Timezone</option>
+                <option value="gmt">GMT (+0:00)</option>
+                <option value="est">EST (-5:00)</option>
+                <option value="gst">GST (+4:00)</option>
+              </select>
+            </div>
+          </div>
+        </section>
+        <!-- Salary Details Section -->
+        <section class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-border-subtle">
+          <div class="form-section-header">Salary Details</div>
+          <div class="p-5 flex flex-col gap-5">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                  >Salary Amount <span class="text-error">*</span></label
+                >
+                <input
+                  class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                  placeholder="5000"
+                  required=""
+                  type="number"
+                />
+              </div>
+              <div>
+                <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                  >Currency <span class="text-error">*</span></label
+                >
+                <select
+                  class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                  required=""
+                >
+                  <option value="usd">USD</option>
+                  <option value="eur">EUR</option>
+                  <option value="aed">AED</option>
+                  <option value="gbp">GBP</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Banking Ledger Section -->
+        <section class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-border-subtle">
+          <div class="form-section-header">Banking Ledger</div>
+          <div class="p-5 flex flex-col gap-5">
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                >Beneficiary Name <span class="text-error">*</span></label
+              >
+              <input
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                required=""
+                type="text"
+              />
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                >Bank Name <span class="text-error">*</span></label
+              >
+              <input
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                required=""
+                type="text"
+              />
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                >Account Number <span class="text-error">*</span></label
+              >
+              <input
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                required=""
+                type="text"
+              />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-label-md text-label-md text-on-surface-variant mb-2">Routing Number</label>
+                <input
+                  class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                  type="text"
+                />
+              </div>
+              <div>
+                <label class="block font-label-md text-label-md text-on-surface-variant mb-2">SWIFT/BIC</label>
+                <input
+                  class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                  type="text"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="block font-label-md text-label-md text-on-surface-variant mb-2"
+                >IBAN <span class="text-error">*</span></label
+              >
+              <input
+                class="w-full px-4 py-3 border border-outline-variant rounded-lg font-body-md text-body-md input-focus-ring"
+                required=""
+                type="text"
+              />
+            </div>
+          </div>
+        </section>
+        <!-- Action Buttons -->
+        <div class="flex flex-col gap-3 mt-4">
+          <button
+            class="w-full py-4 bg-navbar-teal text-white rounded-full font-button-text text-button-text uppercase tracking-widest active:scale-95 transition-all shadow-md"
+            type="submit"
+          >
+            SIGNUP
+          </button>
+          <button
+            class="w-full py-4 border border-outline text-secondary rounded-full font-button-text text-button-text uppercase tracking-widest active:scale-95 transition-all"
+            type="button"
+          >
+            CANCEL
+          </button>
+        </div>
+      </form>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface-container-lowest border-t border-border-subtle shadow-sm rounded-t-xl"
+    >
+      <a
+        class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-surface-container-high transition-colors active:scale-95 transition-transform"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+        <span class="font-label-md text-label-md mt-1">Schedule</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-surface-container-high transition-colors active:scale-95 transition-transform"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="school">school</span>
+        <span class="font-label-md text-label-md mt-1">Teachers</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-surface-container-high transition-colors active:scale-95 transition-transform"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="family_restroom">family_restroom</span>
+        <span class="font-label-md text-label-md mt-1">Parents</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-surface-container-high transition-colors active:scale-95 transition-transform"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="group">group</span>
+        <span class="font-label-md text-label-md mt-1">Students</span>
+      </a>
+    </nav>
+    <script>
+      // Form Interaction Logic
+      document.getElementById("onboardingForm").addEventListener("submit", e => {
+        e.preventDefault();
+        // Subtle feedback animation
+        const btn = e.target.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML =
+          '<span class="material-symbols-outlined animate-spin" data-icon="sync">sync</span> Processing...';
+        btn.disabled = true;
+
+        setTimeout(() => {
+          alert("Onboarding data submitted successfully!");
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }, 1500);
+      });
+
+      // Ripples effect for header buttons
+      document.querySelectorAll("header button, nav a").forEach(btn => {
+        btn.addEventListener("click", function (_e) {
+          const ripple = document.createElement("span");
+          ripple.classList.add("ripple");
+          this.appendChild(ripple);
+          setTimeout(() => ripple.remove(), 600);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+"use client";
+
+import { Box } from "@mui/material";
+import type { LedgerStatus, ReportLedgerRow } from "@/frontend/stores/reportsStore";
+import { PerformanceLedgerCard } from "./PerformanceLedgerCard";
+
+interface PerformanceLedgerCardListLabels {
+  readonly studentLabel: string;
+  readonly paid: string;
+  readonly statusLabels: Record<LedgerStatus, string>;
+  readonly taken: string;
+  readonly absent: string;
+  readonly leave: string;
+  readonly pending: string;
+  readonly hours: string;
+}
+
+interface PerformanceLedgerCardListProps {
+  readonly rows: readonly ReportLedgerRow[];
+  readonly labels: PerformanceLedgerCardListLabels;
+}
+
+export function PerformanceLedgerCardList({ rows, labels }: Readonly<PerformanceLedgerCardListProps>) {
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      {rows.map(row => (
+        <PerformanceLedgerCard key={row.id} row={row} labels={labels} />
+      ))}
+    </Box>
+  );
+}

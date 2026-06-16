@@ -1,0 +1,124 @@
+import { Box, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
+import { useTranslations } from "next-intl";
+import type { ClassSession } from "@/frontend/stores/studentHistoryStore";
+
+interface ClassSessionListProps {
+  dateStr: string;
+  sessions: ClassSession[];
+}
+
+export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionListProps>) {
+  const t = useTranslations("dashboard.studentHistory.classDetails");
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 0.5 }}>
+        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
+          {t("title")}
+        </Typography>
+        <Typography
+          variant="labelMd"
+          sx={theme => ({
+            color: theme.palette.text.secondary,
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+          })}
+        >
+          {dateStr}
+        </Typography>
+      </Box>
+
+      {sessions.map(session => {
+        return (
+          <Box
+            key={session.id}
+            sx={theme => ({
+              bgcolor: theme.palette.surfaceContainerLowest,
+              borderRadius: "xl",
+              boxShadow: theme.palette.shadow.card,
+              border: `1px solid ${theme.palette.border.light}`,
+              p: theme.spacing(2), // mapping cardPadding to spacing(2) or similar if not defined
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              transition: "transform 0.2s",
+              "&:hover": { transform: "translateX(4px)" },
+              cursor: "pointer",
+            })}
+          >
+            <Box
+              sx={theme => ({
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                p: 1,
+                borderRadius: "lg",
+                width: 64,
+                height: 64,
+                flexShrink: 0,
+              })}
+            >
+              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+                {session.time.split(" ")[0]}
+              </Typography>
+              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+                {session.time.split(" ")[1]}
+              </Typography>
+            </Box>
+
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="bodyLg" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
+                {session.title}
+              </Typography>
+              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+                {session.notes}
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+              <Box
+                sx={theme => {
+                  let colors = {
+                    bgcolor: theme.palette.secondaryContainer,
+                    color: theme.palette.onSecondaryContainer,
+                  };
+
+                  if (session.status === "present") {
+                    colors = {
+                      bgcolor: theme.palette.status.activeContainer,
+                      color: theme.palette.status.onActiveContainer,
+                    };
+                  } else if (session.status === "absent") {
+                    colors = {
+                      bgcolor: theme.palette.errorContainer,
+                      color: theme.palette.onErrorContainer,
+                    };
+                  }
+
+                  return {
+                    ...colors,
+                    px: 1,
+                    py: 0.25,
+                    borderRadius: 1,
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  };
+                }}
+              >
+                {t(`status.${session.status}`)}
+              </Box>
+              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+                {session.duration}
+              </Typography>
+            </Box>
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}

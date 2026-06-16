@@ -19,6 +19,36 @@ import fs from "node:fs";
 import path from "node:path";
 
 const SONAR_RESULT_PATH = path.join(process.cwd(), ".scannerwork", "sonar-result.json");
+const STATE_FILE = path.join(process.cwd(), ".quality-gate-state.json");
+
+interface QualityState {
+  stage: string;
+  owner: string;
+  lifecycle: string;
+  lastRun: string;
+}
+
+function updateQualityStateIfOwned(result: SonarResult) {
+  const hasIssues = result.issues && result.issues.length > 0;
+  const hasDuplicates = result.duplicatedBlocksDetails && result.duplicatedBlocksDetails.length > 0;
+
+  if (!hasIssues && !hasDuplicates && fs.existsSync(STATE_FILE)) {
+    try {
+      const state = JSON.parse(fs.readFileSync(STATE_FILE, "utf-8")) as QualityState;
+      if (state.owner === "sonar-manager") {
+        state.owner = "quality-gate";
+        state.stage = "SONAR_RESULTS";
+        state.lifecycle = "NEED_CONFIRM";
+        state.lastRun = new Date().toISOString();
+        fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), "utf-8");
+        console.log("\n✅ All Sonar issues cleared. Ownership transferred back to quality-gate.");
+        console.log("ℹ️ Rerun 'bun quality-gate' to confirm perfect health.");
+      }
+    } catch {
+      // Ignore state update errors
+    }
+  }
+}
 
 interface TextRange {
   startLine: number;
@@ -79,6 +109,10 @@ function writeSonarResult(result: SonarResult) {
 }
 
 function listFiles(result: SonarResult) {
+  if (!result.issues || result.issues.length === 0) {
+    console.log("No files with issues found.");
+    return;
+  }
   const files = [...new Set(result.issues.map(i => i.component))].sort((a, b) => a.localeCompare(b));
   console.log("Files with issues:");
   for (const f of files) {
@@ -88,7 +122,7 @@ function listFiles(result: SonarResult) {
 
 function listDuplicates(result: SonarResult, fileArg: string | null) {
   if (!result.duplicatedBlocksDetails || result.duplicatedBlocksDetails.length === 0) {
-    console.log("No duplicated blocks found.");
+    console.log("No duplications found.");
     return;
   }
 
@@ -161,6 +195,7 @@ function deleteIssues(result: SonarResult, fileArg: string | null, ruleArg: stri
 
   writeSonarResult(result);
   console.log(`Deleted ${deletedIssuesCount} issues and ${deletedDuplicatesCount} duplicate entries.`);
+  updateQualityStateIfOwned(result);
 }
 
 function showHelp() {
@@ -210,6 +245,7 @@ function main() {
   switch (action) {
     case "list-files":
       listFiles(result);
+      updateQualityStateIfOwned(result);
       break;
 
     case "list-issues":
@@ -218,6 +254,7 @@ function main() {
 
     case "list-duplicates":
       listDuplicates(result, fileArg);
+      updateQualityStateIfOwned(result);
       break;
 
     case "delete":

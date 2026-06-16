@@ -1,0 +1,512 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Add Recurring Class | Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Hanken+Grotesk:wght@400;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+      }
+    </style>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container": "#eceef0",
+              "surface-container-high": "#e6e8ea",
+              "on-tertiary-container": "#33c7b4",
+              "on-primary-fixed-variant": "#104f4f",
+              "on-primary-fixed": "#002020",
+              "on-background": "#191c1e",
+              error: "#ba1a1a",
+              "text-muted": "#64748B",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#d8e3fb",
+              "surface-variant": "#e0e3e5",
+              "on-tertiary-fixed": "#00201c",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "border-subtle": "#E2E8F0",
+              "sidebar-bg": "#0F3D3D",
+              "inverse-on-surface": "#eff1f3",
+              "outline-variant": "#bfc8c8",
+              "secondary-fixed-dim": "#bcc7de",
+              "primary-fixed-dim": "#98d1d0",
+              "on-primary-container": "#85bdbc",
+              "tertiary-container": "#004e46",
+              "primary-fixed": "#b4edec",
+              "primary-container": "#0d4d4d",
+              "on-secondary-fixed-variant": "#3c475a",
+              "navbar-teal": "#135E5E",
+              "tertiary-fixed": "#71f8e4",
+              primary: "#003535",
+              "on-surface": "#191c1e",
+              "on-secondary-fixed": "#111c2d",
+              "surface-bright": "#f7f9fb",
+              "on-error-container": "#93000a",
+              surface: "#f7f9fb",
+              "secondary-container": "#d5e0f8",
+              "on-tertiary": "#ffffff",
+              tertiary: "#00352f",
+              "surface-container-highest": "#e0e3e5",
+              "error-container": "#ffdad6",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-surface-variant": "#404848",
+              "surface-container-low": "#f2f4f6",
+              "on-primary": "#ffffff",
+              "surface-tint": "#2e6767",
+              background: "#f7f9fb",
+              "inverse-primary": "#98d1d0",
+              "surface-dim": "#d8dadc",
+              "surface-container-lowest": "#ffffff",
+              secondary: "#545f73",
+              "on-secondary-container": "#586377",
+              "inverse-surface": "#2d3133",
+              "on-secondary": "#ffffff",
+              outline: "#707978",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "auth-width": "420px",
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "card-padding": "1.5rem",
+              "navbar-height": "64px",
+              gutter: "1.5rem",
+              "input-gap": "1rem",
+            },
+            fontFamily: {
+              "label-md": ["Inter"],
+              "body-lg": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "headline-lg": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background text-on-surface font-body-md text-body-md overflow-hidden">
+    <!-- Top Navigation Bar -->
+    <header
+      class="fixed top-0 right-0 h-navbar-height z-10 flex items-center justify-between px-page-margin ml-sidebar-width w-[calc(100%-theme(spacing.sidebar-width))] bg-navbar-teal shadow-sm"
+    >
+      <div class="flex items-center gap-4">
+        <h1 class="font-headline-md text-headline-md text-white">Siraj LMS</h1>
+      </div>
+      <div class="flex items-center gap-6">
+        <button
+          class="text-white/80 hover:bg-primary-container/20 p-2 rounded-full transition-transform scale-95 active:scale-90"
+        >
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <button
+          class="text-white/80 hover:bg-primary-container/20 p-2 rounded-full transition-transform scale-95 active:scale-90"
+        >
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+        <div class="w-8 h-8 rounded-full overflow-hidden border border-white/20">
+          <img
+            alt="Administrator Profile"
+            class="w-full h-full object-cover"
+            data-alt="A professional portrait of a school administrator in their early 40s, wearing a crisp formal suit and a gentle smile. The background is a brightly lit, blurred office environment with bookshelves and soft natural window light. The lighting is clean and high-key, reflecting a modern academic leadership persona consistent with a minimalist corporate aesthetic."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLvoxVJawdiB0YdeqOwe7POYHtKBpfeA5WI-OaPUPC8JqxL9vhxX4FqrVBY5DmFxrdRFSQyiy9nxqvi3hSSLRV7QZQhlNwBb5soPIhQPrvHqnRKJf7Clmw9CnVh5TWaCpc9F9j6rLRNj8IA0LiC5bjZf0x-tMu8gL8wHXt0GxqZtH8x6tYZ1ib88cnv5UkecVKPZCCJwQrDE5IJVS8MqyhKirpwKty3A21da4kpWZpGXzRhCSZiWTTZYQ0vV"
+          />
+        </div>
+      </div>
+    </header>
+    <!-- Side Navigation Bar -->
+    <aside class="fixed left-0 top-0 h-full w-sidebar-width bg-sidebar-bg flex flex-col py-6 z-20">
+      <div class="px-6 mb-10 flex flex-col">
+        <span class="font-headline-md text-headline-md font-bold text-white">Siraj LMS</span>
+        <span class="text-surface-variant text-label-md font-label-md">Administrative Portal</span>
+      </div>
+      <nav class="flex-1 space-y-1">
+        <div
+          class="flex items-center px-6 py-3 cursor-pointer text-surface-variant hover:text-white hover:bg-navbar-teal/50 transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined mr-3">home</span>
+          <span class="font-body-md text-body-md">Home</span>
+        </div>
+        <div
+          class="flex items-center px-6 py-3 cursor-pointer bg-navbar-teal text-white font-bold transition-all duration-200"
+        >
+          <span class="material-symbols-outlined mr-3">calendar_month</span>
+          <span class="font-body-md text-body-md">Schedule Search</span>
+        </div>
+        <div
+          class="flex items-center px-6 py-3 cursor-pointer text-surface-variant hover:text-white hover:bg-navbar-teal/50 transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined mr-3">school</span>
+          <span class="font-body-md text-body-md">Teachers</span>
+        </div>
+        <div
+          class="flex items-center px-6 py-3 cursor-pointer text-surface-variant hover:text-white hover:bg-navbar-teal/50 transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined mr-3">family_restroom</span>
+          <span class="font-body-md text-body-md">Parents</span>
+        </div>
+        <div
+          class="flex items-center px-6 py-3 cursor-pointer text-surface-variant hover:text-white hover:bg-navbar-teal/50 transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined mr-3">group</span>
+          <span class="font-body-md text-body-md">Students</span>
+        </div>
+        <div
+          class="flex items-center px-6 py-3 cursor-pointer text-surface-variant hover:text-white hover:bg-navbar-teal/50 transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined mr-3">admin_panel_settings</span>
+          <span class="font-body-md text-body-md">Managers</span>
+        </div>
+      </nav>
+    </aside>
+    <!-- Main Content Area -->
+    <main
+      class="ml-sidebar-width mt-navbar-height p-page-margin h-[calc(100vh-theme(spacing.navbar-height))] flex items-center justify-center"
+    >
+      <!-- Modal Backdrop -->
+      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-30"></div>
+      <!-- Add Recurring Class Form Modal -->
+      <section
+        class="relative z-40 w-full max-w-2xl bg-white rounded-xl shadow-lg flex flex-col overflow-hidden max-h-[921px]"
+      >
+        <!-- Header -->
+        <div class="p-6 border-b border-border-subtle flex justify-between items-center bg-surface-container-low">
+          <div>
+            <h2 class="font-headline-md text-headline-md text-primary">Add Recurring Class</h2>
+            <p class="text-text-muted text-body-md">Configure schedule for automated weekly sessions</p>
+          </div>
+          <button class="text-text-muted hover:text-error transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <!-- Form Content -->
+        <form class="p-6 flex-1 overflow-y-auto custom-scrollbar space-y-8" id="recurringClassForm">
+          <!-- Primary Settings Row -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+            <div class="space-y-1">
+              <label class="font-label-md text-label-md text-text-muted">Students</label>
+              <div class="relative">
+                <select
+                  class="w-full bg-transparent border-b border-border-subtle py-2 pr-8 focus:border-navbar-teal focus:ring-0 appearance-none transition-colors font-body-md text-body-md"
+                >
+                  <option value="">Select Students Group</option>
+                  <option>Grade 10 - Advanced Math</option>
+                  <option>Grade 11 - Physics Honors</option>
+                  <option>Grade 9 - English Lit</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-0 top-2 pointer-events-none text-text-muted"
+                  >expand_more</span
+                >
+              </div>
+            </div>
+            <div class="space-y-1">
+              <label class="font-label-md text-label-md text-text-muted">Default Start Time</label>
+              <div class="relative flex items-center border-b border-border-subtle">
+                <span class="material-symbols-outlined text-navbar-teal mr-2">schedule</span>
+                <input
+                  class="w-full bg-transparent border-none py-2 focus:ring-0 font-body-md text-body-md"
+                  type="time"
+                  value="09:00"
+                />
+              </div>
+            </div>
+          </div>
+          <!-- Duration Section -->
+          <div class="space-y-3">
+            <label class="font-label-md text-label-md text-text-muted block">Duration</label>
+            <div class="flex gap-4 items-center">
+              <div
+                class="flex-1 flex items-center bg-surface-container-low rounded-lg border border-border-subtle px-3 focus-within:border-navbar-teal transition-colors"
+              >
+                <input
+                  class="bg-transparent border-none w-12 text-center focus:ring-0 p-2"
+                  max="12"
+                  min="0"
+                  placeholder="00"
+                  type="number"
+                />
+                <span class="text-text-muted font-label-md text-label-md">hours</span>
+              </div>
+              <div
+                class="flex-1 flex items-center bg-surface-container-low rounded-lg border border-border-subtle px-3 focus-within:border-navbar-teal transition-colors"
+              >
+                <input
+                  class="bg-transparent border-none w-12 text-center focus:ring-0 p-2"
+                  max="59"
+                  min="0"
+                  placeholder="45"
+                  type="number"
+                />
+                <span class="text-text-muted font-label-md text-label-md">minutes</span>
+              </div>
+            </div>
+          </div>
+          <!-- Day Selection & Overrides -->
+          <div class="space-y-4">
+            <label class="font-label-md text-label-md text-text-muted block">Days Selection &amp; Timing</label>
+            <div class="space-y-2">
+              <!-- Monday -->
+              <div
+                class="flex items-center justify-between p-3 rounded-xl border border-border-subtle hover:bg-surface-container-lowest transition-colors group"
+              >
+                <div class="flex items-center gap-4">
+                  <input
+                    checked=""
+                    class="w-5 h-5 rounded border-border-subtle text-navbar-teal focus:ring-navbar-teal"
+                    type="checkbox"
+                  />
+                  <span class="font-semibold text-primary">Monday</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="hidden animate-in fade-in slide-in-from-right-2" id="time-override-mon">
+                    <input
+                      class="border border-border-subtle rounded-lg px-2 py-1 text-sm focus:ring-navbar-teal focus:border-navbar-teal"
+                      type="time"
+                      value="09:00"
+                    />
+                  </div>
+                  <button
+                    class="p-2 text-text-muted hover:text-navbar-teal hover:bg-navbar-teal/10 rounded-full transition-all"
+                    onclick="toggleOverride('mon')"
+                    type="button"
+                  >
+                    <span class="material-symbols-outlined">tune</span>
+                  </button>
+                </div>
+              </div>
+              <!-- Tuesday -->
+              <div
+                class="flex items-center justify-between p-3 rounded-xl border border-border-subtle hover:bg-surface-container-lowest transition-colors group"
+              >
+                <div class="flex items-center gap-4">
+                  <input
+                    checked=""
+                    class="w-5 h-5 rounded border-border-subtle text-navbar-teal focus:ring-navbar-teal"
+                    type="checkbox"
+                  />
+                  <span class="font-semibold text-primary">Tuesday</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="hidden animate-in fade-in slide-in-from-right-2" id="time-override-tue">
+                    <input
+                      class="border border-border-subtle rounded-lg px-2 py-1 text-sm focus:ring-navbar-teal focus:border-navbar-teal"
+                      type="time"
+                      value="09:00"
+                    />
+                  </div>
+                  <button
+                    class="p-2 text-text-muted hover:text-navbar-teal hover:bg-navbar-teal/10 rounded-full transition-all"
+                    onclick="toggleOverride('tue')"
+                    type="button"
+                  >
+                    <span class="material-symbols-outlined">tune</span>
+                  </button>
+                </div>
+              </div>
+              <!-- Wednesday -->
+              <div
+                class="flex items-center justify-between p-3 rounded-xl border border-border-subtle hover:bg-surface-container-lowest transition-colors group"
+              >
+                <div class="flex items-center gap-4">
+                  <input
+                    class="w-5 h-5 rounded border-border-subtle text-navbar-teal focus:ring-navbar-teal"
+                    type="checkbox"
+                  />
+                  <span class="font-semibold text-primary">Wednesday</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="hidden animate-in fade-in slide-in-from-right-2" id="time-override-wed">
+                    <input
+                      class="border border-border-subtle rounded-lg px-2 py-1 text-sm focus:ring-navbar-teal focus:border-navbar-teal"
+                      type="time"
+                      value="09:00"
+                    />
+                  </div>
+                  <button
+                    class="p-2 text-text-muted hover:text-navbar-teal hover:bg-navbar-teal/10 rounded-full transition-all"
+                    onclick="toggleOverride('wed')"
+                    type="button"
+                  >
+                    <span class="material-symbols-outlined">tune</span>
+                  </button>
+                </div>
+              </div>
+              <!-- Thursday -->
+              <div
+                class="flex items-center justify-between p-3 rounded-xl border border-border-subtle hover:bg-surface-container-lowest transition-colors group bg-surface-container-low/50"
+              >
+                <div class="flex items-center gap-4">
+                  <input
+                    checked=""
+                    class="w-5 h-5 rounded border-border-subtle text-navbar-teal focus:ring-navbar-teal"
+                    type="checkbox"
+                  />
+                  <span class="font-semibold text-primary">Thursday</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="flex animate-in fade-in slide-in-from-right-2" id="time-override-thu">
+                    <input
+                      class="border-2 border-navbar-teal rounded-lg px-2 py-1 text-sm focus:ring-navbar-teal focus:border-navbar-teal bg-white font-bold text-navbar-teal"
+                      type="time"
+                      value="13:30"
+                    />
+                  </div>
+                  <button
+                    class="p-2 text-navbar-teal bg-navbar-teal/10 rounded-full transition-all"
+                    onclick="toggleOverride('thu')"
+                    type="button"
+                  >
+                    <span class="material-symbols-outlined">tune</span>
+                  </button>
+                </div>
+              </div>
+              <!-- Friday -->
+              <div
+                class="flex items-center justify-between p-3 rounded-xl border border-border-subtle hover:bg-surface-container-lowest transition-colors group"
+              >
+                <div class="flex items-center gap-4">
+                  <input
+                    class="w-5 h-5 rounded border-border-subtle text-navbar-teal focus:ring-navbar-teal"
+                    type="checkbox"
+                  />
+                  <span class="font-semibold text-primary">Friday</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="hidden animate-in fade-in slide-in-from-right-2" id="time-override-fri">
+                    <input
+                      class="border border-border-subtle rounded-lg px-2 py-1 text-sm focus:ring-navbar-teal focus:border-navbar-teal"
+                      type="time"
+                      value="09:00"
+                    />
+                  </div>
+                  <button
+                    class="p-2 text-text-muted hover:text-navbar-teal hover:bg-navbar-teal/10 rounded-full transition-all"
+                    onclick="toggleOverride('fri')"
+                    type="button"
+                  >
+                    <span class="material-symbols-outlined">tune</span>
+                  </button>
+                </div>
+              </div>
+              <!-- Weekend Collapsed (Simulated) -->
+              <div
+                class="flex items-center justify-between p-3 rounded-xl bg-slate-50 opacity-50 grayscale cursor-not-allowed"
+              >
+                <div class="flex items-center gap-4">
+                  <input class="w-5 h-5 rounded border-border-subtle" disabled="" type="checkbox" />
+                  <span class="font-semibold text-primary">Saturday &amp; Sunday</span>
+                </div>
+                <span class="text-label-md font-label-md text-text-muted italic px-2">Weekend Off</span>
+              </div>
+            </div>
+          </div>
+        </form>
+        <!-- Footer Action -->
+        <div class="p-6 bg-surface-container-lowest flex items-center justify-between border-t border-border-subtle">
+          <button
+            class="bg-navbar-teal text-white font-button-text text-button-text px-8 py-3 rounded-full hover:brightness-110 active:scale-95 transition-all uppercase tracking-widest flex items-center gap-2"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-sm">add</span>
+            ADD
+          </button>
+          <!-- Success Preview -->
+          <div
+            class="flex items-center gap-3 bg-teal-50 text-navbar-teal border border-navbar-teal/20 px-4 py-2 rounded-lg animate-bounce"
+          >
+            <span class="material-symbols-outlined text-lg" style="font-variation-settings: &quot;FILL&quot; 1"
+              >check_circle</span
+            >
+            <span class="font-semibold">Added Successfully</span>
+          </div>
+        </div>
+      </section>
+      <!-- Background Atmospheric Element -->
+      <div class="fixed bottom-0 right-0 p-12 opacity-10 pointer-events-none">
+        <span class="material-symbols-outlined text-[200px]" style="font-variation-settings: &quot;wght&quot; 100"
+          >school</span
+        >
+      </div>
+    </main>
+    <script>
+      function _toggleOverride(dayId) {
+        const container = document.getElementById(`time-override-${dayId}`);
+        const btn = container.nextElementSibling;
+
+        if (container.classList.contains("hidden")) {
+          container.classList.remove("hidden");
+          container.classList.add("flex");
+          btn.classList.add("text-navbar-teal", "bg-navbar-teal/10");
+          btn.classList.remove("text-text-muted");
+        } else {
+          container.classList.add("hidden");
+          container.classList.remove("flex");
+          btn.classList.remove("text-navbar-teal", "bg-navbar-teal/10");
+          btn.classList.add("text-text-muted");
+        }
+      }
+
+      // Lightweight interaction for duration inputs
+      const durationInputs = document.querySelectorAll('input[type="number"]');
+      durationInputs.forEach(input => {
+        input.addEventListener("focus", () => {
+          input.parentElement.classList.add("ring-2", "ring-navbar-teal/20");
+        });
+        input.addEventListener("blur", () => {
+          input.parentElement.classList.remove("ring-2", "ring-navbar-teal/20");
+        });
+      });
+    </script>
+  </body>
+</html>

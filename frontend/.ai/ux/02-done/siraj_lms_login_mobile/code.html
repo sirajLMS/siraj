@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Login</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              secondary: "#545f73",
+              "secondary-container": "#d5e0f8",
+              "on-secondary-fixed": "#111c2d",
+              "border-subtle": "#E2E8F0",
+              "surface-bright": "#f7f9fb",
+              "tertiary-fixed": "#71f8e4",
+              "inverse-surface": "#2d3133",
+              "on-tertiary-fixed": "#00201c",
+              "surface-container-high": "#e6e8ea",
+              tertiary: "#00352f",
+              primary: "#003535",
+              "surface-tint": "#2e6767",
+              "on-surface-variant": "#404848",
+              "primary-container": "#0d4d4d",
+              "on-error": "#ffffff",
+              "on-surface": "#191c1e",
+              "secondary-fixed-dim": "#bcc7de",
+              "text-muted": "#64748B",
+              "on-secondary-fixed-variant": "#3c475a",
+              background: "#f7f9fb",
+              "primary-fixed-dim": "#98d1d0",
+              "on-tertiary-container": "#33c7b4",
+              outline: "#707978",
+              "surface-dim": "#d8dadc",
+              "inverse-on-surface": "#eff1f3",
+              "surface-container-highest": "#e0e3e5",
+              "navbar-teal": "#135E5E",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-variant": "#e0e3e5",
+              "on-background": "#191c1e",
+              "on-secondary": "#ffffff",
+              "primary-fixed": "#b4edec",
+              "error-container": "#ffdad6",
+              "secondary-fixed": "#d8e3fb",
+              error: "#ba1a1a",
+              "on-primary": "#ffffff",
+              "on-error-container": "#93000a",
+              "outline-variant": "#bfc8c8",
+              "surface-container-lowest": "#ffffff",
+              "tertiary-container": "#004e46",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-primary-fixed": "#002020",
+              "on-primary-container": "#85bdbc",
+              "sidebar-bg": "#0F3D3D",
+              "surface-container-low": "#f2f4f6",
+              "on-tertiary": "#ffffff",
+              "surface-container": "#eceef0",
+              "tertiary-fixed-dim": "#4fdbc8",
+              surface: "#f7f9fb",
+              "inverse-primary": "#98d1d0",
+              "on-secondary-container": "#586377",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "navbar-height": "64px",
+              gutter: "1.5rem",
+              "card-padding": "1.5rem",
+              "auth-width": "420px",
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+            },
+            fontFamily: {
+              display: ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "headline-lg": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "body-lg": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      body {
+        background-color: #ffffff;
+      }
+      input:focus {
+        outline: none;
+        border-color: #135e5e;
+        box-shadow: none;
+      }
+      .active-role {
+        border-bottom: 2px solid #135e5e;
+        color: #135e5e;
+        font-weight: 700;
+      }
+      .inactive-role {
+        color: #64748b;
+        font-weight: 400;
+      }
+    </style>
+  </head>
+  <body class="flex items-center justify-center min-h-screen p-6 font-body-md text-on-surface">
+    <main class="w-full max-w-[420px] flex flex-col items-center">
+      <!-- Logo Section -->
+      <div class="mb-12 flex flex-col items-center">
+        <div
+          class="w-20 h-20 bg-navbar-teal rounded-lg flex items-center justify-center mb-6 shadow-sm overflow-hidden"
+        >
+          <img
+            class="w-full h-full object-cover"
+            data-alt="A sophisticated geometric logo for a learning management system, featuring an abstract, interconnected series of white lines forming a square within a deep teal container. The lighting is crisp and studio-like, emphasizing professional academic excellence. The overall aesthetic is minimalist, corporate modern, and highly organized, matching a prestigious educational institution's brand identity."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLu6coQ_ZtByc5VHprLkdxn4jXDDbV_g5D1R49MWuFZoZwNf-NDQFNCIWQ3VveD_3QmTkB32Zd1e7tF0oT0zwioZeNlzTMmxWzftpQsa1URtTazwT-qe2g4J9MiVnT86-eEIHN9lDo4qAsRw00YG6uw78HP0cb7ruHYW4uUywgjmpWJitjiffWcr_KimMWYAfKLtbnwbSvnAq10SruN40QjGnW5tZcvuF-C81SSiYHoYvdM5UkQvJJrL8P4"
+          />
+        </div>
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight">Siraj LMS</h1>
+        <p class="text-secondary font-body-md mt-1">Academic Portal Access</p>
+      </div>
+      <!-- Role Selection Tabs -->
+      <div class="flex w-full justify-between mb-10 border-b border-border-subtle">
+        <button
+          class="active-role flex-1 py-3 font-button-text text-button-text transition-all"
+          id="role-Admin"
+          onclick="setRole('Admin')"
+        >
+          Admin
+        </button>
+        <button
+          class="inactive-role flex-1 py-3 font-button-text text-button-text transition-all"
+          id="role-Teacher"
+          onclick="setRole('Teacher')"
+        >
+          Teacher
+        </button>
+        <button
+          class="inactive-role flex-1 py-3 font-button-text text-button-text transition-all"
+          id="role-Parent"
+          onclick="setRole('Parent')"
+        >
+          Parent
+        </button>
+      </div>
+      <!-- Form Section -->
+      <form class="w-full space-y-8" onsubmit="return false;">
+        <!-- Username Input -->
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-0 pointer-events-none">
+            <span class="material-symbols-outlined text-navbar-teal text-[20px]" data-icon="person">person</span>
+          </div>
+          <input
+            class="block w-full pl-8 py-3 bg-transparent border-0 border-b border-border-subtle text-on-surface font-body-lg placeholder:text-text-muted transition-colors"
+            id="username"
+            placeholder="Username"
+            required=""
+            type="text"
+          />
+        </div>
+        <!-- Password Input -->
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-0 pointer-events-none">
+            <span class="material-symbols-outlined text-navbar-teal text-[20px]" data-icon="lock">lock</span>
+          </div>
+          <input
+            class="block w-full pl-8 py-3 bg-transparent border-0 border-b border-border-subtle text-on-surface font-body-lg placeholder:text-text-muted transition-colors"
+            id="password"
+            placeholder="Password"
+            required=""
+            type="password"
+          />
+          <div
+            class="absolute inset-y-0 right-0 flex items-center pr-0 cursor-pointer text-text-muted hover:text-primary"
+          >
+            <span class="material-symbols-outlined text-[18px]" data-icon="visibility">visibility</span>
+          </div>
+        </div>
+        <!-- Options -->
+        <div class="flex items-center justify-between mt-4">
+          <label class="flex items-center cursor-pointer">
+            <input
+              class="w-4 h-4 rounded-sm border-border-subtle text-navbar-teal focus:ring-0 focus:ring-offset-0"
+              type="checkbox"
+            />
+            <span class="ml-2 text-secondary font-body-md">Remember me</span>
+          </label>
+          <a class="text-navbar-teal font-button-text text-[12px] hover:underline" href="#">Forgot Password?</a>
+        </div>
+        <!-- Sign In Button -->
+        <button
+          class="w-full bg-navbar-teal text-on-primary py-4 font-button-text text-button-text tracking-widest uppercase transition-all duration-300 hover:bg-primary active:scale-[0.98] shadow-sm"
+          type="submit"
+        >
+          SIGNIN
+        </button>
+      </form>
+      <!-- Footer Help -->
+      <div class="mt-12 text-center">
+        <p class="text-text-muted font-body-md">Having trouble signing in?</p>
+        <a class="text-navbar-teal font-button-text text-[12px] mt-2 block hover:underline" href="#"
+          >CONTACT IT SUPPORT</a
+        >
+      </div>
+    </main>
+    <script>
+      function _setRole(role) {
+        const roles = ["Admin", "Teacher", "Parent"];
+        roles.forEach(r => {
+          const el = document.getElementById(`role-${r}`);
+          if (r === role) {
+            el.classList.remove("inactive-role");
+            el.classList.add("active-role");
+          } else {
+            el.classList.remove("active-role");
+            el.classList.add("inactive-role");
+          }
+        });
+      }
+
+      // Add a subtle entrance animation
+      window.addEventListener("load", () => {
+        document.querySelector("main").classList.add("opacity-0");
+        document.querySelector("main").style.transition = "opacity 0.8s ease-out, transform 0.8s ease-out";
+        document.querySelector("main").style.transform = "translateY(10px)";
+
+        setTimeout(() => {
+          document.querySelector("main").classList.remove("opacity-0");
+          document.querySelector("main").style.opacity = "1";
+          document.querySelector("main").style.transform = "translateY(0)";
+        }, 100);
+      });
+
+      // Interaction for visibility toggle
+      const visibilityToggle = document.querySelector('[data-icon="visibility"]');
+      const passwordInput = document.getElementById("password");
+
+      visibilityToggle.parentElement.addEventListener("click", () => {
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          visibilityToggle.textContent = "visibility_off";
+        } else {
+          passwordInput.type = "password";
+          visibilityToggle.textContent = "visibility";
+        }
+      });
+    </script>
+  </body>
+</html>

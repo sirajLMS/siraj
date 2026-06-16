@@ -1,0 +1,403 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Teacher Weekly Schedule - Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed": "#002020",
+              "error-container": "#ffdad6",
+              "surface-bright": "#f7f9fb",
+              "sidebar-bg": "#0F3D3D",
+              secondary: "#545f73",
+              "on-error-container": "#93000a",
+              "tertiary-fixed": "#71f8e4",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed-variant": "#005048",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "on-primary": "#ffffff",
+              "on-surface-variant": "#404848",
+              error: "#ba1a1a",
+              "surface-dim": "#d8dadc",
+              "on-tertiary": "#ffffff",
+              "surface-container-highest": "#e0e3e5",
+              "on-primary-container": "#85bdbc",
+              "on-secondary-fixed": "#111c2d",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-tint": "#2e6767",
+              "inverse-surface": "#2d3133",
+              "surface-variant": "#e0e3e5",
+              "on-tertiary-container": "#33c7b4",
+              "surface-container-low": "#f2f4f6",
+              "secondary-container": "#d5e0f8",
+              "on-surface": "#191c1e",
+              "secondary-fixed": "#d8e3fb",
+              background: "#f7f9fb",
+              primary: "#003535",
+              "on-secondary-fixed-variant": "#3c475a",
+              "navbar-teal": "#135E5E",
+              "surface-container": "#eceef0",
+              "on-secondary-container": "#586377",
+              tertiary: "#00352f",
+              "surface-container-high": "#e6e8ea",
+              "text-muted": "#64748B",
+              "primary-fixed-dim": "#98d1d0",
+              "on-background": "#191c1e",
+              "primary-fixed": "#b4edec",
+              "surface-container-lowest": "#ffffff",
+              "primary-container": "#0d4d4d",
+              "on-secondary": "#ffffff",
+              "tertiary-container": "#004e46",
+              "outline-variant": "#bfc8c8",
+              "on-tertiary-fixed": "#00201c",
+              "border-subtle": "#E2E8F0",
+              "inverse-on-surface": "#eff1f3",
+              outline: "#707978",
+              surface: "#f7f9fb",
+              "inverse-primary": "#98d1d0",
+              "secondary-fixed-dim": "#bcc7de",
+              "class-burgundy": "#4d0d0d",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "navbar-height": "64px",
+              "auth-width": "420px",
+              "input-gap": "1rem",
+              gutter: "1.5rem",
+              "card-padding": "1.5rem",
+            },
+            fontFamily: {
+              "body-md": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "body-lg": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+    </style>
+  </head>
+  <body class="bg-surface font-body-md text-on-surface selection:bg-primary-fixed-dim selection:text-on-primary-fixed">
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full z-50 bg-navbar-teal flex justify-between items-center px-4 h-navbar-height">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border-2 border-on-primary/20">
+          <img
+            alt="Teacher profile photo"
+            class="w-full h-full object-cover"
+            data-alt="A professional headshot of a middle-aged academic instructor with a warm, confident expression. He is wearing a charcoal blazer over a crisp white shirt, standing against a blurred background of a modern university library. The lighting is soft and natural, emphasizing the professional and scholarly atmosphere of Siraj LMS, using a clean, high-key corporate modern aesthetic."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLv7yVRIxH9OpW2VVVlp8sEokxC_IeMz89hPYFgEO24g2T1_T0TTphqqR1OU9GJ997MzkHPvLEJ-0vgvKHTaF8YxxhO8Ln3Uuw3PbuGdZz8zbzDymAG98PZ1BBC_wjg7szN-5SgOI6P2EhQUjTnRRj1WvpHuf-O3qtx_lMfb_OA9SQyUpmfFOabaFB4bDDYIS9nJs0w6byAE1lUGSVM4BlUwdKSAy9hAq8G7zJiRxGjK-2HkKaOxJvXOhK6H"
+          />
+        </div>
+        <h1 class="font-title-lg text-title-lg text-on-primary truncate max-w-[180px]">Dr. Ahmed Khalil</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="p-2 text-on-primary hover:bg-primary-container/20 transition-colors duration-200 rounded-full">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="pt-20 pb-24 px-4 min-h-screen">
+      <!-- Weekly Metric Card -->
+      <section class="mb-6">
+        <div
+          class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle p-card-padding flex items-center justify-between"
+        >
+          <div>
+            <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
+              Weekly Hours Worked
+            </p>
+            <p class="font-headline-md text-headline-md text-primary mt-1">32:45</p>
+          </div>
+          <div
+            class="w-12 h-12 rounded-full border-2 border-navbar-teal flex items-center justify-center text-navbar-teal"
+          >
+            <span class="material-symbols-outlined">timer</span>
+          </div>
+        </div>
+      </section>
+      <!-- Action Controls -->
+      <section class="flex gap-3 mb-6">
+        <button
+          class="flex-1 bg-navbar-teal text-on-primary py-3 rounded-lg flex items-center justify-center gap-2 font-button-text transition-all active:scale-95"
+        >
+          <span class="material-symbols-outlined">add</span>
+          ADD SLOT
+        </button>
+        <button
+          class="flex-1 bg-error text-on-error py-3 rounded-lg flex items-center justify-center gap-2 font-button-text transition-all active:scale-95"
+        >
+          <span class="material-symbols-outlined">delete</span>
+          DELETE
+        </button>
+      </section>
+      <!-- Horizontal Day Selector -->
+      <nav
+        class="sticky top-16 z-40 bg-surface/95 backdrop-blur-sm -mx-4 px-4 py-3 mb-4 overflow-x-auto no-scrollbar flex gap-2"
+      >
+        <button
+          class="flex-shrink-0 px-4 py-2 rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md whitespace-nowrap shadow-sm border border-primary/10"
+          onclick="selectDay(this)"
+        >
+          Mon 12
+        </button>
+        <button
+          class="flex-shrink-0 px-4 py-2 rounded-full bg-surface-container-low text-on-surface-variant font-label-md text-label-md whitespace-nowrap border border-border-subtle hover:bg-surface-container-high transition-colors"
+          onclick="selectDay(this)"
+        >
+          Tue 13
+        </button>
+        <button
+          class="flex-shrink-0 px-4 py-2 rounded-full bg-surface-container-low text-on-surface-variant font-label-md text-label-md whitespace-nowrap border border-border-subtle hover:bg-surface-container-high transition-colors"
+          onclick="selectDay(this)"
+        >
+          Wed 14
+        </button>
+        <button
+          class="flex-shrink-0 px-4 py-2 rounded-full bg-surface-container-low text-on-surface-variant font-label-md text-label-md whitespace-nowrap border border-border-subtle hover:bg-surface-container-high transition-colors"
+          onclick="selectDay(this)"
+        >
+          Thu 15
+        </button>
+        <button
+          class="flex-shrink-0 px-4 py-2 rounded-full bg-surface-container-low text-on-surface-variant font-label-md text-label-md whitespace-nowrap border border-border-subtle hover:bg-surface-container-high transition-colors"
+          onclick="selectDay(this)"
+        >
+          Fri 16
+        </button>
+        <button
+          class="flex-shrink-0 px-4 py-2 rounded-full bg-surface-container-low text-on-surface-variant font-label-md text-label-md whitespace-nowrap border border-border-subtle hover:bg-surface-container-high transition-colors"
+          onclick="selectDay(this)"
+        >
+          Sat 17
+        </button>
+        <button
+          class="flex-shrink-0 px-4 py-2 rounded-full bg-surface-container-low text-on-surface-variant font-label-md text-label-md whitespace-nowrap border border-border-subtle hover:bg-surface-container-high transition-colors"
+          onclick="selectDay(this)"
+        >
+          Sun 18
+        </button>
+      </nav>
+      <!-- Vertical Schedule Grid -->
+      <div
+        class="relative flex flex-col gap-0.5 bg-border-subtle rounded-xl overflow-hidden shadow-sm border border-border-subtle"
+      >
+        <!-- Time Slot Row: 08:00 AM (Available) -->
+        <div class="flex h-20 bg-surface-container-lowest">
+          <div class="w-20 border-r border-border-subtle flex items-center justify-center p-2 bg-surface-container-low">
+            <span class="font-label-md text-label-md text-on-surface-variant">08:00 AM</span>
+          </div>
+          <div class="flex-1 p-3 flex items-center justify-center opacity-40">
+            <span class="font-body-md text-body-md text-outline">Available</span>
+          </div>
+        </div>
+        <!-- Time Slot Row: 09:00 AM (Booked Class) -->
+        <div class="flex h-20 bg-surface-container-lowest">
+          <div class="w-20 border-r border-border-subtle flex items-center justify-center p-2 bg-surface-container-low">
+            <span class="font-label-md text-label-md text-on-surface-variant">09:00 AM</span>
+          </div>
+          <div class="flex-1 p-2">
+            <div
+              class="h-full w-full bg-class-burgundy rounded-lg px-4 flex items-center justify-between text-on-error shadow-md border-l-4 border-error/50"
+            >
+              <div class="flex flex-col">
+                <span class="font-label-md text-label-md text-on-error/80 uppercase">Geometry 101</span>
+                <span class="font-body-lg text-body-lg font-bold">Omar S. (60m)</span>
+              </div>
+              <button class="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined text-[20px]">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Time Slot Row: 10:00 AM (Available) -->
+        <div class="flex h-20 bg-surface-container-lowest">
+          <div class="w-20 border-r border-border-subtle flex items-center justify-center p-2 bg-surface-container-low">
+            <span class="font-label-md text-label-md text-on-surface-variant">10:00 AM</span>
+          </div>
+          <div class="flex-1 p-3 flex items-center justify-center opacity-40">
+            <span class="font-body-md text-body-md text-outline">Available</span>
+          </div>
+        </div>
+        <!-- Time Slot Row: 11:00 AM (Booked Class) -->
+        <div class="flex h-20 bg-surface-container-lowest">
+          <div class="w-20 border-r border-border-subtle flex items-center justify-center p-2 bg-surface-container-low">
+            <span class="font-label-md text-label-md text-on-surface-variant">11:00 AM</span>
+          </div>
+          <div class="flex-1 p-2">
+            <div
+              class="h-full w-full bg-class-burgundy rounded-lg px-4 flex items-center justify-between text-on-error shadow-md border-l-4 border-error/50"
+            >
+              <div class="flex flex-col">
+                <span class="font-label-md text-label-md text-on-error/80 uppercase">Advanced Algebra</span>
+                <span class="font-body-lg text-body-lg font-bold">Laila M. (60m)</span>
+              </div>
+              <button class="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined text-[20px]">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Time Slot Row: 12:00 PM (Break/Unavailable) -->
+        <div class="flex h-12 bg-surface-container">
+          <div class="w-20 border-r border-border-subtle flex items-center justify-center p-2">
+            <span class="font-label-md text-label-md text-outline">12:00 PM</span>
+          </div>
+          <div class="flex-1 flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-outline text-body-md">restaurant</span>
+            <span class="font-label-md text-label-md text-outline italic">Lunch Break</span>
+          </div>
+        </div>
+        <!-- Time Slot Row: 01:00 PM (Available) -->
+        <div class="flex h-20 bg-surface-container-lowest">
+          <div class="w-20 border-r border-border-subtle flex items-center justify-center p-2 bg-surface-container-low">
+            <span class="font-label-md text-label-md text-on-surface-variant">01:00 PM</span>
+          </div>
+          <div class="flex-1 p-3 flex items-center justify-center opacity-40">
+            <span class="font-body-md text-body-md text-outline">Available</span>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 w-full z-50 bg-surface border-t border-border-subtle shadow-sm flex justify-around items-center h-16 pb-safe"
+    >
+      <!-- Schedule (Active) -->
+      <a
+        class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-95 transition-transform duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1"
+          >calendar_month</span
+        >
+        <span class="font-label-md text-label-md">Schedule</span>
+      </a>
+      <!-- Students -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors duration-200"
+        href="#"
+      >
+        <span class="material-symbols-outlined">school</span>
+        <span class="font-label-md text-label-md">Students</span>
+      </a>
+      <!-- Resources -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors duration-200"
+        href="#"
+      >
+        <span class="material-symbols-outlined">folder_open</span>
+        <span class="font-label-md text-label-md">Resources</span>
+      </a>
+      <!-- Profile -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors duration-200"
+        href="#"
+      >
+        <span class="material-symbols-outlined">person</span>
+        <span class="font-label-md text-label-md">Profile</span>
+      </a>
+    </nav>
+    <script>
+      function _selectDay(element) {
+        // Find all buttons in the day selector
+        const container = element.parentElement;
+        const buttons = container.querySelectorAll("button");
+
+        // Reset styles for all
+        buttons.forEach(btn => {
+          btn.classList.remove("bg-primary-container", "text-on-primary-container", "shadow-sm", "border-primary/10");
+          btn.classList.add("bg-surface-container-low", "text-on-surface-variant", "border-border-subtle");
+        });
+
+        // Apply active styles to clicked
+        element.classList.remove("bg-surface-container-low", "text-on-surface-variant", "border-border-subtle");
+        element.classList.add("bg-primary-container", "text-on-primary-container", "shadow-sm", "border-primary/10");
+
+        // Small haptic-like animation
+        element.classList.add("scale-95");
+        setTimeout(() => element.classList.remove("scale-95"), 100);
+      }
+
+      // Simple mock interaction for class deletion
+      document.querySelectorAll(".bg-class-burgundy button").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const card = e.currentTarget.closest(".bg-class-burgundy");
+          if (confirm("Are you sure you want to remove this class from your schedule?")) {
+            card.parentElement.innerHTML = `
+                        <div class="flex-1 p-3 flex items-center justify-center opacity-40 animate-pulse">
+                            <span class="font-body-md text-body-md text-outline italic">Removing...</span>
+                        </div>
+                    `;
+            setTimeout(() => {
+              const cell = document.querySelector(".animate-pulse");
+              cell.classList.remove("animate-pulse");
+              cell.innerHTML = `<span class="font-body-md text-body-md text-outline">Available</span>`;
+            }, 800);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

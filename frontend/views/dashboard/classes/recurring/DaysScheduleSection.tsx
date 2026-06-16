@@ -1,0 +1,69 @@
+"use client";
+
+import { Box, FormHelperText, Typography } from "@mui/material";
+import type { FieldErrors, UseFormSetValue, UseFormWatch } from "react-hook-form";
+import { labelSx } from "@/frontend/components/ui/form";
+import type { CreateRecurringClassLabels } from "@/frontend/messages/types/message";
+import { DayScheduleRow } from "./DayScheduleRow";
+import type { RecurringClassFormData } from "./recurringClassSchema";
+
+interface DaysScheduleSectionProps {
+  readonly watch: UseFormWatch<RecurringClassFormData>;
+  readonly setValue: UseFormSetValue<RecurringClassFormData>;
+  readonly errors: FieldErrors<RecurringClassFormData>;
+  readonly isMobile: boolean;
+  readonly labels: Pick<
+    CreateRecurringClassLabels,
+    "daysSelection" | "classSchedule" | "weekendOff" | "timeOverride" | "days"
+  >;
+}
+
+export function DaysScheduleSection({ watch, setValue, errors, isMobile, labels }: DaysScheduleSectionProps) {
+  const days = watch("days");
+
+  const handleToggleDay = (index: number, enabled: boolean) => {
+    setValue(`days.${index}.enabled`, enabled, { shouldValidate: true });
+    if (!enabled) {
+      setValue(`days.${index}.showOverride`, false, { shouldValidate: true });
+    }
+  };
+
+  const handleToggleOverride = (index: number) => {
+    const current = days[index];
+    if (!current.enabled || current.isWeekend) return;
+    setValue(`days.${index}.showOverride`, !current.showOverride, { shouldValidate: true });
+  };
+
+  const handleTimeOverrideChange = (index: number, time: string) => {
+    setValue(`days.${index}.timeOverride`, time, { shouldValidate: true });
+  };
+
+  return (
+    <Box>
+      <Typography component="label" sx={labelSx}>
+        {isMobile ? labels.classSchedule : labels.daysSelection}
+      </Typography>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {days.map((day, index) => (
+          <DayScheduleRow
+            key={day.day}
+            day={day}
+            index={index}
+            isMobile={isMobile}
+            dayLabel={labels.days[day.day]}
+            weekendOffLabel={labels.weekendOff}
+            timeOverrideLabel={labels.timeOverride}
+            onToggleDay={handleToggleDay}
+            onToggleOverride={handleToggleOverride}
+            onTimeOverrideChange={handleTimeOverrideChange}
+          />
+        ))}
+      </Box>
+      {errors.days && (
+        <FormHelperText error sx={{ mt: 1 }}>
+          {errors.days.message ?? errors.days.root?.message}
+        </FormHelperText>
+      )}
+    </Box>
+  );
+}

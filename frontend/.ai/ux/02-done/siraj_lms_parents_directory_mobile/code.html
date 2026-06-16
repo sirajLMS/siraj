@@ -1,0 +1,467 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Parents Directory</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              error: "#ba1a1a",
+              "secondary-fixed": "#d8e3fb",
+              "on-error": "#ffffff",
+              "text-muted": "#64748B",
+              "on-primary-fixed": "#002020",
+              "on-background": "#191c1e",
+              "on-tertiary-container": "#33c7b4",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-container": "#eceef0",
+              "surface-container-high": "#e6e8ea",
+              "tertiary-container": "#004e46",
+              "primary-fixed": "#b4edec",
+              "primary-fixed-dim": "#98d1d0",
+              "on-primary-container": "#85bdbc",
+              "navbar-teal": "#135E5E",
+              "tertiary-fixed": "#71f8e4",
+              "primary-container": "#0d4d4d",
+              "on-secondary-fixed-variant": "#3c475a",
+              "border-subtle": "#E2E8F0",
+              "surface-variant": "#e0e3e5",
+              "on-tertiary-fixed": "#00201c",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "secondary-fixed-dim": "#bcc7de",
+              "outline-variant": "#bfc8c8",
+              "inverse-on-surface": "#eff1f3",
+              "sidebar-bg": "#0F3D3D",
+              "surface-container-low": "#f2f4f6",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-surface-variant": "#404848",
+              "surface-container-highest": "#e0e3e5",
+              "error-container": "#ffdad6",
+              background: "#f7f9fb",
+              "surface-tint": "#2e6767",
+              "surface-bright": "#f7f9fb",
+              "on-error-container": "#93000a",
+              surface: "#f7f9fb",
+              "on-surface": "#191c1e",
+              "on-secondary-fixed": "#111c2d",
+              primary: "#003535",
+              tertiary: "#00352f",
+              "on-tertiary": "#ffffff",
+              "secondary-container": "#d5e0f8",
+              secondary: "#545f73",
+              "on-secondary-container": "#586377",
+              outline: "#707978",
+              "on-secondary": "#ffffff",
+              "inverse-surface": "#2d3133",
+              "surface-dim": "#d8dadc",
+              "inverse-primary": "#98d1d0",
+              "surface-container-lowest": "#ffffff",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "input-gap": "1rem",
+              "auth-width": "420px",
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "card-padding": "1.5rem",
+              "navbar-height": "64px",
+              gutter: "1.5rem",
+            },
+            fontFamily: {
+              "headline-md": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "headline-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "body-lg": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      body {
+        font-family: "Hanken Grotesk", sans-serif;
+        background-color: #f7f9fb;
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body class="pb-24 pt-16">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 h-[64px] bg-navbar-teal text-on-primary"
+    >
+      <div class="flex items-center gap-3">
+        <button class="p-2 hover:bg-primary-container/20 rounded-full transition-colors duration-200">
+          <span class="material-symbols-outlined" data-icon="menu">menu</span>
+        </button>
+        <h1 class="font-headline-md text-headline-md font-bold tracking-tight">Siraj LMS</h1>
+      </div>
+      <div class="flex items-center gap-1">
+        <button class="p-2 hover:bg-primary-container/20 rounded-full transition-colors duration-200">
+          <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+        </button>
+      </div>
+    </header>
+    <main class="px-4 py-6">
+      <!-- Dashboard Summary / Metrics -->
+      <section class="grid grid-cols-2 gap-3 mb-8">
+        <!-- Activated -->
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-border-subtle flex flex-col gap-1 transition-transform active:scale-95"
+        >
+          <div class="flex justify-between items-start">
+            <span class="text-primary font-display text-[24px]">124</span>
+            <div class="w-8 h-8 rounded-full border border-navbar-teal/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px] text-navbar-teal" data-icon="check_circle"
+                >check_circle</span
+              >
+            </div>
+          </div>
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Activated</span>
+        </div>
+        <!-- Deactivated -->
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-border-subtle flex flex-col gap-1 transition-transform active:scale-95"
+        >
+          <div class="flex justify-between items-start">
+            <span class="text-primary font-display text-[24px]">12</span>
+            <div class="w-8 h-8 rounded-full border border-navbar-teal/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px] text-navbar-teal" data-icon="cancel">cancel</span>
+            </div>
+          </div>
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Deactivated</span>
+        </div>
+        <!-- Regular -->
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-border-subtle flex flex-col gap-1 transition-transform active:scale-95"
+        >
+          <div class="flex justify-between items-start">
+            <span class="text-primary font-display text-[24px]">89</span>
+            <div class="w-8 h-8 rounded-full border border-navbar-teal/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px] text-navbar-teal" data-icon="person">person</span>
+            </div>
+          </div>
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Regular</span>
+        </div>
+        <!-- On Leave -->
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-border-subtle flex flex-col gap-1 transition-transform active:scale-95"
+        >
+          <div class="flex justify-between items-start">
+            <span class="text-primary font-display text-[24px]">5</span>
+            <div class="w-8 h-8 rounded-full border border-navbar-teal/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px] text-navbar-teal" data-icon="event_busy"
+                >event_busy</span
+              >
+            </div>
+          </div>
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">On Leave</span>
+        </div>
+        <!-- Suspended -->
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-border-subtle flex flex-col gap-1 transition-transform active:scale-95"
+        >
+          <div class="flex justify-between items-start">
+            <span class="text-primary font-display text-[24px]">3</span>
+            <div class="w-8 h-8 rounded-full border border-navbar-teal/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px] text-navbar-teal" data-icon="warning">warning</span>
+            </div>
+          </div>
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Suspended</span>
+        </div>
+        <!-- On Trial -->
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-border-subtle flex flex-col gap-1 transition-transform active:scale-95"
+        >
+          <div class="flex justify-between items-start">
+            <span class="text-primary font-display text-[24px]">15</span>
+            <div class="w-8 h-8 rounded-full border border-navbar-teal/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px] text-navbar-teal" data-icon="hourglass_empty"
+                >hourglass_empty</span
+              >
+            </div>
+          </div>
+          <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">On Trial</span>
+        </div>
+      </section>
+      <!-- Search & Filter Bar -->
+      <div class="flex items-center gap-2 mb-6">
+        <div class="relative flex-1">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]"
+            data-icon="search"
+            >search</span
+          >
+          <input
+            class="w-full bg-white border border-border-subtle rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-navbar-teal outline-none font-body-md text-body-md shadow-sm"
+            placeholder="Search parents..."
+            type="text"
+          />
+        </div>
+        <button
+          class="bg-white border border-border-subtle p-3 rounded-xl flex items-center justify-center text-navbar-teal shadow-sm active:scale-90 transition-transform"
+        >
+          <span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+        </button>
+      </div>
+      <!-- Parent List -->
+      <div class="flex flex-col gap-4">
+        <!-- Parent Card 1 -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border-b border-border-subtle flex flex-col gap-4">
+          <div class="flex justify-between items-start">
+            <div class="flex gap-3">
+              <img
+                alt="Avatar"
+                class="w-12 h-12 rounded-full bg-surface-container"
+                data-alt="A high-quality professional studio portrait of a middle-aged father with a friendly expression. The lighting is soft and even, typical of a professional corporate directory. The color palette is clean with neutral tones, aligning with a professional educational management platform interface. The background is a soft, out-of-focus office setting."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLuOKA5djKR4q3sTsJE-R5PGm0Eevg7ysSdtCt8VZv1f7JE8RJFJjVy-L47bqDv8P6npYfuR-tTeR5YWJoL8Ty0yr5yAERVaOOY1XxckJ9z5WgOD3rV9dVqJAe-ptGh6InWzN01RjtKzIU51_1hJ5IqB7YYEz21jtreCCI8sAOCyQlcJX_4MkPrv5pCN-XiAbb2KVstvQ8EpfCg3QuwA8l-Wpksq5-n1a13p5g5dS6Uk0VW6Lg6VSklHQvUy"
+              />
+              <div class="flex flex-col">
+                <h3 class="font-title-lg text-title-lg text-primary">John Anderson</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">Guardian of Sarah Anderson</p>
+              </div>
+            </div>
+            <button class="text-on-surface-variant p-1">
+              <span class="material-symbols-outlined" data-icon="settings">settings</span>
+            </button>
+          </div>
+          <div class="flex items-center justify-between mt-1">
+            <div class="flex gap-2 items-center">
+              <span
+                class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md"
+                >Regular</span
+              >
+              <div class="flex items-center gap-1 text-error">
+                <span class="material-symbols-outlined text-[16px]" data-icon="priority_high">priority_high</span>
+                <span class="font-label-md text-label-md font-bold">Unpaid: 2</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Parent Card 2 -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border-b border-border-subtle flex flex-col gap-4">
+          <div class="flex justify-between items-start">
+            <div class="flex gap-3">
+              <img
+                alt="Avatar"
+                class="w-12 h-12 rounded-full bg-surface-container"
+                data-alt="A professional headshot of a woman with a confident smile, wearing business-casual attire. The image has a clean, minimalist aesthetic with high-key lighting that feels modern and institutional. The color scheme is dominated by white and soft grays to maintain a calm, academic professional atmosphere."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLsdiNl5F0bcc0_gx-fcbB1EKFQGKenEPSm-dgNbNxqzT8EXcZFYh16FDiZI5_H7tLJ5qK_dMv_W-8flASNwZXAHaJXZhre0hzIV6wwKeUjfe9kuZmNLftdryMe_uj1miynd0D0sBci_tRd49b2OX3XfLR8JTGtSNllGtgdr6vAL27TjieKpwhSBNxSwrc19UiP9sOu_7jiApSi52asT1x7RMXNKQaA38UNFyNEwT6Z1P91CXAsJA4WjLy0o"
+              />
+              <div class="flex flex-col">
+                <h3 class="font-title-lg text-title-lg text-primary">Elena Rodriguez</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">Guardian of Mateo Rodriguez</p>
+              </div>
+            </div>
+            <button class="text-on-surface-variant p-1">
+              <span class="material-symbols-outlined" data-icon="settings">settings</span>
+            </button>
+          </div>
+          <div class="flex items-center justify-between mt-1">
+            <div class="flex gap-2 items-center">
+              <span
+                class="px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant rounded-full font-label-md text-label-md"
+                >On Trial</span
+              >
+              <div class="flex items-center gap-1 text-on-surface-variant opacity-60 italic">
+                <span class="font-label-md text-label-md">Invoices Cleared</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Parent Card 3 -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border-b border-border-subtle flex flex-col gap-4">
+          <div class="flex justify-between items-start">
+            <div class="flex gap-3">
+              <img
+                alt="Avatar"
+                class="w-12 h-12 rounded-full bg-surface-container"
+                data-alt="A close-up professional headshot of a diverse male professional. He is looking directly at the camera with an approachable and trustworthy demeanor. The lighting is crisp and modern, emphasizing clarity. The overall aesthetic is minimalist and corporate, perfectly suited for a high-end educational management dashboard."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLvRoeg66Mu4m-09az1Ts3A3pto-kA5p5gIMCV7eYciFuFBm6qS_64XItMgcKmiHmGrk-V_CaUhn4iDSjaYurynt7s1j6f45XykOnxkhkS5ImX0VPtRyjFG8cMop49OTCyF_2u8DySt0A1E5VR46x90mKckdkxjOLitWzJQWlS43WwDfRR2ARDaKtYwoDSSLHJj9fmnUN2pIWu7tm0ry74zQSw9H8CgFqOcRydUo_LmrIX6GI4ZR4EudbpU"
+              />
+              <div class="flex flex-col">
+                <h3 class="font-title-lg text-title-lg text-primary">Michael Chen</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">Guardian of Kevin Chen</p>
+              </div>
+            </div>
+            <button class="text-on-surface-variant p-1">
+              <span class="material-symbols-outlined" data-icon="settings">settings</span>
+            </button>
+          </div>
+          <div class="flex items-center justify-between mt-1">
+            <div class="flex gap-2 items-center">
+              <span
+                class="px-3 py-1 bg-surface-variant text-on-surface-variant rounded-full font-label-md text-label-md"
+                >Deactivated</span
+              >
+              <div class="flex items-center gap-1 text-error">
+                <span class="material-symbols-outlined text-[16px]" data-icon="priority_high">priority_high</span>
+                <span class="font-label-md text-label-md font-bold">Unpaid: 1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Parent Card 4 -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border-b border-border-subtle flex flex-col gap-4">
+          <div class="flex justify-between items-start">
+            <div class="flex gap-3">
+              <img
+                alt="Avatar"
+                class="w-12 h-12 rounded-full bg-surface-container"
+                data-alt="A portrait of a professional woman wearing glasses and a blazer, set against a neutral gray background. The lighting is soft and flattering, creating a polished corporate look. The design follows a strict minimalist editorial style, with clean lines and high contrast, echoing the professional digital environment of a modern learning management system."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLtiOUWMfMcjoi6vbMxXUeyUAys1EIoHzTeZzuxFBfkbggBuiX2sYq8SZMzR0o-iYLWhS2GWc0B7Rmui8l00RJHF-2zMijDzumkp2xj0pphPqmG4zp9xSygAup9T5DuYhOrLycZ3UcaYhYgxfEMlzKUwtMayyJJ4n9oOFweG1-2hzg4_iH9lQ8JIVnBAvXpHIyN7kgrMZrZaCgjNJA3bZ9TQetBUf9vrtoPVrYyeEPRyRT-xhaStfuFFXlZ5"
+              />
+              <div class="flex flex-col">
+                <h3 class="font-title-lg text-title-lg text-primary">Sara Thompson</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant">Guardian of Leo Thompson</p>
+              </div>
+            </div>
+            <button class="text-on-surface-variant p-1">
+              <span class="material-symbols-outlined" data-icon="settings">settings</span>
+            </button>
+          </div>
+          <div class="flex items-center justify-between mt-1">
+            <div class="flex gap-2 items-center">
+              <span
+                class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md"
+                >Regular</span
+              >
+              <div class="flex items-center gap-1 text-on-surface-variant opacity-60 italic">
+                <span class="font-label-md text-label-md">Invoices Cleared</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- Floating Action Button -->
+    <button
+      class="fixed bottom-24 right-6 w-14 h-14 bg-navbar-teal text-white rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform z-40"
+    >
+      <span class="material-symbols-outlined text-[32px]" data-icon="add">add</span>
+    </button>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface border-t border-border-subtle h-[72px]"
+    >
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors duration-200"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+        <span class="font-label-md text-label-md mt-1">Dashboard</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1.5 scale-95 transition-transform duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: &quot;FILL&quot; 1"
+          >group</span
+        >
+        <span class="font-label-md text-label-md mt-0.5">Parents</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors duration-200"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="school">school</span>
+        <span class="font-label-md text-label-md mt-1">Students</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors duration-200"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="payments">payments</span>
+        <span class="font-label-md text-label-md mt-1">Finance</span>
+      </a>
+    </nav>
+    <script>
+      // Simple micro-interaction for cards
+      document.querySelectorAll(".bg-white.p-4").forEach(card => {
+        card.addEventListener("click", () => {
+          card.classList.add("bg-surface-container-low");
+          setTimeout(() => {
+            card.classList.remove("bg-surface-container-low");
+          }, 100);
+        });
+      });
+
+      // FAB Ripple effect logic (minimalist implementation)
+      const fab = document.querySelector("button.fixed.bottom-24");
+      fab.addEventListener("mousedown", function (e) {
+        const ripple = document.createElement("span");
+        ripple.classList.add("ripple");
+        this.appendChild(ripple);
+        const d = Math.max(this.clientWidth, this.clientHeight);
+        ripple.style.width = ripple.style.height = d + "px";
+        ripple.style.left = e.clientX - this.offsetLeft - d / 2 + "px";
+        ripple.style.top = e.clientY - this.offsetTop - d / 2 + "px";
+        ripple.classList.add("ripple-effect");
+      });
+    </script>
+    <style>
+      .ripple {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: scale(0);
+        pointer-events: none;
+      }
+      .ripple-effect {
+        animation: ripple 0.6s linear;
+      }
+      @keyframes ripple {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+    </style>
+  </body>
+</html>

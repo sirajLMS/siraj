@@ -1,0 +1,398 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Class Audit Trail - Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#e0e3e5",
+              "on-surface-variant": "#404848",
+              "secondary-container": "#d5e0f8",
+              "on-secondary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "primary-fixed": "#b4edec",
+              "on-tertiary": "#ffffff",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#d8e3fb",
+              "on-tertiary-fixed": "#00201c",
+              "tertiary-fixed-dim": "#4fdbc8",
+              error: "#ba1a1a",
+              "inverse-primary": "#98d1d0",
+              "surface-container-high": "#e6e8ea",
+              "surface-tint": "#2e6767",
+              "surface-container-highest": "#e0e3e5",
+              secondary: "#545f73",
+              "on-error-container": "#93000a",
+              "on-primary-fixed": "#002020",
+              "secondary-fixed-dim": "#bcc7de",
+              "on-surface": "#191c1e",
+              "sidebar-bg": "#0F3D3D",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed": "#111c2d",
+              "text-muted": "#64748B",
+              "on-primary-container": "#85bdbc",
+              "on-primary-fixed-variant": "#104f4f",
+              "on-background": "#191c1e",
+              "primary-container": "#0d4d4d",
+              "tertiary-fixed": "#71f8e4",
+              "surface-container": "#eceef0",
+              "on-secondary-container": "#586377",
+              surface: "#f7f9fb",
+              primary: "#003535",
+              tertiary: "#00352f",
+              "surface-bright": "#f7f9fb",
+              "on-tertiary-fixed-variant": "#005048",
+              "tertiary-container": "#004e46",
+              "surface-container-low": "#f2f4f6",
+              "border-subtle": "#E2E8F0",
+              "primary-fixed-dim": "#98d1d0",
+              "error-container": "#ffdad6",
+              "outline-variant": "#bfc8c8",
+              outline: "#707978",
+              "on-secondary-fixed-variant": "#3c475a",
+              "inverse-on-surface": "#eff1f3",
+              "surface-dim": "#d8dadc",
+              "on-tertiary-container": "#33c7b4",
+              background: "#f7f9fb",
+              "navbar-teal": "#135E5E",
+              "inverse-surface": "#2d3133",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "navbar-height": "64px",
+              "input-gap": "1rem",
+              "sidebar-width": "260px",
+              gutter: "1.5rem",
+              "auth-width": "420px",
+              "page-margin": "2rem",
+              "card-padding": "1.5rem",
+            },
+            fontFamily: {
+              display: ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "label-md": ["Inter"],
+              "body-lg": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Hanken Grotesk", sans-serif;
+        background-color: #f7f9fb;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .tab-active {
+        color: #135e5e;
+        font-weight: 700;
+        border-bottom: 2px solid #135e5e;
+      }
+    </style>
+  </head>
+  <body class="bg-surface text-on-surface pb-20">
+    <!-- Top App Bar -->
+    <header
+      class="fixed top-0 w-full z-50 flex justify-between items-center px-4 h-navbar-height w-full bg-navbar-teal"
+    >
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-on-primary">arrow_back</span>
+        <h1 class="font-headline-md text-headline-md font-bold text-on-primary">Class Audit Trail</h1>
+      </div>
+      <span class="material-symbols-outlined text-on-primary">notifications</span>
+    </header>
+    <main class="mt-20 px-4 space-y-6">
+      <!-- Header Section -->
+      <section class="space-y-2">
+        <h2 class="font-headline-md text-headline-md text-primary leading-tight">Advanced Mathematics - Section B</h2>
+        <div
+          class="inline-flex items-center px-3 py-1 rounded-full bg-primary-container text-primary-fixed font-button-text text-xs tracking-wider"
+        >
+          REGULAR (RE SCHEDULED)
+        </div>
+      </section>
+      <!-- Class Info Cards -->
+      <section class="grid grid-cols-1 gap-4">
+        <div class="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border-b border-border-subtle">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-text-muted font-label-md text-label-md uppercase tracking-widest">Class Details</span>
+            <span class="material-symbols-outlined text-navbar-teal">info</span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <span class="text-text-muted font-body-md text-body-md">Course Code</span>
+              <span class="font-title-lg text-body-md font-bold">MATH-402-B</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <span class="text-text-muted font-body-md text-body-md">Teacher</span>
+              <span class="font-title-lg text-body-md font-bold">Dr. Sarah Al-Farsi</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <span class="text-text-muted font-body-md text-body-md">Original Date</span>
+              <span class="font-body-md text-body-md">2023-10-24</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <span class="text-text-muted font-body-md text-body-md">Rescheduled Date</span>
+              <span class="font-title-lg text-body-md font-extrabold text-navbar-teal">2023-10-26</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-100 pb-2">
+              <span class="text-text-muted font-body-md text-body-md">Time Slot</span>
+              <span class="font-body-md text-body-md">10:00 AM - 11:30 AM</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Venue Location -->
+      <section class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border-b border-border-subtle">
+        <div class="h-32 bg-slate-200 relative overflow-hidden">
+          <img
+            alt="Engineering Wing"
+            class="w-full h-full object-cover grayscale-[0.2]"
+            data-alt="A clean, professional interior photograph of a modern university building hallway, specifically the Engineering Wing. The architecture features high ceilings, glass partitions, and industrial-chic metal accents. Soft, natural light streams from a distant window, reflecting on the polished concrete floors. The color palette is composed of cool grays, pristine whites, and deep teal highlights, matching a sophisticated corporate educational aesthetic."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLuta-jlFq_S7yVlUHn1fQPIADBdL2lb_7XmVmCYZksoeRC_164jvcxamY1DtLY4nVGwEm06hkMo2ZCRfkndjKkEoC8Wu8G4-XSVfkDZvzbUtcrTc0H2W9Poa0ahYkdt4feWpoMXdw4sIAWZk80AfxneauiLUJuxRyXQ0Kfss2uzHRa0QeXiC2qRHveGjwyJEtGqANFmCsD1wAMefzuRVtI1gLB2RLaW4unVAjv7ZPo66i7tpjXDw377Nxo"
+          />
+          <div class="absolute top-2 right-2 bg-navbar-teal text-white px-2 py-1 rounded text-xs font-bold shadow-md">
+            45 Students Cap.
+          </div>
+        </div>
+        <div class="p-4 flex justify-between items-center">
+          <div>
+            <h3 class="font-title-lg text-title-lg text-primary">Engineering Wing</h3>
+            <p class="text-text-muted font-body-md text-body-md">Floor 2, Hall 204</p>
+          </div>
+          <button
+            class="bg-primary px-4 py-2 text-on-primary rounded-lg font-button-text text-button-text flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined text-[18px]">map</span>
+            VIEW
+          </button>
+        </div>
+      </section>
+      <!-- Audit Trail -->
+      <section
+        class="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border-l-4 border-navbar-teal border-b border-border-subtle"
+      >
+        <div class="flex items-center gap-2 mb-2 text-navbar-teal">
+          <span class="material-symbols-outlined">history_edu</span>
+          <span class="font-label-md text-label-md font-bold uppercase tracking-widest"
+            >Automated Audit Trail &amp; Remarks</span
+          >
+        </div>
+        <p class="font-body-md text-body-md italic text-on-surface-variant leading-relaxed mb-3">
+          "Class rescheduled due to Dr. Sarah Al-Farsi requesting medical leave for dental procedure. Approved by HOD
+          Mathematics."
+        </p>
+        <div class="text-[10px] font-label-md text-text-muted text-right">System Logged: Oct 23, 2023 • 04:12 PM</div>
+      </section>
+      <!-- Communication Log -->
+      <section class="space-y-3">
+        <div class="flex justify-between items-center px-1">
+          <h3 class="font-title-lg text-title-lg text-primary">Communication Log</h3>
+          <button class="text-navbar-teal font-button-text text-[12px] font-bold border-b-2 border-navbar-teal">
+            RESEND NOTIFICATIONS
+          </button>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between bg-surface-container-low p-4 rounded-xl">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container"
+              >
+                <span class="material-symbols-outlined">mail</span>
+              </div>
+              <div>
+                <p class="font-body-md text-body-md font-bold">Email Notification Sent</p>
+                <p class="text-xs text-text-muted">Status: Delivered to 32 students</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-green-600">check_circle</span>
+          </div>
+          <div class="flex items-center justify-between bg-surface-container-low p-4 rounded-xl opacity-70">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant"
+              >
+                <span class="material-symbols-outlined">sms</span>
+              </div>
+              <div>
+                <p class="font-body-md text-body-md font-bold">SMS Alert (Optional)</p>
+                <p class="text-xs text-text-muted">Not initiated by administrator</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined">radio_button_unchecked</span>
+          </div>
+        </div>
+      </section>
+      <!-- Registered Students -->
+      <section class="space-y-3">
+        <h3 class="font-title-lg text-title-lg text-primary px-1">Registered Students</h3>
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border-b border-border-subtle">
+          <table class="w-full text-left">
+            <thead class="bg-slate-50 border-b border-border-subtle">
+              <tr>
+                <th class="p-4 font-label-md text-label-md text-text-muted">Student</th>
+                <th class="p-4 font-label-md text-label-md text-text-muted">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr>
+                <td class="p-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-navbar-teal font-bold text-xs"
+                    >
+                      JD
+                    </div>
+                    <div>
+                      <p class="font-body-md text-body-md font-bold">John Doe</p>
+                      <p class="text-[10px] text-text-muted">ID: 2023-ST-0192</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <span class="px-2 py-1 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">PENDING</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="p-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs"
+                    >
+                      AS
+                    </div>
+                    <div>
+                      <p class="font-body-md text-body-md font-bold">Amara Smith</p>
+                      <p class="text-[10px] text-text-muted">ID: 2023-ST-0842</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <span class="px-2 py-1 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">PENDING</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="p-3 text-center">
+            <button class="text-navbar-teal font-button-text text-label-md font-bold">View all 42 students</button>
+          </div>
+        </div>
+      </section>
+      <!-- Admin Note -->
+      <section class="bg-sidebar-bg p-card-padding rounded-xl shadow-lg space-y-4 mb-10">
+        <div class="flex items-center gap-2 text-on-primary">
+          <span class="material-symbols-outlined text-[20px]">sticky_note_2</span>
+          <h4 class="font-label-md text-label-md font-bold uppercase tracking-widest">Administrative Justification</h4>
+        </div>
+        <p class="text-on-primary/90 font-body-md text-body-md leading-relaxed">
+          Schedule override approved under academic policy 4.2. Venue change reflected in facility management system.
+          Ensure double-attendance is recorded for the makeup session.
+        </p>
+        <div class="flex justify-end gap-2">
+          <button
+            class="px-4 py-2 rounded border border-on-primary/30 text-on-primary font-button-text text-button-text hover:bg-white/10 transition-all"
+          >
+            EDIT
+          </button>
+          <button
+            class="px-6 py-2 rounded bg-navbar-teal text-on-primary font-button-text text-button-text font-bold shadow-md active:scale-95 transition-transform"
+          >
+            UPDATE
+          </button>
+        </div>
+      </section>
+    </main>
+    <!-- Bottom Navigation Bar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full flex justify-around items-center h-16 bg-surface px-2 border-t border-outline-variant shadow-sm z-50"
+    >
+      <div
+        class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-3 py-1 scale-95 active:scale-90 transition-transform"
+      >
+        <span class="material-symbols-outlined">calendar_today</span>
+        <span class="font-label-md text-label-md">Schedule</span>
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 active:scale-90 transition-transform"
+      >
+        <span class="material-symbols-outlined">school</span>
+        <span class="font-label-md text-label-md">Teachers</span>
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 active:scale-90 transition-transform"
+      >
+        <span class="material-symbols-outlined">family_restroom</span>
+        <span class="font-label-md text-label-md">Parents</span>
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 active:scale-90 transition-transform"
+      >
+        <span class="material-symbols-outlined">group</span>
+        <span class="font-label-md text-label-md">Students</span>
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 active:scale-90 transition-transform"
+      >
+        <span class="material-symbols-outlined">assessment</span>
+        <span class="font-label-md text-label-md">Reports</span>
+      </div>
+    </nav>
+    <script>
+      // Simple micro-interaction for tapping cards
+      document.querySelectorAll(".bg-surface-container-lowest").forEach(card => {
+        card.addEventListener("touchstart", function () {
+          this.classList.add("scale-[0.98]");
+          this.classList.add("transition-transform");
+        });
+        card.addEventListener("touchend", function () {
+          this.classList.remove("scale-[0.98]");
+        });
+      });
+    </script>
+  </body>
+</html>

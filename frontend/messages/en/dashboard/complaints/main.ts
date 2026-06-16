@@ -1,0 +1,62 @@
+import type { ComplaintsLabels } from "../../../types/dashboard/complaints";
+
+export const complaints: ComplaintsLabels = {
+  parent: {
+    pageTitle: "Complaints & Records",
+    formTitle: "Submit a New Complaint",
+    student: "Select Student",
+    contactEmail: "Contact Email",
+    contactEmailPlaceholder: "parent.contact@example.com",
+    complaintDetails: "Complaint Details",
+    complaintDetailsPlaceholder: "Describe your concern in detail...",
+    submit: "Submit Complaint",
+    successMessage: "Your complaint has been submitted successfully.",
+    policyTitle: "Policy Overview",
+    policyBody:
+      "We aim to respond to all parent complaints within 48 academic hours. Urgent matters should be reported directly to the administration office.",
+    recordTitle: "Complaint Record",
+    totalRecords: "{count} Total Records",
+    loadOlder: "Load Older Records",
+    waitingMessage: "Waiting for Admin to review and provide a response...",
+    adminResponse: "Admin Response",
+    regarding: "Regarding",
+    validation: {
+      studentRequired: "Please select a student.",
+      emailRequired: "Please enter your contact email.",
+      emailInvalid: "Please enter a valid email address.",
+      detailsRequired: "Please describe your complaint in at least 10 characters.",
+    },
+    statusLabels: {
+      pending: "Pending",
+      resolved: "Resolved",
+    },
+  },
+  admin: {
+    pageTitle: "Complaints Resolution Queue",
+    pageSubtitle: "Review and respond to institutional complaints.",
+    metrics: {
+      unanswered: "Un-answered",
+      answered: "Answered",
+      avgResolution: "Avg. Resolution Time",
+      efficiencyNote: "Efficiency Up 12%",
+    },
+    tabs: {
+      unanswered: "Un-answered",
+      answered: "Answered",
+    },
+    searchPlaceholder: "Search complaints...",
+    queue: {
+      received: "Received",
+      yourResponse: "Your Response",
+      responsePlaceholder: "Type your official resolution here...",
+      answer: "Answer",
+      answerAndEmail: "Answer & Send to Email",
+      adminResponse: "Admin Response",
+      noEntries: "No complaints match your search",
+    },
+    priorityLabels: {
+      urgent: "Urgent Priority",
+      general: "General Inquiry",
+    },
+  },
+};

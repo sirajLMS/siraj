@@ -1,0 +1,371 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Learning Resources | Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-container": "#0d4d4d",
+              "secondary-fixed": "#d8e3fb",
+              "surface-bright": "#f7f9fb",
+              "surface-dim": "#d8dadc",
+              "on-secondary-fixed": "#111c2d",
+              "tertiary-container": "#004e46",
+              "on-background": "#191c1e",
+              tertiary: "#00352f",
+              "on-primary-container": "#85bdbc",
+              "on-error": "#ffffff",
+              "inverse-primary": "#98d1d0",
+              "inverse-surface": "#2d3133",
+              "tertiary-fixed-dim": "#4fdbc8",
+              surface: "#f7f9fb",
+              background: "#f7f9fb",
+              "surface-tint": "#2e6767",
+              "on-primary-fixed": "#002020",
+              "on-surface-variant": "#404848",
+              "primary-fixed": "#b4edec",
+              "error-container": "#ffdad6",
+              "primary-fixed-dim": "#98d1d0",
+              "surface-container": "#eceef0",
+              outline: "#707978",
+              "sidebar-bg": "#0F3D3D",
+              "outline-variant": "#bfc8c8",
+              "surface-container-lowest": "#ffffff",
+              "on-error-container": "#93000a",
+              "on-surface": "#191c1e",
+              "on-primary-fixed-variant": "#104f4f",
+              "border-subtle": "#E2E8F0",
+              "tertiary-fixed": "#71f8e4",
+              "on-primary": "#ffffff",
+              "on-secondary": "#ffffff",
+              "secondary-container": "#d5e0f8",
+              "inverse-on-surface": "#eff1f3",
+              "secondary-fixed-dim": "#bcc7de",
+              "on-secondary-fixed-variant": "#3c475a",
+              "surface-variant": "#e0e3e5",
+              "on-tertiary-fixed": "#00201c",
+              "surface-container-highest": "#e0e3e5",
+              "on-secondary-container": "#586377",
+              secondary: "#545f73",
+              "text-muted": "#64748B",
+              "on-tertiary-fixed-variant": "#005048",
+              "surface-container-low": "#f2f4f6",
+              "on-tertiary": "#ffffff",
+              primary: "#003535",
+              "surface-container-high": "#e6e8ea",
+              "on-tertiary-container": "#33c7b4",
+              "navbar-teal": "#135E5E",
+              error: "#ba1a1a",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "page-margin": "2rem",
+              "navbar-height": "64px",
+              "input-gap": "1rem",
+              gutter: "1.5rem",
+              "sidebar-width": "260px",
+              "auth-width": "420px",
+              "card-padding": "1.5rem",
+            },
+            fontFamily: {
+              "body-md": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "label-md": ["Inter"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      body {
+        font-family: "Hanken Grotesk", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .file-upload-area {
+        border: 2px dashed #bfc8c8;
+        transition: border-color 0.3s ease;
+      }
+      .file-upload-area:active {
+        border-color: #135e5e;
+        background-color: rgba(19, 94, 94, 0.05);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-surface text-on-surface mb-20">
+    <!-- Shared TopAppBar -->
+    <header
+      class="fixed top-0 w-full z-50 bg-navbar-teal flex justify-between items-center px-4 h-navbar-height w-full no-border shadow-none"
+    >
+      <div class="flex items-center gap-3">
+        <button
+          class="material-symbols-outlined text-on-primary hover:bg-primary-container/20 p-2 rounded-full transition-colors duration-200"
+          data-icon="menu"
+        >
+          menu
+        </button>
+        <span class="font-headline-md text-headline-md font-bold text-on-primary">Siraj LMS</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          class="material-symbols-outlined text-on-primary hover:bg-primary-container/20 p-2 rounded-full transition-colors duration-200"
+          data-icon="notifications"
+        >
+          notifications
+        </button>
+      </div>
+    </header>
+    <main class="pt-20 px-4 pb-4">
+      <!-- Screen Title -->
+      <section class="mb-6">
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">Learning Resources</h1>
+        <p class="font-body-md text-body-md text-on-surface-variant">Manage educational materials.</p>
+      </section>
+      <!-- 1. Upload New Resource (Collapsible Style Card) -->
+      <section class="mb-6">
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle overflow-hidden">
+          <button
+            class="w-full flex items-center justify-between p-4 bg-surface-container-low transition-colors duration-200 active:bg-surface-variant"
+            onclick="toggleUpload()"
+          >
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-primary" data-icon="cloud_upload">cloud_upload</span>
+              <span class="font-title-lg text-title-lg text-primary">Upload New Resource</span>
+            </div>
+            <span
+              class="material-symbols-outlined transition-transform duration-300 transform rotate-180"
+              data-icon="expand_more"
+              id="upload-arrow"
+              >expand_more</span
+            >
+          </button>
+          <div class="p-4 space-y-4 transition-all duration-300" id="upload-content">
+            <div>
+              <label class="font-label-md text-label-md text-on-surface-variant block mb-1">Document Name</label>
+              <input
+                class="w-full border-b border-border-subtle py-2 px-0 bg-transparent focus:border-navbar-teal focus:ring-0 font-body-md text-body-md outline-none transition-colors"
+                placeholder="Enter resource name"
+                type="text"
+              />
+            </div>
+            <div class="file-upload-area rounded-lg p-8 flex flex-col items-center justify-center gap-2 cursor-pointer">
+              <span class="material-symbols-outlined text-outline text-4xl" data-icon="upload_file">upload_file</span>
+              <span class="font-body-md text-body-md text-on-surface-variant">Choose File</span>
+              <span class="text-[10px] uppercase font-bold text-outline-variant">PDF, PPTX, XLSX up to 10MB</span>
+            </div>
+            <button
+              class="w-full bg-navbar-teal text-on-primary py-3 font-button-text text-button-text rounded-[2px] transition-all active:scale-[0.98] uppercase"
+            >
+              UPLOAD
+            </button>
+          </div>
+        </div>
+      </section>
+      <!-- 3. Resource Filtering -->
+      <section class="mb-4 flex items-center gap-2 overflow-x-auto pb-2">
+        <div
+          class="flex items-center gap-1 bg-surface-container-high px-3 py-1.5 rounded-full border border-outline-variant"
+        >
+          <span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span>
+          <span class="font-label-md text-label-md">Filter</span>
+        </div>
+        <div
+          class="flex items-center gap-1 bg-surface-container-high px-3 py-1.5 rounded-full border border-outline-variant"
+        >
+          <span class="material-symbols-outlined text-sm" data-icon="calendar_today">calendar_today</span>
+          <span class="font-label-md text-label-md">Date</span>
+        </div>
+        <div
+          class="flex items-center gap-1 bg-surface-container-high px-3 py-1.5 rounded-full border border-outline-variant"
+        >
+          <span class="font-label-md text-label-md">Type: All</span>
+          <span class="material-symbols-outlined text-sm" data-icon="expand_more">expand_more</span>
+        </div>
+      </section>
+      <!-- 2. Document Library -->
+      <section class="space-y-3">
+        <!-- PDF Card -->
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-border-subtle flex items-start gap-4 relative"
+        >
+          <div class="w-12 h-12 bg-error-container/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-error text-3xl" data-icon="picture_as_pdf">picture_as_pdf</span>
+          </div>
+          <div class="flex-1 pr-6">
+            <h3 class="font-body-lg text-body-lg font-bold text-primary truncate">Business Communication</h3>
+            <p class="font-label-md text-label-md text-on-surface-variant">Business Skill.pdf</p>
+            <p class="font-label-md text-label-md text-outline-variant mt-1">Uploaded 2 days ago</p>
+          </div>
+          <button class="absolute top-4 right-4 text-error transition-transform active:scale-90">
+            <span class="material-symbols-outlined" data-icon="delete">delete</span>
+          </button>
+        </div>
+        <!-- PPTX Card -->
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-border-subtle flex items-start gap-4 relative"
+        >
+          <div class="w-12 h-12 bg-secondary-container/30 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-secondary text-3xl" data-icon="presentation_play"
+              >present_to_all</span
+            >
+          </div>
+          <div class="flex-1 pr-6">
+            <h3 class="font-body-lg text-body-lg font-bold text-primary truncate">Advanced Calculus</h3>
+            <p class="font-label-md text-label-md text-on-surface-variant">Math_Module_3.pptx</p>
+            <p class="font-label-md text-label-md text-outline-variant mt-1">Uploaded 5 days ago</p>
+          </div>
+          <button class="absolute top-4 right-4 text-error transition-transform active:scale-90">
+            <span class="material-symbols-outlined" data-icon="delete">delete</span>
+          </button>
+        </div>
+        <!-- XLSX Card -->
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-border-subtle flex items-start gap-4 relative"
+        >
+          <div class="w-12 h-12 bg-tertiary-container/10 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-tertiary-fixed-dim text-3xl" data-icon="table_chart"
+              >table_chart</span
+            >
+          </div>
+          <div class="flex-1 pr-6">
+            <h3 class="font-body-lg text-body-lg font-bold text-primary truncate">Student Attendance Q3</h3>
+            <p class="font-label-md text-label-md text-on-surface-variant">Attendance_Record.xlsx</p>
+            <p class="font-label-md text-label-md text-outline-variant mt-1">Uploaded 1 week ago</p>
+          </div>
+          <button class="absolute top-4 right-4 text-error transition-transform active:scale-90">
+            <span class="material-symbols-outlined" data-icon="delete">delete</span>
+          </button>
+        </div>
+      </section>
+      <!-- 4. Upload Guidelines -->
+      <section class="mt-8">
+        <div class="bg-surface-container-high p-4 rounded-xl border border-outline-variant">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="info">info</span>
+            <h4 class="font-label-md text-label-md font-bold uppercase text-on-surface-variant tracking-wider">
+              Upload Guidelines
+            </h4>
+          </div>
+          <ul class="space-y-2 list-none font-body-md text-body-md text-on-surface-variant pl-1">
+            <li class="flex items-start gap-2">
+              <span class="text-navbar-teal mt-1">•</span>
+              <span>Ensure file names are descriptive and exclude special characters.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-navbar-teal mt-1">•</span>
+              <span>Maximum file size per upload is limited to 10MB.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-navbar-teal mt-1">•</span>
+              <span>Confirm all materials adhere to institutional copyright policies.</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+    <!-- Shared BottomNavBar -->
+    <nav
+      class="fixed bottom-0 w-full z-50 bg-surface-container-lowest flex justify-around items-center h-16 pb-safe border-t border-border-subtle shadow-sm"
+    >
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant transition-transform scale-95"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+        <span class="font-label-md text-label-md">Dashboard</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 transition-transform scale-95"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="school">school</span>
+        <span class="font-label-md text-label-md">Courses</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant transition-transform scale-95"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="group">group</span>
+        <span class="font-label-md text-label-md">Students</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant transition-transform scale-95"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+        <span class="font-label-md text-label-md">Reports</span>
+      </a>
+    </nav>
+    <script>
+      function _toggleUpload() {
+        const content = document.getElementById("upload-content");
+        const arrow = document.getElementById("upload-arrow");
+        if (content.classList.contains("hidden")) {
+          content.classList.remove("hidden");
+          arrow.style.transform = "rotate(180deg)";
+        } else {
+          content.classList.add("hidden");
+          arrow.style.transform = "rotate(0deg)";
+        }
+      }
+
+      // Start expanded as requested for UX visibility
+      window.onload = () => {
+        // Uncomment the line below to start collapsed
+        // toggleUpload();
+      };
+    </script>
+  </body>
+</html>

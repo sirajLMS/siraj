@@ -1,0 +1,28 @@
+"use client";
+
+import type { SuggestionsAdminLabels } from "@/frontend/messages/types/dashboard/suggestions/main";
+import type { SuggestionTab } from "@/frontend/stores/adminSuggestionsStore";
+import { AdminQueueTabBar, formatAdminQueueTabLabel } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
+
+interface SuggestionsTabBarProps {
+  readonly activeTab: SuggestionTab;
+  readonly pendingCount: number;
+  readonly reviewedCount: number;
+  readonly labels: SuggestionsAdminLabels;
+  readonly onTabChange: (tab: SuggestionTab) => void;
+}
+
+export function SuggestionsTabBar({
+  activeTab,
+  pendingCount,
+  reviewedCount,
+  labels,
+  onTabChange,
+}: Readonly<SuggestionsTabBarProps>) {
+  const tabs = [
+    { key: "pending" as const, label: formatAdminQueueTabLabel(labels.tabs.pending, pendingCount) },
+    { key: "reviewed" as const, label: formatAdminQueueTabLabel(labels.tabs.reviewed, reviewedCount) },
+  ];
+
+  return <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={onTabChange} />;
+}

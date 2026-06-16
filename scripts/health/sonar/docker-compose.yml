@@ -6,6 +6,11 @@ services:
       - "9000:9000"
     environment:
       - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+      # Tuning JVM for better performance within the 4GB limit
+      # Current values were 512m, increasing to 1G for each component
+      - SONAR_WEB_JAVAOPTS=-Xmx1G -Xms1G
+      - SONAR_CE_JAVAOPTS=-Xmx1G -Xms1G
+      - SONAR_SEARCH_JAVAOPTS=-Xmx1G -Xms1G
     volumes:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
@@ -13,22 +18,20 @@ services:
     networks:
       - sonarnet
 
-    # 1. Resource limits added here
     deploy:
       resources:
         limits:
-          cpus: "16.0"
-          memory: 8192M # Capped at 3GB instead of 4GB
+          cpus: "4.0"
+          memory: 4096M
         reservations:
-          memory: 1536M # Reserves 1.5GB on startup
+          memory: 2048M
 
-    # 2. Optimized health check to handle temporary lags gently
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9000/api/system/status"]
-      interval: 30s # Increased from 10s so it doesn't spam pings during high GC overhead
-      timeout: 10s # Increased from 5s to give the container time to answer if lagging
-      retries: 5 # Reduced retries because interval is longer
-      start_period: 120s # Increased from 60s because SonarQube's DB migrations can take over a minute
+      test: ["CMD", "curl", "-f", "http://localhost:9000/api/system/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
 
 volumes:
   sonarqube_data:

@@ -1,0 +1,458 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Admin Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Material Symbols -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Theme Configuration -->
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed-dim": "#98d1d0",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-secondary-fixed-variant": "#3c475a",
+              "tertiary-fixed": "#71f8e4",
+              "error-container": "#ffdad6",
+              "surface-bright": "#f7f9fb",
+              "surface-container-lowest": "#ffffff",
+              "inverse-on-surface": "#eff1f3",
+              outline: "#707978",
+              surface: "#f7f9fb",
+              "primary-container": "#0d4d4d",
+              "on-primary-container": "#85bdbc",
+              "on-error-container": "#93000a",
+              "surface-variant": "#e0e3e5",
+              "on-background": "#191c1e",
+              "surface-container-high": "#e6e8ea",
+              "on-tertiary-container": "#33c7b4",
+              "on-error": "#ffffff",
+              "surface-dim": "#d8dadc",
+              "navbar-teal": "#135E5E",
+              "text-muted": "#64748B",
+              "on-tertiary-fixed": "#00201c",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed": "#d8e3fb",
+              "on-secondary": "#ffffff",
+              "on-secondary-container": "#586377",
+              primary: "#003535",
+              "on-primary-fixed": "#002020",
+              "on-primary": "#ffffff",
+              "surface-tint": "#2e6767",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-container-highest": "#e0e3e5",
+              secondary: "#545f73",
+              "outline-variant": "#bfc8c8",
+              "surface-container-low": "#f2f4f6",
+              "tertiary-fixed-dim": "#4fdbc8",
+              tertiary: "#00352f",
+              "inverse-primary": "#98d1d0",
+              "secondary-fixed-dim": "#bcc7de",
+              "border-subtle": "#E2E8F0",
+              "tertiary-container": "#004e46",
+              "primary-fixed": "#b4edec",
+              "on-surface": "#191c1e",
+              "on-secondary-fixed": "#111c2d",
+              "secondary-container": "#d5e0f8",
+              error: "#ba1a1a",
+              "inverse-surface": "#2d3133",
+              "surface-container": "#eceef0",
+              background: "#f7f9fb",
+              "sidebar-bg": "#0F3D3D",
+              "on-surface-variant": "#404848",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+              "auth-width": "420px",
+              "navbar-height": "64px",
+              gutter: "1.5rem",
+              "card-padding": "1.5rem",
+            },
+            fontFamily: {
+              "button-text": ["Inter"],
+              "headline-md": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+            },
+            fontSize: {
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      body {
+        background-color: #f7f9fb;
+        font-family: "Hanken Grotesk", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body class="pb-24">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 w-full z-50 flex justify-between items-center px-4 h-navbar-height w-full bg-navbar-teal transition-colors duration-200"
+    >
+      <div class="flex items-center gap-4">
+        <span class="material-symbols-outlined text-on-primary" data-icon="menu">menu</span>
+        <h1 class="font-headline-md text-headline-md font-bold text-on-primary">Siraj LMS</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="relative p-2 hover:bg-primary-container/20 transition-colors rounded-full">
+          <span class="material-symbols-outlined text-on-primary" data-icon="notifications">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border border-navbar-teal"></span>
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="mt-navbar-height px-4 py-6 space-y-6">
+      <!-- High-priority Alert Banners -->
+      <section class="space-y-3" id="alerts">
+        <div class="bg-error text-on-error p-4 rounded-xl shadow-sm flex items-start gap-3">
+          <span class="material-symbols-outlined shrink-0" data-icon="warning">warning</span>
+          <p class="font-body-md text-body-md font-bold">YOU HAVE REACHED THE MAXIMUM LIMIT FOR LEAVING CLASSES</p>
+        </div>
+        <div class="bg-error text-on-error p-4 rounded-xl shadow-sm flex items-start gap-3">
+          <span class="material-symbols-outlined shrink-0" data-icon="error">error</span>
+          <p class="font-body-md text-body-md font-bold">YOU MISSED THE CLASS TIME</p>
+        </div>
+      </section>
+      <!-- Metric Grid -->
+      <section class="grid grid-cols-2 gap-4" id="metrics">
+        <!-- Total Students Card -->
+        <div
+          class="bg-white p-4 rounded-xl shadow-sm flex flex-col justify-between h-32 hover:shadow-md transition-shadow"
+        >
+          <div class="flex justify-between items-start">
+            <div class="w-10 h-10 rounded-full border border-navbar-teal flex items-center justify-center">
+              <span class="material-symbols-outlined text-navbar-teal text-[20px]" data-icon="group">group</span>
+            </div>
+            <span class="text-success text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full"
+              >+12%</span
+            >
+          </div>
+          <div>
+            <h3 class="font-label-md text-label-md text-text-muted uppercase">Total Students</h3>
+            <p class="font-headline-md text-headline-md text-primary">12,840</p>
+          </div>
+        </div>
+        <!-- Active Courses Card -->
+        <div
+          class="bg-white p-4 rounded-xl shadow-sm flex flex-col justify-between h-32 hover:shadow-md transition-shadow"
+        >
+          <div class="flex justify-between items-start">
+            <div class="w-10 h-10 rounded-full border border-navbar-teal flex items-center justify-center">
+              <span class="material-symbols-outlined text-navbar-teal text-[20px]" data-icon="school">school</span>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-label-md text-label-md text-text-muted uppercase">Active Courses</h3>
+            <p class="font-headline-md text-headline-md text-primary">Across 8 Dept.</p>
+          </div>
+        </div>
+      </section>
+      <!-- Institutional Report Card (Bento Style) -->
+      <section id="institutional-report">
+        <div class="relative bg-white rounded-xl shadow-sm overflow-hidden p-6 border-l-4 border-navbar-teal">
+          <div class="flex flex-col gap-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <h2 class="font-title-lg text-title-lg text-primary">Institutional Report 2024</h2>
+                <p class="font-body-md text-body-md text-text-muted mt-1">
+                  Full academic and financial performance audit.
+                </p>
+              </div>
+              <span class="material-symbols-outlined text-navbar-teal/20 text-5xl" data-icon="assessment"
+                >assessment</span
+              >
+            </div>
+            <button
+              class="bg-navbar-teal text-on-primary py-3 rounded-lg font-button-text text-button-text uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all"
+            >
+              <span class="material-symbols-outlined text-sm" data-icon="download">download</span>
+              Download PDF
+            </button>
+          </div>
+        </div>
+      </section>
+      <!-- Academic Schedule Header & Filters -->
+      <section class="flex items-center justify-between" id="schedule-header">
+        <h2 class="font-headline-md text-headline-md text-primary">Academic Schedule</h2>
+        <div class="flex gap-2">
+          <button
+            class="w-10 h-10 flex items-center justify-center bg-white border border-border-subtle rounded-full text-primary hover:bg-surface-container-high transition-colors"
+          >
+            <span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+          </button>
+          <button
+            class="w-10 h-10 flex items-center justify-center bg-white border border-border-subtle rounded-full text-primary hover:bg-surface-container-high transition-colors"
+          >
+            <span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
+          </button>
+        </div>
+      </section>
+      <!-- Classes List (Mobile Cards) -->
+      <section class="space-y-4" id="class-list">
+        <!-- Card 1 -->
+        <div
+          class="bg-white rounded-xl shadow-sm p-5 border border-transparent hover:border-navbar-teal/20 transition-all"
+        >
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="font-title-lg text-title-lg text-primary leading-tight">Advanced Mathematics II</h3>
+              <p class="font-body-md text-body-md text-text-muted flex items-center gap-1 mt-1">
+                <span class="material-symbols-outlined text-sm" data-icon="person">person</span>
+                Dr. Sarah Jenkins
+              </p>
+            </div>
+            <span
+              class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-md text-label-md"
+              >Active</span
+            >
+          </div>
+          <div class="flex items-center gap-4 py-3 border-y border-border-subtle mb-4">
+            <div class="flex items-center gap-1.5 font-label-md text-label-md text-primary">
+              <span class="material-symbols-outlined text-navbar-teal" data-icon="schedule">schedule</span>
+              09:00 AM - 10:30 AM
+            </div>
+            <div class="flex items-center gap-1.5 font-label-md text-label-md text-primary">
+              <span class="material-symbols-outlined text-navbar-teal" data-icon="location_on">location_on</span>
+              Hall 4B
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button
+              class="flex-1 border border-error text-error py-2.5 rounded font-button-text text-button-text uppercase active:bg-error/5 transition-colors"
+            >
+              Leave Class
+            </button>
+            <button
+              class="flex-1 bg-navbar-teal text-on-primary py-2.5 rounded font-button-text text-button-text uppercase active:bg-primary-container transition-colors"
+            >
+              Join Session
+            </button>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div
+          class="bg-white rounded-xl shadow-sm p-5 border border-transparent hover:border-navbar-teal/20 transition-all"
+        >
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="font-title-lg text-title-lg text-primary leading-tight">Intro to Computer Science</h3>
+              <p class="font-body-md text-body-md text-text-muted flex items-center gap-1 mt-1">
+                <span class="material-symbols-outlined text-sm" data-icon="person">person</span>
+                Prof. Marcus Chen
+              </p>
+            </div>
+            <span
+              class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full font-label-md text-label-md"
+              >Upcoming</span
+            >
+          </div>
+          <div class="flex items-center gap-4 py-3 border-y border-border-subtle mb-4">
+            <div class="flex items-center gap-1.5 font-label-md text-label-md text-primary">
+              <span class="material-symbols-outlined text-navbar-teal" data-icon="schedule">schedule</span>
+              11:00 AM - 12:30 PM
+            </div>
+            <div class="flex items-center gap-1.5 font-label-md text-label-md text-primary">
+              <span class="material-symbols-outlined text-navbar-teal" data-icon="computer">computer</span>
+              Lab 02
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button
+              class="flex-1 border border-error text-error py-2.5 rounded font-button-text text-button-text uppercase active:bg-error/5 transition-colors"
+            >
+              Leave Class
+            </button>
+            <button
+              class="flex-1 bg-navbar-teal text-on-primary py-2.5 rounded font-button-text text-button-text uppercase active:bg-primary-container transition-colors"
+            >
+              Join Session
+            </button>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div
+          class="bg-white rounded-xl shadow-sm p-5 border border-transparent hover:border-navbar-teal/20 transition-all opacity-80"
+        >
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="font-title-lg text-title-lg text-primary leading-tight">Educational Psychology</h3>
+              <p class="font-body-md text-body-md text-text-muted flex items-center gap-1 mt-1">
+                <span class="material-symbols-outlined text-sm" data-icon="person">person</span>
+                Dr. Emily Thorne
+              </p>
+            </div>
+            <span class="bg-error-container text-on-error-container px-3 py-1 rounded-full font-label-md text-label-md"
+              >Missed</span
+            >
+          </div>
+          <div class="flex items-center gap-4 py-3 border-y border-border-subtle mb-4">
+            <div class="flex items-center gap-1.5 font-label-md text-label-md text-primary">
+              <span class="material-symbols-outlined text-navbar-teal" data-icon="schedule">schedule</span>
+              08:00 AM - 09:00 AM
+            </div>
+            <div class="flex items-center gap-1.5 font-label-md text-label-md text-primary">
+              <span class="material-symbols-outlined text-navbar-teal" data-icon="meeting_room">meeting_room</span>
+              Room 105
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button
+              class="w-full border border-outline-variant text-on-surface-variant py-2.5 rounded font-button-text text-button-text uppercase"
+            >
+              View Recording
+            </button>
+          </div>
+        </div>
+      </section>
+      <!-- Illustration / Empty State Placeholder (Contextual Aesthetic) -->
+      <div class="py-8 flex flex-col items-center justify-center text-center">
+        <div
+          class="w-full h-48 rounded-2xl bg-surface-container-high flex items-center justify-center overflow-hidden mb-4 border border-border-subtle"
+        >
+          <img
+            class="w-full h-full object-cover mix-blend-multiply opacity-60"
+            data-alt="A clean and modern higher education office setting with professional administrators working on computers in a bright, minimalist environment. The scene is bathed in natural morning light, featuring a sophisticated palette of deep teals and soft grays, mirroring a corporate academic aesthetic. High-quality digital rendering style that emphasizes organizational efficiency and clarity."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLtH3xR9Let6uwfBW51hO29FKtwfRsS0loZ06hG8gXBLqZO7x54rZg9gJjIPGcysWnduasDRQciWDojsqWoplVTRzE0aO6jM0kK2DSSCKY78FSUSltoimHic7KTF-MJuha-M_14Ag1T79NJ7E5E_tSdYst7FQEjQxLW1tTWiGcKbD9cyMTpJYGbGWTxFD6Bb9KGnJLletnwfXZaofq4UxFoxT1SLcDJbx6ZE69CAIzc8v12wjpullS-AmsnC"
+          />
+        </div>
+        <p class="font-body-md text-body-md text-text-muted italic">End of Today's Primary Schedule</p>
+      </div>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full flex justify-around items-center h-16 bg-surface px-2 z-50 border-t border-outline-variant dark:border-outline shadow-sm"
+    >
+      <!-- Schedule (Active) -->
+      <a
+        class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-3 py-1 scale-95 active:scale-90 transition-transform"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+        <span class="font-label-md text-label-md">Schedule</span>
+      </a>
+      <!-- Teachers -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 active:scale-90 transition-transform hover:bg-surface-container-high p-1 rounded-xl"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="school">school</span>
+        <span class="font-label-md text-label-md">Teachers</span>
+      </a>
+      <!-- Parents -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 active:scale-90 transition-transform hover:bg-surface-container-high p-1 rounded-xl"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="family_restroom">family_restroom</span>
+        <span class="font-label-md text-label-md">Parents</span>
+      </a>
+      <!-- Students -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 active:scale-90 transition-transform hover:bg-surface-container-high p-1 rounded-xl"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="group">group</span>
+        <span class="font-label-md text-label-md">Students</span>
+      </a>
+      <!-- Reports -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 active:scale-90 transition-transform hover:bg-surface-container-high p-1 rounded-xl"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+        <span class="font-label-md text-label-md">Reports</span>
+      </a>
+    </nav>
+    <!-- Micro-interactions Script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Ripple-like effect for metric cards
+        const cards = document.querySelectorAll(".bg-white");
+        cards.forEach(card => {
+          card.addEventListener("touchstart", () => {
+            card.classList.add("bg-surface-container");
+          });
+          card.addEventListener("touchend", () => {
+            setTimeout(() => {
+              card.classList.remove("bg-surface-container");
+            }, 100);
+          });
+        });
+
+        // Active Nav Logic (Simplistic Toggle)
+        const navItems = document.querySelectorAll("nav a");
+        navItems.forEach(item => {
+          item.addEventListener("click", e => {
+            e.preventDefault();
+            navItems.forEach(i => {
+              i.className =
+                "flex flex-col items-center justify-center text-on-surface-variant scale-95 active:scale-90 transition-transform hover:bg-surface-container-high p-1 rounded-xl";
+            });
+            item.className =
+              "flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-3 py-1 scale-95 active:scale-90 transition-transform";
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

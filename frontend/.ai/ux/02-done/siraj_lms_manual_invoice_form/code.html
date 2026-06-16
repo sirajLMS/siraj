@@ -1,0 +1,494 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Create Manual Invoice</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;900&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-fixed-variant": "#3c475a",
+              error: "#ba1a1a",
+              "primary-fixed-dim": "#98d1d0",
+              "primary-fixed": "#b4edec",
+              "secondary-container": "#d5e0f8",
+              "on-tertiary-fixed": "#00201c",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed": "#002020",
+              "surface-container-high": "#e6e8ea",
+              "tertiary-container": "#004e46",
+              "on-background": "#191c1e",
+              "surface-variant": "#e0e3e5",
+              tertiary: "#00352f",
+              "surface-container-highest": "#e0e3e5",
+              "on-secondary-container": "#586377",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-container-low": "#f2f4f6",
+              "tertiary-fixed": "#71f8e4",
+              "secondary-fixed": "#d8e3fb",
+              outline: "#707978",
+              "border-subtle": "#E2E8F0",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed-dim": "#bcc7de",
+              "primary-container": "#0d4d4d",
+              "surface-container": "#eceef0",
+              "on-primary-container": "#85bdbc",
+              "on-primary": "#ffffff",
+              "inverse-on-surface": "#eff1f3",
+              "surface-bright": "#f7f9fb",
+              "surface-dim": "#d8dadc",
+              "surface-tint": "#2e6767",
+              "on-secondary-fixed": "#111c2d",
+              "inverse-primary": "#98d1d0",
+              "on-secondary": "#ffffff",
+              "tertiary-fixed-dim": "#4fdbc8",
+              background: "#f7f9fb",
+              "error-container": "#ffdad6",
+              "outline-variant": "#bfc8c8",
+              primary: "#003535",
+              "on-surface": "#191c1e",
+              "navbar-teal": "#135E5E",
+              "on-tertiary-container": "#33c7b4",
+              "inverse-surface": "#2d3133",
+              "sidebar-bg": "#0F3D3D",
+              "on-surface-variant": "#404848",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-error": "#ffffff",
+              secondary: "#545f73",
+              "on-error-container": "#93000a",
+              "text-muted": "#64748B",
+              surface: "#f7f9fb",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "page-margin": "2rem",
+              "sidebar-width": "260px",
+              "input-gap": "1rem",
+              "navbar-height": "64px",
+              "card-padding": "1.5rem",
+              gutter: "1.5rem",
+              "auth-width": "420px",
+            },
+            fontFamily: {
+              "body-lg": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              display: ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "body-md": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .minimalist-input {
+        border: none;
+        border-bottom: 1px solid #e2e8f0;
+        background: transparent;
+        border-radius: 0;
+        padding-left: 2.5rem;
+      }
+      .minimalist-input:focus {
+        outline: none;
+        box-shadow: none;
+        border-bottom: 2px solid #135e5e;
+      }
+      .custom-checkbox {
+        appearance: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 2px;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s;
+      }
+      .custom-checkbox:checked {
+        background-color: #135e5e;
+        border-color: #135e5e;
+      }
+      .custom-checkbox:checked::after {
+        content: "check";
+        font-family: "Material Symbols Outlined";
+        font-size: 14px;
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    </style>
+  </head>
+  <body class="bg-background text-on-background font-body-md">
+    <!-- Sidebar Shell -->
+    <aside class="fixed h-full w-[260px] left-0 top-0 bg-sidebar-bg flex flex-col shadow-xl z-50">
+      <div class="p-6 flex flex-col gap-1">
+        <h1 class="font-headline-md text-headline-md text-on-primary uppercase tracking-wider">Siraj LMS</h1>
+        <p class="text-on-primary/70 font-medium text-body-md">Admin Portal</p>
+      </div>
+      <nav class="flex-1 mt-4 px-2 space-y-1">
+        <div
+          class="flex items-center h-[48px] px-4 space-x-3 rounded transition-all duration-200 cursor-pointer text-on-primary/70 font-medium hover:bg-navbar-teal/50"
+        >
+          <span class="material-symbols-outlined" data-icon="home">home</span>
+          <span class="font-body-md text-body-md">Home</span>
+        </div>
+        <div
+          class="flex items-center h-[48px] px-4 space-x-3 rounded transition-all duration-200 cursor-pointer text-on-primary/70 font-medium hover:bg-navbar-teal/50"
+        >
+          <span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+          <span class="font-body-md text-body-md">Schedule Search</span>
+        </div>
+        <div
+          class="flex items-center h-[48px] px-4 space-x-3 rounded transition-all duration-200 cursor-pointer text-on-primary/70 font-medium hover:bg-navbar-teal/50"
+        >
+          <span class="material-symbols-outlined" data-icon="school">school</span>
+          <span class="font-body-md text-body-md">Teachers</span>
+        </div>
+        <div
+          class="flex items-center h-[48px] px-4 space-x-3 rounded transition-all duration-200 cursor-pointer bg-navbar-teal text-white font-bold"
+        >
+          <span class="material-symbols-outlined" data-icon="family_restroom">family_restroom</span>
+          <span class="font-body-md text-body-md">Parents</span>
+        </div>
+        <div
+          class="flex items-center h-[48px] px-4 space-x-3 rounded transition-all duration-200 cursor-pointer text-on-primary/70 font-medium hover:bg-navbar-teal/50"
+        >
+          <span class="material-symbols-outlined" data-icon="group">group</span>
+          <span class="font-body-md text-body-md">Students</span>
+        </div>
+        <div
+          class="flex items-center h-[48px] px-4 space-x-3 rounded transition-all duration-200 cursor-pointer text-on-primary/70 font-medium hover:bg-navbar-teal/50"
+        >
+          <span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+          <span class="font-body-md text-body-md">Managers</span>
+        </div>
+      </nav>
+      <div class="mt-auto border-t border-on-primary/10 p-2 space-y-1">
+        <div
+          class="flex items-center h-[48px] px-4 space-x-3 rounded transition-all duration-200 cursor-pointer text-on-primary/70 font-medium hover:bg-navbar-teal/50"
+        >
+          <span class="material-symbols-outlined" data-icon="settings">settings</span>
+          <span class="font-body-md text-body-md">Settings</span>
+        </div>
+        <div
+          class="flex items-center h-[48px] px-4 space-x-3 rounded transition-all duration-200 cursor-pointer text-on-primary/70 font-medium hover:bg-navbar-teal/50"
+        >
+          <span class="material-symbols-outlined" data-icon="logout">logout</span>
+          <span class="font-body-md text-body-md">Logout</span>
+        </div>
+      </div>
+    </aside>
+    <!-- Top Navigation Bar -->
+    <header
+      class="fixed top-0 right-0 w-[calc(100%-260px)] h-[64px] bg-navbar-teal flex justify-between items-center px-8 z-40"
+    >
+      <div class="flex items-center gap-4">
+        <span class="font-headline-md text-headline-md text-white font-black">Siraj LMS</span>
+        <div class="relative ml-8">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/70 text-sm"
+            data-icon="search"
+            >search</span
+          >
+          <input
+            class="bg-white/10 border-none text-white placeholder:text-white/60 text-sm pl-10 pr-4 py-1.5 w-64 rounded-lg focus:ring-1 focus:ring-white/30"
+            placeholder="Search parents or invoices..."
+            type="text"
+          />
+        </div>
+      </div>
+      <div class="flex items-center space-x-6 text-white">
+        <button class="relative hover:opacity-80 transition-opacity">
+          <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+          <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+        </button>
+        <div class="flex items-center gap-3 cursor-pointer group">
+          <div class="text-right">
+            <p class="font-title-lg text-[14px] leading-none">Admin User</p>
+            <p class="text-[10px] text-white/70 uppercase tracking-tighter">System Manager</p>
+          </div>
+          <span class="material-symbols-outlined text-3xl" data-icon="account_circle">account_circle</span>
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Area -->
+    <main class="ml-[260px] pt-[64px] min-h-screen p-8 bg-[#F8FAFC]">
+      <div class="max-w-4xl mx-auto py-8">
+        <!-- Form Header & Navigation -->
+        <div class="mb-8 flex items-center justify-between">
+          <div>
+            <h2 class="font-headline-lg text-headline-lg text-primary">Create Manual Invoice</h2>
+            <p class="text-text-muted mt-1 font-body-md">Generate one-off fee records for institutional billing.</p>
+          </div>
+          <button class="flex items-center gap-2 text-navbar-teal font-bold hover:underline">
+            <span class="material-symbols-outlined text-sm" data-icon="arrow_back">arrow_back</span>
+            <span>Back to Financials</span>
+          </button>
+        </div>
+        <!-- Main Form Card -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <form class="p-10 space-y-10" id="manualInvoiceForm">
+            <!-- Section 1: Core Details -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+              <!-- Parent Selection -->
+              <div class="flex flex-col gap-2">
+                <label class="font-label-md text-label-md text-on-surface-variant uppercase">Parent Selection</label>
+                <div class="relative group">
+                  <span
+                    class="material-symbols-outlined absolute left-0 bottom-3 text-navbar-teal"
+                    data-icon="family_restroom"
+                    >family_restroom</span
+                  >
+                  <select class="minimalist-input w-full appearance-none cursor-pointer py-2 focus:border-navbar-teal">
+                    <option disabled="" selected="" value="">Select a parent record...</option>
+                    <option>Ahmed Khan (ID: 4492)</option>
+                    <option>Sara Alii (ID: 1023)</option>
+                    <option>John Smith (ID: 8821)</option>
+                    <option>Fatima Zayed (ID: 3099)</option>
+                  </select>
+                  <span
+                    class="material-symbols-outlined absolute right-0 bottom-3 text-outline pointer-events-none"
+                    data-icon="keyboard_arrow_down"
+                    >keyboard_arrow_down</span
+                  >
+                </div>
+              </div>
+              <!-- Fee Amount -->
+              <div class="flex flex-col gap-2">
+                <label class="font-label-md text-label-md text-on-surface-variant uppercase">Fee Amount (AED)</label>
+                <div class="relative">
+                  <span class="material-symbols-outlined absolute left-0 bottom-3 text-navbar-teal" data-icon="payments"
+                    >payments</span
+                  >
+                  <input class="minimalist-input w-full py-2" placeholder="0.00" step="0.01" type="number" />
+                </div>
+              </div>
+              <!-- Issue Date -->
+              <div class="flex flex-col gap-2">
+                <label class="font-label-md text-label-md text-on-surface-variant uppercase">Issue Date</label>
+                <div class="relative">
+                  <span class="material-symbols-outlined absolute left-0 bottom-3 text-navbar-teal" data-icon="event"
+                    >event</span
+                  >
+                  <input class="minimalist-input w-full py-2" type="date" />
+                </div>
+              </div>
+              <!-- Due Date -->
+              <div class="flex flex-col gap-2">
+                <label class="font-label-md text-label-md text-on-surface-variant uppercase">Due Date</label>
+                <div class="relative">
+                  <span class="material-symbols-outlined absolute left-0 bottom-3 text-navbar-teal" data-icon="timer"
+                    >timer</span
+                  >
+                  <input class="minimalist-input w-full py-2" type="date" />
+                </div>
+              </div>
+            </div>
+            <!-- Section 2: Billing Period (Month Grid) -->
+            <div class="pt-4">
+              <label class="font-label-md text-label-md text-on-surface-variant uppercase block mb-6"
+                >Select Billing Months</label
+              >
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <!-- JS will generate months for brevity or manual entry -->
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">January</span>
+                </label>
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">February</span>
+                </label>
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">March</span>
+                </label>
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">April</span>
+                </label>
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">May</span>
+                </label>
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">June</span>
+                </label>
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">July</span>
+                </label>
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">August</span>
+                </label>
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">September</span>
+                </label>
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">October</span>
+                </label>
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">November</span>
+                </label>
+                <label
+                  class="flex items-center gap-3 p-3 rounded-lg border border-border-subtle hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <input class="custom-checkbox" type="checkbox" />
+                  <span class="font-body-md text-on-surface">December</span>
+                </label>
+              </div>
+            </div>
+            <!-- Section 3: Summary Area -->
+            <div
+              class="bg-surface-container-lowest p-6 rounded-xl border border-dashed border-outline-variant flex items-center justify-between"
+            >
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-navbar-teal/10 flex items-center justify-center text-navbar-teal">
+                  <span class="material-symbols-outlined" data-icon="info">info</span>
+                </div>
+                <div>
+                  <h4 class="font-title-lg text-sm text-primary">Invoice Summary</h4>
+                  <p class="text-text-muted text-xs">
+                    Tax will be calculated automatically based on the selected fee amount.
+                  </p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-on-surface-variant block uppercase font-label-md">Total Draft Value</span>
+                <span class="text-headline-md text-primary font-bold">AED 0.00</span>
+              </div>
+            </div>
+            <!-- Footer Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-6">
+              <button
+                class="flex-1 bg-primary text-white font-button-text text-button-text py-4 tracking-[0.1em] transition-all hover:bg-navbar-teal active:scale-[0.98]"
+                type="submit"
+              >
+                SUBMIT
+              </button>
+              <button
+                class="flex-1 bg-navbar-teal text-white font-button-text text-button-text py-4 tracking-[0.1em] flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-[0.98]"
+                type="submit"
+              >
+                <span class="material-symbols-outlined text-lg" data-icon="send">send</span>
+                SUBMIT &amp; SEND EMAIL
+              </button>
+            </div>
+          </form>
+        </div>
+        <!-- Illustrative Support Info -->
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white p-6 rounded-xl shadow-sm">
+            <span class="material-symbols-outlined text-navbar-teal mb-3" data-icon="security">security</span>
+            <h5 class="font-title-lg text-[16px] mb-2">Secure Billing</h5>
+            <p class="text-text-muted text-xs">All manual invoices are encrypted and logged for auditing purposes.</p>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-sm">
+            <span class="material-symbols-outlined text-navbar-teal mb-3" data-icon="receipt_long">receipt_long</span>
+            <h5 class="font-title-lg text-[16px] mb-2">Automated Ledgers</h5>
+            <p class="text-text-muted text-xs">
+              Records are automatically synchronized with the parent's financial statement.
+            </p>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-sm">
+            <span class="material-symbols-outlined text-navbar-teal mb-3" data-icon="history">history</span>
+            <h5 class="font-title-lg text-[16px] mb-2">Draft Mode</h5>
+            <p class="text-text-muted text-xs">
+              Invoices can be saved as drafts before finalizing institutional release.
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      // Simple interactivity for the form
+      document.getElementById("manualInvoiceForm").addEventListener("submit", e => {
+        e.preventDefault();
+        const submitter = e.submitter.innerText;
+        alert(`Processing: ${submitter}\nInvoice data captured for administrative approval.`);
+      });
+
+      // Add some dynamic hover effects for checkboxes
+      const checkboxLabels = document.querySelectorAll("label.flex.items-center");
+      checkboxLabels.forEach(label => {
+        const cb = label.querySelector("input");
+        cb.addEventListener("change", () => {
+          if (cb.checked) {
+            label.classList.add("bg-navbar-teal/5", "border-navbar-teal");
+          } else {
+            label.classList.remove("bg-navbar-teal/5", "border-navbar-teal");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

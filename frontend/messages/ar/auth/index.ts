@@ -1,0 +1,22 @@
+import type { AuthLabels } from "../../types/auth";
+
+export const auth: AuthLabels = {
+  login: {
+    title: "سراج LMS",
+    subtitle: "نظام إدارة التعليم",
+    email: "البريد الإلكتروني",
+    password: "كلمة المرور",
+    rememberMe: "تذكرني",
+    forgotPassword: "نسيت كلمة المرور؟",
+    signIn: "تسجيل الدخول",
+    noAccount: "ليس لديك حساب؟",
+    register: "سجل مدرستك",
+    emailRequired: "البريد الإلكتروني مطلوب",
+    emailInvalid: "يرجى إدخال بريد إلكتروني صالح",
+    passwordRequired: "كلمة المرور مطلوبة",
+    passwordMinLength: "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+    loginSuccess: "تم تسجيل الدخول بنجاح!",
+    loginError: "فشل تسجيل الدخول. حاول مرة أخرى.",
+    invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+  },
+};

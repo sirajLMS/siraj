@@ -1,0 +1,459 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Master Student Directory | Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#005048",
+              "on-primary-fixed": "#002020",
+              "on-tertiary-container": "#33c7b4",
+              "on-background": "#191c1e",
+              "on-primary-container": "#85bdbc",
+              "tertiary-fixed": "#71f8e4",
+              "surface-container-low": "#f2f4f6",
+              "on-secondary-fixed-variant": "#3c475a",
+              "on-secondary-container": "#586377",
+              "tertiary-container": "#004e46",
+              "text-muted": "#64748B",
+              "primary-container": "#0d4d4d",
+              "inverse-primary": "#98d1d0",
+              surface: "#f7f9fb",
+              "surface-tint": "#2e6767",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-highest": "#e0e3e5",
+              "on-primary": "#ffffff",
+              "surface-dim": "#d8dadc",
+              "on-secondary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              background: "#f7f9fb",
+              "on-error-container": "#93000a",
+              "outline-variant": "#bfc8c8",
+              "navbar-teal": "#135E5E",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "surface-container": "#eceef0",
+              secondary: "#545f73",
+              "on-surface-variant": "#404848",
+              "on-surface": "#191c1e",
+              "on-tertiary-fixed": "#00201c",
+              "primary-fixed": "#b4edec",
+              "inverse-surface": "#2d3133",
+              "border-subtle": "#E2E8F0",
+              "secondary-container": "#d5e0f8",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#d8e3fb",
+              "secondary-fixed-dim": "#bcc7de",
+              "primary-fixed-dim": "#98d1d0",
+              tertiary: "#00352f",
+              "surface-variant": "#e0e3e5",
+              "on-primary-fixed-variant": "#104f4f",
+              "on-secondary-fixed": "#111c2d",
+              "error-container": "#ffdad6",
+              error: "#ba1a1a",
+              "sidebar-bg": "#0F3D3D",
+              "inverse-on-surface": "#eff1f3",
+              "surface-container-high": "#e6e8ea",
+              "surface-bright": "#f7f9fb",
+              primary: "#003535",
+              outline: "#707978",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "auth-width": "420px",
+              "input-gap": "1rem",
+              "card-padding": "1.5rem",
+              "page-margin": "2rem",
+              "sidebar-width": "260px",
+              "navbar-height": "64px",
+              gutter: "1.5rem",
+            },
+            fontFamily: {
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "label-md": ["Inter"],
+              "body-md": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        display: inline-block;
+        line-height: 1;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-surface font-body-md text-on-surface">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 w-full z-50 bg-navbar-teal dark:bg-primary-container flex items-center justify-between px-4 h-navbar-height w-full shadow-md"
+    >
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-on-primary" data-icon="menu">menu</span>
+        <h1 class="font-headline-md text-headline-md-mobile font-bold text-on-primary">Student Directory</h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="material-symbols-outlined text-on-primary" data-icon="notifications">notifications</span>
+        <div class="w-8 h-8 rounded-full overflow-hidden border border-on-primary/20">
+          <img
+            alt="User"
+            class="w-full h-full object-cover"
+            data-alt="A professional close-up headshot of a middle-aged academic administrator in a modern office environment. The person wears a clean, charcoal suit and glasses, reflecting a tone of institutional authority and calm expertise. The lighting is soft and natural, coming from a large window off-camera, creating a bright and airy minimalist atmosphere. The overall color palette is dominated by neutral greys and crisp whites, aligning with a high-end corporate modern design."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLuOPtBwy5JHd4bqAMIjR9NamePBvNh_jGyCdsPQNePLuK4X5HXBxcKuHD_azdioylq3j0VWX4g_FGeRqjPDFmAQr4bkEBK7pE8lB5470BETD3EsnBg7Na-YfBlpVMYcw2EbIeOO1orXdDKNvMCzKXfXy3AxJvnxXcC8f6x6xLzE09S32DNGB4JfJTaiX_iaWUeURq5efFZ5t7aFwQRN71yTrR8KuMdvfCBJQbY_2jjuQvap4lbcUAypNlKD"
+          />
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="pt-20 pb-24 px-4 max-w-md mx-auto">
+      <!-- Verbatim Header -->
+      <section class="mb-6">
+        <h2 class="font-headline-md text-headline-md-mobile text-primary mb-1">Master Student Directory</h2>
+        <p class="font-body-md text-text-muted">
+          Comprehensive CRM management for all enrolled and historical student data.
+        </p>
+      </section>
+      <!-- Top Metrics Section (Pill-shaped horizontal scroll) -->
+      <section class="mb-8 -mx-4">
+        <div class="flex overflow-x-auto gap-3 px-4 pb-2 hide-scrollbar">
+          <!-- Activated -->
+          <div
+            class="flex-shrink-0 bg-surface-container-lowest rounded-full px-5 py-3 shadow-sm border border-border-subtle flex items-center gap-3 min-w-[140px]"
+          >
+            <div class="w-10 h-10 rounded-full border border-navbar-teal flex items-center justify-center">
+              <span class="material-symbols-outlined text-navbar-teal text-[20px]" data-icon="how_to_reg"
+                >how_to_reg</span
+              >
+            </div>
+            <div>
+              <div class="text-[18px] font-bold text-primary">1,284</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-text-muted">Activated</div>
+            </div>
+          </div>
+          <!-- Regular -->
+          <div
+            class="flex-shrink-0 bg-surface-container-lowest rounded-full px-5 py-3 shadow-sm border border-border-subtle flex items-center gap-3 min-w-[140px]"
+          >
+            <div class="w-10 h-10 rounded-full border border-navbar-teal flex items-center justify-center">
+              <span class="material-symbols-outlined text-navbar-teal text-[20px]" data-icon="person">person</span>
+            </div>
+            <div>
+              <div class="text-[18px] font-bold text-primary">856</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-text-muted">Regular</div>
+            </div>
+          </div>
+          <!-- On Leave -->
+          <div
+            class="flex-shrink-0 bg-surface-container-lowest rounded-full px-5 py-3 shadow-sm border border-border-subtle flex items-center gap-3 min-w-[140px]"
+          >
+            <div class="w-10 h-10 rounded-full border border-navbar-teal flex items-center justify-center">
+              <span class="material-symbols-outlined text-navbar-teal text-[20px]" data-icon="event_busy"
+                >event_busy</span
+              >
+            </div>
+            <div>
+              <div class="text-[18px] font-bold text-primary">42</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-text-muted">On Leave</div>
+            </div>
+          </div>
+          <!-- Suspended -->
+          <div
+            class="flex-shrink-0 bg-surface-container-lowest rounded-full px-5 py-3 shadow-sm border border-border-subtle flex items-center gap-3 min-w-[140px]"
+          >
+            <div class="w-10 h-10 rounded-full border border-error flex items-center justify-center">
+              <span class="material-symbols-outlined text-error text-[20px]" data-icon="block">block</span>
+            </div>
+            <div>
+              <div class="text-[18px] font-bold text-primary">12</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-text-muted">Suspended</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Search & Action Bar -->
+      <section class="flex gap-2 mb-6">
+        <div class="relative flex-grow">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[20px]"
+            data-icon="search"
+            >search</span
+          >
+          <input
+            class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-border-subtle rounded-xl font-body-md focus:outline-none focus:border-navbar-teal transition-colors"
+            placeholder="Search students..."
+            type="text"
+          />
+        </div>
+        <button
+          class="bg-navbar-teal text-on-primary px-4 rounded-xl flex items-center justify-center active:scale-95 transition-transform"
+        >
+          <span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+        </button>
+      </section>
+      <!-- Student List -->
+      <section class="space-y-4">
+        <!-- Student Card 1 -->
+        <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-border-subtle">
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+              <img
+                alt="Aria Abbott"
+                class="w-12 h-12 rounded-full object-cover"
+                data-alt="A vibrant and clear studio portrait of a young female college student with a bright smile, representing diversity and modern education. She is wearing a simple casual sweater in a soft teal color that matches the brand's primary palette. The background is a crisp, out-of-focus modern campus interior with plenty of natural light and professional minimalist aesthetics."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLtjFk9d10Ea2P23xla98TyboUZud6abAdodOZUaizSRX15rUQ2HpoMMTXMnXnBJGD_AorJqVJIDNwRUz-E0oYOYOJrLKjmDGyP82Ylhs8crfdR4F5c8Y6uaJnotgIjh4cu4ERUrj67n6OvSr9UcUNYPARiJXpXud5G9rdbP3S6dHx9JKru6rWJf2V3jDYTSjGzirqsE4gAQKoCKtmiw_ZvnK-74FtS27-sT5H-yTyQGp4xKL4gW9Wb7N7d3"
+              />
+              <div>
+                <h3 class="font-title-lg text-primary text-body-lg font-bold">Aria Abbott</h3>
+                <p class="text-label-md text-text-muted">aria.abbott@email.com</p>
+              </div>
+            </div>
+            <span
+              class="bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter"
+              >Activated</span
+            >
+          </div>
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <p class="text-[10px] font-bold text-text-muted uppercase mb-1">Weekly Hours</p>
+              <p class="font-bold text-primary">12.5 hrs</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-text-muted uppercase mb-1">Status</p>
+              <div class="flex items-center gap-1">
+                <div class="w-2 h-2 rounded-full bg-on-tertiary-container"></div>
+                <span class="text-body-md font-medium">Regular</span>
+              </div>
+            </div>
+          </div>
+          <div class="border-t border-border-subtle pt-3 flex items-center justify-between">
+            <div class="flex-grow mr-4">
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="font-bold text-text-muted uppercase">Classes Left</span>
+                <span class="font-bold text-primary">15/20</span>
+              </div>
+              <div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+                <div class="h-full bg-navbar-teal w-[75%] rounded-full"></div>
+              </div>
+            </div>
+            <button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[20px]" data-icon="info">info</span>
+            </button>
+          </div>
+        </div>
+        <!-- Student Card 2 -->
+        <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-border-subtle">
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+              <img
+                alt="Julian Meyer"
+                class="w-12 h-12 rounded-full object-cover"
+                data-alt="A professional studio headshot of a focused young male student with a clean-cut appearance. He wears a neutral white t-shirt and has a confident, calm expression. The lighting is cinematic yet soft, typical of high-end educational photography. The background features subtle teal accents and a bright, minimalist atmosphere consistent with the Siraj LMS brand identity."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLvbfNRLJa7NuqnOwDTDz1f1ottCY3oecI3aOrSMr_V08PI5H0koXmGVuY2kpWVUwRqlrjjSm5k6NbkeHrkKywDbWvY2svpJNCdLQqMfspOEIu8e-FSkD5Y1enQbB7UcYF8rr3f6jAsaZ3OAI3lkl0Iq-zRYHqSdpPnWMx4yj5cAsNBF9FVecfE8JIf1C2NaJgzAqMrEXHtPE1plX3yL2w4VqS5On_4jggqABCn7qo8FM-cWV-uWF-_VF24"
+              />
+              <div>
+                <h3 class="font-title-lg text-primary text-body-lg font-bold">Julian Meyer</h3>
+                <p class="text-label-md text-text-muted">j.meyer@edu.org</p>
+              </div>
+            </div>
+            <span
+              class="bg-tertiary-fixed text-on-tertiary-fixed text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter"
+              >On Trial</span
+            >
+          </div>
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <p class="text-[10px] font-bold text-text-muted uppercase mb-1">Weekly Hours</p>
+              <p class="font-bold text-primary">6.0 hrs</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-text-muted uppercase mb-1">Status</p>
+              <div class="flex items-center gap-1">
+                <div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
+                <span class="text-body-md font-medium">Prospect</span>
+              </div>
+            </div>
+          </div>
+          <div class="border-t border-border-subtle pt-3 flex items-center justify-between">
+            <div class="flex-grow mr-4">
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="font-bold text-text-muted uppercase">Classes Left</span>
+                <span class="font-bold text-primary">2/3</span>
+              </div>
+              <div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+                <div class="h-full bg-primary-container w-[66%] rounded-full"></div>
+              </div>
+            </div>
+            <button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[20px]" data-icon="info">info</span>
+            </button>
+          </div>
+        </div>
+        <!-- Student Card 3 -->
+        <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-border-subtle opacity-80">
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+              <img
+                alt="Sara Lin"
+                class="w-12 h-12 rounded-full object-cover"
+                data-alt="A portrait of a serene female student in a library setting, with bookshelves softly blurred in the background. She wears a professional navy blazer and has an organized, academic demeanor. The light is warm and inviting, but the overall style remains minimalist and modern. High contrast between the subject and the clean library environment, following a corporate educational aesthetic."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLs2AOD6-ACUxj9zaa3jcRu0OTFwcLaBVjOfyaQ6USmvtnB41V6gBkP618mjEhHHgUW_1E22zjs6jp_SuDtc2dN3hhp_1k1i8OaojMVrLyG3UOykqMCWWhaAiygL3L0x9VfQ9OTZ_72FmzhxBQIvch-35zuVQ0Tt4rLquqWf1KPZ7SqWPw75XwTi_FUSwX3TQYW2e_bgkZ1Z5rIBfFnwaTSEbK5DrXQ-NyEWKQomI90plX_dRWfdbTRKKVOT"
+              />
+              <div>
+                <h3 class="font-title-lg text-primary text-body-lg font-bold">Sara Lin</h3>
+                <p class="text-label-md text-text-muted">sara.lin@univ.co</p>
+              </div>
+            </div>
+            <span
+              class="bg-surface-container-highest text-on-surface-variant text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter"
+              >Deactivated</span
+            >
+          </div>
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <p class="text-[10px] font-bold text-text-muted uppercase mb-1">Weekly Hours</p>
+              <p class="font-bold text-primary">0 hrs</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-text-muted uppercase mb-1">Status</p>
+              <div class="flex items-center gap-1">
+                <div class="w-2 h-2 rounded-full bg-error"></div>
+                <span class="text-body-md font-medium">Withdrawn</span>
+              </div>
+            </div>
+          </div>
+          <div class="border-t border-border-subtle pt-3 flex items-center justify-between">
+            <div class="flex-grow mr-4">
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="font-bold text-text-muted uppercase">Classes Left</span>
+                <span class="font-bold text-primary">0/20</span>
+              </div>
+              <div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+                <div class="h-full bg-outline-variant w-[0%] rounded-full"></div>
+              </div>
+            </div>
+            <button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[20px]" data-icon="info">info</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full h-16 flex justify-around items-center px-2 bg-surface shadow-[0_-2px_10px_rgba(0,0,0,0.05)] border-t border-outline-variant z-50"
+    >
+      <!-- Home -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-xl"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+        <span class="font-label-md text-label-md">Home</span>
+      </a>
+      <!-- Students (ACTIVE) -->
+      <a
+        class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-2xl px-3 py-1 active:scale-95 transition-transform duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: &quot;FILL&quot; 1"
+          >group</span
+        >
+        <span class="font-label-md text-label-md">Students</span>
+      </a>
+      <!-- Attendance -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-xl"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+        <span class="font-label-md text-label-md">Attendance</span>
+      </a>
+      <!-- Profile -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-xl"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+        <span class="font-label-md text-label-md">Profile</span>
+      </a>
+    </nav>
+    <!-- Floating Action Button (FAB) - Suppression logic: rendered for primary CRM action -->
+    <button
+      class="fixed bottom-20 right-6 w-14 h-14 rounded-full bg-navbar-teal text-on-primary shadow-xl flex items-center justify-center active:scale-90 transition-transform z-40"
+    >
+      <span class="material-symbols-outlined text-[28px]" data-icon="add">add</span>
+    </button>
+    <script>
+      // Simple micro-interaction for active states
+      document.querySelectorAll("a, button").forEach(el => {
+        el.addEventListener("click", e => {
+          // Mock navigation behavior
+          if (el.tagName === "A") e.preventDefault();
+        });
+      });
+    </script>
+  </body>
+</html>

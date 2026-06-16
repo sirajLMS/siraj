@@ -1,0 +1,640 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Teacher Onboarding | Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#e0e3e5",
+              "primary-container": "#0d4d4d",
+              "on-primary-container": "#85bdbc",
+              "on-error-container": "#93000a",
+              "on-background": "#191c1e",
+              "surface-container-lowest": "#ffffff",
+              "surface-bright": "#f7f9fb",
+              "tertiary-fixed": "#71f8e4",
+              "error-container": "#ffdad6",
+              "primary-fixed-dim": "#98d1d0",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-secondary-fixed-variant": "#3c475a",
+              surface: "#f7f9fb",
+              outline: "#707978",
+              "inverse-on-surface": "#eff1f3",
+              "on-tertiary-fixed": "#00201c",
+              "text-muted": "#64748B",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#33c7b4",
+              "surface-container-high": "#e6e8ea",
+              "surface-dim": "#d8dadc",
+              "navbar-teal": "#135E5E",
+              "surface-container-highest": "#e0e3e5",
+              "surface-tint": "#2e6767",
+              "on-primary-fixed-variant": "#104f4f",
+              primary: "#003535",
+              "on-primary-fixed": "#002020",
+              "on-primary": "#ffffff",
+              secondary: "#545f73",
+              "outline-variant": "#bfc8c8",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed": "#d8e3fb",
+              "on-secondary-container": "#586377",
+              "on-secondary": "#ffffff",
+              "surface-container": "#eceef0",
+              background: "#f7f9fb",
+              "secondary-container": "#d5e0f8",
+              error: "#ba1a1a",
+              "inverse-surface": "#2d3133",
+              "on-secondary-fixed": "#111c2d",
+              "on-surface-variant": "#404848",
+              "sidebar-bg": "#0F3D3D",
+              "tertiary-fixed-dim": "#4fdbc8",
+              tertiary: "#00352f",
+              "surface-container-low": "#f2f4f6",
+              "on-surface": "#191c1e",
+              "border-subtle": "#E2E8F0",
+              "tertiary-container": "#004e46",
+              "primary-fixed": "#b4edec",
+              "inverse-primary": "#98d1d0",
+              "secondary-fixed-dim": "#bcc7de",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              gutter: "1.5rem",
+              "card-padding": "1.5rem",
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+              "auth-width": "420px",
+              "navbar-height": "64px",
+            },
+            fontFamily: {
+              "title-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "body-lg": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "headline-lg": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        vertical-align: middle;
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #135e5e;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body class="bg-background text-on-surface font-body-md selection:bg-navbar-teal selection:text-on-primary">
+    <!-- Sidebar Component (Shared Component Logic) -->
+    <nav
+      class="fixed left-0 top-0 h-full w-sidebar-width bg-sidebar-bg dark:bg-primary flex flex-col pt-navbar-height z-40 shadow-sm hidden md:flex"
+    >
+      <div class="px-6 py-8 flex flex-col items-center gap-2">
+        <div
+          class="w-16 h-16 rounded-full bg-navbar-teal flex items-center justify-center text-on-primary overflow-hidden border-2 border-on-primary/20"
+        >
+          <span class="material-symbols-outlined text-4xl" data-icon="school">school</span>
+        </div>
+        <h2 class="font-headline-md text-headline-md font-bold text-on-primary">Siraj Portal</h2>
+        <span class="font-label-md text-label-md text-on-primary/70">Admin Dashboard</span>
+      </div>
+      <div class="flex-1 overflow-y-auto px-4 space-y-1">
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer hover:bg-navbar-teal/50 hover:text-on-primary transition-all text-on-primary/70 font-normal rounded-lg"
+        >
+          <span class="material-symbols-outlined" data-icon="home">home</span>
+          <span class="font-label-md text-label-md">Home</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer hover:bg-navbar-teal/50 hover:text-on-primary transition-all text-on-primary/70 font-normal rounded-lg"
+        >
+          <span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+          <span class="font-label-md text-label-md">Schedule Search</span>
+        </div>
+        <!-- Teachers Active Tab -->
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer bg-navbar-teal text-on-primary font-bold rounded-lg shadow-inner"
+        >
+          <span class="material-symbols-outlined" data-icon="school">school</span>
+          <span class="font-label-md text-label-md">Teachers</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer hover:bg-navbar-teal/50 hover:text-on-primary transition-all text-on-primary/70 font-normal rounded-lg"
+        >
+          <span class="material-symbols-outlined" data-icon="family_restroom">family_restroom</span>
+          <span class="font-label-md text-label-md">Parents</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer hover:bg-navbar-teal/50 hover:text-on-primary transition-all text-on-primary/70 font-normal rounded-lg"
+        >
+          <span class="material-symbols-outlined" data-icon="person">person</span>
+          <span class="font-label-md text-label-md">Students</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer hover:bg-navbar-teal/50 hover:text-on-primary transition-all text-on-primary/70 font-normal rounded-lg"
+        >
+          <span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+          <span class="font-label-md text-label-md">Managers</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer hover:bg-navbar-teal/50 hover:text-on-primary transition-all text-on-primary/70 font-normal rounded-lg"
+        >
+          <span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
+          <span class="font-label-md text-label-md">Resources</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer hover:bg-navbar-teal/50 hover:text-on-primary transition-all text-on-primary/70 font-normal rounded-lg"
+        >
+          <span class="material-symbols-outlined" data-icon="description">description</span>
+          <span class="font-label-md text-label-md">Reports</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer hover:bg-navbar-teal/50 hover:text-on-primary transition-all text-on-primary/70 font-normal rounded-lg"
+        >
+          <span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+          <span class="font-label-md text-label-md">Add Account</span>
+        </div>
+      </div>
+      <div class="p-4 mt-auto">
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer hover:bg-error-container/20 hover:text-error transition-all text-on-primary/70 font-normal rounded-lg"
+        >
+          <span class="material-symbols-outlined" data-icon="logout">logout</span>
+          <span class="font-label-md text-label-md">Logout</span>
+        </div>
+      </div>
+    </nav>
+    <!-- Top AppBar Component -->
+    <header
+      class="fixed top-0 right-0 left-0 z-50 flex justify-between items-center px-gutter h-navbar-height bg-navbar-teal dark:bg-primary-container text-on-primary dark:text-on-primary-container shadow-sm"
+    >
+      <div class="flex items-center gap-4">
+        <span class="md:hidden material-symbols-outlined cursor-pointer" data-icon="menu">menu</span>
+        <div class="font-headline-md text-headline-md font-bold text-on-primary">Siraj LMS</div>
+      </div>
+      <div class="hidden md:flex items-center bg-white/10 rounded-lg px-3 py-1 gap-2 w-96">
+        <span class="material-symbols-outlined text-on-primary/70" data-icon="search">search</span>
+        <input
+          class="bg-transparent border-none focus:ring-0 text-on-primary placeholder:text-on-primary/50 font-body-md w-full"
+          placeholder="Search accounts, resources, or files..."
+          type="text"
+        />
+      </div>
+      <div class="flex items-center gap-4">
+        <span
+          class="material-symbols-outlined cursor-pointer text-on-primary hover:bg-white/10 p-2 rounded-full transition-colors"
+          data-icon="notifications"
+          >notifications</span
+        >
+        <span
+          class="material-symbols-outlined cursor-pointer text-on-primary hover:bg-white/10 p-2 rounded-full transition-colors"
+          data-icon="help"
+          >help</span
+        >
+        <span
+          class="material-symbols-outlined cursor-pointer text-on-primary hover:bg-white/10 p-2 rounded-full transition-colors"
+          data-icon="settings"
+          >settings</span
+        >
+        <div class="flex items-center gap-2 border-l border-white/20 pl-4 ml-2">
+          <img
+            alt="Administrator Profile"
+            class="w-8 h-8 rounded-full border border-white/40"
+            data-alt="A professional headshot of a middle-aged male administrator with a confident smile. He is wearing a sharp charcoal grey suit and a crisp white shirt, set against a blurred academic office background with soft bokeh. The lighting is bright and clean, reinforcing a professional and authoritative atmosphere within a modern educational setting."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLtpithzi4nD-hD4dg2e6tgMRh89GjR_WvKPQNdZgt6SlrLbX69GUvbxAx1100OuDuXjx_dr-U4RBYoOp856fy6eZ3wH0cNrLL5kkSRp-dG-3xrKv2G7_79B3UPJZXamFZeKigleqeE21g-RD0scw7-AvVNYx_vAIN3-llF5cc1KwaFB7WpMcHAdhN_TZ3s5rvtpB9sWT4nd5Zros4--3Ov3kZUBXM3JDWk9XdM0qWeI7BbXZMCE9coYa20"
+          />
+          <div class="hidden lg:block">
+            <p class="font-label-md text-label-md leading-none">Admin</p>
+            <p class="text-[10px] opacity-70">Super User</p>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="md:ml-sidebar-width pt-navbar-height min-h-screen">
+      <div class="p-page-margin max-w-5xl mx-auto">
+        <!-- Page Header -->
+        <div class="mb-8 flex justify-between items-end">
+          <div>
+            <h1 class="font-headline-lg text-headline-lg text-primary mb-1">Teacher Onboarding</h1>
+            <p class="text-text-muted font-body-md">Create a new educator profile and configure access credentials.</p>
+          </div>
+          <div class="hidden md:block">
+            <span class="text-error font-label-md">* Mandatory fields</span>
+          </div>
+        </div>
+        <!-- Form Container -->
+        <form class="space-y-8 pb-12">
+          <!-- Section: Teacher Information -->
+          <section class="bg-white rounded-xl shadow-sm border border-border-subtle overflow-hidden">
+            <div class="bg-navbar-teal px-6 py-4 flex items-center gap-3">
+              <span class="material-symbols-outlined text-on-primary" data-icon="person">person</span>
+              <h2 class="text-on-primary font-title-lg text-title-lg">Teacher Information</h2>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <!-- Name -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal flex items-center gap-1"
+                  >Full Name <span class="text-error">*</span></label
+                >
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="e.g. Dr. Ahmed Al-Farid"
+                  required=""
+                  type="text"
+                />
+              </div>
+              <!-- Email -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal flex items-center gap-1"
+                  >Email Address <span class="text-error">*</span></label
+                >
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="ahmed.f@sirajlms.edu"
+                  required=""
+                  type="email"
+                />
+              </div>
+              <!-- Nationality -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal">Nationality</label>
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="Egyptian"
+                  type="text"
+                />
+              </div>
+              <!-- National ID -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal flex items-center gap-1"
+                  >National ID <span class="text-error">*</span></label
+                >
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="1234-5678-9012"
+                  required=""
+                  type="text"
+                />
+              </div>
+              <!-- Phone -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal flex items-center gap-1"
+                  >Phone/Mobile <span class="text-error">*</span></label
+                >
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="+20 123 456 789"
+                  required=""
+                  type="tel"
+                />
+              </div>
+              <!-- Age & Gender Row -->
+              <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label class="font-label-md text-navbar-teal">Age</label>
+                  <input
+                    class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                    placeholder="35"
+                    type="number"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="font-label-md text-navbar-teal">Gender</label>
+                  <div class="flex items-center gap-4 h-full pt-2">
+                    <label class="flex items-center gap-2 cursor-pointer font-body-md">
+                      <input class="text-navbar-teal focus:ring-navbar-teal" name="gender" type="radio" value="male" />
+                      Male
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer font-body-md">
+                      <input
+                        class="text-navbar-teal focus:ring-navbar-teal"
+                        name="gender"
+                        type="radio"
+                        value="female"
+                      />
+                      Female
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <!-- Address -->
+              <div class="flex flex-col gap-1.5 lg:col-span-2">
+                <label class="font-label-md text-navbar-teal">Home Address</label>
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="123 Educational Blvd, Downtown District, Cairo"
+                  type="text"
+                />
+              </div>
+              <!-- Qualifications -->
+              <div class="flex flex-col gap-1.5 lg:col-span-1">
+                <label class="font-label-md text-navbar-teal">Qualifications</label>
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="Ph.D. in Computer Science"
+                  type="text"
+                />
+              </div>
+            </div>
+          </section>
+          <!-- Section: Official Details -->
+          <section class="bg-white rounded-xl shadow-sm border border-border-subtle overflow-hidden">
+            <div class="bg-navbar-teal px-6 py-4 flex items-center gap-3">
+              <span class="material-symbols-outlined text-on-primary" data-icon="badge">badge</span>
+              <h2 class="text-on-primary font-title-lg text-title-lg">Official Details</h2>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <!-- Skype -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal">Skype ID</label>
+                <div class="relative">
+                  <span
+                    class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm"
+                    data-icon="chat"
+                    >chat</span
+                  >
+                  <input
+                    class="w-full border-border-subtle rounded-lg pl-10 focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                    placeholder="live:ahmed.f"
+                    type="text"
+                  />
+                </div>
+              </div>
+              <!-- Zoom Link -->
+              <div class="flex flex-col gap-1.5 lg:col-span-2">
+                <label class="font-label-md text-navbar-teal">Zoom Personal Link</label>
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="https://zoom.us/j/123456789"
+                  type="url"
+                />
+              </div>
+              <!-- Country -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal">Country</label>
+                <select
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                >
+                  <option>Egypt</option>
+                  <option>United Arab Emirates</option>
+                  <option>Saudi Arabia</option>
+                  <option>United Kingdom</option>
+                  <option>United States</option>
+                </select>
+              </div>
+              <!-- Zoom User -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal">Zoom Username</label>
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="ahmed_zoom"
+                  type="text"
+                />
+              </div>
+              <!-- Zoom Pass -->
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal">Zoom Password</label>
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="••••••••"
+                  type="password"
+                />
+              </div>
+              <!-- Timezone -->
+              <div class="flex flex-col gap-1.5 lg:col-span-2">
+                <label class="font-label-md text-navbar-teal">Primary Timezone</label>
+                <select
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                >
+                  <option>(GMT+02:00) Cairo</option>
+                  <option>(GMT+04:00) Abu Dhabi</option>
+                  <option>(GMT+03:00) Riyadh</option>
+                  <option>(GMT+00:00) London</option>
+                </select>
+              </div>
+            </div>
+          </section>
+          <!-- Section: Salary Details -->
+          <section class="bg-white rounded-xl shadow-sm border border-border-subtle overflow-hidden">
+            <div class="bg-navbar-teal px-6 py-4 flex items-center gap-3">
+              <span class="material-symbols-outlined text-on-primary" data-icon="payments">payments</span>
+              <h2 class="text-on-primary font-title-lg text-title-lg">Salary Details</h2>
+            </div>
+            <div class="p-6 flex flex-wrap gap-6">
+              <div class="flex flex-col gap-1.5 min-w-[240px]">
+                <label class="font-label-md text-navbar-teal flex items-center gap-1"
+                  >Salary Amount <span class="text-error">*</span></label
+                >
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted font-bold">$</span>
+                  <input
+                    class="w-full border-border-subtle rounded-lg pl-8 focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                    placeholder="5000.00"
+                    required=""
+                    type="number"
+                  />
+                </div>
+              </div>
+              <div class="flex flex-col gap-1.5 min-w-[140px]">
+                <label class="font-label-md text-navbar-teal">Currency</label>
+                <select
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                >
+                  <option>USD</option>
+                  <option>EGP</option>
+                  <option>SAR</option>
+                  <option>AED</option>
+                  <option>EUR</option>
+                </select>
+              </div>
+            </div>
+          </section>
+          <!-- Section: Banking Ledger -->
+          <section class="bg-white rounded-xl shadow-sm border border-border-subtle overflow-hidden">
+            <div class="bg-navbar-teal px-6 py-4 flex items-center gap-3">
+              <span class="material-symbols-outlined text-on-primary" data-icon="account_balance">account_balance</span>
+              <h2 class="text-on-primary font-title-lg text-title-lg">Banking Ledger</h2>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div class="flex flex-col gap-1.5 lg:col-span-2">
+                <label class="font-label-md text-navbar-teal flex items-center gap-1"
+                  >Beneficiary Name <span class="text-error">*</span></label
+                >
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="As it appears on bank statement"
+                  required=""
+                  type="text"
+                />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal flex items-center gap-1"
+                  >Bank Name <span class="text-error">*</span></label
+                >
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="Commercial International Bank (CIB)"
+                  required=""
+                  type="text"
+                />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal flex items-center gap-1"
+                  >Account Number <span class="text-error">*</span></label
+                >
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="100012345678"
+                  required=""
+                  type="text"
+                />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal">Routing Number</label>
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="00112233"
+                  type="text"
+                />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="font-label-md text-navbar-teal">SWIFT / BIC</label>
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="CIBAEGXXXX"
+                  type="text"
+                />
+              </div>
+              <div class="flex flex-col gap-1.5 lg:col-span-3">
+                <label class="font-label-md text-navbar-teal flex items-center gap-1"
+                  >IBAN <span class="text-error">*</span></label
+                >
+                <input
+                  class="w-full border-border-subtle rounded-lg focus:ring-navbar-teal focus:border-navbar-teal font-body-md"
+                  placeholder="EG850003001200000001234567890"
+                  required=""
+                  type="text"
+                />
+              </div>
+            </div>
+          </section>
+          <!-- Actions -->
+          <div class="flex items-center gap-4">
+            <button
+              class="bg-[#10b981] hover:bg-[#059669] text-white font-button-text text-button-text px-10 py-3.5 rounded-lg shadow-lg hover:shadow-xl transition-all active:scale-95 uppercase"
+              type="submit"
+            >
+              SIGNUP
+            </button>
+            <button
+              class="text-text-muted hover:text-navbar-teal font-button-text text-button-text transition-colors"
+              type="reset"
+            >
+              CANCEL
+            </button>
+          </div>
+        </form>
+      </div>
+      <!-- Visual Decorative Element (Bento-like background accent) -->
+      <div class="fixed bottom-0 right-0 p-8 opacity-10 pointer-events-none select-none z-0 overflow-hidden">
+        <span class="material-symbols-outlined text-[320px] leading-none" data-icon="draw">draw</span>
+      </div>
+    </main>
+    <!-- Footer Meta (Hidden by default, shown on mobile as bottom nav if top nav was suppressed) -->
+    <footer
+      class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border-subtle flex justify-around items-center py-2 z-50"
+    >
+      <div class="flex flex-col items-center gap-1 text-navbar-teal">
+        <span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+        <span class="text-[10px] font-bold">Register</span>
+      </div>
+      <div class="flex flex-col items-center gap-1 text-text-muted">
+        <span class="material-symbols-outlined" data-icon="help">help</span>
+        <span class="text-[10px]">Support</span>
+      </div>
+    </footer>
+    <script>
+      // Micro-interaction for input highlighting
+      const inputs = document.querySelectorAll("input, select");
+      inputs.forEach(input => {
+        input.addEventListener("focus", () => {
+          input.parentElement.querySelector("label")?.classList.add("font-bold");
+        });
+        input.addEventListener("blur", () => {
+          input.parentElement.querySelector("label")?.classList.remove("font-bold");
+        });
+      });
+
+      // Form submission animation (prevent actual submit for demo)
+      document.querySelector("form").addEventListener("submit", e => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML =
+          '<span class="material-symbols-outlined animate-spin" data-icon="progress_activity">progress_activity</span> PROCEEDING...';
+        btn.classList.add("opacity-80");
+
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.classList.remove("opacity-80");
+          alert("Teacher profile submitted for administrative review.");
+        }, 1500);
+      });
+    </script>
+  </body>
+</html>

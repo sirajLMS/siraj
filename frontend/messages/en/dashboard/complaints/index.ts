@@ -1,0 +1,1 @@
+export { complaints } from "./main";

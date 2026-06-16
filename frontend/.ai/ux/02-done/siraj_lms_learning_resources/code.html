@@ -1,0 +1,406 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Learning Resources</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .drag-over {
+        border-color: #135e5e;
+        background-color: rgba(19, 94, 94, 0.05);
+      }
+    </style>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              outline: "#707978",
+              "tertiary-fixed": "#71f8e4",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed": "#d8e3fb",
+              "on-secondary-fixed-variant": "#3c475a",
+              "on-tertiary-fixed-variant": "#005048",
+              "surface-bright": "#f7f9fb",
+              tertiary: "#00352f",
+              surface: "#f7f9fb",
+              "primary-container": "#0d4d4d",
+              "secondary-fixed-dim": "#bcc7de",
+              "inverse-primary": "#98d1d0",
+              "on-secondary": "#ffffff",
+              "primary-fixed": "#b4edec",
+              "on-tertiary-container": "#33c7b4",
+              secondary: "#545f73",
+              primary: "#003535",
+              "surface-tint": "#2e6767",
+              "on-tertiary-fixed": "#00201c",
+              "on-surface-variant": "#404848",
+              "tertiary-container": "#004e46",
+              "sidebar-bg": "#0F3D3D",
+              "text-muted": "#64748B",
+              "on-secondary-container": "#586377",
+              "on-background": "#191c1e",
+              "error-container": "#ffdad6",
+              background: "#f7f9fb",
+              "on-secondary-fixed": "#111c2d",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-container": "#eceef0",
+              "border-subtle": "#E2E8F0",
+              "surface-dim": "#d8dadc",
+              "navbar-teal": "#135E5E",
+              "surface-variant": "#e0e3e5",
+              "surface-container-highest": "#e0e3e5",
+              "inverse-on-surface": "#eff1f3",
+              "primary-fixed-dim": "#98d1d0",
+              "outline-variant": "#bfc8c8",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "on-error-container": "#93000a",
+              "on-error": "#ffffff",
+              "on-primary-container": "#85bdbc",
+              error: "#ba1a1a",
+              "surface-container-high": "#e6e8ea",
+              "surface-container-low": "#f2f4f6",
+              "on-surface": "#191c1e",
+              "on-primary-fixed": "#002020",
+              "inverse-surface": "#2d3133",
+              "secondary-container": "#d5e0f8",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "card-padding": "1.5rem",
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+              "navbar-height": "64px",
+              gutter: "1.5rem",
+              "sidebar-width": "260px",
+              "auth-width": "420px",
+            },
+            fontFamily: {
+              "headline-lg": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+            },
+            fontSize: {
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-surface font-body-md text-on-surface min-h-screen flex flex-col overflow-x-hidden">
+    <!-- TopNavBar -->
+    <header
+      class="fixed top-0 right-0 w-[calc(100%-260px)] h-[64px] bg-navbar-teal dark:bg-primary-container text-on-primary flex items-center justify-between px-page-margin shadow-sm z-30 transition-all duration-200"
+    >
+      <div class="flex items-center gap-4 flex-1">
+        <div class="relative w-full max-w-md">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-primary/70"
+            >search</span
+          >
+          <input
+            class="w-full bg-white/10 border-none rounded-lg py-2 pl-10 pr-4 text-on-primary placeholder:text-on-primary/60 focus:ring-2 focus:ring-white/20 transition-all"
+            placeholder="Search resources..."
+            type="text"
+          />
+        </div>
+      </div>
+      <div class="flex items-center gap-6">
+        <button
+          class="material-symbols-outlined hover:bg-primary/10 transition-colors cursor-pointer active:scale-95 p-2 rounded-full"
+        >
+          notifications
+        </button>
+        <button
+          class="material-symbols-outlined hover:bg-primary/10 transition-colors cursor-pointer active:scale-95 p-2 rounded-full"
+        >
+          settings
+        </button>
+        <button
+          class="material-symbols-outlined hover:bg-primary/10 transition-colors cursor-pointer active:scale-95 p-2 rounded-full"
+        >
+          person
+        </button>
+      </div>
+    </header>
+    <!-- SideNavBar -->
+    <aside
+      class="fixed left-0 top-0 h-full w-[260px] bg-sidebar-bg dark:bg-primary text-on-primary flex flex-col py-4 shadow-lg z-40"
+    >
+      <div class="px-6 mb-8 flex flex-col">
+        <span class="font-headline-md text-headline-md font-bold text-on-primary">Siraj LMS</span>
+        <span class="font-label-md text-label-md text-on-primary/70 uppercase tracking-widest"
+          >Administrative Portal</span
+        >
+      </div>
+      <nav class="flex-1 space-y-1">
+        <a
+          class="flex items-center gap-3 px-6 py-3 text-on-primary/70 font-medium hover:bg-navbar-teal/50 hover:text-on-primary transition-all duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">home</span>
+          <span class="font-label-md text-label-md">Home</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-6 py-3 text-on-primary/70 font-medium hover:bg-navbar-teal/50 hover:text-on-primary transition-all duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">calendar_month</span>
+          <span class="font-label-md text-label-md">Schedule Search</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-6 py-3 text-on-primary/70 font-medium hover:bg-navbar-teal/50 hover:text-on-primary transition-all duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">school</span>
+          <span class="font-label-md text-label-md">Teachers</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-6 py-3 text-on-primary/70 font-medium hover:bg-navbar-teal/50 hover:text-on-primary transition-all duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">family_restroom</span>
+          <span class="font-label-md text-label-md">Parents</span>
+        </a>
+        <!-- Active State for Resources/Students context -->
+        <a
+          class="flex items-center gap-3 px-6 py-3 bg-navbar-teal text-on-primary font-bold border-r-4 border-tertiary-fixed transition-all duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">group</span>
+          <span class="font-label-md text-label-md">Students</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-6 py-3 text-on-primary/70 font-medium hover:bg-navbar-teal/50 hover:text-on-primary transition-all duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">admin_panel_settings</span>
+          <span class="font-label-md text-label-md">Managers</span>
+        </a>
+      </nav>
+      <div class="mt-auto px-6 pt-4 border-t border-white/10">
+        <a
+          class="flex items-center gap-3 py-3 text-on-primary/70 font-medium hover:bg-navbar-teal/50 hover:text-on-primary transition-all duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">logout</span>
+          <span class="font-label-md text-label-md">Logout</span>
+        </a>
+      </div>
+    </aside>
+    <!-- Main Content Canvas -->
+    <main class="ml-[260px] mt-[64px] p-page-margin flex justify-center items-start min-h-[calc(100vh-64px)]">
+      <div class="w-full max-w-2xl animate-fade-in">
+        <!-- Learning Resources Container Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-border-subtle p-8 transition-all duration-300">
+          <div class="mb-8 text-center sm:text-left">
+            <h1 class="font-headline-md text-headline-md text-primary mb-2">Learning Resources</h1>
+            <p class="font-body-md text-text-muted">
+              Manage academic materials and educational assets for the institution.
+            </p>
+          </div>
+          <!-- File Upload Engine -->
+          <form class="space-y-6" id="upload-form">
+            <!-- Document Name Input -->
+            <div class="space-y-2">
+              <label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" for="doc-name"
+                >Document Name</label
+              >
+              <input
+                class="w-full rounded-lg border-border-subtle focus:border-navbar-teal focus:ring-1 focus:ring-navbar-teal py-3 px-4 font-body-md transition-all outline-none"
+                id="doc-name"
+                placeholder="Enter resource title (e.g., Q3 Mathematics Syllabus)"
+                type="text"
+              />
+            </div>
+            <!-- File Selection Zone -->
+            <div
+              class="relative group border-2 border-dashed border-border-subtle rounded-xl p-10 flex flex-col items-center justify-center transition-all cursor-pointer hover:border-navbar-teal hover:bg-surface-container-low"
+              id="drop-zone"
+            >
+              <input
+                aria-label="File upload"
+                class="absolute inset-0 opacity-0 cursor-pointer"
+                id="file-input"
+                type="file"
+              />
+              <div
+                class="w-16 h-16 rounded-full bg-navbar-teal/5 flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+              >
+                <span class="material-symbols-outlined text-navbar-teal text-4xl">cloud_upload</span>
+              </div>
+              <p class="font-title-lg text-title-lg text-on-surface mb-1">Drag and drop files here</p>
+              <p class="font-body-md text-text-muted">
+                or <span class="text-navbar-teal font-bold">browse your computer</span>
+              </p>
+              <div
+                class="hidden mt-4 w-full p-4 bg-surface-container-high rounded-lg flex items-center gap-3"
+                id="file-preview"
+              >
+                <span class="material-symbols-outlined text-navbar-teal">description</span>
+                <span class="font-label-md truncate flex-1" id="file-name">No file selected</span>
+                <button
+                  class="material-symbols-outlined text-error text-xl hover:bg-error/10 rounded-full p-1 transition-colors"
+                  id="remove-file"
+                  type="button"
+                >
+                  close
+                </button>
+              </div>
+              <div class="mt-4 text-center">
+                <span class="font-label-md text-label-md text-text-muted/60"
+                  >Supported formats: PDF, DOCX, PPTX (Max 25MB)</span
+                >
+              </div>
+            </div>
+            <!-- Upload Button -->
+            <button
+              class="w-full bg-navbar-teal hover:bg-primary-container text-on-primary font-button-text text-button-text py-4 rounded-[2px] shadow-sm transition-all active:scale-[0.98] uppercase tracking-widest flex items-center justify-center gap-2"
+              type="submit"
+            >
+              <span>Upload</span>
+              <span class="material-symbols-outlined text-lg">publish</span>
+            </button>
+          </form>
+          <!-- Role-Based Visibility Instruction -->
+          <div class="mt-10 pt-6 border-t border-border-subtle flex items-start gap-4">
+            <div class="p-2 rounded-full bg-surface-container">
+              <span class="material-symbols-outlined text-on-surface-variant">visibility_off</span>
+            </div>
+            <div>
+              <h4 class="font-label-md text-label-md font-bold text-on-surface-variant uppercase mb-1">
+                Privacy &amp; Governance
+              </h4>
+              <p class="font-body-md text-on-surface-variant italic leading-relaxed">
+                "Documents uploaded here are visible to
+                <span class="text-navbar-teal font-bold not-italic">Teachers only</span>. Student and Parent access must
+                be manually configured via the Permissions tab."
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Dashboard Background Contextual Image -->
+        <div class="mt-12 overflow-hidden rounded-xl shadow-sm aspect-video relative group">
+          <img
+            alt="Educational Resource Workspace"
+            class="w-full h-full object-cover grayscale-[20%] group-hover:scale-105 transition-transform duration-700"
+            data-alt="A clean, minimalist high-angle shot of a bright modern educational workspace at Siraj LMS. The scene includes a sleek silver laptop, a organized stack of teal-themed textbooks, and a steaming cup of coffee on a white marble desk. The lighting is high-key and natural, streaming from an out-of-frame window to create a calm, professional academic atmosphere that aligns with the institution's professional branding."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLvPm2MJxgEeJGpxaiMCMDKvkIUzi9mHhgFCdhnUVWJfHODz5zKN_RtGY8bfCPYzIiAITuV7mnUI2QxHZUsYw9mimkDGoyzqJlnPph5mfJmruggo4NDd1y8mLzxGIOQDRt7qOy4bqA_mnERkQ70cPRhpD-KWbkl6OB5J5JpvJs01iCxnRGNskAKQJGuu-nIL6_hktJ28u8S2kSthIcqE2pZIifJBjC91TEoKPolmG7XxeMNeMRsksN1fLqOG"
+          />
+          <div class="absolute inset-0 bg-navbar-teal/10 mix-blend-multiply"></div>
+          <div class="absolute bottom-6 left-6 text-white drop-shadow-lg">
+            <p class="font-headline-md text-headline-md font-bold">Institutional Excellence</p>
+            <p class="font-body-md opacity-90">Digital Library &amp; Knowledge Center</p>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      const dropZone = document.getElementById("drop-zone");
+      const fileInput = document.getElementById("file-input");
+      const filePreview = document.getElementById("file-preview");
+      const fileName = document.getElementById("file-name");
+      const removeFile = document.getElementById("remove-file");
+
+      ["dragenter", "dragover"].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+          e.preventDefault();
+          dropZone.classList.add("drag-over");
+        });
+      });
+
+      ["dragleave", "drop"].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+          e.preventDefault();
+          dropZone.classList.remove("drag-over");
+        });
+      });
+
+      fileInput.addEventListener("change", e => {
+        if (e.target.files.length > 0) {
+          showPreview(e.target.files[0]);
+        }
+      });
+
+      dropZone.addEventListener("drop", e => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          fileInput.files = files;
+          showPreview(files[0]);
+        }
+      });
+
+      removeFile.addEventListener("click", e => {
+        e.stopPropagation();
+        fileInput.value = "";
+        filePreview.classList.add("hidden");
+      });
+
+      function showPreview(file) {
+        fileName.textContent = file.name;
+        filePreview.classList.remove("hidden");
+      }
+
+      document.getElementById("upload-form").addEventListener("submit", e => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        const originalContent = btn.innerHTML;
+
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> <span>Processing...</span>';
+        btn.disabled = true;
+        btn.classList.add("opacity-80");
+
+        setTimeout(() => {
+          alert("Document successfully uploaded to Siraj LMS Repository.");
+          btn.innerHTML = originalContent;
+          btn.disabled = false;
+          btn.classList.remove("opacity-80");
+          fileInput.value = "";
+          filePreview.classList.add("hidden");
+          document.getElementById("doc-name").value = "";
+        }, 1500);
+      });
+    </script>
+  </body>
+</html>

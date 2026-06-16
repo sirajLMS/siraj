@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Reschedule Class</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed-dim": "#bcc7de",
+              "error-container": "#ffdad6",
+              background: "#f7f9fb",
+              "on-tertiary-fixed-variant": "#005048",
+              "inverse-on-surface": "#eff1f3",
+              "on-background": "#191c1e",
+              "on-primary-container": "#85bdbc",
+              "outline-variant": "#bfc8c8",
+              "surface-container": "#eceef0",
+              "text-muted": "#64748B",
+              "on-tertiary": "#ffffff",
+              "surface-container-high": "#e6e8ea",
+              "on-secondary": "#ffffff",
+              "tertiary-fixed": "#71f8e4",
+              "on-surface": "#191c1e",
+              "sidebar-bg": "#0F3D3D",
+              "surface-variant": "#e0e3e5",
+              primary: "#003535",
+              "surface-container-highest": "#e0e3e5",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#00201c",
+              error: "#ba1a1a",
+              "primary-container": "#0d4d4d",
+              "surface-dim": "#d8dadc",
+              "primary-fixed-dim": "#98d1d0",
+              "on-primary-fixed": "#002020",
+              "on-error-container": "#93000a",
+              "on-primary": "#ffffff",
+              "on-primary-fixed-variant": "#104f4f",
+              "on-tertiary-container": "#33c7b4",
+              "inverse-primary": "#98d1d0",
+              secondary: "#545f73",
+              "primary-fixed": "#b4edec",
+              outline: "#707978",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "surface-container-low": "#f2f4f6",
+              "surface-bright": "#f7f9fb",
+              "on-secondary-fixed-variant": "#3c475a",
+              "surface-tint": "#2e6767",
+              surface: "#f7f9fb",
+              "on-surface-variant": "#404848",
+              "tertiary-container": "#004e46",
+              "secondary-container": "#d5e0f8",
+              "border-subtle": "#E2E8F0",
+              tertiary: "#00352f",
+              "on-secondary-fixed": "#111c2d",
+              "on-secondary-container": "#586377",
+              "secondary-fixed": "#d8e3fb",
+              "navbar-teal": "#135E5E",
+              "inverse-surface": "#2d3133",
+              "surface-container-lowest": "#ffffff",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "card-padding": "1.5rem",
+              gutter: "1.5rem",
+              "sidebar-width": "260px",
+              "auth-width": "420px",
+              "navbar-height": "64px",
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+            },
+            fontFamily: {
+              display: ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "headline-lg": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+            },
+            fontSize: {
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background text-on-surface font-body-md text-body-md min-h-screen pb-24">
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full z-50 bg-navbar-teal flex justify-between items-center h-16 px-4 w-full">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-on-primary">menu</span>
+        <h1 class="font-headline-md text-headline-md font-bold text-on-primary">Siraj LMS</h1>
+      </div>
+      <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed-dim/30">
+        <img
+          alt="Admin Avatar"
+          class="w-full h-full object-cover"
+          data-alt="A professional headshot of a middle-eastern administrator in a clean, high-key corporate setting. The lighting is soft and even, highlighting a friendly but authoritative expression. The background is a minimalist office with subtle teal accents, maintaining a professional and academic atmosphere consistent with a modern LMS platform."
+          src="https://lh3.googleusercontent.com/aida/AP1WRLtrsciURFIG1F6DQrDaP26yPIc_RiJxeNcBxYwSHO8V8DAJNFznOx8kURNeZ1QFRRdNeec4s-HOaPDcBywPwKb-QRVsQTsfUkGu2Ux_gTCBj7V5fI0ewZpoV6H1AVual2q2wGfXlhkUblWaZoJ5d626ZhnuiFxxWNvT2ciTm9KP80RRzgNmYFU3XB7cxSbRE0fKRxm4lt0_lXxa5PJk8i9-qjDIXIc0v5nheYcoUzBVNibQRMRZtggK_fej"
+        />
+      </div>
+    </header>
+    <main class="pt-20 px-4 flex flex-col gap-6">
+      <!-- Page Title & Header -->
+      <div class="mt-4">
+        <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">Reschedule a class</h2>
+        <p class="text-text-muted font-body-md">Adjust the session timing for the following participants.</p>
+      </div>
+      <!-- Warning Banner -->
+      <div class="w-full bg-[#FEF9C3] border-l-4 border-[#EAB308] p-4 flex gap-3 items-start animate-pulse-subtle">
+        <span class="material-symbols-outlined text-[#854D0E]">warning</span>
+        <p class="text-[#854D0E] font-medium leading-tight">
+          Warning: The class time is calculated based on the Teacher's timezone (Africa/Cairo). Please ensure local
+          conversions are correct.
+        </p>
+      </div>
+      <!-- Form Details Card -->
+      <div
+        class="bg-surface-container-lowest rounded-xl shadow-sm p-card-padding flex flex-col gap-6 border border-border-subtle"
+      >
+        <!-- Read-only Participants -->
+        <div class="grid grid-cols-1 gap-4">
+          <div class="flex flex-col gap-1">
+            <label class="font-label-md text-label-md text-text-muted uppercase tracking-wider">Teacher Name</label>
+            <div class="flex items-center gap-2 py-2 border-b border-border-subtle">
+              <span class="material-symbols-outlined text-navbar-teal">school</span>
+              <span class="font-title-lg text-title-lg text-on-surface">Ahmed Al-Farsi</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="font-label-md text-label-md text-text-muted uppercase tracking-wider">Student Name</label>
+            <div class="flex items-center gap-2 py-2 border-b border-border-subtle">
+              <span class="material-symbols-outlined text-navbar-teal">person</span>
+              <span class="font-title-lg text-title-lg text-on-surface">Omar Ahmed</span>
+            </div>
+          </div>
+        </div>
+        <!-- Date Picker -->
+        <div class="flex flex-col gap-2">
+          <label class="font-label-md text-label-md text-on-surface-variant">Session Date</label>
+          <div class="relative">
+            <input
+              class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-transparent focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+              type="date"
+              value="2023-10-24"
+            />
+          </div>
+        </div>
+        <!-- Time Picker -->
+        <div class="flex flex-col gap-2">
+          <label class="font-label-md text-label-md text-on-surface-variant">Session Time (24h or AM/PM)</label>
+          <div class="flex gap-2">
+            <div class="flex-1">
+              <input
+                class="w-full text-center px-2 py-3 rounded-lg border border-outline-variant bg-transparent focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                placeholder="HH"
+                type="number"
+                value="10"
+              />
+            </div>
+            <div class="flex items-center text-title-lg text-text-muted">:</div>
+            <div class="flex-1">
+              <input
+                class="w-full text-center px-2 py-3 rounded-lg border border-outline-variant bg-transparent focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                placeholder="MM"
+                type="number"
+                value="30"
+              />
+            </div>
+            <div class="flex-1">
+              <select
+                class="w-full px-2 py-3 rounded-lg border border-outline-variant bg-transparent focus:ring-2 focus:ring-primary focus:border-transparent outline-none appearance-none text-center"
+              >
+                <option value="AM">AM</option>
+                <option selected="" value="PM">PM</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <!-- Quick Adjust Buttons -->
+        <div class="flex flex-col gap-3">
+          <label class="font-label-md text-label-md text-text-muted uppercase tracking-wider">Quick Adjust</label>
+          <div class="flex flex-wrap gap-2">
+            <button
+              class="flex-1 min-w-[100px] py-2 px-3 rounded-full border border-primary text-primary font-bold text-label-md hover:bg-primary/5 active:scale-95 transition-all flex items-center justify-center gap-1"
+            >
+              <span class="material-symbols-outlined text-[18px]">add</span> 1 Hour
+            </button>
+            <button
+              class="flex-1 min-w-[100px] py-2 px-3 rounded-full border border-primary text-primary font-bold text-label-md hover:bg-primary/5 active:scale-95 transition-all flex items-center justify-center gap-1"
+            >
+              <span class="material-symbols-outlined text-[18px]">add</span> 1 Day
+            </button>
+            <button
+              class="flex-1 min-w-[100px] py-2 px-3 rounded-full border border-primary text-primary font-bold text-label-md hover:bg-primary/5 active:scale-95 transition-all flex items-center justify-center gap-1"
+            >
+              <span class="material-symbols-outlined text-[18px]">add</span> 1 Week
+            </button>
+          </div>
+        </div>
+        <!-- Form Actions -->
+        <div class="flex flex-col gap-3 mt-4">
+          <button
+            class="w-full py-4 bg-navbar-teal text-on-primary font-button-text uppercase rounded-full shadow-md active:scale-95 transition-all"
+          >
+            SUBMIT RESCHEDULE
+          </button>
+          <button
+            class="w-full py-4 bg-[#FEE2E2] text-error font-button-text uppercase rounded-full active:scale-95 transition-all"
+          >
+            CANCEL
+          </button>
+        </div>
+      </div>
+      <!-- Additional Context / Information -->
+      <div class="p-4 bg-surface-container-low rounded-xl flex items-start gap-3">
+        <span class="material-symbols-outlined text-secondary">info</span>
+        <div class="flex flex-col gap-1">
+          <p class="font-label-md font-bold text-secondary">NOTIFICATION POLICY</p>
+          <p class="text-on-surface-variant text-body-md">
+            Both teacher and student will receive immediate WhatsApp and Email notifications upon confirmation.
+          </p>
+        </div>
+      </div>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface-container-lowest border-t border-border-subtle shadow-sm"
+    >
+      <div
+        class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform duration-150"
+      >
+        <span class="material-symbols-outlined">calendar_today</span>
+        <span class="font-label-md text-label-md">Schedule</span>
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-colors active:scale-90 transition-transform duration-150"
+      >
+        <span class="material-symbols-outlined">school</span>
+        <span class="font-label-md text-label-md">Teachers</span>
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-colors active:scale-90 transition-transform duration-150"
+      >
+        <span class="material-symbols-outlined">family_restroom</span>
+        <span class="font-label-md text-label-md">Parents</span>
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-colors active:scale-90 transition-transform duration-150"
+      >
+        <span class="material-symbols-outlined">person</span>
+        <span class="font-label-md text-label-md">Students</span>
+      </div>
+      <div
+        class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-colors active:scale-90 transition-transform duration-150"
+      >
+        <span class="material-symbols-outlined">assessment</span>
+        <span class="font-label-md text-label-md">Reports</span>
+      </div>
+    </nav>
+    <script>
+      // Simple micro-interaction for quick adjust buttons
+      document.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", function (_e) {
+          const ripple = document.createElement("span");
+          ripple.classList.add("ripple");
+          this.appendChild(ripple);
+          setTimeout(() => ripple.remove(), 600);
+        });
+      });
+    </script>
+    <style>
+      .animate-pulse-subtle {
+        animation: pulse-bg 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes pulse-bg {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.85;
+        }
+      }
+      input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.3);
+        cursor: pointer;
+      }
+    </style>
+  </body>
+</html>

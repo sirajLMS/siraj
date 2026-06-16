@@ -1,0 +1,490 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Manager Onboarding | Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#e0e3e5",
+              "primary-container": "#0d4d4d",
+              "on-primary-container": "#85bdbc",
+              "on-error-container": "#93000a",
+              "on-background": "#191c1e",
+              "surface-container-lowest": "#ffffff",
+              "surface-bright": "#f7f9fb",
+              "tertiary-fixed": "#71f8e4",
+              "error-container": "#ffdad6",
+              "primary-fixed-dim": "#98d1d0",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-secondary-fixed-variant": "#3c475a",
+              surface: "#f7f9fb",
+              outline: "#707978",
+              "inverse-on-surface": "#eff1f3",
+              "on-tertiary-fixed": "#00201c",
+              "text-muted": "#64748B",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#33c7b4",
+              "surface-container-high": "#e6e8ea",
+              "surface-dim": "#d8dadc",
+              "navbar-teal": "#135E5E",
+              "surface-container-highest": "#e0e3e5",
+              "surface-tint": "#2e6767",
+              "on-primary-fixed-variant": "#104f4f",
+              primary: "#003535",
+              "on-primary-fixed": "#002020",
+              "on-primary": "#ffffff",
+              secondary: "#545f73",
+              "outline-variant": "#bfc8c8",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed": "#d8e3fb",
+              "on-secondary-container": "#586377",
+              "on-secondary": "#ffffff",
+              "surface-container": "#eceef0",
+              background: "#f7f9fb",
+              "secondary-container": "#d5e0f8",
+              error: "#ba1a1a",
+              "inverse-surface": "#2d3133",
+              "on-secondary-fixed": "#111c2d",
+              "on-surface-variant": "#404848",
+              "sidebar-bg": "#0F3D3D",
+              "tertiary-fixed-dim": "#4fdbc8",
+              tertiary: "#00352f",
+              "surface-container-low": "#f2f4f6",
+              "on-surface": "#191c1e",
+              "border-subtle": "#E2E8F0",
+              "tertiary-container": "#004e46",
+              "primary-fixed": "#b4edec",
+              "inverse-primary": "#98d1d0",
+              "secondary-fixed-dim": "#bcc7de",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              gutter: "1.5rem",
+              "card-padding": "1.5rem",
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+              "auth-width": "420px",
+              "navbar-height": "64px",
+            },
+            fontFamily: {
+              "title-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "body-lg": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "headline-lg": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background-color: #f7f9fb;
+        color: #191c1e;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body class="font-body-md overflow-x-hidden">
+    <!-- Top Navigation Shell -->
+    <header
+      class="fixed top-0 right-0 left-0 z-50 flex justify-between items-center px-gutter h-navbar-height bg-navbar-teal dark:bg-primary-container"
+    >
+      <div class="flex items-center gap-4">
+        <span class="font-headline-md text-headline-md font-bold text-on-primary">Siraj LMS</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="hidden md:flex items-center gap-6">
+          <span
+            class="text-on-primary font-bold border-b-2 border-on-primary pb-1 font-body-md text-body-md cursor-pointer"
+            >Onboarding</span
+          >
+          <span
+            class="text-on-primary/80 font-body-md text-body-md cursor-pointer hover:bg-primary-container/50 transition-colors px-2 py-1"
+            >Support</span
+          >
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="material-symbols-outlined text-on-primary cursor-pointer" data-icon="notifications"
+            >notifications</span
+          >
+          <span class="material-symbols-outlined text-on-primary cursor-pointer" data-icon="settings">settings</span>
+          <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden">
+            <img
+              alt="Administrator Profile"
+              data-alt="A professional close-up portrait of a corporate administrator in a modern, brightly lit academic office. The image has a high-key, clean aesthetic with soft natural light streaming through large windows. The background is a blurred bookshelf and a sleek desk setup, reinforcing a scholarly and organized atmosphere. The overall tone is authoritative yet approachable, aligned with minimalist corporate modern design."
+              src="https://lh3.googleusercontent.com/aida/AP1WRLtHOMQetXZSYfiXG5HBQi9NuX4pkRS7PALwEImeLZl3LEhYnL9a84lcTA-qQ1lfNHt8lbq4GyKNldHAblu-aAnbLAAEGsc1aqlXKvxQ7ZfWyH35z60ap8KZHPcjFZyCsldvgGNidQUAoC5J3OitWBJ1J-2F9GVi62F-sWnokyXsvdDHiB3n0Umg7grT7f4CNwyxdBBMHEwKAhzbRUeFIfTLww3L3vEhR2c5wn6yW8Litkf9BPm_gBki6G5O"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- Sidebar Navigation Shell -->
+    <aside
+      class="fixed left-0 top-0 h-full w-sidebar-width bg-sidebar-bg dark:bg-primary flex flex-col pt-navbar-height z-40 shadow-sm"
+    >
+      <div class="p-6">
+        <h2 class="font-headline-md text-headline-md font-bold text-on-primary">Siraj Portal</h2>
+        <p class="text-on-primary/70 font-label-md text-label-md">Admin Dashboard</p>
+      </div>
+      <nav class="flex-1 overflow-y-auto custom-scrollbar mt-4">
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all"
+        >
+          <span class="material-symbols-outlined" data-icon="home">home</span>
+          <span class="font-label-md text-label-md">Home</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all"
+        >
+          <span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+          <span class="font-label-md text-label-md">Schedule Search</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all"
+        >
+          <span class="material-symbols-outlined" data-icon="school">school</span>
+          <span class="font-label-md text-label-md">Teachers</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all"
+        >
+          <span class="material-symbols-outlined" data-icon="family_restroom">family_restroom</span>
+          <span class="font-label-md text-label-md">Parents</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all"
+        >
+          <span class="material-symbols-outlined" data-icon="person">person</span>
+          <span class="font-label-md text-label-md">Students</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all"
+        >
+          <span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+          <span class="font-label-md text-label-md">Managers</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all"
+        >
+          <span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
+          <span class="font-label-md text-label-md">Resources</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all"
+        >
+          <span class="material-symbols-outlined" data-icon="description">description</span>
+          <span class="font-label-md text-label-md">Reports</span>
+        </div>
+        <div class="bg-navbar-teal text-on-primary font-bold flex items-center gap-3 px-4 h-12 cursor-pointer">
+          <span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+          <span class="font-label-md text-label-md">Add Account</span>
+        </div>
+      </nav>
+      <div class="p-4 border-t border-on-primary/10">
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all"
+        >
+          <span class="material-symbols-outlined" data-icon="logout">logout</span>
+          <span class="font-label-md text-label-md">Logout</span>
+        </div>
+      </div>
+    </aside>
+    <!-- Main Content Canvas -->
+    <main class="ml-[260px] pt-[64px] min-h-screen">
+      <div class="p-page-margin">
+        <!-- Header Section -->
+        <div class="mb-10">
+          <h1 class="font-display text-display text-primary mb-2">Manager Onboarding</h1>
+          <p class="text-text-muted font-body-lg text-body-lg">
+            Register new administrative personnel to the Siraj Management ecosystem.
+          </p>
+        </div>
+        <!-- Form Container -->
+        <div class="max-w-4xl bg-white rounded-xl shadow-sm overflow-hidden border border-border-subtle">
+          <div class="p-card-padding">
+            <form class="space-y-12" id="onboardingForm">
+              <!-- Section 1: Staff Information -->
+              <section>
+                <div class="flex items-center gap-4 mb-8 border-b border-border-subtle pb-4">
+                  <span
+                    class="material-symbols-outlined text-navbar-teal"
+                    data-icon="badge"
+                    style="font-variation-settings: &quot;FILL&quot; 1"
+                    >badge</span
+                  >
+                  <h3 class="font-headline-md text-headline-md text-primary">Staff Information</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div class="relative group">
+                    <label class="block font-label-md text-label-md text-navbar-teal mb-2 font-bold" for="fullName"
+                      >Full Name</label
+                    >
+                    <input
+                      class="w-full px-4 py-3 bg-transparent border border-outline-variant rounded-lg focus:ring-1 focus:ring-navbar-teal focus:border-navbar-teal outline-none transition-all font-body-md text-body-md"
+                      id="fullName"
+                      placeholder="e.g. Dr. Salman Al-Farsi"
+                      required=""
+                      type="text"
+                    />
+                  </div>
+                  <div class="relative group">
+                    <label class="block font-label-md text-label-md text-navbar-teal mb-2 font-bold" for="email"
+                      >Official Email</label
+                    >
+                    <input
+                      class="w-full px-4 py-3 bg-transparent border border-outline-variant rounded-lg focus:ring-1 focus:ring-navbar-teal focus:border-navbar-teal outline-none transition-all font-body-md text-body-md"
+                      id="email"
+                      placeholder="s.alfarsi@siraj-lms.edu"
+                      required=""
+                      type="email"
+                    />
+                  </div>
+                  <div class="relative group">
+                    <label class="block font-label-md text-label-md text-navbar-teal mb-2 font-bold" for="phone"
+                      >Phone Number</label
+                    >
+                    <input
+                      class="w-full px-4 py-3 bg-transparent border border-outline-variant rounded-lg focus:ring-1 focus:ring-navbar-teal focus:border-navbar-teal outline-none transition-all font-body-md text-body-md"
+                      id="phone"
+                      placeholder="+966 50 000 0000"
+                      type="tel"
+                    />
+                  </div>
+                  <div class="relative group">
+                    <label class="block font-label-md text-label-md text-navbar-teal mb-2 font-bold" for="skypeId"
+                      >Skype ID</label
+                    >
+                    <div class="flex items-center">
+                      <input
+                        class="w-full px-4 py-3 bg-transparent border border-outline-variant rounded-lg focus:ring-1 focus:ring-navbar-teal focus:border-navbar-teal outline-none transition-all font-body-md text-body-md"
+                        id="skypeId"
+                        placeholder="live:.cid.987654321"
+                        type="text"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+              <!-- Section 2: System Access -->
+              <section>
+                <div class="flex items-center gap-4 mb-8 border-b border-border-subtle pb-4">
+                  <span
+                    class="material-symbols-outlined text-navbar-teal"
+                    data-icon="lock_open"
+                    style="font-variation-settings: &quot;FILL&quot; 1"
+                    >lock_open</span
+                  >
+                  <h3 class="font-headline-md text-headline-md text-primary">System Access</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                  <div class="relative">
+                    <label class="block font-label-md text-label-md text-navbar-teal mb-4 font-bold"
+                      >Account Type</label
+                    >
+                    <div class="flex p-1 bg-surface-container rounded-lg w-full">
+                      <button
+                        class="flex-1 py-3 px-4 rounded-md transition-all font-button-text text-button-text bg-navbar-teal text-on-primary shadow-sm"
+                        id="roleManager"
+                        onclick="toggleRole('manager')"
+                        type="button"
+                      >
+                        MANAGER
+                      </button>
+                      <button
+                        class="flex-1 py-3 px-4 rounded-md transition-all font-button-text text-button-text text-on-surface-variant hover:bg-surface-variant/50"
+                        id="roleAdmin"
+                        onclick="toggleRole('admin')"
+                        type="button"
+                      >
+                        ADMIN
+                      </button>
+                    </div>
+                    <p class="mt-3 text-label-md text-text-muted" id="roleDesc">
+                      Managers have oversight of curriculum and teachers but restricted financial access.
+                    </p>
+                  </div>
+                  <div class="relative group">
+                    <label class="block font-label-md text-label-md text-navbar-teal mb-2 font-bold" for="department"
+                      >Primary Department</label
+                    >
+                    <select
+                      class="w-full px-4 py-3 bg-transparent border border-outline-variant rounded-lg focus:ring-1 focus:ring-navbar-teal focus:border-navbar-teal outline-none transition-all font-body-md text-body-md appearance-none"
+                      id="department"
+                    >
+                      <option value="academic">Academic Affairs</option>
+                      <option value="operations">Student Operations</option>
+                      <option value="human_resources">Human Resources</option>
+                      <option value="it_support">IT Support</option>
+                    </select>
+                    <span
+                      class="material-symbols-outlined absolute right-4 top-[42px] pointer-events-none text-outline"
+                      data-icon="expand_more"
+                      >expand_more</span
+                    >
+                  </div>
+                </div>
+              </section>
+              <!-- Form Footer Actions -->
+              <div class="pt-8 flex items-center justify-between border-t border-border-subtle mt-12">
+                <button
+                  class="bg-navbar-teal text-on-primary px-10 py-4 font-button-text text-button-text tracking-widest hover:bg-primary-container transition-all active:scale-95"
+                  type="submit"
+                >
+                  SIGNUP
+                </button>
+                <button
+                  class="text-text-muted font-button-text text-button-text hover:text-primary transition-colors"
+                  type="button"
+                >
+                  CANCEL
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!-- Dashboard Visual Context -->
+        <div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div
+            class="bg-white p-card-padding rounded-xl shadow-sm border border-border-subtle flex items-center justify-between group hover:border-navbar-teal transition-all cursor-pointer"
+          >
+            <div>
+              <p class="text-text-muted font-label-md text-label-md uppercase tracking-wider mb-1">Active Staff</p>
+              <h4 class="font-display text-headline-md text-primary">128</h4>
+            </div>
+            <div
+              class="w-12 h-12 rounded-full border-2 border-navbar-teal flex items-center justify-center text-navbar-teal group-hover:bg-navbar-teal group-hover:text-white transition-all"
+            >
+              <span class="material-symbols-outlined" data-icon="groups">groups</span>
+            </div>
+          </div>
+          <div
+            class="bg-white p-card-padding rounded-xl shadow-sm border border-border-subtle flex items-center justify-between group hover:border-navbar-teal transition-all cursor-pointer"
+          >
+            <div>
+              <p class="text-text-muted font-label-md text-label-md uppercase tracking-wider mb-1">Pending Approval</p>
+              <h4 class="font-display text-headline-md text-primary">12</h4>
+            </div>
+            <div
+              class="w-12 h-12 rounded-full border-2 border-navbar-teal flex items-center justify-center text-navbar-teal group-hover:bg-navbar-teal group-hover:text-white transition-all"
+            >
+              <span class="material-symbols-outlined" data-icon="pending_actions">pending_actions</span>
+            </div>
+          </div>
+          <div
+            class="bg-white p-card-padding rounded-xl shadow-sm border border-border-subtle flex items-center justify-between group hover:border-navbar-teal transition-all cursor-pointer"
+          >
+            <div>
+              <p class="text-text-muted font-label-md text-label-md uppercase tracking-wider mb-1">Avg. Onboarding</p>
+              <h4 class="font-display text-headline-md text-primary">2.4 d</h4>
+            </div>
+            <div
+              class="w-12 h-12 rounded-full border-2 border-navbar-teal flex items-center justify-center text-navbar-teal group-hover:bg-navbar-teal group-hover:text-white transition-all"
+            >
+              <span class="material-symbols-outlined" data-icon="speed">speed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      function _toggleRole(role) {
+        const btnManager = document.getElementById("roleManager");
+        const btnAdmin = document.getElementById("roleAdmin");
+        const desc = document.getElementById("roleDesc");
+
+        if (role === "manager") {
+          btnManager.classList.add("bg-navbar-teal", "text-on-primary", "shadow-sm");
+          btnManager.classList.remove("text-on-surface-variant", "hover:bg-surface-variant/50");
+
+          btnAdmin.classList.remove("bg-navbar-teal", "text-on-primary", "shadow-sm");
+          btnAdmin.classList.add("text-on-surface-variant", "hover:bg-surface-variant/50");
+
+          desc.textContent = "Managers have oversight of curriculum and teachers but restricted financial access.";
+        } else {
+          btnAdmin.classList.add("bg-navbar-teal", "text-on-primary", "shadow-sm");
+          btnAdmin.classList.remove("text-on-surface-variant", "hover:bg-surface-variant/50");
+
+          btnManager.classList.remove("bg-navbar-teal", "text-on-primary", "shadow-sm");
+          btnManager.classList.add("text-on-surface-variant", "hover:bg-surface-variant/50");
+
+          desc.textContent =
+            "Administrators have full system control, including fiscal management and global settings.";
+        }
+      }
+
+      document.getElementById("onboardingForm").addEventListener("submit", e => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        const originalText = btn.textContent;
+        btn.textContent = "PROCESSING...";
+        btn.disabled = true;
+        btn.classList.add("opacity-80");
+
+        setTimeout(() => {
+          alert("Account request submitted successfully. Awaiting primary admin verification.");
+          btn.textContent = originalText;
+          btn.disabled = false;
+          btn.classList.remove("opacity-80");
+          e.target.reset();
+        }, 1500);
+      });
+    </script>
+  </body>
+</html>

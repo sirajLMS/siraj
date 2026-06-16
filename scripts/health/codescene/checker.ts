@@ -5,6 +5,34 @@ import { glob } from "glob";
 import { ensureCacheDir, getCachedMtime, getCachedResult, getFileMtime, saveResult, updateCachedMtime } from "./cache";
 import { COLORS, logError, logInfo, logSuccess, PROJECT_ROOT, resolveCodesceneBin } from "./config";
 
+const STATE_FILE = join(PROJECT_ROOT, ".quality-gate-state.json");
+
+interface QualityState {
+  stage: string;
+  owner: string;
+  lifecycle: string;
+  lastRun: string;
+}
+
+function updateQualityStateIfOwned(results: CheckResults) {
+  if (results.warningCount === 0 && results.errorCount === 0 && fs.existsSync(STATE_FILE)) {
+    try {
+      const state = JSON.parse(fs.readFileSync(STATE_FILE, "utf-8")) as QualityState;
+      if (state.owner === "codescene") {
+        state.owner = "quality-gate";
+        state.stage = "SONAR_SCAN";
+        state.lifecycle = "NEED_CONFIRM";
+        state.lastRun = new Date().toISOString();
+        fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), "utf-8");
+        logSuccess("\n✅ Code health perfected. Ownership transferred back to quality-gate.");
+        globalThis.console.log("ℹ️ Rerun 'bun quality-gate' to confirm perfect health.");
+      }
+    } catch {
+      // Ignore state update errors
+    }
+  }
+}
+
 interface CheckResults {
   perfectCount: number;
   warningCount: number;
@@ -131,6 +159,7 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
   }
 
   printSummary(results);
+  updateQualityStateIfOwned(results);
 
   if (results.errorCount > 0 || results.warningCount > 0) {
     process.exit(1);
@@ -265,8 +294,6 @@ function printSummary(results: CheckResults): void {
     globalThis.console.log(
       `\n${COLORS.YELLOW}💡 Run 'bun run codescene --file <file>' for detailed analysis${COLORS.NC}`
     );
-    globalThis.console.log(
-      `${COLORS.YELLOW}💡 Run 'bun run codescene --scan --no-cache' to force a full check (bypasses incremental cache)${COLORS.NC}`
-    );
+    globalThis.console.log(`${COLORS.YELLOW}💡 Run 'bun run codescene --scan --full' to force full check${COLORS.NC}`);
   }
 }

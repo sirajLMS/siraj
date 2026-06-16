@@ -1,8 +1,16 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["127.0.0.1", "localhost"],
+  reactStrictMode: true,
+  turbopack: {
+    resolveAlias: {
+      "next-intl/config": "./src/i18n/request.ts",
+    },
+  },
+  // eslint-disable-next-line sonarjs/no-hardcoded-ip
+  allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.100.30"],
   images: {
     // Disable image optimization for localhost URLs to avoid 400 errors
     // The Next.js Image Optimization API can't reach localhost:5000 from the server side
@@ -34,4 +42,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Pass the path to the request config file for the plugin
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+export default withNextIntl(nextConfig);

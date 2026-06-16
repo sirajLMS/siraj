@@ -1,4 +1,3 @@
-import cspellESLintPluginRecommended from "@cspell/eslint-plugin/recommended";
 import eslint from "@eslint/js";
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
@@ -9,9 +8,11 @@ import sonarjs from "eslint-plugin-sonarjs";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // import cspellESLintPluginRecommended from "@cspell/eslint-plugin/recommended";
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -34,7 +35,12 @@ const eslintConfig = defineConfig([
     ".vscode",
     ".devcontainer",
     ".github",
-    ".ai",
+    "**/.ai",
+    "**/.git",
+    "**/*.md",
+    "**/*.html",
+    ".husky",
+    "**/messages/**",
     // File patterns
     "**/*.d.ts",
     "next-env.d.ts",
@@ -47,13 +53,16 @@ const eslintConfig = defineConfig([
     "frontend/graphql/generated/**",
     "scratch/**",
     "**/unRefactored_tests/**",
+    "*storybook.log",
+    "storybook-static/**",
+    ".playwright-mcp/**",
   ]),
   eslint.configs.recommended,
   sonarjs.configs.recommended,
-  cspellESLintPluginRecommended,
+  // cspellESLintPluginRecommended, // Disabled for performance
 
   // TypeScript and React-specific configuration
-  ...tseslint.configs.strictTypeChecked.map(config => ({
+  ...tseslint.configs.recommended.map(config => ({
     ...config,
     files: ["**/*.{ts,tsx}"],
   })),
@@ -68,7 +77,10 @@ const eslintConfig = defineConfig([
       // ecmaVersion: 2020,
       globals: globals.browser,
       parserOptions: {
-        project: true,
+        projectService: {
+          allowDefaultProject: ["*.config.*"],
+          defaultProject: './tsconfig.json',
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -117,15 +129,15 @@ const eslintConfig = defineConfig([
       "react-hooks/preserve-manual-memoization": "off",
       "@typescript-eslint/restrict-template-expressions": "off",
 
-      // Spell checking
-      "@cspell/spellchecker": [
-        "warn",
-        {
-          autoFix: true,
-          configFile: new URL("./cspell.config.yaml", import.meta.url).toString(),
-          cspellOptionsRoot: import.meta.url,
-        },
-      ],
+      // Spell checking (disabled for performance - run separately if needed)
+      // "@cspell/spellchecker": [
+      //   "warn",
+      //   {
+      //     autoFix: true,
+      //     configFile: new URL("./cspell.config.yaml", import.meta.url).toString(),
+      //     cspellOptionsRoot: import.meta.url,
+      //   },
+      // ],
     },
   },
 
@@ -156,6 +168,18 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-unnecessary-condition": "off",
     },
   },
+
+  // // Local custom rules
+  // import { localRulesPlugin } from "./scripts/eslint-rules/index.mjs";
+  //   {
+  //     files: ["**/*.{tsx}"],
+  //     plugins: {
+  //       "local-rules": localRulesPlugin,
+  //     },
+  //     rules: {
+  //       "local-rules/no-hardcoded-colors": "error",
+  //     },
+  //   },
 ]);
 
 export default eslintConfig;

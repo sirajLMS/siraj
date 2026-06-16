@@ -1,0 +1,227 @@
+"use client";
+
+import {
+  CalendarTodayOutlined,
+  HistoryOutlined,
+  PersonOffOutlined,
+  ScheduleOutlined,
+  SchoolOutlined,
+  VisibilityOutlined,
+  WarningAmberOutlined,
+} from "@mui/icons-material";
+import { Box, Card, IconButton, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
+import { StatusBadge } from "@/frontend/components/ui";
+import type { TrackingRow } from "@/frontend/stores/rescheduleTrackingStore";
+
+interface RescheduleTrackingCardListProps {
+  readonly rows: readonly TrackingRow[];
+  readonly labels: {
+    readonly newDate: string;
+    readonly leaveRequest: string;
+    readonly rescheduled: string;
+    readonly pendingLeave: string;
+    readonly viewDetails: string;
+    readonly noEntries: string;
+  };
+  readonly onView: (id: string) => void;
+}
+
+const CardHeader = ({ row, onView }: { row: TrackingRow; onView: (id: string) => void }) => {
+  return (
+    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
+      <Box>
+        <Typography
+          sx={theme => ({
+            fontFamily: '"Hanken Grotesk", sans-serif',
+            fontSize: "16px",
+            fontWeight: 700,
+            color: theme.palette.text.primary,
+          })}
+        >
+          {row.teacherName}
+        </Typography>
+        <Typography
+          sx={theme => ({
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "12px",
+            color: theme.palette.text.secondary,
+            fontWeight: 500,
+          })}
+        >
+          ID: {row.teacherId}
+        </Typography>
+      </Box>
+      <IconButton
+        id={`view-card-${row.id}`}
+        size="small"
+        onClick={() => {
+          onView(row.id);
+        }}
+        sx={theme => ({
+          width: 40,
+          height: 40,
+          borderRadius: "50%",
+          bgcolor: theme.palette.action.hover,
+          color: theme.palette.primary.main,
+          "&:hover": {
+            bgcolor: alpha(theme.palette.primary.main, 0.07),
+          },
+        })}
+      >
+        <VisibilityOutlined fontSize="small" />
+      </IconButton>
+    </Box>
+  );
+};
+
+const CardBody = ({ row }: { row: TrackingRow }) => {
+  return (
+    <Box sx={{ mb: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}>
+        <SchoolOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />
+        <Typography
+          sx={theme => ({
+            fontFamily: '"Hanken Grotesk", sans-serif',
+            fontSize: "14px",
+            color: theme.palette.text.secondary,
+          })}
+        >
+          {row.studentClass}
+        </Typography>
+      </Box>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <ScheduleOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />
+        <Typography
+          sx={theme => ({
+            fontFamily: '"Hanken Grotesk", sans-serif',
+            fontSize: "14px",
+            fontWeight: 600,
+            color: theme.palette.text.primary,
+          })}
+        >
+          {row.timeSlot}
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
+
+const CardFooter = ({
+  row,
+  labels,
+  isLeave,
+}: {
+  row: TrackingRow;
+  labels: RescheduleTrackingCardListProps["labels"];
+  isLeave: boolean;
+}) => {
+  return (
+    <Box
+      sx={theme => ({
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 1,
+        pt: 1.5,
+        borderTop: `1px solid ${theme.palette.border.light}`,
+      })}
+    >
+      <Box
+        sx={theme => ({
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 0.5,
+          px: 1.5,
+          py: 0.5,
+          borderRadius: 6,
+          bgcolor: isLeave ? theme.palette.error.main : theme.palette.primary.main,
+        })}
+      >
+        {isLeave ? (
+          <PersonOffOutlined sx={theme => ({ fontSize: 14, color: theme.palette.onError })} />
+        ) : (
+          <CalendarTodayOutlined sx={theme => ({ fontSize: 14, color: theme.palette.onPrimary })} />
+        )}
+        <Typography
+          sx={theme => ({
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "10px",
+            fontWeight: 700,
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            color: isLeave ? theme.palette.onError : theme.palette.onPrimary,
+          })}
+        >
+          {isLeave ? labels.leaveRequest : `${labels.newDate}: ${row.scheduledDate}`}
+        </Typography>
+      </Box>
+
+      <StatusBadge
+        category="trackingStatus"
+        status={row.status}
+        label={row.status === "rescheduled" ? labels.rescheduled : labels.pendingLeave}
+        icon={
+          row.status === "rescheduled" ? (
+            <HistoryOutlined sx={{ fontSize: 14 }} />
+          ) : (
+            <WarningAmberOutlined sx={{ fontSize: 14 }} />
+          )
+        }
+      />
+    </Box>
+  );
+};
+
+function TrackingCard({
+  row,
+  labels,
+  onView,
+}: {
+  readonly row: TrackingRow;
+  readonly labels: RescheduleTrackingCardListProps["labels"];
+  readonly onView: (id: string) => void;
+}) {
+  const isLeave = row.dateLabel === "leave_request";
+
+  return (
+    <Card
+      elevation={0}
+      sx={theme => ({
+        borderRadius: 3,
+        border: `1px solid ${theme.palette.border.light}`,
+        borderBottom: `3px solid ${isLeave ? theme.palette.error.main : theme.palette.primary.main}20`,
+        overflow: "hidden",
+        p: 2,
+        position: "relative",
+        transition: "box-shadow 0.2s ease",
+        "&:hover": {
+          boxShadow: theme.palette.shadow.cardHover,
+        },
+      })}
+    >
+      <CardHeader row={row} onView={onView} />
+      <CardBody row={row} />
+      <CardFooter row={row} labels={labels} isLeave={isLeave} />
+    </Card>
+  );
+}
+
+export function RescheduleTrackingCardList({ rows, labels, onView }: RescheduleTrackingCardListProps) {
+  if (rows.length === 0) {
+    return (
+      <Box sx={{ textAlign: "center", py: 6 }}>
+        <Typography sx={theme => ({ color: theme.palette.text.secondary, fontSize: "14px" })}>
+          {labels.noEntries}
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      {rows.map(row => (
+        <TrackingCard key={row.id} row={row} labels={labels} onView={onView} />
+      ))}
+    </Box>
+  );
+}

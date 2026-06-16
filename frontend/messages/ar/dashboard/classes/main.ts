@@ -1,0 +1,43 @@
+import type { CreateRecurringClassLabels } from "../../../types/dashboard/classes";
+
+export const createRecurringClass: CreateRecurringClassLabels = {
+  title: "إضافة حصة متكررة",
+  subtitle: "تكوين الجدول للجلسات الأسبوعية التلقائية",
+  breadcrumbs: {
+    dashboard: "لوحة التحكم",
+    classes: "الحصص",
+  },
+  add: "إضافة",
+  addClass: "إضافة حصة",
+  addedSuccessfully: "تمت الإضافة بنجاح",
+  close: "إغلاق",
+  students: "الطلاب",
+  studentsPlaceholder: "اختر مجموعة الطلاب",
+  defaultStartTime: "وقت البدء الافتراضي",
+  duration: "المدة",
+  durationHours: "المدة (ساعات)",
+  durationMinutes: "المدة (دقائق)",
+  hours: "ساعات",
+  minutes: "دقائق",
+  daysSelection: "اختيار الأيام والتوقيت",
+  classSchedule: "جدول الحصص",
+  timeOverride: "تجاوز الوقت",
+  weekendOff: "عطلة نهاية الأسبوع",
+  days: {
+    monday: "الاثنين",
+    tuesday: "الثلاثاء",
+    wednesday: "الأربعاء",
+    thursday: "الخميس",
+    friday: "الجمعة",
+    saturday: "السبت",
+    sunday: "الأحد",
+  },
+  validation: {
+    studentGroupRequired: "يرجى اختيار مجموعة الطلاب",
+    startTimeRequired: "وقت البدء الافتراضي مطلوب",
+    durationRequired: "يجب أن تكون المدة أكبر من صفر",
+    daysRequired: "اختر يوماً واحداً على الأقل",
+    durationHoursMax: "لا يمكن أن تتجاوز الساعات 12",
+    durationMinutesMax: "لا يمكن أن تتجاوز الدقائق 59",
+  },
+};

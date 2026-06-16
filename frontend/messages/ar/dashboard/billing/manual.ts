@@ -1,0 +1,58 @@
+import type { BillingManualLabels } from "@/frontend/messages/types/dashboard/billing/manual";
+
+export const billingManual: BillingManualLabels = {
+  pageTitle: "إنشاء فاتورة يدوية",
+  pageSubtitle: "إنشاء سجلات رسوم لمرة واحدة للفوترة المؤسسية.",
+  backToFinancials: "العودة إلى المالية",
+  parentSelection: "اختيار ولي الأمر",
+  parentPlaceholder: "اختر سجل ولي أمر...",
+  feeAmount: "مبلغ الرسوم (درهم)",
+  feeAmountPlaceholder: "0.00",
+  issueDate: "تاريخ الإصدار",
+  dueDate: "تاريخ الاستحقاق",
+  billingMonths: "اختر أشهر الفوترة",
+  billingMonthsMobile: "فترة الفوترة (الأشهر)",
+  summaryTitle: "ملخص الفاتورة",
+  summarySubtitle: "سيتم حساب الضريبة تلقائياً بناءً على مبلغ الرسوم المحدد.",
+  totalDraftValue: "إجمالي قيمة المسودة",
+  submit: "إرسال",
+  submitAndSendEmail: "إرسال وإرسال بريد إلكتروني",
+  successMessage: "تم إرسال الفاتورة اليدوية بنجاح.",
+  months: {
+    jan: "يناير",
+    feb: "فبراير",
+    mar: "مارس",
+    apr: "أبريل",
+    may: "مايو",
+    jun: "يونيو",
+    jul: "يوليو",
+    aug: "أغسطس",
+    sep: "سبتمبر",
+    oct: "أكتوبر",
+    nov: "نوفمبر",
+    dec: "ديسمبر",
+  },
+  validation: {
+    parentRequired: "يرجى اختيار ولي أمر.",
+    feeAmountRequired: "مبلغ الرسوم مطلوب.",
+    feeAmountPositive: "يجب أن يكون مبلغ الرسوم أكبر من صفر.",
+    issueDateRequired: "تاريخ الإصدار مطلوب.",
+    dueDateRequired: "تاريخ الاستحقاق مطلوب.",
+    billingMonthsRequired: "اختر شهر فوترة واحداً على الأقل.",
+    dueDateBeforeIssueDate: "يجب أن يكون تاريخ الاستحقاق في أو بعد تاريخ الإصدار.",
+  },
+  support: {
+    secureBilling: {
+      title: "فوترة آمنة",
+      body: "جميع الفواتير اليدوية مشفرة ومسجلة لأغراض التدقيق.",
+    },
+    automatedLedgers: {
+      title: "دفاتر آلية",
+      body: "يتم مزامنة السجلات تلقائياً مع البيان المالي لولي الأمر.",
+    },
+    draftMode: {
+      title: "وضع المسودة",
+      body: "يمكن حفظ الفواتير كمسودات قبل الإصدار المؤسسي النهائي.",
+    },
+  },
+};

@@ -1,0 +1,435 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Staff Directory | Siraj LMS</title>
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Material Symbols -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container": "#eceef0",
+              "on-background": "#191c1e",
+              "error-container": "#ffdad6",
+              "primary-container": "#0d4d4d",
+              "secondary-container": "#d5e0f8",
+              "surface-tint": "#2e6767",
+              background: "#f7f9fb",
+              "on-tertiary-fixed-variant": "#005048",
+              "surface-variant": "#e0e3e5",
+              surface: "#f7f9fb",
+              "on-tertiary": "#ffffff",
+              "on-error-container": "#93000a",
+              "on-primary-fixed": "#002020",
+              "on-secondary-container": "#586377",
+              "navbar-teal": "#135E5E",
+              "surface-container-low": "#f2f4f6",
+              "surface-dim": "#d8dadc",
+              "tertiary-fixed-dim": "#4fdbc8",
+              error: "#ba1a1a",
+              outline: "#707978",
+              "on-tertiary-container": "#33c7b4",
+              "on-primary": "#ffffff",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#00201c",
+              "on-secondary-fixed-variant": "#3c475a",
+              "text-muted": "#64748B",
+              "on-surface-variant": "#404848",
+              "on-primary-fixed-variant": "#104f4f",
+              "inverse-surface": "#2d3133",
+              "tertiary-container": "#004e46",
+              "surface-bright": "#f7f9fb",
+              "secondary-fixed-dim": "#bcc7de",
+              secondary: "#545f73",
+              "inverse-primary": "#98d1d0",
+              tertiary: "#00352f",
+              "tertiary-fixed": "#71f8e4",
+              "on-primary-container": "#85bdbc",
+              "on-secondary": "#ffffff",
+              "border-subtle": "#E2E8F0",
+              "surface-container-highest": "#e0e3e5",
+              "primary-fixed-dim": "#98d1d0",
+              "outline-variant": "#bfc8c8",
+              "on-secondary-fixed": "#111c2d",
+              "primary-fixed": "#b4edec",
+              "inverse-on-surface": "#eff1f3",
+              "surface-container-lowest": "#ffffff",
+              "on-surface": "#191c1e",
+              "sidebar-bg": "#0F3D3D",
+              primary: "#003535",
+              "surface-container-high": "#e6e8ea",
+              "secondary-fixed": "#d8e3fb",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              gutter: "1.5rem",
+              "card-padding": "1.5rem",
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "navbar-height": "64px",
+              "auth-width": "420px",
+              "input-gap": "1rem",
+            },
+            fontFamily: {
+              "body-md": ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "label-md": ["Inter"],
+              display: ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        display: inline-block;
+        line-height: 1;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+      }
+      body {
+        -webkit-tap-highlight-color: transparent;
+        font-family: "Hanken Grotesk", sans-serif;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-background text-on-background min-h-screen pb-20">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 w-full z-50 h-[64px] bg-navbar-teal flex items-center justify-between px-4 w-full transition-colors duration-200"
+    >
+      <div class="flex items-center gap-4">
+        <button class="p-2 hover:bg-primary-container/20 rounded-full transition-colors duration-200">
+          <span class="material-symbols-outlined text-on-primary">menu</span>
+        </button>
+        <h1 class="font-headline-md text-headline-md font-bold text-on-primary">Staff Directory</h1>
+      </div>
+      <button class="p-2 hover:bg-primary-container/20 rounded-full transition-colors duration-200">
+        <span class="material-symbols-outlined text-on-primary">search</span>
+      </button>
+    </header>
+    <main class="pt-[80px] px-4 space-y-6">
+      <!-- Action Area -->
+      <div class="flex flex-col gap-4">
+        <button
+          class="w-full bg-primary-container text-on-primary font-button-text text-button-text py-4 rounded-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"
+        >
+          <span class="material-symbols-outlined">add</span>
+          ADD NEW MANAGER
+        </button>
+      </div>
+      <!-- Metrics Grid -->
+      <section class="grid grid-cols-2 gap-3">
+        <!-- Total Admin -->
+        <div
+          class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-border-subtle flex flex-col justify-between h-28"
+        >
+          <div class="flex justify-between items-start">
+            <span class="font-label-md text-label-md text-text-muted uppercase tracking-wider">Total Admin</span>
+            <div class="w-8 h-8 rounded-full border border-primary-container/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary-container text-[18px]">admin_panel_settings</span>
+            </div>
+          </div>
+          <span class="font-headline-md text-headline-md text-primary-container">24</span>
+        </div>
+        <!-- System Staff -->
+        <div
+          class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-border-subtle flex flex-col justify-between h-28"
+        >
+          <div class="flex justify-between items-start">
+            <span class="font-label-md text-label-md text-text-muted uppercase tracking-wider">System Staff</span>
+            <div class="w-8 h-8 rounded-full border border-primary-container/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary-container text-[18px]">group</span>
+            </div>
+          </div>
+          <span class="font-headline-md text-headline-md text-primary-container">12</span>
+        </div>
+        <!-- Active Now -->
+        <div
+          class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-border-subtle flex flex-col justify-between h-28"
+        >
+          <div class="flex justify-between items-start">
+            <span class="font-label-md text-label-md text-text-muted uppercase tracking-wider">Active Now</span>
+            <div class="w-8 h-8 rounded-full border border-primary-container/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary-container text-[18px]">bolt</span>
+            </div>
+          </div>
+          <span class="font-headline-md text-headline-md text-primary-container">8</span>
+        </div>
+        <!-- Permissions Alert -->
+        <div
+          class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-border-subtle flex flex-col justify-between h-28"
+        >
+          <div class="flex justify-between items-start">
+            <span class="font-label-md text-label-md text-text-muted uppercase tracking-wider">Alerts</span>
+            <div class="w-8 h-8 rounded-full border border-error/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-error text-[18px]">warning</span>
+            </div>
+          </div>
+          <span class="font-headline-md text-headline-md text-error">0</span>
+        </div>
+      </section>
+      <!-- Search & Filter Tab Area (Visual separation) -->
+      <div class="flex items-center justify-between border-b border-border-subtle pb-2">
+        <h2 class="font-title-lg text-title-lg text-primary">Managers List</h2>
+        <button class="text-primary-container font-label-md text-label-md flex items-center gap-1">
+          <span class="material-symbols-outlined text-[18px]">filter_list</span>
+          Filters
+        </button>
+      </div>
+      <!-- Manager Cards List -->
+      <section class="space-y-4 pb-12">
+        <!-- Manager Card 1 -->
+        <div class="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-border-subtle relative">
+          <button class="absolute top-4 right-4 text-outline hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <div class="flex items-start gap-4">
+            <div class="relative">
+              <img
+                alt="Ahmad Ali"
+                class="w-16 h-16 rounded-full object-cover border-2 border-surface-container"
+                data-alt="A portrait of a professional middle-aged man with a confident smile, wearing a sharp charcoal business suit and a clean white shirt. The background is a blurred high-end office environment with soft teal and white lighting, creating a corporate yet approachable aesthetic. The image is bright, high-definition, and follows a clean minimalist professional style."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLvd3D4ZlS-INOLS0D3Wgj7uHYleDoRef7JpHYk6ypfDd5WtURV5zYRplC659toJCJtnv-97HjsEi_QJ3zGg3HdjH17v-aMeorbehtbJYg-GqauzpvKYjfoAmLVYM5eO6Zo_zwIwtCM_mNWkAn4lx64eofEQVPqyBDvpraGAT3Y2DThXvpvWBJKm3Lt-QpybodcAtbB58iPAcx_tUqx9ODZYFuVbBfOHJEVm1oyXJHaJDMXcNa0WXqr_aEvW"
+              />
+              <div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-title-lg text-title-lg text-on-surface leading-tight">Ahmad Ali</h3>
+              <div class="flex gap-2 mt-1">
+                <span
+                  class="bg-primary-container/10 text-primary-container text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter"
+                  >Admin</span
+                >
+                <span
+                  class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter"
+                  >Active</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 grid gap-3">
+            <div class="flex items-center gap-3 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px] text-primary-container">mail</span>
+              <span class="font-body-md text-body-md">a.ali@siraj-edu.com</span>
+            </div>
+            <div class="flex items-center gap-3 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px] text-primary-container">chat_bubble</span>
+              <span class="font-body-md text-body-md">ahmad.edu_hq</span>
+            </div>
+            <div class="flex items-center gap-3 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px] text-primary-container">call</span>
+              <span class="font-body-md text-body-md">+971 50 123 4567</span>
+            </div>
+          </div>
+        </div>
+        <!-- Manager Card 2 -->
+        <div class="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-border-subtle relative">
+          <button class="absolute top-4 right-4 text-outline hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <div class="flex items-start gap-4">
+            <div class="relative">
+              <img
+                alt="Fatima Al-Sayed"
+                class="w-16 h-16 rounded-full object-cover border-2 border-surface-container"
+                data-alt="A portrait of a professional woman wearing a modest and elegant corporate attire with a dark teal hijab. She is looking directly at the camera with a calm and intellectual expression. The lighting is soft and natural, coming from a large window in a modern minimalist school administration office. The color palette is composed of soft whites, slate grays, and professional teal accents."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLtDcL_DHVJRRMIAshbAUZCU2oTriacrNr_xmpLdKqBNQp0ySdKD98AN1dnBoDyXQGuVzGi7ZgaModE9QReLQ7DYWzcjQoaAi9SCkCDS0dn_CxPuSkFee_hVLdr1YrYBcysHGEuTq_23XGZ9jOG6cKsKSOM4422z-xdEySzxT_qMcilzFHiK9-qslmi96-mS9nkeaSBzs1iVzfl8StY9v9UCYCIRsCg7wHWHnULjTi_zxmlibwIABObotxoE"
+              />
+              <div class="absolute bottom-0 right-0 w-4 h-4 bg-slate-300 border-2 border-white rounded-full"></div>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-title-lg text-title-lg text-on-surface leading-tight">Fatima Al-Sayed</h3>
+              <div class="flex gap-2 mt-1">
+                <span
+                  class="bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter"
+                  >Staff</span
+                >
+                <span
+                  class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter"
+                  >Offline</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 grid gap-3">
+            <div class="flex items-center gap-3 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px] text-primary-container">mail</span>
+              <span class="font-body-md text-body-md">f.alsayed@siraj-edu.com</span>
+            </div>
+            <div class="flex items-center gap-3 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px] text-primary-container">chat_bubble</span>
+              <span class="font-body-md text-body-md">fatima.ops</span>
+            </div>
+            <div class="flex items-center gap-3 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px] text-primary-container">call</span>
+              <span class="font-body-md text-body-md">+971 50 987 6543</span>
+            </div>
+          </div>
+        </div>
+        <!-- Manager Card 3 -->
+        <div
+          class="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-border-subtle relative opacity-90"
+        >
+          <button class="absolute top-4 right-4 text-outline hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <div class="flex items-start gap-4">
+            <div class="relative">
+              <img
+                alt="Zaid Ibrahim"
+                class="w-16 h-16 rounded-full object-cover border-2 border-surface-container"
+                data-alt="A portrait of a young professional man with a neat beard, wearing a white thobe and looking focused. He is in a brightly lit, contemporary educational environment with glass walls and minimalist furniture. The lighting is crisp and even, highlighting a clean, professional appearance. The overall mood is organized and efficient, reflecting a high-standard academic management setting."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLtSgkq5h3i-hsfOW5ijuezUYgCLGB2_ha4gqPwTxKkbsy8eQGAfKr-7cwDGJyfVwZatxrqtnivFra5wdFTcoahImU-z_hwBzOvV_ajwVqcukijuXc20DFjc_LpA0UNEJjbBX8jryjj2xx8pCN8rniurq-g-iVPhL47ZAbeA5gZuhu_DTm3iZz2DHa58b-L9Fl9fgYoWD0ecLUZzlteWrm1K6LOh4qVoUDVLdxtCG8ACBAK0CfbbpOmp9SIQ"
+              />
+              <div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-title-lg text-title-lg text-on-surface leading-tight">Zaid Ibrahim</h3>
+              <div class="flex gap-2 mt-1">
+                <span
+                  class="bg-primary-container/10 text-primary-container text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter"
+                  >Admin</span
+                >
+                <span
+                  class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter"
+                  >Active</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 grid gap-3">
+            <div class="flex items-center gap-3 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px] text-primary-container">mail</span>
+              <span class="font-body-md text-body-md">z.ibrahim@siraj-edu.com</span>
+            </div>
+            <div class="flex items-center gap-3 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px] text-primary-container">chat_bubble</span>
+              <span class="font-body-md text-body-md">zaid.it_support</span>
+            </div>
+            <div class="flex items-center gap-3 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px] text-primary-container">call</span>
+              <span class="font-body-md text-body-md">+971 52 555 0199</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- FAB for quick action (Optional but UX friendly) -->
+    <button
+      class="fixed bottom-20 right-6 w-14 h-14 bg-primary-container text-on-primary rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform z-40"
+    >
+      <span class="material-symbols-outlined text-[30px]">person_add</span>
+    </button>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 w-full z-50 bg-surface-container-lowest flex justify-around items-center h-16 w-full px-2 pb-safe border-t border-border-subtle shadow-[0_-2px_10px_rgba(0,0,0,0.05)]"
+    >
+      <!-- Dashboard -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 transition-transform duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="font-label-md text-label-md">Dashboard</span>
+      </a>
+      <!-- Parents -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 transition-transform duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined">family_restroom</span>
+        <span class="font-label-md text-label-md">Parents</span>
+      </a>
+      <!-- Students -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 transition-transform duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined">school</span>
+        <span class="font-label-md text-label-md">Students</span>
+      </a>
+      <!-- Finance -->
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant scale-95 transition-transform duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined">payments</span>
+        <span class="font-label-md text-label-md">Finance</span>
+      </a>
+    </nav>
+    <script>
+      // Simple Micro-interactions for Manager Cards
+      document.querySelectorAll("section > div").forEach(card => {
+        card.addEventListener("touchstart", () => {
+          card.classList.add("bg-surface-container-low");
+        });
+        card.addEventListener("touchend", () => {
+          setTimeout(() => {
+            card.classList.remove("bg-surface-container-low");
+          }, 150);
+        });
+      });
+    </script>
+  </body>
+</html>

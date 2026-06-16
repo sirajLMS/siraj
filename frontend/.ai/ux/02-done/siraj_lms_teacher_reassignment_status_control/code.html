@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Teacher Reassignment &amp; Status Control</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800;900&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-fixed-variant": "#3c475a",
+              error: "#ba1a1a",
+              "primary-fixed-dim": "#98d1d0",
+              "primary-fixed": "#b4edec",
+              "secondary-container": "#d5e0f8",
+              "on-tertiary-fixed": "#00201c",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed": "#002020",
+              "surface-container-high": "#e6e8ea",
+              "tertiary-container": "#004e46",
+              "on-background": "#191c1e",
+              "surface-variant": "#e0e3e5",
+              tertiary: "#00352f",
+              "surface-container-highest": "#e0e3e5",
+              "on-secondary-container": "#586377",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-container-low": "#f2f4f6",
+              "tertiary-fixed": "#71f8e4",
+              "secondary-fixed": "#d8e3fb",
+              outline: "#707978",
+              "border-subtle": "#E2E8F0",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed-dim": "#bcc7de",
+              "primary-container": "#0d4d4d",
+              "surface-container": "#eceef0",
+              "on-primary-container": "#85bdbc",
+              "on-primary": "#ffffff",
+              "inverse-on-surface": "#eff1f3",
+              "surface-bright": "#f7f9fb",
+              "surface-dim": "#d8dadc",
+              "surface-tint": "#2e6767",
+              "on-secondary-fixed": "#111c2d",
+              "inverse-primary": "#98d1d0",
+              "on-secondary": "#ffffff",
+              "tertiary-fixed-dim": "#4fdbc8",
+              background: "#f7f9fb",
+              "error-container": "#ffdad6",
+              "outline-variant": "#bfc8c8",
+              primary: "#003535",
+              "on-surface": "#191c1e",
+              "navbar-teal": "#135E5E",
+              "on-tertiary-container": "#33c7b4",
+              "inverse-surface": "#2d3133",
+              "sidebar-bg": "#0F3D3D",
+              "on-surface-variant": "#404848",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-error": "#ffffff",
+              secondary: "#545f73",
+              "on-error-container": "#93000a",
+              "text-muted": "#64748B",
+              surface: "#f7f9fb",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "page-margin": "2rem",
+              "sidebar-width": "260px",
+              "input-gap": "1rem",
+              "navbar-height": "64px",
+              "card-padding": "1.5rem",
+              gutter: "1.5rem",
+              "auth-width": "420px",
+            },
+            fontFamily: {
+              "body-lg": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              display: ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "body-md": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .sidebar-transition {
+        transition: all 0.3s ease;
+      }
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px);
+      }
+    </style>
+  </head>
+  <body class="bg-background font-body-md text-on-surface antialiased overflow-x-hidden">
+    <!-- Sidebar Navigation -->
+    <aside class="fixed h-full w-[260px] left-0 top-0 bg-sidebar-bg shadow-xl flex flex-col z-50">
+      <div class="p-6">
+        <h1 class="font-headline-md text-headline-md text-on-primary uppercase tracking-wider">Siraj LMS</h1>
+        <p class="text-on-primary/70 font-medium text-xs">Admin Portal</p>
+      </div>
+      <nav class="flex-1 mt-4">
+        <a
+          class="flex items-center px-6 py-4 text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors cursor-pointer group"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-4" data-icon="home">home</span>
+          <span class="font-body-md text-body-md">Home</span>
+        </a>
+        <a
+          class="flex items-center px-6 py-4 text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors cursor-pointer group"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-4" data-icon="calendar_month">calendar_month</span>
+          <span class="font-body-md text-body-md">Schedule Search</span>
+        </a>
+        <a
+          class="flex items-center px-6 py-4 text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors cursor-pointer group"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-4" data-icon="school">school</span>
+          <span class="font-body-md text-body-md">Teachers</span>
+        </a>
+        <a
+          class="flex items-center px-6 py-4 bg-navbar-teal text-white font-bold transition-colors cursor-pointer group"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-4" data-icon="family_restroom">family_restroom</span>
+          <span class="font-body-md text-body-md">Parents</span>
+        </a>
+        <a
+          class="flex items-center px-6 py-4 text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors cursor-pointer group"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-4" data-icon="group">group</span>
+          <span class="font-body-md text-body-md">Students</span>
+        </a>
+        <a
+          class="flex items-center px-6 py-4 text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors cursor-pointer group"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-4" data-icon="admin_panel_settings">admin_panel_settings</span>
+          <span class="font-body-md text-body-md">Managers</span>
+        </a>
+      </nav>
+      <div class="p-6 space-y-2 border-t border-white/10">
+        <a
+          class="flex items-center px-2 py-2 text-on-primary/70 font-medium hover:text-white transition-colors"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-4" data-icon="settings">settings</span>
+          <span class="font-body-md text-body-md">Settings</span>
+        </a>
+        <a
+          class="flex items-center px-2 py-2 text-on-primary/70 font-medium hover:text-white transition-colors"
+          href="#"
+        >
+          <span class="material-symbols-outlined mr-4" data-icon="logout">logout</span>
+          <span class="font-body-md text-body-md">Logout</span>
+        </a>
+      </div>
+    </aside>
+    <!-- Top Navigation Bar -->
+    <header
+      class="fixed top-0 right-0 w-[calc(100%-260px)] h-[64px] bg-navbar-teal flex justify-between items-center px-8 z-40"
+    >
+      <div class="flex items-center flex-1 max-w-lg">
+        <div class="relative w-full">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/70"
+            data-icon="search"
+            >search</span
+          >
+          <input
+            class="w-full bg-white/10 border-none rounded-lg py-2 pl-10 pr-4 text-white placeholder:text-white/60 focus:ring-2 focus:ring-white/20"
+            placeholder="Search resources..."
+            type="text"
+          />
+        </div>
+      </div>
+      <div class="flex items-center space-x-6">
+        <button class="text-white hover:opacity-80 transition-opacity relative">
+          <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+          <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+        </button>
+        <div class="flex items-center space-x-3 cursor-pointer group">
+          <img
+            alt="Administrator Profile"
+            class="w-8 h-8 rounded-full border border-white/20"
+            data-alt="A professional headshot of a middle-aged male administrator with a clean-cut appearance, wearing a crisp navy blazer. The lighting is bright and corporate, reflecting a modern workspace. The background is a soft-focus office interior with minimalist decor, aligned with the Siraj LMS professional and academic brand identity."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLtyvzZv0ehsiLekvWXYFslc3cylTGBjimR_lwdo_R7YMeCS5_cAkg3QZ3UUiM-mQO1Es6tpFPZ7vy2-gVkMe-1fPXmwoxDYbX6RczfHirgIHfZvH3XERqEH-LFIYrPKQ14EVSVl0LNefIcA0eerGhfY9mEfSRnNptOXgAelBCs3KGYEOzqPGnzpasUFW4Dx8s5hRSFkKgHNgqPAEoZgIe0pOpkCv40O5oaVqxVINf0qJIsXYqmbqBRV1Hoo"
+          />
+          <span class="font-title-lg text-title-lg text-white">Admin</span>
+          <span class="material-symbols-outlined text-white" data-icon="expand_more">expand_more</span>
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="ml-[260px] pt-[64px] min-h-screen p-page-margin">
+      <div class="max-w-6xl mx-auto">
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center space-x-2 mb-8 text-on-surface-variant font-body-md">
+          <a class="hover:text-primary transition-colors" href="#">Dashboard</a>
+          <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+          <a class="hover:text-primary transition-colors" href="#">Parent Management</a>
+          <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+          <span class="font-bold text-primary">Teacher Reassignment</span>
+        </nav>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+          <!-- Left Column: Student Context -->
+          <div class="lg:col-span-4 space-y-gutter">
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm p-6 border border-border-subtle">
+              <div class="flex flex-col items-center text-center">
+                <img
+                  alt="Student Portrait"
+                  class="w-24 h-24 rounded-full mb-4 border-2 border-primary-fixed"
+                  data-alt="A high-quality studio portrait of a young student, approximately 10 years old, smiling warmly. The lighting is soft and natural, emphasizing a friendly and approachable educational atmosphere. The background is a neutral, clean white, fitting perfectly with the minimalist Siraj LMS dashboard aesthetic."
+                  src="https://lh3.googleusercontent.com/aida/AP1WRLt18n2APqJIusIk8xWtydsR0aD2Y4PtQmEzD4BZljtz-0YaNoTfeXjUirQSBk99IMBf3qZnXenUYJ-d4uPq7g7ii9_u_LdmrGkINEAe7J3X6CeisktNOU5xRvntsRjnjAIiH80M0KoEP4_k8QbEeurgQxY9V-GuxF_ctucNo0boLDCd88msWD1VP6qjU4FPhVk-G__h4_lq-3s-Fy2qukReJtfB-DWWnnqSErUzIJzaShz8RulrTIwgFjc"
+                />
+                <h2 class="font-headline-md text-headline-md text-primary">Zaid Al-Mansour</h2>
+                <p class="text-on-surface-variant mb-6">Student ID: #SIR-4492</p>
+                <div class="w-full grid grid-cols-2 gap-4 text-left">
+                  <div class="p-3 bg-surface-container-low rounded-lg">
+                    <p class="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant">Grade</p>
+                    <p class="font-bold">Year 5</p>
+                  </div>
+                  <div class="p-3 bg-surface-container-low rounded-lg">
+                    <p class="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant">Enrollment</p>
+                    <p class="font-bold">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-primary rounded-xl p-6 text-white overflow-hidden relative">
+              <div class="relative z-10">
+                <p class="font-bold mb-2">Current Teacher</p>
+                <h3 class="text-xl font-bold mb-4">Unset</h3>
+                <p class="text-sm opacity-80">
+                  Reassigning a teacher will trigger an automated notification to the parents via email and SMS.
+                </p>
+              </div>
+              <span
+                class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl opacity-10"
+                data-icon="assignment_ind"
+                >assignment_ind</span
+              >
+            </div>
+          </div>
+          <!-- Right Column: Reassignment Form -->
+          <div class="lg:col-span-8">
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-border-subtle">
+              <!-- Red Warning Banner -->
+              <div class="bg-error-container text-on-error-container p-4 flex items-center space-x-3">
+                <span class="material-symbols-outlined" data-icon="warning">warning</span>
+                <p class="font-body-md font-bold text-error">
+                  Note: Don't forget to add a schedule to the student if teacher was unset.
+                </p>
+              </div>
+              <div class="p-8">
+                <header class="mb-8">
+                  <h2 class="font-headline-md text-headline-md text-primary">Management Controls</h2>
+                  <p class="text-on-surface-variant">
+                    Update the primary instructor and administrative status for the selected student.
+                  </p>
+                </header>
+                <form class="space-y-8">
+                  <!-- Teacher Selection -->
+                  <div class="space-y-3">
+                    <label class="block font-bold text-primary uppercase text-[12px] tracking-widest"
+                      >Assign New Teacher</label
+                    >
+                    <div class="relative group">
+                      <select
+                        class="w-full bg-white border border-border-subtle rounded-xl py-4 pl-4 pr-10 appearance-none focus:ring-2 focus:ring-navbar-teal focus:border-navbar-teal transition-all cursor-pointer"
+                      >
+                        <option disabled="" selected="" value="">Select an instructor from the directory...</option>
+                        <option value="1">Dr. Sarah Jenkins - Mathematics</option>
+                        <option value="2">Prof. Ahmed Ahmed - Arabic Literature</option>
+                        <option value="3">Mrs. Elena Rodriguez - Sciences</option>
+                        <option value="4">Mr. Julian Thorne - History</option>
+                      </select>
+                      <span
+                        class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary pointer-events-none group-focus:rotate-180 transition-transform"
+                        data-icon="expand_more"
+                        >expand_more</span
+                      >
+                    </div>
+                    <p class="text-xs text-on-surface-variant italic px-2">
+                      Only teachers with availability in the student's time zone are listed above.
+                    </p>
+                  </div>
+                  <!-- Status Selection -->
+                  <div class="space-y-3">
+                    <label class="block font-bold text-primary uppercase text-[12px] tracking-widest"
+                      >Student Status Update</label
+                    >
+                    <div class="relative group">
+                      <select
+                        class="w-full bg-white border border-border-subtle rounded-xl py-4 pl-4 pr-10 appearance-none focus:ring-2 focus:ring-navbar-teal focus:border-navbar-teal transition-all cursor-pointer"
+                      >
+                        <option value="regular">Regular</option>
+                        <option value="leave">On Leave</option>
+                        <option value="suspended">Suspended</option>
+                      </select>
+                      <span
+                        class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary pointer-events-none group-focus:rotate-180 transition-transform"
+                        data-icon="unfold_more"
+                        >unfold_more</span
+                      >
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                      <span
+                        class="px-3 py-1 bg-surface-container-low text-[10px] font-bold text-primary rounded-full uppercase"
+                        >Current: Regular</span
+                      >
+                    </div>
+                  </div>
+                  <!-- Action Buttons -->
+                  <div
+                    class="pt-6 border-t border-border-subtle flex flex-col md:flex-row gap-4 items-center justify-between"
+                  >
+                    <div class="flex items-center text-on-surface-variant text-sm">
+                      <span class="material-symbols-outlined mr-2 text-primary" data-icon="info">info</span>
+                      <span>Changes take effect immediately.</span>
+                    </div>
+                    <div class="flex space-x-4 w-full md:w-auto">
+                      <button
+                        class="flex-1 md:flex-none px-8 py-4 text-on-surface-variant font-bold uppercase tracking-widest text-[12px] border border-border-subtle rounded-lg hover:bg-surface-container-low transition-colors"
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        class="flex-1 md:flex-none px-12 py-4 bg-navbar-teal text-white font-bold uppercase tracking-widest text-[12px] rounded-lg shadow-lg shadow-navbar-teal/20 hover:bg-primary transition-all active:scale-[0.98]"
+                        type="submit"
+                      >
+                        SUBMIT
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <!-- Bento Information Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+              <div
+                class="bg-white p-6 rounded-xl border border-border-subtle hover:shadow-md transition-shadow cursor-pointer flex items-center space-x-4"
+              >
+                <div class="w-12 h-12 rounded-full border-2 border-navbar-teal flex items-center justify-center">
+                  <span class="material-symbols-outlined text-navbar-teal" data-icon="history">history</span>
+                </div>
+                <div>
+                  <h4 class="font-bold">Change History</h4>
+                  <p class="text-xs text-on-surface-variant">Last updated by Admin on Oct 24</p>
+                </div>
+              </div>
+              <div
+                class="bg-white p-6 rounded-xl border border-border-subtle hover:shadow-md transition-shadow cursor-pointer flex items-center space-x-4"
+              >
+                <div class="w-12 h-12 rounded-full border-2 border-navbar-teal flex items-center justify-center">
+                  <span class="material-symbols-outlined text-navbar-teal" data-icon="mail">mail</span>
+                </div>
+                <div>
+                  <h4 class="font-bold">Parent Contact</h4>
+                  <p class="text-xs text-on-surface-variant">2 pending notifications in queue</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      // Subtle interaction for select elements
+      document.querySelectorAll("select").forEach(select => {
+        select.addEventListener("change", function () {
+          const parent = this.closest(".relative");
+          const icon = parent.querySelector(".material-symbols-outlined");
+          icon.style.color = "#135E5E";
+
+          // Pulsing effect on change
+          this.classList.add("ring-2", "ring-navbar-teal/20");
+          setTimeout(() => {
+            this.classList.remove("ring-2", "ring-navbar-teal/20");
+          }, 400);
+        });
+      });
+
+      // Submit interaction
+      const form = document.querySelector("form");
+      form.addEventListener("submit", e => {
+        e.preventDefault();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerText;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="sync">sync</span>';
+
+        setTimeout(() => {
+          submitBtn.innerHTML =
+            '<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span> SAVED';
+          submitBtn.classList.replace("bg-navbar-teal", "bg-green-600");
+
+          setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
+            submitBtn.classList.replace("bg-green-600", "bg-navbar-teal");
+          }, 2000);
+        }, 1200);
+      });
+    </script>
+  </body>
+</html>

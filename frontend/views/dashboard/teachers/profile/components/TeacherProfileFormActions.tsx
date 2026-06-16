@@ -1,0 +1,94 @@
+import { SaveOutlined } from "@mui/icons-material";
+import { Box, Button, Typography } from "@mui/material";
+import { useTranslations } from "next-intl";
+
+import { PrimaryPageAction } from "@/frontend/components/ui/ActionButtons";
+
+interface TeacherProfileFormActionsProps {
+  readonly isSaving: boolean;
+  readonly isMobile: boolean;
+  readonly lastModified: string;
+}
+
+export function TeacherProfileFormActions({
+  isSaving,
+  isMobile,
+  lastModified,
+}: Readonly<TeacherProfileFormActionsProps>) {
+  const t = useTranslations("dashboard.teacherProfile");
+
+  return (
+    <Box
+      sx={theme => ({
+        pt: 4,
+        borderTop: `1px solid ${theme.palette.outlineVariant}`,
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 3,
+      })}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          width: { xs: "100%", md: "auto" },
+        }}
+      >
+        <PrimaryPageAction
+          type="submit"
+          disabled={isSaving}
+          startIcon={<SaveOutlined />}
+          fullWidth={isMobile}
+          sx={theme => ({
+            bgcolor: theme.palette.success.main,
+            color: theme.palette.onSuccess,
+            boxShadow: theme.palette.shadow.button,
+            "&:hover": {
+              bgcolor: theme.palette.success.dark,
+              boxShadow: theme.palette.shadow.buttonHover,
+            },
+            px: 4,
+            py: 1.5,
+          })}
+        >
+          {t("actions.saveProfile")}
+        </PrimaryPageAction>
+        <Button
+          variant="outlined"
+          fullWidth={isMobile}
+          sx={theme => ({
+            borderRadius: theme.layout.radius.button,
+            px: 4,
+            py: 1.5,
+            color: theme.palette.onSurface,
+            borderColor: theme.palette.outline,
+            "&:hover": {
+              borderColor: theme.palette.outlineVariant,
+              bgcolor: theme.palette.surfaceVariant,
+            },
+          })}
+        >
+          {t("actions.discardChanges")}
+        </Button>
+      </Box>
+
+      <Box sx={{ textAlign: { xs: "center", md: "right" } }}>
+        <Typography
+          variant="labelUppercase"
+          sx={theme => ({
+            color: theme.palette.onSurfaceVariant,
+            display: "block",
+            mb: 0.5,
+          })}
+        >
+          Last modified
+        </Typography>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
+          {lastModified}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}

@@ -1,0 +1,542 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Parent Onboarding | Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#e0e3e5",
+              "primary-container": "#0d4d4d",
+              "on-primary-container": "#85bdbc",
+              "on-error-container": "#93000a",
+              "on-background": "#191c1e",
+              "surface-container-lowest": "#ffffff",
+              "surface-bright": "#f7f9fb",
+              "tertiary-fixed": "#71f8e4",
+              "error-container": "#ffdad6",
+              "primary-fixed-dim": "#98d1d0",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-secondary-fixed-variant": "#3c475a",
+              surface: "#f7f9fb",
+              outline: "#707978",
+              "inverse-on-surface": "#eff1f3",
+              "on-tertiary-fixed": "#00201c",
+              "text-muted": "#64748B",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#33c7b4",
+              "surface-container-high": "#e6e8ea",
+              "surface-dim": "#d8dadc",
+              "navbar-teal": "#135E5E",
+              "surface-container-highest": "#e0e3e5",
+              "surface-tint": "#2e6767",
+              "on-primary-fixed-variant": "#104f4f",
+              primary: "#003535",
+              "on-primary-fixed": "#002020",
+              "on-primary": "#ffffff",
+              secondary: "#545f73",
+              "outline-variant": "#bfc8c8",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed": "#d8e3fb",
+              "on-secondary-container": "#586377",
+              "on-secondary": "#ffffff",
+              "surface-container": "#eceef0",
+              background: "#f7f9fb",
+              "secondary-container": "#d5e0f8",
+              error: "#ba1a1a",
+              "inverse-surface": "#2d3133",
+              "on-secondary-fixed": "#111c2d",
+              "on-surface-variant": "#404848",
+              "sidebar-bg": "#0F3D3D",
+              "tertiary-fixed-dim": "#4fdbc8",
+              tertiary: "#00352f",
+              "surface-container-low": "#f2f4f6",
+              "on-surface": "#191c1e",
+              "border-subtle": "#E2E8F0",
+              "tertiary-container": "#004e46",
+              "primary-fixed": "#b4edec",
+              "inverse-primary": "#98d1d0",
+              "secondary-fixed-dim": "#bcc7de",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              gutter: "1.5rem",
+              "card-padding": "1.5rem",
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+              "auth-width": "420px",
+              "navbar-height": "64px",
+            },
+            fontFamily: {
+              "title-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "body-lg": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "headline-lg": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      body {
+        background-color: #f8fafc;
+      }
+      .form-input-focus:focus {
+        outline: none;
+        border-color: #135e5e;
+        box-shadow: 0 0 0 1px #135e5e;
+      }
+    </style>
+  </head>
+  <body class="font-body-md text-on-surface">
+    <!-- TopNavBar Shell -->
+    <header
+      class="fixed top-0 right-0 left-0 z-50 flex justify-between items-center px-gutter h-navbar-height bg-navbar-teal"
+    >
+      <div class="flex items-center gap-4">
+        <span
+          class="material-symbols-outlined text-on-primary text-headline-md"
+          style="font-variation-settings: &quot;FILL&quot; 1"
+          >school</span
+        >
+        <h1 class="font-headline-md text-headline-md font-bold text-on-primary">Siraj LMS</h1>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="hidden md:flex items-center gap-6 mr-8">
+          <a class="text-on-primary/80 hover:text-on-primary font-body-md transition-colors" href="#">Dashboard</a>
+          <a class="text-on-primary font-bold border-b-2 border-on-primary pb-1 font-body-md" href="#">Onboarding</a>
+          <a class="text-on-primary/80 hover:text-on-primary font-body-md transition-colors" href="#">Resources</a>
+        </div>
+        <div class="flex gap-4 text-on-primary">
+          <span class="material-symbols-outlined cursor-pointer hover:opacity-80">notifications</span>
+          <span class="material-symbols-outlined cursor-pointer hover:opacity-80">help</span>
+          <div class="w-8 h-8 rounded-full overflow-hidden border border-on-primary/20">
+            <img
+              alt="Administrator Profile"
+              data-alt="A professional studio headshot of a middle-aged male administrator with a warm, confident expression. He is wearing a sharp charcoal suit over a white shirt, set against a soft-focus corporate office background. The lighting is bright and even, reflecting a modern, high-contrast digital professional environment. The overall aesthetic is clean, academic, and authoritative, matching the Siraj LMS brand identity."
+              src="https://lh3.googleusercontent.com/aida/AP1WRLuMgEI39h0mVILXPByv8IrU-wvx4mTb8cf49t6QpLxfb8aENkL6IKNsu6UoGRgx1g8qduawRdYt4Qpc3NPmhozsmNej_BVQVLqCPQUFZhlIdfRh9PrQF5ypSr-XCV-6ogRwrw6lIAjmbZl1njl8AUAQAZDOre-L_Q9oyKjWjV38wUtlBD3IKeTc3dL-oEKUOr1bn259yOVVquBTz5I0JkbI9pjHKVNrTD4vKMlAFh9UeFGUTcxDfWbgvbm-"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- Sidebar Shell -->
+    <aside
+      class="fixed left-0 top-0 h-full w-sidebar-width bg-sidebar-bg flex flex-col pt-navbar-height z-40 hidden md:flex shadow-sm"
+    >
+      <div class="p-6 border-b border-on-primary/10 mb-4">
+        <h2 class="font-headline-md text-headline-md font-bold text-on-primary">Siraj Portal</h2>
+        <p class="font-label-md text-label-md text-on-primary/60">Admin Dashboard</p>
+      </div>
+      <nav class="flex-1 px-2 space-y-1">
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all rounded"
+        >
+          <span class="material-symbols-outlined">home</span>
+          <span class="font-label-md text-label-md">Home</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all rounded"
+        >
+          <span class="material-symbols-outlined">calendar_month</span>
+          <span class="font-label-md text-label-md">Schedule Search</span>
+        </div>
+        <div class="flex items-center gap-3 px-4 h-12 cursor-pointer bg-navbar-teal text-on-primary font-bold rounded">
+          <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1"
+            >family_restroom</span
+          >
+          <span class="font-label-md text-label-md">Parents</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all rounded"
+        >
+          <span class="material-symbols-outlined">school</span>
+          <span class="font-label-md text-label-md">Teachers</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all rounded"
+        >
+          <span class="material-symbols-outlined">person</span>
+          <span class="font-label-md text-label-md">Students</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 font-normal hover:bg-navbar-teal/50 hover:text-on-primary transition-all rounded"
+        >
+          <span class="material-symbols-outlined">description</span>
+          <span class="font-label-md text-label-md">Reports</span>
+        </div>
+      </nav>
+      <div class="mt-auto p-4 border-t border-on-primary/10">
+        <div
+          class="flex items-center gap-3 px-4 h-12 cursor-pointer text-on-primary/70 hover:text-on-primary transition-all"
+        >
+          <span class="material-symbols-outlined">logout</span>
+          <span class="font-label-md text-label-md">Logout</span>
+        </div>
+      </div>
+    </aside>
+    <!-- Main Content Shell -->
+    <main class="md:ml-sidebar-width pt-navbar-height min-h-screen">
+      <div class="p-page-margin max-w-5xl mx-auto">
+        <!-- Page Header -->
+        <div class="mb-8 flex items-center justify-between">
+          <div>
+            <h2 class="font-headline-lg text-headline-lg text-primary">New Parent Registration</h2>
+            <p class="text-text-muted font-body-md">
+              Complete the following fields to enroll a new parent in the Siraj LMS ecosystem.
+            </p>
+          </div>
+          <div
+            class="hidden sm:flex items-center gap-2 text-primary bg-primary-fixed px-4 py-2 rounded-lg font-label-md"
+          >
+            <span class="material-symbols-outlined">info</span>
+            Account Status: Pending Registration
+          </div>
+        </div>
+        <!-- Form Container -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <form class="flex flex-col" id="onboardingForm">
+            <!-- Section 1: Parent Information -->
+            <div class="border-b border-border-subtle">
+              <div class="bg-sidebar-bg py-3 px-8">
+                <h3 class="font-title-lg text-title-lg text-on-primary flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[20px]">person</span>
+                  Parent Information
+                </h3>
+              </div>
+              <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary"
+                    >Full Name <span class="text-error font-bold">*</span></label
+                  >
+                  <input
+                    class="border border-border-subtle rounded-lg px-4 py-2.5 font-body-md form-input-focus transition-all"
+                    placeholder="e.g. Ahmed Al-Farsi"
+                    required=""
+                    type="text"
+                  />
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary"
+                    >Email Address <span class="text-error font-bold">*</span></label
+                  >
+                  <input
+                    class="border border-border-subtle rounded-lg px-4 py-2.5 font-body-md form-input-focus transition-all"
+                    placeholder="email@example.com"
+                    required=""
+                    type="email"
+                  />
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary"
+                    >Phone Number <span class="text-error font-bold">*</span></label
+                  >
+                  <input
+                    class="border border-border-subtle rounded-lg px-4 py-2.5 font-body-md form-input-focus transition-all"
+                    placeholder="+966 50 000 0000"
+                    required=""
+                    type="tel"
+                  />
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary">Nationality</label>
+                  <input
+                    class="border border-border-subtle rounded-lg px-4 py-2.5 font-body-md form-input-focus transition-all"
+                    placeholder="Select Nationality"
+                    type="text"
+                  />
+                </div>
+                <div class="md:col-span-2 flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary"
+                    >Residential Address <span class="text-error font-bold">*</span></label
+                  >
+                  <textarea
+                    class="border border-border-subtle rounded-lg px-4 py-2.5 font-body-md form-input-focus transition-all resize-none"
+                    placeholder="Street Name, Building No., District"
+                    required=""
+                    rows="2"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+            <!-- Section 2: Social & Communication -->
+            <div class="border-b border-border-subtle">
+              <div class="bg-sidebar-bg py-3 px-8">
+                <h3 class="font-title-lg text-title-lg text-on-primary flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[20px]">share</span>
+                  Social &amp; Communication
+                </h3>
+              </div>
+              <div class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary">WhatsApp</label>
+                  <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40"
+                      >chat</span
+                    >
+                    <input
+                      class="w-full border border-border-subtle rounded-lg pl-10 pr-4 py-2.5 font-body-md form-input-focus transition-all"
+                      placeholder="WhatsApp Handle"
+                      type="text"
+                    />
+                  </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary">Facebook</label>
+                  <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40"
+                      >groups</span
+                    >
+                    <input
+                      class="w-full border border-border-subtle rounded-lg pl-10 pr-4 py-2.5 font-body-md form-input-focus transition-all"
+                      placeholder="Facebook Profile"
+                      type="text"
+                    />
+                  </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary">Twitter</label>
+                  <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40"
+                      >alternate_email</span
+                    >
+                    <input
+                      class="w-full border border-border-subtle rounded-lg pl-10 pr-4 py-2.5 font-body-md form-input-focus transition-all"
+                      placeholder="@username"
+                      type="text"
+                    />
+                  </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary">Skype</label>
+                  <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40"
+                      >video_call</span
+                    >
+                    <input
+                      class="w-full border border-border-subtle rounded-lg pl-10 pr-4 py-2.5 font-body-md form-input-focus transition-all"
+                      placeholder="live:.cid.example"
+                      type="text"
+                    />
+                  </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary">Zoom ID</label>
+                  <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/40"
+                      >meeting_room</span
+                    >
+                    <input
+                      class="w-full border border-border-subtle rounded-lg pl-10 pr-4 py-2.5 font-body-md form-input-focus transition-all"
+                      placeholder="Meeting ID"
+                      type="text"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Section 3: Fees & Contract Details -->
+            <div>
+              <div class="bg-sidebar-bg py-3 px-8">
+                <h3 class="font-title-lg text-title-lg text-on-primary flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[20px]">payments</span>
+                  Fees &amp; Contract Details
+                </h3>
+              </div>
+              <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary"
+                    >Invoice Type <span class="text-error font-bold">*</span></label
+                  >
+                  <select
+                    class="border border-border-subtle rounded-lg px-4 py-2.5 font-body-md form-input-focus transition-all appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em]"
+                    required=""
+                    style="
+                      background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%2364748B%22%3E%3Cpath d=%22M7 10l5 5 5-5H7z%22/%3E%3C/svg%3E&quot;);
+                    "
+                  >
+                    <option value="">Select Invoice Type</option>
+                    <option selected="" value="per_class">Per Classes</option>
+                    <option value="monthly">Monthly Subscription</option>
+                    <option value="semester">Per Semester</option>
+                  </select>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary"
+                    >Fee Amount <span class="text-error font-bold">*</span></label
+                  >
+                  <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-primary/60 font-bold">$</span>
+                    <input
+                      class="w-full border border-border-subtle rounded-lg pl-8 pr-4 py-2.5 font-body-md form-input-focus transition-all"
+                      placeholder="0.00"
+                      required=""
+                      type="number"
+                    />
+                  </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary"
+                    >Payment Method <span class="text-error font-bold">*</span></label
+                  >
+                  <select
+                    class="border border-border-subtle rounded-lg px-4 py-2.5 font-body-md form-input-focus transition-all appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em]"
+                    required=""
+                    style="
+                      background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%2364748B%22%3E%3Cpath d=%22M7 10l5 5 5-5H7z%22/%3E%3C/svg%3E&quot;);
+                    "
+                  >
+                    <option value="">Select Method</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="credit_card">Credit / Debit Card</option>
+                    <option value="cash">Cash Payment</option>
+                    <option value="paypal">PayPal</option>
+                  </select>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="font-label-md text-label-md text-secondary"
+                    >Currency <span class="text-error font-bold">*</span></label
+                  >
+                  <select
+                    class="border border-border-subtle rounded-lg px-4 py-2.5 font-body-md form-input-focus transition-all appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em]"
+                    required=""
+                    style="
+                      background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%2364748B%22%3E%3Cpath d=%22M7 10l5 5 5-5H7z%22/%3E%3C/svg%3E&quot;);
+                    "
+                  >
+                    <option selected="" value="USD">USD - US Dollar</option>
+                    <option value="SAR">SAR - Saudi Riyal</option>
+                    <option value="AED">AED - UAE Dirham</option>
+                    <option value="EUR">EUR - Euro</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <!-- Footer / Submit Area -->
+            <div class="px-8 py-6 bg-surface-container-low flex items-center justify-between">
+              <button
+                class="bg-navbar-teal text-on-primary font-button-text text-button-text px-10 py-4 uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-md"
+                type="submit"
+              >
+                SIGNUP
+              </button>
+              <div class="text-text-muted text-label-md italic">
+                All information is handled securely according to our Privacy Policy.
+              </div>
+            </div>
+          </form>
+        </div>
+        <!-- Dashboard Stats Preview (Bento Grid) -->
+        <div class="mt-12">
+          <h3 class="font-headline-md text-headline-md text-primary mb-6">Parent Network Overview</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div
+              class="md:col-span-2 bg-white p-card-padding rounded-xl shadow-sm border-l-4 border-navbar-teal flex justify-between items-center group cursor-pointer hover:shadow-md transition-shadow"
+            >
+              <div>
+                <p class="text-text-muted font-label-md uppercase tracking-wider">Total Enrolled Parents</p>
+                <h4 class="text-display font-display text-primary mt-1">1,284</h4>
+                <p class="text-navbar-teal font-label-md flex items-center gap-1 mt-2">
+                  <span class="material-symbols-outlined text-[16px]">trending_up</span>
+                  +12% from last term
+                </p>
+              </div>
+              <div
+                class="w-16 h-16 rounded-full border-2 border-border-subtle flex items-center justify-center group-hover:border-navbar-teal transition-colors"
+              >
+                <span class="material-symbols-outlined text-navbar-teal text-[32px]">diversity_3</span>
+              </div>
+            </div>
+            <div
+              class="bg-white p-card-padding rounded-xl shadow-sm border-l-4 border-primary-container flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer"
+            >
+              <span class="material-symbols-outlined text-primary-container text-[24px] mb-4">pending_actions</span>
+              <div>
+                <p class="text-text-muted font-label-md uppercase tracking-wider">Pending Forms</p>
+                <h4 class="font-headline-lg text-headline-lg text-primary mt-1">28</h4>
+              </div>
+            </div>
+            <div
+              class="bg-white p-card-padding rounded-xl shadow-sm border-l-4 border-error flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer"
+            >
+              <span class="material-symbols-outlined text-error text-[24px] mb-4">receipt_long</span>
+              <div>
+                <p class="text-text-muted font-label-md uppercase tracking-wider">Unpaid Invoices</p>
+                <h4 class="font-headline-lg text-headline-lg text-error mt-1">15</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      // Micro-interactions for form inputs
+      document.querySelectorAll("input, select, textarea").forEach(el => {
+        el.addEventListener("focus", () => {
+          el.parentElement.querySelector("label")?.classList.add("text-navbar-teal");
+          el.parentElement.querySelector("label")?.classList.remove("text-secondary");
+        });
+        el.addEventListener("blur", () => {
+          el.parentElement.querySelector("label")?.classList.remove("text-navbar-teal");
+          el.parentElement.querySelector("label")?.classList.add("text-secondary");
+        });
+      });
+
+      // Form submission effect
+      document.getElementById("onboardingForm").addEventListener("submit", e => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        const originalText = btn.innerText;
+        btn.innerText = "PROCESSING...";
+        btn.disabled = true;
+
+        setTimeout(() => {
+          btn.innerText = "SUCCESS";
+          btn.classList.replace("bg-navbar-teal", "bg-green-600");
+          setTimeout(() => {
+            btn.innerText = originalText;
+            btn.classList.replace("bg-green-600", "bg-navbar-teal");
+            btn.disabled = false;
+            alert("Registration submitted successfully! This parent account is now pending review.");
+          }, 2000);
+        }, 1500);
+      });
+    </script>
+  </body>
+</html>

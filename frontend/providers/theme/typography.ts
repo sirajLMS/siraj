@@ -1,0 +1,123 @@
+// cspell:ignore: onepassword, Hanken, Grotesk, Segoe
+
+export const typography = {
+  fontFamily: '"Hanken Grotesk", "Inter", "Segoe UI", sans-serif',
+  display: {
+    fontFamily: '"Hanken Grotesk", sans-serif',
+    fontSize: "40px",
+    fontWeight: 700,
+    lineHeight: 1.2,
+    letterSpacing: "-0.02em",
+  },
+  headlineLg: {
+    fontFamily: '"Hanken Grotesk", sans-serif',
+    fontSize: "32px",
+    fontWeight: 600,
+    lineHeight: 1.25,
+  },
+  headlineMd: {
+    fontFamily: '"Hanken Grotesk", sans-serif',
+    fontSize: "24px",
+    fontWeight: 600,
+    lineHeight: 1.33,
+  },
+  titleLg: {
+    fontFamily: '"Hanken Grotesk", sans-serif',
+    fontSize: "20px",
+    fontWeight: 600,
+    lineHeight: 1.4,
+  },
+  bodyLg: {
+    fontFamily: '"Hanken Grotesk", sans-serif',
+    fontSize: "16px",
+    fontWeight: 400,
+    lineHeight: 1.5,
+  },
+  bodyMd: {
+    fontFamily: '"Hanken Grotesk", sans-serif',
+    fontSize: "14px",
+    fontWeight: 400,
+    lineHeight: 1.43,
+  },
+  labelMd: {
+    fontFamily: '"Inter", sans-serif',
+    fontSize: "12px",
+    fontWeight: 500,
+    lineHeight: 1.33,
+    letterSpacing: "0.05em",
+  },
+  labelSm: {
+    fontFamily: '"Inter", sans-serif',
+    fontSize: "10px",
+    fontWeight: 300,
+    lineHeight: 1.2,
+    letterSpacing: "0.1em",
+  },
+  labelUppercase: {
+    fontFamily: '"Inter", sans-serif',
+    fontSize: "11px",
+    fontWeight: 700,
+    lineHeight: 1.33,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+  },
+  buttonText: {
+    fontFamily: '"Inter", sans-serif',
+    fontSize: "14px",
+    fontWeight: 700,
+    lineHeight: 1.43,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+  },
+  // Map basic MUI elements to ensure unified rendering
+  h1: {
+    fontFamily: '"Hanken Grotesk", sans-serif',
+    fontSize: "40px",
+    fontWeight: 700,
+    lineHeight: 1.2,
+    letterSpacing: "-0.02em",
+  },
+  h2: {
+    fontFamily: '"Hanken Grotesk", sans-serif',
+    fontSize: "32px",
+    fontWeight: 600,
+    lineHeight: 1.25,
+    "@media (max-width: 768px)": {
+      fontSize: "28px",
+      lineHeight: 1.28,
+    },
+  },
+  h3: {
+    fontFamily: '"Hanken Grotesk", sans-serif',
+    fontSize: "24px",
+    fontWeight: 600,
+    lineHeight: 1.33,
+  },
+  body1: {
+    fontFamily: '"Hanken Grotesk", sans-serif',
+    fontSize: "16px",
+    fontWeight: 400,
+    lineHeight: 1.5,
+  },
+  body2: {
+    fontFamily: '"Hanken Grotesk", sans-serif',
+    fontSize: "14px",
+    fontWeight: 400,
+    lineHeight: 1.43,
+  },
+  caption: {
+    fontFamily: '"Inter", sans-serif',
+    fontSize: "12px",
+    fontWeight: 500,
+    lineHeight: 1.33,
+    letterSpacing: "0.05em",
+  },
+  button: {
+    fontFamily: '"Inter", sans-serif',
+    fontSize: "14px",
+    fontWeight: 700,
+    lineHeight: 1.43,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+  },
+};

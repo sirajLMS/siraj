@@ -1,0 +1,212 @@
+"use client";
+
+import { AddOutlined, CalendarMonthOutlined } from "@mui/icons-material";
+import { Box, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import type {
+  StudentProgressFeedItem,
+  TeacherDashboardMetrics,
+  TeacherScheduleRow,
+} from "@/frontend/stores/teacherDashboardTypes";
+import { logger } from "@/frontend/utils/logger";
+import { SessionActivateButton } from "./components/SessionActivateButton";
+import { StudentProgressFeed } from "./components/StudentProgressFeed";
+import { TeacherActiveMetricsRow } from "./components/TeacherActiveMetricsRow";
+import { TeacherActiveScheduleDataGrid } from "./components/TeacherActiveScheduleDataGrid";
+import { TeacherActiveSessionControls } from "./components/TeacherActiveSessionControls";
+import type { TeacherDashboardLabels } from "./types/teacherDashboardLabels";
+
+interface TeacherDashboardActiveViewProps {
+  readonly userName: string;
+  readonly metrics: TeacherDashboardMetrics;
+  readonly scheduleRows: readonly TeacherScheduleRow[];
+  readonly progressFeed: readonly StudentProgressFeedItem[];
+  readonly welcomeDateSummary: string;
+  readonly sessionsScheduledToday: number;
+  readonly labels: TeacherDashboardLabels;
+  readonly onActivate?: (id: string) => void;
+  readonly onNewSession: () => void;
+}
+
+function formatWelcomeSubtitle(template: string, date: string, count: number): string {
+  return template.replace("{date}", date).replace("{count}", String(count));
+}
+
+function formatActiveSessionsSummary(template: string, date: string, count: number): string {
+  return template.replace("{date}", date).replace("{count}", String(count));
+}
+
+function ActiveMobileScheduleCard({
+  row,
+  labels,
+  onActivate,
+}: {
+  readonly row: TeacherScheduleRow;
+  readonly labels: TeacherDashboardLabels;
+  readonly onActivate?: (id: string) => void;
+}) {
+  const isLive = row.isLive === true;
+
+  return (
+    <Paper
+      variant="outlined"
+      sx={theme => ({
+        p: 2.5,
+        borderColor: isLive ? theme.palette.header : theme.palette.border.light,
+        borderLeftWidth: isLive ? 4 : 1,
+        boxShadow: isLive ? theme.palette.shadow.card : undefined,
+      })}
+    >
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Box>
+          {isLive && (
+            <Typography
+              sx={{ typography: "labelUppercase", color: theme => theme.palette.error.main, fontWeight: 700 }}
+            >
+              {labels.activeControls.liveNow}
+            </Typography>
+          )}
+          <Typography sx={{ typography: "titleLg" }}>{row.courseTitle ?? row.classId}</Typography>
+          {row.locationLabel && (
+            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+              {row.locationLabel}
+            </Typography>
+          )}
+        </Box>
+        <Box sx={{ textAlign: "right" }}>
+          <Typography sx={{ typography: "bodyLg", fontWeight: 700 }}>{row.timeRange}</Typography>
+          {row.durationMinutes && (
+            <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
+              {labels.schedule.durationValue.replace("{minutes}", String(row.durationMinutes))}
+            </Typography>
+          )}
+        </Box>
+      </Box>
+
+      {isLive ? (
+        <Box sx={{ pt: 2, borderTop: theme => `1px solid ${theme.palette.border.light}` }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
+              {labels.activeControls.sessionControls}
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1.5 }}>
+              <TeacherActiveSessionControls
+                labels={labels.activeControls}
+                onStart={() => {
+                  logger.info("Teacher active mobile start", { id: row.id });
+                }}
+                onMarkAbsent={() => {
+                  logger.info("Teacher active mobile absent", { id: row.id });
+                }}
+                onRequestLeave={() => {
+                  logger.info("Teacher active mobile leave", { id: row.id });
+                }}
+              />
+            </Box>
+          </Box>
+        </Box>
+      ) : (
+        <Box sx={{ width: "100%" }}>
+          <SessionActivateButton
+            disabled={!row.activateEnabled}
+            isConnecting={row.status === "connecting"}
+            activateLabel={labels.actions.activateSession}
+            connectingLabel={labels.actions.connecting}
+            onActivate={() => onActivate?.(row.id)}
+          />
+        </Box>
+      )}
+    </Paper>
+  );
+}
+
+export function TeacherDashboardActiveView({
+  userName,
+  metrics,
+  scheduleRows,
+  progressFeed,
+  welcomeDateSummary,
+  sessionsScheduledToday,
+  labels,
+  onActivate,
+  onNewSession,
+}: Readonly<TeacherDashboardActiveViewProps>) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const welcomeSubtitle = formatWelcomeSubtitle(
+    labels.activeWelcome.subtitle,
+    welcomeDateSummary,
+    sessionsScheduledToday
+  );
+
+  if (isMobile) {
+    return (
+      <PageContainer>
+        <Box sx={{ mb: 3 }}>
+          <Typography sx={{ typography: "labelUppercase", color: theme => theme.palette.text.secondary }}>
+            {labels.activeWelcome.overviewLabel}
+          </Typography>
+          <Typography sx={{ typography: "headlineMd", color: theme.palette.primary.main, mt: 0.5 }}>
+            {labels.activeWelcome.title.replace("{name}", userName)}
+          </Typography>
+          <Box
+            sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1, color: theme => theme.palette.text.secondary }}
+          >
+            <CalendarMonthOutlined sx={{ fontSize: 18 }} />
+            <Typography sx={{ typography: "bodyMd" }}>
+              {formatActiveSessionsSummary(
+                labels.activeWelcome.mobileSummary,
+                welcomeDateSummary,
+                metrics.activeSessions ?? 0
+              )}
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box sx={{ mb: 4 }}>
+          <TeacherActiveMetricsRow metrics={metrics} labels={labels.activeMetrics} isMobile={true} />
+        </Box>
+
+        <Box sx={{ mb: 4 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+            <Typography sx={{ typography: "titleLg", color: theme.palette.primary.main }}>
+              {labels.schedule.titleToday}
+            </Typography>
+            <Typography sx={{ typography: "labelUppercase", color: theme.palette.primary.main, fontWeight: 700 }}>
+              {labels.schedule.viewAll}
+            </Typography>
+          </Box>
+          <Stack spacing={2}>
+            {scheduleRows.map(row => (
+              <ActiveMobileScheduleCard key={row.id} row={row} labels={labels} onActivate={onActivate} />
+            ))}
+          </Stack>
+        </Box>
+
+        <StudentProgressFeed items={progressFeed} title={labels.progressFeed.title} />
+      </PageContainer>
+    );
+  }
+
+  return (
+    <PageContainer>
+      <PageHeader
+        title={labels.activeWelcome.title.replace("{name}", userName)}
+        subtitle={welcomeSubtitle}
+        actions={
+          <PrimaryPageAction startIcon={<AddOutlined />} onClick={onNewSession}>
+            {labels.actions.newSession}
+          </PrimaryPageAction>
+        }
+      />
+
+      <Box sx={{ mb: 4 }}>
+        <TeacherActiveMetricsRow metrics={metrics} labels={labels.activeMetrics} isMobile={false} />
+      </Box>
+
+      <SectionPanel title={labels.schedule.titleToday}>
+        <TeacherActiveScheduleDataGrid rows={scheduleRows} labels={labels} onActivate={onActivate} />
+      </SectionPanel>
+    </PageContainer>
+  );
+}

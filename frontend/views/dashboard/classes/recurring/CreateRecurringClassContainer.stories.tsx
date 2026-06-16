@@ -1,0 +1,18 @@
+import type { Meta, StoryObj } from "@storybook/react";
+import { CreateRecurringClassContainer } from "./CreateRecurringClassContainer";
+
+const meta: Meta<typeof CreateRecurringClassContainer> = {
+  title: "Views/dashboard/classes/recurring/CreateRecurringClassContainer",
+  component: CreateRecurringClassContainer,
+  tags: ["autodocs"],
+  parameters: {
+    layout: "fullscreen",
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof CreateRecurringClassContainer>;
+
+export const Default: Story = {
+  args: {},
+};

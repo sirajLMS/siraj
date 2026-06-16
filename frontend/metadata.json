@@ -1,0 +1,6 @@
+{
+  "name": "Siraj",
+  "description": "A polished Next.js Hello World application.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,14 @@
+import { z } from "zod";
+import type { ComplaintValidationLabels } from "@/frontend/messages/types/dashboard/complaints/main";
+
+export const complaintFormSchema = (labels: ComplaintValidationLabels) =>
+  z.object({
+    studentId: z.string().min(1, labels.studentRequired),
+    contactEmail: z
+      .string()
+      .min(1, labels.emailRequired)
+      .pipe(z.email({ message: labels.emailInvalid })),
+    complaintDetails: z.string().min(10, labels.detailsRequired),
+  });
+
+export type ComplaintFormData = z.infer<ReturnType<typeof complaintFormSchema>>;

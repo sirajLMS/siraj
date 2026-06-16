@@ -1,0 +1,157 @@
+"use client";
+
+import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import type { GridColDef } from "@mui/x-data-grid";
+import { useMemo } from "react";
+import { AppDataGrid, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
+import type { ParentInvoiceRow, ParentInvoiceStatus } from "@/frontend/stores/parentBillingStore";
+
+export interface ParentInvoicesDataGridLabels {
+  readonly invoiceNumber: string;
+  readonly month: string;
+  readonly issueDate: string;
+  readonly dueDate: string;
+  readonly paidDate: string;
+  readonly fee: string;
+  readonly status: string;
+  readonly options: string;
+  readonly viewDetails: string;
+  readonly downloadPdf: string;
+  readonly payNow: string;
+  readonly noEntries: string;
+  readonly statusLabels: Record<ParentInvoiceStatus, string>;
+}
+
+interface ParentInvoicesDataGridProps {
+  readonly rows: readonly ParentInvoiceRow[];
+  readonly labels: ParentInvoicesDataGridLabels;
+  readonly canView: boolean;
+  readonly onPayNow: (id: string) => void;
+  readonly onDownloadPdf: (id: string) => void;
+}
+
+export function ParentInvoicesDataGrid({
+  rows,
+  labels,
+  canView,
+  onPayNow,
+  onDownloadPdf,
+}: Readonly<ParentInvoicesDataGridProps>) {
+  const columns = useMemo<GridColDef<ParentInvoiceRow>[]>(
+    () => [
+      {
+        field: "invoiceNumber",
+        headerName: labels.invoiceNumber,
+        flex: 1,
+        minWidth: 140,
+        renderCell: ({ row }) => (
+          <Typography variant="labelMd" sx={{ fontWeight: 700 }}>
+            {row.invoiceNumber}
+          </Typography>
+        ),
+      },
+      {
+        field: "month",
+        headerName: labels.month,
+        flex: 0.8,
+        minWidth: 110,
+        renderCell: ({ row }) => <Typography variant="bodyMd">{row.month}</Typography>,
+      },
+      {
+        field: "issueDate",
+        headerName: labels.issueDate,
+        flex: 0.9,
+        minWidth: 120,
+        renderCell: ({ row }) => <Typography variant="bodyMd">{row.issueDate}</Typography>,
+      },
+      {
+        field: "dueDate",
+        headerName: labels.dueDate,
+        flex: 0.9,
+        minWidth: 120,
+        renderCell: ({ row }) => <Typography variant="bodyMd">{row.dueDate}</Typography>,
+      },
+      {
+        field: "paidDate",
+        headerName: labels.paidDate,
+        flex: 0.9,
+        minWidth: 120,
+        renderCell: ({ row }) => <Typography variant="bodyMd">{row.paidDate}</Typography>,
+      },
+      {
+        field: "fee",
+        headerName: labels.fee,
+        flex: 0.7,
+        minWidth: 100,
+        renderCell: ({ row }) => (
+          <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
+            {row.fee}
+          </Typography>
+        ),
+      },
+      {
+        field: "status",
+        headerName: labels.status,
+        flex: 0.8,
+        minWidth: 120,
+        align: "center",
+        headerAlign: "center",
+        renderCell: ({ row }) => (
+          <StatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status]} />
+        ),
+      },
+      {
+        field: "options",
+        headerName: labels.options,
+        flex: 1,
+        minWidth: 160,
+        sortable: false,
+        align: "right",
+        headerAlign: "right",
+        renderCell: ({ row }) => {
+          if (!canView) {
+            return null;
+          }
+
+          if (row.status === "unpaid") {
+            return (
+              <PrimaryPageAction
+                size="small"
+                onClick={() => {
+                  onPayNow(row.id);
+                }}
+              >
+                {labels.payNow}
+              </PrimaryPageAction>
+            );
+          }
+
+          return (
+            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
+              <Tooltip title={labels.viewDetails}>
+                <IconButton size="small" aria-label={labels.viewDetails}>
+                  <VisibilityOutlined fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title={labels.downloadPdf}>
+                <IconButton
+                  size="small"
+                  aria-label={labels.downloadPdf}
+                  onClick={() => {
+                    onDownloadPdf(row.id);
+                  }}
+                >
+                  <DownloadOutlined fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          );
+        },
+      },
+    ],
+    [canView, labels, onDownloadPdf, onPayNow]
+  );
+
+  return <AppDataGrid rows={rows} columns={columns} getRowId={row => row.id} emptyMessage={labels.noEntries} />;
+}

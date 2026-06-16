@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Teacher Future Schedule</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      body {
+        font-family: "Hanken Grotesk", sans-serif;
+        background-color: #f7f9fb;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+      }
+    </style>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              background: "#f7f9fb",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-background": "#191c1e",
+              "inverse-on-surface": "#eff1f3",
+              "error-container": "#ffdad6",
+              "secondary-fixed-dim": "#bcc7de",
+              "on-tertiary": "#ffffff",
+              "text-muted": "#64748B",
+              "on-secondary": "#ffffff",
+              "surface-container-high": "#e6e8ea",
+              "on-primary-container": "#85bdbc",
+              "outline-variant": "#bfc8c8",
+              "surface-container": "#eceef0",
+              "surface-variant": "#e0e3e5",
+              primary: "#003535",
+              "on-surface": "#191c1e",
+              "tertiary-fixed": "#71f8e4",
+              "sidebar-bg": "#0F3D3D",
+              "surface-dim": "#d8dadc",
+              "primary-fixed-dim": "#98d1d0",
+              "surface-container-highest": "#e0e3e5",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#00201c",
+              "primary-container": "#0d4d4d",
+              error: "#ba1a1a",
+              "primary-fixed": "#b4edec",
+              outline: "#707978",
+              secondary: "#545f73",
+              "on-primary-fixed": "#002020",
+              "on-error-container": "#93000a",
+              "on-tertiary-container": "#33c7b4",
+              "inverse-primary": "#98d1d0",
+              "on-primary": "#ffffff",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-tint": "#2e6767",
+              surface: "#f7f9fb",
+              "on-surface-variant": "#404848",
+              "surface-bright": "#f7f9fb",
+              "on-secondary-fixed-variant": "#3c475a",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "surface-container-low": "#f2f4f6",
+              "tertiary-container": "#004e46",
+              "secondary-container": "#d5e0f8",
+              "border-subtle": "#E2E8F0",
+              "navbar-teal": "#135E5E",
+              "inverse-surface": "#2d3133",
+              "surface-container-lowest": "#ffffff",
+              tertiary: "#00352f",
+              "secondary-fixed": "#d8e3fb",
+              "on-secondary-fixed": "#111c2d",
+              "on-secondary-container": "#586377",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+              "sidebar-width": "260px",
+              "auth-width": "420px",
+              "navbar-height": "64px",
+              "card-padding": "1.5rem",
+              gutter: "1.5rem",
+            },
+            fontFamily: {
+              "button-text": ["Inter"],
+              "title-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "headline-lg": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background">
+    <!-- Sidebar Navigation -->
+    <aside class="fixed left-0 top-0 h-full w-[260px] bg-sidebar-bg flex flex-col z-50">
+      <div class="p-6 flex items-center gap-3">
+        <div class="w-10 h-10 rounded bg-primary-container flex items-center justify-center">
+          <span class="material-symbols-outlined text-white" style="font-variation-settings: &quot;FILL&quot; 1"
+            >school</span
+          >
+        </div>
+        <div>
+          <h1 class="font-display text-on-primary text-xl leading-none">Siraj LMS</h1>
+          <p class="font-label-md text-on-primary/60 text-xs mt-1">Teacher Portal</p>
+        </div>
+      </div>
+      <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto custom-scrollbar">
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors"
+          href="#"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="font-label-md text-label-md">Dashboard</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded bg-navbar-teal text-on-primary font-bold transition-colors"
+          href="#"
+        >
+          <span class="material-symbols-outlined">calendar_month</span>
+          <span class="font-label-md text-label-md">Schedule</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors"
+          href="#"
+        >
+          <span class="material-symbols-outlined">groups</span>
+          <span class="font-label-md text-label-md">My Students</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors"
+          href="#"
+        >
+          <span class="material-symbols-outlined">description</span>
+          <span class="font-label-md text-label-md">Resources</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors"
+          href="#"
+        >
+          <span class="material-symbols-outlined">analytics</span>
+          <span class="font-label-md text-label-md">Reports</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors"
+          href="#"
+        >
+          <span class="material-symbols-outlined">settings</span>
+          <span class="font-label-md text-label-md">Settings</span>
+        </a>
+      </nav>
+      <div class="p-4 border-t border-on-primary/10">
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors"
+          href="#"
+        >
+          <span class="material-symbols-outlined">help</span>
+          <span class="font-label-md text-label-md">Support</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-on-primary/70 font-medium hover:bg-navbar-teal/50 transition-colors"
+          href="#"
+        >
+          <span class="material-symbols-outlined">logout</span>
+          <span class="font-label-md text-label-md">Logout</span>
+        </a>
+      </div>
+    </aside>
+    <!-- Top Navbar -->
+    <header
+      class="fixed top-0 right-0 w-[calc(100%-260px)] h-[64px] bg-navbar-teal flex justify-between items-center px-8 z-40 shadow-sm"
+    >
+      <div class="flex items-center gap-6">
+        <h2 class="font-headline-md text-headline-md font-bold text-on-primary">Teacher Schedule</h2>
+        <div class="hidden md:flex gap-4">
+          <a class="font-body-lg text-body-lg text-on-primary border-b-2 border-on-primary pb-1" href="#"
+            >Weekly View</a
+          >
+          <a class="font-body-lg text-body-lg text-on-primary/80 hover:text-on-primary transition-opacity" href="#"
+            >Calendar</a
+          >
+        </div>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="relative">
+          <span class="material-symbols-outlined text-on-primary cursor-pointer">notifications</span>
+          <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </div>
+        <div class="flex items-center gap-3 pl-4 border-l border-on-primary/20">
+          <div class="text-right">
+            <p class="text-on-primary font-bold text-sm">Dr. Ahmed Ali</p>
+            <p class="text-on-primary/60 text-xs">Senior Educator</p>
+          </div>
+          <img
+            alt="User Profile Avatar"
+            class="w-10 h-10 rounded-full border-2 border-on-primary/20"
+            src="https://lh3.googleusercontent.com/aida/AP1WRLuRm5Uus2nZakOfsL6wLixknEJEOP7RddddeXpogwdyvOswi3GSH_roN5Ro5TsAde3pYhrav7k5Rv81_RTSyIH4lovWDtzCxwzFs548iV48qhjjwbxz2_nOwr0XStTy8DD9Gr9q4Katu-arw7LrSclj_0uezQ0H8k61g-R3wru8JSB2K46Qnr1V30yIpJbgaic4udamZ2_9dnxtJoWooJUBhO_tn0hDZXQR1xayooDPxLp6NDDk81CbvqY"
+          />
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Area -->
+    <main class="ml-[260px] pt-[64px] min-h-screen p-8">
+      <div class="max-w-7xl mx-auto space-y-8">
+        <!-- Future Navigation Header -->
+        <div
+          class="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white p-6 rounded-xl shadow-sm border border-border-subtle"
+        >
+          <div class="space-y-4">
+            <h3 class="font-headline-md text-headline-md text-primary">Jump to Date</h3>
+            <div class="flex items-center gap-4">
+              <button
+                class="w-10 h-10 rounded-full border border-border-subtle flex items-center justify-center hover:bg-background transition-colors"
+              >
+                <span class="material-symbols-outlined">chevron_left</span>
+              </button>
+              <div
+                class="flex items-center gap-2 px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-primary">calendar_today</span>
+                <span class="font-title-lg text-title-lg text-primary">October 24, 2023</span>
+              </div>
+              <button
+                class="w-10 h-10 rounded-full border border-border-subtle flex items-center justify-center hover:bg-background transition-colors"
+              >
+                <span class="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="p-4 bg-primary/5 rounded-lg border-l-4 border-primary">
+              <p class="text-muted text-xs uppercase font-bold tracking-wider">Leave Quota</p>
+              <p class="text-primary font-bold text-xl">0 / 2 Remaining</p>
+            </div>
+            <div class="p-4 bg-navbar-teal/5 rounded-lg border-l-4 border-navbar-teal">
+              <p class="text-muted text-xs uppercase font-bold tracking-wider">Total Classes</p>
+              <p class="text-navbar-teal font-bold text-xl">12 Classes</p>
+            </div>
+          </div>
+        </div>
+        <!-- Schedule Grid (Bento Style) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Main Schedule List -->
+          <div class="lg:col-span-8 space-y-4">
+            <div class="flex items-center justify-between">
+              <h4 class="font-headline-md text-headline-md text-primary">Future Classes</h4>
+              <div class="flex gap-2">
+                <span
+                  class="inline-flex items-center gap-1 text-xs font-semibold text-muted bg-white px-3 py-1 rounded-full border border-border-subtle"
+                >
+                  <span class="w-2 h-2 bg-green-500 rounded-full"></span> Regular
+                </span>
+                <span
+                  class="inline-flex items-center gap-1 text-xs font-semibold text-muted bg-white px-3 py-1 rounded-full border border-border-subtle"
+                >
+                  <span class="w-2 h-2 bg-red-600 rounded-full"></span> Re-Scheduled
+                </span>
+              </div>
+            </div>
+            <!-- Class Card 1: Re-scheduled -->
+            <div
+              class="bg-white rounded-xl shadow-sm border border-border-subtle p-6 hover:border-primary/20 transition-all group"
+            >
+              <div class="flex flex-col md:flex-row justify-between gap-4">
+                <div class="flex gap-4">
+                  <div
+                    class="w-14 h-14 bg-red-50 rounded-lg flex flex-col items-center justify-center border border-red-100 shrink-0"
+                  >
+                    <span class="text-red-600 font-bold text-lg">24</span>
+                    <span class="text-red-600/70 text-[10px] uppercase font-bold">Oct</span>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h5 class="font-title-lg text-title-lg text-primary">Advanced Mathematics - Group A</h5>
+                      <span
+                        class="text-red-600 text-xs font-semibold uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded"
+                        >Re Scheduled</span
+                      >
+                    </div>
+                    <div class="flex flex-wrap gap-y-2 gap-x-6 mt-2">
+                      <div class="flex items-center gap-1 text-muted">
+                        <span class="material-symbols-outlined text-sm">schedule</span>
+                        <span class="text-sm font-medium">09:00 AM - 10:30 AM</span>
+                      </div>
+                      <div class="flex items-center gap-1 text-muted">
+                        <span class="material-symbols-outlined text-sm">location_on</span>
+                        <span class="text-sm font-medium">Virtual Room 12</span>
+                      </div>
+                      <div class="flex items-center gap-1 text-muted">
+                        <span class="material-symbols-outlined text-sm">person</span>
+                        <span class="text-sm font-medium">18 Students</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  <!-- Leave button logic: Disabled due to time (less than 2 hours) -->
+                  <button
+                    class="px-4 py-2 border border-border-subtle text-muted bg-surface-container-low rounded font-bold text-xs uppercase tracking-widest opacity-50 cursor-not-allowed flex items-center gap-2"
+                    disabled=""
+                  >
+                    <span class="material-symbols-outlined text-sm">event_busy</span>
+                    Request Leave
+                  </button>
+                  <button
+                    class="px-6 py-2 bg-primary text-white rounded font-bold text-xs uppercase tracking-widest hover:bg-primary-container transition-all"
+                  >
+                    View Materials
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Class Card 2: Regular -->
+            <div
+              class="bg-white rounded-xl shadow-sm border border-border-subtle p-6 hover:border-primary/20 transition-all"
+            >
+              <div class="flex flex-col md:flex-row justify-between gap-4">
+                <div class="flex gap-4">
+                  <div
+                    class="w-14 h-14 bg-slate-50 rounded-lg flex flex-col items-center justify-center border border-border-subtle shrink-0"
+                  >
+                    <span class="text-primary font-bold text-lg">24</span>
+                    <span class="text-muted text-[10px] uppercase font-bold">Oct</span>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h5 class="font-title-lg text-title-lg text-primary">Physics 101: Mechanics</h5>
+                    </div>
+                    <div class="flex flex-wrap gap-y-2 gap-x-6 mt-2">
+                      <div class="flex items-center gap-1 text-muted">
+                        <span class="material-symbols-outlined text-sm">schedule</span>
+                        <span class="text-sm font-medium">11:00 AM - 12:30 PM</span>
+                      </div>
+                      <div class="flex items-center gap-1 text-muted">
+                        <span class="material-symbols-outlined text-sm">location_on</span>
+                        <span class="text-sm font-medium">Hall B - Campus</span>
+                      </div>
+                      <div class="flex items-center gap-1 text-muted">
+                        <span class="material-symbols-outlined text-sm">person</span>
+                        <span class="text-sm font-medium">24 Students</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  <!-- Leave button logic: Enabled -->
+                  <button
+                    class="px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-white rounded font-bold text-xs uppercase tracking-widest transition-all flex items-center gap-2"
+                  >
+                    <span class="material-symbols-outlined text-sm">event_busy</span>
+                    Request Leave
+                  </button>
+                  <button
+                    class="px-6 py-2 bg-primary text-white rounded font-bold text-xs uppercase tracking-widest hover:bg-primary-container transition-all"
+                  >
+                    View Materials
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Class Card 3: Re-scheduled -->
+            <div
+              class="bg-white rounded-xl shadow-sm border border-border-subtle p-6 hover:border-primary/20 transition-all"
+            >
+              <div class="flex flex-col md:flex-row justify-between gap-4">
+                <div class="flex gap-4">
+                  <div
+                    class="w-14 h-14 bg-red-50 rounded-lg flex flex-col items-center justify-center border border-red-100 shrink-0"
+                  >
+                    <span class="text-red-600 font-bold text-lg">25</span>
+                    <span class="text-red-600/70 text-[10px] uppercase font-bold">Oct</span>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h5 class="font-title-lg text-title-lg text-primary">Intro to Arabic Literature</h5>
+                      <span
+                        class="text-red-600 text-xs font-semibold uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded"
+                        >Re Scheduled</span
+                      >
+                    </div>
+                    <div class="flex flex-wrap gap-y-2 gap-x-6 mt-2">
+                      <div class="flex items-center gap-1 text-muted">
+                        <span class="material-symbols-outlined text-sm">schedule</span>
+                        <span class="text-sm font-medium">02:00 PM - 03:30 PM</span>
+                      </div>
+                      <div class="flex items-center gap-1 text-muted">
+                        <span class="material-symbols-outlined text-sm">location_on</span>
+                        <span class="text-sm font-medium">Virtual Room 04</span>
+                      </div>
+                      <div class="flex items-center gap-1 text-muted">
+                        <span class="material-symbols-outlined text-sm">person</span>
+                        <span class="text-sm font-medium">12 Students</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  <!-- Leave button logic: Disabled due to quota (0/2 remaining) -->
+                  <button
+                    class="px-4 py-2 border border-border-subtle text-muted bg-surface-container-low rounded font-bold text-xs uppercase tracking-widest opacity-50 cursor-not-allowed flex items-center gap-2"
+                    disabled=""
+                  >
+                    <span class="material-symbols-outlined text-sm">block</span>
+                    Quota Reached
+                  </button>
+                  <button
+                    class="px-6 py-2 bg-primary text-white rounded font-bold text-xs uppercase tracking-widest hover:bg-primary-container transition-all"
+                  >
+                    View Materials
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Sidebar Calendar/Insights -->
+          <div class="lg:col-span-4 space-y-6">
+            <!-- Mini Calendar -->
+            <div class="bg-white rounded-xl shadow-sm border border-border-subtle p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h5 class="font-bold text-primary">October 2023</h5>
+                <div class="flex gap-2">
+                  <span class="material-symbols-outlined text-sm cursor-pointer hover:text-primary"
+                    >arrow_back_ios</span
+                  >
+                  <span class="material-symbols-outlined text-sm cursor-pointer hover:text-primary"
+                    >arrow_forward_ios</span
+                  >
+                </div>
+              </div>
+              <div class="calendar-grid text-center text-xs font-bold text-muted mb-2">
+                <div>S</div>
+                <div>M</div>
+                <div>T</div>
+                <div>W</div>
+                <div>T</div>
+                <div>F</div>
+                <div>S</div>
+              </div>
+              <div class="calendar-grid gap-1">
+                <div class="p-2 text-xs text-muted/40">1</div>
+                <div class="p-2 text-xs text-muted/40">2</div>
+                <div class="p-2 text-xs text-muted/40">3</div>
+                <div class="p-2 text-xs text-muted/40">4</div>
+                <div class="p-2 text-xs text-muted/40">5</div>
+                <div class="p-2 text-xs text-muted/40">6</div>
+                <div class="p-2 text-xs text-muted/40">7</div>
+                <!-- ... simplified dates ... -->
+                <div class="p-2 text-xs">22</div>
+                <div class="p-2 text-xs bg-navbar-teal text-white rounded-full">23</div>
+                <div class="p-2 text-xs bg-primary/10 text-primary font-bold rounded-full relative">
+                  24
+                  <span class="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-red-600 rounded-full"></span>
+                </div>
+                <div class="p-2 text-xs bg-primary/10 text-primary font-bold rounded-full relative">
+                  25
+                  <span class="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-red-600 rounded-full"></span>
+                </div>
+                <div class="p-2 text-xs">26</div>
+                <div class="p-2 text-xs">27</div>
+                <div class="p-2 text-xs">28</div>
+              </div>
+            </div>
+            <!-- Upcoming Reminders Card -->
+            <div class="bg-primary text-white rounded-xl p-6 shadow-sm overflow-hidden relative">
+              <div class="relative z-10">
+                <h5 class="font-bold mb-4 flex items-center gap-2">
+                  <span class="material-symbols-outlined">info</span>
+                  Important Notes
+                </h5>
+                <ul class="space-y-3">
+                  <li class="text-sm bg-white/10 p-3 rounded-lg border border-white/10">
+                    <p class="font-bold">Quarterly Review</p>
+                    <p class="opacity-70 text-xs">Oct 26 • All day event</p>
+                  </li>
+                  <li class="text-sm bg-white/10 p-3 rounded-lg border border-white/10">
+                    <p class="font-bold">Final Exam Submission</p>
+                    <p class="opacity-70 text-xs">Due in 4 days</p>
+                  </li>
+                </ul>
+              </div>
+              <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full"></div>
+            </div>
+            <!-- Faculty Contact -->
+            <div class="bg-white rounded-xl shadow-sm border border-border-subtle p-6">
+              <h5 class="font-bold text-primary mb-4">Support Contact</h5>
+              <div class="flex items-center gap-3">
+                <img
+                  alt="Coordinator Avatar"
+                  class="w-10 h-10 rounded-full"
+                  data-alt="A professional headshot of a female academic coordinator in a brightly lit modern office setting. She has a friendly expression and is wearing a modest business suit. The background features a blurred university library with high shelves of books and natural sunlight streaming through large windows."
+                  src="https://lh3.googleusercontent.com/aida/AP1WRLtIgvm6rtZAYth2xdqzSGNE8w7dHDf2f3ENdJQP95e_KYiICEuaT8LsaLMBlMqVhyvE6EH6SXQpjBcWX9zHeP5MdR0ePB2v81iLkrmarbEoq-OOLSNuZgb2urX_ADcCDXCz6m2NSmns6yn8l-cahNHFjC_00FuUG9epKn0W26c22x-yLcT078nI55GhEI72ls2EURpWgfLzzI7Ag3qnadEktByfc_sgWkWinkPG2s_cvY1pmsEAlt1nCkV_"
+                />
+                <div>
+                  <p class="font-bold text-sm text-primary">Sarah Jenkins</p>
+                  <p class="text-muted text-xs">Faculty Coordinator</p>
+                </div>
+              </div>
+              <button
+                class="w-full mt-4 py-2 border border-border-subtle rounded-lg text-primary text-xs font-bold uppercase tracking-widest hover:bg-background transition-all"
+              >
+                Contact Admin
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- Contextual FAB - Suppressed as per instructions for Details/Focused pages -->
+    <script>
+      // Micro-interaction for class card hover
+      document.querySelectorAll(".bg-white.rounded-xl.shadow-sm.border").forEach(card => {
+        card.addEventListener("mouseenter", () => {
+          card.classList.add("translate-x-1");
+        });
+        card.addEventListener("mouseleave", () => {
+          card.classList.remove("translate-x-1");
+        });
+      });
+
+      // Simple feedback for disabled buttons
+      document.querySelectorAll("button[disabled]").forEach(btn => {
+        btn.addEventListener("click", e => {
+          e.preventDefault();
+          alert("Action restricted: Leave quota reached or class time too close.");
+        });
+      });
+    </script>
+  </body>
+</html>

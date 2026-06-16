@@ -1,0 +1,57 @@
+import type { StudentStatusLabels } from "../../../types/dashboard/students";
+
+export const status: StudentStatusLabels = {
+  pageTitle: "حالة الطالب وتجميد الجدول",
+  studentId: "المعرف: #{id}",
+  breadcrumbs: {
+    students: "الطلاب",
+    statusHold: "الحالة والتجميد",
+  },
+  sections: {
+    adminHold: "تجميد إداري",
+    policyOverview: "نظرة عامة على السياسة",
+    upcomingClasses: "جدول الحصص القادمة",
+  },
+  fields: {
+    accountStatus: "حالة الحساب الجديدة",
+    statusReason: "سبب التغيير",
+    statusReasonPlaceholder: "أدخل المبررات الإدارية هنا...",
+    quickReasons: "أسباب سريعة",
+  },
+  statusOptions: {
+    regular: "عادي / نشط",
+    suspended: "موقوف (مالي/تأديبي)",
+    onLeave: "في إجازة (طبية/مخطط لها)",
+  },
+  reasons: {
+    unpaidInvoice: "فاتورة غير مدفوعة",
+    misconduct: "سوء سلوك",
+    vacation: "إجازة",
+  },
+  actions: {
+    applyChange: "تطبيق تغيير الحالة",
+    viewHistory: "عرض السجل",
+    contactParent: "الاتصال بولي الأمر",
+    viewAll: "عرض الكل",
+  },
+  table: {
+    subjectInstructor: "المادة والمعلم",
+    dateTime: "التاريخ والوقت",
+    roomLink: "الغرفة / الرابط",
+    status: "الحالة",
+    pendingHolds: "{count} تجميدات معلقة",
+    footerInfo: "نهاية قائمة الحصص القادمة لـ {id}",
+  },
+  policies: {
+    suspensionTitle: "الإيقاف",
+    suspensionDesc: "يوقف محرك الفوترة تماماً ويغلق جميع صلاحيات الوصول لبوابة الطالب فوراً.",
+    onLeaveTitle: "في إجازة",
+    onLeaveDesc: "يحافظ على سجلات التسجيل ولكنه يوقف جدولة الحصص. قد يتم احتساب الفوترة بنسب تناسبية.",
+  },
+  warning: {
+    title: "تنبيه: تعليق الحساب قيد الانتظار",
+    description:
+      "سيؤدي تغيير الحالة إلى 'موقوف' إلى تفعيل قفل شامل للنظام فوراً. سيتم تجميد جميع الحصص القادمة، مما يمنع المعلمين من بدء الجلسات. سيتم إيقاف محرك الفوترة لهذا المعرف حتى إعادة التفعيل يدوياً.",
+  },
+  successMessage: "تم تحديث حالة الطالب بنجاح.",
+};
