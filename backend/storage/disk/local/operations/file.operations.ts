@@ -4,7 +4,7 @@ import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { extToMime } from "@/utils/storage.utils";
+import { extToMime } from "@/shared/utils/storage.utils";
 import { processFile } from "../shared";
 import type { LocalContext } from "../types";
 import { calculateFileHash, ensureDirectory, getAbsolutePath } from "../utils";

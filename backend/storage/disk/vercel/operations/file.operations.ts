@@ -3,7 +3,7 @@ import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { extToMime } from "@/utils/storage.utils";
+import { extToMime } from "@/shared/utils/storage.utils";
 import type { VercelContext } from "../types";
 import { getVercelBlobPath } from "../utils";
 

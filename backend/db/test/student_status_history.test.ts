@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import { StudentStatus } from "../../../lib/enum";
-import { testLogger } from "../../../lib/testlogger";
+import { StudentStatus } from "@/shared/lib/enum";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { StudentStatusHistorySelectType } from "../../types";
 import { studentStatusHistory, students } from "../schema";
 import { createTestUser, setupStudent } from "./entity-setup";

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { CurrencyExchangeRateInsertInput } from "../../types";
 import { currencyExchangeRates } from "../schema";
 import { runInRollback } from "./test-utils";

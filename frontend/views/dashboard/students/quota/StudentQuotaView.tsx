@@ -14,8 +14,8 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import type { MessageSchema } from "@/frontend/messages/types/message";
 import type { StudentProfileData } from "@/frontend/stores/studentQuotaStore";
+import type { MessageSchema } from "@/shared/messages/types/message";
 import { ContextualHelperCards } from "./components/ContextualHelperCards";
 import { CourseDetailsSection } from "./components/CourseDetailsSection";
 import { StudentInformationSection } from "./components/StudentInformationSection";
@@ -254,7 +254,7 @@ export function StudentQuotaView({
             component="form"
             onSubmit={e => {
               e.preventDefault();
-              void methods.handleSubmit(onSubmit)(e);
+              methods.handleSubmit(onSubmit)(e);
             }}
             sx={{
               p: { xs: 0, md: 4 },

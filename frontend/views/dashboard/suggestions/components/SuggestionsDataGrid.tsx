@@ -4,8 +4,8 @@ import { Button, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
-import type { SuggestionsAdminLabels } from "@/frontend/messages/types/dashboard/suggestions/main";
 import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/stores/adminSuggestionsStore";
+import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 
 interface SuggestionsDataGridProps {
   readonly rows: readonly AdminSuggestionRow[];

@@ -1,8 +1,8 @@
 "use client";
 
-import type { SuggestionsAdminLabels } from "@/frontend/messages/types/dashboard/suggestions/main";
 import type { SuggestionTab } from "@/frontend/stores/adminSuggestionsStore";
 import { AdminQueueTabBar, formatAdminQueueTabLabel } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
+import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 
 interface SuggestionsTabBarProps {
   readonly activeTab: SuggestionTab;

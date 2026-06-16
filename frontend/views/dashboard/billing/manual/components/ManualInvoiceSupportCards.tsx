@@ -3,7 +3,7 @@
 import { HistoryOutlined, ReceiptLongOutlined, SecurityOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/components/ui";
-import type { BillingManualLabels } from "@/frontend/messages/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 
 interface ManualInvoiceSupportCardsProps {
   readonly labels: BillingManualLabels;

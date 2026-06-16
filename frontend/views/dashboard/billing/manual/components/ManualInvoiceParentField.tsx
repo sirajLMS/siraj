@@ -4,8 +4,8 @@ import { FamilyRestroomOutlined } from "@mui/icons-material";
 import { Autocomplete, InputAdornment, TextField } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import type { BillingManualLabels } from "@/frontend/messages/types/dashboard/billing/manual";
 import type { ParentInvoiceOption } from "@/frontend/stores/adminManualInvoiceStore";
+import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 import type { ManualInvoiceFormData } from "../schemas/manualInvoiceSchema";
 
 interface ManualInvoiceParentFieldProps {

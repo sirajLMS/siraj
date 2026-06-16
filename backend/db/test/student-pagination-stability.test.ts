@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { AppLanguage, Gender, OrderSortDirection, ParentStatus } from "../../../lib/enum";
-import { testLogger } from "../../../lib/testlogger";
+import { AppLanguage, Gender, OrderSortDirection, ParentStatus } from "@/shared/lib/enum";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { ParentEntity, StudentEntity, StudentFilterArgs, UserEntity } from "../../types";
 import { PaginationArgs, StudentsOrderByColumn } from "../../types";
 import { db } from "../drizzleDb";

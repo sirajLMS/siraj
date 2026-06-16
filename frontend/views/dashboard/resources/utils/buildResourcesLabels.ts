@@ -1,4 +1,4 @@
-import type { ResourcesLabels } from "@/frontend/messages/types/dashboard/resources/main";
+import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 
 type ResourcesTranslator = (key: string) => string;
 

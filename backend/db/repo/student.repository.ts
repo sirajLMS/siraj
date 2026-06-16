@@ -5,7 +5,7 @@ import { queryWithPagination } from "@/backend/db/query.extensions";
 import { students } from "@/backend/db/schema";
 import * as Types from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
-import { OrderSortDirection } from "@/lib/enum";
+import { OrderSortDirection } from "@/shared/lib/enum";
 
 // Extract the transaction type from Drizzle
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];

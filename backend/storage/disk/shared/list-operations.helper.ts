@@ -1,7 +1,7 @@
 import { StorageDbRepository } from "@/backend/db/repo";
 import * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { OrderSortDirection } from "@/lib/enum";
+import { OrderSortDirection } from "@/shared/lib/enum";
 
 /**
  * Common logic for loading database entities for a list of paths

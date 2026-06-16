@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { RecurringScheduleEntity } from "../../types";
 import { recurringSchedules, teachers } from "../schema";
 import { setupStudent, setupTeacher } from "./entity-setup";

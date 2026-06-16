@@ -13,7 +13,7 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import type * as Types from "../../types";
 import { db } from "../drizzleDb";
 import { AuditRepository } from "../repo";

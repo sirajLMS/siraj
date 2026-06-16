@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { DayOfWeek, Gender, VacationRequestStatus } from "../../../lib/enum";
+import { DayOfWeek, Gender, VacationRequestStatus } from "@/shared/lib/enum";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import { SchedulingRepository, TeacherAvailabilityRepository } from "../repo";
 import { parents, students, teacherAssignments, teachers, users } from "../schema";

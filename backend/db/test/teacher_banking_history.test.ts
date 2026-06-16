@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { TeacherBankingDetailsHistorySelectType } from "../../types";
 import { TeacherBankingRepository } from "../repo/teacher-banking.repository";
 import { teacherBankingDetailsHistory } from "../schema";

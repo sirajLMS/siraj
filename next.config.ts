@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   turbopack: {
     resolveAlias: {
-      "next-intl/config": "./src/i18n/request.ts",
+      "next-intl/config": "./frontend/i18n/request.ts",
     },
   },
   // eslint-disable-next-line sonarjs/no-hardcoded-ip

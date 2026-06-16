@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { SuggestionsParentLabels } from "@/frontend/messages/types/dashboard/suggestions/main";
+import type { SuggestionsParentLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 
 interface SuggestionHeroBannerProps {
   readonly labels: SuggestionsParentLabels;

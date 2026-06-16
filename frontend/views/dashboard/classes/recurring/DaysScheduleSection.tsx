@@ -3,7 +3,7 @@
 import { Box, FormHelperText, Typography } from "@mui/material";
 import type { FieldErrors, UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { labelSx } from "@/frontend/components/ui/form";
-import type { CreateRecurringClassLabels } from "@/frontend/messages/types/message";
+import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 import { DayScheduleRow } from "./DayScheduleRow";
 import type { RecurringClassFormData } from "./recurringClassSchema";
 

@@ -3,8 +3,8 @@
 import { FilterListOutlined, SortOutlined } from "@mui/icons-material";
 import { Box, Chip } from "@mui/material";
 import { FilterButton } from "@/frontend/components/ui";
-import type { ResourcesLabels } from "@/frontend/messages/types/dashboard/resources/main";
 import type { ResourceFilterType, ResourceSortBy } from "@/frontend/stores/resourcesStore";
+import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 
 interface ResourceLibraryHeaderProps {
   readonly labels: ResourcesLabels;

@@ -7,8 +7,8 @@ import {
   NotificationChannel,
   NotificationDeliveryStatus,
   NotificationEventType,
-} from "../../../lib/enum";
-import { testLogger } from "../../../lib/testlogger";
+} from "@/shared/lib/enum";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { UserEntity } from "../../types";
 import { NotificationRepository } from "../repo/notification.repository";
 import { notificationDeliveries, userDeviceTokens, users } from "../schema";

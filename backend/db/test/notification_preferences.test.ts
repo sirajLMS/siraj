@@ -2,8 +2,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
-import { NotificationChannel, NotificationEventType } from "../../../lib/enum";
-import { testLogger } from "../../../lib/testlogger";
+import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { UserEntity, UserNotificationPreferenceSelectType } from "../../types";
 import { userNotificationPreferences, users } from "../schema";
 import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "./test-utils";

@@ -1,5 +1,5 @@
 import type { useTranslations } from "next-intl";
-import type { ComplaintsLabels } from "@/frontend/messages/types/dashboard/complaints/main";
+import type { ComplaintsLabels } from "@/shared/messages/types/dashboard/complaints/main";
 
 type ComplaintsTranslator = ReturnType<typeof useTranslations<"dashboard.complaints">>;
 

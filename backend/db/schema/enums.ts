@@ -22,7 +22,7 @@ import {
   PaymentMethod,
   StudentStatus,
   VacationRequestStatus,
-} from "@/lib/enum";
+} from "@/shared/lib/enum";
 import { createPgEnumFromEnum } from "../../utils/db.utils";
 
 export const appLanguageEnum = createPgEnumFromEnum("app_language", AppLanguage);

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { extToMime } from "@/utils/storage.utils";
+import { extToMime } from "@/shared/utils/storage.utils";
 import type { LocalContext } from "./types";
 import { calculateFileHash, getAbsolutePath } from "./utils";
 

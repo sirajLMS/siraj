@@ -61,13 +61,13 @@ export function ManualInvoiceView({
   }, [showSuccess, onDismissSuccess]);
 
   const onSubmitClick = () => {
-    void handleSubmit(data => {
+    handleSubmit(data => {
       onSubmit(data, false);
     })();
   };
 
   const onSubmitAndSendEmailClick = () => {
-    void handleSubmit(data => {
+    handleSubmit(data => {
       onSubmit(data, true);
     })();
   };

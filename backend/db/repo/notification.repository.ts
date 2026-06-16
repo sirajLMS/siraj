@@ -2,7 +2,7 @@ import { and, count, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { notificationDeliveries, userDeviceTokens } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
-import { NotificationDeliveryStatus } from "@/lib/enum";
+import { NotificationDeliveryStatus } from "@/shared/lib/enum";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 

@@ -3,8 +3,8 @@
 import { HourglassEmptyOutlined, VerifiedUserOutlined } from "@mui/icons-material";
 import { Box, Paper, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { ComplaintsParentLabels } from "@/frontend/messages/types/dashboard/complaints/main";
 import type { ParentComplaintRecord } from "@/frontend/stores/parentComplaintsStore";
+import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 
 interface ComplaintRecordCardProps {
   readonly record: ParentComplaintRecord;

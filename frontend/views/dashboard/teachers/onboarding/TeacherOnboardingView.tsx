@@ -6,7 +6,7 @@ import { Box, Button, Snackbar, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import type { MessageSchema } from "@/frontend/messages/types/message";
+import type { MessageSchema } from "@/shared/messages/types/message";
 import { BankingLedgerSection } from "./components/BankingLedgerSection";
 import { OfficialDetailsSection } from "./components/OfficialDetailsSection";
 import { SalaryDetailsSection } from "./components/SalaryDetailsSection";
@@ -139,7 +139,7 @@ export function TeacherOnboardingView({
       <Box
         component="form"
         onSubmit={e => {
-          void handleSubmit(onSubmit)(e);
+          handleSubmit(onSubmit)(e);
         }}
         sx={{ display: "flex", flexDirection: "column", gap: 4, pb: 12 }}
       >

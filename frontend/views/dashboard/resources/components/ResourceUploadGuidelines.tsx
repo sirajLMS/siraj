@@ -2,7 +2,7 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import type { ResourcesLabels } from "@/frontend/messages/types/dashboard/resources/main";
+import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 
 interface ResourceUploadGuidelinesProps {
   readonly labels: ResourcesLabels;

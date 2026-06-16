@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { config } from "dotenv";
 import { getRedisService } from "@/backend/services/redis";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import { db } from "../drizzleDb";
 import { SessionRepository } from "../repo";
 import { users } from "../schema";

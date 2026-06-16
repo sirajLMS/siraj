@@ -2,7 +2,7 @@
 
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { InvoiceInsertInput, PaymentInsertInput } from "../../types";
 import { invoices, parents, payments, students, users } from "../schema";
 import { type DbTransaction, runInRollback } from "./test-utils";

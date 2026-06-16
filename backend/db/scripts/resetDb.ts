@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/sql-queries */
 import { Pool } from "pg";
 import logger from "@/backend/lib/logger";
 import { runMigrations } from "./migrate";

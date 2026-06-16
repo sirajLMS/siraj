@@ -6,7 +6,7 @@ import {
   teacherVacationRequests,
 } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
-import { DayOfWeek, VacationRequestStatus } from "@/lib/enum";
+import { DayOfWeek, VacationRequestStatus } from "@/shared/lib/enum";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 

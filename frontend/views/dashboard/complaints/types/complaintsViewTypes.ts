@@ -1,6 +1,6 @@
-import type { ComplaintsLabels } from "@/frontend/messages/types/dashboard/complaints/main";
 import type { AdminComplaintRow, AdminComplaintsSummary, ComplaintTab } from "@/frontend/stores/adminComplaintsStore";
 import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/stores/parentComplaintsStore";
+import type { ComplaintsLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import type { ComplaintFormData } from "../schemas/complaintFormSchema";
 
 export type { ComplaintsLabels };

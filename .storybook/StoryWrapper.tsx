@@ -9,9 +9,9 @@ import { useEffect, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/context/ThemeContext";
-import ar from "@/frontend/messages/ar";
-import en from "@/frontend/messages/en";
 import { createAppTheme } from "@/frontend/providers/theme/theme";
+import ar from "@/shared/messages/ar";
+import en from "@/shared/messages/en";
 
 // Create Emotion caches for Storybook
 const cacheLtr = createCache({

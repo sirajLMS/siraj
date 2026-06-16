@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
 import { notificationDeliveries, teacherBankingDetailsHistory, teacherPayments, teachers } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
-import { NotificationChannel, NotificationEventType } from "@/lib/enum";
+import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 

@@ -3,7 +3,7 @@
 import { Box, Checkbox, FormControlLabel, FormHelperText, Typography } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import type { BillingManualLabels } from "@/frontend/messages/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 import { BILLING_MONTH_IDS } from "../constants/billingMonths";
 import type { ManualInvoiceFormData } from "../schemas/manualInvoiceSchema";
 

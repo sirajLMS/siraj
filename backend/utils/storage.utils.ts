@@ -1,6 +1,6 @@
 import * as Types from "@/backend/types";
-import { OrderSortDirection } from "@/lib/enum";
-import { isAllowedMimeType } from "@/utils/storage.utils";
+import { OrderSortDirection } from "@/shared/lib/enum";
+import { isAllowedMimeType } from "@/shared/utils/storage.utils";
 import logger from "../lib/logger";
 import { STORAGE_CONFIG } from "../storage/disk/storage.service.interface";
 

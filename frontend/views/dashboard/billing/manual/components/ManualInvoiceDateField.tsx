@@ -4,7 +4,7 @@ import { format, isValid } from "date-fns";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { AppDatePicker } from "@/frontend/components/ui/form/AppDatePicker";
-import type { BillingManualLabels } from "@/frontend/messages/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 import type { ManualInvoiceFormData } from "../schemas/manualInvoiceSchema";
 import { parseFormDate } from "../utils/manualInvoiceFormatters";
 

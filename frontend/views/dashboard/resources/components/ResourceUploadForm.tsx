@@ -5,7 +5,7 @@ import { Box, TextField, Typography } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import type { ResourcesLabels } from "@/frontend/messages/types/dashboard/resources/main";
+import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 import type { ResourceUploadFormData } from "../schemas/resourceUploadSchema";
 import { ResourceUploadDropzone } from "./ResourceUploadDropzone";
 

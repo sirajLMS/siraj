@@ -8,7 +8,6 @@ import sonarjs from "eslint-plugin-sonarjs";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -77,10 +76,6 @@ const eslintConfig = defineConfig([
       // ecmaVersion: 2020,
       globals: globals.browser,
       parserOptions: {
-        projectService: {
-          allowDefaultProject: ["*.config.*"],
-          defaultProject: './tsconfig.json',
-        },
         tsconfigRootDir: import.meta.dirname,
       },
     },

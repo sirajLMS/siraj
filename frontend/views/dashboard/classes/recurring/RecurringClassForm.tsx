@@ -10,8 +10,8 @@ import type {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
-import type { CreateRecurringClassLabels } from "@/frontend/messages/types/message";
 import type { StudentGroup } from "@/frontend/stores/createRecurringClassStore";
+import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 import { RecurringClassFormFields } from "./RecurringClassFormFields";
 import type { RecurringClassFormData } from "./recurringClassSchema";
 
@@ -67,7 +67,7 @@ export function RecurringClassForm({
       component="form"
       onSubmit={e => {
         e.preventDefault();
-        void handleSubmit(onSubmit)(e);
+        handleSubmit(onSubmit)(e);
       }}
       sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
     >

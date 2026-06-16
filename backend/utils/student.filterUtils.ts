@@ -3,7 +3,7 @@ import type { PgSelect } from "drizzle-orm/pg-core";
 import { fullTextSearch } from "@/backend/db/query.extensions";
 import { students } from "@/backend/db/schema";
 import * as Types from "@/backend/types";
-import { OrderSortDirection } from "@/lib/enum";
+import { OrderSortDirection } from "@/shared/lib/enum";
 
 export namespace StudentFilterUtils {
   export function applyFilters<T extends PgSelect>(qb: T, args?: Types.StudentFilterArgs | null): T {

@@ -5,7 +5,7 @@ import { Paper, type PaperProps, Popover, Stack, styled, Typography } from "@mui
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useLanguageSwitch } from "@/frontend/hooks/useLanguageSwitch";
-import type { Locale } from "@/frontend/i18n/routing";
+import type { Locale } from "@/shared/i18n/routing";
 import { NavbarIcon } from "./NavbarIcon";
 
 // --- Styled Components ---

@@ -1,4 +1,4 @@
-import type { SuggestionsLabels } from "@/frontend/messages/types/dashboard/suggestions/main";
+import type { SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 
 type SuggestionsTranslator = (key: string) => string;
 

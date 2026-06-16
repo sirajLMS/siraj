@@ -3,8 +3,8 @@
 import { Box } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PageHeader } from "@/frontend/components/ui";
-import type { BillingManualLabels } from "@/frontend/messages/types/dashboard/billing/manual";
 import type { ParentInvoiceOption } from "@/frontend/stores/adminManualInvoiceStore";
+import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 import { BillingMonthSelector } from "./components/BillingMonthSelector";
 import { InvoiceDraftSummaryCard } from "./components/InvoiceDraftSummaryCard";
 import { ManualInvoiceActions } from "./components/ManualInvoiceActions";

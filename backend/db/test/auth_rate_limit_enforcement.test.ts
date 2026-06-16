@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import { db } from "../drizzleDb";
 import { RateLimitRepository } from "../repo";
 import { authRateLimits, passwordResetTokens } from "../schema";

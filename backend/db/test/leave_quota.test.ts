@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { LeaveQuotaUsageEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import { leaveQuotaUsage, parents, students, systemSettings, teachers, users } from "../schema";
 import { type DbTransaction, runInRollback } from "./test-utils";

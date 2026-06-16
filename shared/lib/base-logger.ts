@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { format } from "node:util";
 
-import { formatTimestamp } from "./shared/date-utils";
+import { formatTimestamp } from "./date-utils";
 
 type LogLevel = "log" | "info" | "warn" | "error" | "debug";
 
@@ -74,7 +74,7 @@ export abstract class BaseLogger {
     }
 
     // Write to file
-    if (this.writeToFileEnabled) void this.writeToFile(level, message);
+    if (this.writeToFileEnabled) this.writeToFile(level, message);
   }
 
   public log(...args: unknown[]): void {

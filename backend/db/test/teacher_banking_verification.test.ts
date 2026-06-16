@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { NotificationEventType } from "../../../lib/enum";
-import { testLogger } from "../../../lib/testlogger";
+import { NotificationEventType } from "@/shared/lib/enum";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { TeacherEntity, UserEntity } from "../../types";
 import { TeacherBankingRepository } from "../repo/teacher-banking.repository";
 import { teachers, users } from "../schema";

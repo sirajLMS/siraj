@@ -91,7 +91,7 @@ export const getCacheService = async (): Promise<ICacheService> => {
  */
 export const resetCacheService = (): void => {
   if (instance) {
-    void instance.disconnect();
+    instance.disconnect();
     instance = null;
   }
   initializationPromise = null;

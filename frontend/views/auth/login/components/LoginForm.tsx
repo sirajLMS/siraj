@@ -208,7 +208,7 @@ export function LoginForm() {
       component="form"
       onSubmit={e => {
         e.preventDefault();
-        void handleSubmit(onSubmit)(e);
+        handleSubmit(onSubmit)(e);
       }}
       sx={{
         display: "flex",

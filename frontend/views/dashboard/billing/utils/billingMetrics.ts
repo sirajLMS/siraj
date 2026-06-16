@@ -8,9 +8,9 @@ import {
   TrendingUpOutlined,
   WarningAmberOutlined,
 } from "@mui/icons-material";
-import type { BillingLabels } from "@/frontend/messages/types/dashboard/billing";
 import type { AdminBillingSummary } from "@/frontend/stores/adminBillingStore";
 import type { ParentBillingSummary } from "@/frontend/stores/parentBillingStore";
+import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 import type { BillingMetricItem } from "../components/BillingMetricsRow";
 
 export function buildAdminMetrics(summary: AdminBillingSummary, labels: BillingLabels): BillingMetricItem[] {

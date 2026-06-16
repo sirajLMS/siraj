@@ -1,6 +1,6 @@
-import type { BillingLabels } from "@/frontend/messages/types/dashboard/billing";
 import type { AdminBillingSummary, AdminInvoiceRow, StudentCreditRow } from "@/frontend/stores/adminBillingStore";
 import type { ParentBillingSummary, ParentInvoiceRow } from "@/frontend/stores/parentBillingStore";
+import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 
 export interface BillingCapabilityProps {
   readonly canManage: boolean;

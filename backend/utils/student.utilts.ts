@@ -1,4 +1,4 @@
-import type { AppLanguage, Gender, StudentStatus } from "@/lib/enum";
+import type { AppLanguage, Gender, StudentStatus } from "@/shared/lib/enum";
 import type { StudentDto, StudentEntity } from "../types";
 
 export namespace StudentUtils {

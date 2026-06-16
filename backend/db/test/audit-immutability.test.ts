@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { AdminAuditLogInsertInput } from "../../types";
 import { adminAuditLogs, users } from "../schema";
 import { runInRollback } from "./test-utils";

@@ -8,8 +8,8 @@ import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
-import type { MessageSchema } from "@/frontend/messages/types/message";
 import type { TeacherProfileData } from "@/frontend/stores/teacherProfileStore";
+import type { MessageSchema } from "@/shared/messages/types/message";
 import { SalaryDetailsSection } from "./components/SalaryDetailsSection";
 import { SystemConfigSection } from "./components/SystemConfigSection";
 import { TeacherInfoSection } from "./components/TeacherInfoSection";
@@ -85,7 +85,7 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
           <Box
             component="form"
             onSubmit={e => {
-              void methods.handleSubmit(onSubmit)(e);
+              methods.handleSubmit(onSubmit)(e);
             }}
             sx={theme => ({
               bgcolor: theme.palette.background.paper,

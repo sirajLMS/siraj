@@ -3,8 +3,8 @@
 import { AlternateEmailOutlined, CheckCircleOutlined, SendOutlined } from "@mui/icons-material";
 import { Avatar, Box, Paper, TextField, Typography } from "@mui/material";
 import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
-import type { ComplaintsAdminLabels } from "@/frontend/messages/types/dashboard/complaints/main";
 import type { AdminComplaintRow, ComplaintPriority } from "@/frontend/stores/adminComplaintsStore";
+import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
 
 interface ComplaintQueueCardProps {
   readonly row: AdminComplaintRow;

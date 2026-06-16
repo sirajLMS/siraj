@@ -41,7 +41,7 @@ export function ManagerOnboardingView({
       <Box
         component="form"
         onSubmit={e => {
-          void handleSubmit(onSubmit)(e);
+          handleSubmit(onSubmit)(e);
         }}
         sx={{ display: "flex", flexDirection: "column", gap: 3 }}
       >

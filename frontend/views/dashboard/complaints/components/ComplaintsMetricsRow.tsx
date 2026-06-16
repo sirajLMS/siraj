@@ -2,10 +2,10 @@
 
 import { CheckCircleOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import type { ComplaintsAdminLabels } from "@/frontend/messages/types/dashboard/complaints/main";
 import type { AdminComplaintsSummary } from "@/frontend/stores/adminComplaintsStore";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { AdminQueueEfficiencyBanner } from "@/frontend/views/dashboard/shared/AdminQueueEfficiencyBanner";
+import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
 
 interface ComplaintsMetricsRowProps {
   readonly summary: AdminComplaintsSummary;

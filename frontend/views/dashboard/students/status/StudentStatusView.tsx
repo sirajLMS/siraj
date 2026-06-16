@@ -83,7 +83,7 @@ export function StudentStatusView({
           <Box
             component="form"
             onSubmit={e => {
-              void methods.handleSubmit(handleSubmit)(e);
+              methods.handleSubmit(handleSubmit)(e);
             }}
             sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}
           >

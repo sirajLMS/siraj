@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { SuggestionValidationLabels } from "@/frontend/messages/types/dashboard/suggestions/main";
+import type { SuggestionValidationLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 
 export const suggestionFormSchema = (labels: SuggestionValidationLabels) =>
   z.object({

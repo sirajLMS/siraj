@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import { BillingRepository, StudentRepository } from "../repo";
 import { invoices, parents, students, users } from "../schema";
 import { type DbTransaction, runInRollback } from "./test-utils";

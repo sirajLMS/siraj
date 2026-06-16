@@ -1,4 +1,4 @@
-import { formatTimestamp } from "@/lib/shared/date-utils";
+import { formatTimestamp } from "@/shared/lib/date-utils";
 import type { ApiLogOptions, LogEntry, LoggerConfig, LogLevel } from "./types";
 
 type LogOptions = {
@@ -87,7 +87,7 @@ class ClientLogger {
     if (this.batchTimer !== null) return;
 
     this.batchTimer = setTimeout(() => {
-      void this.flushLogs();
+      this.flushLogs();
     }, this.config.batchInterval);
   }
 

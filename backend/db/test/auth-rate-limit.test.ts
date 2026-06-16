@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { AuthRateLimitEntityInput } from "../../types";
 import { authRateLimits } from "../schema";
 import { IP_ADDRESS_1 } from "./const";

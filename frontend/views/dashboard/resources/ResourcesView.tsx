@@ -66,7 +66,7 @@ export function ResourcesView({
   };
 
   const handleFormSubmit = () => {
-    void handleSubmit(data => {
+    handleSubmit(data => {
       onUpload(data);
       reset();
       setSelectedFileName("");

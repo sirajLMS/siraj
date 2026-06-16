@@ -3,8 +3,8 @@
 import { Box } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PrimaryPageAction } from "@/frontend/components/ui";
-import type { SuggestionsParentLabels } from "@/frontend/messages/types/dashboard/suggestions/main";
 import { SubmissionSuccessBanner } from "@/frontend/views/dashboard/shared/SubmissionSuccessBanner";
+import type { SuggestionsParentLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 import { SuggestionFormFields } from "./components/SuggestionFormFields";
 import { SuggestionHeroBanner } from "./components/SuggestionHeroBanner";
 import { SuggestionSocialProof } from "./components/SuggestionSocialProof";

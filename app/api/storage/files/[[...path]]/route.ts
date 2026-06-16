@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
 import logger from "@/backend/lib/logger";
-import { extToMime } from "@/utils/storage.utils";
+import { extToMime } from "@/shared/utils/storage.utils";
 
 const storagePath = process.env.LOCAL_STORAGE_PATH || "./storage/";
 

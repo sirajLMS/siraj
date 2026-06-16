@@ -2,8 +2,8 @@
 
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { SuggestionsAdminLabels } from "@/frontend/messages/types/dashboard/suggestions/main";
 import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/stores/adminSuggestionsStore";
+import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 
 interface SuggestionsCardListProps {
   readonly rows: readonly AdminSuggestionRow[];

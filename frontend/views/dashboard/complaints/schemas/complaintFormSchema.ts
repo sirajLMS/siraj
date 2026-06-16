@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ComplaintValidationLabels } from "@/frontend/messages/types/dashboard/complaints/main";
+import type { ComplaintValidationLabels } from "@/shared/messages/types/dashboard/complaints/main";
 
 export const complaintFormSchema = (labels: ComplaintValidationLabels) =>
   z.object({

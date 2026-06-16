@@ -14,6 +14,7 @@ export type BaseContext = {
   sessionId: string | undefined;
   ipAddress?: string;
   cookies?: ResponseCookies;
+  locale: string;
 };
 
 export type AuthContexts = {
@@ -21,7 +22,13 @@ export type AuthContexts = {
   permission: BaseContext & { user: object };
 };
 
-export async function createContext({ userId }: { userId?: string | null }): Promise<BaseContext> {
+export async function createContext({
+  userId,
+  locale = "ar",
+}: {
+  userId?: string | null;
+  locale?: string;
+}): Promise<BaseContext> {
   if (!userId) {
     return {
       user: undefined,
@@ -30,6 +37,7 @@ export async function createContext({ userId }: { userId?: string | null }): Pro
       isSuperAdmin: false,
       refreshToken: undefined,
       sessionId: undefined,
+      locale,
     };
   }
 
@@ -42,5 +50,6 @@ export async function createContext({ userId }: { userId?: string | null }): Pro
     isSuperAdmin: permissionContext.isSuperAdmin,
     refreshToken: undefined,
     sessionId: undefined,
+    locale,
   };
 }

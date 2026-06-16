@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { MessageSchema } from "@/frontend/messages/types/message";
+import type { MessageSchema } from "@/shared/messages/types/message";
 
 export const createStudentQuotaSchema = (messages: MessageSchema["dashboard"]["studentQuota"]["validation"]) => {
   return z.object({

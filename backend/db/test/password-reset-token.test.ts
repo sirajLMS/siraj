@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { PasswordResetTokenInsertInput } from "../../types";
 import { passwordResetTokens } from "../schema";
 import { runInRollback } from "./test-utils";

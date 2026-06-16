@@ -2,8 +2,8 @@
 
 import { ExpandMoreOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Typography } from "@mui/material";
-import type { ComplaintsParentLabels } from "@/frontend/messages/types/dashboard/complaints/main";
 import type { ParentComplaintRecord } from "@/frontend/stores/parentComplaintsStore";
+import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import { ComplaintRecordCard } from "./ComplaintRecordCard";
 
 interface ComplaintRecordCardListProps {

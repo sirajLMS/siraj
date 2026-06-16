@@ -2,7 +2,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
-import { extToMime } from "@/utils/storage.utils";
+import { extToMime } from "@/shared/utils/storage.utils";
 import { getStorageService, type StorageService } from "../storage.service";
 
 /**

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import { Gender } from "../../../lib/enum";
-import { testLogger } from "../../../lib/testlogger";
+import { Gender } from "@/shared/lib/enum";
+import { testLogger } from "@/shared/lib/testlogger";
 import { db } from "../drizzleDb";
 import { SchedulingRepository } from "../repo";
 import { parents, students, teacherAssignments, teachers, users } from "../schema";

@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import { Gender } from "../../../lib/enum";
-import { testLogger } from "../../../lib/testlogger";
+import { Gender } from "@/shared/lib/enum";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import type { ClassInstanceEntity } from "../../types/scheduling.types";
 import type { StudentProgressSelectType } from "../../types/student.types";

@@ -1,6 +1,6 @@
 import { StudentRepository } from "@/backend/db/repo/student.repository";
 import * as Types from "@/backend/types";
-import { OrderSortDirection } from "@/lib/enum";
+import { OrderSortDirection } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   AppLanguagePothosObject,

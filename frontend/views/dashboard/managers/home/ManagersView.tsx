@@ -1,8 +1,8 @@
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import { Link } from "@/frontend/i18n/routing";
 import type { Manager } from "@/frontend/stores/managersStore";
+import { Link } from "@/shared/i18n/routing";
 import { ManagersCardList } from "./ManagersCardList";
 import { ManagersDataGrid } from "./ManagersDataGrid";
 import { ManagersFilterBar } from "./ManagersFilterBar";

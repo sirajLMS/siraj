@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import { testLogger } from "../../../lib/testlogger";
+import { testLogger } from "@/shared/lib/testlogger";
 import type { ParentEntity, StudentEntity, UserEntity } from "../../types";
 import { db } from "../drizzleDb";
 import { parents, students, users } from "../schema";

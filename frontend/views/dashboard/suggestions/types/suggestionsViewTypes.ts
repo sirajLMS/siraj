@@ -1,9 +1,9 @@
-import type { SuggestionsLabels } from "@/frontend/messages/types/dashboard/suggestions/main";
 import type {
   AdminSuggestionRow,
   AdminSuggestionsSummary,
   SuggestionTab,
 } from "@/frontend/stores/adminSuggestionsStore";
+import type { SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 import type { SuggestionFormData } from "../schemas/suggestionFormSchema";
 
 export type { SuggestionsLabels };

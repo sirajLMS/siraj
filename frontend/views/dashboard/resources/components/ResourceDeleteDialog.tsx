@@ -3,7 +3,7 @@
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
-import type { ResourcesLabels } from "@/frontend/messages/types/dashboard/resources/main";
+import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 
 interface ResourceDeleteDialogProps {
   readonly labels: ResourcesLabels;

@@ -2,9 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import type { MessageSchema } from "@/frontend/messages/types/message";
 import { useTeacherOnboardingStore } from "@/frontend/stores/teacherOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
+import type { MessageSchema } from "@/shared/messages/types/message";
 import type { TeacherOnboardingFormData } from "./schemas/teacherOnboardingSchema";
 import { TeacherOnboardingView } from "./TeacherOnboardingView";
 

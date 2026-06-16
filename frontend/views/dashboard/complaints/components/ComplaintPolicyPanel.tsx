@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { ComplaintsParentLabels } from "@/frontend/messages/types/dashboard/complaints/main";
+import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 
 interface ComplaintPolicyPanelProps {
   readonly labels: ComplaintsParentLabels;

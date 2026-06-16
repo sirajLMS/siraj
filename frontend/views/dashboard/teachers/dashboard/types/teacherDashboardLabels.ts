@@ -1,1 +1,1 @@
-export type { TeacherDashboardLabels } from "@/frontend/messages/types/dashboard/teachers";
+export type { TeacherDashboardLabels } from "@/shared/messages/types/dashboard/teachers";

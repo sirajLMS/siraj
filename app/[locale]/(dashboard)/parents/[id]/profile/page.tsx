@@ -1,6 +1,6 @@
 import { getMessages } from "next-intl/server";
-import type { MessageSchema } from "@/frontend/messages/types/message";
 import ParentProfileContainer from "@/frontend/views/dashboard/parents/profile/ParentProfileContainer";
+import type { MessageSchema } from "@/shared/messages/types/message";
 
 interface PageProps {
   readonly params: Promise<{

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { MessageSchema } from "@/frontend/messages/types/message";
+import type { MessageSchema } from "@/shared/messages/types/message";
 
 export const createTeacherProfileSchema = (messages: MessageSchema["dashboard"]["teacherProfile"]["validation"]) => {
   return z.object({

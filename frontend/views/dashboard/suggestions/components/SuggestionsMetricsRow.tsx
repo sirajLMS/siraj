@@ -2,10 +2,10 @@
 
 import { CheckCircleOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import type { SuggestionsAdminLabels } from "@/frontend/messages/types/dashboard/suggestions/main";
 import type { AdminSuggestionsSummary } from "@/frontend/stores/adminSuggestionsStore";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { AdminQueueEfficiencyBanner } from "@/frontend/views/dashboard/shared/AdminQueueEfficiencyBanner";
+import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 
 interface SuggestionsMetricsRowProps {
   readonly summary: AdminSuggestionsSummary;

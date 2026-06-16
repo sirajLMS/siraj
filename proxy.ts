@@ -4,7 +4,7 @@
 
 import type { NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
-import { routing } from "@/frontend/i18n/routing";
+import { routing } from "@/shared/i18n/routing";
 
 // Create the next-intl middleware with localePrefix: 'never'
 const intlMiddleware = createMiddleware(routing);

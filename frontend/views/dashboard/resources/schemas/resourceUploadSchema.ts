@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ResourceValidationLabels } from "@/frontend/messages/types/dashboard/resources/main";
+import type { ResourceValidationLabels } from "@/shared/messages/types/dashboard/resources/main";
 
 export const resourceUploadSchema = (labels: ResourceValidationLabels) =>
   z.object({

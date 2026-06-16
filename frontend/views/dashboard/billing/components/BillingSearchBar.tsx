@@ -4,7 +4,7 @@
 import { FilterListOutlined } from "@mui/icons-material";
 import { Box, TextField } from "@mui/material";
 import { FilterButton } from "@/frontend/components/ui";
-import type { BillingLabels } from "@/frontend/messages/types/dashboard/billing";
+import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 
 interface BillingSearchBarProps {
   readonly value: string;

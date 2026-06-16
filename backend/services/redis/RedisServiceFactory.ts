@@ -70,7 +70,7 @@ export const getRedisService = (): IRedisService => {
  */
 export const resetRedisService = (): void => {
   if (instance) {
-    void instance.disconnect();
+    instance.disconnect();
     instance = null;
   }
 };

@@ -4,7 +4,7 @@ import { PaymentsOutlined } from "@mui/icons-material";
 import { InputAdornment, TextField, Typography } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import type { BillingManualLabels } from "@/frontend/messages/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 import type { ManualInvoiceFormData } from "../schemas/manualInvoiceSchema";
 
 interface ManualInvoiceFeeFieldProps {

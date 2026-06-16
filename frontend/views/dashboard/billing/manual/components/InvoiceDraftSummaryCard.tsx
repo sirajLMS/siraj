@@ -2,7 +2,7 @@
 
 import { InfoOutlined, ReceiptLongOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import type { BillingManualLabels } from "@/frontend/messages/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 
 interface InvoiceDraftSummaryCardProps {
   readonly labels: BillingManualLabels;

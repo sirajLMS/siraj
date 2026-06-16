@@ -1,10 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/frontend/i18n/routing";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { useStatusTrackingStore } from "@/frontend/stores/statusTrackingStore";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import { useRouter } from "@/shared/i18n/routing";
 import { StatusTrackingView } from "./StatusTrackingView";
 
 export function StatusTrackingContainer() {

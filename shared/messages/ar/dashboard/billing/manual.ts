@@ -1,4 +1,4 @@
-import type { BillingManualLabels } from "@/frontend/messages/types/dashboard/billing/manual";
+import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 
 export const billingManual: BillingManualLabels = {
   pageTitle: "إنشاء فاتورة يدوية",

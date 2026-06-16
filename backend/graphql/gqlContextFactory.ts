@@ -30,6 +30,27 @@ function getIpAddress(headersList: Headers): string {
 }
 
 /**
+ * Determine locale from cookies or headers
+ */
+function getLocale(headersList: Headers, cookieStore: Awaited<ReturnType<typeof cookies>>): string {
+  // 1. Try cookie
+  const localeCookie = cookieStore.get("NEXT_LOCALE")?.value;
+  if (localeCookie && ["ar", "en"].includes(localeCookie)) {
+    return localeCookie;
+  }
+
+  // 2. Try Accept-Language header
+  const acceptLanguage = headersList.get("accept-language");
+  if (acceptLanguage) {
+    if (acceptLanguage.includes("ar")) return "ar";
+    if (acceptLanguage.includes("en")) return "en";
+  }
+
+  // 3. Default
+  return "ar";
+}
+
+/**
  * Create GraphQL context from Next.js request
  * This extracts authentication information from headers and cookies
  */
@@ -47,12 +68,15 @@ export async function createGraphQLContext(): Promise<BaseContext> {
     logger.debug("[GraphQL Context] No auth cookies found in request");
   }
 
+  // Determine locale
+  const locale = getLocale(headersList, cookieStore);
+
   // Get user identity and IP
   const userId = await getUserIdFromRequest(headersList);
   const ipAddress = getIpAddress(headersList);
 
   // Create base context with user information
-  const baseContext = await createContext({ userId });
+  const baseContext = await createContext({ userId, locale });
 
   return {
     ...baseContext,
@@ -60,5 +84,6 @@ export async function createGraphQLContext(): Promise<BaseContext> {
     sessionId,
     ipAddress,
     cookies: cookieStore,
+    locale,
   };
 }

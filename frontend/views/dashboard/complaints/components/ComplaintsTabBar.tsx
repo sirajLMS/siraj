@@ -1,8 +1,8 @@
 "use client";
 
-import type { ComplaintsAdminLabels } from "@/frontend/messages/types/dashboard/complaints/main";
 import type { ComplaintTab } from "@/frontend/stores/adminComplaintsStore";
 import { AdminQueueTabBar, formatAdminQueueTabLabel } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
+import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
 
 interface ComplaintsTabBarProps {
   readonly activeTab: ComplaintTab;

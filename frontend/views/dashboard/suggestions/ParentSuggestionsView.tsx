@@ -49,7 +49,7 @@ export function ParentSuggestionsView({
   }, [showSuccess, onDismissSuccess]);
 
   const handleFormSubmit = () => {
-    void handleSubmit(data => {
+    handleSubmit(data => {
       onSubmit(data);
       reset();
     })();

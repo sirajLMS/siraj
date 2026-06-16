@@ -3,7 +3,7 @@ import type {
   teacherRecurringUnavailability,
   teacherVacationRequests,
 } from "@/backend/db/schema";
-import type { DayOfWeek } from "@/lib/enum";
+import type { DayOfWeek } from "@/shared/lib/enum";
 
 export type TeacherAvailabilityWindowSelectType = typeof teacherAvailabilityWindows.$inferSelect;
 export type TeacherAvailabilityWindowInsertInput = typeof teacherAvailabilityWindows.$inferInsert;

@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, Grid } from "@mui/material";
-import type { AdminViewLabels } from "@/frontend/messages/types/message";
 import type { ClassInstance } from "@/frontend/views/dashboard/types/dashboard";
+import type { AdminViewLabels } from "@/shared/messages/types/message";
 import { TimezoneWarningBanner } from "../teacher/TimezoneWarningBanner";
 import { ActivityHeatmap } from "./ActivityHeatmap";
 import { AdminActionsBar } from "./AdminActionsBar";

@@ -2,7 +2,7 @@ import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
-import { extToMime } from "@/utils/storage.utils";
+import { extToMime } from "@/shared/utils/storage.utils";
 import { loadListEntities, paginateStorageItems } from "../../shared/list-operations.helper";
 import { getBlobs } from "../shared";
 import type { VercelContext } from "../types";

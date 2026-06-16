@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, Grid, Typography } from "@mui/material";
-import type { ResourcesLabels } from "@/frontend/messages/types/dashboard/resources/main";
 import type { LearningResourceRow, ResourceFilterType, ResourceSortBy } from "@/frontend/stores/resourcesStore";
+import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 import { ResourceLibraryCard } from "./ResourceLibraryCard";
 import { ResourceLibraryHeader } from "./ResourceLibraryHeader";
 
