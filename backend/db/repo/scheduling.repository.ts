@@ -3,6 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
 import { classInstances, students, teacherAssignments } from "@/backend/db/schema";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
 // Extract the transaction type from Drizzle
@@ -21,7 +22,13 @@ export namespace SchedulingRepository {
   /**
    * Validates if a teacher is officially assigned to a student for a given time.
    */
-  async function validateTeacherAssignment(tx: DBTransaction, studentId: string, teacherId: string, startTime: Date) {
+  async function validateTeacherAssignment(
+    tx: DBTransaction,
+    studentId: string,
+    teacherId: string,
+    startTime: Date,
+    locale?: string
+  ) {
     const assignments = await tx
       .select({ id: teacherAssignments.id })
       .from(teacherAssignments)
@@ -35,8 +42,13 @@ export namespace SchedulingRepository {
       .limit(1);
 
     if (assignments.length === 0) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(
-        `Teacher ${teacherId} is not assigned to student ${studentId} for the scheduled time ${startTime.toISOString()}`
+        t("teacherNotAssigned", {
+          teacherId,
+          studentId,
+          startTime: startTime.toISOString(),
+        })
       );
     }
   }
@@ -56,7 +68,7 @@ export namespace SchedulingRepository {
   /**
    * Checks for overlapping class instances for the teacher, student, or zoom URL.
    */
-  async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParams) {
+  async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParams, locale?: string) {
     const { studentId, teacherId, startTime, endTime, zoomUrl, excludeId } = params;
     const overlapCondition = sql`(${classInstances.scheduledStartAt}, ${classInstances.scheduledEndAt}) OVERLAPS (${startTime}, ${endTime})`;
 
@@ -72,7 +84,10 @@ export namespace SchedulingRepository {
         )
       )
       .limit(1);
-    if (teacherOverlaps.length > 0) throw new Error("Teacher is already booked for this time period");
+    if (teacherOverlaps.length > 0) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("teacherBooked"));
+    }
 
     const studentOverlaps = await tx
       .select({ id: classInstances.id })
@@ -86,7 +101,10 @@ export namespace SchedulingRepository {
         )
       )
       .limit(1);
-    if (studentOverlaps.length > 0) throw new Error("Student is already booked for this time period");
+    if (studentOverlaps.length > 0) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("studentBooked"));
+    }
 
     if (zoomUrl) {
       const zoomOverlaps = await tx
@@ -101,7 +119,10 @@ export namespace SchedulingRepository {
           )
         )
         .limit(1);
-      if (zoomOverlaps.length > 0) throw new Error("Zoom meeting URL is already in use for this time period");
+      if (zoomOverlaps.length > 0) {
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(t("zoomInUse"));
+      }
     }
   }
 
@@ -142,24 +163,29 @@ export namespace SchedulingRepository {
 
   export const createClassInstance = async (
     input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.ClassInstanceEntity> => {
     const runner = async (t: DBTransaction) => {
       await acquireLocks(t, input.teacherId, input.studentId);
-      await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt);
+      await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt, locale);
       await TeacherAvailabilityRepository.validateBookingAvailability(
         input.teacherId,
         input.scheduledStartAt,
         input.scheduledEndAt,
         t
       );
-      await checkOverlaps(t, {
-        studentId: input.studentId,
-        teacherId: input.teacherId,
-        startTime: input.scheduledStartAt,
-        endTime: input.scheduledEndAt,
-        zoomUrl: input.zoomMeetingUrl,
-      });
+      await checkOverlaps(
+        t,
+        {
+          studentId: input.studentId,
+          teacherId: input.teacherId,
+          startTime: input.scheduledStartAt,
+          endTime: input.scheduledEndAt,
+          zoomUrl: input.zoomMeetingUrl,
+        },
+        locale
+      );
 
       if (input.quotaDeducted) {
         await t
@@ -186,11 +212,15 @@ export namespace SchedulingRepository {
   export const updateClassInstance = async (
     id: string,
     input: Partial<Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">>,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.ClassInstanceEntity> => {
     const runner = async (t: DBTransaction) => {
       const results = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
-      if (results.length === 0) throw new Error(`Class instance ${id} not found`);
+      if (results.length === 0) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("classInstanceNotFound", { id }));
+      }
       const existing = results[0];
 
       const studentId = input.studentId ?? existing.studentId;
@@ -203,16 +233,20 @@ export namespace SchedulingRepository {
       await acquireLocks(t, teacherId, studentId);
 
       if (!isBeingSoftDeleted) {
-        await validateTeacherAssignment(t, studentId, teacherId, startTime);
+        await validateTeacherAssignment(t, studentId, teacherId, startTime, locale);
         await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, startTime, endTime, t);
-        await checkOverlaps(t, {
-          studentId,
-          teacherId,
-          startTime,
-          endTime,
-          zoomUrl,
-          excludeId: id,
-        });
+        await checkOverlaps(
+          t,
+          {
+            studentId,
+            teacherId,
+            startTime,
+            endTime,
+            zoomUrl,
+            excludeId: id,
+          },
+          locale
+        );
       }
 
       await adjustQuotaOnUpdate(t, existing, input, isBeingSoftDeleted);
@@ -232,10 +266,17 @@ export namespace SchedulingRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const deleteClassInstance = async (id: string, tx?: DBTransaction): Promise<Types.ClassInstanceEntity> => {
+  export const deleteClassInstance = async (
+    id: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<Types.ClassInstanceEntity> => {
     const runner = async (t: DBTransaction) => {
       const results = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
-      if (results.length === 0) throw new Error(`Class instance ${id} not found`);
+      if (results.length === 0) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("classInstanceNotFound", { id }));
+      }
       const existing = results[0];
 
       if (existing.quotaDeducted && existing.deletedAt === null) {
@@ -255,18 +296,27 @@ export namespace SchedulingRepository {
   export const rescheduleClassInstance = async (
     originalClassId: string,
     input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.ClassInstanceEntity> => {
     const runner = async (t: DBTransaction) => {
       const results = await t.select().from(classInstances).where(eq(classInstances.id, originalClassId)).limit(1);
-      if (results.length === 0) throw new Error("Original class not found");
+      if (results.length === 0) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("originalClassNotFound"));
+      }
       const original = results[0];
-      if (original.id === input.id) throw new Error("A class cannot be rescheduled to itself");
+      if (original.id === input.id) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("cannotRescheduleToSelf"));
+      }
       if (original.executionState === "COMPLETED" || original.outcome === "TAKEN") {
-        throw new Error("Cannot reschedule a completed or taken class");
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("cannotRescheduleCompleted"));
       }
       if (original.isRescheduled) {
-        throw new Error("Cannot reschedule a class that has already been rescheduled");
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("cannotRescheduleAlreadyRescheduled"));
       }
 
       const newInstanceInput: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt"> = {
@@ -283,7 +333,8 @@ export namespace SchedulingRepository {
         t,
         newInstanceInput.studentId,
         newInstanceInput.teacherId,
-        newInstanceInput.scheduledStartAt
+        newInstanceInput.scheduledStartAt,
+        locale
       );
       await TeacherAvailabilityRepository.validateBookingAvailability(
         newInstanceInput.teacherId,
@@ -291,13 +342,17 @@ export namespace SchedulingRepository {
         newInstanceInput.scheduledEndAt,
         t
       );
-      await checkOverlaps(t, {
-        studentId: newInstanceInput.studentId,
-        teacherId: newInstanceInput.teacherId,
-        startTime: newInstanceInput.scheduledStartAt,
-        endTime: newInstanceInput.scheduledEndAt,
-        zoomUrl: newInstanceInput.zoomMeetingUrl,
-      });
+      await checkOverlaps(
+        t,
+        {
+          studentId: newInstanceInput.studentId,
+          teacherId: newInstanceInput.teacherId,
+          startTime: newInstanceInput.scheduledStartAt,
+          endTime: newInstanceInput.scheduledEndAt,
+          zoomUrl: newInstanceInput.zoomMeetingUrl,
+        },
+        locale
+      );
 
       const [created] = await t
         .insert(classInstances)
@@ -332,7 +387,7 @@ export namespace SchedulingRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const getDailyMetrics = async (date: Date, teacherId?: string, tx?: DBTransaction) => {
+  export const getDailyMetrics = async (date: Date, teacherId?: string, tx?: DBTransaction, _locale?: string) => {
     const runner = async (t: DBTransaction) => {
       const baseConditions = and(
         isNull(classInstances.deletedAt),
@@ -379,7 +434,7 @@ export namespace SchedulingRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const getDailySchedule = async (date: Date, teacherId?: string, tx?: DBTransaction) => {
+  export const getDailySchedule = async (date: Date, teacherId?: string, tx?: DBTransaction, _locale?: string) => {
     const runner = async (t: DBTransaction) => {
       const baseConditions = and(
         isNull(classInstances.deletedAt),

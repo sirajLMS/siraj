@@ -8,6 +8,7 @@ import {
   payments,
   systemSettings,
 } from "@/backend/db/schema";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -24,20 +25,18 @@ export namespace BillingRepository {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('invoice_' || ${invoiceId}::text))`);
   }
 
-  /**
-   * Helper to resolve exchange rate snapshot for billing entities
-   */
   async function resolveExchangeRateSnapshot(
     t: DBTransaction | typeof db,
     currency: string,
     snapshot?: string | null,
-    source?: string | null
+    source?: string | null,
+    locale?: string
   ): Promise<{ snapshot: string | null; source: string | null }> {
     if (snapshot || currency === "USD") {
       return { snapshot: snapshot ?? null, source: source ?? null };
     }
 
-    const rate = await getLatestExchangeRate(currency, "USD", t as DBTransaction);
+    const rate = await getLatestExchangeRate(currency, "USD", t as DBTransaction, locale);
     return {
       snapshot: rate.rate,
       source: rate.source || "SYSTEM_AUTO",
@@ -53,13 +52,15 @@ export namespace BillingRepository {
     input: { currency: string; exchangeRateSnapshot?: string | null; exchangeRateSource?: string | null } & Record<
       string,
       unknown
-    >
+    >,
+    locale?: string
   ): Promise<R> {
     const { snapshot, source } = await resolveExchangeRateSnapshot(
       t,
       input.currency,
       input.exchangeRateSnapshot,
-      input.exchangeRateSource
+      input.exchangeRateSource,
+      locale
     );
 
     const results = await t
@@ -77,12 +78,13 @@ export namespace BillingRepository {
   }
 
   /**
-   * Fetches the latest exchange rate for a currency pair.
+   * Get the latest exchange rate.
    */
   export const getLatestExchangeRate = async (
     fromCurrency: string,
     toCurrency: string,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.CurrencyExchangeRateSelectType> => {
     const t = tx || db;
     const results = await t
@@ -95,13 +97,15 @@ export namespace BillingRepository {
       .limit(1);
 
     if (results.length === 0) {
-      throw new Error(`No exchange rate found for ${fromCurrency} to ${toCurrency}`);
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("noExchangeRate", { fromCurrency, toCurrency }));
     }
     const latest = results[0];
 
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     if (latest.effectiveDate < twentyFourHoursAgo) {
-      throw new Error(`Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24h)`);
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("exchangeRateStale", { fromCurrency, toCurrency }));
     }
 
     return latest;
@@ -160,9 +164,10 @@ export namespace BillingRepository {
    */
   export const createInvoice = async (
     input: InvoiceCreateInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.InvoiceSelectType> => {
-    const runner = async (t: DBTransaction) => createBillingEntity<Types.InvoiceSelectType>(t, invoices, input);
+    const runner = async (t: DBTransaction) => createBillingEntity<Types.InvoiceSelectType>(t, invoices, input, locale);
     return tx ? runner(tx) : db.transaction(runner);
   };
 
@@ -171,9 +176,10 @@ export namespace BillingRepository {
    */
   export const recordPayment = async (
     input: PaymentRecordInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.PaymentSelectType> => {
-    const runner = async (t: DBTransaction) => createBillingEntity<Types.PaymentSelectType>(t, payments, input);
+    const runner = async (t: DBTransaction) => createBillingEntity<Types.PaymentSelectType>(t, payments, input, locale);
     return tx ? runner(tx) : db.transaction(runner);
   };
 
@@ -200,20 +206,27 @@ export namespace BillingRepository {
     newStatus: string,
     paidDate?: Date | null,
     expectedVersion?: number,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.InvoiceSelectType> => {
     const runner = async (t: DBTransaction) => {
       await acquireInvoiceLock(t, invoiceId);
 
       const results = await t.select().from(invoices).where(eq(invoices.id, invoiceId)).limit(1);
       if (results.length === 0) {
-        throw new Error(`Invoice ${invoiceId} not found`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("invoiceNotFound", { id: invoiceId }));
       }
       const current = results[0];
 
       if (expectedVersion !== undefined && current.version !== expectedVersion) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(
-          `Version mismatch for invoice ${invoiceId}. Expected ${expectedVersion}, got ${current.version}. Please retry.`
+          tFunc("invoiceVersionMismatch", {
+            id: invoiceId,
+            expectedVersion,
+            gotVersion: current.version,
+          })
         );
       }
 

@@ -4,6 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { users } from "@/backend/db/schema";
 import { PaginationArgsDefault } from "@/backend/graphql/pothos";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import type { PaginatedUsersResponseSelectType, PaginationArgs, UserCreateInput, UserEntity } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
@@ -26,10 +27,11 @@ export namespace UserRepository {
     return (await db.$count(users, eq(users.email, email))) > 0;
   };
 
-  export const findUserByIdOrThrow = async (id: string): Promise<UserEntity> => {
+  export const findUserByIdOrThrow = async (id: string, locale?: string): Promise<UserEntity> => {
     const user = await findById(id);
     if (!user) {
-      throw new Error(`User with ID ${id} not found`);
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("userNotFound", { id }));
     }
     return user;
   };
@@ -55,13 +57,14 @@ export namespace UserRepository {
     return await db.select().from(users).orderBy(users.createdAt).limit(opts.limit).offset(opts.offset);
   };
 
-  export const loadByIds = async (ids: string[]): Promise<(UserEntity | Error)[]> => {
+  export const loadByIds = async (ids: string[], locale?: string): Promise<(UserEntity | Error)[]> => {
     if (ids.length === 0) return [];
     const filteredUsers = await db.select().from(users).where(inArray(users.id, ids));
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
 
     return ids.map(id => {
       const matchingUser = filteredUsers.find(c => c.id === id);
-      return matchingUser || new Error(`User ${id} not found`);
+      return matchingUser || new Error(t("userNotFound", { id }));
     });
   };
 
@@ -99,10 +102,11 @@ export namespace UserRepository {
     };
   };
 
-  export const create = async (input: UserCreateInput): Promise<UserEntity> => {
+  export const create = async (input: UserCreateInput, locale?: string): Promise<UserEntity> => {
     const exists = await existsByEmail(input.email.value);
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
     if (exists) {
-      throw new Error(`User with email ${input.email.value} already exists`);
+      throw new Error(t("userEmailExists", { email: input.email.value }));
     }
 
     AuthUtils.validateUserName(input.name);
@@ -124,7 +128,7 @@ export namespace UserRepository {
       return result;
     } catch (err) {
       logger.error(err);
-      throw new Error(`Failed to create user with email: ${input.email.value}`, { cause: err });
+      throw new Error(t("userCreateFailed", { email: input.email.value }), { cause: err });
     }
   };
 

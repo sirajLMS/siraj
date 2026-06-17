@@ -1,3 +1,4 @@
+import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { DailyScheduleListPothosObject, DailyScheduleMetricsPothosObject } from "../pothos/schedule.pothos";
@@ -12,9 +13,10 @@ gqlSchemaBuilder.queryField("dailyScheduleMetrics", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        throw new Error("Unauthorized");
+        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+        throw new Error(tFunc("unauthorized"));
       }
-      return ScheduleService.getDailyMetrics(ctx.user.id, new Date(args.date), args.teacherId || undefined);
+      return ScheduleService.getDailyMetrics(ctx.user.id, new Date(args.date), args.teacherId || undefined, ctx.locale);
     },
   })
 );
@@ -29,12 +31,14 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
-        throw new Error("Unauthorized");
+        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+        throw new Error(tFunc("unauthorized"));
       }
       const rawList = await ScheduleService.getDailySchedule(
         ctx.user.id,
         new Date(args.date),
-        args.teacherId || undefined
+        args.teacherId || undefined,
+        ctx.locale
       );
 
       return rawList.map(item => ({

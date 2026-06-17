@@ -104,3 +104,22 @@ export type DailyScheduleListQueryVariables = Exact<{
 
 
 export type DailyScheduleListQuery = DailyScheduleListQuery_Query;
+
+export type WelcomeMessageQuery_Query = { welcomeMessage: string | null };
+
+
+export type WelcomeMessageQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type WelcomeMessageQuery = WelcomeMessageQuery_Query;
+
+export type TranslatedMessageQuery_Query = { translatedMessage: string | null };
+
+
+export type TranslatedMessageQueryVariables = Exact<{
+  key: string;
+  namespace: string;
+}>;
+
+
+export type TranslatedMessageQuery = TranslatedMessageQuery_Query;

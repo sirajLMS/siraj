@@ -14,6 +14,7 @@ import {
   teacherFiles,
   userFiles,
 } from "@/backend/db/schema/storage";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import type * as StorageTypes from "@/backend/types";
 
@@ -243,19 +244,23 @@ export namespace StorageDbRepository {
   };
 
   export const registerFileUsage = async (
-    input: StorageTypes.FileUsageRegisterInput
+    input: StorageTypes.FileUsageRegisterInput,
+    locale?: string
   ): Promise<StorageTypes.FileOperationResult> => {
     try {
       const { referenceTable, referenceId, usageType, filePath } = input;
 
       const file = await createFile(filePath);
-      await performJunctionInsert({
-        table: referenceTable,
-        fileId: file.id,
-        refId: referenceId,
-        type: usageType,
-        createdAt: new Date(),
-      });
+      await performJunctionInsert(
+        {
+          table: referenceTable,
+          fileId: file.id,
+          refId: referenceId,
+          type: usageType,
+          createdAt: new Date(),
+        },
+        locale
+      );
 
       return { success: true, message: "File usage registered successfully" };
     } catch (error) {
@@ -274,7 +279,7 @@ export namespace StorageDbRepository {
   /**
    * Helper to perform the actual junction table insertion in a type-safe way.
    */
-  async function performJunctionInsert(params: JunctionInsertParams): Promise<void> {
+  async function performJunctionInsert(params: JunctionInsertParams, locale?: string): Promise<void> {
     const { table, fileId, refId, type, createdAt } = params;
     switch (table) {
       case "users":
@@ -311,8 +316,10 @@ export namespace StorageDbRepository {
       case "class_instances":
         await db.insert(classInstanceFiles).values({ fileId, classInstanceId: refId, usageType: type, createdAt });
         break;
-      default:
-        throw new Error(`Unsupported table: ${table}`);
+      default: {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("unsupportedTable", { table }));
+      }
     }
   }
 

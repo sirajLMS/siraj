@@ -1,17 +1,19 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 
 export namespace ScheduleService {
-  export async function getDailyMetrics(userId: string, targetDate: Date, teacherId?: string) {
+  export async function getDailyMetrics(userId: string, targetDate: Date, teacherId?: string, locale?: string) {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, "dashboard.view_metrics");
       if (!isAuthorized) {
         logger.error("Unauthorized access to daily metrics", { userId });
-        throw new Error("Unauthorized: Missing dashboard.view_metrics permission");
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(t("unauthorizedViewMetrics"));
       }
 
-      const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacherId);
+      const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacherId, undefined, locale);
 
       // Inject ID for Apollo Cache
       return {
@@ -24,15 +26,16 @@ export namespace ScheduleService {
     }
   }
 
-  export async function getDailySchedule(userId: string, targetDate: Date, teacherId?: string) {
+  export async function getDailySchedule(userId: string, targetDate: Date, teacherId?: string, locale?: string) {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, "schedule.view_list");
       if (!isAuthorized) {
         logger.error("Unauthorized access to daily schedule", { userId });
-        throw new Error("Unauthorized: Missing schedule.view_list permission");
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(t("unauthorizedViewList"));
       }
 
-      const list = await SchedulingRepository.getDailySchedule(targetDate, teacherId);
+      const list = await SchedulingRepository.getDailySchedule(targetDate, teacherId, undefined, locale);
 
       // We will map it to the GraphQL object shape in the Pothos definitions
       return list;

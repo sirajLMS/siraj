@@ -9,6 +9,7 @@ import {
   recurringSchedules,
   users,
 } from "@/backend/db/schema";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -57,7 +58,8 @@ export namespace SoftDeleteRepository {
 
   export const softDelete = async <T extends Types.SoftDeletableTableName>(
     input: Types.SoftDeleteInput & { tableName: T },
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.SoftDeleteResult<Types.SoftDeletableEntityMap[T]>> => {
     const runner = async (t: DBTransaction) => {
       const config = SOFT_DELETE_TABLES[input.tableName];
@@ -71,7 +73,8 @@ export namespace SoftDeleteRepository {
         .limit(1);
 
       if (results.length === 0) {
-        throw new Error(`Active ${input.tableName} record ${input.entityId} not found`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("activeRecordNotFound", { tableName: input.tableName, entityId: input.entityId }));
       }
 
       const existing = results[0];
@@ -169,14 +172,16 @@ export namespace SoftDeleteRepository {
   export const hardDelete = async <T extends Types.SoftDeletableTableName>(
     tableName: T,
     entityId: string,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.SoftDeletableEntityMap[T]> => {
     const runner = async (t: DBTransaction) => {
       const config = SOFT_DELETE_TABLES[tableName];
       const deletedResults = await t.delete(config.table).where(eq(config.table.id, entityId)).returning();
 
       if (deletedResults.length === 0) {
-        throw new Error(`${tableName} record ${entityId} not found`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("recordNotFound", { tableName, entityId }));
       }
 
       return deletedResults[0] as Types.SoftDeletableEntityMap[T];

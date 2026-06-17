@@ -43,6 +43,7 @@ import type {
   TeachersDirectoryLabels,
   TeacherWeeklyScheduleLabels,
 } from "./dashboard/teachers";
+import type { ErrorsLabels } from "./errors";
 
 export type {
   AdminDashboardLabels,
@@ -85,6 +86,7 @@ export type {
 export type MessageSchema = {
   common: CommonLabels;
   auth: AuthLabels;
+  errors: ErrorsLabels;
   dashboard: {
     readonly nav: DashboardNavigationLabels;
     readonly layout: DashboardLayoutLabels;

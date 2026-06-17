@@ -5,6 +5,7 @@ import {
   teacherRecurringUnavailability,
   teacherVacationRequests,
 } from "@/backend/db/schema";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import { DayOfWeek, VacationRequestStatus } from "@/shared/lib/enum";
 
@@ -77,19 +78,21 @@ export namespace TeacherAvailabilityRepository {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('teacher_availability_' || ${teacherId}::text))`);
   }
 
-  function assertValidTimeRange(startTime: string, endTime: string): void {
+  async function assertValidTimeRange(startTime: string, endTime: string, locale?: string): Promise<void> {
     if (timeToMinutes(startTime) >= timeToMinutes(endTime)) {
-      throw new Error("startTime must be before endTime");
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("startTimeBeforeEndTime"));
     }
   }
 
   export const addAvailabilityWindow = async (
     input: Types.AvailabilityWindowInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherAvailabilityWindowSelectType> => {
     const runner = async (t: DBTransaction) => {
       await acquireAvailabilityLock(t, input.teacherId);
-      assertValidTimeRange(input.startTime, input.endTime);
+      await assertValidTimeRange(input.startTime, input.endTime, locale);
       const now = new Date();
 
       const [created] = await t
@@ -117,11 +120,12 @@ export namespace TeacherAvailabilityRepository {
 
   export const addRecurringUnavailability = async (
     input: Types.RecurringUnavailabilityInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherRecurringUnavailabilitySelectType> => {
     const runner = async (t: DBTransaction) => {
       await acquireAvailabilityLock(t, input.teacherId);
-      assertValidTimeRange(input.startTime, input.endTime);
+      await assertValidTimeRange(input.startTime, input.endTime, locale);
       const now = new Date();
 
       const [created] = await t
@@ -150,11 +154,13 @@ export namespace TeacherAvailabilityRepository {
 
   export const submitVacationRequest = async (
     input: Types.SubmitVacationRequestInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> => {
     const runner = async (t: DBTransaction) => {
       if (input.startAt >= input.endAt) {
-        throw new Error("Vacation startAt must be before endAt");
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("vacationStartBeforeEnd"));
       }
 
       await acquireAvailabilityLock(t, input.teacherId);
@@ -185,22 +191,25 @@ export namespace TeacherAvailabilityRepository {
 
   export const approveVacationRequest = async (
     input: Types.ProcessVacationRequestInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> => {
-    return processVacationRequest(input, VacationRequestStatus.APPROVED, tx);
+    return processVacationRequest(input, VacationRequestStatus.APPROVED, tx, locale);
   };
 
   export const rejectVacationRequest = async (
     input: Types.ProcessVacationRequestInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> => {
-    return processVacationRequest(input, VacationRequestStatus.REJECTED, tx);
+    return processVacationRequest(input, VacationRequestStatus.REJECTED, tx, locale);
   };
 
   async function processVacationRequest(
     input: Types.ProcessVacationRequestInput,
     status: VacationRequestStatus.APPROVED | VacationRequestStatus.REJECTED,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> {
     const runner = async (t: DBTransaction) => {
       const results = await t
@@ -210,14 +219,16 @@ export namespace TeacherAvailabilityRepository {
         .limit(1);
 
       if (results.length === 0) {
-        throw new Error(`Vacation request ${input.vacationRequestId} not found`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("vacationRequestNotFound", { id: input.vacationRequestId }));
       }
 
       const current = results[0];
       await acquireAvailabilityLock(t, current.teacherId);
 
       if ((current.status as VacationRequestStatus) !== VacationRequestStatus.PENDING) {
-        throw new Error(`Vacation request ${input.vacationRequestId} is not pending`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("vacationRequestNotPending", { id: input.vacationRequestId }));
       }
 
       const now = new Date();
@@ -240,7 +251,8 @@ export namespace TeacherAvailabilityRepository {
 
   export const cancelVacationRequest = async (
     vacationRequestId: string,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> => {
     const runner = async (t: DBTransaction) => {
       const results = await t
@@ -250,14 +262,16 @@ export namespace TeacherAvailabilityRepository {
         .limit(1);
 
       if (results.length === 0) {
-        throw new Error(`Vacation request ${vacationRequestId} not found`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("vacationRequestNotFound", { id: vacationRequestId }));
       }
 
       const current = results[0];
       await acquireAvailabilityLock(t, current.teacherId);
 
       if ((current.status as VacationRequestStatus) === VacationRequestStatus.CANCELLED) {
-        throw new Error(`Vacation request ${vacationRequestId} is already cancelled`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("vacationRequestAlreadyCancelled", { id: vacationRequestId }));
       }
 
       const now = new Date();
@@ -288,7 +302,11 @@ export namespace TeacherAvailabilityRepository {
   /**
    * Checks for approved vacations that overlap with the booking time
    */
-  async function checkVacationConflicts(t: DBTransaction | typeof db, input: BookingAvailabilityInput): Promise<void> {
+  async function checkVacationConflicts(
+    t: DBTransaction | typeof db,
+    input: BookingAvailabilityInput,
+    locale?: string
+  ): Promise<void> {
     const approvedVacations = await t
       .select({ id: teacherVacationRequests.id })
       .from(teacherVacationRequests)
@@ -302,7 +320,8 @@ export namespace TeacherAvailabilityRepository {
       .limit(1);
 
     if (approvedVacations.length > 0) {
-      throw new Error("Teacher is on approved vacation during the requested time");
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("teacherOnVacation"));
     }
   }
 
@@ -315,7 +334,8 @@ export namespace TeacherAvailabilityRepository {
     bookingDate: string,
     bookingDay: DayOfWeek,
     bookingStartMinutes: number,
-    bookingEndMinutes: number
+    bookingEndMinutes: number,
+    locale?: string
   ): Promise<void> {
     const patterns = await t
       .select()
@@ -340,7 +360,8 @@ export namespace TeacherAvailabilityRepository {
           timeToMinutes(pattern.endTime)
         )
       ) {
-        throw new Error("Teacher has a recurring unavailability during the requested time");
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("teacherUnavailabilityConflict"));
       }
     }
   }
@@ -354,7 +375,8 @@ export namespace TeacherAvailabilityRepository {
     bookingDate: string,
     bookingDay: DayOfWeek,
     bookingStartMinutes: number,
-    bookingEndMinutes: number
+    bookingEndMinutes: number,
+    locale?: string
   ): Promise<void> {
     const windows = await t
       .select()
@@ -375,7 +397,8 @@ export namespace TeacherAvailabilityRepository {
     });
 
     if (!matches) {
-      throw new Error("Requested time is outside teacher availability windows");
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("outsideAvailability"));
     }
   }
 
@@ -386,7 +409,8 @@ export namespace TeacherAvailabilityRepository {
     teacherId: string,
     startTime: Date,
     endTime: Date,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<void> => {
     const t = tx ?? db;
     const input: BookingAvailabilityInput = { teacherId, startTime, endTime };
@@ -395,8 +419,24 @@ export namespace TeacherAvailabilityRepository {
     const bookingStartMinutes = timeToMinutes(dateToTimeString(startTime));
     const bookingEndMinutes = timeToMinutes(dateToTimeString(endTime));
 
-    await checkVacationConflicts(t, input);
-    await checkRecurringUnavailability(t, input, bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes);
-    await validateAvailabilityWindows(t, input, bookingDate, bookingDay, bookingStartMinutes, bookingEndMinutes);
+    await checkVacationConflicts(t, input, locale);
+    await checkRecurringUnavailability(
+      t,
+      input,
+      bookingDate,
+      bookingDay,
+      bookingStartMinutes,
+      bookingEndMinutes,
+      locale
+    );
+    await validateAvailabilityWindows(
+      t,
+      input,
+      bookingDate,
+      bookingDay,
+      bookingStartMinutes,
+      bookingEndMinutes,
+      locale
+    );
   };
 }

@@ -3,6 +3,7 @@ import type { PgSelect } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { students } from "@/backend/db/schema";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import * as Types from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
 import { OrderSortDirection } from "@/shared/lib/enum";
@@ -88,8 +89,8 @@ export namespace StudentRepository {
     });
   };
 
-  export const create = async (input: Types.StudentCreateInput): Promise<Types.StudentEntity> => {
-    const err = await StudentUtils.validateName(input.name);
+  export const create = async (input: Types.StudentCreateInput, locale?: string): Promise<Types.StudentEntity> => {
+    const err = await StudentUtils.validateName(input.name, locale);
     if (err) throw new Error(err);
 
     const insertInput: Types.StudentEntityInput = {
@@ -110,28 +111,34 @@ export namespace StudentRepository {
       const [createdStudent] = await db.insert(students).values(insertInput).returning();
       return createdStudent;
     } catch {
-      throw new Error("Failed to create student");
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("studentCreateFailed"));
     }
   };
 
-  export const createList = async (input: Types.StudentCreateInput[]): Promise<Types.StudentEntity[]> => {
+  export const createList = async (
+    input: Types.StudentCreateInput[],
+    locale?: string
+  ): Promise<Types.StudentEntity[]> => {
     if (input.length === 0) return [];
     try {
-      return await Promise.all(input.map(item => create(item)));
+      return await Promise.all(input.map(item => create(item, locale)));
     } catch (error) {
-      throw new Error(`Failed to create students: ${error instanceof Error ? error.message : "Unknown error"}`, {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("studentCreateError", { message: error instanceof Error ? error.message : "Unknown error" }), {
         cause: error,
       });
     }
   };
 
-  export const loadByIds = async (ids: string[]): Promise<(Types.StudentDto | Error)[]> => {
+  export const loadByIds = async (ids: string[], locale?: string): Promise<(Types.StudentDto | Error)[]> => {
     if (ids.length === 0) return [];
     const foundStudents = await db.select().from(students).where(inArray(students.id, ids));
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
 
     return ids.map(id => {
       const s = foundStudents.find(c => c.id === id);
-      return s ? (StudentUtils.mapEntityToDto(s) as Types.StudentDto) : new Error(`Student ${id} not found`);
+      return s ? (StudentUtils.mapEntityToDto(s) as Types.StudentDto) : new Error(t("studentNotFound", { id }));
     });
   };
 
@@ -147,19 +154,28 @@ export namespace StudentRepository {
     return await db.$count(students);
   };
 
-  export const deleteById = async (id: string): Promise<Types.StudentEntity> => {
+  export const deleteById = async (id: string, locale?: string): Promise<Types.StudentEntity> => {
     const existingStudent = await findById(id);
-    if (!existingStudent) throw new Error(`Student ${id} not found`);
+    if (!existingStudent) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("studentNotFound", { id }));
+    }
     await db.delete(students).where(eq(students.id, id));
     return existingStudent;
   };
 
-  export const partiallyUpdate = async (input: Types.PartialStudentUpdateInput): Promise<Types.StudentEntity> => {
+  export const partiallyUpdate = async (
+    input: Types.PartialStudentUpdateInput,
+    locale?: string
+  ): Promise<Types.StudentEntity> => {
     const existingStudent = await findById(input.id);
-    if (!existingStudent) throw new Error(`Student ${input.id} not found`);
+    if (!existingStudent) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("studentNotFound", { id: input.id }));
+    }
 
     if (input.name) {
-      const nameErr = await StudentUtils.validateName(input.name);
+      const nameErr = await StudentUtils.validateName(input.name, locale);
       if (nameErr) throw new Error(nameErr);
     }
 
@@ -184,7 +200,8 @@ export namespace StudentRepository {
       const [updatedStudent] = await db.update(students).set(updateInput).where(eq(students.id, input.id)).returning();
       return updatedStudent;
     } catch {
-      throw new Error(`Failed to update student with ID ${input.id}.`);
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("studentUpdateFailed", { id: input.id }));
     }
   };
 
@@ -207,25 +224,34 @@ export namespace StudentRepository {
   async function adjustClassesQuota(
     t: DBTransaction,
     studentId: string,
-    updateFn: (current: Types.StudentEntity) => Record<string, unknown>,
-    expectedVersion?: number
+    updateFn: (current: Types.StudentEntity) => Record<string, unknown> | Promise<Record<string, unknown>>,
+    expectedVersion?: number,
+    locale?: string
   ): Promise<Types.StudentEntity> {
     await acquireStudentLock(t, studentId);
 
     const results = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
-    if (results.length === 0) throw new Error(`Student ${studentId} not found`);
+    if (results.length === 0) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("studentNotFound", { id: studentId }));
+    }
     const current = results[0];
 
     if (expectedVersion !== undefined && current.version !== expectedVersion) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(
-        `Version mismatch for student ${studentId}. Expected ${expectedVersion}, got ${current.version}.`
+        tFunc("studentVersionMismatch", {
+          id: studentId,
+          expectedVersion,
+          gotVersion: current.version,
+        })
       );
     }
 
     const [updated] = await t
       .update(students)
       .set({
-        ...updateFn(current),
+        ...(await updateFn(current)),
         version: sql`${students.version} + 1`,
         updatedAt: new Date(),
       })
@@ -239,21 +265,28 @@ export namespace StudentRepository {
     studentId: string,
     amount: number = 1,
     expectedVersion?: number,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.StudentEntity> => {
     const runner = async (t: DBTransaction) =>
       adjustClassesQuota(
         t,
         studentId,
-        current => {
+        async current => {
           if (current.classesRemaining < amount) {
+            const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
             throw new Error(
-              `Insufficient classes for student ${studentId}. Remaining: ${current.classesRemaining}, Required: ${amount}`
+              tFunc("insufficientClasses", {
+                id: studentId,
+                remaining: current.classesRemaining,
+                required: amount,
+              })
             );
           }
           return { classesRemaining: sql`${students.classesRemaining} - ${amount}` };
         },
-        expectedVersion
+        expectedVersion,
+        locale
       );
 
     return tx ? runner(tx) : db.transaction(runner);
@@ -263,7 +296,8 @@ export namespace StudentRepository {
     studentId: string,
     amount: number = 1,
     expectedVersion?: number,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.StudentEntity> => {
     const runner = async (t: DBTransaction) =>
       adjustClassesQuota(
@@ -273,7 +307,8 @@ export namespace StudentRepository {
           classesRemaining: sql`${students.classesRemaining} + ${amount}`,
           classesTotal: sql`${students.classesTotal} + ${amount}`,
         }),
-        expectedVersion
+        expectedVersion,
+        locale
       );
 
     return tx ? runner(tx) : db.transaction(runner);

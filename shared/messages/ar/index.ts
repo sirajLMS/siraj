@@ -32,10 +32,12 @@ import {
   directory as teachersDirectory,
   weeklySchedule as teacherWeeklySchedule,
 } from "./dashboard/teachers";
+import { errors } from "./errors";
 
 export const arTranslations = {
   common,
   auth,
+  errors,
   dashboard: {
     nav,
     layout,

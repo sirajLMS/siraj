@@ -1,6 +1,7 @@
 import { and, count, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { notificationDeliveries, userDeviceTokens } from "@/backend/db/schema";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import { NotificationDeliveryStatus } from "@/shared/lib/enum";
 
@@ -23,16 +24,18 @@ export namespace NotificationRepository {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('notification_delivery_' || ${deliveryId}::text))`);
   }
 
-  function assertValidStatusTransition(
+  async function assertValidStatusTransition(
     currentStatus: NotificationDeliveryStatus,
-    nextStatus: NotificationDeliveryStatus
-  ): void {
+    nextStatus: NotificationDeliveryStatus,
+    locale?: string
+  ): Promise<void> {
     if (currentStatus === nextStatus) {
       return;
     }
 
     if (currentStatus === NotificationDeliveryStatus.FAILED) {
-      throw new Error(`Cannot transition delivery from FAILED to ${nextStatus}`);
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("cannotTransitionFailed", { status: nextStatus }));
     }
 
     if (nextStatus === NotificationDeliveryStatus.FAILED) {
@@ -40,7 +43,8 @@ export namespace NotificationRepository {
     }
 
     if (STATUS_ORDER[nextStatus] <= STATUS_ORDER[currentStatus]) {
-      throw new Error(`Invalid delivery status transition from ${currentStatus} to ${nextStatus}`);
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("invalidTransition", { currentStatus, nextStatus }));
     }
   }
 
@@ -166,7 +170,8 @@ export namespace NotificationRepository {
 
   export const updateDeliveryStatus = async (
     input: Types.UpdateDeliveryStatusInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.NotificationDeliverySelectType> => {
     const runner = async (t: DBTransaction) => {
       await acquireDeliveryLock(t, input.deliveryId);
@@ -179,11 +184,12 @@ export namespace NotificationRepository {
         .limit(1);
 
       if (results.length === 0) {
-        throw new Error(`Notification delivery ${input.deliveryId} not found`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("notificationNotFound", { id: input.deliveryId }));
       }
 
       const current = results[0];
-      assertValidStatusTransition(current.status as NotificationDeliveryStatus, input.status);
+      await assertValidStatusTransition(current.status as NotificationDeliveryStatus, input.status, locale);
 
       const statusTimestamps = buildStatusTimestamps(input.status, now);
 
@@ -212,7 +218,8 @@ export namespace NotificationRepository {
   export const recordDeliveryOpened = async (
     deliveryId: string,
     webhookPayload?: Record<string, unknown> | null,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.NotificationDeliverySelectType> => {
     return updateDeliveryStatus(
       {
@@ -220,7 +227,8 @@ export namespace NotificationRepository {
         status: NotificationDeliveryStatus.OPENED,
         webhookPayload: webhookPayload ?? null,
       },
-      tx
+      tx,
+      locale
     );
   };
 
@@ -253,14 +261,16 @@ export namespace NotificationRepository {
    */
   export const handleDeliveryWebhook = async (
     input: DeliveryWebhookInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.NotificationDeliverySelectType> => {
     const { providerMessageId, status, webhookPayload, failureReason } = input;
 
     const runner = async (t: DBTransaction) => {
       const delivery = await getDeliveryByProviderMessageId(providerMessageId, t);
       if (!delivery) {
-        throw new Error(`Notification delivery with provider message id ${providerMessageId} not found`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("notificationProviderNotFound", { providerMessageId }));
       }
 
       return updateDeliveryStatus(
@@ -271,7 +281,8 @@ export namespace NotificationRepository {
           failureReason: failureReason ?? null,
           webhookPayload: webhookPayload ?? null,
         },
-        t
+        t,
+        locale
       );
     };
 

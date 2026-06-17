@@ -2,7 +2,9 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
 import { notificationDeliveries, teacherBankingDetailsHistory, teacherPayments, teachers } from "@/backend/db/schema";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
+
 import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -21,23 +23,30 @@ export namespace TeacherBankingRepository {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('teacher_banking_' || ${teacherId}::text))`);
   }
 
-  function assertNoBankingFieldChanges(
+  async function assertNoBankingFieldChanges(
     current: Types.TeacherBankingDetailsHistorySelectType,
-    updates: Partial<Types.TeacherBankingDetailsHistoryInsertInput>
-  ): void {
+    updates: Partial<Types.TeacherBankingDetailsHistoryInsertInput>,
+    locale?: string
+  ): Promise<void> {
     for (const field of BANKING_DETAIL_FIELDS) {
       if (updates[field] !== undefined && updates[field] !== current[field]) {
-        throw new Error("Cannot modify banking fields directly. Close the current record and insert a new one.");
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(t("cannotModifyBankingFields"));
       }
     }
   }
 
-  function assertRecordIsMutable(record: Types.TeacherBankingDetailsHistorySelectType): void {
+  async function assertRecordIsMutable(
+    record: Types.TeacherBankingDetailsHistorySelectType,
+    locale?: string
+  ): Promise<void> {
     if (record.validUntil !== null) {
-      throw new Error("Cannot modify historical banking records");
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("cannotModifyHistoricalBanking"));
     }
     if (record.verifiedAt !== null) {
-      throw new Error("Cannot modify verified banking records");
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("cannotModifyVerifiedBanking"));
     }
   }
 
@@ -70,7 +79,8 @@ export namespace TeacherBankingRepository {
 
   export const submitBankingDetails = async (
     input: Types.SubmitBankingDetailsInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherBankingDetailsHistorySelectType> => {
     const runner = async (t: DBTransaction) => {
       await acquireBankingLock(t, input.teacherId);
@@ -91,7 +101,7 @@ export namespace TeacherBankingRepository {
           beneficiaryName: input.beneficiaryName,
           bankName: input.bankName,
           accountNumber: input.accountNumber,
-          routingNumber: input.routingNumber,
+          routingNumber: input.routingNumber ?? null,
           swiftBic: input.swiftBic,
           iban: input.iban,
           validFrom: now,
@@ -107,7 +117,8 @@ export namespace TeacherBankingRepository {
         .limit(1);
 
       if (teacherResults.length === 0) {
-        throw new Error(`Teacher ${input.teacherId} not found`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("teacherNotFound", { id: input.teacherId }));
       }
 
       await NotificationRepository.createDelivery(
@@ -129,7 +140,8 @@ export namespace TeacherBankingRepository {
 
   export const verifyBankingDetails = async (
     input: Types.VerifyBankingDetailsInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherBankingDetailsHistorySelectType> => {
     const runner = async (t: DBTransaction) => {
       const results = await t
@@ -139,18 +151,21 @@ export namespace TeacherBankingRepository {
         .limit(1);
 
       if (results.length === 0) {
-        throw new Error(`Banking details ${input.bankingDetailsId} not found`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("bankingDetailsNotFound", { id: input.bankingDetailsId }));
       }
 
       const record = results[0];
       await acquireBankingLock(t, record.teacherId);
 
       if (record.validUntil !== null) {
-        throw new Error("Cannot verify historical banking records");
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("cannotVerifyHistoricalBanking"));
       }
 
       if (record.verifiedAt !== null) {
-        throw new Error("Banking details are already verified");
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("bankingDetailsAlreadyVerified"));
       }
 
       const now = new Date();
@@ -173,7 +188,8 @@ export namespace TeacherBankingRepository {
   async function updateRecord(
     bankingDetailsId: string,
     updates: Partial<Types.TeacherBankingDetailsHistoryInsertInput>,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherBankingDetailsHistorySelectType> {
     const runner = async (t: DBTransaction) => {
       const results = await t
@@ -183,13 +199,14 @@ export namespace TeacherBankingRepository {
         .limit(1);
 
       if (results.length === 0) {
-        throw new Error(`Banking details ${bankingDetailsId} not found`);
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("bankingDetailsNotFound", { id: bankingDetailsId }));
       }
 
       const record = results[0];
       await acquireBankingLock(t, record.teacherId);
-      assertRecordIsMutable(record);
-      assertNoBankingFieldChanges(record, updates);
+      await assertRecordIsMutable(record, locale);
+      await assertNoBankingFieldChanges(record, updates, locale);
 
       const [updated] = await t
         .update(teacherBankingDetailsHistory)
@@ -222,9 +239,19 @@ export namespace TeacherBankingRepository {
     return updateRecord(bankingDetailsId, updates, tx);
   };
 
+  export const partiallyUpdateBankingDetails = async (
+    bankingDetailsId: string,
+    updates: Partial<Types.TeacherBankingDetailsHistoryInsertInput>,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<Types.TeacherBankingDetailsHistorySelectType> => {
+    return updateRecord(bankingDetailsId, updates, tx, locale);
+  };
+
   export const createTeacherPayment = async (
     input: Types.CreateTeacherPaymentInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherPaymentSelectType> => {
     const runner = async (t: DBTransaction) => {
       await acquireBankingLock(t, input.teacherId);
@@ -236,9 +263,10 @@ export namespace TeacherBankingRepository {
         : await getVerifiedActiveBankingDetails(input.teacherId, t);
 
       if (!bankingDetails) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
         const message = isTestPayment
-          ? `No active banking details found for teacher ${input.teacherId}`
-          : `No verified active banking details found for teacher ${input.teacherId}`;
+          ? tFunc("noActiveBankingDetails", { id: input.teacherId })
+          : tFunc("noVerifiedActiveBankingDetails", { id: input.teacherId });
         throw new Error(message);
       }
 

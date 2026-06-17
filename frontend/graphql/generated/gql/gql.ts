@@ -22,6 +22,8 @@ type Documents = {
     "\n  mutation refreshToken {\n    refreshToken {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n        permissions\n        role\n        avatarUrl\n        notificationCount\n      }\n    }\n  }\n": typeof types.RefreshTokenDocument,
     "\n  query dailyScheduleMetrics($date: String!, $teacherId: String) {\n    dailyScheduleMetrics(date: $date, teacherId: $teacherId) {\n      id\n      total\n      regular\n      trial\n      advance\n      rescheduled\n      suspended\n      taken\n      pending\n      activated\n      running\n      absent\n      leave\n    }\n  }\n": typeof types.DailyScheduleMetricsDocument,
     "\n  query dailyScheduleList($date: String!, $teacherId: String) {\n    dailyScheduleList(date: $date, teacherId: $teacherId) {\n      id\n      studentTime\n      yourTime\n      duration\n      status\n      student {\n        id\n        name\n      }\n      teacher {\n        id\n        name\n      }\n    }\n  }\n": typeof types.DailyScheduleListDocument,
+    "\n  query welcomeMessage {\n    welcomeMessage\n  }\n": typeof types.WelcomeMessageDocument,
+    "\n  query translatedMessage($key: String!, $namespace: String!) {\n    translatedMessage(key: $key, namespace: $namespace)\n  }\n": typeof types.TranslatedMessageDocument,
 };
 const documents: Documents = {
     "\n  query me {\n    me {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n": types.MeDocument,
@@ -32,6 +34,8 @@ const documents: Documents = {
     "\n  mutation refreshToken {\n    refreshToken {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n        permissions\n        role\n        avatarUrl\n        notificationCount\n      }\n    }\n  }\n": types.RefreshTokenDocument,
     "\n  query dailyScheduleMetrics($date: String!, $teacherId: String) {\n    dailyScheduleMetrics(date: $date, teacherId: $teacherId) {\n      id\n      total\n      regular\n      trial\n      advance\n      rescheduled\n      suspended\n      taken\n      pending\n      activated\n      running\n      absent\n      leave\n    }\n  }\n": types.DailyScheduleMetricsDocument,
     "\n  query dailyScheduleList($date: String!, $teacherId: String) {\n    dailyScheduleList(date: $date, teacherId: $teacherId) {\n      id\n      studentTime\n      yourTime\n      duration\n      status\n      student {\n        id\n        name\n      }\n      teacher {\n        id\n        name\n      }\n    }\n  }\n": types.DailyScheduleListDocument,
+    "\n  query welcomeMessage {\n    welcomeMessage\n  }\n": types.WelcomeMessageDocument,
+    "\n  query translatedMessage($key: String!, $namespace: String!) {\n    translatedMessage(key: $key, namespace: $namespace)\n  }\n": types.TranslatedMessageDocument,
 };
 
 /**
@@ -80,6 +84,14 @@ export function graphql(source: "\n  query dailyScheduleMetrics($date: String!, 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query dailyScheduleList($date: String!, $teacherId: String) {\n    dailyScheduleList(date: $date, teacherId: $teacherId) {\n      id\n      studentTime\n      yourTime\n      duration\n      status\n      student {\n        id\n        name\n      }\n      teacher {\n        id\n        name\n      }\n    }\n  }\n"): (typeof documents)["\n  query dailyScheduleList($date: String!, $teacherId: String) {\n    dailyScheduleList(date: $date, teacherId: $teacherId) {\n      id\n      studentTime\n      yourTime\n      duration\n      status\n      student {\n        id\n        name\n      }\n      teacher {\n        id\n        name\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query welcomeMessage {\n    welcomeMessage\n  }\n"): (typeof documents)["\n  query welcomeMessage {\n    welcomeMessage\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query translatedMessage($key: String!, $namespace: String!) {\n    translatedMessage(key: $key, namespace: $namespace)\n  }\n"): (typeof documents)["\n  query translatedMessage($key: String!, $namespace: String!) {\n    translatedMessage(key: $key, namespace: $namespace)\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

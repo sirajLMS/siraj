@@ -73,5 +73,12 @@ At the bottom of the plan, list the exact terminal commands you will run to veri
 - **Mock Data & Dummy Views Ban (Production)**: Mock data, dummy layouts, and placeholder views are strictly forbidden in production application code. Whenever a sprint involves a dummy page, you MUST migrate it fully to real components, replacing mock queries with real stateful Apollo hooks (`useQuery`) linked to the real generated backend types.
 - **Storybook Exception**: While mock data is banned in production, you **MUST KEEP AND USE** dummy data, mock stores, and mock layouts for Storybook files (`*.stories.tsx`). Storybooks are critical for isolated component testing and design, and they must remain entirely decoupled from real Apollo queries and real database states. Do not delete mock data if it is used by a `.stories.tsx` file.
 
+### G. Backend Localization & next-intl (`backend/`)
+- **No Hardcoded Errors/Messages**: Hardcoded user-facing error strings, warnings, or messages are strictly forbidden in all repositories, services, and GraphQL resolvers.
+- **Translation Helper**: Always use the translation helper utility `getBackendTranslations({ locale?: string, namespace?: string })` (which wraps `next-intl/server`'s `getTranslations`).
+- **Locale Propagation**: Ensure the locale is propagated through parameter signature (e.g. `locale?: string`) down from the GraphQL resolver context (`ctx.locale`) into the services and then to the repositories.
+- **Graceful Fallback**: If called outside of a Next.js HTTP request context (e.g. in test suites, seeders, or scripts), next-intl should gracefully fall back to the default locale `"ar"` (or the requested locale).
+
 ## 4. Final Validation
 - You must ensure the project passes strict TypeScript compilation by running `bun tsgo`. Do not leave unresolved type errors.
+
