@@ -7,10 +7,62 @@ export interface CachedResult {
   details: string;
 }
 
+// In-memory cache
+const mtimeCache: Map<string, number> = new Map();
+const resultCache: Map<string, { status: string; details: string }> = new Map();
+let isLoaded = false;
+
 export function ensureCacheDir(): void {
   if (!existsSync(CONFIG.CACHE_DIR)) {
     mkdirSync(CONFIG.CACHE_DIR, { recursive: true });
   }
+}
+
+export function loadCache(): void {
+  if (isLoaded) return;
+  ensureCacheDir();
+
+  if (existsSync(CONFIG.TIMESTAMP_FILE)) {
+    const content = readFileSync(CONFIG.TIMESTAMP_FILE, "utf8");
+    content.split("\n").forEach(line => {
+      const parts = line.split(" ");
+      if (parts.length >= 2) {
+        mtimeCache.set(parts[0], Number.parseInt(parts[1], 10));
+      }
+    });
+  }
+
+  if (existsSync(CONFIG.RESULTS_FILE)) {
+    const content = readFileSync(CONFIG.RESULTS_FILE, "utf8");
+    content.split("\n").forEach(line => {
+      const parts = line.split("§§§");
+      if (parts.length >= 2) {
+        resultCache.set(parts[0], {
+          status: parts[1],
+          details: (parts[2] || "").replaceAll("|||NEWLINE|||", "\n"),
+        });
+      }
+    });
+  }
+
+  isLoaded = true;
+}
+
+export function saveCache(): void {
+  ensureCacheDir();
+
+  const mtimeContent = Array.from(mtimeCache.entries())
+    .map(([file, mtime]) => `${file} ${mtime}`)
+    .join("\n");
+  writeFileSync(CONFIG.TIMESTAMP_FILE, mtimeContent + (mtimeContent ? "\n" : ""), "utf8");
+
+  const resultsContent = Array.from(resultCache.entries())
+    .map(([file, { status, details }]) => {
+      const encodedDetails = details.replaceAll("\n", "|||NEWLINE|||");
+      return `${file}§§§${status}§§§${encodedDetails}`;
+    })
+    .join("\n");
+  writeFileSync(CONFIG.RESULTS_FILE, resultsContent + (resultsContent ? "\n" : ""), "utf8");
 }
 
 export function getFileMtime(filePath: string): number {
@@ -22,47 +74,29 @@ export function getFileMtime(filePath: string): number {
 }
 
 export function getCachedMtime(filePath: string): number {
-  if (!existsSync(CONFIG.TIMESTAMP_FILE)) return 0;
-  const content = readFileSync(CONFIG.TIMESTAMP_FILE, "utf8");
-  const line = content.split("\n").find(l => l.startsWith(`${filePath} `));
-  if (!line) return 0;
-  return Number.parseInt(line.split(" ")[1], 10);
+  loadCache();
+  return mtimeCache.get(filePath) || 0;
 }
 
 export function updateCachedMtime(filePath: string, mtime: number): void {
-  let content = "";
-  if (existsSync(CONFIG.TIMESTAMP_FILE)) {
-    content = readFileSync(CONFIG.TIMESTAMP_FILE, "utf8");
-  }
-  const lines = content.split("\n").filter(l => l.trim() && !l.startsWith(`${filePath} `));
-  lines.push(`${filePath} ${mtime}`);
-  writeFileSync(CONFIG.TIMESTAMP_FILE, lines.join("\n") + "\n");
+  loadCache();
+  mtimeCache.set(filePath, mtime);
 }
 
 export function saveResult(filePath: string, status: string, details: string): void {
-  let content = "";
-  if (existsSync(CONFIG.RESULTS_FILE)) {
-    content = readFileSync(CONFIG.RESULTS_FILE, "utf8");
-  }
-  const lines = content.split("\n").filter(l => l.trim() && !l.startsWith(`${filePath}§§§`));
-  // Encode newlines
-  const encodedDetails = details.replaceAll("\n", "|||NEWLINE|||");
-  lines.push(`${filePath}§§§${status}§§§${encodedDetails}`);
-  writeFileSync(CONFIG.RESULTS_FILE, lines.join("\n") + "\n");
+  loadCache();
+  resultCache.set(filePath, { status, details });
 }
 
 export function getCachedResult(filePath: string): CachedResult | null {
-  if (!existsSync(CONFIG.RESULTS_FILE)) return null;
-  const content = readFileSync(CONFIG.RESULTS_FILE, "utf8");
-  const line = content.split("\n").find(l => l.startsWith(`${filePath}§§§`));
-  if (!line) return null;
+  loadCache();
+  const cached = resultCache.get(filePath);
+  if (!cached) return null;
 
-  const parts = line.split("§§§");
-  const status = parts[1] as "perfect" | "warning" | "error";
   return {
-    file: parts[0],
-    status,
-    details: parts[2].replaceAll("|||NEWLINE|||", "\n"),
+    file: filePath,
+    status: cached.status as "perfect" | "warning" | "error",
+    details: cached.details,
   };
 }
 
@@ -73,4 +107,7 @@ export function clearCache(): void {
   if (existsSync(CONFIG.RESULTS_FILE)) {
     unlinkSync(CONFIG.RESULTS_FILE);
   }
+  mtimeCache.clear();
+  resultCache.clear();
+  isLoaded = true; // Mark as loaded to prevent reloading empty files
 }

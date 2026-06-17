@@ -17,6 +17,9 @@ export const CONFIG = {
   CODESCENE_BIN: process.env.CODESCENE_BIN || "cs",
 };
 
+// Disable automatic version check on every run to prevent console clutter during parallel execution
+process.env.CS_DISABLE_VERSION_CHECK = "true";
+
 // 1. Try to load token from local file first (highest priority for persistence)
 if (fs.existsSync(CONFIG.TOKEN_FILE)) {
   try {
@@ -34,6 +37,9 @@ if (fs.existsSync(CONFIG.TOKEN_FILE)) {
 if (!CONFIG.CS_TOKEN) {
   CONFIG.CS_TOKEN = process.env.CS_ACCESS_TOKEN || "";
 }
+
+// Disable automatic version check to prevent spam during parallel execution
+process.env.CS_DISABLE_VERSION_CHECK = "true";
 
 let resolvedCsBin: string | null = null;
 

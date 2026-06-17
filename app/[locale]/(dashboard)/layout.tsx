@@ -15,7 +15,7 @@ export default async function DashboardLayout({
   const { locale } = await params;
 
   if (!userId || !context) {
-    redirect(`/${locale}/auth/login`);
+    redirect(`/${locale}/login`);
   }
 
   // We verified access server-side.

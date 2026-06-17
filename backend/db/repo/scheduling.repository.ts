@@ -293,6 +293,69 @@ export namespace SchedulingRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
+  /**
+   * Validates if a class instance can be rescheduled.
+   */
+  async function validateRescheduleState(
+    original: Types.ClassInstanceEntity,
+    input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
+    locale?: string
+  ) {
+    if (original.id === input.id) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("cannotRescheduleToSelf"));
+    }
+    if (original.executionState === "COMPLETED" || original.outcome === "TAKEN") {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("cannotRescheduleCompleted"));
+    }
+    if (original.isRescheduled) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("cannotRescheduleAlreadyRescheduled"));
+    }
+  }
+
+  /**
+   * Performs technical validations for rescheduling (locks, assignments, availability, overlaps).
+   */
+  async function performRescheduleValidations(
+    t: DBTransaction,
+    input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
+    locale?: string
+  ) {
+    await acquireLocks(t, input.teacherId, input.studentId);
+    await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt, locale);
+    await TeacherAvailabilityRepository.validateBookingAvailability(
+      input.teacherId,
+      input.scheduledStartAt,
+      input.scheduledEndAt,
+      t
+    );
+    await checkOverlaps(
+      t,
+      {
+        studentId: input.studentId,
+        teacherId: input.teacherId,
+        startTime: input.scheduledStartAt,
+        endTime: input.scheduledEndAt,
+        zoomUrl: input.zoomMeetingUrl,
+      },
+      locale
+    );
+  }
+
+  /**
+   * Adjusts student quota if the original class had quota deducted.
+   */
+  async function handleOriginalQuotaRestoration(t: DBTransaction, original: Types.ClassInstanceEntity) {
+    if (original.quotaDeducted && original.deletedAt === null) {
+      await t
+        .update(students)
+        .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
+        .where(eq(students.id, original.studentId));
+    }
+  }
+
   export const rescheduleClassInstance = async (
     originalClassId: string,
     input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
@@ -306,18 +369,8 @@ export namespace SchedulingRepository {
         throw new Error(tFunc("originalClassNotFound"));
       }
       const original = results[0];
-      if (original.id === input.id) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("cannotRescheduleToSelf"));
-      }
-      if (original.executionState === "COMPLETED" || original.outcome === "TAKEN") {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("cannotRescheduleCompleted"));
-      }
-      if (original.isRescheduled) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("cannotRescheduleAlreadyRescheduled"));
-      }
+
+      await validateRescheduleState(original, input, locale);
 
       const newInstanceInput: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt"> = {
         ...input,
@@ -328,31 +381,7 @@ export namespace SchedulingRepository {
         rateCurrency: input.rateCurrency ?? original.rateCurrency,
       };
 
-      await acquireLocks(t, newInstanceInput.teacherId, newInstanceInput.studentId);
-      await validateTeacherAssignment(
-        t,
-        newInstanceInput.studentId,
-        newInstanceInput.teacherId,
-        newInstanceInput.scheduledStartAt,
-        locale
-      );
-      await TeacherAvailabilityRepository.validateBookingAvailability(
-        newInstanceInput.teacherId,
-        newInstanceInput.scheduledStartAt,
-        newInstanceInput.scheduledEndAt,
-        t
-      );
-      await checkOverlaps(
-        t,
-        {
-          studentId: newInstanceInput.studentId,
-          teacherId: newInstanceInput.teacherId,
-          startTime: newInstanceInput.scheduledStartAt,
-          endTime: newInstanceInput.scheduledEndAt,
-          zoomUrl: newInstanceInput.zoomMeetingUrl,
-        },
-        locale
-      );
+      await performRescheduleValidations(t, newInstanceInput, locale);
 
       const [created] = await t
         .insert(classInstances)
@@ -374,12 +403,7 @@ export namespace SchedulingRepository {
         })
         .where(eq(classInstances.id, originalClassId));
 
-      if (original.quotaDeducted && original.deletedAt === null) {
-        await t
-          .update(students)
-          .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
-          .where(eq(students.id, original.studentId));
-      }
+      await handleOriginalQuotaRestoration(t, original);
 
       return created;
     };
@@ -397,18 +421,30 @@ export namespace SchedulingRepository {
 
       const metrics = await t
         .select({
-          total: sql<number>`CAST(COUNT(*) AS INTEGER)`,
-          regular: sql<number>`CAST(SUM(CASE WHEN ${classInstances.classType} = 'REGULAR' THEN 1 ELSE 0 END) AS INTEGER)`,
-          trial: sql<number>`CAST(SUM(CASE WHEN ${classInstances.classType} = 'TRIAL' THEN 1 ELSE 0 END) AS INTEGER)`,
-          advance: sql<number>`CAST(SUM(CASE WHEN ${classInstances.classType} = 'ADVANCE' THEN 1 ELSE 0 END) AS INTEGER)`,
-          rescheduled: sql<number>`CAST(SUM(CASE WHEN ${classInstances.isRescheduled} = true THEN 1 ELSE 0 END) AS INTEGER)`,
-          suspended: sql<number>`CAST(SUM(CASE WHEN ${classInstances.isFrozen} = true THEN 1 ELSE 0 END) AS INTEGER)`,
-          taken: sql<number>`CAST(SUM(CASE WHEN ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END) AS INTEGER)`,
-          pending: sql<number>`CAST(SUM(CASE WHEN ${classInstances.outcome} = 'PENDING' THEN 1 ELSE 0 END) AS INTEGER)`,
-          activated: sql<number>`CAST(SUM(CASE WHEN ${classInstances.executionState} = 'ACTIVATED' THEN 1 ELSE 0 END) AS INTEGER)`,
-          running: sql<number>`CAST(SUM(CASE WHEN ${classInstances.executionState} = 'ACTIVATED' AND ${classInstances.actualStartAt} IS NOT NULL AND ${classInstances.actualEndAt} IS NULL THEN 1 ELSE 0 END) AS INTEGER)`,
-          absent: sql<number>`CAST(SUM(CASE WHEN ${classInstances.outcome} IN ('ABSENT_STUDENT', 'ABSENT_TEACHER') THEN 1 ELSE 0 END) AS INTEGER)`,
-          leave: sql<number>`CAST(SUM(CASE WHEN ${classInstances.outcome} = 'EXCUSED' THEN 1 ELSE 0 END) AS INTEGER)`,
+          total: sql<number>`count(*)`.mapWith(Number),
+          regular: sql<number>`sum(case when ${classInstances.classType} = 'REGULAR' then 1 else 0 end)`.mapWith(
+            Number
+          ),
+          trial: sql<number>`sum(case when ${classInstances.classType} = 'TRIAL' then 1 else 0 end)`.mapWith(Number),
+          advance: sql<number>`sum(case when ${classInstances.classType} = 'ADVANCE' then 1 else 0 end)`.mapWith(
+            Number
+          ),
+          rescheduled: sql<number>`sum(case when ${classInstances.isRescheduled} = true then 1 else 0 end)`.mapWith(
+            Number
+          ),
+          suspended: sql<number>`sum(case when ${classInstances.isFrozen} = true then 1 else 0 end)`.mapWith(Number),
+          taken: sql<number>`sum(case when ${classInstances.outcome} = 'TAKEN' then 1 else 0 end)`.mapWith(Number),
+          pending: sql<number>`sum(case when ${classInstances.outcome} = 'PENDING' then 1 else 0 end)`.mapWith(Number),
+          activated:
+            sql<number>`sum(case when ${classInstances.executionState} = 'ACTIVATED' then 1 else 0 end)`.mapWith(
+              Number
+            ),
+          running:
+            sql<number>`sum(case when ${classInstances.executionState} = 'ACTIVATED' and ${classInstances.actualStartAt} is not null and ${classInstances.actualEndAt} is null then 1 else 0 end)`.mapWith(
+              Number
+            ),
+          absent: sql<number>`sum(case when ${classInstances.outcome} = 'ABSENT' then 1 else 0 end)`.mapWith(Number),
+          leave: sql<number>`sum(case when ${classInstances.outcome} = 'LEAVE' then 1 else 0 end)`.mapWith(Number),
         })
         .from(classInstances)
         .where(baseConditions);
@@ -443,7 +479,7 @@ export namespace SchedulingRepository {
       );
 
       // Using standard joins because findMany raised type errors with SQL<unknown> and missing relations
-      const { users } = await import("@/backend/db/schema");
+      const { students, teachers } = await import("@/backend/db/schema");
       const { inArray } = await import("drizzle-orm");
 
       const rows = await t
@@ -453,14 +489,19 @@ export namespace SchedulingRepository {
         .from(classInstances)
         .where(baseConditions);
 
-      const userIds = Array.from(new Set(rows.flatMap(r => [r.classInstance.studentId, r.classInstance.teacherId])));
-      const usersData = userIds.length > 0 ? await t.select().from(users).where(inArray(users.id, userIds)) : [];
-      const userMap = new Map(usersData.map(u => [u.id, u]));
+      const studentIds = Array.from(new Set(rows.map(r => r.classInstance.studentId)));
+      const teacherIds = Array.from(new Set(rows.map(r => r.classInstance.teacherId)));
+
+      const studentsData = studentIds.length > 0 ? await t.select().from(students).where(inArray(students.id, studentIds)) : [];
+      const teachersData = teacherIds.length > 0 ? await t.select().from(teachers).where(inArray(teachers.id, teacherIds)) : [];
+
+      const studentMap = new Map(studentsData.map(s => [s.id, s]));
+      const teacherMap = new Map(teachersData.map(tc => [tc.id, tc]));
 
       return rows.map(r => ({
         ...r.classInstance,
-        student: userMap.get(r.classInstance.studentId),
-        teacher: userMap.get(r.classInstance.teacherId),
+        student: studentMap.get(r.classInstance.studentId),
+        teacher: teacherMap.get(r.classInstance.teacherId),
       }));
     };
 

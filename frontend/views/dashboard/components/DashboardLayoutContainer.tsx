@@ -129,7 +129,7 @@ export function DashboardLayoutContainer({ children }: DashboardLayoutContainerP
         error={error}
         user={user}
         onRetry={() => refetch()}
-        onLoginRedirect={() => router.push(`/${locale}/auth/login`)}
+        onLoginRedirect={() => router.push(`/${locale}/login`)}
         t={t}
       />
     );

@@ -29,6 +29,7 @@ ${COLORS.YELLOW}Flags:${COLORS.NC}
   --file <path> Check a single file
   --full        Force full check of all files (ignore incremental cache)
   --reset       Clear incremental cache
+  --update      Update CodeScene CLI to the latest version
   --help, -h    Display this help message
 
 ${COLORS.YELLOW}Examples:${COLORS.NC}
@@ -36,6 +37,7 @@ ${COLORS.YELLOW}Examples:${COLORS.NC}
   bun run codescene --scan --full
   bun run codescene --file src/components/MyComponent.tsx
   bun run codescene --reset
+  bun run codescene --update
 `);
 }
 
@@ -43,7 +45,7 @@ function checkVersion() {
   const csBin = resolveCodesceneBin();
   const csVersionResult = spawnSync(csBin, ["version"], {
     encoding: "utf8",
-    env: process.env,
+    env: { ...process.env, CS_DISABLE_VERSION_CHECK: "true" },
   });
   if (csVersionResult.error) {
     logError("Failed to execute CodeScene CLI: " + csVersionResult.error.message);
@@ -51,6 +53,20 @@ function checkVersion() {
   }
   const version = csVersionResult.stdout?.trim() || "unknown";
   logSuccess(`CodeScene CLI installed: ${COLORS.BLUE}${version}${COLORS.NC}`);
+}
+
+function updateCodeScene() {
+  const csBin = resolveCodesceneBin();
+  logInfo("Updating CodeScene CLI...");
+  const result = spawnSync(csBin, ["update"], {
+    stdio: "inherit",
+    env: { ...process.env, CS_DISABLE_VERSION_CHECK: "true" },
+  });
+  if (result.status === 0) {
+    logSuccess("CodeScene CLI updated successfully.");
+  } else {
+    logError("Failed to update CodeScene CLI.");
+  }
 }
 
 function maskToken(token: string): string {
@@ -102,7 +118,7 @@ function verifyToken(token: string): { isValid: boolean; output: string } {
   const testResult = spawnSync(csBin, ["check", testFileRel], {
     cwd: PROJECT_ROOT,
     encoding: "utf8",
-    env: { ...process.env, CS_ACCESS_TOKEN: token },
+    env: { ...process.env, CS_ACCESS_TOKEN: token, CS_DISABLE_VERSION_CHECK: "true" },
   });
   const testOutput = (testResult.stdout || "") + (testResult.stderr || "");
   const isValid =
@@ -147,34 +163,16 @@ async function configureToken() {
   logSuccess(`New token verified and ready to use (${maskToken(CONFIG.CS_TOKEN)})`);
 }
 
-async function main() {
-  const args = process.argv.slice(2);
-
-  if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
-    printHelp();
-    return;
-  }
-
-  if (args.includes("--reset")) {
-    clearCache();
-    logSuccess("Cache cleared.");
-    return;
-  }
-
-  globalThis.console.log("");
-  logInfo("🔍 CodeScene Health Checker");
-  globalThis.console.log("");
-
+function handleSystemChecks() {
   if (!isCsInstalled()) {
     logWarning("CodeScene CLI (cs) is not installed");
     if (!installCodeScene()) {
       process.exit(1);
     }
   }
+}
 
-  checkVersion();
-  await configureToken();
-
+async function handleAction(args: string[]) {
   if (args.includes("--file")) {
     const fileIndex = args.indexOf("--file");
     const filePath = args[fileIndex + 1];
@@ -193,6 +191,39 @@ async function main() {
     logError("Invalid arguments. Use --help for usage information.");
     process.exit(1);
   }
+}
+
+async function main() {
+  // Disable automatic version check for individual file scans to avoid noise and rate limiting
+  process.env.CS_DISABLE_VERSION_CHECK = "true";
+
+  const args = process.argv.slice(2);
+
+  if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
+    printHelp();
+    return;
+  }
+
+  if (args.includes("--update")) {
+    delete process.env.CS_DISABLE_VERSION_CHECK;
+    updateCodeScene();
+    return;
+  }
+
+  if (args.includes("--reset")) {
+    clearCache();
+    logSuccess("Incremental cache cleared.");
+    if (!args.includes("--scan") && !args.includes("--file")) return;
+  }
+
+  logInfo("🔍 CodeScene Health Checker");
+  globalThis.console.log("");
+
+  handleSystemChecks();
+  checkVersion();
+  await configureToken();
+
+  await handleAction(args);
 
   globalThis.console.log("");
   logSuccess("All done! 🎉");

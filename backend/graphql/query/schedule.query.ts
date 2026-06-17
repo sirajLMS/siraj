@@ -48,7 +48,7 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
         duration: 30, // Simplified map
         status: item.outcome || item.executionState,
         student: { id: item.studentId, name: item.student?.name || "Unknown" },
-        teacher: { id: item.teacherId, name: item.teacher?.name || "Unknown" },
+        teacher: { id: item.teacherId, name: "Unknown" },
       }));
     },
   })

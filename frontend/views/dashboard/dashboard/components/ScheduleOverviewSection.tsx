@@ -2,6 +2,7 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, Paper, TextField, Typography } from "@mui/material";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { SectionPanel } from "@/frontend/components/ui";
 import type { ScheduleOverviewData } from "@/frontend/views/dashboard/types/dashboard";
 import { ScheduleFilters } from "./ScheduleFilters";
@@ -44,6 +45,7 @@ export function ScheduleOverviewSection({
   teacherPlaceholder,
   teacherValue,
   submitLabel,
+  teachers,
   rows,
   headers,
   statusLabels,
@@ -93,18 +95,21 @@ export function ScheduleOverviewSection({
         }
       >
         {/* Filters */}
-        <Box sx={theme => ({ px: 3, py: 2.5, borderBottom: `1px solid ${theme.palette.border.light}` })}>
-          <ScheduleFilters
-            dateLabel={dateLabel}
-            dateValue={dateValue}
-            teacherPlaceholder={teacherPlaceholder}
-            teacherValue={teacherValue}
-            submitLabel={submitLabel}
-            onDateChange={onDateChange}
-            onTeacherChange={onTeacherChange}
-            onSubmit={onSubmit}
-          />
-        </Box>
+        <RequirePermission permissions={["schedule.filter_advanced"]}>
+          <Box sx={theme => ({ px: 3, py: 2.5, borderBottom: `1px solid ${theme.palette.border.light}` })}>
+            <ScheduleFilters
+              dateLabel={dateLabel}
+              dateValue={dateValue}
+              teacherPlaceholder={teacherPlaceholder}
+              teacherValue={teacherValue}
+              submitLabel={submitLabel}
+              teachers={teachers}
+              onDateChange={onDateChange}
+              onTeacherChange={onTeacherChange}
+              onSubmit={onSubmit}
+            />
+          </Box>
+        </RequirePermission>
 
         {/* Table */}
         <ScheduleOverviewDataGrid

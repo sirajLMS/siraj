@@ -1,8 +1,18 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import { join, relative } from "node:path";
 import { glob } from "glob";
-import { ensureCacheDir, getCachedMtime, getCachedResult, getFileMtime, saveResult, updateCachedMtime } from "./cache";
+import {
+  ensureCacheDir,
+  getCachedMtime,
+  getCachedResult,
+  getFileMtime,
+  loadCache,
+  saveCache,
+  saveResult,
+  updateCachedMtime,
+} from "./cache";
 import { COLORS, logError, logInfo, logSuccess, PROJECT_ROOT, resolveCodesceneBin } from "./config";
 
 const STATE_FILE = join(PROJECT_ROOT, ".quality-gate-state.json");
@@ -74,7 +84,7 @@ export function checkSingleFile(filePath: string): void {
   const result = spawnSync(csBin, ["check", relPath], {
     cwd: PROJECT_ROOT,
     encoding: "utf8",
-    env: process.env,
+    env: { ...process.env, CS_DISABLE_VERSION_CHECK: "true" },
   });
   const output = (result.stdout || "") + (result.stderr || "");
   globalThis.console.log(output);
@@ -106,7 +116,23 @@ export function checkSingleFile(filePath: string): void {
   }
 }
 
+// Concurrency pool handler
+async function pool<T>(items: T[], concurrency: number, fn: (item: T) => Promise<void>): Promise<void> {
+  const workers = new Set<Promise<void>>();
+  for (const item of items) {
+    if (workers.size >= concurrency) {
+      await Promise.race(workers);
+    }
+    const p = fn(item).then(() => {
+      workers.delete(p);
+    });
+    workers.add(p);
+  }
+  await Promise.all(workers);
+}
+
 export async function runHealthCheck(forceFull = false): Promise<void> {
+  loadCache();
   ensureCacheDir();
 
   const tsConfigIgnores = getTsConfigIgnores();
@@ -149,15 +175,19 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
     errorFiles: [],
   };
 
-  for (const file of files) {
+  const concurrency = Math.max(1, os.cpus().length - 1);
+  logInfo(`🚀 Using ${concurrency} threads`);
+
+  await pool(files, concurrency, async file => {
     const isChanged = filesToCheck.includes(file);
     if (isChanged) {
-      processChangedFile(file, results);
+      await processChangedFile(file, results);
     } else {
       processCachedFile(file, results);
     }
-  }
+  });
 
+  saveCache();
   printSummary(results);
   updateQualityStateIfOwned(results);
 
@@ -166,32 +196,64 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
   }
 }
 
-function processChangedFile(file: string, results: CheckResults): void {
-  const filePath = join(PROJECT_ROOT, file);
-  const csBin = resolveCodesceneBin();
-  const result = spawnSync(csBin, ["check", file], {
-    cwd: PROJECT_ROOT,
-    encoding: "utf8",
-    env: process.env,
-  });
-  const output = (result.stdout || "") + (result.stderr || "");
+async function executeCodeScene(
+  csBin: string,
+  file: string
+): Promise<{ output: string; exitCode: number; errorMsg: string }> {
+  let output = "";
+  let exitCode: number;
+  let errorMsg = "";
 
-  if (result.error) {
-    results.errorCount++;
-    results.errorFiles.push(file);
-    globalThis.console.log(`${COLORS.RED}❌ ${file}${COLORS.NC}`);
-    globalThis.console.log(`    Failed to run CodeScene CLI: ${result.error.message}`);
-    saveResult(file, "error", result.error.message);
-    return;
+  try {
+    if (typeof Bun === "undefined") {
+      const { spawn } = await import("node:child_process");
+      const proc = spawn(csBin, ["check", file], {
+        cwd: PROJECT_ROOT,
+        env: { ...process.env, CS_DISABLE_VERSION_CHECK: "true" },
+      });
+
+      const stdoutChunks: Buffer[] = [];
+      const stderrChunks: Buffer[] = [];
+
+      proc.stdout.on("data", data => stdoutChunks.push(data));
+      proc.stderr.on("data", data => stderrChunks.push(data));
+
+      exitCode = await new Promise<number>(resolve => {
+        proc.on("close", (code: number) => resolve(code));
+        proc.on("error", (err: Error) => {
+          errorMsg = err.message;
+          resolve(1);
+        });
+      });
+
+      output = Buffer.concat(stdoutChunks).toString() + Buffer.concat(stderrChunks).toString();
+    } else {
+      const proc = Bun.spawn([csBin, "check", file], {
+        cwd: PROJECT_ROOT,
+        stdout: "pipe",
+        stderr: "pipe",
+        env: { ...process.env, CS_DISABLE_VERSION_CHECK: "true" },
+      });
+      output = await new Response(proc.stdout).text();
+      const stderrOutput = await new Response(proc.stderr).text();
+      output += stderrOutput;
+      exitCode = await proc.exited;
+    }
+  } catch (err: unknown) {
+    errorMsg = err instanceof Error ? err.message : String(err);
+    exitCode = 1;
   }
 
+  return { output, exitCode, errorMsg };
+}
+
+function parseCodeSceneIssues(output: string): string[] {
   const lines = output
     .split("\n")
     .map(l => l.trim())
     .filter(Boolean);
 
-  // Filter for actual issues, ignoring the informational "Code health score" lines
-  const issues = lines.filter(line => {
+  return lines.filter(line => {
     const isScoreLine = /info:.*Code health score:/i.test(line);
     if (isScoreLine) return false;
     return (
@@ -200,8 +262,25 @@ function processChangedFile(file: string, results: CheckResults): void {
       line.includes("unauthorized")
     );
   });
+}
 
-  const hasError = result.status !== 0 || issues.some(i => /^(error|err|license|unauthorized)/i.test(i));
+async function processChangedFile(file: string, results: CheckResults): Promise<void> {
+  const filePath = join(PROJECT_ROOT, file);
+  const csBin = resolveCodesceneBin();
+
+  const { output, exitCode, errorMsg } = await executeCodeScene(csBin, file);
+
+  if (errorMsg) {
+    results.errorCount++;
+    results.errorFiles.push(file);
+    globalThis.console.log(`${COLORS.RED}❌ ${file}${COLORS.NC}`);
+    globalThis.console.log(`    Failed to run CodeScene CLI: ${errorMsg}`);
+    saveResult(file, "error", errorMsg);
+    return;
+  }
+
+  const issues = parseCodeSceneIssues(output);
+  const hasError = exitCode !== 0 || issues.some(i => /^(error|err|license|unauthorized)/i.test(i));
   const hasWarning = issues.some(i => /^(warn|arn|info|nfo)/i.test(i));
 
   if (hasError) {
@@ -213,8 +292,8 @@ function processChangedFile(file: string, results: CheckResults): void {
         globalThis.console.log(`    ${i}`);
       });
       saveResult(file, "error", issues.join("\n"));
-    } else if (result.status !== 0) {
-      globalThis.console.log(`    Command failed with exit code ${result.status}`);
+    } else if (exitCode !== 0) {
+      globalThis.console.log(`    Command failed with exit code ${exitCode}`);
       globalThis.console.log(`    Output: ${output.slice(0, 200)}${output.length > 200 ? "..." : ""}`);
       saveResult(file, "error", output);
     }

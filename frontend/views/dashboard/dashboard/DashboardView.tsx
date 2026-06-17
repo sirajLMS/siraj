@@ -1,5 +1,6 @@
 "use client";
 
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer } from "@/frontend/components/ui";
 import type { MetricItem, ScheduleOverviewData } from "@/frontend/views/dashboard/types/dashboard";
 import { ScheduleOverviewSection } from "./components/ScheduleOverviewSection";
@@ -27,6 +28,7 @@ export function DashboardView({
   teacherPlaceholder,
   teacherValue,
   submitLabel,
+  teachers,
   rows,
   headers,
   statusLabels,
@@ -41,34 +43,39 @@ export function DashboardView({
   return (
     <PageContainer>
       {/* Today Classes Section */}
-      <TodayClassesSection
-        title={todayClassesTitle}
-        lastUpdated={lastUpdated}
-        metrics={metrics}
-        onMetricClick={onMetricClick}
-      />
+      <RequirePermission permissions={["dashboard.view_metrics"]}>
+        <TodayClassesSection
+          title={todayClassesTitle}
+          lastUpdated={lastUpdated}
+          metrics={metrics}
+          onMetricClick={onMetricClick}
+        />
+      </RequirePermission>
 
       {/* Schedule Overview Section */}
-      <ScheduleOverviewSection
-        title={scheduleTitle}
-        searchPlaceholder={searchPlaceholder}
-        searchValue={searchValue}
-        dateLabel={dateLabel}
-        dateValue={dateValue}
-        teacherPlaceholder={teacherPlaceholder}
-        teacherValue={teacherValue}
-        submitLabel={submitLabel}
-        rows={rows}
-        headers={headers}
-        statusLabels={statusLabels}
-        detailsLabel={detailsLabel}
-        emptyMessage={emptyMessage}
-        showingText={showingText}
-        onSearchChange={onSearchChange}
-        onDateChange={onDateChange}
-        onTeacherChange={onTeacherChange}
-        onSubmit={onSubmit}
-      />
+      <RequirePermission permissions={["schedule.view_list"]}>
+        <ScheduleOverviewSection
+          title={scheduleTitle}
+          searchPlaceholder={searchPlaceholder}
+          searchValue={searchValue}
+          dateLabel={dateLabel}
+          dateValue={dateValue}
+          teacherPlaceholder={teacherPlaceholder}
+          teacherValue={teacherValue}
+          submitLabel={submitLabel}
+          teachers={teachers}
+          rows={rows}
+          headers={headers}
+          statusLabels={statusLabels}
+          detailsLabel={detailsLabel}
+          emptyMessage={emptyMessage}
+          showingText={showingText}
+          onSearchChange={onSearchChange}
+          onDateChange={onDateChange}
+          onTeacherChange={onTeacherChange}
+          onSubmit={onSubmit}
+        />
+      </RequirePermission>
     </PageContainer>
   );
 }

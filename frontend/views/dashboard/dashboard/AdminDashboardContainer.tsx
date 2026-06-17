@@ -1,31 +1,207 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
+// Import MUI icons for the metrics
+import {
+  AssignmentTurnedInOutlined,
+  CalendarToday,
+  CancelOutlined,
+  CheckCircleOutlineOutlined,
+  EventRepeatOutlined,
+  GroupAddOutlined,
+  HistoryOutlined,
+  MenuBookOutlined,
+  PendingActionsOutlined,
+  PersonOffOutlined,
+  QuizOutlined,
+  ScienceOutlined,
+} from "@mui/icons-material";
 import { useTranslations } from "next-intl";
-import { useDashboardStore } from "@/frontend/stores/mockDashboardStore";
-import type { ClassStatus } from "@/frontend/views/dashboard/types/dashboard";
+import { usersQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
+import {
+  dailyScheduleListQueryDocument,
+  dailyScheduleMetricsQueryDocument,
+} from "@/frontend/graphql/sharedDocuments/schedule.documents";
+import { useDashboardStore } from "@/frontend/stores/dashboardStore";
+import { useUserStore } from "@/frontend/stores/userStore";
+import type { ClassStatus, MetricItem, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
 import { DashboardView } from "./DashboardView";
 
 export function AdminDashboardContainer() {
   const t = useTranslations("dashboard");
 
-  const todayClasses = useDashboardStore(state => state.todayClasses);
-  const lastUpdatedKey = useDashboardStore(state => state.lastUpdated);
-  const filters = useDashboardStore(state => state.filters);
-  const scheduleRows = useDashboardStore(state => state.scheduleRows);
-  const setDateFilter = useDashboardStore(state => state.setDateFilter);
-  const setTeacherFilter = useDashboardStore(state => state.setTeacherFilter);
-  const setSearchQuery = useDashboardStore(state => state.setSearchQuery);
+  // Load user details and RBAC validation hook
+  const { hasPermission } = useUserStore();
+
+  // Filter state managed via the new real Zustand store
+  const { filters, setDateFilter, setTeacherFilter, setSearchQuery, setSelectedStatus } = useDashboardStore();
+
+  // Fetch metrics using active filters
+  const {
+    data: metricsData,
+    loading: loadingMetrics,
+    refetch: refetchMetrics,
+  } = useQuery(dailyScheduleMetricsQueryDocument, {
+    variables: {
+      date: filters.date,
+      teacherId: filters.teacherId || null,
+    },
+  });
+
+  // Fetch daily list using active filters
+  const {
+    data: listData,
+    loading: loadingList,
+    refetch: refetchList,
+  } = useQuery(dailyScheduleListQueryDocument, {
+    variables: {
+      date: filters.date,
+      teacherId: filters.teacherId || null,
+    },
+  });
+
+  // Fetch teachers list (users having the teacher permission)
+  const { data: usersData, loading: loadingUsers } = useQuery(usersQueryDocument);
 
   const handleSubmit = () => {
-    // Placeholder for future refetch
+    void refetchMetrics();
+    void refetchList();
   };
 
-  const cleanedLastUpdatedKey = lastUpdatedKey.startsWith("dashboard.")
-    ? lastUpdatedKey.replace("dashboard.", "")
-    : lastUpdatedKey;
-  const translatedLastUpdated = t(cleanedLastUpdatedKey);
+  const rawUsers = usersData?.users ?? [];
+  const teachers = rawUsers
+    .filter(u => u.permissions?.includes("schedule.view_assigned") && u.role !== "Academy Admin")
+    .map(u => ({
+      id: u.id ?? "",
+      name: u.name ?? "",
+    }));
 
-  const filteredRows = scheduleRows.filter(row => {
+  const handleMetricClick = (key: string) => {
+    // Enforce dashboard.filter_metrics permission for card clicking
+    if (!hasPermission("dashboard.filter_metrics")) {
+      return;
+    }
+    // Toggle the selected status
+    if (filters.selectedStatus === key) {
+      setSelectedStatus(null);
+    } else {
+      setSelectedStatus(key);
+    }
+  };
+
+  // Map API metrics back to the required frontend MetricItem[] structure
+  const rawMetrics = metricsData?.dailyScheduleMetrics;
+  const metricsList: MetricItem[] = [
+    { key: "total", count: rawMetrics?.total ?? 0, labelKey: "dashboard.admin.metrics.total", icon: CalendarToday },
+    {
+      key: "regular",
+      count: rawMetrics?.regular ?? 0,
+      labelKey: "dashboard.admin.metrics.regular",
+      icon: MenuBookOutlined,
+    },
+    { key: "trial", count: rawMetrics?.trial ?? 0, labelKey: "dashboard.admin.metrics.trial", icon: ScienceOutlined },
+    {
+      key: "evaluation",
+      count: rawMetrics?.advance ?? 0,
+      labelKey: "dashboard.admin.metrics.evaluation",
+      icon: AssignmentTurnedInOutlined,
+    },
+    {
+      key: "makeup",
+      count: rawMetrics?.running ?? 0,
+      labelKey: "dashboard.admin.metrics.makeup",
+      icon: HistoryOutlined,
+    },
+    {
+      key: "testing",
+      count: rawMetrics?.activated ?? 0,
+      labelKey: "dashboard.admin.metrics.testing",
+      icon: QuizOutlined,
+    },
+    {
+      key: "pending",
+      count: rawMetrics?.pending ?? 0,
+      labelKey: "dashboard.admin.metrics.pending",
+      icon: PendingActionsOutlined,
+    },
+    {
+      key: "done",
+      count: rawMetrics?.taken ?? 0,
+      labelKey: "dashboard.admin.metrics.done",
+      icon: CheckCircleOutlineOutlined,
+    },
+    {
+      key: "rescheduled",
+      count: rawMetrics?.rescheduled ?? 0,
+      labelKey: "dashboard.admin.metrics.rescheduled",
+      icon: EventRepeatOutlined,
+    },
+    {
+      key: "cancelled",
+      count: rawMetrics?.suspended ?? 0,
+      labelKey: "dashboard.admin.metrics.cancelled",
+      icon: CancelOutlined,
+    },
+    {
+      key: "noShow",
+      count: rawMetrics?.absent ?? 0,
+      labelKey: "dashboard.admin.metrics.noShow",
+      icon: PersonOffOutlined,
+    },
+    {
+      key: "needCover",
+      count: rawMetrics?.leave ?? 0,
+      labelKey: "dashboard.admin.metrics.needCover",
+      icon: GroupAddOutlined,
+    },
+  ];
+
+  // Helper to format ISO dates to the "hh:mm AM/PM - hh:mm AM/PM" format expected by the UI
+  const formatTimeRange = (isoString: string, durationMinutes: number): string => {
+    try {
+      const start = new Date(isoString);
+      if (Number.isNaN(start.getTime())) return "";
+      const end = new Date(start.getTime() + durationMinutes * 60000);
+
+      const formatTime = (date: Date) => {
+        let hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, "0");
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours}:${minutes} ${ampm}`;
+      };
+
+      return `${formatTime(start)} - ${formatTime(end)}`;
+    } catch {
+      return "";
+    }
+  };
+
+  // Map and filter raw schedule list to rows
+  const rawList = listData?.dailyScheduleList ?? [];
+  const mappedRows: ScheduleRow[] = rawList.map(item => {
+    // Determine the status mapping safely
+    let status: ClassStatus = "pending";
+    if (
+      item.status &&
+      ["scheduled", "in_progress", "pending", "completed", "cancelled", "absent"].includes(item.status)
+    ) {
+      status = item.status as ClassStatus;
+    }
+
+    return {
+      classId: `#CLS-${item.id}`,
+      student: item.student?.name ?? "Unknown Student",
+      teacher: item.teacher?.name ?? "Unknown Teacher",
+      time: formatTimeRange(item.yourTime ?? "", item.duration ?? 0),
+      status,
+    };
+  });
+
+  // Client-side filtering
+  const filteredRows = mappedRows.filter(row => {
+    // 1. Search Query filtering
     if (filters.searchQuery) {
       const query = filters.searchQuery.toLowerCase();
       const studentMatch = row.student.toLowerCase().includes(query);
@@ -35,15 +211,22 @@ export function AdminDashboardContainer() {
       }
     }
 
-    if (filters.teacher) {
-      const teacherId = filters.teacher.toLowerCase();
-      const nameParts = teacherId.split("-");
-      const matchesTeacher = nameParts.some(part => row.teacher.toLowerCase().includes(part));
-      if (!matchesTeacher) {
+    // 2. Selected Status card filtering
+    if (filters.selectedStatus && filters.selectedStatus !== "total") {
+      const statusMapping: Record<string, string> = {
+        pending: "pending",
+        done: "completed",
+        cancelled: "cancelled",
+        noShow: "absent",
+        scheduled: "scheduled",
+        running: "in_progress",
+      };
+
+      const targetStatus = statusMapping[filters.selectedStatus];
+      if (targetStatus && row.status !== targetStatus) {
         return false;
       }
     }
-
     return true;
   });
 
@@ -67,30 +250,31 @@ export function AdminDashboardContainer() {
 
   const showingText = t("admin.showingOf", {
     shown: filteredRows.length,
-    total: scheduleRows.length,
+    total: mappedRows.length,
   });
+
+  const isLoading = loadingMetrics || loadingList || loadingUsers;
 
   return (
     <DashboardView
       todayClassesTitle={t("admin.todayClasses")}
-      lastUpdated={translatedLastUpdated}
-      metrics={todayClasses}
-      onMetricClick={_key => {
-        // Handle metric card click if needed
-      }}
+      lastUpdated={t("admin.updatedMinutesAgo")}
+      metrics={metricsList}
+      onMetricClick={handleMetricClick}
       scheduleTitle={t("admin.scheduleOverview")}
       searchPlaceholder={t("admin.searchPlaceholder")}
       searchValue={filters.searchQuery}
       dateLabel={t("admin.listOfClassesOn")}
       dateValue={filters.date}
       teacherPlaceholder={t("admin.selectTeacher")}
-      teacherValue={filters.teacher}
+      teacherValue={filters.teacherId}
       submitLabel={t("admin.submit")}
+      teachers={teachers}
       rows={filteredRows}
       headers={headers}
       statusLabels={statusLabels}
       detailsLabel={t("admin.details")}
-      emptyMessage={t("admin.noClasses")}
+      emptyMessage={isLoading ? "Loading..." : t("admin.noClasses")}
       showingText={showingText}
       onSearchChange={setSearchQuery}
       onDateChange={setDateFilter}

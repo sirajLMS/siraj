@@ -5,23 +5,19 @@ import { Box, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/mat
 import { format, isValid, parse } from "date-fns";
 import { AppDatePicker } from "@/frontend/components/ui/form/AppDatePicker";
 
+import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
+
 interface ScheduleFiltersProps {
   readonly dateLabel: string;
   readonly dateValue: string;
   readonly teacherPlaceholder: string;
   readonly teacherValue: string;
   readonly submitLabel: string;
+  readonly teachers: readonly TeacherFilterItem[];
   readonly onDateChange: (date: string) => void;
   readonly onTeacherChange: (teacher: string) => void;
   readonly onSubmit: () => void;
 }
-
-const MOCK_TEACHERS = [
-  { id: "", name: "" },
-  { id: "ahmed-omar", name: "Ahmed Omar" },
-  { id: "sarah-johnson", name: "Sarah Johnson" },
-  { id: "omar-said", name: "Omar Said" },
-];
 
 const DATE_FILTER_FORMAT = "yyyy-MM-dd";
 
@@ -41,6 +37,7 @@ export function ScheduleFilters({
   teacherPlaceholder,
   teacherValue,
   submitLabel,
+  teachers,
   onDateChange,
   onTeacherChange,
   onSubmit,
@@ -86,7 +83,7 @@ export function ScheduleFilters({
           <MenuItem value="">
             <em>{teacherPlaceholder}</em>
           </MenuItem>
-          {MOCK_TEACHERS.filter(teacher => teacher.id !== "").map(teacher => (
+          {teachers.map(teacher => (
             <MenuItem key={teacher.id} value={teacher.id}>
               {teacher.name}
             </MenuItem>

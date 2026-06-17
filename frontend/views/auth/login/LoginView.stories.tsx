@@ -3,7 +3,7 @@ import { LoginView } from "./LoginView";
 import type { LoginFormData } from "./schemas/loginSchema";
 
 const meta: Meta<typeof LoginView> = {
-  title: "Views/auth/login/LoginView",
+  title: "Views /login/LoginView",
   component: LoginView,
   tags: ["autodocs"],
   parameters: {

@@ -33,6 +33,19 @@ export async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): P
 }
 
 /**
+ * Convenience wrapper for bun:test to automatically run a test case in a rolled-back transaction.
+ * Drastically reduces boilerplate and CodeScene structural duplication scores.
+ */
+export function testInRollback(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+  // We dynamically import test from bun:test to avoid global pollution if not in test env
+  import("bun:test").then(({ test }) => {
+    test(name, async () => {
+      await runInRollback(fn);
+    });
+  });
+}
+
+/**
  * Creates a test user in the database.
  * @param tx Database transaction
  * @param overrides Optional field overrides

@@ -13,31 +13,13 @@ import {
   ScienceOutlined,
 } from "@mui/icons-material";
 import { create } from "zustand";
-import type { MetricItem, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
+import type { MetricItem, ScheduleRow, TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { DashboardState } from "./dashboardStore";
 
-interface ScheduleFilters {
-  date: string;
-  teacher: string;
-  searchQuery: string;
-}
-
-interface Pagination {
-  page: number;
-  totalItems: number;
-  pageSize: number;
-}
-
-interface DashboardState {
-  todayClasses: readonly MetricItem[];
-  lastUpdated: string;
-  filters: ScheduleFilters;
-  scheduleRows: readonly ScheduleRow[];
-  pagination: Pagination;
-  setDateFilter: (date: string) => void;
-  setTeacherFilter: (teacher: string) => void;
-  setSearchQuery: (query: string) => void;
-  setPage: (page: number) => void;
-}
+const MOCK_TEACHERS: TeacherFilterItem[] = [
+  { id: "teacher-ahmed", name: "Ahmed Mohammed" },
+  { id: "teacher-sarah", name: "Sarah Johnson" },
+];
 
 const MOCK_METRICS: MetricItem[] = [
   { key: "total", count: 42, labelKey: "dashboard.admin.metrics.total", icon: CalendarToday },
@@ -78,15 +60,17 @@ const MOCK_SCHEDULE: ScheduleRow[] = [
   },
 ];
 
-export const useDashboardStore = create<DashboardState>(set => ({
+export const useMockDashboardStore = create<DashboardState>(set => ({
   todayClasses: MOCK_METRICS,
   lastUpdated: "dashboard.admin.updatedMinutesAgo",
   filters: {
     date: "2023-10-27",
-    teacher: "",
+    teacherId: "",
     searchQuery: "",
+    selectedStatus: null,
   },
   scheduleRows: MOCK_SCHEDULE,
+  teachers: MOCK_TEACHERS,
   pagination: {
     page: 0,
     totalItems: 42,
@@ -95,11 +79,24 @@ export const useDashboardStore = create<DashboardState>(set => ({
   setDateFilter: (date: string) => {
     set(state => ({ filters: { ...state.filters, date } }));
   },
-  setTeacherFilter: (teacher: string) => {
-    set(state => ({ filters: { ...state.filters, teacher } }));
+  setTeacherFilter: (teacherId: string) => {
+    set(state => ({ filters: { ...state.filters, teacherId } }));
   },
   setSearchQuery: (searchQuery: string) => {
     set(state => ({ filters: { ...state.filters, searchQuery } }));
+  },
+  setSelectedStatus: (selectedStatus: string | null) => {
+    set(state => ({ filters: { ...state.filters, selectedStatus } }));
+  },
+  resetFilters: () => {
+    set({
+      filters: {
+        date: "2023-10-27",
+        teacherId: "",
+        searchQuery: "",
+        selectedStatus: null,
+      },
+    });
   },
   setPage: (page: number) => {
     set(state => ({ pagination: { ...state.pagination, page } }));

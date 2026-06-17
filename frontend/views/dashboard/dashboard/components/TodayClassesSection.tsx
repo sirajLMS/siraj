@@ -4,8 +4,8 @@
 
 import { AccessTimeOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
+import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-import { MetricCardGrid } from "../../../../components/reports/MetricCardGrid";
 
 interface TodayClassesSectionProps {
   readonly title: string;

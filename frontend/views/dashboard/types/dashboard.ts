@@ -74,6 +74,11 @@ export interface ScheduleRow {
   readonly status: ClassStatus;
 }
 
+export interface TeacherFilterItem {
+  readonly id: string;
+  readonly name: string;
+}
+
 export interface ScheduleOverviewData {
   readonly searchPlaceholder: string;
   readonly searchValue: string;
@@ -82,6 +87,7 @@ export interface ScheduleOverviewData {
   readonly teacherPlaceholder: string;
   readonly teacherValue: string;
   readonly submitLabel: string;
+  readonly teachers: readonly TeacherFilterItem[];
   readonly rows: readonly ScheduleRow[];
   readonly headers: {
     readonly classId: string;

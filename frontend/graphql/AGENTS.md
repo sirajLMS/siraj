@@ -13,16 +13,16 @@
 When writing integration tests for GraphQL queries/mutations under `frontend/graphql/test/`, adhere strictly to these rules:
 
 1. **Next.js Server Lifecycle Management**:
-   - Import the reusable dev server setup helper from `testServer.ts` and call it at the root of your `describe` block:
+   - Import the reusable dev server setup lifecycle helper from `lifecycle.ts` and call it at the root of your `describe` block:
      ```typescript
-     import { setupTestServer } from "./testServer";
+     import { setupTestServerLifecycle } from "./lifecycle";
 
      describe("My GraphQL Tests", () => {
-       setupTestServer();
+       setupTestServerLifecycle();
        // ...
      });
      ```
-   - This automatically handles spawning the Next.js dev server on port 3001, polling until ready (catching start connection errors to avoid ESLint warnings), and killing the server clean upon test suite completion.
+   - This automatically handles hooking into Bun's `beforeAll` and `afterAll` lifecycles to spawn the Next.js dev server on port 3001, poll until ready, and kill the process cleanly upon test suite completion. The process logic itself is defined separately in `testServer.ts`.
 
 2. **Apollo Shared Client**:
    - Import the shared, cache-disabled test client from `testClient.ts` to perform all GraphQL operations:

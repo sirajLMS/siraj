@@ -1,5 +1,3 @@
-"use client";
-
 import type { Breakpoint } from "@mui/material";
 import Grid, { type GridSize } from "@mui/material/Grid";
 import { useTranslations } from "next-intl";

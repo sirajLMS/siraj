@@ -113,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // for security reasons (prevents XSS attacks).
 
           // Perform a hard redirect to break any race conditions and ensure a clean state.
-          globalThis.location.href = redirectUrl || "/admin/dashboard";
+          globalThis.location.href = redirectUrl || "/dashboard";
           return true;
         } else {
           logger.error({ caller: "AuthProvider.login" }, "Login failed: No token or user in response");

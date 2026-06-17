@@ -18,7 +18,7 @@ export function LoginContainer() {
   useEffect(() => {
     if (isAuthenticated) {
       const redirectUrl = searchParams.get("redirect");
-      const targetUrl = redirectUrl || "/admin/dashboard";
+      const targetUrl = redirectUrl || "/dashboard";
       router.replace(targetUrl);
     }
   }, [isAuthenticated, router, searchParams]);
