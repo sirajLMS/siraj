@@ -2,7 +2,7 @@
 
 import { ReportOutlined, TimerOffOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
-import type { ScheduleAlert, ScheduleAlertType } from "@/frontend/stores/scheduleAlertsStore";
+import type { ScheduleAlert, ScheduleAlertType } from "@/frontend/stores/mockScheduleAlertsStore";
 
 interface ScheduleAlertBannersProps {
   readonly alerts: readonly ScheduleAlert[];

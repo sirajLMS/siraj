@@ -5,7 +5,7 @@ import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
-import type { ParentInvoiceRow, ParentInvoiceStatus } from "@/frontend/stores/parentBillingStore";
+import type { ParentInvoiceRow, ParentInvoiceStatus } from "@/frontend/stores/moackParentBillingStore";
 
 export interface ParentInvoicesDataGridLabels {
   readonly invoiceNumber: string;

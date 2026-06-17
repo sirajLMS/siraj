@@ -1,7 +1,7 @@
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, Paper, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ClassSession } from "@/frontend/stores/studentHistoryStore";
+import type { ClassSession } from "@/frontend/stores/mockStudentHistoryStore";
 
 const CalendarCell = styled(Box)(({ theme }) => ({
   borderRight: `1px solid ${theme.palette.border.light}`,

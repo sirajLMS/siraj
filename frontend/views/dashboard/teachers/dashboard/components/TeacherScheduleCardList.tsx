@@ -3,7 +3,7 @@
 import { VideocamOffOutlined, VideocamOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, IconButton, Paper, Stack, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
+import type { TeacherScheduleRow } from "@/frontend/stores/mockTeacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
 import { SessionActivateButton } from "./SessionActivateButton";

@@ -4,12 +4,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useLayoutStore } from "@/frontend/stores/layoutStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import {
   BOTTOM_NAV_ITEMS,
   getNavItemsForPermissions,
   SIDEBAR_NAV_ITEMS,
-} from "@/frontend/views/dashboard/config/navigationConfig";
+} from "@/frontend/views/dashboard/config/mockNavigationConfig";
 import { DashboardLayout } from "./DashboardLayout";
 
 interface DashboardLayoutContainerProps {

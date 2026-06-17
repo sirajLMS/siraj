@@ -3,7 +3,7 @@
 import { ExpandMoreOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Collapse, IconButton, Typography } from "@mui/material";
 import { useState } from "react";
-import type { ReportTeacherOption, ReportType } from "@/frontend/stores/reportsStore";
+import type { ReportTeacherOption, ReportType } from "@/frontend/stores/mockReportsStore";
 import type { ReportFiltersFormLabels } from "./ReportFiltersForm";
 import { ReportFiltersForm } from "./ReportFiltersForm";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTeachersStore } from "@/frontend/stores/teachersStore";
+import { useTeachersStore } from "@/frontend/stores/mockTeachersStore";
 import { TeachersView } from "./TeachersView";
 
 export function TeachersContainer() {

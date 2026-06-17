@@ -7,7 +7,7 @@ import { PrimaryPageAction } from "@/frontend/components/ui/ActionButtons";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
 import { SectionPanel } from "@/frontend/components/ui/SectionPanel";
-import type { TeacherDirectoryRow, TeacherMetrics } from "@/frontend/stores/teachersStore";
+import type { TeacherDirectoryRow, TeacherMetrics } from "@/frontend/stores/mockTeachersStore";
 import { TeacherCardList } from "./components/TeacherCardList";
 import { TeacherDataGrid } from "./components/TeacherDataGrid";
 import { TeacherMetricsRow } from "./components/TeacherMetricsRow";

@@ -3,7 +3,7 @@
 import { MapOutlined, MeetingRoomOutlined } from "@mui/icons-material";
 import { Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { BaseCard } from "@/frontend/components/ui";
-import type { VenueInfo } from "@/frontend/stores/classAuditStore";
+import type { VenueInfo } from "@/frontend/stores/mockClassAuditStore";
 
 interface VenueLocationCardProps {
   readonly venue: VenueInfo;

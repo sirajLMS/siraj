@@ -2,7 +2,7 @@
 
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/stores/adminSuggestionsStore";
+import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/stores/mockAdminSuggestionsStore";
 import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 
 interface SuggestionsCardListProps {

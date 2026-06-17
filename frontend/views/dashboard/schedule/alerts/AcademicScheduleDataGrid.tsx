@@ -5,7 +5,7 @@ import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/stores/scheduleAlertsStore";
+import type { AcademicClassRow, ClassSessionStatus } from "@/frontend/stores/mockScheduleAlertsStore";
 import { ClassSessionActionButton } from "./ClassSessionActionButton";
 
 export interface AcademicScheduleDataGridLabels {

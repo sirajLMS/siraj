@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
-import type { ReportLedgerRow } from "@/frontend/stores/reportsStore";
+import type { ReportLedgerRow } from "@/frontend/stores/mockReportsStore";
 
 export interface ReportsDataGridLabels {
   readonly name: string;

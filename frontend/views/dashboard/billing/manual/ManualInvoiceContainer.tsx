@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useAdminManualInvoiceStore } from "@/frontend/stores/adminManualInvoiceStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useAdminManualInvoiceStore } from "@/frontend/stores/mocKAdminManualInvoiceStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { ManualInvoiceView } from "./ManualInvoiceView";
 import { buildManualInvoiceLabels } from "./utils/buildManualInvoiceLabels";
 

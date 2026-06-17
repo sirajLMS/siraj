@@ -4,7 +4,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
-import type { Manager } from "@/frontend/stores/managersStore";
+import type { Manager } from "@/frontend/stores/mockManagersStore";
 
 interface ManagersDataGridProps {
   managers: Manager[];

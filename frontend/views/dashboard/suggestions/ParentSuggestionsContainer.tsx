@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useParentSuggestionsStore } from "@/frontend/stores/parentSuggestionsStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useParentSuggestionsStore } from "@/frontend/stores/mockParentSuggestionsStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { ParentSuggestionsView } from "./ParentSuggestionsView";
 import { buildSuggestionsLabels } from "./utils/buildSuggestionsLabels";
 

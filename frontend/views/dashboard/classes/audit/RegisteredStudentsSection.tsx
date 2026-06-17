@@ -6,7 +6,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ExportButton, SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
-import type { AttendanceStatus, RegisteredStudent } from "@/frontend/stores/classAuditStore";
+import type { AttendanceStatus, RegisteredStudent } from "@/frontend/stores/mockClassAuditStore";
 
 interface RegisteredStudentsSectionProps {
   readonly students: readonly RegisteredStudent[];

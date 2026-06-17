@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BaseCard, StatusBadge } from "@/frontend/components/ui";
 import { labelSx, outlinedInputSx } from "@/frontend/components/ui/form";
-import type { TeacherDirectoryRow } from "@/frontend/stores/teachersStore";
+import type { TeacherDirectoryRow } from "@/frontend/stores/mockTeachersStore";
 
 interface ManagementControlsCardProps {
   readonly teachers: readonly TeacherDirectoryRow[];
@@ -195,7 +195,7 @@ export function ManagementControlsCard({ teachers, currentStatus }: Readonly<Man
       <Stack component="form" spacing={4} onSubmit={handleSubmit}>
         <TeacherSelection teachers={teachers} />
         <StatusUpdate currentStatus={currentStatus} />
-        <ActionButtons loading={loading} saved={saved} onCancel={() => {}} />
+        <ActionButtons loading={loading} saved={saved} onCancel={() => { }} />
       </Stack>
     </BaseCard>
   );

@@ -10,7 +10,7 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
-import type { ParentDirectoryRow } from "@/frontend/stores/parentsStore";
+import type { ParentDirectoryRow } from "@/frontend/stores/mockParentsStore";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { ParentCardList, type ParentCardListLabels } from "./ParentCardList";
 import { ParentsDataGrid, type ParentsDataGridLabels } from "./ParentsDataGrid";
@@ -115,8 +115,8 @@ export function ParentsView({
         title={labels.records}
         actions={
           <Box sx={{ display: "flex", gap: 1 }}>
-            <FilterButton onClick={() => {}} />
-            <ExportButton onClick={() => {}} />
+            <FilterButton onClick={() => { }} />
+            <ExportButton onClick={() => { }} />
           </Box>
         }
       >

@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import type { StudentAccountStatus, StudentEnrollmentStatus } from "@/frontend/stores/studentsStore";
-import { MOBILE_METRIC_ICONS, MOBILE_METRIC_KEYS, useStudentsStore } from "@/frontend/stores/studentsStore";
+import type { StudentAccountStatus, StudentEnrollmentStatus } from "@/frontend/stores/mockStudentsStore";
+import { MOBILE_METRIC_ICONS, MOBILE_METRIC_KEYS, useStudentsStore } from "@/frontend/stores/mockStudentsStore";
 import { StudentsView } from "./StudentsView";
 
 function getMetricTranslationKey(key: string): string {

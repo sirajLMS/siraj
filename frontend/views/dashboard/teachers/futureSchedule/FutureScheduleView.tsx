@@ -4,7 +4,7 @@ import { Box, Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/mate
 import { useTranslations } from "next-intl";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
-import type { FutureClass } from "@/frontend/stores/teacherScheduleStore";
+import type { FutureClass } from "@/frontend/stores/mockTeacherScheduleStore";
 import { FutureClassCard } from "./components/FutureClassCard";
 import { ImportantNotes } from "./components/ImportantNotes";
 import { JumpToDateHeader } from "./components/JumpToDateHeader";

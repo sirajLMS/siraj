@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useCreateRecurringClassStore } from "@/frontend/stores/mockCreateRecurringClassStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { logger } from "@/frontend/utils/logger";
 import { createRecurringClass } from "./actions/createRecurringClass";
 import { CreateRecurringClassView } from "./CreateRecurringClassView";

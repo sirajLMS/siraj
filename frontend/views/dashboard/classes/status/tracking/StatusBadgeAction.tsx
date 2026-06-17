@@ -7,7 +7,7 @@ import {
   PowerSettingsNewOutlined,
 } from "@mui/icons-material";
 import { Box, Button, type SxProps, styled, type Theme, Tooltip, Typography, useTheme } from "@mui/material";
-import type { StatusSessionRow } from "@/frontend/stores/statusTrackingStore";
+import type { StatusSessionRow } from "@/frontend/stores/mockStatusTrackingStore";
 
 interface StatusActionProps {
   readonly row: StatusSessionRow;

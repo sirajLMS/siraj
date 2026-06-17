@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { type ParentAccountStatus, useParentsStore } from "@/frontend/stores/parentsStore";
+import { type ParentAccountStatus, useParentsStore } from "@/frontend/stores/mockParentsStore";
 import { ParentsView } from "./ParentsView";
 
 export function ParentsContainer() {

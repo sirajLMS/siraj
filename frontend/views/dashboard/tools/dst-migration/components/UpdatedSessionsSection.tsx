@@ -3,7 +3,7 @@
 import { CheckCircleOutlined } from "@mui/icons-material";
 import { alpha, Box, Chip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { UpdatedSession } from "@/frontend/stores/dstMigrationStore";
+import type { UpdatedSession } from "@/frontend/stores/mockDstMigrationStore";
 import { UpdatedSessionsCardList } from "./UpdatedSessionsCardList";
 import { UpdatedSessionsDataGrid } from "./UpdatedSessionsDataGrid";
 

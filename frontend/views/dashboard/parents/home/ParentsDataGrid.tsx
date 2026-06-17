@@ -11,7 +11,7 @@ import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { ParentAccountStatus, ParentDirectoryRow } from "@/frontend/stores/parentsStore";
+import type { ParentAccountStatus, ParentDirectoryRow } from "@/frontend/stores/mockParentsStore";
 
 export interface ParentsDataGridLabels {
   readonly index: string;

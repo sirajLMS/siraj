@@ -3,8 +3,8 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { useClassDetailsStore } from "@/frontend/stores/classDetailsStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useClassDetailsStore } from "@/frontend/stores/mockClassDetailsStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { logger } from "@/frontend/utils/logger";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
@@ -196,10 +196,10 @@ export function ClassDetailsContainer() {
         isMobile
           ? undefined
           : [
-              { label: t("breadcrumbs.dashboard"), href: "/dashboard" },
-              { label: t("breadcrumbs.classes"), href: `/classes/${instance.id}` },
-              { label: instance.courseName, current: true },
-            ]
+            { label: t("breadcrumbs.dashboard"), href: "/dashboard" },
+            { label: t("breadcrumbs.classes"), href: `/classes/${instance.id}` },
+            { label: instance.courseName, current: true },
+          ]
       }
     />
   );

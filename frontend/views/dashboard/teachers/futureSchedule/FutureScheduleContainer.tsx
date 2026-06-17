@@ -1,6 +1,6 @@
 "use client";
 
-import { useTeacherScheduleStore } from "@/frontend/stores/teacherScheduleStore";
+import { useTeacherScheduleStore } from "@/frontend/stores/mockTeacherScheduleStore";
 import { FutureScheduleView } from "./FutureScheduleView";
 
 export function FutureScheduleContainer() {

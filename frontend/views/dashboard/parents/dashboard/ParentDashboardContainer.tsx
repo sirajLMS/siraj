@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useParentDashboardStore } from "@/frontend/stores/parentDashboardStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useParentDashboardStore } from "@/frontend/stores/mockParentDashboardStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentDashboardView } from "./ParentDashboardView";
 

@@ -5,7 +5,7 @@ import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Fab, useMediaQuery, useTheme } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import type { StatusSessionRow } from "@/frontend/stores/statusTrackingStore";
+import type { StatusSessionRow } from "@/frontend/stores/mockStatusTrackingStore";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StatusTrackingCardList } from "./StatusTrackingCardList";
 import { StatusTrackingDataGrid } from "./StatusTrackingDataGrid";

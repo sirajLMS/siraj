@@ -3,7 +3,7 @@
 import { ScheduleOutlined, VideocamOutlined } from "@mui/icons-material";
 import { Avatar, Box, Card, CardContent, IconButton, Stack, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { ParentScheduleRow } from "@/frontend/stores/parentDashboardStore";
+import type { ParentScheduleRow } from "@/frontend/stores/mockParentDashboardStore";
 import type { ParentDashboardLabels } from "../types/parentDashboardLabels";
 
 interface ParentScheduleCardListProps {

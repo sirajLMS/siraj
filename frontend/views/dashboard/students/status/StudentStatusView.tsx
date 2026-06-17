@@ -8,7 +8,7 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
-import type { StudentStatusInfo } from "@/frontend/stores/studentStatusStore";
+import type { StudentStatusInfo } from "@/frontend/stores/mockStudentStatusStore";
 import { AdminHoldControls } from "./components/AdminHoldControls";
 import { PolicyOverviewCard, SuspensionWarningBanner } from "./components/PolicyOverviewCard";
 import { StudentStatusHeader } from "./components/StudentStatusHeader";

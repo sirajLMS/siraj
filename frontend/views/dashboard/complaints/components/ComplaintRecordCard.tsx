@@ -3,7 +3,7 @@
 import { HourglassEmptyOutlined, VerifiedUserOutlined } from "@mui/icons-material";
 import { Box, Paper, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { ParentComplaintRecord } from "@/frontend/stores/parentComplaintsStore";
+import type { ParentComplaintRecord } from "@/frontend/stores/mockParentComplaintsStore";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 
 interface ComplaintRecordCardProps {

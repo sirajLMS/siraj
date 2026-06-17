@@ -7,7 +7,7 @@ import type {
   StudentAccountStatus,
   StudentDirectoryRow,
   StudentEnrollmentStatus,
-} from "@/frontend/stores/studentsStore";
+} from "@/frontend/stores/mockStudentsStore";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentDirectoryCardList } from "./components/StudentDirectoryCardList";
 import { StudentMobileMetricsScroll } from "./components/StudentMobileMetricsScroll";

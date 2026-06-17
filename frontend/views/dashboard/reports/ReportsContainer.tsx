@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { useReportsStore } from "@/frontend/stores/reportsStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useReportsStore } from "@/frontend/stores/mockReportsStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { logger } from "@/frontend/utils/logger";
 import { ReportsView } from "./ReportsView";
 import { reportFiltersSchema } from "./schemas/reportFiltersSchema";

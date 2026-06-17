@@ -2,7 +2,7 @@ import type {
   AdminSuggestionRow,
   AdminSuggestionsSummary,
   SuggestionTab,
-} from "@/frontend/stores/adminSuggestionsStore";
+} from "@/frontend/stores/mockAdminSuggestionsStore";
 import type { SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 import type { SuggestionFormData } from "../schemas/suggestionFormSchema";
 

@@ -2,7 +2,7 @@ import { CalendarToday, PictureAsPdf, School, Timer, TrendingUp, VerifiedUser } 
 import { Box } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { ExportButton, MetricCard, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import type { ClassSession, StudentHistoryMetrics } from "@/frontend/stores/studentHistoryStore";
+import type { ClassSession, StudentHistoryMetrics } from "@/frontend/stores/mockStudentHistoryStore";
 import { CalendarGrid } from "./CalendarGrid";
 
 interface StudentHistoryDesktopProps {

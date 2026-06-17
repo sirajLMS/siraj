@@ -6,8 +6,8 @@ import { alpha, Box, IconButton, Snackbar, Typography, useMediaQuery, useTheme }
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import type { StudentGroup } from "@/frontend/stores/createRecurringClassStore";
-import { DEFAULT_DAY_SCHEDULE } from "@/frontend/stores/createRecurringClassStore";
+import type { StudentGroup } from "@/frontend/stores/mockCreateRecurringClassStore";
+import { DEFAULT_DAY_SCHEDULE } from "@/frontend/stores/mockCreateRecurringClassStore";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 import { RecurringClassForm } from "./RecurringClassForm";
 import type { RecurringClassFormData } from "./recurringClassSchema";
@@ -141,10 +141,10 @@ export function CreateRecurringClassView({
   const breadcrumbs = isMobile
     ? undefined
     : [
-        { label: labels.breadcrumbs.dashboard, href: "/dashboard" },
-        { label: labels.breadcrumbs.classes, href: "/classes/new" },
-        { label: labels.title, current: true },
-      ];
+      { label: labels.breadcrumbs.dashboard, href: "/dashboard" },
+      { label: labels.breadcrumbs.classes, href: "/classes/new" },
+      { label: labels.title, current: true },
+    ];
 
   return (
     <PageContainer>

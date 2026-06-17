@@ -2,7 +2,7 @@
 
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Alert, Box, Typography } from "@mui/material";
-import type { MissedClassAlert } from "@/frontend/stores/teacherDashboardTypes";
+import type { MissedClassAlert } from "@/frontend/stores/mockTeacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 
 interface MissedClassAlertBannerProps {
@@ -22,13 +22,13 @@ export function MissedClassAlertBanner({ alert, labels, fixed = false }: Readonl
         mb: 3,
         ...(fixed
           ? {
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: theme.zIndex.appBar + 2,
-              borderRadius: 0,
-            }
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: theme.zIndex.appBar + 2,
+            borderRadius: 0,
+          }
           : {}),
       })}
     >

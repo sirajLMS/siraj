@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ScheduledClass } from "@/frontend/stores/teacherScheduleStore";
+import type { ScheduledClass } from "@/frontend/stores/mockTeacherScheduleStore";
 
 interface WeeklyScheduleGridProps {
   readonly classes: readonly ScheduledClass[];

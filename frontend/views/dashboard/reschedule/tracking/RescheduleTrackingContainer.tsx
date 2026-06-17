@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRescheduleTrackingStore } from "@/frontend/stores/rescheduleTrackingStore";
+import { useRescheduleTrackingStore } from "@/frontend/stores/mockRescheduleTrackingStore";
 import { RescheduleTrackingView } from "./RescheduleTrackingView";
 
 export function RescheduleTrackingContainer() {

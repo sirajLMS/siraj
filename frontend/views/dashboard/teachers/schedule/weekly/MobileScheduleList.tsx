@@ -3,7 +3,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import type { ScheduledClass } from "@/frontend/stores/teacherScheduleStore";
+import type { ScheduledClass } from "@/frontend/stores/mockTeacherScheduleStore";
 
 interface MobileScheduleListProps {
   readonly classes: readonly ScheduledClass[];

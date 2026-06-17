@@ -11,7 +11,7 @@ import { alpha, Box, Button, Stack, Typography, useMediaQuery, useTheme } from "
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { FutureClass } from "@/frontend/stores/teacherScheduleStore";
+import type { FutureClass } from "@/frontend/stores/mockTeacherScheduleStore";
 
 interface FutureClassCardProps {
   readonly item: FutureClass;

@@ -3,7 +3,7 @@
 import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import type { StudentAccountStatus, StudentDirectoryRow } from "@/frontend/stores/studentsStore";
+import type { StudentAccountStatus, StudentDirectoryRow } from "@/frontend/stores/mockStudentsStore";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentDirectoryDataGrid } from "./components/StudentDirectoryDataGrid";
 

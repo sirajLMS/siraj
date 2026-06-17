@@ -1,4 +1,4 @@
-import type { ParentBookingStatus, ParentLiveClassStatus } from "@/frontend/stores/parentDashboardStore";
+import type { ParentBookingStatus, ParentLiveClassStatus } from "@/frontend/stores/mockParentDashboardStore";
 import type { MessageSchema } from "@/shared/messages/types/message";
 
 type ParentDashboardMessages = MessageSchema["dashboard"]["parentDashboard"];

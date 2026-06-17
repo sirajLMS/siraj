@@ -3,7 +3,7 @@
 import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
-import type { ParentInvoiceRow, ParentInvoiceStatus } from "@/frontend/stores/parentBillingStore";
+import type { ParentInvoiceRow, ParentInvoiceStatus } from "@/frontend/stores/moackParentBillingStore";
 
 interface ParentInvoicesCardListLabels {
   readonly viewDetails: string;

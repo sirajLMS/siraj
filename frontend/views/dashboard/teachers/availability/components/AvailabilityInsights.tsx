@@ -9,7 +9,7 @@ import {
 import { Avatar, AvatarGroup, Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
-import type { TeacherAvailabilityInsights } from "@/frontend/stores/teacherAvailabilityStore";
+import type { TeacherAvailabilityInsights } from "@/frontend/stores/mockTeacherAvailabilityStore";
 
 interface InsightCardProps {
   readonly title: string;

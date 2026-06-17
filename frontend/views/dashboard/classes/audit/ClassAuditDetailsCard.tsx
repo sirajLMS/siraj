@@ -4,7 +4,7 @@ import { AccountCircleOutlined, EventNoteOutlined, HistoryOutlined, UpdateOutlin
 import { alpha, Box, Chip, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { BaseCard } from "@/frontend/components/ui";
-import type { ClassAuditData } from "@/frontend/stores/classAuditStore";
+import type { ClassAuditData } from "@/frontend/stores/mockClassAuditStore";
 
 interface ClassAuditDetailsCardProps {
   readonly audit: ClassAuditData;

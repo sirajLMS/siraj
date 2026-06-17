@@ -7,7 +7,7 @@ import type {
   StudentProgressFeedItem,
   TeacherDashboardMetrics,
   TeacherScheduleRow,
-} from "@/frontend/stores/teacherDashboardTypes";
+} from "@/frontend/stores/mockTeacherDashboardTypes";
 import { logger } from "@/frontend/utils/logger";
 import { SessionActivateButton } from "./components/SessionActivateButton";
 import { StudentProgressFeed } from "./components/StudentProgressFeed";

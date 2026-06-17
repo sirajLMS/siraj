@@ -3,7 +3,7 @@ import { Avatar, Box, IconButton, Link, Typography } from "@mui/material";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
-import type { TeacherDirectoryRow } from "@/frontend/stores/teachersStore";
+import type { TeacherDirectoryRow } from "@/frontend/stores/mockTeachersStore";
 
 interface TeacherDataGridProps {
   readonly rows: readonly TeacherDirectoryRow[];

@@ -4,7 +4,7 @@ import { PriorityHighOutlined as AlertIcon, SettingsOutlined as SettingsIcon } f
 import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { ParentAccountStatus, ParentDirectoryRow } from "@/frontend/stores/parentsStore";
+import type { ParentAccountStatus, ParentDirectoryRow } from "@/frontend/stores/mockParentsStore";
 
 export interface ParentCardListLabels {
   readonly guardianOf: (name: string) => string;

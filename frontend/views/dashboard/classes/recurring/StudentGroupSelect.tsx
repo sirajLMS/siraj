@@ -4,7 +4,7 @@ import { ExpandMoreOutlined } from "@mui/icons-material";
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import type { UseFormSetValue } from "react-hook-form";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
-import type { StudentGroup } from "@/frontend/stores/createRecurringClassStore";
+import type { StudentGroup } from "@/frontend/stores/mockCreateRecurringClassStore";
 import type { RecurringClassFormData } from "./recurringClassSchema";
 
 interface StudentGroupSelectProps {

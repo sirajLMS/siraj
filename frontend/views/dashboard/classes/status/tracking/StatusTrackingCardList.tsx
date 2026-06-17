@@ -4,7 +4,7 @@ import { BlockOutlined, PersonOutlined, ScheduleOutlined, WarningAmberOutlined }
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { StatusSessionRow } from "@/frontend/stores/statusTrackingStore";
+import type { StatusSessionRow } from "@/frontend/stores/mockStatusTrackingStore";
 
 interface StatusTrackingCardListProps {
   readonly rows: readonly StatusSessionRow[];

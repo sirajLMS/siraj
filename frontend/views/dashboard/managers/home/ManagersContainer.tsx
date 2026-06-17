@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useManagersStore } from "@/frontend/stores/managersStore";
+import { useManagersStore } from "@/frontend/stores/mockManagersStore";
 import { ManagersView } from "./ManagersView";
 
 export function ManagersContainer() {

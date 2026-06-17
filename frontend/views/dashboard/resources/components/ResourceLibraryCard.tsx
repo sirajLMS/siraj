@@ -2,7 +2,7 @@
 
 import { AttachFileOutlined, DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
-import type { LearningResourceRow } from "@/frontend/stores/resourcesStore";
+import type { LearningResourceRow } from "@/frontend/stores/mockResourcesStore";
 import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 import { ResourceFileTypeIcon } from "./ResourceFileTypeIcon";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { AdminComplaintRow } from "@/frontend/stores/adminComplaintsStore";
+import type { AdminComplaintRow } from "@/frontend/stores/mockAdminComplaintsStore";
 import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import { ComplaintQueueCard } from "./ComplaintQueueCard";
 

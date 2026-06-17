@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useTeacherScheduleStore } from "@/frontend/stores/teacherScheduleStore";
+import { useTeacherScheduleStore } from "@/frontend/stores/mockTeacherScheduleStore";
 import { logger } from "@/frontend/utils/logger";
 import TeacherWeeklyScheduleView from "./TeacherWeeklyScheduleView";
 

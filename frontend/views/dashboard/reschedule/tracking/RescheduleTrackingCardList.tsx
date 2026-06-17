@@ -12,7 +12,7 @@ import {
 import { Box, Card, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { TrackingRow } from "@/frontend/stores/rescheduleTrackingStore";
+import type { TrackingRow } from "@/frontend/stores/mockRescheduleTrackingStore";
 
 interface RescheduleTrackingCardListProps {
   readonly rows: readonly TrackingRow[];

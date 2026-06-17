@@ -3,7 +3,7 @@
 import { CancelOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Chip, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ConflictGroup } from "@/frontend/stores/dstMigrationStore";
+import type { ConflictGroup } from "@/frontend/stores/mockDstMigrationStore";
 
 interface Props {
   readonly conflictGroups: readonly ConflictGroup[];

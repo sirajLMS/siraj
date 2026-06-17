@@ -2,7 +2,7 @@ import { ChatBubbleOutlineOutlined, MailOutlined, PhoneOutlined, SettingsOutline
 import { Avatar, Box, Chip, IconButton, Stack, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { BaseCard, StatusBadge } from "@/frontend/components/ui";
-import type { Manager } from "@/frontend/stores/managersStore";
+import type { Manager } from "@/frontend/stores/mockManagersStore";
 
 interface ManagersCardListProps {
   managers: Manager[];

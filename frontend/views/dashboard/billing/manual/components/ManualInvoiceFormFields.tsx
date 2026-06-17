@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
-import type { ParentInvoiceOption } from "@/frontend/stores/adminManualInvoiceStore";
+import type { ParentInvoiceOption } from "@/frontend/stores/mocKAdminManualInvoiceStore";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 import type { ManualInvoiceFormData } from "../schemas/manualInvoiceSchema";
 import { ManualInvoiceDateField } from "./ManualInvoiceDateField";

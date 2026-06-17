@@ -1,7 +1,7 @@
 import { CloseOutlined, Science } from "@mui/icons-material";
 import { alpha, Box, IconButton, Paper, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ClassSession } from "@/frontend/stores/studentHistoryStore";
+import type { ClassSession } from "@/frontend/stores/mockStudentHistoryStore";
 
 const ModalOverlay = styled(Box)(({ theme }) => ({
   position: "fixed",

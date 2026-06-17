@@ -9,7 +9,7 @@ import {
 } from "@mui/icons-material";
 import { Box, type Theme, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ClassSession, StudentHistoryMetrics } from "@/frontend/stores/studentHistoryStore";
+import type { ClassSession, StudentHistoryMetrics } from "@/frontend/stores/mockStudentHistoryStore";
 import { ClassSessionList } from "./ClassSessionList";
 import { MobileWeeklyScroller } from "./MobileWeeklyScroller";
 import { PerformanceStreak } from "./PerformanceStreak";

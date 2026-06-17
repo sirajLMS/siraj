@@ -2,7 +2,7 @@
 
 import { ExpandMoreOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Typography } from "@mui/material";
-import type { ParentComplaintRecord } from "@/frontend/stores/parentComplaintsStore";
+import type { ParentComplaintRecord } from "@/frontend/stores/mockParentComplaintsStore";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import { ComplaintRecordCard } from "./ComplaintRecordCard";
 

@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { useAdminComplaintsStore } from "@/frontend/stores/adminComplaintsStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useAdminComplaintsStore } from "@/frontend/stores/mockAdminComplaintsStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { AdminComplaintsView } from "./AdminComplaintsView";
 import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
 import { filterComplaintsByTab } from "./utils/complaintFilters";

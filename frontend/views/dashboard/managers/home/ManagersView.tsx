@@ -1,7 +1,7 @@
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import type { Manager } from "@/frontend/stores/managersStore";
+import type { Manager } from "@/frontend/stores/mockManagersStore";
 import { Link } from "@/shared/i18n/routing";
 import { ManagersCardList } from "./ManagersCardList";
 import { ManagersDataGrid } from "./ManagersDataGrid";

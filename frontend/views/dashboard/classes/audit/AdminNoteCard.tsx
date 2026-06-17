@@ -3,7 +3,7 @@
 import { AdminPanelSettingsOutlined, StickyNote2Outlined } from "@mui/icons-material";
 import { alpha, Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { BaseCard } from "@/frontend/components/ui";
-import type { AdminNote } from "@/frontend/stores/classAuditStore";
+import type { AdminNote } from "@/frontend/stores/mockClassAuditStore";
 
 interface AdminNoteCardProps {
   readonly note: AdminNote;

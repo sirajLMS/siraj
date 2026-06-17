@@ -8,7 +8,7 @@ import type {
   ParentScheduleRow,
   StudentProgressItem,
   WorkshopPromo,
-} from "@/frontend/stores/parentDashboardStore";
+} from "@/frontend/stores/mockParentDashboardStore";
 import { AcademicProgressSummary } from "./components/AcademicProgressSummary";
 import { ParentDashboardMetricsRow } from "./components/ParentDashboardMetrics";
 import { ParentScheduleCardList } from "./components/ParentScheduleCardList";

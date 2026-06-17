@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import type { ClassSession } from "@/frontend/stores/studentHistoryStore";
+import type { ClassSession } from "@/frontend/stores/mockStudentHistoryStore";
 
 interface ClassSessionListProps {
   dateStr: string;

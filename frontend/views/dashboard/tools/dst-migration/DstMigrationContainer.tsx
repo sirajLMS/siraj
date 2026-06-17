@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useDstMigrationStore } from "@/frontend/stores/dstMigrationStore";
+import { useDstMigrationStore } from "@/frontend/stores/mockDstMigrationStore";
 import { DstMigrationView } from "./DstMigrationView";
 
 export function DstMigrationContainer() {

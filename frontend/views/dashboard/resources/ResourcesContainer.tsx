@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { useResourcesStore } from "@/frontend/stores/resourcesStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useResourcesStore } from "@/frontend/stores/mockResourcesStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { ResourcesView } from "./ResourcesView";
 import { buildResourcesLabels } from "./utils/buildResourcesLabels";
 import { filterResources } from "./utils/resourceFilters";

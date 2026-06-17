@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import type { StudentProfileData } from "@/frontend/stores/studentQuotaStore";
+import type { StudentProfileData } from "@/frontend/stores/mockStudentQuotaStore";
 import type { MessageSchema } from "@/shared/messages/types/message";
 import { ContextualHelperCards } from "./components/ContextualHelperCards";
 import { CourseDetailsSection } from "./components/CourseDetailsSection";

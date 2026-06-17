@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import type { ParentLiveClassStatus } from "@/frontend/stores/parentDashboardStore";
+import type { ParentLiveClassStatus } from "@/frontend/stores/mockParentDashboardStore";
 
 interface ParentClassStatusIndicatorProps {
   readonly status: ParentLiveClassStatus;

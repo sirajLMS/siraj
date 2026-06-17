@@ -7,7 +7,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { StatusSessionRow } from "@/frontend/stores/statusTrackingStore";
+import type { StatusSessionRow } from "@/frontend/stores/mockStatusTrackingStore";
 import { StatusAction } from "./StatusBadgeAction";
 
 interface StatusTrackingDataGridLabels {

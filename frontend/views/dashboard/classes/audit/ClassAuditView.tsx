@@ -2,7 +2,7 @@
 
 import { Box, Chip, Grid, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import type { ClassAuditData } from "@/frontend/stores/classAuditStore";
+import type { ClassAuditData } from "@/frontend/stores/mockClassAuditStore";
 import { AdminNoteCard } from "./AdminNoteCard";
 import { ClassAuditDetailsCard } from "./ClassAuditDetailsCard";
 import { CommunicationLogCard } from "./CommunicationLogCard";

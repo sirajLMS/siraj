@@ -2,7 +2,7 @@ import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutli
 import { Avatar, Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { TeacherDirectoryRow } from "@/frontend/stores/teachersStore";
+import type { TeacherDirectoryRow } from "@/frontend/stores/mockTeachersStore";
 
 interface TeacherCardListProps {
   readonly rows: readonly TeacherDirectoryRow[];

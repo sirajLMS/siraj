@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
-import { useStudentQuotaStore } from "@/frontend/stores/studentQuotaStore";
+import { useStudentQuotaStore } from "@/frontend/stores/mockStudentQuotaStore";
 import { StudentQuotaView } from "./StudentQuotaView";
 
 export function StudentQuotaContainer() {

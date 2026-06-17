@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { ReportsSummary } from "@/frontend/stores/reportsStore";
+import type { ReportsSummary } from "@/frontend/stores/mockReportsStore";
 
 interface ReportsTotalsRowProps {
   readonly summary: ReportsSummary;

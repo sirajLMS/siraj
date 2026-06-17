@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
-import { useTeacherProfileStore } from "@/frontend/stores/teacherProfileStore";
+import { useTeacherProfileStore } from "@/frontend/stores/mockTeacherProfileStore";
 import { TeacherProfileView } from "./TeacherProfileView";
 
 export function TeacherProfileContainer() {

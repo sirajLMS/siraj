@@ -4,7 +4,7 @@ import { DescriptionOutlined, EmailOutlined, RateReviewOutlined } from "@mui/ico
 import { Box, FormControl, InputAdornment, MenuItem, Select, TextField, Typography } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import type { ParentStudentOption } from "@/frontend/stores/parentComplaintsStore";
+import type { ParentStudentOption } from "@/frontend/stores/mockParentComplaintsStore";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import type { ComplaintFormData } from "../schemas/complaintFormSchema";
 

@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { LedgerStatus, ReportLedgerRow } from "@/frontend/stores/reportsStore";
+import type { LedgerStatus, ReportLedgerRow } from "@/frontend/stores/mockReportsStore";
 
 interface PerformanceLedgerCardLabels {
   readonly studentLabel: string;

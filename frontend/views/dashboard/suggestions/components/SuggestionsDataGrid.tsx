@@ -4,7 +4,7 @@ import { Button, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
-import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/stores/adminSuggestionsStore";
+import type { AdminSuggestionRow, SuggestionStatus } from "@/frontend/stores/mockAdminSuggestionsStore";
 import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 
 interface SuggestionsDataGridProps {

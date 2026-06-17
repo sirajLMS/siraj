@@ -1,7 +1,7 @@
 // cspell:disable
 "use client";
 
-import { useTeacherAvailabilityStore } from "@/frontend/stores/teacherAvailabilityStore";
+import { useTeacherAvailabilityStore } from "@/frontend/stores/mockTeacherAvailabilityStore";
 import { TeacherAvailabilityView } from "./TeacherAvailabilityView";
 
 export function TeacherAvailabilityContainer() {

@@ -10,7 +10,7 @@ import type {
   DstMigrationMetrics,
   MigrationStatus,
   UpdatedSession,
-} from "@/frontend/stores/dstMigrationStore";
+} from "@/frontend/stores/mockDstMigrationStore";
 import { CheckedEmptyPanel } from "./components/CheckedEmptyPanel";
 import { ConflictErrorsPanel } from "./components/ConflictErrorsPanel";
 import { DstMigrationMetricsRow } from "./components/DstMigrationMetricsRow";

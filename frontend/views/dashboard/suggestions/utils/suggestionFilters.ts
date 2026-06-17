@@ -1,4 +1,4 @@
-import type { AdminSuggestionRow, SuggestionTab } from "@/frontend/stores/adminSuggestionsStore";
+import type { AdminSuggestionRow, SuggestionTab } from "@/frontend/stores/mockAdminSuggestionsStore";
 
 export function filterSuggestionsByTab(
   rows: readonly AdminSuggestionRow[],

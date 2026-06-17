@@ -2,9 +2,9 @@
 
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useTeacherDashboardActiveStore } from "@/frontend/stores/teacherDashboardActiveStore";
-import { useTeacherDashboardStore } from "@/frontend/stores/teacherDashboardStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useTeacherDashboardActiveStore } from "@/frontend/stores/mockTeacherDashboardActiveStore";
+import { useTeacherDashboardStore } from "@/frontend/stores/mockTeacherDashboardStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { logger } from "@/frontend/utils/logger";
 import { TeacherDashboardActiveView } from "./TeacherDashboardActiveView";
 import { TeacherDashboardView } from "./TeacherDashboardView";

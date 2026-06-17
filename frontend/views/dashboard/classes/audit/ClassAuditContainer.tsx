@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useClassAuditStore } from "@/frontend/stores/classAuditStore";
+import { useClassAuditStore } from "@/frontend/stores/mockClassAuditStore";
 import { logger } from "@/frontend/utils/logger";
 import { ClassAuditView } from "./ClassAuditView";
 

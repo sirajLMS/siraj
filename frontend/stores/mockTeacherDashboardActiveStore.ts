@@ -1,6 +1,6 @@
 // cspell:disable
 import { create } from "zustand";
-import type { StudentProgressFeedItem, TeacherDashboardState, TeacherScheduleRow } from "./teacherDashboardTypes";
+import type { StudentProgressFeedItem, TeacherDashboardState, TeacherScheduleRow } from "./mockTeacherDashboardTypes";
 
 interface TeacherDashboardActiveState extends TeacherDashboardState {
   readonly progressFeed: readonly StudentProgressFeedItem[];

@@ -3,7 +3,7 @@
 import { FilterListOutlined, SortOutlined } from "@mui/icons-material";
 import { Box, Chip } from "@mui/material";
 import { FilterButton } from "@/frontend/components/ui";
-import type { ResourceFilterType, ResourceSortBy } from "@/frontend/stores/resourcesStore";
+import type { ResourceFilterType, ResourceSortBy } from "@/frontend/stores/mockResourcesStore";
 import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 
 interface ResourceLibraryHeaderProps {

@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
-import { useStatusTrackingStore } from "@/frontend/stores/statusTrackingStore";
+import { useRescheduleStore } from "@/frontend/stores/mockRescheduleStore";
+import { useStatusTrackingStore } from "@/frontend/stores/mockStatusTrackingStore";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
 import { StatusTrackingView } from "./StatusTrackingView";

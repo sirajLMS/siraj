@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useAdminBillingStore } from "@/frontend/stores/mockAdminBillingStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { AdminBillingView } from "./AdminBillingView";
 import type { AdminBillingViewProps } from "./types/billingViewTypes";
 import { filterAdminInvoices } from "./utils/billingFilters";

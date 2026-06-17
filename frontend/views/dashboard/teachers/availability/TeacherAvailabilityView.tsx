@@ -8,7 +8,7 @@ import { ExportButton } from "@/frontend/components/ui/ActionButtons";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
 import { SectionPanel } from "@/frontend/components/ui/SectionPanel";
-import type { TeacherAvailabilityInsights, WeeklyAvailability } from "@/frontend/stores/teacherAvailabilityStore";
+import type { TeacherAvailabilityInsights, WeeklyAvailability } from "@/frontend/stores/mockTeacherAvailabilityStore";
 import { AvailabilityInsights } from "./components/AvailabilityInsights";
 import { AvailabilitySearchForm } from "./components/AvailabilitySearchForm";
 import { WeeklyAvailabilityGrid } from "./components/WeeklyAvailabilityGrid";

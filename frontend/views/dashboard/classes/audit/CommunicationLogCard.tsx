@@ -3,7 +3,7 @@
 import { CheckCircleOutlined, EmailOutlined, RadioButtonUncheckedOutlined, SmsOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { BaseCard } from "@/frontend/components/ui";
-import type { CommunicationLogEntry, CommunicationType } from "@/frontend/stores/classAuditStore";
+import type { CommunicationLogEntry, CommunicationType } from "@/frontend/stores/mockClassAuditStore";
 
 interface CommunicationLogCardProps {
   readonly entries: readonly CommunicationLogEntry[];

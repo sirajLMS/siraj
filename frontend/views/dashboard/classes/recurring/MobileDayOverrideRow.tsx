@@ -4,7 +4,7 @@ import { EventRepeatOutlined, ScheduleOutlined, TuneOutlined } from "@mui/icons-
 import { Box, Checkbox, FormControlLabel, IconButton, Typography } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
 import { AppTimePicker } from "@/frontend/components/ui/form";
-import type { DayScheduleConfig } from "@/frontend/stores/createRecurringClassStore";
+import type { DayScheduleConfig } from "@/frontend/stores/mockCreateRecurringClassStore";
 
 const TIME_FORMAT = "HH:mm";
 

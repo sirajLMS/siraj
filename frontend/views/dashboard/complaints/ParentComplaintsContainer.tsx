@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useParentComplaintsStore } from "@/frontend/stores/parentComplaintsStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useParentComplaintsStore } from "@/frontend/stores/mockParentComplaintsStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { ParentComplaintsView } from "./ParentComplaintsView";
 import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
 

@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
-import { useUserStore } from "@/frontend/stores/userStore";
+import { useParentBillingStore } from "@/frontend/stores/moackParentBillingStore";
+import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentBillingView } from "./ParentBillingView";
 import type { ParentBillingViewProps } from "./types/billingViewTypes";

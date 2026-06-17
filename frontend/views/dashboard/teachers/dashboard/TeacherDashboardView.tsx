@@ -8,7 +8,7 @@ import type {
   MissedClassAlert,
   TeacherDashboardMetrics,
   TeacherScheduleRow,
-} from "@/frontend/stores/teacherDashboardTypes";
+} from "@/frontend/stores/mockTeacherDashboardTypes";
 import { ParentSupportFab } from "@/frontend/views/dashboard/parents/dashboard/components/ParentSupportFab";
 import { ActivationPolicyPanel } from "./components/ActivationPolicyPanel";
 import { MissedClassAlertBanner } from "./components/MissedClassAlertBanner";

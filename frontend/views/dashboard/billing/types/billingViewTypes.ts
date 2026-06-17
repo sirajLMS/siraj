@@ -1,5 +1,5 @@
-import type { AdminBillingSummary, AdminInvoiceRow, StudentCreditRow } from "@/frontend/stores/adminBillingStore";
-import type { ParentBillingSummary, ParentInvoiceRow } from "@/frontend/stores/parentBillingStore";
+import type { AdminBillingSummary, AdminInvoiceRow, StudentCreditRow } from "@/frontend/stores/mockAdminBillingStore";
+import type { ParentBillingSummary, ParentInvoiceRow } from "@/frontend/stores/moackParentBillingStore";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 
 export interface BillingCapabilityProps {

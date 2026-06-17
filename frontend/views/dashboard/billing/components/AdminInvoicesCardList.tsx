@@ -2,7 +2,7 @@
 
 import { Avatar, Box, Button, Paper, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { AdminInvoiceRow, AdminInvoiceStatus } from "@/frontend/stores/adminBillingStore";
+import type { AdminInvoiceRow, AdminInvoiceStatus } from "@/frontend/stores/mockAdminBillingStore";
 
 interface AdminInvoicesCardListLabels {
   readonly markAsPaid: string;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import { useStudentHistoryStore } from "@/frontend/stores/studentHistoryStore";
+import { useStudentHistoryStore } from "@/frontend/stores/mockStudentHistoryStore";
 import { ClassDetailsModal } from "./components/ClassDetailsModal";
 import { StudentHistoryDesktop } from "./components/StudentHistoryDesktop";
 import { StudentHistoryMobile } from "./components/StudentHistoryMobile";

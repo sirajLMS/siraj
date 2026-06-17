@@ -2,7 +2,7 @@
 "use client";
 
 import { alpha, Box, Paper, Typography } from "@mui/material";
-import type { AvailabilityEntry, DayOfWeek, WeeklyAvailability } from "@/frontend/stores/teacherAvailabilityStore";
+import type { AvailabilityEntry, DayOfWeek, WeeklyAvailability } from "@/frontend/stores/mockTeacherAvailabilityStore";
 
 interface WeeklyAvailabilityGridProps {
   readonly availability: WeeklyAvailability;

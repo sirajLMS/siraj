@@ -4,7 +4,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { UpcomingClass } from "@/frontend/stores/studentStatusStore";
+import type { UpcomingClass } from "@/frontend/stores/mockStudentStatusStore";
 
 interface UpcomingClassesTableProps {
   readonly classes: readonly UpcomingClass[];

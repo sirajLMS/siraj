@@ -5,7 +5,7 @@ import type {
   StudentAccountStatus,
   StudentDirectoryRow,
   StudentEnrollmentStatus,
-} from "@/frontend/stores/studentsStore";
+} from "@/frontend/stores/mockStudentsStore";
 import { StudentDirectoryCard } from "./StudentDirectoryCard";
 
 interface StudentDirectoryCardListLabels {
