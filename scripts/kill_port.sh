@@ -4,7 +4,11 @@
 # sudo apt install lsof
 
 # Prompt for the port number
-read -r -p "Enter the port number to kill: " port
+if [ -n "$1" ]; then
+    port="$1"
+else
+    read -r -p "Enter the port number to kill: " port
+fi
 
 # Find all PIDs using the given port numbero
 found=0
@@ -22,4 +26,6 @@ else
 fi
 
 # Pause for user to see the output (useful for scripts run interactively)
-read -r -p "Press Enter to continue..."
+if [ -z "$1" ]; then
+    read -r -p "Press Enter to continue..."
+fi

@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "module": "esnext",
     "skipLibCheck": true,
     "moduleDetection": "force",
@@ -24,10 +28,14 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     },
     "allowJs": true,
-    "types": ["bun"]
+    "types": [
+      "bun"
+    ]
   },
   "include": [
     ".storybook/**/*.ts",
@@ -46,5 +54,12 @@
     ".next-test/dev/types/**/*.ts",
     ".next-test/dev/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "draft", "frontend/graphql/generated", "**/unRefactored_tests", "**/.ai", ".next-test/**"]
+  "exclude": [
+    "node_modules",
+    "draft",
+    "frontend/graphql/generated",
+    "**/unRefactored_tests",
+    "**/.ai",
+    ".next-test/**"
+  ]
 }

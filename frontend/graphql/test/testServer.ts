@@ -1,4 +1,4 @@
-import { spawn } from "bun";
+import { spawn, spawnSync } from "bun";
 import { testLogger } from "@/shared/lib/testlogger";
 
 let serverProcess: ReturnType<typeof spawn> | undefined;
@@ -9,6 +9,28 @@ export async function startTestServer() {
     return;
   }
   testLogger.info("Starting Next.js dev server for GraphQL integration tests...");
+
+  // Kill port 3001 first to prevent startup failures
+  try {
+    if (process.platform === "win32") {
+      testLogger.info("Killing any process on port 3001 (Windows)...");
+      spawnSync([
+        String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/ps1/kill_port.ps1",
+        "3001",
+      ]);
+    } else {
+      testLogger.info("Killing any process on port 3001 (Unix)...");
+      spawnSync(["bash", "scripts/kill_port.sh", "3001"]);
+    }
+  } catch (error) {
+    testLogger.error("Failed to execute port-killing script:", error);
+  }
+
   serverProcess = spawn(["bun", "run", "next", "dev", "-p", "3001"], {
     stdout: "pipe",
     stderr: "pipe",

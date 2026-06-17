@@ -617,9 +617,9 @@ CREATE TABLE "teacher_recurring_unavailability" (
 	"utc_offset_snapshot" integer,
 	"effective_from" date,
 	"effective_until" date,
-	"reason" text,
 	"created_at" timestamp(3) with time zone NOT NULL,
-	"updated_at" timestamp(3) with time zone NOT NULL
+	"updated_at" timestamp(3) with time zone NOT NULL,
+	"reason" text
 );
 --> statement-breakpoint
 CREATE TABLE "teacher_vacation_requests" (
@@ -757,6 +757,7 @@ CREATE TABLE "users" (
 	"password" varchar(255) NOT NULL,
 	"remember_token_hash" varchar(255),
 	"avatar_file_path" varchar(1024),
+	"avatar_url" varchar(1024),
 	"is_active" boolean DEFAULT true NOT NULL,
 	"is_super_admin" boolean DEFAULT false NOT NULL,
 	"last_login_at" timestamp(3) with time zone,

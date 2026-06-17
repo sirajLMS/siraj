@@ -1,47 +1,76 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "6b95514e-0715-4be7-bf35-7bd0099a68de",
-  "prevIds": ["a1e635f0-6038-4661-bbd0-9785e0274a73"],
+  "id": "cd716a10-8787-4bdb-9df8-44fb16ef459e",
+  "prevIds": [
+    "70fe1c7d-4c04-493a-92d6-b536f8c0a0c2"
+  ],
   "ddl": [
     {
-      "values": ["ACTIVATED", "DEACTIVATED"],
+      "values": [
+        "ACTIVATED",
+        "DEACTIVATED"
+      ],
       "name": "account_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["ar", "en"],
+      "values": [
+        "ar",
+        "en"
+      ],
       "name": "app_language",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["NOT_ACTIVATED", "ACTIVATED", "RUNNING", "COMPLETED"],
+      "values": [
+        "NOT_ACTIVATED",
+        "ACTIVATED",
+        "RUNNING",
+        "COMPLETED"
+      ],
       "name": "class_execution_state",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PENDING", "TAKEN", "ABSENT", "LEAVE"],
+      "values": [
+        "PENDING",
+        "TAKEN",
+        "ABSENT",
+        "LEAVE"
+      ],
       "name": "class_outcome",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["REGULAR", "TRIAL", "ADVANCE"],
+      "values": [
+        "REGULAR",
+        "TRIAL",
+        "ADVANCE"
+      ],
       "name": "class_type",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["REGARDING_TEACHER", "REGARDING_SYSTEM", "OTHER"],
+      "values": [
+        "REGARDING_TEACHER",
+        "REGARDING_SYSTEM",
+        "OTHER"
+      ],
       "name": "complaint_category",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["UNANSWERED", "ANSWERED"],
+      "values": [
+        "UNANSWERED",
+        "ANSWERED"
+      ],
       "name": "complaint_status",
       "entityType": "enums",
       "schema": "public"
@@ -300,91 +329,160 @@
       "schema": "public"
     },
     {
-      "values": ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
+      "values": [
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+        "SUNDAY"
+      ],
       "name": "day_of_week",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["IOS", "ANDROID", "WEB"],
+      "values": [
+        "IOS",
+        "ANDROID",
+        "WEB"
+      ],
       "name": "device_platform",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["UPDATED", "CONFLICT", "UNCHANGED"],
+      "values": [
+        "UPDATED",
+        "CONFLICT",
+        "UNCHANGED"
+      ],
       "name": "dst_migration_result",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["MALE", "FEMALE"],
+      "values": [
+        "MALE",
+        "FEMALE"
+      ],
       "name": "gender",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["UNPAID", "PAID"],
+      "values": [
+        "UNPAID",
+        "PAID"
+      ],
       "name": "invoice_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PER_CLASSES", "MONTHLY"],
+      "values": [
+        "PER_CLASSES",
+        "MONTHLY"
+      ],
       "name": "invoice_type",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PENDING", "APPROVED", "RESCHEDULED", "CANCELLED"],
+      "values": [
+        "PENDING",
+        "APPROVED",
+        "RESCHEDULED",
+        "CANCELLED"
+      ],
       "name": "leave_request_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["TEACHER", "PARENT", "ADMIN"],
+      "values": [
+        "TEACHER",
+        "PARENT",
+        "ADMIN"
+      ],
       "name": "leave_requester_type",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["EMAIL", "SMS", "PUSH"],
+      "values": [
+        "EMAIL",
+        "SMS",
+        "PUSH"
+      ],
       "name": "notification_channel",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PENDING", "SENT", "DELIVERED", "OPENED", "FAILED"],
+      "values": [
+        "PENDING",
+        "SENT",
+        "DELIVERED",
+        "OPENED",
+        "FAILED"
+      ],
       "name": "notification_delivery_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["CLASS_REMINDER", "INVOICE_GENERATED", "COMPLAINT_RESPONSE", "BANKING_DETAILS_CHANGED"],
+      "values": [
+        "CLASS_REMINDER",
+        "INVOICE_GENERATED",
+        "COMPLAINT_RESPONSE",
+        "BANKING_DETAILS_CHANGED"
+      ],
       "name": "notification_event_type",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["REGULAR", "ON_LEAVE", "SUSPENDED", "ON_TRIAL"],
+      "values": [
+        "REGULAR",
+        "ON_LEAVE",
+        "SUSPENDED",
+        "ON_TRIAL"
+      ],
       "name": "parent_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PAYPAL", "BANK_ACCOUNT"],
+      "values": [
+        "PAYPAL",
+        "BANK_ACCOUNT"
+      ],
       "name": "payment_method",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["REGULAR", "ON_LEAVE", "SUSPENDED", "ON_TRIAL", "DEACTIVATED", "GRADUATED"],
+      "values": [
+        "REGULAR",
+        "ON_LEAVE",
+        "SUSPENDED",
+        "ON_TRIAL",
+        "DEACTIVATED",
+        "GRADUATED"
+      ],
       "name": "student_status",
       "entityType": "enums",
       "schema": "public"
     },
     {
-      "values": ["PENDING", "APPROVED", "REJECTED", "CANCELLED"],
+      "values": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED",
+        "CANCELLED"
+      ],
       "name": "vacation_request_status",
       "entityType": "enums",
       "schema": "public"
@@ -6293,19 +6391,6 @@
       "table": "teacher_recurring_unavailability"
     },
     {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "reason",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "teacher_recurring_unavailability"
-    },
-    {
       "type": "timestamp(3) with time zone",
       "typeSchema": null,
       "notNull": true,
@@ -6327,6 +6412,19 @@
       "generated": null,
       "identity": null,
       "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "teacher_recurring_unavailability"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "reason",
       "entityType": "columns",
       "schema": "public",
       "table": "teacher_recurring_unavailability"
@@ -7666,6 +7764,19 @@
       "generated": null,
       "identity": null,
       "name": "avatar_file_path",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "varchar(1024)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "avatar_url",
       "entityType": "columns",
       "schema": "public",
       "table": "users"
@@ -10749,10 +10860,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["actor_user_id"],
+      "columns": [
+        "actor_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "admin_audit_logs_actor_user_id_users_id_fkey",
@@ -10762,10 +10877,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["target_user_id"],
+      "columns": [
+        "target_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "admin_audit_logs_target_user_id_users_id_fkey",
@@ -10775,10 +10894,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["actor_user_id"],
+      "columns": [
+        "actor_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "audit_logs_actor_user_id_users_id_fkey",
@@ -10788,10 +10911,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["changed_by_user_id"],
+      "columns": [
+        "changed_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "currency_exchange_audit_logs_changed_by_user_id_users_id_fkey",
@@ -10801,10 +10928,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["invoice_id"],
+      "columns": [
+        "invoice_id"
+      ],
       "schemaTo": "public",
       "tableTo": "invoices",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "invoice_coverage_months_invoice_id_invoices_id_fkey",
@@ -10814,10 +10945,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["parent_id"],
+      "columns": [
+        "parent_id"
+      ],
       "schemaTo": "public",
       "tableTo": "parents",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "invoices_parent_id_parents_id_fkey",
@@ -10827,10 +10962,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["student_id"],
+      "columns": [
+        "student_id"
+      ],
       "schemaTo": "public",
       "tableTo": "students",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "invoices_student_id_students_id_fkey",
@@ -10840,10 +10979,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["created_by_user_id"],
+      "columns": [
+        "created_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "invoices_created_by_user_id_users_id_fkey",
@@ -10853,10 +10996,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["invoice_id"],
+      "columns": [
+        "invoice_id"
+      ],
       "schemaTo": "public",
       "tableTo": "invoices",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "payments_invoice_id_invoices_id_fkey",
@@ -10866,10 +11013,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["complaint_id"],
+      "columns": [
+        "complaint_id"
+      ],
       "schemaTo": "public",
       "tableTo": "complaints",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "complaint_responses_complaint_id_complaints_id_fkey",
@@ -10879,10 +11030,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["responder_user_id"],
+      "columns": [
+        "responder_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "complaint_responses_responder_user_id_users_id_fkey",
@@ -10892,10 +11047,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["parent_id"],
+      "columns": [
+        "parent_id"
+      ],
       "schemaTo": "public",
       "tableTo": "parents",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "complaints_parent_id_parents_id_fkey",
@@ -10905,10 +11064,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["student_id"],
+      "columns": [
+        "student_id"
+      ],
       "schemaTo": "public",
       "tableTo": "students",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "complaints_student_id_students_id_fkey",
@@ -10918,10 +11081,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["uploaded_by_user_id"],
+      "columns": [
+        "uploaded_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "learning_resources_uploaded_by_user_id_users_id_fkey",
@@ -10931,10 +11098,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "notification_deliveries_user_id_users_id_fkey",
@@ -10944,10 +11115,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["device_token_id"],
+      "columns": [
+        "device_token_id"
+      ],
       "schemaTo": "public",
       "tableTo": "user_device_tokens",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "notification_deliveries_wsuupd9kUEsX_fkey",
@@ -10957,10 +11132,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["parent_id"],
+      "columns": [
+        "parent_id"
+      ],
       "schemaTo": "public",
       "tableTo": "parents",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "suggestions_parent_id_parents_id_fkey",
@@ -10970,10 +11149,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "user_device_tokens_user_id_users_id_fkey",
@@ -10983,10 +11166,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "user_notification_preferences_user_id_users_id_fkey",
@@ -10996,10 +11183,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "parents_user_id_users_id_fkey",
@@ -11009,10 +11200,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["group_id"],
+      "columns": [
+        "group_id"
+      ],
       "schemaTo": "public",
       "tableTo": "permission_groups",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "group_permissions_group_id_permission_groups_id_fkey",
@@ -11022,10 +11217,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["permission_id"],
+      "columns": [
+        "permission_id"
+      ],
       "schemaTo": "public",
       "tableTo": "permissions",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "group_permissions_permission_id_permissions_id_fkey",
@@ -11035,10 +11234,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["created_by_user_id"],
+      "columns": [
+        "created_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "permission_groups_created_by_user_id_users_id_fkey",
@@ -11048,10 +11251,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "user_permission_groups_user_id_users_id_fkey",
@@ -11061,10 +11268,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["group_id"],
+      "columns": [
+        "group_id"
+      ],
       "schemaTo": "public",
       "tableTo": "permission_groups",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "user_permission_groups_group_id_permission_groups_id_fkey",
@@ -11074,10 +11285,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["assigned_by_user_id"],
+      "columns": [
+        "assigned_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "user_permission_groups_assigned_by_user_id_users_id_fkey",
@@ -11087,10 +11302,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["student_id"],
+      "columns": [
+        "student_id"
+      ],
       "schemaTo": "public",
       "tableTo": "students",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "class_instances_student_id_students_id_fkey",
@@ -11100,10 +11319,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "class_instances_teacher_id_teachers_id_fkey",
@@ -11113,10 +11336,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["recurring_schedule_id"],
+      "columns": [
+        "recurring_schedule_id"
+      ],
       "schemaTo": "public",
       "tableTo": "recurring_schedules",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "class_instances_PylSk1pBxELI_fkey",
@@ -11126,10 +11353,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["original_class_id"],
+      "columns": [
+        "original_class_id"
+      ],
       "schemaTo": "public",
       "tableTo": "class_instances",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "class_instances_original_class_id_class_instances_id_fkey",
@@ -11139,10 +11370,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["booking_timezone_id"],
+      "columns": [
+        "booking_timezone_id"
+      ],
       "schemaTo": "public",
       "tableTo": "timezones",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "class_instances_booking_timezone_id_timezones_id_fkey",
@@ -11152,10 +11387,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["activated_by_user_id"],
+      "columns": [
+        "activated_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "class_instances_activated_by_user_id_users_id_fkey",
@@ -11165,10 +11404,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["force_activated_by_user_id"],
+      "columns": [
+        "force_activated_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "class_instances_force_activated_by_user_id_users_id_fkey",
@@ -11178,10 +11421,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["class_instance_id"],
+      "columns": [
+        "class_instance_id"
+      ],
       "schemaTo": "public",
       "tableTo": "class_instances",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "class_status_events_class_instance_id_class_instances_id_fkey",
@@ -11191,10 +11438,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["actor_user_id"],
+      "columns": [
+        "actor_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "class_status_events_actor_user_id_users_id_fkey",
@@ -11204,10 +11455,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["run_id"],
+      "columns": [
+        "run_id"
+      ],
       "schemaTo": "public",
       "tableTo": "dst_migration_runs",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "dst_migration_entries_run_id_dst_migration_runs_id_fkey",
@@ -11217,10 +11472,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["class_instance_id"],
+      "columns": [
+        "class_instance_id"
+      ],
       "schemaTo": "public",
       "tableTo": "class_instances",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "dst_migration_entries_class_instance_id_class_instances_id_fkey",
@@ -11230,10 +11489,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["run_by_user_id"],
+      "columns": [
+        "run_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "dst_migration_runs_run_by_user_id_users_id_fkey",
@@ -11243,10 +11506,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "leave_quota_usage_teacher_id_teachers_id_fkey",
@@ -11256,10 +11523,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["student_id"],
+      "columns": [
+        "student_id"
+      ],
       "schemaTo": "public",
       "tableTo": "students",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "leave_quota_usage_student_id_students_id_fkey",
@@ -11269,10 +11540,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["class_instance_id"],
+      "columns": [
+        "class_instance_id"
+      ],
       "schemaTo": "public",
       "tableTo": "class_instances",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "leave_requests_class_instance_id_class_instances_id_fkey",
@@ -11282,10 +11557,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["requested_by_user_id"],
+      "columns": [
+        "requested_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "leave_requests_requested_by_user_id_users_id_fkey",
@@ -11295,10 +11574,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["processed_by_user_id"],
+      "columns": [
+        "processed_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "leave_requests_processed_by_user_id_users_id_fkey",
@@ -11308,10 +11591,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["recurring_schedule_id"],
+      "columns": [
+        "recurring_schedule_id"
+      ],
       "schemaTo": "public",
       "tableTo": "recurring_schedules",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "recurring_schedule_days_ok4vhL3oaFBE_fkey",
@@ -11321,10 +11608,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["student_id"],
+      "columns": [
+        "student_id"
+      ],
       "schemaTo": "public",
       "tableTo": "students",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "recurring_schedules_student_id_students_id_fkey",
@@ -11334,10 +11625,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "recurring_schedules_teacher_id_teachers_id_fkey",
@@ -11347,10 +11642,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["timezone_id"],
+      "columns": [
+        "timezone_id"
+      ],
       "schemaTo": "public",
       "tableTo": "timezones",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "recurring_schedules_timezone_id_timezones_id_fkey",
@@ -11360,10 +11659,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["updated_by_user_id"],
+      "columns": [
+        "updated_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "system_settings_updated_by_user_id_users_id_fkey",
@@ -11373,10 +11676,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["updated_by_user_id"],
+      "columns": [
+        "updated_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "site_content_updated_by_user_id_users_id_fkey",
@@ -11386,10 +11693,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "staff_profiles_user_id_users_id_fkey",
@@ -11399,10 +11710,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["file_id"],
+      "columns": [
+        "file_id"
+      ],
       "schemaTo": "public",
       "tableTo": "storage_file",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "class_instance_files_file_id_storage_file_id_fkey",
@@ -11412,10 +11727,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["class_instance_id"],
+      "columns": [
+        "class_instance_id"
+      ],
       "schemaTo": "public",
       "tableTo": "class_instances",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "class_instance_files_class_instance_id_class_instances_id_fkey",
@@ -11425,10 +11744,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["file_id"],
+      "columns": [
+        "file_id"
+      ],
       "schemaTo": "public",
       "tableTo": "storage_file",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "complaint_files_file_id_storage_file_id_fkey",
@@ -11438,10 +11761,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["complaint_id"],
+      "columns": [
+        "complaint_id"
+      ],
       "schemaTo": "public",
       "tableTo": "complaints",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "complaint_files_complaint_id_complaints_id_fkey",
@@ -11451,10 +11778,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["file_id"],
+      "columns": [
+        "file_id"
+      ],
       "schemaTo": "public",
       "tableTo": "storage_file",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "invoice_files_file_id_storage_file_id_fkey",
@@ -11464,10 +11795,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["invoice_id"],
+      "columns": [
+        "invoice_id"
+      ],
       "schemaTo": "public",
       "tableTo": "invoices",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "invoice_files_invoice_id_invoices_id_fkey",
@@ -11477,10 +11812,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["file_id"],
+      "columns": [
+        "file_id"
+      ],
       "schemaTo": "public",
       "tableTo": "storage_file",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "learning_resource_files_file_id_storage_file_id_fkey",
@@ -11490,10 +11829,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["learning_resource_id"],
+      "columns": [
+        "learning_resource_id"
+      ],
       "schemaTo": "public",
       "tableTo": "learning_resources",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "learning_resource_files_i6h6QhQDvKDk_fkey",
@@ -11503,10 +11846,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["file_id"],
+      "columns": [
+        "file_id"
+      ],
       "schemaTo": "public",
       "tableTo": "storage_file",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "parent_files_file_id_storage_file_id_fkey",
@@ -11516,10 +11863,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["parent_id"],
+      "columns": [
+        "parent_id"
+      ],
       "schemaTo": "public",
       "tableTo": "parents",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "parent_files_parent_id_parents_id_fkey",
@@ -11529,10 +11880,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["file_id"],
+      "columns": [
+        "file_id"
+      ],
       "schemaTo": "public",
       "tableTo": "storage_file",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "recurring_schedule_files_file_id_storage_file_id_fkey",
@@ -11542,10 +11897,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["recurring_schedule_id"],
+      "columns": [
+        "recurring_schedule_id"
+      ],
       "schemaTo": "public",
       "tableTo": "recurring_schedules",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "recurring_schedule_files_oFa8bm7nPzJm_fkey",
@@ -11555,10 +11914,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["file_id"],
+      "columns": [
+        "file_id"
+      ],
       "schemaTo": "public",
       "tableTo": "storage_file",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "staff_profile_files_file_id_storage_file_id_fkey",
@@ -11568,10 +11931,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["staff_profile_id"],
+      "columns": [
+        "staff_profile_id"
+      ],
       "schemaTo": "public",
       "tableTo": "staff_profiles",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "staff_profile_files_staff_profile_id_staff_profiles_id_fkey",
@@ -11581,10 +11948,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["file_id"],
+      "columns": [
+        "file_id"
+      ],
       "schemaTo": "public",
       "tableTo": "storage_file",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "student_files_file_id_storage_file_id_fkey",
@@ -11594,10 +11965,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["student_id"],
+      "columns": [
+        "student_id"
+      ],
       "schemaTo": "public",
       "tableTo": "students",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "student_files_student_id_students_id_fkey",
@@ -11607,10 +11982,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["file_id"],
+      "columns": [
+        "file_id"
+      ],
       "schemaTo": "public",
       "tableTo": "storage_file",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "teacher_files_file_id_storage_file_id_fkey",
@@ -11620,10 +11999,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "teacher_files_teacher_id_teachers_id_fkey",
@@ -11633,10 +12016,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["file_id"],
+      "columns": [
+        "file_id"
+      ],
       "schemaTo": "public",
       "tableTo": "storage_file",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "user_files_file_id_storage_file_id_fkey",
@@ -11646,10 +12033,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "user_files_user_id_users_id_fkey",
@@ -11659,10 +12050,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["student_id"],
+      "columns": [
+        "student_id"
+      ],
       "schemaTo": "public",
       "tableTo": "students",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "student_progress_student_id_students_id_fkey",
@@ -11672,10 +12067,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["class_instance_id"],
+      "columns": [
+        "class_instance_id"
+      ],
       "schemaTo": "public",
       "tableTo": "class_instances",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "student_progress_class_instance_id_class_instances_id_fkey",
@@ -11685,10 +12084,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "student_progress_teacher_id_teachers_id_fkey",
@@ -11698,10 +12101,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["student_id"],
+      "columns": [
+        "student_id"
+      ],
       "schemaTo": "public",
       "tableTo": "students",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "student_status_history_student_id_students_id_fkey",
@@ -11711,10 +12118,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["changed_by_user_id"],
+      "columns": [
+        "changed_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "student_status_history_changed_by_user_id_users_id_fkey",
@@ -11724,10 +12135,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["parent_id"],
+      "columns": [
+        "parent_id"
+      ],
       "schemaTo": "public",
       "tableTo": "parents",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "students_parent_id_parents_id_fkey",
@@ -11737,10 +12152,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["primary_teacher_id"],
+      "columns": [
+        "primary_teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "students_primary_teacher_id_teachers_id_fkey",
@@ -11750,10 +12169,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["student_id"],
+      "columns": [
+        "student_id"
+      ],
       "schemaTo": "public",
       "tableTo": "students",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "teacher_assignments_student_id_students_id_fkey",
@@ -11763,10 +12186,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "teacher_assignments_teacher_id_teachers_id_fkey",
@@ -11776,10 +12203,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["assigned_by_user_id"],
+      "columns": [
+        "assigned_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "teacher_assignments_assigned_by_user_id_users_id_fkey",
@@ -11789,10 +12220,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "teacher_availability_windows_teacher_id_teachers_id_fkey",
@@ -11802,10 +12237,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["timezone_id"],
+      "columns": [
+        "timezone_id"
+      ],
       "schemaTo": "public",
       "tableTo": "timezones",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "teacher_availability_windows_timezone_id_timezones_id_fkey",
@@ -11815,10 +12254,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "teacher_recurring_unavailability_teacher_id_teachers_id_fkey",
@@ -11828,10 +12271,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["timezone_id"],
+      "columns": [
+        "timezone_id"
+      ],
       "schemaTo": "public",
       "tableTo": "timezones",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "teacher_recurring_unavailability_timezone_id_timezones_id_fkey",
@@ -11841,10 +12288,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "teacher_vacation_requests_teacher_id_teachers_id_fkey",
@@ -11854,10 +12305,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["requested_by_user_id"],
+      "columns": [
+        "requested_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "teacher_vacation_requests_requested_by_user_id_users_id_fkey",
@@ -11867,10 +12322,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["timezone_id"],
+      "columns": [
+        "timezone_id"
+      ],
       "schemaTo": "public",
       "tableTo": "timezones",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "teacher_vacation_requests_timezone_id_timezones_id_fkey",
@@ -11880,10 +12339,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["processed_by_user_id"],
+      "columns": [
+        "processed_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "teacher_vacation_requests_processed_by_user_id_users_id_fkey",
@@ -11893,10 +12356,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "teacher_banking_details_history_teacher_id_teachers_id_fkey",
@@ -11906,10 +12373,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["verified_by_user_id"],
+      "columns": [
+        "verified_by_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "teacher_banking_details_history_M2JKQjWemqEv_fkey",
@@ -11919,10 +12390,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["teacher_id"],
+      "columns": [
+        "teacher_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teachers",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "teacher_payments_teacher_id_teachers_id_fkey",
@@ -11932,10 +12407,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["banking_details_history_id"],
+      "columns": [
+        "banking_details_history_id"
+      ],
       "schemaTo": "public",
       "tableTo": "teacher_banking_details_history",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "teacher_payments_5SKCg5lB6byn_fkey",
@@ -11945,10 +12424,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "teachers_user_id_users_id_fkey",
@@ -11958,10 +12441,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["timezone_id"],
+      "columns": [
+        "timezone_id"
+      ],
       "schemaTo": "public",
       "tableTo": "timezones",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "teachers_timezone_id_timezones_id_fkey",
@@ -11971,10 +12458,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "session_metadata_user_id_users_id_fkey",
@@ -11984,10 +12475,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "sessions_user_id_users_id_fkey",
@@ -11996,7 +12491,11 @@
       "table": "sessions"
     },
     {
-      "columns": ["invoice_id", "year", "month"],
+      "columns": [
+        "invoice_id",
+        "year",
+        "month"
+      ],
       "nameExplicit": false,
       "name": "invoice_coverage_months_pkey",
       "entityType": "pks",
@@ -12004,7 +12503,10 @@
       "table": "invoice_coverage_months"
     },
     {
-      "columns": ["group_id", "permission_id"],
+      "columns": [
+        "group_id",
+        "permission_id"
+      ],
       "nameExplicit": false,
       "name": "group_permissions_pkey",
       "entityType": "pks",
@@ -12012,7 +12514,10 @@
       "table": "group_permissions"
     },
     {
-      "columns": ["user_id", "group_id"],
+      "columns": [
+        "user_id",
+        "group_id"
+      ],
       "nameExplicit": false,
       "name": "user_permission_groups_pkey",
       "entityType": "pks",
@@ -12020,7 +12525,9 @@
       "table": "user_permission_groups"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "admin_audit_logs_pkey",
       "schema": "public",
@@ -12028,7 +12535,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "audit_logs_pkey",
       "schema": "public",
@@ -12036,7 +12545,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "currency_exchange_audit_logs_pkey",
       "schema": "public",
@@ -12044,7 +12555,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "currency_exchange_rates_pkey",
       "schema": "public",
@@ -12052,7 +12565,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "currency_hedges_pkey",
       "schema": "public",
@@ -12060,7 +12575,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "invoices_pkey",
       "schema": "public",
@@ -12068,7 +12585,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "payments_pkey",
       "schema": "public",
@@ -12076,7 +12595,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["key"],
+      "columns": [
+        "key"
+      ],
       "nameExplicit": false,
       "name": "rate_limit_cache_pkey",
       "schema": "public",
@@ -12084,7 +12605,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["key"],
+      "columns": [
+        "key"
+      ],
       "nameExplicit": false,
       "name": "session_cache_pkey",
       "schema": "public",
@@ -12092,7 +12615,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "complaint_responses_pkey",
       "schema": "public",
@@ -12100,7 +12625,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "complaints_pkey",
       "schema": "public",
@@ -12108,7 +12635,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "learning_resources_pkey",
       "schema": "public",
@@ -12116,7 +12645,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "notification_deliveries_pkey",
       "schema": "public",
@@ -12124,7 +12655,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "suggestions_pkey",
       "schema": "public",
@@ -12132,7 +12665,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "user_device_tokens_pkey",
       "schema": "public",
@@ -12140,7 +12675,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "user_notification_preferences_pkey",
       "schema": "public",
@@ -12148,7 +12685,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "parents_pkey",
       "schema": "public",
@@ -12156,7 +12695,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "permission_groups_pkey",
       "schema": "public",
@@ -12164,7 +12705,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "permissions_pkey",
       "schema": "public",
@@ -12172,7 +12715,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "class_instances_pkey",
       "schema": "public",
@@ -12180,7 +12725,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "class_status_events_pkey",
       "schema": "public",
@@ -12188,7 +12735,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "dst_migration_entries_pkey",
       "schema": "public",
@@ -12196,7 +12745,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "dst_migration_runs_pkey",
       "schema": "public",
@@ -12204,7 +12755,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "leave_quota_usage_pkey",
       "schema": "public",
@@ -12212,7 +12765,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "leave_requests_pkey",
       "schema": "public",
@@ -12220,7 +12775,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "recurring_schedule_days_pkey",
       "schema": "public",
@@ -12228,7 +12785,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "recurring_schedules_pkey",
       "schema": "public",
@@ -12236,7 +12795,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["key"],
+      "columns": [
+        "key"
+      ],
       "nameExplicit": false,
       "name": "system_settings_pkey",
       "schema": "public",
@@ -12244,7 +12805,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "site_content_pkey",
       "schema": "public",
@@ -12252,7 +12815,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "staff_profiles_pkey",
       "schema": "public",
@@ -12260,7 +12825,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "class_instance_files_pkey",
       "schema": "public",
@@ -12268,7 +12835,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "complaint_files_pkey",
       "schema": "public",
@@ -12276,7 +12845,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "invoice_files_pkey",
       "schema": "public",
@@ -12284,7 +12855,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "learning_resource_files_pkey",
       "schema": "public",
@@ -12292,7 +12865,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "parent_files_pkey",
       "schema": "public",
@@ -12300,7 +12875,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "recurring_schedule_files_pkey",
       "schema": "public",
@@ -12308,7 +12885,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "signed_url_pkey",
       "schema": "public",
@@ -12316,7 +12895,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "staff_profile_files_pkey",
       "schema": "public",
@@ -12324,7 +12905,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "storage_directory_pkey",
       "schema": "public",
@@ -12332,7 +12915,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "storage_file_pkey",
       "schema": "public",
@@ -12340,7 +12925,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "student_files_pkey",
       "schema": "public",
@@ -12348,7 +12935,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "teacher_files_pkey",
       "schema": "public",
@@ -12356,7 +12945,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "user_files_pkey",
       "schema": "public",
@@ -12364,7 +12955,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "student_progress_pkey",
       "schema": "public",
@@ -12372,7 +12965,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "student_status_history_pkey",
       "schema": "public",
@@ -12380,7 +12975,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "students_pkey",
       "schema": "public",
@@ -12388,7 +12985,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "teacher_assignments_pkey",
       "schema": "public",
@@ -12396,7 +12995,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "teacher_availability_windows_pkey",
       "schema": "public",
@@ -12404,7 +13005,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "teacher_recurring_unavailability_pkey",
       "schema": "public",
@@ -12412,7 +13015,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "teacher_vacation_requests_pkey",
       "schema": "public",
@@ -12420,7 +13025,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "teacher_banking_details_history_pkey",
       "schema": "public",
@@ -12428,7 +13035,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "teacher_payments_pkey",
       "schema": "public",
@@ -12436,7 +13045,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "teachers_pkey",
       "schema": "public",
@@ -12444,7 +13055,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "timezones_pkey",
       "schema": "public",
@@ -12452,7 +13065,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "auth_rate_limits_pkey",
       "schema": "public",
@@ -12460,7 +13075,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "password_reset_tokens_pkey",
       "schema": "public",
@@ -12468,7 +13085,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "session_config_pkey",
       "schema": "public",
@@ -12476,7 +13095,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "session_metadata_pkey",
       "schema": "public",
@@ -12484,7 +13105,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["hashed_id"],
+      "columns": [
+        "hashed_id"
+      ],
       "nameExplicit": false,
       "name": "sessions_pkey",
       "schema": "public",
@@ -12492,7 +13115,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",
@@ -12501,7 +13126,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "nullsNotDistinct": false,
       "name": "parents_user_id_key",
       "schema": "public",
@@ -12510,7 +13137,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["name"],
+      "columns": [
+        "name"
+      ],
       "nullsNotDistinct": false,
       "name": "permission_groups_name_key",
       "schema": "public",
@@ -12519,7 +13148,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["slug"],
+      "columns": [
+        "slug"
+      ],
       "nullsNotDistinct": false,
       "name": "permission_groups_slug_key",
       "schema": "public",
@@ -12528,7 +13159,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["key"],
+      "columns": [
+        "key"
+      ],
       "nullsNotDistinct": false,
       "name": "permissions_key_key",
       "schema": "public",
@@ -12537,7 +13170,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["slug"],
+      "columns": [
+        "slug"
+      ],
       "nullsNotDistinct": false,
       "name": "site_content_slug_key",
       "schema": "public",
@@ -12546,7 +13181,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "nullsNotDistinct": false,
       "name": "staff_profiles_user_id_key",
       "schema": "public",
@@ -12555,7 +13192,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["path"],
+      "columns": [
+        "path"
+      ],
       "nullsNotDistinct": false,
       "name": "storage_directory_path_key",
       "schema": "public",
@@ -12564,7 +13203,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["path"],
+      "columns": [
+        "path"
+      ],
       "nullsNotDistinct": false,
       "name": "storage_file_path_key",
       "schema": "public",
@@ -12573,7 +13214,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["user_id"],
+      "columns": [
+        "user_id"
+      ],
       "nullsNotDistinct": false,
       "name": "teachers_user_id_key",
       "schema": "public",
@@ -12582,7 +13225,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["iana_id"],
+      "columns": [
+        "iana_id"
+      ],
       "nullsNotDistinct": false,
       "name": "timezones_iana_id_key",
       "schema": "public",
@@ -12591,7 +13236,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["role_name"],
+      "columns": [
+        "role_name"
+      ],
       "nullsNotDistinct": false,
       "name": "session_config_role_name_key",
       "schema": "public",
@@ -12600,7 +13247,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["session_id"],
+      "columns": [
+        "session_id"
+      ],
       "nullsNotDistinct": false,
       "name": "session_metadata_session_id_key",
       "schema": "public",
@@ -12609,7 +13258,9 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["email"],
+      "columns": [
+        "email"
+      ],
       "nullsNotDistinct": false,
       "name": "users_email_key",
       "schema": "public",
