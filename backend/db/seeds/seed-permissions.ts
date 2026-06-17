@@ -2,6 +2,7 @@ import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { groupPermissions, permissionGroups, permissions } from "@/backend/db/schema";
 import {
+  ACADEMY_ADMIN_PERMISSION_KEYS,
   PARENT_DEFAULT_PERMISSION_KEYS,
   PERMISSION_CATALOG,
   STAFF_DEFAULT_PERMISSION_KEYS,
@@ -16,6 +17,13 @@ const SYSTEM_GROUPS = [
     description: "Full system access",
     isSystem: true,
     permissionKeys: PERMISSION_CATALOG.map(p => p.key),
+  },
+  {
+    name: "Academy Admin",
+    slug: SYSTEM_PERMISSION_GROUP_SLUGS.ACADEMY_ADMIN,
+    description: "Full operational oversight for the sprint",
+    isSystem: true,
+    permissionKeys: [...ACADEMY_ADMIN_PERMISSION_KEYS],
   },
   {
     name: "Teacher Default",

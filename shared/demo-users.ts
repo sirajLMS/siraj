@@ -18,6 +18,16 @@ export const superAdmins: DemoUser[] = [
   },
 ];
 
+export const academyAdmins: DemoUser[] = [
+  {
+    name: "Academy Admin",
+    email: "academy@siraj.local",
+    plainPassword: PWD,
+    isSuperAdmin: false,
+    groupSlug: "academy_admin",
+  },
+];
+
 export const teachers: DemoUser[] = [
   {
     name: "Default Teacher",
@@ -48,4 +58,4 @@ export const staff: DemoUser[] = [
   },
 ];
 
-export const ALL_DEMO_USERS: DemoUser[] = [...superAdmins, ...teachers, ...parents, ...staff];
+export const ALL_DEMO_USERS: DemoUser[] = [...superAdmins, ...academyAdmins, ...teachers, ...parents, ...staff];

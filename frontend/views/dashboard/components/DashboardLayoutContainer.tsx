@@ -7,8 +7,8 @@ import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useState } from "react";
-import { meQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import type { User } from "@/frontend/graphql/generated/gql/graphql-types";
+import { meQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useLayoutStore } from "@/frontend/stores/layoutStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import {

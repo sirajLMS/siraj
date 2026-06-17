@@ -5,6 +5,7 @@ Frontend project's rules: Read frontend/AGENTS.md
 Before working on any specific layer, you **MUST** read the corresponding `AGENTS.md` file for that layer:
 
 - **Database / Repositories**: Read `backend/db/repo/AGENTS.md`
+- **Database / Seeders**: Read `backend/db/seeds/AGENTS.md`
 - **Backend Services**: Read `backend/services/AGENTS.md`
 - **Backend GraphQL / Pothos**: Read `backend/graphql/AGENTS.md`
 - **Frontend GraphQL / Apollo**: Read `frontend/graphql/AGENTS.md`

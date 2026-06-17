@@ -42,12 +42,21 @@ const LIST_DELETE_ACTIONS = (pluralLabel: string): [string, string][] => [
 ];
 
 export const PERMISSION_CATALOG: PermissionSeed[] = [
+  ...createPermissions("Authentication", "auth", [
+    ["login", "Login to system"],
+    ["view_own_profile", "View own profile"],
+  ]),
+
   ...createPermissions("Dashboard", "dashboard", [
     ["view", "View dashboard"],
+    ["view_metrics", "View dashboard metrics"],
+    ["filter_metrics", "Filter dashboard metrics"],
     ["metrics.view_all", "View all dashboard metrics"],
   ]),
 
   ...createPermissions("Scheduling", "schedule", [
+    ["view_list", "View daily schedule list"],
+    ["filter_advanced", "Advanced filtering of schedule"],
     ["view_all", "View all schedules"],
     ["view_assigned", "View assigned teacher schedule"],
     ["view_family", "View family student schedule"],
@@ -112,6 +121,7 @@ export const PERMISSION_CATALOG: PermissionSeed[] = [
 
 export const SYSTEM_PERMISSION_GROUP_SLUGS = {
   SUPER_ADMIN: "super_admin",
+  ACADEMY_ADMIN: "academy_admin",
   TEACHER_DEFAULT: "teacher_default",
   PARENT_DEFAULT: "parent_default",
   STAFF_DEFAULT: "staff_default",
@@ -148,4 +158,13 @@ export const STAFF_DEFAULT_PERMISSION_KEYS = [
   "parents.list",
   "students.list",
   "complaints.list",
+] as const;
+
+export const ACADEMY_ADMIN_PERMISSION_KEYS = [
+  "auth.login",
+  "auth.view_own_profile",
+  "dashboard.view_metrics",
+  "dashboard.filter_metrics",
+  "schedule.view_list",
+  "schedule.filter_advanced",
 ] as const;

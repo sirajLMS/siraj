@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import type { User } from "../graphql/generated/gql/graphql-types";
 
-
 interface UserState {
   user: User | null;
   setUser: (user: User | null) => void;

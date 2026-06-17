@@ -9,6 +9,13 @@ Before writing any code or proposing an implementation plan, you must perform de
 - **Transitioning from Mock to Real**: 
   - If a story involves features currently existing as mock UI pages or using dummy data/layouts (e.g., mock Zustand stores or mock Navigation configs), you MUST plan a strict migration path to real implementations.
   - This involves hooking up the real backend repositories, real GraphQL queries, transitioning to real Zustand stores with strict typing, migrating the layout wrappers (e.g., `DashboardLayoutContainer`), and completely discarding the mock data.
+- **Data Seeding Lifecycle**:
+  - Whenever new tables are introduced or new permissions are defined in the sprint, you MUST update the seeders in `backend/db/seeds`.
+  - Check the existing permissions in `permission-catalog.ts` and add any missing sprint permissions.
+  - Update `seed-permissions.ts` and ensure each new table gets its own `seedOrGet` seeder pattern integrated into `index.ts`.
+  - **Schema Synchronization:** You MUST run `bun run scripts/dbActions.ts push` before running `bun run db seed` if you altered any schema files.
+  - **Constraints & Enums:** Seed data MUST respect PostgreSQL specific values (e.g., EXACT enum strings like `"ACTIVATED"`) and `CHECK` constraints found in `backend/db/schema/*.ts`.
+  - **Drizzle Safety:** Use standard `db.select().from(table)` in seeders rather than relational queries to avoid complex generic type errors. If strict `Entity` types are unavailable for dependency injection, create new types under `backend/types/` in the specified type file (one type per table) and update `backend/types/index.ts` if needed, rather than using inline types or `any`.
 
 ## 2. Planning Requirements
 Your implementation plan (`implementation_plan.md`) must be hyper-detailed and strictly follow this specific structure:
