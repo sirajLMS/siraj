@@ -52,3 +52,11 @@ When writing integration tests for GraphQL queries/mutations under `frontend/gra
        },
      });
      ```
+
+5. **Handling Query Errors & Non-Null Checks**:
+   - Since the test client is configured with `errorPolicy: "all"`, GraphQL errors (like unauthorized access) do not throw. Instead, assert against the `result.error` property (type `ApolloError | undefined`) rather than `result.errors`.
+   - Always verify that target query properties (e.g., `result.data?.teachers`) are defined and not null before performing assertions on them, to satisfy TypeScript's strict null checking. Use guards (e.g., `if (!teachers) throw new Error("...")`) to narrow the type cleanly.
+
+6. **Align Test Data with Shared Constants**:
+   - Avoid hardcoding search strings or expected names (e.g., `"Default Teacher"`). Instead, import the shared demo users definition from `@/shared/demo-users` (e.g., `teachers as demoTeachers`) and use these values dynamically in both search parameters and assertions to ensure test and database seed consistency.
+

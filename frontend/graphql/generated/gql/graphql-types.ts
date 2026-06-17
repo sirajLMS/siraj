@@ -626,6 +626,7 @@ export type Query = {
   storageStats: Maybe<StorageStats>;
   student: Maybe<Student>;
   students: StudentsWithFiltersResponse;
+  teachers: Maybe<Array<TeacherSimple>>;
   translatedMessage: Maybe<Scalars['String']['output']>;
   user: Maybe<User>;
   users: Maybe<Array<User>>;
@@ -692,6 +693,12 @@ export type QueryStudentsArgs = {
   filterArgs: InputMaybe<StudentFilterArgs>;
   orderBy: InputMaybe<Array<StudentsOrderByClause>>;
   paginationArgs: InputMaybe<PaginationArgs>;
+};
+
+
+export type QueryTeachersArgs = {
+  limit: Scalars['Int']['input'];
+  search: Scalars['String']['input'];
 };
 
 
@@ -851,6 +858,12 @@ export type StudentsWithFiltersResponse = {
   __typename?: 'StudentsWithFiltersResponse';
   data: Array<Student>;
   pageInfo: PageInfo;
+};
+
+export type TeacherSimple = {
+  __typename?: 'TeacherSimple';
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
 };
 
 export type UploadPreparation = {

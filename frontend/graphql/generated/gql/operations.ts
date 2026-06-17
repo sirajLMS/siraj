@@ -125,6 +125,19 @@ export type DailyScheduleListQueryVariables = Exact<{
 
 export type DailyScheduleListQuery = DailyScheduleListQuery_Query;
 
+export type TeachersQuery_teachers_TeacherSimple = { id: string | null, name: string | null };
+
+export type TeachersQuery_Query = { teachers: Array<TeachersQuery_teachers_TeacherSimple> | null };
+
+
+export type TeachersQueryVariables = Exact<{
+  search: string;
+  limit: number;
+}>;
+
+
+export type TeachersQuery = TeachersQuery_Query;
+
 export type WelcomeMessageQuery_Query = { welcomeMessage: string | null };
 
 

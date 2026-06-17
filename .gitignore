@@ -79,3 +79,5 @@ eslint-results.json
 storybook-static
 
 .playwright-mcp
+
+.next-test

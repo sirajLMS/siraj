@@ -564,6 +564,7 @@ type Query {
   ): StorageStats
   student(id: String!): Student
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
+  teachers(limit: Int!, search: String!): [TeacherSimple!]
   translatedMessage(key: String!, namespace: String!): String
   user(id: String!): User
   users: [User!]
@@ -714,6 +715,11 @@ enum StudentsOrderByColumn {
 type StudentsWithFiltersResponse {
   data: [Student!]!
   pageInfo: PageInfo!
+}
+
+type TeacherSimple {
+  id: String
+  name: String
 }
 
 type UploadPreparation {

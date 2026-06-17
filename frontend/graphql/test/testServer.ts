@@ -12,6 +12,10 @@ export async function startTestServer() {
   serverProcess = spawn(["bun", "run", "next", "dev", "-p", "3001"], {
     stdout: "pipe",
     stderr: "pipe",
+    env: {
+      ...process.env,
+      NEXT_DIST_DIR: ".next-test",
+    },
   });
 
   const start = Date.now();

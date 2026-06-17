@@ -17,11 +17,12 @@ import {
   ScienceOutlined,
 } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
-import { usersQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
+import { useState } from "react";
 import {
   dailyScheduleListQueryDocument,
   dailyScheduleMetricsQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/schedule.documents";
+import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { ClassStatus, MetricItem, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
@@ -60,21 +61,25 @@ export function AdminDashboardContainer() {
     },
   });
 
-  // Fetch teachers list (users having the teacher permission)
-  const { data: usersData, loading: loadingUsers } = useQuery(usersQueryDocument);
+  const [teacherSearchQuery, setTeacherSearchQuery] = useState("");
+
+  // Fetch teachers list using the new teachers query
+  const { data: teachersData, loading: loadingTeachers } = useQuery(teachersQueryDocument, {
+    variables: {
+      search: teacherSearchQuery,
+      limit: 10,
+    },
+  });
 
   const handleSubmit = () => {
     void refetchMetrics();
     void refetchList();
   };
 
-  const rawUsers = usersData?.users ?? [];
-  const teachers = rawUsers
-    .filter(u => u.permissions?.includes("schedule.view_assigned") && u.role !== "Academy Admin")
-    .map(u => ({
-      id: u.id ?? "",
-      name: u.name ?? "",
-    }));
+  const teachers = (teachersData?.teachers ?? []).map(t => ({
+    id: t?.id ?? "",
+    name: t?.name ?? "",
+  }));
 
   const handleMetricClick = (key: string) => {
     // Enforce dashboard.filter_metrics permission for card clicking
@@ -253,7 +258,7 @@ export function AdminDashboardContainer() {
     total: mappedRows.length,
   });
 
-  const isLoading = loadingMetrics || loadingList || loadingUsers;
+  const isLoading = loadingMetrics || loadingList;
 
   return (
     <DashboardView
@@ -270,6 +275,9 @@ export function AdminDashboardContainer() {
       teacherValue={filters.teacherId}
       submitLabel={t("admin.submit")}
       teachers={teachers}
+      loadingTeachers={loadingTeachers}
+      teacherSearchValue={teacherSearchQuery}
+      onTeacherSearchChange={setTeacherSearchQuery}
       rows={filteredRows}
       headers={headers}
       statusLabels={statusLabels}
