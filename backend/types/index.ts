@@ -8,5 +8,6 @@ export * from "./scheduling.types";
 export * from "./soft-delete.types";
 export * from "./storage.types";
 export * from "./student.types";
+export * from "./system-settings.types";
 export * from "./teacher.types";
 export * from "./teacher-availability.types";

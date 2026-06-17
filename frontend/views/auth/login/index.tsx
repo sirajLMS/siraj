@@ -46,5 +46,30 @@ export function LoginContainer() {
     }
   };
 
-  return <LoginView onSubmitAction={handleLoginSubmit} externalLoginResult={loginResult} />;
+  const handleFastLogin = async (email: string, password: string) => {
+    const redirectUrl = searchParams.get("redirect");
+    setLoginResult(null);
+
+    try {
+      const success = await login({ input: { email, password } }, redirectUrl);
+      if (success) {
+        setLoginResult({ type: "success", message: t("loginSuccess") });
+      } else {
+        setLoginResult({ type: "error", message: t("invalidCredentials") });
+      }
+    } catch {
+      setLoginResult({ type: "error", message: t("loginError") });
+    }
+  };
+
+  const isDemo = Boolean(process.env.NEXT_PUBLIC_IS_DEMO);
+
+  return (
+    <LoginView
+      onSubmitAction={handleLoginSubmit}
+      externalLoginResult={loginResult}
+      isDemo={isDemo}
+      onFastLogin={handleFastLogin}
+    />
+  );
 }

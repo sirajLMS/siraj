@@ -18,6 +18,11 @@ export interface AuthLoginLabels {
   readonly tryAgain: string;
   readonly signinFailed: string;
   readonly invalidLoginResponse: string;
+  readonly orQuickLogin: string;
+  readonly superAdmin: string;
+  readonly teacher: string;
+  readonly parent: string;
+  readonly staff: string;
 }
 
 export interface AuthLabels {

@@ -46,6 +46,11 @@ const en: MessageSchema = {
       tryAgain: "Try Again",
       signinFailed: "Sign in failed",
       invalidLoginResponse: "Invalid response from server",
+      orQuickLogin: "Or Quick Login",
+      superAdmin: "Super Admin",
+      teacher: "Teacher",
+      parent: "Parent",
+      staff: "Staff",
     },
   },
   dashboard: {

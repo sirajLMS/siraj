@@ -1,10 +1,16 @@
 import { Box, Card, CardContent } from "@mui/material";
+import { DemoFastLogin } from "./components/DemoFastLogin";
 import { LoginFooter } from "./components/LoginFooter";
 import { LoginForm, type LoginFormProps } from "./components/LoginForm";
 import { LoginHeader } from "./components/LoginHeader";
 import { ThemeLanguageControls } from "./components/ThemeLanguageControls";
 
-export function LoginView(props: LoginFormProps) {
+export interface LoginViewProps extends LoginFormProps {
+  isDemo?: boolean;
+  onFastLogin?: (email: string, password: string) => void;
+}
+
+export function LoginView({ isDemo, onFastLogin, ...formProps }: Readonly<LoginViewProps>) {
   return (
     <Box
       sx={theme => ({
@@ -32,7 +38,8 @@ export function LoginView(props: LoginFormProps) {
           })}
         >
           <LoginHeader />
-          <LoginForm {...props} />
+          <LoginForm {...formProps} />
+          {isDemo && onFastLogin && <DemoFastLogin onFastLogin={onFastLogin} />}
           <LoginFooter />
         </CardContent>
       </Card>

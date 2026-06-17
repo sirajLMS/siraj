@@ -21,5 +21,10 @@ export const auth: AuthLabels = {
     tryAgain: "حاول مرة أخرى",
     signinFailed: "فشل تسجيل الدخول",
     invalidLoginResponse: "استجابة غير صالحة من الخادم",
+    orQuickLogin: "أو الدخول السريع",
+    superAdmin: "مدير النظام",
+    teacher: "معلم",
+    parent: "ولي أمر",
+    staff: "موظف",
   },
 };

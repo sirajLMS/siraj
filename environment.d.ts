@@ -70,6 +70,9 @@ declare global {
        * Blob Read/Write Token for secure access to vercel blob storage
        */
       BLOB_READ_WRITE_TOKEN?: string;
+
+      // Demo Site Configuration
+      NEXT_PUBLIC_IS_DEMO?: string;
     }
   }
 }

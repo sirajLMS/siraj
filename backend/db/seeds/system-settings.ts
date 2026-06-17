@@ -2,7 +2,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { systemSettings } from "@/backend/db/schema";
 import logger from "@/backend/lib/logger";
 
-export async function seedSystemSettings() {
+export async function seedOrGet() {
   logger.info("Seeding system settings...");
 
   const settings = [
@@ -40,8 +40,10 @@ export async function seedSystemSettings() {
     },
   ];
 
+  const results = [];
+
   for (const setting of settings) {
-    await db
+    const [inserted] = await db
       .insert(systemSettings)
       .values(setting)
       .onConflictDoUpdate({
@@ -50,8 +52,12 @@ export async function seedSystemSettings() {
           value: setting.value,
           updatedAt: setting.updatedAt,
         },
-      });
+      })
+      .returning();
+
+    results.push(inserted);
   }
 
   logger.info("System settings seeded.");
+  return results;
 }

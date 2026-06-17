@@ -2,7 +2,7 @@ import logger from "@/backend/lib/logger";
 import { db } from "../drizzleDb";
 import { timezones } from "../schema";
 
-export async function seedTimezones() {
+export async function seedOrGet() {
   logger.log("Seeding common timezones...");
   const commonTimezones = [
     { ianaId: "UTC", baseOffsetMinutes: 0 },
@@ -15,13 +15,20 @@ export async function seedTimezones() {
     { ianaId: "Australia/Sydney", baseOffsetMinutes: 600 },
   ];
 
+  const results = [];
+
   for (const tz of commonTimezones) {
-    await db
+    const [inserted] = await db
       .insert(timezones)
       .values(tz)
       .onConflictDoUpdate({
         target: timezones.ianaId,
         set: { baseOffsetMinutes: tz.baseOffsetMinutes },
-      });
+      })
+      .returning();
+
+    results.push(inserted);
   }
+
+  return results;
 }

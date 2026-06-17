@@ -1,13 +1,9 @@
 "use client";
 
-import { Brightness4, Brightness7 } from "@mui/icons-material";
-import { Box, IconButton } from "@mui/material";
-import { useThemeMode } from "@/frontend/hooks/useThemeMode";
-import { LanguageSwitcher } from "@/frontend/views/dashboard/components/navbar/LanguageSwitcher";
+import { Box } from "@mui/material";
+import { LanguageSwitcher, ThemeSwitcher } from "@/frontend/views/dashboard/components/navbar";
 
 export function ThemeLanguageControls() {
-  const { mode, toggleTheme } = useThemeMode();
-
   return (
     <Box
       sx={{
@@ -19,19 +15,22 @@ export function ThemeLanguageControls() {
         alignItems: "center",
       }}
     >
-      <LanguageSwitcher />
-      <IconButton
-        onClick={toggleTheme}
+      <Box
         sx={theme => ({
-          color: theme.palette.text.secondary,
-          "&:hover": {
-            color: theme.palette.primary.main,
-          },
+          backgroundColor: theme.palette.headerContainer,
+          borderRadius: theme.shape.borderRadius,
         })}
-        aria-label={`Switch to ${mode === "light" ? "dark" : "light"} mode`}
       >
-        {mode === "light" ? <Brightness4 /> : <Brightness7 />}
-      </IconButton>
+        <LanguageSwitcher />
+      </Box>
+      <Box
+        sx={theme => ({
+          backgroundColor: theme.palette.headerContainer,
+          borderRadius: theme.shape.borderRadius,
+        })}
+      >
+        <ThemeSwitcher />
+      </Box>
     </Box>
   );
 }

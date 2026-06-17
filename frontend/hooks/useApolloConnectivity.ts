@@ -132,15 +132,16 @@ export const useApolloConnectivity = () => {
       const delay = getReconnectionDelay(reconnectAttemptRef.current);
       if (delay === null) return;
 
-      reconnectTimeoutRef.current = setTimeout(() => {
-        checkConnectivity().then(connected => {
-          if (!connected) {
-            reconnectAttemptRef.current += 1;
-            scheduleReconnect();
-          } else {
-            reconnectAttemptRef.current = 0;
-          }
-        });
+      reconnectTimeoutRef.current = setTimeout(async () => {
+        const connected = await checkConnectivity();
+
+        if (connected) {
+          reconnectAttemptRef.current = 0;
+          return;
+        }
+
+        reconnectAttemptRef.current += 1;
+        scheduleReconnect();
       }, delay);
     };
 

@@ -1,29 +1,27 @@
 "use server";
 
-import { webcrypto } from "node:crypto";
 import type { LoginFormData } from "../schemas/loginSchema";
 
 export type LoginResponse =
   | {
-      success: true;
-      message: string;
-      user: {
-        id: string;
-        email: string;
-        role: string;
-      };
-    }
-  | {
-      success: false;
-      message: string;
+    success: true;
+    message: string;
+    user: {
+      id: string;
+      email: string;
+      role: string;
     };
+  }
+  | {
+    success: false;
+    message: string;
+  };
 
 /**
  * Generate a cryptographically secure random number between 0 and 1
  */
 function secureRandom(): number {
   const array = new Uint32Array(1);
-  webcrypto.getRandomValues(array);
   return array[0] / (0xffffffff + 1);
 }
 
@@ -45,7 +43,6 @@ export async function mockLogin(data: LoginFormData): Promise<LoginResponse> {
 
     // Generate secure random ID
     const randomBytes = new Uint8Array(4);
-    webcrypto.getRandomValues(randomBytes);
     const id = Array.from(randomBytes, byte => byte.toString(36)).join("");
 
     return {

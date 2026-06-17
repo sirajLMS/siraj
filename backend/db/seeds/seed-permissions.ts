@@ -40,7 +40,7 @@ const SYSTEM_GROUPS = [
   },
 ] as const;
 
-export async function seedPermissions(): Promise<void> {
+export async function seedOrGet() {
   const now = new Date();
 
   for (const entry of PERMISSION_CATALOG) {
@@ -59,6 +59,8 @@ export async function seedPermissions(): Promise<void> {
 
   const allPermissions = await db.select().from(permissions);
   const permissionByKey = new Map(allPermissions.map(p => [p.key, p.id]));
+
+  const groups = [];
 
   for (const group of SYSTEM_GROUPS) {
     const [insertedGroup] = await db
@@ -97,7 +99,11 @@ export async function seedPermissions(): Promise<void> {
         }))
       );
     }
+
+    groups.push(insertedGroup);
   }
+
+  return groups;
 }
 
 export async function getPermissionIdsByKeys(keys: string[]): Promise<string[]> {

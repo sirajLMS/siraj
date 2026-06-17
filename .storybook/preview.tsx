@@ -5,7 +5,7 @@ import { mswHandlers } from "./msw-handlers";
 import { StoryWrapper } from "./StoryWrapper";
 
 // Import global styles
-import "../src/index.css";
+import "../app/index.css";
 
 // Initialize MSW
 initialize({ onUnhandledRequest: "bypass" });

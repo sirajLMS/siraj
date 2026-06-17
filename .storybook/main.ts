@@ -1,7 +1,7 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite";
 
 const config: StorybookConfig = {
-  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
+  stories: ["../frontend/**/*.mdx", "../frontend/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: [
     "@chromatic-com/storybook",
     "@storybook/addon-vitest",
@@ -12,6 +12,6 @@ const config: StorybookConfig = {
     "storybook-next-intl",
   ],
   framework: "@storybook/nextjs-vite",
-  staticDirs: ["..\\public"],
+  staticDirs: ["..\\public"], //NoSonar
 };
 export default config;
