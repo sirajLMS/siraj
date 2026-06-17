@@ -3,6 +3,8 @@ import type { UserInfo } from "@/frontend/views/dashboard/types/dashboard";
 
 interface UserState extends UserInfo {
   setUser: (user: UserInfo) => void;
+  user: UserInfo | null;
+  hasPermission: (permission: string) => boolean;
 }
 
 export const MOCK_ADMIN_USER: UserInfo = {
@@ -70,9 +72,20 @@ export const MOCK_AUTHENTICATED_USER: UserInfo = {
   notificationCount: 0,
 };
 
-export const useUserStore = create<UserState>(set => ({
-  ...MOCK_ADMIN_USER,
-  setUser: (user: UserInfo) => {
-    set(user);
-  },
-}));
+export const useUserStore = create<UserState>((set, get) => {
+  const defaultUser = MOCK_ADMIN_USER;
+  return {
+    ...defaultUser,
+    user: defaultUser,
+    setUser: (user: UserInfo) => {
+      set({
+        ...user,
+        user,
+      });
+    },
+    hasPermission: (permission: string) => {
+      const permissions = get().user?.permissions || get().permissions || [];
+      return permissions.includes(permission);
+    },
+  };
+});
