@@ -9,7 +9,7 @@ export type LoginInput = {
   password: string;
 };
 
-export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null };
+export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
 
 export type MeQuery_Query = { me: MeQuery_me_User | null };
 
@@ -19,7 +19,7 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = MeQuery_Query;
 
-export type UserQuery_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null };
+export type UserQuery_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
 
 export type UserQuery_Query = { user: UserQuery_user_User | null };
 
@@ -31,7 +31,7 @@ export type UserQueryVariables = Exact<{
 
 export type UserQuery = UserQuery_Query;
 
-export type UsersQuery_users_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null };
+export type UsersQuery_users_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
 
 export type UsersQuery_Query = { users: Array<UsersQuery_users_User> | null };
 
@@ -41,7 +41,7 @@ export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type UsersQuery = UsersQuery_Query;
 
-export type LoginMutation_login_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null };
+export type LoginMutation_login_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
 
 export type LoginMutation_login_LoginResponse = { token: string | null, user: LoginMutation_login_LoginResponse_user_User | null };
 
@@ -63,7 +63,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type LogoutMutation = LogoutMutation_Mutation;
 
-export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null };
+export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
 
 export type RefreshTokenMutation_refreshToken_RefreshTokenResponse = { token: string | null, user: RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User | null };
 
@@ -74,3 +74,33 @@ export type RefreshTokenMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type RefreshTokenMutation = RefreshTokenMutation_Mutation;
+
+export type DailyScheduleMetricsQuery_dailyScheduleMetrics_DailyScheduleMetrics = { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
+
+export type DailyScheduleMetricsQuery_Query = { dailyScheduleMetrics: DailyScheduleMetricsQuery_dailyScheduleMetrics_DailyScheduleMetrics | null };
+
+
+export type DailyScheduleMetricsQueryVariables = Exact<{
+  date: string;
+  teacherId: string | null | undefined;
+}>;
+
+
+export type DailyScheduleMetricsQuery = DailyScheduleMetricsQuery_Query;
+
+export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem = { id: string | null, name: string | null };
+
+export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem = { id: string | null, name: string | null };
+
+export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList = { id: string | null, studentTime: string | null, yourTime: string | null, duration: number | null, status: string | null, student: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
+
+export type DailyScheduleListQuery_Query = { dailyScheduleList: Array<DailyScheduleListQuery_dailyScheduleList_DailyScheduleList> | null };
+
+
+export type DailyScheduleListQueryVariables = Exact<{
+  date: string;
+  teacherId: string | null | undefined;
+}>;
+
+
+export type DailyScheduleListQuery = DailyScheduleListQuery_Query;

@@ -11,12 +11,16 @@ export const meQueryDocument: TypedDocumentNode<Operations.MeQuery> = gql`
       id
       name
       updatedAt
+      permissions
+      role
+      avatarUrl
+      notificationCount
     }
   }
 `;
 
 export const userQueryDocument: TypedDocumentNode<Operations.UserQuery, Types.QueryUserArgs> = gql`
-  query user($id: Int!) {
+  query user($id: String!) {
     user(id: $id) {
       createdAt
       email
@@ -24,6 +28,10 @@ export const userQueryDocument: TypedDocumentNode<Operations.UserQuery, Types.Qu
       id
       name
       updatedAt
+      permissions
+      role
+      avatarUrl
+      notificationCount
     }
   }
 `;
@@ -37,6 +45,10 @@ export const usersQueryDocument: TypedDocumentNode<Operations.UsersQuery> = gql`
       id
       name
       updatedAt
+      permissions
+      role
+      avatarUrl
+      notificationCount
     }
   }
 `;
@@ -52,6 +64,10 @@ export const loginMutationDocument: TypedDocumentNode<Operations.LoginMutation, 
         id
         name
         updatedAt
+        permissions
+        role
+        avatarUrl
+        notificationCount
       }
     }
   }
@@ -74,6 +90,10 @@ export const refreshTokenMutationDocument: TypedDocumentNode<Operations.RefreshT
         id
         name
         updatedAt
+        permissions
+        role
+        avatarUrl
+        notificationCount
       }
     }
   }

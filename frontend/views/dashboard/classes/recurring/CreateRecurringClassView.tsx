@@ -141,10 +141,10 @@ export function CreateRecurringClassView({
   const breadcrumbs = isMobile
     ? undefined
     : [
-      { label: labels.breadcrumbs.dashboard, href: "/dashboard" },
-      { label: labels.breadcrumbs.classes, href: "/classes/new" },
-      { label: labels.title, current: true },
-    ];
+        { label: labels.breadcrumbs.dashboard, href: "/dashboard" },
+        { label: labels.breadcrumbs.classes, href: "/classes/new" },
+        { label: labels.title, current: true },
+      ];
 
   return (
     <PageContainer>

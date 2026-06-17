@@ -33,7 +33,7 @@ export default function TeacherWeeklyScheduleView({
         actions={
           !isMobile && (
             <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-              <PrimaryPageAction startIcon={<AddOutlined />} onClick={() => { }}>
+              <PrimaryPageAction startIcon={<AddOutlined />} onClick={() => {}}>
                 {t("actions.addSlot")}
               </PrimaryPageAction>
               <IconButton
@@ -64,7 +64,7 @@ export default function TeacherWeeklyScheduleView({
       {/* Mobile Actions */}
       {isMobile && (
         <Stack direction="row" spacing={2} sx={{ mb: 2, alignItems: "center" }}>
-          <PrimaryPageAction startIcon={<AddOutlined />} onClick={() => { }} sx={{ flex: 1, py: 1.5 }}>
+          <PrimaryPageAction startIcon={<AddOutlined />} onClick={() => {}} sx={{ flex: 1, py: 1.5 }}>
             {t("actions.addSlot")}
           </PrimaryPageAction>
           <IconButton

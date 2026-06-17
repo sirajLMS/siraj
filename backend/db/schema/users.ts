@@ -22,6 +22,7 @@ export const users = pgTable("users", {
   password: varchar("password", { length: 255 }).notNull(),
   rememberTokenHash: varchar("remember_token_hash", { length: 255 }),
   avatarFilePath: varchar("avatar_file_path", { length: 1024 }),
+  avatarUrl: varchar("avatar_url", { length: 1024 }),
   isActive: boolean("is_active").notNull().default(true),
   isSuperAdmin: boolean("is_super_admin").notNull().default(false),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true, precision: 3 }),

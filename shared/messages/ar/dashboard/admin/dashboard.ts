@@ -42,4 +42,12 @@ export const admin: AdminDashboardLabels = {
     cancelled: "ملغى",
     absent: "غائب",
   },
+  loadingTimeoutTitle: "انتهت مهلة الطلب",
+  loadingTimeoutDesc: "استغرق الخادم وقتًا طويلاً للاستجابة. يرجى التحقق من الاتصال والمحاولة مرة أخرى.",
+  unauthenticatedTitle: "المستخدم غير مصرح له",
+  unauthenticatedDesc: "يرجى تسجيل الدخول مرة أخرى للوصول إلى لوحة التحكم.",
+  loadingFailedTitle: "فشل تحميل لوحة التحكم",
+  loadingFailedDesc: "حدث خطأ غير متوقع أثناء تحميل المخطط.",
+  retryBtn: "إعادة محاولة التحميل",
+  loginBtn: "الذهاب لتسجيل الدخول",
 };

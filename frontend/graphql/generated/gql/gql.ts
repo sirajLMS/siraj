@@ -14,20 +14,24 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  query me {\n    me {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n": typeof types.MeDocument,
-    "\n  query user($id: String!) {\n    user(id: $id) {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n": typeof types.UserDocument,
-    "\n  query users {\n    users {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n": typeof types.UsersDocument,
-    "\n  mutation login($input: LoginInput!) {\n    login(input: $input) {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n      }\n    }\n  }\n": typeof types.LoginDocument,
+    "\n  query me {\n    me {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n": typeof types.MeDocument,
+    "\n  query user($id: String!) {\n    user(id: $id) {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n": typeof types.UserDocument,
+    "\n  query users {\n    users {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n": typeof types.UsersDocument,
+    "\n  mutation login($input: LoginInput!) {\n    login(input: $input) {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n        permissions\n        role\n        avatarUrl\n        notificationCount\n      }\n    }\n  }\n": typeof types.LoginDocument,
     "\n  mutation logout {\n    logout\n  }\n": typeof types.LogoutDocument,
-    "\n  mutation refreshToken {\n    refreshToken {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n      }\n    }\n  }\n": typeof types.RefreshTokenDocument,
+    "\n  mutation refreshToken {\n    refreshToken {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n        permissions\n        role\n        avatarUrl\n        notificationCount\n      }\n    }\n  }\n": typeof types.RefreshTokenDocument,
+    "\n  query dailyScheduleMetrics($date: String!, $teacherId: String) {\n    dailyScheduleMetrics(date: $date, teacherId: $teacherId) {\n      id\n      total\n      regular\n      trial\n      advance\n      rescheduled\n      suspended\n      taken\n      pending\n      activated\n      running\n      absent\n      leave\n    }\n  }\n": typeof types.DailyScheduleMetricsDocument,
+    "\n  query dailyScheduleList($date: String!, $teacherId: String) {\n    dailyScheduleList(date: $date, teacherId: $teacherId) {\n      id\n      studentTime\n      yourTime\n      duration\n      status\n      student {\n        id\n        name\n      }\n      teacher {\n        id\n        name\n      }\n    }\n  }\n": typeof types.DailyScheduleListDocument,
 };
 const documents: Documents = {
-    "\n  query me {\n    me {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n": types.MeDocument,
-    "\n  query user($id: String!) {\n    user(id: $id) {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n": types.UserDocument,
-    "\n  query users {\n    users {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n": types.UsersDocument,
-    "\n  mutation login($input: LoginInput!) {\n    login(input: $input) {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n      }\n    }\n  }\n": types.LoginDocument,
+    "\n  query me {\n    me {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n": types.MeDocument,
+    "\n  query user($id: String!) {\n    user(id: $id) {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n": types.UserDocument,
+    "\n  query users {\n    users {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n": types.UsersDocument,
+    "\n  mutation login($input: LoginInput!) {\n    login(input: $input) {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n        permissions\n        role\n        avatarUrl\n        notificationCount\n      }\n    }\n  }\n": types.LoginDocument,
     "\n  mutation logout {\n    logout\n  }\n": types.LogoutDocument,
-    "\n  mutation refreshToken {\n    refreshToken {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n      }\n    }\n  }\n": types.RefreshTokenDocument,
+    "\n  mutation refreshToken {\n    refreshToken {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n        permissions\n        role\n        avatarUrl\n        notificationCount\n      }\n    }\n  }\n": types.RefreshTokenDocument,
+    "\n  query dailyScheduleMetrics($date: String!, $teacherId: String) {\n    dailyScheduleMetrics(date: $date, teacherId: $teacherId) {\n      id\n      total\n      regular\n      trial\n      advance\n      rescheduled\n      suspended\n      taken\n      pending\n      activated\n      running\n      absent\n      leave\n    }\n  }\n": types.DailyScheduleMetricsDocument,
+    "\n  query dailyScheduleList($date: String!, $teacherId: String) {\n    dailyScheduleList(date: $date, teacherId: $teacherId) {\n      id\n      studentTime\n      yourTime\n      duration\n      status\n      student {\n        id\n        name\n      }\n      teacher {\n        id\n        name\n      }\n    }\n  }\n": types.DailyScheduleListDocument,
 };
 
 /**
@@ -47,19 +51,19 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query me {\n    me {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n"): (typeof documents)["\n  query me {\n    me {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n"];
+export function graphql(source: "\n  query me {\n    me {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n"): (typeof documents)["\n  query me {\n    me {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query user($id: String!) {\n    user(id: $id) {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n"): (typeof documents)["\n  query user($id: String!) {\n    user(id: $id) {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n"];
+export function graphql(source: "\n  query user($id: String!) {\n    user(id: $id) {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n"): (typeof documents)["\n  query user($id: String!) {\n    user(id: $id) {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query users {\n    users {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n"): (typeof documents)["\n  query users {\n    users {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n    }\n  }\n"];
+export function graphql(source: "\n  query users {\n    users {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n"): (typeof documents)["\n  query users {\n    users {\n      createdAt\n      email\n      emailVerifiedAt\n      id\n      name\n      updatedAt\n      permissions\n      role\n      avatarUrl\n      notificationCount\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation login($input: LoginInput!) {\n    login(input: $input) {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation login($input: LoginInput!) {\n    login(input: $input) {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  mutation login($input: LoginInput!) {\n    login(input: $input) {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n        permissions\n        role\n        avatarUrl\n        notificationCount\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation login($input: LoginInput!) {\n    login(input: $input) {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n        permissions\n        role\n        avatarUrl\n        notificationCount\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -67,7 +71,15 @@ export function graphql(source: "\n  mutation logout {\n    logout\n  }\n"): (ty
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation refreshToken {\n    refreshToken {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation refreshToken {\n    refreshToken {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  mutation refreshToken {\n    refreshToken {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n        permissions\n        role\n        avatarUrl\n        notificationCount\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation refreshToken {\n    refreshToken {\n      token\n      user {\n        createdAt\n        email\n        emailVerifiedAt\n        id\n        name\n        updatedAt\n        permissions\n        role\n        avatarUrl\n        notificationCount\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query dailyScheduleMetrics($date: String!, $teacherId: String) {\n    dailyScheduleMetrics(date: $date, teacherId: $teacherId) {\n      id\n      total\n      regular\n      trial\n      advance\n      rescheduled\n      suspended\n      taken\n      pending\n      activated\n      running\n      absent\n      leave\n    }\n  }\n"): (typeof documents)["\n  query dailyScheduleMetrics($date: String!, $teacherId: String) {\n    dailyScheduleMetrics(date: $date, teacherId: $teacherId) {\n      id\n      total\n      regular\n      trial\n      advance\n      rescheduled\n      suspended\n      taken\n      pending\n      activated\n      running\n      absent\n      leave\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query dailyScheduleList($date: String!, $teacherId: String) {\n    dailyScheduleList(date: $date, teacherId: $teacherId) {\n      id\n      studentTime\n      yourTime\n      duration\n      status\n      student {\n        id\n        name\n      }\n      teacher {\n        id\n        name\n      }\n    }\n  }\n"): (typeof documents)["\n  query dailyScheduleList($date: String!, $teacherId: String) {\n    dailyScheduleList(date: $date, teacherId: $teacherId) {\n      id\n      studentTime\n      yourTime\n      duration\n      status\n      student {\n        id\n        name\n      }\n      teacher {\n        id\n        name\n      }\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

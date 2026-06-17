@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { useParentOnboardingStore } from "@/frontend/stores/parentOnboardingStore";
+import { useParentOnboardingStore } from "@/frontend/stores/mockParentOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentOnboardingView } from "./ParentOnboardingView";
 import { type ParentOnboardingFormData, parentOnboardingSchema } from "./schemas/parentOnboardingSchema";

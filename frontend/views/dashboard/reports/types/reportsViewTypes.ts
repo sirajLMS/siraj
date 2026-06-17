@@ -1,4 +1,9 @@
-import type { ReportLedgerRow, ReportsSummary, ReportTeacherOption, ReportType } from "@/frontend/stores/mockReportsStore";
+import type {
+  ReportLedgerRow,
+  ReportsSummary,
+  ReportTeacherOption,
+  ReportType,
+} from "@/frontend/stores/mockReportsStore";
 
 export interface ReportsSummaryLabels {
   readonly engagementRate: string;

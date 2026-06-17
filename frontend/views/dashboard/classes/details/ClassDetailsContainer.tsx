@@ -196,10 +196,10 @@ export function ClassDetailsContainer() {
         isMobile
           ? undefined
           : [
-            { label: t("breadcrumbs.dashboard"), href: "/dashboard" },
-            { label: t("breadcrumbs.classes"), href: `/classes/${instance.id}` },
-            { label: instance.courseName, current: true },
-          ]
+              { label: t("breadcrumbs.dashboard"), href: "/dashboard" },
+              { label: t("breadcrumbs.classes"), href: `/classes/${instance.id}` },
+              { label: instance.courseName, current: true },
+            ]
       }
     />
   );

@@ -43,16 +43,16 @@ export function UpdateSchedulesButton({ status, onUpdate, fullWidth = false }: R
         borderWidth: 2,
         ...(isComplete
           ? {
-            bgcolor: theme.palette.success.main,
-            color: theme.palette.onSuccess,
-            borderColor: theme.palette.success.main,
-            "&:hover": { bgcolor: theme.palette.success.dark },
-          }
+              bgcolor: theme.palette.success.main,
+              color: theme.palette.onSuccess,
+              borderColor: theme.palette.success.main,
+              "&:hover": { bgcolor: theme.palette.success.dark },
+            }
           : {
-            color: theme.palette.primary.main,
-            borderColor: theme.palette.primary.main,
-            "&:hover": { bgcolor: theme.palette.primary.main, color: theme.palette.onPrimary },
-          }),
+              color: theme.palette.primary.main,
+              borderColor: theme.palette.primary.main,
+              "&:hover": { bgcolor: theme.palette.primary.main, color: theme.palette.onPrimary },
+            }),
         "& .MuiButton-startIcon .MuiSvgIcon-root": isRunning
           ? { animation: "spin 1s linear infinite", "@keyframes spin": { to: { transform: "rotate(360deg)" } } }
           : undefined,

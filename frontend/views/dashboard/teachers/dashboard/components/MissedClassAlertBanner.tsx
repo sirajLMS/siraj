@@ -22,13 +22,13 @@ export function MissedClassAlertBanner({ alert, labels, fixed = false }: Readonl
         mb: 3,
         ...(fixed
           ? {
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: theme.zIndex.appBar + 2,
-            borderRadius: 0,
-          }
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: theme.zIndex.appBar + 2,
+              borderRadius: 0,
+            }
           : {}),
       })}
     >

@@ -115,8 +115,8 @@ export function ParentsView({
         title={labels.records}
         actions={
           <Box sx={{ display: "flex", gap: 1 }}>
-            <FilterButton onClick={() => { }} />
-            <ExportButton onClick={() => { }} />
+            <FilterButton onClick={() => {}} />
+            <ExportButton onClick={() => {}} />
           </Box>
         }
       >

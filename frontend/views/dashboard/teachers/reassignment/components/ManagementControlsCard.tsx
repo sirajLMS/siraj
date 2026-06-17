@@ -195,7 +195,7 @@ export function ManagementControlsCard({ teachers, currentStatus }: Readonly<Man
       <Stack component="form" spacing={4} onSubmit={handleSubmit}>
         <TeacherSelection teachers={teachers} />
         <StatusUpdate currentStatus={currentStatus} />
-        <ActionButtons loading={loading} saved={saved} onCancel={() => { }} />
+        <ActionButtons loading={loading} saved={saved} onCancel={() => {}} />
       </Stack>
     </BaseCard>
   );

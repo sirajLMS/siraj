@@ -291,6 +291,40 @@ export enum CountryCode {
   Zw = 'ZW'
 }
 
+export type DailyScheduleList = {
+  __typename?: 'DailyScheduleList';
+  duration: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  student: Maybe<DailyScheduleListUserItem>;
+  studentTime: Maybe<Scalars['String']['output']>;
+  teacher: Maybe<DailyScheduleListUserItem>;
+  yourTime: Maybe<Scalars['String']['output']>;
+};
+
+export type DailyScheduleListUserItem = {
+  __typename?: 'DailyScheduleListUserItem';
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+};
+
+export type DailyScheduleMetrics = {
+  __typename?: 'DailyScheduleMetrics';
+  absent: Maybe<Scalars['Int']['output']>;
+  activated: Maybe<Scalars['Int']['output']>;
+  advance: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  leave: Maybe<Scalars['Int']['output']>;
+  pending: Maybe<Scalars['Int']['output']>;
+  regular: Maybe<Scalars['Int']['output']>;
+  rescheduled: Maybe<Scalars['Int']['output']>;
+  running: Maybe<Scalars['Int']['output']>;
+  suspended: Maybe<Scalars['Int']['output']>;
+  taken: Maybe<Scalars['Int']['output']>;
+  total: Maybe<Scalars['Int']['output']>;
+  trial: Maybe<Scalars['Int']['output']>;
+};
+
 export type DirectoryInfo = StorageObject & {
   __typename?: 'DirectoryInfo';
   createdAt: Maybe<Scalars['DateTime']['output']>;
@@ -567,6 +601,8 @@ export type PartialStudentUpdateInput = {
 
 export type Query = {
   __typename?: 'Query';
+  dailyScheduleList: Maybe<Array<DailyScheduleList>>;
+  dailyScheduleMetrics: Maybe<DailyScheduleMetrics>;
   directoryChildren: Maybe<Array<DirectoryInfo>>;
   fileInfo: Maybe<FileInfo>;
   fileUsage: Maybe<FileUsageResult>;
@@ -581,6 +617,18 @@ export type Query = {
   user: Maybe<User>;
   users: Maybe<Array<User>>;
   welcomeMessage: Maybe<Scalars['String']['output']>;
+};
+
+
+export type QueryDailyScheduleListArgs = {
+  date: Scalars['String']['input'];
+  teacherId: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryDailyScheduleMetricsArgs = {
+  date: Scalars['String']['input'];
+  teacherId: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -813,10 +861,14 @@ export enum UploadType {
 
 export type User = {
   __typename?: 'User';
+  avatarUrl: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   email: Maybe<Scalars['String']['output']>;
   emailVerifiedAt: Maybe<Scalars['DateTime']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
+  notificationCount: Maybe<Scalars['Int']['output']>;
+  permissions: Maybe<Array<Scalars['String']['output']>>;
+  role: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };

@@ -1,4 +1,5 @@
 import { UserRepository } from "@/backend/db/repo";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { LoginInput, LoginResponse, RefreshTokenResponse, UserPothosDefinition } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
@@ -23,6 +24,14 @@ export const UserPothosObject = gqlSchemaBuilder.loadableObject<
     }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
+    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
+    notificationCount: t.int({ resolve: () => 0 }),
+    permissions: t.stringList({
+      resolve: async user => PermissionsService.getUserContext(user.id).then(c => c.permissions),
+    }),
+    role: t.string({
+      resolve: async user => PermissionsService.getUserContext(user.id).then(c => c.role),
+    }),
   }),
 });
 

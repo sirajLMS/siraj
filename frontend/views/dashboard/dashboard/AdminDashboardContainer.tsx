@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useDashboardStore } from "@/frontend/stores/dashboardStore";
+import { useDashboardStore } from "@/frontend/stores/mockDashboardStore";
 import type { ClassStatus } from "@/frontend/views/dashboard/types/dashboard";
 import { DashboardView } from "./DashboardView";
 

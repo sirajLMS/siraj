@@ -266,6 +266,37 @@ enum CountryCode {
   ZW
 }
 
+type DailyScheduleList {
+  duration: Int
+  id: String
+  status: String
+  student: DailyScheduleListUserItem
+  studentTime: String
+  teacher: DailyScheduleListUserItem
+  yourTime: String
+}
+
+type DailyScheduleListUserItem {
+  id: String
+  name: String
+}
+
+type DailyScheduleMetrics {
+  absent: Int
+  activated: Int
+  advance: Int
+  id: String
+  leave: Int
+  pending: Int
+  regular: Int
+  rescheduled: Int
+  running: Int
+  suspended: Int
+  taken: Int
+  total: Int
+  trial: Int
+}
+
 """
 A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
@@ -490,6 +521,8 @@ input PartialStudentUpdateInput {
 scalar PhoneNumber
 
 type Query {
+  dailyScheduleList(date: String!, teacherId: String): [DailyScheduleList!]
+  dailyScheduleMetrics(date: String!, teacherId: String): DailyScheduleMetrics
   directoryChildren(
     """Parent directory path (empty or null for root level)"""
     path: String
@@ -691,10 +724,14 @@ enum UploadType {
 }
 
 type User {
+  avatarUrl: String
   createdAt: DateTime
   email: String
   emailVerifiedAt: DateTime
   id: String
   name: String
+  notificationCount: Int
+  permissions: [String!]
+  role: String
   updatedAt: DateTime
 }

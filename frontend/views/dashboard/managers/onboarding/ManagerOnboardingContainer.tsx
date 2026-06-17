@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useManagerOnboardingStore } from "@/frontend/stores/managerOnboardingStore";
+import { useManagerOnboardingStore } from "@/frontend/stores/mockManagerOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
 import { ManagerOnboardingView } from "./ManagerOnboardingView";

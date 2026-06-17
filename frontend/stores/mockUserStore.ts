@@ -6,10 +6,16 @@ interface UserState extends UserInfo {
 }
 
 export const MOCK_ADMIN_USER: UserInfo = {
-  name: "Ahmed",
-  role: "SUPER ADMIN",
+  name: "Academy Admin",
+  role: "Academy Admin",
   avatarUrl: "",
   permissions: [
+    "auth.login",
+    "auth.view_own_profile",
+    "dashboard.view_metrics",
+    "dashboard.filter_metrics",
+    "schedule.view_list",
+    "schedule.filter_advanced",
     "home",
     "schedule-search",
     "schedule-tracking",
@@ -56,44 +62,12 @@ export const MOCK_ADMIN_USER: UserInfo = {
   notificationCount: 3,
 };
 
-export const MOCK_TEACHER_DASHBOARD_USER: UserInfo = {
-  name: "Prof. Ahmed Al-Siraj",
-  role: "TEACHER",
+export const MOCK_AUTHENTICATED_USER: UserInfo = {
+  name: "Standard User",
+  role: "User",
   avatarUrl: "",
-  permissions: ["teacher-dashboard", "schedule-search", "resources-view"],
-  notificationCount: 2,
-};
-
-export const MOCK_TEACHER_ACTIVE_USER: UserInfo = {
-  name: "Prof. Ahmed Al-Siraj",
-  role: "TEACHER",
-  avatarUrl: "",
-  permissions: ["teacher-dashboard", "teacher-dashboard-controls", "schedule-search", "resources-view"],
-  notificationCount: 2,
-};
-
-export const MOCK_PARENT_BILLING_USER: UserInfo = {
-  name: "Ahmed Al-Siraj",
-  role: "PARENT",
-  avatarUrl: "",
-  permissions: ["parent-dashboard", "schedule-search", "students-view", "billing-view"],
-  notificationCount: 1,
-};
-
-export const MOCK_PARENT_SUGGESTIONS_USER: UserInfo = {
-  name: "Fatima Al-Siraj",
-  role: "PARENT",
-  avatarUrl: "",
-  permissions: ["parent-dashboard", "schedule-search", "students-view", "suggestions-submit"],
-  notificationCount: 1,
-};
-
-export const MOCK_PARENT_COMPLAINTS_USER: UserInfo = {
-  name: "Fatima Al-Siraj",
-  role: "PARENT",
-  avatarUrl: "",
-  permissions: ["parent-dashboard", "schedule-search", "students-view", "complaints-submit"],
-  notificationCount: 1,
+  permissions: ["auth.login", "auth.view_own_profile"],
+  notificationCount: 0,
 };
 
 export const useUserStore = create<UserState>(set => ({

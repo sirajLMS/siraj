@@ -331,4 +331,84 @@ export namespace SchedulingRepository {
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
+
+  export const getDailyMetrics = async (date: Date, teacherId?: string, tx?: DBTransaction) => {
+    const runner = async (t: DBTransaction) => {
+      const baseConditions = and(
+        isNull(classInstances.deletedAt),
+        sql`DATE(${classInstances.scheduledStartAt}) = DATE(${date.toISOString()})`,
+        teacherId ? eq(classInstances.teacherId, teacherId) : undefined
+      );
+
+      const metrics = await t
+        .select({
+          total: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+          regular: sql<number>`CAST(SUM(CASE WHEN ${classInstances.classType} = 'REGULAR' THEN 1 ELSE 0 END) AS INTEGER)`,
+          trial: sql<number>`CAST(SUM(CASE WHEN ${classInstances.classType} = 'TRIAL' THEN 1 ELSE 0 END) AS INTEGER)`,
+          advance: sql<number>`CAST(SUM(CASE WHEN ${classInstances.classType} = 'ADVANCE' THEN 1 ELSE 0 END) AS INTEGER)`,
+          rescheduled: sql<number>`CAST(SUM(CASE WHEN ${classInstances.isRescheduled} = true THEN 1 ELSE 0 END) AS INTEGER)`,
+          suspended: sql<number>`CAST(SUM(CASE WHEN ${classInstances.isFrozen} = true THEN 1 ELSE 0 END) AS INTEGER)`,
+          taken: sql<number>`CAST(SUM(CASE WHEN ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END) AS INTEGER)`,
+          pending: sql<number>`CAST(SUM(CASE WHEN ${classInstances.outcome} = 'PENDING' THEN 1 ELSE 0 END) AS INTEGER)`,
+          activated: sql<number>`CAST(SUM(CASE WHEN ${classInstances.executionState} = 'ACTIVATED' THEN 1 ELSE 0 END) AS INTEGER)`,
+          running: sql<number>`CAST(SUM(CASE WHEN ${classInstances.executionState} = 'ACTIVATED' AND ${classInstances.actualStartAt} IS NOT NULL AND ${classInstances.actualEndAt} IS NULL THEN 1 ELSE 0 END) AS INTEGER)`,
+          absent: sql<number>`CAST(SUM(CASE WHEN ${classInstances.outcome} IN ('ABSENT_STUDENT', 'ABSENT_TEACHER') THEN 1 ELSE 0 END) AS INTEGER)`,
+          leave: sql<number>`CAST(SUM(CASE WHEN ${classInstances.outcome} = 'EXCUSED' THEN 1 ELSE 0 END) AS INTEGER)`,
+        })
+        .from(classInstances)
+        .where(baseConditions);
+
+      return (
+        metrics[0] ?? {
+          total: 0,
+          regular: 0,
+          trial: 0,
+          advance: 0,
+          rescheduled: 0,
+          suspended: 0,
+          taken: 0,
+          pending: 0,
+          activated: 0,
+          running: 0,
+          absent: 0,
+          leave: 0,
+        }
+      );
+    };
+
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  };
+
+  export const getDailySchedule = async (date: Date, teacherId?: string, tx?: DBTransaction) => {
+    const runner = async (t: DBTransaction) => {
+      const baseConditions = and(
+        isNull(classInstances.deletedAt),
+        sql`DATE(${classInstances.scheduledStartAt}) = DATE(${date.toISOString()})`,
+        teacherId ? eq(classInstances.teacherId, teacherId) : undefined
+      );
+
+      // Using standard joins because findMany raised type errors with SQL<unknown> and missing relations
+      const { users } = await import("@/backend/db/schema");
+      const { inArray } = await import("drizzle-orm");
+
+      const rows = await t
+        .select({
+          classInstance: classInstances,
+        })
+        .from(classInstances)
+        .where(baseConditions);
+
+      const userIds = Array.from(new Set(rows.flatMap(r => [r.classInstance.studentId, r.classInstance.teacherId])));
+      const usersData = userIds.length > 0 ? await t.select().from(users).where(inArray(users.id, userIds)) : [];
+      const userMap = new Map(usersData.map(u => [u.id, u]));
+
+      return rows.map(r => ({
+        ...r.classInstance,
+        student: userMap.get(r.classInstance.studentId),
+        teacher: userMap.get(r.classInstance.teacherId),
+      }));
+    };
+
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  };
 }

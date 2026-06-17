@@ -40,4 +40,12 @@ export interface AdminDashboardLabels {
     readonly cancelled: string;
     readonly absent: string;
   };
+  readonly loadingTimeoutTitle: string;
+  readonly loadingTimeoutDesc: string;
+  readonly unauthenticatedTitle: string;
+  readonly unauthenticatedDesc: string;
+  readonly loadingFailedTitle: string;
+  readonly loadingFailedDesc: string;
+  readonly retryBtn: string;
+  readonly loginBtn: string;
 }

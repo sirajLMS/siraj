@@ -1,5 +1,17 @@
 Frontend project's rules: Read frontend/AGENTS.md
 
+## Layer-Specific Agent Rules
+
+Before working on any specific layer, you **MUST** read the corresponding `AGENTS.md` file for that layer:
+
+- **Database / Repositories**: Read `backend/db/repo/AGENTS.md`
+- **Backend Services**: Read `backend/services/AGENTS.md`
+- **Backend GraphQL / Pothos**: Read `backend/graphql/AGENTS.md`
+- **Frontend GraphQL / Apollo**: Read `frontend/graphql/AGENTS.md`
+- **Frontend Views / UI**: Read `frontend/views/AGENTS.md`
+- **Frontend Stores / Zustand**: Read `frontend/stores/AGENTS.md`
+- **Sprint/Story Planning**: Read `.ai/siraj_stories/AGENTS.md`
+
 ## SonarQube Issue Management
 
 - **Existing Results**: When `.scannerwork/sonar-result.json` is present, use `scripts/sonar-manager.ts`. **Do NOT run a new Sonar analysis command.**

@@ -4,18 +4,18 @@ import type { LoginFormData } from "../schemas/loginSchema";
 
 export type LoginResponse =
   | {
-    success: true;
-    message: string;
-    user: {
-      id: string;
-      email: string;
-      role: string;
-    };
-  }
+      success: true;
+      message: string;
+      user: {
+        id: string;
+        email: string;
+        role: string;
+      };
+    }
   | {
-    success: false;
-    message: string;
-  };
+      success: false;
+      message: string;
+    };
 
 /**
  * Generate a cryptographically secure random number between 0 and 1
