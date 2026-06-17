@@ -4,6 +4,60 @@ type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 /** Internal type. DO NOT USE DIRECTLY. */
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type AppPermission =
+  | 'AUTH_LOGIN'
+  | 'AUTH_VIEW_OWN_PROFILE'
+  | 'CLASSES_ACTIVATE'
+  | 'CLASSES_ADMIN_LEAVE'
+  | 'CLASSES_FORCE_ACTIVATE'
+  | 'CLASSES_MARK_ABSENT'
+  | 'CLASSES_REQUEST_LEAVE'
+  | 'CLASSES_RESCHEDULE'
+  | 'CLASSES_REVERT'
+  | 'CLASSES_START'
+  | 'CLASSES_VIEW_DETAILS'
+  | 'COMPLAINTS_DELETE'
+  | 'COMPLAINTS_LIST'
+  | 'COMPLAINTS_RESPOND'
+  | 'DASHBOARD_FILTER_METRICS'
+  | 'DASHBOARD_METRICS_VIEW_ALL'
+  | 'DASHBOARD_VIEW'
+  | 'DASHBOARD_VIEW_METRICS'
+  | 'INVOICES_CREATE'
+  | 'INVOICES_DELETE'
+  | 'INVOICES_EDIT'
+  | 'INVOICES_LIST'
+  | 'INVOICES_MARK_PAID'
+  | 'PARENTS_CREATE'
+  | 'PARENTS_EDIT'
+  | 'PARENTS_LIST'
+  | 'PERMISSION_GROUPS_ASSIGN'
+  | 'PERMISSION_GROUPS_MANAGE'
+  | 'REPORTS_GENERATE'
+  | 'RESOURCES_DELETE'
+  | 'RESOURCES_LIST'
+  | 'RESOURCES_UPLOAD'
+  | 'SCHEDULE_DST_MIGRATE'
+  | 'SCHEDULE_FILTER_ADVANCED'
+  | 'SCHEDULE_MANAGE_RECURRING'
+  | 'SCHEDULE_SEARCH_AVAILABILITY'
+  | 'SCHEDULE_VIEW_ALL'
+  | 'SCHEDULE_VIEW_ASSIGNED'
+  | 'SCHEDULE_VIEW_FAMILY'
+  | 'SCHEDULE_VIEW_LIST'
+  | 'STAFF_CREATE'
+  | 'STAFF_EDIT'
+  | 'STAFF_LIST'
+  | 'STUDENTS_CHANGE_STATUS'
+  | 'STUDENTS_CHANGE_TEACHER'
+  | 'STUDENTS_EDIT'
+  | 'STUDENTS_LIST'
+  | 'STUDENTS_OVERRIDE_QUOTA'
+  | 'TEACHERS_CREATE'
+  | 'TEACHERS_EDIT'
+  | 'TEACHERS_LIST'
+  | 'TEACHERS_MANAGE_SCHEDULE';
+
 /** Input for the demo fast login mutation. */
 export type DemoLoginInput = {
   /** The unique slug of the permission group to authenticate as. */
@@ -18,33 +72,33 @@ export type LoginInput = {
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { me: { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null } | null };
+export type MeQuery = { me: { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null } | null };
 
 export type UserQueryVariables = Exact<{
   id: string;
 }>;
 
 
-export type UserQuery = { user: { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null } | null };
+export type UserQuery = { user: { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null } | null };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UsersQuery = { users: Array<{ createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null }> | null };
+export type UsersQuery = { users: Array<{ createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null }> | null };
 
 export type LoginMutationVariables = Exact<{
   input: LoginInput;
 }>;
 
 
-export type LoginMutation = { login: { token: string | null, user: { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null } | null } | null };
+export type LoginMutation = { login: { token: string | null, user: { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null } | null } | null };
 
 export type DemoLoginMutationVariables = Exact<{
   input: DemoLoginInput;
 }>;
 
 
-export type DemoLoginMutation = { demoLogin: { token: string | null, user: { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null } | null } | null };
+export type DemoLoginMutation = { demoLogin: { token: string | null, user: { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null } | null } | null };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -54,7 +108,7 @@ export type LogoutMutation = { logout: boolean | null };
 export type RefreshTokenMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type RefreshTokenMutation = { refreshToken: { token: string | null, user: { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null } | null } | null };
+export type RefreshTokenMutation = { refreshToken: { token: string | null, user: { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null } | null } | null };
 
 export type DailyScheduleMetricsQueryVariables = Exact<{
   date: string;

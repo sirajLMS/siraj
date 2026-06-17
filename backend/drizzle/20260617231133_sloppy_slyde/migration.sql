@@ -1,5 +1,6 @@
 CREATE TYPE "account_status" AS ENUM('ACTIVATED', 'DEACTIVATED');--> statement-breakpoint
 CREATE TYPE "app_language" AS ENUM('ar', 'en');--> statement-breakpoint
+CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'classes.view_details', 'classes.activate', 'classes.force_activate', 'classes.start', 'classes.mark_absent', 'classes.request_leave', 'classes.admin_leave', 'classes.reschedule', 'classes.revert', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'complaints.list', 'complaints.delete', 'complaints.respond', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign');--> statement-breakpoint
 CREATE TYPE "class_execution_state" AS ENUM('NOT_ACTIVATED', 'ACTIVATED', 'RUNNING', 'COMPLETED');--> statement-breakpoint
 CREATE TYPE "class_outcome" AS ENUM('PENDING', 'TAKEN', 'ABSENT', 'LEAVE');--> statement-breakpoint
 CREATE TYPE "class_type" AS ENUM('REGULAR', 'TRIAL', 'ADVANCE');--> statement-breakpoint
@@ -262,7 +263,7 @@ CREATE TABLE "permission_groups" (
 --> statement-breakpoint
 CREATE TABLE "permissions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-	"key" varchar(255) NOT NULL UNIQUE,
+	"key" "app_permission" NOT NULL UNIQUE,
 	"resource" varchar(100) NOT NULL,
 	"action" varchar(100) NOT NULL,
 	"description" text NOT NULL,

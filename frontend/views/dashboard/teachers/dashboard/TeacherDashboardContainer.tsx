@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useTeacherDashboardActiveStore } from "@/frontend/stores/mockTeacherDashboardActiveStore";
 import { useTeacherDashboardStore } from "@/frontend/stores/mockTeacherDashboardStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
@@ -37,7 +38,7 @@ export function TeacherDashboardContainer() {
 
   const mode = resolveTeacherDashboardMode(permissions, modeParam);
   const labels = buildTeacherDashboardLabels(t);
-  const canControl = permissions.includes("teacher-dashboard-controls");
+  const canControl = permissions.includes(AppPermission.ClassesActivate);
 
   if (mode === "active" && canControl) {
     return (

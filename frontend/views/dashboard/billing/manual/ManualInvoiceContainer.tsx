@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useAdminManualInvoiceStore } from "@/frontend/stores/mocKAdminManualInvoiceStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { ManualInvoiceView } from "./ManualInvoiceView";
@@ -21,8 +22,8 @@ export function ManualInvoiceContainer() {
   const resetSuccess = useAdminManualInvoiceStore(state => state.resetSuccess);
   const submitInvoice = useAdminManualInvoiceStore(state => state.submitInvoice);
 
-  const canCreate = permissions.includes("billing-create");
-  const canSendEmail = permissions.includes("billing-manage");
+  const canCreate = permissions.includes(AppPermission.InvoicesCreate);
+  const canSendEmail = permissions.includes(AppPermission.InvoicesEdit);
 
   const handleBack = () => {
     router.push(`/${locale}/billing`);

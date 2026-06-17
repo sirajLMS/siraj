@@ -18,6 +18,7 @@ import {
 } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   dailyScheduleListQueryDocument,
   dailyScheduleMetricsQueryDocument,
@@ -83,7 +84,7 @@ export function AdminDashboardContainer() {
 
   const handleMetricClick = (key: string) => {
     // Enforce dashboard.filter_metrics permission for card clicking
-    if (!hasPermission("dashboard.filter_metrics")) {
+    if (!hasPermission(AppPermission.DashboardFilterMetrics)) {
       return;
     }
     // Toggle the selected status

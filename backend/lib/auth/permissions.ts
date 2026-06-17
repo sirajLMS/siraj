@@ -1,8 +1,9 @@
 import { db } from "@/backend/db/drizzleDb";
 import { permissions } from "@/backend/db/schema";
+import type { AppPermission } from "@/shared/lib/enum";
 
 export type UserPermissionContext = {
-  permissions: string[];
+  permissions: AppPermission[];
   permissionGroups: string[];
   isSuperAdmin: boolean;
 };
@@ -45,7 +46,7 @@ export async function resolveUserPermissions(userId: string): Promise<UserPermis
     };
   }
 
-  const permissionSet = new Set<string>();
+  const permissionSet = new Set<AppPermission>();
   const groupSlugs: string[] = [];
 
   for (const group of user.permissionGroups) {
@@ -62,7 +63,7 @@ export async function resolveUserPermissions(userId: string): Promise<UserPermis
   };
 }
 
-export async function userHasPermission(userId: string, permissionKey: string): Promise<boolean> {
+export async function userHasPermission(userId: string, permissionKey: AppPermission): Promise<boolean> {
   const context = await resolveUserPermissions(userId);
-  return context.isSuperAdmin || context.permissions.includes(permissionKey);
+  return context.isSuperAdmin || (context.permissions as string[]).includes(permissionKey);
 }

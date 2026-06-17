@@ -26,6 +26,61 @@ export enum AppLanguage {
   En = 'en'
 }
 
+export enum AppPermission {
+  AuthLogin = 'AUTH_LOGIN',
+  AuthViewOwnProfile = 'AUTH_VIEW_OWN_PROFILE',
+  ClassesActivate = 'CLASSES_ACTIVATE',
+  ClassesAdminLeave = 'CLASSES_ADMIN_LEAVE',
+  ClassesForceActivate = 'CLASSES_FORCE_ACTIVATE',
+  ClassesMarkAbsent = 'CLASSES_MARK_ABSENT',
+  ClassesRequestLeave = 'CLASSES_REQUEST_LEAVE',
+  ClassesReschedule = 'CLASSES_RESCHEDULE',
+  ClassesRevert = 'CLASSES_REVERT',
+  ClassesStart = 'CLASSES_START',
+  ClassesViewDetails = 'CLASSES_VIEW_DETAILS',
+  ComplaintsDelete = 'COMPLAINTS_DELETE',
+  ComplaintsList = 'COMPLAINTS_LIST',
+  ComplaintsRespond = 'COMPLAINTS_RESPOND',
+  DashboardFilterMetrics = 'DASHBOARD_FILTER_METRICS',
+  DashboardMetricsViewAll = 'DASHBOARD_METRICS_VIEW_ALL',
+  DashboardView = 'DASHBOARD_VIEW',
+  DashboardViewMetrics = 'DASHBOARD_VIEW_METRICS',
+  InvoicesCreate = 'INVOICES_CREATE',
+  InvoicesDelete = 'INVOICES_DELETE',
+  InvoicesEdit = 'INVOICES_EDIT',
+  InvoicesList = 'INVOICES_LIST',
+  InvoicesMarkPaid = 'INVOICES_MARK_PAID',
+  ParentsCreate = 'PARENTS_CREATE',
+  ParentsEdit = 'PARENTS_EDIT',
+  ParentsList = 'PARENTS_LIST',
+  PermissionGroupsAssign = 'PERMISSION_GROUPS_ASSIGN',
+  PermissionGroupsManage = 'PERMISSION_GROUPS_MANAGE',
+  ReportsGenerate = 'REPORTS_GENERATE',
+  ResourcesDelete = 'RESOURCES_DELETE',
+  ResourcesList = 'RESOURCES_LIST',
+  ResourcesUpload = 'RESOURCES_UPLOAD',
+  ScheduleDstMigrate = 'SCHEDULE_DST_MIGRATE',
+  ScheduleFilterAdvanced = 'SCHEDULE_FILTER_ADVANCED',
+  ScheduleManageRecurring = 'SCHEDULE_MANAGE_RECURRING',
+  ScheduleSearchAvailability = 'SCHEDULE_SEARCH_AVAILABILITY',
+  ScheduleViewAll = 'SCHEDULE_VIEW_ALL',
+  ScheduleViewAssigned = 'SCHEDULE_VIEW_ASSIGNED',
+  ScheduleViewFamily = 'SCHEDULE_VIEW_FAMILY',
+  ScheduleViewList = 'SCHEDULE_VIEW_LIST',
+  StaffCreate = 'STAFF_CREATE',
+  StaffEdit = 'STAFF_EDIT',
+  StaffList = 'STAFF_LIST',
+  StudentsChangeStatus = 'STUDENTS_CHANGE_STATUS',
+  StudentsChangeTeacher = 'STUDENTS_CHANGE_TEACHER',
+  StudentsEdit = 'STUDENTS_EDIT',
+  StudentsList = 'STUDENTS_LIST',
+  StudentsOverrideQuota = 'STUDENTS_OVERRIDE_QUOTA',
+  TeachersCreate = 'TEACHERS_CREATE',
+  TeachersEdit = 'TEACHERS_EDIT',
+  TeachersList = 'TEACHERS_LIST',
+  TeachersManageSchedule = 'TEACHERS_MANAGE_SCHEDULE'
+}
+
 export type BulkOperationFailure = {
   __typename?: 'BulkOperationFailure';
   error: Maybe<Scalars['String']['output']>;
@@ -894,7 +949,7 @@ export type User = {
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   notificationCount: Maybe<Scalars['Int']['output']>;
-  permissions: Maybe<Array<Scalars['String']['output']>>;
+  permissions: Maybe<Array<AppPermission>>;
   role: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };

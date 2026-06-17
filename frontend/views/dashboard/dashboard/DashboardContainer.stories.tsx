@@ -1,20 +1,26 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useSearchParams } from "next/navigation";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore as useMockUserStore } from "@/frontend/stores/mockUserStore";
 import { ParentDashboardContainer } from "@/frontend/views/dashboard/parents/dashboard/ParentDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
 import { shouldRenderTeacherDashboard } from "@/frontend/views/dashboard/teachers/dashboard/utils/teacherDashboardMode";
 import { MockAdminDashboardContainer } from "./AdminDashboardContainer.stories";
 
-function shouldShowParentDashboard(permissions: readonly string[]): boolean {
-  return permissions.includes("parent-dashboard") && !permissions.includes("home");
+function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
+  return (
+    permissions.includes(AppPermission.ScheduleViewFamily) && !permissions.includes(AppPermission.DashboardViewMetrics)
+  );
 }
 
-function shouldShowTeacherDashboard(permissions: readonly string[], modeParam: string | null): boolean {
+function shouldShowTeacherDashboard(permissions: readonly AppPermission[], modeParam: string | null): boolean {
   if (shouldRenderTeacherDashboard(permissions, modeParam)) {
     return true;
   }
-  return permissions.includes("teacher-dashboard") && !permissions.includes("home");
+  return (
+    permissions.includes(AppPermission.ScheduleViewAssigned) &&
+    !permissions.includes(AppPermission.DashboardViewMetrics)
+  );
 }
 
 export function MockDashboardContainer() {

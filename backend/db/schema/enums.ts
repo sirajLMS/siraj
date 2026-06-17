@@ -1,6 +1,8 @@
+import { pgEnum } from "drizzle-orm/pg-core";
 import {
   AccountStatus,
   AppLanguage,
+  AppPermission,
   ClassExecutionState,
   ClassOutcome,
   ClassType,
@@ -73,3 +75,8 @@ export const devicePlatformEnum = createPgEnumFromEnum("device_platform", Device
 export const dayOfWeekEnum = createPgEnumFromEnum("day_of_week", DayOfWeek);
 
 export const dstMigrationResultEnum = createPgEnumFromEnum("dst_migration_result", DstMigrationResult);
+
+export const appPermissionEnum = pgEnum(
+  "app_permission",
+  Object.values(AppPermission) as [AppPermission, ...AppPermission[]]
+);

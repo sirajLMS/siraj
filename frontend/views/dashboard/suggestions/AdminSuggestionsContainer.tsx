@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useAdminSuggestionsStore } from "@/frontend/stores/mockAdminSuggestionsStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { AdminSuggestionsView } from "./AdminSuggestionsView";
@@ -20,7 +21,7 @@ export function AdminSuggestionsContainer() {
   const setActiveTab = useAdminSuggestionsStore(state => state.setActiveTab);
   const markReviewed = useAdminSuggestionsStore(state => state.markReviewed);
 
-  const canManage = permissions.includes("suggestions-manage");
+  const canManage = permissions.includes(AppPermission.ComplaintsRespond);
 
   const filteredRows = useMemo(
     () => filterSuggestionsByTab(rows, activeTab, searchQuery),

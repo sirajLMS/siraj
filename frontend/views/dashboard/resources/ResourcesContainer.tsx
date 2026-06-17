@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useResourcesStore } from "@/frontend/stores/mockResourcesStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { ResourcesView } from "./ResourcesView";
@@ -29,8 +30,9 @@ export function ResourcesContainer() {
   const resetUploadSuccess = useResourcesStore(state => state.resetUploadSuccess);
   const uploadResource = useResourcesStore(state => state.uploadResource);
 
-  const canView = permissions.includes("resources-view") || permissions.includes("resources-manage");
-  const canManage = permissions.includes("resources-manage");
+  const canView =
+    permissions.includes(AppPermission.ResourcesList) || permissions.includes(AppPermission.ResourcesDelete);
+  const canManage = permissions.includes(AppPermission.ResourcesDelete);
 
   const filteredResources = useMemo(
     () => filterResources(resources, searchQuery, filterType, sortBy),

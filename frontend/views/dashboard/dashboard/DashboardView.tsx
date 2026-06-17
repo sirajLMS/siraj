@@ -2,6 +2,7 @@
 
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer } from "@/frontend/components/ui";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { MetricItem, ScheduleOverviewData } from "@/frontend/views/dashboard/types/dashboard";
 import { ScheduleOverviewSection } from "./components/ScheduleOverviewSection";
 import { TodayClassesSection } from "./components/TodayClassesSection";
@@ -49,7 +50,7 @@ export function DashboardView({
   return (
     <PageContainer>
       {/* Today Classes Section */}
-      <RequirePermission permissions={["dashboard.view_metrics"]}>
+      <RequirePermission permissions={[AppPermission.DashboardViewMetrics]}>
         <TodayClassesSection
           title={todayClassesTitle}
           lastUpdated={lastUpdated}
@@ -59,7 +60,7 @@ export function DashboardView({
       </RequirePermission>
 
       {/* Schedule Overview Section */}
-      <RequirePermission permissions={["schedule.view_list"]}>
+      <RequirePermission permissions={[AppPermission.ScheduleViewList]}>
         <ScheduleOverviewSection
           title={scheduleTitle}
           searchPlaceholder={searchPlaceholder}

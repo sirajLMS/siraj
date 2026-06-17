@@ -3,6 +3,7 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useClassDetailsStore } from "@/frontend/stores/mockClassDetailsStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { logger } from "@/frontend/utils/logger";
@@ -184,8 +185,8 @@ export function ClassDetailsContainer() {
   const permissions = useUserStore(state => state.permissions);
   const instance = useClassDetailsStore(state => state.instance);
 
-  const canManage = permissions.includes("classes-manage");
-  const canView = permissions.includes("classes-view");
+  const canManage = permissions.includes(AppPermission.ClassesReschedule);
+  const canView = permissions.includes(AppPermission.ClassesViewDetails);
 
   const pageHeader = (
     <PageHeader

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useCreateRecurringClassStore } from "@/frontend/stores/mockCreateRecurringClassStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { logger } from "@/frontend/utils/logger";
@@ -22,7 +23,7 @@ export function CreateRecurringClassContainer() {
   const setShowSuccess = useCreateRecurringClassStore(state => state.setShowSuccess);
   const resetSuccess = useCreateRecurringClassStore(state => state.resetSuccess);
 
-  const canCreate = permissions.includes("classes-create");
+  const canCreate = permissions.includes(AppPermission.ScheduleManageRecurring);
 
   const handleClose = () => {
     router.push(`/${locale}/dashboard`);

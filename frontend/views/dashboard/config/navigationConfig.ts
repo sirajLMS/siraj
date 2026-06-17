@@ -1,4 +1,5 @@
 import { CalendarTodayOutlined, DashboardOutlined } from "@mui/icons-material";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 
 /**
@@ -12,7 +13,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: DashboardOutlined,
     href: "/dashboard",
     section: "main",
-    permission: "dashboard.view_metrics",
+    permission: AppPermission.DashboardViewMetrics,
   },
   {
     key: "schedule",
@@ -20,7 +21,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: CalendarTodayOutlined,
     href: "/schedule",
     section: "main",
-    permission: "schedule.view_list",
+    permission: AppPermission.ScheduleViewList,
   },
 ] as const;
 
@@ -34,7 +35,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     icon: DashboardOutlined,
     href: "/dashboard",
     section: "main",
-    permission: "dashboard.view_metrics",
+    permission: AppPermission.DashboardViewMetrics,
   },
   {
     key: "schedule",
@@ -42,19 +43,19 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     icon: CalendarTodayOutlined,
     href: "/schedule",
     section: "main",
-    permission: "schedule.view_list",
+    permission: AppPermission.ScheduleViewList,
   },
 ] as const;
 
 /**
  * Filter navigation items based on real user permissions array.
  */
-export function getNavItemsForPermissions(items: readonly NavItem[], permissions: readonly string[]): NavItem[] {
+export function getNavItemsForPermissions(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
   return items.filter(item => {
     if (!item.permission) return true;
-    if (Array.isArray(item.permission)) {
-      return (item.permission as readonly string[]).some(p => permissions.includes(p));
+    if (typeof item.permission === "string") {
+      return permissions.includes(item.permission);
     }
-    return permissions.includes(item.permission as string);
+    return item.permission.some(p => permissions.includes(p));
   });
 }

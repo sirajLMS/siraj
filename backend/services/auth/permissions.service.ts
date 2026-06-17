@@ -1,9 +1,10 @@
 import { db } from "@/backend/db/drizzleDb";
 import { permissions } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
+import type { AppPermission } from "@/shared/lib/enum";
 
 export type UserPermissionContext = {
-  permissions: string[];
+  permissions: AppPermission[];
   permissionGroups: string[];
   isSuperAdmin: boolean;
   role: string;
@@ -50,7 +51,7 @@ export namespace PermissionsService {
         };
       }
 
-      const permissionSet = new Set<string>();
+      const permissionSet = new Set<AppPermission>();
       const groupSlugs: string[] = [];
 
       for (const group of user.permissionGroups) {
@@ -77,10 +78,10 @@ export namespace PermissionsService {
     }
   }
 
-  export async function hasPermission(userId: string, permissionKey: string): Promise<boolean> {
+  export async function hasPermission(userId: string, permissionKey: AppPermission): Promise<boolean> {
     try {
       const context = await PermissionsService.getUserContext(userId);
-      return context.isSuperAdmin || context.permissions.includes(permissionKey);
+      return context.isSuperAdmin || (context.permissions as string[]).includes(permissionKey);
     } catch (error) {
       logger.error("Failed to check permission", { userId, permissionKey, error });
       return false;

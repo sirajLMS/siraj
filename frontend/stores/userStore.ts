@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import type { User } from "../graphql/generated/gql/graphql-types";
+import type { AppPermission, User } from "../graphql/generated/gql/graphql-types";
 
 interface UserState {
   user: User | null;
   setUser: (user: User | null) => void;
-  hasPermission: (permission: string) => boolean;
+  hasPermission: (permission: AppPermission) => boolean;
 }
 
 export const useUserStore = create<UserState>((set, get) => ({

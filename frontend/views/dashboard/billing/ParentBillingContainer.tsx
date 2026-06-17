@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useParentBillingStore } from "@/frontend/stores/moackParentBillingStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { logger } from "@/frontend/utils/logger";
@@ -15,9 +16,9 @@ export function ParentBillingContainer() {
   const permissions = useUserStore(state => state.permissions);
   const labels = buildBillingLabels(t);
 
-  const canManage = permissions.includes("billing-manage");
-  const canView = permissions.includes("billing-view");
-  const canCreate = permissions.includes("billing-create");
+  const canManage = permissions.includes(AppPermission.InvoicesEdit);
+  const canView = permissions.includes(AppPermission.InvoicesList);
+  const canCreate = permissions.includes(AppPermission.InvoicesCreate);
 
   const searchQuery = useParentBillingStore(state => state.searchQuery);
   const summary = useParentBillingStore(state => state.summary);

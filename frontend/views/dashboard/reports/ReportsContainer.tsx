@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useReportsStore } from "@/frontend/stores/mockReportsStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { logger } from "@/frontend/utils/logger";
@@ -21,7 +22,7 @@ export function ReportsContainer() {
   const setTeacherId = useReportsStore(state => state.setTeacherId);
   const setReportType = useReportsStore(state => state.setReportType);
 
-  const canGenerate = permissions.includes("reports-generate");
+  const canGenerate = permissions.includes(AppPermission.ReportsGenerate);
 
   const filteredRows = useMemo(() => {
     if (filters.teacherId.length === 0) {

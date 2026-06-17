@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useParentSuggestionsStore } from "@/frontend/stores/mockParentSuggestionsStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { ParentSuggestionsView } from "./ParentSuggestionsView";
@@ -16,7 +17,7 @@ export function ParentSuggestionsContainer() {
   const resetSuccess = useParentSuggestionsStore(state => state.resetSuccess);
   const submitSuggestion = useParentSuggestionsStore(state => state.submitSuggestion);
 
-  const canSubmit = permissions.includes("suggestions-submit");
+  const canSubmit = permissions.includes(AppPermission.ComplaintsList);
 
   if (!canSubmit) {
     return null;

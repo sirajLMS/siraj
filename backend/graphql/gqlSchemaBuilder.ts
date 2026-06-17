@@ -10,6 +10,7 @@ import WithInputPlugin from "@pothos/plugin-with-input";
 import { getTableConfig } from "drizzle-orm/pg-core";
 import { type DrizzleRelations, db, relations } from "@/backend/db/drizzleDb";
 import logger from "@/backend/lib/logger";
+import type { AppPermission } from "@/shared/lib/enum";
 import type { Email, PhoneNumber } from "../lib";
 import type { AuthContexts, BaseContext } from "./gqlContext";
 
@@ -18,7 +19,7 @@ export interface PothosTypes {
   Context: BaseContext;
   AuthScopes: {
     loggedIn: boolean;
-    permission: string;
+    permission: AppPermission;
     superAdmin: boolean;
   };
   AuthContexts: AuthContexts;
@@ -55,7 +56,7 @@ export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
   scopeAuth: {
     authScopes: ctx => ({
       loggedIn: !!ctx.user,
-      permission: (key: string) => ctx.isSuperAdmin || ctx.permissions.includes(key),
+      permission: (key: AppPermission) => ctx.isSuperAdmin || ctx.permissions.includes(key),
       superAdmin: ctx.isSuperAdmin,
     }),
   },

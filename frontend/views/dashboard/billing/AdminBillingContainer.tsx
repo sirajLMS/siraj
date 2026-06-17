@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useAdminBillingStore } from "@/frontend/stores/mockAdminBillingStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { AdminBillingView } from "./AdminBillingView";
@@ -17,9 +18,9 @@ export function AdminBillingContainer() {
   const permissions = useUserStore(state => state.permissions);
   const labels = buildBillingLabels(t);
 
-  const canManage = permissions.includes("billing-manage");
-  const canView = permissions.includes("billing-view");
-  const canCreate = permissions.includes("billing-create");
+  const canManage = permissions.includes(AppPermission.InvoicesEdit);
+  const canView = permissions.includes(AppPermission.InvoicesList);
+  const canCreate = permissions.includes(AppPermission.InvoicesCreate);
 
   const searchQuery = useAdminBillingStore(state => state.searchQuery);
   const summary = useAdminBillingStore(state => state.summary);

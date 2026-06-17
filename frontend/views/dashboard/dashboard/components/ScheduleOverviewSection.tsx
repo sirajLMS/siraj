@@ -4,6 +4,7 @@ import { SearchOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, Paper, TextField, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { SectionPanel } from "@/frontend/components/ui";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ScheduleOverviewData } from "@/frontend/views/dashboard/types/dashboard";
 import { ScheduleFilters } from "./ScheduleFilters";
 import { ScheduleOverviewDataGrid } from "./ScheduleOverviewDataGrid";
@@ -101,7 +102,7 @@ export function ScheduleOverviewSection({
         }
       >
         {/* Filters */}
-        <RequirePermission permissions={["schedule.filter_advanced"]}>
+        <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>
           <Box sx={theme => ({ px: 3, py: 2.5, borderBottom: `1px solid ${theme.palette.border.light}` })}>
             <ScheduleFilters
               dateLabel={dateLabel}

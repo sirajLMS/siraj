@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useAdminComplaintsStore } from "@/frontend/stores/mockAdminComplaintsStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { AdminComplaintsView } from "./AdminComplaintsView";
@@ -22,8 +23,9 @@ export function AdminComplaintsContainer() {
   const setDraftResponse = useAdminComplaintsStore(state => state.setDraftResponse);
   const answerComplaint = useAdminComplaintsStore(state => state.answerComplaint);
 
-  const canView = permissions.includes("complaints-manage") || permissions.includes("complaints-view");
-  const canManage = permissions.includes("complaints-manage");
+  const canView =
+    permissions.includes(AppPermission.ComplaintsRespond) || permissions.includes(AppPermission.ComplaintsList);
+  const canManage = permissions.includes(AppPermission.ComplaintsRespond);
 
   const filteredRows = useMemo(
     () => filterComplaintsByTab(rows, activeTab, searchQuery),

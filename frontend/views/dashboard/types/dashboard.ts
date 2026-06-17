@@ -1,4 +1,5 @@
 import type { SvgIconComponent } from "@mui/icons-material";
+import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface NavItem {
   readonly key: string;
@@ -6,7 +7,7 @@ export interface NavItem {
   readonly icon: SvgIconComponent;
   readonly href: string;
   readonly section: "main" | "footer";
-  readonly permission?: string | readonly string[];
+  readonly permission?: AppPermission | readonly AppPermission[];
 }
 
 export interface MetricItem {
@@ -111,6 +112,6 @@ export interface UserInfo {
   readonly name: string;
   readonly role: string;
   readonly avatarUrl: string;
-  readonly permissions: readonly string[];
+  readonly permissions: readonly AppPermission[];
   readonly notificationCount: number;
 }

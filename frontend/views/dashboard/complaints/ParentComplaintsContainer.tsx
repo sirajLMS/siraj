@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useParentComplaintsStore } from "@/frontend/stores/mockParentComplaintsStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { ParentComplaintsView } from "./ParentComplaintsView";
@@ -20,7 +21,7 @@ export function ParentComplaintsContainer() {
   const submitComplaint = useParentComplaintsStore(state => state.submitComplaint);
   const loadOlderRecords = useParentComplaintsStore(state => state.loadOlderRecords);
 
-  const canSubmit = permissions.includes("complaints-submit");
+  const canSubmit = permissions.includes(AppPermission.ComplaintsList);
 
   if (!canSubmit) {
     return null;

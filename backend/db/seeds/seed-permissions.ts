@@ -1,6 +1,7 @@
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { groupPermissions, permissionGroups, permissions } from "@/backend/db/schema";
+import type { AppPermission } from "@/shared/lib/enum";
 import {
   ACADEMY_ADMIN_PERMISSION_KEYS,
   PARENT_DEFAULT_PERMISSION_KEYS,
@@ -114,8 +115,11 @@ export async function seedOrGet() {
   return groups;
 }
 
-export async function getPermissionIdsByKeys(keys: string[]): Promise<string[]> {
-  const rows = await db.select({ id: permissions.id }).from(permissions).where(inArray(permissions.key, keys));
+export async function getPermissionIdsByKeys(keys: (AppPermission | string)[]): Promise<string[]> {
+  const rows = await db
+    .select({ id: permissions.id })
+    .from(permissions)
+    .where(inArray(permissions.key, keys as AppPermission[]));
 
   return rows.map(r => r.id);
 }

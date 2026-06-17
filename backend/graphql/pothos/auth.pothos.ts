@@ -7,9 +7,14 @@ import type {
   RefreshTokenResponse,
   UserPothosDefinition,
 } from "@/backend/types";
+import { AppPermission } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserPothosDefinition>("User");
+
+export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {
+  name: "AppPermission",
+});
 
 // User type
 export const UserPothosObject = gqlSchemaBuilder.loadableObject<
@@ -32,7 +37,8 @@ export const UserPothosObject = gqlSchemaBuilder.loadableObject<
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     notificationCount: t.int({ resolve: () => 0 }),
-    permissions: t.stringList({
+    permissions: t.field({
+      type: [AppPermissionPothosEnum],
       resolve: async user => PermissionsService.getUserContext(user.id).then(c => c.permissions),
     }),
     role: t.string({

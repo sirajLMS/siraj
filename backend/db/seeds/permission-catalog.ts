@@ -1,5 +1,9 @@
+import { AppPermission } from "@/shared/lib/enum";
+
+export { SystemPermissionGroupSlug as SYSTEM_PERMISSION_GROUP_SLUGS } from "@/shared/lib/enum";
+
 export type PermissionSeed = {
-  key: string;
+  key: AppPermission;
   resource: string;
   action: string;
   description: string;
@@ -12,7 +16,7 @@ const createPermissions = (
   permissions: Array<[string, string]>
 ): PermissionSeed[] => {
   return permissions.map(([action, description]) => ({
-    key: `${resource}.${action}`,
+    key: `${resource}.${action}` as AppPermission,
     resource,
     action,
     description,
@@ -119,52 +123,44 @@ export const PERMISSION_CATALOG: PermissionSeed[] = [
   ]),
 ];
 
-export const SYSTEM_PERMISSION_GROUP_SLUGS = {
-  SUPER_ADMIN: "super_admin",
-  ACADEMY_ADMIN: "academy_admin",
-  TEACHER_DEFAULT: "teacher_default",
-  PARENT_DEFAULT: "parent_default",
-  STAFF_DEFAULT: "staff_default",
-} as const;
-
-const COMMON_DASHBOARD_PERMISSIONS = ["dashboard.view"] as const;
-const COMMON_CLASS_PERMISSIONS = ["classes.view_details"] as const;
+const COMMON_DASHBOARD_PERMISSIONS = [AppPermission.DASHBOARD_VIEW] as const;
+const COMMON_CLASS_PERMISSIONS = [AppPermission.CLASSES_VIEW_DETAILS] as const;
 
 export const TEACHER_DEFAULT_PERMISSION_KEYS = [
   ...COMMON_DASHBOARD_PERMISSIONS,
-  "schedule.view_assigned",
+  AppPermission.SCHEDULE_VIEW_ASSIGNED,
   ...COMMON_CLASS_PERMISSIONS,
-  "classes.activate",
-  "classes.start",
-  "classes.mark_absent",
-  "classes.request_leave",
-  "resources.list",
+  AppPermission.CLASSES_ACTIVATE,
+  AppPermission.CLASSES_START,
+  AppPermission.CLASSES_MARK_ABSENT,
+  AppPermission.CLASSES_REQUEST_LEAVE,
+  AppPermission.RESOURCES_LIST,
 ] as const;
 
 export const PARENT_DEFAULT_PERMISSION_KEYS = [
   ...COMMON_DASHBOARD_PERMISSIONS,
-  "schedule.view_family",
+  AppPermission.SCHEDULE_VIEW_FAMILY,
   ...COMMON_CLASS_PERMISSIONS,
-  "classes.request_leave",
-  "complaints.list",
+  AppPermission.CLASSES_REQUEST_LEAVE,
+  AppPermission.COMPLAINTS_LIST,
 ] as const;
 
 export const STAFF_DEFAULT_PERMISSION_KEYS = [
   ...COMMON_DASHBOARD_PERMISSIONS,
-  "dashboard.metrics.view_all",
-  "schedule.view_all",
+  AppPermission.DASHBOARD_METRICS_VIEW_ALL,
+  AppPermission.SCHEDULE_VIEW_ALL,
   ...COMMON_CLASS_PERMISSIONS,
-  "teachers.list",
-  "parents.list",
-  "students.list",
-  "complaints.list",
+  AppPermission.TEACHERS_LIST,
+  AppPermission.PARENTS_LIST,
+  AppPermission.STUDENTS_LIST,
+  AppPermission.COMPLAINTS_LIST,
 ] as const;
 
 export const ACADEMY_ADMIN_PERMISSION_KEYS = [
-  "auth.login",
-  "auth.view_own_profile",
-  "dashboard.view_metrics",
-  "dashboard.filter_metrics",
-  "schedule.view_list",
-  "schedule.filter_advanced",
+  AppPermission.AUTH_LOGIN,
+  AppPermission.AUTH_VIEW_OWN_PROFILE,
+  AppPermission.DASHBOARD_VIEW_METRICS,
+  AppPermission.DASHBOARD_FILTER_METRICS,
+  AppPermission.SCHEDULE_VIEW_LIST,
+  AppPermission.SCHEDULE_FILTER_ADVANCED,
 ] as const;

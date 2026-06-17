@@ -1,9 +1,11 @@
+import { SystemPermissionGroupSlug } from "./lib/enum";
+
 interface InternalDemoUser {
   name: string;
   email: string;
   plainPassword?: string;
   isSuperAdmin: boolean;
-  groupSlug: string;
+  groupSlug: SystemPermissionGroupSlug;
 }
 
 export type DemoUser = Omit<InternalDemoUser, "plainPassword">;
@@ -16,7 +18,7 @@ const _superAdmins: InternalDemoUser[] = [
     email: "admin@siraj.local",
     plainPassword: PWD,
     isSuperAdmin: true,
-    groupSlug: "super_admin",
+    groupSlug: SystemPermissionGroupSlug.SUPER_ADMIN,
   },
 ];
 
@@ -26,7 +28,7 @@ const _academyAdmins: InternalDemoUser[] = [
     email: "academy@siraj.local",
     plainPassword: PWD,
     isSuperAdmin: false,
-    groupSlug: "academy_admin",
+    groupSlug: SystemPermissionGroupSlug.ACADEMY_ADMIN,
   },
 ];
 
@@ -36,7 +38,7 @@ const _teachers: InternalDemoUser[] = [
     email: "teacher@siraj.local",
     plainPassword: PWD,
     isSuperAdmin: false,
-    groupSlug: "teacher_default",
+    groupSlug: SystemPermissionGroupSlug.TEACHER_DEFAULT,
   },
 ];
 
@@ -46,7 +48,7 @@ const _parents: InternalDemoUser[] = [
     email: "parent@siraj.local",
     plainPassword: PWD,
     isSuperAdmin: false,
-    groupSlug: "parent_default",
+    groupSlug: SystemPermissionGroupSlug.PARENT_DEFAULT,
   },
 ];
 
@@ -56,7 +58,7 @@ const _staff: InternalDemoUser[] = [
     email: "staff@siraj.local",
     plainPassword: PWD,
     isSuperAdmin: false,
-    groupSlug: "staff_default",
+    groupSlug: SystemPermissionGroupSlug.STAFF_DEFAULT,
   },
 ];
 
