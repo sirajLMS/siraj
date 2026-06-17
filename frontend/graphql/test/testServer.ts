@@ -29,10 +29,10 @@ export async function startTestServer() {
         isReady = true;
         break;
       }
-    } catch (error) {
+    } catch {
       // Polling will fail until the server starts listening.
       // We pass the error to debug log to satisfy eslint's no-ignored-exceptions.
-      testLogger.debug("Dev server not ready yet:", error);
+      testLogger.debug("Dev server not ready yet");
     }
     await new Promise(resolve => setTimeout(resolve, 500));
   }

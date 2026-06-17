@@ -71,7 +71,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     expect(firstTeacher?.name).toBeDefined();
 
     // Verify expected teacher is in the list
-    const hasExpectedTeacher = teachersList.some((t) => t.name === expectedTeacher.name);
+    const hasExpectedTeacher = teachersList.some(t => t.name === expectedTeacher.name);
     expect(hasExpectedTeacher).toBeTrue();
   });
 
@@ -98,8 +98,8 @@ describe("GraphQL Teacher Integration Tests", () => {
     if (!teachersList) throw new Error("No teachers returned");
 
     expect(Array.isArray(teachersList)).toBeTrue();
-    
-    const matched = teachersList.some((t) => t.name === expectedTeacher.name);
+
+    const matched = teachersList.some(t => t.name === expectedTeacher.name);
     expect(matched).toBeTrue();
   });
 

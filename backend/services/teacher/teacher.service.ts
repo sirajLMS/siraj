@@ -3,12 +3,7 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 
 export namespace TeacherService {
-  export async function searchTeachers(
-    userId: string | undefined,
-    search: string,
-    limit: number,
-    locale?: string
-  ) {
+  export async function searchTeachers(userId: string | undefined, search: string, limit: number, locale?: string) {
     try {
       if (!userId) {
         logger.error("Unauthorized access to searchTeachers - user not logged in");

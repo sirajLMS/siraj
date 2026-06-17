@@ -11,12 +11,7 @@ gqlSchemaBuilder.queryField("teachers", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      return await TeacherService.searchTeachers(
-        ctx.user?.id,
-        args.search,
-        args.limit,
-        ctx.locale
-      );
+      return await TeacherService.searchTeachers(ctx.user?.id, args.search, args.limit, ctx.locale);
     },
   })
 );

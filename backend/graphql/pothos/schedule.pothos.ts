@@ -73,4 +73,3 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
     teacher: t.expose("teacher", { type: DailyScheduleListUserItemObject }),
   }),
 });
-

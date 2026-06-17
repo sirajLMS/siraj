@@ -81,7 +81,7 @@ export function ScheduleFilters({
         size="small"
         sx={{ minWidth: 200 }}
         options={teachers}
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={option => option.name}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         value={selectedTeacher}
         inputValue={teacherSearchValue}
@@ -95,13 +95,7 @@ export function ScheduleFilters({
           onTeacherChange(newValue?.id ?? "");
         }}
         loading={loadingTeachers}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={teacherPlaceholder}
-            placeholder={teacherPlaceholder}
-          />
-        )}
+        renderInput={params => <TextField {...params} label={teacherPlaceholder} placeholder={teacherPlaceholder} />}
       />
 
       <Button
