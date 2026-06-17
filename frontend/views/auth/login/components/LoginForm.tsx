@@ -145,7 +145,12 @@ const FormActions = ({ control, isSubmitting }: { control: Control<LoginFormData
   );
 };
 
-export function LoginForm() {
+export interface LoginFormProps {
+  onSubmitAction?: (data: LoginFormData) => Promise<void>;
+  externalLoginResult?: { type: "success" | "error"; message: string } | null;
+}
+
+export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProps = {}) {
   const t = useTranslations("auth.login");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -178,30 +183,45 @@ export function LoginForm() {
     setIsSubmitting(true);
     setLoginResult(null);
 
-    mockLogin(data)
-      .then(response => {
-        if (response.success) {
-          setLoginResult({
-            type: "success",
-            message: t("loginSuccess"),
-          });
-        } else {
+    if (onSubmitAction) {
+      onSubmitAction(data)
+        .catch(() => {
           setLoginResult({
             type: "error",
-            message: t("invalidCredentials"),
+            message: t("loginError"),
           });
-        }
-      })
-      .catch(() => {
-        setLoginResult({
-          type: "error",
-          message: t("loginError"),
+        })
+        .finally(() => {
+          setIsSubmitting(false);
         });
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+    } else {
+      mockLogin(data)
+        .then(response => {
+          if (response.success) {
+            setLoginResult({
+              type: "success",
+              message: t("loginSuccess"),
+            });
+          } else {
+            setLoginResult({
+              type: "error",
+              message: t("invalidCredentials"),
+            });
+          }
+        })
+        .catch(() => {
+          setLoginResult({
+            type: "error",
+            message: t("loginError"),
+          });
+        })
+        .finally(() => {
+          setIsSubmitting(false);
+        });
+    }
   };
+
+  const finalLoginResult = externalLoginResult || loginResult;
 
   return (
     <Box
@@ -216,9 +236,9 @@ export function LoginForm() {
         gap: 2.5,
       }}
     >
-      {loginResult && (
-        <Alert severity={loginResult.type} sx={{ mb: 1 }}>
-          {loginResult.message}
+      {finalLoginResult && (
+        <Alert severity={finalLoginResult.type} sx={{ mb: 1 }}>
+          {finalLoginResult.message}
         </Alert>
       )}
 

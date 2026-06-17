@@ -20,6 +20,10 @@ const en: MessageSchema = {
     themeTooltip: "Theme settings",
     languageTooltip: "Language settings",
     notifications: "Notifications",
+    serverConnectionLost: "Server connection lost",
+    retry: "Retry",
+    checkNetworkConnection: "Please check your network connection",
+    connectionRestored: "Connection restored",
   },
   auth: {
     login: {
@@ -39,6 +43,9 @@ const en: MessageSchema = {
       loginSuccess: "Login successful!",
       loginError: "Login failed. Please try again.",
       invalidCredentials: "Invalid email or password",
+      tryAgain: "Try Again",
+      signinFailed: "Sign in failed",
+      invalidLoginResponse: "Invalid response from server",
     },
   },
   dashboard: {

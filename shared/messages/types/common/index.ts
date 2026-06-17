@@ -15,4 +15,8 @@ export interface CommonLabels {
   readonly themeTooltip: string;
   readonly languageTooltip: string;
   readonly notifications: string;
+  readonly serverConnectionLost: string;
+  readonly retry: string;
+  readonly checkNetworkConnection: string;
+  readonly connectionRestored: string;
 }

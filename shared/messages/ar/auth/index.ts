@@ -18,5 +18,8 @@ export const auth: AuthLabels = {
     loginSuccess: "تم تسجيل الدخول بنجاح!",
     loginError: "فشل تسجيل الدخول. حاول مرة أخرى.",
     invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    tryAgain: "حاول مرة أخرى",
+    signinFailed: "فشل تسجيل الدخول",
+    invalidLoginResponse: "استجابة غير صالحة من الخادم",
   },
 };

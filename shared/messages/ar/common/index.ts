@@ -18,4 +18,8 @@ export const common: CommonLabels = {
   themeTooltip: "إعدادات المظهر",
   languageTooltip: "إعدادات اللغة",
   notifications: "الإشعارات",
+  serverConnectionLost: "فقد الاتصال بالخادم",
+  retry: "إعادة المحاولة",
+  checkNetworkConnection: "يرجى التحقق من اتصال الشبكة الخاص بك",
+  connectionRestored: "تمت استعادة الاتصال",
 };

@@ -36,8 +36,36 @@ const config: CodegenConfig = {
         },
       },
     },
-    "./frontend/graphql/generated/gql/schema.ts": {
+    "./frontend/graphql/generated/gql/graphql-types.ts": {
       plugins: ["typescript"],
+      config: {
+        useTypeImports: true,
+        avoidOptionals: true,
+        enumsAsTypes: false,
+        dedupeFragments: true,
+        onlyOperationTypes: false,
+        inlineFragmentTypes: false,
+        extractAllFieldsToTypes: true,
+        skipTypeNameForRoot: false,
+        strictScalars: true,
+        defaultScalarType: "unknown",
+        scalars: {
+          Date: "string",
+          DateTime: "string",
+          Email: "string",
+          JSON: JSON_SCALAR_TYPE,
+          PhoneNumber: "string",
+          StringMap: "Record<string, string>",
+        },
+      },
+    },
+
+    "./frontend/graphql/generated/gql/operations.ts": {
+      plugins: ["typescript-operations"],
+      preset: "import-types",
+      presetConfig: {
+        typesPath: "./graphql-types.ts",
+      },
       config: {
         useTypeImports: true,
         avoidOptionals: true,
