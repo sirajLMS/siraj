@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -10,12 +12,13 @@
   }
 }
 
-html {
-  height: 100%;
-}
-
 html,
 body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
   max-width: 100vw;
   overflow-x: hidden;
 }
@@ -31,15 +34,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
 }
 
 @media (prefers-color-scheme: dark) {

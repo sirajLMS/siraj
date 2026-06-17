@@ -4,7 +4,9 @@ import { getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { getThemeFromCookies, THEME_COOKIE_NAME } from "@/frontend/lib/theme-detection";
 import MuiProvider from "@/frontend/providers/theme/MuiProvider";
-import "../index.css";
+import "./index.css";
+import { AppApolloProvider } from "@/frontend/context";
+import { AuthProvider } from "@/frontend/providers/apollo/AuthProvider";
 
 async function getLocale() {
   const cookieStore = await cookies();
@@ -37,7 +39,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang={locale} dir={direction}>
       <body style={{ overflow: "hidden" }}>
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <MuiProvider initialTheme={initialTheme}>{children}</MuiProvider>
+          <MuiProvider initialTheme={initialTheme}>
+            <AppApolloProvider>
+              <AuthProvider>{children}</AuthProvider>
+            </AppApolloProvider>
+          </MuiProvider>
         </NextIntlClientProvider>
       </body>
     </html>

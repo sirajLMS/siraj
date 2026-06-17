@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   turbopack: {
     resolveAlias: {
-      "next-intl/config": "./frontend/i18n/request.ts",
+      "next-intl/config": "./shared/i18n/request.ts",
     },
   },
   // eslint-disable-next-line sonarjs/no-hardcoded-ip
@@ -43,6 +43,6 @@ const nextConfig: NextConfig = {
 };
 
 // Pass the path to the request config file for the plugin
-const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+const withNextIntl = createNextIntlPlugin("./shared/i18n/request.ts");
 
 export default withNextIntl(nextConfig);

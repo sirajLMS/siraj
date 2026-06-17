@@ -93,19 +93,21 @@ export const AppApolloProvider: React.FC<{
 
       const persistedQueryLink = new PersistedQueryLink({ sha256 });
 
-      setApolloClient(new ApolloClient({
-        link: ApolloLink.from([errorLink, connectivityCheckLink, authLink, persistedQueryLink, httpLink]),
-        cache: new InMemoryCache(),
-        defaultOptions: {
-          watchQuery: {
-            errorPolicy: "all",
-            notifyOnNetworkStatusChange: true,
+      setApolloClient(
+        new ApolloClient({
+          link: ApolloLink.from([errorLink, connectivityCheckLink, authLink, persistedQueryLink, httpLink]),
+          cache: new InMemoryCache(),
+          defaultOptions: {
+            watchQuery: {
+              errorPolicy: "all",
+              notifyOnNetworkStatusChange: true,
+            },
+            query: {
+              errorPolicy: "all",
+            },
           },
-          query: {
-            errorPolicy: "all",
-          },
-        },
-      }));
+        })
+      );
     }
   }, [apolloClient]);
 
