@@ -126,7 +126,7 @@ describe("Row Level Security for Students", () => {
 
         tx.rollback();
       })
-      .catch(() => { });
+      .catch(() => {});
 
     testLogger.info("Parent SELECT RLS test passed.");
   });
@@ -167,7 +167,7 @@ describe("Row Level Security for Students", () => {
 
         tx.rollback();
       })
-      .catch(() => { });
+      .catch(() => {});
 
     testLogger.info("Parent UPDATE/DELETE RLS test passed.");
   });
@@ -192,7 +192,7 @@ describe("Row Level Security for Students", () => {
 
         tx.rollback();
       })
-      .catch(() => { });
+      .catch(() => {});
 
     testLogger.info("Admin SELECT RLS test passed.");
   });

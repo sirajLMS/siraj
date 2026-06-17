@@ -4,6 +4,12 @@ type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import type * as Types from './graphql-types.ts';
 
+/** Input for the demo fast login mutation. */
+export type DemoLoginInput = {
+  /** The unique slug of the permission group to authenticate as. */
+  groupSlug: string;
+};
+
 export type LoginInput = {
   email: string;
   password: string;
@@ -54,6 +60,20 @@ export type LoginMutationVariables = Exact<{
 
 
 export type LoginMutation = LoginMutation_Mutation;
+
+export type DemoLoginMutation_demoLogin_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<string> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
+
+export type DemoLoginMutation_demoLogin_LoginResponse = { token: string | null, user: DemoLoginMutation_demoLogin_LoginResponse_user_User | null };
+
+export type DemoLoginMutation_Mutation = { demoLogin: DemoLoginMutation_demoLogin_LoginResponse | null };
+
+
+export type DemoLoginMutationVariables = Exact<{
+  input: Types.DemoLoginInput;
+}>;
+
+
+export type DemoLoginMutation = DemoLoginMutation_Mutation;
 
 export type LogoutMutation_Mutation = { logout: boolean | null };
 

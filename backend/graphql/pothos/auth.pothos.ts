@@ -1,6 +1,12 @@
 import { UserRepository } from "@/backend/db/repo";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { LoginInput, LoginResponse, RefreshTokenResponse, UserPothosDefinition } from "@/backend/types";
+import type {
+  DemoLoginInput,
+  LoginInput,
+  LoginResponse,
+  RefreshTokenResponse,
+  UserPothosDefinition,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserPothosDefinition>("User");
@@ -35,7 +41,6 @@ export const UserPothosObject = gqlSchemaBuilder.loadableObject<
   }),
 });
 
-// Login input
 export const LoginInputPothosObject = gqlSchemaBuilder.inputRef<LoginInput>("LoginInput").implement({
   fields: t => ({
     email: t.field({
@@ -43,6 +48,16 @@ export const LoginInputPothosObject = gqlSchemaBuilder.inputRef<LoginInput>("Log
       required: true,
     }),
     password: t.string({ required: true }),
+  }),
+});
+
+export const DemoLoginInputPothosObject = gqlSchemaBuilder.inputRef<DemoLoginInput>("DemoLoginInput").implement({
+  description: "Input for the demo fast login mutation.",
+  fields: t => ({
+    groupSlug: t.string({
+      required: true,
+      description: "The unique slug of the permission group to authenticate as.",
+    }),
   }),
 });
 

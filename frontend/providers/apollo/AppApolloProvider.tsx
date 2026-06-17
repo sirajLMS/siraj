@@ -31,7 +31,6 @@ export const AppApolloProvider: React.FC<{
 
   // Stable callback refs for Apollo Links
   const getIsConnectedRef = useRef(() => isConnected);
-  const getAuthTokenRef = useRef(() => authToken);
   const checkConnectivityRef = useRef(checkConnectivity);
   const notifyIfDisconnectedRef = useRef(notifyIfDisconnected);
   const setConnectedWithRefRef = useRef((v: boolean) => {
@@ -42,10 +41,6 @@ export const AppApolloProvider: React.FC<{
   useEffect(() => {
     getIsConnectedRef.current = () => isConnected;
   }, [isConnected]);
-
-  useEffect(() => {
-    getAuthTokenRef.current = () => authToken;
-  }, [authToken]);
 
   useEffect(() => {
     checkConnectivityRef.current = checkConnectivity;
@@ -76,7 +71,7 @@ export const AppApolloProvider: React.FC<{
         credentials: "include",
       });
 
-      const authLink = createAuthLink(() => getAuthTokenRef.current());
+      const authLink = createAuthLink(() => authTokenRef.current);
 
       const connectivityCheckLink = createConnectivityLink(
         () => getIsConnectedRef.current(),

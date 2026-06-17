@@ -1,14 +1,16 @@
-export interface DemoUser {
+interface InternalDemoUser {
   name: string;
   email: string;
-  plainPassword: string;
+  plainPassword?: string;
   isSuperAdmin: boolean;
   groupSlug: string;
 }
 
+export type DemoUser = Omit<InternalDemoUser, "plainPassword">;
+
 const PWD = "12345678";
 
-export const superAdmins: DemoUser[] = [
+const _superAdmins: InternalDemoUser[] = [
   {
     name: "Super Admin",
     email: "admin@siraj.local",
@@ -18,7 +20,7 @@ export const superAdmins: DemoUser[] = [
   },
 ];
 
-export const academyAdmins: DemoUser[] = [
+const _academyAdmins: InternalDemoUser[] = [
   {
     name: "Academy Admin",
     email: "academy@siraj.local",
@@ -28,7 +30,7 @@ export const academyAdmins: DemoUser[] = [
   },
 ];
 
-export const teachers: DemoUser[] = [
+const _teachers: InternalDemoUser[] = [
   {
     name: "Default Teacher",
     email: "teacher@siraj.local",
@@ -38,7 +40,7 @@ export const teachers: DemoUser[] = [
   },
 ];
 
-export const parents: DemoUser[] = [
+const _parents: InternalDemoUser[] = [
   {
     name: "Default Parent",
     email: "parent@siraj.local",
@@ -48,7 +50,7 @@ export const parents: DemoUser[] = [
   },
 ];
 
-export const staff: DemoUser[] = [
+const _staff: InternalDemoUser[] = [
   {
     name: "Default Staff",
     email: "staff@siraj.local",
@@ -58,4 +60,19 @@ export const staff: DemoUser[] = [
   },
 ];
 
+export const superAdmins: DemoUser[] = _superAdmins.map(({ plainPassword: _plainPassword, ...rest }) => rest);
+export const academyAdmins: DemoUser[] = _academyAdmins.map(({ plainPassword: _plainPassword, ...rest }) => rest);
+export const teachers: DemoUser[] = _teachers.map(({ plainPassword: _plainPassword, ...rest }) => rest);
+export const parents: DemoUser[] = _parents.map(({ plainPassword: _plainPassword, ...rest }) => rest);
+export const staff: DemoUser[] = _staff.map(({ plainPassword: _plainPassword, ...rest }) => rest);
+
 export const ALL_DEMO_USERS: DemoUser[] = [...superAdmins, ...academyAdmins, ...teachers, ...parents, ...staff];
+
+// Exported exclusively for backend seeders, DO NOT import this in frontend code
+export const INTERNAL_DEMO_USERS: InternalDemoUser[] = [
+  ..._superAdmins,
+  ..._academyAdmins,
+  ..._teachers,
+  ..._parents,
+  ..._staff,
+];

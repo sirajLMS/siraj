@@ -73,6 +73,27 @@ export const loginMutationDocument: TypedDocumentNode<Operations.LoginMutation, 
   }
 `;
 
+export const demoLoginMutationDocument: TypedDocumentNode<Operations.DemoLoginMutation, Types.MutationDemoLoginArgs> =
+  gql`
+  mutation demoLogin($input: DemoLoginInput!) {
+    demoLogin(input: $input) {
+      token
+      user {
+        createdAt
+        email
+        emailVerifiedAt
+        id
+        name
+        updatedAt
+        permissions
+        role
+        avatarUrl
+        notificationCount
+      }
+    }
+  }
+`;
+
 export const logoutMutationDocument: TypedDocumentNode<Operations.LogoutMutation> = gql`
   mutation logout {
     logout

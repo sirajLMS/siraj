@@ -46,8 +46,8 @@ describe("Audit Log Immutability", () => {
         // Check for either the custom trigger message or a general update error
         expect(
           errorMessage.includes("Modifying or deleting audit logs is forbidden") ||
-          errorMessage.includes("admin_audit_logs") ||
-          errorMessage.toLowerCase().includes("trigger")
+            errorMessage.includes("admin_audit_logs") ||
+            errorMessage.toLowerCase().includes("trigger")
         ).toBe(true);
       }
       expect(updateDidThrow).toBe(true);
@@ -62,8 +62,8 @@ describe("Audit Log Immutability", () => {
         // Check for either the custom trigger message or a general delete error
         expect(
           errorMessage.includes("Modifying or deleting audit logs is forbidden") ||
-          errorMessage.includes("admin_audit_logs") ||
-          errorMessage.toLowerCase().includes("trigger")
+            errorMessage.includes("admin_audit_logs") ||
+            errorMessage.toLowerCase().includes("trigger")
         ).toBe(true);
       }
       expect(deleteDidThrow).toBe(true);

@@ -67,3 +67,7 @@ This directory contains database integration tests. Follow these guidelines to e
     - CodeScene often flags repetitive structural patterns as code duplication, particularly when identical setup/execution sequences (e.g., `test`, `runInRollback`, `createMock`, `expectError`) are repeated for multiple error cases.
     - **Do NOT** try to blindly dump all this logic into `test-utils.ts` if the domain constraints are highly specific to the repository being tested.
     - Instead, **aggressively build custom higher-order test wrappers within the test file itself** (e.g., `function testRepoError(name, logic)`) that compress the repetitive boilerplate into 1-2 lines per test. This perfectly satisfies CodeScene while keeping the domain-specific logic isolated to the file.
+
+14. **Coverage Requirements**
+    - All repository tests located in the `repo/` directory MUST achieve **100% code coverage** (lines and functions).
+    - After writing or updating a repository test, always verify coverage by running `bun run test:coverage <path-to-test-file>`.

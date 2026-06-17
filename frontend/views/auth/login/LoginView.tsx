@@ -7,10 +7,11 @@ import { ThemeLanguageControls } from "./components/ThemeLanguageControls";
 
 export interface LoginViewProps extends LoginFormProps {
   isDemo?: boolean;
-  onFastLogin?: (email: string, password: string) => void;
+  demoGroups?: { slug: string; name: string; description: string | null }[];
+  onFastLogin?: (groupSlug: string) => void;
 }
 
-export function LoginView({ isDemo, onFastLogin, ...formProps }: Readonly<LoginViewProps>) {
+export function LoginView({ isDemo, demoGroups, onFastLogin, ...formProps }: Readonly<LoginViewProps>) {
   return (
     <Box
       sx={theme => ({
@@ -39,7 +40,7 @@ export function LoginView({ isDemo, onFastLogin, ...formProps }: Readonly<LoginV
         >
           <LoginHeader />
           <LoginForm {...formProps} />
-          {isDemo && onFastLogin && <DemoFastLogin onFastLogin={onFastLogin} />}
+          {isDemo && onFastLogin && <DemoFastLogin onFastLogin={onFastLogin} groups={demoGroups || []} />}
           <LoginFooter />
         </CardContent>
       </Card>

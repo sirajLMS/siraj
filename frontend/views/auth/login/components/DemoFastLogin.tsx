@@ -1,9 +1,8 @@
 "use client";
 
-import { AdminPanelSettings, Badge, FamilyRestroom, School } from "@mui/icons-material";
+import { AdminPanelSettings, Badge, FamilyRestroom, Group as GroupIcon, School } from "@mui/icons-material";
 import { Box, Button, type ButtonProps, Divider, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { parents, staff, superAdmins, teachers } from "@/shared/demo-users";
 
 // Extending ButtonProps in case you need to type check somewhere, or just use it inline
 const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
@@ -33,18 +32,22 @@ const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
 }));
 
 export interface DemoFastLoginProps {
-  onFastLogin: (email: string, password: string) => void;
+  groups: { slug: string; name: string; description: string | null }[];
+  onFastLogin: (groupSlug: string) => void;
 }
 
-export function DemoFastLogin({ onFastLogin }: Readonly<DemoFastLoginProps>) {
+const getGroupIcon = (slug: string) => {
+  if (slug.includes("admin")) return <AdminPanelSettings />;
+  if (slug.includes("teacher")) return <School />;
+  if (slug.includes("parent")) return <FamilyRestroom />;
+  if (slug.includes("staff")) return <Badge />;
+  return <GroupIcon />;
+};
+
+export function DemoFastLogin({ groups, onFastLogin }: Readonly<DemoFastLoginProps>) {
   const t = useTranslations("auth.login");
 
-  const demoUsers = [
-    { user: superAdmins[0], label: t("superAdmin"), icon: <AdminPanelSettings /> },
-    { user: teachers[0], label: t("teacher"), icon: <School /> },
-    { user: parents[0], label: t("parent"), icon: <FamilyRestroom /> },
-    { user: staff[0], label: t("staff"), icon: <Badge /> },
-  ].filter(item => !!item.user);
+  if (!groups || groups.length === 0) return null;
 
   return (
     <Box sx={{ mt: 3, mb: 1 }}>
@@ -69,15 +72,15 @@ export function DemoFastLogin({ onFastLogin }: Readonly<DemoFastLoginProps>) {
           gap: 1.5,
         }}
       >
-        {demoUsers.map(({ user, label, icon }) => (
+        {groups.map(group => (
           <FastLoginButton
-            key={user.email}
+            key={group.slug}
             variant="outlined"
             size="small"
-            startIcon={icon}
-            onClick={() => onFastLogin(user.email, user.plainPassword)}
+            startIcon={getGroupIcon(group.slug)}
+            onClick={() => onFastLogin(group.slug)}
           >
-            {label}
+            {group.name}
           </FastLoginButton>
         ))}
       </Box>

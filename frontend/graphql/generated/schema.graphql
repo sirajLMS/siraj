@@ -307,6 +307,12 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
+"""Input for the demo fast login mutation."""
+input DemoLoginInput {
+  """The unique slug of the permission group to authenticate as."""
+  groupSlug: String!
+}
+
 type DirectoryInfo implements StorageObject {
   createdAt: DateTime
   fileCount: Int
@@ -465,6 +471,11 @@ type Mutation {
   deleteFile(path: String!): FileOperationResult
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
   deleteStudent(id: String!): Student
+
+  """
+  Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
+  """
+  demoLogin(input: DemoLoginInput!): LoginResponse
   login(input: LoginInput!): LoginResponse
   logout: Boolean
   moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult

@@ -5,7 +5,14 @@ import { testLogger } from "@/shared/lib/testlogger";
 import type * as Types from "../../../types";
 import { db } from "../../drizzleDb";
 import { BillingRepository } from "../../repo";
-import { currencyExchangeAuditLogs, currencyExchangeRates, invoices, parents, systemSettings, users } from "../../schema";
+import {
+  currencyExchangeAuditLogs,
+  currencyExchangeRates,
+  invoices,
+  parents,
+  systemSettings,
+  users,
+} from "../../schema";
 
 describe("Billing Safeguards & Exchange Rates", () => {
   let testUser: Types.UserEntity | undefined;

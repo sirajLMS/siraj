@@ -104,7 +104,7 @@ describe("Row Level Security and Soft Delete", () => {
 
         tx.rollback();
       })
-      .catch(() => { });
+      .catch(() => {});
   });
 
   test("Repository soft delete hides row from SELECT. Hard delete as RLS role is blocked. Superuser hard delete removes row.", async () => {

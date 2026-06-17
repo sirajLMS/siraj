@@ -13,7 +13,7 @@ const meta: Meta<typeof LoginView> = {
     onSubmitAction: async (_data: LoginFormData) => {
       // Pure presentational action, no-op for storybook
     },
-    onFastLogin: (_email: string, _password: string) => {
+    onFastLogin: (_groupSlug: string) => {
       // Pure presentational action, no-op for storybook
     },
     isDemo: false,
@@ -39,5 +39,11 @@ export const Default: Story = {
 export const Demo: Story = {
   args: {
     isDemo: true,
+    demoGroups: [
+      { slug: "super_admin", name: "Super Admin", description: null },
+      { slug: "teacher", name: "Teacher", description: null },
+      { slug: "parent", name: "Parent", description: null },
+      { slug: "staff", name: "Staff", description: null },
+    ],
   },
 };

@@ -3,11 +3,11 @@ import { userPermissionGroups, users } from "@/backend/db/schema";
 import { hashPassword } from "@/backend/lib/auth/password";
 import logger from "@/backend/lib/logger";
 import type { PermissionGroupEntity } from "@/backend/types/auth.types";
-import { ALL_DEMO_USERS, type DemoUser } from "@/shared/demo-users";
+import { INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 import { seedOrGet as seedOrGetPermissions } from "./seed-permissions";
 
-async function seedUser(u: DemoUser, groupMap: Map<string, string>, now: Date) {
-  const hashedPassword = await hashPassword(u.plainPassword);
+async function seedUser(u: (typeof INTERNAL_DEMO_USERS)[0], groupMap: Map<string, string>, now: Date) {
+  const hashedPassword = await hashPassword(u.plainPassword || "12345678");
 
   const [insertedUser] = await db
     .insert(users)
@@ -54,7 +54,7 @@ export async function seedOrGet(permissionGroups?: PermissionGroupEntity[]) {
 
   const results = [];
 
-  for (const u of ALL_DEMO_USERS) {
+  for (const u of INTERNAL_DEMO_USERS) {
     const insertedUser = await seedUser(u, groupMap, now);
     results.push(insertedUser);
   }

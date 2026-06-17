@@ -1,17 +1,26 @@
 "use client";
 
+import { useMutation } from "@apollo/client/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { demoLoginMutationDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useAuth } from "@/frontend/hooks/useAuth";
+import { useAuthToken } from "@/frontend/hooks/useAuthToken";
 import { LoginView } from "./LoginView";
 import type { LoginFormData } from "./schemas/loginSchema";
 
-export function LoginContainer() {
+export interface LoginContainerProps {
+  demoGroups?: { slug: string; name: string; description: string | null }[];
+}
+
+export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
   const t = useTranslations("auth.login");
   const searchParams = useSearchParams();
   const router = useRouter();
   const { login, error: authError, isAuthenticated } = useAuth();
+  const { updateAuthToken } = useAuthToken();
+  const [demoLoginMutation] = useMutation(demoLoginMutationDocument);
 
   const [loginResult, setLoginResult] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
@@ -46,14 +55,15 @@ export function LoginContainer() {
     }
   };
 
-  const handleFastLogin = async (email: string, password: string) => {
+  const handleFastLogin = async (groupSlug: string) => {
     const redirectUrl = searchParams.get("redirect");
     setLoginResult(null);
 
     try {
-      const success = await login({ input: { email, password } }, redirectUrl);
-      if (success) {
-        setLoginResult({ type: "success", message: t("loginSuccess") });
+      const { data } = await demoLoginMutation({ variables: { input: { groupSlug } } });
+      if (data?.demoLogin?.token && data.demoLogin.user) {
+        updateAuthToken(data.demoLogin.token);
+        globalThis.location.href = redirectUrl || "/dashboard";
       } else {
         setLoginResult({ type: "error", message: t("invalidCredentials") });
       }
@@ -69,6 +79,7 @@ export function LoginContainer() {
       onSubmitAction={handleLoginSubmit}
       externalLoginResult={loginResult}
       isDemo={isDemo}
+      demoGroups={demoGroups}
       onFastLogin={handleFastLogin}
     />
   );

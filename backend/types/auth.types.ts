@@ -111,6 +111,10 @@ export type LoginInput = {
   password: string;
 };
 
+export type DemoLoginInput = {
+  groupSlug: string;
+};
+
 export type LoginResponse = {
   user: UserPothosDefinition;
   token: string;

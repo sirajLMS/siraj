@@ -4,10 +4,16 @@ import { RateLimitRepository, SessionRepository, UserRepository } from "@/backen
 import { generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
 import { comparePassword } from "@/backend/lib/auth/password";
 import logger from "@/backend/lib/logger";
+import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
 import type { SessionEntity, UserEntity } from "@/backend/types";
 import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { LoginInputPothosObject, LoginResponsePothosObject, RefreshTokenResponsePothosObject } from "../pothos";
+import {
+  DemoLoginInputPothosObject,
+  LoginInputPothosObject,
+  LoginResponsePothosObject,
+  RefreshTokenResponsePothosObject,
+} from "../pothos";
 
 function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: string) {
   if (!ctx.cookies) return;
@@ -132,6 +138,48 @@ gqlSchemaBuilder.mutationFields(t => ({
         token: accessToken,
         user,
       };
+    },
+  }),
+
+  /**
+   * Special GraphQL endpoint for demo fast login.
+   * This endpoint logs in a user using the provided permission group slug without requiring a password.
+   * It is intended strictly for demonstration purposes and is secured by environment variables.
+   *
+   * @drizzle `DemoAuthService.loginWithGroupSlug` (which uses `db.query.permissionGroups`, `db.query.userPermissionGroups`, `db.query.users`)
+   * @drizzle `SessionRepository.create` (which uses `db.insert(sessions)`)
+   */
+  demoLogin: t.field({
+    type: LoginResponsePothosObject,
+    description:
+      "Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.",
+    args: {
+      input: t.arg({ type: DemoLoginInputPothosObject, required: true }),
+    },
+    resolve: async (_parent, args, ctx) => {
+      const isDemo = process.env.NEXT_PUBLIC_IS_DEMO === "true" || process.env.IS_DEMO === "true";
+      if (!isDemo) {
+        throw new GraphQLError("Demo login is not enabled", {
+          extensions: { code: "UNAUTHENTICATED" },
+        });
+      }
+
+      const { groupSlug } = args.input;
+
+      try {
+        const result = await DemoAuthService.loginWithGroupSlug(groupSlug);
+        setAuthCookies(ctx, result.sessionId, result.refreshToken);
+        return {
+          token: result.accessToken,
+          user: result.user,
+        };
+      } catch (error) {
+        const err = error as Error;
+        logger.error("Demo login failed", { error: err });
+        throw new GraphQLError(err.message || "Demo login failed", {
+          extensions: { code: "UNAUTHENTICATED" },
+        });
+      }
     },
   }),
 

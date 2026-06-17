@@ -21,6 +21,7 @@
     "codegen": "graphql-codegen",
     "codegen:watch": "graphql-codegen --watch",
     "test": "bun test --timeout=60000",
+    "test:coverage": "bun test --coverage --timeout=60000",
     "codescene": "bun run scripts/health/codescene/main.ts --scan",
     "quality-gate": "bun run scripts/quality-gate.ts",
     "quality-gate:fresh": "bun run scripts/quality-gate.ts --fresh",

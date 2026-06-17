@@ -325,6 +325,12 @@ export type DailyScheduleMetrics = {
   trial: Maybe<Scalars['Int']['output']>;
 };
 
+/** Input for the demo fast login mutation. */
+export type DemoLoginInput = {
+  /** The unique slug of the permission group to authenticate as. */
+  groupSlug: Scalars['String']['input'];
+};
+
 export type DirectoryInfo = StorageObject & {
   __typename?: 'DirectoryInfo';
   createdAt: Maybe<Scalars['DateTime']['output']>;
@@ -486,6 +492,8 @@ export type Mutation = {
   deleteFile: Maybe<FileOperationResult>;
   deleteStorageItems: Maybe<BulkOperationResult>;
   deleteStudent: Maybe<Student>;
+  /** Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables. */
+  demoLogin: Maybe<LoginResponse>;
   login: Maybe<LoginResponse>;
   logout: Maybe<Scalars['Boolean']['output']>;
   moveStorageItems: Maybe<BulkOperationResult>;
@@ -520,6 +528,11 @@ export type MutationDeleteStorageItemsArgs = {
 
 export type MutationDeleteStudentArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type MutationDemoLoginArgs = {
+  input: DemoLoginInput;
 };
 
 

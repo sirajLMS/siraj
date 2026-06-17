@@ -10,30 +10,72 @@ import { type DbTransaction, runInRollback } from "../test-utils";
  */
 async function setupTestEntities(tx: DbTransaction, prefix: string) {
   const now = new Date();
-  
-  const [parentUser] = await tx.insert(users).values({
-    name: `${prefix} ParentUser`, email: `${prefix}-parent-${randomUUID()}@example.com`, password: "password", createdAt: now, updatedAt: now,
-  }).returning();
-    
-  const [parent] = await tx.insert(parents).values({
-    userId: parentUser.id, status: "REGULAR", createdAt: now, updatedAt: now,
-  }).returning();
 
-  const [student] = await tx.insert(students).values({
-    parentId: parent.id, name: `${prefix} Student`, status: "REGULAR", classesRemaining: 10, classesTotal: 10, idempotencyKey: randomUUID(), createdAt: now, updatedAt: now,
-  }).returning();
+  const [parentUser] = await tx
+    .insert(users)
+    .values({
+      name: `${prefix} ParentUser`,
+      email: `${prefix}-parent-${randomUUID()}@example.com`,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
 
-  const [teacherUser] = await tx.insert(users).values({
-    name: `${prefix} TeacherUser`, email: `${prefix}-teacher-${randomUUID()}@example.com`, password: "password", createdAt: now, updatedAt: now,
-  }).returning();
-    
-  const [teacher] = await tx.insert(teachers).values({
-    userId: teacherUser.id, status: "ACTIVATED", timezone: "UTC", createdAt: now, updatedAt: now,
-  }).returning();
+  const [parent] = await tx
+    .insert(parents)
+    .values({
+      userId: parentUser.id,
+      status: "REGULAR",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
 
-  const [assignment] = await tx.insert(teacherAssignments).values({
-    studentId: student.id, teacherId: teacher.id, assignedAt: now,
-  }).returning();
+  const [student] = await tx
+    .insert(students)
+    .values({
+      parentId: parent.id,
+      name: `${prefix} Student`,
+      status: "REGULAR",
+      classesRemaining: 10,
+      classesTotal: 10,
+      idempotencyKey: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+
+  const [teacherUser] = await tx
+    .insert(users)
+    .values({
+      name: `${prefix} TeacherUser`,
+      email: `${prefix}-teacher-${randomUUID()}@example.com`,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+
+  const [teacher] = await tx
+    .insert(teachers)
+    .values({
+      userId: teacherUser.id,
+      status: "ACTIVATED",
+      timezone: "UTC",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+
+  const [assignment] = await tx
+    .insert(teacherAssignments)
+    .values({
+      studentId: student.id,
+      teacherId: teacher.id,
+      assignedAt: now,
+    })
+    .returning();
 
   return { parentUser, parent, student, teacherUser, teacher, assignment, now };
 }
@@ -41,12 +83,28 @@ async function setupTestEntities(tx: DbTransaction, prefix: string) {
 /**
  * HELPER: createMockClassInstance
  */
-async function createMockClassInstance(tx: DbTransaction, studentId: string, teacherId: string, overrides: Partial<typeof classInstances.$inferInsert> = {}) {
+async function createMockClassInstance(
+  tx: DbTransaction,
+  studentId: string,
+  teacherId: string,
+  overrides: Partial<typeof classInstances.$inferInsert> = {}
+) {
   const now = new Date();
-  const [instance] = await tx.insert(classInstances).values({
-    studentId, teacherId, scheduledStartAt: new Date(now.getTime() + 1000 * 60 * 60), scheduledEndAt: new Date(now.getTime() + 1000 * 60 * 120),
-    durationMinutes: 60, classType: "REGULAR", idempotencyKey: randomUUID(), createdAt: now, updatedAt: now, ...overrides,
-  }).returning();
+  const [instance] = await tx
+    .insert(classInstances)
+    .values({
+      studentId,
+      teacherId,
+      scheduledStartAt: new Date(now.getTime() + 1000 * 60 * 60),
+      scheduledEndAt: new Date(now.getTime() + 1000 * 60 * 120),
+      durationMinutes: 60,
+      classType: "REGULAR",
+      idempotencyKey: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+      ...overrides,
+    })
+    .returning();
   return instance;
 }
 
@@ -73,21 +131,36 @@ function testRepoError(name: string, logic: (tx: DbTransaction) => Promise<void>
 }
 
 describe("Scheduling Repository logic", () => {
-
   describe("createClassInstance", () => {
-    const getCreatePayload = (studentId: string, teacherId: string, start: Date, end: Date, overrides: Partial<typeof classInstances.$inferInsert> = {}) => ({
-      studentId, teacherId, scheduledStartAt: start, scheduledEndAt: end, durationMinutes: 60, classType: "REGULAR" as const, idempotencyKey: randomUUID(), ...overrides,
+    const getCreatePayload = (
+      studentId: string,
+      teacherId: string,
+      start: Date,
+      end: Date,
+      overrides: Partial<typeof classInstances.$inferInsert> = {}
+    ) => ({
+      studentId,
+      teacherId,
+      scheduledStartAt: start,
+      scheduledEndAt: end,
+      durationMinutes: 60,
+      classType: "REGULAR" as const,
+      idempotencyKey: randomUUID(),
+      ...overrides,
     });
 
     test("creates successfully with valid data and handles quota deduction", async () => {
       await runInRollback(async tx => {
         const { student, teacher, now } = await setupTestEntities(tx, "Create1");
         const [studentBefore] = await tx.select().from(students).where(eq(students.id, student.id));
-        
+
         const start = new Date(now.getTime() + 86400000); // tomorrow
         const end = new Date(start.getTime() + 3600000); // +1 hour
 
-        const created = await SchedulingRepository.createClassInstance(getCreatePayload(student.id, teacher.id, start, end, { quotaDeducted: true }), tx);
+        const created = await SchedulingRepository.createClassInstance(
+          getCreatePayload(student.id, teacher.id, start, end, { quotaDeducted: true }),
+          tx
+        );
         expect(created.quotaDeducted).toBe(true);
 
         const [studentAfter] = await tx.select().from(students).where(eq(students.id, student.id));
@@ -98,7 +171,15 @@ describe("Scheduling Repository logic", () => {
     testRepoError("throws if teacher is not assigned to student", async tx => {
       const { student, now } = await setupTestEntities(tx, "Create2");
       const { teacher } = await setupTestEntities(tx, "CreateUnassigned");
-      await SchedulingRepository.createClassInstance(getCreatePayload(student.id, teacher.id, new Date(now.getTime() + 86400000), new Date(now.getTime() + 90000000)), tx);
+      await SchedulingRepository.createClassInstance(
+        getCreatePayload(
+          student.id,
+          teacher.id,
+          new Date(now.getTime() + 86400000),
+          new Date(now.getTime() + 90000000)
+        ),
+        tx
+      );
     });
 
     testRepoError("throws on teacher overlap", async tx => {
@@ -126,9 +207,16 @@ describe("Scheduling Repository logic", () => {
       const start = new Date(now.getTime() + 86400000);
       const end = new Date(start.getTime() + 3600000);
       const zoomUrl = "https://zoom.us/j/123456789";
-      await createMockClassInstance(tx, student.id, teacher.id, { scheduledStartAt: start, scheduledEndAt: end, zoomMeetingUrl: zoomUrl });
+      await createMockClassInstance(tx, student.id, teacher.id, {
+        scheduledStartAt: start,
+        scheduledEndAt: end,
+        zoomMeetingUrl: zoomUrl,
+      });
       const { student: s2, teacher: t2 } = await setupTestEntities(tx, "CreateZoom2");
-      await SchedulingRepository.createClassInstance(getCreatePayload(s2.id, t2.id, start, end, { zoomMeetingUrl: zoomUrl }), tx);
+      await SchedulingRepository.createClassInstance(
+        getCreatePayload(s2.id, t2.id, start, end, { zoomMeetingUrl: zoomUrl }),
+        tx
+      );
     });
   });
 
@@ -205,24 +293,48 @@ describe("Scheduling Repository logic", () => {
   });
 
   describe("rescheduleClassInstance", () => {
-    const getReschedulePayload = (studentId: string, teacherId: string, overrides: Partial<typeof classInstances.$inferInsert> = {}) => ({
-      studentId, teacherId, scheduledStartAt: new Date(), scheduledEndAt: new Date(), durationMinutes: 60, classType: "REGULAR" as const, idempotencyKey: randomUUID(), ...overrides,
+    const getReschedulePayload = (
+      studentId: string,
+      teacherId: string,
+      overrides: Partial<typeof classInstances.$inferInsert> = {}
+    ) => ({
+      studentId,
+      teacherId,
+      scheduledStartAt: new Date(),
+      scheduledEndAt: new Date(),
+      durationMinutes: 60,
+      classType: "REGULAR" as const,
+      idempotencyKey: randomUUID(),
+      ...overrides,
     });
 
     testRepoError("throws if original class not found", async tx => {
       const { student, teacher } = await setupTestEntities(tx, "Resched1");
-      await SchedulingRepository.rescheduleClassInstance(randomUUID(), getReschedulePayload(student.id, teacher.id), tx);
+      await SchedulingRepository.rescheduleClassInstance(
+        randomUUID(),
+        getReschedulePayload(student.id, teacher.id),
+        tx
+      );
     });
 
     testRepoError("throws if rescheduling to self", async tx => {
       const { student, teacher } = await setupTestEntities(tx, "Resched2");
       const instance = await createMockClassInstance(tx, student.id, teacher.id);
-      await SchedulingRepository.rescheduleClassInstance(instance.id, getReschedulePayload(student.id, teacher.id, { id: instance.id }), tx);
+      await SchedulingRepository.rescheduleClassInstance(
+        instance.id,
+        getReschedulePayload(student.id, teacher.id, { id: instance.id }),
+        tx
+      );
     });
 
     testRepoError("throws if original is completed or taken", async tx => {
       const { student, teacher, now } = await setupTestEntities(tx, "Resched3");
-      const instance = await createMockClassInstance(tx, student.id, teacher.id, { executionState: "COMPLETED", outcome: "TAKEN", actualStartAt: now, actualEndAt: new Date(now.getTime() + 3600000) });
+      const instance = await createMockClassInstance(tx, student.id, teacher.id, {
+        executionState: "COMPLETED",
+        outcome: "TAKEN",
+        actualStartAt: now,
+        actualEndAt: new Date(now.getTime() + 3600000),
+      });
       await SchedulingRepository.rescheduleClassInstance(instance.id, getReschedulePayload(student.id, teacher.id), tx);
     });
 
@@ -242,7 +354,11 @@ describe("Scheduling Repository logic", () => {
         const start = new Date(now.getTime() + 86400000 * 2);
         const end = new Date(start.getTime() + 3600000);
 
-        const newInstance = await SchedulingRepository.rescheduleClassInstance(original.id, getReschedulePayload(student.id, teacher.id, { scheduledStartAt: start, scheduledEndAt: end }), tx);
+        const newInstance = await SchedulingRepository.rescheduleClassInstance(
+          original.id,
+          getReschedulePayload(student.id, teacher.id, { scheduledStartAt: start, scheduledEndAt: end }),
+          tx
+        );
         expect(newInstance.originalClassId).toBe(original.id);
         expect(newInstance.quotaDeducted).toBe(false);
 
@@ -261,12 +377,26 @@ describe("Scheduling Repository logic", () => {
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "Metrics");
         const testDate = new Date("2028-01-01T12:00:00Z");
-        
+
         const initialMetrics = await SchedulingRepository.getDailyMetrics(testDate, teacher.id, tx);
         const initialSchedule = await SchedulingRepository.getDailySchedule(testDate, teacher.id, tx);
-        
-        await createMockClassInstance(tx, student.id, teacher.id, { scheduledStartAt: testDate, scheduledEndAt: new Date(testDate.getTime() + 3600000), classType: "REGULAR", outcome: "PENDING", executionState: "NOT_ACTIVATED" });
-        await createMockClassInstance(tx, student.id, teacher.id, { scheduledStartAt: testDate, scheduledEndAt: new Date(testDate.getTime() + 3600000), classType: "TRIAL", outcome: "TAKEN", executionState: "COMPLETED", actualStartAt: testDate, actualEndAt: new Date(testDate.getTime() + 3600000) });
+
+        await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: testDate,
+          scheduledEndAt: new Date(testDate.getTime() + 3600000),
+          classType: "REGULAR",
+          outcome: "PENDING",
+          executionState: "NOT_ACTIVATED",
+        });
+        await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: testDate,
+          scheduledEndAt: new Date(testDate.getTime() + 3600000),
+          classType: "TRIAL",
+          outcome: "TAKEN",
+          executionState: "COMPLETED",
+          actualStartAt: testDate,
+          actualEndAt: new Date(testDate.getTime() + 3600000),
+        });
 
         const newMetrics = await SchedulingRepository.getDailyMetrics(testDate, teacher.id, tx);
         const newSchedule = await SchedulingRepository.getDailySchedule(testDate, teacher.id, tx);
@@ -277,13 +407,13 @@ describe("Scheduling Repository logic", () => {
         expect(newMetrics.taken).toBe(initialMetrics.taken + 1);
         expect(newMetrics.pending).toBe(initialMetrics.pending + 1);
         expect(newSchedule.length).toBe(initialSchedule.length + 2);
-        
+
         const scheduledClass = newSchedule.find(s => s.classType === "REGULAR");
         expect(scheduledClass?.student).toBeDefined();
         expect(scheduledClass?.teacher).toBeDefined();
       });
     });
-    
+
     test("handles no transaction context natively", async () => {
       const date = new Date("2029-01-01T00:00:00Z");
       const metrics = await SchedulingRepository.getDailyMetrics(date);

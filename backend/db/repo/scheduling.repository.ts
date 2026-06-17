@@ -1,8 +1,8 @@
-import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
-import { classInstances, students, teacherAssignments } from "@/backend/db/schema";
+import { classInstances, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
@@ -479,8 +479,6 @@ export namespace SchedulingRepository {
       );
 
       // Using standard joins because findMany raised type errors with SQL<unknown> and missing relations
-      const { students, teachers } = await import("@/backend/db/schema");
-      const { inArray } = await import("drizzle-orm");
 
       const rows = await t
         .select({
@@ -492,11 +490,19 @@ export namespace SchedulingRepository {
       const studentIds = Array.from(new Set(rows.map(r => r.classInstance.studentId)));
       const teacherIds = Array.from(new Set(rows.map(r => r.classInstance.teacherId)));
 
-      const studentsData = studentIds.length > 0 ? await t.select().from(students).where(inArray(students.id, studentIds)) : [];
-      const teachersData = teacherIds.length > 0 ? await t.select().from(teachers).where(inArray(teachers.id, teacherIds)) : [];
+      const studentsData =
+        studentIds.length > 0 ? await t.select().from(students).where(inArray(students.id, studentIds)) : [];
+      const teachersData =
+        teacherIds.length > 0
+          ? await t
+              .select({ teacher: teachers, user: users })
+              .from(teachers)
+              .innerJoin(users, eq(teachers.userId, users.id))
+              .where(inArray(teachers.id, teacherIds))
+          : [];
 
       const studentMap = new Map(studentsData.map(s => [s.id, s]));
-      const teacherMap = new Map(teachersData.map(tc => [tc.id, tc]));
+      const teacherMap = new Map(teachersData.map(tc => [tc.teacher.id, { ...tc.teacher, user: tc.user }]));
 
       return rows.map(r => ({
         ...r.classInstance,

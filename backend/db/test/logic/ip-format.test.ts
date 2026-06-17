@@ -70,8 +70,8 @@ describe("IP Address Formatting", () => {
         const errorMessage = String(error);
         expect(
           errorMessage.includes("invalid input syntax for type inet") ||
-          errorMessage.toLowerCase().includes("inet") ||
-          errorMessage.includes("invalid")
+            errorMessage.toLowerCase().includes("inet") ||
+            errorMessage.includes("invalid")
         ).toBe(true);
       }
       expect(sessionDidThrow).toBe(true);
