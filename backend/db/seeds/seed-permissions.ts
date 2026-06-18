@@ -1,7 +1,7 @@
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { groupPermissions, permissionGroups, permissions } from "@/backend/db/schema";
-import type { AppPermission } from "@/shared/lib/enum";
+import { AppPermission } from "@/shared/lib/enum";
 import {
   ACADEMY_ADMIN_PERMISSION_KEYS,
   PARENT_DEFAULT_PERMISSION_KEYS,
@@ -10,6 +10,8 @@ import {
   SYSTEM_PERMISSION_GROUP_SLUGS,
   TEACHER_DEFAULT_PERMISSION_KEYS,
 } from "./permission-catalog";
+
+const SYSTEM_AUTOMATED_PERMISSION_KEYS = [AppPermission.SYSTEM_ENFORCE_TIME_WINDOW] as const;
 
 const SYSTEM_GROUPS = [
   {
@@ -46,6 +48,13 @@ const SYSTEM_GROUPS = [
     description: "Default permissions for staff accounts",
     isSystem: true,
     permissionKeys: [...STAFF_DEFAULT_PERMISSION_KEYS],
+  },
+  {
+    name: "System Automated",
+    slug: "system_automated",
+    description: "Internal system rules for validation",
+    isSystem: true,
+    permissionKeys: [...SYSTEM_AUTOMATED_PERMISSION_KEYS],
   },
 ] as const;
 

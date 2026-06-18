@@ -68,6 +68,7 @@ const GROUPS: PermissionGroupData[] = [
       ["view_metrics", "View dashboard metrics"],
       ["filter_metrics", "Filter dashboard metrics"],
       ["metrics.view_all", "View all dashboard metrics"],
+      ["search", "Global search on admin schedule table"],
     ],
   },
   {
@@ -82,6 +83,7 @@ const GROUPS: PermissionGroupData[] = [
       ["search_availability", "Search teacher availability"],
       ["manage_recurring", "Manage recurring schedules"],
       ["dst_migrate", "Run DST migration"],
+      ["view_timezones", "View multi-timezone schedule columns"],
     ],
   },
   {
@@ -97,7 +99,26 @@ const GROUPS: PermissionGroupData[] = [
       ["admin_leave", "Admin excused leave on a class"],
       ["reschedule", "Reschedule a class"],
       ["revert", "Revert class to pending state"],
+      ["override_actions", "Admin override toolbar on class details page"],
     ],
+  },
+  {
+    category: "History",
+    resource: "history",
+    items: [
+      ["view_calendar", "View student class history calendar"],
+      ["view_details", "View session metadata in history modal drill-down"],
+    ],
+  },
+  {
+    category: "Teacher",
+    resource: "teacher",
+    items: [["view_dashboard", "Access teacher dashboard"]],
+  },
+  {
+    category: "System",
+    resource: "system",
+    items: [["enforce_time_window", "Validate activation time window"]],
   },
   {
     category: "Teachers",
@@ -165,23 +186,24 @@ export const PERMISSION_CATALOG: PermissionSeed[] = GROUPS.flatMap(group =>
 );
 
 const COMMON_DASHBOARD_PERMISSIONS = [AppPermission.DASHBOARD_VIEW] as const;
-const COMMON_CLASS_PERMISSIONS = [AppPermission.SESSION_VIEW_DETAILS] as const;
+const COMMON_SESSION_PERMISSIONS = [AppPermission.SESSION_VIEW_DETAILS] as const;
 
 export const TEACHER_DEFAULT_PERMISSION_KEYS = [
   ...COMMON_DASHBOARD_PERMISSIONS,
   AppPermission.SCHEDULE_VIEW_ASSIGNED,
-  ...COMMON_CLASS_PERMISSIONS,
+  ...COMMON_SESSION_PERMISSIONS,
   AppPermission.SESSION_ACTIVATE_CLASS,
   AppPermission.SESSION_START,
   AppPermission.SESSION_MARK_ABSENT,
   AppPermission.SESSION_REQUEST_LEAVE,
+  AppPermission.TEACHER_VIEW_DASHBOARD,
   AppPermission.RESOURCES_LIST,
 ] as const;
 
 export const PARENT_DEFAULT_PERMISSION_KEYS = [
   ...COMMON_DASHBOARD_PERMISSIONS,
   AppPermission.SCHEDULE_VIEW_FAMILY,
-  ...COMMON_CLASS_PERMISSIONS,
+  ...COMMON_SESSION_PERMISSIONS,
   AppPermission.SESSION_REQUEST_LEAVE,
   AppPermission.COMPLAINTS_LIST,
 ] as const;
@@ -190,7 +212,7 @@ export const STAFF_DEFAULT_PERMISSION_KEYS = [
   ...COMMON_DASHBOARD_PERMISSIONS,
   AppPermission.DASHBOARD_METRICS_VIEW_ALL,
   AppPermission.SCHEDULE_VIEW_ALL,
-  ...COMMON_CLASS_PERMISSIONS,
+  ...COMMON_SESSION_PERMISSIONS,
   AppPermission.TEACHERS_LIST,
   AppPermission.PARENTS_LIST,
   AppPermission.STUDENTS_LIST,
@@ -202,6 +224,16 @@ export const ACADEMY_ADMIN_PERMISSION_KEYS = [
   AppPermission.AUTH_VIEW_OWN_PROFILE,
   AppPermission.DASHBOARD_VIEW_METRICS,
   AppPermission.DASHBOARD_FILTER_METRICS,
+  AppPermission.DASHBOARD_SEARCH,
   AppPermission.SCHEDULE_VIEW_LIST,
   AppPermission.SCHEDULE_FILTER_ADVANCED,
+  AppPermission.SCHEDULE_VIEW_TIMEZONES,
+  AppPermission.HISTORY_VIEW_CALENDAR,
+  AppPermission.HISTORY_VIEW_DETAILS,
+  AppPermission.SESSION_OVERRIDE_ACTIONS,
+  AppPermission.SESSION_VIEW_DETAILS,
+  AppPermission.SESSION_FORCE_ACTIVATE,
+  AppPermission.SESSION_RESCHEDULE,
+  AppPermission.SESSION_REVERT,
+  AppPermission.SESSION_ADMIN_LEAVE,
 ] as const;

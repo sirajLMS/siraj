@@ -1,8 +1,8 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "05bd39ad-b970-4c78-9bf8-d7e799895164",
-  "prevIds": ["b9fa3179-2e0d-4ca5-95bf-40cc873c0218"],
+  "id": "5b298a14-a660-4a89-a9de-c7efec2fea44",
+  "prevIds": ["5018d3ee-44de-4cf2-b2c2-6d0fbf75d5b4"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
