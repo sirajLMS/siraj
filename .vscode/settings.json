@@ -3,5 +3,8 @@
   "sonarlint.connectedMode.project": {
     "connectionId": "siraj",
     "projectKey": "siraj"
-  }
+  },
+  "sonarlint.analysisExcludesStandalone": "**/.next-test/**,**/messages/**,**theme/palette/**,**/.scannerwork/**,**/.git/**,**/.agent/**,**/.ai/**,docs/**,backend/drizzle/**,**/node_modules/**,**/.next/**,**/dist/**,**/out/**,**/build/**,**/.storybook/**,**/*.stories.@(js|jsx|ts|tsx),**/*.test.@(js|jsx|ts|tsx),**/__tests__/**,**/*.d.ts,**/public/**,**/coverage/**,**/scripts/**,**/mockData/**,**/decorators/**,**/graphql/generated/**,storybook-static/**",
+  "codescene.enableAutoRefactor": false,
+  "codescene.enableTelemetry": false,
 }
