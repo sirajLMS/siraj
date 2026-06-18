@@ -4,8 +4,7 @@ import { Box, Grid } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { AdminViewLabels } from "@/shared/messages/types/message";
-import { LiveSessionToolbar } from "../components/LiveSessionToolbar";
-import { TimezoneWarningBanner } from "../teacher/TimezoneWarningBanner";
+import { ClassDetailsToolbarArea } from "../components/ClassDetailsToolbarArea";
 import { ActivityHeatmap } from "./ActivityHeatmap";
 import { AdminActionsBar } from "./AdminActionsBar";
 import { ClassInfoCard } from "./ClassInfoCard";
@@ -66,21 +65,11 @@ export function ClassDetailsAdminView({
 
   return (
     <Box>
-      {/* Timezone Warning */}
-      {!isWarningDismissed && instance.hasTimezoneMismatch && (
-        <RequirePermission permissions={[AppPermission.ScheduleViewTimezones]}>
-          <TimezoneWarningBanner
-            studentTimezone={instance.studentTimezone ?? ""}
-            onDismiss={onDismissWarning}
-            labels={labels.timezone}
-          />
-        </RequirePermission>
-      )}
-
-      {/* Live Session Toolbar */}
-      <LiveSessionToolbar
-        classInstanceId={instance.id ?? ""}
-        executionState={instance.executionState ?? "NOT_ACTIVATED"}
+      <ClassDetailsToolbarArea
+        instance={instance}
+        isWarningDismissed={isWarningDismissed}
+        onDismissWarning={onDismissWarning}
+        labels={labels}
         onStart={onStart}
         onAbsent={onAbsent}
         onLeave={onLeave}

@@ -1,17 +1,15 @@
 "use client";
 
 import { Box, Grid } from "@mui/material";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
-import { LiveSessionToolbar } from "../components/LiveSessionToolbar";
+import { ClassDetailsToolbarArea } from "../components/ClassDetailsToolbarArea";
 import type { TeacherViewLabels } from "../useClassDetailsLabels";
 import { ActionsPanel } from "./ActionsPanel";
 import { ClassInstanceDetailsCard } from "./ClassInstanceDetailsCard";
 import { PerformanceOverviewCard } from "./PerformanceOverviewCard";
 import { RemarksCard } from "./RemarksCard";
 import { StudentProfileCard } from "./StudentProfileCard";
-import { TimezoneWarningBanner } from "./TimezoneWarningBanner";
 
 interface ClassDetailsTeacherViewProps {
   readonly instance: ClassInstanceDetail;
@@ -58,21 +56,11 @@ export function ClassDetailsTeacherView({
 
   return (
     <Box>
-      {/* Timezone Warning */}
-      {!isWarningDismissed && instance.hasTimezoneMismatch && (
-        <RequirePermission permissions={[AppPermission.ScheduleViewTimezones]}>
-          <TimezoneWarningBanner
-            studentTimezone={instance.studentTimezone ?? ""}
-            onDismiss={onDismissWarning}
-            labels={labels.timezone}
-          />
-        </RequirePermission>
-      )}
-
-      {/* Live Session Toolbar */}
-      <LiveSessionToolbar
-        classInstanceId={instance.id ?? ""}
-        executionState={instance.executionState ?? "NOT_ACTIVATED"}
+      <ClassDetailsToolbarArea
+        instance={instance}
+        isWarningDismissed={isWarningDismissed}
+        onDismissWarning={onDismissWarning}
+        labels={labels}
         onStart={onStart}
         onAbsent={onAbsent}
         onLeave={onLeave}

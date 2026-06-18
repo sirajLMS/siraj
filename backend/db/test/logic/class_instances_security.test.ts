@@ -108,26 +108,24 @@ describe("Class Instances Security Logic", () => {
     }));
 
   describe("Story 2: State Transitions", () => {
+    const testOutcome = async (tx: DbTransaction, key: string, outcome: "ABSENT" | "LEAVE") => {
+      const { teacher, student } = await setupTestEntities(tx, key, { skipInstance: true });
+      const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
+
+      await tx
+        .update(classInstances)
+        .set({ executionState: "COMPLETED", outcome })
+        .where(eq(classInstances.id, instance.id));
+    };
+
     it("allows ACTIVATED → COMPLETED with outcome=ABSENT", () =>
       runInRollback(async tx => {
-        const { teacher, student } = await setupTestEntities(tx, "S2-1", { skipInstance: true });
-        const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
-
-        await tx
-          .update(classInstances)
-          .set({ executionState: "COMPLETED", outcome: "ABSENT" })
-          .where(eq(classInstances.id, instance.id));
+        await testOutcome(tx, "S2-1", "ABSENT");
       }));
 
     it("allows ACTIVATED → COMPLETED with outcome=LEAVE", () =>
       runInRollback(async tx => {
-        const { teacher, student } = await setupTestEntities(tx, "S2-2", { skipInstance: true });
-        const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
-
-        await tx
-          .update(classInstances)
-          .set({ executionState: "COMPLETED", outcome: "LEAVE" })
-          .where(eq(classInstances.id, instance.id));
+        await testOutcome(tx, "S2-2", "LEAVE");
       }));
 
     it("blocks ACTIVATED → COMPLETED with outcome=TAKEN", () =>

@@ -238,6 +238,18 @@ export function ClassDetailsContainer() {
 
   const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;
 
+  const sessionActionProps = {
+    onStart: () => startSession({ variables: { classInstanceId: id } }),
+    onAbsent: () => markAbsent({ variables: { classInstanceId: id } }),
+    onLeave: (reason: string) => processLeave({ variables: { classInstanceId: id, leaveReason: reason } }),
+    onReset: () => resetSession({ variables: { classInstanceId: id } }),
+    isStarting,
+    isMarkingAbsent,
+    isProcessingLeave,
+    isResetting,
+    error: errorState,
+  };
+
   if (canOverride) {
     return (
       <PageContainer>
@@ -250,15 +262,7 @@ export function ClassDetailsContainer() {
           onStop={handleStop}
           onGenerateLog={handleGenerateLog}
           onDelete={handleDelete}
-          onStart={() => startSession({ variables: { classInstanceId: id } })}
-          onAbsent={() => markAbsent({ variables: { classInstanceId: id } })}
-          onLeave={reason => processLeave({ variables: { classInstanceId: id, leaveReason: reason } })}
-          onReset={() => resetSession({ variables: { classInstanceId: id } })}
-          isStarting={isStarting}
-          isMarkingAbsent={isMarkingAbsent}
-          isProcessingLeave={isProcessingLeave}
-          isResetting={isResetting}
-          error={errorState}
+          {...sessionActionProps}
         />
       </PageContainer>
     );
@@ -277,15 +281,7 @@ export function ClassDetailsContainer() {
           onInfoEdit={handleInfoEdit}
           onDelete={handleDelete}
           onViewProfile={handleViewProfile}
-          onStart={() => startSession({ variables: { classInstanceId: id } })}
-          onAbsent={() => markAbsent({ variables: { classInstanceId: id } })}
-          onLeave={reason => processLeave({ variables: { classInstanceId: id, leaveReason: reason } })}
-          onReset={() => resetSession({ variables: { classInstanceId: id } })}
-          isStarting={isStarting}
-          isMarkingAbsent={isMarkingAbsent}
-          isProcessingLeave={isProcessingLeave}
-          isResetting={isResetting}
-          error={errorState}
+          {...sessionActionProps}
         />
       </PageContainer>
     );
