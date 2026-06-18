@@ -123,4 +123,15 @@ describe("SystemSettingsRepository", () => {
       expect(afterDelete).toBeNull();
     });
   });
+
+  it("should return false when deletion fails", async () => {
+    const fakeTx = {
+      delete: () => {
+        throw new Error("Simulated database failure");
+      },
+    } as unknown as DbTransaction;
+
+    const success = await SystemSettingsRepository.deleteSetting("some_key", fakeTx);
+    expect(success).toBe(false);
+  });
 });

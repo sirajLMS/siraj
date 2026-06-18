@@ -80,4 +80,13 @@ describe("ClassPerformanceRepository", () => {
     // We cannot easily test non-transactional upsert without polluting the DB or setting up data outside a tx,
     // so we just test the getter to hit the code path.
   });
+
+  it("should trigger transaction callback and throw foreign key error when run without tx and using fake ID", async () => {
+    const fakeId = randomUUID();
+    await expect(
+      ClassPerformanceRepository.upsertForClassInstance(fakeId, {
+        engagementScore: 85,
+      })
+    ).rejects.toThrow();
+  });
 });

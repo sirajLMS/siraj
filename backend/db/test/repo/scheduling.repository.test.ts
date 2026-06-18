@@ -11,7 +11,7 @@ import {
   teacherAssignments,
   users,
 } from "@/backend/db/schema";
-import { createMockClassInstance, setupTestEntities } from "../entity-setup";
+import { createMockClassInstance, setupStudent, setupTeacher, setupTestEntities } from "../entity-setup";
 import { type DbTransaction, runInRollback } from "../test-utils";
 
 interface ClassStatusEventState {
@@ -513,6 +513,213 @@ describe("Scheduling Repository logic", () => {
         // No match
         schedule = await SchedulingRepository.getDailySchedule(date, { search: "NoMatchHere" }, tx);
         expect(schedule.length).toBe(0);
+      });
+    });
+  });
+
+  describe("Missing Coverage Extensions", () => {
+    test("startClassInstance, markClassAbsent, requestClassLeave, adminExcuseClassLeave, revertClassInstance work successfully", async () => {
+      await runInRollback(async tx => {
+        // Test 1: startClassInstance (ACTIVATED -> RUNNING) and markClassAbsent (RUNNING -> COMPLETED with ABSENT)
+        const { instance: inst1, teacher: t1 } = await setupTestEntities(tx, "State1");
+        const id1 = inst1?.id;
+        const u1 = t1.userId;
+        if (!id1 || !u1) throw new Error("setup error");
+
+        await SchedulingRepository.activateClassInstance(id1, u1, { force: false }, tx);
+        const started1 = await SchedulingRepository.startClassInstance(id1, u1, tx);
+        expect(started1?.executionState).toBe("RUNNING");
+        const absent = await SchedulingRepository.markClassAbsent(id1, u1, tx);
+        expect(absent?.executionState).toBe("COMPLETED");
+        expect(absent?.outcome).toBe("ABSENT");
+
+        // Test 2: requestClassLeave (RUNNING -> COMPLETED with LEAVE)
+        const { instance: inst2, teacher: t2 } = await setupTestEntities(tx, "State2");
+        const id2 = inst2?.id;
+        const u2 = t2.userId;
+        if (!id2 || !u2) throw new Error("setup error");
+
+        await SchedulingRepository.activateClassInstance(id2, u2, { force: false }, tx);
+        await SchedulingRepository.startClassInstance(id2, u2, tx);
+        const leave = await SchedulingRepository.requestClassLeave(id2, "Feeling sick", u2, tx);
+        expect(leave?.executionState).toBe("COMPLETED");
+        expect(leave?.outcome).toBe("LEAVE");
+
+        // Test 3: adminExcuseClassLeave (RUNNING -> COMPLETED with LEAVE)
+        const { instance: inst3, teacher: t3 } = await setupTestEntities(tx, "State3");
+        const id3 = inst3?.id;
+        const u3 = t3.userId;
+        if (!id3 || !u3) throw new Error("setup error");
+
+        await SchedulingRepository.activateClassInstance(id3, u3, { force: false }, tx);
+        await SchedulingRepository.startClassInstance(id3, u3, tx);
+        const excused = await SchedulingRepository.adminExcuseClassLeave(id3, u3, tx);
+        expect(excused?.executionState).toBe("COMPLETED");
+        expect(excused?.outcome).toBe("LEAVE");
+
+        // Test 4: revertClassInstance (COMPLETED -> NOT_ACTIVATED)
+        // From absent class in Test 1
+        const reverted = await SchedulingRepository.revertClassInstance(id1, u1, tx);
+        expect(reverted?.executionState).toBe("NOT_ACTIVATED");
+        expect(reverted?.outcome).toBe("PENDING");
+      });
+    });
+
+    test("IDOR checks for teachers and parents throw unauthorizedAction", async () => {
+      await runInRollback(async tx => {
+        const { instance } = await setupTestEntities(tx, "IdorO");
+        const id = instance?.id;
+        if (!id) throw new Error("setup error");
+
+        // Create another teacher
+        const { teacher: otherTeacher } = await setupTeacher(tx, {
+          name: "Other Teacher",
+          email: `other-${randomUUID()}@example.com`,
+        });
+        const otherUserId = otherTeacher.userId;
+        if (!otherUserId) throw new Error("setup error");
+
+        // Other teacher trying to activate should throw
+        await expectRepositoryError(() =>
+          SchedulingRepository.activateClassInstance(id, otherUserId, { force: false }, tx)
+        );
+
+        // Create another parent
+        const { parent: otherParent } = await setupStudent(tx, {
+          name: "Other Parent",
+          email: `otherparent-${randomUUID()}@example.com`,
+        });
+        const otherParentUserId = otherParent.userId;
+        if (!otherParentUserId) throw new Error("setup error");
+
+        // Other parent trying to activate should throw
+        await expectRepositoryError(() =>
+          SchedulingRepository.activateClassInstance(id, otherParentUserId, { force: false }, tx)
+        );
+      });
+    });
+
+    test("Invalid state transitions throw invalidTransition error", async () => {
+      await runInRollback(async tx => {
+        // ACTIVATED state when trying to activate again -> throws
+        const { instance, teacher } = await setupTestEntities(tx, "Trans1");
+        const id = instance?.id;
+        const u = teacher.userId;
+        if (!id || !u) throw new Error("setup error");
+
+        await tx.update(classInstances).set({ executionState: "ACTIVATED" }).where(eq(classInstances.id, id));
+        await expectRepositoryError(() => SchedulingRepository.activateClassInstance(id, u, { force: false }, tx));
+
+        // NOT_ACTIVATED when trying to start -> throws
+        const { instance: instance2, teacher: teacher2 } = await setupTestEntities(tx, "Trans2");
+        const id2 = instance2?.id;
+        const u2 = teacher2.userId;
+        if (!id2 || !u2) throw new Error("setup error");
+        await expectRepositoryError(() => SchedulingRepository.startClassInstance(id2, u2, tx));
+
+        // NOT_ACTIVATED when trying to complete -> throws
+        const { instance: instance3, teacher: teacher3 } = await setupTestEntities(tx, "Trans3");
+        const id3 = instance3?.id;
+        const u3 = teacher3.userId;
+        if (!id3 || !u3) throw new Error("setup error");
+        await expectRepositoryError(() => SchedulingRepository.markClassAbsent(id3, u3, tx));
+      });
+    });
+
+    test("outOfQuota checks throw outOfQuota error", async () => {
+      await runInRollback(async tx => {
+        // 1. createClassInstance with 0 quota
+        const { student, teacher } = await setupTestEntities(tx, "NoQuota", {
+          skipInstance: true,
+          classesRemaining: 0,
+        });
+
+        await expectRepositoryError(() =>
+          SchedulingRepository.createClassInstance(
+            {
+              studentId: student.id,
+              teacherId: teacher.id,
+              scheduledStartAt: new Date(Date.now() + 86400000),
+              scheduledEndAt: new Date(Date.now() + 90000000),
+              durationMinutes: 60,
+              classType: "REGULAR",
+              idempotencyKey: randomUUID(),
+              quotaDeducted: true,
+            },
+            tx
+          )
+        );
+
+        // 2. updateClassInstance with 0 quota
+        const { student: s2, instance: i2 } = await setupTestEntities(tx, "QuotaUp1", {
+          skipInstance: false,
+          classesRemaining: 0,
+        });
+        const id2 = i2?.id;
+        if (!id2) throw new Error("setup error");
+
+        // Set instance quotaDeducted to false initially
+        await tx.update(classInstances).set({ quotaDeducted: false }).where(eq(classInstances.id, id2));
+        // Force students classesRemaining to 0 just in case
+        await tx.update(students).set({ classesRemaining: 0 }).where(eq(students.id, s2.id));
+
+        await expectRepositoryError(() => SchedulingRepository.updateClassInstance(id2, { quotaDeducted: true }, tx));
+
+        // 3. updateClassInstance swapping to student with 0 quota
+        const { instance: i3 } = await setupTestEntities(tx, "QuotaUp2", { classesRemaining: 5 });
+        const id3 = i3?.id;
+        const t3 = i3?.teacherId;
+        if (!id3 || !t3) throw new Error("setup error");
+
+        const { student: s4 } = await setupStudent(
+          tx,
+          {
+            name: "NoQuota Swap",
+            email: `noq-swap-${randomUUID()}@example.com`,
+          },
+          {},
+          { classesRemaining: 0 }
+        );
+
+        // Add assignment for s4 to the same teacher
+        await tx.insert(teacherAssignments).values({
+          studentId: s4.id,
+          teacherId: t3,
+          assignedAt: new Date(),
+        });
+
+        // Ensure quotaDeducted is true on the original class instance
+        await tx.update(classInstances).set({ quotaDeducted: true }).where(eq(classInstances.id, id3));
+
+        await expectRepositoryError(() => SchedulingRepository.updateClassInstance(id3, { studentId: s4.id }, tx));
+      });
+    });
+
+    test("getClassStatusEvents and getTeacherProgressFeed work successfully", async () => {
+      await runInRollback(async tx => {
+        const { instance, teacher } = await setupTestEntities(tx, "EventsFeed");
+        const id = instance?.id;
+        const u = teacher.userId;
+        if (!id || !u) throw new Error("setup error");
+
+        // Trigger state change to create classStatusEvents
+        await SchedulingRepository.activateClassInstance(id, u, { force: false }, tx);
+
+        // Test getClassStatusEvents
+        const events = await SchedulingRepository.getClassStatusEvents(id, tx);
+        expect(events.length).toBeGreaterThan(0);
+
+        // Test getTeacherProgressFeed
+        const feed = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date(), tx);
+        expect(feed.length).toBeGreaterThan(0);
+        expect(feed[0].id).toBe(events[0].id);
+
+        // Non-transactional calls
+        const feedNoTx = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date());
+        expect(Array.isArray(feedNoTx)).toBe(true);
+
+        const eventsNoTx = await SchedulingRepository.getClassStatusEvents(id);
+        expect(Array.isArray(eventsNoTx)).toBe(true);
       });
     });
   });
