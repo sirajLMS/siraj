@@ -27,7 +27,7 @@ export namespace ScheduleService {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
       if (!isAuthorized) {
-        logger.error("Unauthorized access to daily metrics", { userId });
+        logger.warn("Unauthorized access to daily metrics", { userId });
         const t = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(t("unauthorizedViewMetrics"));
       }
@@ -55,7 +55,7 @@ export namespace ScheduleService {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_LIST);
       if (!isAuthorized) {
-        logger.error("Unauthorized access to daily schedule", { userId });
+        logger.warn("Unauthorized access to daily schedule", { userId });
         const t = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(t("unauthorizedViewList"));
       }
@@ -63,7 +63,7 @@ export namespace ScheduleService {
       if (search) {
         const canSearch = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_SEARCH);
         if (!canSearch) {
-          logger.error("Unauthorized search access to daily schedule", { userId });
+          logger.warn("Unauthorized search access to daily schedule", { userId });
           const t = await getBackendTranslations({ locale, namespace: "errors" });
           throw new Error(t("unauthorizedSearch"));
         }

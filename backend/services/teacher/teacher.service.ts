@@ -6,7 +6,7 @@ export namespace TeacherService {
   export async function searchTeachers(userId: string | undefined, search: string, limit: number, locale?: string) {
     try {
       if (!userId) {
-        logger.error("Unauthorized access to searchTeachers - user not logged in");
+        logger.warn("Unauthorized access to searchTeachers - user not logged in");
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(tFunc("unauthorized"));
       }

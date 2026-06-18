@@ -485,7 +485,10 @@ describe("Scheduling Repository logic", () => {
 
     test("getDailySchedule handles search and timezones", async () => {
       await runInRollback(async tx => {
-        const { student, teacher, teacherUser } = await setupTestEntities(tx, "schSrch");
+        // We pass { skipInstance: true } to prevent creating a dynamic default class instance relative to 'now'.
+        // Otherwise, if the test is run late in the UTC day, 'now + 1 hour' can cross into the next day in the target
+        // timezone (e.g. UTC+3 for Cairo), polluting the results and causing flakiness.
+        const { student, teacher, teacherUser } = await setupTestEntities(tx, "schSrch", { skipInstance: true });
 
         await tx.update(students).set({ name: "Searchable Student XYZ" }).where(eq(students.id, student.id));
         await tx.update(users).set({ name: "Unrelated Teacher Name" }).where(eq(users.id, teacherUser.id));

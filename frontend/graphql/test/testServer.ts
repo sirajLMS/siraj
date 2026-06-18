@@ -1,7 +1,92 @@
 import { spawn, spawnSync } from "bun";
 import { testLogger } from "@/shared/lib/testlogger";
+import { appendFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 let serverProcess: ReturnType<typeof spawn> | undefined;
+
+async function writeNextLog(text: string) {
+  try {
+    await appendFile(join(process.cwd(), "logs", "next-dev-server.log"), text);
+  } catch {
+    // ignore
+  }
+}
+
+function killPort(port: number) {
+  try {
+    if (process.platform === "win32") {
+      testLogger.info(`Killing any process on port ${port} (Windows)...`);
+      spawnSync([
+        String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/ps1/kill_port.ps1",
+        String(port),
+      ]);
+    } else {
+      testLogger.info(`Killing any process on port ${port} (Unix)...`);
+      spawnSync(["bash", "scripts/kill_port.sh", String(port)]);
+    }
+  } catch (error) {
+    testLogger.error("Failed to execute port-killing script:", error);
+  }
+}
+
+function pipeStreamLogs(proc: ReturnType<typeof spawn>) {
+  if (proc.stderr && typeof proc.stderr === "object" && "getReader" in proc.stderr) {
+    const stderrStream = proc.stderr as ReadableStream<Uint8Array>;
+    (async () => {
+      try {
+        const reader = stderrStream.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          await writeNextLog(`[ERROR] ${decoder.decode(value)}`);
+        }
+      } catch (err) {
+        testLogger.error("Error reading next dev server stderr:", err);
+      }
+    })();
+  }
+
+  if (proc.stdout && typeof proc.stdout === "object" && "getReader" in proc.stdout) {
+    const stdoutStream = proc.stdout as ReadableStream<Uint8Array>;
+    (async () => {
+      try {
+        const reader = stdoutStream.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          await writeNextLog(`[DEBUG] ${decoder.decode(value)}`);
+        }
+      } catch (err) {
+        testLogger.error("Error reading next dev server stdout:", err);
+      }
+    })();
+  }
+}
+
+async function waitForServerReady(port: number, timeoutMs: number): Promise<boolean> {
+  const start = Date.now();
+  const url = `http://localhost:${port}/api/graphql`;
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const res = await fetch(url, { method: "HEAD" });
+      if (res.status === 204) {
+        return true;
+      }
+    } catch {
+      testLogger.debug("Dev server not ready yet");
+    }
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  return false;
+}
 
 export async function startTestServer() {
   if (serverProcess) {
@@ -10,26 +95,14 @@ export async function startTestServer() {
   }
   testLogger.info("Starting Next.js dev server for GraphQL integration tests...");
 
-  // Kill port 3001 first to prevent startup failures
+  // Initialize/clear the log file
   try {
-    if (process.platform === "win32") {
-      testLogger.info("Killing any process on port 3001 (Windows)...");
-      spawnSync([
-        String.raw`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`,
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "scripts/ps1/kill_port.ps1",
-        "3001",
-      ]);
-    } else {
-      testLogger.info("Killing any process on port 3001 (Unix)...");
-      spawnSync(["bash", "scripts/kill_port.sh", "3001"]);
-    }
-  } catch (error) {
-    testLogger.error("Failed to execute port-killing script:", error);
+    await writeFile(join(process.cwd(), "logs", "next-dev-server.log"), "");
+  } catch {
+    // ignore
   }
+
+  killPort(3001);
 
   serverProcess = spawn(["bun", "run", "next", "dev", "-p", "3001"], {
     stdout: "pipe",
@@ -40,31 +113,16 @@ export async function startTestServer() {
     },
   });
 
-  const start = Date.now();
-  const timeout = 60000; // 60s max
-  let isReady = false;
+  pipeStreamLogs(serverProcess);
 
-  while (Date.now() - start < timeout) {
-    try {
-      const res = await fetch("http://localhost:3001/api/graphql", { method: "HEAD" });
-      if (res.status === 204) {
-        isReady = true;
-        break;
-      }
-    } catch {
-      // Polling will fail until the server starts listening.
-      // We pass the error to debug log to satisfy eslint's no-ignored-exceptions.
-      testLogger.debug("Dev server not ready yet");
-    }
-    await new Promise(resolve => setTimeout(resolve, 500));
-  }
+  const isReady = await waitForServerReady(3001, 60000);
 
   if (!isReady) {
     if (serverProcess) {
       serverProcess.kill();
       serverProcess = undefined;
     }
-    throw new Error("Next.js dev server failed to start within 30 seconds");
+    throw new Error("Next.js dev server failed to start within 30 seconds. See logs/next-dev-server.log for details.");
   }
   testLogger.info("Next.js dev server is ready on port 3001!");
 }
@@ -76,3 +134,16 @@ export function stopTestServer() {
     serverProcess = undefined;
   }
 }
+
+// Ensure the Next.js dev server process is killed when the main test runner process exits
+process.on("exit", () => {
+  stopTestServer();
+});
+process.on("SIGINT", () => {
+  stopTestServer();
+  process.exit(0);
+});
+process.on("SIGTERM", () => {
+  stopTestServer();
+  process.exit(0);
+});

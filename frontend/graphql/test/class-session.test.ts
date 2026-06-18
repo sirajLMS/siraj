@@ -13,9 +13,45 @@ import {
   createTeacherManualClassEntryMutationDocument,
   teacherDashboardQueryDocument,
 } from "../sharedDocuments/teacher-dashboard.documents";
-import { fetchFirstStudentTeacherPair, loginDemoUser, authenticatedRequest } from "./helpers";
+import { authenticatedRequest, fetchFirstStudentTeacherPair, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
+
+const testDate = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+
+async function clearClassesOnDate(token: string, dateVal: string) {
+  const result = await testClient.query({
+    query: dailyScheduleListQueryDocument,
+    variables: {
+      date: dateVal,
+      teacherId: null,
+      search: null,
+    },
+    context: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  });
+
+  const list = result.data?.dailyScheduleList || [];
+  for (const item of list) {
+    if (!item.id) continue;
+    const deleteRes = await testClient.mutate({
+      mutation: deleteClassInstanceMutationDocument,
+      variables: {
+        classInstanceId: item.id,
+      },
+      errorPolicy: "all",
+      context: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
+    expect(deleteRes.error).toBeUndefined();
+  }
+}
 
 describe("GraphQL Class Session Integration Tests", () => {
   setupTestServerLifecycle();
@@ -26,11 +62,6 @@ describe("GraphQL Class Session Integration Tests", () => {
   let teacherId: string | null = null;
   let outsideClassInstanceId: string | null = null;
   let outsideDate: string | null = null;
-  const testDate = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
-  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  const tomorrowDate = tomorrow.toISOString().split("T")[0];
-  const eightDaysLater = new Date(tomorrow.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const eightDaysLaterDate = eightDaysLater.toISOString().split("T")[0];
 
   test("login as academy_admin and teacher", async () => {
     adminToken = await loginDemoUser("academy_admin");
@@ -38,40 +69,6 @@ describe("GraphQL Class Session Integration Tests", () => {
     expect(adminToken).not.toBeNull();
     expect(teacherToken).not.toBeNull();
   });
-
-  async function clearClassesOnDate(token: string, dateVal: string) {
-    const result = await testClient.query({
-      query: dailyScheduleListQueryDocument,
-      variables: {
-        date: dateVal,
-        teacherId: null,
-        search: null,
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    });
-
-    const list = result.data?.dailyScheduleList || [];
-    for (const item of list) {
-      if (!item.id) continue;
-      const deleteRes = await testClient.mutate({
-        mutation: deleteClassInstanceMutationDocument,
-        variables: {
-          classInstanceId: item.id,
-        },
-        errorPolicy: "all",
-        context: {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      });
-      expect(deleteRes.error).toBeUndefined();
-    }
-  }
 
   test("find student and teacher IDs, then clear schedule range to avoid overlaps", async () => {
     if (!adminToken) throw new Error("No admin token");
@@ -258,51 +255,34 @@ describe("GraphQL Class Session Integration Tests", () => {
     if (!adminToken || !teacherToken || !outsideClassInstanceId) throw new Error("Missing test context");
 
     // 1. Teacher starts the activated session successfully
-    const startData = await authenticatedRequest(
-      teacherToken,
-      "mutate",
-      updateSessionStatusStartMutationDocument,
-      { classInstanceId: outsideClassInstanceId }
-    );
+    const startData = await authenticatedRequest(teacherToken, "mutate", updateSessionStatusStartMutationDocument, {
+      classInstanceId: outsideClassInstanceId,
+    });
     expect(startData.updateSessionStatusStart?.executionState).toBe("RUNNING");
 
     // 2. Academy admin resets the running session successfully
-    const resetData = await authenticatedRequest(
-      adminToken,
-      "mutate",
-      resetClassMutationDocument,
-      { classInstanceId: outsideClassInstanceId }
-    );
+    const resetData = await authenticatedRequest(adminToken, "mutate", resetClassMutationDocument, {
+      classInstanceId: outsideClassInstanceId,
+    });
     expect(resetData.resetClass).toBe(true);
 
     // 3. Force activate it again as admin (since it's outside window)
-    const forceData = await authenticatedRequest(
-      adminToken,
-      "mutate",
-      activateOverrideClassMutationDocument,
-      { classInstanceId: outsideClassInstanceId }
-    );
+    const forceData = await authenticatedRequest(adminToken, "mutate", activateOverrideClassMutationDocument, {
+      classInstanceId: outsideClassInstanceId,
+    });
     expect(forceData.activateOverrideClass?.executionState).toBe("ACTIVATED");
 
     // 4. Start it again as teacher
-    const restartData = await authenticatedRequest(
-      teacherToken,
-      "mutate",
-      updateSessionStatusStartMutationDocument,
-      { classInstanceId: outsideClassInstanceId }
-    );
+    const restartData = await authenticatedRequest(teacherToken, "mutate", updateSessionStatusStartMutationDocument, {
+      classInstanceId: outsideClassInstanceId,
+    });
     expect(restartData.updateSessionStatusStart?.executionState).toBe("RUNNING");
 
     // 5. Teacher processes leave on the running session
-    const leaveData = await authenticatedRequest(
-      teacherToken,
-      "mutate",
-      updateSessionStatusLeaveMutationDocument,
-      {
-        classInstanceId: outsideClassInstanceId,
-        leaveReason: "Teacher has an emergency",
-      }
-    );
+    const leaveData = await authenticatedRequest(teacherToken, "mutate", updateSessionStatusLeaveMutationDocument, {
+      classInstanceId: outsideClassInstanceId,
+      leaveReason: "Teacher has an emergency",
+    });
     expect(leaveData.updateSessionStatusLeave?.completedInstanceId).toBe(outsideClassInstanceId);
     expect(leaveData.updateSessionStatusLeave?.completedInstance?.outcome).toBe("LEAVE");
     expect(leaveData.updateSessionStatusLeave?.completedInstance?.isRescheduled).toBe(true);
@@ -341,20 +321,12 @@ describe("GraphQL Class Session Integration Tests", () => {
     if (!instanceId) throw new Error("Failed to create class for absent test");
 
     // Activate the class
-    await authenticatedRequest(
-      teacherToken,
-      "mutate",
-      activateClassMutationDocument,
-      { classInstanceId: instanceId }
-    );
+    await authenticatedRequest(teacherToken, "mutate", activateClassMutationDocument, { classInstanceId: instanceId });
 
     // Mark it absent
-    const absentData = await authenticatedRequest(
-      teacherToken,
-      "mutate",
-      updateSessionStatusAbsentMutationDocument,
-      { classInstanceId: instanceId }
-    );
+    const absentData = await authenticatedRequest(teacherToken, "mutate", updateSessionStatusAbsentMutationDocument, {
+      classInstanceId: instanceId,
+    });
 
     expect(absentData.updateSessionStatusAbsent?.executionState).toBe("COMPLETED");
     expect(absentData.updateSessionStatusAbsent?.outcome).toBe("ABSENT");

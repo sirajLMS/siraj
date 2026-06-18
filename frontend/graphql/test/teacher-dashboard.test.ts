@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { deleteClassInstanceMutationDocument } from "../sharedDocuments/class-session.documents";
+import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
 import {
   createTeacherManualClassEntryMutationDocument,
   teacherDashboardQueryDocument,
@@ -6,6 +8,38 @@ import {
 import { fetchFirstStudentTeacherPair, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
+
+async function clearClassesOnDate(token: string, dateVal: string) {
+  const result = await testClient.query({
+    query: dailyScheduleListQueryDocument,
+    variables: {
+      date: dateVal,
+      teacherId: null,
+      search: null,
+    },
+    context: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  });
+
+  const list = result.data?.dailyScheduleList || [];
+  for (const item of list) {
+    if (!item.id) continue;
+    await testClient.mutate({
+      mutation: deleteClassInstanceMutationDocument,
+      variables: {
+        classInstanceId: item.id,
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
+  }
+}
 
 describe("GraphQL Teacher Dashboard Integration Tests", () => {
   setupTestServerLifecycle();
@@ -85,11 +119,15 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   });
 
   test("createTeacherManualClassEntry creates a manual class instance successfully", async () => {
-    if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
+    if (!teacherToken || !adminToken || !studentId || !teacherId) throw new Error("Missing test context");
 
     const randomYear = 2030 + (Date.now() % 10);
-    const startAt = `${randomYear}-06-25T10:00:00Z`;
-    const endAt = `${randomYear}-06-25T11:00:00Z`;
+    const dateStr = `${randomYear}-06-25`;
+    const startAt = `${dateStr}T10:00:00Z`;
+    const endAt = `${dateStr}T11:00:00Z`;
+
+    // Clear any existing classes on this date to prevent booking conflicts
+    await clearClassesOnDate(adminToken, dateStr);
 
     const result = await testClient.mutate({
       mutation: createTeacherManualClassEntryMutationDocument,
@@ -119,5 +157,24 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
     expect(created.id).toBeDefined();
     expect(created.status).toBeDefined();
     expect(created.durationMinutes).toBe(60);
+
+    const classInstanceId = created.id;
+    if (!classInstanceId) {
+      throw new Error("Created class instance ID is null or undefined");
+    }
+
+    // Clean up to avoid test pollution / booking overlaps in subsequent runs
+    const deleteRes = await testClient.mutate({
+      mutation: deleteClassInstanceMutationDocument,
+      variables: {
+        classInstanceId,
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      },
+    });
+    expect(deleteRes.error).toBeUndefined();
   });
 });
