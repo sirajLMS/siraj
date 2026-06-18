@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { StudentHistoryRepository } from "@/backend/db/repo/student-history.repository";
-import { classInstances } from "@/backend/db/schema";
+import { classInstancePerformance, classInstances } from "@/backend/db/schema";
 import { setupTestEntities } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
@@ -63,6 +63,41 @@ describe("StudentHistoryRepository", () => {
     });
   });
 
+  it("getMonthlyCalendar handles null zoomMeetingUrl by returning null room", async () => {
+    await runInRollback(async tx => {
+      const { student, teacher } = await setupTestEntities(tx, "cal2", { skipInstance: true });
+
+      const juneClassNoZoom = await tx
+        .insert(classInstances)
+        .values({
+          studentId: student.id,
+          teacherId: teacher.id,
+          scheduledStartAt: new Date("2026-06-16T14:30:00Z"),
+          scheduledEndAt: new Date("2026-06-16T15:30:00Z"),
+          durationMinutes: 60,
+          classType: "REGULAR",
+          executionState: "COMPLETED",
+          outcome: "TAKEN",
+          actualStartAt: new Date("2026-06-16T14:30:00Z"),
+          actualEndAt: new Date("2026-06-16T15:30:00Z"),
+          idempotencyKey: randomUUID(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          zoomMeetingUrl: null,
+          remarks: "No zoom url",
+        })
+        .returning()
+        .then(r => r[0]);
+
+      const calendar = await StudentHistoryRepository.getMonthlyCalendar(student.id, 2026, 6, undefined, tx);
+      expect(calendar.length).toBe(1);
+
+      const entryNoZoom = calendar[0];
+      expect(entryNoZoom.id).toBe(juneClassNoZoom.id);
+      expect(entryNoZoom.room).toBeNull();
+    });
+  });
+
   it("getMonthlyMetrics returns metrics for completed classes in month", async () => {
     await runInRollback(async tx => {
       const { student, teacher } = await setupTestEntities(tx, "met1");
@@ -119,6 +154,60 @@ describe("StudentHistoryRepository", () => {
       expect(metrics.totalClasses).toBe(2); // 2 completed
       expect(metrics.attendanceRate).toBe(50); // 1 taken / 2 total = 50%
       expect(metrics.hoursStudied).toBe(1.5); // 90 min / 60
+    });
+  });
+
+  it("getMonthlyMetrics computes average performance score correctly", async () => {
+    await runInRollback(async tx => {
+      const { student, teacher } = await setupTestEntities(tx, "met_perf");
+
+      const [class1] = await tx
+        .insert(classInstances)
+        .values({
+          studentId: student.id,
+          teacherId: teacher.id,
+          scheduledStartAt: new Date("2026-06-10T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-10T11:00:00Z"),
+          durationMinutes: 60,
+          classType: "REGULAR",
+          executionState: "COMPLETED",
+          outcome: "TAKEN",
+          actualStartAt: new Date("2026-06-10T10:00:00Z"),
+          idempotencyKey: randomUUID(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+
+      const [class2] = await tx
+        .insert(classInstances)
+        .values({
+          studentId: student.id,
+          teacherId: teacher.id,
+          scheduledStartAt: new Date("2026-06-12T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-12T11:00:00Z"),
+          durationMinutes: 60,
+          classType: "REGULAR",
+          executionState: "COMPLETED",
+          outcome: "ABSENT",
+          idempotencyKey: randomUUID(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+
+      await tx.insert(classInstancePerformance).values({
+        classInstanceId: class1.id,
+        engagementScore: 90,
+      });
+
+      await tx.insert(classInstancePerformance).values({
+        classInstanceId: class2.id,
+        engagementScore: 80,
+      });
+
+      const metrics = await StudentHistoryRepository.getMonthlyMetrics(student.id, 2026, 6, tx);
+      expect(metrics.performance).toBe(85); // average of 90 and 80
     });
   });
 

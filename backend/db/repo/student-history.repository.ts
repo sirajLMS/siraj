@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "../drizzleDb";
-import { classInstances, teachers, users } from "../schema";
+import { classInstancePerformance, classInstances, teachers, users } from "../schema";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -12,7 +12,7 @@ export interface SessionSummary {
   status: string;
   instructor: string;
   timeSlot: string;
-  room: string;
+  room: string | null;
   notes: string;
   dayOfMonth: number;
 }
@@ -66,7 +66,7 @@ export namespace StudentHistoryRepository {
         status: r.instance.executionState,
         instructor: r.user.name,
         timeSlot: `${hh}:${mm}`,
-        room: r.instance.zoomMeetingUrl ?? "TBD",
+        room: r.instance.zoomMeetingUrl ?? null,
         notes: r.instance.remarks ?? "",
         dayOfMonth,
       };
@@ -84,8 +84,10 @@ export namespace StudentHistoryRepository {
         totalClasses: sql<number>`count(*)`.mapWith(Number),
         hoursStudied: sql<number>`sum(${classInstances.durationMinutes}) / 60.0`.mapWith(Number),
         takenClasses: sql<number>`sum(case when ${classInstances.outcome} = 'TAKEN' then 1 else 0 end)`.mapWith(Number),
+        avgPerformance: sql<number>`coalesce(avg(${classInstancePerformance.engagementScore}), 0)`.mapWith(Number),
       })
       .from(classInstances)
+      .leftJoin(classInstancePerformance, eq(classInstances.id, classInstancePerformance.classInstanceId))
       .where(
         and(
           eq(classInstances.studentId, studentId),
@@ -104,7 +106,7 @@ export namespace StudentHistoryRepository {
       totalClasses: total,
       attendanceRate: total > 0 ? Math.round((taken / total) * 100) : 0,
       hoursStudied: Math.round((m?.hoursStudied || 0) * 10) / 10,
-      performance: 0, // Placeholder, calculated properly in service layer
+      performance: Math.round(m?.avgPerformance || 0),
     };
   }
 

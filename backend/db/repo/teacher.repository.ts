@@ -3,6 +3,11 @@ import { db } from "@/backend/db/drizzleDb";
 import { teachers, users } from "@/backend/db/schema";
 
 export namespace TeacherRepository {
+  export const findByUserId = async (userId: string) => {
+    const [teacher] = await db.select().from(teachers).where(eq(teachers.userId, userId)).limit(1);
+    return teacher ?? null;
+  };
+
   export const searchTeachers = async (searchQuery: string, limit: number) => {
     return await db
       .select({

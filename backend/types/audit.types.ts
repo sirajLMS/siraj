@@ -6,12 +6,13 @@ export type AuditLogEntityInput = typeof auditLogs.$inferInsert;
 /**
  * Actor type for audit logs
  */
-export type ActorType = "USER" | "SYSTEM" | "API" | "CRON";
+export type ActorType = "USER" | "SYSTEM" | "API" | "CRON" | "TEACHER" | "PARENT";
 
 /**
  * Entity types that can be audited
  */
 export type AuditEntityType =
+  | "SYSTEM"
   | "STUDENT"
   | "INVOICE"
   | "PAYMENT"
@@ -46,7 +47,8 @@ export type AuditAction =
   | "REJECT"
   | "ACTIVATE"
   | "DEACTIVATE"
-  | "RESTORE";
+  | "RESTORE"
+  | "TEACHER_SUPPORT_REQUEST";
 
 /**
  * Input for creating an audit log entry

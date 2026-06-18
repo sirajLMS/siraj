@@ -41,6 +41,98 @@ export namespace SchedulingRepository {
     return results[0];
   }
 
+  async function updateInstanceState(
+    t: DBTransaction,
+    id: string,
+    actorUserId: string,
+    state: Partial<Types.ClassInstanceInsertInput>,
+    event: {
+      fromState: Record<string, unknown>;
+      toState: Record<string, unknown>;
+      description: string;
+    }
+  ): Promise<Types.ClassInstanceEntity | null> {
+    const now = new Date();
+    const [updated] = await t
+      .update(classInstances)
+      .set({
+        ...state,
+        updatedAt: now,
+      })
+      .where(eq(classInstances.id, id))
+      .returning();
+
+    if (updated) {
+      await t.insert(classStatusEvents).values({
+        classInstanceId: updated.id,
+        eventType: "STATE_CHANGE",
+        fromState: event.fromState,
+        toState: event.toState,
+        description: event.description,
+        actorUserId,
+        createdAt: now,
+      });
+    }
+    return updated;
+  }
+
+  /**
+   * Helper to run a state-changing operation with consistent transaction and logging logic.
+   */
+  async function runStateChange(
+    id: string,
+    actorUserId: string,
+    tx: DBTransaction | undefined,
+    logic: (
+      t: DBTransaction,
+      existing: Types.ClassInstanceEntity
+    ) => Promise<{
+      state: Partial<Types.ClassInstanceInsertInput>;
+      event: {
+        fromState: Record<string, unknown>;
+        toState: Record<string, unknown>;
+        description: string;
+      };
+    }>
+  ): Promise<Types.ClassInstanceEntity | null> {
+    const runner = async (t: DBTransaction) => {
+      const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
+      if (!existing) return null;
+
+      const { state, event } = await logic(t, existing);
+      return updateInstanceState(t, id, actorUserId, state, event);
+    };
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  }
+
+  /**
+   * Internal helper for transition to COMPLETED state.
+   */
+  async function transitionToCompleted(
+    id: string,
+    actorUserId: string,
+    outcome: "ABSENT" | "LEAVE" | "TAKEN",
+    description: string,
+    tx?: DBTransaction
+  ) {
+    return runStateChange(id, actorUserId, tx, async (_, existing) => {
+      const now = new Date();
+      return {
+        state: {
+          executionState: "COMPLETED",
+          outcome,
+          actualStartAt: existing.actualStartAt ?? now,
+          actualEndAt: now,
+        },
+        event: {
+          fromState: { executionState: existing.executionState, outcome: existing.outcome },
+          toState: { executionState: "COMPLETED", outcome },
+          description,
+        },
+      };
+    });
+  }
+
   export async function resolveStudentTimezone(studentId: string, tx?: DBTransaction): Promise<string> {
     const queryDb = tx ?? db;
     const [row] = await queryDb
@@ -66,95 +158,45 @@ export namespace SchedulingRepository {
     options: { force: boolean },
     tx?: DBTransaction
   ) => {
-    const runner = async (t: DBTransaction) => {
-      const now = new Date();
-      const [updated] = await t
-        .update(classInstances)
-        .set({
-          executionState: "ACTIVATED",
-          activatedAt: now,
-          activatedByUserId: actorUserId,
-          forceActivated: options.force,
-          forceActivatedByUserId: options.force ? actorUserId : null,
-          updatedAt: now,
-        })
-        .where(eq(classInstances.id, id))
-        .returning();
-
-      if (updated) {
-        await t.insert(classStatusEvents).values({
-          classInstanceId: updated.id,
-          eventType: "STATE_CHANGE",
-          fromState: { executionState: "NOT_ACTIVATED", outcome: updated.outcome },
-          toState: { executionState: "ACTIVATED", outcome: updated.outcome },
-          description: options.force ? "Force activated" : "Activated",
-          actorUserId,
-          createdAt: now,
-        });
-      }
-      return updated;
-    };
-    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+    return runStateChange(id, actorUserId, tx, async () => ({
+      state: {
+        executionState: "ACTIVATED",
+        activatedAt: new Date(),
+        activatedByUserId: actorUserId,
+        forceActivated: options.force,
+        forceActivatedByUserId: options.force ? actorUserId : null,
+      },
+      event: {
+        fromState: { executionState: "NOT_ACTIVATED" },
+        toState: { executionState: "ACTIVATED" },
+        description: options.force ? "Force activated" : "Activated",
+      },
+    }));
   };
 
   export const stopClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction) => {
-    const runner = async (t: DBTransaction) => {
-      const now = new Date();
-      const [updated] = await t
-        .update(classInstances)
-        .set({
-          executionState: "COMPLETED",
-          outcome: "TAKEN",
-          actualEndAt: now,
-          updatedAt: now,
-        })
-        .where(eq(classInstances.id, id))
-        .returning();
-
-      if (updated) {
-        await t.insert(classStatusEvents).values({
-          classInstanceId: updated.id,
-          eventType: "STATE_CHANGE",
-          fromState: { executionState: "RUNNING", outcome: "PENDING" },
-          toState: { executionState: "COMPLETED", outcome: "TAKEN" },
-          description: "Stopped manually",
-          actorUserId,
-          createdAt: now,
-        });
-      }
-      return updated;
-    };
-    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+    return transitionToCompleted(id, actorUserId, "TAKEN", "Stopped manually", tx);
   };
 
   export const softDeleteClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction) => {
     const runner = async (t: DBTransaction) => {
-      const now = new Date();
-
       const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
       if (!existing) return null;
 
-      const [updated] = await t
-        .update(classInstances)
-        .set({
-          deletedAt: now,
-          updatedAt: now,
-        })
-        .where(eq(classInstances.id, id))
-        .returning();
-
-      if (updated) {
-        await t.insert(classStatusEvents).values({
-          classInstanceId: updated.id,
-          eventType: "STATE_CHANGE",
+      const updated = await updateInstanceState(
+        t,
+        id,
+        actorUserId,
+        { deletedAt: new Date() },
+        {
           fromState: { executionState: existing.executionState, outcome: existing.outcome, deleted: false },
           toState: { executionState: existing.executionState, outcome: existing.outcome, deleted: true },
           description: "Soft deleted",
-          actorUserId,
-          createdAt: now,
-        });
+        }
+      );
 
-        await adjustQuotaOnUpdate(t, existing, { deletedAt: now }, true);
+      if (updated) {
+        await adjustQuotaOnUpdate(t, existing, { deletedAt: updated.deletedAt }, true);
       }
       return updated;
     };
@@ -185,6 +227,45 @@ export namespace SchedulingRepository {
       student: studentMap.get(row.studentId),
       teacher: teacherMap.get(row.teacherId),
     };
+  };
+
+  export const startClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction) => {
+    return runStateChange(id, actorUserId, tx, async (_, existing) => ({
+      state: { executionState: "RUNNING", outcome: "PENDING", actualStartAt: new Date() },
+      event: {
+        fromState: { executionState: existing.executionState, outcome: existing.outcome },
+        toState: { executionState: "RUNNING", outcome: "PENDING" },
+        description: "Started class",
+      },
+    }));
+  };
+
+  export const markClassAbsent = async (id: string, actorUserId: string, tx?: DBTransaction) => {
+    return transitionToCompleted(id, actorUserId, "ABSENT", "Marked absent", tx);
+  };
+
+  export const requestClassLeave = async (
+    id: string,
+    reason: string | null,
+    actorUserId: string,
+    tx?: DBTransaction
+  ) => {
+    return transitionToCompleted(id, actorUserId, "LEAVE", `Leave requested: ${reason ?? "No reason provided"}`, tx);
+  };
+
+  export const adminExcuseClassLeave = async (id: string, actorUserId: string, tx?: DBTransaction) => {
+    return transitionToCompleted(id, actorUserId, "LEAVE", "Admin excused leave", tx);
+  };
+
+  export const revertClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction) => {
+    return runStateChange(id, actorUserId, tx, async (_, existing) => ({
+      state: { executionState: "NOT_ACTIVATED", outcome: "PENDING", actualStartAt: null, actualEndAt: null },
+      event: {
+        fromState: { executionState: existing.executionState, outcome: existing.outcome },
+        toState: { executionState: "NOT_ACTIVATED", outcome: "PENDING" },
+        description: "Reverted to pending",
+      },
+    }));
   };
 
   /**
@@ -705,5 +786,37 @@ export namespace SchedulingRepository {
     };
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  };
+
+  export const getTeacherProgressFeed = async (teacherId: string, date: Date, tx?: DBTransaction) => {
+    const queryDb = tx ?? db;
+    const startOfDay = new Date(date);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
+    const rows = await queryDb
+      .select({
+        id: classStatusEvents.id,
+        description: classStatusEvents.description,
+        eventType: classStatusEvents.eventType,
+      })
+      .from(classStatusEvents)
+      .innerJoin(classInstances, eq(classStatusEvents.classInstanceId, classInstances.id))
+      .where(
+        and(
+          eq(classInstances.teacherId, teacherId),
+          sql`${classStatusEvents.createdAt} >= ${startOfDay}`,
+          sql`${classStatusEvents.createdAt} <= ${endOfDay}`
+        )
+      )
+      .orderBy(sql`${classStatusEvents.createdAt} DESC`)
+      .limit(10);
+
+    return rows.map(r => ({
+      id: r.id,
+      title: r.description || "Status Updated",
+      type: r.eventType === "STATE_CHANGE" ? "SUCCESS" : "UPDATE",
+    }));
   };
 }
