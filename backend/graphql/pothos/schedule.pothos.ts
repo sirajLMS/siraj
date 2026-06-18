@@ -53,6 +53,7 @@ const DailyScheduleListUserItemObject = DailyScheduleListUserItemRef.implement({
 export type DailyScheduleListDefinition = {
   id: string;
   studentTime: string;
+  teacherTime: string;
   yourTime: string;
   duration: number;
   status: string;
@@ -66,6 +67,7 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
   fields: t => ({
     id: t.exposeString("id"),
     studentTime: t.exposeString("studentTime"),
+    teacherTime: t.exposeString("teacherTime"),
     yourTime: t.exposeString("yourTime"),
     duration: t.exposeInt("duration"),
     status: t.exposeString("status"),

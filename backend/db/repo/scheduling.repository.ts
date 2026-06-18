@@ -889,6 +889,15 @@ export namespace SchedulingRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
+  export const getClassStatusEvents = async (classInstanceId: string, tx?: DBTransaction) => {
+    const queryDb = tx ?? db;
+    return queryDb
+      .select()
+      .from(classStatusEvents)
+      .where(eq(classStatusEvents.classInstanceId, classInstanceId))
+      .orderBy(sql`${classStatusEvents.createdAt} DESC`);
+  };
+
   export const getTeacherProgressFeed = async (teacherId: string, date: Date, tx?: DBTransaction) => {
     const queryDb = tx ?? db;
     const startOfDay = new Date(date);

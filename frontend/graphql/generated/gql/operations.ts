@@ -7,22 +7,16 @@ import type * as Types from './graphql-types.ts';
 export type AppPermission =
   | 'AUTH_LOGIN'
   | 'AUTH_VIEW_OWN_PROFILE'
-  | 'CLASSES_ACTIVATE'
-  | 'CLASSES_ADMIN_LEAVE'
-  | 'CLASSES_FORCE_ACTIVATE'
-  | 'CLASSES_MARK_ABSENT'
-  | 'CLASSES_REQUEST_LEAVE'
-  | 'CLASSES_RESCHEDULE'
-  | 'CLASSES_REVERT'
-  | 'CLASSES_START'
-  | 'CLASSES_VIEW_DETAILS'
   | 'COMPLAINTS_DELETE'
   | 'COMPLAINTS_LIST'
   | 'COMPLAINTS_RESPOND'
   | 'DASHBOARD_FILTER_METRICS'
   | 'DASHBOARD_METRICS_VIEW_ALL'
+  | 'DASHBOARD_SEARCH'
   | 'DASHBOARD_VIEW'
   | 'DASHBOARD_VIEW_METRICS'
+  | 'HISTORY_VIEW_CALENDAR'
+  | 'HISTORY_VIEW_DETAILS'
   | 'INVOICES_CREATE'
   | 'INVOICES_DELETE'
   | 'INVOICES_EDIT'
@@ -45,6 +39,17 @@ export type AppPermission =
   | 'SCHEDULE_VIEW_ASSIGNED'
   | 'SCHEDULE_VIEW_FAMILY'
   | 'SCHEDULE_VIEW_LIST'
+  | 'SCHEDULE_VIEW_TIMEZONES'
+  | 'SESSION_ACTIVATE_CLASS'
+  | 'SESSION_ADMIN_LEAVE'
+  | 'SESSION_FORCE_ACTIVATE'
+  | 'SESSION_MARK_ABSENT'
+  | 'SESSION_OVERRIDE_ACTIONS'
+  | 'SESSION_REQUEST_LEAVE'
+  | 'SESSION_RESCHEDULE'
+  | 'SESSION_REVERT'
+  | 'SESSION_START'
+  | 'SESSION_VIEW_DETAILS'
   | 'STAFF_CREATE'
   | 'STAFF_EDIT'
   | 'STAFF_LIST'
@@ -53,10 +58,21 @@ export type AppPermission =
   | 'STUDENTS_EDIT'
   | 'STUDENTS_LIST'
   | 'STUDENTS_OVERRIDE_QUOTA'
+  | 'SYSTEM_ENFORCE_TIME_WINDOW'
   | 'TEACHERS_CREATE'
   | 'TEACHERS_EDIT'
   | 'TEACHERS_LIST'
-  | 'TEACHERS_MANAGE_SCHEDULE';
+  | 'TEACHERS_MANAGE_SCHEDULE'
+  | 'TEACHER_VIEW_DASHBOARD';
+
+export type CreateManualClassEntryInput = {
+  classType: string | null | undefined;
+  durationMinutes: number;
+  scheduledEndAt: string;
+  scheduledStartAt: string;
+  studentId: string | number;
+  teacherId: string | number;
+};
 
 /** Input for the demo fast login mutation. */
 export type DemoLoginInput = {
@@ -64,9 +80,19 @@ export type DemoLoginInput = {
   groupSlug: string;
 };
 
+export type LogSupportRequestInput = {
+  reason: string;
+};
+
 export type LoginInput = {
   email: string;
   password: string;
+};
+
+export type RescheduleClassInput = {
+  durationMinutes: number;
+  scheduledEndAt: string;
+  scheduledStartAt: string;
 };
 
 export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
@@ -149,6 +175,156 @@ export type RefreshTokenMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type RefreshTokenMutation = RefreshTokenMutation_Mutation;
 
+export type ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo = { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null };
+
+export type ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo = { id: string | null, name: string | null, title: string | null, avatarUrl: string | null };
+
+export type ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance = { engagementScore: number | null, assessmentProgress: number | null, assessmentTotal: number | null, focusLevel: string | null, sessionHealth: string | null, heatmapData: Array<unknown> | null, latencyMs: number | null, attendanceRate: number | null, avgGrade: string | null, lastClassDaysAgo: number | null };
+
+export type ClassInstanceQuery_classInstance_ClassInstanceDetail = { id: string | null, courseName: string | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: string | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: string | null, zoomMeetingUrl: string | null, student: ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo | null, teacher: ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo | null, performance: ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance | null };
+
+export type ClassInstanceQuery_Query = { classInstance: ClassInstanceQuery_classInstance_ClassInstanceDetail | null };
+
+
+export type ClassInstanceQueryVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type ClassInstanceQuery = ClassInstanceQuery_Query;
+
+export type ClassStatusEventsQuery_classStatusEvents_ClassStatusEvent = { id: string | null, eventType: string | null, description: string | null, createdAt: string | null };
+
+export type ClassStatusEventsQuery_Query = { classStatusEvents: Array<ClassStatusEventsQuery_classStatusEvents_ClassStatusEvent> | null };
+
+
+export type ClassStatusEventsQueryVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type ClassStatusEventsQuery = ClassStatusEventsQuery_Query;
+
+export type ActivateClassMutation_activateClass_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null, zoomMeetingUrl: string | null };
+
+export type ActivateClassMutation_Mutation = { activateClass: ActivateClassMutation_activateClass_ClassInstanceDetail | null };
+
+
+export type ActivateClassMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type ActivateClassMutation = ActivateClassMutation_Mutation;
+
+export type ForceActivateClassMutation_forceActivateClass_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null, zoomMeetingUrl: string | null };
+
+export type ForceActivateClassMutation_Mutation = { forceActivateClass: ForceActivateClassMutation_forceActivateClass_ClassInstanceDetail | null };
+
+
+export type ForceActivateClassMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type ForceActivateClassMutation = ForceActivateClassMutation_Mutation;
+
+export type StopClassMutation_stopClass_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
+
+export type StopClassMutation_Mutation = { stopClass: StopClassMutation_stopClass_ClassInstanceDetail | null };
+
+
+export type StopClassMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type StopClassMutation = StopClassMutation_Mutation;
+
+export type StartClassMutation_startClass_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
+
+export type StartClassMutation_Mutation = { startClass: StartClassMutation_startClass_ClassInstanceDetail | null };
+
+
+export type StartClassMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type StartClassMutation = StartClassMutation_Mutation;
+
+export type MarkClassAbsentMutation_markClassAbsent_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
+
+export type MarkClassAbsentMutation_Mutation = { markClassAbsent: MarkClassAbsentMutation_markClassAbsent_ClassInstanceDetail | null };
+
+
+export type MarkClassAbsentMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type MarkClassAbsentMutation = MarkClassAbsentMutation_Mutation;
+
+export type RequestClassLeaveMutation_requestClassLeave_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
+
+export type RequestClassLeaveMutation_Mutation = { requestClassLeave: RequestClassLeaveMutation_requestClassLeave_ClassInstanceDetail | null };
+
+
+export type RequestClassLeaveMutationVariables = Exact<{
+  classInstanceId: string | number;
+  reason: string | null | undefined;
+}>;
+
+
+export type RequestClassLeaveMutation = RequestClassLeaveMutation_Mutation;
+
+export type AdminExcuseClassLeaveMutation_adminExcuseClassLeave_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
+
+export type AdminExcuseClassLeaveMutation_Mutation = { adminExcuseClassLeave: AdminExcuseClassLeaveMutation_adminExcuseClassLeave_ClassInstanceDetail | null };
+
+
+export type AdminExcuseClassLeaveMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type AdminExcuseClassLeaveMutation = AdminExcuseClassLeaveMutation_Mutation;
+
+export type RescheduleClassMutation_rescheduleClass_ClassInstanceDetail = { id: string | null, status: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null };
+
+export type RescheduleClassMutation_Mutation = { rescheduleClass: RescheduleClassMutation_rescheduleClass_ClassInstanceDetail | null };
+
+
+export type RescheduleClassMutationVariables = Exact<{
+  classInstanceId: string | number;
+  input: Types.RescheduleClassInput;
+}>;
+
+
+export type RescheduleClassMutation = RescheduleClassMutation_Mutation;
+
+export type RevertClassMutation_revertClass_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
+
+export type RevertClassMutation_Mutation = { revertClass: RevertClassMutation_revertClass_ClassInstanceDetail | null };
+
+
+export type RevertClassMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type RevertClassMutation = RevertClassMutation_Mutation;
+
+export type DeleteClassInstanceMutation_Mutation = { deleteClassInstance: boolean | null };
+
+
+export type DeleteClassInstanceMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type DeleteClassInstanceMutation = DeleteClassInstanceMutation_Mutation;
+
 export type DailyScheduleMetricsQuery_dailyScheduleMetrics_DailyScheduleMetrics = { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 
 export type DailyScheduleMetricsQuery_Query = { dailyScheduleMetrics: DailyScheduleMetricsQuery_dailyScheduleMetrics_DailyScheduleMetrics | null };
@@ -166,7 +342,7 @@ export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_D
 
 export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem = { id: string | null, name: string | null };
 
-export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList = { id: string | null, studentTime: string | null, yourTime: string | null, duration: number | null, status: string | null, student: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
+export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, status: string | null, student: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
 
 export type DailyScheduleListQuery_Query = { dailyScheduleList: Array<DailyScheduleListQuery_dailyScheduleList_DailyScheduleList> | null };
 
@@ -174,10 +350,111 @@ export type DailyScheduleListQuery_Query = { dailyScheduleList: Array<DailySched
 export type DailyScheduleListQueryVariables = Exact<{
   date: string;
   teacherId: string | null | undefined;
+  search: string | null | undefined;
 }>;
 
 
 export type DailyScheduleListQuery = DailyScheduleListQuery_Query;
+
+export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
+
+export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, instructor: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null };
+
+export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory = { id: string | null, studentName: string | null, metrics: StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics | null, sessions: Array<StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession> | null };
+
+export type StudentClassHistoryQuery_Query = { studentClassHistory: StudentClassHistoryQuery_studentClassHistory_StudentClassHistory | null };
+
+
+export type StudentClassHistoryQueryVariables = Exact<{
+  studentId: string | number;
+  year: number;
+  month: number;
+}>;
+
+
+export type StudentClassHistoryQuery = StudentClassHistoryQuery_Query;
+
+export type StudentClassSessionDetailQuery_studentClassSessionDetail_StudentSessionDetail = { id: string | null, durationMinutes: number | null, executionState: string | null, outcome: string | null, remarks: string | null, zoomMeetingUrl: string | null, teacherName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null };
+
+export type StudentClassSessionDetailQuery_Query = { studentClassSessionDetail: StudentClassSessionDetailQuery_studentClassSessionDetail_StudentSessionDetail | null };
+
+
+export type StudentClassSessionDetailQueryVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type StudentClassSessionDetailQuery = StudentClassSessionDetailQuery_Query;
+
+export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics = { total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
+
+export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, durationMinutes: number | null, executionState: string | null, outcome: string | null, zoomMeetingUrl: string | null, yourTimeFormatted: string | null };
+
+export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem = { id: string | null, title: string | null, type: string | null };
+
+export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard = { id: string | null, metrics: TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics | null, scheduleRows: Array<TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow> | null, progressFeed: Array<TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem> | null };
+
+export type TeacherDashboardQuery_Query = { teacherDashboard: TeacherDashboardQuery_teacherDashboard_TeacherDashboard | null };
+
+
+export type TeacherDashboardQueryVariables = Exact<{
+  date: string;
+}>;
+
+
+export type TeacherDashboardQuery = TeacherDashboardQuery_Query;
+
+export type TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics = { total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
+
+export type TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, durationMinutes: number | null, executionState: string | null, outcome: string | null, zoomMeetingUrl: string | null, yourTimeFormatted: string | null };
+
+export type TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem = { id: string | null, title: string | null, type: string | null };
+
+export type TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard = { id: string | null, metrics: TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics | null, scheduleRows: Array<TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow> | null, progressFeed: Array<TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem> | null };
+
+export type TeacherActiveDashboardQuery_Query = { teacherActiveDashboard: TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard | null };
+
+
+export type TeacherActiveDashboardQueryVariables = Exact<{
+  date: string;
+}>;
+
+
+export type TeacherActiveDashboardQuery = TeacherActiveDashboardQuery_Query;
+
+export type CreateTeacherManualClassEntryMutation_createTeacherManualClassEntry_ClassInstanceDetail = { id: string | null, status: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null };
+
+export type CreateTeacherManualClassEntryMutation_Mutation = { createTeacherManualClassEntry: CreateTeacherManualClassEntryMutation_createTeacherManualClassEntry_ClassInstanceDetail | null };
+
+
+export type CreateTeacherManualClassEntryMutationVariables = Exact<{
+  input: Types.CreateManualClassEntryInput;
+}>;
+
+
+export type CreateTeacherManualClassEntryMutation = CreateTeacherManualClassEntryMutation_Mutation;
+
+export type LogTeacherSupportRequestMutation_logTeacherSupportRequest_SupportRequestResult = { id: string | null, success: boolean | null };
+
+export type LogTeacherSupportRequestMutation_Mutation = { logTeacherSupportRequest: LogTeacherSupportRequestMutation_logTeacherSupportRequest_SupportRequestResult | null };
+
+
+export type LogTeacherSupportRequestMutationVariables = Exact<{
+  input: Types.LogSupportRequestInput;
+}>;
+
+
+export type LogTeacherSupportRequestMutation = LogTeacherSupportRequestMutation_Mutation;
+
+export type TeacherHandbookUrlQuery_teacherHandbookUrl_TeacherHandbookUrl = { id: string | null, url: string | null };
+
+export type TeacherHandbookUrlQuery_Query = { teacherHandbookUrl: TeacherHandbookUrlQuery_teacherHandbookUrl_TeacherHandbookUrl | null };
+
+
+export type TeacherHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TeacherHandbookUrlQuery = TeacherHandbookUrlQuery_Query;
 
 export type TeachersQuery_teachers_TeacherSimple = { id: string | null, name: string | null };
 

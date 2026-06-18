@@ -27,6 +27,7 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
     args: {
       date: t.arg.string({ required: true }),
       teacherId: t.arg.string({ required: false }),
+      search: t.arg.string({ required: false }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
@@ -38,14 +39,16 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
         ctx.user.id,
         new Date(args.date),
         args.teacherId || undefined,
+        args.search || undefined,
         ctx.locale
       );
 
       return rawList.map(item => ({
         id: item.id,
-        studentTime: item.scheduledStartAt.toISOString(), // Simplified for now
-        yourTime: item.scheduledStartAt.toISOString(),
-        duration: 30, // Simplified map
+        studentTime: item.scheduledStartAt.toISOString(),
+        teacherTime: item.scheduledStartAt.toISOString(),
+        yourTime: item.yourTimeFormatted || item.scheduledStartAt.toISOString(),
+        duration: item.durationMinutes,
         status: item.outcome || item.executionState,
         student: { id: item.studentId, name: item.student?.name || "Unknown" },
         teacher: { id: item.teacherId, name: item.teacher?.user?.name || "Unknown" },

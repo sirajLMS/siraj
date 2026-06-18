@@ -113,7 +113,6 @@ function quoteIdent(ident: string): string {
   return `"${ident.replaceAll('"', '""')}"`;
 }
 
-
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     const cause = (error as Error & { cause?: unknown }).cause;

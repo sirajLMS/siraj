@@ -6,22 +6,16 @@ enum AppLanguage {
 enum AppPermission {
   AUTH_LOGIN
   AUTH_VIEW_OWN_PROFILE
-  CLASSES_ACTIVATE
-  CLASSES_ADMIN_LEAVE
-  CLASSES_FORCE_ACTIVATE
-  CLASSES_MARK_ABSENT
-  CLASSES_REQUEST_LEAVE
-  CLASSES_RESCHEDULE
-  CLASSES_REVERT
-  CLASSES_START
-  CLASSES_VIEW_DETAILS
   COMPLAINTS_DELETE
   COMPLAINTS_LIST
   COMPLAINTS_RESPOND
   DASHBOARD_FILTER_METRICS
   DASHBOARD_METRICS_VIEW_ALL
+  DASHBOARD_SEARCH
   DASHBOARD_VIEW
   DASHBOARD_VIEW_METRICS
+  HISTORY_VIEW_CALENDAR
+  HISTORY_VIEW_DETAILS
   INVOICES_CREATE
   INVOICES_DELETE
   INVOICES_EDIT
@@ -44,6 +38,17 @@ enum AppPermission {
   SCHEDULE_VIEW_ASSIGNED
   SCHEDULE_VIEW_FAMILY
   SCHEDULE_VIEW_LIST
+  SCHEDULE_VIEW_TIMEZONES
+  SESSION_ACTIVATE_CLASS
+  SESSION_ADMIN_LEAVE
+  SESSION_FORCE_ACTIVATE
+  SESSION_MARK_ABSENT
+  SESSION_OVERRIDE_ACTIONS
+  SESSION_REQUEST_LEAVE
+  SESSION_RESCHEDULE
+  SESSION_REVERT
+  SESSION_START
+  SESSION_VIEW_DETAILS
   STAFF_CREATE
   STAFF_EDIT
   STAFF_LIST
@@ -52,10 +57,12 @@ enum AppPermission {
   STUDENTS_EDIT
   STUDENTS_LIST
   STUDENTS_OVERRIDE_QUOTA
+  SYSTEM_ENFORCE_TIME_WINDOW
   TEACHERS_CREATE
   TEACHERS_EDIT
   TEACHERS_LIST
   TEACHERS_MANAGE_SCHEDULE
+  TEACHER_VIEW_DASHBOARD
 }
 
 type BulkOperationFailure {
@@ -70,6 +77,59 @@ type BulkOperationResult {
   success: Boolean
   successCount: Int
   successfulItems: [StorageObject!]
+}
+
+type ClassInstanceDetail {
+  courseName: String
+  durationMinutes: Int
+  endTime: String
+  hasTimezoneMismatch: Boolean
+  id: String
+  instanceId: String
+  performance: ClassInstancePerformance
+  remarks: String
+  scheduledDate: String
+  startTime: String
+  status: String
+  student: ClassInstanceStudentInfo
+  studentTimezone: String
+  teacher: ClassInstanceTeacherInfo
+  zoomMeetingUrl: String
+}
+
+type ClassInstancePerformance {
+  assessmentProgress: Int
+  assessmentTotal: Int
+  attendanceRate: Int
+  avgGrade: String
+  engagementScore: Int
+  focusLevel: String
+  heatmapData: [JSON!]
+  lastClassDaysAgo: Int
+  latencyMs: Int
+  sessionHealth: String
+}
+
+type ClassInstanceStudentInfo {
+  avatarUrl: String
+  grade: String
+  id: String
+  level: String
+  name: String
+}
+
+type ClassInstanceTeacherInfo {
+  avatarUrl: String
+  id: String
+  name: String
+  title: String
+}
+
+type ClassStatusEvent {
+  createdAt: DateTime
+  description: String
+  eventType: String
+  id: String
 }
 
 enum CountryCode {
@@ -321,6 +381,15 @@ enum CountryCode {
   ZW
 }
 
+input CreateManualClassEntryInput {
+  classType: String
+  durationMinutes: Int!
+  scheduledEndAt: String!
+  scheduledStartAt: String!
+  studentId: ID!
+  teacherId: ID!
+}
+
 type DailyScheduleList {
   duration: Int
   id: String
@@ -328,6 +397,7 @@ type DailyScheduleList {
   student: DailyScheduleListUserItem
   studentTime: String
   teacher: DailyScheduleListUserItem
+  teacherTime: String
   yourTime: String
 }
 
@@ -510,6 +580,10 @@ enum Gender {
 """A type representing arbitrary JSON values"""
 scalar JSON
 
+input LogSupportRequestInput {
+  reason: String!
+}
+
 input LoginInput {
   email: Email!
   password: String!
@@ -521,8 +595,12 @@ type LoginResponse {
 }
 
 type Mutation {
+  activateClass(classInstanceId: ID!): ClassInstanceDetail
+  adminExcuseClassLeave(classInstanceId: ID!): ClassInstanceDetail
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createFolder(input: FolderCreateInput!): FileOperationResult
+  createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
+  deleteClassInstance(classInstanceId: ID!): Boolean
   deleteFile(path: String!): FileOperationResult
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
   deleteStudent(id: String!): Student
@@ -531,14 +609,22 @@ type Mutation {
   Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
   """
   demoLogin(input: DemoLoginInput!): LoginResponse
+  forceActivateClass(classInstanceId: ID!): ClassInstanceDetail
+  logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
   logout: Boolean
+  markClassAbsent(classInstanceId: ID!): ClassInstanceDetail
   moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
   refreshToken: RefreshTokenResponse
   renameFile(input: FileRenameInput!): FileOperationResult
+  requestClassLeave(classInstanceId: ID!, reason: String): ClassInstanceDetail
+  rescheduleClass(classInstanceId: ID!, input: RescheduleClassInput!): ClassInstanceDetail
+  revertClass(classInstanceId: ID!): ClassInstanceDetail
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
+  startClass(classInstanceId: ID!): ClassInstanceDetail
+  stopClass(classInstanceId: ID!): ClassInstanceDetail
   updateDirectoryPermissions(input: DirectoryPermissionsUpdateInput!): FileOperationResult
 }
 
@@ -587,7 +673,9 @@ input PartialStudentUpdateInput {
 scalar PhoneNumber
 
 type Query {
-  dailyScheduleList(date: String!, teacherId: String): [DailyScheduleList!]
+  classInstance(id: ID!): ClassInstanceDetail
+  classStatusEvents(classInstanceId: ID!): [ClassStatusEvent!]
+  dailyScheduleList(date: String!, search: String, teacherId: String): [DailyScheduleList!]
   dailyScheduleMetrics(date: String!, teacherId: String): DailyScheduleMetrics
   directoryChildren(
     """Parent directory path (empty or null for root level)"""
@@ -618,7 +706,12 @@ type Query {
     path: String
   ): StorageStats
   student(id: String!): Student
+  studentClassHistory(month: Int!, studentId: ID!, year: Int!): StudentClassHistory
+  studentClassSessionDetail(classInstanceId: ID!): StudentSessionDetail
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
+  teacherActiveDashboard(date: String!): TeacherDashboard
+  teacherDashboard(date: String!): TeacherDashboard
+  teacherHandbookUrl: TeacherHandbookUrl
   teachers(limit: Int!, search: String!): [TeacherSimple!]
   translatedMessage(key: String!, namespace: String!): String
   user(id: String!): User
@@ -629,6 +722,12 @@ type Query {
 type RefreshTokenResponse {
   token: String
   user: User
+}
+
+input RescheduleClassInput {
+  durationMinutes: Int!
+  scheduledEndAt: String!
+  scheduledStartAt: String!
 }
 
 input StorageItemProtectionUpdateInput {
@@ -691,6 +790,13 @@ type Student {
   updatedAt: DateTime
 }
 
+type StudentClassHistory {
+  id: String
+  metrics: StudentHistoryMetrics
+  sessions: [StudentHistorySession!]
+  studentName: String
+}
+
 input StudentCreateInput {
   classesRemaining: Int
   classesTotal: Int
@@ -740,6 +846,38 @@ input StudentFilterArgs {
   status: StudentStatus
 }
 
+type StudentHistoryMetrics {
+  attendanceRate: Int
+  hoursStudied: Float
+  performance: Int
+  totalClasses: Int
+}
+
+type StudentHistorySession {
+  dayOfMonth: Int
+  duration: Int
+  id: String
+  instructor: String
+  notes: String
+  room: String
+  status: String
+  time: String
+  timeSlot: String
+  title: String
+}
+
+type StudentSessionDetail {
+  durationMinutes: Int
+  executionState: String
+  id: String
+  outcome: String
+  remarks: String
+  scheduledEndAt: DateTime
+  scheduledStartAt: DateTime
+  teacherName: String
+  zoomMeetingUrl: String
+}
+
 enum StudentStatus {
   DEACTIVATED
   GRADUATED
@@ -770,6 +908,56 @@ enum StudentsOrderByColumn {
 type StudentsWithFiltersResponse {
   data: [Student!]!
   pageInfo: PageInfo!
+}
+
+type SupportRequestResult {
+  id: String
+  success: Boolean
+}
+
+type TeacherDashboard {
+  id: String
+  metrics: TeacherDashboardMetrics
+  progressFeed: [TeacherProgressFeedItem!]
+  scheduleRows: [TeacherDashboardScheduleRow!]
+}
+
+type TeacherDashboardMetrics {
+  absent: Int
+  activated: Int
+  advance: Int
+  leave: Int
+  pending: Int
+  regular: Int
+  rescheduled: Int
+  running: Int
+  suspended: Int
+  taken: Int
+  total: Int
+  trial: Int
+}
+
+type TeacherDashboardScheduleRow {
+  durationMinutes: Int
+  executionState: String
+  id: String
+  outcome: String
+  scheduledStartAt: DateTime
+  studentId: String
+  studentName: String
+  yourTimeFormatted: String
+  zoomMeetingUrl: String
+}
+
+type TeacherHandbookUrl {
+  id: String
+  url: String
+}
+
+type TeacherProgressFeedItem {
+  id: String
+  title: String
+  type: String
 }
 
 type TeacherSimple {

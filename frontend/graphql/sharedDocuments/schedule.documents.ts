@@ -1,4 +1,4 @@
-import { gql, type TypedDocumentNode } from "@apollo/client/core";
+import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 
@@ -29,11 +29,12 @@ export const dailyScheduleListQueryDocument: TypedDocumentNode<
   Operations.DailyScheduleListQuery,
   Types.QueryDailyScheduleListArgs
 > = gql`
-  query dailyScheduleList($date: String!, $teacherId: String) {
-    dailyScheduleList(date: $date, teacherId: $teacherId) {
+  query dailyScheduleList($date: String!, $teacherId: String, $search: String) {
+    dailyScheduleList(date: $date, teacherId: $teacherId, search: $search) {
       id
-      studentTime
       yourTime
+      teacherTime
+      studentTime
       duration
       status
       student {

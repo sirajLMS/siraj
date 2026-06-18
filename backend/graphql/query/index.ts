@@ -4,3 +4,6 @@ import "./student.query";
 import "./intl.query";
 import "./schedule.query";
 import "./teacher.query";
+import "./class-session.query";
+import "./student-history.query";
+import "./teacher-dashboard.query";

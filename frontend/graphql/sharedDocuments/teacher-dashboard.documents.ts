@@ -1,0 +1,122 @@
+import { gql, type TypedDocumentNode } from "@apollo/client";
+import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+
+export const teacherDashboardQueryDocument: TypedDocumentNode<
+  Operations.TeacherDashboardQuery,
+  Types.QueryTeacherDashboardArgs
+> = gql`
+  query teacherDashboard($date: String!) {
+    teacherDashboard(date: $date) {
+      id
+      metrics {
+        total
+        regular
+        trial
+        advance
+        rescheduled
+        suspended
+        taken
+        pending
+        activated
+        running
+        absent
+        leave
+      }
+      scheduleRows {
+        id
+        studentId
+        studentName
+        scheduledStartAt
+        durationMinutes
+        executionState
+        outcome
+        zoomMeetingUrl
+        yourTimeFormatted
+      }
+      progressFeed {
+        id
+        title
+        type
+      }
+    }
+  }
+`;
+
+export const teacherActiveDashboardQueryDocument: TypedDocumentNode<
+  Operations.TeacherActiveDashboardQuery,
+  Types.QueryTeacherActiveDashboardArgs
+> = gql`
+  query teacherActiveDashboard($date: String!) {
+    teacherActiveDashboard(date: $date) {
+      id
+      metrics {
+        total
+        regular
+        trial
+        advance
+        rescheduled
+        suspended
+        taken
+        pending
+        activated
+        running
+        absent
+        leave
+      }
+      scheduleRows {
+        id
+        studentId
+        studentName
+        scheduledStartAt
+        durationMinutes
+        executionState
+        outcome
+        zoomMeetingUrl
+        yourTimeFormatted
+      }
+      progressFeed {
+        id
+        title
+        type
+      }
+    }
+  }
+`;
+
+export const createTeacherManualClassEntryMutationDocument: TypedDocumentNode<
+  Operations.CreateTeacherManualClassEntryMutation,
+  Types.MutationCreateTeacherManualClassEntryArgs
+> = gql`
+  mutation createTeacherManualClassEntry($input: CreateManualClassEntryInput!) {
+    createTeacherManualClassEntry(input: $input) {
+      id
+      status
+      scheduledDate
+      startTime
+      endTime
+      durationMinutes
+    }
+  }
+`;
+
+export const logTeacherSupportRequestMutationDocument: TypedDocumentNode<
+  Operations.LogTeacherSupportRequestMutation,
+  Types.MutationLogTeacherSupportRequestArgs
+> = gql`
+  mutation logTeacherSupportRequest($input: LogSupportRequestInput!) {
+    logTeacherSupportRequest(input: $input) {
+      id
+      success
+    }
+  }
+`;
+
+export const teacherHandbookUrlQueryDocument: TypedDocumentNode<Operations.TeacherHandbookUrlQuery> = gql`
+  query teacherHandbookUrl {
+    teacherHandbookUrl {
+      id
+      url
+    }
+  }
+`;
