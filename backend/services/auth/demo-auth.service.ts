@@ -55,7 +55,7 @@ export namespace DemoAuthService {
       if (groupSlug === "super_admin") {
         const [superAdmin] = await db.select().from(users).where(eq(users.isSuperAdmin, true)).limit(1);
         if (superAdmin) {
-          return proceedWithUser(superAdmin as UserEntity);
+          return proceedWithUser(superAdmin);
         }
       }
       throw new Error(`Demo group not found: ${groupSlug}`);
@@ -74,7 +74,7 @@ export namespace DemoAuthService {
       throw new Error(`No user found for demo group: ${groupSlug}`);
     }
 
-    return proceedWithUser(assignment.user as UserEntity);
+    return proceedWithUser(assignment.user);
   }
 
   async function proceedWithUser(user: UserEntity) {

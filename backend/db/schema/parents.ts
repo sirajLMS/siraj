@@ -1,4 +1,5 @@
-import { index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { check, index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { countryCodeEnum, invoiceTypeEnum, parentStatusEnum, paymentMethodEnum } from "./enums";
 import { users } from "./users";
 
@@ -23,8 +24,13 @@ export const parents = pgTable(
     feeAmount: numeric("fee_amount", { precision: 12, scale: 2 }),
     paymentMethod: paymentMethodEnum("payment_method"),
     currency: varchar("currency", { length: 10 }),
+    timezone: varchar("timezone", { length: 100 }).notNull().default("UTC"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
-  table => [index("parents_user_id_idx").on(table.userId), index("parents_status_idx").on(table.status)]
+  table => [
+    index("parents_user_id_idx").on(table.userId),
+    index("parents_status_idx").on(table.status),
+    check("parents_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
+  ]
 );

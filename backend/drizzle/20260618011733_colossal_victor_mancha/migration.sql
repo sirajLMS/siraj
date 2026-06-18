@@ -1,6 +1,6 @@
 CREATE TYPE "account_status" AS ENUM('ACTIVATED', 'DEACTIVATED');--> statement-breakpoint
 CREATE TYPE "app_language" AS ENUM('ar', 'en');--> statement-breakpoint
-CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'classes.view_details', 'classes.activate', 'classes.force_activate', 'classes.start', 'classes.mark_absent', 'classes.request_leave', 'classes.admin_leave', 'classes.reschedule', 'classes.revert', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'complaints.list', 'complaints.delete', 'complaints.respond', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign');--> statement-breakpoint
+CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.force_activate', 'session.start', 'session.mark_absent', 'session.request_leave', 'session.admin_leave', 'session.reschedule', 'session.revert', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'system.enforce_time_window', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'complaints.list', 'complaints.delete', 'complaints.respond', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign');--> statement-breakpoint
 CREATE TYPE "class_execution_state" AS ENUM('NOT_ACTIVATED', 'ACTIVATED', 'RUNNING', 'COMPLETED');--> statement-breakpoint
 CREATE TYPE "class_outcome" AS ENUM('PENDING', 'TAKEN', 'ABSENT', 'LEAVE');--> statement-breakpoint
 CREATE TYPE "class_type" AS ENUM('REGULAR', 'TRIAL', 'ADVANCE');--> statement-breakpoint
@@ -240,8 +240,10 @@ CREATE TABLE "parents" (
 	"fee_amount" numeric(12,2),
 	"payment_method" "payment_method",
 	"currency" varchar(10),
+	"timezone" varchar(100) DEFAULT 'UTC' NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
-	"updated_at" timestamp(3) with time zone NOT NULL
+	"updated_at" timestamp(3) with time zone NOT NULL,
+	CONSTRAINT "parents_timezone_chk" CHECK (is_valid_timezone("timezone"))
 );
 --> statement-breakpoint
 CREATE TABLE "group_permissions" (
@@ -277,6 +279,24 @@ CREATE TABLE "user_permission_groups" (
 	"assigned_at" timestamp(3) with time zone NOT NULL,
 	"assigned_by_user_id" uuid,
 	CONSTRAINT "user_permission_groups_pkey" PRIMARY KEY("user_id","group_id")
+);
+--> statement-breakpoint
+CREATE TABLE "class_instance_performance" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"class_instance_id" uuid NOT NULL UNIQUE,
+	"engagement_score" integer,
+	"assessment_progress" integer,
+	"assessment_total" integer,
+	"focus_level" varchar(50),
+	"session_health" varchar(50),
+	"heatmap_data" jsonb,
+	"latency_ms" integer,
+	"authorization_label" varchar(100),
+	"attendance_rate" integer,
+	"avg_grade" varchar(10),
+	"last_class_days_ago" integer,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "class_instances" (
@@ -571,6 +591,7 @@ CREATE TABLE "students" (
 	"date_of_birth" timestamp(3) with time zone,
 	"gender" "gender",
 	"language" "app_language",
+	"timezone_override" varchar(100),
 	"status" "student_status" NOT NULL,
 	"classes_total" integer DEFAULT 0 NOT NULL,
 	"classes_remaining" integer DEFAULT 0 NOT NULL,
@@ -580,7 +601,8 @@ CREATE TABLE "students" (
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL,
 	CONSTRAINT "students_classes_remaining_chk" CHECK ("classes_remaining" >= 0),
-	CONSTRAINT "students_classes_total_chk" CHECK ("classes_total" >= 0)
+	CONSTRAINT "students_classes_total_chk" CHECK ("classes_total" >= 0),
+	CONSTRAINT "students_timezone_override_chk" CHECK ("timezone_override" IS NULL OR is_valid_timezone("timezone_override"))
 );
 --> statement-breakpoint
 CREATE TABLE "teacher_assignments" (
@@ -927,6 +949,7 @@ ALTER TABLE "permission_groups" ADD CONSTRAINT "permission_groups_created_by_use
 ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_group_id_permission_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "permission_groups"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_assigned_by_user_id_users_id_fkey" FOREIGN KEY ("assigned_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "class_instance_performance" ADD CONSTRAINT "class_instance_performance_aA1hiAMGrLBk_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_PylSk1pBxELI_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE SET NULL;--> statement-breakpoint

@@ -227,12 +227,18 @@ async function fetchAllIssues(token: string): Promise<SonarIssue[]> {
       headers: { Authorization: authHeader },
     });
 
-    if (!response.ok) throw new Error(`SonarQube API error: ${response.status}`);
+    if (!response.ok) {
+      if (response.status === 400 && page * pageSize > 10000) {
+        logWarning("Reached SonarQube's 10,000 issues pagination limit. Some issues may not be included.");
+        break;
+      }
+      throw new Error(`SonarQube API error: ${response.status}`);
+    }
 
     const data = (await response.json()) as SonarResponse;
     allIssues.push(...data.issues);
 
-    if (allIssues.length >= data.paging.total) break;
+    if (allIssues.length >= data.paging.total || allIssues.length >= 10000) break;
     page++;
   }
   return allIssues;

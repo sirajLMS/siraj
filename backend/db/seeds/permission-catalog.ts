@@ -69,9 +69,9 @@ export const PERMISSION_CATALOG: PermissionSeed[] = [
     ["dst_migrate", "Run DST migration"],
   ]),
 
-  ...createPermissions("Scheduling", "classes", [
+  ...createPermissions("Scheduling", "session", [
     ["view_details", "View class details"],
-    ["activate", "Activate a class within time window"],
+    ["activate_class", "Activate a class within time window"],
     ["force_activate", "Force activate a class"],
     ["start", "Start a class session"],
     ["mark_absent", "Mark student as absent"],
@@ -124,16 +124,16 @@ export const PERMISSION_CATALOG: PermissionSeed[] = [
 ];
 
 const COMMON_DASHBOARD_PERMISSIONS = [AppPermission.DASHBOARD_VIEW] as const;
-const COMMON_CLASS_PERMISSIONS = [AppPermission.CLASSES_VIEW_DETAILS] as const;
+const COMMON_CLASS_PERMISSIONS = [AppPermission.SESSION_VIEW_DETAILS] as const;
 
 export const TEACHER_DEFAULT_PERMISSION_KEYS = [
   ...COMMON_DASHBOARD_PERMISSIONS,
   AppPermission.SCHEDULE_VIEW_ASSIGNED,
   ...COMMON_CLASS_PERMISSIONS,
-  AppPermission.CLASSES_ACTIVATE,
-  AppPermission.CLASSES_START,
-  AppPermission.CLASSES_MARK_ABSENT,
-  AppPermission.CLASSES_REQUEST_LEAVE,
+  AppPermission.SESSION_ACTIVATE_CLASS,
+  AppPermission.SESSION_START,
+  AppPermission.SESSION_MARK_ABSENT,
+  AppPermission.SESSION_REQUEST_LEAVE,
   AppPermission.RESOURCES_LIST,
 ] as const;
 
@@ -141,7 +141,7 @@ export const PARENT_DEFAULT_PERMISSION_KEYS = [
   ...COMMON_DASHBOARD_PERMISSIONS,
   AppPermission.SCHEDULE_VIEW_FAMILY,
   ...COMMON_CLASS_PERMISSIONS,
-  AppPermission.CLASSES_REQUEST_LEAVE,
+  AppPermission.SESSION_REQUEST_LEAVE,
   AppPermission.COMPLAINTS_LIST,
 ] as const;
 

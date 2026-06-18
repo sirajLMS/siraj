@@ -39,9 +39,22 @@ function getManualTranslations(locale: string, namespace: string) {
     }
 
     if (!values) return template;
+
     return template.replace(/\{(\w+)\}/g, (match, paramName) => {
       const val = values[paramName];
-      return val !== undefined ? String(val) : match;
+
+      // 1. If undefined, leave the tag as is
+      if (val === undefined) {
+        return match;
+      }
+
+      // 2. Safe primitives check: SonarQube can see that structural objects cannot pass this check
+      if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") {
+        return String(val);
+      }
+
+      // 3. Fallback for structural objects, arrays, or null to prevent [object Object]
+      return val ? JSON.stringify(val) : "";
     });
   };
 }

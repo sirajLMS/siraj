@@ -287,6 +287,16 @@ export const relations = defineRelations(schema, r => ({
       from: r.classInstances.id,
       to: r.dstMigrationEntries.classInstanceId,
     }),
+    performance: r.one.classInstancePerformance({
+      from: r.classInstances.id,
+      to: r.classInstancePerformance.classInstanceId,
+    }),
+  },
+  classInstancePerformance: {
+    classInstance: r.one.classInstances({
+      from: r.classInstancePerformance.classInstanceId,
+      to: r.classInstances.id,
+    }),
   },
   classStatusEvents: {
     classInstance: r.one.classInstances({

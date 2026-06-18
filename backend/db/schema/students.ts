@@ -24,6 +24,7 @@ import { users } from "./users";
  * Database-level Constraints & Triggers:
  * - CHECK Constraint `students_classes_remaining_chk`: Enforces `classes_remaining >= 0`.
  * - CHECK Constraint `students_classes_total_chk`: Enforces `classes_total >= 0`.
+ * - CHECK Constraint `students_timezone_override_chk`: Enforces valid timezone if provided.
  * - Triggers `trg_recalc_hours_recurring_schedules` and `trg_recalc_hours_recurring_schedule_days`:
  *   Automatically recalculate `hours_per_week` (sum of duration of active schedule days) when schedules or schedule days change.
  * - Trigger `trg_enforce_student_status_transition`: Enforces valid state machine transitions for student status
@@ -37,6 +38,11 @@ import { users } from "./users";
  *   - `students_update_policy`: Restricts parent users to updating only their own student records.
  *   - `students_delete_policy`: Restricts parent users to deleting only their own student records.
  *   Administrators or teachers (whose user IDs do not exist in the `parents` table) bypass these policies.
+ *
+ * Student effective timezone for schedule display:
+ *   COALESCE(students.timezone_override, parents.timezone, academy default)
+ * When timezone_override IS NULL, inherit from parent record.
+ * booking_timezone on class_instances is a booking snapshot only — NOT used for UI localization.
  */
 export const students = pgTable(
   "students",
@@ -50,6 +56,7 @@ export const students = pgTable(
     dateOfBirth: timestamp("date_of_birth", { withTimezone: true, precision: 3 }),
     gender: genderEnum("gender"),
     language: appLanguageEnum("language"),
+    timezoneOverride: varchar("timezone_override", { length: 100 }),
     status: studentStatusEnum("status").notNull(),
     classesTotal: integer("classes_total").notNull().default(0),
     classesRemaining: integer("classes_remaining").notNull().default(0),
@@ -70,6 +77,10 @@ export const students = pgTable(
     uniqueIndex("students_idempotency_key_unique_idx").on(table.idempotencyKey),
     check("students_classes_remaining_chk", sql`${table.classesRemaining} >= 0`),
     check("students_classes_total_chk", sql`${table.classesTotal} >= 0`),
+    check(
+      "students_timezone_override_chk",
+      sql`${table.timezoneOverride} IS NULL OR is_valid_timezone(${table.timezoneOverride})`
+    ),
     index("students_pagination_idx").on(table.createdAt, table.id),
     index("idx_students_filter_mobile").on(table.status, table.primaryTeacherId, table.dateOfBirth),
     index("idx_students_parent_status").on(table.parentId, table.status),

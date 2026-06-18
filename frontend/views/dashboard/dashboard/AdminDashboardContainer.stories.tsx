@@ -1,12 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { useMockDashboardStore } from "@/frontend/stores/mockDashboardStore";
-import type { ClassStatus } from "@/frontend/views/dashboard/types/dashboard";
 import { DashboardView } from "./DashboardView";
+import { useAdminDashboardLabels } from "./utils";
 
 // Reusable mock container that acts exactly like the old AdminDashboardContainer
 export function MockAdminDashboardContainer() {
   const t = useTranslations("dashboard");
+
+  const { headers, statusLabels } = useAdminDashboardLabels();
 
   const todayClasses = useMockDashboardStore(state => state.todayClasses);
   const lastUpdatedKey = useMockDashboardStore(state => state.lastUpdated);
@@ -48,24 +50,6 @@ export function MockAdminDashboardContainer() {
     return true;
   });
 
-  const headers = {
-    classId: t("admin.classId"),
-    student: t("admin.student"),
-    teacher: t("admin.teacher"),
-    time: t("admin.time"),
-    status: t("admin.status"),
-    actions: t("admin.actions"),
-  };
-
-  const statusLabels: Record<ClassStatus, string> = {
-    scheduled: t("admin.statusLabels.scheduled"),
-    in_progress: t("admin.statusLabels.inProgress"),
-    pending: t("admin.statusLabels.pending"),
-    completed: t("admin.statusLabels.completed"),
-    cancelled: t("admin.statusLabels.cancelled"),
-    absent: t("admin.statusLabels.absent"),
-  };
-
   const showingText = t("admin.showingOf", {
     shown: filteredRows.length,
     total: scheduleRows.length,
@@ -76,7 +60,7 @@ export function MockAdminDashboardContainer() {
       todayClassesTitle={t("admin.todayClasses")}
       lastUpdated={translatedLastUpdated}
       metrics={todayClasses}
-      onMetricClick={_key => {}}
+      onMetricClick={_key => { }}
       scheduleTitle={t("admin.scheduleOverview")}
       searchPlaceholder={t("admin.searchPlaceholder")}
       searchValue={filters.searchQuery}

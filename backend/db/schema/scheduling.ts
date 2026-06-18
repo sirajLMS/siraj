@@ -290,3 +290,24 @@ export const dstMigrationEntries = pgTable(
   },
   table => [index("dst_migration_entries_run_id_idx").on(table.runId)]
 );
+
+export const classInstancePerformance = pgTable("class_instance_performance", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  classInstanceId: uuid("class_instance_id")
+    .notNull()
+    .unique()
+    .references(() => classInstances.id, { onDelete: "cascade" }),
+  engagementScore: integer("engagement_score"),
+  assessmentProgress: integer("assessment_progress"),
+  assessmentTotal: integer("assessment_total"),
+  focusLevel: varchar("focus_level", { length: 50 }),
+  sessionHealth: varchar("session_health", { length: 50 }),
+  heatmapData: jsonb("heatmap_data").$type<number[]>(),
+  latencyMs: integer("latency_ms"),
+  authorizationLabel: varchar("authorization_label", { length: 100 }),
+  attendanceRate: integer("attendance_rate"),
+  avgGrade: varchar("avg_grade", { length: 10 }),
+  lastClassDaysAgo: integer("last_class_days_ago"),
+  createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+});

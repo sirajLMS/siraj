@@ -224,7 +224,7 @@ async function runQualityGate(): Promise<void> {
 }
 // Timeout logic
 const timeoutArg = process.argv.find(arg => arg.startsWith("--timeout="));
-const timeoutMs = timeoutArg ? parseInt(timeoutArg.split("=")[1], 10) : 0;
+const timeoutMs = timeoutArg ? Number.parseInt(timeoutArg.split("=")[1], 10) : 0;
 
 let timeoutId: NodeJS.Timeout | undefined;
 if (timeoutMs > 0) {

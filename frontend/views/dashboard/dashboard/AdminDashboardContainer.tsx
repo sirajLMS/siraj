@@ -28,6 +28,7 @@ import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { ClassStatus, MetricItem, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
 import { DashboardView } from "./DashboardView";
+import { useAdminDashboardLabels } from "./utils";
 
 export function AdminDashboardContainer() {
   const t = useTranslations("dashboard");
@@ -37,6 +38,8 @@ export function AdminDashboardContainer() {
 
   // Filter state managed via the new real Zustand store
   const { filters, setDateFilter, setTeacherFilter, setSearchQuery, setSelectedStatus } = useDashboardStore();
+
+  const { headers, statusLabels } = useAdminDashboardLabels();
 
   // Fetch metrics using active filters
   const {
@@ -235,24 +238,6 @@ export function AdminDashboardContainer() {
     }
     return true;
   });
-
-  const headers = {
-    classId: t("admin.classId"),
-    student: t("admin.student"),
-    teacher: t("admin.teacher"),
-    time: t("admin.time"),
-    status: t("admin.status"),
-    actions: t("admin.actions"),
-  };
-
-  const statusLabels: Record<ClassStatus, string> = {
-    scheduled: t("admin.statusLabels.scheduled"),
-    in_progress: t("admin.statusLabels.inProgress"),
-    pending: t("admin.statusLabels.pending"),
-    completed: t("admin.statusLabels.completed"),
-    cancelled: t("admin.statusLabels.cancelled"),
-    absent: t("admin.statusLabels.absent"),
-  };
 
   const showingText = t("admin.showingOf", {
     shown: filteredRows.length,

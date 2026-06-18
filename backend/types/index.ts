@@ -1,6 +1,7 @@
 export * from "./audit.types";
 export * from "./auth.types";
 export * from "./billing.types";
+export * from "./class-instance-performance.types";
 export * from "./communications.types";
 export * from "./pagination.types";
 export * from "./parent.types";
