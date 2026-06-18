@@ -10,9 +10,9 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import {
   activateClassMutationDocument,
-  markClassAbsentMutationDocument,
-  requestClassLeaveMutationDocument,
-  startClassMutationDocument,
+  updateSessionStatusAbsentMutationDocument,
+  updateSessionStatusLeaveMutationDocument,
+  updateSessionStatusStartMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/class-session.documents";
 import {
   createTeacherManualClassEntryMutationDocument,
@@ -124,9 +124,15 @@ interface ActiveDashboardWrapperProps {
   readonly handleActivate: (id: string) => Promise<void>;
   readonly setManualEntryDefaultActive: (val: boolean) => void;
   readonly setManualEntryOpen: (val: boolean) => void;
-  readonly startClass: (options: { readonly variables: Types.MutationStartClassArgs }) => Promise<unknown>;
-  readonly markAbsent: (options: { readonly variables: Types.MutationMarkClassAbsentArgs }) => Promise<unknown>;
-  readonly requestLeave: (options: { readonly variables: Types.MutationRequestClassLeaveArgs }) => Promise<unknown>;
+  readonly startClass: (options: {
+    readonly variables: Types.MutationUpdateSessionStatusStartArgs;
+  }) => Promise<unknown>;
+  readonly markAbsent: (options: {
+    readonly variables: Types.MutationUpdateSessionStatusAbsentArgs;
+  }) => Promise<unknown>;
+  readonly requestLeave: (options: {
+    readonly variables: Types.MutationUpdateSessionStatusLeaveArgs;
+  }) => Promise<unknown>;
   readonly refetchActive: (variables?: Partial<Types.QueryTeacherActiveDashboardArgs>) => Promise<{
     readonly data?: Operations.TeacherActiveDashboardQuery | null;
     readonly error?: unknown;
@@ -210,7 +216,7 @@ function ActiveDashboardWrapper({
       onRequestLeave={async id => {
         try {
           await requestLeave({
-            variables: { classInstanceId: id, reason: "Teacher requested leave from active dashboard" },
+            variables: { classInstanceId: id, leaveReason: "Teacher requested leave from active dashboard" },
           });
           await refetchActive();
         } catch (err) {
@@ -324,9 +330,9 @@ export function TeacherDashboardContainer() {
   const [fetchHandbookUrl] = useLazyQuery(teacherHandbookUrlQueryDocument);
 
   const [activateClass] = useMutation(activateClassMutationDocument);
-  const [startClass] = useMutation(startClassMutationDocument);
-  const [markAbsent] = useMutation(markClassAbsentMutationDocument);
-  const [requestLeave] = useMutation(requestClassLeaveMutationDocument);
+  const [startClass] = useMutation(updateSessionStatusStartMutationDocument);
+  const [markAbsent] = useMutation(updateSessionStatusAbsentMutationDocument);
+  const [requestLeave] = useMutation(updateSessionStatusLeaveMutationDocument);
   const [createManualEntry] = useMutation(createTeacherManualClassEntryMutationDocument);
   const [logSupportRequest] = useMutation(logTeacherSupportRequestMutationDocument);
 

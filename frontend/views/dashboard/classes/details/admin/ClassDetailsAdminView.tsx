@@ -4,6 +4,7 @@ import { Box, Grid } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { AdminViewLabels } from "@/shared/messages/types/message";
+import { LiveSessionToolbar } from "../components/LiveSessionToolbar";
 import { TimezoneWarningBanner } from "../teacher/TimezoneWarningBanner";
 import { ActivityHeatmap } from "./ActivityHeatmap";
 import { AdminActionsBar } from "./AdminActionsBar";
@@ -20,6 +21,15 @@ interface ClassDetailsAdminViewProps {
   readonly onGenerateLog: () => void;
   readonly onDelete: () => void;
   readonly labels: AdminViewLabels;
+  readonly onStart: () => void;
+  readonly onAbsent: () => void;
+  readonly onLeave: (reason: string) => void;
+  readonly onReset: () => void;
+  readonly isStarting: boolean;
+  readonly isMarkingAbsent: boolean;
+  readonly isProcessingLeave: boolean;
+  readonly isResetting: boolean;
+  readonly error: string | null;
 }
 
 export function ClassDetailsAdminView({
@@ -31,6 +41,15 @@ export function ClassDetailsAdminView({
   onGenerateLog,
   onDelete,
   labels,
+  onStart,
+  onAbsent,
+  onLeave,
+  onReset,
+  isStarting,
+  isMarkingAbsent,
+  isProcessingLeave,
+  isResetting,
+  error,
 }: ClassDetailsAdminViewProps) {
   const performanceMetrics = [
     { key: "engagement", labelKey: "engagementScore", value: `${instance.performance?.engagementScore ?? 0}%` },
@@ -57,6 +76,21 @@ export function ClassDetailsAdminView({
           />
         </RequirePermission>
       )}
+
+      {/* Live Session Toolbar */}
+      <LiveSessionToolbar
+        classInstanceId={instance.id ?? ""}
+        executionState={instance.executionState ?? "NOT_ACTIVATED"}
+        onStart={onStart}
+        onAbsent={onAbsent}
+        onLeave={onLeave}
+        onReset={onReset}
+        isStarting={isStarting}
+        isMarkingAbsent={isMarkingAbsent}
+        isProcessingLeave={isProcessingLeave}
+        isResetting={isResetting}
+        error={error}
+      />
 
       {/* Admin Actions Bar */}
       <RequirePermission permissions={[AppPermission.SessionOverrideActions]}>

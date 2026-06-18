@@ -43,7 +43,7 @@ function StartButton({ classInstanceId, isAnyLoading, isStarting, onStart, start
         disabled={isAnyLoading}
         onClick={onStart}
         startIcon={isStarting ? <CircularProgress size={16} color="inherit" /> : <PlayArrowOutlined />}
-        sx={(theme) => ({
+        sx={theme => ({
           bgcolor: theme.palette.success.main,
           color: theme.palette.onSuccess,
           borderRadius: theme.layout.radius.button,
@@ -75,7 +75,7 @@ function AbsentButton({ classInstanceId, isAnyLoading, isMarkingAbsent, onAbsent
         disabled={isAnyLoading}
         onClick={onAbsent}
         startIcon={isMarkingAbsent ? <CircularProgress size={16} color="inherit" /> : <HighlightOffOutlined />}
-        sx={(theme) => ({
+        sx={theme => ({
           bgcolor: theme.palette.warning.main,
           color: theme.palette.onWarning,
           borderRadius: theme.layout.radius.button,
@@ -107,7 +107,7 @@ function LeaveButton({ classInstanceId, isAnyLoading, isProcessingLeave, onLeave
         disabled={isAnyLoading}
         onClick={onLeaveClick}
         startIcon={isProcessingLeave ? <CircularProgress size={16} color="inherit" /> : <ExitToAppOutlined />}
-        sx={(theme) => ({
+        sx={theme => ({
           color: theme.palette.secondary.main,
           borderColor: theme.palette.secondary.main,
           borderRadius: theme.layout.radius.button,
@@ -140,7 +140,7 @@ function ResetButton({ classInstanceId, isAnyLoading, isResetting, onResetClick,
         disabled={isAnyLoading}
         onClick={onResetClick}
         startIcon={isResetting ? <CircularProgress size={16} color="inherit" /> : <RestartAltOutlined />}
-        sx={(theme) => ({
+        sx={theme => ({
           bgcolor: theme.palette.error.main,
           color: theme.palette.onError,
           borderRadius: theme.layout.radius.button,

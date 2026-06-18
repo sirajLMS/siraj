@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import {
   activateClassMutationDocument,
+  activateOverrideClassMutationDocument,
   deleteClassInstanceMutationDocument,
-  forceActivateClassMutationDocument,
 } from "../sharedDocuments/class-session.documents";
 import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
 import {
@@ -200,7 +200,7 @@ describe("GraphQL Class Session Integration Tests", () => {
 
     // Call forceActivateClass as academy admin on the class instance created in the previous test
     const forceRes = await testClient.mutate({
-      mutation: forceActivateClassMutationDocument,
+      mutation: activateOverrideClassMutationDocument,
       variables: {
         classInstanceId: outsideClassInstanceId,
       },

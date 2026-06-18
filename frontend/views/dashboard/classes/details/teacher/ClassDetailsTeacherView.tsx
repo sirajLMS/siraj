@@ -4,6 +4,7 @@ import { Box, Grid } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
+import { LiveSessionToolbar } from "../components/LiveSessionToolbar";
 import type { TeacherViewLabels } from "../useClassDetailsLabels";
 import { ActionsPanel } from "./ActionsPanel";
 import { ClassInstanceDetailsCard } from "./ClassInstanceDetailsCard";
@@ -22,6 +23,15 @@ interface ClassDetailsTeacherViewProps {
   readonly onDelete: () => void;
   readonly onViewProfile: () => void;
   readonly labels: TeacherViewLabels;
+  readonly onStart: () => void;
+  readonly onAbsent: () => void;
+  readonly onLeave: (reason: string) => void;
+  readonly onReset: () => void;
+  readonly isStarting: boolean;
+  readonly isMarkingAbsent: boolean;
+  readonly isProcessingLeave: boolean;
+  readonly isResetting: boolean;
+  readonly error: string | null;
 }
 
 export function ClassDetailsTeacherView({
@@ -34,6 +44,15 @@ export function ClassDetailsTeacherView({
   onDelete,
   onViewProfile,
   labels,
+  onStart,
+  onAbsent,
+  onLeave,
+  onReset,
+  isStarting,
+  isMarkingAbsent,
+  isProcessingLeave,
+  isResetting,
+  error,
 }: ClassDetailsTeacherViewProps) {
   const status = (instance.status as ClassInstanceStatus) || "pending";
 
@@ -49,6 +68,21 @@ export function ClassDetailsTeacherView({
           />
         </RequirePermission>
       )}
+
+      {/* Live Session Toolbar */}
+      <LiveSessionToolbar
+        classInstanceId={instance.id ?? ""}
+        executionState={instance.executionState ?? "NOT_ACTIVATED"}
+        onStart={onStart}
+        onAbsent={onAbsent}
+        onLeave={onLeave}
+        onReset={onReset}
+        isStarting={isStarting}
+        isMarkingAbsent={isMarkingAbsent}
+        isProcessingLeave={isProcessingLeave}
+        isResetting={isResetting}
+        error={error}
+      />
 
       <Grid container spacing={3}>
         {/* Left Column: Details + Performance */}

@@ -570,12 +570,12 @@ describe("IDOR Protection with Admin Bypass", () => {
 ```
 
 **Success Criteria:**
-- [ ] `hasAnyPermission` method implemented and tested
-- [ ] Four-layer security model documented in repository header
-- [ ] Privileged actor bypass implemented at start of `runStateChange`
-- [ ] All IDOR tests pass (teacher cross-access blocked, admin bypass works)
-- [ ] 100% line + function coverage on `runStateChange` method
-- [ ] No hardcoded error strings (all use `getBackendTranslations`)
+- [x] `hasAnyPermission` method implemented and tested
+- [x] Four-layer security model documented in repository header
+- [x] Privileged actor bypass implemented at start of `runStateChange`
+- [x] All IDOR tests pass (teacher cross-access blocked, admin bypass works)
+- [x] 100% line + function coverage on `runStateChange` method
+- [x] No hardcoded error strings (all use `getBackendTranslations`)
 
 ---
 
@@ -707,11 +707,11 @@ describe("Story 2: State Transitions", () => {
 ```
 
 **Success Criteria:**
-- [ ] Trigger allows `ACTIVATED → COMPLETED` for `outcome IN ('ABSENT', 'LEAVE')`
-- [ ] Trigger blocks `ACTIVATED → COMPLETED` for other outcomes (e.g., `TAKEN`)
-- [ ] Trigger allows reset transitions (`ACTIVATED/RUNNING/COMPLETED → NOT_ACTIVATED`)
-- [ ] All security logic tests pass
-- [ ] Migration applied without errors
+- [x] Trigger allows `ACTIVATED → COMPLETED` for `outcome IN ('ABSENT', 'LEAVE')`
+- [x] Trigger blocks `ACTIVATED → COMPLETED` for other outcomes (e.g., `TAKEN`)
+- [x] Trigger allows reset transitions (`ACTIVATED/RUNNING/COMPLETED → NOT_ACTIVATED`)
+- [x] All security logic tests pass
+- [x] Migration applied without errors
 
 ---
 
@@ -789,11 +789,11 @@ export async function seedOrGet() {
 ```
 
 **Success Criteria:**
-- [ ] `payrollCredited` column added to `class_instances` with default `false`
-- [ ] `session_absent_waiting_minutes` setting seeded (default 30)
-- [ ] `session_leave_reschedule_offset_days` setting seeded (default 7)
-- [ ] Schema push completes without errors
-- [ ] Seed script runs idempotently (can run multiple times)
+- [x] `payrollCredited` column added to `class_instances` with default `false`
+- [x] `session_absent_waiting_minutes` setting seeded (default 30)
+- [x] `session_leave_reschedule_offset_days` setting seeded (default 7)
+- [x] Schema push completes without errors
+- [x] Seed script runs idempotently (can run multiple times)
 
 ---
 
@@ -2706,11 +2706,11 @@ rg "t\(\"absentWaitingRemark\"|t\(\"sessionNotActivated\"|t\(\"absentTooEarly\""
 ```
 
 **Success Criteria:**
-- [ ] All Story 2 UI labels added to `dashboard.json` (ar + en)
-- [ ] All system remarks added to `session.json` (ar + en)
-- [ ] All error messages added to `errors.json` (ar + en)
-- [ ] Translation keys match usage in code
-- [ ] TypeScript compilation passes
+- [x] All Story 2 UI labels added to `dashboard.json` (ar + en)
+- [x] All system remarks added to `session.json` (ar + en)
+- [x] All error messages added to `errors.json` (ar + en)
+- [x] Translation keys match usage in code
+- [x] TypeScript compilation passes
 
 ---
 

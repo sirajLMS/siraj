@@ -11,7 +11,15 @@ import {
   teacherAssignments,
   users,
 } from "@/backend/db/schema";
-import { createMockClassInstance, setupStudent, setupTeacher, setupTestEntities } from "../entity-setup";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { AppPermission } from "@/shared/lib/enum";
+import {
+  createMockClassInstance,
+  createTestUser,
+  setupStudent,
+  setupTeacher,
+  setupTestEntities,
+} from "../entity-setup";
 import { type DbTransaction, runInRollback } from "../test-utils";
 
 interface ClassStatusEventState {
@@ -606,6 +614,38 @@ describe("Scheduling Repository logic", () => {
         await expectRepositoryError(() =>
           SchedulingRepository.activateClassInstance(id, otherParentUserId, { force: false }, tx)
         );
+      });
+    });
+
+    test("IDOR checks are bypassed for privileged admins", async () => {
+      await runInRollback(async tx => {
+        const { instance } = await setupTestEntities(tx, "IdorBypass");
+        const id = instance?.id;
+        if (!id) throw new Error("setup error");
+
+        // Create an admin user (privileged actor)
+        const adminUser = await createTestUser(tx, {
+          isSuperAdmin: true,
+          name: "Admin User",
+          email: `admin-${randomUUID()}@example.com`,
+        });
+
+        // Mock hasAnyPermission to return true for the adminUser
+        const originalHasAnyPermission = PermissionsService.hasAnyPermission;
+        PermissionsService.hasAnyPermission = async (userId: string, permissionKeys: AppPermission[]) => {
+          if (userId === adminUser.id) return true;
+          return originalHasAnyPermission(userId, permissionKeys);
+        };
+
+        try {
+          // Admin trying to activate another teacher's instance should succeed (not throw unauthorizedAction)
+          const activated = await SchedulingRepository.activateClassInstance(id, adminUser.id, { force: false }, tx);
+          expect(activated).not.toBeNull();
+          expect(activated?.executionState).toBe("ACTIVATED");
+        } finally {
+          // Restore mock
+          PermissionsService.hasAnyPermission = originalHasAnyPermission;
+        }
       });
     });
 

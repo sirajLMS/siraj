@@ -84,6 +84,18 @@ export namespace SchedulingRepository {
     actorUserId: string,
     locale?: string
   ) {
+    // Check if actor has privileged permissions that bypass IDOR checks
+    const isPrivilegedActor = await PermissionsService.hasAnyPermission(actorUserId, [
+      AppPermission.SESSION_OVERRIDE_ACTIONS,
+      AppPermission.SESSION_ACTIVATE_OVERRIDE,
+      AppPermission.SESSION_RESET,
+      // AppPermission.DASHBOARD_VIEW_METRICS,
+    ]);
+
+    if (isPrivilegedActor) {
+      return;
+    }
+
     // Scoping IDOR checks (Threat 1)
     const [teacher] = await t
       .select({ id: teachers.id })
@@ -108,17 +120,8 @@ export namespace SchedulingRepository {
     const isTeacherOfClass = existing.teacherId === teacher?.id;
 
     if (!isTeacherOfClass && !isParentOfStudent) {
-      // Admin bypass
-      const hasAdminBypass = await PermissionsService.hasAnyPermission(actorUserId, [
-        AppPermission.SESSION_OVERRIDE_ACTIONS,
-        AppPermission.SESSION_ACTIVATE_OVERRIDE,
-        AppPermission.SESSION_RESET,
-      ]);
-
-      if (!hasAdminBypass) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorizedAction"));
-      }
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("unauthorizedAction"));
     }
   }
 
@@ -150,13 +153,20 @@ export namespace SchedulingRepository {
   }
 
   /**
-   * Helper to run a state-changing operation with consistent transaction and logging logic.
+   * Multi-layer security enforcement for class instance state changes:
    *
-   * 4-Layer Security Model:
-   * 1. DB Trigger: Restricts invalid edge transitions globally (blacklist).
-   * 2. Repo Guard (runStateChange): Verifies IDOR constraints and logic conditions.
-   * 3. Service Layer: Checks feature-specific permissions per action.
-   * 4. UI Gates: Components hidden from unauthorized users via <RequirePermission>.
+   * Layer 1: PostgreSQL RLS policies (class_instances_rls_policies.sql)
+   *   - Row-level security enforced at database level
+   *
+   * Layer 2: Database trigger (fn_enforce_class_instance_transition)
+   *   - Validates state machine transitions
+   *
+   * Layer 3: Repository assertions (teacher/parent IDOR checks with admin bypass)
+   *   - Enforces relationship-based access control
+   *   - Privileged actors bypass relationship checks
+   *
+   * Layer 4: Service permission gates (explicit permission checks)
+   *   - Services validate specific action permissions before calling repository
    */
   async function runStateChange(
     id: string,

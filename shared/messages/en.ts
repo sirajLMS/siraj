@@ -727,8 +727,7 @@ const en: MessageSchema = {
         leaveButton: "Process Leave",
         resetButton: "Reset Session",
         leaveReasonPrompt: "Enter leave reason",
-        resetConfirmation:
-          "Are you sure you want to reset this session? All data will be cleared.",
+        resetConfirmation: "Are you sure you want to reset this session? All data will be cleared.",
       },
       status: {
         active: "Active",

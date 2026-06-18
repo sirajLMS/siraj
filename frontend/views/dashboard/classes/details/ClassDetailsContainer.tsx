@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
@@ -9,104 +9,60 @@ import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   activateClassMutationDocument,
+  activateOverrideClassMutationDocument,
   classInstanceQueryDocument,
+  classStatusEventsQueryDocument,
   deleteClassInstanceMutationDocument,
-  forceActivateClassMutationDocument,
+  resetClassMutationDocument,
   stopClassMutationDocument,
+  updateSessionStatusAbsentMutationDocument,
+  updateSessionStatusLeaveMutationDocument,
+  updateSessionStatusStartMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
+import { getErrorMessage } from "@/shared/utils/error";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
 import { ClassDetailsHeader } from "./ClassDetailsHeader";
 import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
 import { useAdminViewLabels, useTeacherViewLabels } from "./useClassDetailsLabels";
 
-interface AdminViewWrapperProps {
-  readonly pageHeader: React.ReactNode;
+interface CommonViewProps {
   readonly instance: ClassInstanceDetail;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;
-  readonly onForceActivate: () => void;
   readonly onStop: () => void;
   readonly onDelete: () => void;
+  readonly onStart: () => void;
+  readonly onAbsent: () => void;
+  readonly onLeave: (reason: string) => void;
+  readonly onReset: () => void;
+  readonly isStarting: boolean;
+  readonly isMarkingAbsent: boolean;
+  readonly isProcessingLeave: boolean;
+  readonly isResetting: boolean;
+  readonly error: string | null;
 }
 
-const AdminViewWrapper = ({
-  pageHeader,
-  instance,
-  isWarningDismissed,
-  onDismissWarning,
-  onForceActivate,
-  onStop,
-  onDelete,
-}: AdminViewWrapperProps) => {
-  const labels = useAdminViewLabels(instance.studentTimezone ?? "");
+interface AdminViewProps extends CommonViewProps {
+  readonly onForceActivate: () => void;
+  readonly onGenerateLog: () => void;
+}
 
-  const handleGenerateLog = () => {
-    logger.info("Admin generate log:", instance.id);
-  };
-
-  return (
-    <PageContainer>
-      {pageHeader}
-      <ClassDetailsAdminView
-        instance={instance}
-        isWarningDismissed={isWarningDismissed}
-        onDismissWarning={onDismissWarning}
-        onForceActivate={onForceActivate}
-        onStop={onStop}
-        onGenerateLog={handleGenerateLog}
-        onDelete={onDelete}
-        labels={labels}
-      />
-    </PageContainer>
-  );
+const AdminView = (props: AdminViewProps) => {
+  const labels = useAdminViewLabels(props.instance.studentTimezone ?? "");
+  return <ClassDetailsAdminView {...props} labels={labels} />;
 };
 
-interface TeacherViewWrapperProps {
-  readonly pageHeader: React.ReactNode;
-  readonly instance: ClassInstanceDetail;
-  readonly isWarningDismissed: boolean;
-  readonly onDismissWarning: () => void;
+interface TeacherViewProps extends CommonViewProps {
   readonly onActivate: () => void;
-  readonly onStop: () => void;
-  readonly onDelete: () => void;
+  readonly onInfoEdit: () => void;
+  readonly onViewProfile: () => void;
 }
 
-const TeacherViewWrapper = ({
-  pageHeader,
-  instance,
-  isWarningDismissed,
-  onDismissWarning,
-  onActivate,
-  onStop,
-  onDelete,
-}: TeacherViewWrapperProps) => {
-  const labels = useTeacherViewLabels(instance.studentTimezone ?? "");
-
-  const handleInfoEdit = () => {
-    logger.info("Teacher info/edit:", instance.id);
-  };
-  const handleViewProfile = () => {
-    logger.info("View student profile:", instance.student?.id ?? "");
-  };
-
-  return (
-    <PageContainer>
-      {pageHeader}
-      <ClassDetailsTeacherView
-        instance={instance}
-        isWarningDismissed={isWarningDismissed}
-        onDismissWarning={onDismissWarning}
-        onActivate={onActivate}
-        onStop={onStop}
-        onInfoEdit={handleInfoEdit}
-        onDelete={onDelete}
-        onViewProfile={handleViewProfile}
-        labels={labels}
-      />
-    </PageContainer>
-  );
+const TeacherView = (props: TeacherViewProps) => {
+  const labels = useTeacherViewLabels(props.instance.studentTimezone ?? "");
+  return <ClassDetailsTeacherView {...props} labels={labels} />;
 };
 
 export function ClassDetailsContainer() {
@@ -114,20 +70,80 @@ export function ClassDetailsContainer() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const router = useRouter();
   const locale = useLocale();
+  const client = useApolloClient();
 
   const { id } = useParams() as { id: string };
   const hasPermission = useUserStore(state => state.hasPermission);
 
   const [isWarningDismissed, setIsWarningDismissed] = useState(false);
+  const [errorState, setErrorState] = useState<string | null>(null);
 
   const { data, loading, error } = useQuery(classInstanceQueryDocument, {
     variables: { id },
   });
 
-  const [activateClass] = useMutation(activateClassMutationDocument);
-  const [forceActivateClass] = useMutation(forceActivateClassMutationDocument);
-  const [stopClass] = useMutation(stopClassMutationDocument);
-  const [deleteClass] = useMutation(deleteClassInstanceMutationDocument);
+  const [activateClass] = useMutation(activateClassMutationDocument, {
+    onCompleted: () => {
+      setErrorState(null);
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => setErrorState(err.message),
+  });
+
+  const [activateOverrideClass] = useMutation(activateOverrideClassMutationDocument, {
+    onCompleted: () => {
+      setErrorState(null);
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => setErrorState(err.message),
+  });
+
+  const [stopClass] = useMutation(stopClassMutationDocument, {
+    onCompleted: () => {
+      setErrorState(null);
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => setErrorState(err.message),
+  });
+
+  const [deleteClass] = useMutation(deleteClassInstanceMutationDocument, {
+    onCompleted: () => {
+      setErrorState(null);
+    },
+    onError: err => setErrorState(err.message),
+  });
+
+  const [startSession, { loading: isStarting }] = useMutation(updateSessionStatusStartMutationDocument, {
+    onCompleted: () => {
+      setErrorState(null);
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => setErrorState(err.message),
+  });
+
+  const [markAbsent, { loading: isMarkingAbsent }] = useMutation(updateSessionStatusAbsentMutationDocument, {
+    onCompleted: () => {
+      setErrorState(null);
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => setErrorState(err.message),
+  });
+
+  const [processLeave, { loading: isProcessingLeave }] = useMutation(updateSessionStatusLeaveMutationDocument, {
+    onCompleted: () => {
+      setErrorState(null);
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => setErrorState(err.message),
+  });
+
+  const [resetSession, { loading: isResetting }] = useMutation(resetClassMutationDocument, {
+    onCompleted: () => {
+      setErrorState(null);
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => setErrorState(err.message),
+  });
 
   const canOverride = hasPermission(AppPermission.SessionOverrideActions);
   const canView = hasPermission(AppPermission.SessionViewDetails);
@@ -149,10 +165,10 @@ export function ClassDetailsContainer() {
 
   const handleForceActivate = async () => {
     try {
-      await forceActivateClass({ variables: { classInstanceId: id } });
+      await activateOverrideClass({ variables: { classInstanceId: id } });
       logger.info("Admin force-activated session:", id);
     } catch (err) {
-      logger.error("Error in forceActivateClass:", err);
+      logger.error("Error in activateOverrideClass:", err);
     }
   };
 
@@ -184,33 +200,94 @@ export function ClassDetailsContainer() {
     }
   };
 
+  const handleGenerateLog = async () => {
+    try {
+      const { data: logData } = await client.query({
+        query: classStatusEventsQueryDocument,
+        variables: { classInstanceId: id },
+      });
+
+      if (logData?.classStatusEvents) {
+        const blob = new Blob([JSON.stringify(logData.classStatusEvents, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `class-${id}-events.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      logger.error("Error generating log:", err);
+      setErrorState(getErrorMessage(err));
+    }
+  };
+
+  const handleViewProfile = () => {
+    if (instance.student?.id) {
+      router.push(`/${locale}/students/${instance.student.id}/status`);
+    }
+  };
+
+  const handleInfoEdit = () => {
+    router.push(`/${locale}/classes/${id}/audit`);
+  };
+
   const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;
 
   if (canOverride) {
     return (
-      <AdminViewWrapper
-        pageHeader={pageHeader}
-        instance={instance}
-        isWarningDismissed={isWarningDismissed}
-        onDismissWarning={() => setIsWarningDismissed(true)}
-        onForceActivate={handleForceActivate}
-        onStop={handleStop}
-        onDelete={handleDelete}
-      />
+      <PageContainer>
+        {pageHeader}
+        <AdminView
+          instance={instance}
+          isWarningDismissed={isWarningDismissed}
+          onDismissWarning={() => setIsWarningDismissed(true)}
+          onForceActivate={handleForceActivate}
+          onStop={handleStop}
+          onGenerateLog={handleGenerateLog}
+          onDelete={handleDelete}
+          onStart={() => startSession({ variables: { classInstanceId: id } })}
+          onAbsent={() => markAbsent({ variables: { classInstanceId: id } })}
+          onLeave={reason => processLeave({ variables: { classInstanceId: id, leaveReason: reason } })}
+          onReset={() => resetSession({ variables: { classInstanceId: id } })}
+          isStarting={isStarting}
+          isMarkingAbsent={isMarkingAbsent}
+          isProcessingLeave={isProcessingLeave}
+          isResetting={isResetting}
+          error={errorState}
+        />
+      </PageContainer>
     );
   }
 
   if (canView) {
     return (
-      <TeacherViewWrapper
-        pageHeader={pageHeader}
-        instance={instance}
-        isWarningDismissed={isWarningDismissed}
-        onDismissWarning={() => setIsWarningDismissed(true)}
-        onActivate={handleActivate}
-        onStop={handleStop}
-        onDelete={handleDelete}
-      />
+      <PageContainer>
+        {pageHeader}
+        <TeacherView
+          instance={instance}
+          isWarningDismissed={isWarningDismissed}
+          onDismissWarning={() => setIsWarningDismissed(true)}
+          onActivate={handleActivate}
+          onStop={handleStop}
+          onInfoEdit={handleInfoEdit}
+          onDelete={handleDelete}
+          onViewProfile={handleViewProfile}
+          onStart={() => startSession({ variables: { classInstanceId: id } })}
+          onAbsent={() => markAbsent({ variables: { classInstanceId: id } })}
+          onLeave={reason => processLeave({ variables: { classInstanceId: id, leaveReason: reason } })}
+          onReset={() => resetSession({ variables: { classInstanceId: id } })}
+          isStarting={isStarting}
+          isMarkingAbsent={isMarkingAbsent}
+          isProcessingLeave={isProcessingLeave}
+          isResetting={isResetting}
+          error={errorState}
+        />
+      </PageContainer>
     );
   }
 

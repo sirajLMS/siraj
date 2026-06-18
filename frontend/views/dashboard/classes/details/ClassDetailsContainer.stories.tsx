@@ -46,6 +46,15 @@ function MockAdminViewWrapper({ pageHeader, instance, isWarningDismissed, dismis
         onGenerateLog={handleGenerateLog}
         onDelete={handleDelete}
         labels={labels}
+        onStart={() => logger.info("Start clicked")}
+        onAbsent={() => logger.info("Absent clicked")}
+        onLeave={reason => logger.info("Leave clicked with reason:", reason)}
+        onReset={() => logger.info("Reset clicked")}
+        isStarting={false}
+        isMarkingAbsent={false}
+        isProcessingLeave={false}
+        isResetting={false}
+        error={null}
       />
     </PageContainer>
   );
@@ -83,6 +92,15 @@ function MockTeacherViewWrapper({ pageHeader, instance, isWarningDismissed, dism
         onDelete={handleDelete}
         onViewProfile={handleViewProfile}
         labels={labels}
+        onStart={() => logger.info("Start clicked")}
+        onAbsent={() => logger.info("Absent clicked")}
+        onLeave={reason => logger.info("Leave clicked with reason:", reason)}
+        onReset={() => logger.info("Reset clicked")}
+        isStarting={false}
+        isMarkingAbsent={false}
+        isProcessingLeave={false}
+        isResetting={false}
+        error={null}
       />
     </PageContainer>
   );
