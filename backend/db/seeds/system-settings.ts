@@ -1,6 +1,10 @@
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { db } from "@/backend/db/drizzleDb";
 import { systemSettings } from "@/backend/db/schema";
 import logger from "@/backend/lib/logger";
+import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
+import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 
 const createSetting = (
   key: string,
@@ -31,6 +35,28 @@ const SYSTEM_SETTINGS_DATA = [
 ] as const;
 
 export async function seedOrGet() {
+  logger.info("Initializing storage directories...");
+  try {
+    const fileSeeder = await createFileSeedingService();
+    await fileSeeder.ensureDirectory("public", true);
+    await fileSeeder.ensureDirectory("public/docs", true);
+    logger.info("Storage directories initialized successfully.");
+  } catch (error) {
+    logger.error("Failed to initialize storage directories:", error);
+  }
+
+  // Seed the teacher handbook using SystemSettingsService
+  logger.info("Seeding teacher handbook...");
+  const handbookFileName = "teacher-handbook.pdf";
+  const handbookPath = path.join(__dirname, "assets", "teacher_handbook", handbookFileName);
+  try {
+    const fileBuffer = await fs.readFile(handbookPath);
+    await SystemSettingsService.uploadHandbook(null, handbookFileName, fileBuffer);
+    logger.info("Teacher handbook seeded successfully.");
+  } catch (error) {
+    logger.error("Failed to seed teacher handbook:", error);
+  }
+
   logger.info("Seeding system settings...");
   const now = new Date();
   const results = [];

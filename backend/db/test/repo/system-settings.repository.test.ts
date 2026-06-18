@@ -77,4 +77,50 @@ describe("SystemSettingsRepository", () => {
       expect(value).toBe("default_val");
     });
   });
+
+  it("should upsert setting successfully", async () => {
+    await runInRollback(async tx => {
+      const inserted = await SystemSettingsRepository.upsertSetting(
+        {
+          key: "test_upsert_key",
+          value: "first_value",
+          dataType: "string",
+          category: "system",
+          description: "Test upsert setting",
+        },
+        tx
+      );
+      expect(inserted.value).toBe("first_value");
+
+      const updated = await SystemSettingsRepository.upsertSetting(
+        {
+          key: "test_upsert_key",
+          value: "second_value",
+          dataType: "string",
+          category: "system",
+          description: "Test upsert setting updated",
+        },
+        tx
+      );
+      expect(updated.value).toBe("second_value");
+
+      const setting = await SystemSettingsRepository.getByKey("test_upsert_key", tx);
+      expect(setting?.value).toBe("second_value");
+    });
+  });
+
+  it("should delete setting successfully", async () => {
+    await runInRollback(async tx => {
+      await createTestSetting(tx, "test_delete_key", "value_to_delete");
+
+      const beforeDelete = await SystemSettingsRepository.getByKey("test_delete_key", tx);
+      expect(beforeDelete).not.toBeNull();
+
+      const success = await SystemSettingsRepository.deleteSetting("test_delete_key", tx);
+      expect(success).toBe(true);
+
+      const afterDelete = await SystemSettingsRepository.getByKey("test_delete_key", tx);
+      expect(afterDelete).toBeNull();
+    });
+  });
 });

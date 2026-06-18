@@ -37,4 +37,59 @@ export namespace SystemSettingsRepository {
     }
     return setting.value;
   }
+
+  /**
+   * Upserts a system setting.
+   */
+  export async function upsertSetting(
+    input: {
+      key: string;
+      value: string;
+      dataType?: "string" | "integer";
+      description?: string;
+      category?: string;
+      updatedByUserId?: string | null;
+    },
+    tx?: DBTransaction
+  ): Promise<SystemSettingSelectType> {
+    const queryDb = tx ?? db;
+    const now = new Date();
+    const [inserted] = await queryDb
+      .insert(systemSettings)
+      .values({
+        key: input.key,
+        value: input.value,
+        dataType: input.dataType ?? "string",
+        description: input.description ?? "",
+        category: input.category ?? "system",
+        updatedByUserId: input.updatedByUserId ?? null,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: systemSettings.key,
+        set: {
+          value: input.value,
+          dataType: input.dataType ?? "string",
+          description: input.description ?? "",
+          category: input.category ?? "system",
+          updatedByUserId: input.updatedByUserId ?? null,
+          updatedAt: now,
+        },
+      })
+      .returning();
+    return inserted;
+  }
+
+  /**
+   * Deletes a system setting by key.
+   */
+  export async function deleteSetting(key: string, tx?: DBTransaction): Promise<boolean> {
+    const queryDb = tx ?? db;
+    try {
+      await queryDb.delete(systemSettings).where(eq(systemSettings.key, key));
+      return true;
+    } catch {
+      return false;
+    }
+  }
 }

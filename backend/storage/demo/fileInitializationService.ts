@@ -1,63 +1,43 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import logger from "@/backend/lib/logger";
-import type * as Types from "@/backend/types";
+import type { FileOperationResult, FileUploadResult, FolderCreateInput } from "@/backend/types";
 import { extToMime } from "@/shared/utils/storage.utils";
 import { getStorageService, type StorageService } from "../storage.service";
 
-/**
- * Interface for FileInitializationService
- */
-export interface IFileInitializationService {
+export interface FileSeedInput {
   /**
-   * Initialize required directories and upload demo files
+   * The destination path in the storage bucket (e.g. "public/docs/handbook.pdf")
    */
-  initializeFileSystem(): Promise<void>;
-
+  bucketPath: string;
   /**
-   * Create required directories in the storage system
+   * The absolute path to the local file to upload (or relative to the current execution directory)
    */
-  createRequiredDirectories(): Promise<void>;
-
+  localFilePath: string;
   /**
-   * Create a directory if it doesn't exist
+   * Optional content type. If not provided, it will be inferred from the file extension.
    */
-  createDirectoryIfNotExists(input: Types.FolderCreateInput): Promise<void>;
-
-  /**
-   * Upload demo template files from resources
-   */
-  uploadDemoTemplateFiles(): Promise<void>;
-
-  /**
-   * Upload a demo file if it doesn't exist in storage
-   */
-  uploadDemoFileIfNotExists(fileName: string): Promise<void>;
-
-  /**
-   * Verify that all demo files are properly accessible in the bucket
-   */
-  verifyDemoFilesInDatabase(): Promise<void>;
-
-  /**
-   * Get demo files that are available for templates
-   * Files are automatically registered in the database when uploaded via StorageService
-   * This method retrieves their database IDs for use in templates
-   */
-  getTemplateCoverDemoFileIds(): Promise<string[]>;
-
-  /**
-   * Register file usage for template covers
-   */
-  registerTemplateFileUsage(templateId: string, fileId: string): Promise<void>;
-
-  /**
-   * Get content type from file name
-   */
-  getContentTypeFromFileName(fileName: string): string;
+  contentType?: string;
 }
 
-export class FileInitializationService implements IFileInitializationService {
+export interface IFileSeedingService {
+  /**
+   * Ensures that a directory exists in the storage system.
+   */
+  ensureDirectory(path: string, isProtected?: boolean): Promise<FileOperationResult>;
+
+  /**
+   * Seeds a single file to storage from a local file path if it doesn't already exist.
+   */
+  seedFile(input: FileSeedInput): Promise<FileUploadResult>;
+
+  /**
+   * Seeds multiple files in sequence.
+   */
+  seedFiles(inputs: FileSeedInput[]): Promise<FileUploadResult[]>;
+}
+
+export class FileSeedingService implements IFileSeedingService {
   private readonly storageService: StorageService;
 
   constructor(storageService: StorageService) {
@@ -65,223 +45,104 @@ export class FileInitializationService implements IFileInitializationService {
   }
 
   /**
-   * Create a directory if it doesn't exist
+   * Ensures that a directory exists in the storage system.
    */
-  async createDirectoryIfNotExists(input: Types.FolderCreateInput): Promise<void> {
+  async ensureDirectory(path: string, isProtected = true): Promise<FileOperationResult> {
     try {
-      // Check if directory exists in storage
-      const directoryInfo = await this.storageService.directoryInfoByPath(input.path);
-
+      const directoryInfo = await this.storageService.directoryInfoByPath(path);
       if (directoryInfo) {
-        logger.info(`   📁 Directory already exists: ${input.path}`);
-        return;
+        return { success: true, message: `Directory already exists: ${path}` };
       }
 
-      // Create the directory
+      const input: FolderCreateInput = {
+        path,
+        protected: isProtected,
+      };
+
       const result = await this.storageService.createFolder(input);
-
       if (result.success) {
-        logger.info(`   📁 Created directory: ${input.path}`);
+        logger.info(`   📁 Created directory: ${path}`);
       } else {
-        logger.warn(`   ⚠️  Warning: Could not create directory: ${input.path} - ${result.message}`);
+        logger.warn(`   ⚠️  Could not create directory: ${path} - ${result.message}`);
       }
+      return result;
     } catch (error) {
-      logger.error(`   ❌ Error creating directory ${input.path}:`, error);
-      throw error;
+      logger.error(`   ❌ Error ensuring directory ${path}:`, error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 
   /**
-   * Initialize required directories and upload demo files
+   * Seeds a single file to storage from a local file path if it doesn't already exist.
    */
-  async initializeFileSystem(): Promise<void> {
-    logger.info("🗂️  Initializing file system...");
-
-    // Create required directories
-    await this.createRequiredDirectories();
-
-    // Upload demo template files
-    await this.uploadDemoTemplateFiles();
-
-    logger.info("✅ File system initialization completed");
-  }
-
-  /**
-   * Create required directories in the storage system
-   */
-  async createRequiredDirectories(): Promise<void> {
-    const requiredDirectories: Types.FolderCreateInput[] = [
-      { path: "public", protected: true },
-      { path: "public/templates", protected: true },
-      { path: "public/templates/covers", protected: true },
-    ];
-
-    for (const input of requiredDirectories) {
-      await this.createDirectoryIfNotExists(input);
-    }
-  }
-
-  /**
-   * Upload demo template files from resources
-   */
-  async uploadDemoTemplateFiles(): Promise<void> {
-    const demoFiles = ["demo1.jpg", "demo2.jpg", "demo3.jpg", "demo4.jpg"];
-
-    for (const fileName of demoFiles) {
-      await this.uploadDemoFileIfNotExists(fileName);
-    }
-
-    // After processing all files, verify they are in the database
-    logger.info("   🔍 Verifying demo files are registered in database...");
-    await this.verifyDemoFilesInDatabase();
-  }
-
-  /**
-   * Upload a demo file if it doesn't exist in storage
-   */
-  async uploadDemoFileIfNotExists(fileName: string): Promise<void> {
-    const bucketPath = `public/img/${fileName}`;
+  async seedFile(input: FileSeedInput): Promise<FileUploadResult> {
+    const { bucketPath, localFilePath, contentType } = input;
 
     try {
-      // Check if file exists in storage
+      // 1. Check if file already exists in storage
       const fileInfo = await this.storageService.fileInfoByPath(bucketPath);
-      if (fileInfo) {
-        logger.info(`   🖼️  Demo file already exists in bucket: ${fileName}`);
-        return;
+      if (fileInfo?.url) {
+        return {
+          success: true,
+          message: `File already exists in storage: ${bucketPath}`,
+        };
       }
     } catch (error) {
       logger.warn(
-        `   ⚠️  Could not check bucket for file: ${fileName} - ${error instanceof Error ? error.message : String(error)}`
+        `   ⚠️  Could not check storage for ${bucketPath}: ${error instanceof Error ? error.message : String(error)}`
       );
     }
 
-    // Upload file from resources using StorageService
     try {
-      const resourcePath = path.join(__dirname, "res", fileName);
+      // 2. Read local file from disk
+      const resolvedPath = path.resolve(localFilePath);
+      const fileBuffer = await fs.readFile(resolvedPath);
 
-      // Read file from disk
-      const fileBuffer = await fs.readFile(resourcePath);
-      const contentType = this.getContentTypeFromFileName(fileName);
+      // 3. Detect mime type if not provided
+      const finalContentType = contentType || this.getContentTypeFromFileName(bucketPath) || "application/octet-stream";
 
-      const result = await this.storageService.uploadFile(bucketPath, contentType, fileBuffer);
-
+      // 4. Upload file using StorageService
+      const result = await this.storageService.uploadFile(bucketPath, finalContentType, fileBuffer);
       if (result.success) {
-        logger.info(`   🖼️  Uploaded demo file: ${fileName}`);
+        logger.info(`   📄 Seeded file to storage: ${bucketPath}`);
       } else {
-        logger.error(`   ❌ Failed to upload demo file ${fileName}: ${result.message}`);
+        logger.error(`   ❌ Failed to seed file ${bucketPath}: ${result.message}`);
       }
+      return result;
     } catch (error) {
-      const isNotFound = error instanceof Error && (error as NodeJS.ErrnoException).code === "ENOENT";
-      if (isNotFound) {
-        logger.error(`   ❌ Resource not found: ${fileName}`);
-      } else {
-        logger.error(`   ❌ Failed to upload demo file ${fileName}:`, error);
-      }
+      logger.error(`   ❌ Error seeding file ${bucketPath}:`, error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 
   /**
-   * Verify that all demo files are properly accessible in the bucket
+   * Seeds multiple files in sequence.
    */
-  async verifyDemoFilesInDatabase(): Promise<void> {
-    const demoFiles = [
-      { fileName: "demo1.jpg", bucketPath: "public/img/demo1.jpg" },
-      { fileName: "demo2.jpg", bucketPath: "public/img/demo2.jpg" },
-      { fileName: "demo3.jpg", bucketPath: "public/img/demo3.jpg" },
-      { fileName: "demo4.jpg", bucketPath: "public/img/demo4.jpg" },
-    ];
-
-    for (const { fileName, bucketPath } of demoFiles) {
-      try {
-        const fileInfo = await this.storageService.fileInfoByPath(bucketPath);
-        if (fileInfo) {
-          logger.info(`   ✅ Demo file exists in bucket: ${fileName}`);
-        } else {
-          logger.error(`   ❌ Demo file NOT found in bucket: ${fileName}`);
-        }
-      } catch (error) {
-        logger.error(`   ❌ Error checking demo file ${fileName}:`, error);
-      }
+  async seedFiles(inputs: FileSeedInput[]): Promise<FileUploadResult[]> {
+    const results: FileUploadResult[] = [];
+    for (const input of inputs) {
+      const result = await this.seedFile(input);
+      results.push(result);
     }
+    return results;
   }
 
-  /**
-   * Get demo files that are available for templates
-   */
-  async getTemplateCoverDemoFileIds(): Promise<string[]> {
-    const demoFiles = ["public/img/demo1.jpg", "public/img/demo2.jpg", "public/img/demo3.jpg", "public/img/demo4.jpg"];
-
-    logger.info("   🔍 Checking for demo files and registering as needed...");
-
-    const fileIds: string[] = [];
-    const { StorageDbRepository } = await import("@/backend/db/repo");
-
-    for (const filePath of demoFiles) {
-      try {
-        // First check if already in DB
-        const existingFile = await StorageDbRepository.fileByPath(filePath);
-
-        if (existingFile) {
-          logger.info(`   ✅ Found demo file in database: ${filePath} (ID: ${existingFile.id})`);
-          fileIds.push(existingFile.id);
-          continue;
-        }
-
-        // Check if exists in bucket and register it for use
-        const fileInfo = await this.storageService.fileInfoByPath(filePath);
-
-        if (fileInfo) {
-          // File exists in bucket but not in database - register it
-          const fileEntity = await StorageDbRepository.createFile(
-            filePath,
-            true // isProtected = true for demo files
-          );
-
-          logger.info(`   ✅ Registered demo file for use: ${filePath} (ID: ${fileEntity.id})`);
-          fileIds.push(fileEntity.id);
-        } else {
-          logger.error(`   ❌ Demo file NOT found in bucket: ${filePath}`);
-        }
-      } catch (error) {
-        logger.error(`   ❌ Error accessing demo file ${filePath}:`, error);
-      }
-    }
-
-    logger.info(`   📊 Total demo files available: ${String(fileIds.length)} out of ${String(demoFiles.length)}`);
-    return fileIds;
-  }
-
-  /**
-   * Register file usage for template covers
-   */
-  async registerTemplateFileUsage(templateId: string, fileId: string): Promise<void> {
-    try {
-      const fileInfo = await this.storageService.fileInfoByDbFileId(fileId);
-
-      if (fileInfo) {
-        logger.info(`   📎 File ${fileId} (${fileInfo.path}) will be used for template ${templateId}`);
-        logger.info(`   ℹ️  File usage tracking happens through template-file relationships`);
-      } else {
-        logger.warn(`   ⚠️  File with ID ${fileId} not found`);
-      }
-    } catch (error) {
-      logger.error(`   ❌ Error accessing file ${fileId}:`, error);
-    }
-  }
-
-  /**
-   * Get content type from file name extension
-   */
-  getContentTypeFromFileName(fileName: string): string {
+  private getContentTypeFromFileName(fileName: string): string {
     const extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-    return extToMime[extension] || "image/jpeg";
+    return extToMime[extension] || "application/octet-stream";
   }
 }
 
 /**
- * Factory function to create FileInitializationService instance
+ * Factory function to create FileSeedingService instance
  */
-export const createFileInitializationService = async (): Promise<FileInitializationService> => {
+export const createFileSeedingService = async (): Promise<IFileSeedingService> => {
   const storageService = await getStorageService();
-  return new FileInitializationService(storageService);
+  return new FileSeedingService(storageService);
 };
