@@ -10,16 +10,6 @@ import { AppPermission } from "@/shared/lib/enum";
  *
  * This service implements domain-specific business logic for class session management.
  * It is protected by a multi-layered security setup to prevent IDOR and unauthorized state transitions:
- *
- * 1. Database Level (RLS Policies): class_instances_rls_policies.sql enforces row-level visibility,
- *    scoping read/update queries to only records belonging to the current user's role (Teacher or Parent).
- * 2. Database Level (Triggers): class_instances_state_transition_trigger.sql prevents invalid state machine
- *    transitions (e.g. COMPLETED -> ACTIVATED) at the lowest layer, triggering a transaction rollback.
- * 3. Repository Layer Assertions: SchedulingRepository implements application-level checks to verify the relationship
- *    of the actorUserId to the class instance (e.g., matching teacherId or studentId). It also explicitly blocks
- *    state transition logic bypasses and checks quota constraints before booking.
- * 4. Service Layer: This layer validates that the user possesses the required AppPermission before
- *    deferring to the Repository Layer.
  */
 export namespace ClassSessionService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
@@ -48,15 +38,6 @@ export namespace ClassSessionService {
     return result;
   }
 
-  export async function activate(userId: string, classInstanceId: string, locale?: string) {
-    await assertPermission(userId, AppPermission.SESSION_ACTIVATE_CLASS, locale);
-    const instance = await getOrThrow(classInstanceId, locale);
-
-    await SystemRulesService.assertActivationTimeWindow(instance, locale);
-
-    return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: false });
-  }
-
   async function assertSessionActivated(instance: ClassInstanceEntity, locale?: string): Promise<void> {
     const validStates = ["ACTIVATED", "RUNNING"];
     if (!validStates.includes(instance.executionState)) {
@@ -65,13 +46,30 @@ export namespace ClassSessionService {
     }
   }
 
+  async function runActivatedClassAction<T>(
+    userId: string,
+    classInstanceId: string,
+    permission: AppPermission,
+    locale: string | undefined,
+    action: (instance: ClassInstanceEntity) => Promise<T | null>
+  ): Promise<T> {
+    await assertPermission(userId, permission, locale);
+    const instance = await getOrThrow(classInstanceId, locale);
+    await assertSessionActivated(instance, locale);
+    return handleUpdate(action(instance), locale);
+  }
+
+  export async function activate(userId: string, classInstanceId: string, locale?: string) {
+    await assertPermission(userId, AppPermission.SESSION_ACTIVATE_CLASS, locale);
+    const instance = await getOrThrow(classInstanceId, locale);
+    await SystemRulesService.assertActivationTimeWindow(instance, locale);
+    return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: false });
+  }
+
   export async function activateOverride(userId: string, classInstanceId: string, locale?: string) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, locale);
     await assertPermission(userId, AppPermission.SESSION_ACTIVATE_OVERRIDE, locale);
-
     await getOrThrow(classInstanceId, locale);
-
-    // Bypass SystemRulesService.assertActivationTimeWindow
     return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: true });
   }
 
@@ -86,20 +84,22 @@ export namespace ClassSessionService {
     return deleted !== null;
   }
 
-  export async function updateStatusStart(userId: string, classInstanceId: string, locale?: string) {
-    await assertPermission(userId, AppPermission.SESSION_UPDATE_STATUS_START, locale);
-    const instance = await getOrThrow(classInstanceId, locale);
-    await assertSessionActivated(instance, locale);
-    return handleUpdate(SchedulingRepository.startClassInstance(classInstanceId, userId), locale);
-  }
+  export const updateStatusStart: ClassActionFn<ClassInstanceEntity> = (userId, classInstanceId, locale) =>
+    runActivatedClassAction(userId, classInstanceId, AppPermission.SESSION_UPDATE_STATUS_START, locale, () =>
+      SchedulingRepository.startClassInstance(classInstanceId, userId)
+    );
 
-  export async function updateStatusAbsent(userId: string, classInstanceId: string, locale?: string) {
-    await assertPermission(userId, AppPermission.SESSION_UPDATE_STATUS_ABSENT, locale);
-    const instance = await getOrThrow(classInstanceId, locale);
-    await assertSessionActivated(instance, locale);
-    await SystemRulesService.assertAbsentWaitingPeriod(instance, locale);
-    return handleUpdate(SchedulingRepository.markClassAbsent(classInstanceId, userId), locale);
-  }
+  export const updateStatusAbsent: ClassActionFn<ClassInstanceEntity> = (userId, classInstanceId, locale) =>
+    runActivatedClassAction(
+      userId,
+      classInstanceId,
+      AppPermission.SESSION_UPDATE_STATUS_ABSENT,
+      locale,
+      async instance => {
+        await SystemRulesService.assertAbsentWaitingPeriod(instance, locale);
+        return SchedulingRepository.markClassAbsent(classInstanceId, userId);
+      }
+    );
 
   export async function updateStatusLeave(
     userId: string,
@@ -107,10 +107,9 @@ export namespace ClassSessionService {
     reason?: string | null,
     locale?: string
   ) {
-    await assertPermission(userId, AppPermission.SESSION_UPDATE_STATUS_LEAVE, locale);
-    const instance = await getOrThrow(classInstanceId, locale);
-    await assertSessionActivated(instance, locale);
-    return handleUpdate(SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId), locale);
+    return runActivatedClassAction(userId, classInstanceId, AppPermission.SESSION_UPDATE_STATUS_LEAVE, locale, () =>
+      SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId)
+    );
   }
 
   export async function reschedule(

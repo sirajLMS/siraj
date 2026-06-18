@@ -1,9 +1,14 @@
 import type { ErrorsLabels } from "../types/errors";
 
 export const errors: ErrorsLabels = {
-  unauthorizedViewMetrics: "غير مصرح: صلاحية dashboard.view_metrics مفقودة",
-  unauthorizedViewList: "غير مصرح: صلاحية schedule.view_list مفقودة",
+  unauthorizedViewMetrics: "غير مصرح: مطلوب إذن dashboard.view_metrics",
+  unauthorizedViewList: "غير مصرح: مطلوب إذن schedule.view_list",
   unauthorized: "غير مصرح",
+  unauthorizedAction: "إجراء غير مصرح",
+  insufficientPermissions: "صلاحيات غير كافية",
+  notFound: "غير موجود",
+  sessionNotActivated: "الجلسة غير مفعلة",
+  absentTooEarly: "لا يمكن تسجيل الغياب بعد. يجب الانتظار {waitingMinutes} دقيقة.",
   userNotFound: "المستخدم ذو المعرف {id} غير موجود",
   userEmailExists: "المستخدم ذو البريد الإلكتروني {email} موجود بالفعل",
   userCreateFailed: "فشل إنشاء مستخدم بالبريد الإلكتروني: {email}",

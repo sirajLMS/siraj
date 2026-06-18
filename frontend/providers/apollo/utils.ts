@@ -110,7 +110,7 @@ function handleAuthError(error: unknown, operationName: string | undefined): boo
   if (!isAuthError) return false;
   if (operationName === "login" || operationName === "demoLogin" || operationName === "refreshToken") return false;
 
-  if (typeof globalThis.window !== "undefined") {
+  if (globalThis.window !== undefined) {
     const pathname = globalThis.window.location.pathname;
     const search = globalThis.window.location.search;
     const currentUrl = `${pathname}${search}`;

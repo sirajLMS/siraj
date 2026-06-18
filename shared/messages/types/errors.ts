@@ -2,6 +2,11 @@ export interface ErrorsLabels {
   readonly unauthorizedViewMetrics: string;
   readonly unauthorizedViewList: string;
   readonly unauthorized: string;
+  readonly unauthorizedAction: string;
+  readonly insufficientPermissions: string;
+  readonly notFound: string;
+  readonly sessionNotActivated: string;
+  readonly absentTooEarly: string;
   readonly userNotFound: string;
   readonly userEmailExists: string;
   readonly userCreateFailed: string;

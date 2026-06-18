@@ -29,6 +29,12 @@ const en: MessageSchema = {
     unauthorizedViewMetrics: "Unauthorized: Missing dashboard.view_metrics permission",
     unauthorizedViewList: "Unauthorized: Missing schedule.view_list permission",
     unauthorized: "Unauthorized",
+    unauthorizedAction: "Unauthorized action",
+    insufficientPermissions: "Insufficient permissions",
+    notFound: "Not found",
+    sessionNotActivated: "Class session is not activated",
+    missedClassTime: "Cannot activate class outside of the allowed time window",
+    absentTooEarly: "Cannot mark absent yet. Must wait {waitingMinutes} minutes.",
     userNotFound: "User with ID {id} not found",
     userEmailExists: "User with email {email} already exists",
     userCreateFailed: "Failed to create user with email: {email}",
@@ -80,7 +86,6 @@ const en: MessageSchema = {
     insufficientClasses: "Insufficient classes for student {id}. Remaining: {remaining}, Required: {required}",
     studentVersionMismatch: "Version mismatch for student {id}. Expected {expectedVersion}, got {gotVersion}.",
     cannotVerifyHistoricalBanking: "Cannot verify historical banking records",
-    missedClassTime: "YOU MISSED THE CLASS TIME",
   },
   auth: {
     login: {
@@ -1882,6 +1887,10 @@ const en: MessageSchema = {
         fileRequired: "Please select a file to upload.",
       },
     },
+  },
+  session: {
+    leaveProcessedDescription: "Leave requested. Rescheduled to {successorId}.",
+    absentWaitingRemark: "I have been waiting for the whole class time.",
   },
 };
 

@@ -83,10 +83,9 @@ describe("ClassPerformanceRepository", () => {
 
   it("should trigger transaction callback and throw foreign key error when run without tx and using fake ID", async () => {
     const fakeId = randomUUID();
-    await expect(
-      ClassPerformanceRepository.upsertForClassInstance(fakeId, {
-        engagementScore: 85,
-      })
-    ).rejects.toThrow();
+    const error = await ClassPerformanceRepository.upsertForClassInstance(fakeId, {
+      engagementScore: 85,
+    }).catch(e => e);
+    expect(error).toBeInstanceOf(Error);
   });
 });

@@ -78,7 +78,77 @@ export namespace SchedulingRepository {
     return updated;
   }
 
-  /**
+  async function checkStateChangeAuth(
+    t: DBTransaction,
+    existing: Types.ClassInstanceEntity,
+    actorUserId: string,
+    locale?: string
+  ) {
+    // Scoping IDOR checks (Threat 1)
+    const [teacher] = await t
+      .select({ id: teachers.id })
+      .from(teachers)
+      .where(eq(teachers.userId, actorUserId))
+      .limit(1);
+
+    const [parent] = await t.select({ id: parents.id }).from(parents).where(eq(parents.userId, actorUserId)).limit(1);
+
+    let isParentOfStudent = false;
+    if (parent) {
+      const [studentLink] = await t
+        .select({ id: students.id })
+        .from(students)
+        .where(and(eq(students.id, existing.studentId), eq(students.parentId, parent.id)))
+        .limit(1);
+      if (studentLink) {
+        isParentOfStudent = true;
+      }
+    }
+
+    const isTeacherOfClass = existing.teacherId === teacher?.id;
+
+    if (!isTeacherOfClass && !isParentOfStudent) {
+      // Admin bypass
+      const hasAdminBypass = await PermissionsService.hasAnyPermission(actorUserId, [
+        AppPermission.SESSION_OVERRIDE_ACTIONS,
+        AppPermission.SESSION_ACTIVATE_OVERRIDE,
+        AppPermission.SESSION_RESET,
+      ]);
+
+      if (!hasAdminBypass) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("unauthorizedAction"));
+      }
+    }
+  }
+
+  async function validateStateTransition(
+    existing: Types.ClassInstanceEntity,
+    state: Partial<Types.ClassInstanceInsertInput>,
+    locale?: string
+  ) {
+    // State Transition checks (Threat 3)
+    if (state.executionState === "ACTIVATED") {
+      if (existing.executionState !== "NOT_ACTIVATED") {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("invalidTransition"));
+      }
+    } else if (state.executionState === "RUNNING") {
+      if (existing.executionState !== "ACTIVATED") {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("invalidTransition"));
+      }
+    } else if (state.executionState === "COMPLETED") {
+      const isValidStandard = existing.executionState === "RUNNING";
+      const isValidEarly =
+        existing.executionState === "ACTIVATED" && (state.outcome === "ABSENT" || state.outcome === "LEAVE");
+      if (!isValidStandard && !isValidEarly) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("invalidTransition"));
+      }
+    }
+  }
+
   /**
    * Helper to run a state-changing operation with consistent transaction and logging logic.
    *
@@ -109,65 +179,11 @@ export namespace SchedulingRepository {
       const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
       if (!existing) return null;
 
-      // Scoping IDOR checks (Threat 1)
-      const [teacher] = await t
-        .select({ id: teachers.id })
-        .from(teachers)
-        .where(eq(teachers.userId, actorUserId))
-        .limit(1);
-
-      const [parent] = await t.select({ id: parents.id }).from(parents).where(eq(parents.userId, actorUserId)).limit(1);
-
-      let isParentOfStudent = false;
-      if (parent) {
-        const [studentLink] = await t
-          .select({ id: students.id })
-          .from(students)
-          .where(and(eq(students.id, existing.studentId), eq(students.parentId, parent.id)))
-          .limit(1);
-        if (studentLink) {
-          isParentOfStudent = true;
-        }
-      }
-
-      const isTeacherOfClass = teacher && existing.teacherId === teacher.id;
-
-      if (!isTeacherOfClass && !isParentOfStudent) {
-        // Admin bypass
-        const hasAdminBypass = await PermissionsService.hasAnyPermission(actorUserId, [
-          AppPermission.SESSION_OVERRIDE_ACTIONS,
-          AppPermission.SESSION_ACTIVATE_OVERRIDE,
-          AppPermission.SESSION_RESET,
-        ]);
-
-        if (!hasAdminBypass) {
-          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(tFunc("unauthorizedAction"));
-        }
-      }
+      await checkStateChangeAuth(t, existing, actorUserId, locale);
 
       const { state, event } = await logic(t, existing);
 
-      // State Transition checks (Threat 3)
-      if (state.executionState === "ACTIVATED") {
-        if (existing.executionState !== "NOT_ACTIVATED") {
-          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(tFunc("invalidTransition"));
-        }
-      } else if (state.executionState === "RUNNING") {
-        if (existing.executionState !== "ACTIVATED") {
-          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(tFunc("invalidTransition"));
-        }
-      } else if (state.executionState === "COMPLETED") {
-        const isValidStandard = existing.executionState === "RUNNING";
-        const isValidEarly =
-          existing.executionState === "ACTIVATED" && (state.outcome === "ABSENT" || state.outcome === "LEAVE");
-        if (!isValidStandard && !isValidEarly) {
-          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(tFunc("invalidTransition"));
-        }
-      }
+      await validateStateTransition(existing, state, locale);
 
       return updateInstanceState(t, id, actorUserId, state, event);
     };
@@ -393,6 +409,11 @@ export namespace SchedulingRepository {
         };
       });
 
+      if (!updated) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("classInstanceNotFound", { id }));
+      }
+
       return { originalId: updated.id, successorId: successor.id };
     };
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
@@ -411,6 +432,7 @@ export namespace SchedulingRepository {
         state: {
           executionState: "NOT_ACTIVATED",
           outcome: "PENDING",
+          classType: "REGULAR",
           actualStartAt: null,
           actualEndAt: null,
           activatedAt: null,
@@ -419,7 +441,9 @@ export namespace SchedulingRepository {
           forceActivatedByUserId: null,
           payrollCredited: false,
           quotaDeducted: false,
+          isRescheduled: false,
           remarks: null,
+          adminNotes: null,
         },
         event: {
           fromState: { executionState: existing.executionState, outcome: existing.outcome },

@@ -5,8 +5,38 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students } from "@/backend/db/schema";
 import { setupTestEntities } from "@/backend/db/test/entity-setup";
+import type { DbTransaction } from "@/backend/db/test/test-utils";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { getErrorMessage } from "@/shared/utils/error";
+
+async function createTestInstance(
+  tx: DbTransaction,
+  teacherId: string,
+  studentId: string,
+  overrides: Partial<typeof classInstances.$inferInsert> = {}
+) {
+  const [instance] = await tx
+    .insert(classInstances)
+    .values({
+      teacherId,
+      studentId,
+      classType: "REGULAR",
+      scheduledStartAt: new Date(),
+      scheduledEndAt: new Date(Date.now() + 3600000),
+      durationMinutes: 60,
+      idempotencyKey: randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      executionState: "NOT_ACTIVATED",
+      outcome: "PENDING",
+      quotaDeducted: false,
+      rateAmount: "100.00",
+      rateCurrency: "USD",
+      ...overrides,
+    })
+    .returning();
+  return instance;
+}
 
 describe("Class Instances Security Logic", () => {
   beforeAll(async () => {
@@ -21,31 +51,18 @@ describe("Class Instances Security Logic", () => {
     await teardownRlsRole();
   });
 
+
+
   it("should rollback when a COMPLETED class instance is transitioned to RUNNING", () =>
     runInRollback(async tx => {
       const { teacher, student } = await setupTestEntities(tx, "SecLogic", { skipInstance: true });
 
-      const [instance] = await tx
-        .insert(classInstances)
-        .values({
-          teacherId: teacher.id,
-          studentId: student.id,
-          classType: "REGULAR",
-          scheduledStartAt: new Date(),
-          scheduledEndAt: new Date(Date.now() + 3600000),
-          durationMinutes: 60,
-          idempotencyKey: randomUUID(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          executionState: "COMPLETED",
-          outcome: "TAKEN",
-          actualStartAt: new Date(),
-          actualEndAt: new Date(Date.now() + 3600000),
-          quotaDeducted: false,
-          rateAmount: "100.00",
-          rateCurrency: "USD",
-        })
-        .returning();
+      const instance = await createTestInstance(tx, teacher.id, student.id, {
+        executionState: "COMPLETED",
+        outcome: "TAKEN",
+        actualStartAt: new Date(),
+        actualEndAt: new Date(Date.now() + 3600000),
+      });
 
       expect(instance.executionState).toBe("COMPLETED");
 
@@ -64,22 +81,7 @@ describe("Class Instances Security Logic", () => {
       const scenario1 = await setupTestEntities(tx, "SecLogic", { skipInstance: true });
       await setupTestEntities(tx, "SecLogic", { skipInstance: true });
 
-      await tx.insert(classInstances).values({
-        teacherId: scenario1.teacher.id,
-        studentId: scenario1.student.id,
-        classType: "REGULAR",
-        scheduledStartAt: new Date(),
-        scheduledEndAt: new Date(Date.now() + 3600000),
-        durationMinutes: 60,
-        idempotencyKey: randomUUID(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        executionState: "NOT_ACTIVATED",
-        outcome: "PENDING",
-        quotaDeducted: false,
-        rateAmount: "100.00",
-        rateCurrency: "USD",
-      });
+      await createTestInstance(tx, scenario1.teacher.id, scenario1.student.id);
 
       await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${scenario1.teacherUser.id}, true)`);
@@ -106,29 +108,12 @@ describe("Class Instances Security Logic", () => {
       expect(error).toBeInstanceOf(Error);
       expect(getErrorMessage(error)).toMatch(/students_classes_remaining_chk/);
     }));
+
   describe("Story 2: State Transitions", () => {
     it("allows ACTIVATED → COMPLETED with outcome=ABSENT", () =>
       runInRollback(async tx => {
         const { teacher, student } = await setupTestEntities(tx, "S2-1", { skipInstance: true });
-        const [instance] = await tx
-          .insert(classInstances)
-          .values({
-            teacherId: teacher.id,
-            studentId: student.id,
-            classType: "REGULAR",
-            scheduledStartAt: new Date(),
-            scheduledEndAt: new Date(Date.now() + 3600000),
-            durationMinutes: 60,
-            idempotencyKey: randomUUID(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            executionState: "ACTIVATED",
-            outcome: "PENDING",
-            quotaDeducted: false,
-            rateAmount: "100.00",
-            rateCurrency: "USD",
-          })
-          .returning();
+        const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
 
         await tx
           .update(classInstances)
@@ -139,25 +124,7 @@ describe("Class Instances Security Logic", () => {
     it("allows ACTIVATED → COMPLETED with outcome=LEAVE", () =>
       runInRollback(async tx => {
         const { teacher, student } = await setupTestEntities(tx, "S2-2", { skipInstance: true });
-        const [instance] = await tx
-          .insert(classInstances)
-          .values({
-            teacherId: teacher.id,
-            studentId: student.id,
-            classType: "REGULAR",
-            scheduledStartAt: new Date(),
-            scheduledEndAt: new Date(Date.now() + 3600000),
-            durationMinutes: 60,
-            idempotencyKey: randomUUID(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            executionState: "ACTIVATED",
-            outcome: "PENDING",
-            quotaDeducted: false,
-            rateAmount: "100.00",
-            rateCurrency: "USD",
-          })
-          .returning();
+        const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
 
         await tx
           .update(classInstances)
@@ -168,25 +135,7 @@ describe("Class Instances Security Logic", () => {
     it("blocks ACTIVATED → COMPLETED with outcome=TAKEN", () =>
       runInRollback(async tx => {
         const { teacher, student } = await setupTestEntities(tx, "S2-3", { skipInstance: true });
-        const [instance] = await tx
-          .insert(classInstances)
-          .values({
-            teacherId: teacher.id,
-            studentId: student.id,
-            classType: "REGULAR",
-            scheduledStartAt: new Date(),
-            scheduledEndAt: new Date(Date.now() + 3600000),
-            durationMinutes: 60,
-            idempotencyKey: randomUUID(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            executionState: "ACTIVATED",
-            outcome: "PENDING",
-            quotaDeducted: false,
-            rateAmount: "100.00",
-            rateCurrency: "USD",
-          })
-          .returning();
+        const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
 
         const error = await tx
           .update(classInstances)
@@ -200,27 +149,12 @@ describe("Class Instances Security Logic", () => {
     it("allows COMPLETED → NOT_ACTIVATED (reset)", () =>
       runInRollback(async tx => {
         const { teacher, student } = await setupTestEntities(tx, "S2-4", { skipInstance: true });
-        const [instance] = await tx
-          .insert(classInstances)
-          .values({
-            teacherId: teacher.id,
-            studentId: student.id,
-            classType: "REGULAR",
-            scheduledStartAt: new Date(),
-            scheduledEndAt: new Date(Date.now() + 3600000),
-            durationMinutes: 60,
-            idempotencyKey: randomUUID(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            executionState: "COMPLETED",
-            outcome: "TAKEN",
-            actualStartAt: new Date(),
-            actualEndAt: new Date(Date.now() + 3600000),
-            quotaDeducted: false,
-            rateAmount: "100.00",
-            rateCurrency: "USD",
-          })
-          .returning();
+        const instance = await createTestInstance(tx, teacher.id, student.id, {
+          executionState: "COMPLETED",
+          outcome: "TAKEN",
+          actualStartAt: new Date(),
+          actualEndAt: new Date(Date.now() + 3600000),
+        });
 
         await tx
           .update(classInstances)
@@ -231,25 +165,7 @@ describe("Class Instances Security Logic", () => {
     it("allows ACTIVATED → NOT_ACTIVATED (reset)", () =>
       runInRollback(async tx => {
         const { teacher, student } = await setupTestEntities(tx, "S2-5", { skipInstance: true });
-        const [instance] = await tx
-          .insert(classInstances)
-          .values({
-            teacherId: teacher.id,
-            studentId: student.id,
-            classType: "REGULAR",
-            scheduledStartAt: new Date(),
-            scheduledEndAt: new Date(Date.now() + 3600000),
-            durationMinutes: 60,
-            idempotencyKey: randomUUID(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            executionState: "ACTIVATED",
-            outcome: "PENDING",
-            quotaDeducted: false,
-            rateAmount: "100.00",
-            rateCurrency: "USD",
-          })
-          .returning();
+        const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
 
         await tx
           .update(classInstances)

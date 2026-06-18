@@ -34,10 +34,16 @@ import {
 } from "./dashboard/teachers";
 import { errors } from "./errors";
 
+export const session = {
+  leaveProcessedDescription: "تم طلب مغادرة. تم إعادة الجدولة إلى {successorId}.",
+  absentWaitingRemark: "لقد انتظرت طوال وقت الحصة.",
+};
+
 export const arTranslations = {
   common,
   auth,
   errors,
+  session,
   dashboard: {
     nav,
     layout,
