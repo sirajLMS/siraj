@@ -1,5 +1,6 @@
 import { ClassPerformanceRepository } from "@/backend/db/repo/class-performance.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceDetailDefinition } from "../pothos/class-session.pothos";
 
 /**
@@ -24,6 +25,10 @@ export function buildClassInstanceDetail(
     hasTimezoneMismatch: false,
     studentTimezone: null,
     zoomMeetingUrl: instance.zoomMeetingUrl ?? null,
+    payrollCredited: instance.payrollCredited ?? false,
+    isRescheduled: instance.isRescheduled ?? false,
+    executionState: instance.executionState,
+    outcome: instance.outcome || "PENDING",
     student: {
       id: instance.student?.id || instance.studentId,
       name: instance.student?.name || "Unknown",
@@ -57,9 +62,12 @@ export function buildClassInstanceDetail(
 /**
  * Shared helper to resolve class instance details by ID.
  */
-export async function resolveDetail(classInstanceId: string): Promise<ClassInstanceDetailDefinition> {
+export async function resolveDetail(classInstanceId: string, locale?: string): Promise<ClassInstanceDetailDefinition> {
   const instance = await SchedulingRepository.getClassInstanceById(classInstanceId);
-  if (!instance) throw new Error("Not found");
+  if (!instance) {
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(t("notFound"));
+  }
   const perf = await ClassPerformanceRepository.getByClassInstanceId(classInstanceId);
   return buildClassInstanceDetail(instance, perf);
 }

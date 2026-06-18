@@ -63,14 +63,13 @@ export enum AppPermission {
   ScheduleViewList = 'SCHEDULE_VIEW_LIST',
   ScheduleViewTimezones = 'SCHEDULE_VIEW_TIMEZONES',
   SessionActivateClass = 'SESSION_ACTIVATE_CLASS',
-  SessionAdminLeave = 'SESSION_ADMIN_LEAVE',
-  SessionForceActivate = 'SESSION_FORCE_ACTIVATE',
-  SessionMarkAbsent = 'SESSION_MARK_ABSENT',
+  SessionActivateOverride = 'SESSION_ACTIVATE_OVERRIDE',
   SessionOverrideActions = 'SESSION_OVERRIDE_ACTIONS',
-  SessionRequestLeave = 'SESSION_REQUEST_LEAVE',
   SessionReschedule = 'SESSION_RESCHEDULE',
-  SessionRevert = 'SESSION_REVERT',
-  SessionStart = 'SESSION_START',
+  SessionReset = 'SESSION_RESET',
+  SessionUpdateStatusAbsent = 'SESSION_UPDATE_STATUS_ABSENT',
+  SessionUpdateStatusLeave = 'SESSION_UPDATE_STATUS_LEAVE',
+  SessionUpdateStatusStart = 'SESSION_UPDATE_STATUS_START',
   SessionViewDetails = 'SESSION_VIEW_DETAILS',
   StaffCreate = 'STAFF_CREATE',
   StaffEdit = 'STAFF_EDIT',
@@ -109,9 +108,13 @@ export type ClassInstanceDetail = {
   courseName: Maybe<Scalars['String']['output']>;
   durationMinutes: Maybe<Scalars['Int']['output']>;
   endTime: Maybe<Scalars['String']['output']>;
+  executionState: Maybe<Scalars['String']['output']>;
   hasTimezoneMismatch: Maybe<Scalars['Boolean']['output']>;
   id: Maybe<Scalars['String']['output']>;
   instanceId: Maybe<Scalars['String']['output']>;
+  isRescheduled: Maybe<Scalars['Boolean']['output']>;
+  outcome: Maybe<Scalars['String']['output']>;
+  payrollCredited: Maybe<Scalars['Boolean']['output']>;
   performance: Maybe<ClassInstancePerformance>;
   remarks: Maybe<Scalars['String']['output']>;
   scheduledDate: Maybe<Scalars['String']['output']>;
@@ -604,6 +607,14 @@ export enum Gender {
   Male = 'MALE'
 }
 
+export type LeaveProcessResult = {
+  __typename?: 'LeaveProcessResult';
+  completedInstance: Maybe<ClassInstanceDetail>;
+  completedInstanceId: Maybe<Scalars['Int']['output']>;
+  rescheduledInstance: Maybe<ClassInstanceDetail>;
+  rescheduledInstanceId: Maybe<Scalars['Int']['output']>;
+};
+
 export type LogSupportRequestInput = {
   reason: Scalars['String']['input'];
 };
@@ -622,7 +633,7 @@ export type LoginResponse = {
 export type Mutation = {
   __typename?: 'Mutation';
   activateClass: Maybe<ClassInstanceDetail>;
-  adminExcuseClassLeave: Maybe<ClassInstanceDetail>;
+  activateOverrideClass: Maybe<ClassInstanceDetail>;
   copyStorageItems: Maybe<BulkOperationResult>;
   createFolder: Maybe<FileOperationResult>;
   createTeacherManualClassEntry: Maybe<ClassInstanceDetail>;
@@ -632,23 +643,22 @@ export type Mutation = {
   deleteStudent: Maybe<Student>;
   /** Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables. */
   demoLogin: Maybe<LoginResponse>;
-  forceActivateClass: Maybe<ClassInstanceDetail>;
   logTeacherSupportRequest: Maybe<SupportRequestResult>;
   login: Maybe<LoginResponse>;
   logout: Maybe<Scalars['Boolean']['output']>;
-  markClassAbsent: Maybe<ClassInstanceDetail>;
   moveStorageItems: Maybe<BulkOperationResult>;
   partiallyUpdateStudent: Maybe<Student>;
   prepareUpload: Maybe<UploadPreparation>;
   refreshToken: Maybe<RefreshTokenResponse>;
   renameFile: Maybe<FileOperationResult>;
-  requestClassLeave: Maybe<ClassInstanceDetail>;
   rescheduleClass: Maybe<ClassInstanceDetail>;
-  revertClass: Maybe<ClassInstanceDetail>;
+  resetClass: Maybe<Scalars['Boolean']['output']>;
   setStorageItemProtection: Maybe<FileOperationResult>;
-  startClass: Maybe<ClassInstanceDetail>;
   stopClass: Maybe<ClassInstanceDetail>;
   updateDirectoryPermissions: Maybe<FileOperationResult>;
+  updateSessionStatusAbsent: Maybe<ClassInstanceDetail>;
+  updateSessionStatusLeave: Maybe<LeaveProcessResult>;
+  updateSessionStatusStart: Maybe<ClassInstanceDetail>;
 };
 
 
@@ -657,7 +667,7 @@ export type MutationActivateClassArgs = {
 };
 
 
-export type MutationAdminExcuseClassLeaveArgs = {
+export type MutationActivateOverrideClassArgs = {
   classInstanceId: Scalars['ID']['input'];
 };
 
@@ -702,11 +712,6 @@ export type MutationDemoLoginArgs = {
 };
 
 
-export type MutationForceActivateClassArgs = {
-  classInstanceId: Scalars['ID']['input'];
-};
-
-
 export type MutationLogTeacherSupportRequestArgs = {
   input: LogSupportRequestInput;
 };
@@ -714,11 +719,6 @@ export type MutationLogTeacherSupportRequestArgs = {
 
 export type MutationLoginArgs = {
   input: LoginInput;
-};
-
-
-export type MutationMarkClassAbsentArgs = {
-  classInstanceId: Scalars['ID']['input'];
 };
 
 
@@ -742,30 +742,19 @@ export type MutationRenameFileArgs = {
 };
 
 
-export type MutationRequestClassLeaveArgs = {
-  classInstanceId: Scalars['ID']['input'];
-  reason: InputMaybe<Scalars['String']['input']>;
-};
-
-
 export type MutationRescheduleClassArgs = {
   classInstanceId: Scalars['ID']['input'];
   input: RescheduleClassInput;
 };
 
 
-export type MutationRevertClassArgs = {
+export type MutationResetClassArgs = {
   classInstanceId: Scalars['ID']['input'];
 };
 
 
 export type MutationSetStorageItemProtectionArgs = {
   input: StorageItemProtectionUpdateInput;
-};
-
-
-export type MutationStartClassArgs = {
-  classInstanceId: Scalars['ID']['input'];
 };
 
 
@@ -776,6 +765,22 @@ export type MutationStopClassArgs = {
 
 export type MutationUpdateDirectoryPermissionsArgs = {
   input: DirectoryPermissionsUpdateInput;
+};
+
+
+export type MutationUpdateSessionStatusAbsentArgs = {
+  classInstanceId: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdateSessionStatusLeaveArgs = {
+  classInstanceId: Scalars['ID']['input'];
+  leaveReason: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateSessionStatusStartArgs = {
+  classInstanceId: Scalars['ID']['input'];
 };
 
 export enum OrderSortDirection {

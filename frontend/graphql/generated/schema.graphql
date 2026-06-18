@@ -40,14 +40,13 @@ enum AppPermission {
   SCHEDULE_VIEW_LIST
   SCHEDULE_VIEW_TIMEZONES
   SESSION_ACTIVATE_CLASS
-  SESSION_ADMIN_LEAVE
-  SESSION_FORCE_ACTIVATE
-  SESSION_MARK_ABSENT
+  SESSION_ACTIVATE_OVERRIDE
   SESSION_OVERRIDE_ACTIONS
-  SESSION_REQUEST_LEAVE
   SESSION_RESCHEDULE
-  SESSION_REVERT
-  SESSION_START
+  SESSION_RESET
+  SESSION_UPDATE_STATUS_ABSENT
+  SESSION_UPDATE_STATUS_LEAVE
+  SESSION_UPDATE_STATUS_START
   SESSION_VIEW_DETAILS
   STAFF_CREATE
   STAFF_EDIT
@@ -83,9 +82,13 @@ type ClassInstanceDetail {
   courseName: String
   durationMinutes: Int
   endTime: String
+  executionState: String
   hasTimezoneMismatch: Boolean
   id: String
   instanceId: String
+  isRescheduled: Boolean
+  outcome: String
+  payrollCredited: Boolean
   performance: ClassInstancePerformance
   remarks: String
   scheduledDate: String
@@ -580,6 +583,13 @@ enum Gender {
 """A type representing arbitrary JSON values"""
 scalar JSON
 
+type LeaveProcessResult {
+  completedInstance: ClassInstanceDetail
+  completedInstanceId: Int
+  rescheduledInstance: ClassInstanceDetail
+  rescheduledInstanceId: Int
+}
+
 input LogSupportRequestInput {
   reason: String!
 }
@@ -596,7 +606,7 @@ type LoginResponse {
 
 type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
-  adminExcuseClassLeave(classInstanceId: ID!): ClassInstanceDetail
+  activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createFolder(input: FolderCreateInput!): FileOperationResult
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
@@ -609,23 +619,22 @@ type Mutation {
   Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
   """
   demoLogin(input: DemoLoginInput!): LoginResponse
-  forceActivateClass(classInstanceId: ID!): ClassInstanceDetail
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
   logout: Boolean
-  markClassAbsent(classInstanceId: ID!): ClassInstanceDetail
   moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
   refreshToken: RefreshTokenResponse
   renameFile(input: FileRenameInput!): FileOperationResult
-  requestClassLeave(classInstanceId: ID!, reason: String): ClassInstanceDetail
   rescheduleClass(classInstanceId: ID!, input: RescheduleClassInput!): ClassInstanceDetail
-  revertClass(classInstanceId: ID!): ClassInstanceDetail
+  resetClass(classInstanceId: ID!): Boolean
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
-  startClass(classInstanceId: ID!): ClassInstanceDetail
   stopClass(classInstanceId: ID!): ClassInstanceDetail
   updateDirectoryPermissions(input: DirectoryPermissionsUpdateInput!): FileOperationResult
+  updateSessionStatusAbsent(classInstanceId: ID!): ClassInstanceDetail
+  updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
+  updateSessionStatusStart(classInstanceId: ID!): ClassInstanceDetail
 }
 
 enum OrderSortDirection {

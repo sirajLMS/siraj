@@ -51,8 +51,6 @@ describe("Class Instances Security Logic", () => {
     await teardownRlsRole();
   });
 
-
-
   it("should rollback when a COMPLETED class instance is transitioned to RUNNING", () =>
     runInRollback(async tx => {
       const { teacher, student } = await setupTestEntities(tx, "SecLogic", { skipInstance: true });

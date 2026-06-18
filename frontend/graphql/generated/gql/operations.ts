@@ -45,14 +45,13 @@ export type AppPermission =
   | 'SCHEDULE_VIEW_LIST'
   | 'SCHEDULE_VIEW_TIMEZONES'
   | 'SESSION_ACTIVATE_CLASS'
-  | 'SESSION_ADMIN_LEAVE'
-  | 'SESSION_FORCE_ACTIVATE'
-  | 'SESSION_MARK_ABSENT'
+  | 'SESSION_ACTIVATE_OVERRIDE'
   | 'SESSION_OVERRIDE_ACTIONS'
-  | 'SESSION_REQUEST_LEAVE'
   | 'SESSION_RESCHEDULE'
-  | 'SESSION_REVERT'
-  | 'SESSION_START'
+  | 'SESSION_RESET'
+  | 'SESSION_UPDATE_STATUS_ABSENT'
+  | 'SESSION_UPDATE_STATUS_LEAVE'
+  | 'SESSION_UPDATE_STATUS_START'
   | 'SESSION_VIEW_DETAILS'
   | 'STAFF_CREATE'
   | 'STAFF_EDIT'
@@ -264,7 +263,7 @@ export type ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassIn
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance = { engagementScore: number | null, assessmentProgress: number | null, assessmentTotal: number | null, focusLevel: string | null, sessionHealth: string | null, heatmapData: Array<unknown> | null, latencyMs: number | null, attendanceRate: number | null, avgGrade: string | null, lastClassDaysAgo: number | null };
 
-export type ClassInstanceQuery_classInstance_ClassInstanceDetail = { id: string | null, courseName: string | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: string | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: string | null, zoomMeetingUrl: string | null, student: ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo | null, teacher: ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo | null, performance: ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance | null };
+export type ClassInstanceQuery_classInstance_ClassInstanceDetail = { id: string | null, courseName: string | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: string | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: string | null, zoomMeetingUrl: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, executionState: string | null, outcome: string | null, student: ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo | null, teacher: ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo | null, performance: ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance | null };
 
 export type ClassInstanceQuery_Query = { classInstance: ClassInstanceQuery_classInstance_ClassInstanceDetail | null };
 
@@ -300,17 +299,68 @@ export type ActivateClassMutationVariables = Exact<{
 
 export type ActivateClassMutation = ActivateClassMutation_Mutation;
 
-export type ForceActivateClassMutation_forceActivateClass_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null, zoomMeetingUrl: string | null };
+export type ActivateOverrideClassMutation_activateOverrideClass_ClassInstanceDetail = { id: string | null, executionState: string | null, status: string | null, durationMinutes: number | null, remarks: string | null, zoomMeetingUrl: string | null };
 
-export type ForceActivateClassMutation_Mutation = { forceActivateClass: ForceActivateClassMutation_forceActivateClass_ClassInstanceDetail | null };
+export type ActivateOverrideClassMutation_Mutation = { activateOverrideClass: ActivateOverrideClassMutation_activateOverrideClass_ClassInstanceDetail | null };
 
 
-export type ForceActivateClassMutationVariables = Exact<{
+export type ActivateOverrideClassMutationVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
 
-export type ForceActivateClassMutation = ForceActivateClassMutation_Mutation;
+export type ActivateOverrideClassMutation = ActivateOverrideClassMutation_Mutation;
+
+export type ResetClassMutation_Mutation = { resetClass: boolean | null };
+
+
+export type ResetClassMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type ResetClassMutation = ResetClassMutation_Mutation;
+
+export type UpdateSessionStatusStartMutation_updateSessionStatusStart_ClassInstanceDetail = { id: string | null, executionState: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
+
+export type UpdateSessionStatusStartMutation_Mutation = { updateSessionStatusStart: UpdateSessionStatusStartMutation_updateSessionStatusStart_ClassInstanceDetail | null };
+
+
+export type UpdateSessionStatusStartMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type UpdateSessionStatusStartMutation = UpdateSessionStatusStartMutation_Mutation;
+
+export type UpdateSessionStatusAbsentMutation_updateSessionStatusAbsent_ClassInstanceDetail = { id: string | null, executionState: string | null, outcome: string | null, payrollCredited: boolean | null, status: string | null, durationMinutes: number | null, remarks: string | null };
+
+export type UpdateSessionStatusAbsentMutation_Mutation = { updateSessionStatusAbsent: UpdateSessionStatusAbsentMutation_updateSessionStatusAbsent_ClassInstanceDetail | null };
+
+
+export type UpdateSessionStatusAbsentMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type UpdateSessionStatusAbsentMutation = UpdateSessionStatusAbsentMutation_Mutation;
+
+export type UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult_completedInstance_ClassInstanceDetail = { id: string | null, outcome: string | null, isRescheduled: boolean | null };
+
+export type UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult_rescheduledInstance_ClassInstanceDetail = { id: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null };
+
+export type UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult = { completedInstanceId: number | null, rescheduledInstanceId: number | null, completedInstance: UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult_completedInstance_ClassInstanceDetail | null, rescheduledInstance: UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult_rescheduledInstance_ClassInstanceDetail | null };
+
+export type UpdateSessionStatusLeaveMutation_Mutation = { updateSessionStatusLeave: UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult | null };
+
+
+export type UpdateSessionStatusLeaveMutationVariables = Exact<{
+  classInstanceId: string | number;
+  leaveReason: string;
+}>;
+
+
+export type UpdateSessionStatusLeaveMutation = UpdateSessionStatusLeaveMutation_Mutation;
 
 export type StopClassMutation_stopClass_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
 
@@ -324,55 +374,6 @@ export type StopClassMutationVariables = Exact<{
 
 export type StopClassMutation = StopClassMutation_Mutation;
 
-export type StartClassMutation_startClass_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
-
-export type StartClassMutation_Mutation = { startClass: StartClassMutation_startClass_ClassInstanceDetail | null };
-
-
-export type StartClassMutationVariables = Exact<{
-  classInstanceId: string | number;
-}>;
-
-
-export type StartClassMutation = StartClassMutation_Mutation;
-
-export type MarkClassAbsentMutation_markClassAbsent_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
-
-export type MarkClassAbsentMutation_Mutation = { markClassAbsent: MarkClassAbsentMutation_markClassAbsent_ClassInstanceDetail | null };
-
-
-export type MarkClassAbsentMutationVariables = Exact<{
-  classInstanceId: string | number;
-}>;
-
-
-export type MarkClassAbsentMutation = MarkClassAbsentMutation_Mutation;
-
-export type RequestClassLeaveMutation_requestClassLeave_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
-
-export type RequestClassLeaveMutation_Mutation = { requestClassLeave: RequestClassLeaveMutation_requestClassLeave_ClassInstanceDetail | null };
-
-
-export type RequestClassLeaveMutationVariables = Exact<{
-  classInstanceId: string | number;
-  reason: string | null | undefined;
-}>;
-
-
-export type RequestClassLeaveMutation = RequestClassLeaveMutation_Mutation;
-
-export type AdminExcuseClassLeaveMutation_adminExcuseClassLeave_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
-
-export type AdminExcuseClassLeaveMutation_Mutation = { adminExcuseClassLeave: AdminExcuseClassLeaveMutation_adminExcuseClassLeave_ClassInstanceDetail | null };
-
-
-export type AdminExcuseClassLeaveMutationVariables = Exact<{
-  classInstanceId: string | number;
-}>;
-
-
-export type AdminExcuseClassLeaveMutation = AdminExcuseClassLeaveMutation_Mutation;
-
 export type RescheduleClassMutation_rescheduleClass_ClassInstanceDetail = { id: string | null, status: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null };
 
 export type RescheduleClassMutation_Mutation = { rescheduleClass: RescheduleClassMutation_rescheduleClass_ClassInstanceDetail | null };
@@ -385,18 +386,6 @@ export type RescheduleClassMutationVariables = Exact<{
 
 
 export type RescheduleClassMutation = RescheduleClassMutation_Mutation;
-
-export type RevertClassMutation_revertClass_ClassInstanceDetail = { id: string | null, status: string | null, durationMinutes: number | null, remarks: string | null };
-
-export type RevertClassMutation_Mutation = { revertClass: RevertClassMutation_revertClass_ClassInstanceDetail | null };
-
-
-export type RevertClassMutationVariables = Exact<{
-  classInstanceId: string | number;
-}>;
-
-
-export type RevertClassMutation = RevertClassMutation_Mutation;
 
 export type DeleteClassInstanceMutation_Mutation = { deleteClassInstance: boolean | null };
 

@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { resolveDetail } from "../utils/class-session.utils";
 
 // ─── Performance ─────────────────────────────────────────────────────────────
 
@@ -94,6 +95,10 @@ export type ClassInstanceDetailDefinition = {
   hasTimezoneMismatch: boolean;
   studentTimezone: string | null;
   zoomMeetingUrl: string | null;
+  payrollCredited: boolean;
+  isRescheduled: boolean;
+  executionState: string;
+  outcome: string;
   student: ClassInstanceStudentDefinition;
   teacher: ClassInstanceTeacherDefinition;
   performance: ClassInstancePerformanceDefinition | null;
@@ -115,6 +120,10 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     hasTimezoneMismatch: t.exposeBoolean("hasTimezoneMismatch"),
     studentTimezone: t.exposeString("studentTimezone", { nullable: true }),
     zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
+    payrollCredited: t.exposeBoolean("payrollCredited"),
+    isRescheduled: t.exposeBoolean("isRescheduled"),
+    executionState: t.exposeString("executionState"),
+    outcome: t.exposeString("outcome"),
     student: t.expose("student", { type: ClassInstanceStudentPothosObject }),
     teacher: t.expose("teacher", { type: ClassInstanceTeacherPothosObject }),
     performance: t.expose("performance", {
@@ -175,5 +184,29 @@ export const SupportRequestResultPothosObject = SupportRequestResultRef.implemen
   fields: t => ({
     id: t.exposeString("id"),
     success: t.exposeBoolean("success"),
+  }),
+});
+
+// ─── Leave Process Result ───────────────────────────────────────────────────
+
+export type LeaveProcessResultDefinition = {
+  completedInstanceId: string;
+  rescheduledInstanceId: string;
+};
+
+const LeaveProcessResultRef = gqlSchemaBuilder.objectRef<LeaveProcessResultDefinition>("LeaveProcessResult");
+
+export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
+  fields: t => ({
+    completedInstanceId: t.exposeString("completedInstanceId"),
+    rescheduledInstanceId: t.exposeString("rescheduledInstanceId"),
+    completedInstance: t.field({
+      type: ClassInstanceDetailPothosObject,
+      resolve: (parent, _args, ctx) => resolveDetail(parent.completedInstanceId, ctx.locale),
+    }),
+    rescheduledInstance: t.field({
+      type: ClassInstanceDetailPothosObject,
+      resolve: (parent, _args, ctx) => resolveDetail(parent.rescheduledInstanceId, ctx.locale),
+    }),
   }),
 });

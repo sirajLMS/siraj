@@ -20,6 +20,10 @@ export const classInstanceQueryDocument: TypedDocumentNode<
       hasTimezoneMismatch
       studentTimezone
       zoomMeetingUrl
+      payrollCredited
+      isRescheduled
+      executionState
+      outcome
       student {
         id
         name
@@ -78,13 +82,14 @@ export const activateClassMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const forceActivateClassMutationDocument: TypedDocumentNode<
-  Operations.ForceActivateClassMutation,
-  Types.MutationForceActivateClassArgs
+export const activateOverrideClassMutationDocument: TypedDocumentNode<
+  Operations.ActivateOverrideClassMutation,
+  Types.MutationActivateOverrideClassArgs
 > = gql`
-  mutation forceActivateClass($classInstanceId: ID!) {
-    forceActivateClass(classInstanceId: $classInstanceId) {
+  mutation activateOverrideClass($classInstanceId: ID!) {
+    activateOverrideClass(classInstanceId: $classInstanceId) {
       id
+      executionState
       status
       durationMinutes
       remarks
@@ -93,66 +98,74 @@ export const forceActivateClassMutationDocument: TypedDocumentNode<
   }
 `;
 
+export const resetClassMutationDocument: TypedDocumentNode<
+  Operations.ResetClassMutation,
+  Types.MutationResetClassArgs
+> = gql`
+  mutation resetClass($classInstanceId: ID!) {
+    resetClass(classInstanceId: $classInstanceId)
+  }
+`;
+
+export const updateSessionStatusStartMutationDocument: TypedDocumentNode<
+  Operations.UpdateSessionStatusStartMutation,
+  Types.MutationUpdateSessionStatusStartArgs
+> = gql`
+  mutation updateSessionStatusStart($classInstanceId: ID!) {
+    updateSessionStatusStart(classInstanceId: $classInstanceId) {
+      id
+      executionState
+      status
+      durationMinutes
+      remarks
+    }
+  }
+`;
+
+export const updateSessionStatusAbsentMutationDocument: TypedDocumentNode<
+  Operations.UpdateSessionStatusAbsentMutation,
+  Types.MutationUpdateSessionStatusAbsentArgs
+> = gql`
+  mutation updateSessionStatusAbsent($classInstanceId: ID!) {
+    updateSessionStatusAbsent(classInstanceId: $classInstanceId) {
+      id
+      executionState
+      outcome
+      payrollCredited
+      status
+      durationMinutes
+      remarks
+    }
+  }
+`;
+
+export const updateSessionStatusLeaveMutationDocument: TypedDocumentNode<
+  Operations.UpdateSessionStatusLeaveMutation,
+  Types.MutationUpdateSessionStatusLeaveArgs
+> = gql`
+  mutation updateSessionStatusLeave($classInstanceId: ID!, $leaveReason: String!) {
+    updateSessionStatusLeave(classInstanceId: $classInstanceId, leaveReason: $leaveReason) {
+      completedInstanceId
+      rescheduledInstanceId
+      completedInstance {
+        id
+        outcome
+        isRescheduled
+      }
+      rescheduledInstance {
+        id
+        scheduledDate
+        startTime
+        endTime
+      }
+    }
+  }
+`;
+
 export const stopClassMutationDocument: TypedDocumentNode<Operations.StopClassMutation, Types.MutationStopClassArgs> =
   gql`
   mutation stopClass($classInstanceId: ID!) {
     stopClass(classInstanceId: $classInstanceId) {
-      id
-      status
-      durationMinutes
-      remarks
-    }
-  }
-`;
-
-export const startClassMutationDocument: TypedDocumentNode<
-  Operations.StartClassMutation,
-  Types.MutationStartClassArgs
-> = gql`
-  mutation startClass($classInstanceId: ID!) {
-    startClass(classInstanceId: $classInstanceId) {
-      id
-      status
-      durationMinutes
-      remarks
-    }
-  }
-`;
-
-export const markClassAbsentMutationDocument: TypedDocumentNode<
-  Operations.MarkClassAbsentMutation,
-  Types.MutationMarkClassAbsentArgs
-> = gql`
-  mutation markClassAbsent($classInstanceId: ID!) {
-    markClassAbsent(classInstanceId: $classInstanceId) {
-      id
-      status
-      durationMinutes
-      remarks
-    }
-  }
-`;
-
-export const requestClassLeaveMutationDocument: TypedDocumentNode<
-  Operations.RequestClassLeaveMutation,
-  Types.MutationRequestClassLeaveArgs
-> = gql`
-  mutation requestClassLeave($classInstanceId: ID!, $reason: String) {
-    requestClassLeave(classInstanceId: $classInstanceId, reason: $reason) {
-      id
-      status
-      durationMinutes
-      remarks
-    }
-  }
-`;
-
-export const adminExcuseClassLeaveMutationDocument: TypedDocumentNode<
-  Operations.AdminExcuseClassLeaveMutation,
-  Types.MutationAdminExcuseClassLeaveArgs
-> = gql`
-  mutation adminExcuseClassLeave($classInstanceId: ID!) {
-    adminExcuseClassLeave(classInstanceId: $classInstanceId) {
       id
       status
       durationMinutes
@@ -173,20 +186,6 @@ export const rescheduleClassMutationDocument: TypedDocumentNode<
       startTime
       endTime
       durationMinutes
-    }
-  }
-`;
-
-export const revertClassMutationDocument: TypedDocumentNode<
-  Operations.RevertClassMutation,
-  Types.MutationRevertClassArgs
-> = gql`
-  mutation revertClass($classInstanceId: ID!) {
-    revertClass(classInstanceId: $classInstanceId) {
-      id
-      status
-      durationMinutes
-      remarks
     }
   }
 `;

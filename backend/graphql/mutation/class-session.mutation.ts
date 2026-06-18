@@ -3,7 +3,11 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { type ClassActionFn, ClassSessionService } from "@/backend/services/session/class-session.service";
 import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { ClassInstanceDetailPothosObject, RescheduleClassInputPothosObject } from "../pothos/class-session.pothos";
+import {
+  ClassInstanceDetailPothosObject,
+  LeaveProcessResultPothosObject,
+  RescheduleClassInputPothosObject,
+} from "../pothos/class-session.pothos";
 import { resolveDetail } from "../utils/class-session.utils";
 
 // ─── Shared Helpers ───────────────────────────────────────────────────────────
@@ -19,7 +23,7 @@ async function requireAuth(ctx: BaseContext): Promise<string> {
 async function handleClassAction<R>(ctx: BaseContext, classInstanceId: string, action: ClassActionFn<R>) {
   const userId = await requireAuth(ctx);
   await action(userId, classInstanceId, ctx.locale);
-  return resolveDetail(classInstanceId);
+  return resolveDetail(classInstanceId, ctx.locale);
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
@@ -33,7 +37,7 @@ gqlSchemaBuilder.mutationField("activateClass", t =>
   })
 );
 
-gqlSchemaBuilder.mutationField("forceActivateClass", t =>
+gqlSchemaBuilder.mutationField("activateOverrideClass", t =>
   t.field({
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
@@ -51,7 +55,7 @@ gqlSchemaBuilder.mutationField("stopClass", t =>
   })
 );
 
-gqlSchemaBuilder.mutationField("startClass", t =>
+gqlSchemaBuilder.mutationField("updateSessionStatusStart", t =>
   t.field({
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
@@ -61,7 +65,7 @@ gqlSchemaBuilder.mutationField("startClass", t =>
   })
 );
 
-gqlSchemaBuilder.mutationField("markClassAbsent", t =>
+gqlSchemaBuilder.mutationField("updateSessionStatusAbsent", t =>
   t.field({
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
@@ -71,28 +75,26 @@ gqlSchemaBuilder.mutationField("markClassAbsent", t =>
   })
 );
 
-gqlSchemaBuilder.mutationField("requestClassLeave", t =>
+gqlSchemaBuilder.mutationField("updateSessionStatusLeave", t =>
   t.field({
-    type: ClassInstanceDetailPothosObject,
+    type: LeaveProcessResultPothosObject,
     args: {
       classInstanceId: t.arg.id({ required: true }),
-      reason: t.arg.string({ required: false }),
+      leaveReason: t.arg.string({ required: true }),
     },
     authScopes: { loggedIn: true },
-    resolve: (_parent, args, ctx) =>
-      handleClassAction(ctx, args.classInstanceId, (userId, id, locale) =>
-        ClassSessionService.updateStatusLeave(userId, id, args.reason ?? null, locale)
-      ),
-  })
-);
-
-gqlSchemaBuilder.mutationField("adminExcuseClassLeave", t =>
-  t.field({
-    type: ClassInstanceDetailPothosObject,
-    args: { classInstanceId: t.arg.id({ required: true }) },
-    authScopes: { loggedIn: true },
-    resolve: (_parent, args, ctx) =>
-      handleClassAction(ctx, args.classInstanceId, ClassSessionService.updateStatusLeave),
+    resolve: async (_parent, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      const result = await ClassSessionService.updateStatusLeave(
+        userId,
+        args.classInstanceId,
+        args.leaveReason,
+        ctx.locale
+      );
+      return {
+        completedInstanceId: result.originalId,
+        rescheduledInstanceId: result.successorId,
+      };},
   })
 );
 
@@ -127,17 +129,21 @@ gqlSchemaBuilder.mutationField("rescheduleClass", t =>
         },
         ctx.locale
       );
-      return resolveDetail(newInstance.id);
+      return resolveDetail(newInstance.id, ctx.locale);
     },
   })
 );
 
-gqlSchemaBuilder.mutationField("revertClass", t =>
+gqlSchemaBuilder.mutationField("resetClass", t =>
   t.field({
-    type: ClassInstanceDetailPothosObject,
+    type: "Boolean",
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.reset),
+    resolve: async (_parent, args, ctx) => {
+      const userId = await requireAuth(ctx);
+      await ClassSessionService.reset(userId, args.classInstanceId, ctx.locale);
+      return true;
+    },
   })
 );
 
