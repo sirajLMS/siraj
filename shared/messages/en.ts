@@ -1905,6 +1905,13 @@ const en: MessageSchema = {
     leaveRescheduledRemark: "Leave approved - session rescheduled.",
     resetDescription: "Session reset by administrator.",
     absentEventDescription: "Student marked as absent after waiting period.",
+    manualRescheduleDescription: "Class manually rescheduled to {newStart} by administrator.",
+    manualRescheduleRemark: "Rescheduled: Moved from {oldStart} to {newStart}.",
+    activateDescription: "Activated",
+    forceActivateDescription: "Force activated",
+    startDescription: "Started class",
+    stopDescription: "Stopped manually",
+    softDeleteDescription: "Soft deleted",
   },
 };
 

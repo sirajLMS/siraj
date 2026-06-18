@@ -3091,15 +3091,15 @@ describe("Story 2: Live Session Lifecycle", () => {
 ```
 
 **Success Criteria:**
-- [ ] All integration tests pass
-- [ ] `activateOverrideClass` tested (admin succeeds, teacher fails)
-- [ ] `updateSessionStatusStart` tested (RUNNING transition + timestamp)
-- [ ] `updateSessionStatusAbsent` tested (payroll flag + waiting period)
-- [ ] `updateSessionStatusLeave` tested (successor instance created)
-- [ ] `resetClass` tested (admin succeeds, teacher fails)
-- [ ] IDOR protection verified (cross-teacher access blocked)
-- [ ] Tests use `TypedDocumentNode` (no raw strings)
-- [ ] Tests use shared helpers (`loginDemoUser`, etc.)
+- [x] All integration tests pass
+- [x] `activateOverrideClass` tested (admin succeeds, teacher fails)
+- [x] `updateSessionStatusStart` tested (RUNNING transition + timestamp)
+- [x] `updateSessionStatusAbsent` tested (payroll flag + waiting period)
+- [x] `updateSessionStatusLeave` tested (successor instance created)
+- [x] `resetClass` tested (admin succeeds, teacher fails)
+- [x] IDOR protection verified (cross-teacher access blocked)
+- [x] Tests use `TypedDocumentNode` (no raw strings)
+- [x] Tests use shared helpers (`loginDemoUser`, etc.)
 
 ---
 

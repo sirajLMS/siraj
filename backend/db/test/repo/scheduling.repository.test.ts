@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import {
   classInstances,
   classStatusEvents,
@@ -773,6 +774,87 @@ describe("Scheduling Repository logic", () => {
 
         const eventsNoTx = await SchedulingRepository.getClassStatusEvents(id);
         expect(Array.isArray(eventsNoTx)).toBe(true);
+      });
+    });
+
+    test("resetClassInstance restores quota if quotaDeducted was true", async () => {
+      await runInRollback(async tx => {
+        const { instance, student, teacher } = await setupTestEntities(tx, "ResetQ", { skipInstance: false });
+        const id = instance?.id;
+        const u = teacher.userId;
+        if (!id || !u) throw new Error("setup error");
+
+        // Set quotaDeducted to true and record initial classesRemaining
+        await tx.update(classInstances).set({ quotaDeducted: true, executionState: "ACTIVATED" }).where(eq(classInstances.id, id));
+        const [sBefore] = await tx.select().from(students).where(eq(students.id, student.id));
+
+        const reverted = await SchedulingRepository.resetClassInstance(id, u, tx);
+        expect(reverted?.executionState).toBe("NOT_ACTIVATED");
+        expect(reverted?.quotaDeducted).toBe(false);
+
+        const [sAfter] = await tx.select().from(students).where(eq(students.id, student.id));
+        expect(sAfter.classesRemaining).toBe(sBefore.classesRemaining + 1);
+      });
+    });
+
+    test("IDOR checks allow parent of student to perform action", async () => {
+      await runInRollback(async tx => {
+        const { student, parent, user: parentUser } = await setupStudent(tx, {
+          name: "Parent User",
+          email: `parent-${randomUUID()}@example.com`,
+        });
+        const { teacher } = await setupTeacher(tx);
+        
+        // Ensure student has a teacher assignment
+        await tx.insert(teacherAssignments).values({
+          studentId: student.id,
+          teacherId: teacher.id,
+          assignedAt: new Date(),
+        });
+        
+        const instance = await createMockClassInstance(tx, student.id, teacher.id);
+        
+        // Parent of student should bypass IDOR check successfully
+        const activated = await SchedulingRepository.activateClassInstance(instance.id, parentUser.id, { force: true }, tx);
+        expect(activated).not.toBeNull();
+        expect(activated?.executionState).toBe("ACTIVATED");
+      });
+    });
+
+    test("processClassLeave throws error when instance doesn't exist", async () => {
+      await runInRollback(async tx => {
+        const fakeId = randomUUID();
+        await expectRepositoryError(() =>
+          SchedulingRepository.processClassLeave(fakeId, "Sick", "some-actor-id", tx)
+        );
+      });
+    });
+
+    test("processClassLeave throws error when updated is falsy", async () => {
+      await runInRollback(async tx => {
+        const { instance, teacher } = await setupTestEntities(tx, "LeaveFalsy");
+        const id = instance?.id;
+        const u = teacher.userId;
+        if (!id || !u) throw new Error("setup error");
+
+        // Mock SchedulingRepository.rescheduleClassInstance to delete the instance right after rescheduling
+        const originalReschedule = SchedulingRepository.rescheduleClassInstance;
+        SchedulingRepository.rescheduleClassInstance = async (originalClassId, input, transaction, locale) => {
+          const res = await originalReschedule(originalClassId, input, transaction, locale);
+          if (transaction) {
+            await transaction.delete(classInstances).where(eq(classInstances.id, originalClassId));
+          }
+          return res;
+        };
+
+        try {
+          // This should throw because the class instance is deleted right after rescheduling and won't be updated by runStateChange
+          await expectRepositoryError(() =>
+            SchedulingRepository.processClassLeave(id, "Sick", u, tx)
+          );
+        } finally {
+          SchedulingRepository.rescheduleClassInstance = originalReschedule;
+        }
       });
     });
   });

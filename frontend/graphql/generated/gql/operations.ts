@@ -116,6 +116,13 @@ export type RescheduleClassInput = {
   scheduledStartAt: string;
 };
 
+export type RescheduleTrackingInput = {
+  limit: number | null | undefined;
+  offset: number | null | undefined;
+  search: string | null | undefined;
+  status: string | null | undefined;
+};
+
 export type StudentFilterArgs = {
   birthDate: string | null | undefined;
   birthDateAfter: string | null | undefined;
@@ -427,6 +434,28 @@ export type DailyScheduleListQueryVariables = Exact<{
 
 
 export type DailyScheduleListQuery = DailyScheduleListQuery_Query;
+
+export type RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingRow = { id: string | null, originalClassId: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, status: string | null, dateLabel: string | null, remarks: string | null };
+
+export type RescheduleTrackingRowsQuery_Query = { rescheduleTrackingRows: Array<RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingRow> | null };
+
+
+export type RescheduleTrackingRowsQueryVariables = Exact<{
+  input: Types.RescheduleTrackingInput;
+}>;
+
+
+export type RescheduleTrackingRowsQuery = RescheduleTrackingRowsQuery_Query;
+
+export type RescheduleTrackingMetricsQuery_rescheduleTrackingMetrics_RescheduleTrackingMetrics = { id: string | null, pending: number | null, approved: number | null, leave: number | null, rescheduled: number | null, cancelled: number | null };
+
+export type RescheduleTrackingMetricsQuery_Query = { rescheduleTrackingMetrics: RescheduleTrackingMetricsQuery_rescheduleTrackingMetrics_RescheduleTrackingMetrics | null };
+
+
+export type RescheduleTrackingMetricsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RescheduleTrackingMetricsQuery = RescheduleTrackingMetricsQuery_Query;
 
 export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
 

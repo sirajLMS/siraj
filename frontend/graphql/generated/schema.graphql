@@ -586,6 +586,7 @@ scalar JSON
 type LeaveProcessResult {
   completedInstance: ClassInstanceDetail
   completedInstanceId: String
+  id: String
   rescheduledInstance: ClassInstanceDetail
   rescheduledInstanceId: String
 }
@@ -695,6 +696,8 @@ type Query {
   folderInfo(path: String!): DirectoryInfo
   listFiles(input: FilesListInput!): StorageObjectList
   me: User
+  rescheduleTrackingMetrics: RescheduleTrackingMetrics
+  rescheduleTrackingRows(input: RescheduleTrackingInput!): [RescheduleTrackingRow!]
   searchFiles(
     """File type filter (optional)"""
     fileType: String
@@ -737,6 +740,37 @@ input RescheduleClassInput {
   durationMinutes: Int!
   scheduledEndAt: String!
   scheduledStartAt: String!
+}
+
+input RescheduleTrackingInput {
+  limit: Int
+  offset: Int
+  search: String
+  status: String
+}
+
+type RescheduleTrackingMetrics {
+  approved: Int
+  cancelled: Int
+  id: String
+  leave: Int
+  pending: Int
+  rescheduled: Int
+}
+
+type RescheduleTrackingRow {
+  dateLabel: String
+  id: String
+  originalClassId: String
+  remarks: String
+  scheduledEndAt: DateTime
+  scheduledStartAt: DateTime
+  status: String
+  studentId: String
+  studentName: String
+  teacherAvatarUrl: String
+  teacherId: String
+  teacherName: String
 }
 
 input StorageItemProtectionUpdateInput {

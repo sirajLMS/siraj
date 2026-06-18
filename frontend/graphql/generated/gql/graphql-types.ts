@@ -611,6 +611,7 @@ export type LeaveProcessResult = {
   __typename?: 'LeaveProcessResult';
   completedInstance: Maybe<ClassInstanceDetail>;
   completedInstanceId: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
   rescheduledInstance: Maybe<ClassInstanceDetail>;
   rescheduledInstanceId: Maybe<Scalars['String']['output']>;
 };
@@ -837,6 +838,8 @@ export type Query = {
   folderInfo: Maybe<DirectoryInfo>;
   listFiles: Maybe<StorageObjectList>;
   me: Maybe<User>;
+  rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
+  rescheduleTrackingRows: Maybe<Array<RescheduleTrackingRow>>;
   searchFiles: Maybe<StorageObjectList>;
   storageStats: Maybe<StorageStats>;
   student: Maybe<Student>;
@@ -899,6 +902,11 @@ export type QueryFolderInfoArgs = {
 
 export type QueryListFilesArgs = {
   input: FilesListInput;
+};
+
+
+export type QueryRescheduleTrackingRowsArgs = {
+  input: RescheduleTrackingInput;
 };
 
 
@@ -975,6 +983,39 @@ export type RescheduleClassInput = {
   durationMinutes: Scalars['Int']['input'];
   scheduledEndAt: Scalars['String']['input'];
   scheduledStartAt: Scalars['String']['input'];
+};
+
+export type RescheduleTrackingInput = {
+  limit: InputMaybe<Scalars['Int']['input']>;
+  offset: InputMaybe<Scalars['Int']['input']>;
+  search: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<Scalars['String']['input']>;
+};
+
+export type RescheduleTrackingMetrics = {
+  __typename?: 'RescheduleTrackingMetrics';
+  approved: Maybe<Scalars['Int']['output']>;
+  cancelled: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  leave: Maybe<Scalars['Int']['output']>;
+  pending: Maybe<Scalars['Int']['output']>;
+  rescheduled: Maybe<Scalars['Int']['output']>;
+};
+
+export type RescheduleTrackingRow = {
+  __typename?: 'RescheduleTrackingRow';
+  dateLabel: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  originalClassId: Maybe<Scalars['String']['output']>;
+  remarks: Maybe<Scalars['String']['output']>;
+  scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
+  scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+  teacherAvatarUrl: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
 };
 
 export type StorageItemProtectionUpdateInput = {

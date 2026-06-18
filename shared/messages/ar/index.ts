@@ -40,6 +40,13 @@ export const session = {
   leaveRescheduledRemark: "تمت الموافقة على الإجازة - تم إعادة جدولة الجلسة.",
   resetDescription: "تم إعادة تعيين الجلسة من قبل المسؤول.",
   absentEventDescription: "تم تسجيل غياب الطالب بعد فترة الانتظار.",
+  manualRescheduleDescription: "تم إعادة جدولة الحصة يدويًا إلى {newStart} بواسطة المسؤول.",
+  manualRescheduleRemark: "إعادة جدولة: نقل من {oldStart} إلى {newStart}.",
+  activateDescription: "تم التفعيل",
+  forceActivateDescription: "تفعيل قسري",
+  startDescription: "بدء الحصة",
+  stopDescription: "إيقاف يدوي",
+  softDeleteDescription: "حذف مؤقت",
 };
 
 export const arTranslations = {

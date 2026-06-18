@@ -1,4 +1,5 @@
 import { and, eq, gte, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
@@ -6,6 +7,7 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availab
 import {
   classInstances,
   classStatusEvents,
+  leaveRequests,
   parents,
   students,
   teacherAssignments,
@@ -255,24 +257,30 @@ export namespace SchedulingRepository {
     tx?: DBTransaction,
     locale?: string
   ) => {
-    return runStateChange(id, actorUserId, tx, locale, async () => ({
-      state: {
-        executionState: "ACTIVATED",
-        activatedAt: new Date(),
-        activatedByUserId: actorUserId,
-        forceActivated: options.force,
-        forceActivatedByUserId: options.force ? actorUserId : null,
-      },
-      event: {
-        fromState: { executionState: "NOT_ACTIVATED" },
-        toState: { executionState: "ACTIVATED" },
-        description: options.force ? "Force activated" : "Activated",
-      },
-    }));
+    return runStateChange(id, actorUserId, tx, locale, async () => {
+      const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+      return {
+        state: {
+          executionState: "ACTIVATED",
+          activatedAt: new Date(),
+          activatedByUserId: actorUserId,
+          forceActivated: options.force,
+          forceActivatedByUserId: options.force ? actorUserId : null,
+        },
+        event: {
+          fromState: { executionState: "NOT_ACTIVATED" },
+          toState: { executionState: "ACTIVATED" },
+          description: options.force
+            ? tFuncSession("forceActivateDescription")
+            : tFuncSession("activateDescription"),
+        },
+      };
+    });
   };
 
   export const stopClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
-    return transitionToCompleted(id, actorUserId, "TAKEN", "Stopped manually", tx, locale);
+    const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+    return transitionToCompleted(id, actorUserId, "TAKEN", tFuncSession("stopDescription"), tx, locale);
   };
 
   export const softDeleteClassInstance = async (
@@ -284,6 +292,7 @@ export namespace SchedulingRepository {
     const runner = async (t: DBTransaction) => {
       const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
       if (!existing) return null;
+      const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
 
       const updated = await updateInstanceState(
         t,
@@ -293,7 +302,7 @@ export namespace SchedulingRepository {
         {
           fromState: { executionState: existing.executionState, outcome: existing.outcome, deleted: false },
           toState: { executionState: existing.executionState, outcome: existing.outcome, deleted: true },
-          description: "Soft deleted",
+          description: tFuncSession("softDeleteDescription"),
         }
       );
 
@@ -332,14 +341,17 @@ export namespace SchedulingRepository {
   };
 
   export const startClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
-    return runStateChange(id, actorUserId, tx, locale, async (_, existing) => ({
-      state: { executionState: "RUNNING", outcome: "PENDING", actualStartAt: new Date() },
-      event: {
-        fromState: { executionState: existing.executionState, outcome: existing.outcome },
-        toState: { executionState: "RUNNING", outcome: "PENDING" },
-        description: "Started class",
-      },
-    }));
+    return runStateChange(id, actorUserId, tx, locale, async (_, existing) => {
+      const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+      return {
+        state: { executionState: "RUNNING", outcome: "PENDING", actualStartAt: new Date() },
+        event: {
+          fromState: { executionState: existing.executionState, outcome: existing.outcome },
+          toState: { executionState: "RUNNING", outcome: "PENDING" },
+          description: tFuncSession("startDescription"),
+        },
+      };
+    });
   };
 
   export const markClassAbsent = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
@@ -373,32 +385,64 @@ export namespace SchedulingRepository {
   ) => {
     const runner = async (t: DBTransaction) => {
       const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+      const tFuncErrors = await getBackendTranslations({ locale, namespace: "errors" });
+
       const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
       if (!existing) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("classInstanceNotFound", { id }));
+        throw new Error(tFuncErrors("classInstanceNotFound", { id }));
       }
+
+      // 1. Run IDOR check
+      await checkStateChangeAuth(t, existing, actorUserId, locale);
+
+      // 2. Validate state matches ACTIVATED or RUNNING
+      if (existing.executionState !== "ACTIVATED" && existing.executionState !== "RUNNING") {
+        throw new Error(tFuncErrors("sessionNotActivated"));
+      }
+
+      // 3. Resolve reschedule offset days
       const offsetDays = await SystemSettingsRepository.getIntValue("session_leave_reschedule_offset_days", 7, t);
-      const newScheduledStartAt = new Date(existing.scheduledStartAt);
-      newScheduledStartAt.setDate(newScheduledStartAt.getDate() + offsetDays);
-      const newScheduledEndAt = new Date(existing.scheduledEndAt);
-      newScheduledEndAt.setDate(newScheduledEndAt.getDate() + offsetDays);
+      const offsetMs = offsetDays * 24 * 60 * 60 * 1000;
+      const newScheduledStartAt = new Date(existing.scheduledStartAt.getTime() + offsetMs);
+      const newScheduledEndAt = new Date(existing.scheduledEndAt.getTime() + offsetMs);
 
-      const successor = await rescheduleClassInstance(
-        id,
-        {
-          studentId: existing.studentId,
-          teacherId: existing.teacherId,
-          scheduledStartAt: newScheduledStartAt,
-          scheduledEndAt: newScheduledEndAt,
-          durationMinutes: existing.durationMinutes,
-          classType: existing.classType,
-          idempotencyKey: `leave-reschedule-${existing.id}-${Date.now()}`,
-        },
-        t,
-        locale
-      );
+      const successorIdempotencyKey = `leave-reschedule-${existing.id}-${newScheduledStartAt.toISOString()}`;
 
+      // 4. Construct successor insert values
+      const successorInput = {
+        studentId: existing.studentId,
+        teacherId: existing.teacherId,
+        originalClassId: existing.id,
+        scheduledStartAt: newScheduledStartAt,
+        scheduledEndAt: newScheduledEndAt,
+        durationMinutes: existing.durationMinutes,
+        classType: existing.classType,
+        executionState: "NOT_ACTIVATED" as const,
+        outcome: "PENDING" as const,
+        isRescheduled: false,
+        quotaDeducted: false,
+        payrollCredited: false,
+        rateAmount: existing.rateAmount,
+        rateCurrency: existing.rateCurrency,
+        isRateOverridden: existing.isRateOverridden,
+        remarks: tFuncSession("leaveRescheduledRemark"),
+        idempotencyKey: successorIdempotencyKey,
+      };
+
+      // 5. Perform validations for successor
+      await performRescheduleValidations(t, successorInput, locale);
+
+      // 6. Insert successor class instance
+      const [successor] = await t
+        .insert(classInstances)
+        .values({
+          ...successorInput,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+
+      // 7. Update original class state
       const updated = await runStateChange(id, actorUserId, t, locale, async () => {
         const now = new Date();
         const msg = tFuncSession("leaveProcessedDescription", { successorId: successor.id });
@@ -409,6 +453,8 @@ export namespace SchedulingRepository {
             actualStartAt: existing.actualStartAt ?? now,
             actualEndAt: now,
             isRescheduled: true,
+            quotaDeducted: false,
+            payrollCredited: false,
             remarks: reason ? `${reason}\n${msg}` : msg,
           },
           event: {
@@ -420,9 +466,43 @@ export namespace SchedulingRepository {
       });
 
       if (!updated) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("classInstanceNotFound", { id }));
+        throw new Error(tFuncErrors("classInstanceNotFound", { id }));
       }
+
+      // 8. Restore student quota exactly once if it was deducted
+      if (existing.quotaDeducted) {
+        await t
+          .update(students)
+          .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
+          .where(eq(students.id, existing.studentId));
+      }
+
+      // 9. Insert/update leaveRequests record
+      let requesterType: "TEACHER" | "PARENT" | "ADMIN" = "ADMIN";
+      const [teacher] = await t.select({ id: teachers.id }).from(teachers).where(eq(teachers.userId, actorUserId)).limit(1);
+      if (teacher) {
+        requesterType = "TEACHER";
+      } else {
+        const [parent] = await t.select({ id: parents.id }).from(parents).where(eq(parents.userId, actorUserId)).limit(1);
+        if (parent) {
+          requesterType = "PARENT";
+        }
+      }
+
+      const now = new Date();
+      await t
+        .insert(leaveRequests)
+        .values({
+          classInstanceId: id,
+          requestedByUserId: actorUserId,
+          requesterType,
+          reason,
+          status: "RESCHEDULED",
+          createdAt: now,
+          processedAt: now,
+          processedByUserId: actorUserId,
+        })
+        .onConflictDoNothing();
 
       return { originalId: updated.id, successorId: successor.id };
     };
@@ -826,6 +906,36 @@ export namespace SchedulingRepository {
     }
   }
 
+  export function buildRescheduledClassInput(
+    original: Types.ClassInstanceEntity,
+    input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
+    originalClassId: string
+  ): Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt"> {
+    return {
+      ...input,
+      originalClassId,
+      isRescheduled: false,
+      quotaDeducted: false,
+      rateAmount: input.rateAmount ?? original.rateAmount,
+      rateCurrency: input.rateCurrency ?? original.rateCurrency,
+      isRateOverridden: input.isRateOverridden ?? original.isRateOverridden,
+    };
+  }
+
+  export async function markOriginalAsRescheduled(
+    t: DBTransaction,
+    originalClassId: string
+  ): Promise<void> {
+    await t
+      .update(classInstances)
+      .set({
+        isRescheduled: true,
+        quotaDeducted: false,
+        updatedAt: new Date(),
+      })
+      .where(eq(classInstances.id, originalClassId));
+  }
+
   export const rescheduleClassInstance = async (
     originalClassId: string,
     input: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">,
@@ -842,14 +952,7 @@ export namespace SchedulingRepository {
 
       await validateRescheduleState(original, input, locale);
 
-      const newInstanceInput: Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt"> = {
-        ...input,
-        originalClassId: originalClassId,
-        isRescheduled: false,
-        quotaDeducted: false,
-        rateAmount: input.rateAmount ?? original.rateAmount,
-        rateCurrency: input.rateCurrency ?? original.rateCurrency,
-      };
+      const newInstanceInput = buildRescheduledClassInput(original, input, originalClassId);
 
       await performRescheduleValidations(t, newInstanceInput, locale);
 
@@ -862,14 +965,7 @@ export namespace SchedulingRepository {
         })
         .returning();
 
-      await t
-        .update(classInstances)
-        .set({
-          isRescheduled: true,
-          quotaDeducted: false,
-          updatedAt: new Date(),
-        })
-        .where(eq(classInstances.id, originalClassId));
+      await markOriginalAsRescheduled(t, originalClassId);
 
       await handleOriginalQuotaRestoration(t, original);
 
@@ -1060,5 +1156,118 @@ export namespace SchedulingRepository {
       title: r.description || "Status Updated",
       type: r.eventType === "STATE_CHANGE" ? "SUCCESS" : "UPDATE",
     }));
+  };
+
+  export const getRescheduleTrackingRows = async (
+    input: RescheduleTrackingInput,
+    tx?: DBTransaction
+  ): Promise<Types.RescheduleTrackingRow[]> => {
+    const runner = async (t: DBTransaction): Promise<Types.RescheduleTrackingRow[]> => {
+      const originalClass = alias(classInstances, "original_class");
+      const baseConditions = and(
+        isNull(classInstances.deletedAt),
+        sql`${classInstances.originalClassId} IS NOT NULL`
+      );
+
+      let conditions = baseConditions;
+
+      if (input.status === "pending_leave") {
+        conditions = and(conditions, eq(originalClass.outcome, "LEAVE"));
+      } else if (input.status === "rescheduled") {
+        conditions = and(conditions, ne(originalClass.outcome, "LEAVE"));
+      }
+
+      if (input.search) {
+        const searchPattern = `%${input.search}%`;
+        conditions = and(
+          conditions,
+          or(
+            sql`${users.name} ILIKE ${searchPattern}`,
+            sql`${students.name} ILIKE ${searchPattern}`
+          )
+        );
+      }
+
+      const query = t
+        .select({
+          id: classInstances.id,
+          originalClassId: classInstances.originalClassId,
+          teacherId: classInstances.teacherId,
+          teacherName: users.name,
+          teacherAvatarUrl: users.avatarUrl,
+          studentId: classInstances.studentId,
+          studentName: students.name,
+          scheduledStartAt: classInstances.scheduledStartAt,
+          scheduledEndAt: classInstances.scheduledEndAt,
+          remarks: classInstances.remarks,
+          originalOutcome: originalClass.outcome,
+        })
+        .from(classInstances)
+        .leftJoin(originalClass, eq(classInstances.originalClassId, originalClass.id))
+        .leftJoin(teachers, eq(classInstances.teacherId, teachers.id))
+        .leftJoin(users, eq(teachers.userId, users.id))
+        .leftJoin(students, eq(classInstances.studentId, students.id))
+        .where(conditions);
+
+      let finalQuery = query.orderBy(sql`${classInstances.scheduledStartAt} DESC`);
+      if (input.limit !== undefined && input.limit !== null) {
+        finalQuery = finalQuery.limit(input.limit);
+      }
+      if (input.offset !== undefined && input.offset !== null) {
+        finalQuery = finalQuery.offset(input.offset);
+      }
+
+      const queryRows = await finalQuery;
+
+      return queryRows.map(row => {
+        const isLeave = row.originalOutcome === "LEAVE";
+        return {
+          id: row.id,
+          originalClassId: row.originalClassId,
+          teacherId: row.teacherId,
+          teacherName: row.teacherName ?? "",
+          teacherAvatarUrl: row.teacherAvatarUrl,
+          studentId: row.studentId,
+          studentName: row.studentName ?? "",
+          scheduledStartAt: row.scheduledStartAt,
+          scheduledEndAt: row.scheduledEndAt,
+          status: (isLeave ? "pending_leave" : "rescheduled") as const,
+          dateLabel: (isLeave ? "leave_request" : "new_date") as const,
+          remarks: row.remarks,
+        };
+      });
+    };
+
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  };
+
+  export const getRescheduleTrackingMetrics = async (tx?: DBTransaction) => {
+    const runner = async (t: DBTransaction) => {
+      const [lrMetrics] = await t
+        .select({
+          pending: sql<number>`sum(case when status = 'PENDING' then 1 else 0 end)`.mapWith(Number),
+          approved: sql<number>`sum(case when status = 'APPROVED' then 1 else 0 end)`.mapWith(Number),
+          rescheduled: sql<number>`sum(case when status = 'RESCHEDULED' then 1 else 0 end)`.mapWith(Number),
+          cancelled: sql<number>`sum(case when status = 'CANCELLED' then 1 else 0 end)`.mapWith(Number),
+          leave: sql<number>`count(*)`.mapWith(Number),
+        })
+        .from(leaveRequests);
+
+      const [rescheduledCountRow] = await t
+        .select({
+          count: sql<number>`count(*)`.mapWith(Number),
+        })
+        .from(classInstances)
+        .where(and(isNull(classInstances.deletedAt), sql`${classInstances.originalClassId} IS NOT NULL`));
+
+      return {
+        pending: lrMetrics?.pending ?? 0,
+        approved: lrMetrics?.approved ?? 0,
+        leave: lrMetrics?.leave ?? 0,
+        rescheduled: rescheduledCountRow?.count ?? 0,
+        cancelled: lrMetrics?.cancelled ?? 0,
+      };
+    };
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 }
