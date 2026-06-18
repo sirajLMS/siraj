@@ -60,3 +60,16 @@ When writing integration tests for GraphQL queries/mutations under `frontend/gra
 6. **Align Test Data with Shared Constants**:
    - Avoid hardcoding search strings or expected names (e.g., `"Default Teacher"`). Instead, import the shared demo users definition from `@/shared/demo-users` (e.g., `teachers as demoTeachers`) and use these values dynamically in both search parameters and assertions to ensure test and database seed consistency.
 
+7. **Optional Chaining Preference (Linter & TS Compliance)**:
+   - Prefer optional chain expressions (`?.`) over verbose logical checks. Avoid code structures like `if (!result.data || !result.data.field)`. Instead, use `if (!result.data?.field)`. This complies with the `@typescript-eslint/prefer-optional-chain` lint rule.
+
+8. **Test Duplication Prevention (SonarQube Compliance)**:
+   - Never duplicate standard test setup routines—such as demo user login mutations or querying/extracting basic database entities (e.g., matching student/teacher ID pairs)—across multiple test files.
+   - Centralize all reusable test logic in a shared helpers file (e.g., [helpers.ts](file:///C:/Users/PC/Projects/siraj/frontend/graphql/test/helpers.ts)) using helper functions like `loginDemoUser(groupSlug)` and `fetchFirstStudentTeacherPair(adminToken, date)`.
+
+9. **Large Method Remediation (CodeScene Compliance)**:
+   - Keep helper functions and database seeders modular and concise. If a function or seeder (such as `seedOrGet` in `seed-students.ts`) exceeds ~70–80 lines, refactor it by extracting distinct steps into smaller helper functions (e.g., `upsertStudent(...)`, `ensureTeacherAssignments(...)`).
+
+10. **Strict Interface Layer Separation**:
+    - Integration tests under `frontend/graphql/test/` must interact with the application *exclusively* via the GraphQL API (using `testClient`). Under no circumstances should backend repositories (`db/repo/`), drizzle schemas directly (other than for checking in seed files), or service layers (`backend/services/`) be imported or invoked directly inside integration test files.
+
