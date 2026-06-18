@@ -112,36 +112,3 @@ export async function teardownRlsRole(roleName: string = "test_rls_user"): Promi
 function quoteIdent(ident: string): string {
   return `"${ident.replaceAll('"', '""')}"`;
 }
-
-export function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    const cause = (error as Error & { cause?: unknown }).cause;
-
-    if (cause !== undefined && cause !== null) {
-      if (cause instanceof Error) {
-        return cause.message;
-      }
-      if (typeof cause === "object") {
-        return JSON.stringify(cause);
-      }
-      return String(cause);
-    }
-
-    return error.message;
-  }
-
-  // Handle the top-level unknown error if it's not an Error instance
-  if (error === null || error === undefined) {
-    return "";
-  }
-
-  if (typeof error === "object") {
-    // If it's a plain object with a 'message' property, use that!
-    if ("message" in error && typeof (error as Record<string, unknown>).message === "string") {
-      return String((error as Record<string, unknown>).message);
-    }
-    return JSON.stringify(error);
-  }
-
-  return String(error);
-}

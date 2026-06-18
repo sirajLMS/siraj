@@ -113,3 +113,5 @@ export namespace ClassSessionService {
     return handleUpdate(SchedulingRepository.revertClassInstance(classInstanceId, userId), locale);
   }
 }
+
+export type ClassActionFn<R> = (userId: string, classInstanceId: string, locale?: string) => Promise<R>;

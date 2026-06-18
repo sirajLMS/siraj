@@ -185,8 +185,8 @@ export function ClassDetailsContainer() {
   const permissions = useUserStore(state => state.permissions);
   const instance = useClassDetailsStore(state => state.instance);
 
-  const canManage = permissions.includes(AppPermission.ClassesReschedule);
-  const canView = permissions.includes(AppPermission.ClassesViewDetails);
+  const canManage = permissions.includes(AppPermission.SessionReschedule);
+  const canView = permissions.includes(AppPermission.SessionViewDetails);
 
   const pageHeader = (
     <PageHeader

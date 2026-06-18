@@ -1,70 +1,25 @@
-import { ClassPerformanceRepository } from "@/backend/db/repo/class-performance.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import { ClassSessionService } from "@/backend/services/session/class-session.service";
+import { type ClassActionFn, ClassSessionService } from "@/backend/services/session/class-session.service";
+import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import {
-  type ClassInstanceDetailDefinition,
-  ClassInstanceDetailPothosObject,
-  RescheduleClassInputPothosObject,
-} from "../pothos/class-session.pothos";
+import { ClassInstanceDetailPothosObject, RescheduleClassInputPothosObject } from "../pothos/class-session.pothos";
+import { resolveDetail } from "../utils/class-session.utils";
 
 // ─── Shared Helpers ───────────────────────────────────────────────────────────
 
-function buildClassInstanceDetail(
-  instance: NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>,
-  perf: Awaited<ReturnType<typeof ClassPerformanceRepository.getByClassInstanceId>>
-): ClassInstanceDetailDefinition {
-  const start = instance.scheduledStartAt;
-  const end = instance.scheduledEndAt;
-  return {
-    id: instance.id,
-    courseName: "Class Session",
-    instanceId: instance.id,
-    scheduledDate: start.toISOString().split("T")[0],
-    startTime: start.toISOString(),
-    endTime: end.toISOString(),
-    durationMinutes: instance.durationMinutes,
-    status: instance.outcome || instance.executionState,
-    remarks: instance.remarks ?? null,
-    hasTimezoneMismatch: false,
-    studentTimezone: null,
-    zoomMeetingUrl: instance.zoomMeetingUrl ?? null,
-    student: {
-      id: instance.student?.id || instance.studentId,
-      name: instance.student?.name || "Unknown",
-      grade: null,
-      level: null,
-      avatarUrl: null,
-    },
-    teacher: {
-      id: instance.teacher?.id || instance.teacherId,
-      name: instance.teacher?.user?.name || "Unknown",
-      title: null,
-      avatarUrl: null,
-    },
-    performance: perf
-      ? {
-          engagementScore: perf.engagementScore ?? null,
-          assessmentProgress: perf.assessmentProgress ?? null,
-          assessmentTotal: perf.assessmentTotal ?? null,
-          focusLevel: perf.focusLevel ?? null,
-          sessionHealth: perf.sessionHealth ?? null,
-          heatmapData: (perf.heatmapData as number[] | null) ?? null,
-          latencyMs: perf.latencyMs ?? null,
-          attendanceRate: perf.attendanceRate ?? null,
-          avgGrade: perf.avgGrade ?? null,
-          lastClassDaysAgo: perf.lastClassDaysAgo ?? null,
-        }
-      : null,
-  };
+async function requireAuth(ctx: BaseContext): Promise<string> {
+  if (!ctx.user?.id) {
+    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+    throw new Error(tFunc("unauthorized"));
+  }
+  return ctx.user.id;
 }
 
-async function resolveDetail(classInstanceId: string): Promise<ClassInstanceDetailDefinition> {
-  const instance = await SchedulingRepository.getClassInstanceById(classInstanceId);
-  if (!instance) throw new Error("Not found");
-  const perf = await ClassPerformanceRepository.getByClassInstanceId(classInstanceId);
-  return buildClassInstanceDetail(instance, perf);
+async function handleClassAction<R>(ctx: BaseContext, classInstanceId: string, action: ClassActionFn<R>) {
+  const userId = await requireAuth(ctx);
+  await action(userId, classInstanceId, ctx.locale);
+  return resolveDetail(classInstanceId);
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
@@ -74,14 +29,7 @@ gqlSchemaBuilder.mutationField("activateClass", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      await ClassSessionService.activate(ctx.user.id, args.classInstanceId, ctx.locale);
-      return resolveDetail(args.classInstanceId);
-    },
+    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.activate),
   })
 );
 
@@ -90,14 +38,7 @@ gqlSchemaBuilder.mutationField("forceActivateClass", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      await ClassSessionService.forceActivate(ctx.user.id, args.classInstanceId, ctx.locale);
-      return resolveDetail(args.classInstanceId);
-    },
+    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.forceActivate),
   })
 );
 
@@ -106,14 +47,7 @@ gqlSchemaBuilder.mutationField("stopClass", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      await ClassSessionService.stop(ctx.user.id, args.classInstanceId, ctx.locale);
-      return resolveDetail(args.classInstanceId);
-    },
+    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.stop),
   })
 );
 
@@ -122,14 +56,7 @@ gqlSchemaBuilder.mutationField("startClass", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      await ClassSessionService.start(ctx.user.id, args.classInstanceId, ctx.locale);
-      return resolveDetail(args.classInstanceId);
-    },
+    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.start),
   })
 );
 
@@ -138,14 +65,7 @@ gqlSchemaBuilder.mutationField("markClassAbsent", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      await ClassSessionService.markAbsent(ctx.user.id, args.classInstanceId, ctx.locale);
-      return resolveDetail(args.classInstanceId);
-    },
+    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.markAbsent),
   })
 );
 
@@ -157,14 +77,10 @@ gqlSchemaBuilder.mutationField("requestClassLeave", t =>
       reason: t.arg.string({ required: false }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      await ClassSessionService.requestLeave(ctx.user.id, args.classInstanceId, args.reason ?? null, ctx.locale);
-      return resolveDetail(args.classInstanceId);
-    },
+    resolve: (_parent, args, ctx) =>
+      handleClassAction(ctx, args.classInstanceId, (userId, id, locale) =>
+        ClassSessionService.requestLeave(userId, id, args.reason ?? null, locale)
+      ),
   })
 );
 
@@ -173,14 +89,7 @@ gqlSchemaBuilder.mutationField("adminExcuseClassLeave", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      await ClassSessionService.adminLeave(ctx.user.id, args.classInstanceId, ctx.locale);
-      return resolveDetail(args.classInstanceId);
-    },
+    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.adminLeave),
   })
 );
 
@@ -193,17 +102,14 @@ gqlSchemaBuilder.mutationField("rescheduleClass", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
+      const userId = await requireAuth(ctx);
       const existing = await SchedulingRepository.getClassInstanceById(args.classInstanceId);
       if (!existing) {
         const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
         throw new Error(tFunc("notFound"));
       }
       const newInstance = await ClassSessionService.reschedule(
-        ctx.user.id,
+        userId,
         args.classInstanceId,
         {
           studentId: existing.studentId,
@@ -228,14 +134,7 @@ gqlSchemaBuilder.mutationField("revertClass", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      await ClassSessionService.revert(ctx.user.id, args.classInstanceId, ctx.locale);
-      return resolveDetail(args.classInstanceId);
-    },
+    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.revert),
   })
 );
 
@@ -245,11 +144,8 @@ gqlSchemaBuilder.mutationField("deleteClassInstance", t =>
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      return ClassSessionService.deleteInstance(ctx.user.id, args.classInstanceId, ctx.locale);
+      const userId = await requireAuth(ctx);
+      return ClassSessionService.deleteInstance(userId, args.classInstanceId, ctx.locale);
     },
   })
 );

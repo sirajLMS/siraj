@@ -56,7 +56,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: PowerSettingsNewOutlined,
     href: "/dashboard?mode=teacher-active",
     section: "main",
-    permission: AppPermission.ClassesActivate,
+    permission: AppPermission.SessionActivateClass,
   },
   teachers: {
     key: "teachers",
@@ -120,7 +120,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: EditOutlined,
     href: "/reschedule",
     section: "main",
-    permission: AppPermission.ClassesReschedule,
+    permission: AppPermission.SessionReschedule,
   },
   dstMigration: {
     key: "dst-migration",
@@ -268,7 +268,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: ClassOutlined,
     href: "/classes/cls-9921",
     section: "main",
-    permission: [AppPermission.ClassesViewDetails, AppPermission.ClassesReschedule],
+    permission: [AppPermission.SessionViewDetails, AppPermission.SessionReschedule],
   },
   {
     key: "class-audit",
@@ -276,7 +276,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: HistoryOutlined,
     href: "/classes/cls-9921/audit",
     section: "main",
-    permission: AppPermission.ClassesViewDetails,
+    permission: AppPermission.SessionViewDetails,
   },
   {
     key: "classes-create",
@@ -310,7 +310,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: HistoryOutlined,
     href: "/students/SRJ-9921/history",
     section: "main",
-    permission: AppPermission.ClassesViewDetails,
+    permission: AppPermission.SessionViewDetails,
   },
   {
     key: "student-quota",

@@ -58,6 +58,7 @@ describe("GraphQL Schedule Integration Tests", () => {
       variables: {
         date: testDate,
         teacherId: null,
+        search: null,
       },
       context: {
         headers: {

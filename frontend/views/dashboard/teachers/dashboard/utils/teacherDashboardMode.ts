@@ -13,7 +13,7 @@ export function resolveTeacherDashboardMode(
     return "standard";
   }
   if (
-    permissions.includes(AppPermission.ClassesActivate) &&
+    permissions.includes(AppPermission.SessionActivateClass) &&
     !permissions.includes(AppPermission.DashboardViewMetrics)
   ) {
     return "active";
@@ -30,7 +30,8 @@ export function resolveTeacherDashboardMode(
 export function shouldRenderTeacherDashboard(permissions: readonly AppPermission[], modeParam: string | null): boolean {
   if (modeParam === "teacher" || modeParam === "teacher-active") {
     return (
-      permissions.includes(AppPermission.ScheduleViewAssigned) || permissions.includes(AppPermission.ClassesActivate)
+      permissions.includes(AppPermission.ScheduleViewAssigned) ||
+      permissions.includes(AppPermission.SessionActivateClass)
     );
   }
   return (

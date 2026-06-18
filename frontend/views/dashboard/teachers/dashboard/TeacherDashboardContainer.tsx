@@ -38,7 +38,7 @@ export function TeacherDashboardContainer() {
 
   const mode = resolveTeacherDashboardMode(permissions, modeParam);
   const labels = buildTeacherDashboardLabels(t);
-  const canControl = permissions.includes(AppPermission.ClassesActivate);
+  const canControl = permissions.includes(AppPermission.SessionActivateClass);
 
   if (mode === "active" && canControl) {
     return (

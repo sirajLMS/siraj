@@ -62,6 +62,7 @@ export function AdminDashboardContainer() {
     variables: {
       date: filters.date,
       teacherId: filters.teacherId || null,
+      search: filters.searchQuery || null,
     },
   });
 
