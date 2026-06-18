@@ -35,8 +35,11 @@ import {
 import { errors } from "./errors";
 
 export const session = {
-  leaveProcessedDescription: "تم طلب مغادرة. تم إعادة الجدولة إلى {successorId}.",
+  leaveProcessedDescription: "تمت معالجة طلب الإجازة، أعيدت جدولته إلى الجلسة {successorId}.",
   absentWaitingRemark: "لقد انتظرت طوال وقت الحصة.",
+  leaveRescheduledRemark: "تمت الموافقة على الإجازة - تم إعادة جدولة الجلسة.",
+  resetDescription: "تم إعادة تعيين الجلسة من قبل المسؤول.",
+  absentEventDescription: "تم تسجيل غياب الطالب بعد فترة الانتظار.",
 };
 
 export const arTranslations = {

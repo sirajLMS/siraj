@@ -43,6 +43,14 @@ export interface ClassDetailsLabels {
     readonly studentLevel: string;
     readonly viewFullProfile: string;
   };
+  readonly liveSession: {
+    readonly startButton: string;
+    readonly absentButton: string;
+    readonly leaveButton: string;
+    readonly resetButton: string;
+    readonly leaveReasonPrompt: string;
+    readonly resetConfirmation: string;
+  };
   readonly status: {
     readonly active: string;
     readonly scheduled: string;
@@ -50,4 +58,7 @@ export interface ClassDetailsLabels {
     readonly completed: string;
     readonly cancelled: string;
   };
+  readonly viewStudentProfile: string;
+  readonly editInfo: string;
+  readonly generateLog: string;
 }

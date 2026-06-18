@@ -273,7 +273,7 @@ export type UpdateSessionStatusLeaveMutationVariables = Exact<{
 }>;
 
 
-export type UpdateSessionStatusLeaveMutation = { updateSessionStatusLeave: { completedInstanceId: number | null, rescheduledInstanceId: number | null, completedInstance: { id: string | null, outcome: string | null, isRescheduled: boolean | null } | null, rescheduledInstance: { id: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null } | null } | null };
+export type UpdateSessionStatusLeaveMutation = { updateSessionStatusLeave: { completedInstanceId: string | null, rescheduledInstanceId: string | null, completedInstance: { id: string | null, outcome: string | null, isRescheduled: boolean | null } | null, rescheduledInstance: { id: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null } | null } | null };
 
 export type StopClassMutationVariables = Exact<{
   classInstanceId: string | number;

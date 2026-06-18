@@ -8,7 +8,7 @@ export const errors: ErrorsLabels = {
   insufficientPermissions: "صلاحيات غير كافية",
   notFound: "غير موجود",
   sessionNotActivated: "الجلسة غير مفعلة",
-  absentTooEarly: "لا يمكن تسجيل الغياب بعد. يجب الانتظار {waitingMinutes} دقيقة.",
+  absentTooEarly: "لا يمكن تسجيل الغياب بعد. يرجى الانتظار {waitingMinutes} دقيقة من وقت البدء المجدول.",
   userNotFound: "المستخدم ذو المعرف {id} غير موجود",
   userEmailExists: "المستخدم ذو البريد الإلكتروني {email} موجود بالفعل",
   userCreateFailed: "فشل إنشاء مستخدم بالبريد الإلكتروني: {email}",
@@ -18,7 +18,7 @@ export const errors: ErrorsLabels = {
   invoiceVersionMismatch:
     "عدم تطابق الإصدار للفاتورة {id}. المتوقع {expectedVersion}، الحاصل {gotVersion}. يرجى إعادة المحاولة.",
   cannotTransitionFailed: "لا يمكن تحويل حالة التوصيل من FAILED إلى {status}",
-  invalidTransition: "تغيير حالة التوصيل غير صالح من {currentStatus} إلى {nextStatus}",
+  invalidTransition: "انتقال حالة غير صالح.",
   notificationNotFound: "توصيل الإشعار {id} غير موجود",
   notificationProviderNotFound: "توصيل الإشعار ذو معرف مزود الخدمة {providerMessageId} غير موجود",
   teacherBooked: "المعلم محجوز بالفعل لهذه الفترة الزمنية",

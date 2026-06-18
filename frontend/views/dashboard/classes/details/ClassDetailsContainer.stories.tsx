@@ -103,6 +103,10 @@ function mapMockToReal(mock: ClassInstance): ClassInstanceDetail {
     hasTimezoneMismatch: mock.hasTimezoneMismatch,
     studentTimezone: mock.studentTimezone,
     zoomMeetingUrl: "",
+    executionState: "NOT_ACTIVATED",
+    isRescheduled: false,
+    outcome: "PENDING",
+    payrollCredited: false,
     student: {
       __typename: "ClassInstanceStudentInfo",
       id: mock.student.id,

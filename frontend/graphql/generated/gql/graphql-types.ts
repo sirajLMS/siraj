@@ -610,9 +610,9 @@ export enum Gender {
 export type LeaveProcessResult = {
   __typename?: 'LeaveProcessResult';
   completedInstance: Maybe<ClassInstanceDetail>;
-  completedInstanceId: Maybe<Scalars['Int']['output']>;
+  completedInstanceId: Maybe<Scalars['String']['output']>;
   rescheduledInstance: Maybe<ClassInstanceDetail>;
-  rescheduledInstanceId: Maybe<Scalars['Int']['output']>;
+  rescheduledInstanceId: Maybe<Scalars['String']['output']>;
 };
 
 export type LogSupportRequestInput = {

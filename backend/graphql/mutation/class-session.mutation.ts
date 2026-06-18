@@ -94,7 +94,8 @@ gqlSchemaBuilder.mutationField("updateSessionStatusLeave", t =>
       return {
         completedInstanceId: result.originalId,
         rescheduledInstanceId: result.successorId,
-      };},
+      };
+    },
   })
 );
 

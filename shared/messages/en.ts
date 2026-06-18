@@ -34,7 +34,7 @@ const en: MessageSchema = {
     notFound: "Not found",
     sessionNotActivated: "Class session is not activated",
     missedClassTime: "Cannot activate class outside of the allowed time window",
-    absentTooEarly: "Cannot mark absent yet. Must wait {waitingMinutes} minutes.",
+    absentTooEarly: "Cannot mark absent yet. Please wait {waitingMinutes} minutes from scheduled start time.",
     userNotFound: "User with ID {id} not found",
     userEmailExists: "User with email {email} already exists",
     userCreateFailed: "Failed to create user with email: {email}",
@@ -44,7 +44,7 @@ const en: MessageSchema = {
     invoiceVersionMismatch:
       "Version mismatch for invoice {id}. Expected {expectedVersion}, got {gotVersion}. Please retry.",
     cannotTransitionFailed: "Cannot transition delivery from FAILED to {status}",
-    invalidTransition: "Invalid delivery status transition from {currentStatus} to {nextStatus}",
+    invalidTransition: "Invalid state transition.",
     notificationNotFound: "Notification delivery {id} not found",
     notificationProviderNotFound: "Notification delivery with provider message id {providerMessageId} not found",
     teacherBooked: "Teacher is already booked for this time period",
@@ -721,6 +721,15 @@ const en: MessageSchema = {
         studentLevel: "Student Level",
         viewFullProfile: "View Full Profile",
       },
+      liveSession: {
+        startButton: "Start Session",
+        absentButton: "Mark Absent",
+        leaveButton: "Process Leave",
+        resetButton: "Reset Session",
+        leaveReasonPrompt: "Enter leave reason",
+        resetConfirmation:
+          "Are you sure you want to reset this session? All data will be cleared.",
+      },
       status: {
         active: "Active",
         scheduled: "Scheduled",
@@ -728,6 +737,9 @@ const en: MessageSchema = {
         completed: "Completed",
         cancelled: "Cancelled",
       },
+      viewStudentProfile: "View Student Profile",
+      editInfo: "Edit Information",
+      generateLog: "Generate Log",
     },
     classAudit: {
       pageTitle: "Class Detail View",
@@ -1889,8 +1901,11 @@ const en: MessageSchema = {
     },
   },
   session: {
-    leaveProcessedDescription: "Leave requested. Rescheduled to {successorId}.",
+    leaveProcessedDescription: "Leave request processed, rescheduled to instance {successorId}.",
     absentWaitingRemark: "I have been waiting for the whole class time.",
+    leaveRescheduledRemark: "Leave approved - session rescheduled.",
+    resetDescription: "Session reset by administrator.",
+    absentEventDescription: "Student marked as absent after waiting period.",
   },
 };
 

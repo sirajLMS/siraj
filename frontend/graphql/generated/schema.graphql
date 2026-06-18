@@ -585,9 +585,9 @@ scalar JSON
 
 type LeaveProcessResult {
   completedInstance: ClassInstanceDetail
-  completedInstanceId: Int
+  completedInstanceId: String
   rescheduledInstance: ClassInstanceDetail
-  rescheduledInstanceId: Int
+  rescheduledInstanceId: String
 }
 
 input LogSupportRequestInput {

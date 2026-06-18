@@ -72,6 +72,14 @@ export const classDetails: ClassDetailsLabels = {
     studentLevel: "مستوى الطالب",
     viewFullProfile: "عرض الملف الكامل",
   },
+  liveSession: {
+    startButton: "بدء الجلسة",
+    absentButton: "تسجيل غياب",
+    leaveButton: "طلب إذن انصراف",
+    resetButton: "إعادة تعيين الجلسة",
+    leaveReasonPrompt: "الرجاء إدخال سبب الانصراف:",
+    resetConfirmation: "هل أنت متأكد من إعادة تعيين هذه الجلسة؟ سيتم حذف جميع البيانات.",
+  },
   status: {
     active: "نشط",
     scheduled: "مجدول",
@@ -79,4 +87,7 @@ export const classDetails: ClassDetailsLabels = {
     completed: "مكتمل",
     cancelled: "ملغى",
   },
+  viewStudentProfile: "عرض ملف الطالب",
+  editInfo: "تعديل المعلومات",
+  generateLog: "إنشاء سجل",
 };
