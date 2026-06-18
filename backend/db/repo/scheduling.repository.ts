@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
@@ -83,6 +83,7 @@ export namespace SchedulingRepository {
     id: string,
     actorUserId: string,
     tx: DBTransaction | undefined,
+    locale: string | undefined,
     logic: (
       t: DBTransaction,
       existing: Types.ClassInstanceEntity
@@ -99,7 +100,53 @@ export namespace SchedulingRepository {
       const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
       if (!existing) return null;
 
+      // Scoping IDOR checks (Threat 1)
+      const [teacher] = await t
+        .select({ id: teachers.id })
+        .from(teachers)
+        .where(eq(teachers.userId, actorUserId))
+        .limit(1);
+
+      if (teacher && existing.teacherId !== teacher.id) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("unauthorizedAction"));
+      }
+
+      const [parent] = await t.select({ id: parents.id }).from(parents).where(eq(parents.userId, actorUserId)).limit(1);
+
+      if (parent) {
+        const [studentLink] = await t
+          .select({ id: students.id })
+          .from(students)
+          .where(and(eq(students.id, existing.studentId), eq(students.parentId, parent.id)))
+          .limit(1);
+
+        if (!studentLink) {
+          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+          throw new Error(tFunc("unauthorizedAction"));
+        }
+      }
+
       const { state, event } = await logic(t, existing);
+
+      // State Transition checks (Threat 3)
+      if (state.executionState === "ACTIVATED") {
+        if (existing.executionState !== "NOT_ACTIVATED") {
+          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+          throw new Error(tFunc("invalidTransition"));
+        }
+      } else if (state.executionState === "RUNNING") {
+        if (existing.executionState !== "ACTIVATED") {
+          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+          throw new Error(tFunc("invalidTransition"));
+        }
+      } else if (state.executionState === "COMPLETED") {
+        if (existing.executionState !== "RUNNING") {
+          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+          throw new Error(tFunc("invalidTransition"));
+        }
+      }
+
       return updateInstanceState(t, id, actorUserId, state, event);
     };
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
@@ -113,9 +160,10 @@ export namespace SchedulingRepository {
     actorUserId: string,
     outcome: "ABSENT" | "LEAVE" | "TAKEN",
     description: string,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ) {
-    return runStateChange(id, actorUserId, tx, async (_, existing) => {
+    return runStateChange(id, actorUserId, tx, locale, async (_, existing) => {
       const now = new Date();
       return {
         state: {
@@ -156,9 +204,10 @@ export namespace SchedulingRepository {
     id: string,
     actorUserId: string,
     options: { force: boolean },
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ) => {
-    return runStateChange(id, actorUserId, tx, async () => ({
+    return runStateChange(id, actorUserId, tx, locale, async () => ({
       state: {
         executionState: "ACTIVATED",
         activatedAt: new Date(),
@@ -174,11 +223,16 @@ export namespace SchedulingRepository {
     }));
   };
 
-  export const stopClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction) => {
-    return transitionToCompleted(id, actorUserId, "TAKEN", "Stopped manually", tx);
+  export const stopClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
+    return transitionToCompleted(id, actorUserId, "TAKEN", "Stopped manually", tx, locale);
   };
 
-  export const softDeleteClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction) => {
+  export const softDeleteClassInstance = async (
+    id: string,
+    actorUserId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ) => {
     const runner = async (t: DBTransaction) => {
       const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
       if (!existing) return null;
@@ -196,7 +250,7 @@ export namespace SchedulingRepository {
       );
 
       if (updated) {
-        await adjustQuotaOnUpdate(t, existing, { deletedAt: updated.deletedAt }, true);
+        await adjustQuotaOnUpdate(t, existing, { deletedAt: updated.deletedAt }, true, locale);
       }
       return updated;
     };
@@ -229,8 +283,8 @@ export namespace SchedulingRepository {
     };
   };
 
-  export const startClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction) => {
-    return runStateChange(id, actorUserId, tx, async (_, existing) => ({
+  export const startClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
+    return runStateChange(id, actorUserId, tx, locale, async (_, existing) => ({
       state: { executionState: "RUNNING", outcome: "PENDING", actualStartAt: new Date() },
       event: {
         fromState: { executionState: existing.executionState, outcome: existing.outcome },
@@ -240,25 +294,33 @@ export namespace SchedulingRepository {
     }));
   };
 
-  export const markClassAbsent = async (id: string, actorUserId: string, tx?: DBTransaction) => {
-    return transitionToCompleted(id, actorUserId, "ABSENT", "Marked absent", tx);
+  export const markClassAbsent = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
+    return transitionToCompleted(id, actorUserId, "ABSENT", "Marked absent", tx, locale);
   };
 
   export const requestClassLeave = async (
     id: string,
     reason: string | null,
     actorUserId: string,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ) => {
-    return transitionToCompleted(id, actorUserId, "LEAVE", `Leave requested: ${reason ?? "No reason provided"}`, tx);
+    return transitionToCompleted(
+      id,
+      actorUserId,
+      "LEAVE",
+      `Leave requested: ${reason ?? "No reason provided"}`,
+      tx,
+      locale
+    );
   };
 
-  export const adminExcuseClassLeave = async (id: string, actorUserId: string, tx?: DBTransaction) => {
-    return transitionToCompleted(id, actorUserId, "LEAVE", "Admin excused leave", tx);
+  export const adminExcuseClassLeave = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
+    return transitionToCompleted(id, actorUserId, "LEAVE", "Admin excused leave", tx, locale);
   };
 
-  export const revertClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction) => {
-    return runStateChange(id, actorUserId, tx, async (_, existing) => ({
+  export const revertClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
+    return runStateChange(id, actorUserId, tx, locale, async (_, existing) => ({
       state: { executionState: "NOT_ACTIVATED", outcome: "PENDING", actualStartAt: null, actualEndAt: null },
       event: {
         fromState: { executionState: existing.executionState, outcome: existing.outcome },
@@ -382,13 +444,25 @@ export namespace SchedulingRepository {
     t: DBTransaction,
     existing: Types.ClassInstanceEntity,
     input: Partial<Omit<Types.ClassInstanceInsertInput, "createdAt" | "updatedAt">>,
-    isBeingSoftDeleted: boolean
+    isBeingSoftDeleted: boolean,
+    locale?: string
   ) {
     const studentId = input.studentId ?? existing.studentId;
     const wasDeducted = existing.quotaDeducted && existing.deletedAt === null;
     const effectiveNewDeducted = (input.quotaDeducted ?? existing.quotaDeducted) && !isBeingSoftDeleted;
 
     if (!wasDeducted && effectiveNewDeducted) {
+      const [student] = await t
+        .select({ classesRemaining: students.classesRemaining })
+        .from(students)
+        .where(eq(students.id, studentId))
+        .limit(1);
+
+      if (!student || student.classesRemaining <= 0) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("outOfQuota"));
+      }
+
       await t
         .update(students)
         .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
@@ -403,6 +477,18 @@ export namespace SchedulingRepository {
         .update(students)
         .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
         .where(eq(students.id, existing.studentId));
+
+      const [newStudent] = await t
+        .select({ classesRemaining: students.classesRemaining })
+        .from(students)
+        .where(eq(students.id, input.studentId))
+        .limit(1);
+
+      if (!newStudent || newStudent.classesRemaining <= 0) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("outOfQuota"));
+      }
+
       await t
         .update(students)
         .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
@@ -437,6 +523,17 @@ export namespace SchedulingRepository {
       );
 
       if (input.quotaDeducted) {
+        const [student] = await t
+          .select({ classesRemaining: students.classesRemaining })
+          .from(students)
+          .where(eq(students.id, input.studentId))
+          .limit(1);
+
+        if (!student || student.classesRemaining <= 0) {
+          const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+          throw new Error(tFunc("outOfQuota"));
+        }
+
         await t
           .update(students)
           .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
@@ -725,9 +822,13 @@ export namespace SchedulingRepository {
       const search = typeof options === "object" ? options?.search : undefined;
       const viewerTimezone = typeof options === "object" ? options?.viewerTimezone : undefined;
 
+      const { getDayBoundaries } = await import("@/backend/lib/timezone");
+      const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(date, viewerTimezone || "UTC");
+
       const baseConditions = and(
         isNull(classInstances.deletedAt),
-        sql`DATE(${classInstances.scheduledStartAt}) = DATE(${date.toISOString()})`,
+        gte(classInstances.scheduledStartAt, startOfDayUtc),
+        lt(classInstances.scheduledStartAt, endOfDayUtc),
         teacherId ? eq(classInstances.teacherId, teacherId) : undefined
       );
 

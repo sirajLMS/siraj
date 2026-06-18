@@ -1,3 +1,15 @@
+-- Source: 2-functions.sql
+CREATE OR REPLACE FUNCTION current_user_id() 
+RETURNS UUID AS $$
+BEGIN
+    RETURN NULLIF(current_setting('app.current_user_id', true), '')::uuid;
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN NULL;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
 -- Source: audit_log_immutability_trigger.sql
 -- Trigger to prevent modifications to audit_logs table (immutability enforcement)
 -- This ensures audit logs cannot be tampered with for compliance requirements
@@ -139,6 +151,79 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- Source: class_instances_rls_policies.sql
+-- Class Instance RLS policies for scoping access based on current_user_id()
+
+ALTER TABLE "class_instances" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "class_instances" FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS class_instances_access_select_policy ON "class_instances";
+CREATE POLICY class_instances_access_select_policy ON "class_instances"
+AS RESTRICTIVE FOR SELECT
+USING (
+  deleted_at IS NULL
+  AND (
+    (NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()))
+    OR
+    (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id()))
+    OR
+    (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))
+  )
+);
+
+DROP POLICY IF EXISTS class_instances_access_update_policy ON "class_instances";
+CREATE POLICY class_instances_access_update_policy ON "class_instances"
+AS RESTRICTIVE FOR UPDATE
+USING (
+  deleted_at IS NULL
+  AND (
+    (NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()))
+    OR
+    (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id()))
+    OR
+    (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))
+  )
+)
+WITH CHECK (
+  (deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true'))
+  AND (
+    (NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()))
+    OR
+    (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id()))
+    OR
+    (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))
+  )
+);
+
+
+-- Source: class_instances_state_transition_trigger.sql
+-- State Machine transition triggers for class_instances
+
+CREATE OR REPLACE FUNCTION fn_enforce_class_instance_transition()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.execution_state IS DISTINCT FROM NEW.execution_state THEN
+        -- COMPLETED can only transition to NOT_ACTIVATED (revert) or remain COMPLETED
+        IF OLD.execution_state = 'COMPLETED' AND NEW.execution_state IN ('ACTIVATED', 'RUNNING') THEN
+            RAISE EXCEPTION 'Invalid transition: Cannot reactivate a COMPLETED class instance.';
+        END IF;
+
+        -- RUNNING cannot transition to ACTIVATED
+        IF OLD.execution_state = 'RUNNING' AND NEW.execution_state = 'ACTIVATED' THEN
+            RAISE EXCEPTION 'Invalid transition: Cannot move a RUNNING class instance back to ACTIVATED.';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_enforce_class_instance_transition ON class_instances;
+CREATE TRIGGER trg_enforce_class_instance_transition
+BEFORE UPDATE ON class_instances
+FOR EACH ROW EXECUTE FUNCTION fn_enforce_class_instance_transition();
+
+
 -- Source: hours_per_week_recalculation.sql
 -- 1. Helper function to update student's hours_per_week
 CREATE OR REPLACE FUNCTION update_student_hours_per_week(student_id_val UUID)
@@ -274,16 +359,6 @@ FOR EACH ROW EXECUTE FUNCTION enforce_leave_quota_limits();
 
 
 -- Source: permissions_rls_policies.sql
-CREATE OR REPLACE FUNCTION current_user_id() 
-RETURNS UUID AS $$
-BEGIN
-    RETURN NULLIF(current_setting('app.current_user_id', true), '')::uuid;
-EXCEPTION
-    WHEN OTHERS THEN
-        RETURN NULL;
-END;
-$$ LANGUAGE plpgsql STABLE;
-
 ALTER TABLE "students" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "students" FORCE ROW LEVEL SECURITY;
 

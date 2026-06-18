@@ -379,6 +379,7 @@ describe("Scheduling Repository logic", () => {
           { force: true },
           tx
         );
+        if (!updated) throw new Error("Failed to activate class instance");
 
         expect(updated.executionState).toBe("ACTIVATED");
         expect(updated.forceActivated).toBe(true);
@@ -398,11 +399,12 @@ describe("Scheduling Repository logic", () => {
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "stop");
         const instance = await createMockClassInstance(tx, student.id, teacher.id, {
-          executionState: "ACTIVATED",
+          executionState: "RUNNING",
           actualStartAt: new Date(),
         });
 
         const updated = await SchedulingRepository.stopClassInstance(instance.id, teacher.userId, tx);
+        if (!updated) throw new Error("Failed to stop class instance");
 
         expect(updated.executionState).toBe("COMPLETED");
         expect(updated.outcome).toBe("TAKEN");
