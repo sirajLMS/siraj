@@ -76,29 +76,31 @@ export function ScheduleOverviewSection({
       <SectionPanel
         title={title}
         actions={
-          <TextField
-            placeholder={searchPlaceholder}
-            value={searchValue}
-            onChange={e => {
-              onSearchChange(e.target.value);
-            }}
-            size="small"
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchOutlined sx={theme => ({ fontSize: 18, color: theme.palette.onSurfaceVariant })} />
-                  </InputAdornment>
-                ),
-              },
-            }}
-            sx={{
-              maxWidth: { md: 280 },
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-              },
-            }}
-          />
+          <RequirePermission permissions={[AppPermission.DashboardSearch]}>
+            <TextField
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={e => {
+                onSearchChange(e.target.value);
+              }}
+              size="small"
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchOutlined sx={theme => ({ fontSize: 18, color: theme.palette.onSurfaceVariant })} />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              sx={{
+                maxWidth: { md: 280 },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                },
+              }}
+            />
+          </RequirePermission>
         }
       >
         {/* Filters */}

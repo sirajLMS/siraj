@@ -166,28 +166,6 @@ export function AdminDashboardContainer() {
     },
   ];
 
-  // Helper to format ISO dates to the "hh:mm AM/PM - hh:mm AM/PM" format expected by the UI
-  const formatTimeRange = (isoString: string, durationMinutes: number): string => {
-    try {
-      const start = new Date(isoString);
-      if (Number.isNaN(start.getTime())) return "";
-      const end = new Date(start.getTime() + durationMinutes * 60000);
-
-      const formatTime = (date: Date) => {
-        let hours = date.getHours();
-        const minutes = date.getMinutes().toString().padStart(2, "0");
-        const ampm = hours >= 12 ? "PM" : "AM";
-        hours = hours % 12;
-        hours = hours ?? 12;
-        return `${hours}:${minutes} ${ampm}`;
-      };
-
-      return `${formatTime(start)} - ${formatTime(end)}`;
-    } catch {
-      return "";
-    }
-  };
-
   // Map and filter raw schedule list to rows
   const rawList = listData?.dailyScheduleList ?? [];
   const mappedRows: ScheduleRow[] = rawList.map(item => {
@@ -201,27 +179,21 @@ export function AdminDashboardContainer() {
     }
 
     return {
+      id: item.id ?? "",
       classId: `#CLS-${item.id}`,
       student: item.student?.name ?? "Unknown Student",
       teacher: item.teacher?.name ?? "Unknown Teacher",
-      time: formatTimeRange(item.yourTime ?? "", item.duration ?? 0),
+      yourTime: item.yourTime ?? "",
+      teacherTime: item.teacherTime ?? undefined,
+      studentTime: item.studentTime ?? undefined,
+      time: item.yourTime ?? "",
       status,
     };
   });
 
   // Client-side filtering
   const filteredRows = mappedRows.filter(row => {
-    // 1. Search Query filtering
-    if (filters.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
-      const studentMatch = row.student.toLowerCase().includes(query);
-      const classIdMatch = row.classId.toLowerCase().includes(query);
-      if (!studentMatch && !classIdMatch) {
-        return false;
-      }
-    }
-
-    // 2. Selected Status card filtering
+    // Selected Status card filtering
     if (filters.selectedStatus && filters.selectedStatus !== "total") {
       const statusMapping: Record<string, string> = {
         pending: "pending",

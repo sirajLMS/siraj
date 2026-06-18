@@ -68,10 +68,14 @@ export interface ClassInstance {
 }
 
 export interface ScheduleRow {
-  readonly classId: string;
+  readonly id: string; // real UUID for routing
+  readonly classId: string; // display "#CLS-{id}"
   readonly student: string;
   readonly teacher: string;
-  readonly time: string;
+  readonly yourTime: string;
+  readonly teacherTime?: string;
+  readonly studentTime?: string;
+  readonly time: string; // legacy single column fallback
   readonly status: ClassStatus;
 }
 
@@ -95,6 +99,9 @@ export interface ScheduleOverviewData {
     readonly student: string;
     readonly teacher: string;
     readonly time: string;
+    readonly yourTime: string;
+    readonly teacherTime: string;
+    readonly studentTime: string;
     readonly status: string;
     readonly actions: string;
   };

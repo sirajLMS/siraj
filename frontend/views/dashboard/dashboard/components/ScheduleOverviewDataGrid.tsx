@@ -4,9 +4,13 @@ import { Details as DetailsIcon } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/stores/userStore";
 import type { ClassStatus, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
 
 interface ScheduleOverviewDataGridProps {
@@ -16,6 +20,9 @@ interface ScheduleOverviewDataGridProps {
     readonly student: string;
     readonly teacher: string;
     readonly time: string;
+    readonly yourTime: string;
+    readonly teacherTime: string;
+    readonly studentTime: string;
     readonly status: string;
     readonly actions: string;
   };
@@ -40,8 +47,13 @@ export function ScheduleOverviewDataGrid({
   detailsLabel,
   emptyMessage,
 }: ScheduleOverviewDataGridProps) {
-  const columns = useMemo<GridColDef<ScheduleRow>[]>(
-    () => [
+  const router = useRouter();
+  const locale = useLocale();
+  const { hasPermission } = useUserStore();
+  const showTimezones = hasPermission(AppPermission.ScheduleViewTimezones);
+
+  const columns = useMemo<GridColDef<ScheduleRow>[]>(() => {
+    const baseCols: GridColDef<ScheduleRow>[] = [
       {
         field: "classId",
         headerName: headers.classId,
@@ -70,13 +82,43 @@ export function ScheduleOverviewDataGrid({
           </Typography>
         ),
       },
-      {
+    ];
+
+    if (showTimezones) {
+      baseCols.push(
+        {
+          field: "yourTime",
+          headerName: headers.yourTime,
+          width: 150,
+          flex: 1,
+          renderCell: ({ row }) => <MonospaceLabel value={row.yourTime} />,
+        },
+        {
+          field: "teacherTime",
+          headerName: headers.teacherTime,
+          width: 150,
+          flex: 1,
+          renderCell: ({ row }) => <MonospaceLabel value={row.teacherTime ?? ""} />,
+        },
+        {
+          field: "studentTime",
+          headerName: headers.studentTime,
+          width: 150,
+          flex: 1,
+          renderCell: ({ row }) => <MonospaceLabel value={row.studentTime ?? ""} />,
+        }
+      );
+    } else {
+      baseCols.push({
         field: "time",
         headerName: headers.time,
         width: 130,
         flex: 1,
         renderCell: ({ row }) => <MonospaceLabel value={row.time} />,
-      },
+      });
+    }
+
+    baseCols.push(
       {
         field: "status",
         headerName: headers.status,
@@ -92,12 +134,13 @@ export function ScheduleOverviewDataGrid({
         sortable: false,
         align: "center",
         headerAlign: "center",
-        renderCell: () => (
+        renderCell: ({ row }) => (
           <Box sx={{ display: "flex", justifyContent: "center", width: "100%", alignSelf: "center", height: "100%" }}>
             <Box>
               <Tooltip title={detailsLabel}>
                 <IconButton
                   size="small"
+                  onClick={() => router.push(`/${locale}/classes/${row.id}`)}
                   sx={theme => ({
                     color: theme.palette.primary.main,
                     "&:hover": {
@@ -111,10 +154,11 @@ export function ScheduleOverviewDataGrid({
             </Box>
           </Box>
         ),
-      },
-    ],
-    [detailsLabel, headers, statusLabels]
-  );
+      }
+    );
+
+    return baseCols;
+  }, [detailsLabel, headers, statusLabels, showTimezones, router, locale]);
 
   return (
     <AppDataGrid<ScheduleRow>
@@ -128,7 +172,10 @@ export function ScheduleOverviewDataGrid({
       emptyMessage={emptyMessage}
       columnVisibilityModel={{
         teacher: true,
-        time: true,
+        time: !showTimezones,
+        yourTime: showTimezones,
+        teacherTime: showTimezones,
+        studentTime: showTimezones,
       }}
       sx={{
         "& .MuiDataGrid-columnHeader[data-field='teacher'], & .MuiDataGrid-cell[data-field='teacher']": {
@@ -136,6 +183,15 @@ export function ScheduleOverviewDataGrid({
         },
         "& .MuiDataGrid-columnHeader[data-field='time'], & .MuiDataGrid-cell[data-field='time']": {
           display: { xs: "none", sm: "flex" },
+        },
+        "& .MuiDataGrid-columnHeader[data-field='yourTime'], & .MuiDataGrid-cell[data-field='yourTime']": {
+          display: { xs: "none", sm: "flex" },
+        },
+        "& .MuiDataGrid-columnHeader[data-field='teacherTime'], & .MuiDataGrid-cell[data-field='teacherTime']": {
+          display: { xs: "none", md: "flex" },
+        },
+        "& .MuiDataGrid-columnHeader[data-field='studentTime'], & .MuiDataGrid-cell[data-field='studentTime']": {
+          display: { xs: "none", md: "flex" },
         },
       }}
     />

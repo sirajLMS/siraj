@@ -9,6 +9,9 @@ export const useAdminDashboardLabels = () => {
     student: t("admin.student"),
     teacher: t("admin.teacher"),
     time: t("admin.time"),
+    yourTime: t("admin.yourTime"),
+    teacherTime: t("admin.teacherTime"),
+    studentTime: t("admin.studentTime"),
     status: t("admin.status"),
     actions: t("admin.actions"),
   };

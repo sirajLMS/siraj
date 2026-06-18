@@ -11,6 +11,9 @@ export interface AdminDashboardLabels {
   readonly classId: string;
   readonly student: string;
   readonly time: string;
+  readonly yourTime: string;
+  readonly teacherTime: string;
+  readonly studentTime: string;
   readonly status: string;
   readonly actions: string;
   readonly details: string;
