@@ -43,10 +43,6 @@ const preview: Preview = {
   },
   loaders: [mswLoader],
   parameters: {
-    nextIntl: {
-      defaultLocale: "ar",
-      messagesByLocale: {}, // Handled in StoryWrapper for dynamic switching
-    },
     msw: { handlers: mswHandlers },
     nextjs: {
       appDirectory: true,

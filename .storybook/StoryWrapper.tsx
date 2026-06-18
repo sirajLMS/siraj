@@ -39,7 +39,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
   const theme = useMemo(() => createAppTheme(themeMode, direction, locale), [themeMode, direction, locale]);
   const cache = direction === "rtl" ? cacheRtl : cacheLtr;
 
-  const themeContextValue = useMemo(() => ({ mode: themeMode, toggleTheme: () => {} }), [themeMode]);
+  const themeContextValue = useMemo(() => ({ mode: themeMode, toggleTheme: () => { } }), [themeMode]);
 
   // Sync document attributes for global CSS and directionality
   useEffect(() => {
@@ -94,10 +94,20 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
                 },
               })}
             />
-            {Story(context.args, context)}
+            <RenderStory Story={Story} context={context} />
           </ThemeProvider>
         </CacheProvider>
       </ThemeContext.Provider>
     </NextIntlClientProvider>
   );
 };
+
+/**
+ * A small helper component to render the story function.
+ * This ensures that hooks called within the story are executed
+ * within a child component's render cycle, properly inheriting
+ * context from providers in StoryWrapper.
+ */
+function RenderStory({ Story, context }: Readonly<{ Story: StoryFn; context: StoryContext }>) {
+  return <>{Story(context.args, context)}</>;
+}
