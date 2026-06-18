@@ -67,6 +67,7 @@ export const useMockDashboardStore = create<DashboardState>(set => ({
     date: "2023-10-27",
     teacherId: "",
     searchQuery: "",
+    debouncedSearchQuery: "",
     selectedStatus: null,
   },
   scheduleRows: MOCK_SCHEDULE,
@@ -85,6 +86,9 @@ export const useMockDashboardStore = create<DashboardState>(set => ({
   setSearchQuery: (searchQuery: string) => {
     set(state => ({ filters: { ...state.filters, searchQuery } }));
   },
+  setDebouncedSearchQuery: (debouncedSearchQuery: string) => {
+    set(state => ({ filters: { ...state.filters, debouncedSearchQuery } }));
+  },
   setSelectedStatus: (selectedStatus: string | null) => {
     set(state => ({ filters: { ...state.filters, selectedStatus } }));
   },
@@ -94,6 +98,7 @@ export const useMockDashboardStore = create<DashboardState>(set => ({
         date: "2023-10-27",
         teacherId: "",
         searchQuery: "",
+        debouncedSearchQuery: "",
         selectedStatus: null,
       },
     });

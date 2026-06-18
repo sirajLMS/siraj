@@ -1,27 +1,10 @@
-// cspell:disable
 import { create } from "zustand";
 
-export interface ClassSession {
-  readonly id: string;
-  readonly day: number;
-  readonly title: string;
-  readonly time: string;
-  readonly duration: string;
-  readonly status: "present" | "absent" | "late";
-  readonly instructor: string;
-  readonly timeSlot: string;
-  readonly room: string;
-  readonly notes: string;
-}
+import type { ClassSession, StudentHistoryMetrics } from "./studentHistoryStore";
 
-export interface StudentHistoryMetrics {
-  readonly totalClasses: number;
-  readonly attendanceRate: number;
-  readonly hoursStudied: number;
-  readonly performance: string;
-}
+export type { ClassSession, StudentHistoryMetrics };
 
-interface StudentHistoryState {
+export interface StudentHistoryState {
   readonly studentName: string;
   readonly currentMonth: Date;
   readonly metrics: StudentHistoryMetrics;

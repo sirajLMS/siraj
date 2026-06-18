@@ -5,6 +5,7 @@ export interface DashboardFilters {
   readonly date: string;
   readonly teacherId: string;
   readonly searchQuery: string;
+  readonly debouncedSearchQuery: string;
   readonly selectedStatus: string | null;
 }
 
@@ -19,6 +20,7 @@ export interface DashboardState {
   readonly setDateFilter: (date: string) => void;
   readonly setTeacherFilter: (teacherId: string) => void;
   readonly setSearchQuery: (query: string) => void;
+  readonly setDebouncedSearchQuery: (query: string) => void;
   readonly setSelectedStatus: (status: string | null) => void;
   readonly resetFilters: () => void;
 
@@ -44,11 +46,14 @@ export const useDashboardStore = create<DashboardState>(set => ({
     date: getTodayString(),
     teacherId: "",
     searchQuery: "",
+    debouncedSearchQuery: "",
     selectedStatus: null,
   },
   setDateFilter: date => set(state => ({ filters: { ...state.filters, date } })),
   setTeacherFilter: teacherId => set(state => ({ filters: { ...state.filters, teacherId } })),
   setSearchQuery: searchQuery => set(state => ({ filters: { ...state.filters, searchQuery } })),
+  setDebouncedSearchQuery: debouncedSearchQuery =>
+    set(state => ({ filters: { ...state.filters, debouncedSearchQuery } })),
   setSelectedStatus: selectedStatus => set(state => ({ filters: { ...state.filters, selectedStatus } })),
   resetFilters: () =>
     set({
@@ -56,6 +61,7 @@ export const useDashboardStore = create<DashboardState>(set => ({
         date: getTodayString(),
         teacherId: "",
         searchQuery: "",
+        debouncedSearchQuery: "",
         selectedStatus: null,
       },
     }),
