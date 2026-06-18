@@ -73,6 +73,7 @@ export const AppApolloProvider: React.FC<{
 
       const authLink = createAuthLink(() => authTokenRef.current);
 
+
       const connectivityCheckLink = createConnectivityLink(
         () => getIsConnectedRef.current(),
         setConnectedWithRefRef.current,
