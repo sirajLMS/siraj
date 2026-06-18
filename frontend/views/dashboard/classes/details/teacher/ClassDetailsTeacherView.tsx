@@ -1,7 +1,9 @@
 "use client";
 
 import { Box, Grid } from "@mui/material";
-import type { ClassInstance, ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
 import { ActionsPanel } from "./ActionsPanel";
 import { ClassInstanceDetailsCard } from "./ClassInstanceDetailsCard";
 import { PerformanceOverviewCard } from "./PerformanceOverviewCard";
@@ -50,7 +52,7 @@ interface TeacherViewLabels {
 }
 
 interface ClassDetailsTeacherViewProps {
-  readonly instance: ClassInstance;
+  readonly instance: ClassInstanceDetail;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;
   readonly onActivate: () => void;
@@ -72,15 +74,19 @@ export function ClassDetailsTeacherView({
   onViewProfile,
   labels,
 }: ClassDetailsTeacherViewProps) {
+  const status = (instance.status as ClassInstanceStatus) || "pending";
+
   return (
     <Box>
       {/* Timezone Warning */}
       {!isWarningDismissed && instance.hasTimezoneMismatch && (
-        <TimezoneWarningBanner
-          studentTimezone={instance.studentTimezone}
-          onDismiss={onDismissWarning}
-          labels={labels.timezone}
-        />
+        <RequirePermission permissions={[AppPermission.ScheduleViewTimezones]}>
+          <TimezoneWarningBanner
+            studentTimezone={instance.studentTimezone ?? ""}
+            onDismiss={onDismissWarning}
+            labels={labels.timezone}
+          />
+        </RequirePermission>
       )}
 
       <Grid container spacing={3}>
@@ -88,20 +94,20 @@ export function ClassDetailsTeacherView({
         <Grid size={{ xs: 12, md: 8 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <ClassInstanceDetailsCard
-              instanceId={instance.id}
-              studentName={instance.student.name}
-              courseModule={instance.courseName}
-              startTime={instance.startTime}
-              endTime={instance.endTime}
-              durationMinutes={instance.durationMinutes}
-              status={instance.status}
+              instanceId={instance.id ?? ""}
+              studentName={instance.student?.name ?? ""}
+              courseModule={instance.courseName ?? ""}
+              startTime={instance.startTime ?? ""}
+              endTime={instance.endTime ?? ""}
+              durationMinutes={instance.durationMinutes ?? 0}
+              status={status}
               labels={labels.instanceDetails}
             />
-            <RemarksCard remarks={instance.remarks} labels={labels.remarks} />
+            <RemarksCard remarks={instance.remarks ?? ""} labels={labels.remarks} />
             <PerformanceOverviewCard
-              attendanceRate={instance.attendanceRate}
-              avgGrade={instance.avgGrade}
-              lastClassDaysAgo={instance.lastClassDaysAgo}
+              attendanceRate={instance.performance?.attendanceRate ?? 0}
+              avgGrade={instance.performance?.avgGrade ?? ""}
+              lastClassDaysAgo={instance.performance?.lastClassDaysAgo ?? 0}
               labels={labels.performance}
             />
           </Box>
@@ -118,7 +124,13 @@ export function ClassDetailsTeacherView({
               labels={labels.actions}
             />
             <StudentProfileCard
-              student={instance.student}
+              student={{
+                id: instance.student?.id ?? "",
+                name: instance.student?.name ?? "",
+                grade: instance.student?.grade ?? "",
+                level: Number(instance.student?.level ?? 0),
+                avatarUrl: instance.student?.avatarUrl ?? "",
+              }}
               onViewProfile={onViewProfile}
               labels={labels.studentProfile}
             />

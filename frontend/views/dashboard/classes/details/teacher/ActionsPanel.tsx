@@ -7,7 +7,9 @@ import HelpOutlinedIcon from "@mui/icons-material/HelpOutlined";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 import { alpha, Box, Grid, Stack, Typography } from "@mui/material";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { BaseCard } from "@/frontend/components/ui";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface ActionConfig {
   readonly key: string;
@@ -92,48 +94,58 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
           {ACTION_CONFIGS.map(config => {
             const Icon = config.icon;
             const { statusKey } = config;
+            const buttonElement = (
+              <Box
+                component="button"
+                id={`action-btn-${config.key}`}
+                onClick={handlers[config.key]}
+                sx={theme => {
+                  const status = theme.palette.status;
+                  const mainColor = status[statusKey];
+                  const borderColor = status[`${statusKey}Container` as keyof typeof status];
+                  const capitalized = statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
+                  const bgColor = status[`on${capitalized}Container` as keyof typeof status];
+
+                  return {
+                    width: "100%",
+                    aspectRatio: "1",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 1.5,
+                    bgcolor: bgColor,
+                    border: `1px solid ${borderColor}`,
+                    borderRadius: 2,
+                    cursor: "pointer",
+                    color: mainColor,
+                    boxShadow: theme.palette.shadow.button,
+                    transition: "all 0.15s ease",
+                    "&:hover": {
+                      bgcolor: alpha(mainColor, 0.08),
+                      boxShadow: theme.palette.shadow.buttonHover,
+                      "& .action-icon": { transform: "scale(1.1)" },
+                    },
+                    "&:active": { transform: "scale(0.95)" },
+                  };
+                }}
+              >
+                <Icon className="action-icon" sx={{ fontSize: 36, transition: "transform 0.15s ease" }} />
+                <Typography variant="labelUppercase" sx={{ color: "inherit" }}>
+                  {actionLabels[config.key]}
+                </Typography>
+              </Box>
+            );
+
             return (
               <Grid key={config.key} size={{ xs: 6 }}>
-                <Box
-                  component="button"
-                  id={`action-btn-${config.key}`}
-                  onClick={handlers[config.key]}
-                  sx={theme => {
-                    const status = theme.palette.status;
-                    const mainColor = status[statusKey];
-                    const borderColor = status[`${statusKey}Container` as keyof typeof status];
-                    const capitalized = statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
-                    const bgColor = status[`on${capitalized}Container` as keyof typeof status];
-
-                    return {
-                      width: "100%",
-                      aspectRatio: "1",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 1.5,
-                      bgcolor: bgColor,
-                      border: `1px solid ${borderColor}`,
-                      borderRadius: 2,
-                      cursor: "pointer",
-                      color: mainColor,
-                      boxShadow: theme.palette.shadow.button,
-                      transition: "all 0.15s ease",
-                      "&:hover": {
-                        bgcolor: alpha(mainColor, 0.08),
-                        boxShadow: theme.palette.shadow.buttonHover,
-                        "& .action-icon": { transform: "scale(1.1)" },
-                      },
-                      "&:active": { transform: "scale(0.95)" },
-                    };
-                  }}
-                >
-                  <Icon className="action-icon" sx={{ fontSize: 36, transition: "transform 0.15s ease" }} />
-                  <Typography variant="labelUppercase" sx={{ color: "inherit" }}>
-                    {actionLabels[config.key]}
-                  </Typography>
-                </Box>
+                {config.key === "activate" ? (
+                  <RequirePermission permissions={[AppPermission.SessionActivateClass]}>
+                    {buttonElement}
+                  </RequirePermission>
+                ) : (
+                  buttonElement
+                )}
               </Grid>
             );
           })}

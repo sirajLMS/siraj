@@ -1,42 +1,53 @@
 "use client";
 
-import { useMediaQuery, useTheme } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
+import { useParams, useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useClassDetailsStore } from "@/frontend/stores/mockClassDetailsStore";
-import { useUserStore } from "@/frontend/stores/mockUserStore";
+import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  activateClassMutationDocument,
+  classInstanceQueryDocument,
+  deleteClassInstanceMutationDocument,
+  forceActivateClassMutationDocument,
+  stopClassMutationDocument,
+} from "@/frontend/graphql/sharedDocuments";
+import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
 import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
 
-interface ViewWrapperProps {
+interface AdminViewWrapperProps {
   readonly pageHeader: React.ReactNode;
+  readonly instance: ClassInstanceDetail;
+  readonly isWarningDismissed: boolean;
+  readonly onDismissWarning: () => void;
+  readonly onForceActivate: () => void;
+  readonly onStop: () => void;
+  readonly onDelete: () => void;
 }
 
-const AdminViewWrapper = ({ pageHeader }: ViewWrapperProps) => {
+const AdminViewWrapper = ({
+  pageHeader,
+  instance,
+  isWarningDismissed,
+  onDismissWarning,
+  onForceActivate,
+  onStop,
+  onDelete,
+}: AdminViewWrapperProps) => {
   const t = useTranslations("dashboard.classDetails");
-  const instance = useClassDetailsStore(state => state.instance);
-  const isWarningDismissed = useClassDetailsStore(state => state.isWarningDismissed);
-  const dismissWarning = useClassDetailsStore(state => state.dismissWarning);
 
-  const handleForceActivate = () => {
-    logger.info("Admin force-activate:", instance.id);
-  };
-  const handleStop = () => {
-    logger.info("Admin stop:", instance.id);
-  };
   const handleGenerateLog = () => {
     logger.info("Admin generate log:", instance.id);
-  };
-  const handleDelete = () => {
-    logger.warn("Admin delete instance:", instance.id);
   };
 
   const timezoneLabels = {
     title: t("timezone.title"),
-    description: t("timezone.description", { timezone: instance.studentTimezone }),
+    description: t("timezone.description", { timezone: instance.studentTimezone ?? "" }),
   };
 
   return (
@@ -45,11 +56,11 @@ const AdminViewWrapper = ({ pageHeader }: ViewWrapperProps) => {
       <ClassDetailsAdminView
         instance={instance}
         isWarningDismissed={isWarningDismissed}
-        onDismissWarning={dismissWarning}
-        onForceActivate={handleForceActivate}
-        onStop={handleStop}
+        onDismissWarning={onDismissWarning}
+        onForceActivate={onForceActivate}
+        onStop={onStop}
         onGenerateLog={handleGenerateLog}
-        onDelete={handleDelete}
+        onDelete={onDelete}
         labels={{
           timezone: timezoneLabels,
           adminActions: {
@@ -90,31 +101,37 @@ const AdminViewWrapper = ({ pageHeader }: ViewWrapperProps) => {
   );
 };
 
-const TeacherViewWrapper = ({ pageHeader }: ViewWrapperProps) => {
-  const t = useTranslations("dashboard.classDetails");
-  const instance = useClassDetailsStore(state => state.instance);
-  const isWarningDismissed = useClassDetailsStore(state => state.isWarningDismissed);
-  const dismissWarning = useClassDetailsStore(state => state.dismissWarning);
+interface TeacherViewWrapperProps {
+  readonly pageHeader: React.ReactNode;
+  readonly instance: ClassInstanceDetail;
+  readonly isWarningDismissed: boolean;
+  readonly onDismissWarning: () => void;
+  readonly onActivate: () => void;
+  readonly onStop: () => void;
+  readonly onDelete: () => void;
+}
 
-  const handleStop = () => {
-    logger.info("Admin stop:", instance.id);
-  };
-  const handleDelete = () => {
-    logger.warn("Admin delete instance:", instance.id);
-  };
-  const handleActivate = () => {
-    logger.info("Teacher activate:", instance.id);
-  };
+const TeacherViewWrapper = ({
+  pageHeader,
+  instance,
+  isWarningDismissed,
+  onDismissWarning,
+  onActivate,
+  onStop,
+  onDelete,
+}: TeacherViewWrapperProps) => {
+  const t = useTranslations("dashboard.classDetails");
+
   const handleInfoEdit = () => {
     logger.info("Teacher info/edit:", instance.id);
   };
   const handleViewProfile = () => {
-    logger.info("View student profile:", instance.student.id);
+    logger.info("View student profile:", instance.student?.id ?? "");
   };
 
   const timezoneLabels = {
     title: t("timezone.title"),
-    description: t("timezone.description", { timezone: instance.studentTimezone }),
+    description: t("timezone.description", { timezone: instance.studentTimezone ?? "" }),
   };
 
   const statusLabels: Record<ClassInstanceStatus, string> = {
@@ -131,11 +148,11 @@ const TeacherViewWrapper = ({ pageHeader }: ViewWrapperProps) => {
       <ClassDetailsTeacherView
         instance={instance}
         isWarningDismissed={isWarningDismissed}
-        onDismissWarning={dismissWarning}
-        onActivate={handleActivate}
-        onStop={handleStop}
+        onDismissWarning={onDismissWarning}
+        onActivate={onActivate}
+        onStop={onStop}
         onInfoEdit={handleInfoEdit}
-        onDelete={handleDelete}
+        onDelete={onDelete}
         onViewProfile={handleViewProfile}
         labels={{
           timezone: timezoneLabels,
@@ -182,16 +199,82 @@ export function ClassDetailsContainer() {
   const t = useTranslations("dashboard.classDetails");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const permissions = useUserStore(state => state.permissions);
-  const instance = useClassDetailsStore(state => state.instance);
+  const router = useRouter();
+  const locale = useLocale();
 
-  const canManage = permissions.includes(AppPermission.SessionReschedule);
-  const canView = permissions.includes(AppPermission.SessionViewDetails);
+  const { id } = useParams() as { id: string };
+  const hasPermission = useUserStore(state => state.hasPermission);
+
+  const [isWarningDismissed, setIsWarningDismissed] = useState(false);
+
+  const { data, loading, error } = useQuery(classInstanceQueryDocument, {
+    variables: { id },
+  });
+
+  const [activateClass] = useMutation(activateClassMutationDocument);
+  const [forceActivateClass] = useMutation(forceActivateClassMutationDocument);
+  const [stopClass] = useMutation(stopClassMutationDocument);
+  const [deleteClass] = useMutation(deleteClassInstanceMutationDocument);
+
+  const canOverride = hasPermission(AppPermission.SessionOverrideActions);
+  const canView = hasPermission(AppPermission.SessionViewDetails);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error || !data?.classInstance) {
+    logger.error("Error fetching class details:", error);
+    return null;
+  }
+
+  const instance = data.classInstance;
+
+  const handleForceActivate = async () => {
+    try {
+      await forceActivateClass({ variables: { classInstanceId: id } });
+      logger.info("Admin force-activated session:", id);
+    } catch (err) {
+      logger.error("Error in forceActivateClass:", err);
+    }
+  };
+
+  const handleStop = async () => {
+    try {
+      await stopClass({ variables: { classInstanceId: id } });
+      logger.info("Stopped session:", id);
+    } catch (err) {
+      logger.error("Error in stopClass:", err);
+    }
+  };
+
+  const handleActivate = async () => {
+    try {
+      await activateClass({ variables: { classInstanceId: id } });
+      logger.info("Teacher activated session:", id);
+    } catch (err) {
+      logger.error("Error in activateClass:", err);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteClass({ variables: { classInstanceId: id } });
+      logger.warn("Deleted class instance:", id);
+      router.push(`/${locale}/dashboard`);
+    } catch (err) {
+      logger.error("Error in deleteClass:", err);
+    }
+  };
 
   const pageHeader = (
     <PageHeader
-      title={instance.courseName}
-      subtitle={canManage ? t("pageSubtitleAdmin") : t("pageSubtitleTeacher")}
+      title={instance.courseName ?? ""}
+      subtitle={canOverride ? t("pageSubtitleAdmin") : t("pageSubtitleTeacher")}
       titleVariant={isMobile ? "headlineMd" : "headlineLg"}
       breadcrumbs={
         isMobile
@@ -199,18 +282,38 @@ export function ClassDetailsContainer() {
           : [
               { label: t("breadcrumbs.dashboard"), href: "/dashboard" },
               { label: t("breadcrumbs.classes"), href: `/classes/${instance.id}` },
-              { label: instance.courseName, current: true },
+              { label: instance.courseName ?? "", current: true },
             ]
       }
     />
   );
 
-  if (canManage) {
-    return <AdminViewWrapper pageHeader={pageHeader} />;
+  if (canOverride) {
+    return (
+      <AdminViewWrapper
+        pageHeader={pageHeader}
+        instance={instance}
+        isWarningDismissed={isWarningDismissed}
+        onDismissWarning={() => setIsWarningDismissed(true)}
+        onForceActivate={handleForceActivate}
+        onStop={handleStop}
+        onDelete={handleDelete}
+      />
+    );
   }
 
   if (canView) {
-    return <TeacherViewWrapper pageHeader={pageHeader} />;
+    return (
+      <TeacherViewWrapper
+        pageHeader={pageHeader}
+        instance={instance}
+        isWarningDismissed={isWarningDismissed}
+        onDismissWarning={() => setIsWarningDismissed(true)}
+        onActivate={handleActivate}
+        onStop={handleStop}
+        onDelete={handleDelete}
+      />
+    );
   }
 
   return null;
