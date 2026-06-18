@@ -185,15 +185,14 @@ gqlSchemaBuilder.mutationFields(t => ({
 
   refreshToken: t.field({
     type: RefreshTokenResponsePothosObject,
+    nullable: true,
     resolve: async (_parent, _args, ctx) => {
       // Try to get session ID from context (from cookie)
       const sessionId = ctx.sessionId;
       const refreshToken = ctx.refreshToken;
 
       if (!sessionId && !refreshToken) {
-        throw new GraphQLError("No authentication session found", {
-          extensions: { code: "UNAUTHENTICATED" },
-        });
+        return null;
       }
 
       let session: SessionEntity | null = null;
@@ -214,9 +213,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       }
 
       if (!user || !session) {
-        throw new GraphQLError("Invalid session or refresh token", {
-          extensions: { code: "INVALID_TOKEN" },
-        });
+        return null;
       }
 
       // Generate new tokens (token rotation for security)

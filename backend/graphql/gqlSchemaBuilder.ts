@@ -8,6 +8,7 @@ import SimpleObjectsPlugin from "@pothos/plugin-simple-objects";
 import TracingPlugin, { isRootField, wrapResolver } from "@pothos/plugin-tracing";
 import WithInputPlugin from "@pothos/plugin-with-input";
 import { getTableConfig } from "drizzle-orm/pg-core";
+import { GraphQLError } from "graphql";
 import { type DrizzleRelations, db, relations } from "@/backend/db/drizzleDb";
 import logger from "@/backend/lib/logger";
 import type { AppPermission } from "@/shared/lib/enum";
@@ -59,6 +60,28 @@ export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
       permission: (key: AppPermission) => ctx.isSuperAdmin || ctx.permissions.includes(key),
       superAdmin: ctx.isSuperAdmin,
     }),
+    unauthorizedError: (_parent, _context, _info, result) => {
+      const hasLoggedInFailure = (failure: unknown): boolean => {
+        if (!failure || typeof failure !== "object") return false;
+        const failureObj = failure as Record<string, unknown>;
+        if (failureObj.kind === "AuthScope") {
+          return failureObj.scope === "loggedIn";
+        }
+        if (failureObj.kind === "AnyAuthScopes" || failureObj.kind === "AllAuthScopes") {
+          const failures = failureObj.failures;
+          return Array.isArray(failures) && failures.some(hasLoggedInFailure);
+        }
+        return false;
+      };
+
+      const isUnauthenticated = hasLoggedInFailure(result.failure);
+
+      return new GraphQLError(result.message, {
+        extensions: {
+          code: isUnauthenticated ? "UNAUTHENTICATED" : "FORBIDDEN",
+        },
+      });
+    },
   },
   errors: {
     defaultTypes: [],

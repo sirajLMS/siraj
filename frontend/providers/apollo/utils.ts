@@ -1,6 +1,6 @@
 "use client";
 
-import { ApolloLink, Observable } from "@apollo/client";
+import { ApolloLink, CombinedGraphQLErrors, Observable } from "@apollo/client";
 import { ErrorLink } from "@apollo/client/link/error";
 import CryptoJS from "crypto-js";
 import logger from "@/frontend/lib/logger";
@@ -99,13 +99,43 @@ export const createConnectivityLink = (
 };
 
 // Helper to create error link
+function handleAuthError(error: unknown, operationName: string | undefined): boolean {
+  if (!CombinedGraphQLErrors.is(error)) return false;
+
+  const isAuthError = error.errors.some(err => {
+    const code = err.extensions?.code;
+    return code === "UNAUTHENTICATED" || code === "FORBIDDEN";
+  });
+
+  if (!isAuthError) return false;
+  if (operationName === "login" || operationName === "demoLogin" || operationName === "refreshToken") return false;
+
+  if (typeof globalThis.window !== "undefined") {
+    const pathname = globalThis.window.location.pathname;
+    const search = globalThis.window.location.search;
+    const currentUrl = `${pathname}${search}`;
+    const segments = pathname.split("/");
+    const detectedLocale = ["ar", "en"].includes(segments[1]) ? segments[1] : "ar";
+    const encodedRedirect = encodeURIComponent(currentUrl);
+    globalThis.window.location.href = `/${detectedLocale}/login?redirect=${encodedRedirect}`;
+    return true;
+  }
+
+  return false;
+}
+
+// Helper to create error link
 export const createErrorLinkHandler = (
   getConnected: () => boolean,
   setConnected: (v: boolean) => void,
   notifyDisconnected: () => void
 ) => {
-  return new ErrorLink(({ error }) => {
-    if (isNetworkError(error)) {
+  return new ErrorLink(({ error, operation }) => {
+    if (handleAuthError(error, operation.operationName)) {
+      return;
+    }
+
+    if (error && isNetworkError(error)) {
       const wasConnected = getConnected();
       logger.warn({ caller: "AppApolloProvider" }, `[Error Link] Network error detected. wasConnected=${wasConnected}`);
       setConnected(false);
