@@ -4,10 +4,10 @@ import { FilterListOutlined } from "@mui/icons-material";
 import { Box, TextField } from "@mui/material";
 import { FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { BillingMetricsRow } from "./components/BillingMetricsRow";
-import { getParentInvoiceGridLabels } from "./components/BillingSearchBar";
 import { ParentInvoicesDataGrid } from "./components/ParentInvoicesDataGrid";
 import type { ParentBillingViewProps } from "./types/billingViewTypes";
 import { buildParentMetrics } from "./utils/billingMetrics";
+import { getParentInvoiceGridLabels } from "./utils/label-mappers";
 
 export function ParentBillingDesktopView({
   labels,

@@ -1,7 +1,8 @@
 "use client";
 
 import type { SuggestionTab } from "@/frontend/stores/mockAdminSuggestionsStore";
-import { AdminQueueTabBar, formatAdminQueueTabLabel } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
+import { AdminQueueTabBar } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
+import { formatAdminQueueTabLabel } from "@/frontend/views/dashboard/shared/utils";
 import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 
 interface SuggestionsTabBarProps {

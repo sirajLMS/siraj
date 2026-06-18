@@ -10,8 +10,7 @@ const nextConfig: NextConfig = {
       "next-intl/config": "./shared/i18n/request.ts",
     },
   },
-  // eslint-disable-next-line sonarjs/no-hardcoded-ip
-  allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.100.30"],
+  allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.100.30"], // NoSonar
   images: {
     // Disable image optimization for localhost URLs to avoid 400 errors
     // The Next.js Image Optimization API can't reach localhost:5000 from the server side

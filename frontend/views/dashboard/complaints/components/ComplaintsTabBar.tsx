@@ -1,7 +1,8 @@
 "use client";
 
 import type { ComplaintTab } from "@/frontend/stores/mockAdminComplaintsStore";
-import { AdminQueueTabBar, formatAdminQueueTabLabel } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
+import { AdminQueueTabBar } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
+import { formatAdminQueueTabLabel } from "@/frontend/views/dashboard/shared/utils";
 import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
 
 interface ComplaintsTabBarProps {

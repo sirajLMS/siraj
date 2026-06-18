@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 "use client";
 
 import { Box, Button } from "@mui/material";
@@ -46,8 +45,4 @@ export function AdminQueueTabBar<T extends string>({
       })}
     </Box>
   );
-}
-
-export function formatAdminQueueTabLabel(base: string, count: number): string {
-  return `${base} (${count})`;
 }

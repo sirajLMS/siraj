@@ -1,5 +1,4 @@
 // cspell:disable
-// /* eslint-disable local-rules/no-hardcoded-colors */
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { CssBaseline, GlobalStyles, type PaletteMode, ThemeProvider } from "@mui/material";

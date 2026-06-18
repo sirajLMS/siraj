@@ -5,10 +5,11 @@ import { Box, Button, Chip } from "@mui/material";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { AdminInvoicesDataGrid } from "./components/AdminInvoicesDataGrid";
 import { BillingMetricsRow } from "./components/BillingMetricsRow";
-import { BillingSearchBar, getAdminInvoiceGridLabels, getStudentCreditGridLabels } from "./components/BillingSearchBar";
+import { BillingSearchBar } from "./components/BillingSearchBar";
 import { StudentCreditDataGrid } from "./components/StudentCreditDataGrid";
 import type { AdminBillingViewProps } from "./types/billingViewTypes";
 import { buildAdminMetrics } from "./utils/billingMetrics";
+import { getAdminInvoiceGridLabels, getStudentCreditGridLabels } from "./utils/label-mappers";
 
 export function AdminBillingDesktopView({
   labels,

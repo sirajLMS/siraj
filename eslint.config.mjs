@@ -154,13 +154,21 @@ const eslintConfig = defineConfig([
     },
   },
 
-  // Allow console in logger implementation, vite config, and scripts
+  // Allow console and bypass security rules in specific files (logger, scripts, tests, config)
   {
-    files: ["src/utils/logger/**/*.ts", "scripts/**/*.ts"],
+    files: [
+      "frontend/utils/logger.ts",
+      "scripts/**/*.ts",
+      "backend/db/scripts/**/*.ts",
+      "backend/db/test/**/*.ts",
+      "next.config.ts",
+    ],
     rules: {
       "no-console": "off",
       "sonarjs/no-nested-functions": "off",
       "sonarjs/no-os-command-from-path": "off",
+      "sonarjs/no-hardcoded-ip": "off",
+      "sonarjs/sql-queries": "off",
       "@typescript-eslint/no-unnecessary-condition": "off",
     },
   },
