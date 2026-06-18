@@ -288,7 +288,7 @@ describe("Class Rescheduling Business Rules & Constraints", () => {
     {
       name: "Enforces rescheduled no complete check constraint",
       prefix: "noComplete",
-      overrides: { executionState: "COMPLETED" },
+      overrides: { executionState: "COMPLETED", outcome: "TAKEN", actualStartAt: new Date() },
       constraint: "class_instances_rescheduled_no_complete_chk",
     },
   ];

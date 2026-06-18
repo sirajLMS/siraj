@@ -13,6 +13,11 @@ BEGIN
         IF OLD.execution_state = 'RUNNING' AND NEW.execution_state = 'ACTIVATED' THEN
             RAISE EXCEPTION 'Invalid transition: Cannot move a RUNNING class instance back to ACTIVATED.';
         END IF;
+
+        -- ACTIVATED can only transition to COMPLETED if outcome is ABSENT or LEAVE
+        IF OLD.execution_state = 'ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('ABSENT', 'LEAVE') THEN
+            RAISE EXCEPTION 'Invalid transition: ACTIVATED instance can only complete with ABSENT or LEAVE outcome.';
+        END IF;
     END IF;
 
     RETURN NEW;

@@ -38,7 +38,7 @@ gqlSchemaBuilder.mutationField("forceActivateClass", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.forceActivate),
+    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.activateOverride),
   })
 );
 
@@ -56,7 +56,8 @@ gqlSchemaBuilder.mutationField("startClass", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.start),
+    resolve: (_parent, args, ctx) =>
+      handleClassAction(ctx, args.classInstanceId, ClassSessionService.updateStatusStart),
   })
 );
 
@@ -65,7 +66,8 @@ gqlSchemaBuilder.mutationField("markClassAbsent", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.markAbsent),
+    resolve: (_parent, args, ctx) =>
+      handleClassAction(ctx, args.classInstanceId, ClassSessionService.updateStatusAbsent),
   })
 );
 
@@ -79,7 +81,7 @@ gqlSchemaBuilder.mutationField("requestClassLeave", t =>
     authScopes: { loggedIn: true },
     resolve: (_parent, args, ctx) =>
       handleClassAction(ctx, args.classInstanceId, (userId, id, locale) =>
-        ClassSessionService.requestLeave(userId, id, args.reason ?? null, locale)
+        ClassSessionService.updateStatusLeave(userId, id, args.reason ?? null, locale)
       ),
   })
 );
@@ -89,7 +91,8 @@ gqlSchemaBuilder.mutationField("adminExcuseClassLeave", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.adminLeave),
+    resolve: (_parent, args, ctx) =>
+      handleClassAction(ctx, args.classInstanceId, ClassSessionService.updateStatusLeave),
   })
 );
 
@@ -134,7 +137,7 @@ gqlSchemaBuilder.mutationField("revertClass", t =>
     type: ClassInstanceDetailPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
-    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.revert),
+    resolve: (_parent, args, ctx) => handleClassAction(ctx, args.classInstanceId, ClassSessionService.reset),
   })
 );
 

@@ -87,4 +87,16 @@ export namespace PermissionsService {
       return false;
     }
   }
+
+  export async function hasAnyPermission(userId: string, permissionKeys: AppPermission[]): Promise<boolean> {
+    try {
+      if (permissionKeys.length === 0) return false;
+      const context = await PermissionsService.getUserContext(userId);
+      if (context.isSuperAdmin) return true;
+      return permissionKeys.some(key => (context.permissions as string[]).includes(key));
+    } catch (error) {
+      logger.error("Failed to check any permission", { userId, permissionKeys, error });
+      return false;
+    }
+  }
 }

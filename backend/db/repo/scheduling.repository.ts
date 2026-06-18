@@ -13,7 +13,9 @@ import {
   users,
 } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
+import { AppPermission } from "@/shared/lib/enum";
 
 // Extract the transaction type from Drizzle
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -77,7 +79,14 @@ export namespace SchedulingRepository {
   }
 
   /**
+  /**
    * Helper to run a state-changing operation with consistent transaction and logging logic.
+   *
+   * 4-Layer Security Model:
+   * 1. DB Trigger: Restricts invalid edge transitions globally (blacklist).
+   * 2. Repo Guard (runStateChange): Verifies IDOR constraints and logic conditions.
+   * 3. Service Layer: Checks feature-specific permissions per action.
+   * 4. UI Gates: Components hidden from unauthorized users via <RequirePermission>.
    */
   async function runStateChange(
     id: string,
@@ -107,21 +116,31 @@ export namespace SchedulingRepository {
         .where(eq(teachers.userId, actorUserId))
         .limit(1);
 
-      if (teacher && existing.teacherId !== teacher.id) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorizedAction"));
-      }
-
       const [parent] = await t.select({ id: parents.id }).from(parents).where(eq(parents.userId, actorUserId)).limit(1);
 
+      let isParentOfStudent = false;
       if (parent) {
         const [studentLink] = await t
           .select({ id: students.id })
           .from(students)
           .where(and(eq(students.id, existing.studentId), eq(students.parentId, parent.id)))
           .limit(1);
+        if (studentLink) {
+          isParentOfStudent = true;
+        }
+      }
 
-        if (!studentLink) {
+      const isTeacherOfClass = teacher && existing.teacherId === teacher.id;
+
+      if (!isTeacherOfClass && !isParentOfStudent) {
+        // Admin bypass
+        const hasAdminBypass = await PermissionsService.hasAnyPermission(actorUserId, [
+          AppPermission.SESSION_OVERRIDE_ACTIONS,
+          AppPermission.SESSION_ACTIVATE_OVERRIDE,
+          AppPermission.SESSION_RESET,
+        ]);
+
+        if (!hasAdminBypass) {
           const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
           throw new Error(tFunc("unauthorizedAction"));
         }
@@ -141,7 +160,10 @@ export namespace SchedulingRepository {
           throw new Error(tFunc("invalidTransition"));
         }
       } else if (state.executionState === "COMPLETED") {
-        if (existing.executionState !== "RUNNING") {
+        const isValidStandard = existing.executionState === "RUNNING";
+        const isValidEarly =
+          existing.executionState === "ACTIVATED" && (state.outcome === "ABSENT" || state.outcome === "LEAVE");
+        if (!isValidStandard && !isValidEarly) {
           const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
           throw new Error(tFunc("invalidTransition"));
         }
@@ -295,39 +317,117 @@ export namespace SchedulingRepository {
   };
 
   export const markClassAbsent = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
-    return transitionToCompleted(id, actorUserId, "ABSENT", "Marked absent", tx, locale);
+    return runStateChange(id, actorUserId, tx, locale, async (_, existing) => {
+      const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+      const now = new Date();
+      return {
+        state: {
+          executionState: "COMPLETED",
+          outcome: "ABSENT",
+          actualStartAt: existing.actualStartAt ?? now,
+          actualEndAt: now,
+          payrollCredited: true,
+          remarks: existing.remarks ?? tFuncSession("absentEventDescription"),
+        },
+        event: {
+          fromState: { executionState: existing.executionState, outcome: existing.outcome },
+          toState: { executionState: "COMPLETED", outcome: "ABSENT" },
+          description: tFuncSession("absentEventDescription"),
+        },
+      };
+    });
   };
 
-  export const requestClassLeave = async (
+  export const processClassLeave = async (
     id: string,
     reason: string | null,
     actorUserId: string,
     tx?: DBTransaction,
     locale?: string
   ) => {
-    return transitionToCompleted(
-      id,
-      actorUserId,
-      "LEAVE",
-      `Leave requested: ${reason ?? "No reason provided"}`,
-      tx,
-      locale
-    );
+    const runner = async (t: DBTransaction) => {
+      const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+      const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
+      if (!existing) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("classInstanceNotFound", { id }));
+      }
+      const offsetDays = await SystemSettingsRepository.getIntValue("session_leave_reschedule_offset_days", 7, t);
+      const newScheduledStartAt = new Date(existing.scheduledStartAt);
+      newScheduledStartAt.setDate(newScheduledStartAt.getDate() + offsetDays);
+      const newScheduledEndAt = new Date(existing.scheduledEndAt);
+      newScheduledEndAt.setDate(newScheduledEndAt.getDate() + offsetDays);
+
+      const successor = await rescheduleClassInstance(
+        id,
+        {
+          studentId: existing.studentId,
+          teacherId: existing.teacherId,
+          scheduledStartAt: newScheduledStartAt,
+          scheduledEndAt: newScheduledEndAt,
+          durationMinutes: existing.durationMinutes,
+          classType: existing.classType,
+          idempotencyKey: `leave-reschedule-${existing.id}-${Date.now()}`,
+        },
+        t,
+        locale
+      );
+
+      const updated = await runStateChange(id, actorUserId, t, locale, async () => {
+        const now = new Date();
+        const msg = tFuncSession("leaveProcessedDescription", { successorId: successor.id });
+        return {
+          state: {
+            executionState: "COMPLETED",
+            outcome: "LEAVE",
+            actualStartAt: existing.actualStartAt ?? now,
+            actualEndAt: now,
+            isRescheduled: true,
+            remarks: reason ? `${reason}\n${msg}` : msg,
+          },
+          event: {
+            fromState: { executionState: existing.executionState, outcome: existing.outcome },
+            toState: { executionState: "COMPLETED", outcome: "LEAVE" },
+            description: msg,
+          },
+        };
+      });
+
+      return { originalId: updated.id, successorId: successor.id };
+    };
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const adminExcuseClassLeave = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
-    return transitionToCompleted(id, actorUserId, "LEAVE", "Admin excused leave", tx, locale);
-  };
-
-  export const revertClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
-    return runStateChange(id, actorUserId, tx, locale, async (_, existing) => ({
-      state: { executionState: "NOT_ACTIVATED", outcome: "PENDING", actualStartAt: null, actualEndAt: null },
-      event: {
-        fromState: { executionState: existing.executionState, outcome: existing.outcome },
-        toState: { executionState: "NOT_ACTIVATED", outcome: "PENDING" },
-        description: "Reverted to pending",
-      },
-    }));
+  export const resetClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction, locale?: string) => {
+    return runStateChange(id, actorUserId, tx, locale, async (t, existing) => {
+      const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+      if (existing.quotaDeducted) {
+        await t
+          .update(students)
+          .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
+          .where(eq(students.id, existing.studentId));
+      }
+      return {
+        state: {
+          executionState: "NOT_ACTIVATED",
+          outcome: "PENDING",
+          actualStartAt: null,
+          actualEndAt: null,
+          activatedAt: null,
+          activatedByUserId: null,
+          forceActivated: false,
+          forceActivatedByUserId: null,
+          payrollCredited: false,
+          quotaDeducted: false,
+          remarks: null,
+        },
+        event: {
+          fromState: { executionState: existing.executionState, outcome: existing.outcome },
+          toState: { executionState: "NOT_ACTIVATED", outcome: "PENDING" },
+          description: tFuncSession("resetDescription"),
+        },
+      };
+    });
   };
 
   /**
@@ -733,8 +833,6 @@ export namespace SchedulingRepository {
         .set({
           isRescheduled: true,
           quotaDeducted: false,
-          outcome: "PENDING",
-          executionState: "NOT_ACTIVATED",
           updatedAt: new Date(),
         })
         .where(eq(classInstances.id, originalClassId));

@@ -21,4 +21,17 @@ export namespace SystemRulesService {
       throw new Error(t("missedClassTime"));
     }
   }
+
+  export async function assertAbsentWaitingPeriod(instance: ClassInstanceEntity, locale?: string): Promise<void> {
+    const waitingMinutes = await SystemSettingsRepository.getIntValue("session_absent_waiting_minutes", 30);
+    const now = new Date();
+
+    const requiredWaitTime = new Date(instance.scheduledStartAt);
+    requiredWaitTime.setMinutes(requiredWaitTime.getMinutes() + waitingMinutes);
+
+    if (now < requiredWaitTime) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("absentTooEarly", { waitingMinutes: String(waitingMinutes) }));
+    }
+  }
 }

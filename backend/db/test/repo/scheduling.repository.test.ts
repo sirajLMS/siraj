@@ -518,7 +518,7 @@ describe("Scheduling Repository logic", () => {
   });
 
   describe("Missing Coverage Extensions", () => {
-    test("startClassInstance, markClassAbsent, requestClassLeave, adminExcuseClassLeave, revertClassInstance work successfully", async () => {
+    test("startClassInstance, markClassAbsent, processClassLeave, resetClassInstance work successfully", async () => {
       await runInRollback(async tx => {
         // Test 1: startClassInstance (ACTIVATED -> RUNNING) and markClassAbsent (RUNNING -> COMPLETED with ABSENT)
         const { instance: inst1, teacher: t1 } = await setupTestEntities(tx, "State1");
@@ -533,7 +533,7 @@ describe("Scheduling Repository logic", () => {
         expect(absent?.executionState).toBe("COMPLETED");
         expect(absent?.outcome).toBe("ABSENT");
 
-        // Test 2: requestClassLeave (RUNNING -> COMPLETED with LEAVE)
+        // Test 2: processClassLeave (RUNNING -> COMPLETED with LEAVE)
         const { instance: inst2, teacher: t2 } = await setupTestEntities(tx, "State2");
         const id2 = inst2?.id;
         const u2 = t2.userId;
@@ -541,11 +541,16 @@ describe("Scheduling Repository logic", () => {
 
         await SchedulingRepository.activateClassInstance(id2, u2, { force: false }, tx);
         await SchedulingRepository.startClassInstance(id2, u2, tx);
-        const leave = await SchedulingRepository.requestClassLeave(id2, "Feeling sick", u2, tx);
-        expect(leave?.executionState).toBe("COMPLETED");
-        expect(leave?.outcome).toBe("LEAVE");
+        const leave = await SchedulingRepository.processClassLeave(id2, "Feeling sick", u2, tx);
+        const [leaveInst] = await tx
+          .select()
+          .from(classInstances)
+          .where(eq(classInstances.id, leave.originalId))
+          .limit(1);
+        expect(leaveInst?.executionState).toBe("COMPLETED");
+        expect(leaveInst?.outcome).toBe("LEAVE");
 
-        // Test 3: adminExcuseClassLeave (RUNNING -> COMPLETED with LEAVE)
+        // Test 3: admin excuse leave via processClassLeave
         const { instance: inst3, teacher: t3 } = await setupTestEntities(tx, "State3");
         const id3 = inst3?.id;
         const u3 = t3.userId;
@@ -553,13 +558,18 @@ describe("Scheduling Repository logic", () => {
 
         await SchedulingRepository.activateClassInstance(id3, u3, { force: false }, tx);
         await SchedulingRepository.startClassInstance(id3, u3, tx);
-        const excused = await SchedulingRepository.adminExcuseClassLeave(id3, u3, tx);
-        expect(excused?.executionState).toBe("COMPLETED");
-        expect(excused?.outcome).toBe("LEAVE");
+        const excused = await SchedulingRepository.processClassLeave(id3, null, u3, tx);
+        const [excusedInst] = await tx
+          .select()
+          .from(classInstances)
+          .where(eq(classInstances.id, excused.originalId))
+          .limit(1);
+        expect(excusedInst?.executionState).toBe("COMPLETED");
+        expect(excusedInst?.outcome).toBe("LEAVE");
 
-        // Test 4: revertClassInstance (COMPLETED -> NOT_ACTIVATED)
+        // Test 4: resetClassInstance (COMPLETED -> NOT_ACTIVATED)
         // From absent class in Test 1
-        const reverted = await SchedulingRepository.revertClassInstance(id1, u1, tx);
+        const reverted = await SchedulingRepository.resetClassInstance(id1, u1, tx);
         expect(reverted?.executionState).toBe("NOT_ACTIVATED");
         expect(reverted?.outcome).toBe("PENDING");
       });

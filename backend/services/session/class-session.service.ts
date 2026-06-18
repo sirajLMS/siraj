@@ -57,9 +57,17 @@ export namespace ClassSessionService {
     return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: false });
   }
 
-  export async function forceActivate(userId: string, classInstanceId: string, locale?: string) {
+  async function assertSessionActivated(instance: ClassInstanceEntity, locale?: string): Promise<void> {
+    const validStates = ["ACTIVATED", "RUNNING"];
+    if (!validStates.includes(instance.executionState)) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("sessionNotActivated"));
+    }
+  }
+
+  export async function activateOverride(userId: string, classInstanceId: string, locale?: string) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, locale);
-    await assertPermission(userId, AppPermission.SESSION_FORCE_ACTIVATE, locale);
+    await assertPermission(userId, AppPermission.SESSION_ACTIVATE_OVERRIDE, locale);
 
     await getOrThrow(classInstanceId, locale);
 
@@ -78,24 +86,31 @@ export namespace ClassSessionService {
     return deleted !== null;
   }
 
-  export async function start(userId: string, classInstanceId: string, locale?: string) {
-    await assertPermission(userId, AppPermission.SESSION_START, locale);
+  export async function updateStatusStart(userId: string, classInstanceId: string, locale?: string) {
+    await assertPermission(userId, AppPermission.SESSION_UPDATE_STATUS_START, locale);
+    const instance = await getOrThrow(classInstanceId, locale);
+    await assertSessionActivated(instance, locale);
     return handleUpdate(SchedulingRepository.startClassInstance(classInstanceId, userId), locale);
   }
 
-  export async function markAbsent(userId: string, classInstanceId: string, locale?: string) {
-    await assertPermission(userId, AppPermission.SESSION_MARK_ABSENT, locale);
+  export async function updateStatusAbsent(userId: string, classInstanceId: string, locale?: string) {
+    await assertPermission(userId, AppPermission.SESSION_UPDATE_STATUS_ABSENT, locale);
+    const instance = await getOrThrow(classInstanceId, locale);
+    await assertSessionActivated(instance, locale);
+    await SystemRulesService.assertAbsentWaitingPeriod(instance, locale);
     return handleUpdate(SchedulingRepository.markClassAbsent(classInstanceId, userId), locale);
   }
 
-  export async function requestLeave(userId: string, classInstanceId: string, reason?: string | null, locale?: string) {
-    await assertPermission(userId, AppPermission.SESSION_REQUEST_LEAVE, locale);
-    return handleUpdate(SchedulingRepository.requestClassLeave(classInstanceId, reason ?? null, userId), locale);
-  }
-
-  export async function adminLeave(userId: string, classInstanceId: string, locale?: string) {
-    await assertPermission(userId, AppPermission.SESSION_ADMIN_LEAVE, locale);
-    return handleUpdate(SchedulingRepository.adminExcuseClassLeave(classInstanceId, userId), locale);
+  export async function updateStatusLeave(
+    userId: string,
+    classInstanceId: string,
+    reason?: string | null,
+    locale?: string
+  ) {
+    await assertPermission(userId, AppPermission.SESSION_UPDATE_STATUS_LEAVE, locale);
+    const instance = await getOrThrow(classInstanceId, locale);
+    await assertSessionActivated(instance, locale);
+    return handleUpdate(SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId), locale);
   }
 
   export async function reschedule(
@@ -108,9 +123,9 @@ export namespace ClassSessionService {
     return SchedulingRepository.rescheduleClassInstance(classInstanceId, input);
   }
 
-  export async function revert(userId: string, classInstanceId: string, locale?: string) {
-    await assertPermission(userId, AppPermission.SESSION_REVERT, locale);
-    return handleUpdate(SchedulingRepository.revertClassInstance(classInstanceId, userId), locale);
+  export async function reset(userId: string, classInstanceId: string, locale?: string) {
+    await assertPermission(userId, AppPermission.SESSION_RESET, locale);
+    return handleUpdate(SchedulingRepository.resetClassInstance(classInstanceId, userId), locale);
   }
 }
 

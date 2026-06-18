@@ -32,6 +32,18 @@ const SYSTEM_SETTINGS_DATA = [
     "scheduling"
   ),
   createSetting("default_timezone", "UTC", "Default fallback timezone for the system", "scheduling", "string"),
+  createSetting(
+    "session_absent_waiting_minutes",
+    "30",
+    "Minutes to wait before student can be marked absent",
+    "scheduling"
+  ),
+  createSetting(
+    "session_leave_reschedule_offset_days",
+    "7",
+    "Days offset to reschedule when leave is processed",
+    "scheduling"
+  ),
 ] as const;
 
 export async function seedOrGet() {

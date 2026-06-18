@@ -1,6 +1,6 @@
 CREATE TYPE "account_status" AS ENUM('ACTIVATED', 'DEACTIVATED');--> statement-breakpoint
 CREATE TYPE "app_language" AS ENUM('ar', 'en');--> statement-breakpoint
-CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.force_activate', 'session.start', 'session.mark_absent', 'session.request_leave', 'session.admin_leave', 'session.reschedule', 'session.revert', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'system.enforce_time_window', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'complaints.list', 'complaints.delete', 'complaints.respond', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign');--> statement-breakpoint
+CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'system.enforce_time_window', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'complaints.list', 'complaints.delete', 'complaints.respond', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign');--> statement-breakpoint
 CREATE TYPE "class_execution_state" AS ENUM('NOT_ACTIVATED', 'ACTIVATED', 'RUNNING', 'COMPLETED');--> statement-breakpoint
 CREATE TYPE "class_outcome" AS ENUM('PENDING', 'TAKEN', 'ABSENT', 'LEAVE');--> statement-breakpoint
 CREATE TYPE "class_type" AS ENUM('REGULAR', 'TRIAL', 'ADVANCE');--> statement-breakpoint
@@ -324,6 +324,7 @@ CREATE TABLE "class_instances" (
 	"actual_start_at" timestamp(3) with time zone,
 	"actual_end_at" timestamp(3) with time zone,
 	"quota_deducted" boolean DEFAULT false NOT NULL,
+	"payroll_credited" boolean DEFAULT false NOT NULL,
 	"rate_amount" numeric(12,2),
 	"rate_currency" varchar(10),
 	"is_rate_overridden" boolean DEFAULT false NOT NULL,
@@ -342,7 +343,7 @@ CREATE TABLE "class_instances" (
       ),
 	CONSTRAINT "class_instances_reschedule_not_self_chk" CHECK ("original_class_id" IS NULL OR "original_class_id" != "id"),
 	CONSTRAINT "class_instances_rescheduled_no_quota_chk" CHECK ("is_rescheduled" = false OR "quota_deducted" = false),
-	CONSTRAINT "class_instances_rescheduled_no_complete_chk" CHECK ("is_rescheduled" = false OR ("execution_state" != 'COMPLETED' AND "outcome" != 'TAKEN'))
+	CONSTRAINT "class_instances_rescheduled_no_complete_chk" CHECK ("is_rescheduled" = false OR ("execution_state" != 'COMPLETED' OR "outcome" != 'TAKEN'))
 );
 --> statement-breakpoint
 CREATE TABLE "class_status_events" (

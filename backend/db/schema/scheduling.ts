@@ -98,7 +98,7 @@ export const recurringScheduleDays = pgTable(
  * - CHECK Constraint `class_instances_state_machine_chk`: Validates allowed state transitions and values.
  * - CHECK Constraint `class_instances_reschedule_not_self_chk`: Enforces `original_class_id IS NULL OR original_class_id != id` (cannot reschedule to self).
  * - CHECK Constraint `class_instances_rescheduled_no_quota_chk`: Enforces `is_rescheduled = false OR quota_deducted = false`.
- * - CHECK Constraint `class_instances_rescheduled_no_complete_chk`: Enforces `is_rescheduled = false OR (execution_state != 'COMPLETED' AND outcome != 'TAKEN')`.
+ * - CHECK Constraint `class_instances_rescheduled_no_complete_chk`: Enforces `is_rescheduled = false OR (execution_state != 'COMPLETED' OR outcome != 'TAKEN')`.
  *
  * NOTE: High-level business rules (Quota deduction, Overlap prevention, Teacher assignment integrity, Rescheduling logic)
  * are now enforced in the application layer via `SchedulingRepository` to reduce database trigger depth and deadlock risk (Issue #10).
@@ -141,6 +141,7 @@ export const classInstances = pgTable(
     actualStartAt: timestamp("actual_start_at", { withTimezone: true, precision: 3 }),
     actualEndAt: timestamp("actual_end_at", { withTimezone: true, precision: 3 }),
     quotaDeducted: boolean("quota_deducted").notNull().default(false),
+    payrollCredited: boolean("payroll_credited").notNull().default(false),
     // Rate snapshot — captured at class completion, overridable by admin
     rateAmount: numeric("rate_amount", { precision: 12, scale: 2 }),
     rateCurrency: varchar("rate_currency", { length: 10 }),
@@ -186,7 +187,7 @@ export const classInstances = pgTable(
     ),
     check(
       "class_instances_rescheduled_no_complete_chk",
-      sql`${table.isRescheduled} = false OR (${table.executionState} != 'COMPLETED' AND ${table.outcome} != 'TAKEN')`
+      sql`${table.isRescheduled} = false OR (${table.executionState} != 'COMPLETED' OR ${table.outcome} != 'TAKEN')`
     ),
   ]
 );

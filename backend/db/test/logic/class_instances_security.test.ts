@@ -106,4 +106,155 @@ describe("Class Instances Security Logic", () => {
       expect(error).toBeInstanceOf(Error);
       expect(getErrorMessage(error)).toMatch(/students_classes_remaining_chk/);
     }));
+  describe("Story 2: State Transitions", () => {
+    it("allows ACTIVATED → COMPLETED with outcome=ABSENT", () =>
+      runInRollback(async tx => {
+        const { teacher, student } = await setupTestEntities(tx, "S2-1", { skipInstance: true });
+        const [instance] = await tx
+          .insert(classInstances)
+          .values({
+            teacherId: teacher.id,
+            studentId: student.id,
+            classType: "REGULAR",
+            scheduledStartAt: new Date(),
+            scheduledEndAt: new Date(Date.now() + 3600000),
+            durationMinutes: 60,
+            idempotencyKey: randomUUID(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            executionState: "ACTIVATED",
+            outcome: "PENDING",
+            quotaDeducted: false,
+            rateAmount: "100.00",
+            rateCurrency: "USD",
+          })
+          .returning();
+
+        await tx
+          .update(classInstances)
+          .set({ executionState: "COMPLETED", outcome: "ABSENT" })
+          .where(eq(classInstances.id, instance.id));
+      }));
+
+    it("allows ACTIVATED → COMPLETED with outcome=LEAVE", () =>
+      runInRollback(async tx => {
+        const { teacher, student } = await setupTestEntities(tx, "S2-2", { skipInstance: true });
+        const [instance] = await tx
+          .insert(classInstances)
+          .values({
+            teacherId: teacher.id,
+            studentId: student.id,
+            classType: "REGULAR",
+            scheduledStartAt: new Date(),
+            scheduledEndAt: new Date(Date.now() + 3600000),
+            durationMinutes: 60,
+            idempotencyKey: randomUUID(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            executionState: "ACTIVATED",
+            outcome: "PENDING",
+            quotaDeducted: false,
+            rateAmount: "100.00",
+            rateCurrency: "USD",
+          })
+          .returning();
+
+        await tx
+          .update(classInstances)
+          .set({ executionState: "COMPLETED", outcome: "LEAVE" })
+          .where(eq(classInstances.id, instance.id));
+      }));
+
+    it("blocks ACTIVATED → COMPLETED with outcome=TAKEN", () =>
+      runInRollback(async tx => {
+        const { teacher, student } = await setupTestEntities(tx, "S2-3", { skipInstance: true });
+        const [instance] = await tx
+          .insert(classInstances)
+          .values({
+            teacherId: teacher.id,
+            studentId: student.id,
+            classType: "REGULAR",
+            scheduledStartAt: new Date(),
+            scheduledEndAt: new Date(Date.now() + 3600000),
+            durationMinutes: 60,
+            idempotencyKey: randomUUID(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            executionState: "ACTIVATED",
+            outcome: "PENDING",
+            quotaDeducted: false,
+            rateAmount: "100.00",
+            rateCurrency: "USD",
+          })
+          .returning();
+
+        const error = await tx
+          .update(classInstances)
+          .set({ executionState: "COMPLETED", outcome: "TAKEN" })
+          .where(eq(classInstances.id, instance.id))
+          .catch(e => e);
+        expect(error).toBeInstanceOf(Error);
+        expect(getErrorMessage(error)).toMatch(/Invalid transition:/);
+      }));
+
+    it("allows COMPLETED → NOT_ACTIVATED (reset)", () =>
+      runInRollback(async tx => {
+        const { teacher, student } = await setupTestEntities(tx, "S2-4", { skipInstance: true });
+        const [instance] = await tx
+          .insert(classInstances)
+          .values({
+            teacherId: teacher.id,
+            studentId: student.id,
+            classType: "REGULAR",
+            scheduledStartAt: new Date(),
+            scheduledEndAt: new Date(Date.now() + 3600000),
+            durationMinutes: 60,
+            idempotencyKey: randomUUID(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            executionState: "COMPLETED",
+            outcome: "TAKEN",
+            actualStartAt: new Date(),
+            actualEndAt: new Date(Date.now() + 3600000),
+            quotaDeducted: false,
+            rateAmount: "100.00",
+            rateCurrency: "USD",
+          })
+          .returning();
+
+        await tx
+          .update(classInstances)
+          .set({ executionState: "NOT_ACTIVATED", outcome: "PENDING", actualStartAt: null, actualEndAt: null })
+          .where(eq(classInstances.id, instance.id));
+      }));
+
+    it("allows ACTIVATED → NOT_ACTIVATED (reset)", () =>
+      runInRollback(async tx => {
+        const { teacher, student } = await setupTestEntities(tx, "S2-5", { skipInstance: true });
+        const [instance] = await tx
+          .insert(classInstances)
+          .values({
+            teacherId: teacher.id,
+            studentId: student.id,
+            classType: "REGULAR",
+            scheduledStartAt: new Date(),
+            scheduledEndAt: new Date(Date.now() + 3600000),
+            durationMinutes: 60,
+            idempotencyKey: randomUUID(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            executionState: "ACTIVATED",
+            outcome: "PENDING",
+            quotaDeducted: false,
+            rateAmount: "100.00",
+            rateCurrency: "USD",
+          })
+          .returning();
+
+        await tx
+          .update(classInstances)
+          .set({ executionState: "NOT_ACTIVATED", outcome: "PENDING", actualStartAt: null, actualEndAt: null })
+          .where(eq(classInstances.id, instance.id));
+      }));
+  });
 });
