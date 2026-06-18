@@ -3,13 +3,17 @@ import {
   activateClassMutationDocument,
   activateOverrideClassMutationDocument,
   deleteClassInstanceMutationDocument,
+  resetClassMutationDocument,
+  updateSessionStatusAbsentMutationDocument,
+  updateSessionStatusLeaveMutationDocument,
+  updateSessionStatusStartMutationDocument,
 } from "../sharedDocuments/class-session.documents";
 import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
 import {
   createTeacherManualClassEntryMutationDocument,
   teacherDashboardQueryDocument,
 } from "../sharedDocuments/teacher-dashboard.documents";
-import { fetchFirstStudentTeacherPair, loginDemoUser } from "./helpers";
+import { fetchFirstStudentTeacherPair, loginDemoUser, authenticatedRequest } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -21,7 +25,12 @@ describe("GraphQL Class Session Integration Tests", () => {
   let studentId: string | null = null;
   let teacherId: string | null = null;
   let outsideClassInstanceId: string | null = null;
+  let outsideDate: string | null = null;
   const testDate = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const tomorrowDate = tomorrow.toISOString().split("T")[0];
+  const eightDaysLater = new Date(tomorrow.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const eightDaysLaterDate = eightDaysLater.toISOString().split("T")[0];
 
   test("login as academy_admin and teacher", async () => {
     adminToken = await loginDemoUser("academy_admin");
@@ -30,25 +39,17 @@ describe("GraphQL Class Session Integration Tests", () => {
     expect(teacherToken).not.toBeNull();
   });
 
-  test("find student and teacher IDs, then clear today's classes to avoid overlaps", async () => {
-    if (!adminToken) throw new Error("No admin token");
-
-    // 1. Query today's list to get the student and teacher IDs
-    const pair = await fetchFirstStudentTeacherPair(adminToken, testDate);
-    studentId = pair.studentId;
-    teacherId = pair.teacherId;
-
-    // 2. Delete all of today's classes via GraphQL mutation to avoid scheduling conflicts/overlaps
+  async function clearClassesOnDate(token: string, dateVal: string) {
     const result = await testClient.query({
       query: dailyScheduleListQueryDocument,
       variables: {
-        date: testDate,
+        date: dateVal,
         teacherId: null,
         search: null,
       },
       context: {
         headers: {
-          Authorization: `Bearer ${adminToken}`,
+          Authorization: `Bearer ${token}`,
         },
       },
     });
@@ -64,11 +65,27 @@ describe("GraphQL Class Session Integration Tests", () => {
         errorPolicy: "all",
         context: {
           headers: {
-            Authorization: `Bearer ${adminToken}`,
+            Authorization: `Bearer ${token}`,
           },
         },
       });
       expect(deleteRes.error).toBeUndefined();
+    }
+  }
+
+  test("find student and teacher IDs, then clear schedule range to avoid overlaps", async () => {
+    if (!adminToken) throw new Error("No admin token");
+
+    // 1. Query today's list to get the student and teacher IDs
+    const pair = await fetchFirstStudentTeacherPair(adminToken, testDate);
+    studentId = pair.studentId;
+    teacherId = pair.teacherId;
+
+    // 2. Delete all classes in range of [-1, 12] days to avoid scheduling conflicts/overlaps
+    for (let i = -1; i <= 12; i++) {
+      const d = new Date(Date.now() + i * 24 * 60 * 60 * 1000);
+      const dateStr = d.toISOString().split("T")[0];
+      await clearClassesOnDate(adminToken, dateStr);
     }
   });
 
@@ -150,6 +167,7 @@ describe("GraphQL Class Session Integration Tests", () => {
     const now = new Date();
     const startOutside = new Date(now.getTime() + 2 * 60 * 60 * 1000);
     const endOutside = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+    outsideDate = startOutside.toISOString().split("T")[0];
 
     const createRes = await testClient.mutate({
       mutation: createTeacherManualClassEntryMutationDocument,
@@ -219,7 +237,7 @@ describe("GraphQL Class Session Integration Tests", () => {
     const dashboardResult = await testClient.query({
       query: teacherDashboardQueryDocument,
       variables: {
-        date: testDate,
+        date: outsideDate || testDate,
       },
       context: {
         headers: {
@@ -234,5 +252,112 @@ describe("GraphQL Class Session Integration Tests", () => {
     expect(activatedRow).toBeDefined();
     if (!activatedRow) throw new Error("No activatedRow found");
     expect(activatedRow.executionState).toBe("ACTIVATED");
+  });
+
+  test("session lifecycle: start, reset, restart, and leave flow", async () => {
+    if (!adminToken || !teacherToken || !outsideClassInstanceId) throw new Error("Missing test context");
+
+    // 1. Teacher starts the activated session successfully
+    const startData = await authenticatedRequest(
+      teacherToken,
+      "mutate",
+      updateSessionStatusStartMutationDocument,
+      { classInstanceId: outsideClassInstanceId }
+    );
+    expect(startData.updateSessionStatusStart?.executionState).toBe("RUNNING");
+
+    // 2. Academy admin resets the running session successfully
+    const resetData = await authenticatedRequest(
+      adminToken,
+      "mutate",
+      resetClassMutationDocument,
+      { classInstanceId: outsideClassInstanceId }
+    );
+    expect(resetData.resetClass).toBe(true);
+
+    // 3. Force activate it again as admin (since it's outside window)
+    const forceData = await authenticatedRequest(
+      adminToken,
+      "mutate",
+      activateOverrideClassMutationDocument,
+      { classInstanceId: outsideClassInstanceId }
+    );
+    expect(forceData.activateOverrideClass?.executionState).toBe("ACTIVATED");
+
+    // 4. Start it again as teacher
+    const restartData = await authenticatedRequest(
+      teacherToken,
+      "mutate",
+      updateSessionStatusStartMutationDocument,
+      { classInstanceId: outsideClassInstanceId }
+    );
+    expect(restartData.updateSessionStatusStart?.executionState).toBe("RUNNING");
+
+    // 5. Teacher processes leave on the running session
+    const leaveData = await authenticatedRequest(
+      teacherToken,
+      "mutate",
+      updateSessionStatusLeaveMutationDocument,
+      {
+        classInstanceId: outsideClassInstanceId,
+        leaveReason: "Teacher has an emergency",
+      }
+    );
+    expect(leaveData.updateSessionStatusLeave?.completedInstanceId).toBe(outsideClassInstanceId);
+    expect(leaveData.updateSessionStatusLeave?.completedInstance?.outcome).toBe("LEAVE");
+    expect(leaveData.updateSessionStatusLeave?.completedInstance?.isRescheduled).toBe(true);
+    expect(leaveData.updateSessionStatusLeave?.rescheduledInstanceId).toBeDefined();
+  });
+
+  test("teacher marks a class past waiting period as absent", async () => {
+    if (!teacherToken || !adminToken || !studentId || !teacherId) throw new Error("Missing test context");
+
+    // Clear today's classes to avoid any overlaps with previously run tests
+    await clearClassesOnDate(adminToken, testDate);
+
+    // Create a class instance starting 40 minutes ago and ending 20 minutes in the future
+    const now = new Date();
+    const startAbsent = new Date(now.getTime() - 40 * 60 * 1000);
+    const endAbsent = new Date(now.getTime() + 20 * 60 * 1000);
+
+    const createData = await authenticatedRequest(
+      teacherToken,
+      "mutate",
+      createTeacherManualClassEntryMutationDocument,
+      {
+        input: {
+          studentId,
+          teacherId,
+          scheduledStartAt: startAbsent.toISOString(),
+          scheduledEndAt: endAbsent.toISOString(),
+          durationMinutes: 60,
+          classType: "REGULAR",
+        },
+      }
+    );
+
+    const instanceId = createData.createTeacherManualClassEntry?.id;
+    expect(instanceId).toBeDefined();
+    if (!instanceId) throw new Error("Failed to create class for absent test");
+
+    // Activate the class
+    await authenticatedRequest(
+      teacherToken,
+      "mutate",
+      activateClassMutationDocument,
+      { classInstanceId: instanceId }
+    );
+
+    // Mark it absent
+    const absentData = await authenticatedRequest(
+      teacherToken,
+      "mutate",
+      updateSessionStatusAbsentMutationDocument,
+      { classInstanceId: instanceId }
+    );
+
+    expect(absentData.updateSessionStatusAbsent?.executionState).toBe("COMPLETED");
+    expect(absentData.updateSessionStatusAbsent?.outcome).toBe("ABSENT");
+    expect(absentData.updateSessionStatusAbsent?.payrollCredited).toBe(true);
   });
 });
