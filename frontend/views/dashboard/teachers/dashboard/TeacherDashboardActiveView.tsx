@@ -1,14 +1,15 @@
 "use client";
 
 import { AddOutlined, CalendarMonthOutlined } from "@mui/icons-material";
-import { Box, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Alert, Box, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   StudentProgressFeedItem,
   TeacherDashboardMetrics,
   TeacherScheduleRow,
 } from "@/frontend/stores/mockTeacherDashboardTypes";
-import { logger } from "@/frontend/utils/logger";
 import { SessionActivateButton } from "./components/SessionActivateButton";
 import { StudentProgressFeed } from "./components/StudentProgressFeed";
 import { TeacherActiveMetricsRow } from "./components/TeacherActiveMetricsRow";
@@ -26,6 +27,10 @@ interface TeacherDashboardActiveViewProps {
   readonly labels: TeacherDashboardLabels;
   readonly onActivate?: (id: string) => void;
   readonly onNewSession: () => void;
+  readonly onStartSession?: (id: string) => void;
+  readonly onMarkAbsent?: (id: string) => void;
+  readonly onRequestLeave?: (id: string) => void;
+  readonly activationError?: string | null;
 }
 
 function formatWelcomeSubtitle(template: string, date: string, count: number): string {
@@ -40,10 +45,16 @@ function ActiveMobileScheduleCard({
   row,
   labels,
   onActivate,
+  onStartSession,
+  onMarkAbsent,
+  onRequestLeave,
 }: {
   readonly row: TeacherScheduleRow;
   readonly labels: TeacherDashboardLabels;
   readonly onActivate?: (id: string) => void;
+  readonly onStartSession?: (id: string) => void;
+  readonly onMarkAbsent?: (id: string) => void;
+  readonly onRequestLeave?: (id: string) => void;
 }) {
   const isLive = row.isLive === true;
 
@@ -92,28 +103,24 @@ function ActiveMobileScheduleCard({
             <Box sx={{ display: "flex", gap: 1.5 }}>
               <TeacherActiveSessionControls
                 labels={labels.activeControls}
-                onStart={() => {
-                  logger.info("Teacher active mobile start", { id: row.id });
-                }}
-                onMarkAbsent={() => {
-                  logger.info("Teacher active mobile absent", { id: row.id });
-                }}
-                onRequestLeave={() => {
-                  logger.info("Teacher active mobile leave", { id: row.id });
-                }}
+                onStart={() => onStartSession?.(row.id)}
+                onMarkAbsent={() => onMarkAbsent?.(row.id)}
+                onRequestLeave={() => onRequestLeave?.(row.id)}
               />
             </Box>
           </Box>
         </Box>
       ) : (
         <Box sx={{ width: "100%" }}>
-          <SessionActivateButton
-            disabled={!row.activateEnabled}
-            isConnecting={row.status === "connecting"}
-            activateLabel={labels.actions.activateSession}
-            connectingLabel={labels.actions.connecting}
-            onActivate={() => onActivate?.(row.id)}
-          />
+          <RequirePermission permissions={[AppPermission.SessionActivateClass]}>
+            <SessionActivateButton
+              disabled={!row.activateEnabled}
+              isConnecting={row.status === "connecting"}
+              activateLabel={labels.actions.activateSession}
+              connectingLabel={labels.actions.connecting}
+              onActivate={() => onActivate?.(row.id)}
+            />
+          </RequirePermission>
         </Box>
       )}
     </Paper>
@@ -130,6 +137,10 @@ export function TeacherDashboardActiveView({
   labels,
   onActivate,
   onNewSession,
+  onStartSession,
+  onMarkAbsent,
+  onRequestLeave,
+  activationError,
 }: Readonly<TeacherDashboardActiveViewProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -142,6 +153,11 @@ export function TeacherDashboardActiveView({
   if (isMobile) {
     return (
       <PageContainer>
+        {activationError && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {activationError}
+          </Alert>
+        )}
         <Box sx={{ mb: 3 }}>
           <Typography sx={{ typography: "labelUppercase", color: theme => theme.palette.text.secondary }}>
             {labels.activeWelcome.overviewLabel}
@@ -178,7 +194,15 @@ export function TeacherDashboardActiveView({
           </Box>
           <Stack spacing={2}>
             {scheduleRows.map(row => (
-              <ActiveMobileScheduleCard key={row.id} row={row} labels={labels} onActivate={onActivate} />
+              <ActiveMobileScheduleCard
+                key={row.id}
+                row={row}
+                labels={labels}
+                onActivate={onActivate}
+                onStartSession={onStartSession}
+                onMarkAbsent={onMarkAbsent}
+                onRequestLeave={onRequestLeave}
+              />
             ))}
           </Stack>
         </Box>
@@ -190,6 +214,11 @@ export function TeacherDashboardActiveView({
 
   return (
     <PageContainer>
+      {activationError && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {activationError}
+        </Alert>
+      )}
       <PageHeader
         title={labels.activeWelcome.title.replace("{name}", userName)}
         subtitle={welcomeSubtitle}
@@ -205,7 +234,14 @@ export function TeacherDashboardActiveView({
       </Box>
 
       <SectionPanel title={labels.schedule.titleToday}>
-        <TeacherActiveScheduleDataGrid rows={scheduleRows} labels={labels} onActivate={onActivate} />
+        <TeacherActiveScheduleDataGrid
+          rows={scheduleRows}
+          labels={labels}
+          onActivate={onActivate}
+          onStartSession={onStartSession}
+          onMarkAbsent={onMarkAbsent}
+          onRequestLeave={onRequestLeave}
+        />
       </SectionPanel>
     </PageContainer>
   );

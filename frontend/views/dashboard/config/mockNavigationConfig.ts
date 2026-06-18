@@ -48,7 +48,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: DashboardOutlined,
     href: "/dashboard?mode=teacher",
     section: "main",
-    permission: AppPermission.DashboardView,
+    permission: AppPermission.TeacherViewDashboard,
   },
   teacherDashboardActive: {
     key: "teacher-dashboard-active",

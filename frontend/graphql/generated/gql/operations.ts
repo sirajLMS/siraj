@@ -4,6 +4,10 @@ type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import type * as Types from './graphql-types.ts';
 
+export type AppLanguage =
+  | 'ar'
+  | 'en';
+
 export type AppPermission =
   | 'AUTH_LOGIN'
   | 'AUTH_VIEW_OWN_PROFILE'
@@ -80,6 +84,10 @@ export type DemoLoginInput = {
   groupSlug: string;
 };
 
+export type Gender =
+  | 'FEMALE'
+  | 'MALE';
+
 export type LogSupportRequestInput = {
   reason: string;
 };
@@ -89,11 +97,86 @@ export type LoginInput = {
   password: string;
 };
 
+export type OrderSortDirection =
+  | 'ASC'
+  | 'DESC';
+
+export type PaginationArgs = {
+  after: string | null | undefined;
+  before: string | null | undefined;
+  first: number | null | undefined;
+  last: number | null | undefined;
+  maxCount: number | null | undefined;
+  page: number | null | undefined;
+  skip: number | null | undefined;
+};
+
 export type RescheduleClassInput = {
   durationMinutes: number;
   scheduledEndAt: string;
   scheduledStartAt: string;
 };
+
+export type StudentFilterArgs = {
+  birthDate: string | null | undefined;
+  birthDateAfter: string | null | undefined;
+  birthDateBefore: string | null | undefined;
+  birthDateFrom: string | null | undefined;
+  birthDateIsEmpty: boolean | null | undefined;
+  birthDateIsNotEmpty: boolean | null | undefined;
+  birthDateNot: string | null | undefined;
+  birthDateOnOrAfter: string | null | undefined;
+  birthDateOnOrBefore: string | null | undefined;
+  birthDateTo: string | null | undefined;
+  createdAt: string | null | undefined;
+  createdAtAfter: string | null | undefined;
+  createdAtBefore: string | null | undefined;
+  createdAtFrom: string | null | undefined;
+  createdAtIsEmpty: boolean | null | undefined;
+  createdAtIsNotEmpty: boolean | null | undefined;
+  createdAtNot: string | null | undefined;
+  createdAtOnOrAfter: string | null | undefined;
+  createdAtOnOrBefore: string | null | undefined;
+  createdAtTo: string | null | undefined;
+  gender: Gender | null | undefined;
+  language: AppLanguage | null | undefined;
+  name: string | null | undefined;
+  nameEndsWith: string | null | undefined;
+  nameEquals: string | null | undefined;
+  nameIsEmpty: boolean | null | undefined;
+  nameIsNotEmpty: boolean | null | undefined;
+  nameNotContains: string | null | undefined;
+  nameNotEquals: string | null | undefined;
+  nameStartsWith: string | null | undefined;
+  parentId: string | null | undefined;
+  primaryTeacherId: string | null | undefined;
+  status: StudentStatus | null | undefined;
+};
+
+export type StudentStatus =
+  | 'DEACTIVATED'
+  | 'GRADUATED'
+  | 'ON_LEAVE'
+  | 'ON_TRIAL'
+  | 'REGULAR'
+  | 'SUSPENDED';
+
+export type StudentsOrderByClause = {
+  column: StudentsOrderByColumn;
+  order: OrderSortDirection | null | undefined;
+};
+
+export type StudentsOrderByColumn =
+  | 'CLASSES_REMAINING'
+  | 'CLASSES_TOTAL'
+  | 'CREATED_AT'
+  | 'DATE_OF_BIRTH'
+  | 'GENDER'
+  | 'ID'
+  | 'NAME'
+  | 'PARENT_ID'
+  | 'STATUS'
+  | 'UPDATED_AT';
 
 export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
 
@@ -385,6 +468,24 @@ export type StudentClassSessionDetailQueryVariables = Exact<{
 
 
 export type StudentClassSessionDetailQuery = StudentClassSessionDetailQuery_Query;
+
+export type StudentsQuery_students_StudentsWithFiltersResponse_data_Student = { id: string, name: string };
+
+export type StudentsQuery_students_StudentsWithFiltersResponse_pageInfo_PageInfo = { total: number };
+
+export type StudentsQuery_students_StudentsWithFiltersResponse = { data: Array<StudentsQuery_students_StudentsWithFiltersResponse_data_Student>, pageInfo: StudentsQuery_students_StudentsWithFiltersResponse_pageInfo_PageInfo };
+
+export type StudentsQuery_Query = { students: StudentsQuery_students_StudentsWithFiltersResponse };
+
+
+export type StudentsQueryVariables = Exact<{
+  paginationArgs: Types.PaginationArgs | null | undefined;
+  orderBy: Array<Types.StudentsOrderByClause> | Types.StudentsOrderByClause | null | undefined;
+  filterArgs: Types.StudentFilterArgs | null | undefined;
+}>;
+
+
+export type StudentsQuery = StudentsQuery_Query;
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics = { total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 

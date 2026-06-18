@@ -80,6 +80,7 @@ const en: MessageSchema = {
     insufficientClasses: "Insufficient classes for student {id}. Remaining: {remaining}, Required: {required}",
     studentVersionMismatch: "Version mismatch for student {id}. Expected {expectedVersion}, got {gotVersion}.",
     cannotVerifyHistoricalBanking: "Cannot verify historical banking records",
+    missedClassTime: "YOU MISSED THE CLASS TIME",
   },
   auth: {
     login: {
@@ -546,7 +547,7 @@ const en: MessageSchema = {
       pageSubtitle: "Monitor schedule alerts, quotas, and daily class sessions.",
       alerts: {
         leaveQuotaExceeded: "YOU HAVE REACHED THE MAXIMUM LIMIT FOR LEAVING CLASSES.",
-        missedClassTime: "YOU MISSED THE CLASS TIME.",
+        missedClassTime: "YOU MISSED THE CLASS TIME",
       },
       metrics: {
         totalStudents: "Total Students",

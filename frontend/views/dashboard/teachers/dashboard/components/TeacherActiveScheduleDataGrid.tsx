@@ -3,9 +3,10 @@
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/mockTeacherDashboardTypes";
-import { logger } from "@/frontend/utils/logger";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
 import { SessionActivateButton } from "./SessionActivateButton";
@@ -16,6 +17,9 @@ interface TeacherActiveScheduleDataGridProps {
   readonly rows: readonly TeacherScheduleRow[];
   readonly labels: TeacherDashboardLabels;
   readonly onActivate?: (id: string) => void;
+  readonly onStartSession?: (id: string) => void;
+  readonly onMarkAbsent?: (id: string) => void;
+  readonly onRequestLeave?: (id: string) => void;
 }
 
 function formatDuration(minutes: number | undefined, template: string): string {
@@ -28,13 +32,15 @@ function formatDuration(minutes: number | undefined, template: string): string {
 function renderStatusCell(row: TeacherScheduleRow, labels: TeacherDashboardLabels, onActivate?: (id: string) => void) {
   if (row.status === "pending" || row.status === "connecting") {
     return (
-      <SessionActivateButton
-        disabled={!row.activateEnabled}
-        isConnecting={row.status === "connecting"}
-        activateLabel={labels.actions.activateSession}
-        connectingLabel={labels.actions.connecting}
-        onActivate={() => onActivate?.(row.id)}
-      />
+      <RequirePermission permissions={[AppPermission.SessionActivateClass]}>
+        <SessionActivateButton
+          disabled={!row.activateEnabled}
+          isConnecting={row.status === "connecting"}
+          activateLabel={labels.actions.activateSession}
+          connectingLabel={labels.actions.connecting}
+          onActivate={() => onActivate?.(row.id)}
+        />
+      </RequirePermission>
     );
   }
 
@@ -53,6 +59,9 @@ export function TeacherActiveScheduleDataGrid({
   rows,
   labels,
   onActivate,
+  onStartSession,
+  onMarkAbsent,
+  onRequestLeave,
 }: Readonly<TeacherActiveScheduleDataGridProps>) {
   const columns = useMemo<GridColDef<TeacherScheduleRow>[]>(() => {
     return [
@@ -116,22 +125,16 @@ export function TeacherActiveScheduleDataGrid({
             <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
               <TeacherActiveSessionControls
                 labels={labels.activeControls}
-                onStart={() => {
-                  logger.info("Teacher active start session", { id: row.id });
-                }}
-                onMarkAbsent={() => {
-                  logger.info("Teacher active mark absent", { id: row.id });
-                }}
-                onRequestLeave={() => {
-                  logger.info("Teacher active request leave", { id: row.id });
-                }}
+                onStart={() => onStartSession?.(row.id)}
+                onMarkAbsent={() => onMarkAbsent?.(row.id)}
+                onRequestLeave={() => onRequestLeave?.(row.id)}
               />
             </Box>
           );
         },
       },
     ];
-  }, [labels, onActivate]);
+  }, [labels, onActivate, onStartSession, onMarkAbsent, onRequestLeave]);
 
   return (
     <AppDataGrid

@@ -18,6 +18,7 @@ export const MOCK_ADMIN_USER: UserInfo = {
     AppPermission.ScheduleFilterAdvanced,
     AppPermission.ScheduleViewAll,
     AppPermission.ScheduleViewAssigned,
+    AppPermission.TeacherViewDashboard,
     AppPermission.ScheduleViewFamily,
     AppPermission.ScheduleSearchAvailability,
     AppPermission.ScheduleManageRecurring,

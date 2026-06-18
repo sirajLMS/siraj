@@ -22,7 +22,7 @@ function shouldShowTeacherDashboard(permissions: readonly AppPermission[], modeP
     return true;
   }
   return (
-    permissions.includes(AppPermission.ScheduleViewAssigned) &&
+    permissions.includes(AppPermission.TeacherViewDashboard) &&
     !permissions.includes(AppPermission.DashboardViewMetrics)
   );
 }

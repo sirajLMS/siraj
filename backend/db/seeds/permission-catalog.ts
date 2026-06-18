@@ -32,10 +32,10 @@ const ACCOUNT_ACTIONS = (
   type: "profiles" | "accounts" = "profiles",
   pluralLabel?: string
 ): [string, string][] => [
-    ["list", `List ${pluralLabel || label + "s"}`],
-    ["create", `Create ${label} accounts`],
-    ["edit", `Edit ${label} ${type}`],
-  ];
+  ["list", `List ${pluralLabel || label + "s"}`],
+  ["create", `Create ${label} accounts`],
+  ["edit", `Edit ${label} ${type}`],
+];
 
 /**
  * Common list and delete actions

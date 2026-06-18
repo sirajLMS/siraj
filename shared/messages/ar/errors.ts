@@ -55,4 +55,5 @@ export const errors: ErrorsLabels = {
   insufficientClasses: "حصص غير كافية للطالب {id}. المتبقي: {remaining}، المطلوب: {required}",
   studentVersionMismatch: "عدم تطابق الإصدار للطالب {id}. المتوقع {expectedVersion}، الحاصل {gotVersion}.",
   cannotVerifyHistoricalBanking: "لا يمكن تأكيد السجلات البنكية التاريخية",
+  missedClassTime: "لقد فات وقت الحصة",
 };

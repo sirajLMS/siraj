@@ -5,7 +5,7 @@ export const scheduleAlerts: ScheduleAlertsLabels = {
   pageSubtitle: "مراقبة تنبيهات الجدول والحصص اليومية.",
   alerts: {
     leaveQuotaExceeded: "لقد وصلت إلى الحد الأقصى لترك الحصص.",
-    missedClassTime: "لقد فات وقت الحصة.",
+    missedClassTime: "لقد فات وقت الحصة",
   },
   metrics: {
     totalStudents: "إجمالي الطلاب",

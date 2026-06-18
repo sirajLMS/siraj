@@ -1,6 +1,8 @@
 "use client";
 
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { StatusBadge } from "@/frontend/components/ui";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/mockTeacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
@@ -19,13 +21,15 @@ export function TeacherScheduleStatusContent({
 }>) {
   if (canActivate && (row.status === "pending" || row.status === "connecting")) {
     return (
-      <SessionActivateButton
-        disabled={!row.activateEnabled}
-        isConnecting={row.status === "connecting"}
-        activateLabel={labels.actions.activate}
-        connectingLabel={labels.actions.connecting}
-        onActivate={() => onActivate?.(row.id)}
-      />
+      <RequirePermission permissions={[AppPermission.SessionActivateClass]}>
+        <SessionActivateButton
+          disabled={!row.activateEnabled}
+          isConnecting={row.status === "connecting"}
+          activateLabel={labels.actions.activate}
+          connectingLabel={labels.actions.connecting}
+          onActivate={() => onActivate?.(row.id)}
+        />
+      </RequirePermission>
     );
   }
 

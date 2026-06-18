@@ -52,4 +52,5 @@ export interface ErrorsLabels {
   readonly insufficientClasses: string;
   readonly studentVersionMismatch: string;
   readonly cannotVerifyHistoricalBanking: string;
+  readonly missedClassTime: string;
 }
