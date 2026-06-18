@@ -2769,10 +2769,10 @@ rg "session\.revert|SESSION_REVERT" backend frontend shared --glob "!**/*.md"
 ```
 
 **Success Criteria:**
-- [ ] All deprecated permission strings removed from codebase
-- [ ] All references updated to Story 2 keys
-- [ ] TypeScript compilation passes with zero errors
-- [ ] Grep for deprecated strings returns empty
+- [x] All deprecated permission strings removed from codebase
+- [x] All references updated to Story 2 keys
+- [x] TypeScript compilation passes with zero errors
+- [x] Grep for deprecated strings returns empty
 
 ---
 

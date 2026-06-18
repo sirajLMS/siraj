@@ -1,9 +1,9 @@
 "use client";
 
-import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -327,7 +327,21 @@ export function TeacherDashboardContainer() {
     skip: mode !== "active",
   });
 
-  const [fetchHandbookUrl] = useLazyQuery(teacherHandbookUrlQueryDocument);
+  const [handbookRequested, setHandbookRequested] = useState(false);
+  const { data: handbookData, loading: handbookLoading } = useQuery(teacherHandbookUrlQueryDocument, {
+    skip: !handbookRequested,
+  });
+
+  useEffect(() => {
+    if (handbookRequested && !handbookLoading) {
+      if (handbookData?.teacherHandbookUrl?.url) {
+        globalThis.open(handbookData.teacherHandbookUrl.url, "_blank");
+      } else {
+        alert("Handbook URL not found.");
+      }
+      setHandbookRequested(false);
+    }
+  }, [handbookRequested, handbookLoading, handbookData]);
 
   const [activateClass] = useMutation(activateClassMutationDocument);
   const [startClass] = useMutation(updateSessionStatusStartMutationDocument);
@@ -411,16 +425,7 @@ export function TeacherDashboardContainer() {
   };
 
   const handleDownloadHandbook = async () => {
-    try {
-      const { data } = await fetchHandbookUrl();
-      if (data?.teacherHandbookUrl?.url) {
-        globalThis.open(data.teacherHandbookUrl.url, "_blank");
-      } else {
-        alert("Handbook URL not found.");
-      }
-    } catch (err) {
-      logger.error("Error fetching handbook URL:", err);
-    }
+    setHandbookRequested(true);
   };
 
   return (

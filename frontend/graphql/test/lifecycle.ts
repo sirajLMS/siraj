@@ -14,9 +14,7 @@ export function setupTestServerLifecycle() {
       clearTimeout(stopTimeout);
       stopTimeout = null;
     }
-    if (!serverStartPromise) {
-      serverStartPromise = startTestServer();
-    }
+    serverStartPromise ??= startTestServer();
     await serverStartPromise;
   }, 65000);
 
