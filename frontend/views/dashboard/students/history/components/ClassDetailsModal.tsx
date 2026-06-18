@@ -1,7 +1,7 @@
 import { CloseOutlined, Science } from "@mui/icons-material";
 import { alpha, Box, IconButton, Paper, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ClassSession } from "@/frontend/stores/mockStudentHistoryStore";
+import type { ClassSession } from "../types";
 
 const ModalOverlay = styled(Box)(({ theme }) => ({
   position: "fixed",
@@ -31,9 +31,17 @@ interface ClassDetailsModalProps {
   session: ClassSession;
   dateStr: string;
   onClose: () => void;
+  onViewAssignments: () => void;
+  onDownloadLogs: () => void;
 }
 
-export function ClassDetailsModal({ session, dateStr, onClose }: Readonly<ClassDetailsModalProps>) {
+export function ClassDetailsModal({
+  session,
+  dateStr,
+  onClose,
+  onViewAssignments,
+  onDownloadLogs,
+}: Readonly<ClassDetailsModalProps>) {
   const t = useTranslations("dashboard.studentHistory.classDetails");
 
   return (
@@ -51,7 +59,7 @@ export function ClassDetailsModal({ session, dateStr, onClose }: Readonly<ClassD
             <ModalSessionInfo session={session} t={t} />
             <ModalDetailsGrid session={session} t={t} />
             <ModalNotes session={session} t={t} />
-            <ModalActions t={t} />
+            <ModalActions t={t} onViewAssignments={onViewAssignments} onDownloadLogs={onDownloadLogs} />
           </Box>
         </Box>
       </ModalContainer>
@@ -205,11 +213,20 @@ function ModalNotes({ session, t }: Readonly<{ session: ClassSession; t: Transla
   );
 }
 
-function ModalActions({ t }: Readonly<{ t: TranslationFn }>) {
+function ModalActions({
+  t,
+  onViewAssignments,
+  onDownloadLogs,
+}: Readonly<{
+  t: TranslationFn;
+  onViewAssignments: () => void;
+  onDownloadLogs: () => void;
+}>) {
   return (
     <Box sx={{ display: "flex", gap: 2 }}>
       <Box
         component="button"
+        onClick={onViewAssignments}
         sx={theme => ({
           flex: 1,
           py: 1.5,
@@ -227,6 +244,7 @@ function ModalActions({ t }: Readonly<{ t: TranslationFn }>) {
       </Box>
       <Box
         component="button"
+        onClick={onDownloadLogs}
         sx={theme => ({
           flex: 1,
           py: 1.5,

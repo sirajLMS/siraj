@@ -50,8 +50,8 @@ export function AdminActionsBar({ onForceActivate, onStop, onGenerateLog, onDele
             title="Force Activate"
             onClick={onForceActivate}
             sx={theme => ({
-              bgcolor: theme.palette.status.active,
-              color: theme.palette.status.onActive,
+              bgcolor: theme.palette.status.activeContainer,
+              color: theme.palette.status.onActiveContainer,
               borderRadius: 1.5,
               "&:hover": { bgcolor: theme.palette.status.active, filter: "brightness(1.1)" },
               "&:active": { transform: "scale(0.95)" },
@@ -65,12 +65,12 @@ export function AdminActionsBar({ onForceActivate, onStop, onGenerateLog, onDele
             title="Stop/Pause"
             onClick={onStop}
             sx={theme => ({
-              bgcolor: theme.palette.status.cancelled,
-              color: theme.palette.status.onCancelled,
+              backgroundColor: theme.palette.status.cancelledContainer,
+              color: theme.palette.status.onCancelledContainer,
               borderRadius: 1.5,
-              "&:hover": { bgcolor: theme.palette.status.cancelled, filter: "brightness(1.1)" },
+              "&:hover": { backgroundColor: theme.palette.status.cancelled, filter: "brightness(1.1)" },
               "&:active": { transform: "scale(0.95)" },
-              transition: "all 0.15s ease",
+              // transition: "all 0.15s ease",
             })}
           >
             <PauseIcon />
@@ -107,8 +107,8 @@ export function AdminActionsBar({ onForceActivate, onStop, onGenerateLog, onDele
           title="Delete Instance"
           onClick={onDelete}
           sx={theme => ({
-            bgcolor: theme.palette.status.blocked,
-            color: theme.palette.status.onBlocked,
+            bgcolor: theme.palette.status.blockedContainer,
+            color: theme.palette.status.onBlockedContainer,
             borderRadius: 1.5,
             "&:hover": { bgcolor: theme.palette.status.blocked, filter: "brightness(1.1)" },
             "&:active": { transform: "scale(0.95)" },

@@ -2,7 +2,7 @@ import { CalendarToday, PictureAsPdf, School, Timer, TrendingUp, VerifiedUser } 
 import { Box } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { ExportButton, MetricCard, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import type { ClassSession, StudentHistoryMetrics } from "@/frontend/stores/mockStudentHistoryStore";
+import type { ClassSession, StudentHistoryMetrics } from "../types";
 import { CalendarGrid } from "./CalendarGrid";
 
 interface StudentHistoryDesktopProps {
@@ -11,6 +11,7 @@ interface StudentHistoryDesktopProps {
   metrics: StudentHistoryMetrics;
   classes: Readonly<Partial<Record<number, ClassSession>>>;
   onSelectDay: (day: number) => void;
+  onChangeMonth?: () => void;
 }
 
 export function StudentHistoryDesktop({
@@ -19,6 +20,7 @@ export function StudentHistoryDesktop({
   metrics,
   classes,
   onSelectDay,
+  onChangeMonth,
 }: Readonly<StudentHistoryDesktopProps>) {
   const t = useTranslations("dashboard.studentHistory");
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
@@ -35,7 +37,7 @@ export function StudentHistoryDesktop({
           actions={
             <>
               <ExportButton startIcon={<PictureAsPdf sx={{ fontSize: 20 }} />}>{t("exportPdf")}</ExportButton>
-              <PrimaryPageAction startIcon={<CalendarToday sx={{ fontSize: 20 }} />}>
+              <PrimaryPageAction onClick={onChangeMonth} startIcon={<CalendarToday sx={{ fontSize: 20 }} />}>
                 {t("changeMonth")}
               </PrimaryPageAction>
             </>
@@ -57,7 +59,12 @@ export function StudentHistoryDesktop({
           value={`${metrics.hoursStudied}h`}
           variant="default"
         />
-        <MetricCard icon={TrendingUp} label={t("metrics.performance")} value={metrics.performance} variant="default" />
+        <MetricCard
+          icon={TrendingUp}
+          label={t("metrics.performance")}
+          value={typeof metrics.performance === "number" ? `${metrics.performance}%` : metrics.performance}
+          variant="default"
+        />
       </Box>
 
       <CalendarGrid currentMonth={currentMonth} classes={classes} onSelectDay={onSelectDay} />

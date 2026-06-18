@@ -1,7 +1,7 @@
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, Paper, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ClassSession } from "@/frontend/stores/mockStudentHistoryStore";
+import type { ClassSession } from "../types";
 
 const CalendarCell = styled(Box)(({ theme }) => ({
   borderRight: `1px solid ${theme.palette.border.light}`,
@@ -127,7 +127,7 @@ export function CalendarGrid({ currentMonth, classes, onSelectDay }: Readonly<Ca
 
               {session && (
                 <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}>
-                  <StatusBadge status={session.status}>{session.title}</StatusBadge>
+                  <StatusBadge status={session.status as "present" | "absent" | "late"}>{session.title}</StatusBadge>
                   <Box
                     sx={{
                       display: "flex",

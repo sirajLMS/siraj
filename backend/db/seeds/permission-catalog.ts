@@ -32,10 +32,10 @@ const ACCOUNT_ACTIONS = (
   type: "profiles" | "accounts" = "profiles",
   pluralLabel?: string
 ): [string, string][] => [
-  ["list", `List ${pluralLabel || label + "s"}`],
-  ["create", `Create ${label} accounts`],
-  ["edit", `Edit ${label} ${type}`],
-];
+    ["list", `List ${pluralLabel || label + "s"}`],
+    ["create", `Create ${label} accounts`],
+    ["edit", `Edit ${label} ${type}`],
+  ];
 
 /**
  * Common list and delete actions
@@ -190,8 +190,8 @@ const COMMON_SESSION_PERMISSIONS = [AppPermission.SESSION_VIEW_DETAILS] as const
 
 export const TEACHER_DEFAULT_PERMISSION_KEYS = [
   ...COMMON_DASHBOARD_PERMISSIONS,
-  AppPermission.SCHEDULE_VIEW_ASSIGNED,
   ...COMMON_SESSION_PERMISSIONS,
+  AppPermission.SCHEDULE_VIEW_ASSIGNED,
   AppPermission.SESSION_ACTIVATE_CLASS,
   AppPermission.SESSION_START,
   AppPermission.SESSION_MARK_ABSENT,

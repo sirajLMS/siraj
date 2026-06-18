@@ -3,9 +3,9 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useState } from "react";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   activateClassMutationDocument,
@@ -16,9 +16,10 @@ import {
 } from "@/frontend/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
+import { ClassDetailsHeader } from "./ClassDetailsHeader";
 import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
+import { useAdminViewLabels, useTeacherViewLabels } from "./useClassDetailsLabels";
 
 interface AdminViewWrapperProps {
   readonly pageHeader: React.ReactNode;
@@ -39,15 +40,10 @@ const AdminViewWrapper = ({
   onStop,
   onDelete,
 }: AdminViewWrapperProps) => {
-  const t = useTranslations("dashboard.classDetails");
+  const labels = useAdminViewLabels(instance.studentTimezone ?? "");
 
   const handleGenerateLog = () => {
     logger.info("Admin generate log:", instance.id);
-  };
-
-  const timezoneLabels = {
-    title: t("timezone.title"),
-    description: t("timezone.description", { timezone: instance.studentTimezone ?? "" }),
   };
 
   return (
@@ -61,41 +57,7 @@ const AdminViewWrapper = ({
         onStop={onStop}
         onGenerateLog={handleGenerateLog}
         onDelete={onDelete}
-        labels={{
-          timezone: timezoneLabels,
-          adminActions: {
-            administrativeActions: t("adminActions.administrativeActions"),
-            generateLog: t("adminActions.generateLog"),
-          },
-          classInfo: {
-            liveInstance: t("classInfo.liveInstance"),
-            activeConnection: t("classInfo.activeConnection"),
-            student: t("classInfo.student"),
-            moduleInstructor: t("classInfo.moduleInstructor"),
-          },
-          metadata: {
-            metadata: t("metadata.metadata"),
-            scheduledDate: t("metadata.scheduledDate"),
-            duration: t("metadata.duration"),
-            latency: t("metadata.latency"),
-            authorization: t("metadata.authorization"),
-            minutes: t("metadata.minutes"),
-            optimal: t("metadata.optimal"),
-          },
-          performance: {
-            livePerformanceOverview: t("performance.livePerformanceOverview"),
-            last30Mins: t("performance.last30Mins"),
-            engagementScore: t("performance.engagementScore"),
-            assessmentProgress: t("performance.assessmentProgress"),
-            focusLevel: t("performance.focusLevel"),
-            sessionHealth: t("performance.sessionHealth"),
-          },
-          heatmap: {
-            activityHeatmap: t("heatmap.activityHeatmap"),
-            studentInput: t("heatmap.studentInput"),
-            teacherResponse: t("heatmap.teacherResponse"),
-          },
-        }}
+        labels={labels}
       />
     </PageContainer>
   );
@@ -120,26 +82,13 @@ const TeacherViewWrapper = ({
   onStop,
   onDelete,
 }: TeacherViewWrapperProps) => {
-  const t = useTranslations("dashboard.classDetails");
+  const labels = useTeacherViewLabels(instance.studentTimezone ?? "");
 
   const handleInfoEdit = () => {
     logger.info("Teacher info/edit:", instance.id);
   };
   const handleViewProfile = () => {
     logger.info("View student profile:", instance.student?.id ?? "");
-  };
-
-  const timezoneLabels = {
-    title: t("timezone.title"),
-    description: t("timezone.description", { timezone: instance.studentTimezone ?? "" }),
-  };
-
-  const statusLabels: Record<ClassInstanceStatus, string> = {
-    active: t("status.active"),
-    scheduled: t("status.scheduled"),
-    pending: t("status.pending"),
-    completed: t("status.completed"),
-    cancelled: t("status.cancelled"),
   };
 
   return (
@@ -154,49 +103,13 @@ const TeacherViewWrapper = ({
         onInfoEdit={handleInfoEdit}
         onDelete={onDelete}
         onViewProfile={handleViewProfile}
-        labels={{
-          timezone: timezoneLabels,
-          instanceDetails: {
-            classInstanceDetails: t("instanceDetails.classInstanceDetails"),
-            studentName: t("instanceDetails.studentName"),
-            courseModule: t("instanceDetails.courseModule"),
-            startTime: t("instanceDetails.startTime"),
-            endTime: t("instanceDetails.endTime"),
-            duration: t("instanceDetails.duration"),
-            status: t("instanceDetails.status"),
-            minutes: t("metadata.minutes"),
-            statusLabels,
-          },
-          remarks: {
-            remarksTitle: t("remarks.remarksTitle"),
-          },
-          performance: {
-            previousPerformanceOverview: t("performance.previousPerformanceOverview"),
-            attendanceRate: t("performance.attendanceRate"),
-            avgGrade: t("performance.avgGrade"),
-            lastClass: t("performance.lastClass"),
-            days: t("performance.days"),
-          },
-          actions: {
-            actions: t("actions.actions"),
-            activate: t("actions.activate"),
-            stopPause: t("actions.stopPause"),
-            infoEdit: t("actions.infoEdit"),
-            delete: t("actions.delete"),
-            contextualHelp: t("actions.contextualHelp"),
-          },
-          studentProfile: {
-            studentLevel: t("studentProfile.studentLevel"),
-            viewFullProfile: t("studentProfile.viewFullProfile"),
-          },
-        }}
+        labels={labels}
       />
     </PageContainer>
   );
 };
 
 export function ClassDetailsContainer() {
-  const t = useTranslations("dashboard.classDetails");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const router = useRouter();
@@ -271,22 +184,7 @@ export function ClassDetailsContainer() {
     }
   };
 
-  const pageHeader = (
-    <PageHeader
-      title={instance.courseName ?? ""}
-      subtitle={canOverride ? t("pageSubtitleAdmin") : t("pageSubtitleTeacher")}
-      titleVariant={isMobile ? "headlineMd" : "headlineLg"}
-      breadcrumbs={
-        isMobile
-          ? undefined
-          : [
-              { label: t("breadcrumbs.dashboard"), href: "/dashboard" },
-              { label: t("breadcrumbs.classes"), href: `/classes/${instance.id}` },
-              { label: instance.courseName ?? "", current: true },
-            ]
-      }
-    />
-  );
+  const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;
 
   if (canOverride) {
     return (

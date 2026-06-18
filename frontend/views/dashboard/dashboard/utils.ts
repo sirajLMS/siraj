@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import type { ClassStatus } from "../types/dashboard";
 
 export const useAdminDashboardLabels = () => {
-  const t = useTranslations();
+  const t = useTranslations("dashboard");
 
   const headers = {
     classId: t("admin.classId"),

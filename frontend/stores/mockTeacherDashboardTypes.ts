@@ -1,18 +1,15 @@
-import type {
-  MissedClassAlert,
+export type {
   StudentProgressFeedItem,
-  TeacherDashboardMetrics,
-  TeacherScheduleRow,
   TeacherSessionStatus,
 } from "@/frontend/views/dashboard/types/dashboard";
 
-export type {
+import type {
   MissedClassAlert,
-  StudentProgressFeedItem,
   TeacherDashboardMetrics,
   TeacherScheduleRow,
-  TeacherSessionStatus,
-};
+} from "@/frontend/views/dashboard/types/dashboard";
+
+export type { MissedClassAlert, TeacherDashboardMetrics, TeacherScheduleRow };
 
 export interface TeacherDashboardState {
   readonly metrics: TeacherDashboardMetrics;

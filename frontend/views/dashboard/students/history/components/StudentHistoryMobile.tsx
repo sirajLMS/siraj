@@ -9,7 +9,7 @@ import {
 } from "@mui/icons-material";
 import { Box, type Theme, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ClassSession, StudentHistoryMetrics } from "@/frontend/stores/mockStudentHistoryStore";
+import type { ClassSession, StudentHistoryMetrics } from "../types";
 import { ClassSessionList } from "./ClassSessionList";
 import { MobileWeeklyScroller } from "./MobileWeeklyScroller";
 import { PerformanceStreak } from "./PerformanceStreak";
@@ -21,6 +21,8 @@ interface StudentHistoryMobileProps {
   classes: Readonly<Partial<Record<number, ClassSession>>>;
   selectedWeek: number;
   onSelectWeek: (week: number) => void;
+  onSelectSession?: (session: ClassSession) => void;
+  onChangeMonth?: () => void;
 }
 
 export function StudentHistoryMobile({
@@ -30,8 +32,20 @@ export function StudentHistoryMobile({
   classes,
   selectedWeek,
   onSelectWeek,
+  onSelectSession,
+  onChangeMonth,
 }: Readonly<StudentHistoryMobileProps>) {
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
+
+  // Get first class in selected month, or day 15 as fallback
+  const fallbackDay = 15;
+  const activeDay =
+    Object.keys(classes)
+      .map(Number)
+      .find(d => classes[d]) ?? fallbackDay;
+  const activeClass = classes[activeDay];
+  const activeClassList = activeClass ? [activeClass] : [];
+  const dateStr = `Day ${activeDay} of ${monthStr}`;
 
   return (
     <Box sx={{ display: { xs: "block", md: "none" } }}>
@@ -39,10 +53,10 @@ export function StudentHistoryMobile({
 
       <HistoryMobileMetricsGrid metrics={metrics} />
 
-      <HistoryMobileActions />
+      <HistoryMobileActions currentMonth={currentMonth} onChangeMonth={onChangeMonth} />
 
       <MobileWeeklyScroller selectedWeek={selectedWeek} onSelectWeek={onSelectWeek} />
-      <ClassSessionList dateStr="Tuesday Oct 15" sessions={classes[15] ? [classes[15]] : []} />
+      <ClassSessionList dateStr={dateStr} sessions={activeClassList} onSelectSession={onSelectSession} />
       <PerformanceStreak />
     </Box>
   );
@@ -149,14 +163,23 @@ function HistoryMobileMetricsGrid({ metrics }: Readonly<{ metrics: StudentHistor
             })}
           />
         }
-        value={metrics.performance}
+        value={typeof metrics.performance === "number" ? `${metrics.performance}%` : metrics.performance}
         bg={theme => theme.palette.errorContainer}
       />
     </Box>
   );
 }
 
-function HistoryMobileActions() {
+function HistoryMobileActions({
+  currentMonth,
+  onChangeMonth,
+}: Readonly<{
+  currentMonth: Date;
+  onChangeMonth?: () => void;
+}>) {
+  const monthStr = currentMonth.toLocaleString("en-US", { month: "long" }).toUpperCase();
+  const yearStr = currentMonth.getFullYear();
+
   return (
     <Box
       sx={{
@@ -168,6 +191,7 @@ function HistoryMobileActions() {
     >
       <Box
         component="button"
+        onClick={onChangeMonth}
         sx={theme => ({
           display: "flex",
           alignItems: "center",
@@ -184,7 +208,7 @@ function HistoryMobileActions() {
         })}
       >
         <CalendarToday sx={{ fontSize: 18 }} />
-        <Typography variant="buttonText">OCTOBER 2024</Typography>
+        <Typography variant="buttonText">{`${monthStr} ${yearStr}`}</Typography>
       </Box>
       <Box
         component="button"

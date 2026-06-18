@@ -142,10 +142,10 @@ export const darkPalette: PaletteOptions = {
     completedContainer: "#9333EA",
     onCompletedContainer: "#F6E6FF",
 
-    cancelled: "#FFB4AB",
-    onCancelled: "#690005",
-    cancelledContainer: "#DC2626",
-    onCancelledContainer: "#FFF6F5",
+    cancelled: "#ffb4ab",
+    onCancelled: "#561e19",
+    cancelledContainer: "#73332e",
+    onCancelledContainer: "#ffdad6",
 
     blocked: "#FFB4AB",
     onBlocked: "#690005",

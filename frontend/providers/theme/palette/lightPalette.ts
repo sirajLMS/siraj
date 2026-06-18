@@ -142,10 +142,10 @@ export const lightPalette: PaletteOptions = {
     completedContainer: "#9333EA",
     onCompletedContainer: "#F6E6FF",
 
-    cancelled: "#B70011",
-    onCancelled: "#FFFFFF",
-    cancelledContainer: "#DC2626",
-    onCancelledContainer: "#FFF6F5",
+    cancelled: "#904a43",
+    onCancelled: "#ffffff",
+    cancelledContainer: "#ffdad6",
+    onCancelledContainer: "#73332e",
 
     blocked: "#93000B",
     onBlocked: "#FFFFFF",

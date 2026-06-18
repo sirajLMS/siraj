@@ -1,31 +1,25 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { useTranslations } from "next-intl";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useClassDetailsStore } from "@/frontend/stores/mockClassDetailsStore";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { logger } from "@/frontend/utils/logger";
-import type { ClassInstance, ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
+import type { ClassInstance } from "@/frontend/views/dashboard/types/dashboard";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
+import { ClassDetailsHeader } from "./ClassDetailsHeader";
 import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
+import { useAdminViewLabels, useTeacherViewLabels } from "./useClassDetailsLabels";
 
 interface MockViewProps {
   readonly pageHeader: React.ReactNode;
   readonly instance: ClassInstanceDetail;
   readonly isWarningDismissed: boolean;
   readonly dismissWarning: () => void;
-  readonly timezoneLabels: { readonly title: string; readonly description: string };
 }
 
-function MockAdminViewWrapper({
-  pageHeader,
-  instance,
-  isWarningDismissed,
-  dismissWarning,
-  timezoneLabels,
-}: MockViewProps) {
-  const t = useTranslations("dashboard.classDetails");
+function MockAdminViewWrapper({ pageHeader, instance, isWarningDismissed, dismissWarning }: MockViewProps) {
+  const labels = useAdminViewLabels(instance.studentTimezone ?? "");
 
   const handleForceActivate = () => {
     logger.info("Admin force-activate:", instance.id);
@@ -51,54 +45,14 @@ function MockAdminViewWrapper({
         onStop={handleStop}
         onGenerateLog={handleGenerateLog}
         onDelete={handleDelete}
-        labels={{
-          timezone: timezoneLabels,
-          adminActions: {
-            administrativeActions: t("adminActions.administrativeActions"),
-            generateLog: t("adminActions.generateLog"),
-          },
-          classInfo: {
-            liveInstance: t("classInfo.liveInstance"),
-            activeConnection: t("classInfo.activeConnection"),
-            student: t("classInfo.student"),
-            moduleInstructor: t("classInfo.moduleInstructor"),
-          },
-          metadata: {
-            metadata: t("metadata.metadata"),
-            scheduledDate: t("metadata.scheduledDate"),
-            duration: t("metadata.duration"),
-            latency: t("metadata.latency"),
-            authorization: t("metadata.authorization"),
-            minutes: t("metadata.minutes"),
-            optimal: t("metadata.optimal"),
-          },
-          performance: {
-            livePerformanceOverview: t("performance.livePerformanceOverview"),
-            last30Mins: t("performance.last30Mins"),
-            engagementScore: t("performance.engagementScore"),
-            assessmentProgress: t("performance.assessmentProgress"),
-            focusLevel: t("performance.focusLevel"),
-            sessionHealth: t("performance.sessionHealth"),
-          },
-          heatmap: {
-            activityHeatmap: t("heatmap.activityHeatmap"),
-            studentInput: t("heatmap.studentInput"),
-            teacherResponse: t("heatmap.teacherResponse"),
-          },
-        }}
+        labels={labels}
       />
     </PageContainer>
   );
 }
 
-function MockTeacherViewWrapper({
-  pageHeader,
-  instance,
-  isWarningDismissed,
-  dismissWarning,
-  timezoneLabels,
-}: MockViewProps) {
-  const t = useTranslations("dashboard.classDetails");
+function MockTeacherViewWrapper({ pageHeader, instance, isWarningDismissed, dismissWarning }: MockViewProps) {
+  const labels = useTeacherViewLabels(instance.studentTimezone ?? "");
 
   const handleStop = () => {
     logger.info("Admin stop:", instance.id);
@@ -116,14 +70,6 @@ function MockTeacherViewWrapper({
     logger.info("View student profile:", instance.student?.id ?? "");
   };
 
-  const statusLabels: Record<ClassInstanceStatus, string> = {
-    active: t("status.active"),
-    scheduled: t("status.scheduled"),
-    pending: t("status.pending"),
-    completed: t("status.completed"),
-    cancelled: t("status.cancelled"),
-  };
-
   return (
     <PageContainer>
       {pageHeader}
@@ -136,42 +82,7 @@ function MockTeacherViewWrapper({
         onInfoEdit={handleInfoEdit}
         onDelete={handleDelete}
         onViewProfile={handleViewProfile}
-        labels={{
-          timezone: timezoneLabels,
-          instanceDetails: {
-            classInstanceDetails: t("instanceDetails.classInstanceDetails"),
-            studentName: t("instanceDetails.studentName"),
-            courseModule: t("instanceDetails.courseModule"),
-            startTime: t("instanceDetails.startTime"),
-            endTime: t("instanceDetails.endTime"),
-            duration: t("instanceDetails.duration"),
-            status: t("instanceDetails.status"),
-            minutes: t("metadata.minutes"),
-            statusLabels,
-          },
-          remarks: {
-            remarksTitle: t("remarks.remarksTitle"),
-          },
-          performance: {
-            previousPerformanceOverview: t("performance.previousPerformanceOverview"),
-            attendanceRate: t("performance.attendanceRate"),
-            avgGrade: t("performance.avgGrade"),
-            lastClass: t("performance.lastClass"),
-            days: t("performance.days"),
-          },
-          actions: {
-            actions: t("actions.actions"),
-            activate: t("actions.activate"),
-            stopPause: t("actions.stopPause"),
-            infoEdit: t("actions.infoEdit"),
-            delete: t("actions.delete"),
-            contextualHelp: t("actions.contextualHelp"),
-          },
-          studentProfile: {
-            studentLevel: t("studentProfile.studentLevel"),
-            viewFullProfile: t("studentProfile.viewFullProfile"),
-          },
-        }}
+        labels={labels}
       />
     </PageContainer>
   );
@@ -224,7 +135,6 @@ function mapMockToReal(mock: ClassInstance): ClassInstanceDetail {
 }
 
 export function MockClassDetailsContainer() {
-  const t = useTranslations("dashboard.classDetails");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const permissions = useUserStore(state => state.permissions);
@@ -237,27 +147,7 @@ export function MockClassDetailsContainer() {
 
   const instance = mapMockToReal(mockInstance);
 
-  const pageHeader = (
-    <PageHeader
-      title={instance.courseName ?? ""}
-      subtitle={canOverride ? t("pageSubtitleAdmin") : t("pageSubtitleTeacher")}
-      titleVariant={isMobile ? "headlineMd" : "headlineLg"}
-      breadcrumbs={
-        isMobile
-          ? undefined
-          : [
-              { label: t("breadcrumbs.dashboard"), href: "/dashboard" },
-              { label: t("breadcrumbs.classes"), href: `/classes/${instance.id}` },
-              { label: instance.courseName ?? "", current: true },
-            ]
-      }
-    />
-  );
-
-  const timezoneLabels = {
-    title: t("timezone.title"),
-    description: t("timezone.description", { timezone: instance.studentTimezone ?? "" }),
-  };
+  const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;
 
   if (canOverride) {
     return (
@@ -266,7 +156,6 @@ export function MockClassDetailsContainer() {
         instance={instance}
         isWarningDismissed={isWarningDismissed}
         dismissWarning={dismissWarning}
-        timezoneLabels={timezoneLabels}
       />
     );
   }
@@ -278,7 +167,6 @@ export function MockClassDetailsContainer() {
         instance={instance}
         isWarningDismissed={isWarningDismissed}
         dismissWarning={dismissWarning}
-        timezoneLabels={timezoneLabels}
       />
     );
   }

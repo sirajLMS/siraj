@@ -7,7 +7,6 @@ import { useLocale } from "next-intl";
 import { type ReactNode, startTransition, useCallback, useEffect, useMemo, useState } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
 import { getClientTheme, getCookie, setThemePreference } from "../../lib/theme-detection";
-import { logger } from "../../utils/logger";
 import { createAppTheme } from "./theme";
 
 interface AppThemeProviderProps {
@@ -63,8 +62,6 @@ export function AppThemeProvider({ children, initialTheme }: AppThemeProviderPro
   const theme = useMemo(() => createAppTheme(mode, direction, locale), [mode, direction, locale]);
   const themeContextValue = useMemo(() => ({ mode, toggleTheme }), [mode, toggleTheme]);
 
-  logger.info(`Theme Provider: ${mode}`);
-  logger.info(`Theme Provider: ${direction}`);
   return (
     <ThemeContext.Provider value={themeContextValue}>
       <ThemeProvider theme={theme}>

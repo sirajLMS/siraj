@@ -1,15 +1,21 @@
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import type { ClassSession } from "@/frontend/stores/mockStudentHistoryStore";
+import type { ClassSession } from "../types";
 
 interface ClassSessionListProps {
   dateStr: string;
   sessions: ClassSession[];
+  onSelectSession?: (session: ClassSession) => void;
 }
 
-export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionListProps>) {
+export function ClassSessionList({ dateStr, sessions, onSelectSession }: Readonly<ClassSessionListProps>) {
   const t = useTranslations("dashboard.studentHistory.classDetails");
+  const formatDuration = (mins: number) => {
+    if (mins < 60) return `${mins}m`;
+    const hrs = mins / 60;
+    return `${hrs % 1 === 0 ? hrs : hrs.toFixed(1)}h`;
+  };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -33,6 +39,7 @@ export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionLis
         return (
           <Box
             key={session.id}
+            onClick={() => onSelectSession?.(session)}
             sx={theme => ({
               bgcolor: theme.palette.surfaceContainerLowest,
               borderRadius: "xl",
@@ -113,7 +120,7 @@ export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionLis
                 {t(`status.${session.status}`)}
               </Box>
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                {session.duration}
+                {formatDuration(session.duration)}
               </Typography>
             </Box>
           </Box>

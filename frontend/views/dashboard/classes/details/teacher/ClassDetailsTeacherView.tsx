@@ -4,52 +4,13 @@ import { Box, Grid } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
+import type { TeacherViewLabels } from "../useClassDetailsLabels";
 import { ActionsPanel } from "./ActionsPanel";
 import { ClassInstanceDetailsCard } from "./ClassInstanceDetailsCard";
 import { PerformanceOverviewCard } from "./PerformanceOverviewCard";
 import { RemarksCard } from "./RemarksCard";
 import { StudentProfileCard } from "./StudentProfileCard";
 import { TimezoneWarningBanner } from "./TimezoneWarningBanner";
-
-interface TeacherViewLabels {
-  readonly timezone: {
-    readonly title: string;
-    readonly description: string;
-  };
-  readonly instanceDetails: {
-    readonly classInstanceDetails: string;
-    readonly studentName: string;
-    readonly courseModule: string;
-    readonly startTime: string;
-    readonly endTime: string;
-    readonly duration: string;
-    readonly status: string;
-    readonly minutes: string;
-    readonly statusLabels: Record<ClassInstanceStatus, string>;
-  };
-  readonly remarks: {
-    readonly remarksTitle: string;
-  };
-  readonly performance: {
-    readonly previousPerformanceOverview: string;
-    readonly attendanceRate: string;
-    readonly avgGrade: string;
-    readonly lastClass: string;
-    readonly days: string;
-  };
-  readonly actions: {
-    readonly actions: string;
-    readonly activate: string;
-    readonly stopPause: string;
-    readonly infoEdit: string;
-    readonly delete: string;
-    readonly contextualHelp: string;
-  };
-  readonly studentProfile: {
-    readonly studentLevel: string;
-    readonly viewFullProfile: string;
-  };
-}
 
 interface ClassDetailsTeacherViewProps {
   readonly instance: ClassInstanceDetail;
