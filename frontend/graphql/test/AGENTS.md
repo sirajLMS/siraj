@@ -1,16 +1,6 @@
-# Frontend GraphQL & Apollo Layer Rules
+# GraphQL Integration Testing Rules
 
-- **Typed Documents**: Always write queries/mutations in `.documents.ts` files using `gql` and `TypedDocumentNode`.
-- **Code Generation**: Whenever you modify backend GraphQL schemas or frontend `.documents.ts` files, you MUST run `bun run generate:gqlSchema` and `bun codegen` to update the generated Typescript types.
-- **Auto Cache Updates**: All queries and mutations MUST include the `id` field for objects so that Apollo Client automatically caches and updates them.
-- **NO Lazy Queries**: Do NOT use `useLazyQuery`. It is banned in this project. Use stateful `useQuery` exclusively, which automatically tracks data, loading, and error states.
-- **Imports**: Always import Apollo hooks from `"@apollo/client/react"` (e.g., `import { useQuery, useApolloClient } from "@apollo/client/react";`).
-
----
-
-## GraphQL Integration Testing Guidelines
-
-When writing integration tests for GraphQL queries/mutations under `frontend/graphql/test/`, adhere strictly to these rules:
+Integration tests for GraphQL queries/mutations under `frontend/graphql/test/` must adhere strictly to these rules:
 
 1. **Next.js Server Lifecycle Management**:
    - Import the reusable dev server setup lifecycle helper from `lifecycle.ts` and call it at the root of your `describe` block:
@@ -65,11 +55,11 @@ When writing integration tests for GraphQL queries/mutations under `frontend/gra
 
 8. **Test Duplication Prevention (SonarQube Compliance)**:
    - Never duplicate standard test setup routines—such as demo user login mutations or querying/extracting basic database entities (e.g., matching student/teacher ID pairs)—across multiple test files.
-   - Centralize all reusable test logic in a shared helpers file (e.g., [helpers.ts](file:///C:/Users/PC/Projects/siraj/frontend/graphql/test/helpers.ts)) using helper functions like `loginDemoUser(groupSlug)` and `fetchFirstStudentTeacherPair(adminToken, date)`.
+   - Centralize all reusable test logic in a shared helpers file (e.g., [helpers.ts](file:///c:/Users/PC/Projects/siraj/frontend/graphql/test/helpers.ts)).
+   - Use `authenticatedRequest` from `helpers.ts` when performing authenticated queries/mutations in tests instead of manually setting authorization headers and assertions on each call.
 
 9. **Large Method Remediation (CodeScene Compliance)**:
    - Keep helper functions and database seeders modular and concise. If a function or seeder (such as `seedOrGet` in `seed-students.ts`) exceeds ~70–80 lines, refactor it by extracting distinct steps into smaller helper functions (e.g., `upsertStudent(...)`, `ensureTeacherAssignments(...)`).
 
 10. **Strict Interface Layer Separation**:
     - Integration tests under `frontend/graphql/test/` must interact with the application *exclusively* via the GraphQL API (using `testClient`). Under no circumstances should backend repositories (`db/repo/`), drizzle schemas directly (other than for checking in seed files), or service layers (`backend/services/`) be imported or invoked directly inside integration test files.
-

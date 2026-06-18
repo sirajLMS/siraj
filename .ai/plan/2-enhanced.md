@@ -2631,3 +2631,705 @@ Output MUST be empty.
 
 ---
 
+
+
+### Task I — i18n: Translation Keys
+
+**Objective:** Add all Story 2 translation keys for UI labels, error messages, and system remarks in both Arabic and English.
+
+**Target Files:**
+- `frontend/locales/ar/dashboard.json` (UI labels)
+- `frontend/locales/en/dashboard.json` (UI labels)
+- `backend/locales/ar/session.json` (system remarks)
+- `backend/locales/en/session.json` (system remarks)
+- `backend/locales/ar/errors.json` (error messages)
+- `backend/locales/en/errors.json` (error messages)
+
+**Translation Keys Required:**
+
+**Dashboard UI (frontend/locales/*/dashboard.json):**
+```json
+{
+  "classDetails": {
+    "liveSession": {
+      "startButton": "Start Session / بدء الجلسة",
+      "absentButton": "Mark Absent / تسجيل غياب",
+      "leaveButton": "Process Leave / معالجة إجازة",
+      "resetButton": "Reset Session / إعادة تعيين الجلسة",
+      "leaveReasonPrompt": "Enter leave reason / أدخل سبب الإجازة",
+      "resetConfirmation": "Are you sure you want to reset this session? All data will be cleared. / هل أنت متأكد من إعادة تعيين هذه الجلسة؟ سيتم حذف جميع البيانات."
+    },
+    "viewStudentProfile": "View Student Profile / عرض ملف الطالب",
+    "editInfo": "Edit Information / تعديل المعلومات",
+    "generateLog": "Generate Log / إنشاء سجل"
+  }
+}
+```
+
+**Session Remarks (backend/locales/*/session.json):**
+```json
+{
+  "absentWaitingRemark": "I have been waiting for whole class time. / لقد انتظرت طوال وقت الحصة.",
+  "leaveRescheduledRemark": "Leave approved - session rescheduled. / تمت الموافقة على الإجازة - تم إعادة جدولة الجلسة.",
+  "resetDescription": "Session reset by administrator. / تم إعادة تعيين الجلسة من قبل المسؤول.",
+  "absentEventDescription": "Student marked as absent after waiting period. / تم تسجيل غياب الطالب بعد فترة الانتظار.",
+  "leaveProcessedDescription": "Leave request processed, rescheduled to instance {{successorId}}. / تمت معالجة طلب الإجازة، أعيدت جدولته إلى الجلسة {{successorId}}."
+}
+```
+
+**Error Messages (backend/locales/*/errors.json):**
+```json
+{
+  "notFound": "Resource not found. / المورد غير موجود.",
+  "unauthorizedAction": "You are not authorized to perform this action. / ليس لديك صلاحية لتنفيذ هذا الإجراء.",
+  "insufficientPermissions": "Insufficient permissions. / صلاحيات غير كافية.",
+  "invalidTransition": "Invalid state transition. / انتقال حالة غير صالح.",
+  "sessionNotActivated": "Session must be activated before performing this action. / يجب تفعيل الجلسة قبل تنفيذ هذا الإجراء.",
+  "absentTooEarly": "Cannot mark absent yet. Please wait {{waitingMinutes}} minutes from scheduled start time. / لا يمكن تسجيل الغياب بعد. يرجى الانتظار {{waitingMinutes}} دقيقة من وقت البدء المجدول."
+}
+```
+
+**Implementation Steps:**
+
+**Step 1:** Add keys to all locale files (ar and en)
+
+**Step 2:** Verify keys are used in code
+
+```bash
+rg "t\(\"absentWaitingRemark\"|t\(\"sessionNotActivated\"|t\(\"absentTooEarly\"" backend frontend
+```
+
+**Step 3:** Run TypeScript compilation to catch missing translation keys
+
+```bash
+~/.bun/bin/bun tsgo
+```
+
+**Success Criteria:**
+- [ ] All Story 2 UI labels added to `dashboard.json` (ar + en)
+- [ ] All system remarks added to `session.json` (ar + en)
+- [ ] All error messages added to `errors.json` (ar + en)
+- [ ] Translation keys match usage in code
+- [ ] TypeScript compilation passes
+
+---
+
+### Task J — Permission Sweep: Remove Deprecated Keys
+
+**Objective:** Grep entire codebase for deprecated Story 1 permission strings and replace with Story 2 keys, then verify TypeScript compilation.
+
+**Target:** All files in `backend`, `frontend`, `shared`
+
+**Deprecated Keys to Remove:**
+- `session.force_activate` → `session.activate_override`
+- `session.start` → `session.update_status.start`
+- `session.mark_absent` → `session.update_status.absent`
+- `session.request_leave` → `session.update_status.leave`
+- `session.admin_leave` → `session.update_status.leave`
+- `session.revert` → `session.reset`
+
+**Implementation Steps:**
+
+**Step 1:** Search for deprecated permission strings
+
+```bash
+rg "session\.force_activate|SESSION_FORCE_ACTIVATE" backend frontend shared --glob "!**/*.md"
+rg "session\.start|SESSION_START" backend frontend shared --glob "!**/*.md" --glob "!**/system-settings.ts"
+rg "session\.mark_absent|SESSION_MARK_ABSENT" backend frontend shared --glob "!**/*.md"
+rg "session\.request_leave|SESSION_REQUEST_LEAVE" backend frontend shared --glob "!**/*.md"
+rg "session\.admin_leave|SESSION_ADMIN_LEAVE" backend frontend shared --glob "!**/*.md"
+rg "session\.revert|SESSION_REVERT" backend frontend shared --glob "!**/*.md"
+```
+
+**Step 2:** Replace all occurrences with Story 2 keys
+
+**Step 3:** Verify enum values updated
+
+```typescript
+// shared/lib/enum.ts - verify these are REMOVED:
+// SESSION_FORCE_ACTIVATE
+// SESSION_START (careful - don't break system settings keys)
+// SESSION_MARK_ABSENT
+// SESSION_REQUEST_LEAVE
+// SESSION_ADMIN_LEAVE
+// SESSION_REVERT
+
+// And these are PRESENT:
+// SESSION_ACTIVATE_OVERRIDE
+// SESSION_RESET
+// SESSION_UPDATE_STATUS_START
+// SESSION_UPDATE_STATUS_ABSENT
+// SESSION_UPDATE_STATUS_LEAVE
+```
+
+**Step 4:** Run TypeScript compilation
+
+```bash
+~/.bun/bin/bun tsgo
+```
+
+**Success Criteria:**
+- [ ] All deprecated permission strings removed from codebase
+- [ ] All references updated to Story 2 keys
+- [ ] TypeScript compilation passes with zero errors
+- [ ] Grep for deprecated strings returns empty
+
+---
+
+### Task K — Repository Tests: 100% Coverage
+
+**Objective:** Achieve 100% line and function coverage on all new/modified repository methods with comprehensive test cases.
+
+**Layer-Specific Rules (Repository Testing):**
+- **Coverage**: 100% line + function coverage mandatory per `backend/db/test/AGENTS.md`
+- **Test Organization**: Group by method, test happy path + error cases + edge cases
+- **Database State**: Use test fixtures to create consistent starting state
+- **Assertions**: Verify database state changes, not just return values
+
+**Target File:**
+- `backend/db/test/repo/scheduling.repository.test.ts`
+
+**Test Cases Required:**
+
+**resetClassInstance:**
+- [ ] Clears all session data (executionState, outcome, timestamps, remarks, payroll)
+- [ ] Restores quota when quotaDeducted was true
+- [ ] Does NOT restore quota when quotaDeducted was false
+- [ ] Creates audit event with localized resetDescription
+- [ ] Throws notFound error when instance doesn't exist
+- [ ] Works with ACTIVATED, RUNNING, and COMPLETED states
+
+**markClassAbsent:**
+- [ ] Sets payrollCredited to true
+- [ ] Injects localized system remark
+- [ ] Transitions to COMPLETED with outcome=ABSENT
+- [ ] Creates audit event with MARKED_ABSENT type
+- [ ] Throws notFound error when instance doesn't exist
+- [ ] Only works from ACTIVATED state (guards tested in Task S1)
+
+**processClassLeave:**
+- [ ] Creates successor instance with rescheduled date
+- [ ] Marks original as rescheduled with outcome=LEAVE
+- [ ] Successor has same teacher, student, subject
+- [ ] Successor has NOT_ACTIVATED state and PENDING outcome
+- [ ] Fails when student has no quota remaining
+- [ ] Uses system setting for reschedule offset days
+- [ ] Falls back to 7 days when setting not present
+- [ ] Creates audit event with successorId reference
+
+**runStateChange (COMPLETED guard update):**
+- [ ] Allows ACTIVATED → COMPLETED with outcome=ABSENT
+- [ ] Allows ACTIVATED → COMPLETED with outcome=LEAVE
+- [ ] Blocks ACTIVATED → COMPLETED with outcome=TAKEN
+- [ ] Allows RUNNING → COMPLETED with any outcome
+- [ ] Existing transitions still work (NOT_ACTIVATED → ACTIVATED, etc.)
+
+**IDOR protection (from Task S0):**
+- [ ] Teacher cannot mutate another teacher's instance
+- [ ] Parent cannot mutate another student's instance
+- [ ] Academy admin CAN mutate any instance
+- [ ] Admin with SESSION_RESET can reset any instance
+
+**Implementation:**
+
+```bash
+~/.bun/bin/bun run test:coverage backend/db/test/repo/scheduling.repository.test.ts
+```
+
+Expected output:
+```
+File                          | % Stmts | % Branch | % Funcs | % Lines
+------------------------------|---------|----------|---------|--------
+scheduling.repository.ts      |   100   |   100    |   100   |   100
+```
+
+**Success Criteria:**
+- [ ] All test cases pass
+- [ ] 100% statement coverage
+- [ ] 100% branch coverage
+- [ ] 100% function coverage
+- [ ] 100% line coverage
+- [ ] Tests use localized assertions (check for translated error keys)
+
+---
+
+### Task L — GraphQL Integration Tests
+
+**Objective:** Add comprehensive integration tests for all Story 2 mutations covering happy paths, error cases, and security boundaries.
+
+**Layer-Specific Rules (GraphQL Testing - Flattened from frontend/graphql/test/AGENTS.md):**
+- **Server Lifecycle**: Use `setupTestServerLifecycle()` helper at describe block root
+- **Apollo Client**: Use shared `testClient` from `testClient.ts`
+- **Type Safety**: Use `TypedDocumentNode` from generated documents, never raw strings
+- **Dynamic Headers**: Change locale/auth via `context: { headers: {...} }` on per-query basis
+- **Error Handling**: Check `result.error` (type `ApolloError | undefined`), not `result.errors`
+- **Null Checks**: Verify `result.data?.field` is defined before assertions
+- **Shared Helpers**: Use `loginDemoUser()` and `fetchFirstStudentTeacherPair()` from `helpers.ts`
+- **No Repository Imports**: Test ONLY via GraphQL API, never import backend repos/services directly
+
+**Target File:**
+- `frontend/graphql/test/class-session.test.ts`
+
+**Test Cases Required:**
+
+```typescript
+// File: frontend/graphql/test/class-session.test.ts
+
+import { describe, it, expect } from "bun:test";
+import { setupTestServerLifecycle } from "./lifecycle";
+import { testClient } from "./testClient";
+import { loginDemoUser, fetchFirstStudentTeacherPair } from "./helpers";
+import {
+  activateOverrideClassMutationDocument,
+  updateSessionStatusStartMutationDocument,
+  updateSessionStatusAbsentMutationDocument,
+  updateSessionStatusLeaveMutationDocument,
+  resetClassMutationDocument,
+} from "@/frontend/graphql/sharedDocuments/class-session.documents";
+
+describe("Story 2: Live Session Lifecycle", () => {
+  setupTestServerLifecycle();
+
+  describe("activateOverrideClass", () => {
+    it("allows admin to activate outside time window", async () => {
+      const adminToken = await loginDemoUser("academy-admin");
+      const { classInstanceId } = await fetchFirstStudentTeacherPair(adminToken, new Date());
+
+      const result = await testClient.mutate({
+        mutation: activateOverrideClassMutationDocument,
+        variables: { classInstanceId },
+        context: { headers: { Authorization: `Bearer ${adminToken}` } },
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.data?.activateOverrideClass?.executionState).toBe("ACTIVATED");
+    });
+
+    it("rejects teacher without SESSION_ACTIVATE_OVERRIDE permission", async () => {
+      const teacherToken = await loginDemoUser("teacher");
+      const { classInstanceId } = await fetchFirstStudentTeacherPair(teacherToken, new Date());
+
+      const result = await testClient.mutate({
+        mutation: activateOverrideClassMutationDocument,
+        variables: { classInstanceId },
+        context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+      });
+
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain("insufficientPermissions");
+    });
+  });
+
+  describe("updateSessionStatusStart", () => {
+    it("transitions ACTIVATED → RUNNING with actualStartAt timestamp", async () => {
+      const teacherToken = await loginDemoUser("teacher");
+      const { classInstanceId } = await activateClass(teacherToken); // Helper to activate first
+
+      const result = await testClient.mutate({
+        mutation: updateSessionStatusStartMutationDocument,
+        variables: { classInstanceId },
+        context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.data?.updateSessionStatusStart?.executionState).toBe("RUNNING");
+      expect(result.data?.updateSessionStatusStart?.actualStartAt).toBeDefined();
+    });
+
+    it("rejects when session not activated", async () => {
+      const teacherToken = await loginDemoUser("teacher");
+      const { classInstanceId } = await fetchFirstStudentTeacherPair(teacherToken, new Date());
+
+      const result = await testClient.mutate({
+        mutation: updateSessionStatusStartMutationDocument,
+        variables: { classInstanceId },
+        context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+      });
+
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain("sessionNotActivated");
+    });
+  });
+
+  describe("updateSessionStatusAbsent", () => {
+    it("marks student absent with payrollCredited flag and system remark", async () => {
+      const teacherToken = await loginDemoUser("teacher");
+      const { classInstanceId } = await activateAndWait(teacherToken, 31); // Wait 31 minutes
+
+      const result = await testClient.mutate({
+        mutation: updateSessionStatusAbsentMutationDocument,
+        variables: { classInstanceId },
+        context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.data?.updateSessionStatusAbsent?.executionState).toBe("COMPLETED");
+      expect(result.data?.updateSessionStatusAbsent?.outcome).toBe("ABSENT");
+      expect(result.data?.updateSessionStatusAbsent?.payrollCredited).toBe(true);
+      expect(result.data?.updateSessionStatusAbsent?.remarksBySystem).toContain("waiting");
+    });
+
+    it("rejects when waiting period not elapsed", async () => {
+      const teacherToken = await loginDemoUser("teacher");
+      const { classInstanceId } = await activateClass(teacherToken); // Just activated
+
+      const result = await testClient.mutate({
+        mutation: updateSessionStatusAbsentMutationDocument,
+        variables: { classInstanceId },
+        context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+      });
+
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain("absentTooEarly");
+    });
+  });
+
+  describe("updateSessionStatusLeave", () => {
+    it("processes leave with rescheduled successor instance", async () => {
+      const teacherToken = await loginDemoUser("teacher");
+      const { classInstanceId } = await activateClass(teacherToken);
+
+      const result = await testClient.mutate({
+        mutation: updateSessionStatusLeaveMutationDocument,
+        variables: { classInstanceId, leaveReason: "Family emergency" },
+        context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.data?.updateSessionStatusLeave?.completedInstanceId).toBe(classInstanceId);
+      expect(result.data?.updateSessionStatusLeave?.rescheduledInstanceId).toBeGreaterThan(0);
+      
+      // Verify original marked as rescheduled
+      expect(result.data?.updateSessionStatusLeave?.completedInstance?.isRescheduled).toBe(true);
+      expect(result.data?.updateSessionStatusLeave?.completedInstance?.outcome).toBe("LEAVE");
+      
+      // Verify successor exists with future date
+      const successor = result.data?.updateSessionStatusLeave?.rescheduledInstance;
+      if (!successor) throw new Error("Successor instance not returned");
+      
+      expect(new Date(successor.scheduledStartAt).getTime()).toBeGreaterThan(Date.now());
+    });
+
+    it("fails when student has no quota remaining", async () => {
+      const teacherToken = await loginDemoUser("teacher");
+      const { classInstanceId } = await activateClassWithZeroQuota(teacherToken);
+
+      const result = await testClient.mutate({
+        mutation: updateSessionStatusLeaveMutationDocument,
+        variables: { classInstanceId, leaveReason: "Emergency" },
+        context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+      });
+
+      expect(result.error).toBeDefined();
+      // Check for quota-related error message
+    });
+  });
+
+  describe("resetClass", () => {
+    it("allows admin to reset completed session", async () => {
+      const adminToken = await loginDemoUser("academy-admin");
+      const { classInstanceId } = await completeClassSession(adminToken);
+
+      const result = await testClient.mutate({
+        mutation: resetClassMutationDocument,
+        variables: { classInstanceId },
+        context: { headers: { Authorization: `Bearer ${adminToken}` } },
+      });
+
+      expect(result.error).toBeUndefined();
+      
+      // Verify reset cleared data (query instance again)
+      const instanceQuery = await testClient.query({
+        query: classInstanceQueryDocument,
+        variables: { classInstanceId },
+        context: { headers: { Authorization: `Bearer ${adminToken}` } },
+      });
+      
+      expect(instanceQuery.data?.classInstance?.executionState).toBe("NOT_ACTIVATED");
+      expect(instanceQuery.data?.classInstance?.outcome).toBe("PENDING");
+      expect(instanceQuery.data?.classInstance?.payrollCredited).toBe(false);
+    });
+
+    it("rejects teacher without SESSION_RESET permission", async () => {
+      const teacherToken = await loginDemoUser("teacher");
+      const { classInstanceId } = await completeClassSession(teacherToken);
+
+      const result = await testClient.mutate({
+        mutation: resetClassMutationDocument,
+        variables: { classInstanceId },
+        context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+      });
+
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain("insufficientPermissions");
+    });
+  });
+
+  describe("IDOR Protection", () => {
+    it("prevents teacher from resetting another teacher's class", async () => {
+      const teacherAToken = await loginDemoUser("teacher");
+      const teacherBToken = await loginDemoUser("teacher-b");
+      const { classInstanceId } = await activateClass(teacherBToken);
+
+      const result = await testClient.mutate({
+        mutation: resetClassMutationDocument,
+        variables: { classInstanceId },
+        context: { headers: { Authorization: `Bearer ${teacherAToken}` } },
+      });
+
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain("unauthorizedAction");
+    });
+  });
+});
+```
+
+**Implementation:**
+
+```bash
+~/.bun/bin/bun test frontend/graphql/test/class-session.test.ts
+```
+
+**Success Criteria:**
+- [ ] All integration tests pass
+- [ ] `activateOverrideClass` tested (admin succeeds, teacher fails)
+- [ ] `updateSessionStatusStart` tested (RUNNING transition + timestamp)
+- [ ] `updateSessionStatusAbsent` tested (payroll flag + waiting period)
+- [ ] `updateSessionStatusLeave` tested (successor instance created)
+- [ ] `resetClass` tested (admin succeeds, teacher fails)
+- [ ] IDOR protection verified (cross-teacher access blocked)
+- [ ] Tests use `TypedDocumentNode` (no raw strings)
+- [ ] Tests use shared helpers (`loginDemoUser`, etc.)
+
+---
+
+### Task M — Security Regression Suite
+
+**Objective:** Add Story 2-specific test cases to the security logic test suite to ensure all threat mitigations are covered.
+
+**Target File:**
+- `backend/db/test/logic/class_instances_security.test.ts`
+
+**Test Cases Required:**
+
+```typescript
+// File: backend/db/test/logic/class_instances_security.test.ts
+
+describe("Story 2: State Transition Security", () => {
+  it("allows ACTIVATED → COMPLETED with outcome=ABSENT", async () => {
+    const instance = await createActivatedInstance();
+    
+    await expect(
+      db.update(classInstances)
+        .set({ executionState: "COMPLETED", outcome: "ABSENT" })
+        .where(eq(classInstances.id, instance.id))
+    ).resolves.toBeDefined();
+  });
+
+  it("allows ACTIVATED → COMPLETED with outcome=LEAVE", async () => {
+    const instance = await createActivatedInstance();
+    
+    await expect(
+      db.update(classInstances)
+        .set({ executionState: "COMPLETED", outcome: "LEAVE" })
+        .where(eq(classInstances.id, instance.id))
+    ).resolves.toBeDefined();
+  });
+
+  it("blocks ACTIVATED → COMPLETED with outcome=TAKEN", async () => {
+    const instance = await createActivatedInstance();
+    
+    await expect(
+      db.update(classInstances)
+        .set({ executionState: "COMPLETED", outcome: "TAKEN" })
+        .where(eq(classInstances.id, instance.id))
+    ).rejects.toThrow("Invalid transition");
+  });
+
+  it("allows reset transition (COMPLETED → NOT_ACTIVATED)", async () => {
+    const instance = await createCompletedInstance();
+    
+    await expect(
+      db.update(classInstances)
+        .set({ executionState: "NOT_ACTIVATED", outcome: "PENDING" })
+        .where(eq(classInstances.id, instance.id))
+    ).resolves.toBeDefined();
+  });
+
+  it("allows reset from ACTIVATED state", async () => {
+    const instance = await createActivatedInstance();
+    
+    await expect(
+      db.update(classInstances)
+        .set({ executionState: "NOT_ACTIVATED", outcome: "PENDING" })
+        .where(eq(classInstances.id, instance.id))
+    ).resolves.toBeDefined();
+  });
+
+  it("allows reset from RUNNING state", async () => {
+    const instance = await createRunningInstance();
+    
+    await expect(
+      db.update(classInstances)
+        .set({ executionState: "NOT_ACTIVATED", outcome: "PENDING" })
+        .where(eq(classInstances.id, instance.id))
+    ).resolves.toBeDefined();
+  });
+});
+```
+
+**Implementation:**
+
+```bash
+~/.bun/bin/bun test backend/db/test/logic/class_instances_security.test.ts
+```
+
+**Success Criteria:**
+- [ ] All Story 2 state transition tests pass
+- [ ] Database trigger correctly enforces outcome-specific transitions
+- [ ] Reset transitions work from all states
+- [ ] Invalid transitions blocked with descriptive error
+
+---
+
+## Section 7: Strict Verification & Integrity Protocol
+
+Run these commands in sequence before declaring Story 2 complete:
+
+```bash
+# 0. Completeness gate (MUST be empty)
+rg -i "TODO|FIXME|not implemented|placeholder|for now" backend frontend shared --glob "!**/*.md" --glob "!**/generated/**"
+
+# 1. Schema & seeds
+~/.bun/bin/bun db cleanGenerate
+~/.bun/bin/bun run db seed
+
+# 2. GraphQL codegen
+~/.bun/bin/bun run generate:gqlSchema
+~/.bun/bin/bun codegen
+
+# 3. Security & repo tests
+~/.bun/bin/bun test backend/db/test/logic/class_instances_security.test.ts
+~/.bun/bin/bun run test:coverage backend/db/test/repo/scheduling.repository.test.ts
+
+# 4. GraphQL integration tests
+~/.bun/bin/bun test frontend/graphql/test/class-session.test.ts
+
+# 5. TypeScript & lint
+~/.bun/bin/bun tsgo
+~/.bun/bin/bun run lint
+
+# 6. Quality gate (if exists)
+~/.bun/bin/bun quality-gate
+```
+
+### Manual Smoke Checklist
+
+- [ ] Admin `activateOverride` bypasses time window; teacher `activate` still blocked
+- [ ] Live toolbar appears only when `ACTIVATED` or `RUNNING`
+- [ ] Start button transitions to `RUNNING` + captures `actualStartAt` timestamp
+- [ ] Absent button sets `payrollCredited=true` + injects localized system remark
+- [ ] Leave button creates rescheduled successor instance with future date
+- [ ] Reset button (admin-only) clears all session data and restores quota
+- [ ] Teacher cannot see or use reset button (permission-gated)
+- [ ] Teacher cannot mutate another teacher's session (IDOR protection)
+- [ ] Generate Log downloads JSON file with `classStatusEvents` data
+- [ ] View Profile navigates to student status page
+- [ ] Edit Info navigates to audit page or opens remarks dialog
+- [ ] **Zero** logger-only handlers in production views
+- [ ] **Zero** TODO/FIXME/stub patterns in touched files
+- [ ] All mutations return `ClassInstanceDetail` with non-null `id` field
+- [ ] Apollo cache automatically updates after mutations (no manual refetch needed in most cases)
+
+---
+
+## Section 8: Appendix A — Threat → Implementation Map
+
+| **Threat** | **Story 2 Touch Point** | **Task** | **Verification** |
+|---|---|---|---|
+| IDOR scoping | All state-changing mutations | S0 | Teacher cross-access blocked, admin bypass works |
+| Timezone off-by-one | Absent waiting period calculation | D | Uses millisecond arithmetic, not date truncation |
+| State machine bypass | Absent/leave/reset transitions | S1, C | DB trigger + repo guard + service assertion aligned |
+| Student quota | Reset + leave reschedule | C | Reset restores quota; leave validates before reschedule |
+| Separation of duties | Reset admin-only enforcement | B, D, L | Teacher reset rejected; admin succeeds |
+| Payroll integrity | Absent flag setting | A, C, K | Only `markClassAbsent` sets flag; reset clears it |
+| Reschedule completeness | Leave workflow | C, E, L | Successor instance created via `rescheduleClassInstance` |
+
+---
+
+## Section 9: Appendix B — Known Story 1 Stubs Eliminated
+
+| **Location** | **Old Stub** | **Story 2 Implementation** |
+|---|---|---|
+| `ClassDetailsContainer.handleGenerateLog` | `logger.info("Generate log")` | Download JSON from `classStatusEvents` query |
+| `ClassDetailsContainer.handleInfoEdit` | `logger.info("Edit info")` | Navigate to `/classes/[id]/audit` or open remarks dialog |
+| `ClassDetailsContainer.handleViewProfile` | `logger.info("View profile")` | `router.push(\`/students/\${id}/status\`)` |
+| `class-session.utils.resolveDetail` | `throw new Error("Not found")` | Localized `errors.notFound` via `getBackendTranslations` |
+| `requestClassLeave` leave path | Sets `outcome` only | Full `rescheduleClassInstance` call in transaction |
+| `runStateChange` admin bypass | Missing | Privileged actor check at method start (Task S0) |
+| `TeacherDashboard` handbook | `useLazyQuery` | `useQuery` with `skip` option |
+
+---
+
+## Section 10: Appendix C — Decisions Log
+
+| **Decision** | **Resolution** |
+|---|---|
+| Security baseline | Sprint 1 threat doc is mandatory prerequisite; all protections extended |
+| ACTIVATED → COMPLETED | Allowed only for ABSENT/LEAVE; DB trigger + repo + service aligned |
+| Leave reschedule | Mandatory successor instance via `rescheduleClassInstance` in same transaction |
+| Incomplete code policy | Zero tolerance — no TODOs, no logger stubs, no stub throws allowed |
+| Admin IDOR bypass | Privileged permission check bypasses teacher/parent relationship scoping |
+| `useLazyQuery` ban | Removed from teacher dashboard; replaced with stateful `useQuery` + `skip` |
+| Logger-only handlers | All eliminated; every UI action has real GraphQL mutation + backend logic |
+| Permission naming | Story 2 uses dot-notation hierarchy (`update_status.start`, `update_status.absent`) |
+| Localization | All user-facing strings (errors, remarks, UI labels) via `getBackendTranslations` |
+| GraphQL cache | All mutations return objects with non-null `id` for Apollo auto-cache updates |
+
+---
+
+## Section 11: Task Execution Order & Dependencies
+
+```
+Blocking Prerequisites (verify first):
+├─ Story 1 security remediation complete
+└─ All Story 1 artifacts deployed (RLS, trigger, tests)
+
+Phase 1: Security & Database (blocking for all others)
+├─ Task S0: Admin IDOR bypass ← BLOCKING
+├─ Task S1: State trigger migration ← BLOCKING
+└─ Task A: Schema changes (payrollCredited, settings)
+
+Phase 2: Permissions & Backend Logic
+├─ Task B: Permission enum/catalog/seeds
+├─ Task C: Repository methods (reset, absent, leave)
+└─ Task D: Service layer (permissions, rules)
+
+Phase 3: GraphQL & Type Generation
+├─ Task E: GraphQL mutations + codegen
+└─ Task I: i18n translation keys
+
+Phase 4: Frontend Integration
+├─ Task F: LiveSessionToolbar component
+├─ Task G: Class details page wiring
+└─ Task H: Teacher dashboard wiring
+
+Phase 5: Testing & Verification
+├─ Task J: Permission sweep
+├─ Task K: Repository tests (100% coverage)
+├─ Task L: GraphQL integration tests
+└─ Task M: Security regression suite
+
+Final: Section 7 verification protocol + manual smoke testing
+```
+
+---
+
+**END OF ENHANCED PLAN**
+
+**Next Steps:**
+1. Review this enhanced plan for completeness
+2. Obtain approval from technical lead / product owner
+3. Execute tasks in dependency order
+4. Run verification protocol after each phase
+5. Complete manual smoke checklist before declaring Story 2 done

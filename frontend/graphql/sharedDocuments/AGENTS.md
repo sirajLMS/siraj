@@ -38,3 +38,7 @@ After modifying any `.documents.ts` file or any backend schema/pothos file, alwa
 
 ## `id` Field Requirement
 Every query/mutation selection set **must** include the `id` field on every named object type so Apollo Client can auto-update its cache.
+
+## Frontend Client Queries and Hook Usage
+- **NO Lazy Queries**: Do NOT use `useLazyQuery`. It is banned in this project. Use stateful `useQuery` exclusively, which automatically tracks data, loading, and error states.
+- **Imports**: Always import Apollo hooks from `"@apollo/client/react"` (e.g., `import { useQuery, useApolloClient } from "@apollo/client/react";`).
