@@ -2,110 +2,22 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
-import { classInstances, parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
+import {
+  classInstances,
+  classStatusEvents,
+  parents,
+  students,
+  systemSettings,
+  teacherAssignments,
+  users,
+} from "@/backend/db/schema";
+import { createMockClassInstance, setupTestEntities } from "../entity-setup";
 import { type DbTransaction, runInRollback } from "../test-utils";
 
-/**
- * HELPER: setupTestEntities
- */
-async function setupTestEntities(tx: DbTransaction, prefix: string) {
-  const now = new Date();
-
-  const [parentUser] = await tx
-    .insert(users)
-    .values({
-      name: `${prefix} ParentUser`,
-      email: `${prefix}-parent-${randomUUID()}@example.com`,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
-
-  const [parent] = await tx
-    .insert(parents)
-    .values({
-      userId: parentUser.id,
-      status: "REGULAR",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
-
-  const [student] = await tx
-    .insert(students)
-    .values({
-      parentId: parent.id,
-      name: `${prefix} Student`,
-      status: "REGULAR",
-      classesRemaining: 10,
-      classesTotal: 10,
-      idempotencyKey: randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
-
-  const [teacherUser] = await tx
-    .insert(users)
-    .values({
-      name: `${prefix} TeacherUser`,
-      email: `${prefix}-teacher-${randomUUID()}@example.com`,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
-
-  const [teacher] = await tx
-    .insert(teachers)
-    .values({
-      userId: teacherUser.id,
-      status: "ACTIVATED",
-      timezone: "UTC",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
-
-  const [assignment] = await tx
-    .insert(teacherAssignments)
-    .values({
-      studentId: student.id,
-      teacherId: teacher.id,
-      assignedAt: now,
-    })
-    .returning();
-
-  return { parentUser, parent, student, teacherUser, teacher, assignment, now };
-}
-
-/**
- * HELPER: createMockClassInstance
- */
-async function createMockClassInstance(
-  tx: DbTransaction,
-  studentId: string,
-  teacherId: string,
-  overrides: Partial<typeof classInstances.$inferInsert> = {}
-) {
-  const now = new Date();
-  const [instance] = await tx
-    .insert(classInstances)
-    .values({
-      studentId,
-      teacherId,
-      scheduledStartAt: new Date(now.getTime() + 1000 * 60 * 60),
-      scheduledEndAt: new Date(now.getTime() + 1000 * 60 * 120),
-      durationMinutes: 60,
-      classType: "REGULAR",
-      idempotencyKey: randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-      ...overrides,
-    })
-    .returning();
-  return instance;
+interface ClassStatusEventState {
+  executionState?: string;
+  outcome?: string;
+  deleted?: boolean;
 }
 
 async function expectRepositoryError(fn: () => Promise<unknown>) {
@@ -151,7 +63,7 @@ describe("Scheduling Repository logic", () => {
 
     test("creates successfully with valid data and handles quota deduction", async () => {
       await runInRollback(async tx => {
-        const { student, teacher, now } = await setupTestEntities(tx, "Create1");
+        const { student, teacher, now } = await setupTestEntities(tx, "Create1", { skipInstance: true });
         const [studentBefore] = await tx.select().from(students).where(eq(students.id, student.id));
 
         const start = new Date(now.getTime() + 86400000); // tomorrow
@@ -227,7 +139,7 @@ describe("Scheduling Repository logic", () => {
 
     test("toggles quota deduction and updates student classesRemaining correctly", async () => {
       await runInRollback(async tx => {
-        const { student, teacher } = await setupTestEntities(tx, "UpdateQuota");
+        const { student, teacher } = await setupTestEntities(tx, "UpdateQuota", { skipInstance: true });
         const [studentBefore] = await tx.select().from(students).where(eq(students.id, student.id));
         const instance = await createMockClassInstance(tx, student.id, teacher.id, { quotaDeducted: false });
 
@@ -253,8 +165,8 @@ describe("Scheduling Repository logic", () => {
 
     test("swapping student adjusts both quotas if quotaDeducted is true", async () => {
       await runInRollback(async tx => {
-        const { student: student1, teacher, now } = await setupTestEntities(tx, "UpdateSwap1");
-        const { student: student2 } = await setupTestEntities(tx, "UpdateSwap2");
+        const { student: student1, teacher, now } = await setupTestEntities(tx, "UpdateSwap1", { skipInstance: true });
+        const { student: student2 } = await setupTestEntities(tx, "UpdateSwap2", { skipInstance: true });
         await tx.insert(teacherAssignments).values({ studentId: student2.id, teacherId: teacher.id, assignedAt: now });
         const instance = await createMockClassInstance(tx, student1.id, teacher.id, { quotaDeducted: true });
 
@@ -418,8 +330,188 @@ describe("Scheduling Repository logic", () => {
       const date = new Date("2029-01-01T00:00:00Z");
       const metrics = await SchedulingRepository.getDailyMetrics(date);
       expect(metrics.total).toBeGreaterThanOrEqual(0);
-      const schedule = await SchedulingRepository.getDailySchedule(date);
+      const schedule = await SchedulingRepository.getDailySchedule(date, { search: "NoMatchHere" });
       expect(Array.isArray(schedule)).toBe(true);
+    });
+  });
+
+  describe("Timezone and Transitions", () => {
+    test("resolveStudentTimezone resolves correctly from hierarchy", async () => {
+      await runInRollback(async tx => {
+        const { student, parent } = await setupTestEntities(tx, "tz1");
+
+        await tx
+          .insert(systemSettings)
+          .values({
+            key: "default_timezone",
+            value: "Europe/Paris",
+            dataType: "string",
+            description: "desc",
+            category: "test",
+            updatedAt: new Date(),
+          })
+          .onConflictDoUpdate({
+            target: systemSettings.key,
+            set: { value: "Europe/Paris" },
+          });
+
+        await tx.update(parents).set({ timezone: "Africa/Cairo" }).where(eq(parents.id, parent.id));
+
+        let tz = await SchedulingRepository.resolveStudentTimezone(student.id, tx);
+        expect(tz).toBe("Africa/Cairo");
+
+        await tx.update(students).set({ timezoneOverride: "America/New_York" }).where(eq(students.id, student.id));
+        tz = await SchedulingRepository.resolveStudentTimezone(student.id, tx);
+        expect(tz).toBe("America/New_York");
+      });
+    });
+
+    test("activateClassInstance sets flags and creates event", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "activate");
+        const instance = await createMockClassInstance(tx, student.id, teacher.id, {
+          executionState: "NOT_ACTIVATED",
+        });
+
+        const updated = await SchedulingRepository.activateClassInstance(
+          instance.id,
+          teacher.userId,
+          { force: true },
+          tx
+        );
+
+        expect(updated.executionState).toBe("ACTIVATED");
+        expect(updated.forceActivated).toBe(true);
+        expect(updated.forceActivatedByUserId).toBe(teacher.userId);
+
+        const [event] = await tx
+          .select()
+          .from(classStatusEvents)
+          .where(eq(classStatusEvents.classInstanceId, instance.id));
+        expect(event).toBeDefined();
+        expect(event.eventType).toBe("STATE_CHANGE");
+        expect((event.toState as ClassStatusEventState).executionState).toBe("ACTIVATED");
+      });
+    });
+
+    test("stopClassInstance sets flags and creates event", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "stop");
+        const instance = await createMockClassInstance(tx, student.id, teacher.id, {
+          executionState: "ACTIVATED",
+          actualStartAt: new Date(),
+        });
+
+        const updated = await SchedulingRepository.stopClassInstance(instance.id, teacher.userId, tx);
+
+        expect(updated.executionState).toBe("COMPLETED");
+        expect(updated.outcome).toBe("TAKEN");
+        expect(updated.actualEndAt).toBeDefined();
+
+        const [event] = await tx
+          .select()
+          .from(classStatusEvents)
+          .where(eq(classStatusEvents.classInstanceId, instance.id));
+        expect(event).toBeDefined();
+        expect(event.eventType).toBe("STATE_CHANGE");
+        expect((event.toState as ClassStatusEventState).executionState).toBe("COMPLETED");
+        expect((event.toState as ClassStatusEventState).outcome).toBe("TAKEN");
+      });
+    });
+
+    test("softDeleteClassInstance creates event and restores quota", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "softDel2");
+        const instance = await createMockClassInstance(tx, student.id, teacher.id, {
+          executionState: "NOT_ACTIVATED",
+          quotaDeducted: true,
+        });
+
+        const initialStudent = await tx
+          .select()
+          .from(students)
+          .where(eq(students.id, student.id))
+          .then(r => r[0]);
+
+        const updated = await SchedulingRepository.softDeleteClassInstance(instance.id, teacher.userId, tx);
+        expect(updated).not.toBeNull();
+        expect(updated?.deletedAt).toBeDefined();
+
+        const [event] = await tx
+          .select()
+          .from(classStatusEvents)
+          .where(eq(classStatusEvents.classInstanceId, instance.id));
+        expect(event).toBeDefined();
+        expect((event.toState as ClassStatusEventState).deleted).toBe(true);
+
+        const finalStudent = await tx
+          .select()
+          .from(students)
+          .where(eq(students.id, student.id))
+          .then(r => r[0]);
+        expect(finalStudent.classesRemaining).toBe(initialStudent.classesRemaining + 1);
+
+        // Missing instance fallback
+        const missing = await SchedulingRepository.softDeleteClassInstance(randomUUID(), teacher.userId, tx);
+        expect(missing).toBeNull();
+      });
+    });
+
+    test("getClassInstanceById includes relations", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "getById");
+        const instance = await createMockClassInstance(tx, student.id, teacher.id);
+
+        const result = await SchedulingRepository.getClassInstanceById(instance.id, tx);
+        expect(result).toBeDefined();
+        expect(result?.student?.id).toBe(student.id);
+        expect(result?.teacher?.id).toBe(teacher.id);
+        expect(result?.teacher?.user).toBeDefined();
+
+        const missing = await SchedulingRepository.getClassInstanceById(randomUUID(), tx);
+        expect(missing).toBeNull();
+      });
+    });
+
+    test("getDailySchedule handles search and timezones", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher, teacherUser } = await setupTestEntities(tx, "schSrch");
+
+        await tx.update(students).set({ name: "Searchable Student XYZ" }).where(eq(students.id, student.id));
+        await tx.update(users).set({ name: "Unrelated Teacher Name" }).where(eq(users.id, teacherUser.id));
+
+        const date = new Date("2026-06-19T10:00:00.000Z");
+
+        await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: new Date("2026-06-19T12:00:00.000Z"),
+          scheduledEndAt: new Date("2026-06-19T13:00:00.000Z"),
+        });
+
+        // Search by student name
+        let schedule = await SchedulingRepository.getDailySchedule(
+          date,
+          {
+            search: "XYZ",
+            viewerTimezone: "UTC",
+          },
+          tx
+        );
+        expect(schedule.length).toBe(1);
+        expect(schedule[0].yourTimeFormatted).toBe("12:00 PM"); // 12:00 UTC
+
+        // Search by teacher name
+        schedule = await SchedulingRepository.getDailySchedule(
+          date,
+          { search: "Unrelated", viewerTimezone: "Africa/Cairo" },
+          tx
+        );
+        expect(schedule.length).toBe(1);
+        expect(schedule[0].yourTimeFormatted).toBe("03:00 PM"); // 15:00 UTC+3
+
+        // No match
+        schedule = await SchedulingRepository.getDailySchedule(date, { search: "NoMatchHere" }, tx);
+        expect(schedule.length).toBe(0);
+      });
     });
   });
 });

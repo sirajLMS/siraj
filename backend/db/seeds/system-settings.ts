@@ -2,49 +2,32 @@ import { db } from "@/backend/db/drizzleDb";
 import { systemSettings } from "@/backend/db/schema";
 import logger from "@/backend/lib/logger";
 
+const createSetting = (
+  key: string,
+  value: string,
+  description: string,
+  category: "security" | "system" | "scheduling",
+  dataType: "integer" | "string" = "integer"
+) => ({
+  key,
+  value,
+  dataType,
+  description,
+  category,
+});
+
 const SYSTEM_SETTINGS_DATA = [
-  {
-    key: "auth_max_attempts",
-    value: "5",
-    dataType: "integer",
-    description: "Maximum failed login attempts before lockout",
-    category: "security",
-  },
-  {
-    key: "auth_lockout_minutes",
-    value: "15",
-    dataType: "integer",
-    description: "Duration of account lockout in minutes",
-    category: "security",
-  },
-  {
-    key: "password_reset_expiry_hours",
-    value: "24",
-    dataType: "integer",
-    description: "Expiration time for password reset tokens in hours",
-    category: "security",
-  },
-  {
-    key: "cache_default_ttl_seconds",
-    value: "3600",
-    dataType: "integer",
-    description: "Default TTL for cache entries in seconds",
-    category: "system",
-  },
-  {
-    key: "session_activation_window_before_minutes",
-    value: "5",
-    dataType: "integer",
-    description: "Minutes before scheduled start time that a session can be activated",
-    category: "scheduling",
-  },
-  {
-    key: "default_timezone",
-    value: "UTC",
-    dataType: "string",
-    description: "Default fallback timezone for the system",
-    category: "scheduling",
-  },
+  createSetting("auth_max_attempts", "5", "Maximum failed login attempts before lockout", "security"),
+  createSetting("auth_lockout_minutes", "15", "Duration of account lockout in minutes", "security"),
+  createSetting("password_reset_expiry_hours", "24", "Expiration time for password reset tokens in hours", "security"),
+  createSetting("cache_default_ttl_seconds", "3600", "Default TTL for cache entries in seconds", "system"),
+  createSetting(
+    "session_activation_window_before_minutes",
+    "5",
+    "Minutes before scheduled start time that a session can be activated",
+    "scheduling"
+  ),
+  createSetting("default_timezone", "UTC", "Default fallback timezone for the system", "scheduling", "string"),
 ] as const;
 
 export async function seedOrGet() {

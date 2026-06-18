@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto";
-import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
-import { parents, students, teachers, users } from "../schema";
+import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
+import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
 import type { DbTransaction } from "./test-utils";
 
-export async function createTestUser(tx: DbTransaction, overrides: Partial<typeof users.$inferInsert> = {}) {
+export async function createTestUser(
+  tx: DbTransaction,
+  overrides: Partial<typeof users.$inferInsert> = {}
+): Promise<UserEntity> {
   const now = new Date();
   const [user] = (await tx
     .insert(users)
@@ -23,7 +26,7 @@ export async function createTestTeacher(
   tx: DbTransaction,
   userId: string,
   overrides: Partial<typeof teachers.$inferInsert> = {}
-) {
+): Promise<TeacherEntity> {
   const now = new Date();
   const [teacher] = (await tx
     .insert(teachers)
@@ -43,7 +46,7 @@ export async function createTestParent(
   tx: DbTransaction,
   userId: string,
   overrides: Partial<typeof parents.$inferInsert> = {}
-) {
+): Promise<ParentEntity> {
   const now = new Date();
   const [parent] = (await tx
     .insert(parents)
@@ -62,7 +65,7 @@ export async function createTestStudent(
   tx: DbTransaction,
   parentId: string,
   overrides: Partial<typeof students.$inferInsert> = {}
-) {
+): Promise<StudentEntity> {
   const now = new Date();
   const [student] = (await tx
     .insert(students)
@@ -83,7 +86,7 @@ export async function setupTeacher(
   tx: DbTransaction,
   userOverrides: Partial<typeof users.$inferInsert> = {},
   teacherOverrides: Partial<typeof teachers.$inferInsert> = {}
-) {
+): Promise<{ user: UserEntity; teacher: TeacherEntity }> {
   const user = await createTestUser(tx, userOverrides);
   const teacher = await createTestTeacher(tx, user.id, teacherOverrides);
   return { user, teacher };
@@ -94,9 +97,89 @@ export async function setupStudent(
   userOverrides: Partial<typeof users.$inferInsert> = {},
   parentOverrides: Partial<typeof parents.$inferInsert> = {},
   studentOverrides: Partial<typeof students.$inferInsert> = {}
-) {
+): Promise<{ user: UserEntity; parent: ParentEntity; student: StudentEntity }> {
   const user = await createTestUser(tx, userOverrides);
   const parent = await createTestParent(tx, user.id, parentOverrides);
   const student = await createTestStudent(tx, parent.id, studentOverrides);
   return { user, parent, student };
+}
+
+export async function createMockClassInstance(
+  tx: DbTransaction,
+  studentId: string,
+  teacherId: string,
+  overrides: Partial<typeof classInstances.$inferInsert> = {}
+): Promise<ClassInstanceEntity> {
+  const now = new Date();
+  const [instance] = await tx
+    .insert(classInstances)
+    .values({
+      studentId,
+      teacherId,
+      scheduledStartAt: new Date(now.getTime() + 1000 * 60 * 60),
+      scheduledEndAt: new Date(now.getTime() + 1000 * 60 * 120),
+      durationMinutes: 60,
+      classType: "REGULAR",
+      idempotencyKey: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+      ...overrides,
+    })
+    .returning();
+
+  if (!instance) {
+    throw new Error("Failed to create mock class instance");
+  }
+
+  return instance;
+}
+
+export async function setupTestEntities(
+  tx: DbTransaction,
+  prefix: string,
+  options: { skipInstance?: boolean; classesRemaining?: number } = {}
+): Promise<{
+  parentUser: UserEntity;
+  parent: ParentEntity;
+  student: StudentEntity;
+  teacherUser: UserEntity;
+  teacher: TeacherEntity;
+  assignment: typeof teacherAssignments.$inferSelect;
+  instance: ClassInstanceEntity | null;
+  now: Date;
+}> {
+  const now = new Date();
+
+  const {
+    user: parentUser,
+    parent,
+    student,
+  } = await setupStudent(
+    tx,
+    { name: `${prefix} ParentUser`, email: `${prefix}-parent-${randomUUID()}@example.com` },
+    {},
+    {
+      name: `${prefix} Student`,
+      classesRemaining: options.classesRemaining ?? 10,
+      classesTotal: options.classesRemaining ?? 10,
+    }
+  );
+
+  const { user: teacherUser, teacher } = await setupTeacher(tx, {
+    name: `${prefix} TeacherUser`,
+    email: `${prefix}-teacher-${randomUUID()}@example.com`,
+  });
+
+  const [assignment] = await tx
+    .insert(teacherAssignments)
+    .values({
+      studentId: student.id,
+      teacherId: teacher.id,
+      assignedAt: now,
+    })
+    .returning();
+
+  const instance = options.skipInstance ? null : await createMockClassInstance(tx, student.id, teacher.id);
+
+  return { parentUser, parent, student, teacherUser, teacher, assignment, instance, now };
 }

@@ -14,7 +14,7 @@ export namespace ScheduleService {
         throw new Error(t("unauthorizedViewMetrics"));
       }
 
-      const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacherId, undefined, locale);
+      const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacherId);
 
       // Inject ID for Apollo Cache
       return {
@@ -36,7 +36,7 @@ export namespace ScheduleService {
         throw new Error(t("unauthorizedViewList"));
       }
 
-      const list = await SchedulingRepository.getDailySchedule(targetDate, teacherId, undefined, locale);
+      const list = await SchedulingRepository.getDailySchedule(targetDate, teacherId);
 
       // We will map it to the GraphQL object shape in the Pothos definitions
       return list;

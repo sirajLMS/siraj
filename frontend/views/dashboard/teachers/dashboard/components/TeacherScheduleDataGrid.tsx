@@ -4,11 +4,10 @@ import { MoreVertOutlined, VideocamOffOutlined, VideocamOutlined } from "@mui/ic
 import { IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid } from "@/frontend/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/stores/mockTeacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
-import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
-import { SessionActivateButton } from "./SessionActivateButton";
+import { TeacherScheduleStatusContent } from "./TeacherScheduleStatusContent";
 import { TeacherScheduleStudentCell } from "./TeacherScheduleStudentCell";
 
 interface TeacherScheduleDataGridProps {
@@ -30,27 +29,7 @@ function renderStatusCell(
   canActivate: boolean,
   onActivate?: (id: string) => void
 ) {
-  if (canActivate && (row.status === "pending" || row.status === "connecting")) {
-    return (
-      <SessionActivateButton
-        disabled={!row.activateEnabled}
-        isConnecting={row.status === "connecting"}
-        activateLabel={labels.actions.activate}
-        connectingLabel={labels.actions.connecting}
-        onActivate={() => onActivate?.(row.id)}
-      />
-    );
-  }
-
-  const badge = resolveTeacherStatusBadge(row.status);
-  return (
-    <StatusBadge
-      category={badge.category}
-      status={badge.status}
-      label={getStatusLabel(row.status, labels.status)}
-      size="small"
-    />
-  );
+  return <TeacherScheduleStatusContent row={row} labels={labels} canActivate={canActivate} onActivate={onActivate} />;
 }
 
 export function TeacherScheduleDataGrid({

@@ -45,83 +45,124 @@ const LIST_DELETE_ACTIONS = (pluralLabel: string): [string, string][] => [
   ["delete", `Delete ${pluralLabel}`],
 ];
 
-export const PERMISSION_CATALOG: PermissionSeed[] = [
-  ...createPermissions("Authentication", "auth", [
-    ["login", "Login to system"],
-    ["view_own_profile", "View own profile"],
-  ]),
+interface PermissionGroupData {
+  category: string;
+  resource: string;
+  items: [string, string][];
+}
 
-  ...createPermissions("Dashboard", "dashboard", [
-    ["view", "View dashboard"],
-    ["view_metrics", "View dashboard metrics"],
-    ["filter_metrics", "Filter dashboard metrics"],
-    ["metrics.view_all", "View all dashboard metrics"],
-  ]),
-
-  ...createPermissions("Scheduling", "schedule", [
-    ["view_list", "View daily schedule list"],
-    ["filter_advanced", "Advanced filtering of schedule"],
-    ["view_all", "View all schedules"],
-    ["view_assigned", "View assigned teacher schedule"],
-    ["view_family", "View family student schedule"],
-    ["search_availability", "Search teacher availability"],
-    ["manage_recurring", "Manage recurring schedules"],
-    ["dst_migrate", "Run DST migration"],
-  ]),
-
-  ...createPermissions("Scheduling", "session", [
-    ["view_details", "View class details"],
-    ["activate_class", "Activate a class within time window"],
-    ["force_activate", "Force activate a class"],
-    ["start", "Start a class session"],
-    ["mark_absent", "Mark student as absent"],
-    ["request_leave", "Request class leave"],
-    ["admin_leave", "Admin excused leave on a class"],
-    ["reschedule", "Reschedule a class"],
-    ["revert", "Revert class to pending state"],
-  ]),
-
-  ...createPermissions("Teachers", "teachers", [
-    ...ACCOUNT_ACTIONS("teacher"),
-    ["manage_schedule", "Manage teacher schedules"],
-  ]),
-
-  ...createPermissions("Parents", "parents", ACCOUNT_ACTIONS("parent")),
-
-  ...createPermissions("Students", "students", [
-    ["list", "List students"],
-    ["edit", "Edit student profiles"],
-    ["change_teacher", "Reassign student teacher"],
-    ["change_status", "Change student status"],
-    ["override_quota", "Override student class quota"],
-  ]),
-
-  ...createPermissions("Billing", "invoices", [
-    ...LIST_DELETE_ACTIONS("invoices"),
-    ["create", "Create invoices"],
-    ["mark_paid", "Mark invoice as paid"],
-    ["edit", "Edit invoices"],
-  ]),
-
-  ...createPermissions("Resources", "resources", [
-    ...LIST_DELETE_ACTIONS("learning resources"),
-    ["upload", "Upload learning resources"],
-  ]),
-
-  ...createPermissions("Reports", "reports", [["generate", "Generate reports"]]),
-
-  ...createPermissions("Communications", "complaints", [
-    ...LIST_DELETE_ACTIONS("complaints"),
-    ["respond", "Respond to complaints"],
-  ]),
-
-  ...createPermissions("Administration", "staff", ACCOUNT_ACTIONS("staff", "accounts", "staff accounts")),
-
-  ...createPermissions("Administration", "permission_groups", [
-    ["manage", "Manage permission groups"],
-    ["assign", "Assign permission groups to users"],
-  ]),
+const GROUPS: PermissionGroupData[] = [
+  {
+    category: "Authentication",
+    resource: "auth",
+    items: [
+      ["login", "Login to system"],
+      ["view_own_profile", "View own profile"],
+    ],
+  },
+  {
+    category: "Dashboard",
+    resource: "dashboard",
+    items: [
+      ["view", "View dashboard"],
+      ["view_metrics", "View dashboard metrics"],
+      ["filter_metrics", "Filter dashboard metrics"],
+      ["metrics.view_all", "View all dashboard metrics"],
+    ],
+  },
+  {
+    category: "Scheduling",
+    resource: "schedule",
+    items: [
+      ["view_list", "View daily schedule list"],
+      ["filter_advanced", "Advanced filtering of schedule"],
+      ["view_all", "View all schedules"],
+      ["view_assigned", "View assigned teacher schedule"],
+      ["view_family", "View family student schedule"],
+      ["search_availability", "Search teacher availability"],
+      ["manage_recurring", "Manage recurring schedules"],
+      ["dst_migrate", "Run DST migration"],
+    ],
+  },
+  {
+    category: "Scheduling",
+    resource: "session",
+    items: [
+      ["view_details", "View class details"],
+      ["activate_class", "Activate a class within time window"],
+      ["force_activate", "Force activate a class"],
+      ["start", "Start a class session"],
+      ["mark_absent", "Mark student as absent"],
+      ["request_leave", "Request class leave"],
+      ["admin_leave", "Admin excused leave on a class"],
+      ["reschedule", "Reschedule a class"],
+      ["revert", "Revert class to pending state"],
+    ],
+  },
+  {
+    category: "Teachers",
+    resource: "teachers",
+    items: [...ACCOUNT_ACTIONS("teacher"), ["manage_schedule", "Manage teacher schedules"]],
+  },
+  {
+    category: "Parents",
+    resource: "parents",
+    items: ACCOUNT_ACTIONS("parent"),
+  },
+  {
+    category: "Students",
+    resource: "students",
+    items: [
+      ["list", "List students"],
+      ["edit", "Edit student profiles"],
+      ["change_teacher", "Reassign student teacher"],
+      ["change_status", "Change student status"],
+      ["override_quota", "Override student class quota"],
+    ],
+  },
+  {
+    category: "Billing",
+    resource: "invoices",
+    items: [
+      ...LIST_DELETE_ACTIONS("invoices"),
+      ["create", "Create invoices"],
+      ["mark_paid", "Mark invoice as paid"],
+      ["edit", "Edit invoices"],
+    ],
+  },
+  {
+    category: "Resources",
+    resource: "resources",
+    items: [...LIST_DELETE_ACTIONS("learning resources"), ["upload", "Upload learning resources"]],
+  },
+  {
+    category: "Reports",
+    resource: "reports",
+    items: [["generate", "Generate reports"]],
+  },
+  {
+    category: "Communications",
+    resource: "complaints",
+    items: [...LIST_DELETE_ACTIONS("complaints"), ["respond", "Respond to complaints"]],
+  },
+  {
+    category: "Administration",
+    resource: "staff",
+    items: ACCOUNT_ACTIONS("staff", "accounts", "staff accounts"),
+  },
+  {
+    category: "Administration",
+    resource: "permission_groups",
+    items: [
+      ["manage", "Manage permission groups"],
+      ["assign", "Assign permission groups to users"],
+    ],
+  },
 ];
+
+export const PERMISSION_CATALOG: PermissionSeed[] = GROUPS.flatMap(group =>
+  createPermissions(group.category, group.resource, group.items)
+);
 
 const COMMON_DASHBOARD_PERMISSIONS = [AppPermission.DASHBOARD_VIEW] as const;
 const COMMON_CLASS_PERMISSIONS = [AppPermission.SESSION_VIEW_DETAILS] as const;

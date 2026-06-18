@@ -1,8 +1,17 @@
 import { and, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
+import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
-import { classInstances, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
+import {
+  classInstances,
+  classStatusEvents,
+  parents,
+  students,
+  teacherAssignments,
+  teachers,
+  users,
+} from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
@@ -18,6 +27,165 @@ export namespace SchedulingRepository {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('booking_teacher_' || ${teacherId}::text))`);
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('booking_student_' || ${studentId}::text))`);
   }
+
+  async function getClassInstanceByIdOrThrow(
+    t: DBTransaction,
+    id: string,
+    locale?: string
+  ): Promise<Types.ClassInstanceEntity> {
+    const results = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
+    if (results.length === 0) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("classInstanceNotFound", { id }));
+    }
+    return results[0];
+  }
+
+  export async function resolveStudentTimezone(studentId: string, tx?: DBTransaction): Promise<string> {
+    const queryDb = tx ?? db;
+    const [row] = await queryDb
+      .select({
+        override: students.timezoneOverride,
+        parentTimezone: parents.timezone,
+      })
+      .from(students)
+      .innerJoin(parents, eq(students.parentId, parents.id))
+      .where(eq(students.id, studentId))
+      .limit(1);
+
+    return (
+      row?.override ??
+      row?.parentTimezone ??
+      (await SystemSettingsRepository.getStringValue("default_timezone", "UTC", tx))
+    );
+  }
+
+  export const activateClassInstance = async (
+    id: string,
+    actorUserId: string,
+    options: { force: boolean },
+    tx?: DBTransaction
+  ) => {
+    const runner = async (t: DBTransaction) => {
+      const now = new Date();
+      const [updated] = await t
+        .update(classInstances)
+        .set({
+          executionState: "ACTIVATED",
+          activatedAt: now,
+          activatedByUserId: actorUserId,
+          forceActivated: options.force,
+          forceActivatedByUserId: options.force ? actorUserId : null,
+          updatedAt: now,
+        })
+        .where(eq(classInstances.id, id))
+        .returning();
+
+      if (updated) {
+        await t.insert(classStatusEvents).values({
+          classInstanceId: updated.id,
+          eventType: "STATE_CHANGE",
+          fromState: { executionState: "NOT_ACTIVATED", outcome: updated.outcome },
+          toState: { executionState: "ACTIVATED", outcome: updated.outcome },
+          description: options.force ? "Force activated" : "Activated",
+          actorUserId,
+          createdAt: now,
+        });
+      }
+      return updated;
+    };
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  };
+
+  export const stopClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction) => {
+    const runner = async (t: DBTransaction) => {
+      const now = new Date();
+      const [updated] = await t
+        .update(classInstances)
+        .set({
+          executionState: "COMPLETED",
+          outcome: "TAKEN",
+          actualEndAt: now,
+          updatedAt: now,
+        })
+        .where(eq(classInstances.id, id))
+        .returning();
+
+      if (updated) {
+        await t.insert(classStatusEvents).values({
+          classInstanceId: updated.id,
+          eventType: "STATE_CHANGE",
+          fromState: { executionState: "RUNNING", outcome: "PENDING" },
+          toState: { executionState: "COMPLETED", outcome: "TAKEN" },
+          description: "Stopped manually",
+          actorUserId,
+          createdAt: now,
+        });
+      }
+      return updated;
+    };
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  };
+
+  export const softDeleteClassInstance = async (id: string, actorUserId: string, tx?: DBTransaction) => {
+    const runner = async (t: DBTransaction) => {
+      const now = new Date();
+
+      const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
+      if (!existing) return null;
+
+      const [updated] = await t
+        .update(classInstances)
+        .set({
+          deletedAt: now,
+          updatedAt: now,
+        })
+        .where(eq(classInstances.id, id))
+        .returning();
+
+      if (updated) {
+        await t.insert(classStatusEvents).values({
+          classInstanceId: updated.id,
+          eventType: "STATE_CHANGE",
+          fromState: { executionState: existing.executionState, outcome: existing.outcome, deleted: false },
+          toState: { executionState: existing.executionState, outcome: existing.outcome, deleted: true },
+          description: "Soft deleted",
+          actorUserId,
+          createdAt: now,
+        });
+
+        await adjustQuotaOnUpdate(t, existing, { deletedAt: now }, true);
+      }
+      return updated;
+    };
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  };
+
+  export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
+    const queryDb = tx ?? db;
+    const [row] = await queryDb.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
+
+    if (!row) return null;
+
+    const studentIds = [row.studentId];
+    const teacherIds = [row.teacherId];
+
+    const studentsData = await queryDb.select().from(students).where(inArray(students.id, studentIds));
+    const teachersData = await queryDb
+      .select({ teacher: teachers, user: users })
+      .from(teachers)
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .where(inArray(teachers.id, teacherIds));
+
+    const studentMap = new Map(studentsData.map(s => [s.id, s]));
+    const teacherMap = new Map(teachersData.map(tc => [tc.teacher.id, { ...tc.teacher, user: tc.user }]));
+
+    return {
+      ...row,
+      student: studentMap.get(row.studentId),
+      teacher: teacherMap.get(row.teacherId),
+    };
+  };
 
   /**
    * Validates if a teacher is officially assigned to a student for a given time.
@@ -216,12 +384,7 @@ export namespace SchedulingRepository {
     locale?: string
   ): Promise<Types.ClassInstanceEntity> => {
     const runner = async (t: DBTransaction) => {
-      const results = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
-      if (results.length === 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("classInstanceNotFound", { id }));
-      }
-      const existing = results[0];
+      const existing = await getClassInstanceByIdOrThrow(t, id, locale);
 
       const studentId = input.studentId ?? existing.studentId;
       const teacherId = input.teacherId ?? existing.teacherId;
@@ -272,12 +435,7 @@ export namespace SchedulingRepository {
     locale?: string
   ): Promise<Types.ClassInstanceEntity> => {
     const runner = async (t: DBTransaction) => {
-      const results = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
-      if (results.length === 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("classInstanceNotFound", { id }));
-      }
-      const existing = results[0];
+      const existing = await getClassInstanceByIdOrThrow(t, id, locale);
 
       if (existing.quotaDeducted && existing.deletedAt === null) {
         await t
@@ -411,7 +569,7 @@ export namespace SchedulingRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const getDailyMetrics = async (date: Date, teacherId?: string, tx?: DBTransaction, _locale?: string) => {
+  export const getDailyMetrics = async (date: Date, teacherId?: string, tx?: DBTransaction) => {
     const runner = async (t: DBTransaction) => {
       const baseConditions = and(
         isNull(classInstances.deletedAt),
@@ -470,8 +628,22 @@ export namespace SchedulingRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const getDailySchedule = async (date: Date, teacherId?: string, tx?: DBTransaction, _locale?: string) => {
-    const runner = async (t: DBTransaction) => {
+  export type DailyScheduleResult = Types.ClassInstanceEntity & {
+    student?: Types.StudentEntity;
+    teacher?: Types.TeacherEntity & { user: Types.UserEntity };
+    yourTimeFormatted?: string;
+  };
+
+  export const getDailySchedule = async (
+    date: Date,
+    options?: string | { teacherId?: string; search?: string; viewerTimezone?: string },
+    tx?: DBTransaction
+  ): Promise<DailyScheduleResult[]> => {
+    const runner = async (t: DBTransaction): Promise<DailyScheduleResult[]> => {
+      const teacherId = typeof options === "string" ? options : options?.teacherId;
+      const search = typeof options === "object" ? options?.search : undefined;
+      const viewerTimezone = typeof options === "object" ? options?.viewerTimezone : undefined;
+
       const baseConditions = and(
         isNull(classInstances.deletedAt),
         sql`DATE(${classInstances.scheduledStartAt}) = DATE(${date.toISOString()})`,
@@ -504,11 +676,32 @@ export namespace SchedulingRepository {
       const studentMap = new Map(studentsData.map(s => [s.id, s]));
       const teacherMap = new Map(teachersData.map(tc => [tc.teacher.id, { ...tc.teacher, user: tc.user }]));
 
-      return rows.map(r => ({
+      let results: DailyScheduleResult[] = rows.map(r => ({
         ...r.classInstance,
         student: studentMap.get(r.classInstance.studentId),
         teacher: teacherMap.get(r.classInstance.teacherId),
       }));
+
+      // Apply search if provided
+      if (search) {
+        const lowerSearch = search.toLowerCase();
+        results = results.filter(
+          r =>
+            r.student?.name?.toLowerCase().includes(lowerSearch) ||
+            r.teacher?.user?.name?.toLowerCase().includes(lowerSearch)
+        );
+      }
+
+      // Apply timezone formatting if provided
+      if (viewerTimezone) {
+        const { formatInstantInTimezone } = await import("@/backend/lib/timezone");
+        return results.map(r => ({
+          ...r,
+          yourTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone),
+        }));
+      }
+
+      return results;
     };
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));

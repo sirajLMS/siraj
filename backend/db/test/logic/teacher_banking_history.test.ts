@@ -10,6 +10,27 @@ import { createTestUser, runInRollback } from "../test-utils";
 
 type DBTransaction = NonNullable<Parameters<typeof TeacherBankingRepository.submitBankingDetails>[1]>;
 
+/**
+ * Shared setup for banking tests to reduce duplication
+ */
+async function setupBankingTest(tx: DBTransaction, prefix: string, beneficiaryName = "Original Name") {
+  const { teacher } = await setupTeacher(tx, {
+    name: `${prefix} Teacher`,
+    email: `teacher-${prefix.toLowerCase().replace(/\s+/g, "-")}-${randomUUID()}@example.com`,
+  });
+
+  const banking = await TeacherBankingRepository.submitBankingDetails(
+    {
+      teacherId: teacher.id,
+      beneficiaryName,
+      bankName: "Test Bank",
+    },
+    tx
+  );
+
+  return { teacher, banking };
+}
+
 describe("Teacher Banking Details Versioning & History", () => {
   const expectBankingUpdateToFail = async (
     tx: DBTransaction,
@@ -115,19 +136,7 @@ describe("Teacher Banking Details Versioning & History", () => {
   test("Prevents direct updates to banking fields of active records", async () => {
     testLogger.info("Testing active record banking fields immutability...");
     await runInRollback(async tx => {
-      const { teacher } = await setupTeacher(tx, {
-        name: "Active Bank Teacher",
-        email: `teacher-bank-active-${randomUUID()}@example.com`,
-      });
-
-      const banking = await TeacherBankingRepository.submitBankingDetails(
-        {
-          teacherId: teacher.id,
-          beneficiaryName: "Original Name",
-          bankName: "First Bank",
-        },
-        tx
-      );
+      const { banking } = await setupBankingTest(tx, "Active Bank", "Original Name");
 
       await expectBankingUpdateToFail(
         tx,
@@ -142,19 +151,7 @@ describe("Teacher Banking Details Versioning & History", () => {
   test("Allows updating non-banking fields without creating a new historical version", async () => {
     testLogger.info("Testing non-banking fields updates...");
     await runInRollback(async tx => {
-      const { teacher } = await setupTeacher(tx, {
-        name: "Bank Teacher Noop",
-        email: `teacher-bank-noop-${randomUUID()}@example.com`,
-      });
-
-      const banking = await TeacherBankingRepository.submitBankingDetails(
-        {
-          teacherId: teacher.id,
-          beneficiaryName: "Constant Name",
-          bankName: "Constant Bank",
-        },
-        tx
-      );
+      const { teacher, banking } = await setupBankingTest(tx, "Bank Noop", "Constant Name");
 
       await TeacherBankingRepository.updateNonBankingFields(banking.id, { updatedAt: new Date() }, tx);
 
