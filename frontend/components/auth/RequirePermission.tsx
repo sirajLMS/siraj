@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import logger from "@/frontend/lib/logger";
 import { useUserStore } from "@/frontend/stores/userStore";
 
 export interface RequirePermissionProps {
@@ -35,6 +36,7 @@ export function RequirePermission({ children, permissions, fallback = null }: Re
     : hasPermission(permissions as AppPermission);
 
   if (!isAuthorized) {
+    logger.info({ caller: "RequirePermissionProps" }, `Not authorized, access denied to ${permissions}`);
     return <>{fallback}</>;
   }
 

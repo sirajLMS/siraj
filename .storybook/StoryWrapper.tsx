@@ -9,9 +9,13 @@ import { useEffect, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/context/ThemeContext";
+import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createAppTheme } from "@/frontend/providers/theme/theme";
+import { MOCK_ADMIN_USER, userInfoToUser } from "@/frontend/stores/mockUserStore";
+import { useUserStore } from "@/frontend/stores/userStore";
 import ar from "@/shared/messages/ar";
 import en from "@/shared/messages/en";
+import type { MessageSchema } from "@/shared/messages/types/message";
 
 // Create Emotion caches for Storybook
 const cacheLtr = createCache({
@@ -29,7 +33,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
   const locale = (context.globals.locale as string | undefined) ?? "ar";
   const themeMode = (context.globals.theme as PaletteMode | undefined) ?? "dark";
   const direction: "rtl" | "ltr" = locale === "ar" ? "rtl" : "ltr";
-  const messages = locale === "ar" ? ar : en;
+  const messages: MessageSchema = locale === "ar" ? ar : en;
 
   // Build the theme object directly to avoid Next.js-specific provider issues
   const theme = useMemo(() => createAppTheme(themeMode, direction, locale), [themeMode, direction, locale]);
@@ -43,6 +47,19 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
     document.documentElement.lang = locale;
     document.documentElement.dataset.theme = themeMode;
   }, [direction, locale, themeMode]);
+
+  // Seed the user store with admin permissions by default for Storybook
+  useEffect(() => {
+    const user = userInfoToUser(MOCK_ADMIN_USER);
+    useUserStore.setState({
+      user,
+      name: user.name || "",
+      role: user.role || "",
+      avatarUrl: user.avatarUrl || "",
+      permissions: (user.permissions as AppPermission[]) || [],
+      notificationCount: user.notificationCount || 0,
+    });
+  }, []);
 
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>

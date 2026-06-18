@@ -1,12 +1,7 @@
 import { create } from "zustand";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type User } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { UserInfo } from "@/frontend/views/dashboard/types/dashboard";
-
-interface UserState extends UserInfo {
-  setUser: (user: UserInfo) => void;
-  user: UserInfo | null;
-  hasPermission: (permission: AppPermission) => boolean;
-}
+import type { UserState } from "./userStore";
 
 export const MOCK_ADMIN_USER: UserInfo = {
   name: "Academy Admin",
@@ -77,19 +72,36 @@ export const MOCK_AUTHENTICATED_USER: UserInfo = {
   notificationCount: 0,
 };
 
+export const userInfoToUser = (info: UserInfo): User => ({
+  ...info,
+  permissions: info.permissions as AppPermission[],
+  id: "mock-id",
+  email: "mock@example.com",
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  emailVerifiedAt: new Date().toISOString(),
+  __typename: "User",
+});
+
 export const useUserStore = create<UserState>((set, get) => {
-  const defaultUser = MOCK_ADMIN_USER;
+  const defaultUserInfo = MOCK_ADMIN_USER;
+  const defaultUser = userInfoToUser(defaultUserInfo);
+
   return {
-    ...defaultUser,
+    ...defaultUserInfo,
     user: defaultUser,
-    setUser: (user: UserInfo) => {
+    setUser: (user: User | null) => {
       set({
-        ...user,
         user,
+        name: user?.name || "",
+        role: user?.role || "",
+        avatarUrl: user?.avatarUrl || "",
+        permissions: (user?.permissions as AppPermission[]) || [],
+        notificationCount: user?.notificationCount || 0,
       });
     },
     hasPermission: (permission: AppPermission) => {
-      const permissions = get().user?.permissions || get().permissions || [];
+      const permissions = (get().user?.permissions as AppPermission[]) || (get().permissions as AppPermission[]) || [];
       return permissions.includes(permission);
     },
   };

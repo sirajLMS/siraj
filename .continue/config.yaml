@@ -1,0 +1,4 @@
+mcpServers:
+  - name: siraj
+    type: http
+    url: http://localhost:6006/mcp
