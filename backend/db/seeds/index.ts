@@ -11,6 +11,8 @@ import type {
   UserEntity,
 } from "@/backend/types";
 import { seedOrGet as seedOrGetClassInstances } from "./seed-class-instances";
+import { seedOrGet as seedOrGetClassPerformance } from "./seed-class-performance";
+import { seedOrGet as seedOrGetClassStatusEvents } from "./seed-class-status-events";
 import { seedOrGet as seedOrGetClasses } from "./seed-classes";
 import { seedOrGet as seedOrGetParents } from "./seed-parents";
 import { seedOrGet as seedOrGetPermissions } from "./seed-permissions";
@@ -79,6 +81,10 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
     logger.log("Seeding system class instances...");
     context.classInstances = await seedOrGetClassInstances(context.classes, context.teachers, context.students);
   }
+
+  logger.log("Seeding class performance and status events...");
+  await seedOrGetClassPerformance(context.classInstances);
+  await seedOrGetClassStatusEvents(context.classInstances, context.teachers);
 
   logger.log("Master seed process completed.");
   return context;

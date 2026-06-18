@@ -60,7 +60,7 @@ export function MockAdminDashboardContainer() {
       todayClassesTitle={t("admin.todayClasses")}
       lastUpdated={translatedLastUpdated}
       metrics={todayClasses}
-      onMetricClick={_key => { }}
+      onMetricClick={_key => {}}
       scheduleTitle={t("admin.scheduleOverview")}
       searchPlaceholder={t("admin.searchPlaceholder")}
       searchValue={filters.searchQuery}

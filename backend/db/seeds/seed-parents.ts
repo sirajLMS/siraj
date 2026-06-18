@@ -18,6 +18,7 @@ export async function seedOrGet(users: UserEntity[]) {
     .values({
       userId: parentUser.id,
       status: "REGULAR",
+      timezone: "Africa/Cairo",
       createdAt: now,
       updatedAt: now,
     })
@@ -25,6 +26,7 @@ export async function seedOrGet(users: UserEntity[]) {
       target: parents.userId,
       set: {
         status: "REGULAR",
+        timezone: "Africa/Cairo",
         updatedAt: now,
       },
     })

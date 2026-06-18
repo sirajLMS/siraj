@@ -27,6 +27,7 @@ export async function seedOrGet(parentsList: ParentEntity[], teachersList: Teach
       classesTotal: 10,
       classesRemaining: 5,
       version: 1,
+      timezoneOverride: null,
       idempotencyKey: "demo_student_1",
       createdAt: now,
       updatedAt: now,
@@ -36,11 +37,38 @@ export async function seedOrGet(parentsList: ParentEntity[], teachersList: Teach
       set: {
         name: "Demo Student",
         status: "REGULAR",
+        timezoneOverride: null,
+        updatedAt: now,
+      },
+    })
+    .returning();
+
+  const [insertedStudent2] = await db
+    .insert(students)
+    .values({
+      parentId: defaultParent.id,
+      primaryTeacherId: defaultTeacher.id,
+      name: "Demo Student London",
+      status: "REGULAR",
+      classesTotal: 10,
+      classesRemaining: 5,
+      version: 1,
+      timezoneOverride: "Europe/London",
+      idempotencyKey: "demo_student_london_1",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: students.idempotencyKey,
+      set: {
+        name: "Demo Student London",
+        status: "REGULAR",
+        timezoneOverride: "Europe/London",
         updatedAt: now,
       },
     })
     .returning();
 
   logger.info("System students seeded.");
-  return [insertedStudent];
+  return [insertedStudent, insertedStudent2];
 }

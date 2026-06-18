@@ -63,9 +63,8 @@ function getAbsolutePath(relativePath: string): string {
  * Stream request body to file while calculating MD5
  */
 async function streamToFile(stream: ReadableStream<Uint8Array>, filePath: string, expectedMd5: string): Promise<void> {
-  // md5 is used for Content-MD5 integrity check as per HTTP standards
-  // eslint-disable-next-line sonarjs/hashing
-  const hash = crypto.createHash("md5");
+  // Use sha256 for integrity check
+  const hash = crypto.createHash("sha256");
   const writeStream = createWriteStream(filePath);
   const reader = stream.getReader();
 
@@ -89,10 +88,10 @@ async function streamToFile(stream: ReadableStream<Uint8Array>, filePath: string
       });
     });
 
-    const actualMd5 = hash.digest("base64");
-    if (actualMd5 !== expectedMd5) {
+    const actualHash = hash.digest("base64");
+    if (actualHash !== expectedMd5) {
       await fs.unlink(filePath).catch(() => {});
-      throw new Error("MD5 hash mismatch");
+      throw new Error("SHA-256 hash mismatch");
     }
   } catch (error) {
     await fs.unlink(filePath).catch(() => {});

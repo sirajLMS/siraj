@@ -46,8 +46,7 @@ async function runCommand(command: string, args: string[]): Promise<{ success: b
   console.log(`\n> Running: ${command} ${args.join(" ")}`);
 
   return new Promise(resolve => {
-    // eslint-disable-next-line sonarjs/os-command
-    const child = spawn(command, args, { shell: true, stdio: ["inherit", "pipe", "pipe"] });
+    const child = spawn(command, args, { shell: false, stdio: ["inherit", "pipe", "pipe"] });
     let output = "";
 
     child.stdout?.on("data", (data: Buffer) => {
