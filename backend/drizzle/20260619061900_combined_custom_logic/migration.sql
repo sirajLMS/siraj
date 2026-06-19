@@ -134,7 +134,16 @@ BEGIN
             RAISE EXCEPTION 'Cannot delete a system permission or group';
         END IF;
         RETURN OLD;
+    ELSIF TG_OP = 'INSERT' THEN
+        IF TG_TABLE_NAME = 'permissions' AND NEW.is_system = true THEN
+            RAISE EXCEPTION 'Cannot create system permissions';
+        END IF;
+        RETURN NEW;
     ELSIF TG_OP = 'UPDATE' THEN
+        IF TG_TABLE_NAME = 'permissions' AND NEW.is_system = true AND (OLD.is_system = false OR OLD.is_system IS NULL) THEN
+            RAISE EXCEPTION 'Cannot change is_system to true';
+        END IF;
+
         IF OLD.is_system = true THEN
             IF NEW.is_system = false THEN
                 RAISE EXCEPTION 'Cannot change is_system from true to false for system permissions or groups';
@@ -161,7 +170,7 @@ $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS trg_protect_system_permissions ON permissions;
 CREATE TRIGGER trg_protect_system_permissions
-BEFORE UPDATE OR DELETE ON permissions
+BEFORE INSERT OR UPDATE OR DELETE ON permissions
 FOR EACH ROW EXECUTE FUNCTION protect_system_permissions();
 
 DROP TRIGGER IF EXISTS trg_protect_system_permission_groups ON permission_groups;

@@ -61,4 +61,8 @@ export interface ErrorsLabels {
   readonly permissionGroupNotFound: string;
   readonly cannotModifySystemPermissionGroup: string;
   readonly cannotDeleteSystemPermissionGroup: string;
+  readonly permissionGroupNameRequired: string;
+  readonly permissionGroupNameTooLong: string;
+  readonly permissionGroupInvalidName: string;
+  readonly cannotModifySuperAdmin: string;
 }

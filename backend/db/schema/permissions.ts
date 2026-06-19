@@ -2,6 +2,12 @@ import { boolean, index, pgTable, primaryKey, text, timestamp, uuid, varchar } f
 import { appPermissionEnum } from "./enums";
 import { users } from "./users";
 
+/**
+ * System and custom permissions.
+ * NOTE: The isSystem field defaults to false. The database enforces a trigger constraint
+ * (trg_protect_system_permissions) preventing the creation of any new system permissions (is_system = true)
+ * or converting an existing custom permission to a system permission. System permissions are immutable.
+ */
 export const permissions = pgTable(
   "permissions",
   {
@@ -11,7 +17,7 @@ export const permissions = pgTable(
     action: varchar("action", { length: 100 }).notNull(),
     description: text("description").notNull(),
     category: varchar("category", { length: 100 }).notNull(),
-    isSystem: boolean("is_system").notNull().default(true),
+    isSystem: boolean("is_system").notNull().default(false),
   },
   table => [index("permissions_key_idx").on(table.key)]
 );

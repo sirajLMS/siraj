@@ -4,6 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo/permission-management.repository";
 import { permissionGroups, permissions, users } from "@/backend/db/schema";
 import type { UserEntity } from "@/backend/types";
+import { AppPermission } from "@/shared/lib/enum";
 import { getErrorMessage } from "@/shared/utils/error";
 import { createTestUser, type DbTransaction, runInRollback } from "../test-utils";
 
@@ -42,6 +43,24 @@ const badTx = {
 
 describe("PermissionManagementRepository", () => {
   describe("Group Management", () => {
+    testRepo("listAllPermissions should return all permissions ordered by category, resource, action", async tx => {
+      const perms = await PermissionManagementRepository.listAllPermissions(tx);
+      expect(perms).toBeDefined();
+      expect(Array.isArray(perms)).toBe(true);
+      if (perms.length > 0) {
+        const first = perms[0];
+        expect(first.id).toBeDefined();
+        expect(first.key).toBeDefined();
+        expect(first.resource).toBeDefined();
+        expect(first.action).toBeDefined();
+        expect(first.category).toBeDefined();
+      }
+    });
+
+    testRepoError("listAllPermissions should throw on database error", () =>
+      PermissionManagementRepository.listAllPermissions(badTx)
+    );
+
     testRepo("listAllGroups should return all groups with permissionIds", async tx => {
       const groups = await PermissionManagementRepository.listAllGroups(tx);
       expect(groups).toBeDefined();
@@ -153,7 +172,7 @@ describe("PermissionManagementRepository", () => {
     });
 
     testRepo("updateGroup should throw on non-existent group or system group", async tx => {
-      const tFunc = await getErrorMessage;
+      const tFunc = getErrorMessage;
       // Non-existent group
       let errorThrown: unknown = null;
       try {
@@ -441,6 +460,52 @@ describe("PermissionManagementRepository", () => {
 
       // Clean up temp user
       await db.delete(users).where(eq(users.id, userId));
+    });
+  });
+
+  describe("System Permission Constraints (Trigger)", () => {
+    testRepo("Should prevent creating a new system permission", async tx => {
+      let insertErr: unknown = null;
+      try {
+        await tx.insert(permissions).values({
+          key: AppPermission.TEST_SYSTEM_ONLY,
+          resource: "custom",
+          action: "test_system_permission",
+          description: "Test description",
+          category: "Custom",
+          isSystem: true,
+        });
+      } catch (e) {
+        insertErr = e;
+      }
+      expect(insertErr).not.toBeNull();
+      expect(getErrorMessage(insertErr)).toContain("Cannot create system permissions");
+    });
+
+    testRepo("Should prevent modifying custom permission to system permission", async tx => {
+      const [customPerm] = await tx
+        .insert(permissions)
+        .values({
+          key: AppPermission.TEST_CUSTOM_ONLY,
+          resource: "custom",
+          action: "test_custom_permission",
+          description: "Test description",
+          category: "Custom",
+          isSystem: false,
+        })
+        .returning();
+
+      let updateErr: unknown = null;
+      try {
+        await tx
+          .update(permissions)
+          .set({ isSystem: true })
+          .where(eq(permissions.id, customPerm.id));
+      } catch (e) {
+        updateErr = e;
+      }
+      expect(updateErr).not.toBeNull();
+      expect(getErrorMessage(updateErr)).toContain("Cannot change is_system to true");
     });
   });
 });

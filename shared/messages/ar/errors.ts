@@ -65,4 +65,8 @@ export const errors: ErrorsLabels = {
   cannotModifySystemPermissionGroup:
     "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام؛ يمكن فقط تحديث الاسم والوصف",
   cannotDeleteSystemPermissionGroup: "لا يمكن حذف صلاحية أو مجموعة تابعة للنظام",
+  permissionGroupNameRequired: "اسم مجموعة الصلاحيات مطلوب",
+  permissionGroupNameTooLong: "لا يمكن أن يتجاوز اسم مجموعة الصلاحيات 255 حرفاً",
+  permissionGroupInvalidName: "اسم مجموعة الصلاحيات يحتوي على أحرف غير صالحة",
+  cannotModifySuperAdmin: "لا يمكن تعديل صلاحيات مستخدم SuperAdmin",
 };

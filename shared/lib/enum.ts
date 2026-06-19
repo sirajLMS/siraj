@@ -456,6 +456,8 @@ export enum AppPermission {
   STAFF_EDIT = "staff.edit",
   PERMISSION_GROUPS_MANAGE = "permission_groups.manage",
   PERMISSION_GROUPS_ASSIGN = "permission_groups.assign",
+  TEST_SYSTEM_ONLY = "test.system_only",
+  TEST_CUSTOM_ONLY = "test.custom_only",
 }
 
 export enum SystemPermissionGroupSlug {

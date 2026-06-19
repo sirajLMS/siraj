@@ -3,6 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import {
   groupPermissions,
   permissionGroups,
+  permissions,
   userPermissionGroups,
   userPermissionOverrides,
   users,
@@ -13,6 +14,7 @@ import type {
   CreateGroupInput,
   GroupUserEntity,
   GroupWithPermissionIds,
+  PermissionEntity,
   UpdateGroupInput,
   UserOverrideEntity,
   UserOverrideInput,
@@ -22,6 +24,25 @@ type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export namespace PermissionManagementRepository {
   type QueryContext = DbTransaction | typeof db;
+
+  /**
+   * List all permission catalog entries.
+   * NOTE: The is_system field for permissions is protected by a database trigger (trg_protect_system_permissions).
+   * Creating any new permission with is_system = true or updating an existing custom permission
+   * to be a system permission is strictly prohibited by the database schema.
+   */
+  export async function listAllPermissions(tx?: QueryContext): Promise<PermissionEntity[]> {
+    try {
+      const client = tx ?? db;
+      return await client
+        .select()
+        .from(permissions)
+        .orderBy(permissions.category, permissions.resource, permissions.action);
+    } catch (error) {
+      logger.error("Error listing all permissions:", error);
+      throw error;
+    }
+  }
 
   /**
    * Returns left-joined aggregation of groups and their permissionIds.
@@ -160,7 +181,7 @@ export namespace PermissionManagementRepository {
         .set({
           name: input.name ?? existing.name,
           slug: input.slug ?? existing.slug,
-          description: input.description !== undefined ? input.description : existing.description,
+          description: input.description === undefined ? existing.description : input.description,
           isSystem: input.isSystem ?? existing.isSystem,
           updatedAt: now,
         })

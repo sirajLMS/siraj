@@ -90,6 +90,10 @@ const en: MessageSchema = {
     cannotModifySystemPermissionGroup:
       "Cannot modify core properties of system permission groups; only name and description can be updated",
     cannotDeleteSystemPermissionGroup: "Cannot delete a system permission or group",
+    permissionGroupNameRequired: "Permission group name is required",
+    permissionGroupNameTooLong: "Permission group name cannot exceed 255 characters",
+    permissionGroupInvalidName: "Permission group name contains invalid characters",
+    cannotModifySuperAdmin: "Cannot modify permissions of a SuperAdmin user",
   },
   auth: {
     login: {
