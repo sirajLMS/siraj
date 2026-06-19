@@ -32,6 +32,23 @@ type Documents = {
     "\n  mutation stopClass($classInstanceId: ID!) {\n    stopClass(classInstanceId: $classInstanceId) {\n      id\n      status\n      durationMinutes\n      remarks\n    }\n  }\n": typeof types.StopClassDocument,
     "\n  mutation rescheduleClass($classInstanceId: ID!, $input: RescheduleClassInput!) {\n    rescheduleClass(classInstanceId: $classInstanceId, input: $input) {\n      id\n      status\n      scheduledDate\n      startTime\n      endTime\n      durationMinutes\n    }\n  }\n": typeof types.RescheduleClassDocument,
     "\n  mutation deleteClassInstance($classInstanceId: ID!) {\n    deleteClassInstance(classInstanceId: $classInstanceId)\n  }\n": typeof types.DeleteClassInstanceDocument,
+    "\n  fragment PermissionFields on Permission {\n    id\n    key\n    resource\n    action\n    description\n    category\n    isSystem\n  }\n": typeof types.PermissionFieldsFragmentDoc,
+    "\n  fragment PermissionGroupFields on PermissionGroup {\n    id\n    name\n    slug\n    description\n    isSystem\n    createdAt\n    updatedAt\n    permissionIds\n    assignedUsers {\n      id\n      name\n      email\n    }\n  }\n": typeof types.PermissionGroupFieldsFragmentDoc,
+    "\n  fragment UserOverrideFields on UserOverride {\n    permissionId\n    state\n    assignedBy\n  }\n": typeof types.UserOverrideFieldsFragmentDoc,
+    "\n  \n  query permissions {\n    permissions {\n      ...PermissionFields\n    }\n  }\n": typeof types.PermissionsDocument,
+    "\n  \n  query permissionGroups {\n    permissionGroups {\n      ...PermissionGroupFields\n    }\n  }\n": typeof types.PermissionGroupsDocument,
+    "\n  \n  query permissionGroup($id: String!) {\n    permissionGroup(id: $id) {\n      ...PermissionGroupFields\n    }\n  }\n": typeof types.PermissionGroupDocument,
+    "\n  query userPermissionGroups($userId: String!) {\n    userPermissionGroups(userId: $userId)\n  }\n": typeof types.UserPermissionGroupsDocument,
+    "\n  \n  query userOverrides($userId: String!) {\n    userOverrides(userId: $userId) {\n      ...UserOverrideFields\n    }\n  }\n": typeof types.UserOverridesDocument,
+    "\n  query effectiveUserPermissions($userId: String!) {\n    effectiveUserPermissions(userId: $userId)\n  }\n": typeof types.EffectiveUserPermissionsDocument,
+    "\n  \n  mutation createPermissionGroup($input: CreatePermissionGroupInput!) {\n    createPermissionGroup(input: $input) {\n      ...PermissionGroupFields\n    }\n  }\n": typeof types.CreatePermissionGroupDocument,
+    "\n  \n  mutation updatePermissionGroup($input: UpdatePermissionGroupInput!) {\n    updatePermissionGroup(input: $input) {\n      ...PermissionGroupFields\n    }\n  }\n": typeof types.UpdatePermissionGroupDocument,
+    "\n  mutation deletePermissionGroup($groupId: String!) {\n    deletePermissionGroup(groupId: $groupId)\n  }\n": typeof types.DeletePermissionGroupDocument,
+    "\n  mutation assignPermissionGroupToUser($input: AssignPermissionGroupToUserInput!) {\n    assignPermissionGroupToUser(input: $input)\n  }\n": typeof types.AssignPermissionGroupToUserDocument,
+    "\n  mutation revokePermissionGroupFromUser($input: RevokePermissionGroupFromUserInput!) {\n    revokePermissionGroupFromUser(input: $input)\n  }\n": typeof types.RevokePermissionGroupFromUserDocument,
+    "\n  mutation bulkAssignUsersToGroup($groupId: String!, $userIds: [String!]!) {\n    bulkAssignUsersToGroup(groupId: $groupId, userIds: $userIds)\n  }\n": typeof types.BulkAssignUsersToGroupDocument,
+    "\n  mutation bulkRevokeUsersFromGroup($groupId: String!, $userIds: [String!]!) {\n    bulkRevokeUsersFromGroup(groupId: $groupId, userIds: $userIds)\n  }\n": typeof types.BulkRevokeUsersFromGroupDocument,
+    "\n  mutation updateUserOverrides($userId: String!, $overrides: [UserOverrideInput!]!) {\n    updateUserOverrides(userId: $userId, overrides: $overrides)\n  }\n": typeof types.UpdateUserOverridesDocument,
     "\n  query dailyScheduleMetrics($date: String!, $teacherId: String) {\n    dailyScheduleMetrics(date: $date, teacherId: $teacherId) {\n      id\n      total\n      regular\n      trial\n      advance\n      rescheduled\n      suspended\n      taken\n      pending\n      activated\n      running\n      absent\n      leave\n    }\n  }\n": typeof types.DailyScheduleMetricsDocument,
     "\n  query dailyScheduleList($date: String!, $teacherId: String, $search: String) {\n    dailyScheduleList(date: $date, teacherId: $teacherId, search: $search) {\n      id\n      yourTime\n      teacherTime\n      studentTime\n      duration\n      status\n      student {\n        id\n        name\n      }\n      teacher {\n        id\n        name\n      }\n    }\n  }\n": typeof types.DailyScheduleListDocument,
     "\n  query rescheduleTrackingRows($input: RescheduleTrackingInput!) {\n    rescheduleTrackingRows(input: $input) {\n      id\n      originalClassId\n      teacherId\n      teacherName\n      teacherAvatarUrl\n      studentId\n      studentName\n      scheduledStartAt\n      scheduledEndAt\n      status\n      dateLabel\n      remarks\n    }\n  }\n": typeof types.RescheduleTrackingRowsDocument,
@@ -69,6 +86,23 @@ const documents: Documents = {
     "\n  mutation stopClass($classInstanceId: ID!) {\n    stopClass(classInstanceId: $classInstanceId) {\n      id\n      status\n      durationMinutes\n      remarks\n    }\n  }\n": types.StopClassDocument,
     "\n  mutation rescheduleClass($classInstanceId: ID!, $input: RescheduleClassInput!) {\n    rescheduleClass(classInstanceId: $classInstanceId, input: $input) {\n      id\n      status\n      scheduledDate\n      startTime\n      endTime\n      durationMinutes\n    }\n  }\n": types.RescheduleClassDocument,
     "\n  mutation deleteClassInstance($classInstanceId: ID!) {\n    deleteClassInstance(classInstanceId: $classInstanceId)\n  }\n": types.DeleteClassInstanceDocument,
+    "\n  fragment PermissionFields on Permission {\n    id\n    key\n    resource\n    action\n    description\n    category\n    isSystem\n  }\n": types.PermissionFieldsFragmentDoc,
+    "\n  fragment PermissionGroupFields on PermissionGroup {\n    id\n    name\n    slug\n    description\n    isSystem\n    createdAt\n    updatedAt\n    permissionIds\n    assignedUsers {\n      id\n      name\n      email\n    }\n  }\n": types.PermissionGroupFieldsFragmentDoc,
+    "\n  fragment UserOverrideFields on UserOverride {\n    permissionId\n    state\n    assignedBy\n  }\n": types.UserOverrideFieldsFragmentDoc,
+    "\n  \n  query permissions {\n    permissions {\n      ...PermissionFields\n    }\n  }\n": types.PermissionsDocument,
+    "\n  \n  query permissionGroups {\n    permissionGroups {\n      ...PermissionGroupFields\n    }\n  }\n": types.PermissionGroupsDocument,
+    "\n  \n  query permissionGroup($id: String!) {\n    permissionGroup(id: $id) {\n      ...PermissionGroupFields\n    }\n  }\n": types.PermissionGroupDocument,
+    "\n  query userPermissionGroups($userId: String!) {\n    userPermissionGroups(userId: $userId)\n  }\n": types.UserPermissionGroupsDocument,
+    "\n  \n  query userOverrides($userId: String!) {\n    userOverrides(userId: $userId) {\n      ...UserOverrideFields\n    }\n  }\n": types.UserOverridesDocument,
+    "\n  query effectiveUserPermissions($userId: String!) {\n    effectiveUserPermissions(userId: $userId)\n  }\n": types.EffectiveUserPermissionsDocument,
+    "\n  \n  mutation createPermissionGroup($input: CreatePermissionGroupInput!) {\n    createPermissionGroup(input: $input) {\n      ...PermissionGroupFields\n    }\n  }\n": types.CreatePermissionGroupDocument,
+    "\n  \n  mutation updatePermissionGroup($input: UpdatePermissionGroupInput!) {\n    updatePermissionGroup(input: $input) {\n      ...PermissionGroupFields\n    }\n  }\n": types.UpdatePermissionGroupDocument,
+    "\n  mutation deletePermissionGroup($groupId: String!) {\n    deletePermissionGroup(groupId: $groupId)\n  }\n": types.DeletePermissionGroupDocument,
+    "\n  mutation assignPermissionGroupToUser($input: AssignPermissionGroupToUserInput!) {\n    assignPermissionGroupToUser(input: $input)\n  }\n": types.AssignPermissionGroupToUserDocument,
+    "\n  mutation revokePermissionGroupFromUser($input: RevokePermissionGroupFromUserInput!) {\n    revokePermissionGroupFromUser(input: $input)\n  }\n": types.RevokePermissionGroupFromUserDocument,
+    "\n  mutation bulkAssignUsersToGroup($groupId: String!, $userIds: [String!]!) {\n    bulkAssignUsersToGroup(groupId: $groupId, userIds: $userIds)\n  }\n": types.BulkAssignUsersToGroupDocument,
+    "\n  mutation bulkRevokeUsersFromGroup($groupId: String!, $userIds: [String!]!) {\n    bulkRevokeUsersFromGroup(groupId: $groupId, userIds: $userIds)\n  }\n": types.BulkRevokeUsersFromGroupDocument,
+    "\n  mutation updateUserOverrides($userId: String!, $overrides: [UserOverrideInput!]!) {\n    updateUserOverrides(userId: $userId, overrides: $overrides)\n  }\n": types.UpdateUserOverridesDocument,
     "\n  query dailyScheduleMetrics($date: String!, $teacherId: String) {\n    dailyScheduleMetrics(date: $date, teacherId: $teacherId) {\n      id\n      total\n      regular\n      trial\n      advance\n      rescheduled\n      suspended\n      taken\n      pending\n      activated\n      running\n      absent\n      leave\n    }\n  }\n": types.DailyScheduleMetricsDocument,
     "\n  query dailyScheduleList($date: String!, $teacherId: String, $search: String) {\n    dailyScheduleList(date: $date, teacherId: $teacherId, search: $search) {\n      id\n      yourTime\n      teacherTime\n      studentTime\n      duration\n      status\n      student {\n        id\n        name\n      }\n      teacher {\n        id\n        name\n      }\n    }\n  }\n": types.DailyScheduleListDocument,
     "\n  query rescheduleTrackingRows($input: RescheduleTrackingInput!) {\n    rescheduleTrackingRows(input: $input) {\n      id\n      originalClassId\n      teacherId\n      teacherName\n      teacherAvatarUrl\n      studentId\n      studentName\n      scheduledStartAt\n      scheduledEndAt\n      status\n      dateLabel\n      remarks\n    }\n  }\n": types.RescheduleTrackingRowsDocument,
@@ -174,6 +208,74 @@ export function graphql(source: "\n  mutation rescheduleClass($classInstanceId: 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation deleteClassInstance($classInstanceId: ID!) {\n    deleteClassInstance(classInstanceId: $classInstanceId)\n  }\n"): (typeof documents)["\n  mutation deleteClassInstance($classInstanceId: ID!) {\n    deleteClassInstance(classInstanceId: $classInstanceId)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment PermissionFields on Permission {\n    id\n    key\n    resource\n    action\n    description\n    category\n    isSystem\n  }\n"): (typeof documents)["\n  fragment PermissionFields on Permission {\n    id\n    key\n    resource\n    action\n    description\n    category\n    isSystem\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment PermissionGroupFields on PermissionGroup {\n    id\n    name\n    slug\n    description\n    isSystem\n    createdAt\n    updatedAt\n    permissionIds\n    assignedUsers {\n      id\n      name\n      email\n    }\n  }\n"): (typeof documents)["\n  fragment PermissionGroupFields on PermissionGroup {\n    id\n    name\n    slug\n    description\n    isSystem\n    createdAt\n    updatedAt\n    permissionIds\n    assignedUsers {\n      id\n      name\n      email\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment UserOverrideFields on UserOverride {\n    permissionId\n    state\n    assignedBy\n  }\n"): (typeof documents)["\n  fragment UserOverrideFields on UserOverride {\n    permissionId\n    state\n    assignedBy\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query permissions {\n    permissions {\n      ...PermissionFields\n    }\n  }\n"): (typeof documents)["\n  \n  query permissions {\n    permissions {\n      ...PermissionFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query permissionGroups {\n    permissionGroups {\n      ...PermissionGroupFields\n    }\n  }\n"): (typeof documents)["\n  \n  query permissionGroups {\n    permissionGroups {\n      ...PermissionGroupFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query permissionGroup($id: String!) {\n    permissionGroup(id: $id) {\n      ...PermissionGroupFields\n    }\n  }\n"): (typeof documents)["\n  \n  query permissionGroup($id: String!) {\n    permissionGroup(id: $id) {\n      ...PermissionGroupFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query userPermissionGroups($userId: String!) {\n    userPermissionGroups(userId: $userId)\n  }\n"): (typeof documents)["\n  query userPermissionGroups($userId: String!) {\n    userPermissionGroups(userId: $userId)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  query userOverrides($userId: String!) {\n    userOverrides(userId: $userId) {\n      ...UserOverrideFields\n    }\n  }\n"): (typeof documents)["\n  \n  query userOverrides($userId: String!) {\n    userOverrides(userId: $userId) {\n      ...UserOverrideFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query effectiveUserPermissions($userId: String!) {\n    effectiveUserPermissions(userId: $userId)\n  }\n"): (typeof documents)["\n  query effectiveUserPermissions($userId: String!) {\n    effectiveUserPermissions(userId: $userId)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation createPermissionGroup($input: CreatePermissionGroupInput!) {\n    createPermissionGroup(input: $input) {\n      ...PermissionGroupFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation createPermissionGroup($input: CreatePermissionGroupInput!) {\n    createPermissionGroup(input: $input) {\n      ...PermissionGroupFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  \n  mutation updatePermissionGroup($input: UpdatePermissionGroupInput!) {\n    updatePermissionGroup(input: $input) {\n      ...PermissionGroupFields\n    }\n  }\n"): (typeof documents)["\n  \n  mutation updatePermissionGroup($input: UpdatePermissionGroupInput!) {\n    updatePermissionGroup(input: $input) {\n      ...PermissionGroupFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation deletePermissionGroup($groupId: String!) {\n    deletePermissionGroup(groupId: $groupId)\n  }\n"): (typeof documents)["\n  mutation deletePermissionGroup($groupId: String!) {\n    deletePermissionGroup(groupId: $groupId)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation assignPermissionGroupToUser($input: AssignPermissionGroupToUserInput!) {\n    assignPermissionGroupToUser(input: $input)\n  }\n"): (typeof documents)["\n  mutation assignPermissionGroupToUser($input: AssignPermissionGroupToUserInput!) {\n    assignPermissionGroupToUser(input: $input)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation revokePermissionGroupFromUser($input: RevokePermissionGroupFromUserInput!) {\n    revokePermissionGroupFromUser(input: $input)\n  }\n"): (typeof documents)["\n  mutation revokePermissionGroupFromUser($input: RevokePermissionGroupFromUserInput!) {\n    revokePermissionGroupFromUser(input: $input)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation bulkAssignUsersToGroup($groupId: String!, $userIds: [String!]!) {\n    bulkAssignUsersToGroup(groupId: $groupId, userIds: $userIds)\n  }\n"): (typeof documents)["\n  mutation bulkAssignUsersToGroup($groupId: String!, $userIds: [String!]!) {\n    bulkAssignUsersToGroup(groupId: $groupId, userIds: $userIds)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation bulkRevokeUsersFromGroup($groupId: String!, $userIds: [String!]!) {\n    bulkRevokeUsersFromGroup(groupId: $groupId, userIds: $userIds)\n  }\n"): (typeof documents)["\n  mutation bulkRevokeUsersFromGroup($groupId: String!, $userIds: [String!]!) {\n    bulkRevokeUsersFromGroup(groupId: $groupId, userIds: $userIds)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation updateUserOverrides($userId: String!, $overrides: [UserOverrideInput!]!) {\n    updateUserOverrides(userId: $userId, overrides: $overrides)\n  }\n"): (typeof documents)["\n  mutation updateUserOverrides($userId: String!, $overrides: [UserOverrideInput!]!) {\n    updateUserOverrides(userId: $userId, overrides: $overrides)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

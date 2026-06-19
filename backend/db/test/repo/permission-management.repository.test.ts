@@ -497,10 +497,7 @@ describe("PermissionManagementRepository", () => {
 
       let updateErr: unknown = null;
       try {
-        await tx
-          .update(permissions)
-          .set({ isSystem: true })
-          .where(eq(permissions.id, customPerm.id));
+        await tx.update(permissions).set({ isSystem: true }).where(eq(permissions.id, customPerm.id));
       } catch (e) {
         updateErr = e;
       }

@@ -473,10 +473,10 @@
 
   Success Criteria:
 
-  [ ] No  SQL<unknown>  type errors
-  [ ] All multi-table writes in  db.transaction()
-  [ ] System guards throw before any write
-  [ ]  bun test backend/db/test/  passes with 0 failures
+  [x] No  SQL<unknown>  type errors
+  [x] All multi-table writes in  db.transaction()
+  [x] System guards throw before any write
+  [x]  bun test backend/db/test/  passes with 0 failures
   ──────
   ### Task B — Service: Permission Management Business Logic
 
@@ -647,10 +647,10 @@
   •  revokeGroupFromUser()  on SuperAdmin throws  cannotModifySuperAdmin
   Success Criteria:
 
-  [ ] Every public fn calls auth guard first
-  [ ] Slug never accepted from client
-  [ ]  bun tsgo  passes with 0 errors
-  [ ] Service tests pass
+  [x] Every public fn calls auth guard first
+  [x] Slug never accepted from client
+  [x]  bun tsgo  passes with 0 errors
+  [x] Service tests pass
   ──────
   ### Task C — Backend GraphQL: Pothos Schema & Resolvers
 
@@ -819,10 +819,10 @@
 
   Success Criteria:
 
-  [ ] Schema generates without errors
-  [ ] Codegen produces  Permission ,  PermissionGroup  types + all operations
-  [ ] Both object types expose  id
-  [ ]  bun tsgo  passes
+  [x] Schema generates without errors
+  [x] Codegen produces  Permission ,  PermissionGroup  types + all operations
+  [x] Both object types expose  id
+  [x]  bun tsgo  passes
   ──────
   ### Task D — Frontend GraphQL: Apollo Documents
 

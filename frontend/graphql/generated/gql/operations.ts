@@ -66,7 +66,14 @@ export type AppPermission =
   | 'TEACHERS_EDIT'
   | 'TEACHERS_LIST'
   | 'TEACHERS_MANAGE_SCHEDULE'
-  | 'TEACHER_VIEW_DASHBOARD';
+  | 'TEACHER_VIEW_DASHBOARD'
+  | 'TEST_CUSTOM_ONLY'
+  | 'TEST_SYSTEM_ONLY';
+
+export type AssignPermissionGroupToUserInput = {
+  groupId: string;
+  userId: string;
+};
 
 export type CreateManualClassEntryInput = {
   classType: string | null | undefined;
@@ -75,6 +82,12 @@ export type CreateManualClassEntryInput = {
   scheduledStartAt: string;
   studentId: string | number;
   teacherId: string | number;
+};
+
+export type CreatePermissionGroupInput = {
+  description: string | null | undefined;
+  name: string;
+  permissionIds: Array<string>;
 };
 
 /** Input for the demo fast login mutation. */
@@ -121,6 +134,11 @@ export type RescheduleTrackingInput = {
   offset: number | null | undefined;
   search: string | null | undefined;
   status: string | null | undefined;
+};
+
+export type RevokePermissionGroupFromUserInput = {
+  groupId: string;
+  userId: string;
 };
 
 export type StudentFilterArgs = {
@@ -183,6 +201,18 @@ export type StudentsOrderByColumn =
   | 'PARENT_ID'
   | 'STATUS'
   | 'UPDATED_AT';
+
+export type UpdatePermissionGroupInput = {
+  description: string | null | undefined;
+  groupId: string;
+  name: string | null | undefined;
+  permissionIds: Array<string> | null | undefined;
+};
+
+export type UserOverrideInput = {
+  permissionId: string;
+  state: string;
+};
 
 export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
 
@@ -403,6 +433,165 @@ export type DeleteClassInstanceMutationVariables = Exact<{
 
 
 export type DeleteClassInstanceMutation = DeleteClassInstanceMutation_Mutation;
+
+export type PermissionFieldsFragment = { id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null };
+
+export type PermissionGroupFieldsFragment_PermissionGroup_assignedUsers_GroupUser = { id: string | null, name: string | null, email: string | null };
+
+export type PermissionGroupFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<PermissionGroupFieldsFragment_PermissionGroup_assignedUsers_GroupUser> | null };
+
+export type UserOverrideFieldsFragment = { permissionId: string | null, state: string | null, assignedBy: string | null };
+
+export type PermissionsQuery_permissions_Permission = { id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null };
+
+export type PermissionsQuery_Query = { permissions: Array<PermissionsQuery_permissions_Permission> | null };
+
+
+export type PermissionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PermissionsQuery = PermissionsQuery_Query;
+
+export type PermissionGroupsQuery_permissionGroups_PermissionGroup = { id: string | null, name: string | null, slug: string | null, description: string | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<PermissionGroupFieldsFragment_PermissionGroup_assignedUsers_GroupUser> | null };
+
+export type PermissionGroupsQuery_Query = { permissionGroups: Array<PermissionGroupsQuery_permissionGroups_PermissionGroup> | null };
+
+
+export type PermissionGroupsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PermissionGroupsQuery = PermissionGroupsQuery_Query;
+
+export type PermissionGroupQuery_permissionGroup_PermissionGroup = { id: string | null, name: string | null, slug: string | null, description: string | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<PermissionGroupFieldsFragment_PermissionGroup_assignedUsers_GroupUser> | null };
+
+export type PermissionGroupQuery_Query = { permissionGroup: PermissionGroupQuery_permissionGroup_PermissionGroup | null };
+
+
+export type PermissionGroupQueryVariables = Exact<{
+  id: string;
+}>;
+
+
+export type PermissionGroupQuery = PermissionGroupQuery_Query;
+
+export type UserPermissionGroupsQuery_Query = { userPermissionGroups: Array<string> | null };
+
+
+export type UserPermissionGroupsQueryVariables = Exact<{
+  userId: string;
+}>;
+
+
+export type UserPermissionGroupsQuery = UserPermissionGroupsQuery_Query;
+
+export type UserOverridesQuery_userOverrides_UserOverride = { permissionId: string | null, state: string | null, assignedBy: string | null };
+
+export type UserOverridesQuery_Query = { userOverrides: Array<UserOverridesQuery_userOverrides_UserOverride> | null };
+
+
+export type UserOverridesQueryVariables = Exact<{
+  userId: string;
+}>;
+
+
+export type UserOverridesQuery = UserOverridesQuery_Query;
+
+export type EffectiveUserPermissionsQuery_Query = { effectiveUserPermissions: Array<string> | null };
+
+
+export type EffectiveUserPermissionsQueryVariables = Exact<{
+  userId: string;
+}>;
+
+
+export type EffectiveUserPermissionsQuery = EffectiveUserPermissionsQuery_Query;
+
+export type CreatePermissionGroupMutation_createPermissionGroup_PermissionGroup = { id: string | null, name: string | null, slug: string | null, description: string | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<PermissionGroupFieldsFragment_PermissionGroup_assignedUsers_GroupUser> | null };
+
+export type CreatePermissionGroupMutation_Mutation = { createPermissionGroup: CreatePermissionGroupMutation_createPermissionGroup_PermissionGroup | null };
+
+
+export type CreatePermissionGroupMutationVariables = Exact<{
+  input: Types.CreatePermissionGroupInput;
+}>;
+
+
+export type CreatePermissionGroupMutation = CreatePermissionGroupMutation_Mutation;
+
+export type UpdatePermissionGroupMutation_updatePermissionGroup_PermissionGroup = { id: string | null, name: string | null, slug: string | null, description: string | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<PermissionGroupFieldsFragment_PermissionGroup_assignedUsers_GroupUser> | null };
+
+export type UpdatePermissionGroupMutation_Mutation = { updatePermissionGroup: UpdatePermissionGroupMutation_updatePermissionGroup_PermissionGroup | null };
+
+
+export type UpdatePermissionGroupMutationVariables = Exact<{
+  input: Types.UpdatePermissionGroupInput;
+}>;
+
+
+export type UpdatePermissionGroupMutation = UpdatePermissionGroupMutation_Mutation;
+
+export type DeletePermissionGroupMutation_Mutation = { deletePermissionGroup: boolean | null };
+
+
+export type DeletePermissionGroupMutationVariables = Exact<{
+  groupId: string;
+}>;
+
+
+export type DeletePermissionGroupMutation = DeletePermissionGroupMutation_Mutation;
+
+export type AssignPermissionGroupToUserMutation_Mutation = { assignPermissionGroupToUser: boolean | null };
+
+
+export type AssignPermissionGroupToUserMutationVariables = Exact<{
+  input: Types.AssignPermissionGroupToUserInput;
+}>;
+
+
+export type AssignPermissionGroupToUserMutation = AssignPermissionGroupToUserMutation_Mutation;
+
+export type RevokePermissionGroupFromUserMutation_Mutation = { revokePermissionGroupFromUser: boolean | null };
+
+
+export type RevokePermissionGroupFromUserMutationVariables = Exact<{
+  input: Types.RevokePermissionGroupFromUserInput;
+}>;
+
+
+export type RevokePermissionGroupFromUserMutation = RevokePermissionGroupFromUserMutation_Mutation;
+
+export type BulkAssignUsersToGroupMutation_Mutation = { bulkAssignUsersToGroup: boolean | null };
+
+
+export type BulkAssignUsersToGroupMutationVariables = Exact<{
+  groupId: string;
+  userIds: Array<string> | string;
+}>;
+
+
+export type BulkAssignUsersToGroupMutation = BulkAssignUsersToGroupMutation_Mutation;
+
+export type BulkRevokeUsersFromGroupMutation_Mutation = { bulkRevokeUsersFromGroup: boolean | null };
+
+
+export type BulkRevokeUsersFromGroupMutationVariables = Exact<{
+  groupId: string;
+  userIds: Array<string> | string;
+}>;
+
+
+export type BulkRevokeUsersFromGroupMutation = BulkRevokeUsersFromGroupMutation_Mutation;
+
+export type UpdateUserOverridesMutation_Mutation = { updateUserOverrides: boolean | null };
+
+
+export type UpdateUserOverridesMutationVariables = Exact<{
+  userId: string;
+  overrides: Array<Types.UserOverrideInput> | Types.UserOverrideInput;
+}>;
+
+
+export type UpdateUserOverridesMutation = UpdateUserOverridesMutation_Mutation;
 
 export type DailyScheduleMetricsQuery_dailyScheduleMetrics_DailyScheduleMetrics = { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 

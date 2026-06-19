@@ -8,6 +8,17 @@ import { getErrorMessage } from "@/shared/utils/error";
 import { db } from "../../drizzleDb";
 import { permissionGroups, permissions, users } from "../../schema";
 
+async function assertThrows(fn: () => Promise<unknown>, message: string) {
+  let err: unknown = null;
+  try {
+    await fn();
+  } catch (e) {
+    err = e;
+  }
+  expect(err).not.toBeNull();
+  expect(getErrorMessage(err)).toContain(message);
+}
+
 describe("PermissionManagementService Business Logic", () => {
   let adminUser: typeof users.$inferSelect;
   let regularUser: typeof users.$inferSelect;
@@ -16,6 +27,36 @@ describe("PermissionManagementService Business Logic", () => {
   // Track original getUserContext to restore later
   const originalGetUserContext = PermissionsService.getUserContext;
   let mockContext: UserPermissionContext | null = null;
+
+  const manageContext = (): UserPermissionContext => ({
+    permissions: [AppPermission.PERMISSION_GROUPS_MANAGE],
+    permissionGroups: ["admin_group"],
+    isSuperAdmin: false,
+    role: "Admin",
+  });
+
+  const assignContext = (): UserPermissionContext => ({
+    permissions: [AppPermission.PERMISSION_GROUPS_ASSIGN],
+    permissionGroups: ["assigner_group"],
+    isSuperAdmin: false,
+    role: "Assigner",
+  });
+
+  const userContext = (): UserPermissionContext => ({
+    permissions: [],
+    permissionGroups: [],
+    isSuperAdmin: false,
+    role: "User",
+  });
+
+  const superAdminContext = (): UserPermissionContext => ({
+    permissions: [],
+    permissionGroups: [],
+    isSuperAdmin: true,
+    role: "SuperAdmin",
+  });
+
+
 
   beforeAll(async () => {
     // Override PermissionsService.getUserContext to return mock context if set
@@ -79,30 +120,12 @@ describe("PermissionManagementService Business Logic", () => {
 
   describe("Access Control (Authorization Guards)", () => {
     test("listPermissions should throw unauthorized for non-admin", async () => {
-      mockContext = {
-        permissions: [],
-        permissionGroups: [],
-        isSuperAdmin: false,
-        role: "User",
-      };
-
-      let err: any = null;
-      try {
-        await PermissionManagementService.listPermissions(regularUser.id);
-      } catch (e) {
-        err = e;
-      }
-      expect(err).not.toBeNull();
-      expect(err.message).toContain("Unauthorized");
+      mockContext = userContext();
+      await assertThrows(() => PermissionManagementService.listPermissions(regularUser.id), "Unauthorized");
     });
 
     test("listPermissions should allow admin with manage permission", async () => {
-      mockContext = {
-        permissions: [AppPermission.PERMISSION_GROUPS_MANAGE],
-        permissionGroups: ["admin_group"],
-        isSuperAdmin: false,
-        role: "Admin",
-      };
+      mockContext = manageContext();
 
       const perms = await PermissionManagementService.listPermissions(adminUser.id);
       expect(perms).toBeDefined();
@@ -110,12 +133,7 @@ describe("PermissionManagementService Business Logic", () => {
     });
 
     test("listPermissions should allow superadmin", async () => {
-      mockContext = {
-        permissions: [],
-        permissionGroups: [],
-        isSuperAdmin: true,
-        role: "SuperAdmin",
-      };
+      mockContext = superAdminContext();
 
       const perms = await PermissionManagementService.listPermissions(superAdminUser.id);
       expect(perms).toBeDefined();
@@ -125,55 +143,23 @@ describe("PermissionManagementService Business Logic", () => {
 
   describe("Group CRUD Validation", () => {
     test("createGroup should throw if name is empty", async () => {
-      mockContext = {
-        permissions: [AppPermission.PERMISSION_GROUPS_MANAGE],
-        permissionGroups: ["admin_group"],
-        isSuperAdmin: false,
-        role: "Admin",
-      };
-
-      let err: any = null;
-      try {
-        await PermissionManagementService.createGroup(adminUser.id, {
-          name: "   ",
-          permissionIds: [],
-        });
-      } catch (e) {
-        err = e;
-      }
-      expect(err).not.toBeNull();
-      expect(err.message).toContain("Permission group name is required");
+      mockContext = manageContext();
+      await assertThrows(
+        () => PermissionManagementService.createGroup(adminUser.id, { name: "   ", permissionIds: [] }),
+        "Permission group name is required"
+      );
     });
 
     test("createGroup should throw if name too long", async () => {
-      mockContext = {
-        permissions: [AppPermission.PERMISSION_GROUPS_MANAGE],
-        permissionGroups: ["admin_group"],
-        isSuperAdmin: false,
-        role: "Admin",
-      };
-
-      const longName = "a".repeat(256);
-      let err: any = null;
-      try {
-        await PermissionManagementService.createGroup(adminUser.id, {
-          name: longName,
-          permissionIds: [],
-        });
-      } catch (e) {
-        err = e;
-      }
-      expect(err).not.toBeNull();
-      expect(err.message).toContain("Permission group name cannot exceed 255 characters");
+      mockContext = manageContext();
+      await assertThrows(
+        () => PermissionManagementService.createGroup(adminUser.id, { name: "a".repeat(256), permissionIds: [] }),
+        "Permission group name cannot exceed 255 characters"
+      );
     });
 
     test("createGroup should auto-generate slug and succeed", async () => {
-      mockContext = {
-        permissions: [AppPermission.PERMISSION_GROUPS_MANAGE],
-        permissionGroups: ["admin_group"],
-        isSuperAdmin: false,
-        role: "Admin",
-      };
+      mockContext = manageContext();
 
       const [perm] = await db.select().from(permissions).limit(1);
       const group = await PermissionManagementService.createGroup(adminUser.id, {
@@ -192,12 +178,7 @@ describe("PermissionManagementService Business Logic", () => {
     });
 
     test("updateGroup should trim and validate updated fields", async () => {
-      mockContext = {
-        permissions: [AppPermission.PERMISSION_GROUPS_MANAGE],
-        permissionGroups: ["admin_group"],
-        isSuperAdmin: false,
-        role: "Admin",
-      };
+      mockContext = manageContext();
 
       const group = await PermissionManagementService.createGroup(adminUser.id, {
         name: "Initial Group",
@@ -216,59 +197,33 @@ describe("PermissionManagementService Business Logic", () => {
     });
 
     test("updateGroup on system group should throw cannotModifySystemPermissionGroup", async () => {
-      mockContext = {
-        permissions: [AppPermission.PERMISSION_GROUPS_MANAGE],
-        permissionGroups: ["admin_group"],
-        isSuperAdmin: false,
-        role: "Admin",
-      };
+      mockContext = manageContext();
 
       const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
-      let err: any = null;
-      try {
-        await PermissionManagementService.updateGroup(adminUser.id, {
-          groupId: sysGroup.id,
-          name: "New System Name",
-        });
-      } catch (e) {
-        err = e;
-      }
-      expect(err).not.toBeNull();
-      expect(err.message).toContain("Cannot modify core properties of system permission groups");
+      await assertThrows(
+        () => PermissionManagementService.updateGroup(adminUser.id, { groupId: sysGroup.id, name: "New System Name" }),
+        "Cannot modify core properties of system permission groups"
+      );
     });
 
     test("deleteGroup on system group should throw cannotDeleteSystemPermissionGroup", async () => {
-      mockContext = {
-        permissions: [AppPermission.PERMISSION_GROUPS_MANAGE],
-        permissionGroups: ["admin_group"],
-        isSuperAdmin: false,
-        role: "Admin",
-      };
+      mockContext = manageContext();
 
       const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
-      let err: any = null;
-      try {
-        await PermissionManagementService.deleteGroup(adminUser.id, sysGroup.id);
-      } catch (e) {
-        err = e;
-      }
-      expect(err).not.toBeNull();
-      expect(err.message).toContain("Cannot delete a system permission or group");
+      await assertThrows(
+        () => PermissionManagementService.deleteGroup(adminUser.id, sysGroup.id),
+        "Cannot delete a system permission or group"
+      );
     });
   });
 
   describe("User Assignment Logic", () => {
     test("assignGroupToUser and revokeGroupFromUser should work for authorized user", async () => {
-      mockContext = {
-        permissions: [AppPermission.PERMISSION_GROUPS_ASSIGN],
-        permissionGroups: ["assigner_group"],
-        isSuperAdmin: false,
-        role: "Assigner",
-      };
+      mockContext = assignContext();
 
       const group = await db.transaction(async tx => {
         const [g] = await tx
@@ -308,33 +263,21 @@ describe("PermissionManagementService Business Logic", () => {
     });
 
     test("revokeGroupFromUser on SuperAdmin should throw cannotModifySuperAdmin", async () => {
-      mockContext = {
-        permissions: [AppPermission.PERMISSION_GROUPS_ASSIGN],
-        permissionGroups: ["assigner_group"],
-        isSuperAdmin: false,
-        role: "Assigner",
-      };
+      mockContext = assignContext();
 
       const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
-      let err: any = null;
-      try {
-        await PermissionManagementService.revokeGroupFromUser(adminUser.id, {
-          userId: superAdminUser.id,
-          groupId: sysGroup.id,
-        });
-      } catch (e) {
-        err = e;
-      }
-      expect(err).not.toBeNull();
-      expect(err.message).toContain("Cannot modify permissions of a SuperAdmin user");
+      await assertThrows(
+        () => PermissionManagementService.revokeGroupFromUser(adminUser.id, { userId: superAdminUser.id, groupId: sysGroup.id }),
+        "Cannot modify permissions of a SuperAdmin user"
+      );
     });
   });
 
   describe("System Permission Database Constraints", () => {
     test("should prevent creating a new system permission", async () => {
-      let err: any = null;
+      let err: unknown = null;
       try {
         await db.insert(permissions).values({
           key: AppPermission.TEST_SYSTEM_ONLY,
@@ -365,12 +308,9 @@ describe("PermissionManagementService Business Logic", () => {
         })
         .returning();
 
-      let err: any = null;
+      let err: unknown = null;
       try {
-        await db
-          .update(permissions)
-          .set({ isSystem: true })
-          .where(eq(permissions.id, customPerm.id));
+        await db.update(permissions).set({ isSystem: true }).where(eq(permissions.id, customPerm.id));
       } catch (e) {
         err = e;
       }
@@ -380,6 +320,100 @@ describe("PermissionManagementService Business Logic", () => {
 
       expect(err).not.toBeNull();
       expect(getErrorMessage(err)).toContain("Cannot change is_system to true");
+    });
+  });
+
+  describe("Bulk Assignment & Self-Demotion Guards", () => {
+    test("bulkAssignUsersToGroup and bulkRevokeUsersFromGroup work and respect self-demotion filter", async () => {
+      mockContext = assignContext();
+
+      const group = await db.transaction(async tx => {
+        const [g] = await tx
+          .insert(permissionGroups)
+          .values({
+            name: "Bulk Assign Test Group",
+            slug: "bulk_assign_test_group",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            isSystem: false,
+          })
+          .returning();
+        return g;
+      });
+
+      // Bulk assign
+      await PermissionManagementService.bulkAssignUsersToGroup(adminUser.id, {
+        userIds: [regularUser.id],
+        groupId: group.id,
+      });
+
+      let userGroups = await PermissionManagementService.listGroupsForUser(adminUser.id, regularUser.id);
+      expect(userGroups).toContain(group.id);
+
+      // Attempt to bulk revoke both regular user and super admin user
+      await PermissionManagementService.bulkRevokeUsersFromGroup(adminUser.id, {
+        userIds: [regularUser.id, superAdminUser.id],
+        groupId: group.id,
+      });
+
+      // Verify regular user is revoked
+      userGroups = await PermissionManagementService.listGroupsForUser(adminUser.id, regularUser.id);
+      expect(userGroups).not.toContain(group.id);
+    });
+  });
+
+  describe("Slug Collision Handling", () => {
+    test("createGroup handles name collision by appending suffix counter to slug", async () => {
+      mockContext = manageContext();
+
+      const group1 = await PermissionManagementService.createGroup(adminUser.id, {
+        name: "Collision Group Name",
+        permissionIds: [],
+      });
+
+      const group2 = await PermissionManagementService.createGroup(adminUser.id, {
+        name: "Collision Group Name!",
+        permissionIds: [],
+      });
+
+      expect(group1.slug).toBe("collision_group_name");
+      expect(group2.slug).toBe("collision_group_name_1");
+    });
+  });
+
+  describe("User Permission Overrides & Effective Permissions", () => {
+    test("listUserOverrides, updateUserOverrides, and getEffectiveUserPermissions logic", async () => {
+      mockContext = manageContext();
+
+      const [perm1, perm2] = await db.select().from(permissions).limit(2);
+      expect(perm1).toBeDefined();
+      expect(perm2).toBeDefined();
+
+      // Set overrides for regularUser
+      await PermissionManagementService.updateUserOverrides(adminUser.id, {
+        userId: regularUser.id,
+        overrides: [
+          { permissionId: perm1.id, state: "GRANTED" },
+          { permissionId: perm2.id, state: "DENIED" },
+        ],
+      });
+
+      // List overrides
+      const overrides = await PermissionManagementService.listUserOverrides(adminUser.id, regularUser.id);
+      expect(overrides.length).toBe(2);
+      expect(overrides.find(o => o.permissionId === perm1.id)?.state).toBe("GRANTED");
+      expect(overrides.find(o => o.permissionId === perm2.id)?.state).toBe("DENIED");
+
+      // Verify effective permissions combining overrides
+      const effective = await PermissionManagementService.getEffectiveUserPermissions(adminUser.id, regularUser.id);
+      expect(effective).toContain(perm1.key as AppPermission);
+      expect(effective).not.toContain(perm2.key as AppPermission);
+
+      // Clean up overrides
+      await PermissionManagementService.updateUserOverrides(adminUser.id, {
+        userId: regularUser.id,
+        overrides: [],
+      });
     });
   });
 });

@@ -2,6 +2,7 @@ export * from "./auth.pothos";
 export * from "./class-session.pothos";
 export * from "./enum.pothos";
 export * from "./pagination.objects";
+export * from "./permission-management.pothos";
 export * from "./schedule.pothos";
 export * from "./storage.pothos";
 export * from "./student.pothos";

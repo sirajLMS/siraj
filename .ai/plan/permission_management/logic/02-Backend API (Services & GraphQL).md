@@ -68,6 +68,6 @@ updateUserOverrides(userId, overrides: [{ permissionId, state }])
 
 Success Criteria:
 
-[ ] bun run generate:gqlSchema && bun codegen completes without errors.
+[x] bun run generate:gqlSchema && bun codegen completes without errors.
 
-[ ] Service perfectly isolates SuperAdmins from removal operations.
+[x] Service perfectly isolates SuperAdmins from removal operations.

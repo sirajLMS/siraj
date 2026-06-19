@@ -62,6 +62,13 @@ enum AppPermission {
   TEACHERS_LIST
   TEACHERS_MANAGE_SCHEDULE
   TEACHER_VIEW_DASHBOARD
+  TEST_CUSTOM_ONLY
+  TEST_SYSTEM_ONLY
+}
+
+input AssignPermissionGroupToUserInput {
+  groupId: String!
+  userId: String!
 }
 
 type BulkOperationFailure {
@@ -393,6 +400,12 @@ input CreateManualClassEntryInput {
   teacherId: ID!
 }
 
+input CreatePermissionGroupInput {
+  description: String
+  name: String!
+  permissionIds: [String!]!
+}
+
 type DailyScheduleList {
   duration: Int
   id: String
@@ -580,6 +593,12 @@ enum Gender {
   MALE
 }
 
+type GroupUser {
+  email: String
+  id: String
+  name: String
+}
+
 """A type representing arbitrary JSON values"""
 scalar JSON
 
@@ -608,13 +627,18 @@ type LoginResponse {
 type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
+  assignPermissionGroupToUser(input: AssignPermissionGroupToUserInput!): Boolean
+  bulkAssignUsersToGroup(groupId: String!, userIds: [String!]!): Boolean
+  bulkRevokeUsersFromGroup(groupId: String!, userIds: [String!]!): Boolean
   cleanupTestEntities(parentId: String!, parentUserId: String!, studentId: String!, studentUserId: String!, teacherId: String!, teacherUserId: String!): Boolean
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createFolder(input: FolderCreateInput!): FileOperationResult
+  createPermissionGroup(input: CreatePermissionGroupInput!): PermissionGroup
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
   deleteClassInstance(classInstanceId: ID!): Boolean
   deleteFile(path: String!): FileOperationResult
+  deletePermissionGroup(groupId: String!): Boolean
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
   deleteStudent(id: String!): Student
 
@@ -632,12 +656,15 @@ type Mutation {
   renameFile(input: FileRenameInput!): FileOperationResult
   rescheduleClass(classInstanceId: ID!, input: RescheduleClassInput!): ClassInstanceDetail
   resetClass(classInstanceId: ID!): Boolean
+  revokePermissionGroupFromUser(input: RevokePermissionGroupFromUserInput!): Boolean
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
   stopClass(classInstanceId: ID!): ClassInstanceDetail
   updateDirectoryPermissions(input: DirectoryPermissionsUpdateInput!): FileOperationResult
+  updatePermissionGroup(input: UpdatePermissionGroupInput!): PermissionGroup
   updateSessionStatusAbsent(classInstanceId: ID!): ClassInstanceDetail
   updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
   updateSessionStatusStart(classInstanceId: ID!): ClassInstanceDetail
+  updateUserOverrides(overrides: [UserOverrideInput!]!, userId: String!): Boolean
 }
 
 enum OrderSortDirection {
@@ -681,6 +708,28 @@ input PartialStudentUpdateInput {
   status: StudentStatus
 }
 
+type Permission {
+  action: String
+  category: String
+  description: String
+  id: String
+  isSystem: Boolean
+  key: String
+  resource: String
+}
+
+type PermissionGroup {
+  assignedUsers: [GroupUser!]
+  createdAt: DateTime
+  description: String
+  id: String
+  isSystem: Boolean
+  name: String
+  permissionIds: [String!]
+  slug: String
+  updatedAt: DateTime
+}
+
 """A type representing a validated phone number"""
 scalar PhoneNumber
 
@@ -693,11 +742,25 @@ type Query {
     """Parent directory path (empty or null for root level)"""
     path: String
   ): [DirectoryInfo!]
+
+  """
+  Return effective permissions for a user, combining groups and overrides.
+  """
+  effectiveUserPermissions(userId: String!): [String!]
   fileInfo(path: String!): FileInfo
   fileUsage(input: FileUsageCheckInput!): FileUsageResult
   folderInfo(path: String!): DirectoryInfo
   listFiles(input: FilesListInput!): StorageObjectList
   me: User
+
+  """Fetch a single permission group by ID."""
+  permissionGroup(id: String!): PermissionGroup
+
+  """List all permission groups with their permission IDs."""
+  permissionGroups: [PermissionGroup!]
+
+  """List all permission catalog entries."""
+  permissions: [Permission!]
   rescheduleTrackingMetrics: RescheduleTrackingMetrics
   rescheduleTrackingRows(input: RescheduleTrackingInput!): [RescheduleTrackingRow!]
   searchFiles(
@@ -729,6 +792,12 @@ type Query {
   teachers(limit: Int!, search: String!): [TeacherSimple!]
   translatedMessage(key: String!, namespace: String!): String
   user(id: String!): User
+
+  """List overrides for a user."""
+  userOverrides(userId: String!): [UserOverride!]
+
+  """Return group IDs assigned to a user."""
+  userPermissionGroups(userId: String!): [String!]
   users: [User!]
   welcomeMessage: String
 }
@@ -773,6 +842,11 @@ type RescheduleTrackingRow {
   teacherAvatarUrl: String
   teacherId: String
   teacherName: String
+}
+
+input RevokePermissionGroupFromUserInput {
+  groupId: String!
+  userId: String!
 }
 
 input StorageItemProtectionUpdateInput {
@@ -1022,6 +1096,13 @@ type TestEntities {
   teacherUserId: String
 }
 
+input UpdatePermissionGroupInput {
+  description: String
+  groupId: String!
+  name: String
+  permissionIds: [String!]
+}
+
 type UploadPreparation {
   id: String!
   uploadType: UploadType!
@@ -1051,4 +1132,15 @@ type User {
   permissions: [AppPermission!]
   role: String
   updatedAt: DateTime
+}
+
+type UserOverride {
+  assignedBy: String
+  permissionId: String
+  state: String
+}
+
+input UserOverrideInput {
+  permissionId: String!
+  state: String!
 }

@@ -84,8 +84,15 @@ export enum AppPermission {
   TeachersEdit = 'TEACHERS_EDIT',
   TeachersList = 'TEACHERS_LIST',
   TeachersManageSchedule = 'TEACHERS_MANAGE_SCHEDULE',
-  TeacherViewDashboard = 'TEACHER_VIEW_DASHBOARD'
+  TeacherViewDashboard = 'TEACHER_VIEW_DASHBOARD',
+  TestCustomOnly = 'TEST_CUSTOM_ONLY',
+  TestSystemOnly = 'TEST_SYSTEM_ONLY'
 }
+
+export type AssignPermissionGroupToUserInput = {
+  groupId: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
+};
 
 export type BulkOperationFailure = {
   __typename?: 'BulkOperationFailure';
@@ -423,6 +430,12 @@ export type CreateManualClassEntryInput = {
   teacherId: Scalars['ID']['input'];
 };
 
+export type CreatePermissionGroupInput = {
+  description: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  permissionIds: Array<Scalars['String']['input']>;
+};
+
 export type DailyScheduleList = {
   __typename?: 'DailyScheduleList';
   duration: Maybe<Scalars['Int']['output']>;
@@ -607,6 +620,13 @@ export enum Gender {
   Male = 'MALE'
 }
 
+export type GroupUser = {
+  __typename?: 'GroupUser';
+  email: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+};
+
 export type LeaveProcessResult = {
   __typename?: 'LeaveProcessResult';
   completedInstance: Maybe<ClassInstanceDetail>;
@@ -635,13 +655,18 @@ export type Mutation = {
   __typename?: 'Mutation';
   activateClass: Maybe<ClassInstanceDetail>;
   activateOverrideClass: Maybe<ClassInstanceDetail>;
+  assignPermissionGroupToUser: Maybe<Scalars['Boolean']['output']>;
+  bulkAssignUsersToGroup: Maybe<Scalars['Boolean']['output']>;
+  bulkRevokeUsersFromGroup: Maybe<Scalars['Boolean']['output']>;
   cleanupTestEntities: Maybe<Scalars['Boolean']['output']>;
   copyStorageItems: Maybe<BulkOperationResult>;
   createFolder: Maybe<FileOperationResult>;
+  createPermissionGroup: Maybe<PermissionGroup>;
   createTeacherManualClassEntry: Maybe<ClassInstanceDetail>;
   createTestEntities: Maybe<TestEntities>;
   deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
   deleteFile: Maybe<FileOperationResult>;
+  deletePermissionGroup: Maybe<Scalars['Boolean']['output']>;
   deleteStorageItems: Maybe<BulkOperationResult>;
   deleteStudent: Maybe<Student>;
   /** Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables. */
@@ -656,12 +681,15 @@ export type Mutation = {
   renameFile: Maybe<FileOperationResult>;
   rescheduleClass: Maybe<ClassInstanceDetail>;
   resetClass: Maybe<Scalars['Boolean']['output']>;
+  revokePermissionGroupFromUser: Maybe<Scalars['Boolean']['output']>;
   setStorageItemProtection: Maybe<FileOperationResult>;
   stopClass: Maybe<ClassInstanceDetail>;
   updateDirectoryPermissions: Maybe<FileOperationResult>;
+  updatePermissionGroup: Maybe<PermissionGroup>;
   updateSessionStatusAbsent: Maybe<ClassInstanceDetail>;
   updateSessionStatusLeave: Maybe<LeaveProcessResult>;
   updateSessionStatusStart: Maybe<ClassInstanceDetail>;
+  updateUserOverrides: Maybe<Scalars['Boolean']['output']>;
 };
 
 
@@ -672,6 +700,23 @@ export type MutationActivateClassArgs = {
 
 export type MutationActivateOverrideClassArgs = {
   classInstanceId: Scalars['ID']['input'];
+};
+
+
+export type MutationAssignPermissionGroupToUserArgs = {
+  input: AssignPermissionGroupToUserInput;
+};
+
+
+export type MutationBulkAssignUsersToGroupArgs = {
+  groupId: Scalars['String']['input'];
+  userIds: Array<Scalars['String']['input']>;
+};
+
+
+export type MutationBulkRevokeUsersFromGroupArgs = {
+  groupId: Scalars['String']['input'];
+  userIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -695,6 +740,11 @@ export type MutationCreateFolderArgs = {
 };
 
 
+export type MutationCreatePermissionGroupArgs = {
+  input: CreatePermissionGroupInput;
+};
+
+
 export type MutationCreateTeacherManualClassEntryArgs = {
   input: CreateManualClassEntryInput;
 };
@@ -713,6 +763,11 @@ export type MutationDeleteClassInstanceArgs = {
 
 export type MutationDeleteFileArgs = {
   path: Scalars['String']['input'];
+};
+
+
+export type MutationDeletePermissionGroupArgs = {
+  groupId: Scalars['String']['input'];
 };
 
 
@@ -772,6 +827,11 @@ export type MutationResetClassArgs = {
 };
 
 
+export type MutationRevokePermissionGroupFromUserArgs = {
+  input: RevokePermissionGroupFromUserInput;
+};
+
+
 export type MutationSetStorageItemProtectionArgs = {
   input: StorageItemProtectionUpdateInput;
 };
@@ -784,6 +844,11 @@ export type MutationStopClassArgs = {
 
 export type MutationUpdateDirectoryPermissionsArgs = {
   input: DirectoryPermissionsUpdateInput;
+};
+
+
+export type MutationUpdatePermissionGroupArgs = {
+  input: UpdatePermissionGroupInput;
 };
 
 
@@ -800,6 +865,12 @@ export type MutationUpdateSessionStatusLeaveArgs = {
 
 export type MutationUpdateSessionStatusStartArgs = {
   classInstanceId: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdateUserOverridesArgs = {
+  overrides: Array<UserOverrideInput>;
+  userId: Scalars['String']['input'];
 };
 
 export enum OrderSortDirection {
@@ -844,6 +915,30 @@ export type PartialStudentUpdateInput = {
   status: InputMaybe<StudentStatus>;
 };
 
+export type Permission = {
+  __typename?: 'Permission';
+  action: Maybe<Scalars['String']['output']>;
+  category: Maybe<Scalars['String']['output']>;
+  description: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isSystem: Maybe<Scalars['Boolean']['output']>;
+  key: Maybe<Scalars['String']['output']>;
+  resource: Maybe<Scalars['String']['output']>;
+};
+
+export type PermissionGroup = {
+  __typename?: 'PermissionGroup';
+  assignedUsers: Maybe<Array<GroupUser>>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  description: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isSystem: Maybe<Scalars['Boolean']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  permissionIds: Maybe<Array<Scalars['String']['output']>>;
+  slug: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   classInstance: Maybe<ClassInstanceDetail>;
@@ -851,11 +946,19 @@ export type Query = {
   dailyScheduleList: Maybe<Array<DailyScheduleList>>;
   dailyScheduleMetrics: Maybe<DailyScheduleMetrics>;
   directoryChildren: Maybe<Array<DirectoryInfo>>;
+  /** Return effective permissions for a user, combining groups and overrides. */
+  effectiveUserPermissions: Maybe<Array<Scalars['String']['output']>>;
   fileInfo: Maybe<FileInfo>;
   fileUsage: Maybe<FileUsageResult>;
   folderInfo: Maybe<DirectoryInfo>;
   listFiles: Maybe<StorageObjectList>;
   me: Maybe<User>;
+  /** Fetch a single permission group by ID. */
+  permissionGroup: Maybe<PermissionGroup>;
+  /** List all permission groups with their permission IDs. */
+  permissionGroups: Maybe<Array<PermissionGroup>>;
+  /** List all permission catalog entries. */
+  permissions: Maybe<Array<Permission>>;
   rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
   rescheduleTrackingRows: Maybe<Array<RescheduleTrackingRow>>;
   searchFiles: Maybe<StorageObjectList>;
@@ -870,6 +973,10 @@ export type Query = {
   teachers: Maybe<Array<TeacherSimple>>;
   translatedMessage: Maybe<Scalars['String']['output']>;
   user: Maybe<User>;
+  /** List overrides for a user. */
+  userOverrides: Maybe<Array<UserOverride>>;
+  /** Return group IDs assigned to a user. */
+  userPermissionGroups: Maybe<Array<Scalars['String']['output']>>;
   users: Maybe<Array<User>>;
   welcomeMessage: Maybe<Scalars['String']['output']>;
 };
@@ -903,6 +1010,11 @@ export type QueryDirectoryChildrenArgs = {
 };
 
 
+export type QueryEffectiveUserPermissionsArgs = {
+  userId: Scalars['String']['input'];
+};
+
+
 export type QueryFileInfoArgs = {
   path: Scalars['String']['input'];
 };
@@ -920,6 +1032,11 @@ export type QueryFolderInfoArgs = {
 
 export type QueryListFilesArgs = {
   input: FilesListInput;
+};
+
+
+export type QueryPermissionGroupArgs = {
+  id: Scalars['String']['input'];
 };
 
 
@@ -991,6 +1108,16 @@ export type QueryUserArgs = {
   id: Scalars['String']['input'];
 };
 
+
+export type QueryUserOverridesArgs = {
+  userId: Scalars['String']['input'];
+};
+
+
+export type QueryUserPermissionGroupsArgs = {
+  userId: Scalars['String']['input'];
+};
+
 export type RefreshTokenResponse = {
   __typename?: 'RefreshTokenResponse';
   token: Maybe<Scalars['String']['output']>;
@@ -1034,6 +1161,11 @@ export type RescheduleTrackingRow = {
   teacherAvatarUrl: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
+};
+
+export type RevokePermissionGroupFromUserInput = {
+  groupId: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
 };
 
 export type StorageItemProtectionUpdateInput = {
@@ -1296,6 +1428,13 @@ export type TestEntities = {
   teacherUserId: Maybe<Scalars['String']['output']>;
 };
 
+export type UpdatePermissionGroupInput = {
+  description: InputMaybe<Scalars['String']['input']>;
+  groupId: Scalars['String']['input'];
+  name: InputMaybe<Scalars['String']['input']>;
+  permissionIds: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
 export type UploadPreparation = {
   __typename?: 'UploadPreparation';
   id: Scalars['String']['output'];
@@ -1327,4 +1466,16 @@ export type User = {
   permissions: Maybe<Array<AppPermission>>;
   role: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type UserOverride = {
+  __typename?: 'UserOverride';
+  assignedBy: Maybe<Scalars['String']['output']>;
+  permissionId: Maybe<Scalars['String']['output']>;
+  state: Maybe<Scalars['String']['output']>;
+};
+
+export type UserOverrideInput = {
+  permissionId: Scalars['String']['input'];
+  state: Scalars['String']['input'];
 };

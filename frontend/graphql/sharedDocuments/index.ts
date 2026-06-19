@@ -7,3 +7,4 @@ export * from "./teacher.documents";
 export * from "./teacher-dashboard.documents";
 export * from "./test-helper.documents";
 export * from "./translation.documents";
+export * from "./permission-management.documents";

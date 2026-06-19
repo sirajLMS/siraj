@@ -42,7 +42,7 @@ Overrides Modal: effectivePermissions, editOverrides, inheritDefault.
 
 Success Criteria:
 
-[ ] Apollo documents strictly typed.
+[x] Apollo documents strictly typed.
 
 [ ] Zustand store exposes a reset() method to be called on unmount.
 
