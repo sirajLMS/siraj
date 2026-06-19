@@ -1,6 +1,6 @@
 "use client";
 
-import { Autocomplete, Box, Button, TextField } from "@mui/material";
+import { Autocomplete, Box, TextField } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
 import { AppDatePicker } from "@/frontend/components/ui/form/AppDatePicker";
 
@@ -38,14 +38,14 @@ export function ScheduleFilters({
   dateValue,
   teacherPlaceholder,
   teacherValue,
-  submitLabel,
+  // submitLabel,
   teachers,
   loadingTeachers = false,
   teacherSearchValue = "",
   onTeacherSearchChange,
   onDateChange,
   onTeacherChange,
-  onSubmit,
+  // onSubmit,
 }: Readonly<ScheduleFiltersProps>) {
   const selectedDate = parseFilterDate(dateValue);
 
@@ -98,7 +98,7 @@ export function ScheduleFilters({
         renderInput={params => <TextField {...params} label={teacherPlaceholder} placeholder={teacherPlaceholder} />}
       />
 
-      <Button
+      {/* <Button
         variant="contained"
         onClick={onSubmit}
         sx={{
@@ -113,7 +113,7 @@ export function ScheduleFilters({
         }}
       >
         {submitLabel}
-      </Button>
+      </Button> */}
     </Box>
   );
 }

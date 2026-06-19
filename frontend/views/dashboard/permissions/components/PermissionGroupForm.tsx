@@ -110,7 +110,7 @@ export function PermissionGroupForm({
   const filteredPermissions = validPermissions.filter(perm => {
     const matchesSearch =
       perm.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (perm.description && perm.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      perm.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesCategory = selectedCategory === "ALL" || perm.category === selectedCategory;
 
@@ -118,7 +118,9 @@ export function PermissionGroupForm({
   });
 
   // Group filtered permissions by their category
-  const groupedPermissions = filteredPermissions.reduce<Record<string, Array<Permission & { id: string; key: string; category: string }>>>((acc, perm) => {
+  const groupedPermissions = filteredPermissions.reduce<
+    Record<string, Array<Permission & { id: string; key: string; category: string }>>
+  >((acc, perm) => {
     const cat = perm.category;
     if (!acc[cat]) {
       acc[cat] = [];
@@ -180,9 +182,7 @@ export function PermissionGroupForm({
     >
       <DialogTitle id="permission-group-form-title">
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="titleLg">
-            {group ? t("editGroupTitle") : t("createGroupTitle")}
-          </Typography>
+          <Typography variant="titleLg">{group ? t("editGroupTitle") : t("createGroupTitle")}</Typography>
           <IconButton onClick={onClose} disabled={isLoading} size="small">
             <Close />
           </IconButton>
@@ -252,7 +252,9 @@ export function PermissionGroupForm({
                   borderRadius: 2,
                 })}
               >
-                <Box sx={{ display: "flex", flex: 1, gap: 2, width: "100%", flexDirection: { xs: "column", sm: "row" } }}>
+                <Box
+                  sx={{ display: "flex", flex: 1, gap: 2, width: "100%", flexDirection: { xs: "column", sm: "row" } }}
+                >
                   <Input
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
@@ -300,7 +302,10 @@ export function PermissionGroupForm({
               {/* Permissions list grouped by category */}
               <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
                 {Object.keys(groupedPermissions).length === 0 ? (
-                  <Typography variant="bodyMd" sx={theme => ({ textAlign: "center", color: theme.palette.text.secondary, py: 4 })}>
+                  <Typography
+                    variant="bodyMd"
+                    sx={theme => ({ textAlign: "center", color: theme.palette.text.secondary, py: 4 })}
+                  >
                     {t("noPermissionsFound")}
                   </Typography>
                 ) : (
@@ -364,17 +369,13 @@ export function PermissionGroupForm({
                                   px: 2,
                                   py: 1.5,
                                   cursor: perm.isSystem ? "not-allowed" : "pointer",
-                                  bgcolor: isChecked
-                                    ? theme.palette.primaryContainer
-                                    : "transparent",
+                                  bgcolor: isChecked ? theme.palette.primaryContainer : "transparent",
                                   borderBottom: `1px solid ${theme.palette.outlineVariant}`,
                                   "&:last-child": {
                                     borderBottom: "none",
                                   },
                                   "&:hover": {
-                                    bgcolor: isChecked
-                                      ? theme.palette.primaryContainer
-                                      : theme.palette.action.hover,
+                                    bgcolor: isChecked ? theme.palette.primaryContainer : theme.palette.action.hover,
                                   },
                                   opacity: perm.isSystem ? 0.7 : 1,
                                   transition: "background-color 0.2s",

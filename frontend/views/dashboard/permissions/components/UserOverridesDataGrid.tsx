@@ -7,8 +7,8 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui";
-import { userOverridesQueryDocument } from "@/frontend/graphql/sharedDocuments/permission-management.documents";
 import type { PermissionGroup, User, UserOverride } from "@/frontend/graphql/generated/gql/graphql-types";
+import { userOverridesQueryDocument } from "@/frontend/graphql/sharedDocuments/permission-management.documents";
 
 export interface UserOverridesDataGridProps {
   readonly users: readonly User[];
@@ -23,7 +23,10 @@ interface OverridesInfo {
   readonly conflictDetails: string[];
 }
 
-function useUserOverridesInfo(userId: string, userGroups: readonly PermissionGroup[]): {
+function useUserOverridesInfo(
+  userId: string,
+  userGroups: readonly PermissionGroup[]
+): {
   readonly loading: boolean;
   readonly error: any;
   readonly info: OverridesInfo | null;
@@ -151,7 +154,11 @@ function DynamicOverridesCell({ userId, userGroups, type }: Readonly<DynamicOver
         </Box>
       );
     }
-    return <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>{info.grants}</Typography>;
+    return (
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+        {info.grants}
+      </Typography>
+    );
   }
 
   if (type === "revokes") {
@@ -177,7 +184,11 @@ function DynamicOverridesCell({ userId, userGroups, type }: Readonly<DynamicOver
         </Box>
       );
     }
-    return <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>{info.revokes}</Typography>;
+    return (
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+        {info.revokes}
+      </Typography>
+    );
   }
 
   // Type is status
@@ -239,7 +250,12 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
                   fontWeight: 600,
                 })}
               >
-                {user.name?.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+                {user.name
+                  ?.split(" ")
+                  .map(w => w[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
               </Avatar>
               <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
                 <Typography

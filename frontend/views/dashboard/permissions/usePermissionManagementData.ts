@@ -58,11 +58,8 @@ export function usePermissionManagementData() {
   const mutationOptions = (label: string, refetch = true) => ({
     ...(refetch
       ? {
-        refetchQueries: [
-          { query: permissionGroupsQueryDocument },
-          { query: usersQueryDocument },
-        ],
-      }
+          refetchQueries: [{ query: permissionGroupsQueryDocument }, { query: usersQueryDocument }],
+        }
       : {}),
     onError: (err: Error) => {
       logger.error(`[PermissionManagement] ${label} error:`, err);

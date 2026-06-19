@@ -8,14 +8,13 @@ import type { Permission, PermissionGroup, User, UserOverride } from "@/frontend
 import { AdminQueueTabBar } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
 import { AssignGroupDialog } from "./components/AssignGroupDialog";
 import { DeleteGroupDialog } from "./components/DeleteGroupDialog";
+import { ManageOverridesDialog } from "./components/ManageOverridesDialog";
 import { PermissionCatalogSection } from "./components/PermissionCatalogSection";
 import { PermissionGroupCardList } from "./components/PermissionGroupCardList";
 import { PermissionGroupForm } from "./components/PermissionGroupForm";
 import { PermissionGroupsDataGrid } from "./components/PermissionGroupsDataGrid";
-
 import { SingleGroupView } from "./components/SingleGroupView";
 import { UserOverridesDataGrid } from "./components/UserOverridesDataGrid";
-import { ManageOverridesDialog } from "./components/ManageOverridesDialog";
 
 export interface PermissionManagementViewProps {
   readonly permissions: readonly Permission[];

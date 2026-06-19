@@ -226,6 +226,7 @@ export function AdminDashboardContainer() {
       metrics={metricsList}
       onMetricClick={handleMetricClick}
       scheduleTitle={t("admin.scheduleOverview")}
+      viewAllLabel={t("admin.viewAll")}
       searchPlaceholder={t("admin.searchPlaceholder")}
       searchValue={filters.searchQuery}
       dateLabel={t("admin.listOfClassesOn")}

@@ -32,13 +32,9 @@ export function DeleteGroupDialog({
       maxWidth="xs"
       aria-labelledby="delete-group-dialog-title"
     >
-      <DialogTitle id="delete-group-dialog-title">
-        {t("deleteConfirmTitle")}
-      </DialogTitle>
+      <DialogTitle id="delete-group-dialog-title">{t("deleteConfirmTitle")}</DialogTitle>
       <DialogContent>
-        <DialogContentText sx={{ mt: 1 }}>
-          {t("deleteConfirmBody", { name: groupName })}
-        </DialogContentText>
+        <DialogContentText sx={{ mt: 1 }}>{t("deleteConfirmBody", { name: groupName })}</DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button

@@ -1953,7 +1953,8 @@ const en: MessageSchema = {
       cancel: "Cancel",
       save: "Save",
       deleteConfirmTitle: "Delete Permission Group",
-      deleteConfirmBody: "Are you sure you want to delete the permission group \"{name}\"? This action cannot be undone and all assigned users will lose these permissions.",
+      deleteConfirmBody:
+        'Are you sure you want to delete the permission group "{name}"? This action cannot be undone and all assigned users will lose these permissions.',
       createGroupTitle: "Create Permission Group",
       editGroupTitle: "Edit Permission Group",
       groupNameLabel: "Group Name",

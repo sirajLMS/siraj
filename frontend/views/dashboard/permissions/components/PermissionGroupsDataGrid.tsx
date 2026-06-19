@@ -165,7 +165,7 @@ export function PermissionGroupsDataGrid({
         ),
       },
     ];
-  }, [t, onEditGroup, onDeleteGroup, onAssignGroup]);
+  }, [t, onEditGroup, onDeleteGroup, onAssignGroup, onViewGroup]);
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>

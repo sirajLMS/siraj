@@ -25,8 +25,8 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import { userOverridesQueryDocument } from "@/frontend/graphql/sharedDocuments/permission-management.documents";
 import type { Permission, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
+import { userOverridesQueryDocument } from "@/frontend/graphql/sharedDocuments/permission-management.documents";
 
 interface ManageOverridesDialogProps {
   readonly open: boolean;
@@ -36,10 +36,7 @@ interface ManageOverridesDialogProps {
   readonly permissions: readonly Permission[];
   readonly isLoading: boolean;
   readonly onClose: () => void;
-  readonly onSave: (
-    userId: string,
-    overrides: Array<{ permissionId: string; state: string }>
-  ) => Promise<void>;
+  readonly onSave: (userId: string, overrides: Array<{ permissionId: string; state: string }>) => Promise<void>;
 }
 
 type OverrideState = "GRANTED" | "DENIED" | "INHERIT";
@@ -74,7 +71,6 @@ export function ManageOverridesDialog({
     if (!userId) return [];
     return groups.filter(g => g.assignedUsers?.some(au => au.id === userId));
   }, [groups, userId]);
-
 
   // Initialize local overrides when query returns
   useEffect(() => {
@@ -205,7 +201,12 @@ export function ManageOverridesDialog({
                 fontWeight: 600,
               })}
             >
-              {user.name?.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+              {user.name
+                ?.split(" ")
+                .map(w => w[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase()}
             </Avatar>
             <Box>
               <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
@@ -455,10 +456,7 @@ export function ManageOverridesDialog({
                                   </Box>
                                 )}
                                 {effectiveState === "not_set" && (
-                                  <Typography
-                                    variant="bodyMd"
-                                    sx={theme => ({ color: theme.palette.text.secondary })}
-                                  >
+                                  <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
                                     Not Set
                                   </Typography>
                                 )}
@@ -481,11 +479,16 @@ export function ManageOverridesDialog({
                                   onClick={() => handleOverrideChange(p.id!, "INHERIT")}
                                   sx={theme => ({
                                     fontSize: "0.75rem",
-                                    bgcolor: overrideState === "INHERIT" ? theme.palette.primaryContainer : "transparent",
-                                    color: overrideState === "INHERIT" ? theme.palette.onPrimaryContainer : theme.palette.text.secondary,
+                                    bgcolor:
+                                      overrideState === "INHERIT" ? theme.palette.primaryContainer : "transparent",
+                                    color:
+                                      overrideState === "INHERIT"
+                                        ? theme.palette.onPrimaryContainer
+                                        : theme.palette.text.secondary,
                                     borderColor: theme.palette.divider,
                                     "&:hover": {
-                                      bgcolor: overrideState === "INHERIT" ? theme.palette.primaryContainer : "transparent",
+                                      bgcolor:
+                                        overrideState === "INHERIT" ? theme.palette.primaryContainer : "transparent",
                                       borderColor: theme.palette.divider,
                                     },
                                   })}
@@ -497,7 +500,10 @@ export function ManageOverridesDialog({
                                   sx={theme => ({
                                     fontSize: "0.75rem",
                                     bgcolor: overrideState === "GRANTED" ? "rgba(46, 125, 50, 0.15)" : "transparent",
-                                    color: overrideState === "GRANTED" ? theme.palette.success.main : theme.palette.text.secondary,
+                                    color:
+                                      overrideState === "GRANTED"
+                                        ? theme.palette.success.main
+                                        : theme.palette.text.secondary,
                                     borderColor: theme.palette.divider,
                                     fontWeight: overrideState === "GRANTED" ? 600 : 400,
                                     "&:hover": {
@@ -513,7 +519,10 @@ export function ManageOverridesDialog({
                                   sx={theme => ({
                                     fontSize: "0.75rem",
                                     bgcolor: overrideState === "DENIED" ? "rgba(211, 47, 47, 0.15)" : "transparent",
-                                    color: overrideState === "DENIED" ? theme.palette.error.main : theme.palette.text.secondary,
+                                    color:
+                                      overrideState === "DENIED"
+                                        ? theme.palette.error.main
+                                        : theme.palette.text.secondary,
                                     borderColor: theme.palette.divider,
                                     fontWeight: overrideState === "DENIED" ? 600 : 400,
                                     "&:hover": {

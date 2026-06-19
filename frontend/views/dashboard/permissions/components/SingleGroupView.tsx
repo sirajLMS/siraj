@@ -40,12 +40,7 @@ interface SingleGroupViewProps {
   readonly onRevokeGroup: (groupId: string, userId: string) => Promise<void>;
   readonly onBulkAssign: (groupId: string, userIds: string[]) => Promise<void>;
   readonly onBulkRevoke: (groupId: string, userIds: string[]) => Promise<void>;
-  readonly onUpdateGroup: (
-    id: string,
-    name: string,
-    description: string,
-    permissionIds: string[]
-  ) => Promise<void>;
+  readonly onUpdateGroup: (id: string, name: string, description: string, permissionIds: string[]) => Promise<void>;
 }
 
 type SubTabKey = "current" | "add" | "users";
@@ -83,9 +78,7 @@ export function SingleGroupView({
     const available = permissions.filter(
       p => !group.permissionIds?.includes(p.id!) && !group.permissionIds?.includes(p.key!)
     );
-    const cats = available
-      .map(p => p.category)
-      .filter((c): c is string => typeof c === "string" && c.trim() !== "");
+    const cats = available.map(p => p.category).filter((c): c is string => typeof c === "string" && c.trim() !== "");
     return Array.from(new Set(cats));
   }, [permissions, group.permissionIds]);
 
@@ -220,7 +213,7 @@ export function SingleGroupView({
     }
 
     return cols;
-  }, [t, group.isSystem, onUpdateGroup, group.id, group.name, group.description, group.permissionIds]);
+  }, [t, group.isSystem, handleRevokePermission]);
 
   // Definition of Add Permissions columns
   const addPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {
@@ -329,7 +322,12 @@ export function SingleGroupView({
                   fontWeight: 600,
                 })}
               >
-                {user.name?.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+                {user.name
+                  ?.split(" ")
+                  .map(w => w[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
               </Avatar>
               <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
                 <Typography
@@ -405,7 +403,7 @@ export function SingleGroupView({
         ),
       },
     ];
-  }, [t, group.createdAt, selectedAssignedUserIds]);
+  }, [t, group.createdAt, selectedAssignedUserIds, handleRevokeUser]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -522,11 +520,7 @@ export function SingleGroupView({
             sx={{ textTransform: "none", fontWeight: 600 }}
           />
           {!group.isSystem && (
-            <Tab
-              value="add"
-              label={t("addPermissions")}
-              sx={{ textTransform: "none", fontWeight: 600 }}
-            />
+            <Tab value="add" label={t("addPermissions")} sx={{ textTransform: "none", fontWeight: 600 }} />
           )}
           <Tab
             value="users"
@@ -579,7 +573,8 @@ export function SingleGroupView({
                     No Permissions Assigned Yet
                   </Typography>
                   <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, maxWidth: 400 })}>
-                    This custom group currently has no active policies. Add specific resource permissions to grant access to content modules.
+                    This custom group currently has no active policies. Add specific resource permissions to grant
+                    access to content modules.
                   </Typography>
                   {!group.isSystem && (
                     <Button

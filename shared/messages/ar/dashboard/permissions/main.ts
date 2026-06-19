@@ -38,7 +38,8 @@ export const permissions: PermissionsLabels = {
   cancel: "إلغاء",
   save: "حفظ",
   deleteConfirmTitle: "حذف مجموعة الصلاحيات",
-  deleteConfirmBody: "هل أنت متأكد من حذف مجموعة الصلاحيات \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء وسيخسر جميع المستخدمين المعينين هذه الصلاحيات.",
+  deleteConfirmBody:
+    'هل أنت متأكد من حذف مجموعة الصلاحيات "{name}"؟ لا يمكن التراجع عن هذا الإجراء وسيخسر جميع المستخدمين المعينين هذه الصلاحيات.',
   createGroupTitle: "إنشاء مجموعة صلاحيات",
   editGroupTitle: "تعديل مجموعة الصلاحيات",
   groupNameLabel: "اسم المجموعة",
