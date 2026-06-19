@@ -60,3 +60,22 @@ export const userPermissionGroups = pgTable(
     index("user_permission_groups_user_id_idx").on(table.userId),
   ]
 );
+
+export const userPermissionOverrides = pgTable(
+  "user_permission_overrides",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    permissionId: uuid("permission_id")
+      .notNull()
+      .references(() => permissions.id, { onDelete: "cascade" }),
+    state: varchar("state", { length: 20 }).notNull(), // 'GRANTED' | 'DENIED'
+    assignedByUserId: uuid("assigned_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+  },
+  table => [
+    primaryKey({ columns: [table.userId, table.permissionId] }),
+    index("user_permission_overrides_user_id_idx").on(table.userId),
+  ]
+);

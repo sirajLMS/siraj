@@ -73,8 +73,8 @@ setUserOverrides(userId, overrides: { permissionId, state }[]): Atomic transacti
 
 Success Criteria:
 
-[ ] Multi-table writes use db.transaction().
+[x] Multi-table writes use db.transaction().
 
-[ ] Drizzle inArray used for all bulk operations.
+[x] Drizzle inArray used for all bulk operations.
 
-[ ] Tests pass for cannotDeleteSystem exceptions.
+[x] Tests pass for cannotDeleteSystem exceptions.

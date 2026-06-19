@@ -3,12 +3,12 @@ export { BillingRepository } from "./billing.repository";
 export { CacheDbRepository } from "./cache.repository";
 export { ClassPerformanceRepository } from "./class-performance.repository";
 export { NotificationRepository } from "./notification.repository";
+export { PermissionManagementRepository } from "./permission-management.repository";
 export { RateLimitRepository } from "./ratelimit.repository";
 export { SchedulingRepository } from "./scheduling.repository";
 export { SessionRepository } from "./session.repository";
 export { SignedUrlRepository } from "./signedUrl.repository";
 export { SoftDeleteRepository } from "./soft-delete.repository";
-
 export { StorageDbRepository } from "./storage.repository";
 export { StudentRepository } from "./student.repository";
 export { StudentHistoryRepository } from "./student-history.repository";

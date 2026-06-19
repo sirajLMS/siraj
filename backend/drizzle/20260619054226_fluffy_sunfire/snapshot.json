@@ -1,8 +1,8 @@
 {
-  "id": "a4191f9b-6bbe-46ee-b35d-4773738033b8",
-  "prevIds": ["2e4a584e-bfa5-4fbb-aa24-4a19b0620434"],
   "version": "8",
   "dialect": "postgres",
+  "id": "74f6b829-bb07-4fd5-8d9e-7dbc85dbe3a3",
+  "prevIds": ["8a96ac6b-f79d-4bd4-a9bf-9a167dad824f"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
@@ -583,6 +583,12 @@
     {
       "isRlsEnabled": false,
       "name": "user_permission_groups",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "user_permission_overrides",
       "entityType": "tables",
       "schema": "public"
     },
@@ -3294,6 +3300,71 @@
       "entityType": "columns",
       "schema": "public",
       "table": "user_permission_groups"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "user_permission_overrides"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "permission_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "user_permission_overrides"
+    },
+    {
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "state",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "user_permission_overrides"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "assigned_by_user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "user_permission_overrides"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "user_permission_overrides"
     },
     {
       "type": "uuid",
@@ -9029,6 +9100,27 @@
       "nameExplicit": true,
       "columns": [
         {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "user_permission_overrides_user_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "user_permission_overrides"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
           "value": "scheduled_start_at",
           "isExpression": false,
           "asc": true,
@@ -11405,6 +11497,45 @@
     },
     {
       "nameExplicit": false,
+      "columns": ["user_id"],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "user_permission_overrides_user_id_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "user_permission_overrides"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["permission_id"],
+      "schemaTo": "public",
+      "tableTo": "permissions",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "user_permission_overrides_permission_id_permissions_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "user_permission_overrides"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["assigned_by_user_id"],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "user_permission_overrides_assigned_by_user_id_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "user_permission_overrides"
+    },
+    {
+      "nameExplicit": false,
       "columns": ["class_instance_id"],
       "schemaTo": "public",
       "tableTo": "class_instances",
@@ -12349,6 +12480,14 @@
       "entityType": "pks",
       "schema": "public",
       "table": "user_permission_groups"
+    },
+    {
+      "columns": ["user_id", "permission_id"],
+      "nameExplicit": false,
+      "name": "user_permission_overrides_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "user_permission_overrides"
     },
     {
       "columns": ["id"],

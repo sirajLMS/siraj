@@ -1,10 +1,9 @@
 import { db } from "@/backend/db/drizzleDb";
-import { userPermissionGroups, users } from "@/backend/db/schema";
+import { permissionGroups as permissionGroupsSchema, userPermissionGroups, users } from "@/backend/db/schema";
 import { hashPassword } from "@/backend/lib/auth/password";
 import logger from "@/backend/lib/logger";
 import type { PermissionGroupEntity } from "@/backend/types/auth.types";
 import { INTERNAL_DEMO_USERS } from "@/shared/demo-users";
-import { seedOrGet as seedOrGetPermissions } from "./seed-permissions";
 
 async function seedUser(u: (typeof INTERNAL_DEMO_USERS)[0], groupMap: Map<string, string>, now: Date) {
   const hashedPassword = await hashPassword(u.plainPassword || "12345678");
@@ -49,7 +48,7 @@ export async function seedOrGet(permissionGroups?: PermissionGroupEntity[]) {
   const now = new Date();
 
   // Ensure permission groups exist and get them
-  const groups = permissionGroups || (await seedOrGetPermissions());
+  const groups = permissionGroups || (await db.select().from(permissionGroupsSchema));
   const groupMap = new Map(groups.map(g => [g.slug, g.id]));
 
   const results = [];

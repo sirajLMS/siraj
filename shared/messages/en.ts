@@ -86,6 +86,10 @@ const en: MessageSchema = {
     insufficientClasses: "Insufficient classes for student {id}. Remaining: {remaining}, Required: {required}",
     studentVersionMismatch: "Version mismatch for student {id}. Expected {expectedVersion}, got {gotVersion}.",
     cannotVerifyHistoricalBanking: "Cannot verify historical banking records",
+    permissionGroupNotFound: "Permission group {id} not found",
+    cannotModifySystemPermissionGroup:
+      "Cannot modify core properties of system permission groups; only name and description can be updated",
+    cannotDeleteSystemPermissionGroup: "Cannot delete a system permission or group",
   },
   auth: {
     login: {

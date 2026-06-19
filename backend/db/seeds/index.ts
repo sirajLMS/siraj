@@ -1,3 +1,5 @@
+import { db } from "@/backend/db/drizzleDb";
+import { permissionGroups as permissionGroupsSchema } from "@/backend/db/schema";
 import logger from "@/backend/lib/logger";
 import type {
   ClassInstanceEntity,
@@ -15,7 +17,6 @@ import { seedOrGet as seedOrGetClassPerformance } from "./seed-class-performance
 import { seedOrGet as seedOrGetClassStatusEvents } from "./seed-class-status-events";
 import { seedOrGet as seedOrGetClasses } from "./seed-classes";
 import { seedOrGet as seedOrGetParents } from "./seed-parents";
-import { seedOrGet as seedOrGetPermissions } from "./seed-permissions";
 import { seedOrGet as seedOrGetStudents } from "./seed-students";
 import { seedOrGet as seedOrGetTeachers } from "./seed-teachers";
 import { seedOrGet as seedOrGetUsers } from "./seed-users";
@@ -48,8 +49,8 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   }
 
   if (!context.permissionGroups) {
-    logger.log("Seeding permissions catalog and system permission groups...");
-    context.permissionGroups = await seedOrGetPermissions();
+    logger.log("Fetching system permission groups...");
+    context.permissionGroups = await db.select().from(permissionGroupsSchema);
   }
 
   if (!context.users) {

@@ -58,4 +58,7 @@ export interface ErrorsLabels {
   readonly studentVersionMismatch: string;
   readonly cannotVerifyHistoricalBanking: string;
   readonly missedClassTime: string;
+  readonly permissionGroupNotFound: string;
+  readonly cannotModifySystemPermissionGroup: string;
+  readonly cannotDeleteSystemPermissionGroup: string;
 }

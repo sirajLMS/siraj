@@ -281,6 +281,15 @@ CREATE TABLE "user_permission_groups" (
 	CONSTRAINT "user_permission_groups_pkey" PRIMARY KEY("user_id","group_id")
 );
 --> statement-breakpoint
+CREATE TABLE "user_permission_overrides" (
+	"user_id" uuid,
+	"permission_id" uuid,
+	"state" varchar(20) NOT NULL,
+	"assigned_by_user_id" uuid,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "user_permission_overrides_pkey" PRIMARY KEY("user_id","permission_id")
+);
+--> statement-breakpoint
 CREATE TABLE "class_instance_performance" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"class_instance_id" uuid NOT NULL UNIQUE,
@@ -833,6 +842,7 @@ CREATE INDEX "parents_status_idx" ON "parents" ("status");--> statement-breakpoi
 CREATE INDEX "group_permissions_group_id_idx" ON "group_permissions" ("group_id");--> statement-breakpoint
 CREATE INDEX "permissions_key_idx" ON "permissions" ("key");--> statement-breakpoint
 CREATE INDEX "user_permission_groups_user_id_idx" ON "user_permission_groups" ("user_id");--> statement-breakpoint
+CREATE INDEX "user_permission_overrides_user_id_idx" ON "user_permission_overrides" ("user_id");--> statement-breakpoint
 CREATE INDEX "class_instances_scheduled_start_at_idx" ON "class_instances" ("scheduled_start_at");--> statement-breakpoint
 CREATE INDEX "class_instances_teacher_scheduled_idx" ON "class_instances" ("teacher_id","scheduled_start_at");--> statement-breakpoint
 CREATE INDEX "class_instances_student_scheduled_idx" ON "class_instances" ("student_id","scheduled_start_at");--> statement-breakpoint
@@ -950,6 +960,9 @@ ALTER TABLE "permission_groups" ADD CONSTRAINT "permission_groups_created_by_use
 ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_group_id_permission_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "permission_groups"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "user_permission_groups" ADD CONSTRAINT "user_permission_groups_assigned_by_user_id_users_id_fkey" FOREIGN KEY ("assigned_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "user_permission_overrides" ADD CONSTRAINT "user_permission_overrides_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "user_permission_overrides" ADD CONSTRAINT "user_permission_overrides_permission_id_permissions_id_fkey" FOREIGN KEY ("permission_id") REFERENCES "permissions"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "user_permission_overrides" ADD CONSTRAINT "user_permission_overrides_assigned_by_user_id_users_id_fkey" FOREIGN KEY ("assigned_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "class_instance_performance" ADD CONSTRAINT "class_instance_performance_aA1hiAMGrLBk_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint

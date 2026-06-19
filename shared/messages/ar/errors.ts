@@ -61,4 +61,8 @@ export const errors: ErrorsLabels = {
   studentVersionMismatch: "عدم تطابق الإصدار للطالب {id}. المتوقع {expectedVersion}، الحاصل {gotVersion}.",
   cannotVerifyHistoricalBanking: "لا يمكن تأكيد السجلات البنكية التاريخية",
   missedClassTime: "لقد فات وقت الحصة",
+  permissionGroupNotFound: "مجموعة الصلاحيات {id} غير موجودة",
+  cannotModifySystemPermissionGroup:
+    "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام؛ يمكن فقط تحديث الاسم والوصف",
+  cannotDeleteSystemPermissionGroup: "لا يمكن حذف صلاحية أو مجموعة تابعة للنظام",
 };
