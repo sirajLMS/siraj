@@ -56,8 +56,6 @@ describe("PermissionManagementService Business Logic", () => {
     role: "SuperAdmin",
   });
 
-
-
   beforeAll(async () => {
     // Override PermissionsService.getUserContext to return mock context if set
     PermissionsService.getUserContext = async (userId: string): Promise<UserPermissionContext> => {
@@ -269,7 +267,11 @@ describe("PermissionManagementService Business Logic", () => {
       expect(sysGroup).toBeDefined();
 
       await assertThrows(
-        () => PermissionManagementService.revokeGroupFromUser(adminUser.id, { userId: superAdminUser.id, groupId: sysGroup.id }),
+        () =>
+          PermissionManagementService.revokeGroupFromUser(adminUser.id, {
+            userId: superAdminUser.id,
+            groupId: sysGroup.id,
+          }),
         "Cannot modify permissions of a SuperAdmin user"
       );
     });

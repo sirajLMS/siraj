@@ -24,6 +24,7 @@ import type {
 } from "./dashboard/core";
 import type { ManagerOnboardingLabels, ManagersDirectoryLabels } from "./dashboard/managers";
 import type { ParentOnboardingLabels, ParentProfileLabels, ParentsDirectoryLabels } from "./dashboard/parents";
+import type { PermissionsLabels } from "./dashboard/permissions";
 import type { ReportsLabels } from "./dashboard/reports";
 import type { ResourcesLabels } from "./dashboard/resources";
 import type {
@@ -124,5 +125,6 @@ export type MessageSchema = {
     readonly suggestions: SuggestionsLabels;
     readonly complaints: ComplaintsLabels;
     readonly resources: ResourcesLabels;
+    readonly permissions: PermissionsLabels;
   };
 };

@@ -13,6 +13,7 @@ import { complaints as complaintsLabels } from "./dashboard/complaints";
 import { layout, nav, parentDashboard, scheduleAlerts, statusTracking } from "./dashboard/core";
 import { managerOnboarding, managersDirectory } from "./dashboard/managers";
 import { directory, onboarding, profile } from "./dashboard/parents";
+import { permissions as permissionsLabels } from "./dashboard/permissions";
 import { reports as reportsLabels } from "./dashboard/reports";
 import { resources as resourcesLabels } from "./dashboard/resources";
 import {
@@ -89,5 +90,6 @@ export const arTranslations = {
     suggestions: suggestionsLabels,
     complaints: complaintsLabels,
     resources: resourcesLabels,
+    permissions: permissionsLabels,
   },
 };

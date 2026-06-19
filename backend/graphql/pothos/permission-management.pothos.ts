@@ -1,62 +1,60 @@
 import { PermissionManagementRepository } from "@/backend/db/repo";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
-import type { GroupUserEntity, GroupWithPermissionIds, PermissionEntity, UserOverrideEntity, UserOverrideInput } from "@/backend/types";
+import type {
+  GroupUserEntity,
+  GroupWithPermissionIds,
+  PermissionEntity,
+  UserOverrideEntity,
+  UserOverrideInput,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
-export const PermissionObject = gqlSchemaBuilder
-  .objectRef<PermissionEntity>("Permission")
-  .implement({
-    fields: t => ({
-      id: t.exposeString("id"),
-      key: t.exposeString("key"),
-      resource: t.exposeString("resource"),
-      action: t.exposeString("action"),
-      description: t.exposeString("description"),
-      category: t.exposeString("category"),
-      isSystem: t.exposeBoolean("isSystem"),
-    }),
-  });
+export const PermissionObject = gqlSchemaBuilder.objectRef<PermissionEntity>("Permission").implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    key: t.exposeString("key"),
+    resource: t.exposeString("resource"),
+    action: t.exposeString("action"),
+    description: t.exposeString("description"),
+    category: t.exposeString("category"),
+    isSystem: t.exposeBoolean("isSystem"),
+  }),
+});
 
-export const GroupUserObject = gqlSchemaBuilder
-  .objectRef<GroupUserEntity>("GroupUser")
-  .implement({
-    fields: t => ({
-      id: t.exposeString("id"),
-      name: t.exposeString("name"),
-      email: t.exposeString("email"),
-    }),
-  });
+export const GroupUserObject = gqlSchemaBuilder.objectRef<GroupUserEntity>("GroupUser").implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    name: t.exposeString("name"),
+    email: t.exposeString("email"),
+  }),
+});
 
-export const PermissionGroupObject = gqlSchemaBuilder
-  .objectRef<GroupWithPermissionIds>("PermissionGroup")
-  .implement({
-    fields: t => ({
-      id: t.exposeString("id"),
-      name: t.exposeString("name"),
-      slug: t.exposeString("slug"),
-      description: t.exposeString("description", { nullable: true }),
-      isSystem: t.exposeBoolean("isSystem"),
-      createdAt: t.expose("createdAt", { type: "DateTime" }),
-      updatedAt: t.expose("updatedAt", { type: "DateTime" }),
-      permissionIds: t.exposeStringList("permissionIds"),
-      assignedUsers: t.field({
-        type: [GroupUserObject],
-        resolve: async (group) => PermissionManagementRepository.listUsersInGroup(group.id),
-      }),
+export const PermissionGroupObject = gqlSchemaBuilder.objectRef<GroupWithPermissionIds>("PermissionGroup").implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    name: t.exposeString("name"),
+    slug: t.exposeString("slug"),
+    description: t.exposeString("description", { nullable: true }),
+    isSystem: t.exposeBoolean("isSystem"),
+    createdAt: t.expose("createdAt", { type: "DateTime" }),
+    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
+    permissionIds: t.exposeStringList("permissionIds"),
+    assignedUsers: t.field({
+      type: [GroupUserObject],
+      resolve: async group => PermissionManagementRepository.listUsersInGroup(group.id),
     }),
-  });
+  }),
+});
 
-export const UserOverrideObject = gqlSchemaBuilder
-  .objectRef<UserOverrideEntity>("UserOverride")
-  .implement({
-    fields: t => ({
-      permissionId: t.exposeString("permissionId"),
-      state: t.exposeString("state"),
-      assignedBy: t.exposeString("assignedByUserId", { nullable: true }),
-    }),
-  });
+export const UserOverrideObject = gqlSchemaBuilder.objectRef<UserOverrideEntity>("UserOverride").implement({
+  fields: t => ({
+    permissionId: t.exposeString("permissionId"),
+    state: t.exposeString("state"),
+    assignedBy: t.exposeString("assignedByUserId", { nullable: true }),
+  }),
+});
 
 // ─── Input Types ──────────────────────────────────────────────────────────────
 
@@ -104,21 +102,18 @@ gqlSchemaBuilder.queryFields(t => ({
   permissions: t.field({
     type: [PermissionObject],
     description: "List all permission catalog entries.",
-    resolve: async (_root, _args, ctx) =>
-      PermissionManagementService.listPermissions(ctx.user?.id || "", ctx.locale),
+    resolve: async (_root, _args, ctx) => PermissionManagementService.listPermissions(ctx.user?.id || "", ctx.locale),
   }),
   permissionGroups: t.field({
     type: [PermissionGroupObject],
     description: "List all permission groups with their permission IDs.",
-    resolve: async (_root, _args, ctx) =>
-      PermissionManagementService.listGroups(ctx.user?.id || "", ctx.locale),
+    resolve: async (_root, _args, ctx) => PermissionManagementService.listGroups(ctx.user?.id || "", ctx.locale),
   }),
   permissionGroup: t.field({
     type: PermissionGroupObject,
     args: { id: t.arg.string({ required: true }) },
     description: "Fetch a single permission group by ID.",
-    resolve: async (_root, args, ctx) =>
-      PermissionManagementService.getGroup(ctx.user?.id || "", args.id, ctx.locale),
+    resolve: async (_root, args, ctx) => PermissionManagementService.getGroup(ctx.user?.id || "", args.id, ctx.locale),
   }),
   userPermissionGroups: t.stringList({
     args: { userId: t.arg.string({ required: true }) },
@@ -243,7 +238,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         return {
           permissionId: o.permissionId,
           state: o.state,
-        } as UserOverrideInput
+        } as UserOverrideInput;
       });
       await PermissionManagementService.updateUserOverrides(
         ctx.user?.id || "",

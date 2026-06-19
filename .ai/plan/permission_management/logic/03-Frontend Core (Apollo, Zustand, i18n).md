@@ -44,6 +44,6 @@ Success Criteria:
 
 [x] Apollo documents strictly typed.
 
-[ ] Zustand store exposes a reset() method to be called on unmount.
+[x] Zustand store exposes a reset() method to be called on unmount.
 
-[ ] Arabic translations map 1:1 with English keys.
+[x] Arabic translations map 1:1 with English keys.
