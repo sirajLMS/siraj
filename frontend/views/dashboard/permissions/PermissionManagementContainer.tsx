@@ -8,6 +8,7 @@ export function PermissionManagementContainer() {
   const store = usePermissionManagementStore();
   const {
     isLoading,
+    users,
     handleCreateGroup,
     handleUpdateGroup,
     handleDeleteGroup,
@@ -23,6 +24,7 @@ export function PermissionManagementContainer() {
       permissions={store.permissions}
       groups={store.groups}
       overrides={store.overrides}
+      users={users}
       selectedGroupId={store.selectedGroupId}
       selectedGroupIds={store.selectedGroupIds}
       selectedUserIds={store.selectedUserIds}

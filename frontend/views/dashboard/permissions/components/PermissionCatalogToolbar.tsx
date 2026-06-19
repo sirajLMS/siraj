@@ -15,7 +15,7 @@ function CategoryChip({ label, active, onClick }: Readonly<CategoryChipProps>) {
     <Box
       component="button"
       onClick={onClick}
-      sx={(theme) => ({
+      sx={theme => ({
         flexShrink: 0,
         cursor: "pointer",
         borderRadius: "9999px",
@@ -66,7 +66,7 @@ export function PermissionCatalogToolbar({
       <TextField
         size="small"
         value={searchQuery}
-        onChange={(e) => onSearchChange(e.target.value)}
+        onChange={e => onSearchChange(e.target.value)}
         placeholder={t("searchPlaceholder")}
         slotProps={{
           input: {
@@ -83,9 +83,9 @@ export function PermissionCatalogToolbar({
 
       {!isMobile && (
         <FormControl size="small" sx={{ minWidth: 200 }}>
-          <Select value={selectedCategory} onChange={(e) => onCategoryChange(e.target.value)} displayEmpty>
+          <Select value={selectedCategory} onChange={e => onCategoryChange(e.target.value)} displayEmpty>
             <MenuItem value="all">{t("allCategories")}</MenuItem>
-            {categories.map((cat) => (
+            {categories.map(cat => (
               <MenuItem key={cat} value={cat}>
                 {cat}
               </MenuItem>
@@ -111,8 +111,13 @@ export function PermissionCatalogToolbar({
             active={selectedCategory === "all"}
             onClick={() => onCategoryChange("all")}
           />
-          {categories.map((cat) => (
-            <CategoryChip key={cat} label={cat} active={selectedCategory === cat} onClick={() => onCategoryChange(cat)} />
+          {categories.map(cat => (
+            <CategoryChip
+              key={cat}
+              label={cat}
+              active={selectedCategory === cat}
+              onClick={() => onCategoryChange(cat)}
+            />
           ))}
         </Box>
       )}

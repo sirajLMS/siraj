@@ -2,7 +2,8 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect } from "react";
-import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { User } from "@/frontend/graphql/generated/gql/graphql-types";
+import { usersQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import {
   assignPermissionGroupToUserMutationDocument,
   bulkAssignUsersToGroupMutationDocument,
@@ -19,34 +20,50 @@ import { usePermissionManagementStore } from "@/frontend/stores/permissionManage
 import { logger } from "@/frontend/utils/logger";
 
 export function usePermissionManagementData() {
-  const { data: permissionsData, loading: permissionsLoading, error: permissionsError } = useQuery(permissionsQueryDocument);
+  const {
+    data: permissionsData,
+    loading: permissionsLoading,
+    error: permissionsError,
+  } = useQuery(permissionsQueryDocument);
   const { data: groupsData, loading: groupsLoading, error: groupsError } = useQuery(permissionGroupsQueryDocument);
+  const { data: usersData, loading: usersLoading, error: usersError } = useQuery(usersQueryDocument);
+  const setPermissions = usePermissionManagementStore(s => s.setPermissions);
+  const setGroups = usePermissionManagementStore(s => s.setGroups);
+  const setLoading = usePermissionManagementStore(s => s.setLoading);
+  const setError = usePermissionManagementStore(s => s.setError);
   const store = usePermissionManagementStore();
 
   useEffect(() => {
-    if (permissionsData?.permissions) store.setPermissions(permissionsData.permissions as Permission[]);
-  }, [permissionsData, store]);
+    if (permissionsData?.permissions) setPermissions(permissionsData.permissions);
+  }, [permissionsData, setPermissions]);
 
   useEffect(() => {
-    if (groupsData?.permissionGroups) store.setGroups(groupsData.permissionGroups as PermissionGroup[]);
-  }, [groupsData, store]);
+    if (groupsData?.permissionGroups) setGroups(groupsData.permissionGroups);
+  }, [groupsData, setGroups]);
 
   useEffect(() => {
-    store.setLoading(permissionsLoading || groupsLoading);
-  }, [permissionsLoading, groupsLoading, store]);
+    setLoading(permissionsLoading || groupsLoading || usersLoading);
+  }, [permissionsLoading, groupsLoading, usersLoading, setLoading]);
 
-  const queryError = permissionsError || groupsError;
+  const queryError = permissionsError || groupsError || usersError;
   useEffect(() => {
     if (queryError) {
       logger.error("[PermissionManagement] Query error:", queryError);
-      store.setError(queryError.message);
+      setError(queryError.message);
     } else {
-      store.setError(null);
+      setError(null);
     }
-  }, [queryError, store]);
+  }, [queryError, setError]);
 
   const mutationOptions = (label: string, refetch = true) => ({
-    ...(refetch ? { refetchQueries: [{ query: permissionGroupsQueryDocument }] } : {}),
+    ...(refetch
+      ? {
+        refetchQueries: [
+          { query: permissionGroupsQueryDocument },
+          { query: usersQueryDocument },
+        ],
+      }
+      : {}),
     onError: (err: Error) => {
       logger.error(`[PermissionManagement] ${label} error:`, err);
       store.setError(err.message);
@@ -56,11 +73,20 @@ export function usePermissionManagementData() {
   const [createGroupMutation] = useMutation(createPermissionGroupMutationDocument, mutationOptions("Create group"));
   const [updateGroupMutation] = useMutation(updatePermissionGroupMutationDocument, mutationOptions("Update group"));
   const [deleteGroupMutation] = useMutation(deletePermissionGroupMutationDocument, mutationOptions("Delete group"));
-  const [assignGroupMutation] = useMutation(assignPermissionGroupToUserMutationDocument, mutationOptions("Assign group"));
-  const [revokeGroupMutation] = useMutation(revokePermissionGroupFromUserMutationDocument, mutationOptions("Revoke group"));
+  const [assignGroupMutation] = useMutation(
+    assignPermissionGroupToUserMutationDocument,
+    mutationOptions("Assign group")
+  );
+  const [revokeGroupMutation] = useMutation(
+    revokePermissionGroupFromUserMutationDocument,
+    mutationOptions("Revoke group")
+  );
   const [bulkAssignMutation] = useMutation(bulkAssignUsersToGroupMutationDocument, mutationOptions("Bulk assign"));
   const [bulkRevokeMutation] = useMutation(bulkRevokeUsersFromGroupMutationDocument, mutationOptions("Bulk revoke"));
-  const [updateOverridesMutation] = useMutation(updateUserOverridesMutationDocument, mutationOptions("Update overrides", false));
+  const [updateOverridesMutation] = useMutation(
+    updateUserOverridesMutationDocument,
+    mutationOptions("Update overrides", false)
+  );
 
   const run = async (label: string, fn: () => Promise<unknown>, onSuccess?: () => void) => {
     store.setError(null);
@@ -73,15 +99,28 @@ export function usePermissionManagementData() {
   };
 
   return {
-    isLoading: permissionsLoading || groupsLoading || store.isLoading,
+    isLoading: permissionsLoading || groupsLoading || usersLoading || store.isLoading,
+    users: (usersData?.users || []) as User[],
     handleCreateGroup: (name: string, description: string, permissionIds: string[]) =>
-      run("handleCreateGroup", () => createGroupMutation({ variables: { input: { name, description, permissionIds } } }), store.closeCreateDialog),
+      run(
+        "handleCreateGroup",
+        () => createGroupMutation({ variables: { input: { name, description, permissionIds } } }),
+        store.closeCreateDialog
+      ),
     handleUpdateGroup: (id: string, name: string, description: string, permissionIds: string[]) =>
-      run("handleUpdateGroup", () => updateGroupMutation({ variables: { input: { groupId: id, name, description, permissionIds } } }), store.closeEditDialog),
+      run(
+        "handleUpdateGroup",
+        () => updateGroupMutation({ variables: { input: { groupId: id, name, description, permissionIds } } }),
+        store.closeEditDialog
+      ),
     handleDeleteGroup: (id: string) =>
       run("handleDeleteGroup", () => deleteGroupMutation({ variables: { groupId: id } }), store.closeDeleteDialog),
     handleAssignGroup: (groupId: string, userId: string) =>
-      run("handleAssignGroup", () => assignGroupMutation({ variables: { input: { groupId, userId } } }), store.closeAssignDialog),
+      run(
+        "handleAssignGroup",
+        () => assignGroupMutation({ variables: { input: { groupId, userId } } }),
+        store.closeAssignDialog
+      ),
     handleRevokeGroup: (groupId: string, userId: string) =>
       run("handleRevokeGroup", () => revokeGroupMutation({ variables: { input: { groupId, userId } } })),
     handleBulkAssign: (groupId: string, userIds: string[]) =>
@@ -89,6 +128,10 @@ export function usePermissionManagementData() {
     handleBulkRevoke: (groupId: string, userIds: string[]) =>
       run("handleBulkRevoke", () => bulkRevokeMutation({ variables: { groupId, userIds } })),
     handleUpdateOverrides: (userId: string, overrides: Array<{ permissionId: string; state: string }>) =>
-      run("handleUpdateOverrides", () => updateOverridesMutation({ variables: { userId, overrides } }), store.closeManageOverrides),
+      run(
+        "handleUpdateOverrides",
+        () => updateOverridesMutation({ variables: { userId, overrides } }),
+        store.closeManageOverrides
+      ),
   };
 }

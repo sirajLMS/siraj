@@ -23,15 +23,13 @@ export function PermissionCatalogSection({ permissions, groups }: Readonly<Permi
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const categories = useMemo(() => {
-    const cats = permissions
-      .map((p) => p.category)
-      .filter((c): c is string => typeof c === "string" && c.trim() !== "");
+    const cats = permissions.map(p => p.category).filter((c): c is string => typeof c === "string" && c.trim() !== "");
     return Array.from(new Set(cats));
   }, [permissions]);
 
   const filteredPermissions = useMemo(
     () =>
-      permissions.filter((p) => {
+      permissions.filter(p => {
         if (selectedCategory !== "all" && p.category !== selectedCategory) return false;
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
@@ -43,7 +41,7 @@ export function PermissionCatalogSection({ permissions, groups }: Readonly<Permi
         }
         return true;
       }),
-    [permissions, searchQuery, selectedCategory],
+    [permissions, searchQuery, selectedCategory]
   );
 
   return (

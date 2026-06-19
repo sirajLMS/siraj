@@ -1,9 +1,10 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { DashboardNavigationLabels } from "@/shared/messages/types/message";
 
 export interface NavItem {
   readonly key: string;
-  readonly labelKey: string;
+  readonly labelKey: `dashboard.nav.${keyof DashboardNavigationLabels}`;
   readonly icon: SvgIconComponent;
   readonly href: string;
   readonly section: "main" | "footer";

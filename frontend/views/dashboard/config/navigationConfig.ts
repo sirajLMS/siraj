@@ -1,4 +1,4 @@
-import { CalendarTodayOutlined, DashboardOutlined } from "@mui/icons-material";
+import { CalendarTodayOutlined, DashboardOutlined, SecurityOutlined } from "@mui/icons-material";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 
@@ -22,6 +22,14 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/schedule",
     section: "main",
     permission: AppPermission.ScheduleViewList,
+  },
+  {
+    key: "permissions",
+    labelKey: "dashboard.nav.permissions",
+    icon: SecurityOutlined,
+    href: "/permissions",
+    section: "main",
+    permission: AppPermission.PermissionGroupsManage,
   },
 ] as const;
 

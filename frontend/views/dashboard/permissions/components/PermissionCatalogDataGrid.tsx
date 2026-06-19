@@ -20,7 +20,7 @@ function PermissionKeyCell({ value }: Readonly<PermissionKeyCellProps>) {
   if (!value) return null;
   return (
     <Box
-      sx={(theme) => ({
+      sx={theme => ({
         fontFamily: "JetBrains Mono, monospace",
         fontSize: "0.75rem",
         backgroundColor: theme.palette.surfaceVariant,
@@ -42,12 +42,9 @@ interface UsedInCellProps {
 }
 
 function UsedInCell({ permission, groups }: Readonly<UsedInCellProps>) {
-  const usedGroups = groups.filter((g) => {
+  const usedGroups = groups.filter(g => {
     const ids = g.permissionIds ?? [];
-    return (
-      (permission.id && ids.includes(permission.id)) ||
-      (permission.key && ids.includes(permission.key))
-    );
+    return (permission.id && ids.includes(permission.id)) || (permission.key && ids.includes(permission.key));
   });
 
   if (usedGroups.length === 0) {
@@ -56,12 +53,12 @@ function UsedInCell({ permission, groups }: Readonly<UsedInCellProps>) {
 
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, py: 0.5 }}>
-      {usedGroups.map((g) => {
+      {usedGroups.map(g => {
         if (!g.id || !g.name) return null;
         return (
           <Box
             key={g.id}
-            sx={(theme) => ({
+            sx={theme => ({
               fontSize: "0.75rem",
               fontWeight: 500,
               backgroundColor: theme.palette.secondaryContainer,
@@ -80,10 +77,7 @@ function UsedInCell({ permission, groups }: Readonly<UsedInCellProps>) {
   );
 }
 
-export function PermissionCatalogDataGrid({
-  permissions,
-  groups,
-}: Readonly<PermissionCatalogDataGridProps>) {
+export function PermissionCatalogDataGrid({ permissions, groups }: Readonly<PermissionCatalogDataGridProps>) {
   const t = useTranslations("dashboard.permissions");
 
   const columns = useMemo<GridColDef<Permission>[]>(() => {
@@ -93,16 +87,16 @@ export function PermissionCatalogDataGrid({
         headerName: t("columnKey"),
         flex: 1,
         minWidth: 200,
-        renderCell: (params) => <PermissionKeyCell value={params.value as string | null} />,
+        renderCell: params => <PermissionKeyCell value={params.value as string | null} />,
       },
       {
         field: "category",
         headerName: t("columnCategory"),
         width: 180,
-        renderCell: (params) => {
+        renderCell: params => {
           const val = params.value as string | null;
           return (
-            <Typography variant="bodyMd" sx={(theme) => ({ color: theme.palette.text.secondary })}>
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {val ?? ""}
             </Typography>
           );
@@ -113,7 +107,7 @@ export function PermissionCatalogDataGrid({
         headerName: t("columnDescription"),
         flex: 2,
         minWidth: 300,
-        renderCell: (params) => {
+        renderCell: params => {
           const val = params.value as string | null;
           return (
             <Typography variant="bodyMd" sx={{ whiteSpace: "normal", wordBreak: "break-word" }}>
@@ -127,7 +121,7 @@ export function PermissionCatalogDataGrid({
         headerName: t("columnUsedIn"),
         flex: 1.5,
         minWidth: 220,
-        renderCell: (params) => <UsedInCell permission={params.row} groups={groups} />,
+        renderCell: params => <UsedInCell permission={params.row} groups={groups} />,
       },
     ];
   }, [t, groups]);
@@ -137,7 +131,7 @@ export function PermissionCatalogDataGrid({
       <AppDataGrid<Permission>
         rows={permissions}
         columns={columns}
-        getRowId={(row) => row.id ?? row.key ?? ""}
+        getRowId={row => row.id ?? row.key ?? ""}
         emptyMessage={t("noPermissionsFound")}
         autoHeight
       />

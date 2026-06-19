@@ -10,16 +10,13 @@ export interface PermissionCatalogCardListProps {
   readonly groups: readonly PermissionGroup[];
 }
 
-export function PermissionCatalogCardList({
-  permissions,
-  groups,
-}: Readonly<PermissionCatalogCardListProps>) {
+export function PermissionCatalogCardList({ permissions, groups }: Readonly<PermissionCatalogCardListProps>) {
   const t = useTranslations("dashboard.permissions");
 
   if (permissions.length === 0) {
     return (
       <Box sx={{ p: 4, textAlign: "center" }}>
-        <Typography variant="bodyMd" sx={(theme) => ({ color: theme.palette.text.secondary })}>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {t("noPermissionsFound")}
         </Typography>
       </Box>
@@ -28,14 +25,11 @@ export function PermissionCatalogCardList({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      {permissions.map((permission) => {
+      {permissions.map(permission => {
         const key = permission.id ?? permission.key ?? "";
-        const usedGroups = groups.filter((g) => {
+        const usedGroups = groups.filter(g => {
           const ids = g.permissionIds ?? [];
-          return (
-            (permission.id && ids.includes(permission.id)) ||
-            (permission.key && ids.includes(permission.key))
-          );
+          return (permission.id && ids.includes(permission.id)) || (permission.key && ids.includes(permission.key));
         });
 
         return (
@@ -44,7 +38,7 @@ export function PermissionCatalogCardList({
               {/* Header: Key & Category */}
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
                 <Box
-                  sx={(theme) => ({
+                  sx={theme => ({
                     fontFamily: "JetBrains Mono, monospace",
                     fontSize: "0.8125rem",
                     fontWeight: 500,
@@ -60,7 +54,7 @@ export function PermissionCatalogCardList({
                 </Box>
                 {permission.category && (
                   <Box
-                    sx={(theme) => ({
+                    sx={theme => ({
                       fontSize: "0.75rem",
                       fontWeight: 500,
                       backgroundColor: theme.palette.surfaceVariant,
@@ -78,7 +72,7 @@ export function PermissionCatalogCardList({
 
               {/* Description */}
               {permission.description && (
-                <Typography variant="bodyMd" sx={(theme) => ({ color: theme.palette.text.secondary })}>
+                <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
                   {permission.description}
                 </Typography>
               )}
@@ -86,14 +80,14 @@ export function PermissionCatalogCardList({
               {/* Used In Section */}
               {usedGroups.length > 0 && (
                 <Box
-                  sx={(theme) => ({
+                  sx={theme => ({
                     pt: 1.5,
                     borderTop: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
                   })}
                 >
                   <Typography
                     variant="labelUppercase"
-                    sx={(theme) => ({
+                    sx={theme => ({
                       display: "block",
                       fontSize: "0.6875rem",
                       color: theme.palette.text.secondary,
@@ -103,12 +97,12 @@ export function PermissionCatalogCardList({
                     {t("columnUsedIn")}
                   </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                    {usedGroups.map((g) => {
+                    {usedGroups.map(g => {
                       if (!g.id || !g.name) return null;
                       return (
                         <Box
                           key={g.id}
-                          sx={(theme) => ({
+                          sx={theme => ({
                             fontSize: "0.75rem",
                             fontWeight: 500,
                             backgroundColor: theme.palette.secondaryContainer,
