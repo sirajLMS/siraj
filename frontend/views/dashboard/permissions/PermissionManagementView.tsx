@@ -1,20 +1,14 @@
 "use client";
 
-import { Alert, Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
+import { Alert, Box, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
 import type { Permission, PermissionGroup, User, UserOverride } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AdminQueueTabBar } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
-import { AssignGroupDialog } from "./components/AssignGroupDialog";
-import { DeleteGroupDialog } from "./components/DeleteGroupDialog";
-import { ManageOverridesDialog } from "./components/ManageOverridesDialog";
-import { PermissionCatalogSection } from "./components/PermissionCatalogSection";
-import { PermissionGroupCardList } from "./components/PermissionGroupCardList";
-import { PermissionGroupForm } from "./components/PermissionGroupForm";
-import { PermissionGroupsDataGrid } from "./components/PermissionGroupsDataGrid";
+import { PermissionManagementDialogs } from "./components/PermissionManagementDialogs";
+import { PermissionTabContent, type TabKey } from "./components/PermissionTabContent";
 import { SingleGroupView } from "./components/SingleGroupView";
-import { UserOverridesDataGrid } from "./components/UserOverridesDataGrid";
 
 export interface PermissionManagementViewProps {
   readonly permissions: readonly Permission[];
@@ -64,8 +58,6 @@ export interface PermissionManagementViewProps {
     overrides: Array<{ permissionId: string; state: string }>
   ) => Promise<void>;
 }
-
-type TabKey = "groups" | "catalog" | "overrides";
 
 export function PermissionManagementView({
   permissions,
@@ -148,117 +140,48 @@ export function PermissionManagementView({
 
             <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={(tab: TabKey) => setActiveTab(tab)} />
 
-            {isLoading ? (
-              <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-                <CircularProgress color="primary" />
-              </Box>
-            ) : (
-              <Box>
-                {activeTab === "groups" &&
-                  (isMobile ? (
-                    <PermissionGroupCardList
-                      groups={groups}
-                      onViewGroup={setSelectedGroupId}
-                      onEditGroup={openEditDialog}
-                      onDeleteGroup={openDeleteDialog}
-                      onAssignGroup={openAssignDialog}
-                    />
-                  ) : (
-                    <SectionPanel title={t("groupsTab")}>
-                      <PermissionGroupsDataGrid
-                        groups={groups}
-                        onViewGroup={setSelectedGroupId}
-                        onEditGroup={openEditDialog}
-                        onDeleteGroup={openDeleteDialog}
-                        onAssignGroup={openAssignDialog}
-                      />
-                    </SectionPanel>
-                  ))}
-
-                {activeTab === "catalog" && <PermissionCatalogSection permissions={permissions} groups={groups} />}
-
-                {activeTab === "overrides" && (
-                  <SectionPanel title={t("overridesTab")}>
-                    <UserOverridesDataGrid
-                      users={users}
-                      groups={groups}
-                      onManageOverrides={userId => {
-                        setSelectedUserIdForOverrides(userId);
-                        openManageOverrides();
-                      }}
-                    />
-                  </SectionPanel>
-                )}
-              </Box>
-            )}
+            <PermissionTabContent
+              activeTab={activeTab}
+              isLoading={isLoading}
+              isMobile={isMobile}
+              permissions={permissions}
+              groups={groups}
+              users={users}
+              setSelectedGroupId={setSelectedGroupId}
+              openEditDialog={openEditDialog}
+              openDeleteDialog={openDeleteDialog}
+              openAssignDialog={openAssignDialog}
+              openManageOverrides={openManageOverrides}
+              setSelectedUserIdForOverrides={setSelectedUserIdForOverrides}
+            />
           </Box>
         </>
       )}
 
-      {/* Group Create Dialog */}
-      <PermissionGroupForm
-        open={isCreateDialogOpen}
-        group={null}
+      <PermissionManagementDialogs
         permissions={permissions}
-        isLoading={isLoading}
-        onClose={closeCreateDialog}
-        onSave={onCreateGroup}
-      />
-
-      {/* Group Edit Dialog */}
-      <PermissionGroupForm
-        open={isEditDialogOpen}
-        group={activeGroup}
-        permissions={permissions}
-        isLoading={isLoading}
-        onClose={closeEditDialog}
-        onSave={async (name, description, permissionIds) => {
-          if (selectedGroupId) {
-            await onUpdateGroup(selectedGroupId, name, description, permissionIds);
-          }
-        }}
-      />
-
-      {/* Group Delete Dialog */}
-      <DeleteGroupDialog
-        open={isDeleteDialogOpen}
-        groupName={activeGroup?.name || ""}
-        isLoading={isLoading}
-        onClose={closeDeleteDialog}
-        onConfirm={async () => {
-          if (selectedGroupId) {
-            await onDeleteGroup(selectedGroupId);
-          }
-        }}
-      />
-
-      {/* Group Assign Dialog */}
-      <AssignGroupDialog
-        open={isAssignDialogOpen}
-        group={activeGroup}
-        users={users}
-        isLoading={isLoading}
-        onClose={closeAssignDialog}
-        onAssign={async userId => {
-          if (selectedGroupId) {
-            await onAssignGroup(selectedGroupId, userId);
-          }
-        }}
-      />
-
-      {/* Manage Overrides Dialog */}
-      <ManageOverridesDialog
-        open={isManageOverridesOpen}
-        userId={selectedUserIdForOverrides}
-        users={users}
         groups={groups}
-        permissions={permissions}
+        users={users}
         isLoading={isLoading}
-        onClose={() => {
-          setSelectedUserIdForOverrides(null);
-          closeManageOverrides();
-        }}
-        onSave={onUpdateOverrides}
+        activeGroup={activeGroup}
+        selectedGroupId={selectedGroupId}
+        selectedUserIdForOverrides={selectedUserIdForOverrides}
+        isCreateDialogOpen={isCreateDialogOpen}
+        isEditDialogOpen={isEditDialogOpen}
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        isAssignDialogOpen={isAssignDialogOpen}
+        isManageOverridesOpen={isManageOverridesOpen}
+        closeCreateDialog={closeCreateDialog}
+        closeEditDialog={closeEditDialog}
+        closeDeleteDialog={closeDeleteDialog}
+        closeAssignDialog={closeAssignDialog}
+        closeManageOverrides={closeManageOverrides}
+        setSelectedUserIdForOverrides={setSelectedUserIdForOverrides}
+        onCreateGroup={onCreateGroup}
+        onUpdateGroup={onUpdateGroup}
+        onDeleteGroup={onDeleteGroup}
+        onAssignGroup={onAssignGroup}
+        onUpdateOverrides={onUpdateOverrides}
       />
     </PageContainer>
   );

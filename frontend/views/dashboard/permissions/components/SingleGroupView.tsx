@@ -1,34 +1,13 @@
 "use client";
 
-import {
-  ArrowBackOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  PersonAddOutlined,
-  PersonRemoveOutlined,
-  RemoveCircleOutlined,
-  SearchOutlined,
-  SecurityOutlined,
-} from "@mui/icons-material";
-import {
-  Avatar,
-  Box,
-  Button,
-  Checkbox,
-  CircularProgress,
-  InputAdornment,
-  MenuItem,
-  Select,
-  Tab,
-  Tabs,
-  TextField,
-  Typography,
-} from "@mui/material";
-import type { GridColDef } from "@mui/x-data-grid";
+import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
-import { AppDataGrid, SectionPanel, StatusBadge } from "@/frontend/components/ui";
-import type { GroupUser, Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AddPermissionsTab } from "./AddPermissionsTab";
+import { AssignedUsersTab } from "./AssignedUsersTab";
+import { CurrentPermissionsTab } from "./CurrentPermissionsTab";
+import { SingleGroupHeader } from "./SingleGroupHeader";
 
 interface SingleGroupViewProps {
   readonly group: PermissionGroup;
@@ -159,71 +138,6 @@ export function SingleGroupView({
     setSelectedAssignedUserIds([]);
   };
 
-  // Definition of current permissions columns
-  const currentPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {
-    const cols: GridColDef<Permission>[] = [
-      {
-        field: "key",
-        headerName: t("columnKey"),
-        flex: 1,
-        minWidth: 200,
-        renderCell: params => (
-          <Box
-            sx={theme => ({
-              fontFamily: "JetBrains Mono, monospace",
-              fontSize: "0.75rem",
-              backgroundColor: theme.palette.surfaceVariant,
-              color: theme.palette.onSurfaceVariant,
-              px: 1,
-              py: 0.5,
-              borderRadius: 1,
-              display: "inline-block",
-            })}
-          >
-            {params.value as string}
-          </Box>
-        ),
-      },
-      {
-        field: "category",
-        headerName: t("columnCategory"),
-        width: 180,
-      },
-      {
-        field: "description",
-        headerName: t("columnDescription"),
-        flex: 1.5,
-        minWidth: 250,
-      },
-    ];
-
-    if (!group.isSystem) {
-      cols.push({
-        field: "actions",
-        headerName: "",
-        width: 100,
-        align: "right",
-        sortable: false,
-        renderCell: params => (
-          <Button
-            size="small"
-            startIcon={<RemoveCircleOutlined fontSize="small" />}
-            onClick={() => params.row.id && handleRevokePermission(params.row.id)}
-            sx={theme => ({
-              color: group.isSystem ? theme.palette.text.disabled : theme.palette.error.main,
-              fontWeight: 600,
-              fontSize: "0.75rem",
-            })}
-          >
-            Revoke
-          </Button>
-        ),
-      });
-    }
-
-    return cols;
-  }, [t, group.isSystem, handleRevokePermission]);
-
   const handleAddPermissionToggle = useCallback((id: string, checked: boolean) => {
     if (checked) {
       setSelectedAddPermissionIds(prev => [...prev, id]);
@@ -231,58 +145,6 @@ export function SingleGroupView({
       setSelectedAddPermissionIds(prev => prev.filter(x => x !== id));
     }
   }, []);
-
-  // Definition of Add Permissions columns
-  const addPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {
-    return [
-      {
-        field: "checkbox",
-        headerName: "",
-        width: 50,
-        sortable: false,
-        renderCell: params => {
-          const id = params.row.id ?? "";
-          const checked = selectedAddPermissionIds.includes(id);
-          return (
-            <Checkbox size="small" checked={checked} onChange={e => handleAddPermissionToggle(id, e.target.checked)} />
-          );
-        },
-      },
-      {
-        field: "key",
-        headerName: t("columnKey"),
-        flex: 1,
-        minWidth: 200,
-        renderCell: params => (
-          <Box
-            sx={theme => ({
-              fontFamily: "JetBrains Mono, monospace",
-              fontSize: "0.75rem",
-              backgroundColor: theme.palette.surfaceVariant,
-              color: theme.palette.onSurfaceVariant,
-              px: 1,
-              py: 0.5,
-              borderRadius: 1,
-              display: "inline-block",
-            })}
-          >
-            {params.value as string}
-          </Box>
-        ),
-      },
-      {
-        field: "category",
-        headerName: t("columnCategory"),
-        width: 180,
-      },
-      {
-        field: "description",
-        headerName: t("columnDescription"),
-        flex: 1.5,
-        minWidth: 250,
-      },
-    ];
-  }, [t, selectedAddPermissionIds, handleAddPermissionToggle]);
 
   const handleAssignedUserToggle = useCallback((id: string, checked: boolean) => {
     if (checked) {
@@ -292,219 +154,10 @@ export function SingleGroupView({
     }
   }, []);
 
-  // Definition of Assigned Users columns
-  const assignedUsersColumns = useMemo<GridColDef<GroupUser>[]>(() => {
-    return [
-      {
-        field: "checkbox",
-        headerName: "",
-        width: 50,
-        sortable: false,
-        renderCell: (params: { row: GroupUser }) => {
-          const id = params.row.id ?? "";
-          const checked = selectedAssignedUserIds.includes(id);
-          return (
-            <Checkbox size="small" checked={checked} onChange={e => handleAssignedUserToggle(id, e.target.checked)} />
-          );
-        },
-      },
-      {
-        field: "name",
-        headerName: t("columnName"),
-        flex: 1.5,
-        minWidth: 200,
-        renderCell: (params: { row: GroupUser }) => {
-          const user = params.row;
-          return (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1 }}>
-              <Avatar
-                sx={theme => ({
-                  width: 32,
-                  height: 32,
-                  bgcolor: theme.palette.primaryContainer,
-                  color: theme.palette.onPrimaryContainer,
-                  fontSize: "0.875rem",
-                  fontWeight: 600,
-                })}
-              >
-                {user.name
-                  ?.split(" ")
-                  .map((w: string) => w[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </Avatar>
-              <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                <Typography
-                  variant="bodyMd"
-                  sx={{
-                    fontWeight: 600,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {user.name}
-                </Typography>
-                <Typography
-                  variant="bodyMd"
-                  sx={theme => ({
-                    color: theme.palette.text.secondary,
-                    fontSize: "0.75rem",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  })}
-                >
-                  {user.email}
-                </Typography>
-              </Box>
-            </Box>
-          );
-        },
-      },
-      {
-        field: "assignedDate",
-        headerName: "Assigned Date",
-        flex: 1.2,
-        minWidth: 150,
-        renderCell: () => {
-          const date = group.createdAt ? new Date(group.createdAt) : new Date();
-          return (
-            <Typography variant="bodyMd">
-              {date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-            </Typography>
-          );
-        },
-      },
-      {
-        field: "assignedBy",
-        headerName: "Assigned By",
-        flex: 1,
-        minWidth: 120,
-        renderCell: () => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            System
-          </Typography>
-        ),
-      },
-      {
-        field: "actions",
-        headerName: "",
-        width: 100,
-        align: "right",
-        sortable: false,
-        renderCell: params => (
-          <Button
-            size="small"
-            color="error"
-            startIcon={<PersonRemoveOutlined fontSize="small" />}
-            onClick={() => params.row.id && handleRevokeUser(params.row.id)}
-            sx={{ fontWeight: 600, fontSize: "0.75rem" }}
-          >
-            Remove
-          </Button>
-        ),
-      },
-    ];
-  }, [t, group.createdAt, selectedAssignedUserIds, handleRevokeUser, handleAssignedUserToggle]);
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      {/* Breadcrumbs & Navigation */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Button
-          onClick={onBack}
-          size="small"
-          variant="text"
-          startIcon={<ArrowBackOutlined />}
-          sx={theme => ({
-            color: theme.palette.text.secondary,
-            textTransform: "none",
-            fontSize: "0.875rem",
-            "&:hover": {
-              bgcolor: "transparent",
-              color: theme.palette.primary.main,
-            },
-          })}
-        >
-          {t("groupsTab")}
-        </Button>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.disabled })}>
-          /
-        </Typography>
-        <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-          {group.name}
-        </Typography>
-      </Box>
+      <SingleGroupHeader group={group} onBack={onBack} onEditGroup={onEditGroup} />
 
-      {/* Main Single Group Header Panel */}
-      <Box
-        sx={theme => ({
-          p: 3,
-          borderRadius: 2,
-          border: `1px solid ${theme.palette.divider}`,
-          bgcolor: theme.palette.surfaceContainerLow ?? theme.palette.background.paper,
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          justifyContent: "space-between",
-          alignItems: { xs: "flex-start", md: "center" },
-          gap: 2.5,
-        })}
-      >
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Typography variant="headlineMd" sx={{ fontWeight: 600 }}>
-              {group.name}
-            </Typography>
-            <StatusBadge
-              category="session"
-              status={group.isSystem ? "active" : "pending"}
-              label={group.isSystem ? t("systemBadge") : t("customBadge")}
-            />
-          </Box>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {group.description || "No description provided."}
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: "flex", gap: 1.5, alignSelf: { xs: "stretch", md: "center" } }}>
-          <Button
-            variant="outlined"
-            onClick={onBack}
-            sx={theme => ({
-              borderColor: theme.palette.divider,
-              color: theme.palette.text.primary,
-              textTransform: "none",
-              borderRadius: 1.5,
-              fontWeight: 600,
-            })}
-          >
-            Back to All Groups
-          </Button>
-          {!group.isSystem && (
-            <Button
-              variant="contained"
-              startIcon={<EditOutlined fontSize="small" />}
-              onClick={() => group.id && onEditGroup(group.id)}
-              sx={theme => ({
-                bgcolor: theme.palette.primary.main,
-                color: theme.palette.onPrimary,
-                textTransform: "none",
-                borderRadius: 1.5,
-                fontWeight: 600,
-                "&:hover": {
-                  bgcolor: theme.palette.primary.dark,
-                },
-              })}
-            >
-              Edit Group Details
-            </Button>
-          )}
-        </Box>
-      </Box>
-
-      {/* Tabs Menu */}
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
           value={activeSubTab}
@@ -534,277 +187,50 @@ export function SingleGroupView({
         </Tabs>
       </Box>
 
-      {/* Loading state indicator */}
       {isLoading && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress color="primary" />
         </Box>
       )}
 
-      {/* Tab Panels */}
       {!isLoading && (
         <Box sx={{ mt: 1 }}>
-          {/* 1. CURRENT PERMISSIONS TAB */}
           {activeSubTab === "current" && (
-            <SectionPanel title={t("currentPermissions")}>
-              {permissionsCount === 0 ? (
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    py: 8,
-                    textAlign: "center",
-                    gap: 2,
-                  }}
-                >
-                  <Box
-                    sx={theme => ({
-                      width: 64,
-                      height: 64,
-                      borderRadius: "50%",
-                      bgcolor: theme.palette.surfaceContainerHigh ?? theme.palette.action.hover,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      border: `1px solid ${theme.palette.divider}`,
-                    })}
-                  >
-                    <SecurityOutlined fontSize="large" sx={theme => ({ color: theme.palette.text.secondary })} />
-                  </Box>
-                  <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-                    No Permissions Assigned Yet
-                  </Typography>
-                  <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, maxWidth: 400 })}>
-                    This custom group currently has no active policies. Add specific resource permissions to grant
-                    access to content modules.
-                  </Typography>
-                  {!group.isSystem && (
-                    <Button
-                      variant="contained"
-                      onClick={() => setActiveSubTab("add")}
-                      sx={theme => ({
-                        bgcolor: theme.palette.primary.main,
-                        color: theme.palette.onPrimary,
-                        borderRadius: 1.5,
-                        textTransform: "none",
-                        fontWeight: 600,
-                        "&:hover": {
-                          bgcolor: theme.palette.primary.dark,
-                        },
-                      })}
-                    >
-                      Assign First Permission
-                    </Button>
-                  )}
-                </Box>
-              ) : (
-                <AppDataGrid<Permission>
-                  rows={groupPermissions}
-                  columns={currentPermissionsColumns}
-                  getRowId={row => row.id ?? row.key ?? ""}
-                  emptyMessage={t("noPermissionsFound")}
-                  autoHeight
-                />
-              )}
-            </SectionPanel>
+            <CurrentPermissionsTab
+              group={group}
+              groupPermissions={groupPermissions}
+              permissionsCount={permissionsCount}
+              onRevokePermission={handleRevokePermission}
+              onSwitchToAddTab={() => setActiveSubTab("add")}
+            />
           )}
 
-          {/* 2. ADD PERMISSIONS TAB */}
           {activeSubTab === "add" && !group.isSystem && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              {/* Filter controls */}
-              <Box
-                sx={theme => ({
-                  p: 2,
-                  borderRadius: 2,
-                  bgcolor: theme.palette.surfaceContainerLow ?? theme.palette.background.paper,
-                  border: `1px solid ${theme.palette.divider}`,
-                  display: "flex",
-                  flexDirection: { xs: "column", sm: "row" },
-                  gap: 2,
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                })}
-              >
-                <TextField
-                  size="small"
-                  placeholder={t("searchPermissionsPlaceholder")}
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchOutlined fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                  sx={{ width: { xs: "100%", sm: 360 } }}
-                />
-                <Select
-                  size="small"
-                  value={selectedCategory}
-                  onChange={e => setSelectedCategory(e.target.value)}
-                  sx={{ width: { xs: "100%", sm: 200 } }}
-                >
-                  <MenuItem value="all">{t("allCategoriesOption")}</MenuItem>
-                  {addCategories.map(cat => (
-                    <MenuItem key={cat} value={cat}>
-                      {cat}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Box>
-
-              {/* Bulk Action Bar */}
-              {selectedAddPermissionIds.length > 0 && (
-                <Box
-                  sx={theme => ({
-                    p: 2,
-                    borderRadius: 1.5,
-                    bgcolor: theme.palette.primaryContainer,
-                    color: theme.palette.onPrimaryContainer,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    boxShadow: 2,
-                  })}
-                >
-                  <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-                    {t("itemsSelectedLabel", { count: selectedAddPermissionIds.length })}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    onClick={handleAssignPermissions}
-                    sx={theme => ({
-                      bgcolor: theme.palette.primary.main,
-                      color: theme.palette.onPrimary,
-                      textTransform: "none",
-                      fontWeight: 700,
-                      borderRadius: 1.5,
-                      "&:hover": {
-                        bgcolor: theme.palette.primary.dark,
-                      },
-                    })}
-                  >
-                    {t("assignPermissionsButton")}
-                  </Button>
-                </Box>
-              )}
-
-              {/* Addable catalog grid */}
-              <SectionPanel title={t("addPermissions")}>
-                <AppDataGrid<Permission>
-                  rows={filteredAvailablePermissions}
-                  columns={addPermissionsColumns}
-                  getRowId={row => row.id ?? row.key ?? ""}
-                  emptyMessage={t("noPermissionsFound")}
-                  autoHeight
-                />
-              </SectionPanel>
-            </Box>
+            <AddPermissionsTab
+              filteredAvailablePermissions={filteredAvailablePermissions}
+              selectedAddPermissionIds={selectedAddPermissionIds}
+              searchQuery={searchQuery}
+              selectedCategory={selectedCategory}
+              addCategories={addCategories}
+              onAssignPermissions={handleAssignPermissions}
+              onPermissionToggle={handleAddPermissionToggle}
+              onSearchChange={setSearchQuery}
+              onCategoryChange={setSelectedCategory}
+            />
           )}
 
-          {/* 3. ASSIGNED USERS TAB */}
           {activeSubTab === "users" && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              {/* Toolbar */}
-              <Box
-                sx={theme => ({
-                  p: 2,
-                  borderRadius: 2,
-                  bgcolor: theme.palette.surfaceContainerLow ?? theme.palette.background.paper,
-                  border: `1px solid ${theme.palette.divider}`,
-                  display: "flex",
-                  flexDirection: { xs: "column", sm: "row" },
-                  gap: 2,
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                })}
-              >
-                <TextField
-                  size="small"
-                  placeholder="Search assigned users by name or email..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchOutlined fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                  sx={{ width: { xs: "100%", sm: 360 } }}
-                />
-                <Button
-                  variant="contained"
-                  startIcon={<PersonAddOutlined />}
-                  onClick={() => group.id && onAssignGroup(group.id)}
-                  sx={theme => ({
-                    bgcolor: theme.palette.primary.main,
-                    color: theme.palette.onPrimary,
-                    textTransform: "none",
-                    borderRadius: 1.5,
-                    fontWeight: 600,
-                    width: { xs: "100%", sm: "auto" },
-                    "&:hover": {
-                      bgcolor: theme.palette.primary.dark,
-                    },
-                  })}
-                >
-                  Assign Users
-                </Button>
-              </Box>
-
-              {/* Bulk Action Bar */}
-              {selectedAssignedUserIds.length > 0 && (
-                <Box
-                  sx={theme => ({
-                    p: 2,
-                    borderRadius: 1.5,
-                    bgcolor: theme.palette.errorContainer ?? "rgba(211, 47, 47, 0.15)",
-                    color: theme.palette.onErrorContainer ?? theme.palette.error.main,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    boxShadow: 2,
-                  })}
-                >
-                  <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-                    {selectedAssignedUserIds.length} users selected
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    startIcon={<DeleteOutlined />}
-                    onClick={handleBulkRevokeUsers}
-                    sx={{
-                      textTransform: "none",
-                      fontWeight: 700,
-                      borderRadius: 1.5,
-                    }}
-                  >
-                    Remove Selected
-                  </Button>
-                </Box>
-              )}
-
-              {/* Assigned Users Grid */}
-              <SectionPanel title="Assigned Group Members">
-                <AppDataGrid<GroupUser>
-                  rows={filteredAssignedUsers}
-                  columns={assignedUsersColumns}
-                  getRowId={row => row.id ?? row.email ?? ""}
-                  emptyMessage="No users are currently assigned to this permission group."
-                  autoHeight
-                />
-              </SectionPanel>
-            </Box>
+            <AssignedUsersTab
+              group={group}
+              filteredAssignedUsers={filteredAssignedUsers}
+              selectedAssignedUserIds={selectedAssignedUserIds}
+              searchQuery={searchQuery}
+              onBulkRevokeUsers={handleBulkRevokeUsers}
+              onRevokeUser={handleRevokeUser}
+              onUserToggle={handleAssignedUserToggle}
+              onSearchChange={setSearchQuery}
+              onAssignGroup={onAssignGroup}
+            />
           )}
         </Box>
       )}

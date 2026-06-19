@@ -1,32 +1,28 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Close, Lock, Search } from "@mui/icons-material";
+import { Close } from "@mui/icons-material";
 import {
   Box,
   Button,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
   Grid,
   IconButton,
   Input,
-  InputAdornment,
-  MenuItem,
-  Select,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/components/ui";
-import { FieldWrapper, labelSx, standardInputSx } from "@/frontend/components/ui/form";
+import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 import { type PermissionGroupFormData, permissionGroupSchema } from "../schemas/permissionGroupSchema";
+import { PermissionCategoryList } from "./PermissionCategoryList";
+import { PermissionFilterBar } from "./PermissionFilterBar";
 
 interface PermissionGroupFormProps {
   readonly open: boolean;
@@ -239,198 +235,25 @@ export function PermissionGroupForm({
           {/* Section 2: Permissions Assignment */}
           <SectionPanel title={t("addPermissions")}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              {/* Filter and Selection feedback bar */}
-              <Box
-                sx={theme => ({
-                  display: "flex",
-                  flexDirection: { xs: "column", sm: "row" },
-                  gap: 2,
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  p: 2,
-                  bgcolor: theme.palette.surfaceContainerHigh,
-                  borderRadius: 2,
-                })}
-              >
-                <Box
-                  sx={{ display: "flex", flex: 1, gap: 2, width: "100%", flexDirection: { xs: "column", sm: "row" } }}
-                >
-                  <Input
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    placeholder={t("searchPermissionsPlaceholder")}
-                    sx={standardInputSx}
-                    startAdornment={
-                      <InputAdornment position="start">
-                        <Search sx={theme => ({ color: theme.palette.text.secondary })} />
-                      </InputAdornment>
-                    }
-                    disabled={isLoading}
-                  />
+              <PermissionFilterBar
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+                categories={categories}
+                selectedCount={selectedPermissionIds.length}
+                isLoading={isLoading}
+              />
 
-                  <Select
-                    value={selectedCategory}
-                    onChange={e => setSelectedCategory(e.target.value)}
-                    displayEmpty
-                    variant="standard"
-                    sx={standardInputSx}
-                    disabled={isLoading}
-                  >
-                    <MenuItem value="ALL">{t("allCategoriesOption")}</MenuItem>
-                    {categories.map(cat => (
-                      <MenuItem key={cat} value={cat}>
-                        {cat}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Box>
-
-                <Box
-                  sx={theme => ({
-                    px: 2,
-                    py: 1,
-                    borderRadius: 1.5,
-                    bgcolor: theme.palette.primaryContainer,
-                    color: theme.palette.onPrimaryContainer,
-                    fontWeight: 700,
-                  })}
-                >
-                  {t("itemsSelectedLabel", { count: selectedPermissionIds.length })}
-                </Box>
-              </Box>
-
-              {/* Permissions list grouped by category */}
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                {Object.keys(groupedPermissions).length === 0 ? (
-                  <Typography
-                    variant="bodyMd"
-                    sx={theme => ({ textAlign: "center", color: theme.palette.text.secondary, py: 4 })}
-                  >
-                    {t("noPermissionsFound")}
-                  </Typography>
-                ) : (
-                  Object.entries(groupedPermissions).map(([categoryName, perms]) => {
-                    const allChecked = isGroupSelected(perms);
-                    const indeterminate = isGroupIndeterminate(perms);
-
-                    return (
-                      <Box
-                        key={categoryName}
-                        sx={theme => ({
-                          border: `1px solid ${theme.palette.outlineVariant}`,
-                          borderRadius: 2,
-                          overflow: "hidden",
-                        })}
-                      >
-                        {/* Category Header */}
-                        <Box
-                          sx={theme => ({
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            px: 2,
-                            py: 1.5,
-                            bgcolor: theme.palette.surfaceContainerHigh,
-                            borderBottom: `1px solid ${theme.palette.outlineVariant}`,
-                          })}
-                        >
-                          <Typography variant="bodyLg" sx={{ fontWeight: 700 }}>
-                            {categoryName}
-                          </Typography>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={allChecked}
-                                indeterminate={indeterminate}
-                                onChange={e => handleSelectAllCategory(perms, e.target.checked)}
-                                disabled={isLoading}
-                              />
-                            }
-                            label={
-                              <Typography sx={labelSx} component="span">
-                                {t("allCategoriesOption")}
-                              </Typography>
-                            }
-                          />
-                        </Box>
-
-                        {/* Category Permissions List */}
-                        <Box sx={{ display: "flex", flexDirection: "column" }}>
-                          {perms.map(perm => {
-                            const isChecked = selectedPermissionIds.includes(perm.id);
-
-                            return (
-                              <Box
-                                key={perm.id}
-                                onClick={() => handleTogglePermission(perm.id, !!perm.isSystem)}
-                                sx={theme => ({
-                                  display: "flex",
-                                  alignItems: "center",
-                                  px: 2,
-                                  py: 1.5,
-                                  cursor: perm.isSystem ? "not-allowed" : "pointer",
-                                  bgcolor: isChecked ? theme.palette.primaryContainer : "transparent",
-                                  borderBottom: `1px solid ${theme.palette.outlineVariant}`,
-                                  "&:last-child": {
-                                    borderBottom: "none",
-                                  },
-                                  "&:hover": {
-                                    bgcolor: isChecked ? theme.palette.primaryContainer : theme.palette.action.hover,
-                                  },
-                                  opacity: perm.isSystem ? 0.7 : 1,
-                                  transition: "background-color 0.2s",
-                                })}
-                              >
-                                <Checkbox
-                                  checked={isChecked}
-                                  disabled={!!perm.isSystem || isLoading}
-                                  onClick={e => e.stopPropagation()}
-                                  onChange={() => handleTogglePermission(perm.id, !!perm.isSystem)}
-                                />
-
-                                <Box sx={{ flex: 1, ml: 1 }}>
-                                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                    <Typography
-                                      variant="bodyMd"
-                                      sx={theme => ({
-                                        fontFamily: "monospace",
-                                        fontWeight: 600,
-                                        color: isChecked
-                                          ? theme.palette.onPrimaryContainer
-                                          : theme.palette.primary.main,
-                                      })}
-                                    >
-                                      {perm.key}
-                                    </Typography>
-                                    {perm.isSystem && (
-                                      <Tooltip title={t("corePermissionTooltip")}>
-                                        <Lock fontSize="small" color="error" />
-                                      </Tooltip>
-                                    )}
-                                  </Box>
-                                  {perm.description && (
-                                    <Typography
-                                      variant="caption"
-                                      sx={theme => ({
-                                        color: isChecked
-                                          ? theme.palette.onPrimaryContainer
-                                          : theme.palette.text.secondary,
-                                        mt: 0.5,
-                                      })}
-                                    >
-                                      {perm.description}
-                                    </Typography>
-                                  )}
-                                </Box>
-                              </Box>
-                            );
-                          })}
-                        </Box>
-                      </Box>
-                    );
-                  })
-                )}
-              </Box>
+              <PermissionCategoryList
+                groupedPermissions={groupedPermissions}
+                selectedPermissionIds={selectedPermissionIds}
+                isGroupSelected={isGroupSelected}
+                isGroupIndeterminate={isGroupIndeterminate}
+                onSelectAllCategory={handleSelectAllCategory}
+                onTogglePermission={handleTogglePermission}
+                isLoading={isLoading}
+              />
             </Box>
           </SectionPanel>
         </Box>
