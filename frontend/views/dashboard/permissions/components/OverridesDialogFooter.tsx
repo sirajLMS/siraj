@@ -1,6 +1,28 @@
 "use client";
 
 import { Button, CircularProgress, DialogActions } from "@mui/material";
+import { styled } from "@mui/material/styles";
+
+const StyledFooterContainer = styled(DialogActions)(({ theme }) => ({
+  borderTop: `1px solid ${theme.palette.divider}`,
+  padding: `${theme.spacing(2)} ${theme.spacing(3)}`,
+}));
+
+const StyledCancelButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontWeight: 700,
+  borderRadius: 1.5,
+}));
+
+const StyledSaveButton = styled(Button)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  fontWeight: 700,
+  borderRadius: 1.5,
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+  },
+}));
 
 interface OverridesDialogFooterProps {
   readonly onClose: () => void;
@@ -18,35 +40,15 @@ export function OverridesDialogFooter({
   t,
 }: Readonly<OverridesDialogFooterProps>) {
   return (
-    <DialogActions sx={theme => ({ borderTop: `1px solid ${theme.palette.divider}`, px: 3, py: 2 })}>
-      <Button
-        onClick={onClose}
-        disabled={isDialogLoading}
-        variant="text"
-        sx={theme => ({
-          color: theme.palette.text.secondary,
-          fontWeight: 700,
-          borderRadius: 1.5,
-        })}
-      >
+    <StyledFooterContainer>
+      {/* Cancel Action */}
+      <StyledCancelButton onClick={onClose} disabled={isDialogLoading} variant="text">
         {t("cancel")}
-      </Button>
-      <Button
-        onClick={handleSave}
-        disabled={isDialogLoading}
-        variant="contained"
-        sx={theme => ({
-          bgcolor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-          fontWeight: 700,
-          borderRadius: 1.5,
-          "&:hover": {
-            bgcolor: theme.palette.primary.dark,
-          },
-        })}
-      >
+      </StyledCancelButton>
+      {/* Save Action */}
+      <StyledSaveButton onClick={handleSave} disabled={isDialogLoading} variant="contained">
         {isSaving ? <CircularProgress size={20} color="inherit" /> : "Save Overrides"}
-      </Button>
-    </DialogActions>
+      </StyledSaveButton>
+    </StyledFooterContainer>
   );
 }

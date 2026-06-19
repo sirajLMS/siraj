@@ -2,11 +2,100 @@
 
 import { DeleteOutlined, PersonAddOutlined, PersonRemoveOutlined, SearchOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, Checkbox, InputAdornment, TextField, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
 import type { GroupUser, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+
+const StyledTabContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(3),
+}));
+
+const StyledUserToolbar = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: Number(theme.shape.borderRadius) * 2,
+  backgroundColor: theme.palette.surfaceContainerLow ?? theme.palette.background.paper,
+  border: `1px solid ${theme.palette.divider}`,
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(2),
+  alignItems: "center",
+  justifyContent: "space-between",
+  [theme.breakpoints.up("sm")]: {
+    flexDirection: "row",
+  },
+}));
+
+const StyledAssignUsersButton = styled(Button)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  textTransform: "none",
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  fontWeight: 600,
+  width: "100%",
+  [theme.breakpoints.up("sm")]: {
+    width: "auto",
+  },
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+  },
+}));
+
+const StyledBulkActionBar = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  backgroundColor: theme.palette.errorContainer ?? "rgba(211, 47, 47, 0.15)",
+  color: theme.palette.onErrorContainer ?? theme.palette.error.main,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  boxShadow: theme.shadows[2],
+}));
+
+const StyledRemoveSelectedButton = styled(Button)(({ theme }) => ({
+  textTransform: "none",
+  fontWeight: 700,
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+}));
+
+const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
+  width: 32,
+  height: 32,
+  backgroundColor: theme.palette.primaryContainer,
+  color: theme.palette.onPrimaryContainer,
+  fontSize: "0.875rem",
+  fontWeight: 600,
+}));
+
+const StyledUserInfoContainer = styled(Box)({
+  display: "flex",
+  flexDirection: "column",
+  minWidth: 0,
+});
+
+const StyledUserNameText = styled(Typography)({
+  fontWeight: 600,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+});
+
+const StyledUserEmailText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontSize: "0.75rem",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+}));
+
+const StyledRemoveButton = styled(Button)({
+  fontWeight: 600,
+  fontSize: "0.75rem",
+});
 
 interface AssignedUsersTabProps {
   readonly group: PermissionGroup;
@@ -55,48 +144,18 @@ export function AssignedUsersTab({
           const user = params.row;
           return (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1 }}>
-              <Avatar
-                sx={theme => ({
-                  width: 32,
-                  height: 32,
-                  bgcolor: theme.palette.primaryContainer,
-                  color: theme.palette.onPrimaryContainer,
-                  fontSize: "0.875rem",
-                  fontWeight: 600,
-                })}
-              >
+              <StyledUserAvatar>
                 {user.name
                   ?.split(" ")
                   .map((w: string) => w[0])
                   .join("")
                   .slice(0, 2)
                   .toUpperCase()}
-              </Avatar>
-              <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                <Typography
-                  variant="bodyMd"
-                  sx={{
-                    fontWeight: 600,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {user.name}
-                </Typography>
-                <Typography
-                  variant="bodyMd"
-                  sx={theme => ({
-                    color: theme.palette.text.secondary,
-                    fontSize: "0.75rem",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  })}
-                >
-                  {user.email}
-                </Typography>
-              </Box>
+              </StyledUserAvatar>
+              <StyledUserInfoContainer>
+                <StyledUserNameText variant="bodyMd">{user.name}</StyledUserNameText>
+                <StyledUserEmailText variant="bodyMd">{user.email}</StyledUserEmailText>
+              </StyledUserInfoContainer>
             </Box>
           );
         },
@@ -133,35 +192,23 @@ export function AssignedUsersTab({
         align: "right",
         sortable: false,
         renderCell: params => (
-          <Button
+          <StyledRemoveButton
             size="small"
             color="error"
             startIcon={<PersonRemoveOutlined fontSize="small" />}
             onClick={() => params.row.id && onRevokeUser(params.row.id)}
-            sx={{ fontWeight: 600, fontSize: "0.75rem" }}
           >
             Remove
-          </Button>
+          </StyledRemoveButton>
         ),
       },
     ];
   }, [t, group.createdAt, selectedAssignedUserIds, onRevokeUser, onUserToggle]);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <Box
-        sx={theme => ({
-          p: 2,
-          borderRadius: 2,
-          bgcolor: theme.palette.surfaceContainerLow ?? theme.palette.background.paper,
-          border: `1px solid ${theme.palette.divider}`,
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          gap: 2,
-          alignItems: "center",
-          justifyContent: "space-between",
-        })}
-      >
+    <StyledTabContainer>
+      {/* Search & Actions Toolbar */}
+      <StyledUserToolbar>
         <TextField
           size="small"
           placeholder="Search assigned users by name or email..."
@@ -178,58 +225,33 @@ export function AssignedUsersTab({
           }}
           sx={{ width: { xs: "100%", sm: 360 } }}
         />
-        <Button
+        <StyledAssignUsersButton
           variant="contained"
           startIcon={<PersonAddOutlined />}
           onClick={() => group.id && onAssignGroup(group.id)}
-          sx={theme => ({
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            textTransform: "none",
-            borderRadius: 1.5,
-            fontWeight: 600,
-            width: { xs: "100%", sm: "auto" },
-            "&:hover": {
-              bgcolor: theme.palette.primary.dark,
-            },
-          })}
         >
           Assign Users
-        </Button>
-      </Box>
+        </StyledAssignUsersButton>
+      </StyledUserToolbar>
 
+      {/* Bulk Action Bar */}
       {selectedAssignedUserIds.length > 0 && (
-        <Box
-          sx={theme => ({
-            p: 2,
-            borderRadius: 1.5,
-            bgcolor: theme.palette.errorContainer ?? "rgba(211, 47, 47, 0.15)",
-            color: theme.palette.onErrorContainer ?? theme.palette.error.main,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            boxShadow: 2,
-          })}
-        >
+        <StyledBulkActionBar>
           <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
             {selectedAssignedUserIds.length} users selected
           </Typography>
-          <Button
+          <StyledRemoveSelectedButton
             variant="contained"
             color="error"
             startIcon={<DeleteOutlined />}
             onClick={onBulkRevokeUsers}
-            sx={{
-              textTransform: "none",
-              fontWeight: 700,
-              borderRadius: 1.5,
-            }}
           >
             Remove Selected
-          </Button>
-        </Box>
+          </StyledRemoveSelectedButton>
+        </StyledBulkActionBar>
       )}
 
+      {/* Users Data Grid */}
       <SectionPanel title="Assigned Group Members">
         <AppDataGrid<GroupUser>
           rows={filteredAssignedUsers}
@@ -239,6 +261,6 @@ export function AssignedUsersTab({
           autoHeight
         />
       </SectionPanel>
-    </Box>
+    </StyledTabContainer>
   );
 }

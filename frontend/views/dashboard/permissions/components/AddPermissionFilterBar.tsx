@@ -1,7 +1,37 @@
 "use client";
 
 import { SearchOutlined } from "@mui/icons-material";
-import { Box, InputAdornment, MenuItem, Select, TextField } from "@mui/material";
+import { InputAdornment, MenuItem, Select, TextField } from "@mui/material";
+import { styled } from "@mui/material/styles";
+
+const StyledFilterContainer = styled("div")(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: 8,
+  backgroundColor: theme.palette.surfaceContainerLow ?? theme.palette.background.paper,
+  border: `1px solid ${theme.palette.divider}`,
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(2),
+  alignItems: "center",
+  justifyContent: "space-between",
+  [theme.breakpoints.up("sm")]: {
+    flexDirection: "row",
+  },
+}));
+
+const StyledSearchField = styled(TextField)(({ theme }) => ({
+  width: "100%",
+  [theme.breakpoints.up("sm")]: {
+    width: 360,
+  },
+}));
+
+const StyledCategorySelect = styled(Select<string>)(({ theme }) => ({
+  width: "100%",
+  [theme.breakpoints.up("sm")]: {
+    width: 200,
+  },
+}));
 
 interface AddPermissionFilterBarProps {
   readonly searchQuery: string;
@@ -21,20 +51,9 @@ export function AddPermissionFilterBar({
   t,
 }: Readonly<AddPermissionFilterBarProps>) {
   return (
-    <Box
-      sx={theme => ({
-        p: 2,
-        borderRadius: 2,
-        bgcolor: theme.palette.surfaceContainerLow ?? theme.palette.background.paper,
-        border: `1px solid ${theme.palette.divider}`,
-        display: "flex",
-        flexDirection: { xs: "column", sm: "row" },
-        gap: 2,
-        alignItems: "center",
-        justifyContent: "space-between",
-      })}
-    >
-      <TextField
+    <StyledFilterContainer>
+      {/* Search Field */}
+      <StyledSearchField
         size="small"
         placeholder={t("searchPermissionsPlaceholder")}
         value={searchQuery}
@@ -48,21 +67,16 @@ export function AddPermissionFilterBar({
             ),
           },
         }}
-        sx={{ width: { xs: "100%", sm: 360 } }}
       />
-      <Select
-        size="small"
-        value={selectedCategory}
-        onChange={e => onCategoryChange(e.target.value)}
-        sx={{ width: { xs: "100%", sm: 200 } }}
-      >
+      {/* Category Filter */}
+      <StyledCategorySelect size="small" value={selectedCategory} onChange={e => onCategoryChange(e.target.value)}>
         <MenuItem value="all">{t("allCategoriesOption")}</MenuItem>
         {addCategories.map(cat => (
           <MenuItem key={cat} value={cat}>
             {cat}
           </MenuItem>
         ))}
-      </Select>
-    </Box>
+      </StyledCategorySelect>
+    </StyledFilterContainer>
   );
 }

@@ -1,7 +1,72 @@
 "use client";
 
 import { Avatar, Box, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
+
+const StyledSidebarContainer = styled(Box)(({ theme }) => ({
+  width: "100%",
+  borderRight: "none",
+  borderBottom: `1px solid ${theme.palette.divider}`,
+  padding: theme.spacing(3),
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  textAlign: "center",
+  backgroundColor: theme.palette.surfaceContainerLow ?? "transparent",
+  gap: theme.spacing(3),
+  [theme.breakpoints.up("md")]: {
+    width: "25%",
+    borderRight: `1px solid ${theme.palette.divider}`,
+    borderBottom: "none",
+  },
+}));
+
+const StyledUserInfoBox = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: theme.spacing(2),
+}));
+
+const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
+  width: 80,
+  height: 80,
+  backgroundColor: theme.palette.primaryContainer,
+  color: theme.palette.onPrimaryContainer,
+  fontSize: "2rem",
+  fontWeight: 600,
+}));
+
+const StyledGroupsSection = styled(Box)({
+  width: "100%",
+  textAlign: "left",
+});
+
+const StyledGroupsSectionLabel = styled(Typography)(({ theme }) => ({
+  textTransform: "uppercase",
+  fontSize: "0.75rem",
+  fontWeight: 600,
+  color: theme.palette.text.secondary,
+  marginBottom: theme.spacing(1.5),
+  letterSpacing: "0.05em",
+}));
+
+const StyledGroupChip = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1.5),
+  padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
+  borderRadius: theme.shape.borderRadius * 1.5,
+  border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
+  backgroundColor: theme.palette.secondaryContainer,
+  color: theme.palette.onSecondaryContainer,
+}));
+
+const StyledGroupName = styled(Typography)({
+  fontWeight: 500,
+  fontSize: "0.875rem",
+});
 
 interface OverridesUserSidebarProps {
   readonly user: User;
@@ -10,40 +75,17 @@ interface OverridesUserSidebarProps {
 
 export function OverridesUserSidebar({ user, userGroups }: Readonly<OverridesUserSidebarProps>) {
   return (
-    <Box
-      sx={theme => ({
-        width: { xs: "100%", md: "25%" },
-        borderRight: { xs: "none", md: `1px solid ${theme.palette.divider}` },
-        borderBottom: { xs: `1px solid ${theme.palette.divider}`, md: "none" },
-        p: 3,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        textAlign: "center",
-        bgcolor: theme.palette.surfaceContainerLow ?? "transparent",
-        gap: 3,
-      })}
-    >
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-        <Avatar
-          src={user.avatarUrl ?? undefined}
-          alt={user.name ?? ""}
-          sx={theme => ({
-            width: 80,
-            height: 80,
-            bgcolor: theme.palette.primaryContainer,
-            color: theme.palette.onPrimaryContainer,
-            fontSize: "2rem",
-            fontWeight: 600,
-          })}
-        >
+    <StyledSidebarContainer>
+      {/* User Avatar & Info */}
+      <StyledUserInfoBox>
+        <StyledUserAvatar src={user.avatarUrl ?? undefined} alt={user.name ?? ""}>
           {user.name
             ?.split(" ")
             .map(w => w[0])
             .join("")
             .slice(0, 2)
             .toUpperCase()}
-        </Avatar>
+        </StyledUserAvatar>
         <Box>
           <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
             {user.name}
@@ -52,22 +94,11 @@ export function OverridesUserSidebar({ user, userGroups }: Readonly<OverridesUse
             {user.email}
           </Typography>
         </Box>
-      </Box>
+      </StyledUserInfoBox>
 
-      <Box sx={{ width: "100%", textAlign: "left" }}>
-        <Typography
-          variant="bodyMd"
-          sx={theme => ({
-            textTransform: "uppercase",
-            fontSize: "0.75rem",
-            fontWeight: 600,
-            color: theme.palette.text.secondary,
-            mb: 1.5,
-            letterSpacing: "0.05em",
-          })}
-        >
-          Current Groups
-        </Typography>
+      {/* Current Groups */}
+      <StyledGroupsSection>
+        <StyledGroupsSectionLabel variant="bodyMd">Current Groups</StyledGroupsSectionLabel>
         {userGroups.length === 0 ? (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.disabled, fontStyle: "italic" })}>
             No assigned groups
@@ -75,28 +106,13 @@ export function OverridesUserSidebar({ user, userGroups }: Readonly<OverridesUse
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             {userGroups.map(g => (
-              <Box
-                key={g.id || g.slug}
-                sx={theme => ({
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                  px: 2,
-                  py: 1,
-                  borderRadius: 1.5,
-                  border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
-                  bgcolor: theme.palette.secondaryContainer,
-                  color: theme.palette.onSecondaryContainer,
-                })}
-              >
-                <Typography variant="bodyMd" sx={{ fontWeight: 500, fontSize: "0.875rem" }}>
-                  {g.name}
-                </Typography>
-              </Box>
+              <StyledGroupChip key={g.id || g.slug}>
+                <StyledGroupName variant="bodyMd">{g.name}</StyledGroupName>
+              </StyledGroupChip>
             ))}
           </Box>
         )}
-      </Box>
-    </Box>
+      </StyledGroupsSection>
+    </StyledSidebarContainer>
   );
 }

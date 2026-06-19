@@ -1,6 +1,33 @@
 "use client";
 
 import { Box, Button, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
+
+const StyledBulkBarContainer = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  backgroundColor: theme.palette.primaryContainer,
+  color: theme.palette.onPrimaryContainer,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  boxShadow: theme.shadows[2],
+}));
+
+const StyledSelectionLabel = styled(Typography)({
+  fontWeight: 600,
+});
+
+const StyledAssignButton = styled(Button)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  textTransform: "none",
+  fontWeight: 700,
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+  },
+}));
 
 interface AddPermissionBulkBarProps {
   readonly selectedCount: number;
@@ -10,37 +37,13 @@ interface AddPermissionBulkBarProps {
 
 export function AddPermissionBulkBar({ selectedCount, onAssignPermissions, t }: Readonly<AddPermissionBulkBarProps>) {
   return (
-    <Box
-      sx={theme => ({
-        p: 2,
-        borderRadius: 1.5,
-        bgcolor: theme.palette.primaryContainer,
-        color: theme.palette.onPrimaryContainer,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        boxShadow: 2,
-      })}
-    >
-      <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-        {t("itemsSelectedLabel", { count: selectedCount })}
-      </Typography>
-      <Button
-        variant="contained"
-        onClick={onAssignPermissions}
-        sx={theme => ({
-          bgcolor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-          textTransform: "none",
-          fontWeight: 700,
-          borderRadius: 1.5,
-          "&:hover": {
-            bgcolor: theme.palette.primary.dark,
-          },
-        })}
-      >
+    <StyledBulkBarContainer>
+      {/* Selection Count */}
+      <StyledSelectionLabel variant="titleLg">{t("itemsSelectedLabel", { count: selectedCount })}</StyledSelectionLabel>
+      {/* Assign Action */}
+      <StyledAssignButton variant="contained" onClick={onAssignPermissions}>
         {t("assignPermissionsButton")}
-      </Button>
-    </Box>
+      </StyledAssignButton>
+    </StyledBulkBarContainer>
   );
 }

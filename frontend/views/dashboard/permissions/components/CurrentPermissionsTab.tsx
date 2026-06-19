@@ -2,11 +2,70 @@
 
 import { RemoveCircleOutlined, SecurityOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
+
+const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
+  fontFamily: "JetBrains Mono, monospace",
+  fontSize: "0.75rem",
+  backgroundColor: theme.palette.surfaceVariant,
+  color: theme.palette.onSurfaceVariant,
+  padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
+  borderRadius: theme.shape.borderRadius,
+  display: "inline-block",
+}));
+
+const StyledRevokeButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.error.main,
+  fontWeight: 600,
+  fontSize: "0.75rem",
+}));
+
+const StyledEmptyStateContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  paddingTop: theme.spacing(8),
+  paddingBottom: theme.spacing(8),
+  textAlign: "center",
+  gap: theme.spacing(2),
+}));
+
+const StyledEmptyStateIconCircle = styled(Box)(({ theme }) => ({
+  width: 64,
+  height: 64,
+  borderRadius: "50%",
+  backgroundColor: theme.palette.surfaceContainerHigh ?? theme.palette.action.hover,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  border: `1px solid ${theme.palette.divider}`,
+}));
+
+const StyledEmptyStateTitle = styled(Typography)({
+  fontWeight: 600,
+});
+
+const StyledEmptyStateDescription = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  maxWidth: 400,
+}));
+
+const StyledAssignFirstButton = styled(Button)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  textTransform: "none",
+  fontWeight: 600,
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+  },
+}));
 
 interface CurrentPermissionsTabProps {
   readonly group: PermissionGroup;
@@ -32,22 +91,7 @@ export function CurrentPermissionsTab({
         headerName: t("columnKey"),
         flex: 1,
         minWidth: 200,
-        renderCell: params => (
-          <Box
-            sx={theme => ({
-              fontFamily: "JetBrains Mono, monospace",
-              fontSize: "0.75rem",
-              backgroundColor: theme.palette.surfaceVariant,
-              color: theme.palette.onSurfaceVariant,
-              px: 1,
-              py: 0.5,
-              borderRadius: 1,
-              display: "inline-block",
-            })}
-          >
-            {params.value as string}
-          </Box>
-        ),
+        renderCell: params => <StyledPermissionKeyCell>{params.value as string}</StyledPermissionKeyCell>,
       },
       {
         field: "category",
@@ -70,18 +114,13 @@ export function CurrentPermissionsTab({
         align: "right",
         sortable: false,
         renderCell: params => (
-          <Button
+          <StyledRevokeButton
             size="small"
             startIcon={<RemoveCircleOutlined fontSize="small" />}
             onClick={() => params.row.id && onRevokePermission(params.row.id)}
-            sx={theme => ({
-              color: group.isSystem ? theme.palette.text.disabled : theme.palette.error.main,
-              fontWeight: 600,
-              fontSize: "0.75rem",
-            })}
           >
             Revoke
-          </Button>
+          </StyledRevokeButton>
         ),
       });
     }
@@ -92,58 +131,27 @@ export function CurrentPermissionsTab({
   return (
     <SectionPanel title={t("currentPermissions")}>
       {permissionsCount === 0 ? (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            py: 8,
-            textAlign: "center",
-            gap: 2,
-          }}
-        >
-          <Box
-            sx={theme => ({
-              width: 64,
-              height: 64,
-              borderRadius: "50%",
-              bgcolor: theme.palette.surfaceContainerHigh ?? theme.palette.action.hover,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: `1px solid ${theme.palette.divider}`,
-            })}
-          >
+        /* Empty State */
+        <StyledEmptyStateContainer>
+          {/* Icon Circle */}
+          <StyledEmptyStateIconCircle>
             <SecurityOutlined fontSize="large" sx={theme => ({ color: theme.palette.text.secondary })} />
-          </Box>
-          <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-            No Permissions Assigned Yet
-          </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, maxWidth: 400 })}>
+          </StyledEmptyStateIconCircle>
+          {/* Title & Description */}
+          <StyledEmptyStateTitle variant="titleLg">No Permissions Assigned Yet</StyledEmptyStateTitle>
+          <StyledEmptyStateDescription variant="bodyMd">
             This custom group currently has no active policies. Add specific resource permissions to grant access to
             content modules.
-          </Typography>
+          </StyledEmptyStateDescription>
+          {/* Primary Action */}
           {!group.isSystem && (
-            <Button
-              variant="contained"
-              onClick={onSwitchToAddTab}
-              sx={theme => ({
-                bgcolor: theme.palette.primary.main,
-                color: theme.palette.onPrimary,
-                borderRadius: 1.5,
-                textTransform: "none",
-                fontWeight: 600,
-                "&:hover": {
-                  bgcolor: theme.palette.primary.dark,
-                },
-              })}
-            >
+            <StyledAssignFirstButton variant="contained" onClick={onSwitchToAddTab}>
               Assign First Permission
-            </Button>
+            </StyledAssignFirstButton>
           )}
-        </Box>
+        </StyledEmptyStateContainer>
       ) : (
+        /* Data Grid */
         <AppDataGrid<Permission>
           rows={groupPermissions}
           columns={currentPermissionsColumns}

@@ -2,6 +2,7 @@
 
 import { CloseOutlined } from "@mui/icons-material";
 import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import type { Permission, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
 import { OverridesDialogFooter } from "./OverridesDialogFooter";
@@ -9,6 +10,37 @@ import { OverridesTable } from "./OverridesTable";
 import { OverridesToolbar } from "./OverridesToolbar";
 import { OverridesUserSidebar } from "./OverridesUserSidebar";
 import { useManageOverridesState } from "./useManageOverridesState";
+
+const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
+  borderBottom: `1px solid ${theme.palette.divider}`,
+  padding: `${theme.spacing(2)} ${theme.spacing(3)}`,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+}));
+
+const StyledSubtitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  marginTop: theme.spacing(0.5),
+}));
+
+const StyledDialogContent = styled(DialogContent)({
+  padding: 0,
+  display: "flex",
+  flex: 1,
+  minHeight: 0,
+  flexDirection: "column",
+  "@media (min-width: 900px)": {
+    flexDirection: "row",
+  },
+});
+
+const StyledRightContentArea = styled(Box)({
+  flex: 1,
+  display: "flex",
+  flexDirection: "column",
+  minHeight: 0,
+});
 
 interface ManageOverridesDialogProps {
   readonly open: boolean;
@@ -68,34 +100,26 @@ export function ManageOverridesDialog({
         },
       }}
     >
-      <DialogTitle
-        id="manage-overrides-dialog-title"
-        sx={theme => ({
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          px: 3,
-          py: 2,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        })}
-      >
+      {/* Header */}
+      <StyledDialogTitle id="manage-overrides-dialog-title">
         <Box>
           <Typography variant="headlineMd" sx={{ fontWeight: 600 }}>
             {t("editOverrides")}
           </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, mt: 0.5 })}>
+          <StyledSubtitle variant="bodyMd">
             Configuring explicit rules for {user.name} ({user.email})
-          </Typography>
+          </StyledSubtitle>
         </Box>
         <IconButton onClick={onClose} disabled={isDialogLoading} size="small">
           <CloseOutlined />
         </IconButton>
-      </DialogTitle>
+      </StyledDialogTitle>
 
-      <DialogContent sx={{ p: 0, display: "flex", flex: 1, minHeight: 0, flexDirection: { xs: "column", md: "row" } }}>
+      {/* Sidebar + Content */}
+      <StyledDialogContent>
         <OverridesUserSidebar user={user} userGroups={userGroups} />
 
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <StyledRightContentArea>
           <OverridesToolbar
             mode={mode}
             onModeChange={setMode}
@@ -111,9 +135,10 @@ export function ManageOverridesDialog({
             isDialogLoading={isDialogLoading}
             handleOverrideChange={handleOverrideChange}
           />
-        </Box>
-      </DialogContent>
+        </StyledRightContentArea>
+      </StyledDialogContent>
 
+      {/* Footer */}
       <OverridesDialogFooter
         onClose={onClose}
         handleSave={handleSave}

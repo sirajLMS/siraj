@@ -1,7 +1,38 @@
 "use client";
 
 import { Button, ButtonGroup } from "@mui/material";
+import { styled, type Theme } from "@mui/material/styles";
 import type { OverrideState } from "./OverridesTable";
+
+type OverrideColorVariant = "inherit" | "allow" | "deny";
+
+function getVariantColors(variant: OverrideColorVariant, theme: Theme) {
+  if (variant === "inherit") {
+    return { bg: theme.palette.primaryContainer, color: theme.palette.onPrimaryContainer };
+  }
+  if (variant === "allow") {
+    return { bg: "rgba(46, 125, 50, 0.15)", color: theme.palette.success.main };
+  }
+  return { bg: "rgba(211, 47, 47, 0.15)", color: theme.palette.error.main };
+}
+
+const StyledOverrideButton = styled(Button, {
+  shouldForwardProp: prop => prop !== "isActive" && prop !== "colorVariant",
+})<{ isActive: boolean; colorVariant: OverrideColorVariant }>(({ theme, isActive, colorVariant }) => {
+  const { bg: activeBg, color: activeColor } = getVariantColors(colorVariant, theme);
+
+  return {
+    fontSize: "0.75rem",
+    borderColor: theme.palette.divider,
+    backgroundColor: isActive ? activeBg : "transparent",
+    color: isActive ? activeColor : theme.palette.text.secondary,
+    fontWeight: colorVariant !== "inherit" && isActive ? 600 : 400,
+    "&:hover": {
+      backgroundColor: isActive ? activeBg : "transparent",
+      borderColor: theme.palette.divider,
+    },
+  };
+});
 
 interface OverrideEditControlsProps {
   readonly permissionId: string;
@@ -18,53 +49,30 @@ export function OverrideEditControls({
 }: Readonly<OverrideEditControlsProps>) {
   return (
     <ButtonGroup variant="outlined" size="small" fullWidth disabled={isDialogLoading}>
-      <Button
+      {/* Inherit Button */}
+      <StyledOverrideButton
+        colorVariant="inherit"
+        isActive={overrideState === "INHERIT"}
         onClick={() => handleOverrideChange(permissionId, "INHERIT")}
-        sx={theme => ({
-          fontSize: "0.75rem",
-          bgcolor: overrideState === "INHERIT" ? theme.palette.primaryContainer : "transparent",
-          color: overrideState === "INHERIT" ? theme.palette.onPrimaryContainer : theme.palette.text.secondary,
-          borderColor: theme.palette.divider,
-          "&:hover": {
-            bgcolor: overrideState === "INHERIT" ? theme.palette.primaryContainer : "transparent",
-            borderColor: theme.palette.divider,
-          },
-        })}
       >
         Inherit
-      </Button>
-      <Button
+      </StyledOverrideButton>
+      {/* Allow Button */}
+      <StyledOverrideButton
+        colorVariant="allow"
+        isActive={overrideState === "GRANTED"}
         onClick={() => handleOverrideChange(permissionId, "GRANTED")}
-        sx={theme => ({
-          fontSize: "0.75rem",
-          bgcolor: overrideState === "GRANTED" ? "rgba(46, 125, 50, 0.15)" : "transparent",
-          color: overrideState === "GRANTED" ? theme.palette.success.main : theme.palette.text.secondary,
-          borderColor: theme.palette.divider,
-          fontWeight: overrideState === "GRANTED" ? 600 : 400,
-          "&:hover": {
-            bgcolor: overrideState === "GRANTED" ? "rgba(46, 125, 50, 0.15)" : "transparent",
-            borderColor: theme.palette.divider,
-          },
-        })}
       >
         Allow
-      </Button>
-      <Button
+      </StyledOverrideButton>
+      {/* Deny Button */}
+      <StyledOverrideButton
+        colorVariant="deny"
+        isActive={overrideState === "DENIED"}
         onClick={() => handleOverrideChange(permissionId, "DENIED")}
-        sx={theme => ({
-          fontSize: "0.75rem",
-          bgcolor: overrideState === "DENIED" ? "rgba(211, 47, 47, 0.15)" : "transparent",
-          color: overrideState === "DENIED" ? theme.palette.error.main : theme.palette.text.secondary,
-          borderColor: theme.palette.divider,
-          fontWeight: overrideState === "DENIED" ? 600 : 400,
-          "&:hover": {
-            bgcolor: overrideState === "DENIED" ? "rgba(211, 47, 47, 0.15)" : "transparent",
-            borderColor: theme.palette.divider,
-          },
-        })}
       >
         Deny
-      </Button>
+      </StyledOverrideButton>
     </ButtonGroup>
   );
 }

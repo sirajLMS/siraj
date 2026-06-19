@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useGroupActions } from "./useGroupActions";
+import { useGroupMutationActions } from "./useGroupMutationActions";
 import { useGroupPermissionFilters } from "./useGroupPermissionFilters";
 
 export type SubTabKey = "current" | "add" | "users";
@@ -28,7 +28,7 @@ export function useSingleGroupState({
 
   const filters = useGroupPermissionFilters({ group, permissions, searchQuery, selectedCategory });
 
-  const actions = useGroupActions({
+  const mutationActions = useGroupMutationActions({
     group,
     selectedAddPermissionIds,
     selectedAssignedUserIds,
@@ -38,9 +38,31 @@ export function useSingleGroupState({
     setActiveSubTab,
     setSelectedAddPermissionIds,
     setSelectedAssignedUserIds,
-    setSearchQuery,
-    setSelectedCategory,
   });
+
+  const handleAddPermissionToggle = useCallback((id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedAddPermissionIds(prev => [...prev, id]);
+    } else {
+      setSelectedAddPermissionIds(prev => prev.filter(x => x !== id));
+    }
+  }, []);
+
+  const handleAssignedUserToggle = useCallback((id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedAssignedUserIds(prev => [...prev, id]);
+    } else {
+      setSelectedAssignedUserIds(prev => prev.filter(x => x !== id));
+    }
+  }, []);
+
+  const handleSubTabChange = useCallback((val: SubTabKey) => {
+    setActiveSubTab(val);
+    setSearchQuery("");
+    setSelectedCategory("all");
+    setSelectedAddPermissionIds([]);
+    setSelectedAssignedUserIds([]);
+  }, []);
 
   return {
     activeSubTab,
@@ -52,6 +74,9 @@ export function useSingleGroupState({
     selectedAddPermissionIds,
     selectedAssignedUserIds,
     ...filters,
-    ...actions,
+    ...mutationActions,
+    handleAddPermissionToggle,
+    handleAssignedUserToggle,
+    handleSubTabChange,
   };
 }

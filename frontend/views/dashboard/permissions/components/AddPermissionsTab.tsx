@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Checkbox } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
@@ -8,6 +9,22 @@ import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
 import type { Permission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AddPermissionBulkBar } from "./AddPermissionBulkBar";
 import { AddPermissionFilterBar } from "./AddPermissionFilterBar";
+
+const StyledTabContainer = styled(Box)({
+  display: "flex",
+  flexDirection: "column",
+  gap: 24,
+});
+
+const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
+  fontFamily: "JetBrains Mono, monospace",
+  fontSize: "0.75rem",
+  backgroundColor: theme.palette.surfaceVariant,
+  color: theme.palette.onSurfaceVariant,
+  padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
+  borderRadius: theme.shape.borderRadius,
+  display: "inline-block",
+}));
 
 interface AddPermissionsTabProps {
   readonly filteredAvailablePermissions: readonly Permission[];
@@ -52,22 +69,7 @@ export function AddPermissionsTab({
         headerName: t("columnKey"),
         flex: 1,
         minWidth: 200,
-        renderCell: params => (
-          <Box
-            sx={theme => ({
-              fontFamily: "JetBrains Mono, monospace",
-              fontSize: "0.75rem",
-              backgroundColor: theme.palette.surfaceVariant,
-              color: theme.palette.onSurfaceVariant,
-              px: 1,
-              py: 0.5,
-              borderRadius: 1,
-              display: "inline-block",
-            })}
-          >
-            {params.value as string}
-          </Box>
-        ),
+        renderCell: params => <StyledPermissionKeyCell>{params.value as string}</StyledPermissionKeyCell>,
       },
       {
         field: "category",
@@ -84,7 +86,8 @@ export function AddPermissionsTab({
   }, [t, selectedAddPermissionIds, onPermissionToggle]);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <StyledTabContainer>
+      {/* Filter Bar */}
       <AddPermissionFilterBar
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
@@ -94,6 +97,7 @@ export function AddPermissionsTab({
         t={t}
       />
 
+      {/* Bulk Action Bar */}
       {selectedAddPermissionIds.length > 0 && (
         <AddPermissionBulkBar
           selectedCount={selectedAddPermissionIds.length}
@@ -102,6 +106,7 @@ export function AddPermissionsTab({
         />
       )}
 
+      {/* Permissions Grid */}
       <SectionPanel title={t("addPermissions")}>
         <AppDataGrid<Permission>
           rows={filteredAvailablePermissions}
@@ -111,6 +116,6 @@ export function AddPermissionsTab({
           autoHeight
         />
       </SectionPanel>
-    </Box>
+    </StyledTabContainer>
   );
 }

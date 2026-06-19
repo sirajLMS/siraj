@@ -1,10 +1,35 @@
 "use client";
 
 import { Box, TableCell, TableRow, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 import { OverrideEditControls } from "./OverrideEditControls";
 import { OverrideEffectiveDisplay } from "./OverrideEffectiveDisplay";
 import type { OverrideState } from "./OverridesTable";
+
+const StyledPermissionKeyContainer = styled(Box)({
+  display: "flex",
+  flexDirection: "column",
+});
+
+const StyledPermissionKeyText = styled(Typography)(({ theme }) => ({
+  fontFamily: "JetBrains Mono, monospace",
+  fontSize: "0.8rem",
+  fontWeight: 600,
+  color: theme.palette.primary.main,
+}));
+
+const StyledPermissionDescription = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  marginTop: theme.spacing(0.5),
+}));
+
+const StyledBaselineText = styled(Typography, {
+  shouldForwardProp: prop => prop !== "isAllowed",
+})<{ isAllowed: boolean }>(({ theme, isAllowed }) => ({
+  color: isAllowed ? theme.palette.success.main : theme.palette.text.secondary,
+  fontSize: "0.875rem",
+}));
 
 interface OverridesTableRowProps {
   readonly permission: Permission;
@@ -30,37 +55,22 @@ export function OverridesTableRow({
 }: Readonly<OverridesTableRowProps>) {
   return (
     <TableRow key={permission.id} hover>
+      {/* Permission Key & Description */}
       <TableCell>
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <Typography
-            variant="bodyMd"
-            sx={theme => ({
-              fontFamily: "JetBrains Mono, monospace",
-              fontSize: "0.8rem",
-              fontWeight: 600,
-              color: theme.palette.primary.main,
-            })}
-          >
-            {permission.key}
-          </Typography>
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, mt: 0.5 })}>
-            {permission.description}
-          </Typography>
-        </Box>
+        <StyledPermissionKeyContainer>
+          <StyledPermissionKeyText variant="bodyMd">{permission.key}</StyledPermissionKeyText>
+          <StyledPermissionDescription variant="caption">{permission.description}</StyledPermissionDescription>
+        </StyledPermissionKeyContainer>
       </TableCell>
 
+      {/* Group Baseline */}
       <TableCell>
-        <Typography
-          variant="bodyMd"
-          sx={theme => ({
-            color: isAllowedByGroup ? theme.palette.success.main : theme.palette.text.secondary,
-            fontSize: "0.875rem",
-          })}
-        >
+        <StyledBaselineText variant="bodyMd" isAllowed={isAllowedByGroup}>
           {baselineText}
-        </Typography>
+        </StyledBaselineText>
       </TableCell>
 
+      {/* Override Control */}
       <TableCell>
         {mode === "effective" ? (
           <OverrideEffectiveDisplay effectiveState={effectiveState} overrideState={overrideState} />

@@ -1,8 +1,31 @@
 "use client";
 
 import { Box, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 import { OverridesTableRow } from "./OverridesTableRow";
+
+const StyledTableWrapper = styled(Box)({
+  flex: 1,
+  overflow: "auto",
+  minHeight: 0,
+});
+
+const StyledLoadingContainer = styled(Box)({
+  display: "flex",
+  justifyContent: "center",
+  paddingTop: 64,
+  paddingBottom: 64,
+});
+
+const StyledHeaderCell = styled(TableCell)({
+  fontWeight: 600,
+});
+
+const StyledOverrideControlCell = styled(TableCell)({
+  fontWeight: 600,
+  width: "320px",
+});
 
 export type OverrideState = "GRANTED" | "DENIED" | "INHERIT";
 
@@ -24,21 +47,25 @@ export function OverridesTable({
   handleOverrideChange,
 }: Readonly<OverridesTableProps>) {
   return (
-    <Box sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
+    <StyledTableWrapper>
+      {/* Loading State */}
       {isDialogLoading && !filteredPermissions.length ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <StyledLoadingContainer>
           <CircularProgress color="primary" />
-        </Box>
+        </StyledLoadingContainer>
       ) : (
+        /* Overrides Table */
         <TableContainer>
           <Table stickyHeader aria-label="permissions overrides table">
+            {/* Table Header */}
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 600 }}>Permission</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Group Baseline</TableCell>
-                <TableCell sx={{ fontWeight: 600, width: "320px" }}>Override Control</TableCell>
+                <StyledHeaderCell>Permission</StyledHeaderCell>
+                <StyledHeaderCell>Group Baseline</StyledHeaderCell>
+                <StyledOverrideControlCell>Override Control</StyledOverrideControlCell>
               </TableRow>
             </TableHead>
+            {/* Table Body - Permission Rows */}
             <TableBody>
               {filteredPermissions.map(p => {
                 if (!p.id) return null;
@@ -81,6 +108,6 @@ export function OverridesTable({
           </Table>
         </TableContainer>
       )}
-    </Box>
+    </StyledTableWrapper>
   );
 }

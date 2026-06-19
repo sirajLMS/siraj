@@ -2,7 +2,39 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, Button, InputAdornment, TextField } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
+
+const StyledToolbarContainer = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderBottom: `1px solid ${theme.palette.divider}`,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: theme.spacing(2),
+  flexWrap: "wrap",
+}));
+
+const StyledModeToggleContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  padding: theme.spacing(0.5),
+  borderRadius: Number(theme.shape.borderRadius) * 2,
+  backgroundColor: theme.palette.surfaceContainerHigh ?? theme.palette.action.hover,
+  border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
+}));
+
+const StyledModeToggleButton = styled(Button, {
+  shouldForwardProp: prop => prop !== "isActive",
+})<{ isActive: boolean }>(({ theme, isActive }) => ({
+  padding: `${theme.spacing(0.75)} ${theme.spacing(2)}`,
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  fontWeight: isActive ? 600 : 500,
+  backgroundColor: isActive ? theme.palette.primaryContainer : "transparent",
+  color: isActive ? theme.palette.onPrimaryContainer : theme.palette.text.secondary,
+  "&:hover": {
+    backgroundColor: isActive ? theme.palette.primaryContainer : "transparent",
+  },
+}));
 
 interface OverridesToolbarProps {
   readonly mode: "effective" | "edit";
@@ -15,64 +47,28 @@ export function OverridesToolbar({ mode, onModeChange, searchQuery, onSearchChan
   const t = useTranslations("dashboard.permissions");
 
   return (
-    <Box
-      sx={theme => ({
-        p: 2,
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 2,
-        flexWrap: "wrap",
-      })}
-    >
-      <Box
-        sx={theme => ({
-          display: "flex",
-          p: 0.5,
-          borderRadius: 2,
-          bgcolor: theme.palette.surfaceContainerHigh ?? theme.palette.action.hover,
-          border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
-        })}
-      >
-        <Button
+    <StyledToolbarContainer>
+      {/* Mode Toggle */}
+      <StyledModeToggleContainer>
+        <StyledModeToggleButton
           variant="text"
           size="small"
+          isActive={mode === "effective"}
           onClick={() => onModeChange("effective")}
-          sx={theme => ({
-            px: 2,
-            py: 0.75,
-            borderRadius: 1.5,
-            fontWeight: mode === "effective" ? 600 : 500,
-            bgcolor: mode === "effective" ? theme.palette.primaryContainer : "transparent",
-            color: mode === "effective" ? theme.palette.onPrimaryContainer : theme.palette.text.secondary,
-            "&:hover": {
-              bgcolor: mode === "effective" ? theme.palette.primaryContainer : "transparent",
-            },
-          })}
         >
           {t("effectivePermissions")}
-        </Button>
-        <Button
+        </StyledModeToggleButton>
+        <StyledModeToggleButton
           variant="text"
           size="small"
+          isActive={mode === "edit"}
           onClick={() => onModeChange("edit")}
-          sx={theme => ({
-            px: 2,
-            py: 0.75,
-            borderRadius: 1.5,
-            fontWeight: mode === "edit" ? 600 : 500,
-            bgcolor: mode === "edit" ? theme.palette.primaryContainer : "transparent",
-            color: mode === "edit" ? theme.palette.onPrimaryContainer : theme.palette.text.secondary,
-            "&:hover": {
-              bgcolor: mode === "edit" ? theme.palette.primaryContainer : "transparent",
-            },
-          })}
         >
           Edit Overrides
-        </Button>
-      </Box>
+        </StyledModeToggleButton>
+      </StyledModeToggleContainer>
 
+      {/* Search Box */}
       <TextField
         size="small"
         placeholder="Filter permissions..."
@@ -89,6 +85,6 @@ export function OverridesToolbar({ mode, onModeChange, searchQuery, onSearchChan
         }}
         sx={{ width: { xs: "100%", sm: 260 } }}
       />
-    </Box>
+    </StyledToolbarContainer>
   );
 }

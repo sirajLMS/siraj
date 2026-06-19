@@ -2,8 +2,42 @@
 
 import { Search } from "@mui/icons-material";
 import { Box, Input, InputAdornment, MenuItem, Select } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { standardInputSx } from "@/frontend/components/ui/form";
+
+const StyledFilterContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(2),
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: theme.spacing(2),
+  backgroundColor: theme.palette.surfaceContainerHigh,
+  borderRadius: Number(theme.shape.borderRadius) * 2,
+  [theme.breakpoints.up("sm")]: {
+    flexDirection: "row",
+  },
+}));
+
+const StyledInputGroup = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flex: 1,
+  gap: theme.spacing(2),
+  width: "100%",
+  flexDirection: "column",
+  [theme.breakpoints.up("sm")]: {
+    flexDirection: "row",
+  },
+}));
+
+const StyledSelectedCountBadge = styled(Box)(({ theme }) => ({
+  padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  backgroundColor: theme.palette.primaryContainer,
+  color: theme.palette.onPrimaryContainer,
+  fontWeight: 700,
+}));
 
 interface PermissionFilterBarProps {
   readonly searchTerm: string;
@@ -27,19 +61,9 @@ export function PermissionFilterBar({
   const t = useTranslations("dashboard.permissions");
 
   return (
-    <Box
-      sx={theme => ({
-        display: "flex",
-        flexDirection: { xs: "column", sm: "row" },
-        gap: 2,
-        justifyContent: "space-between",
-        alignItems: "center",
-        p: 2,
-        bgcolor: theme.palette.surfaceContainerHigh,
-        borderRadius: 2,
-      })}
-    >
-      <Box sx={{ display: "flex", flex: 1, gap: 2, width: "100%", flexDirection: { xs: "column", sm: "row" } }}>
+    <StyledFilterContainer>
+      {/* Search & Category Filters */}
+      <StyledInputGroup>
         <Input
           value={searchTerm}
           onChange={e => onSearchChange(e.target.value)}
@@ -68,20 +92,10 @@ export function PermissionFilterBar({
             </MenuItem>
           ))}
         </Select>
-      </Box>
+      </StyledInputGroup>
 
-      <Box
-        sx={theme => ({
-          px: 2,
-          py: 1,
-          borderRadius: 1.5,
-          bgcolor: theme.palette.primaryContainer,
-          color: theme.palette.onPrimaryContainer,
-          fontWeight: 700,
-        })}
-      >
-        {t("itemsSelectedLabel", { count: selectedCount })}
-      </Box>
-    </Box>
+      {/* Selected Count Badge */}
+      <StyledSelectedCountBadge>{t("itemsSelectedLabel", { count: selectedCount })}</StyledSelectedCountBadge>
+    </StyledFilterContainer>
   );
 }
