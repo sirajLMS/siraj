@@ -107,8 +107,15 @@ export namespace ClassSessionService {
     reason?: string | null,
     locale?: string
   ) {
-    return runActivatedClassAction(userId, classInstanceId, AppPermission.SESSION_UPDATE_STATUS_LEAVE, locale, () =>
-      SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId)
+    return runActivatedClassAction(
+      userId,
+      classInstanceId,
+      AppPermission.SESSION_UPDATE_STATUS_LEAVE,
+      locale,
+      async instance => {
+        await SystemRulesService.assertLeaveQuotaAvailable(instance.teacherId, locale);
+        return SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId, undefined, locale);
+      }
     );
   }
 

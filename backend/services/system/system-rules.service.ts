@@ -1,3 +1,4 @@
+import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceEntity } from "@/backend/types";
@@ -32,6 +33,20 @@ export namespace SystemRulesService {
     if (now < requiredWaitTime) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("absentTooEarly", { waitingMinutes: String(waitingMinutes) }));
+    }
+  }
+
+  export async function assertLeaveQuotaAvailable(teacherId: string, locale?: string): Promise<void> {
+    const now = new Date();
+    const periodYear = now.getUTCFullYear();
+    const periodMonth = now.getUTCMonth() + 1;
+
+    const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2);
+    const currentUsage = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacherId, periodYear, periodMonth);
+
+    if (currentUsage >= maxLeaves) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("leaveQuotaExceeded", { maxLeaves: String(maxLeaves) }));
     }
   }
 }

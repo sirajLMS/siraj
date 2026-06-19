@@ -94,6 +94,7 @@ const en: MessageSchema = {
     permissionGroupNameTooLong: "Permission group name cannot exceed 255 characters",
     permissionGroupInvalidName: "Permission group name contains invalid characters",
     cannotModifySuperAdmin: "Cannot modify permissions of a SuperAdmin user",
+    leaveQuotaExceeded: "Leave quota exceeded. Maximum allowed leaves per month is {maxLeaves}.",
   },
   auth: {
     login: {

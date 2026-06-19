@@ -7,6 +7,7 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availab
 import {
   classInstances,
   classStatusEvents,
+  leaveQuotaUsage,
   leaveRequests,
   parents,
   students,
@@ -456,15 +457,25 @@ export namespace SchedulingRepository {
         throw new Error(tFuncErrors("classInstanceNotFound", { id }));
       }
 
-      // 1. Run IDOR check
+      // 1. Increment teacher leave quota WITHIN this transaction (atomic with leave processing)
+      const [teacherRow] = await t
+        .select({ id: teachers.id })
+        .from(teachers)
+        .where(eq(teachers.id, existing.teacherId))
+        .limit(1);
+      if (teacherRow) {
+        await incrementTeacherLeaveQuota(teacherRow.id, t, locale);
+      }
+
+      // 2. Run IDOR check
       await checkStateChangeAuth(t, existing, actorUserId, locale);
 
-      // 2. Validate state matches ACTIVATED or RUNNING
+      // 3. Validate state matches ACTIVATED or RUNNING
       if (existing.executionState !== "ACTIVATED" && existing.executionState !== "RUNNING") {
         throw new Error(tFuncErrors("sessionNotActivated"));
       }
 
-      // 3. Resolve reschedule offset days
+      // 4. Resolve reschedule offset days
       const offsetDays = await SystemSettingsRepository.getIntValue("session_leave_reschedule_offset_days", 7, t);
       const successor = await createRescheduledSuccessor(
         t,
@@ -474,7 +485,7 @@ export namespace SchedulingRepository {
         locale
       );
 
-      // 4. Update original class state
+      // 5. Update original class state
       const updated = await runStateChange(id, actorUserId, t, locale, async () => {
         const now = new Date();
         const msg = tFuncSession("leaveProcessedDescription", { successorId: successor.id });
@@ -499,7 +510,7 @@ export namespace SchedulingRepository {
 
       const originalId = updated?.id ?? id;
 
-      // 5. Restore student quota exactly once if it was deducted
+      // 6. Restore student quota exactly once if it was deducted
       if (existing.quotaDeducted) {
         await t
           .update(students)
@@ -507,7 +518,7 @@ export namespace SchedulingRepository {
           .where(eq(students.id, existing.studentId));
       }
 
-      // 6. Insert/update leaveRequests record
+      // 7. Insert/update leaveRequests record
       const requesterType = await getRequesterTypeForUser(t, actorUserId);
       const now = new Date();
       await t
@@ -1281,4 +1292,67 @@ export namespace SchedulingRepository {
     };
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
+
+  export async function getTeacherLeaveQuotaUsage(
+    teacherId: string,
+    periodYear: number,
+    periodMonth: number,
+    tx?: DBTransaction
+  ): Promise<number> {
+    const queryDb = tx ?? db;
+    const [row] = await queryDb
+      .select({ usedCount: leaveQuotaUsage.usedCount })
+      .from(leaveQuotaUsage)
+      .where(
+        and(
+          eq(leaveQuotaUsage.teacherId, teacherId),
+          eq(leaveQuotaUsage.periodYear, periodYear),
+          eq(leaveQuotaUsage.periodMonth, periodMonth)
+        )
+      )
+      .limit(1);
+
+    return row?.usedCount ?? 0;
+  }
+
+  export async function incrementTeacherLeaveQuota(
+    teacherId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<void> {
+    const now = new Date();
+    const periodYear = now.getUTCFullYear();
+    const periodMonth = now.getUTCMonth() + 1;
+
+    const queryDb = tx ?? db;
+
+    try {
+      await queryDb.execute(sql`
+        INSERT INTO leave_quota_usage (teacher_id, period_year, period_month, used_count)
+        VALUES (${teacherId}, ${periodYear}, ${periodMonth}, 1)
+        ON CONFLICT (teacher_id, period_year, period_month) WHERE teacher_id IS NOT NULL
+        DO UPDATE SET used_count = leave_quota_usage.used_count + 1
+      `);
+    } catch (error) {
+      if (error instanceof Error && (error as { code?: string }).code === "P0001") {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("leaveQuotaExceeded", { maxLeaves: "2" }));
+      }
+      throw error;
+    }
+  }
+
+  export async function getTeacherByUserId(
+    userId: string,
+    tx?: DBTransaction
+  ): Promise<{ id: string; userId: string } | null> {
+    const queryDb = tx ?? db;
+    const [row] = await queryDb
+      .select({ id: teachers.id, userId: teachers.userId })
+      .from(teachers)
+      .where(eq(teachers.userId, userId))
+      .limit(1);
+
+    return row ?? null;
+  }
 }

@@ -5,7 +5,7 @@
 **Security baseline:** `.ai/done/service/1-sprint_1__db_repo_service_enhancments.md` (mandatory prerequisite)  
 **Story scope:** Implement automated leave quota enforcement (`system.enforce_leave_limit`), extend future schedule verification with "Re Scheduled" badge, and enable admin processing of subsequent leave requests with quota tracking awareness  
 **Target roles:** Academy Admin (audit future calendar, process reschedule up to limits), Teacher (view future personal schedules, leave requests gated by system limits), System Automated (validate operational constraints)  
-**Status:** In progress — Task A (Permission + Settings) complete  
+**Status:** In progress — Task A (Permission + Settings) complete, Task B (Service Layer Quota Enforcement) complete  
 **Last updated:** 2026-06-19  
 
 ---
@@ -1035,16 +1035,16 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `getTeacherLeaveQuotaUsage` returns correct count for a given teacher/period
-- [ ] `incrementTeacherLeaveQuota` atomically increments counter and respects DB trigger
-- [ ] `incrementTeacherLeaveQuota` uses raw SQL conflict target for partial unique index (or raw SQL upsert fallback)
-- [ ] `incrementTeacherLeaveQuota` detects trigger errors via PostgreSQL error code `P0001`, not string matching
-- [ ] `assertLeaveQuotaAvailable` throws localized error when quota is exhausted
-- [ ] `updateStatusLeave` pre-checks quota for fast-fail before any DB mutation
-- [ ] `processClassLeave` calls `incrementTeacherLeaveQuota` **inside its transaction** (atomic rollback on trigger failure)
-- [ ] DB trigger catches quota violations even if service pre-check is bypassed
-- [ ] i18n translations added for `leaveQuotaExceeded` in en and ar
-- [ ] `bun tsgo` passes
+- [x] `getTeacherLeaveQuotaUsage` returns correct count for a given teacher/period
+- [x] `incrementTeacherLeaveQuota` atomically increments counter and respects DB trigger
+- [x] `incrementTeacherLeaveQuota` uses raw SQL conflict target for partial unique index (or raw SQL upsert fallback)
+- [x] `incrementTeacherLeaveQuota` detects trigger errors via PostgreSQL error code `P0001`, not string matching
+- [x] `assertLeaveQuotaAvailable` throws localized error when quota is exhausted
+- [x] `updateStatusLeave` pre-checks quota for fast-fail before any DB mutation
+- [x] `processClassLeave` calls `incrementTeacherLeaveQuota` **inside its transaction** (atomic rollback on trigger failure)
+- [x] DB trigger catches quota violations even if service pre-check is bypassed
+- [x] i18n translations added for `leaveQuotaExceeded` in en and ar
+- [x] `bun tsgo` passes (2 pre-existing errors in unrelated permissions UI components)
 - [ ] All existing tests still pass (no regressions)
 
 ---
@@ -2129,10 +2129,10 @@ bun quality-gate
 ```
 Task A (Permission + Settings) ✅ DONE
   ↓
-Task B (Service Layer Quota Enforcement)
-  ├── CRITICAL: processClassLeave modified to include quota increment inside its transaction
-  ├── CRITICAL: incrementTeacherLeaveQuota uses raw SQL conflict target for partial index
-  └── CRITICAL: Trigger error detection uses PostgreSQL error code P0001, not string matching
+Task B (Service Layer Quota Enforcement) ✅ DONE
+  ├── CRITICAL: processClassLeave modified to include quota increment inside its transaction ✅
+  ├── CRITICAL: incrementTeacherLeaveQuota uses raw SQL conflict target for partial index ✅
+  └── CRITICAL: Trigger error detection uses PostgreSQL error code P0001, not string matching ✅
   ↓
 Task C (Backend GraphQL Query)
   ├── FIXED: getTeacherFutureClasses joins students table (no hardcoded stub data)

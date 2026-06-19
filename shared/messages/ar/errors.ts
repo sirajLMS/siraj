@@ -69,4 +69,5 @@ export const errors: ErrorsLabels = {
   permissionGroupNameTooLong: "لا يمكن أن يتجاوز اسم مجموعة الصلاحيات 255 حرفاً",
   permissionGroupInvalidName: "اسم مجموعة الصلاحيات يحتوي على أحرف غير صالحة",
   cannotModifySuperAdmin: "لا يمكن تعديل صلاحيات مستخدم SuperAdmin",
+  leaveQuotaExceeded: "تم تجاوز حد الإجازات. الحد الأقصى المسموح به هو {maxLeaves} إجازات شهرياً.",
 };
