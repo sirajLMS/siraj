@@ -303,7 +303,7 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
         minWidth: 200,
         sortable: false,
         renderCell: params => {
-          const userGroups = getUserGroupsForUser(params.row.id, groups);
+          const userGroups = getUserGroupsForUser(params.row.id ?? undefined, groups);
           return <UserGroupsCell userGroups={userGroups} />;
         },
       },

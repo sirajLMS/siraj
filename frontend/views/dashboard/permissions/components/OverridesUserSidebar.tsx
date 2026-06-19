@@ -57,7 +57,7 @@ const StyledGroupChip = styled(Box)(({ theme }) => ({
   alignItems: "center",
   gap: theme.spacing(1.5),
   padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
-  borderRadius: theme.shape.borderRadius * 1.5,
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
   border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
   backgroundColor: theme.palette.secondaryContainer,
   color: theme.palette.onSecondaryContainer,

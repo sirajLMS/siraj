@@ -1336,7 +1336,7 @@ export namespace SchedulingRepository {
     } catch (error) {
       if (error instanceof Error && (error as { code?: string }).code === "P0001") {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("leaveQuotaExceeded", { maxLeaves: "2" }));
+        throw new Error(tFunc("leaveQuotaExceeded", { maxLeaves: "2" }), { cause: error });
       }
       throw error;
     }
