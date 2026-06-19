@@ -608,9 +608,11 @@ type LoginResponse {
 type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
+  cleanupTestEntities(parentId: String!, parentUserId: String!, studentId: String!, studentUserId: String!, teacherId: String!, teacherUserId: String!): Boolean
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createFolder(input: FolderCreateInput!): FileOperationResult
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
+  createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
   deleteClassInstance(classInstanceId: ID!): Boolean
   deleteFile(path: String!): FileOperationResult
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
@@ -1006,6 +1008,18 @@ type TeacherProgressFeedItem {
 type TeacherSimple {
   id: String
   name: String
+}
+
+type TestEntities {
+  parentId: String
+  parentUserEmail: String
+  parentUserId: String
+  studentId: String
+  studentUserEmail: String
+  studentUserId: String
+  teacherId: String
+  teacherUserEmail: String
+  teacherUserId: String
 }
 
 type UploadPreparation {

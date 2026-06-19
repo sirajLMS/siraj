@@ -635,9 +635,11 @@ export type Mutation = {
   __typename?: 'Mutation';
   activateClass: Maybe<ClassInstanceDetail>;
   activateOverrideClass: Maybe<ClassInstanceDetail>;
+  cleanupTestEntities: Maybe<Scalars['Boolean']['output']>;
   copyStorageItems: Maybe<BulkOperationResult>;
   createFolder: Maybe<FileOperationResult>;
   createTeacherManualClassEntry: Maybe<ClassInstanceDetail>;
+  createTestEntities: Maybe<TestEntities>;
   deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
   deleteFile: Maybe<FileOperationResult>;
   deleteStorageItems: Maybe<BulkOperationResult>;
@@ -673,6 +675,16 @@ export type MutationActivateOverrideClassArgs = {
 };
 
 
+export type MutationCleanupTestEntitiesArgs = {
+  parentId: Scalars['String']['input'];
+  parentUserId: Scalars['String']['input'];
+  studentId: Scalars['String']['input'];
+  studentUserId: Scalars['String']['input'];
+  teacherId: Scalars['String']['input'];
+  teacherUserId: Scalars['String']['input'];
+};
+
+
 export type MutationCopyStorageItemsArgs = {
   input: StorageItemsCopyInput;
 };
@@ -685,6 +697,12 @@ export type MutationCreateFolderArgs = {
 
 export type MutationCreateTeacherManualClassEntryArgs = {
   input: CreateManualClassEntryInput;
+};
+
+
+export type MutationCreateTestEntitiesArgs = {
+  classesRemaining: InputMaybe<Scalars['Int']['input']>;
+  prefix: Scalars['String']['input'];
 };
 
 
@@ -1263,6 +1281,19 @@ export type TeacherSimple = {
   __typename?: 'TeacherSimple';
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
+};
+
+export type TestEntities = {
+  __typename?: 'TestEntities';
+  parentId: Maybe<Scalars['String']['output']>;
+  parentUserEmail: Maybe<Scalars['String']['output']>;
+  parentUserId: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  studentUserEmail: Maybe<Scalars['String']['output']>;
+  studentUserId: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
+  teacherUserEmail: Maybe<Scalars['String']['output']>;
+  teacherUserId: Maybe<Scalars['String']['output']>;
 };
 
 export type UploadPreparation = {

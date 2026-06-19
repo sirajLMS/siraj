@@ -588,6 +588,34 @@ export type TeachersQueryVariables = Exact<{
 
 export type TeachersQuery = TeachersQuery_Query;
 
+export type CreateTestEntitiesMutation_createTestEntities_TestEntities = { studentUserEmail: string | null, studentUserId: string | null, studentId: string | null, parentUserEmail: string | null, parentUserId: string | null, parentId: string | null, teacherUserEmail: string | null, teacherUserId: string | null, teacherId: string | null };
+
+export type CreateTestEntitiesMutation_Mutation = { createTestEntities: CreateTestEntitiesMutation_createTestEntities_TestEntities | null };
+
+
+export type CreateTestEntitiesMutationVariables = Exact<{
+  prefix: string;
+  classesRemaining: number | null | undefined;
+}>;
+
+
+export type CreateTestEntitiesMutation = CreateTestEntitiesMutation_Mutation;
+
+export type CleanupTestEntitiesMutation_Mutation = { cleanupTestEntities: boolean | null };
+
+
+export type CleanupTestEntitiesMutationVariables = Exact<{
+  studentUserId: string;
+  teacherUserId: string;
+  parentUserId: string;
+  studentId: string;
+  teacherId: string;
+  parentId: string;
+}>;
+
+
+export type CleanupTestEntitiesMutation = CleanupTestEntitiesMutation_Mutation;
+
 export type WelcomeMessageQuery_Query = { welcomeMessage: string | null };
 
 

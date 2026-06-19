@@ -1,6 +1,6 @@
 import { expect } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
-import { demoLoginMutationDocument } from "../sharedDocuments/auth.documents";
+import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocuments/auth.documents";
 import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
 import { testClient } from "./testClient";
 
@@ -19,6 +19,26 @@ export async function loginDemoUser(groupSlug: string): Promise<string> {
   const token = result.data?.demoLogin?.token;
   if (!token) {
     throw new Error(`Failed to login demo user: ${groupSlug}`);
+  }
+  return token;
+}
+
+/**
+ * Logs in a standard user using email and password, returning their auth token.
+ */
+export async function loginUser(email: string, password = "password"): Promise<string> {
+  const result = await testClient.mutate({
+    mutation: loginMutationDocument,
+    variables: {
+      input: {
+        email,
+        password,
+      },
+    },
+  });
+  const token = result.data?.login?.token;
+  if (!token) {
+    throw new Error(`Failed to login user: ${email}`);
   }
   return token;
 }

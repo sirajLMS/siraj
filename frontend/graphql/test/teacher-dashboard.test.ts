@@ -1,11 +1,15 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import { deleteClassInstanceMutationDocument } from "../sharedDocuments/class-session.documents";
 import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
 import {
   createTeacherManualClassEntryMutationDocument,
   teacherDashboardQueryDocument,
 } from "../sharedDocuments/teacher-dashboard.documents";
-import { fetchFirstStudentTeacherPair, loginDemoUser } from "./helpers";
+import {
+  cleanupTestEntitiesMutationDocument,
+  createTestEntitiesMutationDocument,
+} from "../sharedDocuments/test-helper.documents";
+import { authenticatedRequest, loginDemoUser, loginUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -48,22 +52,35 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   let adminToken: string | null = null;
   let studentId: string | null = null;
   let teacherId: string | null = null;
+  let studentUserId: string | null = null;
+  let teacherUserId: string | null = null;
+  let parentUserId: string | null = null;
+  let parentId: string | null = null;
   const testDate = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 
   test("login as teacher and academy_admin", async () => {
-    teacherToken = await loginDemoUser("teacher_default");
     adminToken = await loginDemoUser("academy_admin");
-    expect(teacherToken).not.toBeNull();
     expect(adminToken).not.toBeNull();
-  });
 
-  test("retrieve student and teacher IDs to use in manual entry test", async () => {
-    if (!adminToken) throw new Error("No admin token");
-    const pair = await fetchFirstStudentTeacherPair(adminToken, testDate);
-    studentId = pair.studentId;
-    teacherId = pair.teacherId;
-    expect(studentId).toBeDefined();
-    expect(teacherId).toBeDefined();
+    // 1. Provision isolated test entities
+    const setupRes = await authenticatedRequest(adminToken, "mutate", createTestEntitiesMutationDocument, {
+      prefix: "DashTest",
+      classesRemaining: 10,
+    });
+    const entities = setupRes.createTestEntities;
+    if (!entities) throw new Error("Failed to create test entities");
+
+    studentId = entities.studentId;
+    teacherId = entities.teacherId;
+    studentUserId = entities.studentUserId;
+    teacherUserId = entities.teacherUserId;
+    parentUserId = entities.parentUserId;
+    parentId = entities.parentId;
+
+    // 2. Login as the newly created teacher to get their isolated token
+    if (!entities.teacherUserEmail) throw new Error("Teacher email not returned");
+    teacherToken = await loginUser(entities.teacherUserEmail, "password");
+    expect(teacherToken).not.toBeNull();
   });
 
   test("teacherDashboard query returns rows scoped to teacher", async () => {
@@ -176,5 +193,18 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
       },
     });
     expect(deleteRes.error).toBeUndefined();
+  });
+
+  afterAll(async () => {
+    if (adminToken && studentUserId && teacherUserId && parentUserId) {
+      await authenticatedRequest(adminToken, "mutate", cleanupTestEntitiesMutationDocument, {
+        studentUserId,
+        teacherUserId,
+        parentUserId,
+        studentId: studentId || "",
+        teacherId: teacherId || "",
+        parentId: parentId || "",
+      });
+    }
   });
 });

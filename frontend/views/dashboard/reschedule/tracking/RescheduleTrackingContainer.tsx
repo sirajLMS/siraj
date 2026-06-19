@@ -10,6 +10,8 @@ import {
 } from "@mui/icons-material";
 import { Box, CircularProgress } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   rescheduleTrackingMetricsQueryDocument,
   rescheduleTrackingRowsQueryDocument,
@@ -19,9 +21,6 @@ import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
 import { RescheduleTrackingView } from "./RescheduleTrackingView";
 import type { TrackingRow } from "./types";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-
 
 type RawRow = {
   readonly id?: string | null;

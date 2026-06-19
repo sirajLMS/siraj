@@ -5,4 +5,5 @@ export * from "./student.documents";
 export * from "./student-history.documents";
 export * from "./teacher.documents";
 export * from "./teacher-dashboard.documents";
+export * from "./test-helper.documents";
 export * from "./translation.documents";

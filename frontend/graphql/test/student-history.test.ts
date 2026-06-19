@@ -1,6 +1,10 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import { studentClassHistoryQueryDocument } from "../sharedDocuments/student-history.documents";
-import { fetchFirstStudentTeacherPair, loginDemoUser } from "./helpers";
+import {
+  cleanupTestEntitiesMutationDocument,
+  createTestEntitiesMutationDocument,
+} from "../sharedDocuments/test-helper.documents";
+import { authenticatedRequest, loginDemoUser, loginUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -9,7 +13,12 @@ describe("GraphQL Student History Integration Tests", () => {
 
   let adminToken: string | null = null;
   let teacherToken: string | null = null;
-  let targetStudentId: string | null = null;
+  let studentId: string | null = null;
+  let teacherId: string | null = null;
+  let studentUserId: string | null = null;
+  let teacherUserId: string | null = null;
+  let parentUserId: string | null = null;
+  let parentId: string | null = null;
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -17,26 +26,36 @@ describe("GraphQL Student History Integration Tests", () => {
 
   test("login as academy_admin and teacher", async () => {
     adminToken = await loginDemoUser("academy_admin");
-    teacherToken = await loginDemoUser("teacher_default");
     expect(adminToken).not.toBeNull();
+
+    // 1. Provision isolated test entities
+    const setupRes = await authenticatedRequest(adminToken, "mutate", createTestEntitiesMutationDocument, {
+      prefix: "HistTest",
+      classesRemaining: 10,
+    });
+    const entities = setupRes.createTestEntities;
+    if (!entities) throw new Error("Failed to create test entities");
+
+    studentId = entities.studentId;
+    teacherId = entities.teacherId;
+    studentUserId = entities.studentUserId;
+    teacherUserId = entities.teacherUserId;
+    parentUserId = entities.parentUserId;
+    parentId = entities.parentId;
+
+    // 2. Login as the newly created teacher to get their isolated token
+    if (!entities.teacherUserEmail) throw new Error("Teacher email not returned");
+    teacherToken = await loginUser(entities.teacherUserEmail, "password");
     expect(teacherToken).not.toBeNull();
   });
 
-  test("retrieve a valid student ID from schedule list", async () => {
-    if (!adminToken) throw new Error("No admin token");
-    const testDate = now.toISOString().split("T")[0];
-    const pair = await fetchFirstStudentTeacherPair(adminToken, testDate);
-    targetStudentId = pair.studentId;
-    expect(targetStudentId).toBeDefined();
-  });
-
   test("academy admin studentClassHistory returns sessions successfully", async () => {
-    if (!adminToken || !targetStudentId) throw new Error("Missing test context");
+    if (!adminToken || !studentId) throw new Error("Missing test context");
 
     const result = await testClient.query({
       query: studentClassHistoryQueryDocument,
       variables: {
-        studentId: targetStudentId,
+        studentId,
         year: currentYear,
         month: currentMonth,
       },
@@ -57,12 +76,12 @@ describe("GraphQL Student History Integration Tests", () => {
   });
 
   test("user without history.view_calendar (teacher) returns unauthorized GraphQL error", async () => {
-    if (!teacherToken || !targetStudentId) throw new Error("Missing test context");
+    if (!teacherToken || !studentId) throw new Error("Missing test context");
 
     const result = await testClient.query({
       query: studentClassHistoryQueryDocument,
       variables: {
-        studentId: targetStudentId,
+        studentId,
         year: currentYear,
         month: currentMonth,
       },
@@ -75,5 +94,18 @@ describe("GraphQL Student History Integration Tests", () => {
     });
 
     expect(result.error).toBeDefined();
+  });
+
+  afterAll(async () => {
+    if (adminToken && studentUserId && teacherUserId && parentUserId) {
+      await authenticatedRequest(adminToken, "mutate", cleanupTestEntitiesMutationDocument, {
+        studentUserId,
+        teacherUserId,
+        parentUserId,
+        studentId: studentId || "",
+        teacherId: teacherId || "",
+        parentId: parentId || "",
+      });
+    }
   });
 });

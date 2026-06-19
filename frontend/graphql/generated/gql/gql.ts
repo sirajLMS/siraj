@@ -45,6 +45,8 @@ type Documents = {
     "\n  mutation logTeacherSupportRequest($input: LogSupportRequestInput!) {\n    logTeacherSupportRequest(input: $input) {\n      id\n      success\n    }\n  }\n": typeof types.LogTeacherSupportRequestDocument,
     "\n  query teacherHandbookUrl {\n    teacherHandbookUrl {\n      id\n      url\n    }\n  }\n": typeof types.TeacherHandbookUrlDocument,
     "\n  query teachers($search: String!, $limit: Int!) {\n    teachers(search: $search, limit: $limit) {\n      id\n      name\n    }\n  }\n": typeof types.TeachersDocument,
+    "\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      parentUserEmail\n      parentUserId\n      parentId\n      teacherUserEmail\n      teacherUserId\n      teacherId\n    }\n  }\n": typeof types.CreateTestEntitiesDocument,
+    "\n  mutation cleanupTestEntities(\n    $studentUserId: String!\n    $teacherUserId: String!\n    $parentUserId: String!\n    $studentId: String!\n    $teacherId: String!\n    $parentId: String!\n  ) {\n    cleanupTestEntities(\n      studentUserId: $studentUserId\n      teacherUserId: $teacherUserId\n      parentUserId: $parentUserId\n      studentId: $studentId\n      teacherId: $teacherId\n      parentId: $parentId\n    )\n  }\n": typeof types.CleanupTestEntitiesDocument,
     "\n  query welcomeMessage {\n    welcomeMessage\n  }\n": typeof types.WelcomeMessageDocument,
     "\n  query translatedMessage($key: String!, $namespace: String!) {\n    translatedMessage(key: $key, namespace: $namespace)\n  }\n": typeof types.TranslatedMessageDocument,
 };
@@ -80,6 +82,8 @@ const documents: Documents = {
     "\n  mutation logTeacherSupportRequest($input: LogSupportRequestInput!) {\n    logTeacherSupportRequest(input: $input) {\n      id\n      success\n    }\n  }\n": types.LogTeacherSupportRequestDocument,
     "\n  query teacherHandbookUrl {\n    teacherHandbookUrl {\n      id\n      url\n    }\n  }\n": types.TeacherHandbookUrlDocument,
     "\n  query teachers($search: String!, $limit: Int!) {\n    teachers(search: $search, limit: $limit) {\n      id\n      name\n    }\n  }\n": types.TeachersDocument,
+    "\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      parentUserEmail\n      parentUserId\n      parentId\n      teacherUserEmail\n      teacherUserId\n      teacherId\n    }\n  }\n": types.CreateTestEntitiesDocument,
+    "\n  mutation cleanupTestEntities(\n    $studentUserId: String!\n    $teacherUserId: String!\n    $parentUserId: String!\n    $studentId: String!\n    $teacherId: String!\n    $parentId: String!\n  ) {\n    cleanupTestEntities(\n      studentUserId: $studentUserId\n      teacherUserId: $teacherUserId\n      parentUserId: $parentUserId\n      studentId: $studentId\n      teacherId: $teacherId\n      parentId: $parentId\n    )\n  }\n": types.CleanupTestEntitiesDocument,
     "\n  query welcomeMessage {\n    welcomeMessage\n  }\n": types.WelcomeMessageDocument,
     "\n  query translatedMessage($key: String!, $namespace: String!) {\n    translatedMessage(key: $key, namespace: $namespace)\n  }\n": types.TranslatedMessageDocument,
 };
@@ -222,6 +226,14 @@ export function graphql(source: "\n  query teacherHandbookUrl {\n    teacherHand
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query teachers($search: String!, $limit: Int!) {\n    teachers(search: $search, limit: $limit) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query teachers($search: String!, $limit: Int!) {\n    teachers(search: $search, limit: $limit) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      parentUserEmail\n      parentUserId\n      parentId\n      teacherUserEmail\n      teacherUserId\n      teacherId\n    }\n  }\n"): (typeof documents)["\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      parentUserEmail\n      parentUserId\n      parentId\n      teacherUserEmail\n      teacherUserId\n      teacherId\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation cleanupTestEntities(\n    $studentUserId: String!\n    $teacherUserId: String!\n    $parentUserId: String!\n    $studentId: String!\n    $teacherId: String!\n    $parentId: String!\n  ) {\n    cleanupTestEntities(\n      studentUserId: $studentUserId\n      teacherUserId: $teacherUserId\n      parentUserId: $parentUserId\n      studentId: $studentId\n      teacherId: $teacherId\n      parentId: $parentId\n    )\n  }\n"): (typeof documents)["\n  mutation cleanupTestEntities(\n    $studentUserId: String!\n    $teacherUserId: String!\n    $parentUserId: String!\n    $studentId: String!\n    $teacherId: String!\n    $parentId: String!\n  ) {\n    cleanupTestEntities(\n      studentUserId: $studentUserId\n      teacherUserId: $teacherUserId\n      parentUserId: $parentUserId\n      studentId: $studentId\n      teacherId: $teacherId\n      parentId: $parentId\n    )\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

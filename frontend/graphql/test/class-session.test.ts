@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import {
   activateClassMutationDocument,
   activateOverrideClassMutationDocument,
@@ -13,7 +13,11 @@ import {
   createTeacherManualClassEntryMutationDocument,
   teacherDashboardQueryDocument,
 } from "../sharedDocuments/teacher-dashboard.documents";
-import { authenticatedRequest, fetchFirstStudentTeacherPair, loginDemoUser } from "./helpers";
+import {
+  cleanupTestEntitiesMutationDocument,
+  createTestEntitiesMutationDocument,
+} from "../sharedDocuments/test-helper.documents";
+import { authenticatedRequest, loginDemoUser, loginUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -60,25 +64,42 @@ describe("GraphQL Class Session Integration Tests", () => {
   let teacherToken: string | null = null;
   let studentId: string | null = null;
   let teacherId: string | null = null;
+  let studentUserId: string | null = null;
+  let teacherUserId: string | null = null;
+  let parentUserId: string | null = null;
+  let parentId: string | null = null;
   let outsideClassInstanceId: string | null = null;
   let outsideDate: string | null = null;
 
   test("login as academy_admin and teacher", async () => {
     adminToken = await loginDemoUser("academy_admin");
-    teacherToken = await loginDemoUser("teacher_default");
     expect(adminToken).not.toBeNull();
+
+    // 1. Provision isolated test entities
+    const setupRes = await authenticatedRequest(adminToken, "mutate", createTestEntitiesMutationDocument, {
+      prefix: "SessionIntTest",
+      classesRemaining: 10,
+    });
+    const entities = setupRes.createTestEntities;
+    if (!entities) throw new Error("Failed to create test entities");
+
+    studentId = entities.studentId;
+    teacherId = entities.teacherId;
+    studentUserId = entities.studentUserId;
+    teacherUserId = entities.teacherUserId;
+    parentUserId = entities.parentUserId;
+    parentId = entities.parentId;
+
+    // 2. Login as the newly created teacher to get their isolated token
+    if (!entities.teacherUserEmail) throw new Error("Teacher email not returned");
+    teacherToken = await loginUser(entities.teacherUserEmail, "password");
     expect(teacherToken).not.toBeNull();
   });
 
   test("find student and teacher IDs, then clear schedule range to avoid overlaps", async () => {
     if (!adminToken) throw new Error("No admin token");
 
-    // 1. Query today's list to get the student and teacher IDs
-    const pair = await fetchFirstStudentTeacherPair(adminToken, testDate);
-    studentId = pair.studentId;
-    teacherId = pair.teacherId;
-
-    // 2. Delete all classes in range of [-1, 12] days to avoid scheduling conflicts/overlaps
+    // 1. Delete all classes in range of [-1, 12] days to avoid scheduling conflicts/overlaps
     for (let i = -1; i <= 12; i++) {
       const d = new Date(Date.now() + i * 24 * 60 * 60 * 1000);
       const dateStr = d.toISOString().split("T")[0];
@@ -331,5 +352,18 @@ describe("GraphQL Class Session Integration Tests", () => {
     expect(absentData.updateSessionStatusAbsent?.executionState).toBe("COMPLETED");
     expect(absentData.updateSessionStatusAbsent?.outcome).toBe("ABSENT");
     expect(absentData.updateSessionStatusAbsent?.payrollCredited).toBe(true);
+  });
+
+  afterAll(async () => {
+    if (adminToken && studentUserId && teacherUserId && parentUserId) {
+      await authenticatedRequest(adminToken, "mutate", cleanupTestEntitiesMutationDocument, {
+        studentUserId,
+        teacherUserId,
+        parentUserId,
+        studentId: studentId || "",
+        teacherId: teacherId || "",
+        parentId: parentId || "",
+      });
+    }
   });
 });

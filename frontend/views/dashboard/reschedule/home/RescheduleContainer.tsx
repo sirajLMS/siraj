@@ -7,15 +7,14 @@ import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { classInstanceQueryDocument, rescheduleClassMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
 import { RescheduleView } from "./RescheduleView";
 import { type RescheduleFormData, rescheduleSchema } from "./schemas/rescheduleSchema";
 import { combineDateTime } from "./utils/rescheduleDateTime";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-
 
 export function RescheduleContainer() {
   const router = useRouter();
