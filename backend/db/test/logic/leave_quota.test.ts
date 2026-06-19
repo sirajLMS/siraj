@@ -112,6 +112,10 @@ async function setLeaveLimit(tx: DbTransaction, key: "teacher_max_leaves" | "stu
       description: `${key === "teacher_max_leaves" ? "Teacher" : "Student"} maximum leaves per month`,
       updatedAt: new Date(),
     })
+    .onConflictDoUpdate({
+      target: systemSettings.key,
+      set: { value, updatedAt: new Date() },
+    })
     .execute();
 }
 

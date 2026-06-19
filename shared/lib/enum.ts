@@ -427,6 +427,7 @@ export enum AppPermission {
   HISTORY_VIEW_DETAILS = "history.view_details",
   TEACHER_VIEW_DASHBOARD = "teacher.view_dashboard",
   SYSTEM_ENFORCE_TIME_WINDOW = "system.enforce_time_window",
+  SYSTEM_ENFORCE_LEAVE_LIMIT = "system.enforce_leave_limit",
   TEACHERS_LIST = "teachers.list",
   TEACHERS_CREATE = "teachers.create",
   TEACHERS_EDIT = "teachers.edit",

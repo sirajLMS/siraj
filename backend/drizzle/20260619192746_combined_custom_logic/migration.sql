@@ -44,6 +44,7 @@ INSERT INTO permissions (id, key, resource, action, description, category, is_sy
   (gen_random_uuid(), 'history.view_details', 'history', 'view_details', 'View session metadata in history modal drill-down', 'History', true),
   (gen_random_uuid(), 'teacher.view_dashboard', 'teacher', 'view_dashboard', 'Access teacher dashboard', 'Teacher', true),
   (gen_random_uuid(), 'system.enforce_time_window', 'system', 'enforce_time_window', 'Validate activation time window', 'System', true),
+  (gen_random_uuid(), 'system.enforce_leave_limit', 'system', 'enforce_leave_limit', 'System-level validation gate that enforces teacher leave quota limits per calendar month', 'System', true),
   (gen_random_uuid(), 'teachers.list', 'teachers', 'list', 'List teachers', 'Teachers', true),
   (gen_random_uuid(), 'teachers.create', 'teachers', 'create', 'Create teacher accounts', 'Teachers', true),
   (gen_random_uuid(), 'teachers.edit', 'teachers', 'edit', 'Edit teacher profiles', 'Teachers', true),
@@ -98,7 +99,7 @@ DELETE FROM group_permissions WHERE group_id IN (SELECT id FROM permission_group
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p
-WHERE g.slug = 'super_admin' AND p.key IN ('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'dashboard.search', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'schedule.view_timezones', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'system.enforce_time_window', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'complaints.list', 'complaints.delete', 'complaints.respond', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign');
+WHERE g.slug = 'super_admin' AND p.key IN ('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'dashboard.search', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'schedule.view_timezones', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'complaints.list', 'complaints.delete', 'complaints.respond', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign');
 
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
@@ -123,7 +124,7 @@ WHERE g.slug = 'staff_default' AND p.key IN ('dashboard.view', 'dashboard.metric
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p
-WHERE g.slug = 'system_automated' AND p.key IN ('system.enforce_time_window');
+WHERE g.slug = 'system_automated' AND p.key IN ('system.enforce_time_window', 'system.enforce_leave_limit');
 
 -- Triggers to protect system permissions and groups from deletion or mutation of is_system
 CREATE OR REPLACE FUNCTION protect_system_permissions()

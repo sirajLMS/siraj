@@ -1,8 +1,8 @@
 {
+  "id": "e16148e2-7339-499c-8233-12008c8ef693",
+  "prevIds": ["1e1cf7ab-b9d8-4bdd-99a3-f0f9f9e8080e"],
   "version": "8",
   "dialect": "postgres",
-  "id": "fa9061c0-32f5-4531-b013-5d6f698feb0b",
-  "prevIds": ["47871809-25bf-416e-b8b8-ec3278300abd"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
@@ -47,6 +47,7 @@
         "history.view_details",
         "teacher.view_dashboard",
         "system.enforce_time_window",
+        "system.enforce_leave_limit",
         "teachers.list",
         "teachers.create",
         "teachers.edit",

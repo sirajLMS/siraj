@@ -44,6 +44,18 @@ const SYSTEM_SETTINGS_DATA = [
     "Days offset to reschedule when leave is processed",
     "scheduling"
   ),
+  createSetting(
+    "teacher_max_leaves",
+    "2",
+    "Maximum number of leave requests a teacher can make per calendar month",
+    "scheduling"
+  ),
+  createSetting(
+    "student_max_leaves",
+    "2",
+    "Maximum number of leave requests a student can make per calendar month",
+    "scheduling"
+  ),
 ] as const;
 
 export async function seedOrGet() {
