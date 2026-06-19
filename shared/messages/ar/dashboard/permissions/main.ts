@@ -18,4 +18,13 @@ export const permissions: PermissionsLabels = {
   effectivePermissions: "الصلاحيات الفعلية",
   editOverrides: "تعديل تخصيصات المستخدم",
   inheritDefault: "موروث تلقائي (بدون تخصيص)",
+  searchPlaceholder: "البحث عن الصلاحيات...",
+  allCategories: "جميع الفئات",
+  columnKey: "مفتاح الصلاحية",
+  columnCategory: "الفئة",
+  columnDescription: "الوصف",
+  columnUsedIn: "مستخدم في",
+  noPermissionsFound: "لم يتم العثور على صلاحيات تطابق معايير البحث.",
+  systemBadge: "نظام",
+  customBadge: "مخصص",
 };

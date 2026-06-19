@@ -6,6 +6,7 @@ import { useState } from "react";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import type { Permission, PermissionGroup, UserOverride } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AdminQueueTabBar } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
+import { PermissionCatalogSection } from "./components/PermissionCatalogSection";
 
 export interface PermissionManagementViewProps {
   readonly permissions: readonly Permission[];
@@ -110,13 +111,7 @@ export function PermissionManagementView({
             )}
 
             {activeTab === "catalog" && (
-              <SectionPanel title={t("catalogTab")}>
-                <Box sx={{ p: 4, textAlign: "center" }}>
-                  <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-                    Permission Catalog DataGrid Placeholder (Loaded {permissions.length} permissions)
-                  </Typography>
-                </Box>
-              </SectionPanel>
+              <PermissionCatalogSection permissions={permissions} groups={groups} />
             )}
 
             {activeTab === "overrides" && (

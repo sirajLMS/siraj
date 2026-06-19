@@ -16,4 +16,13 @@ export interface PermissionsLabels {
   effectivePermissions: string;
   editOverrides: string;
   inheritDefault: string;
+  searchPlaceholder: string;
+  allCategories: string;
+  columnKey: string;
+  columnCategory: string;
+  columnDescription: string;
+  columnUsedIn: string;
+  noPermissionsFound: string;
+  systemBadge: string;
+  customBadge: string;
 }
