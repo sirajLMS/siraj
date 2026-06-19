@@ -112,6 +112,30 @@ export const logTeacherSupportRequestMutationDocument: TypedDocumentNode<
   }
 `;
 
+export const teacherFutureScheduleQueryDocument: TypedDocumentNode<Operations.TeacherFutureScheduleQuery> = gql`
+  query teacherFutureSchedule {
+    teacherFutureSchedule {
+      id
+      leaveQuotaUsed
+      leaveQuotaTotal
+      totalClasses
+      classes {
+        id
+        courseName
+        scheduledDate
+        startTime
+        endTime
+        durationMinutes
+        isRescheduled
+        leaveRequestDisabled
+        leaveRequestDisabledReason
+        studentCount
+        location
+      }
+    }
+  }
+`;
+
 export const teacherHandbookUrlQueryDocument: TypedDocumentNode<Operations.TeacherHandbookUrlQuery> = gql`
   query teacherHandbookUrl {
     teacherHandbookUrl {

@@ -755,6 +755,18 @@ export type LogTeacherSupportRequestMutationVariables = Exact<{
 
 export type LogTeacherSupportRequestMutation = LogTeacherSupportRequestMutation_Mutation;
 
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass = { id: string | null, courseName: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, isRescheduled: boolean | null, leaveRequestDisabled: boolean | null, leaveRequestDisabledReason: string | null, studentCount: number | null, location: string | null };
+
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule = { id: string | null, leaveQuotaUsed: number | null, leaveQuotaTotal: number | null, totalClasses: number | null, classes: Array<TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass> | null };
+
+export type TeacherFutureScheduleQuery_Query = { teacherFutureSchedule: TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule | null };
+
+
+export type TeacherFutureScheduleQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TeacherFutureScheduleQuery = TeacherFutureScheduleQuery_Query;
+
 export type TeacherHandbookUrlQuery_teacherHandbookUrl_TeacherHandbookUrl = { id: string | null, url: string | null };
 
 export type TeacherHandbookUrlQuery_Query = { teacherHandbookUrl: TeacherHandbookUrlQuery_teacherHandbookUrl_TeacherHandbookUrl | null };

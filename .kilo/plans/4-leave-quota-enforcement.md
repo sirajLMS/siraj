@@ -5,7 +5,7 @@
 **Security baseline:** `.ai/done/service/1-sprint_1__db_repo_service_enhancments.md` (mandatory prerequisite)  
 **Story scope:** Implement automated leave quota enforcement (`system.enforce_leave_limit`), extend future schedule verification with "Re Scheduled" badge, and enable admin processing of subsequent leave requests with quota tracking awareness  
 **Target roles:** Academy Admin (audit future calendar, process reschedule up to limits), Teacher (view future personal schedules, leave requests gated by system limits), System Automated (validate operational constraints)  
-**Status:** In progress — Task A (Permission + Settings) complete, Task B (Service Layer Quota Enforcement) complete, Task C (Backend GraphQL Query) complete, Task G (Database Tests) complete  
+**Status:** In progress — Task A (Permission + Settings) complete, Task B (Service Layer Quota Enforcement) complete, Task C (Backend GraphQL Query) complete, Task D (Frontend GraphQL Document) complete, Task G (Database Tests) complete  
 **Last updated:** 2026-06-20  
 
 ---
@@ -1397,10 +1397,10 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `teacherFutureScheduleQueryDocument` is a valid TypedDocumentNode
-- [ ] Codegen generates `TeacherFutureScheduleQuery` type
-- [ ] All fields are properly typed (no `any`)
-- [ ] `bun tsgo` passes
+- [x] `teacherFutureScheduleQueryDocument` is a valid TypedDocumentNode
+- [x] Codegen generates `TeacherFutureScheduleQuery` type
+- [x] All fields are properly typed (no `any`)
+- [x] `bun tsgo` passes
 
 ---
 
@@ -2138,7 +2138,7 @@ Task C (Backend GraphQL Query) ✅ DONE
   ├── FIXED: getTeacherFutureClasses joins students table (no hardcoded stub data) ✅
   └── FIXED: Execution state filter includes NOT_ACTIVATED + ACTIVATED ✅
   ↓
-Task D (Frontend GraphQL Document)
+Task D (Frontend GraphQL Document) ✅ DONE
   ↓
 Task E (Frontend Views - Future Schedule)
   ↓
