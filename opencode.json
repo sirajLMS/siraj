@@ -3,7 +3,21 @@
   "mcp": {
     "mui-mcp": {
       "type": "local",
-      "command": ["bun", "x", "-y", "@mui/mcp@latest"],
+      "command": [
+        "bun",
+        "x",
+        "-y",
+        "@mui/mcp@latest"
+      ],
+      "enabled": true
+    },
+    "next-devtools": {
+      "command": [
+        "bun",
+        "x",
+        "-y",
+        "next-devtools-mcp@latest"
+      ],
       "enabled": true
     }
   }

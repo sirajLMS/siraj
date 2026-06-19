@@ -2,9 +2,12 @@
   "$schema": "https://app.kilo.ai/config.json",
   "mcp": {
     "mui-mcp": {
-      "type": "stdio",
-      "command": "bun",
-      "args": ["x", "-y", "@mui/mcp@latest"],
+      "type": "local",
+      "command": ["bun", "x", "-y", "@mui/mcp@latest"],
+      "enabled": true
+    },
+    "next-devtools": {
+      "command": ["bun", "x", "-y", "next-devtools-mcp@latest"],
       "enabled": true
     }
   }
