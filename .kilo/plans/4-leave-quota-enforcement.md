@@ -1045,7 +1045,7 @@ bun tsgo
 - [x] DB trigger catches quota violations even if service pre-check is bypassed
 - [x] i18n translations added for `leaveQuotaExceeded` in en and ar
 - [x] `bun tsgo` passes (2 pre-existing errors in unrelated permissions UI components)
-- [ ] All existing tests still pass (no regressions)
+- [x] All existing tests still pass (no regressions) — 305 pass, 0 fail
 
 ---
 
