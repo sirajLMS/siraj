@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Box, CircularProgress, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Alert, Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
@@ -12,6 +12,10 @@ import { PermissionCatalogSection } from "./components/PermissionCatalogSection"
 import { PermissionGroupCardList } from "./components/PermissionGroupCardList";
 import { PermissionGroupForm } from "./components/PermissionGroupForm";
 import { PermissionGroupsDataGrid } from "./components/PermissionGroupsDataGrid";
+
+import { SingleGroupView } from "./components/SingleGroupView";
+import { UserOverridesDataGrid } from "./components/UserOverridesDataGrid";
+import { ManageOverridesDialog } from "./components/ManageOverridesDialog";
 
 export interface PermissionManagementViewProps {
   readonly permissions: readonly Permission[];
@@ -75,6 +79,8 @@ export function PermissionManagementView({
   isEditDialogOpen,
   isDeleteDialogOpen,
   isAssignDialogOpen,
+  isManageOverridesOpen,
+  setSelectedGroupId,
   openCreateDialog,
   closeCreateDialog,
   openEditDialog,
@@ -83,15 +89,22 @@ export function PermissionManagementView({
   closeDeleteDialog,
   openAssignDialog,
   closeAssignDialog,
+  openManageOverrides,
+  closeManageOverrides,
   onCreateGroup,
   onUpdateGroup,
   onDeleteGroup,
   onAssignGroup,
+  onRevokeGroup,
+  onBulkAssign,
+  onBulkRevoke,
+  onUpdateOverrides,
 }: Readonly<PermissionManagementViewProps>) {
   const t = useTranslations("dashboard.permissions");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [activeTab, setActiveTab] = useState<TabKey>("groups");
+  const [selectedUserIdForOverrides, setSelectedUserIdForOverrides] = useState<string | null>(null);
 
   const tabs = [
     { key: "groups" as const, label: t("groupsTab") },
@@ -110,56 +123,78 @@ export function PermissionManagementView({
 
   return (
     <PageContainer>
-      <PageHeader title={t("title")} subtitle={t("subtitle")} actions={headerActions} />
+      {activeGroup ? (
+        <SingleGroupView
+          group={activeGroup}
+          permissions={permissions}
+          isLoading={isLoading}
+          onBack={() => setSelectedGroupId(null)}
+          onEditGroup={openEditDialog}
+          onAssignGroup={openAssignDialog}
+          onRevokeGroup={onRevokeGroup}
+          onBulkAssign={onBulkAssign}
+          onBulkRevoke={onBulkRevoke}
+          onUpdateGroup={onUpdateGroup}
+        />
+      ) : (
+        <>
+          <PageHeader title={t("title")} subtitle={t("subtitle")} actions={headerActions} />
 
-      <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3 }}>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
+          <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3 }}>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
 
-        <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={(tab: TabKey) => setActiveTab(tab)} />
+            <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={(tab: TabKey) => setActiveTab(tab)} />
 
-        {isLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-            <CircularProgress color="primary" />
-          </Box>
-        ) : (
-          <Box>
-            {activeTab === "groups" &&
-              (isMobile ? (
-                <PermissionGroupCardList
-                  groups={groups}
-                  onEditGroup={openEditDialog}
-                  onDeleteGroup={openDeleteDialog}
-                  onAssignGroup={openAssignDialog}
-                />
-              ) : (
-                <SectionPanel title={t("groupsTab")}>
-                  <PermissionGroupsDataGrid
-                    groups={groups}
-                    onEditGroup={openEditDialog}
-                    onDeleteGroup={openDeleteDialog}
-                    onAssignGroup={openAssignDialog}
-                  />
-                </SectionPanel>
-              ))}
+            {isLoading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+                <CircularProgress color="primary" />
+              </Box>
+            ) : (
+              <Box>
+                {activeTab === "groups" &&
+                  (isMobile ? (
+                    <PermissionGroupCardList
+                      groups={groups}
+                      onViewGroup={setSelectedGroupId}
+                      onEditGroup={openEditDialog}
+                      onDeleteGroup={openDeleteDialog}
+                      onAssignGroup={openAssignDialog}
+                    />
+                  ) : (
+                    <SectionPanel title={t("groupsTab")}>
+                      <PermissionGroupsDataGrid
+                        groups={groups}
+                        onViewGroup={setSelectedGroupId}
+                        onEditGroup={openEditDialog}
+                        onDeleteGroup={openDeleteDialog}
+                        onAssignGroup={openAssignDialog}
+                      />
+                    </SectionPanel>
+                  ))}
 
-            {activeTab === "catalog" && <PermissionCatalogSection permissions={permissions} groups={groups} />}
+                {activeTab === "catalog" && <PermissionCatalogSection permissions={permissions} groups={groups} />}
 
-            {activeTab === "overrides" && (
-              <SectionPanel title={t("overridesTab")}>
-                <Box sx={{ p: 4, textAlign: "center" }}>
-                  <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-                    User Overrides DataGrid Placeholder
-                  </Typography>
-                </Box>
-              </SectionPanel>
+                {activeTab === "overrides" && (
+                  <SectionPanel title={t("overridesTab")}>
+                    <UserOverridesDataGrid
+                      users={users}
+                      groups={groups}
+                      onManageOverrides={userId => {
+                        setSelectedUserIdForOverrides(userId);
+                        openManageOverrides();
+                      }}
+                    />
+                  </SectionPanel>
+                )}
+              </Box>
             )}
           </Box>
-        )}
-      </Box>
+        </>
+      )}
 
       {/* Group Create Dialog */}
       <PermissionGroupForm
@@ -210,6 +245,21 @@ export function PermissionManagementView({
             await onAssignGroup(selectedGroupId, userId);
           }
         }}
+      />
+
+      {/* Manage Overrides Dialog */}
+      <ManageOverridesDialog
+        open={isManageOverridesOpen}
+        userId={selectedUserIdForOverrides}
+        users={users}
+        groups={groups}
+        permissions={permissions}
+        isLoading={isLoading}
+        onClose={() => {
+          setSelectedUserIdForOverrides(null);
+          closeManageOverrides();
+        }}
+        onSave={onUpdateOverrides}
       />
     </PageContainer>
   );

@@ -9,6 +9,7 @@ import type { PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-t
 
 export interface PermissionGroupCardListProps {
   readonly groups: readonly PermissionGroup[];
+  readonly onViewGroup: (id: string) => void;
   readonly onEditGroup: (id: string) => void;
   readonly onDeleteGroup: (id: string) => void;
   readonly onAssignGroup: (id: string) => void;
@@ -16,12 +17,13 @@ export interface PermissionGroupCardListProps {
 
 interface GroupCardProps {
   readonly group: PermissionGroup;
+  readonly onViewGroup: (id: string) => void;
   readonly onEditGroup: (id: string) => void;
   readonly onDeleteGroup: (id: string) => void;
   readonly onAssignGroup: (id: string) => void;
 }
 
-function GroupCard({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readonly<GroupCardProps>) {
+function GroupCard({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGroup }: Readonly<GroupCardProps>) {
   const t = useTranslations("dashboard.permissions");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -54,7 +56,18 @@ function GroupCard({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readonl
         {/* Header: Title/Name & Actions Menu */}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-            <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="bodyMd"
+              onClick={() => group.id && onViewGroup(group.id)}
+              sx={theme => ({
+                fontWeight: 600,
+                cursor: "pointer",
+                "&:hover": {
+                  color: theme.palette.primary.main,
+                  textDecoration: "underline",
+                },
+              })}
+            >
               {group.name}
             </Typography>
             <Typography
@@ -133,6 +146,7 @@ function GroupCard({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readonl
 
 export function PermissionGroupCardList({
   groups,
+  onViewGroup,
   onEditGroup,
   onDeleteGroup,
   onAssignGroup,
@@ -155,6 +169,7 @@ export function PermissionGroupCardList({
         <GroupCard
           key={group.id ?? group.slug ?? ""}
           group={group}
+          onViewGroup={onViewGroup}
           onEditGroup={onEditGroup}
           onDeleteGroup={onDeleteGroup}
           onAssignGroup={onAssignGroup}

@@ -10,6 +10,7 @@ import type { PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-t
 
 export interface PermissionGroupsDataGridProps {
   readonly groups: readonly PermissionGroup[];
+  readonly onViewGroup: (id: string) => void;
   readonly onEditGroup: (id: string) => void;
   readonly onDeleteGroup: (id: string) => void;
   readonly onAssignGroup: (id: string) => void;
@@ -78,6 +79,7 @@ function RowActions({ group, onEditGroup, onDeleteGroup, onAssignGroup }: Readon
 
 export function PermissionGroupsDataGrid({
   groups,
+  onViewGroup,
   onEditGroup,
   onDeleteGroup,
   onAssignGroup,
@@ -92,7 +94,18 @@ export function PermissionGroupsDataGrid({
         flex: 1.5,
         minWidth: 200,
         renderCell: params => (
-          <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
+          <Typography
+            variant="bodyMd"
+            onClick={() => params.row.id && onViewGroup(params.row.id)}
+            sx={theme => ({
+              fontWeight: 500,
+              cursor: "pointer",
+              "&:hover": {
+                color: theme.palette.primary.main,
+                textDecoration: "underline",
+              },
+            })}
+          >
             {params.value as string}
           </Typography>
         ),
