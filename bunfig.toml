@@ -1,3 +1,5 @@
 [test]
-preload = ["./backend/db/test/logger-mock.ts"]
+timeout = 60000
+preload = ["./backend/db/test/logger-mock.ts", "./test/ui/components/happydom-preload.ts"]
+coverageSkipTestFiles = true
 

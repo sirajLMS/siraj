@@ -15,6 +15,7 @@ import type { FutureClass } from "@/frontend/stores/mockTeacherScheduleStore";
 
 interface FutureClassCardProps {
   readonly item: FutureClass;
+  readonly onRequestLeave?: () => void;
 }
 
 function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isRescheduled: boolean }>) {
@@ -97,7 +98,11 @@ function ClassInfo({ item, isMobile }: Readonly<{ item: FutureClass; isMobile: b
   );
 }
 
-function ActionButtons({ item, isMobile }: Readonly<{ item: FutureClass; isMobile: boolean }>) {
+function ActionButtons({
+  item,
+  isMobile,
+  onRequestLeave,
+}: Readonly<{ item: FutureClass; isMobile: boolean; onRequestLeave?: () => void }>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
 
   return (
@@ -132,6 +137,7 @@ function ActionButtons({ item, isMobile }: Readonly<{ item: FutureClass; isMobil
         <Button
           variant="outlined"
           startIcon={<EventBusyOutlined />}
+          onClick={onRequestLeave}
           sx={theme => ({
             borderRadius: 2,
             fontSize: 11,
@@ -171,7 +177,7 @@ function ActionButtons({ item, isMobile }: Readonly<{ item: FutureClass; isMobil
   );
 }
 
-export function FutureClassCard({ item }: Readonly<FutureClassCardProps>) {
+export function FutureClassCard({ item, onRequestLeave }: Readonly<FutureClassCardProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isRescheduled = item.status === "rescheduled";
@@ -195,7 +201,7 @@ export function FutureClassCard({ item }: Readonly<FutureClassCardProps>) {
           <DateSquare date={item.date} isRescheduled={isRescheduled} />
           <ClassInfo item={item} isMobile={isMobile} />
         </Stack>
-        <ActionButtons item={item} isMobile={isMobile} />
+        <ActionButtons item={item} isMobile={isMobile} onRequestLeave={onRequestLeave} />
       </Stack>
     </BaseCard>
   );

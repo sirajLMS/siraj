@@ -17,4 +17,11 @@ export interface TeacherFutureScheduleLabels {
   readonly monthDisplay: string;
   readonly leaveQuotaDesc: string;
   readonly totalClassesDesc: string;
+  readonly loading: string;
+  readonly defaultLeaveReason: string;
+  readonly errors: {
+    readonly quotaExceeded: string;
+    readonly leaveRequestFailed: string;
+    readonly failedToLoad: string;
+  };
 }

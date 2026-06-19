@@ -963,6 +963,13 @@ const en: MessageSchema = {
       leaveQuotaDesc: "LEAVE QUOTA",
       totalClassesDesc: "TOTAL CLASSES",
       available: "Available",
+      loading: "Loading future schedule...",
+      defaultLeaveReason: "Teacher requested leave from future schedule",
+      errors: {
+        quotaExceeded: "You have reached the maximum number of leave requests for this month.",
+        leaveRequestFailed: "Failed to request leave. Please try again.",
+        failedToLoad: "Failed to load future schedule.",
+      },
     },
     teacherReassignment: {
       pageTitle: "Teacher Reassignment",

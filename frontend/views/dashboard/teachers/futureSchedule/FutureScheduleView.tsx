@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Alert, Box, Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
@@ -16,6 +16,9 @@ interface FutureScheduleViewProps {
   readonly leaveQuotaUsed: number;
   readonly leaveQuotaTotal: number;
   readonly totalClasses: number;
+  readonly onRequestLeave: (classInstanceId: string) => Promise<void>;
+  readonly leaveError: string | null;
+  readonly onDismissError: () => void;
 }
 
 export function FutureScheduleView({
@@ -23,6 +26,9 @@ export function FutureScheduleView({
   leaveQuotaUsed,
   leaveQuotaTotal,
   totalClasses,
+  onRequestLeave,
+  leaveError,
+  onDismissError,
 }: Readonly<FutureScheduleViewProps>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
   const theme = useTheme();
@@ -41,6 +47,14 @@ export function FutureScheduleView({
             totalClasses={totalClasses}
           />
         </Grid>
+
+        {leaveError && (
+          <Grid size={{ xs: 12 }}>
+            <Alert severity="error" onClose={onDismissError}>
+              {leaveError}
+            </Alert>
+          </Grid>
+        )}
 
         {/* Main Content & Sidebar */}
         <Grid size={{ xs: 12, lg: 8 }}>
@@ -70,7 +84,7 @@ export function FutureScheduleView({
             </Box>
 
             {classes.map(item => (
-              <FutureClassCard key={item.id} item={item} />
+              <FutureClassCard key={item.id} item={item} onRequestLeave={() => onRequestLeave(item.id)} />
             ))}
           </Stack>
         </Grid>

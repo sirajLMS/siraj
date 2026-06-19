@@ -1,9 +1,31 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { FutureScheduleContainer } from "./FutureScheduleContainer";
+import { useTeacherScheduleStore } from "@/frontend/stores/mockTeacherScheduleStore";
+import { logger } from "@/frontend/utils/logger";
+import { FutureScheduleView } from "./FutureScheduleView";
 
-const meta: Meta<typeof FutureScheduleContainer> = {
+export function MockFutureScheduleContainer() {
+  const futureSchedule = useTeacherScheduleStore(state => state.futureSchedule);
+
+  if (!futureSchedule) return null;
+
+  return (
+    <FutureScheduleView
+      classes={futureSchedule.classes}
+      leaveQuotaUsed={futureSchedule.leaveQuotaUsed}
+      leaveQuotaTotal={futureSchedule.leaveQuotaTotal}
+      totalClasses={futureSchedule.totalClasses}
+      onRequestLeave={async (id) => {
+        logger.info({ caller: "MockFutureScheduleContainer" }, `Request leave for: ${id}`);
+      }}
+      leaveError={null}
+      onDismissError={() => {}}
+    />
+  );
+}
+
+const meta: Meta<typeof MockFutureScheduleContainer> = {
   title: "Views/dashboard/teachers/futureSchedule/FutureScheduleContainer",
-  component: FutureScheduleContainer,
+  component: MockFutureScheduleContainer,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
@@ -11,7 +33,7 @@ const meta: Meta<typeof FutureScheduleContainer> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof FutureScheduleContainer>;
+type Story = StoryObj<typeof MockFutureScheduleContainer>;
 
 export const Default: Story = {
   args: {},

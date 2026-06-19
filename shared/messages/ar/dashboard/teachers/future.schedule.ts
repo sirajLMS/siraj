@@ -19,4 +19,11 @@ export const futureSchedule: TeacherFutureScheduleLabels = {
   leaveQuotaDesc: "حصة الإجازة",
   totalClassesDesc: "إجمالي الحصص",
   available: "متاح",
+  loading: "جاري تحميل الجدول المستقبلي...",
+  defaultLeaveReason: "المعلم طلب إجازة من الجدول المستقبلي",
+  errors: {
+    quotaExceeded: "لقد وصلت إلى الحد الأقصى لطلبات الإجازة لهذا الشهر.",
+    leaveRequestFailed: "فشل طلب الإجازة. يرجى المحاولة مرة أخرى.",
+    failedToLoad: "فشل تحميل الجدول المستقبلي.",
+  },
 };

@@ -5,7 +5,7 @@
 **Security baseline:** `.ai/done/service/1-sprint_1__db_repo_service_enhancments.md` (mandatory prerequisite)  
 **Story scope:** Implement automated leave quota enforcement (`system.enforce_leave_limit`), extend future schedule verification with "Re Scheduled" badge, and enable admin processing of subsequent leave requests with quota tracking awareness  
 **Target roles:** Academy Admin (audit future calendar, process reschedule up to limits), Teacher (view future personal schedules, leave requests gated by system limits), System Automated (validate operational constraints)  
-**Status:** In progress — Task A (Permission + Settings) complete, Task B (Service Layer Quota Enforcement) complete, Task C (Backend GraphQL Query) complete, Task D (Frontend GraphQL Document) complete, Task G (Database Tests) complete  
+**Status:** In progress — Task A (Permission + Settings) complete, Task B (Service Layer Quota Enforcement) complete, Task C (Backend GraphQL Query) complete, Task D (Frontend GraphQL Document) complete, Task E (Frontend Views) complete, Task G (Database Tests) complete  
 **Last updated:** 2026-06-20  
 
 ---
@@ -1649,16 +1649,16 @@ rg "mockTeacherScheduleStore" frontend/views/dashboard/teachers/futureSchedule/F
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `FutureScheduleContainer` uses `useQuery(teacherFutureScheduleQueryDocument)` instead of mock store
-- [ ] `FutureScheduleContainer` wires `updateSessionStatusLeaveMutationDocument` for leave requests
-- [ ] `FutureClassCard` accepts and calls `onRequestLeave` callback
-- [ ] Leave quota display shows `leaveQuotaUsed/leaveQuotaTotal`
-- [ ] Error handling displays user-friendly messages for quota exceeded and other errors
-- [ ] `RequirePermission` wraps the view with `ScheduleFilterAdvanced`
-- [ ] Storybook story still uses mock data (unchanged)
-- [ ] No `mockTeacherScheduleStore` import in production container
-- [ ] `bun tsgo` passes
-- [ ] No inline styles — all MUI theme tokens
+- [x] `FutureScheduleContainer` uses `useQuery(teacherFutureScheduleQueryDocument)` instead of mock store
+- [x] `FutureScheduleContainer` wires `updateSessionStatusLeaveMutationDocument` for leave requests
+- [x] `FutureClassCard` accepts and calls `onRequestLeave` callback
+- [x] Leave quota display shows `leaveQuotaUsed/leaveQuotaTotal`
+- [x] Error handling displays user-friendly messages for quota exceeded and other errors
+- [x] `RequirePermission` wraps the view with `ScheduleFilterAdvanced`
+- [x] Storybook story still uses mock data (updated to `MockFutureScheduleContainer` rendering `FutureScheduleView` directly)
+- [x] No `mockTeacherScheduleStore` import in production container
+- [x] `bun tsgo` passes
+- [x] No inline styles — all MUI theme tokens
 
 ---
 
@@ -2140,7 +2140,11 @@ Task C (Backend GraphQL Query) ✅ DONE
   ↓
 Task D (Frontend GraphQL Document) ✅ DONE
   ↓
-Task E (Frontend Views - Future Schedule)
+Task E (Frontend Views - Future Schedule) ✅ DONE
+  ├── FutureScheduleContainer wired to useQuery + useMutation ✅
+  ├── FutureClassCard accepts onRequestLeave callback ✅
+  ├── Storybook updated with MockFutureScheduleContainer ✅
+  └── i18n keys added (en, ar, types) ✅
   ↓
 Task F (Admin Reschedule Quota Awareness)
   ↓
