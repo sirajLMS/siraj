@@ -1,0 +1,11 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "mcp": {
+    "mui-mcp": {
+      "type": "stdio",
+      "command": "bun",
+      "args": ["x", "-y", "@mui/mcp@latest"],
+      "enabled": true
+    }
+  }
+}

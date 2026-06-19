@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, SearchOutlined } from "@mui/icons-material";
-import { Box, IconButton, InputAdornment, Paper, TextField, Typography } from "@mui/material";
+import { Box, IconButton, InputAdornment, Paper, Stack, TextField, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -153,20 +153,24 @@ export function ScheduleOverviewSection({
       </Box>
 
       {/* Mobile Layout */}
-      <Box sx={{ display: { xs: "block", md: "none" }, mb: 3 }}>
+      <Stack
+        direction={"column"}
+        sx={{
+          display: { xs: "flix", md: "none" },
+          gap: 2,
+        }}>
         {/* Title */}
         <Typography
           variant="titleLg"
           sx={theme => ({
             color: theme.palette.primary.main,
-            mb: 2,
           })}
         >
           {title}
         </Typography>
 
         {/* Search */}
-        <Box sx={{ display: "flex", gap: 1.5, mb: 3 }}>
+        <Box sx={{ display: "flex", gap: 1.5, }}>
           <RequirePermission permissions={[AppPermission.DashboardSearch]}>
             <TextField
               placeholder={searchPlaceholder}
@@ -204,59 +208,58 @@ export function ScheduleOverviewSection({
         />
 
         {/* Pagination Footer */}
-        {totalCount > pageSize && (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mt: 2,
-              px: 1,
-            }}
+        {/* {totalCount > pageSize && ( */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: 1,
+          }}
+        >
+          <Typography
+            variant="labelMd"
+            sx={theme => ({
+              color: theme.palette.text.secondary,
+            })}
           >
-            <Typography
-              variant="labelMd"
+            {showingText}
+          </Typography>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <IconButton
+              size="small"
+              disabled={page === 0}
+              onClick={() => onPageChange(page - 1)}
               sx={theme => ({
-                color: theme.palette.text.secondary,
+                border: `1px solid ${theme.palette.border.light}`,
+                borderRadius: 1,
+                bgcolor: theme.palette.surfaceContainerLowest,
+                "&.Mui-disabled": {
+                  opacity: 0.5,
+                },
               })}
             >
-              {showingText}
-            </Typography>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <IconButton
-                size="small"
-                disabled={page === 0}
-                onClick={() => onPageChange(page - 1)}
-                sx={theme => ({
-                  border: `1px solid ${theme.palette.border.light}`,
-                  borderRadius: 1,
-                  bgcolor: theme.palette.surfaceContainerLowest,
-                  "&.Mui-disabled": {
-                    opacity: 0.5,
-                  },
-                })}
-              >
-                <ChevronLeft fontSize="small" />
-              </IconButton>
-              <IconButton
-                size="small"
-                disabled={page >= Math.ceil(totalCount / pageSize) - 1}
-                onClick={() => onPageChange(page + 1)}
-                sx={theme => ({
-                  border: `1px solid ${theme.palette.border.light}`,
-                  borderRadius: 1,
-                  bgcolor: theme.palette.surfaceContainerLowest,
-                  "&.Mui-disabled": {
-                    opacity: 0.5,
-                  },
-                })}
-              >
-                <ChevronRight fontSize="small" />
-              </IconButton>
-            </Box>
+              <ChevronLeft fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              disabled={page >= Math.ceil(totalCount / pageSize) - 1}
+              onClick={() => onPageChange(page + 1)}
+              sx={theme => ({
+                border: `1px solid ${theme.palette.border.light}`,
+                borderRadius: 1,
+                bgcolor: theme.palette.surfaceContainerLowest,
+                "&.Mui-disabled": {
+                  opacity: 0.5,
+                },
+              })}
+            >
+              <ChevronRight fontSize="small" />
+            </IconButton>
           </Box>
-        )}
-      </Box>
+        </Box>
+        {/* )} */}
+      </Stack>
     </>
   );
 }

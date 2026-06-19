@@ -3,18 +3,29 @@
 "use client";
 
 import { AccessTimeOutlined } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import { TodayClassesMobileScroll } from "./TodayClassesMobileScroll";
 
 interface TodayClassesSectionProps {
   readonly title: string;
   readonly lastUpdated: string;
   readonly metrics: readonly MetricItem[];
   readonly onMetricClick?: (key: string) => void;
+  readonly selectedMetricKey?: string;
 }
 
-export function TodayClassesSection({ title, lastUpdated, metrics, onMetricClick }: TodayClassesSectionProps) {
+export function TodayClassesSection({
+  title,
+  lastUpdated,
+  metrics,
+  onMetricClick,
+  selectedMetricKey,
+}: TodayClassesSectionProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   return (
     <Box sx={{ mb: 4 }}>
       {/* Section Header */}
@@ -58,7 +69,11 @@ export function TodayClassesSection({ title, lastUpdated, metrics, onMetricClick
       </Box>
 
       {/* Metric Cards Grid */}
-      <MetricCardGrid metrics={metrics} onMetricClick={onMetricClick} />
+      {isMobile ? (
+        <TodayClassesMobileScroll metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
+      ) : (
+        <MetricCardGrid metrics={metrics} onMetricClick={onMetricClick} />
+      )}
     </Box>
   );
 }

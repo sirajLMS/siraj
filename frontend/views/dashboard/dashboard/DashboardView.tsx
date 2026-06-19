@@ -12,6 +12,7 @@ interface AdminDashboardViewProps extends ScheduleOverviewData {
   readonly lastUpdated: string;
   readonly metrics: readonly MetricItem[];
   readonly onMetricClick?: (key: string) => void;
+  readonly selectedMetricKey?: string;
 
   readonly scheduleTitle: string;
   readonly loadingTeachers?: boolean;
@@ -24,6 +25,7 @@ export function DashboardView({
   lastUpdated,
   metrics,
   onMetricClick,
+  selectedMetricKey,
   scheduleTitle,
   searchPlaceholder,
   searchValue,
@@ -60,6 +62,7 @@ export function DashboardView({
           lastUpdated={lastUpdated}
           metrics={metrics}
           onMetricClick={onMetricClick}
+          selectedMetricKey={selectedMetricKey}
         />
       </RequirePermission>
 

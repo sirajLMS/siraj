@@ -1,8 +1,9 @@
 {
   "servers": {
-    "siraj": {
-      "type": "http",
-      "url": "http://localhost:6006/mcp"
+    "mui-mcp": {
+      "type": "stdio",
+      "command": "bun",
+      "args": ["x", "-y", "@mui/mcp@latest"]
     }
   }
 }
