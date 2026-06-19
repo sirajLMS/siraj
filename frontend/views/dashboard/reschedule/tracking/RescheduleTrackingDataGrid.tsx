@@ -13,7 +13,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { TrackingRow } from "@/frontend/stores/mockRescheduleTrackingStore";
+import type { TrackingRow } from "./types";
 
 interface RescheduleTrackingDataGridHeaders {
   readonly teacherName: string;

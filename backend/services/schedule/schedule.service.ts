@@ -83,4 +83,32 @@ export namespace ScheduleService {
       throw error;
     }
   }
+
+  export async function getRescheduleTracking(
+    userId: string,
+    input: { search?: string | null; status?: string | null; limit?: number | null; offset?: number | null },
+    locale?: string
+  ) {
+    const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SESSION_RESCHEDULE);
+    if (!isAuthorized) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("unauthorizedAction"));
+    }
+
+    return SchedulingRepository.getRescheduleTrackingRows(input);
+  }
+
+  export async function getRescheduleTrackingMetrics(userId: string, locale?: string) {
+    const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SESSION_RESCHEDULE);
+    if (!isAuthorized) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("unauthorizedAction"));
+    }
+
+    const metrics = await SchedulingRepository.getRescheduleTrackingMetrics();
+    return {
+      id: "reschedule-tracking-metrics",
+      ...metrics,
+    };
+  }
 }

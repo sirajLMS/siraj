@@ -2,7 +2,7 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
-import type { ClassInstanceEntity, ClassInstanceInsertInput } from "@/backend/types";
+import type { ClassInstanceEntity } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
 /**
@@ -115,11 +115,33 @@ export namespace ClassSessionService {
   export async function reschedule(
     userId: string,
     classInstanceId: string,
-    input: Omit<ClassInstanceInsertInput, "createdAt" | "updatedAt">,
+    input: {
+      scheduledStartAt: Date;
+      scheduledEndAt: Date;
+      durationMinutes: number;
+    },
     locale?: string
   ) {
     await assertPermission(userId, AppPermission.SESSION_RESCHEDULE, locale);
-    return SchedulingRepository.rescheduleClassInstance(classInstanceId, input);
+    const existing = await getOrThrow(classInstanceId, locale);
+    const idempotencyKey = `manual-reschedule-${classInstanceId}-${input.scheduledStartAt.toISOString()}`;
+    return SchedulingRepository.rescheduleClassInstance(classInstanceId, {
+      studentId: existing.studentId,
+      teacherId: existing.teacherId,
+      scheduledStartAt: input.scheduledStartAt,
+      scheduledEndAt: input.scheduledEndAt,
+      durationMinutes: input.durationMinutes,
+      classType: existing.classType,
+      executionState: "NOT_ACTIVATED" as const,
+      outcome: "PENDING" as const,
+      isRescheduled: false,
+      quotaDeducted: false,
+      payrollCredited: false,
+      rateAmount: existing.rateAmount,
+      rateCurrency: existing.rateCurrency,
+      isRateOverridden: existing.isRateOverridden,
+      idempotencyKey,
+    });
   }
 
   export async function reset(userId: string, classInstanceId: string, locale?: string) {

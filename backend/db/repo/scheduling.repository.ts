@@ -270,9 +270,7 @@ export namespace SchedulingRepository {
         event: {
           fromState: { executionState: "NOT_ACTIVATED" },
           toState: { executionState: "ACTIVATED" },
-          description: options.force
-            ? tFuncSession("forceActivateDescription")
-            : tFuncSession("activateDescription"),
+          description: options.force ? tFuncSession("forceActivateDescription") : tFuncSession("activateDescription"),
         },
       };
     });
@@ -376,6 +374,73 @@ export namespace SchedulingRepository {
     });
   };
 
+  async function getRequesterTypeForUser(t: DBTransaction, actorUserId: string): Promise<"TEACHER" | "PARENT" | "ADMIN"> {
+    const [teacher] = await t
+      .select({ id: teachers.id })
+      .from(teachers)
+      .where(eq(teachers.userId, actorUserId))
+      .limit(1);
+    if (teacher) {
+      return "TEACHER";
+    }
+    const [parent] = await t
+      .select({ id: parents.id })
+      .from(parents)
+      .where(eq(parents.userId, actorUserId))
+      .limit(1);
+    if (parent) {
+      return "PARENT";
+    }
+    return "ADMIN";
+  }
+
+  async function createRescheduledSuccessor(
+    t: DBTransaction,
+    existing: Types.ClassInstanceEntity,
+    offsetDays: number,
+    remarks: string,
+    locale?: string
+  ): Promise<Types.ClassInstanceEntity> {
+    const offsetMs = offsetDays * 24 * 60 * 60 * 1000;
+    const newScheduledStartAt = new Date(existing.scheduledStartAt.getTime() + offsetMs);
+    const newScheduledEndAt = new Date(existing.scheduledEndAt.getTime() + offsetMs);
+
+    const successorIdempotencyKey = `leave-reschedule-${existing.id}-${newScheduledStartAt.toISOString()}`;
+
+    const successorInput = {
+      studentId: existing.studentId,
+      teacherId: existing.teacherId,
+      originalClassId: existing.id,
+      scheduledStartAt: newScheduledStartAt,
+      scheduledEndAt: newScheduledEndAt,
+      durationMinutes: existing.durationMinutes,
+      classType: existing.classType,
+      executionState: "NOT_ACTIVATED" as const,
+      outcome: "PENDING" as const,
+      isRescheduled: false,
+      quotaDeducted: false,
+      payrollCredited: false,
+      rateAmount: existing.rateAmount,
+      rateCurrency: existing.rateCurrency,
+      isRateOverridden: existing.isRateOverridden,
+      remarks,
+      idempotencyKey: successorIdempotencyKey,
+    };
+
+    await performRescheduleValidations(t, successorInput, locale);
+
+    const [successor] = await t
+      .insert(classInstances)
+      .values({
+        ...successorInput,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    return successor;
+  }
+
   export const processClassLeave = async (
     id: string,
     reason: string | null,
@@ -402,47 +467,15 @@ export namespace SchedulingRepository {
 
       // 3. Resolve reschedule offset days
       const offsetDays = await SystemSettingsRepository.getIntValue("session_leave_reschedule_offset_days", 7, t);
-      const offsetMs = offsetDays * 24 * 60 * 60 * 1000;
-      const newScheduledStartAt = new Date(existing.scheduledStartAt.getTime() + offsetMs);
-      const newScheduledEndAt = new Date(existing.scheduledEndAt.getTime() + offsetMs);
+      const successor = await createRescheduledSuccessor(
+        t,
+        existing,
+        offsetDays,
+        tFuncSession("leaveRescheduledRemark"),
+        locale
+      );
 
-      const successorIdempotencyKey = `leave-reschedule-${existing.id}-${newScheduledStartAt.toISOString()}`;
-
-      // 4. Construct successor insert values
-      const successorInput = {
-        studentId: existing.studentId,
-        teacherId: existing.teacherId,
-        originalClassId: existing.id,
-        scheduledStartAt: newScheduledStartAt,
-        scheduledEndAt: newScheduledEndAt,
-        durationMinutes: existing.durationMinutes,
-        classType: existing.classType,
-        executionState: "NOT_ACTIVATED" as const,
-        outcome: "PENDING" as const,
-        isRescheduled: false,
-        quotaDeducted: false,
-        payrollCredited: false,
-        rateAmount: existing.rateAmount,
-        rateCurrency: existing.rateCurrency,
-        isRateOverridden: existing.isRateOverridden,
-        remarks: tFuncSession("leaveRescheduledRemark"),
-        idempotencyKey: successorIdempotencyKey,
-      };
-
-      // 5. Perform validations for successor
-      await performRescheduleValidations(t, successorInput, locale);
-
-      // 6. Insert successor class instance
-      const [successor] = await t
-        .insert(classInstances)
-        .values({
-          ...successorInput,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning();
-
-      // 7. Update original class state
+      // 4. Update original class state
       const updated = await runStateChange(id, actorUserId, t, locale, async () => {
         const now = new Date();
         const msg = tFuncSession("leaveProcessedDescription", { successorId: successor.id });
@@ -465,11 +498,9 @@ export namespace SchedulingRepository {
         };
       });
 
-      if (!updated) {
-        throw new Error(tFuncErrors("classInstanceNotFound", { id }));
-      }
+      const originalId = updated?.id ?? id;
 
-      // 8. Restore student quota exactly once if it was deducted
+      // 5. Restore student quota exactly once if it was deducted
       if (existing.quotaDeducted) {
         await t
           .update(students)
@@ -477,18 +508,8 @@ export namespace SchedulingRepository {
           .where(eq(students.id, existing.studentId));
       }
 
-      // 9. Insert/update leaveRequests record
-      let requesterType: "TEACHER" | "PARENT" | "ADMIN" = "ADMIN";
-      const [teacher] = await t.select({ id: teachers.id }).from(teachers).where(eq(teachers.userId, actorUserId)).limit(1);
-      if (teacher) {
-        requesterType = "TEACHER";
-      } else {
-        const [parent] = await t.select({ id: parents.id }).from(parents).where(eq(parents.userId, actorUserId)).limit(1);
-        if (parent) {
-          requesterType = "PARENT";
-        }
-      }
-
+      // 6. Insert/update leaveRequests record
+      const requesterType = await getRequesterTypeForUser(t, actorUserId);
       const now = new Date();
       await t
         .insert(leaveRequests)
@@ -504,7 +525,7 @@ export namespace SchedulingRepository {
         })
         .onConflictDoNothing();
 
-      return { originalId: updated.id, successorId: successor.id };
+      return { originalId, successorId: successor.id };
     };
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
@@ -922,10 +943,7 @@ export namespace SchedulingRepository {
     };
   }
 
-  export async function markOriginalAsRescheduled(
-    t: DBTransaction,
-    originalClassId: string
-  ): Promise<void> {
+  export async function markOriginalAsRescheduled(t: DBTransaction, originalClassId: string): Promise<void> {
     await t
       .update(classInstances)
       .set({
@@ -1159,15 +1177,12 @@ export namespace SchedulingRepository {
   };
 
   export const getRescheduleTrackingRows = async (
-    input: RescheduleTrackingInput,
+    input: Types.RescheduleTrackingInput,
     tx?: DBTransaction
   ): Promise<Types.RescheduleTrackingRow[]> => {
     const runner = async (t: DBTransaction): Promise<Types.RescheduleTrackingRow[]> => {
       const originalClass = alias(classInstances, "original_class");
-      const baseConditions = and(
-        isNull(classInstances.deletedAt),
-        sql`${classInstances.originalClassId} IS NOT NULL`
-      );
+      const baseConditions = and(isNull(classInstances.deletedAt), sql`${classInstances.originalClassId} IS NOT NULL`);
 
       let conditions = baseConditions;
 
@@ -1181,10 +1196,7 @@ export namespace SchedulingRepository {
         const searchPattern = `%${input.search}%`;
         conditions = and(
           conditions,
-          or(
-            sql`${users.name} ILIKE ${searchPattern}`,
-            sql`${students.name} ILIKE ${searchPattern}`
-          )
+          or(sql`${users.name} ILIKE ${searchPattern}`, sql`${students.name} ILIKE ${searchPattern}`)
         );
       }
 
@@ -1211,10 +1223,10 @@ export namespace SchedulingRepository {
 
       let finalQuery = query.orderBy(sql`${classInstances.scheduledStartAt} DESC`);
       if (input.limit !== undefined && input.limit !== null) {
-        finalQuery = finalQuery.limit(input.limit);
+        finalQuery = finalQuery.limit(input.limit) as typeof finalQuery;
       }
       if (input.offset !== undefined && input.offset !== null) {
-        finalQuery = finalQuery.offset(input.offset);
+        finalQuery = finalQuery.offset(input.offset) as typeof finalQuery;
       }
 
       const queryRows = await finalQuery;
@@ -1231,8 +1243,8 @@ export namespace SchedulingRepository {
           studentName: row.studentName ?? "",
           scheduledStartAt: row.scheduledStartAt,
           scheduledEndAt: row.scheduledEndAt,
-          status: (isLeave ? "pending_leave" : "rescheduled") as const,
-          dateLabel: (isLeave ? "leave_request" : "new_date") as const,
+          status: isLeave ? ("pending_leave" as const) : ("rescheduled" as const),
+          dateLabel: isLeave ? ("leave_request" as const) : ("new_date" as const),
           remarks: row.remarks,
         };
       });

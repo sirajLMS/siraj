@@ -4,7 +4,7 @@ import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
@@ -47,6 +47,7 @@ interface CommonViewProps {
 interface AdminViewProps extends CommonViewProps {
   readonly onForceActivate: () => void;
   readonly onGenerateLog: () => void;
+  readonly onReschedule: () => void;
 }
 
 const AdminView = (props: AdminViewProps) => {
@@ -72,15 +73,55 @@ export function ClassDetailsContainer() {
   const locale = useLocale();
   const client = useApolloClient();
 
-  const { id } = useParams() as { id: string };
+  const params = useParams();
+  const rawId = params?.id;
+  const id = typeof rawId === "string" ? rawId : "";
   const hasPermission = useUserStore(state => state.hasPermission);
 
   const [isWarningDismissed, setIsWarningDismissed] = useState(false);
   const [errorState, setErrorState] = useState<string | null>(null);
+  const [shouldLoadEvents, setShouldLoadEvents] = useState(false);
 
   const { data, loading, error } = useQuery(classInstanceQueryDocument, {
     variables: { id },
+    skip: !id,
   });
+
+  const { data: eventsData, error: eventsError } = useQuery(classStatusEventsQueryDocument, {
+    variables: { classInstanceId: id },
+    skip: !id || !shouldLoadEvents,
+  });
+
+  useEffect(() => {
+    if (shouldLoadEvents && eventsData?.classStatusEvents) {
+      try {
+        const blob = new Blob([JSON.stringify(eventsData.classStatusEvents, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `class-${id}-events.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        logger.error("Error generating log:", err);
+        setErrorState(getErrorMessage(err));
+      } finally {
+        setShouldLoadEvents(false);
+      }
+    }
+  }, [eventsData, shouldLoadEvents, id]);
+
+  useEffect(() => {
+    if (shouldLoadEvents && eventsError) {
+      logger.error("Error fetching class status events:", eventsError);
+      setErrorState(eventsError.message);
+      setShouldLoadEvents(false);
+    }
+  }, [eventsError, shouldLoadEvents]);
 
   const [activateClass] = useMutation(activateClassMutationDocument, {
     onCompleted: () => {
@@ -156,6 +197,10 @@ export function ClassDetailsContainer() {
     );
   }
 
+  if (!id) {
+    return <Box sx={{ p: 3, textAlign: "center" }}>Invalid Class ID</Box>;
+  }
+
   if (error || !data?.classInstance) {
     logger.error("Error fetching class details:", error);
     return null;
@@ -200,30 +245,12 @@ export function ClassDetailsContainer() {
     }
   };
 
-  const handleGenerateLog = async () => {
-    try {
-      const { data: logData } = await client.query({
-        query: classStatusEventsQueryDocument,
-        variables: { classInstanceId: id },
-      });
+  const handleGenerateLog = () => {
+    setShouldLoadEvents(true);
+  };
 
-      if (logData?.classStatusEvents) {
-        const blob = new Blob([JSON.stringify(logData.classStatusEvents, null, 2)], {
-          type: "application/json",
-        });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `class-${id}-events.json`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(url);
-      }
-    } catch (err) {
-      logger.error("Error generating log:", err);
-      setErrorState(getErrorMessage(err));
-    }
+  const handleReschedule = () => {
+    router.push(`/${locale}/reschedule?classInstanceId=${id}`);
   };
 
   const handleViewProfile = () => {
@@ -261,6 +288,7 @@ export function ClassDetailsContainer() {
           onForceActivate={handleForceActivate}
           onStop={handleStop}
           onGenerateLog={handleGenerateLog}
+          onReschedule={handleReschedule}
           onDelete={handleDelete}
           {...sessionActionProps}
         />

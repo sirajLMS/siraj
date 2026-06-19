@@ -44,6 +44,7 @@ function MockAdminViewWrapper({ pageHeader, instance, isWarningDismissed, dismis
         onForceActivate={handleForceActivate}
         onStop={handleStop}
         onGenerateLog={handleGenerateLog}
+        onReschedule={() => logger.info("Reschedule clicked")}
         onDelete={handleDelete}
         labels={labels}
         onStart={() => logger.info("Start clicked")}

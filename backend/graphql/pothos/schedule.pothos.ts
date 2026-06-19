@@ -75,3 +75,78 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
     teacher: t.expose("teacher", { type: DailyScheduleListUserItemObject }),
   }),
 });
+
+export type RescheduleTrackingRowDefinition = {
+  id: string;
+  originalClassId: string | null;
+  teacherId: string;
+  teacherName: string;
+  teacherAvatarUrl: string | null;
+  studentId: string;
+  studentName: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  status: string;
+  dateLabel: string;
+  remarks: string | null;
+};
+
+const RescheduleTrackingRowRef = gqlSchemaBuilder.objectRef<RescheduleTrackingRowDefinition>("RescheduleTrackingRow");
+
+export const RescheduleTrackingRowPothosObject = RescheduleTrackingRowRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    originalClassId: t.exposeString("originalClassId", { nullable: true }),
+    teacherId: t.exposeString("teacherId"),
+    teacherName: t.exposeString("teacherName"),
+    teacherAvatarUrl: t.exposeString("teacherAvatarUrl", { nullable: true }),
+    studentId: t.exposeString("studentId"),
+    studentName: t.exposeString("studentName"),
+    scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
+    scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
+    status: t.exposeString("status"),
+    dateLabel: t.exposeString("dateLabel"),
+    remarks: t.exposeString("remarks", { nullable: true }),
+  }),
+});
+
+export type RescheduleTrackingMetricsDefinition = {
+  id: string;
+  pending: number;
+  approved: number;
+  leave: number;
+  rescheduled: number;
+  cancelled: number;
+};
+
+const RescheduleTrackingMetricsRef =
+  gqlSchemaBuilder.objectRef<RescheduleTrackingMetricsDefinition>("RescheduleTrackingMetrics");
+
+export const RescheduleTrackingMetricsPothosObject = RescheduleTrackingMetricsRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    pending: t.exposeInt("pending"),
+    approved: t.exposeInt("approved"),
+    leave: t.exposeInt("leave"),
+    rescheduled: t.exposeInt("rescheduled"),
+    cancelled: t.exposeInt("cancelled"),
+  }),
+});
+
+export type RescheduleTrackingInputDefinition = {
+  search?: string | null;
+  status?: string | null;
+  limit?: number | null;
+  offset?: number | null;
+};
+
+export const RescheduleTrackingInputPothosObject = gqlSchemaBuilder
+  .inputRef<RescheduleTrackingInputDefinition>("RescheduleTrackingInput")
+  .implement({
+    fields: t => ({
+      search: t.string(),
+      status: t.string(),
+      limit: t.int(),
+      offset: t.int(),
+    }),
+  });

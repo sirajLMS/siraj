@@ -662,6 +662,7 @@ const en: MessageSchema = {
       adminActions: {
         administrativeActions: "Administrative Actions",
         generateLog: "Generate Log",
+        reschedule: "Reschedule Class",
       },
       classInfo: {
         liveInstance: "Live Instance",
@@ -724,10 +725,16 @@ const en: MessageSchema = {
       liveSession: {
         startButton: "Start Session",
         absentButton: "Mark Absent",
-        leaveButton: "Process Leave",
+        leaveButton: "Request Leave",
         resetButton: "Reset Session",
-        leaveReasonPrompt: "Enter leave reason",
+        leaveReasonPrompt: "Please enter the reason for leave:",
         resetConfirmation: "Are you sure you want to reset this session? All data will be cleared.",
+        leaveDialogTitle: "Request Leave",
+        leaveReasonLabel: "Reason for leave",
+        leaveSubmit: "Submit",
+        cancel: "Cancel",
+        resetDialogTitle: "Reset Session?",
+        resetConfirm: "Reset",
       },
       status: {
         active: "Active",
@@ -739,6 +746,7 @@ const en: MessageSchema = {
       viewStudentProfile: "View Student Profile",
       editInfo: "Edit Information",
       generateLog: "Generate Log",
+      reschedule: "Reschedule Class",
     },
     classAudit: {
       pageTitle: "Class Detail View",

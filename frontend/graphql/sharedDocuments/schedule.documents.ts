@@ -48,3 +48,37 @@ export const dailyScheduleListQueryDocument: TypedDocumentNode<
     }
   }
 `;
+export const rescheduleTrackingRowsQueryDocument: TypedDocumentNode<
+  Operations.RescheduleTrackingRowsQuery,
+  Types.QueryRescheduleTrackingRowsArgs
+> = gql`
+  query rescheduleTrackingRows($input: RescheduleTrackingInput!) {
+    rescheduleTrackingRows(input: $input) {
+      id
+      originalClassId
+      teacherId
+      teacherName
+      teacherAvatarUrl
+      studentId
+      studentName
+      scheduledStartAt
+      scheduledEndAt
+      status
+      dateLabel
+      remarks
+    }
+  }
+`;
+
+export const rescheduleTrackingMetricsQueryDocument: TypedDocumentNode<Operations.RescheduleTrackingMetricsQuery> = gql`
+  query rescheduleTrackingMetrics {
+    rescheduleTrackingMetrics {
+      id
+      pending
+      approved
+      leave
+      rescheduled
+      cancelled
+    }
+  }
+`;

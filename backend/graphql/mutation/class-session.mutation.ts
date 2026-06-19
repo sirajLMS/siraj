@@ -1,4 +1,4 @@
-import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { SchedulingRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { type ClassActionFn, ClassSessionService } from "@/backend/services/session/class-session.service";
 import type { BaseContext } from "../gqlContext";
@@ -92,6 +92,7 @@ gqlSchemaBuilder.mutationField("updateSessionStatusLeave", t =>
         ctx.locale
       );
       return {
+        id: `${result.originalId}:${result.successorId}`,
         completedInstanceId: result.originalId,
         rescheduledInstanceId: result.successorId,
       };
@@ -118,15 +119,9 @@ gqlSchemaBuilder.mutationField("rescheduleClass", t =>
         userId,
         args.classInstanceId,
         {
-          studentId: existing.studentId,
-          teacherId: existing.teacherId,
           scheduledStartAt: new Date(args.input.scheduledStartAt),
           scheduledEndAt: new Date(args.input.scheduledEndAt),
           durationMinutes: args.input.durationMinutes,
-          classType: existing.classType,
-          executionState: existing.executionState,
-          outcome: existing.outcome,
-          idempotencyKey: existing.idempotencyKey,
         },
         ctx.locale
       );

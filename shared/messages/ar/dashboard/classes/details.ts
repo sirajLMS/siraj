@@ -14,6 +14,7 @@ export const classDetails: ClassDetailsLabels = {
   adminActions: {
     administrativeActions: "الإجراءات الإدارية",
     generateLog: "إنشاء سجل",
+    reschedule: "تعديل موعد الحصة",
   },
   classInfo: {
     liveInstance: "حصة مباشرة",
@@ -79,6 +80,12 @@ export const classDetails: ClassDetailsLabels = {
     resetButton: "إعادة تعيين الجلسة",
     leaveReasonPrompt: "الرجاء إدخال سبب الانصراف:",
     resetConfirmation: "هل أنت متأكد من إعادة تعيين هذه الجلسة؟ سيتم حذف جميع البيانات.",
+    leaveDialogTitle: "طلب إذن انصراف/غياب",
+    leaveReasonLabel: "سبب الغياب/الانصراف",
+    leaveSubmit: "إرسال",
+    cancel: "إلغاء",
+    resetDialogTitle: "إعادة تعيين الجلسة؟",
+    resetConfirm: "إعادة تعيين",
   },
   status: {
     active: "نشط",
@@ -90,4 +97,5 @@ export const classDetails: ClassDetailsLabels = {
   viewStudentProfile: "عرض ملف الطالب",
   editInfo: "تعديل المعلومات",
   generateLog: "إنشاء سجل",
+  reschedule: "تعديل موعد الحصة",
 };

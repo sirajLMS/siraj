@@ -55,6 +55,7 @@ export const useAdminViewLabels = (timezone: string): AdminViewLabels => {
       adminActions: {
         administrativeActions: t("adminActions.administrativeActions"),
         generateLog: t("adminActions.generateLog"),
+        reschedule: t("adminActions.reschedule"),
       },
       classInfo: {
         liveInstance: t("classInfo.liveInstance"),

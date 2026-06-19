@@ -1,7 +1,13 @@
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { DailyScheduleListPothosObject, DailyScheduleMetricsPothosObject } from "../pothos/schedule.pothos";
+import {
+  DailyScheduleListPothosObject,
+  DailyScheduleMetricsPothosObject,
+  RescheduleTrackingInputPothosObject,
+  RescheduleTrackingMetricsPothosObject,
+  RescheduleTrackingRowPothosObject,
+} from "../pothos/schedule.pothos";
 
 gqlSchemaBuilder.queryField("dailyScheduleMetrics", t =>
   t.field({
@@ -53,6 +59,37 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
         student: { id: item.studentId, name: item.student?.name || "Unknown" },
         teacher: { id: item.teacherId, name: item.teacher?.user?.name || "Unknown" },
       }));
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
+  t.field({
+    type: [RescheduleTrackingRowPothosObject],
+    args: {
+      input: t.arg({ type: RescheduleTrackingInputPothosObject, required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      if (!ctx.user) {
+        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+        throw new Error(tFunc("unauthorized"));
+      }
+      return ScheduleService.getRescheduleTracking(ctx.user.id, args.input, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("rescheduleTrackingMetrics", t =>
+  t.field({
+    type: RescheduleTrackingMetricsPothosObject,
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, _args, ctx) => {
+      if (!ctx.user) {
+        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+        throw new Error(tFunc("unauthorized"));
+      }
+      return ScheduleService.getRescheduleTrackingMetrics(ctx.user.id, ctx.locale);
     },
   })
 );

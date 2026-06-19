@@ -50,6 +50,12 @@ export interface ClassDetailsLabels {
     readonly resetButton: string;
     readonly leaveReasonPrompt: string;
     readonly resetConfirmation: string;
+    readonly leaveDialogTitle: string;
+    readonly leaveReasonLabel: string;
+    readonly leaveSubmit: string;
+    readonly cancel: string;
+    readonly resetDialogTitle: string;
+    readonly resetConfirm: string;
   };
   readonly status: {
     readonly active: string;
@@ -61,4 +67,5 @@ export interface ClassDetailsLabels {
   readonly viewStudentProfile: string;
   readonly editInfo: string;
   readonly generateLog: string;
+  readonly reschedule: string;
 }

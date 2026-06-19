@@ -190,6 +190,7 @@ export const SupportRequestResultPothosObject = SupportRequestResultRef.implemen
 // ─── Leave Process Result ───────────────────────────────────────────────────
 
 export type LeaveProcessResultDefinition = {
+  id: string;
   completedInstanceId: string;
   rescheduledInstanceId: string;
 };
@@ -198,6 +199,7 @@ const LeaveProcessResultRef = gqlSchemaBuilder.objectRef<LeaveProcessResultDefin
 
 export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
   fields: t => ({
+    id: t.exposeString("id"),
     completedInstanceId: t.exposeString("completedInstanceId"),
     rescheduledInstanceId: t.exposeString("rescheduledInstanceId"),
     completedInstance: t.field({

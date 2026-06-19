@@ -1,25 +1,35 @@
 "use client";
 
+import { useMutation, useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Box, CircularProgress } from "@mui/material";
+import { useSearchParams } from "next/navigation";
+import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useRescheduleStore } from "@/frontend/stores/mockRescheduleStore";
+import { classInstanceQueryDocument, rescheduleClassMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
 import { RescheduleView } from "./RescheduleView";
 import { type RescheduleFormData, rescheduleSchema } from "./schemas/rescheduleSchema";
-
-const DEFAULT_FORM_VALUES: RescheduleFormData = {
-  newDate: "2023-10-24",
-  newTime: "22:30",
-};
+import { combineDateTime } from "./utils/rescheduleDateTime";
 
 export function RescheduleContainer() {
   const router = useRouter();
-  const session = useRescheduleStore(state => state.session);
-  const isSubmitting = useRescheduleStore(state => state.isSubmitting);
-  const setSubmitting = useRescheduleStore(state => state.setSubmitting);
+  const locale = useLocale();
+  const searchParams = useSearchParams();
+  const classInstanceId = searchParams.get("classInstanceId") ?? "";
+
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const { data, loading, error } = useQuery(classInstanceQueryDocument, {
+    variables: { id: classInstanceId },
+    skip: !classInstanceId,
+  });
+
+  const [rescheduleClass, { loading: isSubmitting }] = useMutation(rescheduleClassMutationDocument);
+
+  const classInstance = data?.classInstance;
 
   const {
     control,
@@ -30,36 +40,75 @@ export function RescheduleContainer() {
     reset,
   } = useForm<RescheduleFormData>({
     resolver: zodResolver(rescheduleSchema),
-    defaultValues: DEFAULT_FORM_VALUES,
+    defaultValues: {
+      newDate: "",
+      newTime: "",
+    },
   });
 
   useEffect(() => {
-    if (!showSuccess) return undefined;
-    const timer = setTimeout(() => {
-      setShowSuccess(false);
-    }, 3000);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [showSuccess]);
+    if (classInstance) {
+      reset({
+        newDate: classInstance.scheduledDate ?? "",
+        newTime: classInstance.startTime ?? "",
+      });
+    }
+  }, [classInstance, reset]);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error || !classInstance) {
+    logger.error("Error fetching class details for rescheduling:", error);
+    return <Box sx={{ p: 3, textAlign: "center" }}>Class instance not found.</Box>;
+  }
+
+  const session = {
+    sessionId: classInstance.id ?? "",
+    teacherName: classInstance.teacher?.name ?? "",
+    studentName: classInstance.student?.name ?? "",
+    teacherTimezone: classInstance.studentTimezone ?? "UTC",
+  };
 
   const onSubmit = async (formData: RescheduleFormData) => {
-    setSubmitting(true);
+    const startAt = combineDateTime(formData.newDate, formData.newTime);
+    if (!startAt) {
+      logger.error("Invalid date or time format for reschedule");
+      return;
+    }
+    const durationMinutes = classInstance.durationMinutes ?? 60;
+    const endAt = new Date(startAt.getTime() + durationMinutes * 60 * 1000);
+
     try {
-      logger.info("Submitting class reschedule", { sessionId: session.sessionId, formData });
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      logger.info("Class rescheduled successfully", { sessionId: session.sessionId });
-      setShowSuccess(true);
-      reset(DEFAULT_FORM_VALUES);
-    } catch (error) {
-      logger.error("Failed to reschedule class", { error });
-    } finally {
-      setSubmitting(false);
+      const { data: mutationResult } = await rescheduleClass({
+        variables: {
+          classInstanceId,
+          input: {
+            scheduledStartAt: startAt.toISOString(),
+            scheduledEndAt: endAt.toISOString(),
+            durationMinutes,
+          },
+        },
+      });
+
+      if (mutationResult?.rescheduleClass?.id) {
+        setShowSuccess(true);
+        setTimeout(() => {
+          router.push(`/${locale}/classes/${mutationResult.rescheduleClass?.id}`);
+        }, 1500);
+      }
+    } catch (err) {
+      logger.error("Failed to reschedule class:", err);
     }
   };
 
   const onCancel = () => {
-    router.push("/schedule/tracking/status");
+    router.push(`/${locale}/classes/${classInstanceId}`);
   };
 
   return (

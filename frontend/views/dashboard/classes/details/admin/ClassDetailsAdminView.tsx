@@ -18,6 +18,7 @@ interface ClassDetailsAdminViewProps {
   readonly onForceActivate: () => void;
   readonly onStop: () => void;
   readonly onGenerateLog: () => void;
+  readonly onReschedule: () => void;
   readonly onDelete: () => void;
   readonly labels: AdminViewLabels;
   readonly onStart: () => void;
@@ -31,6 +32,13 @@ interface ClassDetailsAdminViewProps {
   readonly error: string | null;
 }
 
+function toNumberArray(value: unknown): number[] {
+  if (Array.isArray(value)) {
+    return value.filter((v): v is number => typeof v === "number");
+  }
+  return [];
+}
+
 export function ClassDetailsAdminView({
   instance,
   isWarningDismissed,
@@ -38,6 +46,7 @@ export function ClassDetailsAdminView({
   onForceActivate,
   onStop,
   onGenerateLog,
+  onReschedule,
   onDelete,
   labels,
   onStart,
@@ -61,7 +70,7 @@ export function ClassDetailsAdminView({
     { key: "health", labelKey: "sessionHealth", value: instance.performance?.sessionHealth ?? "" },
   ];
 
-  const heatmapData = (instance.performance?.heatmapData as number[]) || [];
+  const heatmapData = toNumberArray(instance.performance?.heatmapData);
 
   return (
     <Box>
@@ -87,6 +96,7 @@ export function ClassDetailsAdminView({
           onForceActivate={onForceActivate}
           onStop={onStop}
           onGenerateLog={onGenerateLog}
+          onReschedule={onReschedule}
           onDelete={onDelete}
           labels={labels.adminActions}
         />
