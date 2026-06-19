@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { LeaveQuotaUsageEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
 import { leaveQuotaUsage, parents, students, systemSettings, teachers, users } from "../../schema";
@@ -260,3 +261,143 @@ describe("Leave Quota Limits Trigger", () => {
     testLogger.info("Leave limit update block test passed.");
   });
 });
+
+describe("Leave Quota Repository Methods", () => {
+  const currentYear = new Date().getUTCFullYear();
+  const currentMonth = new Date().getUTCMonth() + 1;
+
+  test("getTeacherLeaveQuotaUsage returns 0 when no row exists for the period", async () => {
+    testLogger.info("Testing getTeacherLeaveQuotaUsage with no existing row...");
+    await runInRollback(async tx => {
+      const { teacher } = await setupTeacherAndStudent(tx);
+      const usage = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
+      expect(usage).toBe(0);
+    });
+    testLogger.info("getTeacherLeaveQuotaUsage returns 0 when no row exists.");
+  });
+
+  test("getTeacherLeaveQuotaUsage returns correct count when row exists", async () => {
+    testLogger.info("Testing getTeacherLeaveQuotaUsage with existing row...");
+    await runInRollback(async tx => {
+      const { teacher } = await setupTeacherAndStudent(tx);
+      await insertLeaveQuota(tx, { teacherId: teacher.id, year: currentYear, month: currentMonth, count: 1 });
+      const usage = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
+      expect(usage).toBe(1);
+    });
+    testLogger.info("getTeacherLeaveQuotaUsage returns correct count.");
+  });
+
+  test("incrementTeacherLeaveQuota creates row on first call and increments on subsequent calls", async () => {
+    testLogger.info("Testing incrementTeacherLeaveQuota atomic increment...");
+    await runInRollback(async tx => {
+      const { teacher } = await setupTeacherAndStudent(tx);
+
+      await SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, "en");
+      const usage1 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
+      expect(usage1).toBe(1);
+
+      await SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, "en");
+      const usage2 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
+      expect(usage2).toBe(2);
+    });
+    testLogger.info("incrementTeacherLeaveQuota atomic increment passed.");
+  });
+
+  test("incrementTeacherLeaveQuota triggers DB error when incrementing beyond limit", async () => {
+    testLogger.info("Testing incrementTeacherLeaveQuota trigger block...");
+    await runInRollback(async tx => {
+      const { teacher } = await setupTeacherAndStudent(tx);
+      await insertLeaveQuota(tx, { teacherId: teacher.id, year: currentYear, month: currentMonth, count: 2 });
+
+      await expectLeaveQuotaExceeded(() =>
+        SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, "en")
+      );
+    });
+    testLogger.info("incrementTeacherLeaveQuota trigger block passed.");
+  });
+
+  test("getTeacherByUserId resolves teacher record from user ID", async () => {
+    testLogger.info("Testing getTeacherByUserId...");
+    await runInRollback(async tx => {
+      const { user, teacher } = await setupTeacherAndStudent(tx);
+      const result = await SchedulingRepository.getTeacherByUserId(user.id, tx);
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe(teacher.id);
+      expect(result?.userId).toBe(user.id);
+    });
+    testLogger.info("getTeacherByUserId passed.");
+  });
+
+  test("getTeacherByUserId returns null for non-existent user", async () => {
+    testLogger.info("Testing getTeacherByUserId with non-existent user...");
+    await runInRollback(async tx => {
+      const result = await SchedulingRepository.getTeacherByUserId(randomUUID(), tx);
+      expect(result).toBeNull();
+    });
+    testLogger.info("getTeacherByUserId returns null for non-existent user.");
+  });
+});
+
+async function setupTeacherAndStudent(
+  tx: DbTransaction
+): Promise<{ user: UserEntity; teacher: TeacherEntity; student: StudentEntity }> {
+  const now = new Date();
+  const [user] = (await tx
+    .insert(users)
+    .values({
+      name: "Quota Teacher User",
+      email: `quota-teacher-${randomUUID()}@example.com`,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [UserEntity];
+
+  const [teacher] = (await tx
+    .insert(teachers)
+    .values({
+      userId: user.id,
+      status: "ACTIVATED",
+      timezone: "UTC",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [TeacherEntity];
+
+  const [parentUser] = (await tx
+    .insert(users)
+    .values({
+      name: "Quota Parent User",
+      email: `quota-parent-${randomUUID()}@example.com`,
+      password: "password",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [UserEntity];
+
+  const [parent] = (await tx
+    .insert(parents)
+    .values({
+      userId: parentUser.id,
+      status: "REGULAR",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [ParentEntity];
+
+  const [student] = (await tx
+    .insert(students)
+    .values({
+      parentId: parent.id,
+      name: "Quota Student",
+      status: "REGULAR",
+      classesTotal: 10,
+      classesRemaining: 10,
+      idempotencyKey: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning()) as [StudentEntity];
+
+  return { user, teacher, student };
+}

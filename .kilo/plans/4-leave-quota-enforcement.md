@@ -5,8 +5,8 @@
 **Security baseline:** `.ai/done/service/1-sprint_1__db_repo_service_enhancments.md` (mandatory prerequisite)  
 **Story scope:** Implement automated leave quota enforcement (`system.enforce_leave_limit`), extend future schedule verification with "Re Scheduled" badge, and enable admin processing of subsequent leave requests with quota tracking awareness  
 **Target roles:** Academy Admin (audit future calendar, process reschedule up to limits), Teacher (view future personal schedules, leave requests gated by system limits), System Automated (validate operational constraints)  
-**Status:** In progress — Task A (Permission + Settings) complete, Task B (Service Layer Quota Enforcement) complete  
-**Last updated:** 2026-06-19  
+**Status:** In progress — Task A (Permission + Settings) complete, Task B (Service Layer Quota Enforcement) complete, Task C (Backend GraphQL Query) complete, Task G (Database Tests) complete  
+**Last updated:** 2026-06-20  
 
 ---
 
@@ -1316,15 +1316,15 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `FutureClass` and `TeacherFutureSchedule` Pothos types defined
-- [ ] `getTeacherFutureClasses` repository method joins with `students` table for real student names (no hardcoded "Course"/"Virtual")
-- [ ] `getTeacherFutureClasses` filters `NOT_ACTIVATED` and `ACTIVATED` states (force-activated classes visible)
-- [ ] `getTeacherFutureSchedule` service method computes leave quota and disabled flags
-- [ ] `teacherFutureSchedule` GraphQL query resolves correctly
-- [ ] Schema generation succeeds (`bun run generate:gqlSchema`)
-- [ ] Codegen succeeds (`bun codegen`)
-- [ ] Generated types include `TeacherFutureScheduleQuery` and related types
-- [ ] `bun tsgo` passes
+- [x] `FutureClass` and `TeacherFutureSchedule` Pothos types defined
+- [x] `getTeacherFutureClasses` repository method joins with `students` table for real student names (no hardcoded "Course"/"Virtual")
+- [x] `getTeacherFutureClasses` filters `NOT_ACTIVATED` and `ACTIVATED` states (force-activated classes visible)
+- [x] `getTeacherFutureSchedule` service method computes leave quota and disabled flags
+- [x] `teacherFutureSchedule` GraphQL query resolves correctly
+- [x] Schema generation succeeds (`bun run generate:gqlSchema`)
+- [x] Codegen succeeds (`bun codegen`)
+- [x] Generated types include `TeacherFutureScheduleQuery` and related types
+- [x] `bun tsgo` passes
 
 ---
 
@@ -1963,13 +1963,13 @@ bun test
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] All leave quota tests pass
-- [ ] Service layer check correctly blocks exhausted quota
-- [ ] Repository increment is atomic and trigger-enforced
-- [ ] Full leave flow test verifies quota increment
-- [ ] Third leave attempt is blocked
-- [ ] 100% coverage on new code paths
-- [ ] No existing tests broken
+- [x] All leave quota tests pass
+- [x] Service layer check correctly blocks exhausted quota
+- [x] Repository increment is atomic and trigger-enforced
+- [x] Full leave flow test verifies quota increment
+- [x] Third leave attempt is blocked
+- [x] 100% coverage on new code paths
+- [x] No existing tests broken — 319 pass, 0 fail
 
 ---
 
@@ -2134,9 +2134,9 @@ Task B (Service Layer Quota Enforcement) ✅ DONE
   ├── CRITICAL: incrementTeacherLeaveQuota uses raw SQL conflict target for partial index ✅
   └── CRITICAL: Trigger error detection uses PostgreSQL error code P0001, not string matching ✅
   ↓
-Task C (Backend GraphQL Query)
-  ├── FIXED: getTeacherFutureClasses joins students table (no hardcoded stub data)
-  └── FIXED: Execution state filter includes NOT_ACTIVATED + ACTIVATED
+Task C (Backend GraphQL Query) ✅ DONE
+  ├── FIXED: getTeacherFutureClasses joins students table (no hardcoded stub data) ✅
+  └── FIXED: Execution state filter includes NOT_ACTIVATED + ACTIVATED ✅
   ↓
 Task D (Frontend GraphQL Document)
   ↓
@@ -2144,9 +2144,9 @@ Task E (Frontend Views - Future Schedule)
   ↓
 Task F (Admin Reschedule Quota Awareness)
   ↓
-Task G (Database Tests)
-  ├── NEW: Test transactional rollback when quota increment fails
-  └── NEW: Test service layer fast-fail pre-check
+Task G (Database Tests) ✅ DONE
+  ├── NEW: Test transactional rollback when quota increment fails ✅
+  └── NEW: Test service layer fast-fail pre-check ✅
   ↓
 Task H (i18n Translations)
   ↓

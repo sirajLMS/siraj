@@ -30,6 +30,33 @@ User requirement: "using bun (not vitest at all)". We use `playwright` (the libr
 
 The `next-devtools-mcp` server (configured in `.mcp.json`) is designed for **coding agent development assistance** — runtime diagnostics, browser evaluation during development, and documentation lookup. It is NOT a testing framework and is not suitable for automated test suites. Our approach uses proper test infrastructure.
 
+### Why Not `@playwright/mcp` for Testing?
+
+The project has `@playwright/mcp@0.0.38` configured in `.mcp.json`. This is **NOT a testing framework** — it is an MCP server by Microsoft that lets AI agents (Claude, Cursor, VS Code Copilot) interact with web pages through structured accessibility snapshots. Key distinction:
+
+| Aspect | `@playwright/mcp` (MCP Server) | `playwright` library (our E2E tests) |
+|---|---|---|
+| **Purpose** | AI agent browser interaction during development | Automated test suites |
+| **Invocation** | MCP protocol (LLM calls tools like `browser_click`, `browser_navigate`) | Programmatic (test code calls Playwright API directly) |
+| **State** | Persistent browser session across agent interactions | Fresh context per test (isolated cookies/storage) |
+| **Assertions** | LLM interprets accessibility snapshots visually | Programmatic `expect()` assertions (deterministic) |
+| **Reproducibility** | Non-deterministic (depends on LLM reasoning) | Deterministic (code-driven, same result every run) |
+| **CI/CD** | Not designed for CI pipelines | Designed for CI (`bun run test:ui:e2e`) |
+| **Speed** | Slow (LLM reasoning per action, large context) | Fast (direct API calls, no LLM overhead) |
+
+**When `@playwright/mcp` IS useful:**
+- During development, an AI agent can use it to visually verify a page renders correctly after code changes
+- Exploratory testing: agent navigates the app and reports what it sees
+- Debugging UI issues: agent can "see" the page state and take screenshots
+- Generating test code snippets: `--codegen typescript` flag can produce Playwright test code from agent interactions
+
+**When `@playwright/mcp` is NOT useful:**
+- Automated test suites (our use case) — non-deterministic, slow, not CI-compatible
+- Regression testing — no assertion framework, relies on LLM interpretation
+- Performance testing — adds LLM latency to every interaction
+
+**Conclusion:** Keep `@playwright/mcp` in `.mcp.json` for development-time AI assistance, but do NOT use it for the automated test suite. Our E2E tests correctly use the `playwright` library directly within `bun:test`.
+
 ### Test Directory Structure
 
 ```

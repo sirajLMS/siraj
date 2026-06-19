@@ -5,6 +5,7 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
 import {
   classInstances,
   classStatusEvents,
+  leaveQuotaUsage,
   parents,
   students,
   systemSettings,
@@ -832,6 +833,109 @@ describe("Scheduling Repository logic", () => {
       await runInRollback(async tx => {
         const fakeId = randomUUID();
         await expectRepositoryError(() => SchedulingRepository.processClassLeave(fakeId, "Sick", "some-actor-id", tx));
+      });
+    });
+  });
+
+  describe("Leave Quota Integration with processClassLeave", () => {
+    const currentYear = new Date().getUTCFullYear();
+    const currentMonth = new Date().getUTCMonth() + 1;
+
+    test("processClassLeave increments teacher leave quota inside transaction", async () => {
+      await runInRollback(async tx => {
+        const { instance, teacher } = await setupTestEntities(tx, "QuotaLeave");
+        const id = instance?.id;
+        const u = teacher.userId;
+        if (!id || !u) throw new Error("setup error");
+
+        await SchedulingRepository.activateClassInstance(id, u, { force: false }, tx);
+
+        const initialUsage = await SchedulingRepository.getTeacherLeaveQuotaUsage(
+          teacher.id,
+          currentYear,
+          currentMonth,
+          tx
+        );
+        expect(initialUsage).toBe(0);
+
+        await SchedulingRepository.processClassLeave(id, "Sick leave", u, tx, "en");
+
+        const finalUsage = await SchedulingRepository.getTeacherLeaveQuotaUsage(
+          teacher.id,
+          currentYear,
+          currentMonth,
+          tx
+        );
+        expect(finalUsage).toBe(1);
+      });
+    });
+
+    test("processClassLeave fails when teacher quota is already at maximum", async () => {
+      await runInRollback(async tx => {
+        const { instance, teacher } = await setupTestEntities(tx, "QuotaMaxLeave");
+        const id = instance?.id;
+        const u = teacher.userId;
+        if (!id || !u) throw new Error("setup error");
+
+        await SchedulingRepository.activateClassInstance(id, u, { force: false }, tx);
+
+        await tx.insert(leaveQuotaUsage).values({
+          teacherId: teacher.id,
+          periodYear: currentYear,
+          periodMonth: currentMonth,
+          usedCount: 2,
+        });
+
+        await expectRepositoryError(() =>
+          SchedulingRepository.processClassLeave(id, "Third leave", u, tx, "en")
+        );
+      });
+    });
+
+    test("processClassLeave increments quota correctly across multiple leaves", async () => {
+      await runInRollback(async tx => {
+        const { teacher } = await setupTestEntities(tx, "QuotaMulti1");
+        const { student: student2 } = await setupTestEntities(tx, "QuotaMulti2", { skipInstance: true });
+
+        await tx
+          .insert(teacherAssignments)
+          .values({ studentId: student2.id, teacherId: teacher.id, assignedAt: new Date() });
+
+        const now = new Date();
+        const instance1 = await createMockClassInstance(tx, student2.id, teacher.id, {
+          scheduledStartAt: new Date(now.getTime() + 86400000),
+          scheduledEndAt: new Date(now.getTime() + 86400000 + 3600000),
+        });
+        await SchedulingRepository.activateClassInstance(instance1.id, teacher.userId, { force: false }, tx);
+        await SchedulingRepository.processClassLeave(instance1.id, "Leave 1", teacher.userId, tx, "en");
+
+        const usage1 = await SchedulingRepository.getTeacherLeaveQuotaUsage(
+          teacher.id,
+          currentYear,
+          currentMonth,
+          tx
+        );
+        expect(usage1).toBe(1);
+
+        const { student: student3 } = await setupTestEntities(tx, "QuotaMulti3", { skipInstance: true });
+        await tx
+          .insert(teacherAssignments)
+          .values({ studentId: student3.id, teacherId: teacher.id, assignedAt: new Date() });
+
+        const instance2 = await createMockClassInstance(tx, student3.id, teacher.id, {
+          scheduledStartAt: new Date(now.getTime() + 86400000 * 20),
+          scheduledEndAt: new Date(now.getTime() + 86400000 * 20 + 3600000),
+        });
+        await SchedulingRepository.activateClassInstance(instance2.id, teacher.userId, { force: false }, tx);
+        await SchedulingRepository.processClassLeave(instance2.id, "Leave 2", teacher.userId, tx, "en");
+
+        const usage2 = await SchedulingRepository.getTeacherLeaveQuotaUsage(
+          teacher.id,
+          currentYear,
+          currentMonth,
+          tx
+        );
+        expect(usage2).toBe(2);
       });
     });
   });

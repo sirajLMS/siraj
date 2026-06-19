@@ -36,13 +36,17 @@ export namespace SystemRulesService {
     }
   }
 
-  export async function assertLeaveQuotaAvailable(teacherId: string, locale?: string): Promise<void> {
+  export async function assertLeaveQuotaAvailable(
+    teacherId: string,
+    locale?: string,
+    tx?: Parameters<Parameters<typeof import("@/backend/db/drizzleDb").db.transaction>[0]>[0]
+  ): Promise<void> {
     const now = new Date();
     const periodYear = now.getUTCFullYear();
     const periodMonth = now.getUTCMonth() + 1;
 
-    const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2);
-    const currentUsage = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacherId, periodYear, periodMonth);
+    const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2, tx);
+    const currentUsage = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacherId, periodYear, periodMonth, tx);
 
     if (currentUsage >= maxLeaves) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
