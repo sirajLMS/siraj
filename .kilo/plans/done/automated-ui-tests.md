@@ -401,9 +401,7 @@ graph LR
 
 ---
 
-#### Task F — E2E helpers
-
-**Status:** Pending
+#### Task F — E2E helpers\n\n**Status:** Complete
 
 **Target files:**
 - `test/ui/e2e/helpers.ts` (new)
@@ -432,8 +430,8 @@ graph LR
 6. Verify: Write a trivial test that logs in as Academy Admin and asserts the dashboard page loads.
 
 **Completion criteria:**
-- [ ] `test/ui/e2e/helpers.ts` exists with all exports
-- [ ] A trivial test logs in as demo user and reaches the dashboard
+- [x] `test/ui/e2e/helpers.ts` exists with all exports
+- [x] A trivial test logs in as demo user and reaches the dashboard
 
 ---
 
@@ -991,6 +989,7 @@ rg "test:e2e" package.json
 | `permissions/rbac-gates.md` | RequirePermission.test.tsx | permissions.test.ts |
 | `permissions/session-permission-migration.md` | — | permissions.test.ts |
 | `permissions/activation-time-window.md` | — | class-details.test.ts, teacher-dashboard.test.ts |
+
 
 
 
