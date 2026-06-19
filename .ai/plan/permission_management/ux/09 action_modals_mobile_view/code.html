@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Action Modals - GuardRail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#404848",
+                        "on-primary-container": "#205b5b",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "on-tertiary-container": "#5d4a71",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "inverse-primary": "#2e6767",
+                        "surface-variant": "#323535",
+                        "error-container": "#93000a",
+                        "on-secondary-container": "#aab5cc",
+                        "primary-container": "#98d1d0",
+                        "on-tertiary-fixed-variant": "#513f65",
+                        "tertiary-fixed-dim": "#d5bdeb",
+                        "warning": "#FFBA46",
+                        "sidebar": "#002626",
+                        "secondary-container": "#3c475a",
+                        "surface-container": "#1D2020",
+                        "on-primary": "#003737",
+                        "info": "#B4C5FF",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed": "#efdbff",
+                        "on-background": "#e1e3e2",
+                        "surface-tint": "#98d1d0",
+                        "on-secondary": "#263143",
+                        "secondary": "#bcc7de",
+                        "on-surface-variant": "#bfc8c7",
+                        "header-container": "#135E5E",
+                        "on-surface": "#e1e3e2",
+                        "background": "#111414",
+                        "secondary-fixed": "#d8e3fa",
+                        "surface-container-highest": "#323535",
+                        "primary-fixed": "#b3edec",
+                        "surface": "#111414",
+                        "surface-container-high": "#282A2A",
+                        "inverse-on-surface": "#2e3131",
+                        "error": "#FFB4AB",
+                        "success": "#62DF7D",
+                        "primary": "#b4edec",
+                        "tertiary": "#efdbff",
+                        "surface-bright": "#373a3a",
+                        "surface-container-low": "#191c1c",
+                        "surface-container-lowest": "#0c0f0f",
+                        "on-tertiary": "#3a284d",
+                        "on-error": "#690005",
+                        "completed": "#DDB8FF",
+                        "on-primary-fixed-variant": "#0f4f4f",
+                        "inverse-surface": "#e1e3e2",
+                        "surface-dim": "#111414",
+                        "on-primary-fixed": "#002020",
+                        "primary-fixed-dim": "#98d1d0",
+                        "tertiary-container": "#d5bdeb",
+                        "outline": "#899292",
+                        "on-tertiary-fixed": "#241337",
+                        "on-secondary-fixed": "#111c2d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-padding": "16px",
+                        "cell-padding-x": "12px",
+                        "unit": "4px",
+                        "grid-gutter": "16px",
+                        "grid-margin": "24px",
+                        "cell-padding-y": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "title-md": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "500" }],
+                        "label-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for data grids if needed */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #111414; }
+        ::-webkit-scrollbar-thumb { background: #323535; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #404848; }
+        
+        .modal-enter { animation: slideUp 0.3s cubic-bezier(0.2, 0, 0, 1) forwards; }
+        .scrim-enter { animation: fadeIn 0.2s ease-out forwards; }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body-md text-body-md overflow-hidden antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-grid-margin h-16 bg-header-container border-b border-outline-variant flat no shadows md:hidden">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined font-headline-md text-headline-md" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-primary-fixed">GuardRail</span>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center border border-outline-variant overflow-hidden hover:bg-surface-container-highest transition-colors active:opacity-80 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant font-label-md text-label-md" style="font-variation-settings: 'FILL' 1;">person</span>
+</button>
+</header>
+<!-- Main Canvas (Blurred/Inactive state behind modals) -->
+<main class="pt-16 pb-24 px-container-padding md:hidden h-screen overflow-hidden flex flex-col gap-4 filter blur-[2px] opacity-60">
+<div class="bg-surface-container p-4 rounded-xl border border-outline-variant mt-4">
+<h2 class="font-title-md text-title-md text-on-surface mb-2">Groups Overview</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Manage permission groups and their members.</p>
+</div>
+<div class="bg-surface-container p-4 rounded-xl border border-outline-variant flex-1">
+<div class="flex justify-between items-center mb-4 pb-2 border-b border-outline-variant">
+<span class="font-label-md text-label-md text-on-surface">Managers</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">12 Members</span>
+</div>
+<div class="flex justify-between items-center mb-4 pb-2 border-b border-outline-variant">
+<span class="font-label-md text-label-md text-on-surface">Editors</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">45 Members</span>
+</div>
+</div>
+</main>
+<!-- MODAL 1: Create/Edit Group (Bottom Sheet style for mobile) -->
+<!-- Scrim -->
+<div class="fixed inset-0 bg-background/80 backdrop-blur-sm z-[60] flex flex-col justify-end md:hidden scrim-enter" id="scrim-1">
+<!-- Bottom Sheet Container -->
+<div class="bg-surface-container w-full rounded-t-xl border-t border-outline-variant flex flex-col max-h-[751px] modal-enter shadow-[0_-4px_24px_rgba(0,0,0,0.5)]">
+<!-- Handle -->
+<div class="w-full flex justify-center pt-3 pb-1">
+<div class="w-12 h-1 bg-outline-variant rounded-full"></div>
+</div>
+<!-- Header -->
+<div class="px-container-padding py-3 flex justify-between items-center border-b border-outline-variant/50">
+<h2 class="font-title-md text-title-md text-on-surface font-semibold">Create Permission Group</h2>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-highest transition-colors" onclick="document.getElementById('scrim-1').style.display='none'">
+<span class="material-symbols-outlined font-label-lg text-label-lg">close</span>
+</button>
+</div>
+<!-- Content -->
+<div class="px-container-padding py-4 overflow-y-auto flex-1 flex flex-col gap-4">
+<!-- Input: Group Name -->
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant" for="group-name">Group Name</label>
+<input class="w-full bg-surface border border-outline rounded-lg px-3 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:border-primary focus:ring-1 focus:ring-primary transition-all min-h-[48px]" id="group-name" placeholder="e.g. Finance Admins" type="text"/>
+</div>
+<!-- Input: Description -->
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant" for="group-desc">Description (Optional)</label>
+<textarea class="w-full bg-surface border border-outline rounded-lg px-3 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:border-primary focus:ring-1 focus:ring-primary transition-all" id="group-desc" placeholder="Describe the purpose of this group..." rows="3"></textarea>
+</div>
+<!-- System Badge Demo -->
+<div class="mt-2 p-3 bg-secondary-container rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-on-secondary-container font-label-md text-label-md mt-0.5">info</span>
+<div>
+<span class="block font-label-sm text-label-sm text-on-secondary-container font-semibold">System Default Pattern</span>
+<span class="block font-body-sm text-body-sm text-on-secondary-container/80 mt-1">Groups created here will inherit standard tenant isolation policies automatically.</span>
+</div>
+</div>
+</div>
+<!-- Footer / Actions -->
+<div class="px-container-padding py-4 border-t border-outline-variant bg-surface-container-high flex flex-row gap-3 pb-safe">
+<button class="flex-1 min-h-[48px] rounded-lg border border-outline text-on-surface font-label-lg text-label-lg font-medium hover:bg-surface-variant transition-colors flex items-center justify-center">
+                    Cancel
+                </button>
+<button class="flex-1 min-h-[48px] rounded-lg bg-primary text-on-primary font-label-lg text-label-lg font-bold hover:bg-primary-fixed transition-colors flex items-center justify-center shadow-[0_0_12px_rgba(180,237,236,0.15)]">
+                    Save Group
+                </button>
+</div>
+</div>
+</div>
+<!-- MODAL 2: Bulk Action Confirmation (Centered Modal for high urgency) -->
+<!-- Note: Normally only one modal is active, showing both here for the prompt request, but styling one as a secondary layer or just demonstrating the code -->
+<div class="fixed inset-0 bg-background/90 backdrop-blur-md z-[70] flex flex-col justify-center items-center px-container-padding md:hidden scrim-enter hidden" id="scrim-2"> <!-- Set hidden by default to not overlap modal 1 in initial view, toggle via JS if needed -->
+<div class="bg-surface-container w-full max-w-[340px] rounded-xl border border-outline-variant flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.6)] modal-enter overflow-hidden">
+<!-- Header area with warning icon -->
+<div class="pt-6 px-container-padding pb-4 flex flex-col items-center text-center">
+<div class="w-12 h-12 rounded-full bg-error-container/20 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-error font-headline-md text-headline-md" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<h2 class="font-title-lg text-title-lg text-on-surface font-semibold mb-2">Confirm Action</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Are you sure you want to remove <span class="font-semibold text-on-surface">5 permissions</span> from the Managers group?</p>
+</div>
+<!-- Content / Alert -->
+<div class="px-container-padding pb-6">
+<div class="bg-error-container p-3 rounded-lg flex items-start gap-2 border border-error/20">
+<span class="material-symbols-outlined text-on-error-container font-label-lg text-label-lg mt-0.5" style="font-variation-settings: 'FILL' 1;">gpp_bad</span>
+<p class="font-body-sm text-body-sm text-on-error-container">Users in this group will immediately lose access to these features.</p>
+</div>
+</div>
+<!-- Footer / Actions -->
+<div class="p-3 border-t border-outline-variant bg-surface-container-high flex flex-col gap-2">
+<button class="w-full min-h-[48px] rounded-lg bg-error text-on-error font-label-lg text-label-lg font-bold hover:bg-error/90 transition-colors flex items-center justify-center shadow-[0_0_12px_rgba(255,180,171,0.15)]">
+                    Confirm Removal
+                </button>
+<button class="w-full min-h-[48px] rounded-lg text-on-surface-variant font-label-lg text-label-lg font-medium hover:bg-surface-variant transition-colors flex items-center justify-center" onclick="document.getElementById('scrim-2').style.display='none'">
+                    Cancel
+                </button>
+</div>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 pb-safe px-2 border-t border-outline-variant bg-surface-container-low dark:bg-surface-container-low md:hidden">
+<!-- Tab 1: Groups (Active) -->
+<button class="flex flex-col items-center justify-center w-full h-full">
+<div class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-5 py-1 mb-1 scale-90 duration-150">
+<span class="material-symbols-outlined font-label-sm text-label-sm" style="font-variation-settings: 'FILL' 1;">group</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary-fixed dark:text-primary-fixed">Groups</span>
+</button>
+<!-- Tab 2: Catalog (Inactive) -->
+<button class="flex flex-col items-center justify-center w-full h-full hover:bg-surface-container-high transition-colors rounded-xl">
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 mb-1">
+<span class="material-symbols-outlined font-label-sm text-label-sm">shield_person</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Catalog</span>
+</button>
+<!-- Tab 3: Overrides (Inactive) -->
+<button class="flex flex-col items-center justify-center w-full h-full hover:bg-surface-container-high transition-colors rounded-xl">
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 mb-1">
+<span class="material-symbols-outlined font-label-sm text-label-sm">edit_calendar</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Overrides</span>
+</button>
+</nav>
+<!-- Demo Script to toggle modals for viewing -->
+<script>
+        // For demonstration purposes, we show Modal 1 by default.
+        // To view Modal 2, click the scrim of Modal 1 to close it, or use this logic.
+        
+        // Uncomment to show Modal 2 instead for testing:
+        // document.getElementById('scrim-1').classList.add('hidden');
+        // document.getElementById('scrim-2').classList.remove('hidden');
+    </script>
+</body></html>
