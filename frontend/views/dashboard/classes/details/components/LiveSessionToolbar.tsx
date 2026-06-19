@@ -1,8 +1,21 @@
 "use client";
 
 import { ExitToAppOutlined, HighlightOffOutlined, PlayArrowOutlined, RestartAltOutlined } from "@mui/icons-material";
-import { Alert, alpha, Box, Button, CircularProgress } from "@mui/material";
+import {
+  Alert,
+  alpha,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 
@@ -26,132 +39,226 @@ export interface LiveSessionToolbarProps {
   readonly error?: string | null;
 }
 
-interface StartButtonProps {
+import type { SxProps, Theme } from "@mui/material";
+
+interface ActionButtonProps {
+  readonly id: string;
+  readonly disabled: boolean;
+  readonly isLoading: boolean;
+  readonly onClick: () => void;
+  readonly label: string;
+  readonly permission: AppPermission;
+  readonly icon: React.ReactNode;
+  readonly variant?: "contained" | "outlined";
+  readonly sx: SxProps<Theme>;
+}
+
+function ActionButton({
+  id,
+  disabled,
+  isLoading,
+  onClick,
+  label,
+  permission,
+  icon,
+  variant = "contained",
+  sx,
+}: ActionButtonProps) {
+  return (
+    <RequirePermission permissions={[permission]}>
+      <Button
+        id={id}
+        variant={variant}
+        disabled={disabled}
+        onClick={onClick}
+        startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : icon}
+        sx={sx}
+      >
+        {label}
+      </Button>
+    </RequirePermission>
+  );
+}
+
+interface LeaveDialogProps {
+  readonly open: boolean;
+  readonly reason: string;
+  readonly isProcessing: boolean;
+  readonly onReasonChange: (reason: string) => void;
+  readonly onClose: () => void;
+  readonly onSubmit: () => void;
+  readonly labels: {
+    readonly title: string;
+    readonly reasonLabel: string;
+    readonly cancel: string;
+    readonly submit: string;
+  };
+}
+
+function LeaveDialog({ open, reason, isProcessing, onReasonChange, onClose, onSubmit, labels }: LeaveDialogProps) {
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+      <DialogTitle>{labels.title}</DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          label={labels.reasonLabel}
+          type="text"
+          fullWidth
+          multiline
+          rows={4}
+          variant="outlined"
+          value={reason}
+          onChange={e => onReasonChange(e.target.value)}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>{labels.cancel}</Button>
+        <Button onClick={onSubmit} variant="contained" disabled={!reason.trim() || isProcessing}>
+          {labels.submit}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+interface ResetDialogProps {
+  readonly open: boolean;
+  readonly isResetting: boolean;
+  readonly onClose: () => void;
+  readonly onSubmit: () => void;
+  readonly labels: {
+    readonly title: string;
+    readonly confirmation: string;
+    readonly cancel: string;
+    readonly submit: string;
+  };
+}
+
+function ResetDialog({ open, isResetting, onClose, onSubmit, labels }: ResetDialogProps) {
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>{labels.title}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{labels.confirmation}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>{labels.cancel}</Button>
+        <Button onClick={onSubmit} variant="contained" color="error" disabled={isResetting}>
+          {labels.submit}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+interface ActionButtonsGroupProps {
   readonly classInstanceId: string;
+  readonly executionState: string;
   readonly isAnyLoading: boolean;
   readonly isStarting: boolean;
-  readonly onStart: () => void;
-  readonly startLabel: string;
-}
-
-function StartButton({ classInstanceId, isAnyLoading, isStarting, onStart, startLabel }: StartButtonProps) {
-  return (
-    <RequirePermission permissions={[AppPermission.SessionUpdateStatusStart]}>
-      <Button
-        id={`live-start-${classInstanceId}`}
-        variant="contained"
-        disabled={isAnyLoading}
-        onClick={onStart}
-        startIcon={isStarting ? <CircularProgress size={16} color="inherit" /> : <PlayArrowOutlined />}
-        sx={theme => ({
-          bgcolor: theme.palette.success.main,
-          color: theme.palette.onSuccess,
-          borderRadius: theme.layout.radius.button,
-          "&:hover": {
-            bgcolor: theme.palette.success.dark,
-          },
-        })}
-      >
-        {startLabel}
-      </Button>
-    </RequirePermission>
-  );
-}
-
-interface AbsentButtonProps {
-  readonly classInstanceId: string;
-  readonly isAnyLoading: boolean;
   readonly isMarkingAbsent: boolean;
-  readonly onAbsent: () => void;
-  readonly absentLabel: string;
-}
-
-function AbsentButton({ classInstanceId, isAnyLoading, isMarkingAbsent, onAbsent, absentLabel }: AbsentButtonProps) {
-  return (
-    <RequirePermission permissions={[AppPermission.SessionUpdateStatusAbsent]}>
-      <Button
-        id={`live-absent-${classInstanceId}`}
-        variant="contained"
-        disabled={isAnyLoading}
-        onClick={onAbsent}
-        startIcon={isMarkingAbsent ? <CircularProgress size={16} color="inherit" /> : <HighlightOffOutlined />}
-        sx={theme => ({
-          bgcolor: theme.palette.warning.main,
-          color: theme.palette.onWarning,
-          borderRadius: theme.layout.radius.button,
-          "&:hover": {
-            bgcolor: theme.palette.warning.dark,
-          },
-        })}
-      >
-        {absentLabel}
-      </Button>
-    </RequirePermission>
-  );
-}
-
-interface LeaveButtonProps {
-  readonly classInstanceId: string;
-  readonly isAnyLoading: boolean;
   readonly isProcessingLeave: boolean;
-  readonly onLeaveClick: () => void;
-  readonly leaveLabel: string;
-}
-
-function LeaveButton({ classInstanceId, isAnyLoading, isProcessingLeave, onLeaveClick, leaveLabel }: LeaveButtonProps) {
-  return (
-    <RequirePermission permissions={[AppPermission.SessionUpdateStatusLeave]}>
-      <Button
-        id={`live-leave-${classInstanceId}`}
-        variant="outlined"
-        disabled={isAnyLoading}
-        onClick={onLeaveClick}
-        startIcon={isProcessingLeave ? <CircularProgress size={16} color="inherit" /> : <ExitToAppOutlined />}
-        sx={theme => ({
-          color: theme.palette.secondary.main,
-          borderColor: theme.palette.secondary.main,
-          borderRadius: theme.layout.radius.button,
-          "&:hover": {
-            borderColor: theme.palette.secondary.dark,
-            bgcolor: alpha(theme.palette.secondary.main, 0.08),
-          },
-        })}
-      >
-        {leaveLabel}
-      </Button>
-    </RequirePermission>
-  );
-}
-
-interface ResetButtonProps {
-  readonly classInstanceId: string;
-  readonly isAnyLoading: boolean;
   readonly isResetting: boolean;
+  readonly onStart: () => void;
+  readonly onAbsent: () => void;
+  readonly onLeaveClick: () => void;
   readonly onResetClick: () => void;
-  readonly resetLabel: string;
+  readonly labels: {
+    readonly startButton: string;
+    readonly absentButton: string;
+    readonly leaveButton: string;
+    readonly resetButton: string;
+  };
 }
 
-function ResetButton({ classInstanceId, isAnyLoading, isResetting, onResetClick, resetLabel }: ResetButtonProps) {
+function ActionButtonsGroup({
+  classInstanceId,
+  executionState,
+  isAnyLoading,
+  isStarting,
+  isMarkingAbsent,
+  isProcessingLeave,
+  isResetting,
+  onStart,
+  onAbsent,
+  onLeaveClick,
+  onResetClick,
+  labels,
+}: ActionButtonsGroupProps) {
   return (
-    <RequirePermission permissions={[AppPermission.SessionReset]}>
-      <Button
+    <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center" }}>
+      {executionState === "ACTIVATED" && (
+        <>
+          <ActionButton
+            id={`live-start-${classInstanceId}`}
+            disabled={isAnyLoading}
+            isLoading={isStarting}
+            onClick={onStart}
+            label={labels.startButton}
+            permission={AppPermission.SessionUpdateStatusStart}
+            icon={<PlayArrowOutlined />}
+            sx={theme => ({
+              bgcolor: theme.palette.success.main,
+              color: theme.palette.onSuccess,
+              borderRadius: theme.layout.radius.button,
+              "&:hover": { bgcolor: theme.palette.success.dark },
+            })}
+          />
+          <ActionButton
+            id={`live-absent-${classInstanceId}`}
+            disabled={isAnyLoading}
+            isLoading={isMarkingAbsent}
+            onClick={onAbsent}
+            label={labels.absentButton}
+            permission={AppPermission.SessionUpdateStatusAbsent}
+            icon={<HighlightOffOutlined />}
+            sx={theme => ({
+              bgcolor: theme.palette.warning.main,
+              color: theme.palette.onWarning,
+              borderRadius: theme.layout.radius.button,
+              "&:hover": { bgcolor: theme.palette.warning.dark },
+            })}
+          />
+          <ActionButton
+            id={`live-leave-${classInstanceId}`}
+            variant="outlined"
+            disabled={isAnyLoading}
+            isLoading={isProcessingLeave}
+            onClick={onLeaveClick}
+            label={labels.leaveButton}
+            permission={AppPermission.SessionUpdateStatusLeave}
+            icon={<ExitToAppOutlined />}
+            sx={theme => ({
+              color: theme.palette.secondary.main,
+              borderColor: theme.palette.secondary.main,
+              borderRadius: theme.layout.radius.button,
+              "&:hover": {
+                borderColor: theme.palette.secondary.dark,
+                bgcolor: alpha(theme.palette.secondary.main, 0.08),
+              },
+            })}
+          />
+        </>
+      )}
+
+      <ActionButton
         id={`live-reset-${classInstanceId}`}
-        variant="contained"
         disabled={isAnyLoading}
+        isLoading={isResetting}
         onClick={onResetClick}
-        startIcon={isResetting ? <CircularProgress size={16} color="inherit" /> : <RestartAltOutlined />}
+        label={labels.resetButton}
+        permission={AppPermission.SessionReset}
+        icon={<RestartAltOutlined />}
         sx={theme => ({
           bgcolor: theme.palette.error.main,
           color: theme.palette.onError,
           borderRadius: theme.layout.radius.button,
-          "&:hover": {
-            bgcolor: theme.palette.error.dark,
-          },
+          "&:hover": { bgcolor: theme.palette.error.dark },
         })}
-      >
-        {resetLabel}
-      </Button>
-    </RequirePermission>
+      />
+    </Box>
   );
 }
 
@@ -170,6 +277,10 @@ export function LiveSessionToolbar({
 }: LiveSessionToolbarProps) {
   const t = useTranslations("dashboard.classDetails.liveSession");
 
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const [leaveReason, setLeaveReason] = useState("");
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+
   // Only show toolbar when session is ACTIVATED or RUNNING
   if (executionState !== "ACTIVATED" && executionState !== "RUNNING") {
     return null;
@@ -178,16 +289,32 @@ export function LiveSessionToolbar({
   const isAnyLoading = isStarting || isMarkingAbsent || isProcessingLeave || isResetting;
 
   const handleLeaveClick = () => {
-    const reason = prompt(t("leaveReasonPrompt"));
-    if (reason?.trim()) {
-      onLeave(reason.trim());
+    setLeaveReason("");
+    setLeaveDialogOpen(true);
+  };
+
+  const handleLeaveClose = () => {
+    setLeaveDialogOpen(false);
+  };
+
+  const handleLeaveSubmit = () => {
+    if (leaveReason.trim()) {
+      onLeave(leaveReason.trim());
+      setLeaveDialogOpen(false);
     }
   };
 
   const handleResetClick = () => {
-    if (confirm(t("resetConfirmation"))) {
-      onReset();
-    }
+    setResetDialogOpen(true);
+  };
+
+  const handleResetClose = () => {
+    setResetDialogOpen(false);
+  };
+
+  const handleResetSubmit = () => {
+    onReset();
+    setResetDialogOpen(false);
   };
 
   return (
@@ -198,48 +325,55 @@ export function LiveSessionToolbar({
         </Alert>
       )}
 
-      <Box
-        sx={{
-          display: "flex",
-          gap: 2,
-          flexWrap: "wrap",
-          alignItems: "center",
+      <ActionButtonsGroup
+        classInstanceId={classInstanceId}
+        executionState={executionState}
+        isAnyLoading={isAnyLoading}
+        isStarting={isStarting}
+        isMarkingAbsent={isMarkingAbsent}
+        isProcessingLeave={isProcessingLeave}
+        isResetting={isResetting}
+        onStart={onStart}
+        onAbsent={onAbsent}
+        onLeaveClick={handleLeaveClick}
+        onResetClick={handleResetClick}
+        labels={{
+          startButton: t("startButton"),
+          absentButton: t("absentButton"),
+          leaveButton: t("leaveButton"),
+          resetButton: t("resetButton"),
         }}
-      >
-        {executionState === "ACTIVATED" && (
-          <>
-            <StartButton
-              classInstanceId={classInstanceId}
-              isAnyLoading={isAnyLoading}
-              isStarting={isStarting}
-              onStart={onStart}
-              startLabel={t("startButton")}
-            />
-            <AbsentButton
-              classInstanceId={classInstanceId}
-              isAnyLoading={isAnyLoading}
-              isMarkingAbsent={isMarkingAbsent}
-              onAbsent={onAbsent}
-              absentLabel={t("absentButton")}
-            />
-            <LeaveButton
-              classInstanceId={classInstanceId}
-              isAnyLoading={isAnyLoading}
-              isProcessingLeave={isProcessingLeave}
-              onLeaveClick={handleLeaveClick}
-              leaveLabel={t("leaveButton")}
-            />
-          </>
-        )}
+      />
 
-        <ResetButton
-          classInstanceId={classInstanceId}
-          isAnyLoading={isAnyLoading}
-          isResetting={isResetting}
-          onResetClick={handleResetClick}
-          resetLabel={t("resetButton")}
-        />
-      </Box>
+      {/* Leave Reason Dialog */}
+      <LeaveDialog
+        open={leaveDialogOpen}
+        reason={leaveReason}
+        isProcessing={isProcessingLeave}
+        onReasonChange={setLeaveReason}
+        onClose={handleLeaveClose}
+        onSubmit={handleLeaveSubmit}
+        labels={{
+          title: t("leaveDialogTitle"),
+          reasonLabel: t("leaveReasonLabel"),
+          cancel: t("cancel"),
+          submit: t("leaveSubmit"),
+        }}
+      />
+
+      {/* Reset Confirmation Dialog */}
+      <ResetDialog
+        open={resetDialogOpen}
+        isResetting={isResetting}
+        onClose={handleResetClose}
+        onSubmit={handleResetSubmit}
+        labels={{
+          title: t("resetDialogTitle"),
+          confirmation: t("resetConfirmation"),
+          cancel: t("cancel"),
+          submit: t("resetConfirm"),
+        }}
+      />
     </Box>
   );
 }

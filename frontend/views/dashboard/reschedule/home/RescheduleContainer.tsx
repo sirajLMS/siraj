@@ -13,6 +13,9 @@ import { useRouter } from "@/shared/i18n/routing";
 import { RescheduleView } from "./RescheduleView";
 import { type RescheduleFormData, rescheduleSchema } from "./schemas/rescheduleSchema";
 import { combineDateTime } from "./utils/rescheduleDateTime";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+
 
 export function RescheduleContainer() {
   const router = useRouter();
@@ -112,20 +115,22 @@ export function RescheduleContainer() {
   };
 
   return (
-    <RescheduleView
-      session={session}
-      control={control}
-      errors={errors}
-      setValue={setValue}
-      getValues={getValues}
-      handleSubmit={handleSubmit}
-      isSubmitting={isSubmitting}
-      showSuccess={showSuccess}
-      onSubmit={onSubmit}
-      onCancel={onCancel}
-      onDismissSuccess={() => {
-        setShowSuccess(false);
-      }}
-    />
+    <RequirePermission permissions={[AppPermission.SessionReschedule]}>
+      <RescheduleView
+        session={session}
+        control={control}
+        errors={errors}
+        setValue={setValue}
+        getValues={getValues}
+        handleSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+        showSuccess={showSuccess}
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+        onDismissSuccess={() => {
+          setShowSuccess(false);
+        }}
+      />
+    </RequirePermission>
   );
 }

@@ -374,7 +374,10 @@ export namespace SchedulingRepository {
     });
   };
 
-  async function getRequesterTypeForUser(t: DBTransaction, actorUserId: string): Promise<"TEACHER" | "PARENT" | "ADMIN"> {
+  async function getRequesterTypeForUser(
+    t: DBTransaction,
+    actorUserId: string
+  ): Promise<"TEACHER" | "PARENT" | "ADMIN"> {
     const [teacher] = await t
       .select({ id: teachers.id })
       .from(teachers)
@@ -383,11 +386,7 @@ export namespace SchedulingRepository {
     if (teacher) {
       return "TEACHER";
     }
-    const [parent] = await t
-      .select({ id: parents.id })
-      .from(parents)
-      .where(eq(parents.userId, actorUserId))
-      .limit(1);
+    const [parent] = await t.select({ id: parents.id }).from(parents).where(eq(parents.userId, actorUserId)).limit(1);
     if (parent) {
       return "PARENT";
     }

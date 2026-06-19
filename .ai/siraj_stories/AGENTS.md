@@ -2,83 +2,318 @@
 
 When working on any story or sprint in the `.ai/siraj_stories/` directory, AI Agents **MUST** strictly adhere to the following planning and execution protocol. **Failure to follow these instructions will result in immediate rejection by the user.**
 
-## 1. Deep Context & System Analysis
-Before writing any code or proposing an implementation plan, you must perform deep analysis:
-- **Do not assume implementation completeness**: Just because a database schema exists does NOT mean the repository, service, or GraphQL definitions exist. You must verify and implement all missing layers.
-- **Trace the full stack**: A typical feature involves Drizzle (DB), Domain Services (Backend Logic), Pothos (Backend API), Apollo Documents (Frontend API), Zustand Stores (State), and React Components (Views). You must plan for every single layer.
-- **Transitioning from Mock to Real**: 
-  - If a story involves features currently existing as mock UI pages or using dummy data/layouts (e.g., mock Zustand stores or mock Navigation configs), you MUST plan a strict migration path to real implementations.
-  - This involves hooking up the real backend repositories, real GraphQL queries, transitioning to real Zustand stores with strict typing, migrating the layout wrappers (e.g., `DashboardLayoutContainer`), and completely discarding the mock data.
-- **Data Seeding Lifecycle**:
-  - Whenever new tables are introduced or new permissions are defined in the sprint, you MUST update the seeders in `backend/db/seeds`.
-  - Check the existing permissions in `permission-catalog.ts` and add any missing sprint permissions.
-  - Update `seed-permissions.ts` and ensure each new table gets its own `seedOrGet` seeder pattern integrated into `index.ts`.
-  - **Schema Synchronization:** You MUST run `bun run scripts/dbActions.ts push` before running `bun run db seed` if you altered any schema files.
-  - **Constraints & Enums:** Seed data MUST respect PostgreSQL specific values (e.g., EXACT enum strings like `"ACTIVATED"`) and `CHECK` constraints found in `backend/db/schema/*.ts`.
-  - **Drizzle Safety:** Use standard `db.select().from(table)` in seeders rather than relational queries to avoid complex generic type errors. If strict `Entity` types are unavailable for dependency injection, create new types under `backend/types/` in the specified type file (one type per table) and update `backend/types/index.ts` if needed, rather than using inline types or `any`.
+This file acts as the orchestra, ruler, tasker, and documentary for creating perfect, bulletproof implementation plans.
 
-## 2. Planning Requirements
-Your implementation plan (`implementation_plan.md`) must be hyper-detailed and strictly follow this specific structure:
+---
 
-### Section 1: Core Principles & Strict Rules
-List out all architectural rules and constraints explicitly at the top of your plan. This serves as a checklist.
-- Explicitly declare the ban on generic monolithic services.
-- Explicitly declare the ban on dummy data in the backend.
-- Reiterate that `~/.bun/bin/bun` must be used for everything.
-- Demand the `id` field in all GraphQL responses.
-- Explicitly mention `useQuery` usage and stateful handling.
-- Explicitly state `import { logger }` must be used over `console.*`.
-- Reiterate the ban on `SUMMARY.md` or `REPORT.md`.
-- **CRITICAL:** Explicitly state the exact permissions extracted from the current sprint file (e.g., `0.md`) that will be used for RBAC. You must read the sprint file and apply ONLY the permissions defined within it.
+## 1. Deep Context & System Analysis (The Reality Check)
+Before writing any code or proposing an implementation plan, you must perform deep analysis and respect the verified repository facts:
+- **Do not assume implementation completeness**: You must verify and implement all missing layers.
+- **Trace the full stack**: Plan for Drizzle (DB), Domain Services (Logic), Pothos (Backend API), Apollo Documents (Frontend API), Zustand Stores (State), and React Components (Views).
+- **Verified Repository Facts (DO NOT CONTRADICT)**:
+  1. **Permission Catalog**: Located at `backend/db/seeds/permission-catalog.ts`, NOT `backend/services/auth/permission-catalog.ts`.
+  2. **GraphQL Types**: Backend GraphQL class/session object and input types are in `backend/graphql/pothos/class-session.pothos.ts` (or relevant pothos files), NOT a separate types file.
+  3. **i18n Localization**: Uses `shared/messages/en.ts` and `shared/messages/ar/` directories. DO NOT create `frontend/locales/` or `backend/locales/` directories.
+  4. **Permission Enums**: Values use PascalCase (e.g., `SESSION_FORCE_ACTIVATE = "session.force_activate"`) in `shared/lib/enum.ts`.
+  5. **Schema Accuracy**: Do not hallucinate column names. Verify them (e.g., use `remarks`, not `remarksByTeacher`). If a column like `payrollCredited` does not exist, explicitly plan a database migration/schema update first.
+  6. **Existing Database Triggers**: Check existing DB triggers before writing new ones. For example, the existing state transition trigger uses a blacklist-style approach; do not overwrite it with a whitelist-style approach without explicit validation.
+- **Transitioning from Mock to Real**: Hook up real backend repositories, real GraphQL queries, replace mock data with real stateful Apollo hooks (`useQuery`), and migrate layout wrappers.
+- **Data Seeding Lifecycle**: Update seeders in `backend/db/seeds`. Run `bun run scripts/dbActions.ts push` before seeding. Ensure constraints and exact enums are respected.
 
-### Section 2: Granular Task Breakdown
-Break down the work into lettered tasks (Task A, Task B, etc.). For each task, you MUST specify:
-- **Target File(s)**: The exact paths to the files being created or modified.
-- **Action Plan**: Numbered, step-by-step instructions. 
-  - **CRITICAL RULE ON DETAIL**: The plan MUST be extremely detailed. Do not use generic phrases like "implement the frontend component" or "add the GraphQL query." You MUST write out the exact Drizzle queries, explicit Pothos configurations, exact Apollo GraphQL tags, and describe the precise TypeScript types and React hooks involved. Never skip details, never use pseudo-code, and never summarize. A generic plan is an immediate failure.
+---
 
-### Section 3: Strict Verification & Integrity Protocol
-At the bottom of the plan, list the exact terminal commands you will run to verify the code without asking for permission (e.g., `~/.bun/bin/bun run generate:gqlSchema`, `~/.bun/bin/bun codegen`, `~/.bun/bin/bun tsgo`, `~/.bun/bin/bun run lint`).
+## 2. Planning Requirements & Length Guidelines
 
-## 3. Strict Layer Architecture Constraints
+Your implementation plan (`implementation_plan.md` or similar) must be **hyper-detailed, lengthy, and exhaustive**. 
+
+### 📏 Length & Detail Thresholds:
+- **Total Plan Length**: Must be at least **2,500+ lines of markdown** (similar to `.ai/plan/2-enhanced.md` which is 3,300+ lines). Plans that are short, high-level summaries will be rejected.
+- **Per-Task Length**: Each task within Section 6 must be at least **300 to 600+ lines long**. You must write out complete code snippets, database schemas, full query logic, and precise UI states.
+- **Zero Placeholder Code**: No `...` inside code blocks. Code examples must be written out fully, displaying exact variable names, typings, error handlers, and imports.
+
+---
+
+## 3. Plan Section Outline & Concrete Examples
+
+Every implementation plan MUST contain these exact 7 sections in order, formatted with the detailed examples shown below:
+
+### Section 0: Story Metadata & Context
+Provide clear metadata links and brief business objectives.
+
+#### *Example Section 0:*
+```markdown
+## Section 0: Story Metadata & Context
+
+- **Source story:** `.ai/siraj_stories/2.md` (Part 3 - Live Session Control, timestamps 00:00 - 01:58)  
+- **Security baseline:** `.ai/done/service/1-sprint_1__db_repo_service_enhancments.md` (mandatory prerequisite)  
+- **Story scope:** Implement live session control toolbar with Start, Absent, Leave, and Reset actions.
+- **Target roles:** Academy Admin (full override + reset), Teacher (standard lifecycle management).
+- **Status:** Planning phase - awaiting approval for execution.
+```
+
+---
+
+### Section 1: Core Principles & Strict Rules (Mandatory Checklist)
+Include general system rules, a ban on monolithic services, and the **Zero Incomplete Implementation Policy** table.
+
+#### *Example Section 1:*
+```markdown
+## Section 1: Core Principles & Strict Rules (Mandatory Checklist)
+
+### 1.1 Service Layer Architecture
+- [ ] **NO monolithic services** - Scoped strictly to domain-driven services (e.g. `ClassSessionService`).
+- [ ] **Business logic centralization** - All orchestration, validation, and permission checks reside in services, NOT repositories or resolvers.
+
+### 1.2 Type Safety - NO `any`, NO Casts
+- [ ] **Strict Type Narrowing** - BANNED: `any`, `as any`, and `as unknown as`. You must find the actual types. Narrow them using type guards.
+- [ ] **No route param casts** - Instead of `useParams() as { id: string }`, use safety checks like `typeof params?.id === "string" ? params.id : ""`.
+
+### 1.3 Zero Incomplete Implementation Policy
+The following patterns are **strictly prohibited**:
+
+| **Prohibited Pattern** | **Required Instead** | **Verification Command** |
+|---|---|---|
+| `// TODO`, `// FIXME`, `@todo` | Fully working implementation in same task | `rg -i "TODO\|FIXME" backend frontend` |
+| `throw new Error("Not implemented")` | Complete service/repo method implementation | Manual code review |
+| Handler calling only `logger.info` | Real GraphQL mutation + UI feedback | Grep for `logger.info.*handle` patterns |
+```
+
+---
+
+### Section 2: RBAC Permissions (Canonical)
+Map the exact permission strings from the sprint rules to the database catalog and file targets.
+
+#### *Example Section 2:*
+```markdown
+## Section 2: RBAC Permissions (Canonical)
+
+| **Permission Key** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Mutation** |
+|---|---|---|---|---|
+| `session.activate_override` | Academy Admin | Live toolbar visibility | `ClassSessionService.activateOverride()` | `activateOverrideClass` |
+| `session.reset` | Academy Admin | Reset button | `ClassSessionService.reset()` | `resetClass` |
+```
+
+---
+
+### Section 3: State Machine & Threat Alignment (If Applicable)
+Define the state machine diagrams and database transition rules.
+
+#### *Example Section 3:*
+```markdown
+## Section 3: Session State Machine & Threat Alignment
+
+```mermaid
+stateDiagram-v2
+    [*] --> NOT_ACTIVATED
+    NOT_ACTIVATED --> ACTIVATED : session.activate_override
+    ACTIVATED --> RUNNING : session.update_status.start
+    ACTIVATED --> COMPLETED : session.update_status.absent (outcome=ABSENT)
+    RUNNING --> COMPLETED : session.update_status.leave (outcome=LEAVE)
+    COMPLETED --> NOT_ACTIVATED : session.reset (Admin-only)
+```
+
+**State Transition Guards (Threat 3):**
+- DB trigger `fn_enforce_class_instance_transition()` enforces allowed state paths.
+- Repo guard `runStateChange()` validates transition outcome alignment.
+```
+
+---
+
+### Section 4: Security Threat Remediation
+Address specific vulnerabilities such as IDOR, timezone differences, quota leaks, and payroll fraud. Show the code to fix them.
+
+#### *Example Section 4:*
+```markdown
+## Section 4: Security Threat Remediation
+
+### Threat 1: IDOR Scoping (Cross-Teacher Access)
+**Current Gap:** Repository `runStateChange` checks relationships but doesn't support Admin overrides.
+**Fix implementation in `scheduling.repository.ts`**:
+```typescript
+const isPrivilegedActor = await PermissionsService.hasAnyPermission(actorUserId, [
+  AppPermission.SESSION_OVERRIDE_ACTIONS,
+  AppPermission.SESSION_RESET
+]);
+if (!isPrivilegedActor) {
+  const instance = await db.select().from(classInstances).where(eq(classInstances.id, instanceId));
+  if (instance[0].teacherUserId !== actorUserId) {
+    throw new Error(await getBackendTranslations({ locale, namespace: "errors" })("unauthorized"));
+  }
+}
+```
+```
+
+---
+
+### Section 5: Prerequisites Verification (BLOCKING)
+A checklist to run before executing the plan to confirm previous sprint work is fully deployed.
+
+#### *Example Section 5:*
+```markdown
+## Section 5: Prerequisites Verification (BLOCKING)
+
+Before starting story work, verify previous migrations:
+- [ ] Run `bun test backend/db/test/logic/class_instances_security.test.ts` to confirm Story 1 security baselines pass.
+- [ ] Verify that schema columns `remarks`, `quotaDeducted`, and `isRescheduled` exist in `backend/db/schema/scheduling.ts`.
+```
+
+---
+
+### Section 6: Granular Task Breakdown (The core breakdown - MUST be 300-600+ lines per task)
+Break down the implementation into letters. Each task MUST include:
+1. **Objective**
+2. **Layer-Specific Rules** (flattened from sub-directory `AGENTS.md` rules)
+3. **Target Files** (exact paths)
+4. **Detailed Implementation Steps** (with extensive, fully-written code blocks)
+5. **Test Execution Requirements** (running the whole test suite to prevent regressions)
+6. **Success Criteria / Check Progress Points** (a detailed progress tracker within each task)
+
+#### *Example Task A (Database & Repo):*
+```markdown
+### Task A — Repository: Reset, Absent, Leave
+
+**Objective:** Implement transactional repository methods for `resetClassInstance` and `processClassLeave`.
+
+**Layer-Specific Rules (Database Repositories - Flattened from backend/db/repo/AGENTS.md):**
+- Use Drizzle standard syntax `db.select().from(classInstances).leftJoin()` instead of relational `findMany` when multiple joins are needed to avoid type compilation slow downs.
+- Wrap all repository changes modifying multiple tables in an atomic `db.transaction()`.
+
+**Target Files:**
+- `backend/db/repo/scheduling.repository.ts`
+- `backend/db/test/repo/scheduling.repository.test.ts`
+
+**Detailed Implementation Steps:**
+
+*Step 1: Write `resetClassInstance` with Quota Restoration*
+```typescript
+async resetClassInstance(id: number, actorUserId: number, locale?: string): Promise<void> {
+  return db.transaction(async (tx) => {
+    const existing = await tx.query.classInstances.findFirst({
+      where: eq(classInstances.id, id),
+    });
+    if (!existing) {
+      throw new Error("NotFound");
+    }
+    if (existing.quotaDeducted) {
+      await this.adjustQuotaOnUpdate(tx, existing.studentId, existing.subjectId, false, existing.quotaDeducted, locale);
+    }
+    await tx.update(classInstances).set({
+      executionState: "NOT_ACTIVATED",
+      outcome: "PENDING",
+      payrollCredited: false,
+      isRescheduled: false,
+      quotaDeducted: false,
+    }).where(eq(classInstances.id, id));
+  });
+}
+```
+
+*Step 2: Add comprehensive unit tests in `scheduling.repository.test.ts`*
+Ensure unit tests verify both success states and rollback behavior on invalid inputs.
+
+**Test Execution Requirements:**
+- **Run the whole test suite:** Run `bun test` across the database folder to make sure no existing tests are broken.
+  ```bash
+  ~/.bun/bin/bun test backend/db/test/
+  ```
+
+**Success Criteria / Check Progress Points:**
+- [ ] `resetClassInstance` is fully implemented and resets the table state.
+- [ ] Student quota is restored successfully if it was deducted.
+- [ ] No compilation errors when compiling the database repository.
+- [ ] `bun test` passes successfully for all database tests (0 failures).
+```
+
+#### *Example Task B (Frontend & Views):*
+```markdown
+### Task B — Frontend: Live Session Control Dialogs & No-Casts
+
+**Objective:** Integrate the live session control buttons inside `LiveSessionToolbar` using proper MUI modals, removing browser alerts, and eliminating blind castings.
+
+**Layer-Specific Rules (Frontend Views - Flattened from frontend/views/AGENTS.md):**
+- BANNED: Do not use inline styling or arbitrary tailwind classes. Use Material UI theme tokens.
+- Maintain localized text strings utilizing translation hooks.
+
+**Target Files:**
+- `frontend/views/dashboard/classes/details/components/LiveSessionToolbar.tsx`
+
+**Detailed Implementation Steps:**
+
+*Step 1: Replace `useParams() as { id: string }` with safe narrowing*
+```typescript
+const params = useParams();
+const id = typeof params?.id === "string" ? params.id : "";
+if (!id) {
+  return <Typography color="error">Invalid Class ID</Typography>;
+}
+```
+
+*Step 2: Implement MUI Dialog instead of browser confirm/prompt*
+Define dialog states:
+```typescript
+const [dialogState, setDialogState] = useState<{ open: boolean; type: 'leave' | 'reset' | null }>({ open: false, type: null });
+```
+Render an accessible `<Dialog>` component enclosing localized text and theme-compliant action buttons.
+
+**Test Execution Requirements:**
+- **Run the entire test suite:** Run the full frontend and graphql tests to ensure there are no breaking changes.
+  ```bash
+  ~/.bun/bin/bun test frontend/graphql/test/
+  ```
+
+**Success Criteria / Check Progress Points:**
+- [ ] The browser `confirm()` and `prompt()` functions are completely deleted.
+- [ ] MUI Dialog functions correctly for both Leave requests and Reset actions.
+- [ ] Typescript compilation is fully successful (no `any` or blind casts in modified components).
+- [ ] Complete frontend integration and GraphQL queries compile without errors.
+```
+
+---
+
+### Section 7: Final Verification & Integrity Protocol
+Outline the list of commands to verify the entire system compiles and passes all checks.
+
+#### *Example Section 7:*
+```markdown
+## Section 7: Final Verification & Integrity Protocol
+
+Execute the following commands in order to guarantee system stability and prevent code regressions:
+1. `bun run generate:gqlSchema` (checks GraphQL schema integration)
+2. `bun codegen` (updates types and queries)
+3. `bun tsgo` (runs global TypeScript typecheck)
+4. `bun test` (runs all unit and integration tests across backend and frontend)
+```
+
+---
+
+## 4. Strict Layer Architecture Constraints
 
 ### A. Database Layer (`backend/db/repo/`)
-- **Drizzle Constraints**: Due to strict TypeScript inference limits, you must **avoid** using `db.query.tableName.findMany` with deeply nested `with` relations if it generates `SQL<unknown>` or property missing errors.
-- **Solution**: Use standard SQL-like syntax: `db.select().from(table).leftJoin(...)` and map the results manually.
+- **Drizzle Constraints**: Avoid `db.query.tableName.findMany` with deeply nested `with`. Use standard `db.select().from(table).leftJoin(...)`.
 
 ### B. Service Layer (`backend/services/`)
-- **Domain-Driven Design**: Services must be scoped to their domain (e.g., `ScheduleService`, `PermissionsService`). 
-- **NO Monoliths**: Never create a generic `DashboardService` or `AppService`. 
-- **Business Logic Hub**: All orchestration, mapping, and permission checks must live here, not in the repositories or GraphQL resolvers.
+- **Domain-Driven Design**: Services must be scoped to their domain. NO Monoliths.
 
 ### C. Backend GraphQL Layer (`backend/graphql/pothos/`)
-- **Nullability**: Pothos fields are `nullable: false` by default. Define `nullable: true` explicitly if the DB allows nulls.
-- **Delegation**: Resolvers must delegate complex logic to the `backend/services/` layer.
-- **Cache Compliance**: Every object returned MUST expose an `id` field to allow the Frontend Apollo Client to automatically update its cache.
+- **Nullability**: `nullable: false` by default.
+- **Cache Compliance**: Every object returned MUST expose an `id` field.
 
 ### D. Frontend GraphQL Layer (`frontend/graphql/`)
-- **Codegen Lifecycle**: After editing `*.pothos.ts` or `*.documents.ts`, you **MUST** run:
-  1. `bun run generate:gqlSchema`
-  2. `bun codegen`
-- **Hook Restrictions**: You are **BANNED** from using `useLazyQuery`. You must exclusively use stateful `useQuery`.
-- **Apollo Setup**: Imports must come from `@apollo/client/react` (e.g., `import { useQuery } from "@apollo/client/react"`).
+- **Codegen Lifecycle**: Must run `bun run generate:gqlSchema` then `bun codegen`.
+- **Hook Restrictions**: BANNED from using `useLazyQuery`. Use stateful `useQuery`.
 
 ### E. Frontend Stores (`frontend/stores/`)
-- **Zustand Types**: Stores must strictly use the generated GraphQL types from `frontend/graphql/generated/gql/graphql-types.ts` (e.g., `User`).
-- **NO Mapping**: Do not create intermediate typescript mappings. Fix type mismatches by updating the backend DB/GraphQL schema and regenerating, so you can directly assign `setUser(data.me as User)`.
+- **Zustand Types**: Strictly use generated GraphQL types from `frontend/graphql/generated/gql/graphql-types.ts`. NO intermediate mappings.
 
 ### F. Frontend Views (`frontend/views/`)
-- **Functional React**: Functional components only. No classes.
-- **Sprint-Specific RBAC Enforcement**: Any component requiring specific access MUST be wrapped in the `<RequirePermission permissions={["domain.action"]} />` wrapper. You MUST read the target sprint file (e.g., `0.md`) to extract the EXACT permissions bound to the current features being developed and use those explicit permission strings in the wrappers.
-- **Mock Data & Dummy Views Ban (Production)**: Mock data, dummy layouts, and placeholder views are strictly forbidden in production application code. Whenever a sprint involves a dummy page, you MUST migrate it fully to real components, replacing mock queries with real stateful Apollo hooks (`useQuery`) linked to the real generated backend types.
-- **Storybook Exception**: While mock data is banned in production, you **MUST KEEP AND USE** dummy data, mock stores, and mock layouts for Storybook files (`*.stories.tsx`). Storybooks are critical for isolated component testing and design, and they must remain entirely decoupled from real Apollo queries and real database states. Do not delete mock data if it is used by a `.stories.tsx` file.
+- **Sprint-Specific RBAC Enforcement**: Use `<RequirePermission permissions={["domain.action"]} />`.
+- **Mock Data Ban (Production)**: Mock data is strictly forbidden in production. Migrate to real components. (Storybooks `*.stories.tsx` MUST KEEP dummy data).
 
 ### G. Backend Localization & next-intl (`backend/`)
-- **No Hardcoded Errors/Messages**: Hardcoded user-facing error strings, warnings, or messages are strictly forbidden in all repositories, services, and GraphQL resolvers.
-- **Translation Helper**: Always use the translation helper utility `getBackendTranslations({ locale?: string, namespace?: string })` (which wraps `next-intl/server`'s `getTranslations`).
-- **Locale Propagation**: Ensure the locale is propagated through parameter signature (e.g. `locale?: string`) down from the GraphQL resolver context (`ctx.locale`) into the services and then to the repositories.
-- **Graceful Fallback**: If called outside of a Next.js HTTP request context (e.g. in test suites, seeders, or scripts), next-intl should gracefully fall back to the default locale `"ar"` (or the requested locale).
+- **No Hardcoded Errors/Messages**: Always use `getBackendTranslations({ locale, namespace })`. Propagate `locale` through the stack.
 
-## 4. Final Validation
-- You must ensure the project passes strict TypeScript compilation by running `bun tsgo`. Do not leave unresolved type errors.
+---
 
+## 5. Final Validation
+- Ensure the project passes strict TypeScript compilation by running `bun tsgo`. Do not leave unresolved type errors.
+- Ensure no successful tests are broken by running the test suite after each task.

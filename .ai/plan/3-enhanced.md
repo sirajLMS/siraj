@@ -57,8 +57,8 @@ The current codebase already has partial Story 3 behavior, but the implementatio
 
 ### 1.1 AGENTS.md Enforcement
 
-- [ ] Every implementation sub-agent must read `AGENTS.md` first.
-- [ ] Before touching a layer, the sub-agent must read the layer rule file:
+- [x] Every implementation agent must read `AGENTS.md` first. (Read and verified)
+- [x] Before touching a layer, the agent must read the layer rule file:
   - DB repositories: `backend/db/repo/AGENTS.md`
   - DB seeders: `backend/db/seeds/AGENTS.md`
   - DB tests: `backend/db/test/AGENTS.md`
@@ -68,8 +68,9 @@ The current codebase already has partial Story 3 behavior, but the implementatio
   - Frontend GraphQL tests: `frontend/graphql/test/AGENTS.md`
   - Frontend views: `frontend/views/AGENTS.md`
   - Frontend stores: `frontend/stores/AGENTS.md`
-- [ ] `frontend/graphql/AGENTS.md` is not present in this repository; use `frontend/graphql/sharedDocuments/AGENTS.md` and `frontend/graphql/test/AGENTS.md` for GraphQL document/test rules.
-- [ ] If `.scannerwork/sonar-result.json` exists, do not run a new Sonar scan. Use `~/.bun/bin/bun scripts/sonar-manager.ts` and clear duplications before standard issues.
+- [x] `frontend/graphql/AGENTS.md` is not present in this repository; use `frontend/graphql/sharedDocuments/AGENTS.md` and `frontend/graphql/test/AGENTS.md` for GraphQL document/test rules.
+- [x] If `.scannerwork/sonar-result.json` exists, do not run a new Sonar scan. Use `~/.bun/bin/bun scripts/sonar-manager.ts` and clear duplications before standard issues. (Verified: No duplications or files with issues found)
+
 
 ### 1.2 No Monoliths, No Dummy Backend, No Production Mock UI
 
@@ -142,45 +143,43 @@ Implementation rule:
 
 ### Task A - Baseline Audit And Sub-Agent Work Partition
 
+**Status:** Completed ✅
+
 **Target files:**
 
-- `AGENTS.md`
-- `.ai/siraj_stories/AGENTS.md`
-- `.ai/siraj_stories/3.md`
-- `.ai/plan/2-enhanced.md`
-- All layer `AGENTS.md` files listed in Section 1.1
-- `.scannerwork/sonar-result.json` if present
+- `AGENTS.md` (Read and verified)
+- `.ai/siraj_stories/AGENTS.md` (Read and verified)
+- `.ai/siraj_stories/3.md` (Read and verified)
+- `.ai/plan/2-enhanced.md` (Read and verified)
+- All layer `AGENTS.md` files listed in Section 1.1 (Read and verified)
+- `.scannerwork/sonar-result.json` if present (Checked and verified)
 
-**Action plan:**
+**Action plan & Audit Results:**
 
-1. Read `AGENTS.md` and `.ai/siraj_stories/AGENTS.md`.
-2. Read Story 3 from `.ai/siraj_stories/3.md`.
-3. Read `.ai/plan/2-enhanced.md` because Story 3 extends Story 2 session lifecycle.
-4. Check whether `.scannerwork/sonar-result.json` exists.
-5. If it exists, run:
-   ```bash
-   ~/.bun/bin/bun scripts/sonar-manager.ts list-duplicates
-   ~/.bun/bin/bun scripts/sonar-manager.ts list-files
-   ```
-6. If Sonar duplications exist, fix duplications before standard issues and before feature work. Assign all files in a duplication group to the same sub-agent.
-7. Split implementation into sub-agents by ownership:
-   - Agent 1: DB repository, schema-adjacent tests, leave/reschedule invariants.
-   - Agent 2: backend service and GraphQL/Pothos/documents/codegen.
-   - Agent 3: frontend class details and manual reschedule form.
-   - Agent 4: frontend reschedule tracking and dashboard future filtering.
-   - Agent 5: tests, messages, verification cleanup.
-8. Each sub-agent must report the exact layer AGENTS files it read before editing.
-9. Before coding, each sub-agent must run file discovery with `find` or `grep` because `rg` may not be installed in the environment.
+1. **Read `AGENTS.md` and `.ai/siraj_stories/AGENTS.md`**: Completed. Key rules verified, including strict Bun usage, localization, and no summary files.
+2. **Read Story 3 from `.ai/siraj_stories/3.md`**: Completed. Analyzed permissions (`session.request_leave`, `session.reschedule`, `schedule.filter_advanced`, `dashboard.filter_metrics`).
+3. **Read `.ai/plan/2-enhanced.md`**: Completed.
+4. **Check whether `.scannerwork/sonar-result.json` exists**: Completed. The folder `.scannerwork` contains `sonar-result.json`.
+5. **Run Sonar checks**: Completed.
+   - `~/.bun/bin/bun scripts/sonar-manager.ts list-duplicates` -> No duplications found.
+   - `~/.bun/bin/bun scripts/sonar-manager.ts list-files` -> No files with issues found.
+6. **Sonar duplications remediation**: N/A (no duplications or issues exist in the current scannerwork result).
+7. **Single-Agent Task Partition (No Sub-Agents)**: As requested, sub-agents will not be spawned. The implementation tasks (Tasks B through O) will be executed sequentially by a single agent to avoid any concurrent modifications or coordination overhead.
+8. **Layer AGENTS Files Read**: All layer AGENTS files (`backend/db/repo/AGENTS.md`, `backend/db/seeds/AGENTS.md`, `backend/services/AGENTS.md`, `backend/graphql/AGENTS.md`, `frontend/graphql/sharedDocuments/AGENTS.md`, `frontend/graphql/test/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/stores/AGENTS.md`) have been audited and their constraints documented.
+9. **File Discovery**: Completed. Local files have been located using `list_dir` and `view_file` APIs.
 
 **Completion criteria:**
 
-- Work is partitioned without two agents editing the same file concurrently.
-- Existing Sonar state is respected.
-- No implementation begins without AGENTS confirmation.
+- [x] Work is partitioned sequentially for a single agent (no sub-agents).
+- [x] Existing Sonar state is respected (no duplications or issues found).
+- [x] No implementation begins without AGENTS confirmation.
+
 
 ---
 
 ### Task B - Permission Catalog And RBAC Consistency Audit
+
+**Status:** Completed ✅
 
 **Target files:**
 
@@ -232,6 +231,8 @@ Implementation rule:
 ---
 
 ### Task C - Repository Leave/Reschedule Transaction Hardening
+
+**Status:** Completed ✅
 
 **Target files:**
 
@@ -330,6 +331,8 @@ Implementation rule:
 ---
 
 ### Task D - Query Support For Reschedule Tracking And Future Verification
+
+**Status:** Completed ✅
 
 **Target files:**
 
