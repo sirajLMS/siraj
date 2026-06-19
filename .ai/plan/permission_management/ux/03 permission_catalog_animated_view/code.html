@@ -1,0 +1,362 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Permission Catalog - GuardRail Enterprise</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#2e3131",
+                        "on-primary-fixed": "#002020",
+                        "on-surface": "#e1e3e2",
+                        "on-primary-container": "#205b5b",
+                        "outline": "#899292",
+                        "on-background": "#e1e3e2",
+                        "surface-dim": "#111414",
+                        "primary-container": "#98d1d0",
+                        "outline-variant": "#404848",
+                        "surface-container-high": "#282a2a",
+                        "surface-container": "#1D2020",
+                        "surface": "#111414",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "on-surface-variant": "#bfc8c7",
+                        "inverse-surface": "#e1e3e2",
+                        "surface-bright": "#373a3a",
+                        "surface-container-lowest": "#0c0f0f",
+                        "background": "#111414",
+                        "secondary-fixed": "#d8e3fa",
+                        "surface-container-low": "#191c1c",
+                        "info": "#B4C5FF",
+                        "on-tertiary-container": "#5d4a71",
+                        "warning": "#FFBA46",
+                        "on-tertiary-fixed-variant": "#513f65",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "surface-container-highest": "#323535",
+                        "on-primary": "#003737",
+                        "surface-tint": "#98d1d0",
+                        "on-tertiary-fixed": "#241337",
+                        "secondary-container": "#3c475a",
+                        "error": "#FFB4AB",
+                        "header-container": "#135E5E",
+                        "tertiary": "#efdbff",
+                        "primary-fixed-dim": "#98d1d0",
+                        "success": "#62DF7D",
+                        "tertiary-fixed": "#efdbff",
+                        "error-container": "#93000a",
+                        "tertiary-fixed-dim": "#d5bdeb",
+                        "on-tertiary": "#3a284d",
+                        "on-primary-fixed-variant": "#0f4f4f",
+                        "on-secondary-fixed": "#111c2d",
+                        "inverse-primary": "#2e6767",
+                        "tertiary-container": "#d5bdeb",
+                        "primary-fixed": "#b3edec",
+                        "on-error": "#690005",
+                        "surface-variant": "#323535",
+                        "completed": "#DDB8FF",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#bcc7de",
+                        "on-secondary-container": "#aab5cc",
+                        "sidebar": "#002626",
+                        "on-secondary": "#263143",
+                        "primary": "#b4edec"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-padding": "16px",
+                        "grid-margin": "24px",
+                        "cell-padding-y": "8px",
+                        "unit": "4px",
+                        "grid-gutter": "16px",
+                        "cell-padding-x": "12px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "title-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "500" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .transition-all, .transition-colors, .transition-transform {
+    transition: none !important;
+  }
+}
+</style></head>
+<body class="bg-surface text-on-surface flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<nav class="bg-sidebar dark:bg-sidebar text-primary dark:text-primary font-label-lg text-label-lg fixed left-0 top-0 h-full w-[280px] hidden md:flex flex-col h-full py-grid-margin border-r border-outline-variant z-40">
+<div class="px-container-padding mb-8">
+<h2 class="text-headline-sm font-headline-sm text-primary">Core Access</h2>
+<p class="text-on-surface-variant font-label-sm text-label-sm mt-1">v2.4.0-stable</p>
+</div>
+<div class="px-container-padding mb-6">
+<button class="w-full bg-primary text-on-primary py-2 px-4 rounded-lg font-label-lg text-label-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity transition-all hover:scale-[1.02] active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">add</span>
+                New Permission
+            </button>
+</div>
+<ul class="flex-1 px-3 space-y-1">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary-container text-on-primary-container rounded-lg font-bold scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">lock_open</span>
+                    Permissions
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">group_work</span>
+                    Roles
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">history_edu</span>
+                    Audit Logs
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+                    Settings
+                </a>
+</li>
+</ul>
+<div class="mt-auto px-3 border-t border-outline-variant pt-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">shield_person</span>
+                Security Center
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-container-highest/50 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">description</span>
+                Documentation
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-[280px] flex flex-col h-full bg-background relative overflow-y-auto">
+<!-- TopNavBar -->
+<header class="bg-header-container dark:bg-header-container text-primary dark:text-primary font-title-lg text-title-lg docked full-width top-0 bg-header-container flat no shadows flex justify-between items-center w-full px-grid-margin h-16 z-50 sticky top-0">
+<div class="flex items-center gap-6">
+<span class="text-title-lg font-title-lg font-bold text-on-primary">GuardRail Enterprise</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-primary/70" style="font-variation-settings: 'FILL' 0;">search</span>
+<input class="bg-surface-container-high/50 border-none rounded-lg py-1.5 pl-10 pr-4 text-on-primary placeholder:text-on-primary/50 text-body-sm font-body-sm focus:ring-2 focus:ring-primary" placeholder="Search..." type="text">
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-primary-container/20 transition-colors text-on-primary/70">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-primary-container/20 transition-colors text-on-primary/70">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help_outline</span>
+</button>
+</div>
+<div class="h-8 w-px bg-on-primary/20 mx-2 hidden sm:block"></div>
+<div class="flex items-center gap-3">
+<span class="text-label-lg font-label-lg text-on-primary/80 hidden sm:block">Support</span>
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A highly detailed portrait photo of a corporate administrator, professional lighting, dark teal background, crisp focus, representing enterprise software user profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbh3LpGqwcL8CusrJaxcuLgookRXq5-O3qIkH5JVej-BuLvMICsWKodPsBK6kSw33x41QYlPf5CtRLs2GdT9siOaIsgCRqis88gU9HcvJDPtl-wXFo3lpu8_uQIY3dxSRJ31v0Ul_126QnMxeQbH2hBXoP_jdfFx9-Ne5D5_5wgvaAttWvaap-mjAGykYw5AxEsA1Qi9zY-f0QrZhn0cuM2vuJ4pIQeRfFdZjg0gfAyFMnmaoj7DY3iJNvbQzWRljyH0x18kWz--w">
+</div>
+</div>
+</div>
+</header>
+<!-- Page Header -->
+<div class="px-grid-margin py-8 border-b border-outline-variant bg-surface-dim sticky top-16 z-30">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+<div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface mb-1">Permission Management</h1>
+<p class="text-body-md font-body-md text-on-surface-variant">Review and manage granular access controls across the system.</p>
+</div>
+</div>
+<!-- Tabs -->
+<div class="flex gap-6 border-b border-outline-variant/50">
+<a class="pb-3 text-label-lg font-label-lg text-on-surface-variant hover:text-on-surface transition-colors" href="#">Role Matrix</a>
+<a class="pb-3 text-label-lg font-label-lg text-primary border-b-2 border-primary" href="#">Permission Catalog</a>
+<a class="pb-3 text-label-lg font-label-lg text-on-surface-variant hover:text-on-surface transition-colors" href="#">Pending Requests</a>
+</div>
+</div>
+<!-- Catalog Content -->
+<div class="p-grid-margin flex-1 flex flex-col">
+<!-- Toolbar -->
+<div class="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+<div class="relative w-full sm:w-96">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">search</span>
+<input class="w-full bg-surface border border-outline rounded-lg py-2 pl-10 pr-4 text-on-surface text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary transition-colors transition-all focus:scale-[1.01]" placeholder="Search permissions..." type="text">
+</div>
+<div class="relative">
+<select class="appearance-none bg-surface border border-outline rounded-lg py-2 pl-4 pr-10 text-on-surface text-body-md font-body-md focus:border-primary focus:ring-1 focus:ring-primary transition-colors cursor-pointer w-full sm:w-auto">
+<option value="all">All Categories</option>
+<option value="user">User Management</option>
+<option value="billing">Billing</option>
+<option value="system">System</option>
+<option value="security">Security</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" style="font-variation-settings: 'FILL' 0;">arrow_drop_down</span>
+</div>
+</div>
+<!-- PaginatedDataGrid -->
+<div class="bg-surface-container rounded-xl border border-outline-variant overflow-hidden flex-1 flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-high border-b border-outline">
+<tr>
+<th class="py-cell-padding-y px-cell-padding-x text-label-md font-label-md text-on-surface font-bold whitespace-nowrap">Permission Key</th>
+<th class="py-cell-padding-y px-cell-padding-x text-label-md font-label-md text-on-surface font-bold whitespace-nowrap">Category</th>
+<th class="py-cell-padding-y px-cell-padding-x text-label-md font-label-md text-on-surface font-bold">Description</th>
+<th class="py-cell-padding-y px-cell-padding-x text-label-md font-label-md text-on-surface font-bold whitespace-nowrap">Used In</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-bright hover:-translate-y-0.5 transition-all duration-200 cursor-pointer animate-fade-in-up opacity-0" style="animation-delay: 0.05s">
+<td class="py-cell-padding-y px-cell-padding-x align-top">
+<span class="inline-block bg-surface-variant text-on-surface-variant font-mono text-[11px] px-2 py-1 rounded transition-colors hover:bg-primary/20 hover:text-primary cursor-pointer">users.create</span>
+</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top text-body-sm font-body-sm text-on-surface-variant">User Management</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top text-body-sm font-body-sm text-on-surface">Allows creation of new user profiles within the tenant.</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top">
+<div class="flex flex-wrap gap-2">
+<span class="bg-secondary-container/50 text-on-secondary-container text-[10px] px-2 py-0.5 rounded border border-outline-variant/50 transition-all hover:border-primary hover:text-primary cursor-pointer">Admin</span>
+<span class="bg-secondary-container/50 text-on-secondary-container text-[10px] px-2 py-0.5 rounded border border-outline-variant/50 transition-all hover:border-primary hover:text-primary cursor-pointer">HR Manager</span>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-bright hover:-translate-y-0.5 transition-all duration-200 cursor-pointer animate-fade-in-up opacity-0" style="animation-delay: 0.1s">
+<td class="py-cell-padding-y px-cell-padding-x align-top">
+<span class="inline-block bg-surface-variant text-on-surface-variant font-mono text-[11px] px-2 py-1 rounded transition-colors hover:bg-primary/20 hover:text-primary cursor-pointer">users.delete</span>
+</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top text-body-sm font-body-sm text-on-surface-variant">User Management</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top text-body-sm font-body-sm text-on-surface">Permits hard deletion of user accounts and associated metadata.</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top">
+<div class="flex flex-wrap gap-2">
+<span class="bg-secondary-container/50 text-on-secondary-container text-[10px] px-2 py-0.5 rounded border border-outline-variant/50 transition-all hover:border-primary hover:text-primary cursor-pointer">Admin</span>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-bright hover:-translate-y-0.5 transition-all duration-200 cursor-pointer animate-fade-in-up opacity-0" style="animation-delay: 0.15s">
+<td class="py-cell-padding-y px-cell-padding-x align-top">
+<span class="inline-block bg-surface-variant text-on-surface-variant font-mono text-[11px] px-2 py-1 rounded transition-colors hover:bg-primary/20 hover:text-primary cursor-pointer">billing.read</span>
+</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top text-body-sm font-body-sm text-on-surface-variant">Billing</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top text-body-sm font-body-sm text-on-surface">Read access to current cycle invoices and subscription tiers.</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top">
+<div class="flex flex-wrap gap-2">
+<span class="bg-secondary-container/50 text-on-secondary-container text-[10px] px-2 py-0.5 rounded border border-outline-variant/50 transition-all hover:border-primary hover:text-primary cursor-pointer">Admin</span>
+<span class="bg-secondary-container/50 text-on-secondary-container text-[10px] px-2 py-0.5 rounded border border-outline-variant/50 transition-all hover:border-primary hover:text-primary cursor-pointer">Finance</span>
+<span class="bg-secondary-container/50 text-on-secondary-container text-[10px] px-2 py-0.5 rounded border border-outline-variant/50 transition-all hover:border-primary hover:text-primary cursor-pointer">Executive</span>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-bright hover:-translate-y-0.5 transition-all duration-200 cursor-pointer animate-fade-in-up opacity-0" style="animation-delay: 0.2s">
+<td class="py-cell-padding-y px-cell-padding-x align-top">
+<span class="inline-block bg-surface-variant text-on-surface-variant font-mono text-[11px] px-2 py-1 rounded transition-colors hover:bg-primary/20 hover:text-primary cursor-pointer">system.config.write</span>
+</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top text-body-sm font-body-sm text-on-surface-variant">System</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top text-body-sm font-body-sm text-on-surface">Modify global tenant settings including SSO integrations and retention policies.</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top">
+<div class="flex flex-wrap gap-2">
+<span class="bg-secondary-container/50 text-on-secondary-container text-[10px] px-2 py-0.5 rounded border border-outline-variant/50 transition-all hover:border-primary hover:text-primary cursor-pointer">Admin</span>
+<span class="bg-secondary-container/50 text-on-secondary-container text-[10px] px-2 py-0.5 rounded border border-outline-variant/50 transition-all hover:border-primary hover:text-primary cursor-pointer">DevOps</span>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-bright hover:-translate-y-0.5 transition-all duration-200 cursor-pointer animate-fade-in-up opacity-0" style="animation-delay: 0.25s">
+<td class="py-cell-padding-y px-cell-padding-x align-top">
+<span class="inline-block bg-surface-variant text-on-surface-variant font-mono text-[11px] px-2 py-1 rounded transition-colors hover:bg-primary/20 hover:text-primary cursor-pointer">audit.logs.export</span>
+</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top text-body-sm font-body-sm text-on-surface-variant">Security</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top text-body-sm font-body-sm text-on-surface">Capability to download bulk audit trail records for compliance review.</td>
+<td class="py-cell-padding-y px-cell-padding-x align-top">
+<div class="flex flex-wrap gap-2">
+<span class="bg-secondary-container/50 text-on-secondary-container text-[10px] px-2 py-0.5 rounded border border-outline-variant/50 transition-all hover:border-primary hover:text-primary cursor-pointer">Security Officer</span>
+<span class="bg-secondary-container/50 text-on-secondary-container text-[10px] px-2 py-0.5 rounded border border-outline-variant/50 transition-all hover:border-primary hover:text-primary cursor-pointer">Compliance</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="mt-auto bg-surface-container-high border-t border-outline-variant px-4 py-3 flex items-center justify-between">
+<span class="text-body-sm font-body-sm text-on-surface-variant">Showing 1-5 of 124 permissions</span>
+<div class="flex items-center gap-2">
+<button class="p-1 rounded hover:bg-surface-variant text-on-surface-variant disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 0;">chevron_left</span>
+</button>
+<span class="text-body-sm font-body-sm text-on-surface px-2">Page 1 of 25</span>
+<button class="p-1 rounded hover:bg-surface-variant text-on-surface">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 0;">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

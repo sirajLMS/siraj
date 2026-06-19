@@ -1,0 +1,274 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>GuardRail - Content Editors</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#2e3131",
+                        "surface-container-low": "#191c1c",
+                        "completed": "#DDB8FF",
+                        "inverse-primary": "#2e6767",
+                        "secondary-fixed": "#d8e3fa",
+                        "primary": "#b4edec",
+                        "on-surface": "#e1e3e2",
+                        "inverse-surface": "#e1e3e2",
+                        "on-error": "#690005",
+                        "info": "#B4C5FF",
+                        "surface-container-lowest": "#0c0f0f",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "outline-variant": "#404848",
+                        "surface-container": "#1D2020",
+                        "on-tertiary-fixed": "#241337",
+                        "tertiary-fixed-dim": "#d5bdeb",
+                        "primary-fixed-dim": "#98d1d0",
+                        "primary-fixed": "#b3edec",
+                        "surface-bright": "#373a3a",
+                        "tertiary": "#efdbff",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "surface-container-high": "#282a2a",
+                        "on-secondary-fixed": "#111c2d",
+                        "secondary-container": "#3c475a",
+                        "on-primary-fixed": "#002020",
+                        "background": "#111414",
+                        "on-primary": "#003737",
+                        "warning": "#FFBA46",
+                        "surface-variant": "#323535",
+                        "on-tertiary": "#3a284d",
+                        "surface-tint": "#98d1d0",
+                        "on-tertiary-fixed-variant": "#513f65",
+                        "primary-container": "#98d1d0",
+                        "secondary": "#bcc7de",
+                        "success": "#62DF7D",
+                        "sidebar": "#002626",
+                        "on-tertiary-container": "#5d4a71",
+                        "error": "#FFB4AB",
+                        "on-background": "#e1e3e2",
+                        "error-container": "#93000a",
+                        "header-container": "#135E5E",
+                        "on-primary-container": "#205b5b",
+                        "on-primary-fixed-variant": "#0f4f4f",
+                        "surface-container-highest": "#323535",
+                        "on-surface-variant": "#bfc8c7",
+                        "on-secondary": "#263143",
+                        "on-secondary-container": "#aab5cc",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#111414",
+                        "outline": "#899292",
+                        "tertiary-fixed": "#efdbff",
+                        "surface": "#111414",
+                        "tertiary-container": "#d5bdeb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "grid-margin": "24px",
+                        "cell-padding-y": "8px",
+                        "grid-gutter": "16px",
+                        "container-padding": "16px",
+                        "cell-padding-x": "12px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "title-md": ["Inter"],
+                        "label-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #404848; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #899292; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen overflow-x-hidden antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-grid-margin h-16 bg-header-container border-b border-outline-variant flat no shadows">
+<div class="flex items-center gap-4">
+<button class="text-primary hover:bg-surface-container-highest transition-colors rounded-full p-2 active:opacity-80 active:scale-95 transition-all">
+<span class="material-symbols-outlined fill text-[24px]">security</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm-mobile text-primary font-bold">Content Editors</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A small circular avatar placeholder image showing a generic user silhouette in a dark modern style. Minimalist and sleek. Deep teal background with a light cyan figure." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9ZdGNARyS6Z7w-3jxzFmH0DWXgtEA1_xZsE0Q3SYl2Y9jEspYJ9rIkLhHojpdagAkMOmAl65vQzsxfQ6vcmftFgQuGEuxXZ_25AUGcrj-w7-lWlHwrU4Xpu40JixvEdDSCN_VmXfyZIt9F1RppKfMZzeTXBdX0762vRs3GRquXFLWOeLlp2Q7BudB35K38FAOjLbvPlg_IfHGdxnQHZYPpxJ8B2qQzJ88WU_-pdEAu5VjCi4xmBU0ah_r3_zFkfz0398-At9Dj4A">
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="pt-16 pb-36 px-container-padding max-w-3xl mx-auto flex flex-col gap-unit">
+<!-- Sub-navigation Tabs -->
+<div class="flex border-b border-outline-variant overflow-x-auto no-scrollbar pt-4 mb-2">
+<button class="px-4 py-3 border-b-2 border-primary text-primary font-title-md text-title-md whitespace-nowrap">Permissions</button>
+<button class="px-4 py-3 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-title-md text-title-md whitespace-nowrap">Add</button>
+<button class="px-4 py-3 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-title-md text-title-md whitespace-nowrap">Users</button>
+</div>
+<!-- Search Bar -->
+<div class="relative w-full mb-4">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-container border border-outline rounded-lg py-2 pl-10 pr-4 text-body-md font-body-md text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" placeholder="Search attached permissions..." type="text">
+</div>
+<!-- Permission List (High-Density Mobile Rows) -->
+<div class="flex flex-col gap-2">
+<!-- Row 1 (Core Permission - Disabled) -->
+<div class="flex items-center gap-3 p-3 bg-surface-container rounded-lg border border-outline-variant opacity-60 cursor-not-allowed">
+<div class="flex-shrink-0 w-8 flex justify-center">
+<input class="w-4 h-4 rounded border-outline bg-surface focus:ring-primary text-primary opacity-50 cursor-not-allowed" disabled="" type="checkbox">
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<h3 class="font-title-sm text-title-sm text-on-surface truncate">content.edit</h3>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-error text-on-error font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+                            Core
+                        </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Content Management</p>
+</div>
+<div class="flex-shrink-0">
+<span class="material-symbols-outlined text-outline">lock</span>
+</div>
+</div>
+<!-- Row 2 (Inherited - No Action) -->
+<div class="flex items-center gap-3 p-3 bg-surface-container rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors">
+<div class="flex-shrink-0 w-8 flex justify-center">
+<input class="w-4 h-4 rounded border-outline bg-surface focus:ring-primary text-primary transition-colors" type="checkbox">
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<h3 class="font-title-sm text-title-sm text-on-surface truncate">content.view</h3>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant border border-outline-variant font-label-sm text-label-sm">
+                            Inherited
+                        </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Content Management</p>
+</div>
+<div class="flex-shrink-0 w-6">
+<!-- Empty space for alignment if needed, or hidden action -->
+</div>
+</div>
+<!-- Row 3 (Custom - Selected) -->
+<div class="flex items-center gap-3 p-3 bg-primary-container/10 rounded-lg border-l-2 border-primary border-y border-r border-y-outline-variant border-r-outline-variant">
+<div class="flex-shrink-0 w-8 flex justify-center">
+<input checked="" class="w-4 h-4 rounded border-primary bg-primary text-on-primary focus:ring-primary transition-colors" type="checkbox">
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<h3 class="font-title-sm text-title-sm text-on-surface truncate">media.upload</h3>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+                            Custom
+                        </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Media</p>
+</div>
+<div class="flex-shrink-0">
+<button class="p-1 rounded-md text-error hover:bg-error/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<!-- Row 4 (Custom - Selected) -->
+<div class="flex items-center gap-3 p-3 bg-primary-container/10 rounded-lg border-l-2 border-primary border-y border-r border-y-outline-variant border-r-outline-variant">
+<div class="flex-shrink-0 w-8 flex justify-center">
+<input checked="" class="w-4 h-4 rounded border-primary bg-primary text-on-primary focus:ring-primary transition-colors" type="checkbox">
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<h3 class="font-title-sm text-title-sm text-on-surface truncate">media.delete</h3>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+                            Custom
+                        </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Media</p>
+</div>
+<div class="flex-shrink-0">
+<button class="p-1 rounded-md text-error hover:bg-error/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bulk Action Bar (Visible) -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-sm bg-surface-container-highest border border-outline-variant rounded-xl p-3 shadow-lg flex items-center justify-between z-40">
+<span class="font-title-sm text-title-sm text-on-surface">2 items selected</span>
+<button class="px-4 py-2 bg-error text-on-error rounded-lg font-label-lg text-label-lg hover:opacity-90 active:scale-95 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+            Remove
+        </button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 pb-safe px-2 bg-surface-container-low border-t border-outline-variant flat no shadows md:hidden">
+<!-- Active Tab: Groups -->
+<a class="flex flex-col items-center justify-center w-full h-full group hover:bg-surface-container-high transition-colors" href="#">
+<div class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-5 py-1 mb-1 scale-90 duration-150">
+<span class="material-symbols-outlined fill">group</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary-fixed">Groups</span>
+</a>
+<!-- Inactive Tab: Catalog -->
+<a class="flex flex-col items-center justify-center w-full h-full group hover:bg-surface-container-high transition-colors text-on-surface-variant" href="#">
+<div class="flex flex-col items-center justify-center px-5 py-1 mb-1">
+<span class="material-symbols-outlined">shield_person</span>
+</div>
+<span class="font-label-sm text-label-sm">Catalog</span>
+</a>
+<!-- Inactive Tab: Overrides -->
+<a class="flex flex-col items-center justify-center w-full h-full group hover:bg-surface-container-high transition-colors text-on-surface-variant" href="#">
+<div class="flex flex-col items-center justify-center px-5 py-1 mb-1">
+<span class="material-symbols-outlined">edit_calendar</span>
+</div>
+<span class="font-label-sm text-label-sm">Overrides</span>
+</a>
+</nav>
+</body></html>

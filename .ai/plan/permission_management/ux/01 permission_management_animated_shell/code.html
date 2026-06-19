@@ -1,0 +1,359 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Permission Management - GuardRail IAM</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#191c1c",
+                    "on-tertiary-fixed-variant": "#513f65",
+                    "info": "#B4C5FF",
+                    "primary": "#b4edec",
+                    "error-container": "#93000a",
+                    "on-secondary-container": "#aab5cc",
+                    "tertiary-fixed-dim": "#d5bdeb",
+                    "primary-fixed-dim": "#98d1d0",
+                    "error": "#FFB4AB",
+                    "surface-dim": "#111414",
+                    "outline-variant": "#404848",
+                    "header-container": "#135E5E",
+                    "secondary": "#bcc7de",
+                    "surface": "#111414",
+                    "surface-container": "#1d2020",
+                    "primary-fixed": "#b3edec",
+                    "on-secondary-fixed-variant": "#3c475a",
+                    "warning": "#FFBA46",
+                    "secondary-fixed": "#d8e3fa",
+                    "on-tertiary-container": "#5d4a71",
+                    "surface-container-high": "#282a2a",
+                    "surface-container-lowest": "#0c0f0f",
+                    "success": "#62DF7D",
+                    "primary-container": "#98d1d0",
+                    "on-surface-variant": "#bfc8c7",
+                    "inverse-surface": "#e1e3e2",
+                    "on-secondary-fixed": "#111c2d",
+                    "surface-tint": "#98d1d0",
+                    "secondary-fixed-dim": "#bcc7de",
+                    "on-background": "#e1e3e2",
+                    "sidebar": "#002626",
+                    "tertiary-container": "#d5bdeb",
+                    "tertiary-fixed": "#efdbff",
+                    "on-primary-container": "#205b5b",
+                    "surface-bright": "#373a3a",
+                    "surface-container-highest": "#323535",
+                    "on-error": "#690005",
+                    "secondary-container": "#3c475a",
+                    "surface-variant": "#323535",
+                    "completed": "#DDB8FF",
+                    "on-surface": "#e1e3e2",
+                    "tertiary": "#efdbff",
+                    "inverse-on-surface": "#2e3131",
+                    "on-tertiary-fixed": "#241337",
+                    "on-error-container": "#ffdad6",
+                    "outline": "#899292",
+                    "on-primary-fixed-variant": "#0f4f4f",
+                    "on-primary": "#003737",
+                    "on-tertiary": "#3a284d",
+                    "inverse-primary": "#2e6767",
+                    "background": "#111414",
+                    "on-secondary": "#263143",
+                    "on-primary-fixed": "#002020"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "cell-padding-y": "8px",
+                    "grid-gutter": "16px",
+                    "container-padding": "16px",
+                    "unit": "4px",
+                    "cell-padding-x": "12px",
+                    "grid-margin": "24px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Inter"],
+                    "label-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "title-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "title-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "title-lg": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "title-md": ["16px", {"lineHeight": "24px", "fontWeight": "500"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        @keyframes tabPulse {
+            0%, 100% { border-bottom-width: 2px; color: theme('colors.primary'); opacity: 1; transform: scaleY(1); }
+            50% { border-bottom-width: 4px; color: theme('colors.primary-fixed'); opacity: 0.8; transform: scaleY(1.05); }
+        }
+        .animate-tab-pulse {
+            animation: tabPulse 2.5s ease-in-out infinite;
+            transform-origin: bottom;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="text-on-background min-h-screen flex flex-col md:flex-row bg-transparent relative">
+<!-- WebGL Background Shader -->
+<canvas class="fixed inset-0 w-full h-full -z-20 pointer-events-none bg-background" id="bg-shader"></canvas>
+<!-- SideNavBar (Hidden on Mobile, Visible on md+) -->
+<aside class="hidden md:flex flex-col py-grid-margin border-r border-outline-variant bg-sidebar dark:bg-sidebar text-primary dark:text-primary fixed left-0 top-0 h-full w-[280px] z-40">
+<div class="px-4 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-outline-variant overflow-hidden">
+<img alt="System Node" class="w-full h-full object-cover" data-alt="A professional, high-quality profile avatar representing a System Node or Global Admin in an enterprise security context. Abstract, minimal, and secure." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBosI9cUdY3ESOLK6BPOCasPGakn7nC3EKxB2PkwFDQSWADXwVirhwwuqjJs6rFuL0TMLu2mjcFDkV1DghQdljRczGi6kjFlPD8K83eG6WDfdoPkQdIBb8R7KBXCeEfrV5fnu3Uohe8YhFncIexTHXengIiS5zWY7KLFxnHutCZ8Qn0BaxHQH-NxJGOZ4BmP38H6cWZUNp2tAZRtHCezT_7TP_xDJYYOob4kMucItgQRDTzRVIs7ccDlMfq6Q2huEWFU7dQYj2gh9Q">
+</div>
+<div>
+<h2 class="text-title-lg font-title-lg text-on-primary-fixed">Global Admin</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Tenant: Production-01</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1 px-2">
+<a class="text-on-surface-variant hover:bg-surface-container-high mx-2 rounded-lg flex items-center gap-3 px-3 py-2 font-label-lg text-label-lg hover:bg-surface-container-highest transition-all scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="fingerprint">fingerprint</span>
+<span>Identity</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high mx-2 rounded-lg flex items-center gap-3 px-3 py-2 font-label-lg text-label-lg hover:bg-surface-container-highest transition-all scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="badge">badge</span>
+<span>Roles</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high mx-2 rounded-lg flex items-center gap-3 px-3 py-2 font-label-lg text-label-lg hover:bg-surface-container-highest transition-all scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span>Resource Groups</span>
+</a>
+<!-- Active Tab -->
+<a class="bg-secondary-container text-on-secondary-container rounded-lg mx-2 flex items-center gap-3 px-3 py-2 font-label-lg text-label-lg scale-95 transition-transform duration-150 cursor-pointer active:opacity-80" href="#">
+<span class="material-symbols-outlined" data-icon="lock_open" data-weight="fill">lock_open</span>
+<span>Permissions</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high mx-2 rounded-lg flex items-center gap-3 px-3 py-2 font-label-lg text-label-lg hover:bg-surface-container-highest transition-all scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="key">key</span>
+<span>API Keys</span>
+</a>
+</nav>
+<div class="px-4 mt-auto">
+<button class="w-full bg-primary text-on-primary font-label-lg text-label-lg py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                New Permission
+            </button>
+<div class="mt-4 border-t border-outline-variant pt-4 flex flex-col gap-1">
+<a class="text-on-surface-variant hover:bg-surface-container-high mx-2 rounded-lg flex items-center gap-3 px-3 py-2 font-label-lg text-label-lg hover:bg-surface-container-highest transition-all scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>System Health</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high mx-2 rounded-lg flex items-center gap-3 px-3 py-2 font-label-lg text-label-lg hover:bg-surface-container-highest transition-all scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span>Documentation</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col md:ml-[280px] min-h-screen w-full relative">
+<!-- TopNavBar (Fixed Header) -->
+<header class="bg-background dark:bg-background text-primary dark:text-primary fixed top-0 w-full z-50 border-b border-outline-variant dark:border-outline-variant flex items-center justify-between px-grid-margin h-16 md:w-[calc(100%-280px)]">
+<div class="flex items-center gap-4">
+<span class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary">GuardRail IAM</span>
+</div>
+<!-- Search Bar (on_left logical, visually centered/responsive) -->
+<div class="hidden sm:flex flex-1 max-w-md mx-4">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-full py-1.5 pl-10 pr-4 text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Search..." type="text">
+</div>
+</div>
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-on-surface-variant font-medium font-title-md text-title-md hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Dashboard</a>
+<a class="text-on-surface-variant font-medium font-title-md text-title-md hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Policies</a>
+<a class="text-on-surface-variant font-medium font-title-md text-title-md hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Audit Logs</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-title-md text-title-md hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-3 ml-auto lg:ml-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200 p-2 rounded-full hover:bg-surface-container-low">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200 p-2 rounded-full hover:bg-surface-container-low">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant overflow-hidden cursor-pointer ml-2">
+<img alt="Administrator Avatar" class="w-full h-full object-cover" data-alt="A small, professional avatar image representing an Administrator in an enterprise SaaS application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9cr9Bj2iAdL9OSnJW_GrL1DG2BmE5rEAII5NIJolH7A8RG3DeNtNUNQxZ4hmYsKSEyFK_xBpVUk5JyKXwebol7490UMt9Zi6ASkfchhqRU4Ew8bbHfXqgDQmgIKE1LYQSSOrvo2zC2gwCiIUvyJANVFxRyEQ-wZf4hjwwb0vdVmJcFf5gl31W01X4gjDvD0GALNAfwyx8LVpuTullfeqkSFgWSgfronDoPyJVinDp7WKt8_7CkiF6KABxLmYmDMsaa55wUvCqoWM">
+</div>
+</div>
+</header>
+<!-- Main Workspace -->
+<main class="flex-1 mt-16 p-grid-margin overflow-y-auto relative z-10">
+<!-- Page Header -->
+<div class="flex items-start justify-between mb-6">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">Permission Management</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Manage groups, view system permissions, and configure user-specific overrides.</p>
+</div>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+</div>
+<!-- Horizontal Tab Group -->
+<div class="border-b border-outline-variant mb-6 flex gap-6">
+<button class="font-title-md text-title-md font-medium border-b-2 border-primary pb-2 px-1 relative -bottom-[1px] animate-tab-pulse">
+                    Permission Groups
+                </button>
+<button class="font-title-md text-title-md text-on-surface-variant hover:text-primary-fixed font-medium pb-2 px-1 transition-colors duration-300">
+                    Permission Catalog
+                </button>
+<button class="font-title-md text-title-md text-on-surface-variant hover:text-primary-fixed font-medium pb-2 px-1 transition-colors duration-300">
+                    User Overrides
+                </button>
+</div>
+<!-- Empty Content Canvas -->
+<div class="bg-surface/90 backdrop-blur-sm border border-outline rounded-xl min-h-[500px] w-full flex items-center justify-center p-8 fade-in-up">
+<div class="text-center max-w-md">
+<div class="w-16 h-16 mx-auto bg-surface-container-high rounded-full flex items-center justify-center mb-4 border border-outline-variant">
+<span class="material-symbols-outlined text-3xl text-on-surface-variant" data-icon="group_work">group_work</span>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface mb-2">No Permission Groups Selected</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Select a group from the sidebar or create a new one to begin managing access levels and system permissions.</p>
+<button class="bg-primary-container text-on-primary-container font-label-lg text-label-lg px-4 py-2 rounded-lg hover:bg-primary transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(180,237,236,0.3)] flex items-center gap-2 mx-auto">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                        Create Group
+                    </button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-4 mt-auto bg-surface-container-lowest dark:bg-surface-container-lowest text-secondary dark:text-secondary border-t border-outline-variant flex justify-between items-center px-grid-margin relative z-10">
+<span class="font-body-sm text-body-sm font-bold text-on-surface">© 2024 GuardRail Enterprise Security. All rights reserved.</span>
+<div class="flex gap-4">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Security Policy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Terms of Service</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">API Reference</a>
+</div>
+</footer>
+</div>
+<script>
+    const canvas = document.getElementById('bg-shader');
+    const gl = canvas.getContext('webgl');
+    if (gl) {
+        const vsSource = `
+            attribute vec2 a_position;
+            varying vec2 v_texCoord;
+            void main() {
+                gl_Position = vec4(a_position, 0.0, 1.0);
+                v_texCoord = a_position * 0.5 + 0.5;
+            }
+        `;
+        const fsSource = `
+precision highp float;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+
+varying vec2 v_texCoord;
+
+void main() {
+    vec2 uv = v_texCoord;
+    
+    // Slow moving organic gradient based on established teal/dark palette
+    vec3 color1 = vec3(0.067, 0.078, 0.078); // surface-container-low
+    vec3 color2 = vec3(0.047, 0.059, 0.059); // surface-container-lowest
+    vec3 accent = vec3(0.075, 0.369, 0.369); // headerContainer-ish
+    
+    float t = u_time * 0.2;
+    
+    // Create soft moving noise/blobs
+    float n1 = sin(uv.x * 2.0 + t) * cos(uv.y * 1.5 - t * 0.5);
+    float n2 = sin(uv.y * 3.0 - t * 0.8) * cos(uv.x * 2.5 + t * 0.3);
+    
+    float mixFactor = smoothstep(-1.0, 1.0, n1 + n2);
+    vec3 finalColor = mix(color1, color2, mixFactor);
+    
+    // Add a very subtle accent glow near the top
+    float glow = smoothstep(0.8, 0.0, length(uv - vec2(0.5, 1.0 + sin(t)*0.2)));
+    finalColor += accent * glow * 0.1;
+
+    gl_FragColor = vec4(finalColor, 1.0);
+}
+        `;
+        
+        function compileShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            return shader;
+        }
+        
+        const vs = compileShader(gl, gl.VERTEX_SHADER, vsSource);
+        const fs = compileShader(gl, gl.FRAGMENT_SHADER, fsSource);
+        const program = gl.createProgram();
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+        gl.useProgram(program);
+        
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1.0, -1.0,  1.0, -1.0,  -1.0,  1.0,
+            -1.0,  1.0,  1.0, -1.0,   1.0,  1.0
+        ]), gl.STATIC_DRAW);
+        
+        const positionLocation = gl.getAttribLocation(program, "a_position");
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+        
+        const timeLocation = gl.getUniformLocation(program, "u_time");
+        const resolutionLocation = gl.getUniformLocation(program, "u_resolution");
+        const mouseLocation = gl.getUniformLocation(program, "u_mouse");
+        
+        function render(time) {
+            if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
+                canvas.width = canvas.clientWidth;
+                canvas.height = canvas.clientHeight;
+                gl.viewport(0, 0, canvas.width, canvas.height);
+            }
+            gl.uniform1f(timeLocation, time * 0.001);
+            gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+            gl.uniform2f(mouseLocation, 0.0, 0.0);
+            
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
+    }
+</script>
+</body></html>

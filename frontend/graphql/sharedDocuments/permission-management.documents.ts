@@ -40,7 +40,7 @@ const USER_OVERRIDE_FIELDS = gql`
   }
 `;
 
-export const permissionsQueryDocument: TypedDocumentNode<Operations.PermissionsQuery, never> = gql`
+export const permissionsQueryDocument: TypedDocumentNode<Operations.PermissionsQuery> = gql`
   ${PERMISSION_FIELDS}
   query permissions {
     permissions {
@@ -49,7 +49,7 @@ export const permissionsQueryDocument: TypedDocumentNode<Operations.PermissionsQ
   }
 `;
 
-export const permissionGroupsQueryDocument: TypedDocumentNode<Operations.PermissionGroupsQuery, never> = gql`
+export const permissionGroupsQueryDocument: TypedDocumentNode<Operations.PermissionGroupsQuery> = gql`
   ${PERMISSION_GROUP_FIELDS}
   query permissionGroups {
     permissionGroups {

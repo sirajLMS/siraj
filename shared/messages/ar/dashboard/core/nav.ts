@@ -40,4 +40,5 @@ export const nav: DashboardNavigationLabels = {
   complaintsManage: "معالجة الشكاوى",
   teacherDashboard: "لوحة المعلم",
   teacherDashboardActive: "التحكم بالحصص",
+  permissions: "الصلاحيات",
 };

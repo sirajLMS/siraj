@@ -1,0 +1,367 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>User Overrides - GuardRail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#efdbff",
+                        "primary-fixed-dim": "#98d1d0",
+                        "success": "#62DF7D",
+                        "tertiary-fixed": "#efdbff",
+                        "error-container": "#93000a",
+                        "tertiary-fixed-dim": "#d5bdeb",
+                        "on-tertiary": "#3a284d",
+                        "on-primary-fixed-variant": "#0f4f4f",
+                        "on-secondary-fixed": "#111c2d",
+                        "surface-container": "#1d2020",
+                        "on-primary": "#003737",
+                        "surface-tint": "#98d1d0",
+                        "on-tertiary-fixed": "#241337",
+                        "secondary-container": "#3c475a",
+                        "error": "#FFB4AB",
+                        "header-container": "#135E5E",
+                        "surface-variant": "#323535",
+                        "completed": "#DDB8FF",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#bcc7de",
+                        "on-secondary-container": "#aab5cc",
+                        "sidebar": "#002626",
+                        "on-secondary": "#263143",
+                        "primary": "#b4edec",
+                        "inverse-primary": "#2e6767",
+                        "tertiary-container": "#d5bdeb",
+                        "primary-fixed": "#b3edec",
+                        "on-error": "#690005",
+                        "on-background": "#e1e3e2",
+                        "surface-dim": "#111414",
+                        "primary-container": "#98d1d0",
+                        "outline-variant": "#404848",
+                        "surface-container-high": "#282a2a",
+                        "surface": "#111414",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "inverse-on-surface": "#2e3131",
+                        "on-primary-fixed": "#002020",
+                        "on-surface": "#e1e3e2",
+                        "on-primary-container": "#205b5b",
+                        "outline": "#899292",
+                        "warning": "#FFBA46",
+                        "on-tertiary-fixed-variant": "#513f65",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "surface-container-highest": "#323535",
+                        "on-surface-variant": "#bfc8c7",
+                        "inverse-surface": "#e1e3e2",
+                        "surface-bright": "#373a3a",
+                        "surface-container-lowest": "#0c0f0f",
+                        "background": "#111414",
+                        "secondary-fixed": "#d8e3fa",
+                        "surface-container-low": "#191c1c",
+                        "info": "#B4C5FF",
+                        "on-tertiary-container": "#5d4a71"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "grid-gutter": "16px",
+                        "cell-padding-x": "12px",
+                        "unit": "4px",
+                        "container-padding": "16px",
+                        "grid-margin": "24px",
+                        "cell-padding-y": "8px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "title-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500"}],
+                        "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "title-md": ["16px", {"lineHeight": "24px", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "title-lg": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-sm": ["11px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.surface-dim');
+            color: theme('colors.on-surface');
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+
+        /* Staggered Card Animations */
+        .card-enter {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUpIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeUpIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hide scrollbar for horizontal scrolling filter */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Padding bottom for safe area on mobile devices with home indicator */
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col min-h-screen relative pt-16 pb-24 md:hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-grid-margin h-16 bg-header-container border-b border-outline-variant">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="security" data-weight="fill">security</span>
+<span class="font-headline-sm text-headline-sm text-on-primary-fixed font-bold tracking-tight">GuardRail</span>
+</div>
+<div>
+<div class="w-8 h-8 rounded-full bg-primary-fixed-dim flex items-center justify-center text-on-primary-fixed font-title-md text-title-md font-bold overflow-hidden shadow-sm hover:bg-surface-container-highest transition-colors cursor-pointer">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A professional headshot avatar of a system administrator in a dark studio setting. The lighting highlights features subtly, matching the deep teal and dark cyan mood of a secure enterprise software platform. Sharp, professional, and clear." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCAcCVavMteV5UeB21EPM4YqKthft-hzIBVD37Nf2dmSI2oxIaEgVariFprmQFEClSJdh4Qzoypw4-AZgRmZBTWo4aARMe7HG_Reomlf0CPzNPHwaQzg7SX83fobbhvLqjXFqs_RCFDSlwkLtsPN3E7p_NAptiHb3s5erNYOo0VyHPKii0QQwV4qwcFFhHY5Th3rWUjY3NnXkmDvZsTVJCgZX4EVkgA3AaY2lWlzxMyqSAVmlximOLB3V2csvtnBBs4ij56vNODoA">
+</div>
+</div>
+</header>
+<!-- Main Canvas Content -->
+<main class="flex-grow flex flex-col w-full px-container-padding py-6 gap-6">
+<!-- Header & Search Section -->
+<section class="flex flex-col gap-4">
+<div class="flex flex-col">
+<h1 class="font-headline-md text-headline-md text-on-surface">User Overrides</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Manage individual permission exceptions</p>
+</div>
+<!-- Search Bar -->
+<div class="relative w-full group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container-low border border-outline rounded-lg pl-10 pr-4 py-2.5 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-on-surface-variant" placeholder="Search by user or email..." type="text">
+</div>
+<!-- Filter Chips (Horizontal Scroll) -->
+<div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2 pt-1 -mx-container-padding px-container-padding">
+<button class="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary-container text-on-primary-container border border-transparent font-label-md text-label-md whitespace-nowrap shadow-sm">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+                    All Overrides
+                </button>
+<button class="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant font-label-md text-label-md whitespace-nowrap hover:bg-surface-variant transition-colors">
+                    Grants Only
+                </button>
+<button class="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant font-label-md text-label-md whitespace-nowrap hover:bg-surface-variant transition-colors">
+                    Revokes Only
+                </button>
+<button class="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant font-label-md text-label-md whitespace-nowrap hover:bg-surface-variant transition-colors">
+                    Conflicts
+                </button>
+</div>
+</section>
+<!-- List View (Cards) -->
+<section class="flex flex-col gap-4">
+<!-- Card 1 -->
+<div class="card-enter bg-surface-container rounded-xl border border-outline-variant p-4 flex flex-col gap-4 shadow-sm hover:border-primary hover:shadow-[0_0_15px_rgba(152,209,208,0.1)] transition-all duration-200" style="animation-delay: 0.1s;">
+<!-- Header: User Info & Status -->
+<div class="flex justify-between items-start">
+<div class="flex gap-3 items-center">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-secondary-container">
+<img class="w-full h-full object-cover" data-alt="A portrait photography avatar of a female software engineer with a focused expression. Shot against a dark, moody background with subtle cyan rim lighting, fitting perfectly into a highly secure, modern enterprise dashboard theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrwpjQkdtT_yYgsiqYS-g30mi6iVeLutM5yDfKseh2CiasZlA_3-RiAOiEXsEhpoWaBgljgJLl7vpetStU0iAk3A_xxsggyzyKtX7R-zBtEwXOwlZrhe-8hS0z5jsfYcI0bQJs4wuRWUEig5CEFPXNO2_I56fVv9SBD2s4aP4MOi2eBgZGEyjhpOA0oK_UJ0m6fxOGxV5Bi1MiP_195eyZ5m8tnzAJwla2TNDHCoOnCM2HN3BmnigAp7m4jIBquW44Fk7PJO-IMNA">
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Sarah Jenkins</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">s.jenkins@enterprise.com</span>
+</div>
+</div>
+<!-- Status Icon -->
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-success/10 text-success">
+<span class="material-symbols-outlined filled text-[20px]">check_circle</span>
+</div>
+</div>
+<!-- Body: Base Groups -->
+<div class="flex flex-col gap-2 border-t border-outline-variant pt-3">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Base Groups</span>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm border border-outline-variant/30">DevOps</span>
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm border border-outline-variant/30">Platform Engineering</span>
+</div>
+</div>
+<!-- Footer: Stats & Actions -->
+<div class="flex items-center justify-between pt-1">
+<div class="flex gap-3">
+<!-- Grants Badge -->
+<div class="flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant mb-1">Grants</span>
+<div class="px-2.5 py-0.5 rounded-full bg-primary/20 text-primary font-label-md text-label-md flex items-center gap-1 border border-primary/30">
+<span class="material-symbols-outlined text-[14px]">add</span> 4
+                            </div>
+</div>
+<!-- Revokes Badge -->
+<div class="flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant mb-1">Revokes</span>
+<div class="px-2.5 py-0.5 rounded-full bg-error/20 text-error font-label-md text-label-md flex items-center gap-1 border border-error/30">
+<span class="material-symbols-outlined text-[14px]">remove</span> 1
+                            </div>
+</div>
+</div>
+<button class="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-container-high text-primary hover:bg-surface-variant border border-outline-variant transition-colors active:scale-95">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+</div>
+<!-- Card 2 (Conflict) -->
+<div class="card-enter bg-surface-container rounded-xl border border-warning/50 p-4 flex flex-col gap-4 shadow-sm hover:border-warning hover:shadow-[0_0_15px_rgba(255,186,70,0.1)] transition-all duration-200 relative overflow-hidden" style="animation-delay: 0.2s;">
+<!-- Subtle warning background tint -->
+<div class="absolute inset-0 bg-warning/5 pointer-events-none"></div>
+<!-- Header: User Info & Status -->
+<div class="flex justify-between items-start relative z-10">
+<div class="flex gap-3 items-center">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-secondary-container">
+<img class="w-full h-full object-cover" data-alt="Avatar image of a male data analyst in his 30s. He is looking slightly off-camera with a neutral expression. The background is pure black with a very faint, warm amber glow on one side of his face to indicate a system warning state in a dark-mode SaaS UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBy5qrgHyDyxjkC-BvPYs5bLwMD5n_j4g0kf4NhlLY3mwReVUml0GIapjMeDa-7p3X_p2ZhSvQL9xu_ONyqMe-VjB2H3RyBNblr2vd7HJqd1AK5_FFyjj4bJqaQg_S0B2EBYELaH54Nq5YcV-U_EwtG9IBdPI-WYk4cfn8MM_9I2F8MHX50jg23ePKVlrFvWfqTRf6-Xk8B5rr9kkZ6BhH_zdrm5yoJXZcQkBW3IsLggf62txGVhdmQRrPKd_yHi9UHpIRwsq30EVY">
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Marcus Chen</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">m.chen@enterprise.com</span>
+</div>
+</div>
+<!-- Status Icon -->
+<div class="flex items-center justify-center px-2 py-1 gap-1 rounded-full bg-warning/20 text-warning border border-warning/30">
+<span class="material-symbols-outlined filled text-[16px]">warning</span>
+<span class="font-label-sm text-label-sm">Conflict</span>
+</div>
+</div>
+<!-- Body: Base Groups -->
+<div class="flex flex-col gap-2 border-t border-outline-variant pt-3 relative z-10">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Base Groups</span>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm border border-outline-variant/30">Data Science</span>
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm border border-outline-variant/30">Contractor</span>
+</div>
+</div>
+<!-- Footer: Stats & Actions -->
+<div class="flex items-center justify-between pt-1 relative z-10">
+<div class="flex gap-3">
+<div class="flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant mb-1">Grants</span>
+<div class="px-2.5 py-0.5 rounded-full bg-primary/20 text-primary font-label-md text-label-md flex items-center gap-1 border border-primary/30">
+<span class="material-symbols-outlined text-[14px]">add</span> 12
+                            </div>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant mb-1">Revokes</span>
+<div class="px-2.5 py-0.5 rounded-full bg-error/20 text-error font-label-md text-label-md flex items-center gap-1 border border-error/30">
+<span class="material-symbols-outlined text-[14px]">remove</span> 0
+                            </div>
+</div>
+</div>
+<button class="flex items-center justify-center px-4 h-10 rounded-lg bg-warning/10 text-warning hover:bg-warning/20 border border-warning/50 font-label-md text-label-md transition-colors active:scale-95">
+                        Resolve
+                    </button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="card-enter bg-surface-container rounded-xl border border-outline-variant p-4 flex flex-col gap-4 shadow-sm hover:border-primary hover:shadow-[0_0_15px_rgba(152,209,208,0.1)] transition-all duration-200" style="animation-delay: 0.3s;">
+<!-- Header: User Info & Status -->
+<div class="flex justify-between items-start">
+<div class="flex gap-3 items-center">
+<div class="w-10 h-10 rounded-full flex items-center justify-center bg-tertiary-container text-on-tertiary-container font-title-md text-title-md font-bold">
+                            AL
+                        </div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">Alex Larson</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">a.larson@enterprise.com</span>
+</div>
+</div>
+<!-- Status Icon -->
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-success/10 text-success">
+<span class="material-symbols-outlined filled text-[20px]">check_circle</span>
+</div>
+</div>
+<!-- Body: Base Groups -->
+<div class="flex flex-col gap-2 border-t border-outline-variant pt-3">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Base Groups</span>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm border border-outline-variant/30">HR Admin</span>
+</div>
+</div>
+<!-- Footer: Stats & Actions -->
+<div class="flex items-center justify-between pt-1">
+<div class="flex gap-3">
+<div class="flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant mb-1">Grants</span>
+<div class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md flex items-center gap-1 border border-outline-variant/30">
+                                0
+                            </div>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-label-sm text-label-sm text-on-surface-variant mb-1">Revokes</span>
+<div class="px-2.5 py-0.5 rounded-full bg-error/20 text-error font-label-md text-label-md flex items-center gap-1 border border-error/30">
+<span class="material-symbols-outlined text-[14px]">remove</span> 3
+                            </div>
+</div>
+</div>
+<button class="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-container-high text-primary hover:bg-surface-variant border border-outline-variant transition-colors active:scale-95">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 pb-safe px-2 bg-surface-container-low border-t border-outline-variant shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+<!-- Inactive Tab 1 -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high rounded-lg p-2 transition-colors w-20" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1" data-icon="group">group</span>
+<span class="font-label-sm text-label-sm text-center w-full">Groups</span>
+</a>
+<!-- Inactive Tab 2 -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high rounded-lg p-2 transition-colors w-20" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1" data-icon="shield_person">shield_person</span>
+<span class="font-label-sm text-label-sm text-center w-full">Catalog</span>
+</a>
+<!-- Active Tab 3 -->
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-5 py-1 w-auto scale-90 transition-all duration-150" href="#">
+<span class="material-symbols-outlined filled text-[24px] mb-1 text-primary-fixed" data-icon="edit_calendar">edit_calendar</span>
+<span class="font-label-sm text-label-sm text-center w-full text-primary-fixed">Overrides</span>
+</a>
+</nav>
+</body></html>

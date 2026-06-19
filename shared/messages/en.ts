@@ -164,6 +164,7 @@ const en: MessageSchema = {
       complaintsManage: "Complaints Resolution",
       teacherDashboard: "Teacher Dashboard",
       teacherDashboardActive: "Session Controls",
+      permissions: "Permissions",
     },
     layout: {
       appTitle: "Siraj LMS",
@@ -1915,6 +1916,8 @@ const en: MessageSchema = {
       },
     },
     permissions: {
+      title: "Permission Management",
+      subtitle: "Configure role-based access control, manage permission groups, and define user-level overrides.",
       groupsTab: "Permission Groups",
       catalogTab: "Permission Catalog",
       overridesTab: "User Overrides",

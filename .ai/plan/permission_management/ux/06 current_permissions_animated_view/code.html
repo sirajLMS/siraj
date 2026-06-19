@@ -1,0 +1,341 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Current Permissions - Single Group View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#e1e3e2",
+                        "primary-container": "#98d1d0",
+                        "on-surface-variant": "#bfc8c7",
+                        "success": "#62DF7D",
+                        "sidebar": "#002626",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "on-background": "#e1e3e2",
+                        "surface-tint": "#98d1d0",
+                        "on-secondary-fixed": "#111c2d",
+                        "surface-container-lowest": "#0c0f0f",
+                        "surface-container-high": "#282a2a",
+                        "header-container": "#135E5E",
+                        "outline-variant": "#404848",
+                        "surface-dim": "#111414",
+                        "secondary-fixed": "#d8e3fa",
+                        "on-tertiary-container": "#5d4a71",
+                        "warning": "#FFBA46",
+                        "surface-container": "#1d2020",
+                        "primary-fixed": "#b3edec",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "surface": "#111414",
+                        "secondary": "#bcc7de",
+                        "primary": "#b4edec",
+                        "info": "#B4C5FF",
+                        "on-tertiary-fixed-variant": "#513f65",
+                        "surface-container-low": "#191c1c",
+                        "primary-fixed-dim": "#98d1d0",
+                        "error": "#FFB4AB",
+                        "tertiary-fixed-dim": "#d5bdeb",
+                        "on-secondary-container": "#aab5cc",
+                        "error-container": "#93000a",
+                        "on-secondary": "#263143",
+                        "inverse-primary": "#2e6767",
+                        "background": "#111414",
+                        "on-primary-fixed": "#002020",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#241337",
+                        "on-tertiary": "#3a284d",
+                        "on-primary": "#003737",
+                        "on-primary-fixed-variant": "#0f4f4f",
+                        "outline": "#899292",
+                        "surface-variant": "#323535",
+                        "secondary-container": "#3c475a",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#2e3131",
+                        "tertiary": "#efdbff",
+                        "on-surface": "#e1e3e2",
+                        "completed": "#DDB8FF",
+                        "on-primary-container": "#205b5b",
+                        "tertiary-fixed": "#efdbff",
+                        "tertiary-container": "#d5bdeb",
+                        "surface-container-highest": "#323535",
+                        "surface-bright": "#373a3a",
+                        "error-main": "#FFB4AB"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "grid-gutter": "16px",
+                        "cell-padding-y": "8px",
+                        "container-padding": "16px",
+                        "grid-margin": "24px",
+                        "unit": "4px",
+                        "cell-padding-x": "12px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "title-md": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        @media (prefers-reduced-motion: no-preference) {
+            .animate-fade-in-up {
+                animation: fade-in-up 0.5s ease-out forwards;
+                opacity: 0;
+            }
+            .animate-slide-down {
+                animation: slide-down 0.4s ease-out forwards;
+                opacity: 0;
+            }
+            .animate-shimmer-bg {
+                animation: shimmer-bg 3s infinite ease-in-out;
+            }
+            .animate-shimmer-icon {
+                animation: shimmer-icon 3s infinite ease-in-out;
+            }
+        }
+
+        @keyframes fade-in-up {
+            0% { opacity: 0; transform: translateY(12px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slide-down {
+            0% { opacity: 0; transform: translateY(-16px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer-bg {
+            0%, 100% { background-color: rgba(25, 28, 28, 0.6); }
+            50% { background-color: rgba(35, 40, 40, 0.7); }
+        }
+        @keyframes shimmer-icon {
+            0%, 100% { opacity: 0.5; text-shadow: 0 0 0 transparent; }
+            50% { opacity: 0.9; text-shadow: 0 0 6px rgba(255, 180, 171, 0.4); }
+        }
+
+        .delay-100 { animation-delay: 100ms; }
+        .delay-150 { animation-delay: 150ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-250 { animation-delay: 250ms; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen font-body-md">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full flex justify-between items-center h-16 px-grid-margin w-full bg-surface dark:bg-surface border-b border-outline-variant z-50">
+<div class="flex items-center gap-8">
+<span class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary">Abyssal Enterprise</span>
+<div class="hidden md:flex gap-6">
+<a class="text-on-surface-variant font-medium hover:text-primary-container transition-colors duration-200 cursor-pointer active:opacity-80 active:scale-95" href="#">Dashboard</a>
+<a class="text-on-surface-variant font-medium hover:text-primary-container transition-colors duration-200 cursor-pointer active:opacity-80 active:scale-95" href="#">Permissions</a>
+<a class="text-on-surface-variant font-medium hover:text-primary-container transition-colors duration-200 cursor-pointer active:opacity-80 active:scale-95" href="#">Audit Log</a>
+<a class="text-on-surface-variant font-medium hover:text-primary-container transition-colors duration-200 cursor-pointer active:opacity-80 active:scale-95" href="#">Settings</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary-container transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary-container transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95">help</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary-container transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95">account_circle</span>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-sidebar dark:bg-sidebar flex flex-col py-grid-margin gap-4 z-40 pt-20 hidden md:flex">
+<div class="px-6 mb-4">
+<div class="font-headline-md text-headline-md text-primary-container">Admin Console</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm mt-1">Permission Management</div>
+</div>
+<button class="mx-6 mb-6 bg-primary text-on-primary font-label-lg text-label-lg py-2 px-4 rounded-lg hover:bg-primary-fixed transition-all duration-200 active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span> New Permission Group
+        </button>
+<div class="flex-1 overflow-y-auto flex flex-col gap-1">
+<a class="text-on-surface-variant hover:text-on-surface mx-2 font-label-lg text-label-lg flex items-center gap-3 py-3 px-4 hover:bg-surface-container-high transition-all duration-200 ease-in-out rounded-lg active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]">security</span> Overview
+            </a>
+<a class="bg-primary-container text-on-primary-container rounded-xl mx-2 font-label-lg text-label-lg flex items-center gap-3 py-3 px-4 transition-all duration-200 ease-in-out active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">group_work</span> Access Groups
+            </a>
+<a class="text-on-surface-variant hover:text-on-surface mx-2 font-label-lg text-label-lg flex items-center gap-3 py-3 px-4 hover:bg-surface-container-high transition-all duration-200 ease-in-out rounded-lg active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]">rule_folder</span> Role Matrix
+            </a>
+<a class="text-on-surface-variant hover:text-on-surface mx-2 font-label-lg text-label-lg flex items-center gap-3 py-3 px-4 hover:bg-surface-container-high transition-all duration-200 ease-in-out rounded-lg active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]">settings_ethernet</span> Policy Engine
+            </a>
+<a class="text-on-surface-variant hover:text-on-surface mx-2 font-label-lg text-label-lg flex items-center gap-3 py-3 px-4 hover:bg-surface-container-high transition-all duration-200 ease-in-out rounded-lg active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span> System Health
+            </a>
+</div>
+<div class="mt-auto flex flex-col gap-1 pt-4 border-t border-outline-variant/30">
+<a class="text-on-surface-variant hover:text-on-surface mx-2 font-label-lg text-label-lg flex items-center gap-3 py-2 px-4 hover:bg-surface-container-high transition-all duration-200 ease-in-out rounded-lg active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]">menu_book</span> Documentation
+            </a>
+<a class="text-on-surface-variant hover:text-on-surface mx-2 font-label-lg text-label-lg flex items-center gap-3 py-2 px-4 hover:bg-surface-container-high transition-all duration-200 ease-in-out rounded-lg active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]">support_agent</span> Support
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-[280px] pt-16 min-h-screen p-grid-margin">
+<!-- Header -->
+<div class="mb-6 flex justify-between items-end">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Content Editors</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-1">Single Group View - Current Permissions</p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-surface-container-high text-on-surface border border-outline rounded hover:bg-surface-variant transition-all duration-200 active:scale-95 font-label-md text-label-md flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">filter_list</span> Filter
+                </button>
+</div>
+</div>
+<!-- Main Workspace Container -->
+<div class="bg-surface-container rounded-xl border border-outline-variant overflow-hidden flex flex-col">
+<!-- Bulk Action Bar (Pinned Header Style) -->
+<div class="bg-primary-container text-on-primary-container px-container-padding py-3 flex justify-between items-center border-b border-primary-container shadow-sm relative z-10 animate-slide-down">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<span class="font-title-md text-title-md font-semibold">2 items selected</span>
+</div>
+<button class="bg-error-container text-on-error-container px-4 py-2 rounded font-label-md text-label-md hover:opacity-90 hover:bg-error transition-all duration-200 active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+                    Remove Permissions
+                </button>
+</div>
+<!-- MultiSelectDataGrid -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<!-- Grid Header -->
+<thead class="bg-surface-container-high border-b border-outline">
+<tr>
+<th class="w-[48px] py-cell-padding-y px-cell-padding-x">
+<input class="w-4 h-4 rounded bg-surface border-outline text-primary focus:ring-primary focus:ring-offset-surface-container-high transition-all duration-200 hover:scale-110 active:scale-95" type="checkbox">
+</th>
+<th class="py-cell-padding-y px-cell-padding-x font-label-md text-label-md font-bold text-on-surface">Permission Key</th>
+<th class="py-cell-padding-y px-cell-padding-x font-label-md text-label-md font-bold text-on-surface">Category</th>
+<th class="py-cell-padding-y px-cell-padding-x font-label-md text-label-md font-bold text-on-surface">Requirement Status</th>
+<th class="py-cell-padding-y px-cell-padding-x font-label-md text-label-md font-bold text-on-surface text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant font-body-md text-body-md">
+<!-- Row 1: Normal -->
+<tr class="hover:bg-surface-container-high transition-colors duration-200 group animate-fade-in-up delay-100">
+<td class="w-[48px] py-cell-padding-y px-cell-padding-x">
+<input class="w-4 h-4 rounded bg-surface border-outline text-primary focus:ring-primary focus:ring-offset-surface transition-all duration-200 hover:scale-110 active:scale-95" type="checkbox">
+</td>
+<td class="py-cell-padding-y px-cell-padding-x font-mono text-[13px] text-on-surface-variant">content.view</td>
+<td class="py-cell-padding-y px-cell-padding-x text-on-surface">Content Management</td>
+<td class="py-cell-padding-y px-cell-padding-x">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm border border-outline-variant">
+                                    Inherited
+                                </span>
+</td>
+<td class="py-cell-padding-y px-cell-padding-x text-right">
+<button class="text-on-surface-variant hover:text-error transition-all duration-200 active:scale-90 p-1 opacity-0 group-hover:opacity-100 focus:opacity-100">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: CORE_LOCKED (Dimmed, Disabled) -->
+<tr class="bg-surface-container-low opacity-60 cursor-not-allowed animate-fade-in-up delay-150 animate-shimmer-bg">
+<td class="w-[48px] py-cell-padding-y px-cell-padding-x">
+<input class="w-4 h-4 rounded bg-surface border-outline-variant cursor-not-allowed opacity-50" disabled="" type="checkbox">
+</td>
+<td class="py-cell-padding-y px-cell-padding-x font-mono text-[13px] text-on-surface-variant">content.edit</td>
+<td class="py-cell-padding-y px-cell-padding-x text-on-surface">Content Management</td>
+<td class="py-cell-padding-y px-cell-padding-x">
+<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-error text-on-error font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+                                    Core
+                                </span>
+</td>
+<td class="py-cell-padding-y px-cell-padding-x text-right">
+<span class="material-symbols-outlined text-[20px] text-outline p-1 cursor-not-allowed animate-shimmer-icon">lock</span>
+</td>
+</tr>
+<!-- Row 3: Selected -->
+<tr class="bg-primary-container/10 border-l-2 border-l-primary hover:bg-primary-container/20 transition-colors duration-200 group animate-fade-in-up delay-200">
+<td class="w-[48px] py-cell-padding-y px-cell-padding-x">
+<input checked="" class="w-4 h-4 rounded bg-surface border-outline text-primary focus:ring-primary focus:ring-offset-primary-container/10 transition-all duration-200 hover:scale-110 active:scale-95" type="checkbox">
+</td>
+<td class="py-cell-padding-y px-cell-padding-x font-mono text-[13px] text-primary">media.upload</td>
+<td class="py-cell-padding-y px-cell-padding-x text-on-surface">Media</td>
+<td class="py-cell-padding-y px-cell-padding-x">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+                                    Custom
+                                </span>
+</td>
+<td class="py-cell-padding-y px-cell-padding-x text-right">
+<button class="text-on-surface-variant hover:text-error transition-all duration-200 active:scale-90 p-1 opacity-100">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: Selected -->
+<tr class="bg-primary-container/10 border-l-2 border-l-primary hover:bg-primary-container/20 transition-colors duration-200 group animate-fade-in-up delay-250">
+<td class="w-[48px] py-cell-padding-y px-cell-padding-x">
+<input checked="" class="w-4 h-4 rounded bg-surface border-outline text-primary focus:ring-primary focus:ring-offset-primary-container/10 transition-all duration-200 hover:scale-110 active:scale-95" type="checkbox">
+</td>
+<td class="py-cell-padding-y px-cell-padding-x font-mono text-[13px] text-primary">media.delete</td>
+<td class="py-cell-padding-y px-cell-padding-x text-on-surface">Media</td>
+<td class="py-cell-padding-y px-cell-padding-x">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+                                    Custom
+                                </span>
+</td>
+<td class="py-cell-padding-y px-cell-padding-x text-right">
+<button class="text-on-surface-variant hover:text-error transition-all duration-200 active:scale-90 p-1 opacity-100">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="bg-surface-container-high py-3 px-container-padding border-t border-outline-variant flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Showing 4 of 24 permissions</span>
+<div class="flex gap-2">
+<button class="p-1 rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-all duration-200 active:scale-90 disabled:opacity-50 disabled:active:scale-100" disabled="">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-all duration-200 active:scale-90">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

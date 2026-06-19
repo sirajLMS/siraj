@@ -1,4 +1,6 @@
 export interface PermissionsLabels {
+  title: string;
+  subtitle: string;
   groupsTab: string;
   catalogTab: string;
   overridesTab: string;

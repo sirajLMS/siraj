@@ -1,6 +1,8 @@
 import type { PermissionsLabels } from "../../../types/dashboard/permissions";
 
 export const permissions: PermissionsLabels = {
+  title: "إدارة الصلاحيات",
+  subtitle: "تهيئة التحكم بالوصول المستند إلى الأدوار، وإدارة مجموعات الصلاحيات، وتحديد استثناءات المستخدمين.",
   groupsTab: "مجموعات الصلاحيات",
   catalogTab: "فهرس الصلاحيات",
   overridesTab: "تخصيص الصلاحيات للمستخدم",

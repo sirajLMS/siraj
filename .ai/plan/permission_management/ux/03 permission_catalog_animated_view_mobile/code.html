@@ -1,0 +1,346 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Permission Catalog - Mobile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-primary": "#2e6767",
+                      "tertiary-container": "#d5bdeb",
+                      "primary-fixed": "#b3edec",
+                      "on-error": "#690005",
+                      "surface-variant": "#323535",
+                      "completed": "#DDB8FF",
+                      "on-error-container": "#ffdad6",
+                      "secondary": "#bcc7de",
+                      "on-secondary": "#263143",
+                      "primary": "#b4edec",
+                      "on-secondary-container": "#aab5cc",
+                      "sidebar": "#002626",
+                      "on-primary": "#003737",
+                      "surface-tint": "#98d1d0",
+                      "on-tertiary-fixed": "#241337",
+                      "secondary-container": "#3c475a",
+                      "header-container": "#135E5E",
+                      "error": "#FFB4AB",
+                      "tertiary": "#efdbff",
+                      "primary-fixed-dim": "#98d1d0",
+                      "success": "#62DF7D",
+                      "error-container": "#93000a",
+                      "tertiary-fixed-dim": "#d5bdeb",
+                      "tertiary-fixed": "#efdbff",
+                      "surface-container": "#1d2020",
+                      "on-tertiary": "#3a284d",
+                      "on-primary-fixed-variant": "#0f4f4f",
+                      "on-secondary-fixed": "#111c2d",
+                      "on-surface-variant": "#bfc8c7",
+                      "surface-bright": "#373a3a",
+                      "inverse-surface": "#e1e3e2",
+                      "background": "#111414",
+                      "surface-container-lowest": "#0c0f0f",
+                      "on-tertiary-container": "#5d4a71",
+                      "secondary-fixed": "#d8e3fa",
+                      "surface-container-low": "#191c1c",
+                      "info": "#B4C5FF",
+                      "warning": "#FFBA46",
+                      "on-tertiary-fixed-variant": "#513f65",
+                      "surface-container-high": "#282A2A",
+                      "surface-container-highest": "#323535",
+                      "on-secondary-fixed-variant": "#3c475a",
+                      "inverse-on-surface": "#2e3131",
+                      "on-primary-fixed": "#002020",
+                      "on-surface": "#e1e3e2",
+                      "on-primary-container": "#205b5b",
+                      "outline": "#899292",
+                      "surface-dim": "#111414",
+                      "on-background": "#e1e3e2",
+                      "primary-container": "#98d1d0",
+                      "outline-variant": "#404848",
+                      "surface": "#111414",
+                      "secondary-fixed-dim": "#bcc7de"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "grid-gutter": "16px",
+                      "cell-padding-x": "12px",
+                      "unit": "4px",
+                      "grid-margin": "24px",
+                      "cell-padding-y": "8px",
+                      "container-padding": "16px"
+              },
+              "fontFamily": {
+                      "title-md": [
+                              "Inter"
+                      ],
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "label-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "title-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "mono": [
+                              "JetBrains Mono"
+                      ]
+              },
+              "fontSize": {
+                      "title-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-lg": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.1px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.5px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-sm": [
+                              "11px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.5px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "title-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+            },
+          }
+        }
+      </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+      </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased md:hidden pb-[80px] pt-[64px]">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-grid-margin h-16 bg-header-container border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-weight="fill" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-headline-md text-headline-md font-bold text-on-primary-fixed">GuardRail</span>
+</div>
+<div>
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center border border-outline-variant overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKYRPmO0tCDOaYHbmv0sXNL9L-oDYfDyMB6p6t2qN_Nhjzu8NHUq8yG4yK3pL-YW8cq4DX_QHhIBwwYPFjBGbffPL12AdEihX6-h6eorbTXVjHYP2RbmtSawRpr316rJB5PKpL55X6--hKsQNH34WgxcjOcnf3DAMTNh6Do6h5oWC7dHf_IKJBAtjttyUaSjXMRj8h2eQonnpMvADS7FHD0RkHtG0FhfFQuDIDLL3SMBvaSm9EW64qc2Dgw59oamhMDuksmHY93wc">
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="px-container-padding py-4 space-y-6">
+<!-- Header Area -->
+<section class="space-y-1">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Permission Catalog</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">View all system permissions.</p>
+</section>
+<!-- Search & Filter -->
+<section class="space-y-3 sticky top-[64px] bg-background z-40 py-2 -mx-container-padding px-container-padding">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-full bg-surface-container border border-outline-variant rounded pl-10 pr-4 py-2 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors outline-none h-10" placeholder="Search permissions..." type="text">
+</div>
+<div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+<button class="shrink-0 px-3 py-1.5 bg-primary-container text-on-primary-container rounded-full font-label-md text-label-md border border-primary-container transition-colors">All</button>
+<button class="shrink-0 px-3 py-1.5 bg-surface-container border border-outline-variant text-on-surface-variant rounded-full font-label-md text-label-md hover:bg-surface-container-high transition-colors">Users</button>
+<button class="shrink-0 px-3 py-1.5 bg-surface-container border border-outline-variant text-on-surface-variant rounded-full font-label-md text-label-md hover:bg-surface-container-high transition-colors">Billing</button>
+<button class="shrink-0 px-3 py-1.5 bg-surface-container border border-outline-variant text-on-surface-variant rounded-full font-label-md text-label-md hover:bg-surface-container-high transition-colors">System</button>
+<button class="shrink-0 px-3 py-1.5 bg-surface-container border border-outline-variant text-on-surface-variant rounded-full font-label-md text-label-md hover:bg-surface-container-high transition-colors">Integration</button>
+</div>
+</section>
+<!-- Content (Permission Cards) -->
+<section class="space-y-4">
+<!-- Card 1 -->
+<div class="bg-surface-container rounded border border-outline-variant p-4 space-y-3 hover:border-primary-container transition-colors group">
+<div class="flex justify-between items-start gap-2">
+<div class="font-mono text-[14px] text-primary font-medium tracking-tight bg-primary-container/10 px-2 py-0.5 rounded">users.create</div>
+<span class="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant rounded font-label-sm text-label-sm border border-outline-variant whitespace-nowrap">User Management</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Allows creation of new user profiles within the tenant. Does not include role assignment privileges.</p>
+<div class="space-y-1.5 pt-2 border-t border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-on-surface-variant/70 uppercase tracking-wider">Used In</span>
+<div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+<span class="shrink-0 px-2 py-1 bg-secondary-container/50 text-on-secondary-container rounded font-label-sm text-label-sm border border-secondary-container/30">Admin</span>
+<span class="shrink-0 px-2 py-1 bg-secondary-container/50 text-on-secondary-container rounded font-label-sm text-label-sm border border-secondary-container/30">HR Manager</span>
+<span class="shrink-0 px-2 py-1 bg-secondary-container/50 text-on-secondary-container rounded font-label-sm text-label-sm border border-secondary-container/30">IT Support</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container rounded border border-outline-variant p-4 space-y-3 hover:border-primary-container transition-colors group">
+<div class="flex justify-between items-start gap-2">
+<div class="font-mono text-[14px] text-primary font-medium tracking-tight bg-primary-container/10 px-2 py-0.5 rounded">billing.invoices.read</div>
+<span class="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant rounded font-label-sm text-label-sm border border-outline-variant whitespace-nowrap">Billing</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Grants read-only access to past and current invoice details, tax summaries, and payment status.</p>
+<div class="space-y-1.5 pt-2 border-t border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-on-surface-variant/70 uppercase tracking-wider">Used In</span>
+<div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+<span class="shrink-0 px-2 py-1 bg-secondary-container/50 text-on-secondary-container rounded font-label-sm text-label-sm border border-secondary-container/30">Admin</span>
+<span class="shrink-0 px-2 py-1 bg-secondary-container/50 text-on-secondary-container rounded font-label-sm text-label-sm border border-secondary-container/30">Finance Controller</span>
+<span class="shrink-0 px-2 py-1 bg-secondary-container/50 text-on-secondary-container rounded font-label-sm text-label-sm border border-secondary-container/30">Auditor</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container rounded border border-error/30 p-4 space-y-3 hover:border-error/60 transition-colors group relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-error/5 -rotate-45 translate-x-8 -translate-y-8"></div>
+<div class="flex justify-between items-start gap-2 relative z-10">
+<div class="font-mono text-[14px] text-error font-medium tracking-tight bg-error/10 px-2 py-0.5 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+                        system.audit_logs.delete
+                    </div>
+<span class="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant rounded font-label-sm text-label-sm border border-outline-variant whitespace-nowrap">System</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 relative z-10">Critical permission allowing the irreversible deletion of system audit trails. Restricted usage recommended.</p>
+<div class="space-y-1.5 pt-2 border-t border-outline-variant/50 relative z-10">
+<span class="font-label-sm text-label-sm text-on-surface-variant/70 uppercase tracking-wider">Used In</span>
+<div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+<span class="shrink-0 px-2 py-1 bg-secondary-container/50 text-on-secondary-container rounded font-label-sm text-label-sm border border-secondary-container/30">Super Admin</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container rounded border border-outline-variant p-4 space-y-3 hover:border-primary-container transition-colors group">
+<div class="flex justify-between items-start gap-2">
+<div class="font-mono text-[14px] text-primary font-medium tracking-tight bg-primary-container/10 px-2 py-0.5 rounded">api.keys.generate</div>
+<span class="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant rounded font-label-sm text-label-sm border border-outline-variant whitespace-nowrap">Integration</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">Permits the generation of long-lived API tokens for external system integrations and automation scripts.</p>
+<div class="space-y-1.5 pt-2 border-t border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-on-surface-variant/70 uppercase tracking-wider">Used In</span>
+<div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+<span class="shrink-0 px-2 py-1 bg-secondary-container/50 text-on-secondary-container rounded font-label-sm text-label-sm border border-secondary-container/30">Admin</span>
+<span class="shrink-0 px-2 py-1 bg-secondary-container/50 text-on-secondary-container rounded font-label-sm text-label-sm border border-secondary-container/30">Developer</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom padding for nav bar -->
+<div class="h-6 w-full"></div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 pb-safe px-2 bg-surface-container-low border-t border-outline-variant">
+<!-- Inactive: Groups -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high w-20 py-2 rounded transition-colors group" href="#">
+<span class="material-symbols-outlined mb-1 group-active:scale-90 duration-150 transition-transform">group</span>
+<span class="font-label-sm text-label-sm">Groups</span>
+</a>
+<!-- Active: Catalog -->
+<a class="flex flex-col items-center justify-center w-20 py-2 group" href="#">
+<div class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-5 py-1 mb-1 group-active:scale-90 duration-150 transition-transform">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">shield_person</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary-fixed">Catalog</span>
+</a>
+<!-- Inactive: Overrides -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high w-20 py-2 rounded transition-colors group" href="#">
+<span class="material-symbols-outlined mb-1 group-active:scale-90 duration-150 transition-transform">edit_calendar</span>
+<span class="font-label-sm text-label-sm">Overrides</span>
+</a>
+</nav>
+</body></html>
