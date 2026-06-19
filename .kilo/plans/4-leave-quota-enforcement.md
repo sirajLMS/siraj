@@ -5,7 +5,7 @@
 **Security baseline:** `.ai/done/service/1-sprint_1__db_repo_service_enhancments.md` (mandatory prerequisite)  
 **Story scope:** Implement automated leave quota enforcement (`system.enforce_leave_limit`), extend future schedule verification with "Re Scheduled" badge, and enable admin processing of subsequent leave requests with quota tracking awareness  
 **Target roles:** Academy Admin (audit future calendar, process reschedule up to limits), Teacher (view future personal schedules, leave requests gated by system limits), System Automated (validate operational constraints)  
-**Status:** Planning phase — awaiting approval for execution  
+**Status:** In progress — Task A (Permission + Settings) complete  
 **Last updated:** 2026-06-19  
 
 ---
@@ -801,12 +801,12 @@ bun run scripts/dbActions.ts seed
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `SYSTEM_ENFORCE_LEAVE_LIMIT = "system.enforce_leave_limit"` exists in `shared/lib/enum.ts`
-- [ ] `system.enforce_leave_limit` is added to `backend/db/migration/3-system_permissions_and_groups.sql`
-- [ ] `teacher_max_leaves` and `student_max_leaves` are seeded in `system_settings` table
-- [ ] `bun run scripts/dbActions.ts push` completes without errors (enum migration applied)
-- [ ] `bun tsgo` passes with no type errors
-- [ ] No hardcoded strings introduced
+- [x] `SYSTEM_ENFORCE_LEAVE_LIMIT = "system.enforce_leave_limit"` exists in `shared/lib/enum.ts`
+- [x] `system.enforce_leave_limit` is added to `backend/db/migration/3-system_permissions_and_groups.sql`
+- [x] `teacher_max_leaves` and `student_max_leaves` are seeded in `system_settings` table
+- [x] `bun run scripts/dbActions.ts push` completes without errors (enum migration applied)
+- [x] `bun tsgo` passes with no type errors (2 pre-existing errors in unrelated permissions UI components)
+- [x] No hardcoded strings introduced
 
 ---
 
@@ -2127,7 +2127,7 @@ bun quality-gate
 ## Section 8: Task Execution Order & Dependencies
 
 ```
-Task A (Permission + Settings)
+Task A (Permission + Settings) ✅ DONE
   ↓
 Task B (Service Layer Quota Enforcement)
   ├── CRITICAL: processClassLeave modified to include quota increment inside its transaction
