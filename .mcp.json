@@ -34,6 +34,15 @@
     "siraj": {
       "url": "http://localhost:6006/mcp",
       "type": "http"
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "bun",
+        "x",
+        "-y",
+        "@playwright/mcp@0.0.38"
+      ]
     }
   }
 }

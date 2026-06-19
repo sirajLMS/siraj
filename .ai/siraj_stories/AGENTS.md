@@ -175,7 +175,7 @@ A checklist to run before executing the plan to confirm previous sprint work is 
 ## Section 5: Prerequisites Verification (BLOCKING)
 
 Before starting story work, verify previous migrations:
-- [ ] Run `bun test backend/db/test/logic/class_instances_security.test.ts` to confirm Story 1 security baselines pass.
+- [ ] Run `bun run test:db` (or `bun test backend/db/test/logic/class_instances_security.test.ts`) to confirm Story 1 security baselines pass.
 - [ ] Verify that schema columns `remarks`, `quotaDeducted`, and `isRescheduled` exist in `backend/db/schema/scheduling.ts`.
 ```
 
@@ -234,16 +234,16 @@ async resetClassInstance(id: number, actorUserId: number, locale?: string): Prom
 Ensure unit tests verify both success states and rollback behavior on invalid inputs.
 
 **Test Execution Requirements:**
-- **Run the whole test suite:** Run `bun test` across the database folder to make sure no existing tests are broken.
+- **Run the whole test suite:** Run `bun run test:db` across the database folder to make sure no existing tests are broken.
   ```bash
-  ~/.bun/bin/bun test backend/db/test/
+  bun run test:db
   ```
 
 **Success Criteria / Check Progress Points:**
 - [ ] `resetClassInstance` is fully implemented and resets the table state.
 - [ ] Student quota is restored successfully if it was deducted.
 - [ ] No compilation errors when compiling the database repository.
-- [ ] `bun test` passes successfully for all database tests (0 failures).
+- [ ] `bun run test:db` passes successfully for all database tests (0 failures).
 ```
 
 #### *Example Task B (Frontend & Views):*
@@ -280,7 +280,7 @@ Render an accessible `<Dialog>` component enclosing localized text and theme-com
 **Test Execution Requirements:**
 - **Run the entire test suite:** Run the full frontend and graphql tests to ensure there are no breaking changes.
   ```bash
-  ~/.bun/bin/bun test frontend/graphql/test/
+  bun run test:graphql
   ```
 
 **Success Criteria / Check Progress Points:**
@@ -303,7 +303,7 @@ Execute the following commands in order to guarantee system stability and preven
 1. `bun run generate:gqlSchema` (checks GraphQL schema integration)
 2. `bun codegen` (updates types and queries)
 3. `bun tsgo` (runs global TypeScript typecheck)
-4. `bun test` (runs all unit and integration tests across backend and frontend)
+4. `bun run test` (runs all unit and integration tests across backend and frontend)
 ```
 
 ---

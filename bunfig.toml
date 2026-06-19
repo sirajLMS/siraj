@@ -1,0 +1,3 @@
+[test]
+preload = ["./backend/db/test/logger-mock.ts"]
+

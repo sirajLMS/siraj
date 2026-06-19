@@ -70,4 +70,4 @@ This directory contains database integration tests. Follow these guidelines to e
 
 14. **Coverage Requirements**
     - All repository tests located in the `repo/` directory MUST achieve **100% code coverage** (lines and functions).
-    - After writing or updating a repository test, always verify coverage by running `bun run test:coverage <path-to-test-file>`.
+    - After writing or updating a repository test, always verify coverage by running `bun test --coverage <path-to-test-file>` or `bun run test:db:coverage` for the full suite.
