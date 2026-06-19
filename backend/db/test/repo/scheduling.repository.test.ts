@@ -886,9 +886,7 @@ describe("Scheduling Repository logic", () => {
           usedCount: 2,
         });
 
-        await expectRepositoryError(() =>
-          SchedulingRepository.processClassLeave(id, "Third leave", u, tx, "en")
-        );
+        await expectRepositoryError(() => SchedulingRepository.processClassLeave(id, "Third leave", u, tx, "en"));
       });
     });
 
@@ -909,12 +907,7 @@ describe("Scheduling Repository logic", () => {
         await SchedulingRepository.activateClassInstance(instance1.id, teacher.userId, { force: false }, tx);
         await SchedulingRepository.processClassLeave(instance1.id, "Leave 1", teacher.userId, tx, "en");
 
-        const usage1 = await SchedulingRepository.getTeacherLeaveQuotaUsage(
-          teacher.id,
-          currentYear,
-          currentMonth,
-          tx
-        );
+        const usage1 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
         expect(usage1).toBe(1);
 
         const { student: student3 } = await setupTestEntities(tx, "QuotaMulti3", { skipInstance: true });
@@ -929,12 +922,7 @@ describe("Scheduling Repository logic", () => {
         await SchedulingRepository.activateClassInstance(instance2.id, teacher.userId, { force: false }, tx);
         await SchedulingRepository.processClassLeave(instance2.id, "Leave 2", teacher.userId, tx, "en");
 
-        const usage2 = await SchedulingRepository.getTeacherLeaveQuotaUsage(
-          teacher.id,
-          currentYear,
-          currentMonth,
-          tx
-        );
+        const usage2 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
         expect(usage2).toBe(2);
       });
     });

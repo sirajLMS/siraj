@@ -309,9 +309,7 @@ describe("Leave Quota Repository Methods", () => {
       const { teacher } = await setupTeacherAndStudent(tx);
       await insertLeaveQuota(tx, { teacherId: teacher.id, year: currentYear, month: currentMonth, count: 2 });
 
-      await expectLeaveQuotaExceeded(() =>
-        SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, "en")
-      );
+      await expectLeaveQuotaExceeded(() => SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, "en"));
     });
     testLogger.info("incrementTeacherLeaveQuota trigger block passed.");
   });

@@ -3,31 +3,16 @@
   "mcp": {
     "mui-mcp": {
       "type": "local",
-      "command": [
-        "bun",
-        "x",
-        "-y",
-        "@mui/mcp@latest"
-      ],
+      "command": ["bun", "x", "-y", "@mui/mcp@latest"],
       "enabled": true
     },
     "next-devtools": {
-      "command": [
-        "bun",
-        "x",
-        "-y",
-        "next-devtools-mcp@latest"
-      ],
+      "command": ["bun", "x", "-y", "next-devtools-mcp@latest"],
       "enabled": true
     },
     "playwright": {
       "type": "local",
-      "command": [
-        "bun",
-        "x",
-        "-y",
-        "@playwright/mcp@0.0.38"
-      ]
+      "command": ["bun", "x", "-y", "@playwright/mcp@0.0.38"]
     }
   }
 }

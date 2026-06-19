@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
-import { testLogger } from "@/shared/lib/testlogger";
 import type { TeacherEntity, UserEntity } from "@/backend/types";
+import { testLogger } from "@/shared/lib/testlogger";
 import { leaveQuotaUsage, systemSettings, teachers, users } from "../../../db/schema";
 import { type DbTransaction, runInRollback } from "../../../db/test/test-utils";
 

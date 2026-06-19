@@ -54,4 +54,3 @@ mock.module("@/backend/lib/logger", () => ({
     debug: noop,
   },
 }));
-

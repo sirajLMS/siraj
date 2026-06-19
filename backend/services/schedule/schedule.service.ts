@@ -129,17 +129,9 @@ export namespace ScheduleService {
     const periodMonth = now.getUTCMonth() + 1;
 
     const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2);
-    const usedLeaves = await SchedulingRepository.getTeacherLeaveQuotaUsage(
-      teacherRecord.id,
-      periodYear,
-      periodMonth
-    );
+    const usedLeaves = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacherRecord.id, periodYear, periodMonth);
 
-    const futureClasses = await SchedulingRepository.getTeacherFutureClasses(
-      teacherRecord.id,
-      fromDate,
-      toDate
-    );
+    const futureClasses = await SchedulingRepository.getTeacherFutureClasses(teacherRecord.id, fromDate, toDate);
 
     const classes = futureClasses.map(cls => {
       const classStart = new Date(cls.scheduledStartAt);

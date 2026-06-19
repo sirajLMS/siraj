@@ -231,8 +231,7 @@ export type TeacherFutureScheduleDefinition = {
   classes: FutureClassDefinition[];
 };
 
-const TeacherFutureScheduleRef =
-  gqlSchemaBuilder.objectRef<TeacherFutureScheduleDefinition>("TeacherFutureSchedule");
+const TeacherFutureScheduleRef = gqlSchemaBuilder.objectRef<TeacherFutureScheduleDefinition>("TeacherFutureSchedule");
 
 export const TeacherFutureSchedulePothosObject = TeacherFutureScheduleRef.implement({
   fields: t => ({
