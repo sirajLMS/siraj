@@ -110,6 +110,10 @@ export interface ScheduleOverviewData {
   readonly detailsLabel: string;
   readonly emptyMessage: string;
   readonly showingText: string;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+  readonly onPageChange: (page: number) => void;
   readonly onSearchChange: (value: string) => void;
   readonly onDateChange: (date: string) => void;
   readonly onTeacherChange: (teacher: string) => void;

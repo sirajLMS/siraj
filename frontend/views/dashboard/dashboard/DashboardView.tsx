@@ -14,7 +14,6 @@ interface AdminDashboardViewProps extends ScheduleOverviewData {
   readonly onMetricClick?: (key: string) => void;
 
   readonly scheduleTitle: string;
-  readonly viewAllLabel?: string;
   readonly loadingTeachers?: boolean;
   readonly teacherSearchValue?: string;
   readonly onTeacherSearchChange?: (search: string) => void;
@@ -26,7 +25,6 @@ export function DashboardView({
   metrics,
   onMetricClick,
   scheduleTitle,
-  viewAllLabel,
   searchPlaceholder,
   searchValue,
   dateLabel,
@@ -44,6 +42,10 @@ export function DashboardView({
   detailsLabel,
   emptyMessage,
   showingText,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
   onSearchChange,
   onDateChange,
   onTeacherChange,
@@ -65,7 +67,6 @@ export function DashboardView({
       <RequirePermission permissions={[AppPermission.ScheduleViewList]}>
         <ScheduleOverviewSection
           title={scheduleTitle}
-          viewAllLabel={viewAllLabel}
           searchPlaceholder={searchPlaceholder}
           searchValue={searchValue}
           dateLabel={dateLabel}
@@ -83,6 +84,10 @@ export function DashboardView({
           detailsLabel={detailsLabel}
           emptyMessage={emptyMessage}
           showingText={showingText}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
           onSearchChange={onSearchChange}
           onDateChange={onDateChange}
           onTeacherChange={onTeacherChange}

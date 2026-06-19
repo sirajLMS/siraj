@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { useMockDashboardStore } from "@/frontend/stores/mockDashboardStore";
 import { DashboardView } from "./DashboardView";
 import { useAdminDashboardLabels } from "./utils";
@@ -18,6 +19,8 @@ export function MockAdminDashboardContainer() {
   const setDateFilter = useMockDashboardStore(state => state.setDateFilter);
   const setTeacherFilter = useMockDashboardStore(state => state.setTeacherFilter);
   const setSearchQuery = useMockDashboardStore(state => state.setSearchQuery);
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
 
   const handleSubmit = () => {
     // Placeholder for story submit
@@ -50,9 +53,11 @@ export function MockAdminDashboardContainer() {
     return true;
   });
 
+  const paginatedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
+
   const showingText = t("admin.showingOf", {
-    shown: filteredRows.length,
-    total: scheduleRows.length,
+    shown: paginatedRows.length,
+    total: filteredRows.length,
   });
 
   return (
@@ -70,12 +75,16 @@ export function MockAdminDashboardContainer() {
       teacherValue={filters.teacherId}
       submitLabel={t("admin.submit")}
       teachers={teachers}
-      rows={filteredRows}
+      rows={paginatedRows}
       headers={headers}
       statusLabels={statusLabels}
       detailsLabel={t("admin.details")}
       emptyMessage={t("admin.noClasses")}
       showingText={showingText}
+      page={page}
+      pageSize={pageSize}
+      totalCount={filteredRows.length}
+      onPageChange={setPage}
       onSearchChange={setSearchQuery}
       onDateChange={setDateFilter}
       onTeacherChange={setTeacherFilter}

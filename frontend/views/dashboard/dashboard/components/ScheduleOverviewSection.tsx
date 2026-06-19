@@ -1,7 +1,7 @@
 "use client";
 
-import { CalendarMonthOutlined, SearchOutlined } from "@mui/icons-material";
-import { Box, Button, IconButton, InputAdornment, Paper, TextField, Typography } from "@mui/material";
+import { ChevronLeft, ChevronRight, SearchOutlined } from "@mui/icons-material";
+import { Box, IconButton, InputAdornment, Paper, TextField, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -15,7 +15,6 @@ export interface ScheduleOverviewSectionProps extends ScheduleOverviewData {
   readonly loadingTeachers?: boolean;
   readonly teacherSearchValue?: string;
   readonly onTeacherSearchChange?: (search: string) => void;
-  readonly viewAllLabel?: string;
 }
 
 const SectionFooter = ({ showingText }: { showingText: string }) => {
@@ -61,7 +60,10 @@ export function ScheduleOverviewSection({
   detailsLabel,
   emptyMessage,
   showingText,
-  viewAllLabel,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
   onSearchChange,
   onDateChange,
   onTeacherChange,
@@ -152,33 +154,18 @@ export function ScheduleOverviewSection({
 
       {/* Mobile Layout */}
       <Box sx={{ display: { xs: "block", md: "none" }, mb: 3 }}>
-        {/* Title + View All */}
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-          <Typography
-            variant="titleLg"
-            sx={theme => ({
-              color: theme.palette.primary.main,
-            })}
-          >
-            {title}
-          </Typography>
-          {viewAllLabel && (
-            <Button
-              variant="text"
-              size="small"
-              sx={theme => ({
-                color: theme.palette.primary.main,
-                typography: "labelUppercase",
-                textTransform: "none",
-                gap: 0.5,
-              })}
-            >
-              {viewAllLabel}
-            </Button>
-          )}
-        </Box>
+        {/* Title */}
+        <Typography
+          variant="titleLg"
+          sx={theme => ({
+            color: theme.palette.primary.main,
+            mb: 2,
+          })}
+        >
+          {title}
+        </Typography>
 
-        {/* Search + Calendar */}
+        {/* Search */}
         <Box sx={{ display: "flex", gap: 1.5, mb: 3 }}>
           <RequirePermission permissions={[AppPermission.DashboardSearch]}>
             <TextField
@@ -206,23 +193,6 @@ export function ScheduleOverviewSection({
               }}
             />
           </RequirePermission>
-          <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>
-            <IconButton
-              onClick={() => {
-                // Open date picker or trigger filter
-              }}
-              sx={theme => ({
-                width: 40,
-                height: 40,
-                borderRadius: 2,
-                border: `1px solid ${theme.palette.border.light}`,
-                bgcolor: theme.palette.surfaceContainerLowest,
-                color: theme.palette.primary.main,
-              })}
-            >
-              <CalendarMonthOutlined />
-            </IconButton>
-          </RequirePermission>
         </Box>
 
         {/* Card List */}
@@ -232,6 +202,60 @@ export function ScheduleOverviewSection({
           detailsLabel={detailsLabel}
           emptyMessage={emptyMessage}
         />
+
+        {/* Pagination Footer */}
+        {totalCount > pageSize && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mt: 2,
+              px: 1,
+            }}
+          >
+            <Typography
+              variant="labelMd"
+              sx={theme => ({
+                color: theme.palette.text.secondary,
+              })}
+            >
+              {showingText}
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <IconButton
+                size="small"
+                disabled={page === 0}
+                onClick={() => onPageChange(page - 1)}
+                sx={theme => ({
+                  border: `1px solid ${theme.palette.border.light}`,
+                  borderRadius: 1,
+                  bgcolor: theme.palette.surfaceContainerLowest,
+                  "&.Mui-disabled": {
+                    opacity: 0.5,
+                  },
+                })}
+              >
+                <ChevronLeft fontSize="small" />
+              </IconButton>
+              <IconButton
+                size="small"
+                disabled={page >= Math.ceil(totalCount / pageSize) - 1}
+                onClick={() => onPageChange(page + 1)}
+                sx={theme => ({
+                  border: `1px solid ${theme.palette.border.light}`,
+                  borderRadius: 1,
+                  bgcolor: theme.palette.surfaceContainerLowest,
+                  "&.Mui-disabled": {
+                    opacity: 0.5,
+                  },
+                })}
+              >
+                <ChevronRight fontSize="small" />
+              </IconButton>
+            </Box>
+          </Box>
+        )}
       </Box>
     </>
   );

@@ -17,7 +17,7 @@ import {
   ScienceOutlined,
 } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   dailyScheduleListQueryDocument,
@@ -67,6 +67,13 @@ export function AdminDashboardContainer() {
   });
 
   const [teacherSearchQuery, setTeacherSearchQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
+
+  // Reset page to 0 when filters change
+  useEffect(() => {
+    setPage(0);
+  }, []);
 
   // Fetch teachers list using the new teachers query
   const { data: teachersData, loading: loadingTeachers } = useQuery(teachersQueryDocument, {
@@ -212,9 +219,12 @@ export function AdminDashboardContainer() {
     return true;
   });
 
+  // Client-side pagination
+  const paginatedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
+
   const showingText = t("admin.showingOf", {
-    shown: filteredRows.length,
-    total: mappedRows.length,
+    shown: paginatedRows.length,
+    total: filteredRows.length,
   });
 
   const isLoading = loadingMetrics || loadingList;
@@ -226,7 +236,6 @@ export function AdminDashboardContainer() {
       metrics={metricsList}
       onMetricClick={handleMetricClick}
       scheduleTitle={t("admin.scheduleOverview")}
-      viewAllLabel={t("admin.viewAll")}
       searchPlaceholder={t("admin.searchPlaceholder")}
       searchValue={filters.searchQuery}
       dateLabel={t("admin.listOfClassesOn")}
@@ -238,12 +247,16 @@ export function AdminDashboardContainer() {
       loadingTeachers={loadingTeachers}
       teacherSearchValue={teacherSearchQuery}
       onTeacherSearchChange={setTeacherSearchQuery}
-      rows={filteredRows}
+      rows={paginatedRows}
       headers={headers}
       statusLabels={statusLabels}
       detailsLabel={t("admin.details")}
       emptyMessage={isLoading ? "Loading..." : t("admin.noClasses")}
       showingText={showingText}
+      page={page}
+      pageSize={pageSize}
+      totalCount={filteredRows.length}
+      onPageChange={setPage}
       onSearchChange={setSearchQuery}
       onDateChange={setDateFilter}
       onTeacherChange={setTeacherFilter}
