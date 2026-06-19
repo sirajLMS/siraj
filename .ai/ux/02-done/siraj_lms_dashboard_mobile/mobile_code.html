@@ -1,0 +1,419 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              secondary: "#545f73",
+              "secondary-container": "#d5e0f8",
+              "on-secondary-fixed": "#111c2d",
+              "border-subtle": "#E2E8F0",
+              "surface-bright": "#f7f9fb",
+              "tertiary-fixed": "#71f8e4",
+              "inverse-surface": "#2d3133",
+              "on-tertiary-fixed": "#00201c",
+              "surface-container-high": "#e6e8ea",
+              tertiary: "#00352f",
+              primary: "#003535",
+              "surface-tint": "#2e6767",
+              "on-surface-variant": "#404848",
+              "primary-container": "#0d4d4d",
+              "on-error": "#ffffff",
+              "on-surface": "#191c1e",
+              "secondary-fixed-dim": "#bcc7de",
+              "text-muted": "#64748B",
+              "on-secondary-fixed-variant": "#3c475a",
+              background: "#f7f9fb",
+              "primary-fixed-dim": "#98d1d0",
+              "on-tertiary-container": "#33c7b4",
+              outline: "#707978",
+              "surface-dim": "#d8dadc",
+              "inverse-on-surface": "#eff1f3",
+              "surface-container-highest": "#e0e3e5",
+              "navbar-teal": "#135E5E",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-variant": "#e0e3e5",
+              "on-background": "#191c1e",
+              "on-secondary": "#ffffff",
+              "primary-fixed": "#b4edec",
+              "error-container": "#ffdad6",
+              "secondary-fixed": "#d8e3fb",
+              error: "#ba1a1a",
+              "on-primary": "#ffffff",
+              "on-error-container": "#93000a",
+              "outline-variant": "#bfc8c8",
+              "surface-container-lowest": "#ffffff",
+              "tertiary-container": "#004e46",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-primary-fixed": "#002020",
+              "on-primary-container": "#85bdbc",
+              "sidebar-bg": "#0F3D3D",
+              "surface-container-low": "#f2f4f6",
+              "on-tertiary": "#ffffff",
+              "surface-container": "#eceef0",
+              "tertiary-fixed-dim": "#4fdbc8",
+              surface: "#f7f9fb",
+              "inverse-primary": "#98d1d0",
+              "on-secondary-container": "#586377",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "navbar-height": "64px",
+              gutter: "1.5rem",
+              "card-padding": "1.5rem",
+              "auth-width": "420px",
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+            },
+            fontFamily: {
+              display: ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "headline-lg": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "body-lg": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        display: inline-block;
+        line-height: 1;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+      }
+      body {
+        background-color: #f8fafc;
+      }
+      .metric-card-shadow {
+        box-shadow:
+          0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body class="font-body-md text-on-surface select-none">
+    <!-- TopAppBar -->
+    <header
+      class="fixed top-0 w-full z-50 bg-navbar-teal dark:bg-primary-container text-on-primary dark:text-on-primary-container flex justify-between items-center h-navbar-height px-4"
+    >
+      <div class="flex items-center gap-3">
+        <button
+          class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary-container/20 transition-colors"
+        >
+          <span class="material-symbols-outlined" data-icon="menu">menu</span>
+        </button>
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-primary">Siraj LMS</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          class="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary-container/20 transition-colors"
+        >
+          <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+        </button>
+        <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-on-primary/20">
+          <img
+            alt="User"
+            data-alt="A professional headshot of a middle-aged academic administrator with a warm, confident expression. The person is wearing professional business attire against a blurred office background that hints at an educational institution. The lighting is soft and high-key, maintaining a corporate and efficient aesthetic consistent with a modern learning management system."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLsvBHu5d3KnjFbbXULXnfHIK1EeEJGUlcukO1yAMP1MxDhOrM2A9BB2szqgjnfQGwiXkLwcm3lX5MJD4Xj6bgDyvxoHJ2Z15bAvaMhTx8gzme7icvy9bnDahQ0ToR-zSFu8WxLejXfxizjATYbZVVf2CpvUoUOA-IAYJ5Po4_k8t7mCI0gJEvmeDx6RtYRSmBLmghu4gfaG8XNqJ5-W11xUSPQP_CHqAll6MKE7afdlAaHrp9z96NcIdpaJ"
+          />
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="pt-20 pb-24 px-4 max-w-md mx-auto">
+      <!-- Welcome Section -->
+      <section class="mb-6">
+        <p class="text-text-muted font-label-md uppercase tracking-wider">Dashboard Overview</p>
+        <h2 class="font-headline-md text-headline-md text-primary mt-1">Today Classes</h2>
+      </section>
+      <!-- Metric Cards 2-column grid -->
+      <section class="grid grid-cols-2 gap-4 mb-8">
+        <!-- Card 1 -->
+        <div
+          class="bg-surface-container-lowest rounded-xl p-4 metric-card-shadow flex flex-col justify-between h-32 border border-border-subtle/50 active:scale-95 transition-transform"
+        >
+          <div class="flex justify-between items-start">
+            <div
+              class="w-10 h-10 rounded-full border-2 border-navbar-teal flex items-center justify-center text-navbar-teal"
+            >
+              <span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+            </div>
+          </div>
+          <div>
+            <span class="block font-display text-headline-md leading-none mb-1">12</span>
+            <span class="text-text-muted font-label-md">Active Classes</span>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div
+          class="bg-surface-container-lowest rounded-xl p-4 metric-card-shadow flex flex-col justify-between h-32 border border-border-subtle/50 active:scale-95 transition-transform"
+        >
+          <div class="flex justify-between items-start">
+            <div
+              class="w-10 h-10 rounded-full border-2 border-navbar-teal flex items-center justify-center text-navbar-teal"
+            >
+              <span class="material-symbols-outlined" data-icon="person">person</span>
+            </div>
+          </div>
+          <div>
+            <span class="block font-display text-headline-md leading-none mb-1">48</span>
+            <span class="text-text-muted font-label-md">Total Students</span>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div
+          class="bg-surface-container-lowest rounded-xl p-4 metric-card-shadow flex flex-col justify-between h-32 border border-border-subtle/50 active:scale-95 transition-transform"
+        >
+          <div class="flex justify-between items-start">
+            <div
+              class="w-10 h-10 rounded-full border-2 border-navbar-teal flex items-center justify-center text-navbar-teal"
+            >
+              <span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+            </div>
+          </div>
+          <div>
+            <span class="block font-display text-headline-md leading-none mb-1">85%</span>
+            <span class="text-text-muted font-label-md">Attendance</span>
+          </div>
+        </div>
+        <!-- Card 4 -->
+        <div
+          class="bg-surface-container-lowest rounded-xl p-4 metric-card-shadow flex flex-col justify-between h-32 border border-border-subtle/50 active:scale-95 transition-transform"
+        >
+          <div class="flex justify-between items-start">
+            <div
+              class="w-10 h-10 rounded-full border-2 border-navbar-teal flex items-center justify-center text-navbar-teal"
+            >
+              <span class="material-symbols-outlined" data-icon="pending_actions">pending_actions</span>
+            </div>
+          </div>
+          <div>
+            <span class="block font-display text-headline-md leading-none mb-1">04</span>
+            <span class="text-text-muted font-label-md">Pending Tasks</span>
+          </div>
+        </div>
+      </section>
+      <!-- Schedule Overview Section -->
+      <section class="mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-title-lg text-title-lg text-primary">Schedule Overview</h3>
+          <button class="text-navbar-teal font-button-text flex items-center gap-1">
+            View All
+            <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+          </button>
+        </div>
+        <!-- Filters -->
+        <div class="flex gap-3 mb-6">
+          <div class="relative flex-1">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-muted"
+              data-icon="search"
+              >search</span
+            >
+            <input
+              class="w-full pl-10 pr-4 py-3 bg-white border border-border-subtle rounded-xl focus:outline-none focus:ring-2 focus:ring-navbar-teal/20 focus:border-navbar-teal transition-all text-body-md"
+              placeholder="Search students..."
+              type="text"
+            />
+          </div>
+          <button
+            class="w-12 h-12 flex items-center justify-center bg-white border border-border-subtle rounded-xl text-primary active:bg-surface-container-high transition-colors"
+          >
+            <span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+          </button>
+        </div>
+        <!-- Schedule List -->
+        <div class="space-y-3">
+          <!-- Class Card 1 -->
+          <div
+            class="bg-white p-4 rounded-xl border-l-4 border-navbar-teal shadow-sm flex items-center justify-between"
+          >
+            <div class="flex flex-col gap-1">
+              <div class="flex items-center gap-2">
+                <span class="font-label-md text-text-muted uppercase">ID: SR-204</span>
+                <span class="w-1 h-1 bg-border-subtle rounded-full"></span>
+                <span class="text-navbar-teal font-bold font-body-md">09:30 AM</span>
+              </div>
+              <h4 class="font-title-lg text-on-surface">Mathematics Advanced</h4>
+              <p class="text-text-muted font-body-md">Student: Ahmad Al-Farsi</p>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-md"
+                >Ongoing</span
+              >
+              <button class="w-8 h-8 flex items-center justify-center text-text-muted">
+                <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+              </button>
+            </div>
+          </div>
+          <!-- Class Card 2 -->
+          <div
+            class="bg-white p-4 rounded-xl border-l-4 border-outline-variant shadow-sm flex items-center justify-between"
+          >
+            <div class="flex flex-col gap-1">
+              <div class="flex items-center gap-2">
+                <span class="font-label-md text-text-muted uppercase">ID: SR-112</span>
+                <span class="w-1 h-1 bg-border-subtle rounded-full"></span>
+                <span class="text-text-muted font-body-md">11:00 AM</span>
+              </div>
+              <h4 class="font-title-lg text-on-surface">Physics Principle</h4>
+              <p class="text-text-muted font-body-md">Student: Sarah Jenkins</p>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-md"
+                >Scheduled</span
+              >
+              <button class="w-8 h-8 flex items-center justify-center text-text-muted">
+                <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+              </button>
+            </div>
+          </div>
+          <!-- Class Card 3 -->
+          <div
+            class="bg-white p-4 rounded-xl border-l-4 border-error shadow-sm flex items-center justify-between opacity-80"
+          >
+            <div class="flex flex-col gap-1">
+              <div class="flex items-center gap-2">
+                <span class="font-label-md text-text-muted uppercase">ID: SR-098</span>
+                <span class="w-1 h-1 bg-border-subtle rounded-full"></span>
+                <span class="text-text-muted font-body-md">08:00 AM</span>
+              </div>
+              <h4 class="font-title-lg text-on-surface">Literature Arts</h4>
+              <p class="text-text-muted font-body-md">Student: Omar Khalid</p>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <span class="px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-md"
+                >Absent</span
+              >
+              <button class="w-8 h-8 flex items-center justify-center text-text-muted">
+                <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Floating Action Button (Contextual for Schedule) -->
+      <button
+        class="fixed bottom-20 right-6 w-14 h-14 bg-navbar-teal text-on-primary rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform z-40"
+      >
+        <span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+      </button>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full flex justify-around items-center h-16 px-2 bg-surface dark:bg-surface-container-lowest border-t border-border-subtle dark:border-outline-variant z-50 shadow-sm"
+    >
+      <a
+        class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 transition-transform active:scale-90"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+        <span class="font-label-md text-label-md">Schedule</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-surface-variant rounded-xl transition-all p-1"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="school">school</span>
+        <span class="font-label-md text-label-md">Teachers</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-surface-variant rounded-xl transition-all p-1"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="family_restroom">family_restroom</span>
+        <span class="font-label-md text-label-md">Parents</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-surface-variant rounded-xl transition-all p-1"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="group">group</span>
+        <span class="font-label-md text-label-md">Students</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-surface-variant rounded-xl transition-all p-1"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+        <span class="font-label-md text-label-md">Reports</span>
+      </a>
+    </nav>
+    <script>
+      // Simple Micro-interactions
+      document.querySelectorAll(".metric-card-shadow").forEach(card => {
+        card.addEventListener("click", () => {
+          card.classList.add("ring-2", "ring-navbar-teal/30");
+          setTimeout(() => card.classList.remove("ring-2", "ring-navbar-teal/30"), 300);
+        });
+      });
+
+      // Search Input focus effect
+      const searchInput = document.querySelector('input[type="text"]');
+      searchInput.addEventListener("focus", () => {
+        searchInput.parentElement.classList.add("scale-[1.02]");
+      });
+      searchInput.addEventListener("blur", () => {
+        searchInput.parentElement.classList.remove("scale-[1.02]");
+      });
+    </script>
+  </body>
+</html>

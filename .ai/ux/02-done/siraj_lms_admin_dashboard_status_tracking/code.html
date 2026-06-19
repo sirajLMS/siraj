@@ -1,0 +1,630 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Admin Dashboard Status Tracking</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .sidebar-active {
+        background-color: #135e5e;
+        color: white;
+        font-weight: 700;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+      .administrative-hold-blur {
+        filter: grayscale(1) opacity(0.6);
+        pointer-events: none;
+      }
+    </style>
+    <!-- Tailwind Configuration -->
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed-dim": "#98d1d0",
+              "surface-dim": "#d8dadc",
+              error: "#ba1a1a",
+              "primary-container": "#0d4d4d",
+              "surface-container-highest": "#e0e3e5",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#00201c",
+              primary: "#003535",
+              "surface-variant": "#e0e3e5",
+              "sidebar-bg": "#0F3D3D",
+              "tertiary-fixed": "#71f8e4",
+              "on-surface": "#191c1e",
+              "surface-container-high": "#e6e8ea",
+              "on-secondary": "#ffffff",
+              "text-muted": "#64748B",
+              "on-tertiary": "#ffffff",
+              "surface-container": "#eceef0",
+              "on-primary-container": "#85bdbc",
+              "outline-variant": "#bfc8c8",
+              "inverse-on-surface": "#eff1f3",
+              "on-background": "#191c1e",
+              background: "#f7f9fb",
+              "on-tertiary-fixed-variant": "#005048",
+              "secondary-fixed-dim": "#bcc7de",
+              "error-container": "#ffdad6",
+              "surface-container-lowest": "#ffffff",
+              "navbar-teal": "#135E5E",
+              "inverse-surface": "#2d3133",
+              "on-secondary-fixed": "#111c2d",
+              "on-secondary-container": "#586377",
+              "secondary-fixed": "#d8e3fb",
+              tertiary: "#00352f",
+              "tertiary-container": "#004e46",
+              "secondary-container": "#d5e0f8",
+              "border-subtle": "#E2E8F0",
+              "surface-tint": "#2e6767",
+              surface: "#f7f9fb",
+              "on-surface-variant": "#404848",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "surface-container-low": "#f2f4f6",
+              "surface-bright": "#f7f9fb",
+              "on-secondary-fixed-variant": "#3c475a",
+              secondary: "#545f73",
+              "primary-fixed": "#b4edec",
+              outline: "#707978",
+              "on-primary": "#ffffff",
+              "on-primary-fixed-variant": "#104f4f",
+              "on-tertiary-container": "#33c7b4",
+              "inverse-primary": "#98d1d0",
+              "on-primary-fixed": "#002020",
+              "on-error-container": "#93000a",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "card-padding": "1.5rem",
+              gutter: "1.5rem",
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+              "sidebar-width": "260px",
+              "auth-width": "420px",
+              "navbar-height": "64px",
+            },
+            fontFamily: {
+              display: ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+            },
+            fontSize: {
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background font-body-md text-on-surface overflow-hidden">
+    <!-- Sidebar Shell -->
+    <aside class="fixed left-0 top-0 h-full w-[260px] bg-sidebar-bg flex flex-col py-page-margin z-50">
+      <div class="px-6 mb-10">
+        <h1 class="font-display text-title-lg font-bold text-white">Siraj LMS</h1>
+        <p class="text-on-primary-container text-label-md">Admin Portal</p>
+      </div>
+      <nav class="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+        <!-- Active State Logic: Home is active -->
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded-lg bg-navbar-teal text-white font-bold transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="font-body-md">Home</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:text-white transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">calendar_month</span>
+          <span class="font-body-md">Schedule Search</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:text-white transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">school</span>
+          <span class="font-body-md">Teachers</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:text-white transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">family_restroom</span>
+          <span class="font-body-md">Parents</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:text-white transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">group</span>
+          <span class="font-body-md">Students</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:text-white transition-colors duration-200"
+          href="#"
+        >
+          <span class="material-symbols-outlined">admin_panel_settings</span>
+          <span class="font-body-md">Managers</span>
+        </a>
+      </nav>
+      <div class="mt-auto px-4 space-y-1">
+        <button
+          class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:text-white transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined">settings</span>
+          <span class="font-body-md">Settings</span>
+        </button>
+        <button
+          class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-container hover:text-white transition-colors duration-200"
+        >
+          <span class="material-symbols-outlined">logout</span>
+          <span class="font-body-md">Logout</span>
+        </button>
+        <div class="mt-4 px-4">
+          <button class="w-full bg-primary-fixed text-on-primary-fixed font-button-text py-2 rounded-lg text-center">
+            Manage Billing
+          </button>
+        </div>
+      </div>
+    </aside>
+    <!-- Main Content Area -->
+    <main class="ml-[260px] h-screen overflow-y-auto">
+      <!-- Top Navigation Bar -->
+      <header
+        class="fixed top-0 right-0 h-navbar-height w-[calc(100%-260px)] bg-navbar-teal text-white flex items-center justify-between px-gutter z-40"
+      >
+        <div class="flex items-center gap-6">
+          <h2 class="font-display text-title-lg font-bold">Admin Dashboard</h2>
+          <div class="relative hidden lg:block">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/60">search</span>
+            <input
+              class="bg-white/10 border-none rounded-full pl-10 pr-4 py-1.5 text-body-md placeholder-white/60 focus:ring-2 focus:ring-primary-fixed-dim w-64 outline-none"
+              placeholder="Search sessions, students..."
+              type="text"
+            />
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <button class="material-symbols-outlined hover:text-primary-fixed-dim transition-opacity">
+            notifications
+          </button>
+          <button class="material-symbols-outlined hover:text-primary-fixed-dim transition-opacity">
+            help_outline
+          </button>
+          <div
+            class="h-8 w-8 rounded-full bg-primary-fixed-dim border border-white/20 overflow-hidden cursor-pointer active:scale-95 transition-transform"
+          >
+            <img
+              alt="Administrator Profile"
+              data-alt="A professional headshot of a female administrator with a kind, authoritative expression, wearing business casual attire. The lighting is soft and natural, against a clean, out-of-focus modern office background that perfectly matches the minimalist professional aesthetic of the Siraj LMS brand."
+              src="https://lh3.googleusercontent.com/aida/AP1WRLv8vBzRGkuUKSPStAscorKpkObufVWaAB7Xq5N6QbZAaOMtK-AdluMvjhySdnG98VzfWhuOBK-l37MQ6Tt0HM-tmamOUqRIvpBl3w9PrltvTsBtHZVg2nS6on0lYRLDNSKU72g3EwQozv-KLYL056gH3lXQ95o-mweO6DjAmiSTBSYtTVOZYSgDMz1Gt7nJ-OTakNa5IJu_1f4Dk3ez9mdmUw9dsVsS0f55P9owLRpaI5Bil8iybFTQrWc"
+            />
+          </div>
+        </div>
+      </header>
+      <!-- Page Canvas -->
+      <div class="mt-navbar-height p-page-margin">
+        <!-- Header Section -->
+        <div class="flex justify-between items-end mb-8">
+          <div>
+            <h3 class="font-display text-headline-lg text-primary">Status Overview</h3>
+            <p class="text-text-muted font-body-md">
+              Real-time tracking of institutional activities and administrative holds.
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <button
+              class="flex items-center gap-2 px-4 py-2 border border-border-subtle rounded-xl bg-white text-on-surface font-label-md hover:bg-surface-container-low transition-colors"
+            >
+              <span class="material-symbols-outlined text-[18px]">filter_list</span>
+              Filters
+            </button>
+            <button
+              class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-label-md hover:opacity-90 transition-opacity"
+            >
+              <span class="material-symbols-outlined text-[18px]">add</span>
+              New Report
+            </button>
+          </div>
+        </div>
+        <!-- Metric Bento Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <!-- Regular Metric -->
+          <div
+            class="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-transparent hover:border-primary-fixed-dim transition-all cursor-pointer"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <p class="text-text-muted text-label-md uppercase tracking-wider mb-1">Regular</p>
+                <h4 class="font-display text-headline-md text-primary">1,248</h4>
+              </div>
+              <div
+                class="h-10 w-10 rounded-full border border-navbar-teal flex items-center justify-center text-navbar-teal"
+              >
+                <span class="material-symbols-outlined">check_circle</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-label-md text-green-600">
+              <span class="material-symbols-outlined text-[16px]">trending_up</span>
+              <span>12% from last week</span>
+            </div>
+          </div>
+          <!-- Pending Metric -->
+          <div
+            class="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-transparent hover:border-primary-fixed-dim transition-all cursor-pointer"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <p class="text-text-muted text-label-md uppercase tracking-wider mb-1">Pending</p>
+                <h4 class="font-display text-headline-md text-primary">84</h4>
+              </div>
+              <div
+                class="h-10 w-10 rounded-full border border-navbar-teal flex items-center justify-center text-navbar-teal"
+              >
+                <span class="material-symbols-outlined">pending</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-label-md text-amber-600">
+              <span class="material-symbols-outlined text-[16px]">schedule</span>
+              <span>Needs review</span>
+            </div>
+          </div>
+          <!-- Suspended Metric (Highlight for Task) -->
+          <div
+            class="bg-error-container p-card-padding rounded-xl shadow-sm border border-transparent hover:border-error transition-all cursor-pointer"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <p class="text-error text-label-md uppercase font-bold tracking-wider mb-1">Suspended</p>
+                <h4 class="font-display text-headline-md text-on-error-container">32</h4>
+              </div>
+              <div
+                class="h-10 w-10 rounded-full border border-error flex items-center justify-center text-error"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+              >
+                <span class="material-symbols-outlined">block</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-label-md text-error">
+              <span class="material-symbols-outlined text-[16px]">warning</span>
+              <span>Immediate action required</span>
+            </div>
+          </div>
+          <!-- On Leave Metric -->
+          <div
+            class="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-transparent hover:border-primary-fixed-dim transition-all cursor-pointer"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <p class="text-text-muted text-label-md uppercase tracking-wider mb-1">On Leave</p>
+                <h4 class="font-display text-headline-md text-primary">15</h4>
+              </div>
+              <div
+                class="h-10 w-10 rounded-full border border-navbar-teal flex items-center justify-center text-navbar-teal"
+              >
+                <span class="material-symbols-outlined">vibration</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-label-md text-secondary">
+              <span class="material-symbols-outlined text-[16px]">event</span>
+              <span>Approved absences</span>
+            </div>
+          </div>
+        </div>
+        <!-- Today's Classes Table Section -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle overflow-hidden">
+          <div class="px-gutter py-4 border-b border-border-subtle flex justify-between items-center">
+            <h4 class="font-display text-title-lg text-primary">Today's Class Schedule</h4>
+            <div class="flex gap-2">
+              <span class="px-3 py-1 bg-surface-container text-on-surface-variant text-label-md rounded-full"
+                >Total: 142 Sessions</span
+              >
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-border-subtle">
+                  <th class="px-gutter py-4 font-label-md text-text-muted">STUDENT / CLASS</th>
+                  <th class="px-gutter py-4 font-label-md text-text-muted">TEACHER</th>
+                  <th class="px-gutter py-4 font-label-md text-text-muted">SCHEDULE</th>
+                  <th class="px-gutter py-4 font-label-md text-text-muted">STATUS</th>
+                  <th class="px-gutter py-4 font-label-md text-text-muted text-right">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border-subtle">
+                <!-- Row 1: Regular -->
+                <tr class="hover:bg-surface-container-low transition-colors group">
+                  <td class="px-gutter py-4">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="h-10 w-10 rounded-lg bg-secondary-container flex items-center justify-center text-secondary font-bold"
+                      >
+                        ZA
+                      </div>
+                      <div>
+                        <p class="font-bold text-on-surface">Zaid Al-Harbi</p>
+                        <p class="text-label-md text-text-muted">Intermediate Quran - Tajweed</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-gutter py-4 text-body-md text-on-surface">Sheikh Omar Farouk</td>
+                  <td class="px-gutter py-4 text-body-md text-on-surface">10:30 AM - 11:30 AM</td>
+                  <td class="px-gutter py-4">
+                    <span class="px-3 py-1 bg-green-100 text-green-700 text-label-md font-bold rounded-full"
+                      >Regular</span
+                    >
+                  </td>
+                  <td class="px-gutter py-4 text-right">
+                    <button class="text-primary hover:underline font-button-text">Join Session</button>
+                  </td>
+                </tr>
+                <!-- Row 2: Suspended (Mandatory Task) -->
+                <tr class="bg-red-50/30 hover:bg-red-50/50 transition-colors group">
+                  <td class="px-gutter py-4">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="h-10 w-10 rounded-lg bg-error-container flex items-center justify-center text-error font-bold"
+                      >
+                        MK
+                      </div>
+                      <div>
+                        <p class="font-bold text-on-surface">Maryam Khan</p>
+                        <p class="text-label-md text-text-muted">Beginner Arabic Level 1</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-gutter py-4 text-body-md text-on-surface">Ustaza Fatima Ali</td>
+                  <td class="px-gutter py-4 text-body-md text-on-surface">11:00 AM - 12:00 PM</td>
+                  <td class="px-gutter py-4">
+                    <span class="px-3 py-1 bg-error text-white text-label-md font-bold rounded-full shadow-sm"
+                      >Suspended (Pending)</span
+                    >
+                  </td>
+                  <td class="px-gutter py-4 text-right">
+                    <div class="group/tooltip relative inline-block">
+                      <button
+                        class="bg-surface-dim text-on-surface-variant px-4 py-2 rounded-lg text-label-md font-bold cursor-not-allowed administrative-hold-blur"
+                      >
+                        Activate
+                      </button>
+                      <div
+                        class="absolute bottom-full right-0 mb-2 w-48 bg-inverse-surface text-inverse-on-surface text-[11px] p-2 rounded shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-10"
+                      >
+                        <span class="flex items-center gap-1 font-bold mb-1">
+                          <span class="material-symbols-outlined text-[14px]">lock</span>
+                          Administrative Hold
+                        </span>
+                        Account suspended due to outstanding balance or policy violation. Contact billing.
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <!-- Row 3: On Leave -->
+                <tr class="hover:bg-surface-container-low transition-colors group">
+                  <td class="px-gutter py-4">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="h-10 w-10 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant font-bold"
+                      >
+                        SY
+                      </div>
+                      <div>
+                        <p class="font-bold text-on-surface">Sami Yusuf</p>
+                        <p class="text-label-md text-text-muted">Advanced Hifdh Section A</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-gutter py-4 text-body-md text-on-surface">Hafiz Abdul Rahman</td>
+                  <td class="px-gutter py-4 text-body-md text-on-surface">11:45 AM - 01:00 PM</td>
+                  <td class="px-gutter py-4">
+                    <span
+                      class="px-3 py-1 bg-secondary-container text-on-secondary-container text-label-md font-bold rounded-full"
+                      >On Leave</span
+                    >
+                  </td>
+                  <td class="px-gutter py-4 text-right">
+                    <button class="text-secondary hover:underline font-button-text">Reschedule</button>
+                  </td>
+                </tr>
+                <!-- Row 4: Suspended (Mandatory Task) -->
+                <tr class="bg-red-50/30 hover:bg-red-50/50 transition-colors group">
+                  <td class="px-gutter py-4">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="h-10 w-10 rounded-lg bg-error-container flex items-center justify-center text-error font-bold"
+                      >
+                        OS
+                      </div>
+                      <div>
+                        <p class="font-bold text-on-surface">Omar Saeed</p>
+                        <p class="text-label-md text-text-muted">Islamic Studies Foundations</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-gutter py-4 text-body-md text-on-surface">Dr. Ibrahim Khalil</td>
+                  <td class="px-gutter py-4 text-body-md text-on-surface">02:00 PM - 03:00 PM</td>
+                  <td class="px-gutter py-4">
+                    <span class="px-3 py-1 bg-error text-white text-label-md font-bold rounded-full shadow-sm"
+                      >Suspended (Pending)</span
+                    >
+                  </td>
+                  <td class="px-gutter py-4 text-right">
+                    <div class="group/tooltip relative inline-block">
+                      <button
+                        class="bg-surface-dim text-on-surface-variant px-4 py-2 rounded-lg text-label-md font-bold cursor-not-allowed administrative-hold-blur"
+                      >
+                        Activate
+                      </button>
+                      <div
+                        class="absolute bottom-full right-0 mb-2 w-48 bg-inverse-surface text-inverse-on-surface text-[11px] p-2 rounded shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-10"
+                      >
+                        <span class="flex items-center gap-1 font-bold mb-1">
+                          <span class="material-symbols-outlined text-[14px]">lock</span>
+                          Administrative Hold
+                        </span>
+                        Manual lock applied by Management. Session cannot be resumed without verification.
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <!-- Row 5: Pending -->
+                <tr class="hover:bg-surface-container-low transition-colors group">
+                  <td class="px-gutter py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="h-10 w-10 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed font-bold">NA</div>
+                      <div>
+                        <p class="font-bold text-on-surface">Noor Ahmed</p>
+                        <p class="text-label-md text-text-muted">Female Only Tajweed Circle</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-gutter py-4 text-body-md text-on-surface">Ustaza Sara Mansour</td>
+                  <td class="px-gutter py-4 text-body-md text-on-surface">03:30 PM - 04:30 PM</td>
+                  <td class="px-gutter py-4">
+                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-label-md font-bold rounded-full"
+                      >Pending Verification</span
+                    >
+                  </td>
+                  <td class="px-gutter py-4 text-right">
+                    <button class="text-primary hover:underline font-button-text">Verify Documents</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div
+            class="px-gutter py-4 bg-surface-container-low border-t border-border-subtle flex justify-between items-center text-label-md text-text-muted"
+          >
+            <span>Showing 5 of 142 total sessions</span>
+            <div class="flex gap-2">
+              <button class="px-3 py-1 border border-border-subtle rounded hover:bg-white transition-colors">
+                Previous
+              </button>
+              <button class="px-3 py-1 border border-border-subtle rounded hover:bg-white transition-colors">
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Footer Analysis Section -->
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-border-subtle">
+            <h5 class="font-display text-title-lg text-primary mb-4">Suspension Analytics</h5>
+            <div class="h-48 flex items-end justify-between gap-2 px-4">
+              <div class="w-1/7 bg-primary-fixed-dim h-[40%] rounded-t-sm" title="Mon"></div>
+              <div class="w-1/7 bg-primary-fixed-dim h-[55%] rounded-t-sm" title="Tue"></div>
+              <div class="w-1/7 bg-primary-fixed-dim h-[30%] rounded-t-sm" title="Wed"></div>
+              <div class="w-1/7 bg-error h-[85%] rounded-t-sm" title="Thu"></div>
+              <div class="w-1/7 bg-primary-fixed-dim h-[45%] rounded-t-sm" title="Fri"></div>
+              <div class="w-1/7 bg-primary-fixed-dim h-[20%] rounded-t-sm" title="Sat"></div>
+              <div class="w-1/7 bg-primary-fixed-dim h-[10%] rounded-t-sm" title="Sun"></div>
+            </div>
+            <div class="flex justify-between mt-2 px-4 text-label-md text-text-muted">
+              <span>M</span><span>T</span><span>W</span><span class="text-error font-bold">T</span><span>F</span
+              ><span>S</span><span>S</span>
+            </div>
+            <p class="mt-4 text-body-md text-text-muted">
+              Note: Sharp increase in suspensions on Thursday due to end-of-month payment processing audit.
+            </p>
+          </div>
+          <div class="bg-primary-container text-white p-card-padding rounded-xl shadow-lg relative overflow-hidden">
+            <div class="relative z-10 h-full flex flex-col justify-between">
+              <div>
+                <span class="inline-block px-3 py-1 bg-white/20 rounded-full text-label-md mb-4"
+                  >Urgent Administrative Task</span
+                >
+                <h5 class="font-display text-headline-md leading-tight mb-2">32 Accounts Locked</h5>
+                <p class="text-on-primary-container text-body-md mb-6">
+                  Review the suspension logs to determine if any of the recent "Administrative Holds" can be released
+                  manually.
+                </p>
+              </div>
+              <button
+                class="w-fit bg-white text-primary font-bold px-6 py-3 rounded-xl hover:bg-primary-fixed transition-colors"
+              >
+                Open Audit Logs
+              </button>
+            </div>
+            <!-- Background Pattern -->
+            <div class="absolute right-[-20%] top-[-20%] w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+            <div class="absolute left-[-10%] bottom-[-10%] w-48 h-48 bg-navbar-teal/30 rounded-full blur-2xl"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- Contextual FAB Suppression: Suspended on Dashboard -->
+    <button
+      class="fixed bottom-8 right-8 h-14 w-14 bg-navbar-teal text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50"
+    >
+      <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1">add</span>
+    </button>
+    <script>
+      // Simple micro-interaction for the table rows
+      document.querySelectorAll("tr").forEach(row => {
+        row.addEventListener("click", e => {
+          if (e.target.tagName !== "BUTTON") {
+            console.log("Row clicked for detailed view");
+          }
+        });
+      });
+
+      // Add "Administrative Hold" feedback to the disabled buttons
+      document.querySelectorAll(".administrative-hold-blur").forEach(btn => {
+        btn.addEventListener("mouseenter", () => {
+          btn.parentElement.querySelector(".tooltip")?.classList.remove("opacity-0");
+        });
+      });
+    </script>
+  </body>
+</html>

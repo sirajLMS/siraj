@@ -1,0 +1,294 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Siraj LMS - Learning Resources</title>
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-container": "#586377",
+              "on-error": "#ffffff",
+              "surface-container-high": "#e6e8ea",
+              "border-subtle": "#E2E8F0",
+              "outline-variant": "#bfc8c8",
+              "tertiary-fixed": "#71f8e4",
+              "error-container": "#ffdad6",
+              "text-muted": "#64748B",
+              "inverse-surface": "#2d3133",
+              "on-primary-fixed-variant": "#104f4f",
+              "on-primary": "#ffffff",
+              "surface-container": "#eceef0",
+              "on-surface-variant": "#404848",
+              outline: "#707978",
+              "surface-container-low": "#f2f4f6",
+              "on-primary-container": "#85bdbc",
+              "on-error-container": "#93000a",
+              "on-secondary-fixed": "#111c2d",
+              secondary: "#545f73",
+              "primary-fixed": "#b4edec",
+              "tertiary-container": "#004e46",
+              surface: "#f7f9fb",
+              "on-surface": "#191c1e",
+              "navbar-teal": "#135E5E",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-fixed-variant": "#3c475a",
+              "surface-tint": "#2e6767",
+              "on-tertiary-fixed": "#00201c",
+              "secondary-container": "#d5e0f8",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "surface-container-highest": "#e0e3e5",
+              background: "#f7f9fb",
+              "surface-variant": "#e0e3e5",
+              error: "#ba1a1a",
+              "inverse-on-surface": "#eff1f3",
+              tertiary: "#00352f",
+              "surface-dim": "#d8dadc",
+              "sidebar-bg": "#0F3D3D",
+              "on-tertiary-container": "#33c7b4",
+              "primary-fixed-dim": "#98d1d0",
+              "on-tertiary-fixed-variant": "#005048",
+              "secondary-fixed": "#d8e3fb",
+              "primary-container": "#0d4d4d",
+              "surface-bright": "#f7f9fb",
+              "on-background": "#191c1e",
+              "inverse-primary": "#98d1d0",
+              primary: "#003535",
+              "secondary-fixed-dim": "#bcc7de",
+              "on-secondary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "on-primary-fixed": "#002020",
+            },
+            borderRadius: {
+              DEFAULT: "2px",
+              lg: "4px",
+              xl: "8px",
+              "2xl": "16px",
+              full: "9999px",
+            },
+            spacing: {
+              "page-margin": "2rem",
+              "sidebar-width": "260px",
+              "navbar-height": "64px",
+              gutter: "1.5rem",
+              "auth-width": "420px",
+              "input-gap": "1rem",
+              "card-padding": "1.5rem",
+            },
+            fontFamily: {
+              "headline-lg": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              display: ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+            },
+            fontSize: {
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      body {
+        background-color: #f7f9fb;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .bento-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.5);
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="font-body-md text-on-surface antialiased">
+    <!-- TopAppBar -->
+    <nav
+      class="fixed top-0 w-full z-50 bg-navbar-teal flex justify-between items-center h-16 px-4 w-full transition-colors duration-200"
+    >
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-on-primary" data-icon="menu">menu</span>
+        <span class="font-headline-md text-headline-md font-bold text-on-primary">Siraj LMS</span>
+      </div>
+      <div class="flex items-center">
+        <span
+          class="material-symbols-outlined text-on-primary p-2 hover:bg-primary/10 rounded-full"
+          data-icon="notifications"
+          >notifications</span
+        >
+      </div>
+    </nav>
+    <!-- Main Content Canvas -->
+    <main class="pt-24 pb-32 px-6 max-w-lg mx-auto">
+      <!-- Header Section -->
+      <header class="mb-8">
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-2">Learning Resources</h1>
+        <p class="font-body-md text-on-secondary-container">
+          Manage academic materials and educational assets for the institution.
+        </p>
+      </header>
+      <!-- Form Section -->
+      <div class="space-y-6">
+        <!-- Input Field -->
+        <div class="flex flex-col gap-2">
+          <label class="font-label-md text-label-md text-primary tracking-wider font-bold">DOCUMENT NAME</label>
+          <input
+            class="w-full h-12 bg-surface-container-lowest border border-outline-variant rounded-lg px-4 focus:ring-2 focus:ring-navbar-teal focus:border-transparent transition-all outline-none"
+            placeholder="Enter resource title (e.g., Q3 Mathematics Syllabus)"
+            type="text"
+          />
+        </div>
+        <!-- Upload Area -->
+        <div class="relative group cursor-pointer" id="drop-zone">
+          <div
+            class="w-full aspect-[4/3] flex flex-col items-center justify-center border-2 border-dashed border-navbar-teal/30 bg-primary/5 rounded-2xl p-8 text-center transition-all hover:bg-primary/10 hover:border-navbar-teal/60"
+          >
+            <div
+              class="w-16 h-16 bg-navbar-teal rounded-full flex items-center justify-center text-on-primary mb-4 shadow-lg group-active:scale-95 transition-transform"
+            >
+              <span class="material-symbols-outlined text-3xl" data-icon="cloud_upload">cloud_upload</span>
+            </div>
+            <h3 class="font-title-lg text-title-lg text-primary mb-1">Tap to upload files or browse</h3>
+            <p class="font-label-md text-label-md text-on-secondary-container">Supported: PDF, DOCX, PPTX (Max 25MB)</p>
+          </div>
+        </div>
+        <!-- CTA Button -->
+        <button
+          class="w-full h-14 bg-navbar-teal text-on-primary font-button-text text-button-text rounded-lg shadow-sm active:scale-[0.98] transition-transform"
+        >
+          UPLOAD
+        </button>
+        <!-- Governance Info Alert -->
+        <div class="flex items-start gap-4 p-4 bg-surface-container-low rounded-xl border-l-4 border-navbar-teal">
+          <span class="material-symbols-outlined text-navbar-teal mt-0.5" data-icon="visibility_off"
+            >visibility_off</span
+          >
+          <p class="font-body-md text-on-surface-variant leading-relaxed">
+            Documents uploaded here are visible to <span class="font-bold text-primary">Teachers only</span>. Student
+            and Parent access must be manually configured via the Permissions tab.
+          </p>
+        </div>
+        <!-- Hero/Banner Card -->
+        <section class="mt-10 overflow-hidden rounded-2xl shadow-sm relative h-48 flex items-end">
+          <img
+            class="absolute inset-0 w-full h-full object-cover"
+            data-alt="A clean, minimalist digital library environment with warm atmospheric lighting. In the foreground, an elegant digital interface display is visible, showcasing organized educational assets. The background features a blurred, modern library space with sleek white bookshelves and subtle teal accents, conveying a sense of institutional excellence and academic professionalism."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLs3l4bcUCaaCETpbtm_-mN3yhCgUqwudZnL-uPRR6184uxRx8IhEr6RYI50KvZJz5YT6_i_PLrDrmNYvAbfbj-TkDCqABX0e-rFWYqLeIEba5SPZZye09B8yLKW-bTmvxdZEqgJ10fSh5qrMR4H0B4vm_Zx8THhyVz1GPEQepnJ4sznnGiASNypxztNkc1ee5Bh87ulHWjha05LwoRbtWm8ORo-YEWAoWtm9Jm5a6O8prcE4ulei2LiycpZ"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
+          <div class="relative p-6 z-10 w-full">
+            <span
+              class="inline-block px-2 py-1 bg-tertiary-fixed text-on-tertiary-fixed font-label-md text-label-md rounded mb-2"
+              >PREMIUM RESOURCE</span
+            >
+            <h2 class="font-headline-md text-headline-md text-on-primary">Institutional Excellence</h2>
+            <p class="font-body-md text-on-primary/80">Digital Library &amp; Knowledge Center</p>
+          </div>
+        </section>
+      </div>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full h-16 flex justify-around items-center px-2 pb-safe bg-surface-container-lowest border-t border-border-subtle z-50"
+    >
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 transition-transform active:scale-90 duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined mb-1" data-icon="dashboard">dashboard</span>
+        <span class="font-label-md text-label-md">Dashboard</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 transition-transform active:scale-90 duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined mb-1" data-icon="family_restroom">family_restroom</span>
+        <span class="font-label-md text-label-md">Parents</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-2xl px-4 py-1 transition-transform active:scale-90 duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined mb-1" data-icon="school">school</span>
+        <span class="font-label-md text-label-md">Students</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 transition-transform active:scale-90 duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined mb-1" data-icon="payments">payments</span>
+        <span class="font-label-md text-label-md">Finance</span>
+      </a>
+    </nav>
+    <script>
+      // Simple Interaction logic
+      const dropZone = document.getElementById("drop-zone");
+
+      dropZone.addEventListener("click", () => {
+        // Trigger haptic-like effect
+        dropZone.classList.add("scale-95");
+        setTimeout(() => {
+          dropZone.classList.remove("scale-95");
+          alert("File picker opened (Mock Interaction)");
+        }, 100);
+      });
+
+      // Prevention of accidental scrolls on navigation
+      document.querySelectorAll("nav a").forEach(link => {
+        link.addEventListener("click", e => {
+          e.preventDefault();
+        });
+      });
+    </script>
+  </body>
+</html>

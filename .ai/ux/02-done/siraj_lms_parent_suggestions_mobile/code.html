@@ -1,0 +1,348 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Parent Suggestions</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "text-muted": "#64748B",
+              primary: "#003535",
+              "error-container": "#ffdad6",
+              "inverse-primary": "#98d1d0",
+              "surface-container-highest": "#e0e3e5",
+              "on-primary": "#ffffff",
+              "tertiary-fixed": "#71f8e4",
+              "on-secondary": "#ffffff",
+              "border-subtle": "#E2E8F0",
+              "on-primary-fixed": "#002020",
+              "on-secondary-fixed-variant": "#3c475a",
+              "on-tertiary-fixed": "#00201c",
+              "secondary-fixed-dim": "#bcc7de",
+              "surface-tint": "#2e6767",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-error": "#ffffff",
+              "tertiary-container": "#004e46",
+              "surface-container": "#eceef0",
+              secondary: "#545f73",
+              "on-background": "#191c1e",
+              "inverse-surface": "#2d3133",
+              tertiary: "#00352f",
+              "on-surface-variant": "#404848",
+              "primary-fixed-dim": "#98d1d0",
+              outline: "#707978",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-bright": "#f7f9fb",
+              "on-secondary-fixed": "#111c2d",
+              "tertiary-fixed-dim": "#4fdbc8",
+              surface: "#f7f9fb",
+              "on-primary-container": "#85bdbc",
+              "outline-variant": "#bfc8c8",
+              background: "#f7f9fb",
+              "inverse-on-surface": "#eff1f3",
+              "secondary-fixed": "#d8e3fb",
+              "primary-fixed": "#b4edec",
+              "surface-container-low": "#f2f4f6",
+              "primary-container": "#0d4d4d",
+              "navbar-teal": "#135E5E",
+              "sidebar-bg": "#0F3D3D",
+              "on-tertiary-container": "#33c7b4",
+              "on-surface": "#191c1e",
+              "on-error-container": "#93000a",
+              "surface-variant": "#e0e3e5",
+              "on-secondary-container": "#586377",
+              error: "#ba1a1a",
+              "on-tertiary": "#ffffff",
+              "surface-container-high": "#e6e8ea",
+              "secondary-container": "#d5e0f8",
+              "surface-dim": "#d8dadc",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "page-margin": "2rem",
+              "navbar-height": "64px",
+              "sidebar-width": "260px",
+              gutter: "1.5rem",
+              "auth-width": "420px",
+              "input-gap": "1rem",
+              "card-padding": "1.5rem",
+            },
+            fontFamily: {
+              "headline-md": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "headline-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "body-lg": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .success-banner-animate {
+        animation: slideDown 0.5s ease-out forwards;
+      }
+      @keyframes slideDown {
+        from {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-background text-on-background font-body-md min-h-screen pb-20">
+    <!-- TopNavBar (Shared Component) -->
+    <header class="fixed top-0 w-full h-[64px] bg-navbar-teal z-50 flex justify-between items-center px-4">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-on-primary text-2xl">menu</span>
+        <span class="font-headline-md text-headline-md text-on-primary font-bold uppercase">Siraj LMS</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="material-symbols-outlined text-on-primary" data-icon="notifications">notifications</span>
+        <div class="w-8 h-8 rounded-full border-2 border-on-primary overflow-hidden">
+          <img
+            alt="User profile"
+            class="w-full h-full object-cover"
+            data-alt="A professional headshot of a Middle Eastern administrator wearing formal attire, with a soft-focus office background. The image is rendered in high-definition with clean, professional lighting that emphasizes the sophisticated and academic atmosphere of the Siraj LMS platform."
+            src="https://lh3.googleusercontent.com/aida/AP1WRLtdZ_n7lFfB1wlAvqbtdvtza96giHYJ99mdz8asVXVAX0VJ8JoauWsOC9FgValHs5kfII4ZVg4_87F5B_hKKuL5_fbjObc3mtQZAA8NxT1DBXU3_Cdmq4GVVvtJwW7Cs8oInL9CjMPFcqHo9yU4xWlprVH6okL_4OjY7SFnNw4AafEP8SS2neBMcG4HZ2LcfbeZC8BR54e8gzlWaJo8DG2bsDL6ZuCS8df-p48p1wOdBu2de7U0i4guelil"
+          />
+        </div>
+      </div>
+    </header>
+    <main class="pt-[64px]">
+      <!-- Success Banner -->
+      <div
+        class="success-banner-animate bg-teal-50 border-b border-teal-100 px-4 py-3 flex items-center justify-between"
+        id="successBanner"
+      >
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-teal-600" style="font-variation-settings: &quot;FILL&quot; 1"
+            >check_circle</span
+          >
+          <p class="text-teal-800 font-label-md text-label-md">We Have Received Your Message</p>
+        </div>
+        <button class="text-teal-400" onclick="document.getElementById('successBanner').remove()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <!-- Hero Header -->
+      <section class="bg-sidebar-bg p-6 text-on-primary">
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile mb-2">Parent Feedback Portal</h1>
+        <p class="text-on-primary/80 font-body-md text-body-md max-w-xs">
+          Your voice shapes our future. Share your ideas to improve our academic environment.
+        </p>
+      </section>
+      <!-- Suggestion Form Section -->
+      <section class="p-6">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-border-subtle">
+          <form class="flex flex-col gap-6" onsubmit="event.preventDefault()">
+            <!-- Name Input -->
+            <div class="flex flex-col gap-2">
+              <label class="text-label-md font-label-md text-text-muted uppercase tracking-wider">Your Full Name</label>
+              <div class="relative flex items-center">
+                <span class="material-symbols-outlined absolute left-0 text-primary text-xl">person</span>
+                <input
+                  class="w-full pl-8 py-2 border-b border-border-subtle focus:border-primary outline-none transition-colors bg-transparent font-body-md text-body-md"
+                  placeholder="Enter your name"
+                  type="text"
+                />
+              </div>
+            </div>
+            <!-- Suggestion Textarea -->
+            <div class="flex flex-col gap-2">
+              <label class="text-label-md font-label-md text-text-muted uppercase tracking-wider"
+                >Your Suggestion</label
+              >
+              <div class="relative flex items-start">
+                <span class="material-symbols-outlined absolute left-0 top-2 text-primary text-xl" data-icon="lightbulb"
+                  >lightbulb</span
+                >
+                <textarea
+                  class="w-full pl-8 py-2 border-b border-border-subtle focus:border-primary outline-none transition-colors bg-transparent font-body-md text-body-md resize-none"
+                  placeholder="Describe your idea or feedback..."
+                  rows="4"
+                ></textarea>
+              </div>
+            </div>
+            <!-- Submit Button -->
+            <button
+              class="bg-primary text-on-primary py-4 font-button-text text-button-text rounded-lg hover:opacity-90 active:scale-[0.98] transition-all uppercase tracking-widest shadow-lg"
+            >
+              SUBMIT
+            </button>
+          </form>
+          <!-- Social Context -->
+          <div class="mt-8 flex flex-col items-center gap-4">
+            <div class="flex -space-x-3">
+              <img
+                alt="Admin 1"
+                class="w-10 h-10 rounded-full border-2 border-white"
+                data-alt="A close-up portrait of a female academic administrator with glasses, looking friendly and professional. The image uses soft studio lighting and a clean white background, aligning with the minimalist and corporate modern aesthetic of the Siraj LMS platform."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLvs3_rtW9UhX6eETkMxvHvxn-ZPK3_o2HjpNPbbD-YHFVByjfiHnD7Qft_ZCkocC9DYkW-hiCv-m9s-0DMhlXEPpgmGafp1Esov6tXdpeL3auv4yttFvoL-vsS12Y3-gNkuAYCfkFPsUxddUQv6BdDUVSwIb6HvgH0ccQJ1SDGNbfUKRweXpkZ3N_0DW3uyCEFnJmRo2JnynoQ81r65XPO-xm2rFpB7GUpWIFF4NVd3d7iuDCnfGODEaVk"
+              />
+              <img
+                alt="Admin 2"
+                class="w-10 h-10 rounded-full border-2 border-white"
+                data-alt="A portrait of a senior male educator with a kind smile, dressed in a sharp navy suit. The image represents institutional authority and modern digital efficiency, featuring clear, high-contrast lighting and a professional studio setting."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLtKMp19F71PDu1R8pXmfU4kDrc67eyKe7FL6cJDI-2WLylrXAxBpRFliF56ZAaS379UW9BkoFb5VBBtBU8uModTFsCOqwIoPvxuEEX7r7C2A7OJC9P7yXtAToA_pGJeme26hpWIauf9DVZAMJq79wHjcbmsyS7MhaVCfNQTo-RqUItyU4_AR2O1e8TKyM9zybcBGl60F-NJ3r20zNI_5o8xX-Fa1C6tTARPTsaGKssD2hFEMgvWRSkabrMN"
+              />
+              <img
+                alt="Admin 3"
+                class="w-10 h-10 rounded-full border-2 border-white"
+                data-alt="A young professional woman in a modern office setting, representing the administrative team. The lighting is bright and airy, with a soft-focus background that includes hints of teal, maintaining visual cohesion with the Siraj LMS brand identity."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLu2xERSTLoJCMCnfEVEgdUI5S1IkZ0UDqPFH184UI4XJ5Ot69mxr66KzSpnnNgvPsefJJSmriPNKSBbkVs94QTbBDBVlngbNrKBS56Ns39vi1kZqb3bLYICYlc6_3dqHVX60B1UZ7-zdKnRVzPxTMTlCFFcwKFPhp6HrAooXW4E8vZwchglv9b9RE2w1HdvTp7IsFe7jy4Syd7Ur7Sycu8QL3o19GgP_Kj-1qnTIfBLDV8X4ewaJodDJIOs"
+              />
+              <div
+                class="w-10 h-10 rounded-full border-2 border-white bg-navbar-teal flex items-center justify-center text-[10px] text-white font-bold"
+              >
+                +5
+              </div>
+            </div>
+            <p class="text-label-md font-label-md text-text-muted text-center italic">
+              Reviewed by our admin team daily
+            </p>
+          </div>
+        </div>
+      </section>
+      <!-- Feature Cards (Stacked) -->
+      <section class="px-6 pb-12 flex flex-col gap-4">
+        <!-- Card 1 -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-border-subtle flex items-start gap-4">
+          <div class="w-12 h-12 rounded-full border border-navbar-teal flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-primary" data-icon="lock">lock</span>
+          </div>
+          <div>
+            <h3 class="font-title-lg text-title-lg text-primary mb-1">Privacy Guaranteed</h3>
+            <p class="font-body-md text-body-md text-text-muted">
+              All suggestions are handled with strict confidentiality by the board.
+            </p>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-border-subtle flex items-start gap-4">
+          <div class="w-12 h-12 rounded-full border border-navbar-teal flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-primary" data-icon="bolt">bolt</span>
+          </div>
+          <div>
+            <h3 class="font-title-lg text-title-lg text-primary mb-1">Fast Response</h3>
+            <p class="font-body-md text-body-md text-text-muted">
+              We aim to review and provide status updates within 48 business hours.
+            </p>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-border-subtle flex items-start gap-4">
+          <div class="w-12 h-12 rounded-full border border-navbar-teal flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-primary" data-icon="trending_up">trending_up</span>
+          </div>
+          <div>
+            <h3 class="font-title-lg text-title-lg text-primary mb-1">Constant Evolution</h3>
+            <p class="font-body-md text-body-md text-text-muted">
+              Your feedback directly influences our term-by-term curriculum updates.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- BottomNavBar (Shared Component Logic) -->
+    <nav
+      class="fixed bottom-0 w-full bg-white border-t border-border-subtle h-[64px] flex justify-around items-center px-2 z-50"
+    >
+      <button class="flex flex-col items-center gap-1 text-text-muted transition-all active:scale-95">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="font-label-md text-[10px] uppercase">Dashboard</span>
+      </button>
+      <button class="flex flex-col items-center gap-1 text-text-muted transition-all active:scale-95">
+        <span class="material-symbols-outlined">school</span>
+        <span class="font-label-md text-[10px] uppercase">Classes</span>
+      </button>
+      <!-- Active Tab: Suggestions -->
+      <button class="flex flex-col items-center gap-1 text-primary transition-all active:scale-95">
+        <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1">lightbulb</span>
+        <span class="font-label-md text-[10px] uppercase font-bold">Suggestions</span>
+      </button>
+      <button class="flex flex-col items-center gap-1 text-text-muted transition-all active:scale-95">
+        <span class="material-symbols-outlined">chat</span>
+        <span class="font-label-md text-[10px] uppercase">Messages</span>
+      </button>
+      <button class="flex flex-col items-center gap-1 text-text-muted transition-all active:scale-95">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="font-label-md text-[10px] uppercase">Settings</span>
+      </button>
+    </nav>
+    <script>
+      // Micro-interaction for input focus effects
+      const inputs = document.querySelectorAll("input, textarea");
+      inputs.forEach(input => {
+        input.addEventListener("focus", () => {
+          input.previousElementSibling.style.color = "#135E5E";
+        });
+        input.addEventListener("blur", () => {
+          input.previousElementSibling.style.color = "#003535";
+        });
+      });
+    </script>
+  </body>
+</html>

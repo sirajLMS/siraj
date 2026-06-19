@@ -1,0 +1,349 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Admin Complaints Resolution Queue - Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed": "#71f8e4",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed": "#d8e3fb",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-secondary-fixed-variant": "#3c475a",
+              tertiary: "#00352f",
+              "surface-bright": "#f7f9fb",
+              surface: "#f7f9fb",
+              "on-primary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              outline: "#707978",
+              "on-secondary": "#ffffff",
+              "on-tertiary-container": "#33c7b4",
+              "primary-fixed": "#b4edec",
+              secondary: "#545f73",
+              primary: "#003535",
+              "on-surface-variant": "#404848",
+              "surface-tint": "#2e6767",
+              "on-tertiary-fixed": "#00201c",
+              "tertiary-container": "#004e46",
+              "primary-container": "#0d4d4d",
+              "secondary-fixed-dim": "#bcc7de",
+              "inverse-primary": "#98d1d0",
+              "surface-variant": "#e0e3e5",
+              "navbar-teal": "#135E5E",
+              "surface-container-highest": "#e0e3e5",
+              "inverse-on-surface": "#eff1f3",
+              "outline-variant": "#bfc8c8",
+              "primary-fixed-dim": "#98d1d0",
+              "text-muted": "#64748B",
+              "on-secondary-container": "#586377",
+              "on-background": "#191c1e",
+              "sidebar-bg": "#0F3D3D",
+              "error-container": "#ffdad6",
+              background: "#f7f9fb",
+              "on-secondary-fixed": "#111c2d",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-container": "#eceef0",
+              "border-subtle": "#E2E8F0",
+              "surface-dim": "#d8dadc",
+              "surface-container-low": "#f2f4f6",
+              "on-surface": "#191c1e",
+              "on-primary-fixed": "#002020",
+              "inverse-surface": "#2d3133",
+              "secondary-container": "#d5e0f8",
+              "on-error-container": "#93000a",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "on-error": "#ffffff",
+              "on-primary-container": "#85bdbc",
+              "surface-container-high": "#e6e8ea",
+              error: "#ba1a1a",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "sidebar-width": "260px",
+              "auth-width": "420px",
+              gutter: "1.5rem",
+              "page-margin": "2rem",
+              "input-gap": "1rem",
+              "card-padding": "1.5rem",
+              "navbar-height": "64px",
+            },
+            fontFamily: {
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+            },
+            fontSize: {
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-background text-on-surface font-body-md min-h-screen pb-20">
+    <!-- Top App Bar (From Shared Components) -->
+    <header
+      class="fixed top-0 w-full z-50 bg-navbar-teal dark:bg-primary-container shadow-sm flex items-center justify-between px-4 h-navbar-height w-full"
+    >
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-on-primary">menu</span>
+        <h1 class="font-headline-md text-headline-md-mobile font-bold text-on-primary">Siraj LMS</h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="material-symbols-outlined text-on-primary">notifications</span>
+        <div class="w-8 h-8 rounded-full bg-primary-fixed-dim flex items-center justify-center">
+          <span class="text-on-primary-fixed font-bold text-xs">AD</span>
+        </div>
+      </div>
+    </header>
+    <main class="pt-20 px-4 space-y-6">
+      <!-- Title -->
+      <div class="mt-4">
+        <h2 class="font-headline-md text-headline-md-mobile text-primary">Complaints Resolution Queue</h2>
+        <p class="font-body-md text-text-muted">Manage and respond to institutional feedback.</p>
+      </div>
+      <!-- Metrics Section (Horizontally Scrollable) -->
+      <div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+        <!-- Un-answered Card -->
+        <div
+          class="min-w-[160px] flex-1 bg-surface-container-lowest rounded-xl p-card-padding shadow-sm border border-border-subtle flex flex-col justify-between"
+        >
+          <div>
+            <span class="font-label-md text-label-md text-text-muted block mb-1">UN-ANSWERED</span>
+            <span class="font-headline-md text-headline-md text-primary">24</span>
+          </div>
+          <div class="mt-4 self-end">
+            <div class="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary">visibility</span>
+            </div>
+          </div>
+        </div>
+        <!-- Answered Card -->
+        <div
+          class="min-w-[160px] flex-1 bg-surface-container-lowest rounded-xl p-card-padding shadow-sm border border-border-subtle flex flex-col justify-between"
+        >
+          <div>
+            <span class="font-label-md text-label-md text-text-muted block mb-1">ANSWERED</span>
+            <span class="font-headline-md text-headline-md text-primary">158</span>
+          </div>
+          <div class="mt-4 self-end">
+            <div class="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary">check_circle</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Tab System -->
+      <div class="flex border-b border-outline-variant">
+        <button class="flex-1 py-3 font-button-text text-button-text border-b-2 border-primary text-primary">
+          UN-ANSWERED
+        </button>
+        <button class="flex-1 py-3 font-button-text text-button-text text-text-muted">ANSWERED</button>
+      </div>
+      <!-- Complaints List -->
+      <div class="space-y-4">
+        <!-- Complaint Card 1 -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle overflow-hidden">
+          <div class="p-4 space-y-4">
+            <!-- User Profile Info -->
+            <div class="flex items-start justify-between">
+              <div class="flex gap-3">
+                <img
+                  class="w-12 h-12 rounded-full bg-secondary-container"
+                  data-alt="A professional high-resolution 3D avatar of a young male student with a clean-cut look and glasses. The lighting is soft and corporate, matching the minimalist teal and white color scheme of an educational management platform. He is set against a neutral, light gray background that conveys focus and academic seriousness."
+                  src="https://lh3.googleusercontent.com/aida/AP1WRLtVqpHjH9f0IAKrkuCtBUqZc-LWq0kMq5Yem6xBcJGUBCV1AyBs3r_zLHN-YaXov_JChYZP7I_k8-5MRhsiFDAtE5MQWEwGnV99wKEc-L7AzHa0dDN7MybxAAt2APW-0ZkP4UYZH_MYGpgBhrhtkdFDuTT_vjXm1IkklW-3cw4iJdkvYJFpYtx8D0VAMjqoqzJDizS_G12CGdIgeHCBK5rgYoBlptUccbEQ6NUK-xSovPtKBldTn6Jqug2q"
+                />
+                <div>
+                  <h3 class="font-title-lg text-title-lg text-on-surface">Omar Al-Farsi</h3>
+                  <p class="font-label-md text-label-md text-text-muted">Student • ID: #ST-8821</p>
+                </div>
+              </div>
+              <span class="font-label-md text-label-md text-text-muted">2h ago</span>
+            </div>
+            <!-- Complaint Text -->
+            <div class="bg-surface-container p-3 rounded-lg">
+              <p class="font-body-md text-on-surface-variant">
+                The digital library portal has been inaccessible since this morning. I have an assignment due tomorrow
+                and cannot access the required journals.
+              </p>
+            </div>
+            <!-- Your Response Section -->
+            <div class="space-y-2">
+              <label class="font-label-md text-label-md text-primary font-bold">YOUR RESPONSE</label>
+              <textarea
+                class="w-full min-h-[100px] p-3 border-b border-outline-variant focus:border-primary outline-none resize-none font-body-md bg-transparent placeholder:text-outline-variant"
+                placeholder="Type your response here..."
+              ></textarea>
+            </div>
+            <!-- Action Buttons -->
+            <div class="flex flex-col gap-2 pt-2">
+              <button
+                class="w-full bg-primary text-on-primary py-3 font-button-text text-button-text rounded-sm uppercase tracking-widest active:scale-95 transition-transform"
+              >
+                ANSWER
+              </button>
+              <button
+                class="w-full border border-primary text-primary py-3 font-button-text text-button-text rounded-sm uppercase tracking-widest active:scale-95 transition-transform flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-[18px]">mail</span>
+                ANSWER &amp; SEND TO EMAIL
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Complaint Card 2 -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle overflow-hidden">
+          <div class="p-4 space-y-4">
+            <div class="flex items-start justify-between">
+              <div class="flex gap-3">
+                <img
+                  class="w-12 h-12 rounded-full bg-secondary-container"
+                  data-alt="A professional 3D avatar of a female parent wearing a headscarf, presented in a clean, minimalist style. The lighting is bright and even, typical of a high-end corporate application. The color palette uses subtle teals and off-whites, reinforcing a sense of trust, institutional authority, and professional digital efficiency within an educational context."
+                  src="https://lh3.googleusercontent.com/aida/AP1WRLt91mUc41e2_Io0bj1ZpSTr0d76qCZfQEGpdWTn_I1e0Vw__rjukbd1mboDVt7b7cWPMMl9Bjew0wTfhsVbhp0A_X9YoMbwNnJ0EWsANM6lZXHSyDWagfh1Y2TJNUR5ePn9f6Hc3cOdLMf3SX3rUzGMbrFFXnaneYeMXsK035Db4W0oo28cc3BDYu28UjJmGg4SHVPdVRokp9NZPgYCx53q6kXfSQkSg0XIkZcjUBFSZxJ2-yMhbkimO61w"
+                />
+                <div>
+                  <h3 class="font-title-lg text-title-lg text-on-surface">Fatima Omar</h3>
+                  <p class="font-label-md text-label-md text-text-muted">Parent • ID: #PA-1044</p>
+                </div>
+              </div>
+              <span class="font-label-md text-label-md text-text-muted">5h ago</span>
+            </div>
+            <div class="bg-surface-container p-3 rounded-lg">
+              <p class="font-body-md text-on-surface-variant">
+                My son's attendance record for Monday seems incorrect. He was present in class but marked absent. Can
+                someone please verify with the teacher?
+              </p>
+            </div>
+            <div class="space-y-2">
+              <label class="font-label-md text-label-md text-primary font-bold">YOUR RESPONSE</label>
+              <textarea
+                class="w-full min-h-[100px] p-3 border-b border-outline-variant focus:border-primary outline-none resize-none font-body-md bg-transparent placeholder:text-outline-variant"
+                placeholder="Type your response here..."
+              ></textarea>
+            </div>
+            <div class="flex flex-col gap-2 pt-2">
+              <button
+                class="w-full bg-primary text-on-primary py-3 font-button-text text-button-text rounded-sm uppercase tracking-widest active:scale-95 transition-transform"
+              >
+                ANSWER
+              </button>
+              <button
+                class="w-full border border-primary text-primary py-3 font-button-text text-button-text rounded-sm uppercase tracking-widest active:scale-95 transition-transform flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-[18px]">mail</span>
+                ANSWER &amp; SEND TO EMAIL
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- Bottom Nav Bar (From Shared Components) -->
+    <nav
+      class="fixed bottom-0 w-full z-50 bg-surface dark:bg-surface-dim border-t border-outline-variant dark:border-outline flex justify-around items-center h-16 px-2"
+    >
+      <div class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="font-label-md text-label-md">Dashboard</span>
+      </div>
+      <div class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim">
+        <span class="material-symbols-outlined">family_restroom</span>
+        <span class="font-label-md text-label-md">Parents</span>
+      </div>
+      <div class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim">
+        <span class="material-symbols-outlined">school</span>
+        <span class="font-label-md text-label-md">Students</span>
+      </div>
+      <div
+        class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1"
+      >
+        <span class="material-symbols-outlined">assessment</span>
+        <span class="font-label-md text-label-md">Reports</span>
+      </div>
+    </nav>
+    <script>
+      // Simple micro-interaction for tabs
+      const tabs = document.querySelectorAll("button.flex-1");
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          tabs.forEach(t => {
+            t.classList.remove("border-b-2", "border-primary", "text-primary");
+            t.classList.add("text-text-muted");
+          });
+          tab.classList.add("border-b-2", "border-primary", "text-primary");
+          tab.classList.remove("text-text-muted");
+        });
+      });
+
+      // Micro-interaction for primary button press
+      const buttons = document.querySelectorAll("button");
+      buttons.forEach(btn => {
+        btn.addEventListener("touchstart", () => {
+          btn.style.opacity = "0.8";
+        });
+        btn.addEventListener("touchend", () => {
+          btn.style.opacity = "1";
+        });
+      });
+    </script>
+  </body>
+</html>

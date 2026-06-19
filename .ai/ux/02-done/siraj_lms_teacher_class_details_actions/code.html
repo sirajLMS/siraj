@@ -1,0 +1,526 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Siraj LMS - Class Details</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-container": "#586377",
+              "on-error": "#ffffff",
+              "border-subtle": "#E2E8F0",
+              "surface-container-high": "#e6e8ea",
+              "outline-variant": "#bfc8c8",
+              "tertiary-fixed": "#71f8e4",
+              "error-container": "#ffdad6",
+              "text-muted": "#64748B",
+              "inverse-surface": "#2d3133",
+              "on-primary-fixed-variant": "#104f4f",
+              "on-primary": "#ffffff",
+              outline: "#707978",
+              "surface-container": "#eceef0",
+              "on-surface-variant": "#404848",
+              "on-error-container": "#93000a",
+              "surface-container-low": "#f2f4f6",
+              "on-primary-container": "#85bdbc",
+              "on-secondary-fixed": "#111c2d",
+              secondary: "#545f73",
+              "primary-fixed": "#b4edec",
+              "tertiary-container": "#004e46",
+              surface: "#f7f9fb",
+              "on-surface": "#191c1e",
+              "navbar-teal": "#135E5E",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-fixed-variant": "#3c475a",
+              "secondary-container": "#d5e0f8",
+              "surface-tint": "#2e6767",
+              "on-tertiary-fixed": "#00201c",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "surface-container-highest": "#e0e3e5",
+              background: "#f7f9fb",
+              "surface-variant": "#e0e3e5",
+              error: "#ba1a1a",
+              "inverse-on-surface": "#eff1f3",
+              "surface-dim": "#d8dadc",
+              tertiary: "#00352f",
+              "sidebar-bg": "#0F3D3D",
+              "on-tertiary-container": "#33c7b4",
+              "on-tertiary-fixed-variant": "#005048",
+              "primary-fixed-dim": "#98d1d0",
+              "secondary-fixed": "#d8e3fb",
+              "primary-container": "#0d4d4d",
+              "surface-bright": "#f7f9fb",
+              "on-background": "#191c1e",
+              "inverse-primary": "#98d1d0",
+              primary: "#003535",
+              "secondary-fixed-dim": "#bcc7de",
+              "on-secondary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "on-primary-fixed": "#002020",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "page-margin": "2rem",
+              "sidebar-width": "260px",
+              "navbar-height": "64px",
+              gutter: "1.5rem",
+              "auth-width": "420px",
+              "input-gap": "1rem",
+              "card-padding": "1.5rem",
+            },
+            fontFamily: {
+              display: ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "body-md": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "headline-md": ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        display: inline-block;
+        line-height: 1;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+      }
+      .sidebar-item-transition {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #135e5e;
+      }
+    </style>
+  </head>
+  <body class="bg-background text-on-background font-body-md overflow-hidden">
+    <!-- App Shell Container -->
+    <div class="flex h-screen w-full">
+      <!-- Sidebar (Shared Component) -->
+      <aside class="fixed left-0 top-0 h-full w-sidebar-width bg-sidebar-bg flex flex-col py-6 px-4 z-50">
+        <div class="mb-10 px-2 flex items-center gap-3">
+          <div class="w-10 h-10 bg-on-primary-container rounded flex items-center justify-center">
+            <span class="material-symbols-outlined text-sidebar-bg" style="font-variation-settings: &quot;FILL&quot; 1"
+              >school</span
+            >
+          </div>
+          <div>
+            <h1 class="text-title-lg font-title-lg font-bold text-on-primary leading-none">Siraj LMS</h1>
+            <p class="font-label-md text-label-md text-tertiary-fixed opacity-70">Administrative Portal</p>
+          </div>
+        </div>
+        <nav class="flex-1 space-y-1 overflow-y-auto">
+          <a
+            class="sidebar-item-transition flex items-center gap-3 px-3 py-3 text-outline-variant hover:text-white hover:bg-on-primary-container/10 rounded-lg group"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="home">home</span>
+            <span class="font-label-md text-label-md">Home</span>
+          </a>
+          <a
+            class="sidebar-item-transition flex items-center gap-3 px-3 py-3 bg-navbar-teal text-white font-bold rounded-lg shadow-sm"
+            href="#"
+          >
+            <span
+              class="material-symbols-outlined"
+              data-icon="calendar_month"
+              style="font-variation-settings: &quot;FILL&quot; 1"
+              >calendar_month</span
+            >
+            <span class="font-label-md text-label-md">Schedule Search</span>
+          </a>
+          <a
+            class="sidebar-item-transition flex items-center gap-3 px-3 py-3 text-outline-variant hover:text-white hover:bg-on-primary-container/10 rounded-lg group"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="school">school</span>
+            <span class="font-label-md text-label-md">Teachers</span>
+          </a>
+          <a
+            class="sidebar-item-transition flex items-center gap-3 px-3 py-3 text-outline-variant hover:text-white hover:bg-on-primary-container/10 rounded-lg group"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="family_restroom">family_restroom</span>
+            <span class="font-label-md text-label-md">Parents</span>
+          </a>
+          <a
+            class="sidebar-item-transition flex items-center gap-3 px-3 py-3 text-outline-variant hover:text-white hover:bg-on-primary-container/10 rounded-lg group"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="groups">groups</span>
+            <span class="font-label-md text-label-md">Students</span>
+          </a>
+          <a
+            class="sidebar-item-transition flex items-center gap-3 px-3 py-3 text-outline-variant hover:text-white hover:bg-on-primary-container/10 rounded-lg group"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+            <span class="font-label-md text-label-md">Managers</span>
+          </a>
+        </nav>
+        <div class="mt-auto pt-6 border-t border-on-primary-container/10 space-y-1">
+          <a
+            class="sidebar-item-transition flex items-center gap-3 px-3 py-3 text-outline-variant hover:text-white hover:bg-on-primary-container/10 rounded-lg"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="settings">settings</span>
+            <span class="font-label-md text-label-md">Settings</span>
+          </a>
+          <a
+            class="sidebar-item-transition flex items-center gap-3 px-3 py-3 text-outline-variant hover:text-white hover:bg-on-primary-container/10 rounded-lg"
+            href="#"
+          >
+            <span class="material-symbols-outlined" data-icon="logout">logout</span>
+            <span class="font-label-md text-label-md">Logout</span>
+          </a>
+        </div>
+      </aside>
+      <!-- Main Content Canvas -->
+      <main class="flex-1 ml-[260px] flex flex-col h-full relative overflow-y-auto">
+        <!-- Top Header (Shared Component) -->
+        <header
+          class="h-navbar-height bg-navbar-teal flex justify-between items-center px-page-margin sticky top-0 z-40 shadow-sm"
+        >
+          <div class="flex items-center gap-4">
+            <div class="relative group">
+              <span
+                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none"
+                >search</span
+              >
+              <input
+                class="bg-white/10 border-none rounded-full py-2 pl-10 pr-4 text-white placeholder:text-white/60 focus:ring-2 focus:ring-white/30 w-64 text-body-md font-body-md transition-all"
+                placeholder="Search sessions..."
+                type="text"
+              />
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+              <button class="relative p-2 text-white hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-navbar-teal"></span>
+              </button>
+              <button class="p-2 text-white hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+              </button>
+            </div>
+            <div class="h-8 w-[1px] bg-white/20"></div>
+            <div class="flex items-center gap-3 cursor-pointer group">
+              <div class="text-right">
+                <p class="font-label-md text-label-md text-white font-bold leading-tight">Admin User</p>
+                <p class="font-label-md text-[10px] text-white/70 uppercase tracking-widest">Super Admin</p>
+              </div>
+              <img
+                alt="Administrator Profile"
+                class="w-10 h-10 rounded-full object-cover border-2 border-white/20 group-hover:border-white/50 transition-all"
+                data-alt="A professional close-up portrait of a corporate administrator with a confident expression, wearing a tailored navy suit and standing against a soft-focus office background. The lighting is bright and clean, emphasizing a professional and organized leadership style. The color palette is modern and neutral, aligning with a corporate minimalist aesthetic."
+                src="https://lh3.googleusercontent.com/aida/AP1WRLup-BMsmQbMwf8ErqcNa55UB6r38ebcO8bq-9Y_YJD9h-PQBLHsuG6vAvHCE4JpGX1NZMHUe3eAiPOr52xJ1dQsWwh3sqISb017-iiWfcNbdXt4MNbkAMq-hUUaHZEVVXmv30S55Jrj7DukuiGrA-jFPwji3s0ELVBkGUPmOmtP6VE_WBXZ5n_mxxqBPr149TS-FKTU0UlIBGuB5-G82TF7aJn0Cv5Sy7aJJ5kBvfeKrXGcBV66mBgYHAs"
+              />
+            </div>
+          </div>
+        </header>
+        <!-- Timezone Warning Banner -->
+        <div
+          class="w-full bg-error-container text-on-error-container py-3 px-page-margin flex items-center justify-between animate-pulse"
+        >
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined" data-icon="warning">warning</span>
+            <span class="font-body-md text-body-md font-semibold"
+              >Timezone Mismatch: Student is currently in America/New_York. Please verify all schedule start times
+              before proceeding.</span
+            >
+          </div>
+          <button class="text-on-error-container/60 hover:text-on-error-container transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <!-- Page Content -->
+        <div class="p-page-margin max-w-5xl mx-auto w-full">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+            <!-- Left Column: Details -->
+            <div class="md:col-span-8 space-y-6">
+              <div class="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-border-subtle">
+                <div class="flex items-center justify-between mb-8">
+                  <h2 class="font-headline-md text-headline-md text-primary flex items-center gap-2">
+                    <span class="material-symbols-outlined text-navbar-teal">info</span>
+                    Class Instance Details
+                  </h2>
+                  <span
+                    class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-label-md font-bold uppercase tracking-wider"
+                    >ID: #CLS-9921</span
+                  >
+                </div>
+                <div class="space-y-6">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-12 border-b border-border-subtle pb-8">
+                    <div class="flex flex-col gap-1">
+                      <span class="font-label-md text-label-md text-navbar-teal font-bold uppercase tracking-wider"
+                        >Student Name</span
+                      >
+                      <p class="font-body-lg text-body-lg text-on-surface font-semibold">Ahmed Al-Siraj</p>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <span class="font-label-md text-label-md text-navbar-teal font-bold uppercase tracking-wider"
+                        >Course Module</span
+                      >
+                      <p class="font-body-lg text-body-lg text-on-surface">Advanced Arabic Grammar (Lvl 4)</p>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <span class="font-label-md text-label-md text-navbar-teal font-bold uppercase tracking-wider"
+                        >Start Time</span
+                      >
+                      <p class="font-body-lg text-body-lg text-on-surface">24 Oct 2023, 09:00 AM</p>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <span class="font-label-md text-label-md text-navbar-teal font-bold uppercase tracking-wider"
+                        >End Time</span
+                      >
+                      <p class="font-body-lg text-body-lg text-on-surface">24 Oct 2023, 10:30 AM</p>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <span class="font-label-md text-label-md text-navbar-teal font-bold uppercase tracking-wider"
+                        >Duration</span
+                      >
+                      <p class="font-body-lg text-body-lg text-on-surface">90 Minutes</p>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <span class="font-label-md text-label-md text-navbar-teal font-bold uppercase tracking-wider"
+                        >Status</span
+                      >
+                      <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 bg-yellow-500 rounded-full"></span>
+                        <p class="font-body-lg text-body-lg text-on-surface font-semibold">Scheduled / Pending</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex flex-col gap-2 pt-2">
+                    <span class="font-label-md text-label-md text-navbar-teal font-bold uppercase tracking-wider"
+                      >Remarks / Special Instructions</span
+                    >
+                    <div class="bg-surface p-4 rounded-lg italic text-on-surface-variant border-l-4 border-navbar-teal">
+                      "Student requested focus on Surah Al-Baqarah verses 120-140. Please ensure high-quality audio
+                      recording for parent review."
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Secondary Info Card: Attendance History -->
+              <div class="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-border-subtle">
+                <h3 class="font-title-lg text-title-lg text-on-surface mb-4">Previous Performance Overview</h3>
+                <div class="grid grid-cols-3 gap-4">
+                  <div class="p-4 bg-surface rounded-lg text-center">
+                    <p class="text-label-md font-label-md text-text-muted mb-1">Attendance Rate</p>
+                    <p class="text-headline-md font-headline-md text-primary">94%</p>
+                  </div>
+                  <div class="p-4 bg-surface rounded-lg text-center">
+                    <p class="text-label-md font-label-md text-text-muted mb-1">Avg Grade</p>
+                    <p class="text-headline-md font-headline-md text-primary">A-</p>
+                  </div>
+                  <div class="p-4 bg-surface rounded-lg text-center">
+                    <p class="text-label-md font-label-md text-text-muted mb-1">Last Class</p>
+                    <p class="text-headline-md font-headline-md text-primary">3 Days</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Right Column: Action Bar -->
+            <div class="md:col-span-4 space-y-gutter">
+              <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle overflow-hidden">
+                <!-- Action Header -->
+                <div class="bg-navbar-teal py-4 px-6">
+                  <h3 class="text-white font-title-lg font-bold flex items-center gap-2">
+                    <span class="material-symbols-outlined">bolt</span>
+                    Actions
+                  </h3>
+                </div>
+                <!-- Action Grid -->
+                <div class="p-6 grid grid-cols-2 gap-4">
+                  <!-- Activate -->
+                  <button
+                    class="aspect-square flex flex-col items-center justify-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-lg hover:bg-green-100 transition-all group active:scale-95"
+                  >
+                    <span
+                      class="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform"
+                      data-icon="power_settings_new"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >power_settings_new</span
+                    >
+                    <span class="font-button-text text-button-text">ACTIVATE</span>
+                  </button>
+                  <!-- Stop/Pause -->
+                  <button
+                    class="aspect-square flex flex-col items-center justify-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-lg hover:bg-red-100 transition-all group active:scale-95"
+                  >
+                    <span
+                      class="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform"
+                      data-icon="pause_circle"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >pause_circle</span
+                    >
+                    <span class="font-button-text text-button-text">STOP/PAUSE</span>
+                  </button>
+                  <!-- Info/Edit -->
+                  <button
+                    class="aspect-square flex flex-col items-center justify-center gap-3 bg-pink-50 border border-pink-200 text-pink-700 rounded-lg hover:bg-pink-100 transition-all group active:scale-95"
+                  >
+                    <span
+                      class="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform"
+                      data-icon="edit_note"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >edit_note</span
+                    >
+                    <span class="font-button-text text-button-text">INFO/EDIT</span>
+                  </button>
+                  <!-- Delete -->
+                  <button
+                    class="aspect-square flex flex-col items-center justify-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-lg hover:bg-red-100 transition-all group active:scale-95"
+                  >
+                    <span
+                      class="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform"
+                      data-icon="delete"
+                      style="font-variation-settings: &quot;FILL&quot; 1"
+                      >delete</span
+                    >
+                    <span class="font-button-text text-button-text">DELETE</span>
+                  </button>
+                </div>
+                <!-- Contextual Help -->
+                <div class="px-6 pb-6 pt-2">
+                  <div class="bg-surface p-4 rounded-lg flex items-start gap-3">
+                    <span class="material-symbols-outlined text-on-secondary-container mt-0.5">help_outline</span>
+                    <p class="text-label-md font-label-md text-on-secondary-container leading-relaxed">
+                      Activating this class will notify both the teacher and student. The delete action is permanent and
+                      cannot be undone.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <!-- Student Quick Profile Card -->
+              <div
+                class="bg-surface-container-lowest p-card-padding rounded-xl shadow-sm border border-border-subtle relative overflow-hidden group"
+              >
+                <div class="absolute top-0 left-0 w-full h-1 bg-navbar-teal"></div>
+                <div class="flex items-center gap-4 mb-4">
+                  <img
+                    alt="Student Portrait"
+                    class="w-16 h-16 rounded-full object-cover"
+                    data-alt="A candid, warm portrait of a young student in a casual environment, smiling brightly with a curious and engaged expression. The background is a soft-focus library with natural sunlight streaming through, creating a friendly and scholarly atmosphere. The visual style is crisp and editorial, maintaining the professional but approachable aesthetic of the Siraj LMS platform."
+                    src="https://lh3.googleusercontent.com/aida/AP1WRLtC22EfZx1ao2WSo3dFlI4dAPbsK4btYGrlCCEfLfdn6pKrLpZEXMW_2uBLCYRXwgORW9ppA42oaHRDFHtF1zAyMdl5MoNFWu0Zu5x4ZTkzLQzbhOPCIMuHW-oeriSN8tlyDQyvbX3UM_Ulr1GEtvVgU5TzNNJ0Cy7iW62kvPPr7rQlcLyPzohJXYYl4ovnwpuDn7uALJd9eIU-0HZ7OGdQLqLepPanVIflXMzuKCej6unuePOlOJ4vCgQw"
+                  />
+                  <div>
+                    <h4 class="font-title-lg text-title-lg text-primary">Ahmed Al-Siraj</h4>
+                    <p class="text-label-md font-label-md text-text-muted">Student Level: 4 (Advanced)</p>
+                  </div>
+                </div>
+                <button
+                  class="w-full py-2 bg-on-primary-container/10 text-navbar-teal font-button-text text-button-text rounded-full hover:bg-navbar-teal hover:text-white transition-all"
+                >
+                  VIEW FULL PROFILE
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Footer Meta -->
+        <footer
+          class="mt-auto py-8 px-page-margin border-t border-border-subtle flex items-center justify-between text-text-muted"
+        >
+          <p class="font-label-md text-label-md">© 2023 Siraj LMS. All Rights Reserved.</p>
+          <div class="flex gap-6">
+            <a
+              class="font-label-md text-label-md hover:text-navbar-teal transition-colors underline decoration-dotted underline-offset-4"
+              href="#"
+              >Privacy Policy</a
+            >
+            <a
+              class="font-label-md text-label-md hover:text-navbar-teal transition-colors underline decoration-dotted underline-offset-4"
+              href="#"
+              >Audit Logs</a
+            >
+            <a
+              class="font-label-md text-label-md hover:text-navbar-teal transition-colors underline decoration-dotted underline-offset-4"
+              href="#"
+              >System Status</a
+            >
+          </div>
+        </footer>
+      </main>
+    </div>
+    <!-- Micro-interaction Script -->
+    <script>
+      document.querySelectorAll("button").forEach(button => {
+        button.addEventListener("mousedown", () => {
+          button.classList.add("scale-95");
+        });
+        button.addEventListener("mouseup", () => {
+          button.classList.remove("scale-95");
+        });
+        button.addEventListener("mouseleave", () => {
+          button.classList.remove("scale-95");
+        });
+      });
+
+      // Simulating search focus
+      const searchInput = document.querySelector('input[type="text"]');
+      searchInput.addEventListener("focus", () => {
+        searchInput.classList.add("w-80");
+      });
+      searchInput.addEventListener("blur", () => {
+        searchInput.classList.remove("w-80");
+      });
+    </script>
+  </body>
+</html>

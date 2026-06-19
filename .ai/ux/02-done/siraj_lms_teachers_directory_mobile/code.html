@@ -1,0 +1,412 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Teachers Directory - Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              background: "#f7f9fb",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-background": "#191c1e",
+              "inverse-on-surface": "#eff1f3",
+              "error-container": "#ffdad6",
+              "secondary-fixed-dim": "#bcc7de",
+              "on-tertiary": "#ffffff",
+              "text-muted": "#64748B",
+              "on-secondary": "#ffffff",
+              "surface-container-high": "#e6e8ea",
+              "on-primary-container": "#85bdbc",
+              "outline-variant": "#bfc8c8",
+              "surface-container": "#eceef0",
+              "surface-variant": "#e0e3e5",
+              primary: "#003535",
+              "on-surface": "#191c1e",
+              "tertiary-fixed": "#71f8e4",
+              "sidebar-bg": "#0F3D3D",
+              "surface-dim": "#d8dadc",
+              "primary-fixed-dim": "#98d1d0",
+              "surface-container-highest": "#e0e3e5",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#00201c",
+              "primary-container": "#0d4d4d",
+              error: "#ba1a1a",
+              "primary-fixed": "#b4edec",
+              outline: "#707978",
+              secondary: "#545f73",
+              "on-primary-fixed": "#002020",
+              "on-error-container": "#93000a",
+              "on-tertiary-container": "#33c7b4",
+              "inverse-primary": "#98d1d0",
+              "on-primary": "#ffffff",
+              "on-primary-fixed-variant": "#104f4f",
+              "surface-tint": "#2e6767",
+              surface: "#f7f9fb",
+              "on-surface-variant": "#404848",
+              "surface-bright": "#f7f9fb",
+              "on-secondary-fixed-variant": "#3c475a",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "surface-container-low": "#f2f4f6",
+              "tertiary-container": "#004e46",
+              "secondary-container": "#d5e0f8",
+              "border-subtle": "#E2E8F0",
+              "navbar-teal": "#135E5E",
+              "inverse-surface": "#2d3133",
+              "surface-container-lowest": "#ffffff",
+              tertiary: "#00352f",
+              "secondary-fixed": "#d8e3fb",
+              "on-secondary-fixed": "#111c2d",
+              "on-secondary-container": "#586377",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            fontFamily: {
+              "button-text": ["Inter"],
+              "title-lg": ["Hanken Grotesk"],
+              "label-md": ["Inter"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background-color: #f7f9fb;
+        font-family: "Hanken Grotesk", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .scroll-hide::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="bg-background text-on-surface">
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full z-50 bg-navbar-teal flex justify-between items-center h-[64px] px-4">
+      <div class="flex items-center gap-3">
+        <button class="p-2 text-on-primary hover:bg-primary-container/20 transition-colors duration-200 rounded-full">
+          <span class="material-symbols-outlined" data-icon="menu">menu</span>
+        </button>
+        <h1 class="font-title-lg text-title-lg font-bold text-on-primary">Siraj LMS</h1>
+      </div>
+      <div class="flex items-center">
+        <button class="p-2 text-on-primary hover:bg-primary-container/20 transition-colors duration-200 rounded-full">
+          <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+        </button>
+      </div>
+    </header>
+    <!-- Main Content Area -->
+    <main class="pt-[80px] pb-24 px-4">
+      <!-- Dashboard Header & Metrics -->
+      <section class="mb-6">
+        <div class="flex flex-col gap-1 mb-4">
+          <h2 class="font-headline-md text-headline-md text-primary">Teachers Directory</h2>
+          <div class="flex gap-4 items-center mt-2">
+            <div
+              class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle"
+            >
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span class="font-label-md text-label-md text-text-muted">Activated:</span>
+              <span class="font-title-lg text-title-lg text-primary">124</span>
+            </div>
+            <div
+              class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle"
+            >
+              <span class="w-2 h-2 rounded-full bg-error"></span>
+              <span class="font-label-md text-label-md text-text-muted">Deactivated:</span>
+              <span class="font-title-lg text-title-lg text-primary">12</span>
+            </div>
+          </div>
+        </div>
+        <button
+          class="w-full py-3 px-6 border-2 border-primary text-primary font-button-text text-button-text rounded-full flex items-center justify-center gap-2 hover:bg-primary/5 transition-colors active:scale-95 duration-200"
+        >
+          <span class="material-symbols-outlined" data-icon="edit_calendar">edit_calendar</span>
+          UPDATE SCHEDULES
+        </button>
+      </section>
+      <!-- Search & Filter Bar -->
+      <section class="mb-6">
+        <div class="relative flex items-center">
+          <span class="material-symbols-outlined absolute left-4 text-outline" data-icon="search">search</span>
+          <input
+            class="w-full bg-surface-container-lowest border border-border-subtle rounded-xl py-3 pl-12 pr-4 font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+            placeholder="Search teachers..."
+            type="text"
+          />
+        </div>
+      </section>
+      <!-- Directory Cards -->
+      <section class="grid grid-cols-1 gap-4">
+        <!-- Teacher Card 1 -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle p-4">
+          <div class="flex items-center gap-4 mb-4">
+            <img
+              alt=""
+              class="w-12 h-12 rounded-full object-cover border border-border-subtle"
+              data-alt="A professional studio portrait of a senior male educator with a kind expression, wearing a tailored navy blue blazer. The background is a soft, out-of-focus academic setting with warm sunlight filtering through. The overall aesthetic is clean, corporate, and minimalist, using the brand's professional teal and neutral slate color palette to convey authority and friendliness."
+              src="https://lh3.googleusercontent.com/aida/AP1WRLu_0mZivHl9gzP4XeMr234vVZdZiD6qv7Iiio3Wi4U8zIFVbL64Qk481a7jRwHdbS_RSDReVg9BsBZ-l2iC08xV2h4Bc29gCixx7cyMh31c1Dr5SMBfs4sowNtnxIM4VV0KyNKIO_7xwbdI-VmvkalLcPrw2d2pftYBNRKsY5JZxgNw-EM9uLhC16CajhoMKcHj-73OEEF310o-RdEGCj0W2wFxrTuxc0I7KYQHFvYt9bB0wR6SrhBEjbf5"
+            />
+            <div class="flex-1">
+              <h3 class="font-title-lg text-title-lg text-primary">Dr. Robert Chen</h3>
+              <p class="font-body-md text-body-md text-text-muted">robert.chen@siraj-edu.com</p>
+            </div>
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 font-label-md text-label-md rounded">Active</span>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-border-subtle">
+            <button
+              class="flex items-center gap-1 font-button-text text-button-text text-primary-container p-2 rounded-lg hover:bg-primary-container/10 transition-colors"
+            >
+              <span class="material-symbols-outlined text-[20px]" data-icon="video_chat">video_chat</span>
+              Join Room
+            </button>
+            <div class="flex gap-2">
+              <button
+                class="p-2 rounded-full border border-border-subtle text-outline hover:bg-surface-container-low transition-colors"
+              >
+                <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+              </button>
+              <button
+                class="p-2 rounded-full border border-border-subtle text-outline hover:bg-surface-container-low transition-colors"
+              >
+                <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Teacher Card 2 -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle p-4">
+          <div class="flex items-center gap-4 mb-4">
+            <img
+              alt=""
+              class="w-12 h-12 rounded-full object-cover border border-border-subtle"
+              data-alt="A high-quality professional portrait of a mid-career female teacher with a welcoming smile, set against a bright, airy office space. She is dressed in a professional charcoal sweater. The lighting is soft and even, highlighting a modern corporate feel. The scene is calm and organized, reflecting the academic integrity of Siraj LMS with a focus on professional digital efficiency."
+              src="https://lh3.googleusercontent.com/aida/AP1WRLuaU5rmtpv0wpmNF3MjwcKBqwYc9efhz5tInFwFbYsIGBGYGGqVbPajaqhokuvd6snTf6_xZqjN0NXw1FgzeeKwGyGvop006fuCquKob9iVTUK35Bx1ryO9UAsjcw7Ng11MhGT83SVk99tce_O2v6LyfHyH7atEHj38oMGTOcg39UwYp7qM1-A5F3Do1ZDe2I6Ur8WQPMiVvZ_T5e7-ZHTz4gLneJcZmFpM68YeGfm7BPfVuggdpIzBXJs"
+            />
+            <div class="flex-1">
+              <h3 class="font-title-lg text-title-lg text-primary">Sarah Miller</h3>
+              <p class="font-body-md text-body-md text-text-muted">s.miller@siraj-edu.com</p>
+            </div>
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 font-label-md text-label-md rounded">Active</span>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-border-subtle">
+            <button
+              class="flex items-center gap-1 font-button-text text-button-text text-primary-container p-2 rounded-lg hover:bg-primary-container/10 transition-colors"
+            >
+              <span class="material-symbols-outlined text-[20px]" data-icon="video_chat">video_chat</span>
+              Join Room
+            </button>
+            <div class="flex gap-2">
+              <button
+                class="p-2 rounded-full border border-border-subtle text-outline hover:bg-surface-container-low transition-colors"
+              >
+                <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+              </button>
+              <button
+                class="p-2 rounded-full border border-border-subtle text-outline hover:bg-surface-container-low transition-colors"
+              >
+                <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Teacher Card 3 -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle p-4">
+          <div class="flex items-center gap-4 mb-4">
+            <img
+              alt=""
+              class="w-12 h-12 rounded-full object-cover border border-border-subtle"
+              data-alt="A modern professional portrait of a younger male educator, standing in a contemporary library with bookshelves in the background. He is wearing a minimalist white shirt and glasses, looking confident and attentive. The image has a crisp, high-contrast look with bright lighting and a focus on clean lines, consistent with a modern educational management platform's professional aesthetic."
+              src="https://lh3.googleusercontent.com/aida/AP1WRLuLLxMoe-RZ3rpM8HDknsROx04Z--7junadI2OeleBPe5DHUWtC0IKES7T6j5cOJfJfCY55oGRR2RRbqTnB96qYH-kbSgklTy_PAC32us2J0mofWoxFXsTiEzjUrpkQBmryOefFcotImB4bn580i-_xGpH4fZ9k6v_4SucXPYFUe17x20U4Blwx9ZSRZkZ8FVu9xbup2Pu4K4f-POm2Zkg0o0Ly40xlS7qfvxzEvPPzsaCoigcESYaS3E4"
+            />
+            <div class="flex-1">
+              <h3 class="font-title-lg text-title-lg text-primary">Ahmed Ahmed</h3>
+              <p class="font-body-md text-body-md text-text-muted">a.hassan@siraj-edu.com</p>
+            </div>
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 font-label-md text-label-md rounded">Active</span>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-border-subtle">
+            <button
+              class="flex items-center gap-1 font-button-text text-button-text text-primary-container p-2 rounded-lg hover:bg-primary-container/10 transition-colors"
+            >
+              <span class="material-symbols-outlined text-[20px]" data-icon="video_chat">video_chat</span>
+              Join Room
+            </button>
+            <div class="flex gap-2">
+              <button
+                class="p-2 rounded-full border border-border-subtle text-outline hover:bg-surface-container-low transition-colors"
+              >
+                <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+              </button>
+              <button
+                class="p-2 rounded-full border border-border-subtle text-outline hover:bg-surface-container-low transition-colors"
+              >
+                <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Teacher Card 4 (Deactivated) -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle p-4 opacity-75">
+          <div class="flex items-center gap-4 mb-4">
+            <img
+              alt=""
+              class="w-12 h-12 rounded-full object-cover border border-border-subtle grayscale"
+              data-alt="A professional headshot of an educator in a gray office environment, presented in high-contrast black and white for a deactivated status indicator. The lighting is professional and moody, with clear architectural lines in the background. The visual style is minimal and solemn, reflecting a temporary inactive status within the system while maintaining the platform's high-density information quality."
+              src="https://lh3.googleusercontent.com/aida/AP1WRLvMygt9t5zcn9TdqYUFcecPBNFXNdrUqIWMLKX8AIfBIGVOcu3SuB8kiQH83DNyeBmkXRPgcJtt8ISxZfIYB7xiwhp8sgulooIc5NfwDCvHhSQjUYUJ6F0UEgJ9wCx6z-BPhH1Kuo7vzNXT78E-Wajwv0RK5juAQcrrd0Y-HUoo-NXJkxW-Xzh1RsVr3fB9jdiY1e0aNIMArETksGgFOfeYct6GTiH322w5T_Y-Awa-UfPg77aXeOMPLq8H"
+            />
+            <div class="flex-1">
+              <h3 class="font-title-lg text-title-lg text-primary">Elena Rodriguez</h3>
+              <p class="font-body-md text-body-md text-text-muted">e.rod@siraj-edu.com</p>
+            </div>
+            <span class="px-2 py-1 bg-surface-variant text-on-surface-variant font-label-md text-label-md rounded"
+              >Offline</span
+            >
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-border-subtle">
+            <button
+              class="flex items-center gap-1 font-button-text text-button-text text-text-muted p-2 rounded-lg cursor-not-allowed"
+              disabled=""
+            >
+              <span class="material-symbols-outlined text-[20px]" data-icon="video_chat_disabled">video_chat</span>
+              Join Room
+            </button>
+            <div class="flex gap-2">
+              <button
+                class="p-2 rounded-full border border-border-subtle text-outline hover:bg-surface-container-low transition-colors"
+              >
+                <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+              </button>
+              <button
+                class="p-2 rounded-full border border-border-subtle text-outline hover:bg-surface-container-low transition-colors"
+              >
+                <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 w-full z-50 bg-surface dark:bg-surface-dim rounded-t-xl border-t border-border-subtle shadow-sm flex justify-around items-center h-20 px-2 pb-safe"
+    >
+      <!-- Schedule Tab -->
+      <a class="flex flex-col items-center justify-center text-text-muted dark:text-on-surface-variant group" href="#">
+        <span
+          class="material-symbols-outlined p-1 rounded-full group-hover:bg-primary-container/10"
+          data-icon="calendar_month"
+          >calendar_month</span
+        >
+        <span class="font-label-md text-label-md">Schedule</span>
+      </a>
+      <!-- Teachers Tab (ACTIVE) -->
+      <a
+        class="flex flex-col items-center justify-center bg-primary-container dark:bg-tertiary-container text-on-primary-container dark:text-on-tertiary-container rounded-full px-4 py-1 transition-transform scale-95 active:scale-90"
+        href="#"
+      >
+        <span class="material-symbols-outlined" data-icon="school" style="font-variation-settings: &quot;FILL&quot; 1"
+          >school</span
+        >
+        <span class="font-label-md text-label-md">Teachers</span>
+      </a>
+      <!-- Parents Tab -->
+      <a class="flex flex-col items-center justify-center text-text-muted dark:text-on-surface-variant group" href="#">
+        <span
+          class="material-symbols-outlined p-1 rounded-full group-hover:bg-primary-container/10"
+          data-icon="family_restroom"
+          >family_restroom</span
+        >
+        <span class="font-label-md text-label-md">Parents</span>
+      </a>
+      <!-- Students Tab -->
+      <a class="flex flex-col items-center justify-center text-text-muted dark:text-on-surface-variant group" href="#">
+        <span class="material-symbols-outlined p-1 rounded-full group-hover:bg-primary-container/10" data-icon="group"
+          >group</span
+        >
+        <span class="font-label-md text-label-md">Students</span>
+      </a>
+      <!-- Reports Tab -->
+      <a class="flex flex-col items-center justify-center text-text-muted dark:text-on-surface-variant group" href="#">
+        <span
+          class="material-symbols-outlined p-1 rounded-full group-hover:bg-primary-container/10"
+          data-icon="assessment"
+          >assessment</span
+        >
+        <span class="font-label-md text-label-md">Reports</span>
+      </a>
+    </nav>
+    <script>
+      // Micro-interactions for cards
+      document.querySelectorAll("section > div").forEach(card => {
+        card.addEventListener("touchstart", () => {
+          card.style.transform = "scale(0.98)";
+          card.style.transition = "transform 0.1s ease";
+        });
+        card.addEventListener("touchend", () => {
+          card.style.transform = "scale(1)";
+        });
+      });
+
+      // Simple feedback for action buttons
+      const actionBtns = document.querySelectorAll("button");
+      actionBtns.forEach(btn => {
+        btn.addEventListener("click", function (_e) {
+          const ripple = document.createElement("div");
+          ripple.className = "absolute inset-0 bg-white/10 rounded-inherit opacity-0 transition-opacity";
+          this.style.position = "relative";
+          this.appendChild(ripple);
+          setTimeout(() => ripple.classList.add("opacity-100"), 10);
+          setTimeout(() => ripple.remove(), 200);
+        });
+      });
+    </script>
+  </body>
+</html>

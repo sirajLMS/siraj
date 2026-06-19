@@ -1,0 +1,443 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+    <title>Siraj LMS - Class History</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Hanken+Grotesk:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#005048",
+              "tertiary-container": "#004e46",
+              "on-tertiary-container": "#33c7b4",
+              "border-subtle": "#E2E8F0",
+              "on-secondary-container": "#586377",
+              "surface-variant": "#e0e3e5",
+              "surface-container-high": "#e6e8ea",
+              "text-muted": "#64748B",
+              tertiary: "#00352f",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "on-primary-container": "#85bdbc",
+              "on-secondary": "#ffffff",
+              primary: "#003535",
+              "surface-dim": "#d8dadc",
+              background: "#f7f9fb",
+              "on-primary-fixed": "#002020",
+              "surface-container-low": "#f2f4f6",
+              "error-container": "#ffdad6",
+              secondary: "#545f73",
+              "on-secondary-fixed-variant": "#3c475a",
+              "on-error": "#ffffff",
+              "on-secondary-fixed": "#111c2d",
+              "secondary-fixed-dim": "#bcc7de",
+              "tertiary-fixed": "#71f8e4",
+              outline: "#707978",
+              "on-primary-fixed-variant": "#104f4f",
+              "secondary-container": "#d5e0f8",
+              "inverse-surface": "#2d3133",
+              "primary-fixed-dim": "#98d1d0",
+              "on-primary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "inverse-primary": "#98d1d0",
+              "sidebar-bg": "#0F3D3D",
+              "surface-bright": "#f7f9fb",
+              "surface-container-highest": "#e0e3e5",
+              "on-surface": "#191c1e",
+              "navbar-teal": "#135E5E",
+              "secondary-fixed": "#d8e3fb",
+              "primary-container": "#0d4d4d",
+              surface: "#f7f9fb",
+              "surface-container": "#eceef0",
+              "surface-tint": "#2e6767",
+              "surface-container-lowest": "#ffffff",
+              error: "#ba1a1a",
+              "on-tertiary-fixed": "#00201c",
+              "inverse-on-surface": "#eff1f3",
+              "on-error-container": "#93000a",
+              "on-surface-variant": "#404848",
+              "outline-variant": "#bfc8c8",
+              "on-background": "#191c1e",
+              "primary-fixed": "#b4edec",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "page-margin": "1.5rem",
+              gutter: "1rem",
+              "navbar-height": "64px",
+              "sidebar-width": "260px",
+              "card-padding": "1.25rem",
+              "auth-width": "420px",
+              "input-gap": "1rem",
+            },
+            fontFamily: {
+              "label-md": ["Inter"],
+              "headline-md": ["Hanken Grotesk"],
+              "headline-lg": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "body-lg": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      body {
+        font-family: "Hanken Grotesk", sans-serif;
+        background-color: #f7f9fb;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body class="antialiased text-on-surface">
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full z-50 bg-navbar-teal flex justify-between items-center h-16 px-page-margin w-full">
+      <div class="flex items-center gap-3">
+        <button class="material-symbols-outlined text-on-primary active:opacity-80 transition-all">menu</button>
+        <span class="font-headline-md text-headline-md font-bold text-on-primary">Siraj LMS</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <button class="material-symbols-outlined text-on-primary">search</button>
+        <div class="w-8 h-8 rounded-full overflow-hidden border border-white/20">
+          <img
+            alt="User Avatar"
+            class="w-full h-full object-cover"
+            src="https://lh3.googleusercontent.com/aida/AP1WRLvecCS2oCnrxW2vjVjLzlJoTAY6WPN1vY26x5-KUndmyfVtSGYWIBXsLTgS9X93w4CQ1Tg0Wwk8oqa9fYCThzqOMoiKOWw8VZedKTrsjbCTylrQow78-2tOQeSB3xZ3iTkUus_m4csVDXva4_snQNWi90JPlnKF8C8ZUWsK3_nR4BrRi7I25KrHkemJAVijD4uFWgYGLGJEtQlBRsVGV7rVF4mPqeXCsaH1fghl4cTOcbhWhpHnM7TMwzfJ"
+          />
+        </div>
+      </div>
+    </header>
+    <main class="pt-20 pb-24 px-4 min-h-screen">
+      <!-- Breadcrumb & Header -->
+      <div class="mb-6">
+        <nav class="flex items-center gap-1 text-text-muted mb-2">
+          <span class="font-label-md text-label-md">Student Archive</span>
+          <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+          <span class="font-label-md text-label-md text-primary font-bold">Class History</span>
+        </nav>
+        <h1 class="font-title-lg text-title-lg text-primary leading-tight">Class History of Ahmad Al-Farsi</h1>
+        <p class="font-body-md text-text-muted mt-1">October 2024 • Academic Year 2024/25</p>
+      </div>
+      <!-- Metric Grid 2x2 -->
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between border border-border-subtle"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <span class="font-label-md text-label-md text-text-muted">Total Classes</span>
+            <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary text-[18px]">school</span>
+            </div>
+          </div>
+          <div class="font-headline-md text-headline-md text-primary">42</div>
+        </div>
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between border border-border-subtle"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <span class="font-label-md text-label-md text-text-muted">Attendance</span>
+            <div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center">
+              <span class="material-symbols-outlined text-secondary text-[18px]">verified_user</span>
+            </div>
+          </div>
+          <div class="font-headline-md text-headline-md text-primary">98%</div>
+        </div>
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between border border-border-subtle"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <span class="font-label-md text-label-md text-text-muted">Hours Studied</span>
+            <div class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center">
+              <span class="material-symbols-outlined text-on-tertiary-fixed-variant text-[18px]">timer</span>
+            </div>
+          </div>
+          <div class="font-headline-md text-headline-md text-primary">84.5h</div>
+        </div>
+        <div
+          class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between border border-border-subtle"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <span class="font-label-md text-label-md text-text-muted">Performance</span>
+            <div class="w-8 h-8 rounded-full bg-error-container flex items-center justify-center">
+              <span class="material-symbols-outlined text-error text-[18px]">trending_up</span>
+            </div>
+          </div>
+          <div class="font-headline-md text-headline-md text-primary">A-</div>
+        </div>
+      </div>
+      <!-- Monthly Overview & Controls -->
+      <div class="flex items-center justify-between mb-4">
+        <button
+          class="flex items-center gap-2 bg-primary px-4 py-2 rounded-lg text-on-primary transition-transform active:scale-95"
+        >
+          <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+          <span class="font-button-text text-button-text">OCTOBER 2024</span>
+          <span class="material-symbols-outlined text-[18px]">expand_more</span>
+        </button>
+        <button
+          class="w-10 h-10 flex items-center justify-center bg-surface-container-high rounded-lg text-primary shadow-sm"
+        >
+          <span class="material-symbols-outlined">picture_as_pdf</span>
+        </button>
+      </div>
+      <!-- Date Scroller -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle p-4 mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-title-lg text-title-lg text-on-surface">Weekly Attendance</h3>
+          <span class="font-label-md text-label-md text-primary font-bold">Week 3</span>
+        </div>
+        <div class="flex justify-between items-center overflow-x-auto hide-scrollbar gap-2">
+          <div class="flex flex-col items-center min-w-[48px] py-3 rounded-xl hover:bg-surface-container-low">
+            <span class="font-label-md text-label-md text-text-muted mb-1">MON</span>
+            <span class="font-title-lg text-title-lg">14</span>
+            <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1"></div>
+          </div>
+          <div
+            class="flex flex-col items-center min-w-[48px] py-3 rounded-xl bg-primary-container text-on-primary-container ring-1 ring-primary/20 shadow-lg"
+          >
+            <span class="font-label-md text-label-md mb-1">TUE</span>
+            <span class="font-title-lg text-title-lg">15</span>
+            <div class="w-1.5 h-1.5 rounded-full bg-on-primary-container mt-1"></div>
+          </div>
+          <div class="flex flex-col items-center min-w-[48px] py-3 rounded-xl hover:bg-surface-container-low">
+            <span class="font-label-md text-label-md text-text-muted mb-1">WED</span>
+            <span class="font-title-lg text-title-lg">16</span>
+            <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1"></div>
+          </div>
+          <div class="flex flex-col items-center min-w-[48px] py-3 rounded-xl hover:bg-surface-container-low">
+            <span class="font-label-md text-label-md text-text-muted mb-1">THU</span>
+            <span class="font-title-lg text-title-lg">17</span>
+            <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1"></div>
+          </div>
+          <div class="flex flex-col items-center min-w-[48px] py-3 rounded-xl hover:bg-surface-container-low">
+            <span class="font-label-md text-label-md text-text-muted mb-1">FRI</span>
+            <span class="font-title-lg text-title-lg">18</span>
+            <div class="w-1.5 h-1.5 rounded-full bg-error mt-1"></div>
+          </div>
+          <div class="flex flex-col items-center min-w-[48px] py-3 rounded-xl opacity-40">
+            <span class="font-label-md text-label-md text-text-muted mb-1">SAT</span>
+            <span class="font-title-lg text-title-lg">19</span>
+          </div>
+        </div>
+      </div>
+      <!-- Class Session List -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between px-1">
+          <h2 class="font-title-lg text-title-lg text-primary">Class Details</h2>
+          <span class="font-label-md text-label-md text-text-muted uppercase tracking-widest">Tuesday Oct 15</span>
+        </div>
+        <!-- Class Item 1 -->
+        <div
+          class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle p-card-padding flex items-center gap-4 transition-all hover:translate-x-1"
+        >
+          <div
+            class="flex flex-col items-center justify-center bg-primary-container/10 p-2 rounded-lg w-16 h-16 shrink-0"
+          >
+            <span class="font-label-md text-label-md text-primary font-bold">09:00</span>
+            <span class="font-label-md text-label-md text-text-muted">AM</span>
+          </div>
+          <div class="flex-grow">
+            <h4 class="font-body-lg font-bold text-on-surface">Physics Lab</h4>
+            <p class="font-body-md text-text-muted">Advanced Mechanics</p>
+          </div>
+          <div class="flex flex-col items-end gap-1">
+            <span
+              class="bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+              >Present</span
+            >
+            <span class="font-label-md text-label-md text-text-muted">1.5h</span>
+          </div>
+        </div>
+        <!-- Class Item 2 -->
+        <div
+          class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle p-card-padding flex items-center gap-4 transition-all hover:translate-x-1"
+        >
+          <div
+            class="flex flex-col items-center justify-center bg-primary-container/10 p-2 rounded-lg w-16 h-16 shrink-0"
+          >
+            <span class="font-label-md text-label-md text-primary font-bold">11:30</span>
+            <span class="font-label-md text-label-md text-text-muted">AM</span>
+          </div>
+          <div class="flex-grow">
+            <h4 class="font-body-lg font-bold text-on-surface">Islamic History</h4>
+            <p class="font-body-md text-text-muted">Golden Age Overview</p>
+          </div>
+          <div class="flex flex-col items-end gap-1">
+            <span
+              class="bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+              >Present</span
+            >
+            <span class="font-label-md text-label-md text-text-muted">2.0h</span>
+          </div>
+        </div>
+        <!-- Class Item 3 -->
+        <div
+          class="bg-surface-container-lowest rounded-xl shadow-sm border border-border-subtle p-card-padding flex items-center gap-4 transition-all hover:translate-x-1"
+        >
+          <div
+            class="flex flex-col items-center justify-center bg-primary-container/10 p-2 rounded-lg w-16 h-16 shrink-0"
+          >
+            <span class="font-label-md text-label-md text-primary font-bold">02:00</span>
+            <span class="font-label-md text-label-md text-text-muted">PM</span>
+          </div>
+          <div class="flex-grow">
+            <h4 class="font-body-lg font-bold text-on-surface">Calculus II</h4>
+            <p class="font-body-md text-text-muted">Integrals Practice</p>
+          </div>
+          <div class="flex flex-col items-end gap-1">
+            <span
+              class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+              >Late</span
+            >
+            <span class="font-label-md text-label-md text-text-muted">1.0h</span>
+          </div>
+        </div>
+      </div>
+      <!-- Monthly Trends Visual -->
+      <div class="mt-8 bg-navbar-teal p-6 rounded-2xl relative overflow-hidden shadow-xl">
+        <div class="relative z-10">
+          <h4 class="font-title-lg text-title-lg text-on-primary mb-2">Performance Streak</h4>
+          <p class="font-body-md text-on-primary/80 mb-4">
+            You've attended 100% of classes this week. Keep up the momentum!
+          </p>
+          <div class="flex gap-1 h-12 items-end">
+            <div class="flex-1 bg-on-primary/20 rounded-t h-4 transition-all hover:h-10 hover:bg-on-primary/40"></div>
+            <div class="flex-1 bg-on-primary/20 rounded-t h-6 transition-all hover:h-10 hover:bg-on-primary/40"></div>
+            <div class="flex-1 bg-on-primary/20 rounded-t h-8 transition-all hover:h-10 hover:bg-on-primary/40"></div>
+            <div class="flex-1 bg-on-primary/20 rounded-t h-10 transition-all hover:h-10 hover:bg-on-primary/40"></div>
+            <div class="flex-1 bg-on-primary rounded-t h-12 transition-all hover:h-10 hover:bg-on-primary/40"></div>
+            <div class="flex-1 bg-on-primary/20 rounded-t h-0 transition-all hover:h-10 hover:bg-on-primary/40"></div>
+            <div class="flex-1 bg-on-primary/20 rounded-t h-0 transition-all hover:h-10 hover:bg-on-primary/40"></div>
+          </div>
+        </div>
+        <!-- Decorative background effect -->
+        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
+      </div>
+    </main>
+    <!-- FAB for quick action -->
+    <button
+      class="fixed bottom-24 right-6 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center active:scale-90 transition-transform z-40"
+    >
+      <span class="material-symbols-outlined text-[28px]">add</span>
+    </button>
+    <!-- BottomNavBar -->
+    <nav
+      class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface-container-lowest dark:bg-inverse-surface border-t border-border-subtle shadow-sm"
+    >
+      <a
+        class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-colors"
+        href="#"
+      >
+        <span class="material-symbols-outlined">calendar_today</span>
+        <span class="font-label-md text-label-md">Schedule</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-colors"
+        href="#"
+      >
+        <span class="material-symbols-outlined">school</span>
+        <span class="font-label-md text-label-md">Teachers</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-colors"
+        href="#"
+      >
+        <span class="material-symbols-outlined">family_restroom</span>
+        <span class="font-label-md text-label-md">Parents</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-colors"
+        href="#"
+      >
+        <span class="material-symbols-outlined">person</span>
+        <span class="font-label-md text-label-md">Students</span>
+      </a>
+      <a
+        class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform duration-150"
+        href="#"
+      >
+        <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1">assessment</span>
+        <span class="font-label-md text-label-md">Reports</span>
+      </a>
+    </nav>
+    <script>
+      // Micro-interactions for the calendar selection
+      document.querySelectorAll(".hide-scrollbar > div").forEach(day => {
+        day.addEventListener("click", () => {
+          document.querySelectorAll(".hide-scrollbar > div").forEach(d => {
+            d.classList.remove(
+              "bg-primary-container",
+              "text-on-primary-container",
+              "ring-1",
+              "ring-primary/20",
+              "shadow-lg"
+            );
+            d.classList.add("hover:bg-surface-container-low");
+            const dot = d.querySelector(".w-1\\.5");
+            if (dot) dot.classList.replace("bg-on-primary-container", "bg-primary");
+          });
+          day.classList.add(
+            "bg-primary-container",
+            "text-on-primary-container",
+            "ring-1",
+            "ring-primary/20",
+            "shadow-lg"
+          );
+          day.classList.remove("hover:bg-surface-container-low");
+          const activeDot = day.querySelector(".w-1\\.5");
+          if (activeDot) activeDot.classList.replace("bg-primary", "bg-on-primary-container");
+        });
+      });
+    </script>
+  </body>
+</html>

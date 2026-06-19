@@ -1,0 +1,489 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Teachers Directory - Siraj LMS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Hanken+Grotesk:wght@400;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container": "#eceef0",
+              "surface-container-high": "#e6e8ea",
+              "on-tertiary-container": "#33c7b4",
+              "on-primary-fixed-variant": "#104f4f",
+              "on-primary-fixed": "#002020",
+              "on-background": "#191c1e",
+              error: "#ba1a1a",
+              "text-muted": "#64748B",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#d8e3fb",
+              "surface-variant": "#e0e3e5",
+              "on-tertiary-fixed": "#00201c",
+              "tertiary-fixed-dim": "#4fdbc8",
+              "border-subtle": "#E2E8F0",
+              "sidebar-bg": "#0F3D3D",
+              "inverse-on-surface": "#eff1f3",
+              "outline-variant": "#bfc8c8",
+              "secondary-fixed-dim": "#bcc7de",
+              "primary-fixed-dim": "#98d1d0",
+              "on-primary-container": "#85bdbc",
+              "tertiary-container": "#004e46",
+              "primary-fixed": "#b4edec",
+              "primary-container": "#0d4d4d",
+              "on-secondary-fixed-variant": "#3c475a",
+              "navbar-teal": "#135E5E",
+              "tertiary-fixed": "#71f8e4",
+              primary: "#003535",
+              "on-surface": "#191c1e",
+              "on-secondary-fixed": "#111c2d",
+              "surface-bright": "#f7f9fb",
+              "on-error-container": "#93000a",
+              surface: "#f7f9fb",
+              "secondary-container": "#d5e0f8",
+              "on-tertiary": "#ffffff",
+              tertiary: "#00352f",
+              "surface-container-highest": "#e0e3e5",
+              "error-container": "#ffdad6",
+              "on-tertiary-fixed-variant": "#005048",
+              "on-surface-variant": "#404848",
+              "surface-container-low": "#f2f4f6",
+              "on-primary": "#ffffff",
+              "surface-tint": "#2e6767",
+              background: "#f7f9fb",
+              "inverse-primary": "#98d1d0",
+              "surface-dim": "#d8dadc",
+              "surface-container-lowest": "#ffffff",
+              secondary: "#545f73",
+              "on-secondary-container": "#586377",
+              "inverse-surface": "#2d3133",
+              "on-secondary": "#ffffff",
+              outline: "#707978",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "auth-width": "420px",
+              "sidebar-width": "260px",
+              "page-margin": "2rem",
+              "card-padding": "1.5rem",
+              "navbar-height": "64px",
+              gutter: "1.5rem",
+              "input-gap": "1rem",
+            },
+            fontFamily: {
+              "label-md": ["Inter"],
+              "body-lg": ["Hanken Grotesk"],
+              display: ["Hanken Grotesk"],
+              "headline-md": ["Hanken Grotesk"],
+              "body-md": ["Hanken Grotesk"],
+              "headline-lg-mobile": ["Hanken Grotesk"],
+              "title-lg": ["Hanken Grotesk"],
+              "button-text": ["Inter"],
+              "headline-lg": ["Hanken Grotesk"],
+            },
+            fontSize: {
+              "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              display: ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+              "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+              "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "title-lg": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+              "button-text": ["14px", { lineHeight: "20px", letterSpacing: "0.1em", fontWeight: "700" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      body {
+        background-color: #f7f9fb;
+      }
+    </style>
+  </head>
+  <body class="font-body-md text-body-md text-on-surface">
+    <!-- Sidebar Navigation -->
+    <aside class="fixed left-0 top-0 h-full w-sidebar-width bg-sidebar-bg flex flex-col py-6 z-20">
+      <div class="px-6 mb-10 flex items-center gap-3">
+        <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+          <span class="material-symbols-outlined text-white" data-icon="school">school</span>
+        </div>
+        <div>
+          <h1 class="font-headline-md text-headline-md font-bold text-white leading-tight">Siraj LMS</h1>
+          <p class="font-label-md text-label-md text-white/60">Administrative Portal</p>
+        </div>
+      </div>
+      <nav class="flex-1 px-4 space-y-1">
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-surface-variant hover:text-white hover:bg-navbar-teal/50 transition-colors cursor-pointer"
+          href="#"
+        >
+          <span class="material-symbols-outlined" data-icon="home">home</span>
+          <span class="font-body-md">Home</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-surface-variant hover:text-white hover:bg-navbar-teal/50 transition-colors cursor-pointer"
+          href="#"
+        >
+          <span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+          <span class="font-body-md">Schedule Search</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded bg-navbar-teal text-white font-bold transition-all duration-200 cursor-pointer"
+          href="#"
+        >
+          <span class="material-symbols-outlined" data-icon="school">school</span>
+          <span class="font-body-md">Teachers</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-surface-variant hover:text-white hover:bg-navbar-teal/50 transition-colors cursor-pointer"
+          href="#"
+        >
+          <span class="material-symbols-outlined" data-icon="family_restroom">family_restroom</span>
+          <span class="font-body-md">Parents</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-surface-variant hover:text-white hover:bg-navbar-teal/50 transition-colors cursor-pointer"
+          href="#"
+        >
+          <span class="material-symbols-outlined" data-icon="group">group</span>
+          <span class="font-body-md">Students</span>
+        </a>
+        <a
+          class="flex items-center gap-3 px-4 py-3 rounded text-surface-variant hover:text-white hover:bg-navbar-teal/50 transition-colors cursor-pointer"
+          href="#"
+        >
+          <span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+          <span class="font-body-md">Managers</span>
+        </a>
+      </nav>
+    </aside>
+    <!-- Top Navigation Bar -->
+    <header
+      class="fixed top-0 right-0 h-navbar-height z-10 bg-navbar-teal flex items-center justify-between px-page-margin ml-sidebar-width w-[calc(100%-theme(spacing.sidebar-width))] shadow-sm"
+    >
+      <div class="flex items-center gap-4">
+        <h2 class="font-headline-md text-headline-md text-white">Teachers Directory</h2>
+      </div>
+      <div class="flex items-center gap-6">
+        <button
+          class="text-white/80 hover:bg-primary-container/20 p-2 rounded transition-transform scale-95 active:scale-90"
+        >
+          <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+        </button>
+        <button
+          class="text-white/80 hover:bg-primary-container/20 p-2 rounded transition-transform scale-95 active:scale-90"
+        >
+          <span class="material-symbols-outlined" data-icon="settings">settings</span>
+        </button>
+        <div class="flex items-center gap-3 pl-4 border-l border-white/20">
+          <div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden">
+            <img
+              alt="Administrator Profile"
+              data-alt="A professional headshot of a corporate male administrator in a light grey studio background. He is wearing a dark navy blazer and a white shirt, looking directly at the camera with a confident, friendly expression. The lighting is soft and even, highlighting a clean-shaven face and neatly styled short hair."
+              src="https://lh3.googleusercontent.com/aida/AP1WRLvO_T1mXDP6AQIX4BXP6TClS8_GvpMlCenXDNIkWEdzxYZaG7eHhNLnzPGjfeL0h6aHY5-iK24U0NExvQ3bxppOAFKTbvXNNTSREGmuq_qD1Y0PBA6A0sjVTNUr-iFmg3ANWczV4RUkPV-BJgRDJKrLnZ3n-whcXaQWeO0T2sZAj6xTxKsXXrTpAIARLPHi4YZ1Exl7w4pRT-jmt4UosdDPn5k72vaPuq5bALVROOBNUSyKs9JF7hloMeTX"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="ml-sidebar-width pt-navbar-height min-h-screen">
+      <div class="p-page-margin">
+        <!-- Header Action Row -->
+        <div class="flex justify-between items-end mb-8">
+          <div class="flex gap-gutter">
+            <!-- Activated Metric Card -->
+            <div
+              class="bg-white rounded-xl shadow-sm p-6 w-64 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer"
+            >
+              <div>
+                <p class="font-label-md text-label-md text-text-muted mb-1">Activated</p>
+                <h3 class="font-headline-lg text-headline-lg text-primary">124</h3>
+              </div>
+              <div
+                class="w-12 h-12 rounded-full border-2 border-navbar-teal flex items-center justify-center text-navbar-teal"
+              >
+                <span
+                  class="material-symbols-outlined"
+                  data-icon="check_circle"
+                  style="font-variation-settings: &quot;FILL&quot; 1"
+                  >check_circle</span
+                >
+              </div>
+            </div>
+            <!-- Deactivated Metric Card -->
+            <div
+              class="bg-white rounded-xl shadow-sm p-6 w-64 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer"
+            >
+              <div>
+                <p class="font-label-md text-label-md text-text-muted mb-1">Deactivated</p>
+                <h3 class="font-headline-lg text-headline-lg text-on-surface">12</h3>
+              </div>
+              <div
+                class="w-12 h-12 rounded-full border-2 border-outline-variant flex items-center justify-center text-outline"
+              >
+                <span class="material-symbols-outlined" data-icon="cancel">cancel</span>
+              </div>
+            </div>
+          </div>
+          <button
+            class="rounded-full px-6 py-2.5 border-2 border-navbar-teal text-navbar-teal font-button-text text-button-text hover:bg-navbar-teal hover:text-white transition-all flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined text-[18px]" data-icon="edit_calendar">edit_calendar</span>
+            Update Schedules
+          </button>
+        </div>
+        <!-- Teachers Data Table Container -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-white border-b border-border-subtle">
+                  <th class="px-6 py-4 font-button-text text-button-text text-primary">#</th>
+                  <th class="px-6 py-4 font-button-text text-button-text text-primary">Image</th>
+                  <th class="px-6 py-4 font-button-text text-button-text text-primary">Name</th>
+                  <th class="px-6 py-4 font-button-text text-button-text text-primary">Email</th>
+                  <th class="px-6 py-4 font-button-text text-button-text text-primary text-center">Zoom</th>
+                  <th class="px-6 py-4 font-button-text text-button-text text-primary text-center">Schedule</th>
+                  <th class="px-6 py-4 font-button-text text-button-text text-primary text-center">Options</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border-subtle">
+                <!-- Teacher Row 1 -->
+                <tr class="hover:bg-surface-container-low transition-colors group">
+                  <td class="px-6 py-4 font-body-md text-on-surface-variant">01</td>
+                  <td class="px-6 py-4">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border border-border-subtle">
+                      <img
+                        alt="Sarah Jenkins"
+                        data-alt="A portrait of a professional female teacher in an academic setting. She is wearing a dark green cardigan over a white blouse, with a soft smile. The background is a brightly lit classroom with a blurred bookshelf, creating a warm, institutional atmosphere. The aesthetic is modern, minimalist, and authoritative."
+                        src="https://lh3.googleusercontent.com/aida/AP1WRLt42A9LK3rU8NVfS5DG9raNX9dKfQ8qvUzB_PR3WSsfa6XGz0rv7k0r2oXuwG_Z6H1F-eutPU2ofr-5AberXy0BGtUi9sr5JSKaSJDW_XGE5WjNs7bsSC4duR_rFPI2PBl3AlkJHm_bsNsMJxwPGaW7nLUo_iR8vSFrzTEd2JiSB_cZ-TCDAs6I2xMlUGeUO_zNVlCZBrSmMghi34QIvjKg1aBgFBLu_QCb0-tqUaY2gOCfz1HfYMfB4sGo"
+                      />
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 font-body-lg text-body-lg font-semibold text-primary">Sarah Jenkins</td>
+                  <td class="px-6 py-4 font-body-md text-text-muted">s.jenkins@sirajlms.edu</td>
+                  <td class="px-6 py-4 text-center">
+                    <a class="text-navbar-teal hover:underline font-label-md" href="#">Join Room</a>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <button class="p-2 text-error hover:bg-error/10 rounded-lg transition-colors">
+                      <span
+                        class="material-symbols-outlined"
+                        data-icon="calendar_month"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >calendar_month</span
+                      >
+                    </button>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <button
+                      class="p-2 text-primary-container hover:bg-primary-container/10 rounded-lg transition-colors"
+                    >
+                      <span class="material-symbols-outlined" data-icon="settings">settings</span>
+                    </button>
+                  </td>
+                </tr>
+                <!-- Teacher Row 2 -->
+                <tr class="hover:bg-surface-container-low transition-colors group">
+                  <td class="px-6 py-4 font-body-md text-on-surface-variant">02</td>
+                  <td class="px-6 py-4">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border border-border-subtle">
+                      <img
+                        alt="Michael Chen"
+                        data-alt="A professional headshot of a male professor in his late 40s. He is wearing formal rectangular glasses and a light blue dress shirt. The background is a clean, neutral grey studio wall with professional softbox lighting. The style is clean, sharp, and corporate, reflecting expertise and approachability."
+                        src="https://lh3.googleusercontent.com/aida/AP1WRLvqx0gNVFO5NaLqylBixe296FAvULfwux3jYvCOtL155pyUDTCF3Yi5hSCEcqPkAZnWZJU8JU5Z4KfUY-PNj63z_9zjRr4AI90d_NOVnIZupZfYidke6uhMq9IgtBGSFYHzNQyFXGLv5s1IsZEZJxLsSHwlrNpy9_2VLmU6l1BnHh-FI00944naOCGuLkREUci91VtyDEvGQCBLARoc9ZIF8aqRcXXZ7xBgs51duhQkZGayaAnMwdeXDbZ4"
+                      />
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 font-body-lg text-body-lg font-semibold text-primary">Michael Chen</td>
+                  <td class="px-6 py-4 font-body-md text-text-muted">m.chen@sirajlms.edu</td>
+                  <td class="px-6 py-4 text-center">
+                    <a class="text-navbar-teal hover:underline font-label-md" href="#">Join Room</a>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <button class="p-2 text-error hover:bg-error/10 rounded-lg transition-colors">
+                      <span
+                        class="material-symbols-outlined"
+                        data-icon="calendar_month"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >calendar_month</span
+                      >
+                    </button>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <button
+                      class="p-2 text-primary-container hover:bg-primary-container/10 rounded-lg transition-colors"
+                    >
+                      <span class="material-symbols-outlined" data-icon="settings">settings</span>
+                    </button>
+                  </td>
+                </tr>
+                <!-- Teacher Row 3 -->
+                <tr class="hover:bg-surface-container-low transition-colors group">
+                  <td class="px-6 py-4 font-body-md text-on-surface-variant">03</td>
+                  <td class="px-6 py-4">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border border-border-subtle">
+                      <img
+                        alt="Elena Rodriguez"
+                        data-alt="A portrait of a young female educator in a modern office environment. She has dark hair tied back and is wearing a cream-colored blazer. The lighting is bright and natural, coming from a nearby window. The aesthetic is clean, academic, and organized, with a palette of soft neutrals and deep teal accents."
+                        src="https://lh3.googleusercontent.com/aida/AP1WRLvG5oICqX0Ncz8OY9aKM-u-XYBVk4kWt_TLBlAl310sQleGI7QmjXFIu6eSL4NLxTOUEF6MkKr56XehAnj6OSn5dAjr0LKvhovhOa5aHvidjr7Brbod8uTQ5bXHkzZenrwsGHoGjd-Yx_hPMy8sLsoq6Fa4jWmha3dkLJz2ucRPZ5GhGFby06OZVMMaMwTVxRzAAEITnGlaw6UTUz7RGPaUd5HejU_d3vPKeoI8ZUrcvWm6UC5s1NE1hMir"
+                      />
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 font-body-lg text-body-lg font-semibold text-primary">Elena Rodriguez</td>
+                  <td class="px-6 py-4 font-body-md text-text-muted">e.rodriguez@sirajlms.edu</td>
+                  <td class="px-6 py-4 text-center">
+                    <a class="text-navbar-teal hover:underline font-label-md" href="#">Join Room</a>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <button class="p-2 text-error hover:bg-error/10 rounded-lg transition-colors">
+                      <span
+                        class="material-symbols-outlined"
+                        data-icon="calendar_month"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >calendar_month</span
+                      >
+                    </button>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <button
+                      class="p-2 text-primary-container hover:bg-primary-container/10 rounded-lg transition-colors"
+                    >
+                      <span class="material-symbols-outlined" data-icon="settings">settings</span>
+                    </button>
+                  </td>
+                </tr>
+                <!-- Teacher Row 4 -->
+                <tr class="hover:bg-surface-container-low transition-colors group">
+                  <td class="px-6 py-4 font-body-md text-on-surface-variant">04</td>
+                  <td class="px-6 py-4">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border border-border-subtle">
+                      <img
+                        alt="David Miller"
+                        data-alt="A professional headshot of a middle-aged male teacher with a neat beard. He is wearing a grey wool sweater over a collared shirt. The background is a minimalist office space with subtle geometric patterns on the wall. The mood is calm, professional, and sophisticated, reflecting an orderly educational environment."
+                        src="https://lh3.googleusercontent.com/aida/AP1WRLuuFIjEbERksIUjV184j6MHrMFzv2H8EG9lPuWyVEytU8HOiFG2GRJumncIMoG7t_7GIZRX9qPEowNLEn3o0-gNI-4FTrgc2Tgz3IWBnAiHU8yLrNRwVYwGlb0X1mF8-LsMM5qTutBsaMexD6EasSoIp0coiG2G6hxzXayvtFrcQW_Y5WtN2sIGtPSU9V4ei1LJEzqoc2IDvQrQuBqjG4SxX-E_vMphpPC9b64fOXR_RFtvct4S9WJ7a1Zm"
+                      />
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 font-body-lg text-body-lg font-semibold text-primary">David Miller</td>
+                  <td class="px-6 py-4 font-body-md text-text-muted">d.miller@sirajlms.edu</td>
+                  <td class="px-6 py-4 text-center">
+                    <span class="text-surface-variant italic font-label-md">Link Pending</span>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <button class="p-2 text-error hover:bg-error/10 rounded-lg transition-colors">
+                      <span
+                        class="material-symbols-outlined"
+                        data-icon="calendar_month"
+                        style="font-variation-settings: &quot;FILL&quot; 1"
+                        >calendar_month</span
+                      >
+                    </button>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <button
+                      class="p-2 text-primary-container hover:bg-primary-container/10 rounded-lg transition-colors"
+                    >
+                      <span class="material-symbols-outlined" data-icon="settings">settings</span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination Footer -->
+          <div
+            class="px-6 py-4 bg-surface-container-low border-t border-border-subtle flex items-center justify-between"
+          >
+            <p class="font-label-md text-label-md text-text-muted">Showing 4 of 136 Teachers</p>
+            <div class="flex gap-2">
+              <button
+                class="p-1.5 rounded border border-border-subtle hover:bg-white transition-colors disabled:opacity-50"
+                disabled=""
+              >
+                <span class="material-symbols-outlined text-[18px]" data-icon="chevron_left">chevron_left</span>
+              </button>
+              <button class="px-3 py-1 rounded bg-navbar-teal text-white font-button-text text-button-text">1</button>
+              <button
+                class="px-3 py-1 rounded border border-border-subtle hover:bg-white text-on-surface font-button-text text-button-text"
+              >
+                2
+              </button>
+              <button
+                class="px-3 py-1 rounded border border-border-subtle hover:bg-white text-on-surface font-button-text text-button-text"
+              >
+                3
+              </button>
+              <button class="p-1.5 rounded border border-border-subtle hover:bg-white transition-colors">
+                <span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- Interactive Layer: Notification Micro-interaction -->
+    <script>
+      document.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", function (e) {
+          const rect = this.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          const ripple = document.createElement("span");
+          ripple.style.position = "absolute";
+          ripple.style.width = "10px";
+          ripple.style.height = "10px";
+          ripple.style.background = "rgba(255, 255, 255, 0.3)";
+          ripple.style.borderRadius = "50%";
+          ripple.style.left = x + "px";
+          ripple.style.top = y + "px";
+          ripple.style.transform = "translate(-50%, -50%) scale(0)";
+          ripple.style.transition = "transform 0.5s ease-out, opacity 0.5s ease-out";
+          ripple.style.pointerEvents = "none";
+
+          this.style.position = "relative";
+          this.style.overflow = "hidden";
+          this.appendChild(ripple);
+
+          requestAnimationFrame(() => {
+            ripple.style.transform = "translate(-50%, -50%) scale(15)";
+            ripple.style.opacity = "0";
+          });
+
+          setTimeout(() => ripple.remove(), 500);
+        });
+      });
+    </script>
+  </body>
+</html>
