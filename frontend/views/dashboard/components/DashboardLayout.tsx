@@ -13,6 +13,7 @@ interface DashboardLayoutProps {
   readonly bottomNavItems: readonly NavItem[];
   readonly activeNavKey: string;
   readonly userName: string;
+  readonly userEmail: string;
   readonly userRole: string;
   readonly roleLabel: string;
   readonly avatarUrl: string;
@@ -33,6 +34,7 @@ export function DashboardLayout({
   bottomNavItems,
   activeNavKey,
   userName,
+  userEmail,
   userRole,
   roleLabel,
   avatarUrl,
@@ -54,6 +56,7 @@ export function DashboardLayout({
       {/* Top Navbar - Full Width */}
       <TopNavbar
         userName={userName}
+        userEmail={userEmail}
         userRole={userRole}
         roleLabel={roleLabel}
         avatarUrl={avatarUrl}

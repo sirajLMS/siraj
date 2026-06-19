@@ -2,14 +2,16 @@
 "use client";
 
 import { MenuOutlined, SchoolOutlined } from "@mui/icons-material";
-import { AppBar, Avatar, alpha, Box, IconButton, Toolbar, Typography } from "@mui/material";
+import { AppBar, alpha, Box, IconButton, Toolbar, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/frontend/views/dashboard/components/navbar/LanguageSwitcher";
 import { ThemeSwitcher } from "@/frontend/views/dashboard/components/navbar/ThemeSwitcher";
 import { NotificationButton } from "./navbar/NotificationButton";
+import { UserMenuButton } from "./navbar/UserMenuButton";
 
 interface TopNavbarProps {
   readonly userName: string;
+  readonly userEmail: string;
   readonly userRole: string;
   readonly roleLabel: string;
   readonly avatarUrl: string;
@@ -32,16 +34,19 @@ const BrandSection = ({ onMenuClick, roleLabel }: { onMenuClick: () => void; rol
         <MenuOutlined />
       </IconButton>
 
-      <Avatar
-        sx={{
+      <Box
+        sx={theme => ({
           width: 40,
           height: 40,
-          bgcolor: theme => alpha(theme.palette.onHeaderContainer, 0.15),
+          bgcolor: alpha(theme.palette.onHeaderContainer, 0.15),
           borderRadius: 2,
-        }}
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        })}
       >
         <SchoolOutlined sx={{ fontSize: 24 }} />
-      </Avatar>
+      </Box>
 
       <Box sx={{ display: { xs: "none", md: "block" } }}>
         <Typography
@@ -73,10 +78,12 @@ const BrandSection = ({ onMenuClick, roleLabel }: { onMenuClick: () => void; rol
 
 const UserProfileSection = ({
   userName,
+  userEmail,
   userRole,
   avatarUrl,
 }: {
   userName: string;
+  userEmail: string;
   userRole: string;
   avatarUrl: string;
 }) => {
@@ -113,21 +120,14 @@ const UserProfileSection = ({
           {userRole}
         </Typography>
       </Box>
-      <Avatar
-        src={avatarUrl}
-        alt={userName}
-        sx={{
-          width: { xs: 32, md: 40 },
-          height: { xs: 32, md: 40 },
-          border: theme => `2px solid ${theme.palette.onHeaderContainer}`,
-        }}
-      />
+      <UserMenuButton userName={userName} userEmail={userEmail} avatarUrl={avatarUrl} />
     </Box>
   );
 };
 
 export function TopNavbar({
   userName,
+  userEmail,
   userRole,
   roleLabel,
   avatarUrl,
@@ -160,7 +160,7 @@ export function TopNavbar({
           <ThemeSwitcher />
           <LanguageSwitcher />
           <NotificationButton notificationCount={notificationCount} onClick={() => {}} />
-          <UserProfileSection userName={userName} userRole={userRole} avatarUrl={avatarUrl} />
+          <UserProfileSection userName={userName} userEmail={userEmail} userRole={userRole} avatarUrl={avatarUrl} />
         </Box>
       </Toolbar>
     </AppBar>

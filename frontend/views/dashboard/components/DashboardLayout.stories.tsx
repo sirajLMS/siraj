@@ -23,7 +23,7 @@ function MockDashboardLayoutContainer({ children }: MockDashboardLayoutContainer
 
   // Read Zustand stores
   const { sidebarOpen, mobileDrawerOpen, toggleSidebar, toggleMobileDrawer, closeMobileDrawer } = useLayoutStore();
-  const { name, role, avatarUrl, permissions, notificationCount } = useUserStore();
+  const { name, role, avatarUrl, permissions, notificationCount, user } = useUserStore();
 
   // Derive filtered nav items from permissions
   const sidebarItems = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, permissions);
@@ -43,6 +43,7 @@ function MockDashboardLayoutContainer({ children }: MockDashboardLayoutContainer
       bottomNavItems={bottomNavItems}
       activeNavKey={activeNavKey}
       userName={name}
+      userEmail={user?.email || "mock@example.com"}
       userRole={role}
       roleLabel={t("roleLabel")}
       avatarUrl={avatarUrl}

@@ -153,6 +153,7 @@ export function DashboardLayoutContainer({ children }: DashboardLayoutContainerP
       bottomNavItems={bottomNavItems}
       activeNavKey={activeNavKey}
       userName={user.name || ""}
+      userEmail={user.email || ""}
       userRole={user.role || ""}
       roleLabel={t("roleLabel")}
       avatarUrl={user.avatarUrl || ""}

@@ -29,12 +29,7 @@ export interface TestEntitiesResult {
 export namespace TestHelperService {
   type TxType = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
-  async function createTestUsers(
-    tx: TxType,
-    prefix: string,
-    hashedPassword: string,
-    now: Date
-  ) {
+  async function createTestUsers(tx: TxType, prefix: string, hashedPassword: string, now: Date) {
     const studentEmail = `${prefix}-student-${randomUUID()}@example.com`;
     const parentEmail = `${prefix}-parent-${randomUUID()}@example.com`;
     const teacherEmail = `${prefix}-teacher-${randomUUID()}@example.com`;
@@ -82,12 +77,7 @@ export namespace TestHelperService {
     };
   }
 
-  async function assignPermissionGroups(
-    tx: TxType,
-    teacherUserId: string,
-    parentUserId: string,
-    now: Date
-  ) {
+  async function assignPermissionGroups(tx: TxType, teacherUserId: string, parentUserId: string, now: Date) {
     const [teacherGroup] = await tx
       .select()
       .from(permissionGroups)
@@ -177,10 +167,7 @@ export namespace TestHelperService {
     };
   }
 
-  export async function createTestEntities(
-    prefix: string,
-    classesRemaining: number = 10
-  ): Promise<TestEntitiesResult> {
+  export async function createTestEntities(prefix: string, classesRemaining: number = 10): Promise<TestEntitiesResult> {
     if (process.env.NODE_ENV === "production") {
       throw new Error("Test helper service is not allowed in production environment.");
     }
@@ -190,14 +177,8 @@ export namespace TestHelperService {
     const hashedPassword = await hashPassword(plainPassword);
 
     return await db.transaction(async tx => {
-      const {
-        studentUserRow,
-        studentEmail,
-        parentUserRow,
-        parentEmail,
-        teacherUserRow,
-        teacherEmail,
-      } = await createTestUsers(tx, prefix, hashedPassword, now);
+      const { studentUserRow, studentEmail, parentUserRow, parentEmail, teacherUserRow, teacherEmail } =
+        await createTestUsers(tx, prefix, hashedPassword, now);
 
       await assignPermissionGroups(tx, teacherUserRow.id, parentUserRow.id, now);
 
