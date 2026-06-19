@@ -53,7 +53,7 @@ const StyledIconWrapper = styled(Grid, {
 const StyledTextContainer = styled(Grid)(() => ({
   display: "flex",
   flexDirection: "column",
-  gap: 8
+  gap: 8,
 }));
 
 const MetricCount = styled(Typography)(({ theme }) => ({
@@ -91,9 +91,7 @@ export function TodayClassesMobileScroll({ metrics, onMetricClick, selectedKey }
               <MetricCount>
                 {typeof metric.count === "number" ? metric.count.toLocaleString() : metric.count}
               </MetricCount>
-              <MetricLabel
-                variant="labelUppercase"
-              >{metric.label ?? t(metric.labelKey)}</MetricLabel>
+              <MetricLabel variant="labelUppercase">{metric.label ?? t(metric.labelKey)}</MetricLabel>
             </StyledTextContainer>
           </StyledMetricCard>
         );

@@ -235,7 +235,7 @@ export function AdminDashboardContainer() {
       lastUpdated={t("admin.updatedMinutesAgo")}
       metrics={metricsList}
       onMetricClick={handleMetricClick}
-      selectedMetricKey={filters.selectedStatus}
+      selectedMetricKey={filters.selectedStatus ?? undefined}
       scheduleTitle={t("admin.scheduleOverview")}
       searchPlaceholder={t("admin.searchPlaceholder")}
       searchValue={filters.searchQuery}

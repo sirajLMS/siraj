@@ -41,10 +41,18 @@ const SectionFooter = ({ showingText }: { showingText: string }) => {
   );
 };
 
-export function ScheduleOverviewSection({
+// Desktop Layout Component
+const DesktopLayout = ({
   title,
   searchPlaceholder,
   searchValue,
+  rows,
+  headers,
+  statusLabels,
+  detailsLabel,
+  emptyMessage,
+  showingText,
+  onSearchChange,
   dateLabel,
   dateValue,
   teacherPlaceholder,
@@ -54,123 +62,22 @@ export function ScheduleOverviewSection({
   loadingTeachers,
   teacherSearchValue,
   onTeacherSearchChange,
-  rows,
-  headers,
-  statusLabels,
-  detailsLabel,
-  emptyMessage,
-  showingText,
-  page,
-  pageSize,
-  totalCount,
-  onPageChange,
-  onSearchChange,
   onDateChange,
   onTeacherChange,
   onSubmit,
-}: ScheduleOverviewSectionProps) {
-  return (
-    <>
-      {/* Desktop Layout */}
-      <Box sx={{ display: { xs: "none", md: "block" } }}>
-        <Paper
-          elevation={0}
-          sx={theme => ({
-            borderRadius: 3,
-            border: `1px solid ${theme.palette.border.light}`,
-            overflow: "hidden",
-          })}
-        >
-          <SectionPanel
-            title={title}
-            actions={
-              <RequirePermission permissions={[AppPermission.DashboardSearch]}>
-                <TextField
-                  placeholder={searchPlaceholder}
-                  value={searchValue}
-                  onChange={e => {
-                    onSearchChange(e.target.value);
-                  }}
-                  size="small"
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchOutlined sx={theme => ({ fontSize: 18, color: theme.palette.onSurfaceVariant })} />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                  sx={{
-                    maxWidth: { md: 280 },
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                    },
-                  }}
-                />
-              </RequirePermission>
-            }
-          >
-            {/* Filters */}
-            <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>
-              <Box
-                sx={theme => ({
-                  px: 3,
-                  py: 2.5,
-                  bgcolor: theme.palette.background.default,
-                  borderBottom: `1px solid ${theme.palette.border.light}`,
-                })}
-              >
-                <ScheduleFilters
-                  dateLabel={dateLabel}
-                  dateValue={dateValue}
-                  teacherPlaceholder={teacherPlaceholder}
-                  teacherValue={teacherValue}
-                  submitLabel={submitLabel}
-                  teachers={teachers}
-                  loadingTeachers={loadingTeachers}
-                  teacherSearchValue={teacherSearchValue}
-                  onTeacherSearchChange={onTeacherSearchChange}
-                  onDateChange={onDateChange}
-                  onTeacherChange={onTeacherChange}
-                  onSubmit={onSubmit}
-                />
-              </Box>
-            </RequirePermission>
-
-            {/* Table */}
-            <ScheduleOverviewDataGrid
-              rows={rows}
-              headers={headers}
-              statusLabels={statusLabels}
-              detailsLabel={detailsLabel}
-              emptyMessage={emptyMessage}
-            />
-
-            <SectionFooter showingText={showingText} />
-          </SectionPanel>
-        </Paper>
-      </Box>
-
-      {/* Mobile Layout */}
-      <Stack
-        direction={"column"}
-        sx={{
-          display: { xs: "flix", md: "none" },
-          gap: 2,
-        }}>
-        {/* Title */}
-        <Typography
-          variant="titleLg"
-          sx={theme => ({
-            color: theme.palette.primary.main,
-          })}
-        >
-          {title}
-        </Typography>
-
-        {/* Search */}
-        <Box sx={{ display: "flex", gap: 1.5, }}>
+}: ScheduleOverviewSectionProps) => (
+  <Box sx={{ display: { xs: "none", md: "block" } }}>
+    <Paper
+      elevation={0}
+      sx={theme => ({
+        borderRadius: 3,
+        border: `1px solid ${theme.palette.border.light}`,
+        overflow: "hidden",
+      })}
+    >
+      <SectionPanel
+        title={title}
+        actions={
           <RequirePermission permissions={[AppPermission.DashboardSearch]}>
             <TextField
               placeholder={searchPlaceholder}
@@ -178,7 +85,6 @@ export function ScheduleOverviewSection({
               onChange={e => {
                 onSearchChange(e.target.value);
               }}
-              fullWidth
               size="small"
               slotProps={{
                 input: {
@@ -190,76 +96,186 @@ export function ScheduleOverviewSection({
                 },
               }}
               sx={{
+                maxWidth: { md: 280 },
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
-                  bgcolor: theme => theme.palette.surfaceContainerLowest,
                 },
               }}
             />
           </RequirePermission>
-        </Box>
+        }
+      >
+        {/* Filters */}
+        <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>
+          <Box
+            sx={theme => ({
+              px: 3,
+              py: 2.5,
+              bgcolor: theme.palette.background.default,
+              borderBottom: `1px solid ${theme.palette.border.light}`,
+            })}
+          >
+            <ScheduleFilters
+              dateLabel={dateLabel}
+              dateValue={dateValue}
+              teacherPlaceholder={teacherPlaceholder}
+              teacherValue={teacherValue}
+              submitLabel={submitLabel}
+              teachers={teachers}
+              loadingTeachers={loadingTeachers}
+              teacherSearchValue={teacherSearchValue}
+              onTeacherSearchChange={onTeacherSearchChange}
+              onDateChange={onDateChange}
+              onTeacherChange={onTeacherChange}
+              onSubmit={onSubmit}
+            />
+          </Box>
+        </RequirePermission>
 
-        {/* Card List */}
-        <ScheduleOverviewCardList
+        {/* Table */}
+        <ScheduleOverviewDataGrid
           rows={rows}
+          headers={headers}
           statusLabels={statusLabels}
           detailsLabel={detailsLabel}
           emptyMessage={emptyMessage}
         />
 
-        {/* Pagination Footer */}
-        {/* {totalCount > pageSize && ( */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            px: 1,
+        <SectionFooter showingText={showingText} />
+      </SectionPanel>
+    </Paper>
+  </Box>
+);
+
+// Mobile Layout Component
+const MobileLayout = ({
+  title,
+  searchPlaceholder,
+  searchValue,
+  rows,
+  statusLabels,
+  detailsLabel,
+  emptyMessage,
+  showingText,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
+  onSearchChange,
+}: ScheduleOverviewSectionProps) => (
+  <Stack
+    direction={"column"}
+    sx={{
+      display: { xs: "flex", md: "none" },
+      gap: 2,
+    }}
+  >
+    {/* Title */}
+    <Typography
+      variant="titleLg"
+      sx={theme => ({
+        color: theme.palette.primary.main,
+      })}
+    >
+      {title}
+    </Typography>
+
+    {/* Search */}
+    <Box sx={{ display: "flex", gap: 1.5 }}>
+      <RequirePermission permissions={[AppPermission.DashboardSearch]}>
+        <TextField
+          placeholder={searchPlaceholder}
+          value={searchValue}
+          onChange={e => {
+            onSearchChange(e.target.value);
           }}
+          fullWidth
+          size="small"
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchOutlined sx={theme => ({ fontSize: 18, color: theme.palette.onSurfaceVariant })} />
+                </InputAdornment>
+              ),
+            },
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              bgcolor: theme => theme.palette.surfaceContainerLowest,
+            },
+          }}
+        />
+      </RequirePermission>
+    </Box>
+
+    {/* Card List */}
+    <ScheduleOverviewCardList
+      rows={rows}
+      statusLabels={statusLabels}
+      detailsLabel={detailsLabel}
+      emptyMessage={emptyMessage}
+    />
+
+    {/* Pagination Footer */}
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        px: 1,
+      }}
+    >
+      <Typography
+        variant="labelMd"
+        sx={theme => ({
+          color: theme.palette.text.secondary,
+        })}
+      >
+        {showingText}
+      </Typography>
+      <Box sx={{ display: "flex", gap: 1 }}>
+        <IconButton
+          size="small"
+          disabled={page === 0}
+          onClick={() => onPageChange(page - 1)}
+          sx={theme => ({
+            border: `1px solid ${theme.palette.border.light}`,
+            borderRadius: 1,
+            bgcolor: theme.palette.surfaceContainerLowest,
+            "&.Mui-disabled": {
+              opacity: 0.5,
+            },
+          })}
         >
-          <Typography
-            variant="labelMd"
-            sx={theme => ({
-              color: theme.palette.text.secondary,
-            })}
-          >
-            {showingText}
-          </Typography>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <IconButton
-              size="small"
-              disabled={page === 0}
-              onClick={() => onPageChange(page - 1)}
-              sx={theme => ({
-                border: `1px solid ${theme.palette.border.light}`,
-                borderRadius: 1,
-                bgcolor: theme.palette.surfaceContainerLowest,
-                "&.Mui-disabled": {
-                  opacity: 0.5,
-                },
-              })}
-            >
-              <ChevronLeft fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              disabled={page >= Math.ceil(totalCount / pageSize) - 1}
-              onClick={() => onPageChange(page + 1)}
-              sx={theme => ({
-                border: `1px solid ${theme.palette.border.light}`,
-                borderRadius: 1,
-                bgcolor: theme.palette.surfaceContainerLowest,
-                "&.Mui-disabled": {
-                  opacity: 0.5,
-                },
-              })}
-            >
-              <ChevronRight fontSize="small" />
-            </IconButton>
-          </Box>
-        </Box>
-        {/* )} */}
-      </Stack>
+          <ChevronLeft fontSize="small" />
+        </IconButton>
+        <IconButton
+          size="small"
+          disabled={page >= Math.ceil(totalCount / pageSize) - 1}
+          onClick={() => onPageChange(page + 1)}
+          sx={theme => ({
+            border: `1px solid ${theme.palette.border.light}`,
+            borderRadius: 1,
+            bgcolor: theme.palette.surfaceContainerLowest,
+            "&.Mui-disabled": {
+              opacity: 0.5,
+            },
+          })}
+        >
+          <ChevronRight fontSize="small" />
+        </IconButton>
+      </Box>
+    </Box>
+  </Stack>
+);
+
+export function ScheduleOverviewSection(props: ScheduleOverviewSectionProps) {
+  return (
+    <>
+      <DesktopLayout {...props} />
+      <MobileLayout {...props} />
     </>
   );
 }

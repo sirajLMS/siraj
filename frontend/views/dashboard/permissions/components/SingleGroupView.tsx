@@ -26,7 +26,7 @@ import {
 } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { AppDataGrid, SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import type { GroupUser, Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 
@@ -76,7 +76,7 @@ export function SingleGroupView({
   // Categories for filtering in Add Permission tab
   const addCategories = useMemo(() => {
     const available = permissions.filter(
-      p => !group.permissionIds?.includes(p.id!) && !group.permissionIds?.includes(p.key!)
+      p => !(p.id && group.permissionIds?.includes(p.id)) && !(p.key && group.permissionIds?.includes(p.key))
     );
     const cats = available.map(p => p.category).filter((c): c is string => typeof c === "string" && c.trim() !== "");
     return Array.from(new Set(cats));
@@ -122,26 +122,35 @@ export function SingleGroupView({
   const assignedUsersCount = group.assignedUsers?.length ?? 0;
 
   // Revoke permission from group
-  const handleRevokePermission = async (permissionId: string) => {
-    if (!group.id) return;
-    const remainingIds = (group.permissionIds ?? []).filter(id => id !== permissionId);
-    await onUpdateGroup(group.id!, group.name ?? "", group.description ?? "", remainingIds);
-  };
+  const handleRevokePermission = useCallback(
+    async (permissionId: string) => {
+      const groupId = group.id;
+      if (!groupId) return;
+      const remainingIds = (group.permissionIds ?? []).filter(id => id !== permissionId);
+      await onUpdateGroup(groupId, group.name ?? "", group.description ?? "", remainingIds);
+    },
+    [group.id, group.permissionIds, group.name, group.description, onUpdateGroup]
+  );
 
   // Assign checked permissions
   const handleAssignPermissions = async () => {
-    if (!group.id || selectedAddPermissionIds.length === 0) return;
+    const groupId = group.id;
+    if (!groupId || selectedAddPermissionIds.length === 0) return;
     const updatedIds = [...(group.permissionIds ?? []), ...selectedAddPermissionIds];
-    await onUpdateGroup(group.id!, group.name ?? "", group.description ?? "", updatedIds);
+    await onUpdateGroup(groupId, group.name ?? "", group.description ?? "", updatedIds);
     setSelectedAddPermissionIds([]);
     setActiveSubTab("current");
   };
 
   // Revoke user from group
-  const handleRevokeUser = async (userId: string) => {
-    if (!group.id) return;
-    await onRevokeGroup(group.id, userId);
-  };
+  const handleRevokeUser = useCallback(
+    async (userId: string) => {
+      const groupId = group.id;
+      if (!groupId) return;
+      await onRevokeGroup(groupId, userId);
+    },
+    [group.id, onRevokeGroup]
+  );
 
   // Bulk revoke users
   const handleBulkRevokeUsers = async () => {
@@ -199,7 +208,7 @@ export function SingleGroupView({
           <Button
             size="small"
             startIcon={<RemoveCircleOutlined fontSize="small" />}
-            onClick={() => handleRevokePermission(params.row.id!)}
+            onClick={() => params.row.id && handleRevokePermission(params.row.id)}
             sx={theme => ({
               color: group.isSystem ? theme.palette.text.disabled : theme.palette.error.main,
               fontWeight: 600,
@@ -215,6 +224,14 @@ export function SingleGroupView({
     return cols;
   }, [t, group.isSystem, handleRevokePermission]);
 
+  const handleAddPermissionToggle = useCallback((id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedAddPermissionIds(prev => [...prev, id]);
+    } else {
+      setSelectedAddPermissionIds(prev => prev.filter(x => x !== id));
+    }
+  }, []);
+
   // Definition of Add Permissions columns
   const addPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {
     return [
@@ -224,20 +241,10 @@ export function SingleGroupView({
         width: 50,
         sortable: false,
         renderCell: params => {
-          const id = params.row.id!;
+          const id = params.row.id ?? "";
           const checked = selectedAddPermissionIds.includes(id);
           return (
-            <Checkbox
-              size="small"
-              checked={checked}
-              onChange={e => {
-                if (e.target.checked) {
-                  setSelectedAddPermissionIds(prev => [...prev, id]);
-                } else {
-                  setSelectedAddPermissionIds(prev => prev.filter(x => x !== id));
-                }
-              }}
-            />
+            <Checkbox size="small" checked={checked} onChange={e => handleAddPermissionToggle(id, e.target.checked)} />
           );
         },
       },
@@ -275,7 +282,15 @@ export function SingleGroupView({
         minWidth: 250,
       },
     ];
-  }, [t, selectedAddPermissionIds]);
+  }, [t, selectedAddPermissionIds, handleAddPermissionToggle]);
+
+  const handleAssignedUserToggle = useCallback((id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedAssignedUserIds(prev => [...prev, id]);
+    } else {
+      setSelectedAssignedUserIds(prev => prev.filter(x => x !== id));
+    }
+  }, []);
 
   // Definition of Assigned Users columns
   const assignedUsersColumns = useMemo<GridColDef<GroupUser>[]>(() => {
@@ -285,21 +300,11 @@ export function SingleGroupView({
         headerName: "",
         width: 50,
         sortable: false,
-        renderCell: params => {
-          const id = params.row.id!;
+        renderCell: (params: { row: GroupUser }) => {
+          const id = params.row.id ?? "";
           const checked = selectedAssignedUserIds.includes(id);
           return (
-            <Checkbox
-              size="small"
-              checked={checked}
-              onChange={e => {
-                if (e.target.checked) {
-                  setSelectedAssignedUserIds(prev => [...prev, id]);
-                } else {
-                  setSelectedAssignedUserIds(prev => prev.filter(x => x !== id));
-                }
-              }}
-            />
+            <Checkbox size="small" checked={checked} onChange={e => handleAssignedUserToggle(id, e.target.checked)} />
           );
         },
       },
@@ -308,7 +313,7 @@ export function SingleGroupView({
         headerName: t("columnName"),
         flex: 1.5,
         minWidth: 200,
-        renderCell: params => {
+        renderCell: (params: { row: GroupUser }) => {
           const user = params.row;
           return (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1 }}>
@@ -324,7 +329,7 @@ export function SingleGroupView({
               >
                 {user.name
                   ?.split(" ")
-                  .map(w => w[0])
+                  .map((w: string) => w[0])
                   .join("")
                   .slice(0, 2)
                   .toUpperCase()}
@@ -364,7 +369,6 @@ export function SingleGroupView({
         flex: 1.2,
         minWidth: 150,
         renderCell: () => {
-          // Default to group creation date
           const date = group.createdAt ? new Date(group.createdAt) : new Date();
           return (
             <Typography variant="bodyMd">
@@ -395,7 +399,7 @@ export function SingleGroupView({
             size="small"
             color="error"
             startIcon={<PersonRemoveOutlined fontSize="small" />}
-            onClick={() => handleRevokeUser(params.row.id!)}
+            onClick={() => params.row.id && handleRevokeUser(params.row.id)}
             sx={{ fontWeight: 600, fontSize: "0.75rem" }}
           >
             Remove
@@ -403,7 +407,7 @@ export function SingleGroupView({
         ),
       },
     ];
-  }, [t, group.createdAt, selectedAssignedUserIds, handleRevokeUser]);
+  }, [t, group.createdAt, selectedAssignedUserIds, handleRevokeUser, handleAssignedUserToggle]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -482,7 +486,7 @@ export function SingleGroupView({
             <Button
               variant="contained"
               startIcon={<EditOutlined fontSize="small" />}
-              onClick={() => onEditGroup(group.id!)}
+              onClick={() => group.id && onEditGroup(group.id)}
               sx={theme => ({
                 bgcolor: theme.palette.primary.main,
                 color: theme.palette.onPrimary,
@@ -740,7 +744,7 @@ export function SingleGroupView({
                 <Button
                   variant="contained"
                   startIcon={<PersonAddOutlined />}
-                  onClick={() => onAssignGroup(group.id!)}
+                  onClick={() => group.id && onAssignGroup(group.id)}
                   sx={theme => ({
                     bgcolor: theme.palette.primary.main,
                     color: theme.palette.onPrimary,

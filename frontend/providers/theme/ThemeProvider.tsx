@@ -16,6 +16,7 @@ interface AppThemeProviderProps {
 
 export function AppThemeProvider({ children, initialTheme }: AppThemeProviderProps) {
   const [mode, setMode] = useState<PaletteMode>(initialTheme ?? "dark");
+  const [isThemeChanging, setIsThemeChanging] = useState<boolean>(false);
   const locale = useLocale();
   const direction = locale === "ar" ? "rtl" : "ltr";
 
@@ -54,13 +55,22 @@ export function AppThemeProvider({ children, initialTheme }: AppThemeProviderPro
   }, [mode, direction, locale]);
 
   const toggleTheme = useCallback(() => {
+    setIsThemeChanging(true);
     const newMode = mode === "light" ? "dark" : "light";
     setMode(newMode);
     setThemePreference(newMode); // This sets both localStorage and cookie
+
+    // Reset loading state after a brief delay to allow for transition
+    setTimeout(() => {
+      setIsThemeChanging(false);
+    }, 300);
   }, [mode]);
 
   const theme = useMemo(() => createAppTheme(mode, direction, locale), [mode, direction, locale]);
-  const themeContextValue = useMemo(() => ({ mode, toggleTheme }), [mode, toggleTheme]);
+  const themeContextValue = useMemo(
+    () => ({ mode, toggleTheme, isThemeChanging, setIsThemeChanging }),
+    [mode, toggleTheme, isThemeChanging]
+  );
 
   return (
     <ThemeContext.Provider value={themeContextValue}>

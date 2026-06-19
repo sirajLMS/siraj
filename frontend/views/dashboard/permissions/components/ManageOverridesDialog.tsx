@@ -366,7 +366,7 @@ export function ManageOverridesDialog({
 
                       // Check group baseline
                       const baselineGroups = userGroups.filter(
-                        g => g.permissionIds?.includes(p.id!) || g.permissionIds?.includes(p.key!)
+                        g => (p.id && g.permissionIds?.includes(p.id)) || (p.key && g.permissionIds?.includes(p.key))
                       );
                       const isAllowedByGroup = baselineGroups.length > 0;
                       const baselineText = isAllowedByGroup
@@ -377,14 +377,14 @@ export function ManageOverridesDialog({
                       const overrideState: OverrideState = localOverrides[p.id] || "INHERIT";
 
                       // Effective state calculation
-                      let effectiveState: "allowed" | "denied" | "not_set" = "not_set";
-                      if (overrideState === "GRANTED") {
-                        effectiveState = "allowed";
-                      } else if (overrideState === "DENIED") {
-                        effectiveState = "denied";
-                      } else {
-                        effectiveState = isAllowedByGroup ? "allowed" : "not_set";
-                      }
+                      const effectiveState: "allowed" | "denied" | "not_set" =
+                        overrideState === "GRANTED"
+                          ? "allowed"
+                          : overrideState === "DENIED"
+                            ? "denied"
+                            : isAllowedByGroup
+                              ? "allowed"
+                              : "not_set";
 
                       return (
                         <TableRow key={p.id} hover>
@@ -476,7 +476,7 @@ export function ManageOverridesDialog({
                             ) : (
                               <ButtonGroup variant="outlined" size="small" fullWidth disabled={isDialogLoading}>
                                 <Button
-                                  onClick={() => handleOverrideChange(p.id!, "INHERIT")}
+                                  onClick={() => p.id && handleOverrideChange(p.id, "INHERIT")}
                                   sx={theme => ({
                                     fontSize: "0.75rem",
                                     bgcolor:
@@ -496,7 +496,7 @@ export function ManageOverridesDialog({
                                   Inherit
                                 </Button>
                                 <Button
-                                  onClick={() => handleOverrideChange(p.id!, "GRANTED")}
+                                  onClick={() => p.id && handleOverrideChange(p.id, "GRANTED")}
                                   sx={theme => ({
                                     fontSize: "0.75rem",
                                     bgcolor: overrideState === "GRANTED" ? "rgba(46, 125, 50, 0.15)" : "transparent",
@@ -515,7 +515,7 @@ export function ManageOverridesDialog({
                                   Allow
                                 </Button>
                                 <Button
-                                  onClick={() => handleOverrideChange(p.id!, "DENIED")}
+                                  onClick={() => p.id && handleOverrideChange(p.id, "DENIED")}
                                   sx={theme => ({
                                     fontSize: "0.75rem",
                                     bgcolor: overrideState === "DENIED" ? "rgba(211, 47, 47, 0.15)" : "transparent",

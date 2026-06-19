@@ -28,7 +28,7 @@ function useUserOverridesInfo(
   userGroups: readonly PermissionGroup[]
 ): {
   readonly loading: boolean;
-  readonly error: any;
+  readonly error: Error | undefined;
   readonly info: OverridesInfo | null;
 } {
   const { data, loading, error } = useQuery(userOverridesQueryDocument, {
@@ -43,7 +43,6 @@ function useUserOverridesInfo(
     const grants = overrides.filter((o: UserOverride) => o.state === "GRANTED").length;
     const revokes = overrides.filter((o: UserOverride) => o.state === "DENIED").length;
 
-    // Build the set of all permission IDs inherited via groups
     const inheritedPermissionIds = new Set<string>();
     for (const group of userGroups) {
       if (group.permissionIds) {
@@ -53,19 +52,8 @@ function useUserOverridesInfo(
       }
     }
 
-    const conflictDetails: string[] = [];
-    let hasConflict = false;
-
-    for (const override of overrides) {
-      const isInherited = override.permissionId ? inheritedPermissionIds.has(override.permissionId) : false;
-      if (override.state === "DENIED" && isInherited) {
-        hasConflict = true;
-        conflictDetails.push(`Deny override for "${override.permissionId}" conflicts with inherited group permission.`);
-      } else if (override.state === "GRANTED" && isInherited) {
-        hasConflict = true;
-        conflictDetails.push(`Allow override for "${override.permissionId}" overlaps with inherited group permission.`);
-      }
-    }
+    const conflictDetails = buildConflictDetails(overrides, inheritedPermissionIds);
+    const hasConflict = conflictDetails.length > 0;
 
     return {
       grants,
@@ -76,6 +64,28 @@ function useUserOverridesInfo(
   }, [data, userGroups]);
 
   return { loading, error, info };
+}
+
+function buildConflictDetails(overrides: readonly UserOverride[], inheritedPermissionIds: Set<string>): string[] {
+  const details: string[] = [];
+  for (const override of overrides) {
+    if (!override.permissionId) continue;
+    const isInherited = inheritedPermissionIds.has(override.permissionId);
+    if (override.state === "DENIED" && isInherited) {
+      details.push(`Deny override for "${override.permissionId}" conflicts with inherited group permission.`);
+    } else if (override.state === "GRANTED" && isInherited) {
+      details.push(`Allow override for "${override.permissionId}" overlaps with inherited group permission.`);
+    }
+  }
+  return details;
+}
+
+function getUserGroupsForUser(
+  userId: string | undefined,
+  groups: readonly PermissionGroup[]
+): readonly PermissionGroup[] {
+  if (!userId) return [];
+  return groups.filter(g => g.assignedUsers?.some(au => au.id === userId));
 }
 
 interface UserGroupsCellProps {
@@ -293,8 +303,7 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
         minWidth: 200,
         sortable: false,
         renderCell: params => {
-          const userId = params.row.id;
-          const userGroups = groups.filter(g => g.assignedUsers?.some(au => au.id === userId));
+          const userGroups = getUserGroupsForUser(params.row.id, groups);
           return <UserGroupsCell userGroups={userGroups} />;
         },
       },
@@ -308,7 +317,7 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
         renderCell: params => {
           const userId = params.row.id;
           if (!userId) return null;
-          const userGroups = groups.filter(g => g.assignedUsers?.some(au => au.id === userId));
+          const userGroups = getUserGroupsForUser(userId, groups);
           return <DynamicOverridesCell userId={userId} userGroups={userGroups} type="grants" />;
         },
       },
@@ -322,7 +331,7 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
         renderCell: params => {
           const userId = params.row.id;
           if (!userId) return null;
-          const userGroups = groups.filter(g => g.assignedUsers?.some(au => au.id === userId));
+          const userGroups = getUserGroupsForUser(userId, groups);
           return <DynamicOverridesCell userId={userId} userGroups={userGroups} type="revokes" />;
         },
       },
@@ -334,7 +343,7 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
         renderCell: params => {
           const userId = params.row.id;
           if (!userId) return null;
-          const userGroups = groups.filter(g => g.assignedUsers?.some(au => au.id === userId));
+          const userGroups = getUserGroupsForUser(userId, groups);
           return <DynamicOverridesCell userId={userId} userGroups={userGroups} type="status" />;
         },
       },

@@ -38,7 +38,15 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
   const theme = useMemo(() => createAppTheme(themeMode, direction, locale), [themeMode, direction, locale]);
   const cache = direction === "rtl" ? cacheRtl : cacheLtr;
 
-  const themeContextValue = useMemo(() => ({ mode: themeMode, toggleTheme: () => {} }), [themeMode]);
+  const themeContextValue = useMemo(
+    () => ({
+      mode: themeMode,
+      toggleTheme: () => {},
+      isThemeChanging: false,
+      setIsThemeChanging: () => {},
+    }),
+    [themeMode]
+  );
 
   // Sync document attributes for global CSS and directionality
   useEffect(() => {

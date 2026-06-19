@@ -24,7 +24,7 @@ Story 4 builds upon Story 3's leave/reschedule workflow by introducing automated
 
 These facts were verified against the current repository and must be treated as canonical:
 
-1. **Permission Catalog**: The permission catalog does NOT exist at `backend/db/seeds/permission-catalog.ts`. Permissions are defined in `shared/lib/enum.ts` as `AppPermission` enum and seeded through the `permissions` table using the enum values. Permission groups are in `permission_groups` table, and group-permission associations in `group_permissions`. The seed file `backend/db/seeds/seed-users.ts` assigns users to permission groups via `userPermissionGroups`.
+1. **Permission Catalog**: System permissions are defined in `backend/db/migration/3-system_permissions_and_groups.sql` and seeded via the migration system, NOT `backend/db/seeds/permission-catalog.ts`. The enum values still exist in `shared/lib/enum.ts` as `AppPermission` enum. Permission groups are in `permission_groups` table, and group-permission associations in `group_permissions`. The seed file `backend/db/seeds/seed-users.ts` assigns users to permission groups via `userPermissionGroups`.
 2. **GraphQL Types**: Backend GraphQL class/session object and input types are in `backend/graphql/pothos/class-session.pothos.ts`. GraphQL mutations are in `backend/graphql/mutation/class-session.mutation.ts`. GraphQL queries are in `backend/graphql/query/class-session.query.ts`.
 3. **i18n Localization**: Uses `shared/messages/en.ts` and `shared/messages/ar/` directories. DO NOT create `frontend/locales/` or `backend/locales/` directories.
 4. **Permission Enums**: Values use PascalCase (e.g., `SESSION_RESCHEDULE = "session.reschedule"`) in `shared/lib/enum.ts`. The `SYSTEM_ENFORCE_LEAVE_LIMIT` permission does NOT yet exist and must be added.
@@ -179,7 +179,168 @@ stateDiagram-v2
     end note
 ```
 
-### 3.2 Leave Quota Enforcement Layers
+### 3.2 Class Instance State Machine with Leave Quota Integration
+
+This diagram shows how the class instance execution states interact with the leave quota enforcement system. The quota check gates the transition to `COMPLETED/LEAVE` for teacher-initiated leave.
+
+```mermaid
+stateDiagram-v2
+    [*] --> NOT_ACTIVATED: Class scheduled
+    
+    NOT_ACTIVATED --> ACTIVATED: session.activate_class\n(Teacher, within time window)
+    NOT_ACTIVATED --> ACTIVATED: session.activate_override\n(Admin, bypasses time window)
+    
+    ACTIVATED --> RUNNING: session.update_status.start\n(Teacher or Admin)
+    
+    ACTIVATED --> COMPLETED: session.update_status.absent\n(outcome=ABSENT, payroll credited)
+    
+    ACTIVATED --> COMPLETED: session.update_status.leave\n(outcome=LEAVE, isRescheduled=true)
+    RUNNING --> COMPLETED: session.update_status.leave\n(outcome=LEAVE, isRescheduled=true)
+    
+    RUNNING --> COMPLETED: session.update_status.stop\n(outcome=TAKEN)
+    
+    COMPLETED --> NOT_ACTIVATED: session.reset\n(Admin only, restores quota)
+    
+    state "COMPLETED" as COMPLETED {
+        [*] --> LEAVE: outcome=LEAVE\n(successor class created)
+        [*] --> ABSENT: outcome=ABSENT\n(student no-show)
+        [*] --> TAKEN: outcome=TAKEN\n(class completed)
+    }
+    
+    state "Leave Quota Gate" as QuotaGate <<choice>>
+    
+    ACTIVATED --> QuotaGate: Teacher requests leave
+    RUNNING --> QuotaGate: Teacher requests leave
+    
+    QuotaGate --> COMPLETED: Quota available\n(usedCount < maxLeaves)
+    QuotaGate --> ACTIVATED: Quota exhausted\n(usedCount >= maxLeaves)\nError: leaveQuotaExceeded
+    QuotaGate --> RUNNING: Quota exhausted\n(usedCount >= maxLeaves)\nError: leaveQuotaExceeded
+    
+    note right of QuotaGate
+        Service layer pre-check:
+        assertLeaveQuotaAvailable()
+        
+        DB trigger safety net:
+        trg_enforce_leave_quota_limits
+        
+        Both must pass for
+        leave to proceed.
+    end note
+```
+
+### 3.3 Leave Request Processing State Machine
+
+This diagram shows the complete leave request flow from teacher initiation through quota enforcement, processing, and admin reschedule.
+
+```mermaid
+stateDiagram-v2
+    [*] --> TeacherInitiatesLeave: Teacher clicks "Request Leave"\non activated/running class
+    
+    TeacherInitiatesLeave --> ServicePreCheck: ClassSessionService\n.updateStatusLeave()
+    
+    state ServicePreCheck {
+        [*] --> CheckPermission: assertPermission(\nSESSION_UPDATE_STATUS_LEAVE)
+        CheckPermission --> CheckActivated: assertSessionActivated()
+        CheckActivated --> CheckQuota: assertLeaveQuotaAvailable(\nteacherId)
+        CheckQuota --> PreCheckPass: usedCount < maxLeaves
+        CheckQuota --> PreCheckFail: usedCount >= maxLeaves
+    }
+    
+    PreCheckFail --> [*]: Error: leaveQuotaExceeded\nUI displays quota message
+    
+    PreCheckPass --> ProcessLeaveTx: SchedulingRepository\n.processClassLeave()\n[ATOMIC TRANSACTION]
+    
+    state ProcessLeaveTx {
+        [*] --> ResolveTeacher: Get teacher record\nfrom classInstances.teacherId
+        ResolveTeacher --> IncrementQuota: incrementTeacherLeaveQuota(\nteacherId, tx)
+        
+        IncrementQuota --> QuotaInsert: No row for period?\nINSERT usedCount=1
+        
+        IncrementQuota --> QuotaUpdate: Row exists?\nUPDATE usedCount = usedCount + 1
+        
+        QuotaInsert --> TriggerCheck: DB Trigger:\ntrg_enforce_leave_quota_limits
+        QuotaUpdate --> TriggerCheck: DB Trigger:\ntrg_enforce_leave_quota_limits
+        
+        TriggerCheck --> TriggerPass: usedCount <= maxLeaves
+        TriggerCheck --> TriggerFail: usedCount > maxLeaves
+        
+        TriggerFail --> [*]: RAISE EXCEPTION\nFULL ROLLBACK
+        
+        TriggerPass --> IdoRCheck: checkStateChangeAuth()
+        IdoRCheck --> ValidateState: executionState in\n[ACTIVATED, RUNNING]
+        ValidateState --> CreateSuccessor: createRescheduledSuccessor()\n(+7 days offset)
+        CreateSuccessor --> UpdateOriginal: runStateChange()\nCOMPLETED/LEAVE
+        UpdateOriginal --> RestoreStudentQuota: If quotaDeducted:\nstudent.classesRemaining + 1
+        RestoreStudentQuota --> CreateLeaveRequest: INSERT leaveRequests\nstatus=RESCHEDULED
+        CreateLeaveRequest --> TxCommit: COMMIT\nAll changes persisted
+    }
+    
+    TriggerFail --> [*]: Transaction rolled back\nClass state unchanged\nNo successor created
+    
+    TxCommit --> [*]: Success\nOriginal: COMPLETED/LEAVE\nSuccessor: NOT_ACTIVATED\nQuota incremented
+    
+    state "Admin Reschedule Path" as AdminPath {
+        [*] --> AdminReschedules: Admin uses\nsession.reschedule\n(NOT gated by quota)
+        AdminReschedules --> CheckTeacherQuota: Get teacher quota\nfor awareness only
+        CheckTeacherQuota --> QuotaExhaustedNote: usedCount >= maxLeaves\nAdd remark to class
+        CheckTeacherQuota --> NormalReschedule: usedCount < maxLeaves\nStandard reschedule
+        QuotaExhaustedNote --> RescheduleComplete: rescheduleClassInstance()\nwith quota note in remarks
+        NormalReschedule --> RescheduleComplete: rescheduleClassInstance()\nstandard remarks
+        RescheduleComplete --> [*]
+    }
+```
+
+### 3.4 Leave Quota Monthly Lifecycle
+
+This diagram shows how the leave quota usage is tracked per calendar month and resets automatically.
+
+```mermaid
+stateDiagram-v2
+    [*] --> NewMonth: Calendar month begins\n(e.g., 2026-07-01 00:00 UTC)
+    
+    NewMonth --> NoQuotaRow: No leave_quota_usage row\nfor (teacherId, periodYear, periodMonth)
+    
+    NoQuotaRow --> FirstLeave: Teacher requests 1st leave\nof the month
+    
+    FirstLeave --> UpsertInsert: INSERT leave_quota_usage\n(teacherId, 2026, 7, usedCount=1)\nON CONFLICT DO UPDATE
+    
+    UpsertInsert --> UsedCount1: usedCount = 1\nQuota remaining: 1/2
+    
+    UsedCount1 --> SecondLeave: Teacher requests 2nd leave\nof the month
+    
+    SecondLeave --> UpsertUpdate: UPDATE leave_quota_usage\nSET usedCount = usedCount + 1\nWHERE (teacherId, 2026, 7)
+    
+    UpsertUpdate --> UsedCount2: usedCount = 2\nQuota remaining: 0/2\n(EXHAUSTED)
+    
+    UsedCount2 --> ThirdLeaveAttempt: Teacher requests 3rd leave
+    
+    ThirdLeaveAttempt --> ServiceReject: Service pre-check:\nassertLeaveQuotaAvailable()\nthrows leaveQuotaExceeded
+    
+    ServiceReject --> [*]: UI shows:\n"Leave quota exceeded.\nMaximum allowed: 2"
+    
+    state "If service check bypassed" as BypassPath {
+        [*] --> DirectIncrement: incrementTeacherLeaveQuota()\ncalled directly
+        DirectIncrement --> UpsertAttempt: UPDATE usedCount = 2 + 1\n= 3
+        UpsertAttempt --> TriggerFires: DB Trigger:\nNEW.used_count (3) > max_leaves (2)
+        TriggerFires --> TriggerReject: RAISE EXCEPTION\n'Leave quota exceeded.\nMaximum allowed leaves is 2'
+        TriggerReject --> [*]: Transaction rolled back
+    }
+    
+    UsedCount2 --> MonthEnd: Calendar month ends\n(e.g., 2026-07-31 23:59 UTC)
+    
+    MonthEnd --> NextMonth: New month begins\n(2026-08-01 00:00 UTC)
+    
+    NextMonth --> NoQuotaRow: New period:\n(teacherId, 2026, 8)\nNo row exists yet\n(Quota reset automatically)
+    
+    note right of UsedCount2
+        Admin reschedule is NOT
+        blocked by quota exhaustion.
+        Admin sees quota note in
+        remarks but can proceed.
+    end note
+```
+
+### 3.5 Leave Quota Enforcement Layers
 
 **Layer 1: Database Trigger (Existing)**
 - `trg_enforce_leave_quota_limits` on `leave_quota_usage` (BEFORE INSERT OR UPDATE)
@@ -199,7 +360,7 @@ stateDiagram-v2
 - `TeacherDashboardContainer` catches quota exceeded error and displays user-friendly message
 - Future schedule query returns `leaveQuotaUsed` and `leaveQuotaTotal` for display
 
-### 3.3 Hard vs Soft Limits
+### 3.6 Hard vs Soft Limits
 
 | **Actor** | **Action** | **Permission** | **Quota Enforcement** | **Behavior When Quota Exhausted** |
 |---|---|---|---|---|
@@ -207,7 +368,7 @@ stateDiagram-v2
 | Admin | Reschedule Class | `session.reschedule` | SOFT (informational) | Admin sees quota warning but can proceed |
 | System | Automated Check | `system.enforce_leave_limit` | N/A (internal) | Enforced via trigger + service layer |
 
-### 3.4 Threat Model Alignment
+### 3.7 Threat Model Alignment
 
 **Threat: Quota Bypass via Direct API Call**
 - **Mitigation**: Database trigger `trg_enforce_leave_quota_limits` prevents `usedCount` from exceeding the limit at the DB level. Even if the service layer check is bypassed, the trigger will roll back the transaction.
@@ -504,11 +665,13 @@ Before starting Story 4 work, verify the following:
 
 **Layer-Specific Rules:**
 - Permission enums are in `shared/lib/enum.ts` with PascalCase members and string values.
+- System permissions are defined in `backend/db/migration/3-system_permissions_and_groups.sql` and seeded via the migration system.
 - System settings are seeded in `backend/db/seeds/system-settings.ts` using the `seedOrGet` pattern.
 - The `permissions` table uses the `app_permission` PostgreSQL enum, which is generated from `shared/lib/enum.ts` via `backend/db/schema/enums.ts`.
 
 **Target Files:**
 - `shared/lib/enum.ts`
+- `backend/db/migration/3-system_permissions_and_groups.sql` (add new permission to migration)
 - `backend/db/seeds/system-settings.ts`
 - `backend/db/schema/enums.ts` (verify import)
 - `backend/drizzle` migrations (auto-generated via push)
@@ -533,7 +696,28 @@ export enum AppPermission {
 
 This follows the existing pattern where system permissions are prefixed with `system.` and use PascalCase enum members.
 
-*Step 2: Verify `backend/db/schema/enums.ts` imports the updated enum*
+*Step 2: Add `SYSTEM_ENFORCE_LEAVE_LIMIT` to `backend/db/migration/3-system_permissions_and_groups.sql`*
+
+Locate the system permissions section in the migration file and add the new permission:
+
+```sql
+-- Add the new system permission for leave quota enforcement
+INSERT INTO permissions (id, key, resource, action, description, category, is_system)
+VALUES (
+    gen_random_uuid(),
+    'system.enforce_leave_limit',
+    'system',
+    'enforce_leave_limit',
+    'System-level validation gate that enforces teacher leave quota limits per calendar month',
+    'system',
+    true
+)
+ON CONFLICT (key) DO NOTHING;
+```
+
+This ensures the permission is seeded via the migration system along with other system permissions.
+
+*Step 3: Verify `backend/db/schema/enums.ts` imports the updated enum*
 
 The file already imports `AppPermission` from `@/shared/lib/enum`:
 
@@ -555,7 +739,7 @@ export const appPermissionEnum = pgEnum(
 
 This will automatically include the new `SYSTEM_ENFORCE_LEAVE_LIMIT` value when the migration is pushed.
 
-*Step 3: Add `teacher_max_leaves` and `student_max_leaves` to system settings seeder*
+*Step 4: Add `teacher_max_leaves` and `student_max_leaves` to system settings seeder*
 
 Edit `backend/db/seeds/system-settings.ts` to add the leave quota settings:
 
@@ -585,17 +769,17 @@ const SYSTEM_SETTINGS_DATA = [
 
 These settings are read by the existing `enforce_leave_quota_limits()` trigger function and will also be read by the new `SystemRulesService.assertLeaveQuotaAvailable()` method.
 
-*Step 4: Push database migration*
+*Step 5: Push database migration*
 
-After modifying the enum, push the schema changes:
+After modifying the enum and the migration file, push the schema changes:
 
 ```bash
 bun run scripts/dbActions.ts push
 ```
 
-This will generate a new Drizzle migration that adds `system.enforce_leave_limit` to the `app_permission` PostgreSQL enum.
+This will generate a new Drizzle migration that adds `system.enforce_leave_limit` to the `app_permission` PostgreSQL enum and applies the migration file changes.
 
-*Step 5: Run seed to populate new system settings*
+*Step 6: Run seed to populate new system settings*
 
 ```bash
 bun run scripts/dbActions.ts seed
@@ -618,6 +802,7 @@ bun run scripts/dbActions.ts seed
 
 **Success Criteria / Check Progress Points:**
 - [ ] `SYSTEM_ENFORCE_LEAVE_LIMIT = "system.enforce_leave_limit"` exists in `shared/lib/enum.ts`
+- [ ] `system.enforce_leave_limit` is added to `backend/db/migration/3-system_permissions_and_groups.sql`
 - [ ] `teacher_max_leaves` and `student_max_leaves` are seeded in `system_settings` table
 - [ ] `bun run scripts/dbActions.ts push` completes without errors (enum migration applied)
 - [ ] `bun tsgo` passes with no type errors

@@ -11,7 +11,7 @@ Before writing any code or proposing an implementation plan, you must perform de
 - **Do not assume implementation completeness**: You must verify and implement all missing layers.
 - **Trace the full stack**: Plan for Drizzle (DB), Domain Services (Logic), Pothos (Backend API), Apollo Documents (Frontend API), Zustand Stores (State), and React Components (Views).
 - **Verified Repository Facts (DO NOT CONTRADICT)**:
-  1. **Permission Catalog**: Located at `backend/db/seeds/permission-catalog.ts`, NOT `backend/services/auth/permission-catalog.ts`.
+  1. **Permission Catalog**: System permissions are now defined in `backend/db/migration/3-system_permissions_and_groups.sql` and seeded via the migration system, NOT `backend/db/seeds/permission-catalog.ts`. The enum values still exist in `shared/lib/enum.ts`.
   2. **GraphQL Types**: Backend GraphQL class/session object and input types are in `backend/graphql/pothos/class-session.pothos.ts` (or relevant pothos files), NOT a separate types file.
   3. **i18n Localization**: Uses `shared/messages/en.ts` and `shared/messages/ar/` directories. DO NOT create `frontend/locales/` or `backend/locales/` directories.
   4. **Permission Enums**: Values use PascalCase (e.g., `SESSION_FORCE_ACTIVATE = "session.force_activate"`) in `shared/lib/enum.ts`.
@@ -96,7 +96,13 @@ Map the exact permission strings from the sprint rules to the database catalog a
 ---
 
 ### Section 3: State Machine & Threat Alignment (If Applicable)
-Define the state machine diagrams and database transition rules.
+Define the state machine diagrams and database transition rules. When your implementation involves state transitions, quota enforcement, or multi-step workflows, you **MUST** include Mermaid state diagrams to visualize the complete flow. This is not optional — visual state machines prevent logical gaps that text-only descriptions miss.
+
+#### Required Diagrams (when applicable):
+
+1. **Primary State Machine**: Show all entity states and transitions with permission guards.
+2. **Processing Flow**: Show the end-to-end processing path including pre-checks, transaction boundaries, and rollback paths.
+3. **Quota/Lifecycle Tracking**: Show time-based or count-based state changes (e.g., monthly quota reset).
 
 #### *Example Section 3:*
 ```markdown
@@ -115,6 +121,22 @@ stateDiagram-v2
 **State Transition Guards (Threat 3):**
 - DB trigger `fn_enforce_class_instance_transition()` enforces allowed state paths.
 - Repo guard `runStateChange()` validates transition outcome alignment.
+
+#### Quota Enforcement State Machine (if applicable):
+```mermaid
+stateDiagram-v2
+    [*] --> QuotaAvailable
+    QuotaAvailable --> QuotaExhausted: Leave processed (usedCount reaches max)
+    QuotaExhausted --> LeaveBlocked: 3rd attempt blocked
+    QuotaExhausted --> QuotaAvailable: New calendar month (reset)
+```
+
+#### Diagram Requirements:
+- Use `stateDiagram-v2` syntax (not `graph` or `flowchart`).
+- Label every transition with the permission/action that triggers it.
+- Use `note` annotations to highlight critical business rules or admin bypass paths.
+- Show rollback/failure paths explicitly (e.g., `QuotaGate --> ACTIVATED: Error: leaveQuotaExceeded`).
+- Include choice nodes (`<<choice>>`) for conditional branching (e.g., quota check pass/fail).
 ```
 
 ---
