@@ -79,6 +79,7 @@ export enum AppPermission {
   StudentsEdit = 'STUDENTS_EDIT',
   StudentsList = 'STUDENTS_LIST',
   StudentsOverrideQuota = 'STUDENTS_OVERRIDE_QUOTA',
+  SystemEnforceLeaveLimit = 'SYSTEM_ENFORCE_LEAVE_LIMIT',
   SystemEnforceTimeWindow = 'SYSTEM_ENFORCE_TIME_WINDOW',
   TeachersCreate = 'TEACHERS_CREATE',
   TeachersEdit = 'TEACHERS_EDIT',
@@ -615,6 +616,21 @@ export type FolderCreateInput = {
   protected: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type FutureClass = {
+  __typename?: 'FutureClass';
+  courseName: Maybe<Scalars['String']['output']>;
+  durationMinutes: Maybe<Scalars['Int']['output']>;
+  endTime: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isRescheduled: Maybe<Scalars['Boolean']['output']>;
+  leaveRequestDisabled: Maybe<Scalars['Boolean']['output']>;
+  leaveRequestDisabledReason: Maybe<Scalars['String']['output']>;
+  location: Maybe<Scalars['String']['output']>;
+  scheduledDate: Maybe<Scalars['String']['output']>;
+  startTime: Maybe<Scalars['String']['output']>;
+  studentCount: Maybe<Scalars['Int']['output']>;
+};
+
 export enum Gender {
   Female = 'FEMALE',
   Male = 'MALE'
@@ -969,6 +985,7 @@ export type Query = {
   students: StudentsWithFiltersResponse;
   teacherActiveDashboard: Maybe<TeacherDashboard>;
   teacherDashboard: Maybe<TeacherDashboard>;
+  teacherFutureSchedule: Maybe<TeacherFutureSchedule>;
   teacherHandbookUrl: Maybe<TeacherHandbookUrl>;
   teachers: Maybe<Array<TeacherSimple>>;
   translatedMessage: Maybe<Scalars['String']['output']>;
@@ -1394,6 +1411,15 @@ export type TeacherDashboardScheduleRow = {
   studentName: Maybe<Scalars['String']['output']>;
   yourTimeFormatted: Maybe<Scalars['String']['output']>;
   zoomMeetingUrl: Maybe<Scalars['String']['output']>;
+};
+
+export type TeacherFutureSchedule = {
+  __typename?: 'TeacherFutureSchedule';
+  classes: Maybe<Array<FutureClass>>;
+  id: Maybe<Scalars['String']['output']>;
+  leaveQuotaTotal: Maybe<Scalars['Int']['output']>;
+  leaveQuotaUsed: Maybe<Scalars['Int']['output']>;
+  totalClasses: Maybe<Scalars['Int']['output']>;
 };
 
 export type TeacherHandbookUrl = {

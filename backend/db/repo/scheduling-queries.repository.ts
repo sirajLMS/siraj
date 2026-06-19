@@ -358,3 +358,47 @@ export async function getTeacherByUserId(
 
   return row ?? null;
 }
+
+export type FutureClassRow = {
+  id: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  isRescheduled: boolean;
+  studentName: string;
+  studentId: string;
+};
+
+export async function getTeacherFutureClasses(
+  teacherId: string,
+  fromDate: Date,
+  toDate: Date,
+  tx?: DBTransaction
+): Promise<FutureClassRow[]> {
+  const queryDb = tx ?? db;
+
+  const rows = await queryDb
+    .select({
+      id: classInstances.id,
+      scheduledStartAt: classInstances.scheduledStartAt,
+      scheduledEndAt: classInstances.scheduledEndAt,
+      durationMinutes: classInstances.durationMinutes,
+      isRescheduled: classInstances.isRescheduled,
+      studentId: students.id,
+      studentName: students.name,
+    })
+    .from(classInstances)
+    .innerJoin(students, eq(classInstances.studentId, students.id))
+    .where(
+      and(
+        eq(classInstances.teacherId, teacherId),
+        isNull(classInstances.deletedAt),
+        gte(classInstances.scheduledStartAt, fromDate),
+        lt(classInstances.scheduledStartAt, toDate),
+        inArray(classInstances.executionState, ["NOT_ACTIVATED", "ACTIVATED"])
+      )
+    )
+    .orderBy(classInstances.scheduledStartAt);
+
+  return rows;
+}

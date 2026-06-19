@@ -1,8 +1,13 @@
 import { ClassPerformanceRepository } from "@/backend/db/repo/class-performance.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { ClassInstanceDetailPothosObject, ClassStatusEventPothosObject } from "../pothos/class-session.pothos";
+import {
+  ClassInstanceDetailPothosObject,
+  ClassStatusEventPothosObject,
+  TeacherFutureSchedulePothosObject,
+} from "../pothos/class-session.pothos";
 import { buildClassInstanceDetail } from "../utils/class-session.utils";
 
 gqlSchemaBuilder.queryField("classInstance", t =>
@@ -37,6 +42,20 @@ gqlSchemaBuilder.queryField("classStatusEvents", t =>
         throw new Error(tFunc("unauthorized"));
       }
       return SchedulingRepository.getClassStatusEvents(args.classInstanceId);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("teacherFutureSchedule", t =>
+  t.field({
+    type: TeacherFutureSchedulePothosObject,
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, _args, ctx) => {
+      if (!ctx.user) {
+        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+        throw new Error(tFunc("unauthorized"));
+      }
+      return ScheduleService.getTeacherFutureSchedule(ctx.user.id, ctx.locale);
     },
   })
 );

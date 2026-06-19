@@ -2,12 +2,14 @@ import { and, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
   type DailyScheduleResult as DailyScheduleResultType,
+  type FutureClassRow as FutureClassRowType,
   getClassStatusEvents as getClassStatusEventsFn,
   getDailyMetrics as getDailyMetricsFn,
   getDailySchedule as getDailyScheduleFn,
   getRescheduleTrackingMetrics as getRescheduleTrackingMetricsFn,
   getRescheduleTrackingRows as getRescheduleTrackingRowsFn,
   getTeacherByUserId as getTeacherByUserIdFn,
+  getTeacherFutureClasses as getTeacherFutureClassesFn,
   getTeacherLeaveQuotaUsage as getTeacherLeaveQuotaUsageFn,
   getTeacherProgressFeed as getTeacherProgressFeedFn,
   incrementTeacherLeaveQuota as incrementTeacherLeaveQuotaFn,
@@ -1035,6 +1037,7 @@ export namespace SchedulingRepository {
   };
 
   export type DailyScheduleResult = DailyScheduleResultType;
+  export type FutureClassRow = FutureClassRowType;
   export const getDailyMetrics = getDailyMetricsFn;
   export const getDailySchedule = getDailyScheduleFn;
   export const getClassStatusEvents = getClassStatusEventsFn;
@@ -1044,4 +1047,5 @@ export namespace SchedulingRepository {
   export const getTeacherLeaveQuotaUsage = getTeacherLeaveQuotaUsageFn;
   export const incrementTeacherLeaveQuota = incrementTeacherLeaveQuotaFn;
   export const getTeacherByUserId = getTeacherByUserIdFn;
+  export const getTeacherFutureClasses = getTeacherFutureClassesFn;
 }

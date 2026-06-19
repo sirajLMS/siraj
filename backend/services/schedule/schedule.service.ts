@@ -111,4 +111,76 @@ export namespace ScheduleService {
       ...metrics,
     };
   }
+
+  export async function getTeacherFutureSchedule(userId: string, locale?: string) {
+    const teacherRecord = await SchedulingRepository.getTeacherByUserId(userId);
+    if (!teacherRecord) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("unauthorizedAction"));
+    }
+
+    const now = new Date();
+    const fromDate = new Date(now);
+    fromDate.setUTCHours(0, 0, 0, 0);
+    const toDate = new Date(now);
+    toDate.setDate(toDate.getDate() + 30);
+
+    const periodYear = now.getUTCFullYear();
+    const periodMonth = now.getUTCMonth() + 1;
+
+    const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2);
+    const usedLeaves = await SchedulingRepository.getTeacherLeaveQuotaUsage(
+      teacherRecord.id,
+      periodYear,
+      periodMonth
+    );
+
+    const futureClasses = await SchedulingRepository.getTeacherFutureClasses(
+      teacherRecord.id,
+      fromDate,
+      toDate
+    );
+
+    const classes = futureClasses.map(cls => {
+      const classStart = new Date(cls.scheduledStartAt);
+      const isPast = classStart < now;
+      const isQuotaExhausted = usedLeaves >= maxLeaves;
+
+      let leaveRequestDisabled = false;
+      let leaveRequestDisabledReason: string | null = null;
+
+      if (isPast) {
+        leaveRequestDisabled = true;
+        leaveRequestDisabledReason = "time";
+      } else if (isQuotaExhausted) {
+        leaveRequestDisabled = true;
+        leaveRequestDisabledReason = "quota";
+      }
+
+      const formatTime = (date: Date): string =>
+        date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+
+      return {
+        id: cls.id,
+        courseName: cls.studentName,
+        scheduledDate: cls.scheduledStartAt.toISOString().split("T")[0],
+        startTime: formatTime(cls.scheduledStartAt),
+        endTime: formatTime(cls.scheduledEndAt),
+        durationMinutes: cls.durationMinutes,
+        isRescheduled: cls.isRescheduled,
+        leaveRequestDisabled,
+        leaveRequestDisabledReason,
+        studentCount: 1,
+        location: "Virtual",
+      };
+    });
+
+    return {
+      id: `future-schedule-${teacherRecord.id}-${periodYear}-${periodMonth}`,
+      leaveQuotaUsed: usedLeaves,
+      leaveQuotaTotal: maxLeaves,
+      totalClasses: classes.length,
+      classes,
+    };
+  }
 }

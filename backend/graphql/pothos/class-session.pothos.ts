@@ -187,6 +187,66 @@ export const SupportRequestResultPothosObject = SupportRequestResultRef.implemen
   }),
 });
 
+// ─── Future Class ────────────────────────────────────────────────────────────
+
+export type FutureClassDefinition = {
+  id: string;
+  courseName: string;
+  scheduledDate: string;
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+  isRescheduled: boolean;
+  leaveRequestDisabled: boolean;
+  leaveRequestDisabledReason: string | null;
+  studentCount: number;
+  location: string;
+};
+
+const FutureClassRef = gqlSchemaBuilder.objectRef<FutureClassDefinition>("FutureClass");
+
+export const FutureClassPothosObject = FutureClassRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    courseName: t.exposeString("courseName"),
+    scheduledDate: t.exposeString("scheduledDate"),
+    startTime: t.exposeString("startTime"),
+    endTime: t.exposeString("endTime"),
+    durationMinutes: t.exposeInt("durationMinutes"),
+    isRescheduled: t.exposeBoolean("isRescheduled"),
+    leaveRequestDisabled: t.exposeBoolean("leaveRequestDisabled"),
+    leaveRequestDisabledReason: t.exposeString("leaveRequestDisabledReason", { nullable: true }),
+    studentCount: t.exposeInt("studentCount"),
+    location: t.exposeString("location"),
+  }),
+});
+
+// ─── Teacher Future Schedule ─────────────────────────────────────────────────
+
+export type TeacherFutureScheduleDefinition = {
+  id: string;
+  leaveQuotaUsed: number;
+  leaveQuotaTotal: number;
+  totalClasses: number;
+  classes: FutureClassDefinition[];
+};
+
+const TeacherFutureScheduleRef =
+  gqlSchemaBuilder.objectRef<TeacherFutureScheduleDefinition>("TeacherFutureSchedule");
+
+export const TeacherFutureSchedulePothosObject = TeacherFutureScheduleRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    leaveQuotaUsed: t.exposeInt("leaveQuotaUsed"),
+    leaveQuotaTotal: t.exposeInt("leaveQuotaTotal"),
+    totalClasses: t.exposeInt("totalClasses"),
+    classes: t.field({
+      type: [FutureClassPothosObject],
+      resolve: parent => parent.classes,
+    }),
+  }),
+});
+
 // ─── Leave Process Result ───────────────────────────────────────────────────
 
 export type LeaveProcessResultDefinition = {

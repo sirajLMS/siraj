@@ -56,6 +56,7 @@ enum AppPermission {
   STUDENTS_EDIT
   STUDENTS_LIST
   STUDENTS_OVERRIDE_QUOTA
+  SYSTEM_ENFORCE_LEAVE_LIMIT
   SYSTEM_ENFORCE_TIME_WINDOW
   TEACHERS_CREATE
   TEACHERS_EDIT
@@ -588,6 +589,20 @@ input FolderCreateInput {
   protected: Boolean
 }
 
+type FutureClass {
+  courseName: String
+  durationMinutes: Int
+  endTime: String
+  id: String
+  isRescheduled: Boolean
+  leaveRequestDisabled: Boolean
+  leaveRequestDisabledReason: String
+  location: String
+  scheduledDate: String
+  startTime: String
+  studentCount: Int
+}
+
 enum Gender {
   FEMALE
   MALE
@@ -788,6 +803,7 @@ type Query {
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
   teacherActiveDashboard(date: String!): TeacherDashboard
   teacherDashboard(date: String!): TeacherDashboard
+  teacherFutureSchedule: TeacherFutureSchedule
   teacherHandbookUrl: TeacherHandbookUrl
   teachers(limit: Int!, search: String!): [TeacherSimple!]
   translatedMessage(key: String!, namespace: String!): String
@@ -1066,6 +1082,14 @@ type TeacherDashboardScheduleRow {
   studentName: String
   yourTimeFormatted: String
   zoomMeetingUrl: String
+}
+
+type TeacherFutureSchedule {
+  classes: [FutureClass!]
+  id: String
+  leaveQuotaTotal: Int
+  leaveQuotaUsed: Int
+  totalClasses: Int
 }
 
 type TeacherHandbookUrl {
