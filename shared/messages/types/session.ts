@@ -11,4 +11,5 @@ export interface SessionLabels {
   readonly startDescription: string;
   readonly stopDescription: string;
   readonly softDeleteDescription: string;
+  readonly teacherQuotaExhaustedNote: string;
 }

@@ -154,6 +154,14 @@ const eslintConfig = defineConfig([
     },
   },
 
+  // Disable react-refresh rule for UI test files (test utilities export non-component helpers)
+  {
+    files: ["test/ui/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+
   // Allow console and bypass security rules in specific files (logger, scripts, tests, config)
   {
     files: [

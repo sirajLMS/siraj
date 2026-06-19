@@ -247,9 +247,7 @@ graph LR
 
 ### Phase 0 — Configuration & Scripts
 
-#### Task A — Create `bunfig.toml`
-
-**Status:** Pending
+#### Task A — Create `bunfig.toml`\n\n**Status:** Complete
 
 **Target files:**
 - `bunfig.toml` (new)
@@ -268,14 +266,12 @@ graph LR
 4. Verify: `bun run test:ui:components` starts without preload errors.
 
 **Completion criteria:**
-- [ ] `bunfig.toml` exists at project root
-- [ ] `bun run test:ui:components` starts without errors (even if no test files exist yet)
+- [x] `bunfig.toml` exists at project root
+- [x] `bun run test:ui:components` starts without errors (even if no test files exist yet)
 
 ---
 
-#### Task B — Remove stale `test:e2e*` scripts
-
-**Status:** Pending
+#### Task B — Remove stale `test:e2e*` scripts\n\n**Status:** Complete
 
 **Target files:**
 - `package.json`
@@ -291,16 +287,14 @@ graph LR
 3. Verify: `bun run test:ui:e2e` resolves correctly (will fail with "no tests found" until Phase 3, but the script itself must exist).
 
 **Completion criteria:**
-- [ ] No `test:e2e*` scripts in `package.json`
-- [ ] `test:ui:e2e` script exists and resolves
+- [x] No `test:e2e*` scripts in `package.json`
+- [x] `test:ui:e2e` script exists and resolves
 
 ---
 
 ### Phase 1 — Infrastructure
 
-#### Task C — Happy-dom preload
-
-**Status:** Pending
+#### Task C — Happy-dom preload\n\n**Status:** Complete
 
 **Target files:**
 - `test/ui/components/happydom-preload.ts` (new)
@@ -318,14 +312,12 @@ graph LR
 5. Verify: Create a trivial test file that accesses `document.createElement("div")` and confirm it works.
 
 **Completion criteria:**
-- [ ] `test/ui/components/happydom-preload.ts` exists
-- [ ] A trivial test accessing `document` passes under `bun run test:ui:components`
+- [x] `test/ui/components/happydom-preload.ts` exists
+- [x] A trivial test accessing `document` passes under `bun run test:ui:components`
 
 ---
 
-#### Task D — TestWrapper component
-
-**Status:** Pending
+#### Task D — TestWrapper component\n\n**Status:** Complete
 
 **Target files:**
 - `test/ui/components/TestWrapper.tsx` (new)
@@ -370,15 +362,13 @@ graph LR
 5. Verify: Write a trivial test that renders `<Typography>Hello</Typography>` inside the wrapper and asserts `screen.getByText("Hello")` is visible.
 
 **Completion criteria:**
-- [ ] `test/ui/components/TestWrapper.tsx` exists with `TestWrapper` and `renderWithWrapper` exports
-- [ ] A trivial test rendering a component inside the wrapper passes
-- [ ] `useUserStore` permissions are correctly seeded
+- [x] `test/ui/components/TestWrapper.tsx` exists with `TestWrapper` and `renderWithWrapper` exports
+- [x] A trivial test rendering a component inside the wrapper passes
+- [x] `useUserStore` permissions are correctly seeded
 
 ---
 
-#### Task E — E2E lifecycle management
-
-**Status:** Pending
+#### Task E — E2E lifecycle management\n\n**Status:** Complete
 
 **Target files:**
 - `test/ui/e2e/lifecycle.ts` (new)
@@ -406,8 +396,8 @@ graph LR
 5. Verify: Write a trivial test that calls `setupBrowserLifecycle()`, creates a context, opens a page, and navigates to `http://localhost:3001`.
 
 **Completion criteria:**
-- [ ] `test/ui/e2e/lifecycle.ts` exists with `setupBrowserLifecycle`, `createContext`, `createMobileContext`
-- [ ] A trivial test launches browser, connects to dev server, and navigates successfully
+- [x] `test/ui/e2e/lifecycle.ts` exists with `setupBrowserLifecycle`, `createContext`, `createMobileContext`
+- [x] A trivial test launches browser, connects to dev server, and navigates successfully
 
 ---
 
@@ -1001,3 +991,7 @@ rg "test:e2e" package.json
 | `permissions/rbac-gates.md` | RequirePermission.test.tsx | permissions.test.ts |
 | `permissions/session-permission-migration.md` | — | permissions.test.ts |
 | `permissions/activation-time-window.md` | — | class-details.test.ts, teacher-dashboard.test.ts |
+
+
+
+

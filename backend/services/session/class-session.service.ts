@@ -1,4 +1,5 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
@@ -131,6 +132,34 @@ export namespace ClassSessionService {
   ) {
     await assertPermission(userId, AppPermission.SESSION_RESCHEDULE, locale);
     const existing = await getOrThrow(classInstanceId, locale);
+
+    let quotaNote: string | null = null;
+    if (existing.teacherId) {
+      const now = new Date();
+      const periodYear = now.getUTCFullYear();
+      const periodMonth = now.getUTCMonth() + 1;
+      const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2);
+      const usedLeaves = await SchedulingRepository.getTeacherLeaveQuotaUsage(
+        existing.teacherId,
+        periodYear,
+        periodMonth
+      );
+
+      if (usedLeaves >= maxLeaves) {
+        const t = await getBackendTranslations({ locale, namespace: "session" });
+        quotaNote = t("teacherQuotaExhaustedNote", { used: String(usedLeaves), max: String(maxLeaves) });
+      }
+    }
+
+    const remarksParts: string[] = [];
+    if (existing.remarks) {
+      remarksParts.push(existing.remarks);
+    }
+    if (quotaNote) {
+      remarksParts.push(quotaNote);
+    }
+    const finalRemarks = remarksParts.length > 0 ? remarksParts.join("\n") : null;
+
     const idempotencyKey = `manual-reschedule-${classInstanceId}-${input.scheduledStartAt.toISOString()}`;
     return SchedulingRepository.rescheduleClassInstance(classInstanceId, {
       studentId: existing.studentId,
@@ -147,6 +176,7 @@ export namespace ClassSessionService {
       rateAmount: existing.rateAmount,
       rateCurrency: existing.rateCurrency,
       isRateOverridden: existing.isRateOverridden,
+      remarks: finalRemarks,
       idempotencyKey,
     });
   }

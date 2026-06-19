@@ -5,7 +5,7 @@
 **Security baseline:** `.ai/done/service/1-sprint_1__db_repo_service_enhancments.md` (mandatory prerequisite)  
 **Story scope:** Implement automated leave quota enforcement (`system.enforce_leave_limit`), extend future schedule verification with "Re Scheduled" badge, and enable admin processing of subsequent leave requests with quota tracking awareness  
 **Target roles:** Academy Admin (audit future calendar, process reschedule up to limits), Teacher (view future personal schedules, leave requests gated by system limits), System Automated (validate operational constraints)  
-**Status:** In progress — Task A (Permission + Settings) complete, Task B (Service Layer Quota Enforcement) complete, Task C (Backend GraphQL Query) complete, Task D (Frontend GraphQL Document) complete, Task E (Frontend Views) complete, Task G (Database Tests) complete  
+**Status:** In progress — Task A (Permission + Settings) complete, Task B (Service Layer Quota Enforcement) complete, Task C (Backend GraphQL Query) complete, Task D (Frontend GraphQL Document) complete, Task E (Frontend Views) complete, Task F (Admin Reschedule Quota Awareness) complete, Task G (Database Tests) complete, Task H (i18n Translations) complete  
 **Last updated:** 2026-06-20  
 
 ---
@@ -1787,11 +1787,11 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] Admin reschedule includes quota note in remarks when teacher quota is exhausted
-- [ ] Quota note is localized
-- [ ] Reschedule still works normally when teacher has quota remaining
-- [ ] `bun tsgo` passes
-- [ ] No mock data in reschedule flow
+- [x] Admin reschedule includes quota note in remarks when teacher quota is exhausted
+- [x] Quota note is localized
+- [x] Reschedule still works normally when teacher has quota remaining
+- [x] `bun tsgo` passes
+- [x] No mock data in reschedule flow
 
 ---
 
@@ -2052,11 +2052,11 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] All new strings have English translations
-- [ ] All new strings have Arabic translations
-- [ ] Type definitions match translation keys
-- [ ] No hardcoded strings in services, repositories, or views
-- [ ] `bun tsgo` passes
+- [x] All new strings have English translations
+- [x] All new strings have Arabic translations
+- [x] Type definitions match translation keys
+- [x] No hardcoded strings in services, repositories, or views
+- [x] `bun tsgo` passes (0 errors)
 
 ---
 
@@ -2146,13 +2146,21 @@ Task E (Frontend Views - Future Schedule) ✅ DONE
   ├── Storybook updated with MockFutureScheduleContainer ✅
   └── i18n keys added (en, ar, types) ✅
   ↓
-Task F (Admin Reschedule Quota Awareness)
+Task F (Admin Reschedule Quota Awareness) ✅ DONE
+  ├── NEW: reschedule() checks teacher quota and appends localized note to remarks when exhausted ✅
+  ├── NEW: teacherQuotaExhaustedNote i18n key added (en, ar, types) ✅
+  └── VERIFIED: GraphQL reschedule mutation response carries remarks via ClassInstanceDetail.remarks ✅
   ↓
 Task G (Database Tests) ✅ DONE
   ├── NEW: Test transactional rollback when quota increment fails ✅
   └── NEW: Test service layer fast-fail pre-check ✅
   ↓
-Task H (i18n Translations)
+Task H (i18n Translations) ✅ DONE
+  ├── VERIFIED: leaveQuotaExceeded in en, ar, types ✅
+  ├── VERIFIED: teacherQuotaExhaustedNote in en, ar, types (added in Task F) ✅
+  ├── VERIFIED: teacherFutureSchedule keys (loading, defaultLeaveReason, errors.*) in en, ar, types ✅
+  ├── FIXED: ar/index.ts session object now typed with SessionLabels ✅
+  └── VERIFIED: bun tsgo passes with 0 errors ✅
   ↓
 Section 7 (Final Verification)
 ```

@@ -1,3 +1,4 @@
+import type { SessionLabels } from "../types/session";
 import { auth } from "./auth";
 import { common } from "./common";
 import { admin, dstMigration } from "./dashboard/admin";
@@ -35,7 +36,7 @@ import {
 } from "./dashboard/teachers";
 import { errors } from "./errors";
 
-export const session = {
+export const session: SessionLabels = {
   leaveProcessedDescription: "تمت معالجة طلب الإجازة، أعيدت جدولته إلى الجلسة {successorId}.",
   absentWaitingRemark: "لقد انتظرت طوال وقت الحصة.",
   leaveRescheduledRemark: "تمت الموافقة على الإجازة - تم إعادة جدولة الجلسة.",
@@ -48,6 +49,7 @@ export const session = {
   startDescription: "بدء الحصة",
   stopDescription: "إيقاف يدوي",
   softDeleteDescription: "حذف مؤقت",
+  teacherQuotaExhaustedNote: "[إعادة جدولة من المدير] المعلم استنفد حد الإجازات الشهري ({used}/{max}).",
 };
 
 export const arTranslations = {

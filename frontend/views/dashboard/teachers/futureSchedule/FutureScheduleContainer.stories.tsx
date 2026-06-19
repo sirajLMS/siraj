@@ -14,7 +14,7 @@ export function MockFutureScheduleContainer() {
       leaveQuotaUsed={futureSchedule.leaveQuotaUsed}
       leaveQuotaTotal={futureSchedule.leaveQuotaTotal}
       totalClasses={futureSchedule.totalClasses}
-      onRequestLeave={async (id) => {
+      onRequestLeave={async id => {
         logger.info({ caller: "MockFutureScheduleContainer" }, `Request leave for: ${id}`);
       }}
       leaveError={null}

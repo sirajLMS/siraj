@@ -1992,6 +1992,7 @@ const en: MessageSchema = {
     startDescription: "Started class",
     stopDescription: "Stopped manually",
     softDeleteDescription: "Soft deleted",
+    teacherQuotaExhaustedNote: "[Admin Reschedule] Teacher has exhausted monthly leave allowance ({used}/{max}).",
   },
 };
 

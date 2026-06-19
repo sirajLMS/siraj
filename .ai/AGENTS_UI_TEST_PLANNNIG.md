@@ -8,6 +8,17 @@ This file is the authoritative guide for producing UI test implementation plans.
 
 ---
 
+## Document Structure Note
+
+This AGENTS.md has two types of numbered sections:
+
+- **Sections 1-3** (top half): Define the **rules and template** that every generated UI test plan must follow. The plan outline subsections (Section 0-7) inside Section 3 describe what the **generated plan document** must contain.
+- **Sections 4-7** (bottom half): Are **authoritative reference policies** that agents must internalize and **flatten verbatim** into each task of the generated plan. These are NOT plan sections — they are the source material that gets copied into tasks.
+
+**Rule:** When a task says "Flatten from Section 4.A", it means copy the rules from Section 4.A of this AGENTS.md directly into the task body. Do NOT rely on cross-references during execution.
+
+---
+
 ## 1. Deep Context & Test Analysis (The Reality Check)
 
 Before writing any test code or proposing a test plan, you must perform deep analysis and respect the verified repository facts:
@@ -37,6 +48,10 @@ Before planning, verify and document these facts against the current repository 
 10. **MCP servers**: `@playwright/mcp` and `next-devtools-mcp` are configured in `.mcp.json` for AI agent development assistance — NOT for automated testing.
 11. **Package scripts**: Layer-specific test scripts exist in `package.json` (`test:db`, `test:graphql`, `test:ui:components`, `test:ui:e2e`, `test:ui`).
 12. **Component boundaries**: Only `"use client"` components can be tested with component tests. Server Components (layouts, page shells with `async`) are tested via E2E only.
+13. **Store reset pattern**: `useUserStore.setState({ permissions: [] }, false)` resets store without replacing the entire state object. The `false` parameter prevents full state replacement.
+14. **Module mocking**: `bun:test` supports `mock.module("next/navigation")` for mocking Next.js router in component tests. Must be called before imports.
+15. **Test isolation**: Each `describe` block in `bun:test` runs sequentially by default. Use `beforeEach`/`afterEach` for per-test setup/teardown, not `beforeAll`/`afterAll` (which run once per describe block).
+16. **Coverage configuration**: `bunfig.toml` supports `coverageSkipTestFiles = true` to exclude test files from coverage reports. Coverage output goes to `coverage/` directory.
 
 ### 1.3 Trace the Full Stack
 
@@ -57,16 +72,22 @@ Your UI test implementation plan must be **detailed, structured, and exhaustive*
 
 ### 📏 Length & Detail Thresholds:
 
-- **Total Plan Length**: Must be at least **700+ lines of markdown** (see exemplar `.kilo/plans/automated-ui-tests-enhanced.md` at 735+ lines). Plans that are short, high-level summaries will be rejected.
-- **Per-Task Length**: Each task within Section 3 must be at least **30 to 60+ lines long**. You must write out test case descriptions, assertion strategies, mock data shapes, and provider configurations.
+- **Total Plan Length**: Must be at least **1,000+ lines of markdown**. Plans that are short, high-level summaries will be rejected. The exemplar plan (`.kilo/plans/automated-ui-tests-enhanced.md`) is 1,002 lines — new plans should meet or exceed this baseline.
+- **Per-Task Length**: Each task within Section 3 must be at least **50 to 100+ lines long**. Infrastructure tasks (Phase 0-1) tend toward 50-70 lines. Test file tasks (Phase 2-3) tend toward 70-100+ lines due to detailed test case descriptions, mock data shapes, and assertion strategies.
 - **Zero Placeholder Code**: No `...` inside code blocks. Code examples must be written out fully, displaying exact import paths, variable names, typings, and assertion patterns.
-- **Mermaid Diagrams**: Every plan MUST include at least 3 Mermaid diagrams (architecture overview, component test flow, E2E test flow). Use `graph`, `sequenceDiagram`, and `stateDiagram-v2` as appropriate.
+- **Mermaid Diagrams**: Every plan MUST include at least **5 Mermaid diagrams**:
+  1. **Test Architecture Overview** — `graph TB` showing both layers, shared infrastructure, and execution flow
+  2. **Component Test Flow** — `sequenceDiagram` showing test file → TestWrapper → store → RTL → happy-dom → component
+  3. **E2E Test Flow** — `sequenceDiagram` showing test file → lifecycle → dev server → browser → page → GraphQL API
+  4. **Provider Stack** — `graph TD` showing the provider hierarchy for TestWrapper
+  5. **Phase Dependency Graph** — `graph LR` showing which phases depend on which
+- Additionally, plans covering features with state transitions (e.g., session activation flows) MUST include a `stateDiagram-v2` showing the UI states the tests validate.
 
 ---
 
 ## 3. Plan Section Outline & Concrete Examples
 
-Every UI test plan MUST contain these exact 7 sections in order, plus appendices.
+Every UI test plan MUST contain these exact 9 sections in order, plus appendices.
 
 ### Section 0: Metadata & Context
 
@@ -85,7 +106,7 @@ Implement a two-layer automated UI test suite covering all manual test scenarios
 
 ### 0.2 Verified Repository Facts — Do Not Contradict
 
-(List 10-15 verified facts about the current repository state. See exemplar plan for the canonical list.)
+(List 12-16 verified facts about the current repository state. See Section 1.2 of the UI Test Planning AGENTS.md for the canonical list.)
 
 ### 0.3 Current Gaps To Fill
 
@@ -143,6 +164,10 @@ Include testing rules, layer separation, Next.js alignment, type safety, and the
 | Empty test body `test("x", () => {})` | At least one assertion | Code review |
 | `// TODO: add more tests` | Implement or use `test.todo()` | `rg -i "TODO" test/ui/` |
 | Hardcoded selectors without comments | Named constants or `data-testid` attributes | Code review |
+| `container.querySelector()` | Use `screen.getByRole()` or `screen.getByText()` | `rg "container.querySelector" test/ui/` |
+| `fireEvent` instead of `userEvent` | Use `@testing-library/user-event` exclusively | `rg "fireEvent" test/ui/` |
+| `waitForTimeout()` in E2E | Use auto-waiting assertions | `rg "waitForTimeout" test/ui/` |
+| Hardcoded permission strings | Use `AppPermission.X` from generated types | `rg '"[a-z]+\.[a-z_]+"' test/ui/ --glob "*.test.*"` |
 
 ### 1.6 Package Manager & Commands
 
@@ -157,13 +182,15 @@ Include testing rules, layer separation, Next.js alignment, type safety, and the
 
 ### Section 2: Architecture & Diagrams
 
-Define the test architecture with Mermaid diagrams. Every plan MUST include at minimum:
+Define the test architecture with Mermaid diagrams. Every plan MUST include at minimum **5 diagrams**:
 
 1. **Test Architecture Overview** — `graph TB` showing both layers, shared infrastructure, and execution flow.
 2. **Component Test Flow** — `sequenceDiagram` showing the interaction between test file, TestWrapper, store, RTL, happy-dom, and component.
 3. **E2E Test Flow** — `sequenceDiagram` showing the interaction between test file, lifecycle, dev server, browser, page, and GraphQL API.
 4. **Provider Stack** — `graph TD` showing the provider hierarchy for TestWrapper.
 5. **Phase Dependency Graph** — `graph LR` showing which phases depend on which.
+
+Additionally, plans covering features with state transitions (e.g., session activation flows) MUST include a `stateDiagram-v2` showing the UI states the tests validate.
 
 #### *Example Section 2 (Architecture Overview):*
 ```markdown
@@ -200,20 +227,50 @@ graph TB
 - Use `sequenceDiagram` for interaction flows (component test flow, E2E test flow).
 - Use `graph TD` for provider stack hierarchies.
 - Use `graph LR` for phase dependency graphs.
+- Use `stateDiagram-v2` for UI state transitions being tested (when applicable).
 - Label every node with the technology or file it represents.
 - Use subgraphs to group related components (Layer 1, Layer 2, Shared Infrastructure).
 ```
 
 ---
 
+### Section 2.5: Prerequisites Verification (BLOCKING)
+
+Before implementing any UI test plan, verify the sprint implementation is fully deployed. This section MUST be included in every generated plan and all items MUST pass before test implementation begins.
+
+#### *Example Section 2.5:*
+```markdown
+## Section 2.5: Prerequisites Verification (BLOCKING)
+
+Before starting test implementation, verify the sprint is fully deployed:
+
+- [ ] `bun run test:db` passes — database layer is stable
+- [ ] `bun run test:graphql` passes — GraphQL layer is stable
+- [ ] `bun tsgo` passes — TypeScript compilation is clean
+- [ ] `bun run lint` passes — no lint errors
+- [ ] All manual test scenarios exist in `test/manual/scenario/` (list each file)
+- [ ] Dev server starts successfully on port 3001: `bun run next dev -p 3001`
+- [ ] Demo users are seeded and login works: verify `shared/demo-users.ts` exists with all required roles
+- [ ] Component source files exist for all components listed in the plan's Appendix A
+- [ ] Storybook stories exist for components being tested (check `frontend/views/dashboard/**/*.stories.tsx`)
+
+If any prerequisite fails, STOP and fix before proceeding with test implementation.
+```
+
+---
+
 ### Section 3: Granular Task Breakdown (The Core Breakdown)
 
-Break down the implementation into **phases** and **tasks**. Each task MUST include:
+Break down the implementation into **phases** and **tasks**. Each task MUST include ALL 8 fields below. Missing any field is a plan rejection criterion.
 
 1. **Status** (Pending / In Progress / Completed)
-2. **Target Files** (exact paths, marked as `(new)` or `(modify)`)
-3. **Action Plan** (numbered steps with code snippets where applicable)
-4. **Completion Criteria** (checkbox list of verifiable outcomes)
+2. **Objective** (one-line statement of what this task achieves and why)
+3. **Layer-Specific Rules (flattened)** (constraints from Section 4 of this AGENTS.md, copied verbatim into the task — agents must NOT rely on looking up Section 4 during execution)
+4. **Input Sources (What to Read)** (exact file paths the agent MUST examine before writing any test code — component source, manual scenario, store shape, GraphQL types, Storybook stories)
+5. **Target Files** (exact paths, marked as `(new)` or `(modify)`)
+6. **Action Plan** (numbered steps with FULL code blocks — no `...`, no placeholders, no "similar to above")
+7. **Test Execution Requirements** (dedicated section: exact command to run, which suite, why, and expected outcome — NOT a one-liner buried in the action plan)
+8. **Completion Criteria** (checkbox list of verifiable outcomes — minimum 3 items per task)
 
 #### Phase Structure:
 
@@ -227,11 +284,53 @@ Every UI test plan MUST have these phases:
 | **Phase 3** | E2E Tests | One task per `.test.ts` file |
 | **Phase 4** | Verification | Full test suite run, quality gate, prohibited patterns check |
 
+#### Flattening Rule (MANDATORY)
+
+Every task's "Layer-Specific Rules" field MUST copy the relevant constraints from Section 4 of this AGENTS.md **verbatim** into the task. The agent must NOT rely on looking up Section 4 during execution — context windows are limited and cross-references get lost.
+
+- **Phase 0-1 tasks** (infrastructure): Flatten from Section 4.C (Shared Infrastructure)
+- **Phase 2 tasks** (component tests): Flatten from Section 4.A (Component Test Layer)
+- **Phase 3 tasks** (E2E tests): Flatten from Section 4.B (E2E Test Layer)
+- **Phase 4 tasks** (verification): Flatten from Section 1.5 (Zero Incomplete Implementation Policy)
+
+This duplication is intentional and required. It ensures every task is self-contained and executable without cross-referencing other sections.
+
+#### Post-Task Verification Matrix (MANDATORY)
+
+Every task MUST include a "Test Execution Requirements" section specifying exactly what to run after completing the task. Use this matrix as the baseline:
+
+| Phase | Command to Run After Each Task | Why |
+|---|---|---|
+| Phase 0 (Config) | `bun run test:ui:components` (verify it starts without errors) | Config changes can break test runner initialization |
+| Phase 1 (Infrastructure) | `bun run test:ui:components` + write a trivial smoke test | Infrastructure must work before test files are written |
+| Phase 2 (Component Tests) | `bun run test:ui:components` | Verify new tests pass and no existing tests broke |
+| Phase 3 (E2E Tests) | `bun run test:ui:e2e` + `bun run test:ui:components` | Verify new E2E tests pass AND component tests didn't regress |
+| Phase 4 (Verification) | `bun run test:ui` + `bun run test` + `bun quality-gate` | Full suite verification |
+
+**Rule:** An agent MUST NOT proceed to the next task until the current task's Test Execution Requirements pass. This prevents regression accumulation across tasks.
+
 #### *Example Task (Component Test):*
 ```markdown
 #### Task G — RequirePermission.test.tsx
 
 **Status:** Pending
+
+**Objective:** Verify that the `RequirePermission` gate correctly renders/hides children and fallback based on the user's permission set in the Zustand store.
+
+**Layer-Specific Rules (Component Tests — Flattened from Section 4.A):**
+- DOM Environment: `happy-dom` registered via `bunfig.toml` preload. Provides `document`, `window`, `HTMLElement` globals.
+- Rendering: `@testing-library/react` with `render()` and `screen` queries.
+- Interactions: `@testing-library/user-event` for `click()`, `type()`, `tab()`, `hover()`.
+- Store Seeding: `useUserStore.setState()` to set permissions before rendering. Reset in `afterEach`.
+- Assertions: `@testing-library/jest-dom` matchers: `toBeVisible()`, `toBeInTheDocument()`, `toHaveTextContent()`, `toBeDisabled()`.
+- Only `"use client"` components can be tested with component tests.
+- Permission enums: Always import from `frontend/graphql/generated/gql/graphql-types.ts`, never hardcode permission strings.
+
+**Input Sources (What to Read):**
+- `frontend/components/auth/RequirePermission.tsx` — component under test (props, rendering logic, fallback behavior)
+- `frontend/graphql/generated/gql/graphql-types.ts` — `AppPermission` enum values (exact PascalCase keys)
+- `frontend/stores/userStore.ts` — store shape for permission seeding (`permissions` field)
+- `test/manual/scenario/permissions/rbac-gates.md` — manual scenario being automated (test case table)
 
 **Target files:**
 - `test/ui/components/RequirePermission.test.tsx` (new)
@@ -250,11 +349,17 @@ Every UI test plan MUST have these phases:
    - **"renders fallback when provided and permission missing"**: Seed empty, render with `fallback={<span>Denied</span>}`, assert `screen.getByText("Denied")` is visible
    - **"renders nothing (not fallback) when permission exists"**: Seed with permission, render with fallback, assert fallback is NOT visible and children ARE visible
 
-6. Verify: `bun run test:ui:components` passes all 5 tests.
+**Test Execution Requirements:**
+- **Run the component test suite** to verify all 5 tests pass and no existing component tests are broken:
+  ```bash
+  bun run test:ui:components
+  ```
+  Expected: 5 tests pass, 0 failures.
 
 **Completion criteria:**
 - [ ] 5 test cases pass
 - [ ] No `any` types or blind casts
+- [ ] `useUserStore` is reset in `afterEach` to prevent state leaking between tests
 ```
 
 #### *Example Task (E2E Test):*
@@ -262,6 +367,26 @@ Every UI test plan MUST have these phases:
 #### Task M — admin-dashboard.test.ts
 
 **Status:** Pending
+
+**Objective:** Verify the Academy Admin dashboard experience end-to-end: search visibility, timezone columns, grid filtering, navigation to class details, role-based access differences, and mobile responsive layout.
+
+**Layer-Specific Rules (E2E Tests — Flattened from Section 4.B):**
+- Browser: `playwright` library, `chromium.launch({ headless: true })`.
+- Dev Server: Reuses `setupTestServerLifecycle()` from `frontend/graphql/test/lifecycle.ts`. Port 3001.
+- Context Isolation: Each test creates a fresh `BrowserContext` with `baseURL: "http://localhost:3001"`. Cookies/storage isolated per test.
+- Authentication: `loginAsDemoUser()` calls `demoLogin` GraphQL mutation via `page.evaluate(fetch(...))`, sets `access_token` cookie via `context.addCookies()`.
+- Navigation: `page.goto("/ar/[route]")` with `page.waitForURL()` for navigation assertions.
+- Assertions: Playwright auto-waiting: `expect(page.getByRole("button")).toBeVisible()`, `expect(page.locator(selector)).toHaveText()`.
+- Mobile Testing: `createMobileContext()` with `{ width: 375, height: 812, isMobile: true, hasTouch: true }`.
+- Seed data: E2E tests rely on existing seed data. Never create test data in E2E tests.
+
+**Input Sources (What to Read):**
+- `frontend/views/dashboard/` — dashboard page components (layout, conditional rendering)
+- `shared/demo-users.ts` — demo user credentials and role slugs
+- `test/manual/scenario/admin-dashboard/schedule-search.md` — manual scenario for search
+- `test/manual/scenario/admin-dashboard/timezone-columns.md` — manual scenario for timezone columns
+- `test/ui/e2e/lifecycle.ts` — browser lifecycle setup (created in Phase 1)
+- `test/ui/e2e/helpers.ts` — login and assertion helpers (created in Phase 1)
 
 **Target files:**
 - `test/ui/e2e/admin-dashboard.test.ts` (new)
@@ -284,11 +409,23 @@ Every UI test plan MUST have these phases:
 
 6. Each test creates a fresh context via `createContext()` or `createMobileContext()`, logs in, performs actions, and closes the context in `afterEach`.
 
-7. Verify: `bun run test:ui:e2e` passes all tests.
+**Test Execution Requirements:**
+- **Run the E2E test suite** to verify all 6 tests pass against the running dev server:
+  ```bash
+  bun run test:ui:e2e
+  ```
+  Expected: 6 tests pass (4 desktop + 1 teacher + 1 mobile), 0 failures.
+- **Run the component test suite** to verify no regressions from Phase 2:
+  ```bash
+  bun run test:ui:components
+  ```
+  Expected: All Phase 2 component tests still pass.
 
 **Completion criteria:**
 - [ ] 6 test cases pass (4 desktop + 1 teacher + 1 mobile)
 - [ ] Each test uses isolated browser context
+- [ ] No hardcoded class/student IDs — all IDs obtained dynamically from seed data
+- [ ] Phase 2 component tests still pass (no regressions)
 ```
 
 #### Task Naming Convention:
@@ -400,6 +537,67 @@ Document every identified risk with a concrete mitigation strategy.
 
 ---
 
+### Section 6.5: Test Integrity Threats & Mitigations
+
+Address specific threats to test reliability. Each threat must include: the current gap, the risk it poses, and the concrete fix with code. This is the testing equivalent of security threat remediation in implementation plans.
+
+#### Required Threats (every plan must address):
+
+| Threat | Risk |
+|---|---|
+| State leakage between component tests | `useUserStore` state bleeds across tests, causing false passes |
+| Flaky E2E timing | Race conditions between page navigation and assertions |
+| Hardcoded IDs from seed data | Tests break when seed data changes |
+| Happy-dom vs Playwright DOM globals | `document`/`window` from happy-dom conflict with Playwright's browser context |
+| MockedProvider stale mocks | Mocks that don't match actual query signatures cause silent failures |
+| Date-dependent tests | Calendar/schedule tests fail on different dates |
+| Missing `afterEach` cleanup | Browser contexts, store state, or module mocks leak between tests |
+| Cross-layer import contamination | Component test accidentally imports E2E helper (or vice versa) |
+
+#### *Example Threat:*
+```markdown
+## Section 6.5: Test Integrity Threats & Mitigations
+
+### Threat 1: State Leakage Between Component Tests
+**Current Gap:** `useUserStore.setState()` sets permissions but never resets them.
+**Risk:** Test B inherits Test A's permissions, causing false passes.
+**Fix in every component test file:**
+```typescript
+import { afterEach } from "bun:test";
+import { useUserStore } from "@/frontend/stores/userStore";
+
+afterEach(() => {
+  useUserStore.setState({ permissions: [] }, false);
+});
+```
+
+### Threat 2: Hardcoded IDs from Seed Data
+**Current Gap:** E2E tests use hardcoded class/student IDs like `goto("/classes/42")`.
+**Risk:** Tests break when seed data is regenerated with different IDs.
+**Fix:** Dynamically extract IDs from the dashboard grid or API responses:
+```typescript
+const firstRow = page.locator("[data-testid='schedule-row']").first();
+const classId = await firstRow.getAttribute("data-class-id");
+await page.goto(`/ar/classes/${classId}`);
+```
+
+### Threat 3: Missing `afterEach` Cleanup
+**Current Gap:** Browser contexts created in tests are not closed.
+**Risk:** Memory leaks, port exhaustion, and state contamination between tests.
+**Fix in every E2E test file:**
+```typescript
+import { afterEach } from "bun:test";
+
+let context: BrowserContext;
+
+afterEach(async () => {
+  if (context) await context.close();
+});
+```
+```
+
+---
+
 ### Section 7: Final Verification & Integrity Protocol
 
 Outline the exact commands to verify the entire system compiles and passes all checks.
@@ -439,6 +637,27 @@ rg -i "TODO|FIXME|skip.*not impl|as any|: any" test/ui/ --glob "!**/*.md"
 # 9. Stale scripts check
 rg "test:e2e" package.json
 # Expected: empty output (only test:ui:e2e should exist)
+
+# 10. Cross-layer import check
+rg "from.*test/ui/e2e" test/ui/components/
+rg "from.*test/ui/components" test/ui/e2e/
+# Expected: empty output for both
+
+# 11. Hardcoded permission strings
+rg '"[a-z]+\.[a-z_]+"' test/ui/ --glob "*.test.*"
+# Expected: empty output (all permissions use AppPermission enum)
+
+# 12. Legacy Playwright patterns
+rg "waitForTimeout|waitForSelector|page\.waitFor" test/ui/e2e/
+# Expected: empty output
+
+# 13. fireEvent usage
+rg "fireEvent" test/ui/
+# Expected: empty output (only userEvent allowed)
+
+# 14. container.querySelector usage
+rg "container.querySelector" test/ui/
+# Expected: empty output (only screen queries allowed)
 ```
 ```
 
@@ -601,3 +820,7 @@ After completing all phases of a UI test plan:
 8. **No prohibited patterns**: `rg -i "TODO|FIXME|skip.*not impl|as any|: any" test/ui/` returns empty.
 9. **Manual scenario coverage**: Every file in `test/manual/scenario/` is covered by at least one automated test (verified via Appendix B matrix).
 10. **No cross-layer imports**: `rg "from.*test/ui/e2e" test/ui/components/` and `rg "from.*test/ui/components" test/ui/e2e/` both return empty.
+11. **No hardcoded permission strings**: `rg '"[a-z]+\.[a-z_]+"' test/ui/ --glob "*.test.*"` returns empty.
+12. **No legacy Playwright patterns**: `rg "waitForTimeout|waitForSelector|page\.waitFor" test/ui/e2e/` returns empty.
+13. **No fireEvent usage**: `rg "fireEvent" test/ui/` returns empty.
+14. **No container.querySelector**: `rg "container.querySelector" test/ui/` returns empty.

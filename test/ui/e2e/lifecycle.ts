@@ -1,0 +1,42 @@
+import { afterAll, beforeAll } from "bun:test";
+import { type Browser, type BrowserContext, chromium } from "playwright";
+import { setupTestServerLifecycle } from "@/frontend/graphql/test/lifecycle";
+
+let browser: Browser | null = null;
+
+export function setupBrowserLifecycle() {
+  setupTestServerLifecycle();
+
+  beforeAll(async () => {
+    browser = await chromium.launch({ headless: true });
+  }, 70000);
+
+  afterAll(async () => {
+    if (browser) {
+      await browser.close();
+      browser = null;
+    }
+  });
+}
+
+export async function createContext(viewport = { width: 1280, height: 720 }): Promise<BrowserContext> {
+  if (!browser) {
+    throw new Error("Browser not initialized. Call setupBrowserLifecycle() first.");
+  }
+  return browser.newContext({
+    baseURL: "http://localhost:3001",
+    viewport,
+  });
+}
+
+export async function createMobileContext(): Promise<BrowserContext> {
+  if (!browser) {
+    throw new Error("Browser not initialized. Call setupBrowserLifecycle() first.");
+  }
+  return browser.newContext({
+    baseURL: "http://localhost:3001",
+    viewport: { width: 375, height: 812 },
+    isMobile: true,
+    hasTouch: true,
+  });
+}
