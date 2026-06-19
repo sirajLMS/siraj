@@ -1,12 +1,13 @@
 "use client";
 
-import { SearchOutlined } from "@mui/icons-material";
-import { Box, Button, Checkbox, InputAdornment, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Box, Checkbox } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
 import type { Permission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AddPermissionBulkBar } from "./AddPermissionBulkBar";
+import { AddPermissionFilterBar } from "./AddPermissionFilterBar";
 
 interface AddPermissionsTabProps {
   readonly filteredAvailablePermissions: readonly Permission[];
@@ -84,83 +85,21 @@ export function AddPermissionsTab({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <Box
-        sx={theme => ({
-          p: 2,
-          borderRadius: 2,
-          bgcolor: theme.palette.surfaceContainerLow ?? theme.palette.background.paper,
-          border: `1px solid ${theme.palette.divider}`,
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          gap: 2,
-          alignItems: "center",
-          justifyContent: "space-between",
-        })}
-      >
-        <TextField
-          size="small"
-          placeholder={t("searchPermissionsPlaceholder")}
-          value={searchQuery}
-          onChange={e => onSearchChange(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchOutlined fontSize="small" />
-                </InputAdornment>
-              ),
-            },
-          }}
-          sx={{ width: { xs: "100%", sm: 360 } }}
-        />
-        <Select
-          size="small"
-          value={selectedCategory}
-          onChange={e => onCategoryChange(e.target.value)}
-          sx={{ width: { xs: "100%", sm: 200 } }}
-        >
-          <MenuItem value="all">{t("allCategoriesOption")}</MenuItem>
-          {addCategories.map(cat => (
-            <MenuItem key={cat} value={cat}>
-              {cat}
-            </MenuItem>
-          ))}
-        </Select>
-      </Box>
+      <AddPermissionFilterBar
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
+        selectedCategory={selectedCategory}
+        onCategoryChange={onCategoryChange}
+        addCategories={addCategories}
+        t={t}
+      />
 
       {selectedAddPermissionIds.length > 0 && (
-        <Box
-          sx={theme => ({
-            p: 2,
-            borderRadius: 1.5,
-            bgcolor: theme.palette.primaryContainer,
-            color: theme.palette.onPrimaryContainer,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            boxShadow: 2,
-          })}
-        >
-          <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-            {t("itemsSelectedLabel", { count: selectedAddPermissionIds.length })}
-          </Typography>
-          <Button
-            variant="contained"
-            onClick={onAssignPermissions}
-            sx={theme => ({
-              bgcolor: theme.palette.primary.main,
-              color: theme.palette.onPrimary,
-              textTransform: "none",
-              fontWeight: 700,
-              borderRadius: 1.5,
-              "&:hover": {
-                bgcolor: theme.palette.primary.dark,
-              },
-            })}
-          >
-            {t("assignPermissionsButton")}
-          </Button>
-        </Box>
+        <AddPermissionBulkBar
+          selectedCount={selectedAddPermissionIds.length}
+          onAssignPermissions={onAssignPermissions}
+          t={t}
+        />
       )}
 
       <SectionPanel title={t("addPermissions")}>

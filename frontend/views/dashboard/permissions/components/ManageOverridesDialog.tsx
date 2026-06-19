@@ -1,25 +1,14 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import { CloseOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Typography,
-} from "@mui/material";
+import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
 import type { Permission, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
-import { userOverridesQueryDocument } from "@/frontend/graphql/sharedDocuments/permission-management.documents";
-import { type OverrideState, OverridesTable } from "./OverridesTable";
+import { OverridesDialogFooter } from "./OverridesDialogFooter";
+import { OverridesTable } from "./OverridesTable";
 import { OverridesToolbar } from "./OverridesToolbar";
 import { OverridesUserSidebar } from "./OverridesUserSidebar";
+import { useManageOverridesState } from "./useManageOverridesState";
 
 interface ManageOverridesDialogProps {
   readonly open: boolean;
@@ -43,81 +32,23 @@ export function ManageOverridesDialog({
   onSave,
 }: Readonly<ManageOverridesDialogProps>) {
   const t = useTranslations("dashboard.permissions");
-  const [mode, setMode] = useState<"effective" | "edit">("edit");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [localOverrides, setLocalOverrides] = useState<Record<string, OverrideState>>({});
-  const [isSaving, setIsSaving] = useState(false);
 
-  // Find the selected user
-  const user = useMemo(() => users.find(u => u.id === userId) || null, [users, userId]);
-
-  // Fetch overrides for this user
-  const { data: queryData, loading: queryLoading } = useQuery(userOverridesQueryDocument, {
-    variables: { userId: userId ?? "" },
-    skip: !userId || !open,
-  });
-
-  // Groups this user belongs to
-  const userGroups = useMemo(() => {
-    if (!userId) return [];
-    return groups.filter(g => g.assignedUsers?.some(au => au.id === userId));
-  }, [groups, userId]);
-
-  // Initialize local overrides when query returns
-  useEffect(() => {
-    if (queryData?.userOverrides) {
-      const overridesMap: Record<string, OverrideState> = {};
-      for (const override of queryData.userOverrides) {
-        if (override.permissionId) {
-          overridesMap[override.permissionId] = override.state as OverrideState;
-        }
-      }
-      setLocalOverrides(overridesMap);
-    } else {
-      setLocalOverrides({});
-    }
-  }, [queryData]);
-
-  // Filter permissions based on search query
-  const filteredPermissions = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return permissions;
-
-    return permissions.filter(
-      p =>
-        p.key?.toLowerCase().includes(query) ||
-        p.category?.toLowerCase().includes(query) ||
-        p.description?.toLowerCase().includes(query)
-    );
-  }, [permissions, searchQuery]);
+  const {
+    user,
+    userGroups,
+    filteredPermissions,
+    localOverrides,
+    mode,
+    searchQuery,
+    isDialogLoading,
+    isSaving,
+    handleOverrideChange,
+    handleSave,
+    setMode,
+    setSearchQuery,
+  } = useManageOverridesState({ userId, users, groups, permissions, isLoading, open, onClose, onSave });
 
   if (!user) return null;
-
-  const handleOverrideChange = (permissionId: string, state: OverrideState) => {
-    setLocalOverrides(prev => ({
-      ...prev,
-      [permissionId]: state,
-    }));
-  };
-
-  const handleSave = async () => {
-    if (!userId) return;
-    setIsSaving(true);
-    try {
-      const formattedOverrides = Object.entries(localOverrides)
-        .filter(([_, state]) => state !== "INHERIT")
-        .map(([permissionId, state]) => ({
-          permissionId,
-          state,
-        }));
-      await onSave(userId, formattedOverrides);
-      onClose();
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const isDialogLoading = queryLoading || isLoading || isSaving;
 
   return (
     <Dialog
@@ -137,7 +68,6 @@ export function ManageOverridesDialog({
         },
       }}
     >
-      {/* Header */}
       <DialogTitle
         id="manage-overrides-dialog-title"
         sx={theme => ({
@@ -184,37 +114,13 @@ export function ManageOverridesDialog({
         </Box>
       </DialogContent>
 
-      {/* Footer */}
-      <DialogActions sx={theme => ({ borderTop: `1px solid ${theme.palette.divider}`, px: 3, py: 2 })}>
-        <Button
-          onClick={onClose}
-          disabled={isDialogLoading}
-          variant="text"
-          sx={theme => ({
-            color: theme.palette.text.secondary,
-            fontWeight: 700,
-            borderRadius: 1.5,
-          })}
-        >
-          {t("cancel")}
-        </Button>
-        <Button
-          onClick={handleSave}
-          disabled={isDialogLoading}
-          variant="contained"
-          sx={theme => ({
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            fontWeight: 700,
-            borderRadius: 1.5,
-            "&:hover": {
-              bgcolor: theme.palette.primary.dark,
-            },
-          })}
-        >
-          {isSaving ? <CircularProgress size={20} color="inherit" /> : "Save Overrides"}
-        </Button>
-      </DialogActions>
+      <OverridesDialogFooter
+        onClose={onClose}
+        handleSave={handleSave}
+        isDialogLoading={isDialogLoading}
+        isSaving={isSaving}
+        t={t}
+      />
     </Dialog>
   );
 }
