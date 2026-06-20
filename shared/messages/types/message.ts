@@ -21,8 +21,10 @@ import type {
   NotificationsLabels,
   ParentDashboardLabels,
   ScheduleAlertsLabels,
+  SearchScheduleLabels,
   StatusTrackingLabels,
 } from "./dashboard/core";
+
 import type { ManagerOnboardingLabels, ManagersDirectoryLabels } from "./dashboard/managers";
 import type { ParentOnboardingLabels, ParentProfileLabels, ParentsDirectoryLabels } from "./dashboard/parents";
 import type { PermissionsLabels } from "./dashboard/permissions";
@@ -128,5 +130,6 @@ export type MessageSchema = {
     readonly complaints: ComplaintsLabels;
     readonly resources: ResourcesLabels;
     readonly permissions: PermissionsLabels;
+    readonly searchSchedule: SearchScheduleLabels;
   };
 };

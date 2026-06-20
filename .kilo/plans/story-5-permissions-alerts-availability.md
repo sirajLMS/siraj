@@ -2074,13 +2074,13 @@ bun run test:ui:components
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `/search-schedule` page renders with search form.
-- [ ] Entire page is gated by `<RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]} />`.
-- [ ] Form submission triggers GraphQL query with correct variables.
-- [ ] Results render as weekly calendar grids per teacher with highlighted gaps.
-- [ ] Empty state shows "no results" message.
-- [ ] NO hardcoded colors — all theme tokens.
-- [ ] All text uses `useTranslations`.
+- [x] `/search-schedule` page renders with search form.
+- [x] Entire page is gated by `<RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]} />`.
+- [x] Form submission triggers GraphQL query with correct variables.
+- [x] Results render as weekly calendar grids per teacher with highlighted gaps.
+- [x] Empty state shows "no results" message.
+- [x] NO hardcoded colors — all theme tokens.
+- [x] All text uses `useTranslations`.
 
 ---
 
