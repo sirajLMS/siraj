@@ -255,9 +255,7 @@ export namespace BillingRepository {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
-  export const getUnpaidInvoicesSummary = async (
-    tx?: DBTransaction
-  ): Promise<Types.UnpaidInvoicesSummaryResult> => {
+  export const getUnpaidInvoicesSummary = async (tx?: DBTransaction): Promise<Types.UnpaidInvoicesSummaryResult> => {
     const t = tx ?? db;
 
     const unpaidInvoices = await t
@@ -269,12 +267,7 @@ export namespace BillingRepository {
         dueDate: invoices.dueDate,
       })
       .from(invoices)
-      .where(
-        and(
-          eq(invoices.status, "UNPAID"),
-          sql`${invoices.dueDate} < CURRENT_DATE`
-        )
-      )
+      .where(and(eq(invoices.status, "UNPAID"), sql`${invoices.dueDate} < CURRENT_DATE`))
       .orderBy(invoices.dueDate);
 
     if (unpaidInvoices.length === 0) {
@@ -297,7 +290,12 @@ export namespace BillingRepository {
       })
       .from(parents)
       .leftJoin(users, eq(parents.userId, users.id))
-      .where(sql`${parents.id} IN (${sql.join(parentIds.map(id => sql`${id}`), sql`, `)})`);
+      .where(
+        sql`${parents.id} IN (${sql.join(
+          parentIds.map(id => sql`${id}`),
+          sql`, `
+        )})`
+      );
 
     const parentMap = new Map(parentUsers.map(p => [p.parentId, p]));
 

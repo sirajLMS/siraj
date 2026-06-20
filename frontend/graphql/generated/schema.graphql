@@ -6,6 +6,7 @@ enum AppLanguage {
 enum AppPermission {
   AUTH_LOGIN
   AUTH_VIEW_OWN_PROFILE
+  BILLING_VIEW_UNPAID_INVOICES
   COMPLAINTS_DELETE
   COMPLAINTS_LIST
   COMPLAINTS_RESPOND
@@ -21,6 +22,7 @@ enum AppPermission {
   INVOICES_EDIT
   INVOICES_LIST
   INVOICES_MARK_PAID
+  NOTIFICATION_VIEW_ALERTS
   PARENTS_CREATE
   PARENTS_EDIT
   PARENTS_LIST
@@ -65,11 +67,32 @@ enum AppPermission {
   TEACHER_VIEW_DASHBOARD
   TEST_CUSTOM_ONLY
   TEST_SYSTEM_ONLY
+  USER_VIEW_PROFILE
 }
 
 input AssignPermissionGroupToUserInput {
   groupId: String!
   userId: String!
+}
+
+input AvailabilitySearchInput {
+  fromTime: String!
+  gender: String
+  toTime: String!
+}
+
+type AvailabilitySearchResult {
+  id: String
+  teachers: [AvailabilitySearchTeacher!]
+  totalGaps: Int
+}
+
+type AvailabilitySearchTeacher {
+  gaps: [TeacherAvailabilityGap!]
+  gender: String
+  id: String
+  name: String
+  timezone: String
 }
 
 type BulkOperationFailure {
@@ -682,6 +705,13 @@ type Mutation {
   updateUserOverrides(overrides: [UserOverrideInput!]!, userId: String!): Boolean
 }
 
+type NotificationAlertsResult {
+  alerts: [SystemAlert!]
+  id: String
+  totalCount: Int
+  unreadCount: Int
+}
+
 enum OrderSortDirection {
   ASC
   DESC
@@ -767,6 +797,7 @@ type Query {
   folderInfo(path: String!): DirectoryInfo
   listFiles(input: FilesListInput!): StorageObjectList
   me: User
+  notificationAlerts: NotificationAlertsResult
 
   """Fetch a single permission group by ID."""
   permissionGroup(id: String!): PermissionGroup
@@ -791,6 +822,7 @@ type Query {
     limit: Int = 50
     searchTerm: String!
   ): StorageObjectList
+  searchTeacherAvailability(input: AvailabilitySearchInput!): AvailabilitySearchResult
   storageStats(
     """
     Folder path to get stats for (optional, gets stats for entire bucket if not specified)
@@ -807,6 +839,7 @@ type Query {
   teacherHandbookUrl: TeacherHandbookUrl
   teachers(limit: Int!, search: String!): [TeacherSimple!]
   translatedMessage(key: String!, namespace: String!): String
+  unpaidInvoicesAlert: UnpaidInvoicesSummary
   user(id: String!): User
 
   """List overrides for a user."""
@@ -1050,6 +1083,26 @@ type SupportRequestResult {
   success: Boolean
 }
 
+type SystemAlert {
+  body: String
+  createdAt: DateTime
+  id: String
+  severity: String
+  title: String
+  type: String
+}
+
+type TeacherAvailabilityGap {
+  dayOfWeek: String
+  gapEndTime: String
+  gapStartTime: String
+  id: String
+  teacherGender: String
+  teacherId: String
+  teacherName: String
+  timezone: String
+}
+
 type TeacherDashboard {
   id: String
   metrics: TeacherDashboardMetrics
@@ -1118,6 +1171,24 @@ type TestEntities {
   teacherId: String
   teacherUserEmail: String
   teacherUserId: String
+}
+
+type UnpaidInvoiceItem {
+  currency: String
+  id: String
+  oldestDueDate: String
+  overdueCount: Int
+  totalUnpaidAmount: String
+  userEmail: String
+  userId: String
+  userName: String
+}
+
+type UnpaidInvoicesSummary {
+  id: String
+  items: [UnpaidInvoiceItem!]
+  totalOverdueAmount: String
+  totalOverdueInvoices: Int
 }
 
 input UpdatePermissionGroupInput {

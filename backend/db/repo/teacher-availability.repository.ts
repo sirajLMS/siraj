@@ -3,8 +3,8 @@ import { db } from "@/backend/db/drizzleDb";
 import {
   teacherAvailabilityWindows,
   teacherRecurringUnavailability,
-  teacherVacationRequests,
   teachers,
+  teacherVacationRequests,
   users,
 } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -525,7 +525,10 @@ export namespace TeacherAvailabilityRepository {
           const mergedBlocked: { start: number; end: number }[] = [];
           for (const range of blockedRanges) {
             if (mergedBlocked.length > 0 && range.start <= mergedBlocked[mergedBlocked.length - 1].end) {
-              mergedBlocked[mergedBlocked.length - 1].end = Math.max(mergedBlocked[mergedBlocked.length - 1].end, range.end);
+              mergedBlocked[mergedBlocked.length - 1].end = Math.max(
+                mergedBlocked[mergedBlocked.length - 1].end,
+                range.end
+              );
             } else {
               mergedBlocked.push({ ...range });
             }

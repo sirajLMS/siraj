@@ -11,6 +11,7 @@ export type AppLanguage =
 export type AppPermission =
   | 'AUTH_LOGIN'
   | 'AUTH_VIEW_OWN_PROFILE'
+  | 'BILLING_VIEW_UNPAID_INVOICES'
   | 'COMPLAINTS_DELETE'
   | 'COMPLAINTS_LIST'
   | 'COMPLAINTS_RESPOND'
@@ -26,6 +27,7 @@ export type AppPermission =
   | 'INVOICES_EDIT'
   | 'INVOICES_LIST'
   | 'INVOICES_MARK_PAID'
+  | 'NOTIFICATION_VIEW_ALERTS'
   | 'PARENTS_CREATE'
   | 'PARENTS_EDIT'
   | 'PARENTS_LIST'
@@ -69,7 +71,8 @@ export type AppPermission =
   | 'TEACHERS_MANAGE_SCHEDULE'
   | 'TEACHER_VIEW_DASHBOARD'
   | 'TEST_CUSTOM_ONLY'
-  | 'TEST_SYSTEM_ONLY';
+  | 'TEST_SYSTEM_ONLY'
+  | 'USER_VIEW_PROFILE';
 
 export type AssignPermissionGroupToUserInput = {
   groupId: string;

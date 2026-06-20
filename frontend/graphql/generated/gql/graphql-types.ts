@@ -29,6 +29,7 @@ export enum AppLanguage {
 export enum AppPermission {
   AuthLogin = 'AUTH_LOGIN',
   AuthViewOwnProfile = 'AUTH_VIEW_OWN_PROFILE',
+  BillingViewUnpaidInvoices = 'BILLING_VIEW_UNPAID_INVOICES',
   ComplaintsDelete = 'COMPLAINTS_DELETE',
   ComplaintsList = 'COMPLAINTS_LIST',
   ComplaintsRespond = 'COMPLAINTS_RESPOND',
@@ -44,6 +45,7 @@ export enum AppPermission {
   InvoicesEdit = 'INVOICES_EDIT',
   InvoicesList = 'INVOICES_LIST',
   InvoicesMarkPaid = 'INVOICES_MARK_PAID',
+  NotificationViewAlerts = 'NOTIFICATION_VIEW_ALERTS',
   ParentsCreate = 'PARENTS_CREATE',
   ParentsEdit = 'PARENTS_EDIT',
   ParentsList = 'PARENTS_LIST',
@@ -87,12 +89,35 @@ export enum AppPermission {
   TeachersManageSchedule = 'TEACHERS_MANAGE_SCHEDULE',
   TeacherViewDashboard = 'TEACHER_VIEW_DASHBOARD',
   TestCustomOnly = 'TEST_CUSTOM_ONLY',
-  TestSystemOnly = 'TEST_SYSTEM_ONLY'
+  TestSystemOnly = 'TEST_SYSTEM_ONLY',
+  UserViewProfile = 'USER_VIEW_PROFILE'
 }
 
 export type AssignPermissionGroupToUserInput = {
   groupId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
+};
+
+export type AvailabilitySearchInput = {
+  fromTime: Scalars['String']['input'];
+  gender: InputMaybe<Scalars['String']['input']>;
+  toTime: Scalars['String']['input'];
+};
+
+export type AvailabilitySearchResult = {
+  __typename?: 'AvailabilitySearchResult';
+  id: Maybe<Scalars['String']['output']>;
+  teachers: Maybe<Array<AvailabilitySearchTeacher>>;
+  totalGaps: Maybe<Scalars['Int']['output']>;
+};
+
+export type AvailabilitySearchTeacher = {
+  __typename?: 'AvailabilitySearchTeacher';
+  gaps: Maybe<Array<TeacherAvailabilityGap>>;
+  gender: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<Scalars['String']['output']>;
 };
 
 export type BulkOperationFailure = {
@@ -889,6 +914,14 @@ export type MutationUpdateUserOverridesArgs = {
   userId: Scalars['String']['input'];
 };
 
+export type NotificationAlertsResult = {
+  __typename?: 'NotificationAlertsResult';
+  alerts: Maybe<Array<SystemAlert>>;
+  id: Maybe<Scalars['String']['output']>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+  unreadCount: Maybe<Scalars['Int']['output']>;
+};
+
 export enum OrderSortDirection {
   Asc = 'ASC',
   Desc = 'DESC'
@@ -969,6 +1002,7 @@ export type Query = {
   folderInfo: Maybe<DirectoryInfo>;
   listFiles: Maybe<StorageObjectList>;
   me: Maybe<User>;
+  notificationAlerts: Maybe<NotificationAlertsResult>;
   /** Fetch a single permission group by ID. */
   permissionGroup: Maybe<PermissionGroup>;
   /** List all permission groups with their permission IDs. */
@@ -978,6 +1012,7 @@ export type Query = {
   rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
   rescheduleTrackingRows: Maybe<Array<RescheduleTrackingRow>>;
   searchFiles: Maybe<StorageObjectList>;
+  searchTeacherAvailability: Maybe<AvailabilitySearchResult>;
   storageStats: Maybe<StorageStats>;
   student: Maybe<Student>;
   studentClassHistory: Maybe<StudentClassHistory>;
@@ -989,6 +1024,7 @@ export type Query = {
   teacherHandbookUrl: Maybe<TeacherHandbookUrl>;
   teachers: Maybe<Array<TeacherSimple>>;
   translatedMessage: Maybe<Scalars['String']['output']>;
+  unpaidInvoicesAlert: Maybe<UnpaidInvoicesSummary>;
   user: Maybe<User>;
   /** List overrides for a user. */
   userOverrides: Maybe<Array<UserOverride>>;
@@ -1067,6 +1103,11 @@ export type QuerySearchFilesArgs = {
   folder: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   searchTerm: Scalars['String']['input'];
+};
+
+
+export type QuerySearchTeacherAvailabilityArgs = {
+  input: AvailabilitySearchInput;
 };
 
 
@@ -1376,6 +1417,28 @@ export type SupportRequestResult = {
   success: Maybe<Scalars['Boolean']['output']>;
 };
 
+export type SystemAlert = {
+  __typename?: 'SystemAlert';
+  body: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  severity: Maybe<Scalars['String']['output']>;
+  title: Maybe<Scalars['String']['output']>;
+  type: Maybe<Scalars['String']['output']>;
+};
+
+export type TeacherAvailabilityGap = {
+  __typename?: 'TeacherAvailabilityGap';
+  dayOfWeek: Maybe<Scalars['String']['output']>;
+  gapEndTime: Maybe<Scalars['String']['output']>;
+  gapStartTime: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  teacherGender: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<Scalars['String']['output']>;
+};
+
 export type TeacherDashboard = {
   __typename?: 'TeacherDashboard';
   id: Maybe<Scalars['String']['output']>;
@@ -1452,6 +1515,26 @@ export type TestEntities = {
   teacherId: Maybe<Scalars['String']['output']>;
   teacherUserEmail: Maybe<Scalars['String']['output']>;
   teacherUserId: Maybe<Scalars['String']['output']>;
+};
+
+export type UnpaidInvoiceItem = {
+  __typename?: 'UnpaidInvoiceItem';
+  currency: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  oldestDueDate: Maybe<Scalars['String']['output']>;
+  overdueCount: Maybe<Scalars['Int']['output']>;
+  totalUnpaidAmount: Maybe<Scalars['String']['output']>;
+  userEmail: Maybe<Scalars['String']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
+  userName: Maybe<Scalars['String']['output']>;
+};
+
+export type UnpaidInvoicesSummary = {
+  __typename?: 'UnpaidInvoicesSummary';
+  id: Maybe<Scalars['String']['output']>;
+  items: Maybe<Array<UnpaidInvoiceItem>>;
+  totalOverdueAmount: Maybe<Scalars['String']['output']>;
+  totalOverdueInvoices: Maybe<Scalars['Int']['output']>;
 };
 
 export type UpdatePermissionGroupInput = {

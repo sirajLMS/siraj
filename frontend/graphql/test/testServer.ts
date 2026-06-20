@@ -74,9 +74,10 @@ function pipeStreamLogs(proc: ReturnType<typeof spawn>) {
 async function waitForServerReady(port: number, timeoutMs: number): Promise<boolean> {
   const start = Date.now();
   const url = `http://localhost:${port}/api/graphql`;
+  const fetchFn = typeof Bun !== "undefined" ? Bun.fetch : fetch;
   while (Date.now() - start < timeoutMs) {
     try {
-      const res = await fetch(url, { method: "HEAD" });
+      const res = await fetchFn(url, { method: "HEAD" });
       if (res.status === 204) {
         return true;
       }

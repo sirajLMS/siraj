@@ -49,7 +49,10 @@ describe("BillingRepository.getUnpaidInvoicesSummary", () => {
 
   test("returns overdue invoices grouped by parent", async () => {
     await runInRollback(async tx => {
-      const parentUser = await createTestUser(tx, { name: "Billing Parent", email: `billing-${randomUUID()}@test.com` });
+      const parentUser = await createTestUser(tx, {
+        name: "Billing Parent",
+        email: `billing-${randomUUID()}@test.com`,
+      });
       const parent = await createTestParent(tx, parentUser.id);
 
       await createOverdueInvoice(tx, parent.id, "100.00", -10);

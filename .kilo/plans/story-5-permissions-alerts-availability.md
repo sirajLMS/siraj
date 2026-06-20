@@ -1219,10 +1219,10 @@ bun run test:graphql
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] 3 new Pothos type files created with proper `id` fields on all objects.
-- [ ] Query fields registered in the schema builder.
-- [ ] `bun run generate:gqlSchema` succeeds without errors.
-- [ ] `bun run test:graphql` passes with 0 failures.
+- [x] 3 new Pothos type files created with proper `id` fields on all objects.
+- [x] Query fields registered in the schema builder.
+- [x] `bun run generate:gqlSchema` succeeds without errors.
+- [x] `bun run test:graphql` passes with 0 failures.
 
 ---
 

@@ -57,10 +57,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
     await runInRollback(async tx => {
       let errorCaught = false;
       try {
-        await TeacherAvailabilityRepository.searchCrossStaffAvailability(
-          { fromTime: "17:00", toTime: "08:00" },
-          tx
-        );
+        await TeacherAvailabilityRepository.searchCrossStaffAvailability({ fromTime: "17:00", toTime: "08:00" }, tx);
       } catch {
         errorCaught = true;
       }
@@ -155,7 +152,10 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
       const activeUser = await createTestUser(tx, { name: "Active Teacher", email: `active-${randomUUID()}@test.com` });
       const activeTeacher = await createTestTeacher(tx, activeUser.id, { status: "ACTIVATED" });
 
-      const inactiveUser = await createTestUser(tx, { name: "Inactive Teacher", email: `inactive-${randomUUID()}@test.com` });
+      const inactiveUser = await createTestUser(tx, {
+        name: "Inactive Teacher",
+        email: `inactive-${randomUUID()}@test.com`,
+      });
       const inactiveTeacher = await createTestTeacher(tx, inactiveUser.id, { status: "DEACTIVATED" });
 
       await createAvailabilityWindow(tx, activeTeacher.id, DayOfWeek.MONDAY, "08:00", "12:00");

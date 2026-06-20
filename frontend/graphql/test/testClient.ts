@@ -68,7 +68,8 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     headers.set("Cookie", merged);
   }
 
-  const response = await fetch(input, {
+  const fetchFn = typeof Bun !== "undefined" ? Bun.fetch : fetch;
+  const response = await fetchFn(input, {
     ...init,
     headers,
   });
