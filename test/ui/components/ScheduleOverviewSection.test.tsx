@@ -8,18 +8,19 @@ mock.module("next/navigation", () => ({
 
 import { afterEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { ScheduleOverviewSectionProps } from "@/frontend/views/dashboard/dashboard/components/ScheduleOverviewSection";
 import { ScheduleOverviewSection } from "@/frontend/views/dashboard/dashboard/components/ScheduleOverviewSection";
+import type { ScheduleOverviewSectionProps } from "@/frontend/views/dashboard/dashboard/components/ScheduleOverviewSection";
 import type { ClassStatus } from "@/frontend/views/dashboard/types/dashboard";
 import { renderWithWrapper } from "./TestWrapper";
 
 afterEach(() => {
+  cleanup();
   useUserStore.setState({ permissions: [] }, false);
 });
 

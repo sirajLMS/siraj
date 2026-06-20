@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
@@ -10,6 +10,7 @@ import { useUserStore } from "@/frontend/stores/userStore";
 import { renderWithWrapper } from "./TestWrapper";
 
 afterEach(() => {
+  cleanup();
   useUserStore.setState({ permissions: [] }, false);
 });
 
