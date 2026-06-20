@@ -48,7 +48,7 @@ Implement the remaining two layers of the automated UI test suite covering all m
 
 | Gap | Current State | Target State |
 |---|---|---|
-| Component test files | 0 files | 6 `.test.tsx` files |
+| Component test files | 0 files | 6 `.test.tsx` files | 2 of 6 complete |
 | E2E test files | 0 files | 5 `.test.ts` files |
 | Full verification | Not run | All suites pass + quality gate |
 
@@ -283,7 +283,7 @@ Each task in Phase 2 creates one `.test.tsx` file in `test/ui/components/`. All 
 
 #### Task G — RequirePermission.test.tsx
 
-**Status:** Pending
+**Status:** ✅ Complete
 
 **Objective:** Verify that the `RequirePermission` gate correctly renders/hides children and fallback based on the user's permission set in the Zustand store.
 
@@ -337,15 +337,15 @@ Each task in Phase 2 creates one `.test.tsx` file in `test/ui/components/`. All 
   Expected: 5 tests pass, 0 failures.
 
 **Completion criteria:**
-- [ ] 5 test cases pass
-- [ ] No `any` types or blind casts
-- [ ] `useUserStore` is reset in `afterEach` to prevent state leaking between tests
+- [x] 5 test cases pass
+- [x] No `any` types or blind casts
+- [x] `useUserStore` is reset in `afterEach` to prevent state leaking between tests
 
 ---
 
 #### Task H — ScheduleOverviewSection.test.tsx
 
-**Status:** Pending
+**Status:** ✅ Complete
 
 **Objective:** Verify that the `ScheduleOverviewSection` component correctly shows/hides the search input based on `DashboardSearch` permission and handles user interactions with search, date, and teacher filters.
 
@@ -418,9 +418,9 @@ Each task in Phase 2 creates one `.test.tsx` file in `test/ui/components/`. All 
   Expected: All tests pass (5 from Task G + 5 from Task H = 10 total), 0 failures.
 
 **Completion criteria:**
-- [ ] 5 test cases pass
-- [ ] Mock props are typed correctly matching `ScheduleOverviewSectionProps`
-- [ ] `useUserStore` is reset in `afterEach`
+- [x] 5 test cases pass
+- [x] Mock props are typed correctly matching `ScheduleOverviewSectionProps`
+- [x] `useUserStore` is reset in `afterEach`
 
 ---
 
