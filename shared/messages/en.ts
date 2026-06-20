@@ -172,6 +172,14 @@ const en: MessageSchema = {
       welcomeUser: "Welcome {name}",
       notifications: "Notifications",
     },
+    notifications: {
+      title: "Notifications",
+      noAlerts: "No alerts at this time.",
+      errorLoading: "Failed to load notifications.",
+      unpaidInvoicesTitle: "Unpaid Invoices",
+      noUnpaidInvoices: "There is no invoices to be paid.",
+      loadingBilling: "Loading billing data...",
+    },
     statusTracking: {
       pageTitle: "Status Overview",
       pageSubtitle: "Real-time tracking of institutional activities and administrative holds.",

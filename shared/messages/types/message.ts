@@ -18,6 +18,7 @@ import type { ComplaintsLabels } from "./dashboard/complaints";
 import type {
   DashboardLayoutLabels,
   DashboardNavigationLabels,
+  NotificationsLabels,
   ParentDashboardLabels,
   ScheduleAlertsLabels,
   StatusTrackingLabels,
@@ -93,6 +94,7 @@ export type MessageSchema = {
   dashboard: {
     readonly nav: DashboardNavigationLabels;
     readonly layout: DashboardLayoutLabels;
+    readonly notifications: NotificationsLabels;
     readonly statusTracking: StatusTrackingLabels;
     readonly teacherProfile: TeacherProfileLabels;
     readonly teachersDirectory: TeachersDirectoryLabels;

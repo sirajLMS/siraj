@@ -1,0 +1,8 @@
+export interface NotificationsLabels {
+  readonly title: string;
+  readonly noAlerts: string;
+  readonly errorLoading: string;
+  readonly unpaidInvoicesTitle: string;
+  readonly noUnpaidInvoices: string;
+  readonly loadingBilling: string;
+}

@@ -1726,12 +1726,12 @@ bun run test:ui:components
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] Notification bell is wrapped in `<RequirePermission>` — invisible to non-admin users.
-- [ ] Clicking the bell opens a Popover with system alerts and unpaid invoices.
-- [ ] Unpaid invoices section is independently gated by `billing.view_unpaid_invoices`.
-- [ ] User rows in unpaid invoices are clickable (gated by `user.view_profile`) and navigate to billing profile.
-- [ ] Empty states render localized placeholder text.
-- [ ] NO hardcoded colors — all use theme tokens.
+- [x] Notification bell is wrapped in `<RequirePermission>` — invisible to non-admin users.
+- [x] Clicking the bell opens a Popover with system alerts and unpaid invoices.
+- [x] Unpaid invoices section is independently gated by `billing.view_unpaid_invoices`.
+- [x] User rows in unpaid invoices are clickable (gated by `user.view_profile`) and navigate to billing profile.
+- [x] Empty states render localized placeholder text.
+- [x] NO hardcoded colors — all use theme tokens.
 
 ---
 

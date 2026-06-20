@@ -11,7 +11,7 @@ import {
   rescheduleTracking,
 } from "./dashboard/classes";
 import { complaints as complaintsLabels } from "./dashboard/complaints";
-import { layout, nav, parentDashboard, scheduleAlerts, statusTracking } from "./dashboard/core";
+import { layout, nav, notifications, parentDashboard, scheduleAlerts, statusTracking } from "./dashboard/core";
 import { managerOnboarding, managersDirectory } from "./dashboard/managers";
 import { directory, onboarding, profile } from "./dashboard/parents";
 import { permissions as permissionsLabels } from "./dashboard/permissions";
@@ -60,6 +60,7 @@ export const arTranslations = {
   dashboard: {
     nav,
     layout,
+    notifications,
     statusTracking,
     teacherProfile,
     teachersDirectory,
