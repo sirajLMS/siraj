@@ -48,7 +48,7 @@ Implement the remaining two layers of the automated UI test suite covering all m
 
 | Gap | Current State | Target State |
 |---|---|---|
-| Component test files | 0 files | 6 `.test.tsx` files | 2 of 6 complete |
+| Component test files | 0 files | 6 `.test.tsx` files | 3 of 6 complete |
 | E2E test files | 0 files | 5 `.test.ts` files |
 | Full verification | Not run | All suites pass + quality gate |
 
@@ -426,7 +426,7 @@ Each task in Phase 2 creates one `.test.tsx` file in `test/ui/components/`. All 
 
 #### Task I — ScheduleOverviewDataGrid.test.tsx
 
-**Status:** Pending
+**Status:** ✅ Complete
 
 **Objective:** Verify that the `ScheduleOverviewDataGrid` correctly shows/hides timezone columns based on `ScheduleViewTimezones` permission and renders schedule rows with student/teacher data.
 
@@ -503,9 +503,9 @@ Each task in Phase 2 creates one `.test.tsx` file in `test/ui/components/`. All 
   Expected: All tests pass (10 from G+H + 4 from I = 14 total), 0 failures.
 
 **Completion criteria:**
-- [ ] 4 test cases pass
-- [ ] `next/navigation` router is properly mocked via `mock.module()`
-- [ ] `useUserStore` is reset in `afterEach`
+- [x] 4 test cases pass
+- [x] `next/navigation` router is properly mocked via `mock.module()`
+- [x] `useUserStore` is reset in `afterEach`
 
 ---
 

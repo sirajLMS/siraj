@@ -457,6 +457,9 @@ export enum AppPermission {
   STAFF_EDIT = "staff.edit",
   PERMISSION_GROUPS_MANAGE = "permission_groups.manage",
   PERMISSION_GROUPS_ASSIGN = "permission_groups.assign",
+  NOTIFICATION_VIEW_ALERTS = "notification.view_alerts",
+  BILLING_VIEW_UNPAID_INVOICES = "billing.view_unpaid_invoices",
+  USER_VIEW_PROFILE = "user.view_profile",
   TEST_SYSTEM_ONLY = "test.system_only",
   TEST_CUSTOM_ONLY = "test.custom_only",
 }
