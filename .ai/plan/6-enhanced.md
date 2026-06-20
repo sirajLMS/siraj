@@ -687,11 +687,11 @@ teacher_default  | schedule.view_workload
 - [x] `super_admin` group has all four permissions
 - [x] `academy_admin` group has all four permissions
 - [x] `teacher_default` group has `schedule.view_weekly` and `schedule.view_workload` only
-- [ ] `bun run test:db` passes with 0 failures
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings
-- [ ] `loop over tsgo, biome:check, lint` on working files till no issues at all
+- [x] `bun run test:db` passes with 0 failures
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings
+- [x] `loop over tsgo, biome:check, lint` on working files till no issues at all
 ---
 
 ### Task B — Repository: Teacher Directory, Weekly Schedule, Workload & Recurring Schedule Creation
@@ -1098,19 +1098,19 @@ Write tests in `backend/db/test/repo/scheduling.repository.test.ts`:
   ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `getTeacherDirectory` returns teacher rows with user profile data joined
-- [ ] `getTeacherDirectoryMetrics` returns correct activated/deactivated counts
-- [ ] `getWeeklyScheduleGrid` returns class instances grouped by day for the given week
-- [ ] `getWeeklyWorkloadMetrics` returns total minutes and formatted hours string
-- [ ] `createRecurringScheduleWithInstances` creates all records atomically
-- [ ] Overlap detection works for each generated class instance
-- [ ] `computeScheduledStartForDay` correctly maps day-of-week + time to a Date
-- [ ] No compilation errors in any repository file
-- [ ] `bun run test:db` passes with 0 failures
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings
-- [ ] `loop over tsgo, biome:check, lint` on working files till no issues at all
+- [x] `getTeacherDirectory` returns teacher rows with user profile data joined
+- [x] `getTeacherDirectoryMetrics` returns correct activated/deactivated counts
+- [x] `getWeeklyScheduleGrid` returns class instances grouped by day for the given week
+- [x] `getWeeklyWorkloadMetrics` returns total minutes and formatted hours string
+- [x] `createRecurringScheduleWithInstances` creates all records atomically
+- [x] Overlap detection works for each generated class instance
+- [x] `computeScheduledStartForDay` correctly maps day-of-week + time to a Date
+- [x] No compilation errors in any repository file
+- [x] `bun run test:db` passes with 0 failures
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings
+- [x] `loop over tsgo, biome:check, lint` on working files till no issues at all
 
 ---
 

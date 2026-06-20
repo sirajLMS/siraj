@@ -7,6 +7,7 @@ import {
   classStatusEvents,
   leaveQuotaUsage,
   parents,
+  recurringSchedules,
   students,
   systemSettings,
   teacherAssignments,
@@ -924,6 +925,127 @@ describe("Scheduling Repository logic", () => {
 
         const usage2 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
         expect(usage2).toBe(2);
+      });
+    });
+  });
+
+  describe("Story 6 Task B Extensions", () => {
+    test("getWeeklyScheduleGrid and getWeeklyWorkloadMetrics", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "WeeklyMetrics", { skipInstance: true });
+
+        const weekStart = new Date("2026-06-22T00:00:00Z");
+        const weekEnd = new Date("2026-06-29T00:00:00Z");
+
+        const c1 = await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: new Date("2026-06-22T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-22T11:00:00Z"),
+          durationMinutes: 60,
+          executionState: "ACTIVATED",
+        });
+        const c2 = await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: new Date("2026-06-24T14:30:00Z"),
+          scheduledEndAt: new Date("2026-06-24T15:30:00Z"),
+          durationMinutes: 60,
+          executionState: "NOT_ACTIVATED",
+        });
+
+        const { getWeeklyScheduleGrid, getWeeklyWorkloadMetrics } = await import(
+          "@/backend/db/repo/scheduling-queries.repository"
+        );
+        const grid = await getWeeklyScheduleGrid(teacher.id, weekStart, weekEnd, tx);
+        expect(grid.length).toBe(2);
+
+        const monClass = grid.find(c => c.id === c1.id);
+        expect(monClass?.dayOfWeek).toBe("monday");
+
+        const wedClass = grid.find(c => c.id === c2.id);
+        expect(wedClass?.dayOfWeek).toBe("wednesday");
+
+        const workload = await getWeeklyWorkloadMetrics(teacher.id, weekStart, weekEnd, tx);
+        expect(workload.classCount).toBe(1);
+        expect(workload.totalMinutes).toBe(60);
+        expect(workload.totalHoursFormatted).toBe("1:00");
+      });
+    });
+
+    test("createRecurringScheduleWithInstances success and conflict checks", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher, now } = await setupTestEntities(tx, "RecClass", { skipInstance: true });
+
+        await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
+
+        const effectiveFrom = new Date("2026-06-22T00:00:00Z");
+        const effectiveUntil = new Date("2026-07-22T00:00:00Z");
+
+        const result = await SchedulingRepository.createRecurringScheduleWithInstances(
+          {
+            studentId: student.id,
+            teacherId: teacher.id,
+            durationMinutes: 60,
+            defaultStartTime: "10:00:00",
+            timezone: "UTC",
+            effectiveFrom,
+            effectiveUntil,
+            days: [
+              { dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true },
+              { dayOfWeek: "WEDNESDAY", startTime: "14:00:00", isActive: true },
+            ],
+            classType: "REGULAR",
+            generateInstancesForWeeks: 2,
+            quotaDeducted: true,
+          },
+          tx
+        );
+
+        expect(result.recurringScheduleId).toBeDefined();
+        expect(result.classInstanceIds.length).toBe(4);
+
+        const [studentAfter] = await tx
+          .select({ classesRemaining: students.classesRemaining })
+          .from(students)
+          .where(eq(students.id, student.id));
+        expect(studentAfter.classesRemaining).toBe(1);
+
+        const [schedule] = await tx
+          .select()
+          .from(recurringSchedules)
+          .where(eq(recurringSchedules.id, result.recurringScheduleId));
+        expect(schedule.utcOffsetSnapshot).toBe(0);
+
+        const [instance] = await tx
+          .select()
+          .from(classInstances)
+          .where(eq(classInstances.id, result.classInstanceIds[0]));
+        expect(instance.bookingTimezone).toBe("UTC");
+        expect(instance.bookingUtcOffset).toBe(0);
+
+        const { student: student2 } = await setupTestEntities(tx, "RecClass2", { skipInstance: true });
+        await tx.insert(teacherAssignments).values({ studentId: student2.id, teacherId: teacher.id, assignedAt: now });
+
+        let errorCaught = false;
+        try {
+          await SchedulingRepository.createRecurringScheduleWithInstances(
+            {
+              studentId: student2.id,
+              teacherId: teacher.id,
+              durationMinutes: 60,
+              defaultStartTime: "10:00:00",
+              timezone: "UTC",
+              effectiveFrom,
+              effectiveUntil,
+              days: [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }],
+              classType: "REGULAR",
+              generateInstancesForWeeks: 1,
+              quotaDeducted: false,
+            },
+            tx
+          );
+        } catch (error) {
+          errorCaught = true;
+          expect(error).toBeDefined();
+        }
+        expect(errorCaught).toBe(true);
       });
     });
   });

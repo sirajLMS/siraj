@@ -22,6 +22,8 @@ import {
   classStatusEvents,
   leaveRequests,
   parents,
+  recurringScheduleDays,
+  recurringSchedules,
   students,
   teacherAssignments,
   teachers,
@@ -1036,6 +1038,188 @@ export namespace SchedulingRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
+  export interface CreateRecurringScheduleInput {
+    studentId: string;
+    teacherId: string;
+    durationMinutes: number;
+    defaultStartTime: string;
+    timezone: string;
+    timezoneId?: number | null;
+    effectiveFrom?: Date | null;
+    effectiveUntil?: Date | null;
+    days: {
+      dayOfWeek: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+      startTime: string;
+      isActive: boolean;
+    }[];
+    classType?: "REGULAR" | "TRIAL" | "ADVANCE";
+    generateInstancesForWeeks?: number;
+    quotaDeducted?: boolean;
+  }
+
+  async function createSingleRecurringInstance(
+    t: DBTransaction,
+    recurringScheduleId: string,
+    day: { dayOfWeek: string; startTime: string; isActive: boolean },
+    weekOffset: number,
+    effectiveStartDate: Date,
+    input: CreateRecurringScheduleInput,
+    utcOffsetSnapshot: number | null,
+    now: Date,
+    locale?: string
+  ): Promise<string> {
+    const scheduledStartAt = computeScheduledStartForDay(
+      day.dayOfWeek,
+      day.startTime,
+      effectiveStartDate,
+      weekOffset,
+      input.timezone
+    );
+    const scheduledEndAt = new Date(scheduledStartAt.getTime() + input.durationMinutes * 60000);
+
+    await acquireLocks(t, input.teacherId, input.studentId);
+    await validateTeacherAssignment(t, input.studentId, input.teacherId, scheduledStartAt, locale);
+    await TeacherAvailabilityRepository.validateBookingAvailability(
+      input.teacherId,
+      scheduledStartAt,
+      scheduledEndAt,
+      t
+    );
+    await checkOverlaps(
+      t,
+      {
+        studentId: input.studentId,
+        teacherId: input.teacherId,
+        startTime: scheduledStartAt,
+        endTime: scheduledEndAt,
+      },
+      locale
+    );
+
+    if (input.quotaDeducted) {
+      const [student] = await t
+        .select({ classesRemaining: students.classesRemaining })
+        .from(students)
+        .where(eq(students.id, input.studentId))
+        .limit(1);
+
+      if (!student || student.classesRemaining <= 0) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("outOfQuota"));
+      }
+
+      await t
+        .update(students)
+        .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
+        .where(eq(students.id, input.studentId));
+    }
+
+    const idempotencyKey = `recurring-${recurringScheduleId}-${day.dayOfWeek}-${scheduledStartAt.toISOString()}`;
+
+    const [classInstance] = await t
+      .insert(classInstances)
+      .values({
+        studentId: input.studentId,
+        teacherId: input.teacherId,
+        recurringScheduleId,
+        scheduledStartAt,
+        scheduledEndAt,
+        bookingTimezone: input.timezone,
+        bookingUtcOffset: utcOffsetSnapshot,
+        bookingTimezoneId: input.timezoneId ?? null,
+        durationMinutes: input.durationMinutes,
+        classType: input.classType ?? "REGULAR",
+        executionState: "NOT_ACTIVATED",
+        outcome: "PENDING",
+        idempotencyKey,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+
+    return classInstance.id;
+  }
+
+  export const createRecurringScheduleWithInstances = async (
+    input: CreateRecurringScheduleInput,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<{ recurringScheduleId: string; classInstanceIds: string[] }> => {
+    const runner = async (t: DBTransaction) => {
+      const now = new Date();
+
+      const getOffsetMinutes = (ianaTimezone: string, d: Date) => {
+        try {
+          const utcDate = new Date(d.toLocaleString("en-US", { timeZone: "UTC" }));
+          const tzDate = new Date(d.toLocaleString("en-US", { timeZone: ianaTimezone }));
+          return Math.round((tzDate.getTime() - utcDate.getTime()) / 60000);
+        } catch {
+          return null;
+        }
+      };
+      const utcOffsetSnapshot = getOffsetMinutes(input.timezone, now);
+
+      const [recurringSchedule] = await t
+        .insert(recurringSchedules)
+        .values({
+          studentId: input.studentId,
+          teacherId: input.teacherId,
+          durationMinutes: input.durationMinutes,
+          defaultStartTime: input.defaultStartTime,
+          timezone: input.timezone,
+          timezoneId: input.timezoneId ?? null,
+          utcOffsetSnapshot,
+          effectiveFrom: input.effectiveFrom ? input.effectiveFrom.toISOString().split("T")[0] : null,
+          effectiveUntil: input.effectiveUntil ? input.effectiveUntil.toISOString().split("T")[0] : null,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      const insertedDays = await t
+        .insert(recurringScheduleDays)
+        .values(
+          input.days.map(day => ({
+            recurringScheduleId: recurringSchedule.id,
+            dayOfWeek: day.dayOfWeek,
+            startTime: day.startTime,
+            isActive: day.isActive,
+          }))
+        )
+        .returning();
+
+      const classInstanceIds: string[] = [];
+      const weeksToGenerate = input.generateInstancesForWeeks ?? 1;
+      const effectiveStartDate = input.effectiveFrom ? new Date(input.effectiveFrom) : now;
+
+      for (let weekOffset = 0; weekOffset < weeksToGenerate; weekOffset++) {
+        for (const day of insertedDays) {
+          if (!day.isActive) continue;
+
+          const instanceId = await createSingleRecurringInstance(
+            t,
+            recurringSchedule.id,
+            day,
+            weekOffset,
+            effectiveStartDate,
+            input,
+            utcOffsetSnapshot,
+            now,
+            locale
+          );
+          classInstanceIds.push(instanceId);
+        }
+      }
+
+      return {
+        recurringScheduleId: recurringSchedule.id,
+        classInstanceIds,
+      };
+    };
+
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  };
+
   export type DailyScheduleResult = DailyScheduleResultType;
   export type FutureClassRow = FutureClassRowType;
   export const getDailyMetrics = getDailyMetricsFn;
@@ -1048,4 +1232,54 @@ export namespace SchedulingRepository {
   export const incrementTeacherLeaveQuota = incrementTeacherLeaveQuotaFn;
   export const getTeacherByUserId = getTeacherByUserIdFn;
   export const getTeacherFutureClasses = getTeacherFutureClassesFn;
+}
+
+function computeScheduledStartForDay(
+  dayOfWeek: string,
+  startTime: string,
+  effectiveStartDate: Date,
+  weekOffset: number,
+  timezone: string
+): Date {
+  const dayMap: Record<string, number> = {
+    SUNDAY: 0,
+    MONDAY: 1,
+    TUESDAY: 2,
+    WEDNESDAY: 3,
+    THURSDAY: 4,
+    FRIDAY: 5,
+    SATURDAY: 6,
+  };
+
+  const targetDay = dayMap[dayOfWeek];
+  const startDay = effectiveStartDate.getUTCDay();
+  let daysUntilTarget = targetDay - startDay;
+  if (daysUntilTarget < 0) daysUntilTarget += 7;
+  daysUntilTarget += weekOffset * 7;
+
+  const [hours, minutes] = startTime.split(":").map(Number);
+
+  const result = new Date(effectiveStartDate);
+  result.setUTCDate(result.getUTCDate() + daysUntilTarget);
+
+  const year = result.getUTCFullYear();
+  const month = result.getUTCMonth();
+  const date = result.getUTCDate();
+
+  // Construct guess date in UTC matching local hours/minutes
+  const guess = new Date(Date.UTC(year, month, date, hours, minutes, 0, 0));
+
+  // Compute offset of the target timezone at this specific guess date
+  const getOffsetMs = (d: Date) => {
+    try {
+      const utcDate = new Date(d.toLocaleString("en-US", { timeZone: "UTC" }));
+      const tzDate = new Date(d.toLocaleString("en-US", { timeZone: timezone }));
+      return tzDate.getTime() - utcDate.getTime();
+    } catch {
+      return 0;
+    }
+  };
+
+  const offsetMs = getOffsetMs(guess);
+  return new Date(guess.getTime() - offsetMs);
 }

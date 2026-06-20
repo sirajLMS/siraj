@@ -402,3 +402,100 @@ export async function getTeacherFutureClasses(
 
   return rows;
 }
+
+export type WeeklyScheduleGridRow = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  teacherId: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  dayOfWeek: string;
+  executionState: string;
+  outcome: string;
+};
+
+export const getWeeklyScheduleGrid = async (
+  teacherId: string,
+  weekStart: Date,
+  weekEnd: Date,
+  tx?: DBTransaction
+): Promise<WeeklyScheduleGridRow[]> => {
+  const queryDb = tx ?? db;
+
+  const rows = await queryDb
+    .select({
+      id: classInstances.id,
+      studentId: classInstances.studentId,
+      studentName: students.name,
+      teacherId: classInstances.teacherId,
+      scheduledStartAt: classInstances.scheduledStartAt,
+      scheduledEndAt: classInstances.scheduledEndAt,
+      durationMinutes: classInstances.durationMinutes,
+      executionState: classInstances.executionState,
+      outcome: classInstances.outcome,
+    })
+    .from(classInstances)
+    .innerJoin(students, eq(classInstances.studentId, students.id))
+    .where(
+      and(
+        eq(classInstances.teacherId, teacherId),
+        isNull(classInstances.deletedAt),
+        gte(classInstances.scheduledStartAt, weekStart),
+        lt(classInstances.scheduledStartAt, weekEnd)
+      )
+    )
+    .orderBy(classInstances.scheduledStartAt);
+
+  return rows.map(row => {
+    const dayIndex = row.scheduledStartAt.getUTCDay();
+    const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    return {
+      ...row,
+      dayOfWeek: dayNames[dayIndex],
+    };
+  });
+};
+
+export type WeeklyWorkloadMetrics = {
+  totalMinutes: number;
+  totalHoursFormatted: string;
+  classCount: number;
+};
+
+export const getWeeklyWorkloadMetrics = async (
+  teacherId: string,
+  weekStart: Date,
+  weekEnd: Date,
+  tx?: DBTransaction
+): Promise<WeeklyWorkloadMetrics> => {
+  const queryDb = tx ?? db;
+
+  const [metrics] = await queryDb
+    .select({
+      totalMinutes: sql<number>`coalesce(sum(${classInstances.durationMinutes}), 0)`.mapWith(Number),
+      classCount: sql<number>`count(*)`.mapWith(Number),
+    })
+    .from(classInstances)
+    .where(
+      and(
+        eq(classInstances.teacherId, teacherId),
+        isNull(classInstances.deletedAt),
+        gte(classInstances.scheduledStartAt, weekStart),
+        lt(classInstances.scheduledStartAt, weekEnd),
+        ne(classInstances.executionState, "NOT_ACTIVATED")
+      )
+    );
+
+  const totalMinutes = metrics?.totalMinutes ?? 0;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const totalHoursFormatted = `${hours}:${minutes.toString().padStart(2, "0")}`;
+
+  return {
+    totalMinutes,
+    totalHoursFormatted,
+    classCount: metrics?.classCount ?? 0,
+  };
+};
