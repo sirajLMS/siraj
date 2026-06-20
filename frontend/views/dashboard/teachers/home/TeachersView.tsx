@@ -7,13 +7,13 @@ import { PrimaryPageAction } from "@/frontend/components/ui/ActionButtons";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
 import { SectionPanel } from "@/frontend/components/ui/SectionPanel";
-import type { TeacherDirectoryRow, TeacherMetrics } from "@/frontend/stores/mockTeachersStore";
+import type { TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { TeacherCardList } from "./components/TeacherCardList";
 import { TeacherDataGrid } from "./components/TeacherDataGrid";
 import { TeacherMetricsRow } from "./components/TeacherMetricsRow";
 
 interface TeachersViewProps {
-  readonly metrics: TeacherMetrics;
+  readonly metrics: TeacherDirectoryMetrics | null | undefined;
   readonly rows: readonly TeacherDirectoryRow[];
   readonly totalTeachers: number;
   readonly searchQuery: string;
@@ -33,8 +33,8 @@ export function TeachersView({
 
   const filteredRows = rows.filter(
     row =>
-      row.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.email.toLowerCase().includes(searchQuery.toLowerCase())
+      (row.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (row.email || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

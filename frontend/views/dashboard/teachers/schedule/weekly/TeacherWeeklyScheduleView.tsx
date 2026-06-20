@@ -3,19 +3,30 @@
 import { AddOutlined, DeleteOutlined, TimerOutlined } from "@mui/icons-material";
 import { Box, IconButton, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { MetricCard, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import type { TeacherWeeklySchedule } from "@/frontend/stores/mockTeacherScheduleStore";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import MobileScheduleList from "./MobileScheduleList";
-import WeeklyScheduleGrid from "./WeeklyScheduleGrid";
+import WeeklyScheduleGrid, { type ScheduledClass } from "./WeeklyScheduleGrid";
+
+export interface TeacherWeeklySchedule {
+  readonly teacherId: string;
+  readonly teacherName: string;
+  readonly weeklyHoursWorked: string;
+  readonly classes: readonly ScheduledClass[];
+  readonly lastUpdated: string;
+}
 
 interface TeacherWeeklyScheduleViewProps {
   readonly schedule: TeacherWeeklySchedule | null;
   readonly onRemoveClass: (id: string) => void;
+  readonly onAddClass?: () => void;
 }
 
 export default function TeacherWeeklyScheduleView({
   schedule,
   onRemoveClass,
+  onAddClass,
 }: Readonly<TeacherWeeklyScheduleViewProps>) {
   const t = useTranslations("dashboard.teacherWeeklySchedule");
   const theme = useTheme();
@@ -33,9 +44,11 @@ export default function TeacherWeeklyScheduleView({
         actions={
           !isMobile && (
             <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-              <PrimaryPageAction startIcon={<AddOutlined />} onClick={() => {}}>
-                {t("actions.addSlot")}
-              </PrimaryPageAction>
+              <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
+                <PrimaryPageAction startIcon={<AddOutlined />} onClick={onAddClass}>
+                  {t("actions.addSlot")}
+                </PrimaryPageAction>
+              </RequirePermission>
               <IconButton
                 sx={theme => ({
                   bgcolor: theme.palette.error.main,
@@ -52,33 +65,37 @@ export default function TeacherWeeklyScheduleView({
       />
 
       {/* Metrics */}
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(4, 1fr)" }, gap: 2 }}>
-        <MetricCard
-          icon={TimerOutlined}
-          label={t("metrics.weeklyHoursWorked")}
-          value={schedule.weeklyHoursWorked}
-          variant="default"
-        />
-      </Box>
+      <RequirePermission permissions={[AppPermission.ScheduleViewWorkload]}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(4, 1fr)" }, gap: 2 }}>
+          <MetricCard
+            icon={TimerOutlined}
+            label={t("metrics.weeklyHoursWorked")}
+            value={schedule.weeklyHoursWorked}
+            variant="default"
+          />
+        </Box>
+      </RequirePermission>
 
       {/* Mobile Actions */}
       {isMobile && (
-        <Stack direction="row" spacing={2} sx={{ mb: 2, alignItems: "center" }}>
-          <PrimaryPageAction startIcon={<AddOutlined />} onClick={() => {}} sx={{ flex: 1, py: 1.5 }}>
-            {t("actions.addSlot")}
-          </PrimaryPageAction>
-          <IconButton
-            sx={theme => ({
-              bgcolor: theme.palette.error.main,
-              color: theme.palette.onError,
-              borderRadius: 2,
-              px: 4,
-              "&:hover": { bgcolor: theme.palette.error.dark },
-            })}
-          >
-            <DeleteOutlined />
-          </IconButton>
-        </Stack>
+        <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
+          <Stack direction="row" spacing={2} sx={{ mb: 2, alignItems: "center" }}>
+            <PrimaryPageAction startIcon={<AddOutlined />} onClick={onAddClass} sx={{ flex: 1, py: 1.5 }}>
+              {t("actions.addSlot")}
+            </PrimaryPageAction>
+            <IconButton
+              sx={theme => ({
+                bgcolor: theme.palette.error.main,
+                color: theme.palette.onError,
+                borderRadius: 2,
+                px: 4,
+                "&:hover": { bgcolor: theme.palette.error.dark },
+              })}
+            >
+              <DeleteOutlined />
+            </IconButton>
+          </Stack>
+        </RequirePermission>
       )}
 
       {/* Schedule Content */}

@@ -1,8 +1,28 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Typography,
+} from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ScheduledClass } from "@/frontend/stores/mockTeacherScheduleStore";
+import { useState } from "react";
+
+export interface ScheduledClass {
+  readonly id: string;
+  readonly studentName: string;
+  readonly studentId: string;
+  readonly duration: number;
+  readonly startTime: string;
+  readonly day: string;
+  readonly executionState?: string | null;
+  readonly outcome?: string | null;
+}
 
 interface WeeklyScheduleGridProps {
   readonly classes: readonly ScheduledClass[];
@@ -29,47 +49,68 @@ interface SlotItemProps {
 }
 
 function SlotItem({ classItem, onRemove, deleteConfirmMessage }: Readonly<SlotItemProps>) {
-  const handleDelete = () => {
-    if (globalThis.confirm(deleteConfirmMessage)) {
-      onRemove(classItem.id);
-    }
+  const [open, setOpen] = useState(false);
+
+  const handleDeleteClick = () => {
+    setOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setOpen(false);
+    onRemove(classItem.id);
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
   };
 
   return (
-    <Box
-      sx={theme => ({
-        bgcolor: theme.palette.primary.main,
-        color: theme.palette.onPrimary,
-        borderRadius: 1,
-        p: 1,
-        fontSize: "0.75rem",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        height: "100%",
-      })}
-    >
-      <Box>
-        <Typography variant="labelUppercase" sx={{ opacity: 0.8 }}>
-          {classItem.subjectName}
-        </Typography>
-        <Typography variant="bodyMd" sx={{ fontWeight: "bold", color: "inherit" }}>
-          {classItem.studentName} ({classItem.duration}m)
-        </Typography>
-      </Box>
+    <>
       <Box
-        component="span"
-        className="material-symbols-outlined"
         sx={theme => ({
-          fontSize: 18,
-          cursor: "pointer",
-          "&:hover": { color: theme.palette.error.main },
+          bgcolor: theme.palette.primary.main,
+          color: theme.palette.onPrimary,
+          borderRadius: 1,
+          p: 1,
+          fontSize: "0.75rem",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          height: "100%",
         })}
-        onClick={handleDelete}
       >
-        delete
+        <Box>
+          <Typography variant="bodyMd" sx={{ fontWeight: "bold", color: "inherit" }}>
+            {classItem.studentName} ({classItem.duration}m)
+          </Typography>
+        </Box>
+        <Box
+          component="span"
+          className="material-symbols-outlined"
+          sx={theme => ({
+            fontSize: 18,
+            cursor: "pointer",
+            "&:hover": { color: theme.palette.error.main },
+          })}
+          onClick={handleDeleteClick}
+        >
+          delete
+        </Box>
       </Box>
-    </Box>
+
+      <Dialog open={open} onClose={handleCancel}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{deleteConfirmMessage}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel}>Cancel</Button>
+          <Button onClick={handleConfirm} color="error" variant="contained" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
 
@@ -126,7 +167,7 @@ function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
   const t = useTranslations("dashboard.teacherWeeklySchedule");
 
   const getClassesForSlot = (day: string) => {
-    return classes.filter(c => c.day === day && c.startTime === time);
+    return classes.filter(c => c.day.toLowerCase() === day && c.startTime === time);
   };
 
   return (

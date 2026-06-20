@@ -2099,15 +2099,15 @@ export const useCreateRecurringClassStore = create<CreateRecurringClassState>(se
   ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `useTeacherDirectoryStore` manages search query state
-- [ ] `useWeeklyScheduleStore` manages selected week date
-- [ ] `useCreateRecurringClassStore` manages dialog state, day configs, and submission state
-- [ ] All stores use generated GraphQL types where applicable
-- [ ] No mock data in production stores
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings
-- [ ] `loop over tsgo, biome:check, lint` on working files till no issues at all
+- [x] `useTeacherDirectoryStore` manages search query state
+- [x] `useWeeklyScheduleStore` manages selected week date
+- [x] `useCreateRecurringClassStore` manages dialog state, day configs, and submission state
+- [x] All stores use generated GraphQL types where applicable
+- [x] No mock data in production stores
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings
+- [x] `loop over tsgo, biome:check, lint` on working files till no issues at all
 
 ---
 
@@ -2315,20 +2315,20 @@ The dialog should:
   ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `TeachersContainer` uses `useQuery` with `teacherDirectoryQueryDocument` instead of mock store
-- [ ] `TeachersContainer` wraps content in `<RequirePermission permissions={["staff.view_directory"]}>`
-- [ ] `TeacherWeeklyScheduleContainer` uses `useQuery` for schedule grid and workload metrics
-- [ ] `TeacherWeeklyScheduleContainer` wraps content in `<RequirePermission permissions={["schedule.view_weekly"]}>`
-- [ ] `WeeklyScheduleGrid` uses MUI `<Dialog>` instead of `globalThis.confirm()`
-- [ ] `CreateRecurringClassDialog` implements full "Add Class" workflow
-- [ ] `CreateRecurringClassDialog` uses `useMutation` with `createRecurringClassMutationDocument`
-- [ ] `CreateRecurringClassDialog` gated behind `<RequirePermission permissions={["schedule.create_class"]}>`
-- [ ] No `any` or blind casts in modified components
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings
-- [ ] `loop over tsgo, biome:check, lint` on working files till no issues at all
-- [ ] `bun run test:ui:components` passes
+- [x] `TeachersContainer` uses `useQuery` with `teacherDirectoryQueryDocument` instead of mock store
+- [x] `TeachersContainer` wraps content in `<RequirePermission permissions={["staff.view_directory"]}>`
+- [x] `TeacherWeeklyScheduleContainer` uses `useQuery` for schedule grid and workload metrics
+- [x] `TeacherWeeklyScheduleContainer` wraps content in `<RequirePermission permissions={["schedule.view_weekly"]}>`
+- [x] `WeeklyScheduleGrid` uses MUI `<Dialog>` instead of `globalThis.confirm()`
+- [x] `CreateRecurringClassDialog` implements full "Add Class" workflow
+- [x] `CreateRecurringClassDialog` uses `useMutation` with `createRecurringClassMutationDocument`
+- [x] `CreateRecurringClassDialog` gated behind `<RequirePermission permissions={["schedule.create_class"]}>`
+- [x] No `any` or blind casts in modified components
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings
+- [x] `loop over tsgo, biome:check, lint` on working files till no issues at all
+- [x] `bun run test:ui:components` passes
 
 ---
 

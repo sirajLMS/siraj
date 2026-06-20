@@ -2,10 +2,15 @@ import { CancelOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { MetricCard } from "@/frontend/components/ui/MetricCard";
-import type { TeacherMetrics } from "@/frontend/stores/mockTeachersStore";
 
 interface TeacherMetricsRowProps {
-  readonly metrics: TeacherMetrics;
+  readonly metrics:
+    | {
+        readonly activated?: number | null;
+        readonly deactivated?: number | null;
+      }
+    | null
+    | undefined;
 }
 
 export function TeacherMetricsRow({ metrics }: Readonly<TeacherMetricsRowProps>) {
@@ -13,8 +18,8 @@ export function TeacherMetricsRow({ metrics }: Readonly<TeacherMetricsRowProps>)
 
   return (
     <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: "gutter" }}>
-      <MetricCard icon={CheckCircleOutlined} label={t("activated")} value={metrics.activated} variant="default" />
-      <MetricCard icon={CancelOutlined} label={t("deactivated")} value={metrics.deactivated} variant="default" />
+      <MetricCard icon={CheckCircleOutlined} label={t("activated")} value={metrics?.activated ?? 0} variant="default" />
+      <MetricCard icon={CancelOutlined} label={t("deactivated")} value={metrics?.deactivated ?? 0} variant="default" />
     </Box>
   );
 }

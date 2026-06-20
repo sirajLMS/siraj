@@ -1,9 +1,19 @@
 "use client";
 
-import { Box, Button, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button as MuiButton,
+  Typography,
+} from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import type { ScheduledClass } from "@/frontend/stores/mockTeacherScheduleStore";
+import type { ScheduledClass } from "./WeeklyScheduleGrid";
 
 interface MobileScheduleListProps {
   readonly classes: readonly ScheduledClass[];
@@ -17,48 +27,69 @@ interface MobileSlotItemProps {
 }
 
 function MobileSlotItem({ classItem, onRemove, deleteConfirmMessage }: Readonly<MobileSlotItemProps>) {
-  const handleDelete = () => {
-    if (globalThis.confirm(deleteConfirmMessage)) {
-      onRemove(classItem.id);
-    }
+  const [open, setOpen] = useState(false);
+
+  const handleDeleteClick = () => {
+    setOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setOpen(false);
+    onRemove(classItem.id);
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
   };
 
   return (
-    <Box
-      sx={theme => ({
-        bgcolor: theme.palette.primary.dark,
-        color: theme.palette.onPrimary,
-        borderRadius: 2,
-        px: 2,
-        py: 1.5,
-        width: "100%",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        borderLeft: `4px solid ${theme.palette.status.confirmed}`,
-      })}
-    >
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <Typography variant="labelUppercase" sx={{ fontSize: "0.65rem", opacity: 0.8 }}>
-          {classItem.subjectName}
-        </Typography>
-        <Typography variant="titleLg" sx={{ fontSize: "1rem", color: "inherit" }}>
-          {classItem.studentName} ({classItem.duration}m)
-        </Typography>
-      </Box>
+    <>
       <Box
-        component="span"
-        className="material-symbols-outlined"
         sx={theme => ({
-          fontSize: 20,
-          cursor: "pointer",
-          "&:hover": { color: theme.palette.error.light },
+          bgcolor: theme.palette.primary.dark,
+          color: theme.palette.onPrimary,
+          borderRadius: 2,
+          px: 2,
+          py: 1.5,
+          width: "100%",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderLeft: `4px solid ${theme.palette.status.confirmed}`,
         })}
-        onClick={handleDelete}
       >
-        delete
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
+          <Typography variant="titleLg" sx={{ fontSize: "1rem", color: "inherit" }}>
+            {classItem.studentName} ({classItem.duration}m)
+          </Typography>
+        </Box>
+        <Box
+          component="span"
+          className="material-symbols-outlined"
+          sx={theme => ({
+            fontSize: 20,
+            cursor: "pointer",
+            "&:hover": { color: theme.palette.error.light },
+          })}
+          onClick={handleDeleteClick}
+        >
+          delete
+        </Box>
       </Box>
-    </Box>
+
+      <Dialog open={open} onClose={handleCancel}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{deleteConfirmMessage}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <MuiButton onClick={handleCancel}>Cancel</MuiButton>
+          <MuiButton onClick={handleConfirm} color="error" variant="contained" autoFocus>
+            Delete
+          </MuiButton>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
 
@@ -205,7 +236,7 @@ export default function MobileScheduleList({ classes, onRemoveClass }: Readonly<
   const [selectedDay, setSelectedDay] = useState<string>("monday");
 
   const getClassesForSlot = (day: string, time: string) => {
-    return classes.filter(c => c.day === day && c.startTime === time);
+    return classes.filter(c => c.day.toLowerCase() === day && c.startTime === time);
   };
 
   return (

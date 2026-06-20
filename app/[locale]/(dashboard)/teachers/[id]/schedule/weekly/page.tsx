@@ -14,5 +14,5 @@ interface PageProps {
 
 export default async function TeacherWeeklySchedulePage({ params }: PageProps) {
   const { id } = await params;
-  return <TeacherWeeklyScheduleContainer _teacherId={id} />;
+  return <TeacherWeeklyScheduleContainer teacherId={id} />;
 }

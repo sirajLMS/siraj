@@ -1,9 +1,10 @@
 import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
 import { Avatar, Box, IconButton, Link, Typography } from "@mui/material";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
-import type { TeacherDirectoryRow } from "@/frontend/stores/mockTeachersStore";
+import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface TeacherDataGridProps {
   readonly rows: readonly TeacherDirectoryRow[];
@@ -11,6 +12,8 @@ interface TeacherDataGridProps {
 
 export function TeacherDataGrid({ rows }: Readonly<TeacherDataGridProps>) {
   const t = useTranslations("dashboard.teachersDirectory");
+  const router = useRouter();
+  const locale = useLocale();
 
   const columns: GridColDef<TeacherDirectoryRow>[] = [
     {
@@ -31,8 +34,8 @@ export function TeacherDataGrid({ rows }: Readonly<TeacherDataGridProps>) {
       renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
         <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
           <Avatar
-            src={params.row.avatarUrl}
-            alt={params.row.name}
+            src={params.row.avatarUrl || undefined}
+            alt={params.row.name || ""}
             sx={theme => ({
               width: 40,
               height: 40,
@@ -101,12 +104,14 @@ export function TeacherDataGrid({ rows }: Readonly<TeacherDataGridProps>) {
       width: 120,
       align: "center",
       headerAlign: "center",
-      renderCell: () => (
+      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
         <TeacherActionButton
           icon={<CalendarMonthOutlined />}
           variant="error"
           onClick={() => {
-            /* Handle schedule click */
+            if (params.row.id) {
+              router.push(`/${locale}/teachers/${params.row.id}/schedule/weekly`);
+            }
           }}
         />
       ),

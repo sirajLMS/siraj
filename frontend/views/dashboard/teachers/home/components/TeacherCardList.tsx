@@ -1,8 +1,9 @@
 import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, IconButton, TextField, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { TeacherDirectoryRow } from "@/frontend/stores/mockTeachersStore";
+import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface TeacherCardListProps {
   readonly rows: readonly TeacherDirectoryRow[];
@@ -12,6 +13,8 @@ interface TeacherCardListProps {
 
 export function TeacherCardList({ rows, searchQuery, onSearchChange }: Readonly<TeacherCardListProps>) {
   const t = useTranslations("dashboard.teachersDirectory");
+  const router = useRouter();
+  const locale = useLocale();
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -56,8 +59,8 @@ export function TeacherCardList({ rows, searchQuery, onSearchChange }: Readonly<
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
               <Avatar
-                src={row.avatarUrl}
-                alt={row.name}
+                src={row.avatarUrl || undefined}
+                alt={row.name || ""}
                 sx={theme => ({
                   width: 48,
                   height: 48,
@@ -101,7 +104,14 @@ export function TeacherCardList({ rows, searchQuery, onSearchChange }: Readonly<
                 {t("actions.joinRoom")}
               </Button>
               <Box sx={{ display: "flex", gap: 1 }}>
-                <IconButton sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}>
+                <IconButton
+                  sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
+                  onClick={() => {
+                    if (row.id) {
+                      router.push(`/${locale}/teachers/${row.id}/schedule/weekly`);
+                    }
+                  }}
+                >
                   <CalendarTodayOutlined sx={{ fontSize: 20 }} />
                 </IconButton>
                 <IconButton sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}>

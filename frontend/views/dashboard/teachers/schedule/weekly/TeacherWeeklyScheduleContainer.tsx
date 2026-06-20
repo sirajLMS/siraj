@@ -1,20 +1,101 @@
 "use client";
 
-import { useEffect } from "react";
-import { useTeacherScheduleStore } from "@/frontend/stores/mockTeacherScheduleStore";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { deleteClassInstanceMutationDocument } from "@/frontend/graphql/sharedDocuments/class-session.documents";
+import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
+import {
+  teacherWeeklyScheduleGridQueryDocument,
+  teacherWorkloadMetricsQueryDocument,
+} from "@/frontend/graphql/sharedDocuments/weekly-schedule.documents";
+import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
+import { useUserStore } from "@/frontend/stores/userStore";
+import { useWeeklyScheduleStore } from "@/frontend/stores/weeklyScheduleStore";
 import { logger } from "@/frontend/utils/logger";
+import { CreateRecurringClassDialog } from "./components/CreateRecurringClassDialog";
 import TeacherWeeklyScheduleView from "./TeacherWeeklyScheduleView";
 
 interface TeacherWeeklyScheduleContainerProps {
-  readonly _teacherId: string;
+  readonly teacherId: string;
 }
 
-export default function TeacherWeeklyScheduleContainer({ _teacherId }: Readonly<TeacherWeeklyScheduleContainerProps>) {
-  const { schedule, removeClass } = useTeacherScheduleStore();
+export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<TeacherWeeklyScheduleContainerProps>) {
+  const { selectedWeekDate } = useWeeklyScheduleStore();
+  const { openDialog } = useCreateRecurringClassStore();
+  const { name: loggedInUserName, hasPermission } = useUserStore();
 
-  useEffect(() => {
-    logger.info(`Loading schedule for teacher: ${_teacherId}`);
-  }, [_teacherId]);
+  const {
+    data: scheduleData,
+    loading: scheduleLoading,
+    refetch: refetchSchedule,
+  } = useQuery(teacherWeeklyScheduleGridQueryDocument, {
+    variables: { teacherId, weekDate: selectedWeekDate },
+  });
 
-  return <TeacherWeeklyScheduleView schedule={schedule} onRemoveClass={removeClass} />;
+  const { data: workloadData, refetch: refetchWorkload } = useQuery(teacherWorkloadMetricsQueryDocument, {
+    variables: { teacherId, weekDate: selectedWeekDate },
+  });
+
+  const isAdmin = hasPermission(AppPermission.StaffViewDirectory);
+
+  const { data: directoryData } = useQuery(teacherDirectoryQueryDocument, {
+    variables: { search: null, limit: 100, offset: 0 },
+    skip: !isAdmin,
+  });
+
+  const [deleteClassInstance] = useMutation(deleteClassInstanceMutationDocument);
+
+  const schedule = scheduleData?.teacherWeeklyScheduleGrid;
+  const workload = workloadData?.teacherWorkloadMetrics;
+
+  const teacherName =
+    directoryData?.teacherDirectory?.rows?.find(r => r?.id === teacherId)?.name || loggedInUserName || "";
+
+  const handleRemoveClass = async (classInstanceId: string) => {
+    try {
+      await deleteClassInstance({
+        variables: { classInstanceId },
+      });
+      await refetchSchedule();
+      await refetchWorkload();
+    } catch (error) {
+      logger.error("Failed to delete class instance", { error });
+    }
+  };
+
+  const handleRefetch = async () => {
+    await refetchSchedule();
+    await refetchWorkload();
+  };
+
+  if (scheduleLoading || !schedule) {
+    return null;
+  }
+
+  return (
+    <RequirePermission permissions={[AppPermission.ScheduleViewWeekly]}>
+      <TeacherWeeklyScheduleView
+        schedule={{
+          teacherId: schedule.teacherId || "",
+          teacherName,
+          weeklyHoursWorked: workload?.weeklyHoursWorked ?? "0:00",
+          classes: (schedule.classes || []).map(c => ({
+            id: c.id || "",
+            studentName: c.studentName || "",
+            studentId: c.studentId || "",
+            duration: c.duration || 0,
+            startTime: c.startTime || "",
+            day: c.day || "",
+            executionState: c.executionState,
+            outcome: c.outcome,
+          })),
+          lastUpdated: new Date().toLocaleTimeString(),
+        }}
+        onRemoveClass={handleRemoveClass}
+        onAddClass={openDialog}
+      />
+      <CreateRecurringClassDialog teacherId={teacherId} onRefetch={handleRefetch} />
+    </RequirePermission>
+  );
 }
