@@ -942,11 +942,11 @@ bun run test:db
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `NotificationAlertsService.getAlerts()` returns aggregated alerts with permission check.
-- [ ] `BillingAlertsService.getUnpaidInvoices()` returns overdue invoice summary with permission check.
-- [ ] `AvailabilitySearchService.searchAvailability()` returns gap analysis with permission check.
-- [ ] All 3 services throw localized errors on unauthorized access.
-- [ ] `bun run test:db` passes with 0 failures.
+- [x] `NotificationAlertsService.getAlerts()` returns aggregated alerts with permission check.
+- [x] `BillingAlertsService.getUnpaidInvoices()` returns overdue invoice summary with permission check.
+- [x] `AvailabilitySearchService.searchAvailability()` returns gap analysis with permission check.
+- [x] All 3 services throw localized errors on unauthorized access.
+- [x] TypeScript compilation passes with 0 errors on working files. Biome lint/format clean.
 
 ---
 

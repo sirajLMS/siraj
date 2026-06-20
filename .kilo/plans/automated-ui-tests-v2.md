@@ -636,7 +636,7 @@ Each task in Phase 2 creates one `.test.tsx` file in `test/ui/components/`. All 
 
 #### Task L — CalendarGrid.test.tsx
 
-**Status:** Pending
+**Status:** ✅ Complete
 
 **Objective:** Verify that the `CalendarGrid` renders all days of a given month, highlights days with sessions, and fires callbacks when days are clicked or month navigation buttons are used.
 
@@ -690,9 +690,9 @@ Each task in Phase 2 creates one `.test.tsx` file in `test/ui/components/`. All 
   Expected: All tests pass (25 from G+H+I+J+K + 4 from L = 29 total), 0 failures.
 
 **Completion criteria:**
-- [ ] 4 test cases pass
-- [ ] Calendar renders correct number of days for June 2026 (30 days)
-- [ ] Days with sessions have distinguishable visual indicators
+- [x] 4 test cases pass
+- [x] Calendar renders correct number of days for June 2026 (30 days)
+- [x] Days with sessions have distinguishable visual indicators
 
 ---
 
