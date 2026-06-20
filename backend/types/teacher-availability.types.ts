@@ -3,7 +3,7 @@ import type {
   teacherRecurringUnavailability,
   teacherVacationRequests,
 } from "@/backend/db/schema";
-import type { DayOfWeek } from "@/shared/lib/enum";
+import type { DayOfWeek, Gender } from "@/shared/lib/enum";
 
 export type TeacherAvailabilityWindowSelectType = typeof teacherAvailabilityWindows.$inferSelect;
 export type TeacherAvailabilityWindowInsertInput = typeof teacherAvailabilityWindows.$inferInsert;
@@ -45,3 +45,32 @@ export type ProcessVacationRequestInput = {
   vacationRequestId: string;
   processedByUserId: string;
 };
+
+export interface CrossStaffSearchInput {
+  fromTime: string;
+  toTime: string;
+  gender?: Gender | null;
+}
+
+export interface TeacherAvailabilityGap {
+  id: string;
+  teacherId: string;
+  teacherName: string;
+  teacherGender: string | null;
+  dayOfWeek: DayOfWeek;
+  gapStartTime: string;
+  gapEndTime: string;
+  timezone: string;
+}
+
+export interface AvailabilitySearchResult {
+  id: string;
+  teachers: {
+    id: string;
+    name: string;
+    gender: string | null;
+    timezone: string;
+    gaps: TeacherAvailabilityGap[];
+  }[];
+  totalGaps: number;
+}

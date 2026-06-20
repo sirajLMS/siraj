@@ -5,8 +5,10 @@ import {
   currencyExchangeAuditLogs,
   currencyExchangeRates,
   invoices,
+  parents,
   payments,
   systemSettings,
+  users,
 } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
@@ -251,5 +253,88 @@ export namespace BillingRepository {
     };
 
     return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  export const getUnpaidInvoicesSummary = async (
+    tx?: DBTransaction
+  ): Promise<Types.UnpaidInvoicesSummaryResult> => {
+    const t = tx ?? db;
+
+    const unpaidInvoices = await t
+      .select({
+        invoiceId: invoices.id,
+        parentId: invoices.parentId,
+        amount: invoices.amount,
+        currency: invoices.currency,
+        dueDate: invoices.dueDate,
+      })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.status, "UNPAID"),
+          sql`${invoices.dueDate} < CURRENT_DATE`
+        )
+      )
+      .orderBy(invoices.dueDate);
+
+    if (unpaidInvoices.length === 0) {
+      return {
+        id: "unpaid-invoices-summary",
+        totalOverdueInvoices: 0,
+        totalOverdueAmount: "0.00",
+        items: [],
+      };
+    }
+
+    const parentIds = [...new Set(unpaidInvoices.map(inv => inv.parentId))];
+
+    const parentUsers = await t
+      .select({
+        parentId: parents.id,
+        userId: parents.userId,
+        userName: users.name,
+        userEmail: users.email,
+      })
+      .from(parents)
+      .leftJoin(users, eq(parents.userId, users.id))
+      .where(sql`${parents.id} IN (${sql.join(parentIds.map(id => sql`${id}`), sql`, `)})`);
+
+    const parentMap = new Map(parentUsers.map(p => [p.parentId, p]));
+
+    const groupedByParent = new Map<string, typeof unpaidInvoices>();
+    for (const inv of unpaidInvoices) {
+      const existing = groupedByParent.get(inv.parentId) ?? [];
+      existing.push(inv);
+      groupedByParent.set(inv.parentId, existing);
+    }
+
+    const items: Types.UnpaidInvoiceSummaryItem[] = [];
+    let totalAmount = 0;
+
+    for (const [parentId, invs] of groupedByParent) {
+      const parent = parentMap.get(parentId);
+      if (!parent?.userId) continue;
+
+      const parentTotal = invs.reduce((sum, inv) => sum + Number.parseFloat(inv.amount), 0);
+      totalAmount += parentTotal;
+
+      items.push({
+        id: parentId,
+        userId: parent.userId,
+        userName: parent.userName ?? "Unknown",
+        userEmail: parent.userEmail ?? "",
+        totalUnpaidAmount: parentTotal.toFixed(2),
+        currency: invs[0].currency,
+        overdueCount: invs.length,
+        oldestDueDate: invs[0].dueDate,
+      });
+    }
+
+    return {
+      id: "unpaid-invoices-summary",
+      totalOverdueInvoices: unpaidInvoices.length,
+      totalOverdueAmount: totalAmount.toFixed(2),
+      items,
+    };
   };
 }

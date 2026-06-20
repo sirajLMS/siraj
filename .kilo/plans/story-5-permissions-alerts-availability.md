@@ -713,11 +713,11 @@ bun run test:db
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `getUnpaidInvoicesSummary()` returns overdue invoices grouped by parent with user names.
-- [ ] `searchCrossStaffAvailability()` returns gap analysis for all matching teachers.
-- [ ] Gender filter works correctly in availability search.
-- [ ] Empty results return proper empty-state structures.
-- [ ] `bun run test:db` passes with 0 failures.
+- [x] `getUnpaidInvoicesSummary()` returns overdue invoices grouped by parent with user names.
+- [x] `searchCrossStaffAvailability()` returns gap analysis for all matching teachers.
+- [x] Gender filter works correctly in availability search.
+- [x] Empty results return proper empty-state structures.
+- [x] `bun run test:db` passes with 0 failures (11 new tests: 4 billing + 7 teacher-availability, all passing).
 
 ---
 

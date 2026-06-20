@@ -4,6 +4,8 @@ import {
   teacherAvailabilityWindows,
   teacherRecurringUnavailability,
   teacherVacationRequests,
+  teachers,
+  users,
 } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
@@ -438,5 +440,145 @@ export namespace TeacherAvailabilityRepository {
       bookingEndMinutes,
       locale
     );
+  };
+
+  export const searchCrossStaffAvailability = async (
+    input: Types.CrossStaffSearchInput,
+    tx?: DBTransaction
+  ): Promise<Types.AvailabilitySearchResult> => {
+    const t = tx ?? db;
+
+    const fromMinutes = timeToMinutes(input.fromTime);
+    const toMinutes = timeToMinutes(input.toTime);
+
+    if (fromMinutes >= toMinutes) {
+      const tFunc = await getBackendTranslations({ locale: undefined, namespace: "errors" });
+      throw new Error(tFunc("startTimeBeforeEndTime"));
+    }
+
+    const teacherConditions = [eq(teachers.status, "ACTIVATED")];
+    if (input.gender) {
+      teacherConditions.push(eq(teachers.gender, input.gender));
+    }
+
+    const allTeachers = await t
+      .select({
+        teacherId: teachers.id,
+        teacherName: users.name,
+        teacherGender: teachers.gender,
+        teacherTimezone: teachers.timezone,
+      })
+      .from(teachers)
+      .leftJoin(users, eq(teachers.userId, users.id))
+      .where(and(...teacherConditions));
+
+    if (allTeachers.length === 0) {
+      return {
+        id: `availability-search-${input.fromTime}-${input.toTime}`,
+        teachers: [],
+        totalGaps: 0,
+      };
+    }
+
+    const daysOfWeek = Object.values(DayOfWeek);
+    const result: Types.AvailabilitySearchResult["teachers"] = [];
+    let totalGaps = 0;
+
+    for (const teacher of allTeachers) {
+      const windows = await t
+        .select()
+        .from(teacherAvailabilityWindows)
+        .where(eq(teacherAvailabilityWindows.teacherId, teacher.teacherId));
+
+      const unavailabilities = await t
+        .select()
+        .from(teacherRecurringUnavailability)
+        .where(eq(teacherRecurringUnavailability.teacherId, teacher.teacherId));
+
+      const gaps: Types.TeacherAvailabilityGap[] = [];
+
+      for (const day of daysOfWeek) {
+        const dayWindows = windows.filter(w => (w.dayOfWeek as DayOfWeek) === day);
+        const dayUnavail = unavailabilities.filter(u => (u.dayOfWeek as DayOfWeek) === day);
+
+        for (const window of dayWindows) {
+          const windowStart = timeToMinutes(window.startTime);
+          const windowEnd = timeToMinutes(window.endTime);
+
+          const searchStart = Math.max(windowStart, fromMinutes);
+          const searchEnd = Math.min(windowEnd, toMinutes);
+
+          if (searchStart >= searchEnd) continue;
+
+          const blockedRanges: { start: number; end: number }[] = [];
+
+          for (const u of dayUnavail) {
+            const uStart = timeToMinutes(u.startTime);
+            const uEnd = timeToMinutes(u.endTime);
+            if (uStart < searchEnd && uEnd > searchStart) {
+              blockedRanges.push({ start: Math.max(uStart, searchStart), end: Math.min(uEnd, searchEnd) });
+            }
+          }
+
+          blockedRanges.sort((a, b) => a.start - b.start);
+
+          const mergedBlocked: { start: number; end: number }[] = [];
+          for (const range of blockedRanges) {
+            if (mergedBlocked.length > 0 && range.start <= mergedBlocked[mergedBlocked.length - 1].end) {
+              mergedBlocked[mergedBlocked.length - 1].end = Math.max(mergedBlocked[mergedBlocked.length - 1].end, range.end);
+            } else {
+              mergedBlocked.push({ ...range });
+            }
+          }
+
+          let cursor = searchStart;
+          for (const blocked of mergedBlocked) {
+            if (cursor < blocked.start) {
+              gaps.push({
+                id: `${teacher.teacherId}-${day}-${cursor}-${blocked.start}`,
+                teacherId: teacher.teacherId,
+                teacherName: teacher.teacherName ?? "Unknown",
+                teacherGender: teacher.teacherGender,
+                dayOfWeek: day,
+                gapStartTime: `${String(Math.floor(cursor / 60)).padStart(2, "0")}:${String(cursor % 60).padStart(2, "0")}`,
+                gapEndTime: `${String(Math.floor(blocked.start / 60)).padStart(2, "0")}:${String(blocked.start % 60).padStart(2, "0")}`,
+                timezone: teacher.teacherTimezone,
+              });
+            }
+            cursor = Math.max(cursor, blocked.end);
+          }
+
+          if (cursor < searchEnd) {
+            gaps.push({
+              id: `${teacher.teacherId}-${day}-${cursor}-${searchEnd}`,
+              teacherId: teacher.teacherId,
+              teacherName: teacher.teacherName ?? "Unknown",
+              teacherGender: teacher.teacherGender,
+              dayOfWeek: day,
+              gapStartTime: `${String(Math.floor(cursor / 60)).padStart(2, "0")}:${String(cursor % 60).padStart(2, "0")}`,
+              gapEndTime: `${String(Math.floor(searchEnd / 60)).padStart(2, "0")}:${String(searchEnd % 60).padStart(2, "0")}`,
+              timezone: teacher.teacherTimezone,
+            });
+          }
+        }
+      }
+
+      if (gaps.length > 0) {
+        result.push({
+          id: teacher.teacherId,
+          name: teacher.teacherName ?? "Unknown",
+          gender: teacher.teacherGender,
+          timezone: teacher.teacherTimezone,
+          gaps,
+        });
+        totalGaps += gaps.length;
+      }
+    }
+
+    return {
+      id: `availability-search-${input.fromTime}-${input.toTime}`,
+      teachers: result,
+      totalGaps,
+    };
   };
 }

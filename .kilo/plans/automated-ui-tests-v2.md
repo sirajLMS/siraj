@@ -48,7 +48,7 @@ Implement the remaining two layers of the automated UI test suite covering all m
 
 | Gap | Current State | Target State |
 |---|---|---|
-| Component test files | 0 files | 6 `.test.tsx` files | 3 of 6 complete |
+| Component test files | 0 files | 6 `.test.tsx` files | 5 of 6 complete |
 | E2E test files | 0 files | 5 `.test.ts` files |
 | Full verification | Not run | All suites pass + quality gate |
 
@@ -511,7 +511,7 @@ Each task in Phase 2 creates one `.test.tsx` file in `test/ui/components/`. All 
 
 #### Task J — AdminActionsBar.test.tsx
 
-**Status:** Pending
+**Status:** ✅ Complete
 
 **Objective:** Verify that the `AdminActionsBar` renders all admin action buttons (force activate, stop, delete, reschedule) and that the reschedule button visibility is gated by `SessionReschedule` permission.
 
@@ -576,15 +576,15 @@ Each task in Phase 2 creates one `.test.tsx` file in `test/ui/components/`. All 
   Expected: All tests pass (14 from G+H+I + 6 from J = 20 total), 0 failures.
 
 **Completion criteria:**
-- [ ] 6 test cases pass
-- [ ] All handler mocks are properly verified (called/not called)
-- [ ] `useUserStore` is reset in `afterEach`
+- [x] 6 test cases pass
+- [x] All handler mocks are properly verified (called/not called)
+- [x] `useUserStore` is reset in `afterEach`
 
 ---
 
 #### Task K — SessionActivateButton.test.tsx
 
-**Status:** Pending
+**Status:** ✅ Complete
 
 **Objective:** Verify that the `SessionActivateButton` correctly renders in ready, connecting, and disabled states, and that click handlers fire only when the button is enabled.
 
@@ -628,9 +628,9 @@ Each task in Phase 2 creates one `.test.tsx` file in `test/ui/components/`. All 
   Expected: All tests pass (20 from G+H+I+J + 5 from K = 25 total), 0 failures.
 
 **Completion criteria:**
-- [ ] 5 test cases pass
-- [ ] `onActivate` mock is properly verified in both enabled and disabled states
-- [ ] Connecting state renders progress indicator
+- [x] 5 test cases pass
+- [x] `onActivate` mock is properly verified in both enabled and disabled states
+- [x] Connecting state renders progress indicator
 
 ---
 
