@@ -32,6 +32,7 @@ enum AppPermission {
   RESOURCES_DELETE
   RESOURCES_LIST
   RESOURCES_UPLOAD
+  SCHEDULE_CREATE_CLASS
   SCHEDULE_DST_MIGRATE
   SCHEDULE_FILTER_ADVANCED
   SCHEDULE_MANAGE_RECURRING
@@ -41,6 +42,8 @@ enum AppPermission {
   SCHEDULE_VIEW_FAMILY
   SCHEDULE_VIEW_LIST
   SCHEDULE_VIEW_TIMEZONES
+  SCHEDULE_VIEW_WEEKLY
+  SCHEDULE_VIEW_WORKLOAD
   SESSION_ACTIVATE_CLASS
   SESSION_ACTIVATE_OVERRIDE
   SESSION_OVERRIDE_ACTIONS
@@ -53,6 +56,7 @@ enum AppPermission {
   STAFF_CREATE
   STAFF_EDIT
   STAFF_LIST
+  STAFF_VIEW_DIRECTORY
   STUDENTS_CHANGE_STATUS
   STUDENTS_CHANGE_TEACHER
   STUDENTS_EDIT
@@ -430,6 +434,27 @@ input CreatePermissionGroupInput {
   permissionIds: [String!]!
 }
 
+input CreateRecurringClassInput {
+  classType: String
+  days: [RecurringClassDayInput!]!
+  defaultStartTime: String!
+  durationMinutes: Int!
+  effectiveFrom: String
+  effectiveUntil: String
+  generateInstancesForWeeks: Int
+  studentId: String!
+  teacherId: String!
+  timezone: String!
+  timezoneId: Int
+}
+
+type CreateRecurringClassResult {
+  classInstanceCount: Int
+  classInstanceIds: [String!]
+  id: String
+  recurringScheduleId: String
+}
+
 type DailyScheduleList {
   duration: Int
   id: String
@@ -672,6 +697,7 @@ type Mutation {
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createFolder(input: FolderCreateInput!): FileOperationResult
   createPermissionGroup(input: CreatePermissionGroupInput!): PermissionGroup
+  createRecurringClass(input: CreateRecurringClassInput!): CreateRecurringClassResult
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
   deleteClassInstance(classInstanceId: ID!): Boolean
@@ -835,8 +861,11 @@ type Query {
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
   teacherActiveDashboard(date: String!): TeacherDashboard
   teacherDashboard(date: String!): TeacherDashboard
+  teacherDirectory(limit: Int, offset: Int, search: String): TeacherDirectory
   teacherFutureSchedule: TeacherFutureSchedule
   teacherHandbookUrl: TeacherHandbookUrl
+  teacherWeeklyScheduleGrid(teacherId: String, weekDate: String!): WeeklyScheduleGrid
+  teacherWorkloadMetrics(teacherId: String, weekDate: String!): WeeklyWorkloadMetrics
   teachers(limit: Int!, search: String!): [TeacherSimple!]
   translatedMessage(key: String!, namespace: String!): String
   unpaidInvoicesAlert: UnpaidInvoicesSummary
@@ -849,6 +878,12 @@ type Query {
   userPermissionGroups(userId: String!): [String!]
   users: [User!]
   welcomeMessage: String
+}
+
+input RecurringClassDayInput {
+  dayOfWeek: String!
+  isActive: Boolean!
+  startTime: String!
 }
 
 type RefreshTokenResponse {
@@ -1137,6 +1172,29 @@ type TeacherDashboardScheduleRow {
   zoomMeetingUrl: String
 }
 
+type TeacherDirectory {
+  id: String
+  metrics: TeacherDirectoryMetrics
+  rows: [TeacherDirectoryRow!]
+  totalTeachers: Int
+}
+
+type TeacherDirectoryMetrics {
+  activated: Int
+  deactivated: Int
+  id: String
+}
+
+type TeacherDirectoryRow {
+  avatarUrl: String
+  email: String
+  id: String
+  index: String
+  name: String
+  status: String
+  zoomLink: String
+}
+
 type TeacherFutureSchedule {
   classes: [FutureClass!]
   id: String
@@ -1238,4 +1296,30 @@ type UserOverride {
 input UserOverrideInput {
   permissionId: String!
   state: String!
+}
+
+type WeeklyScheduleClass {
+  day: String
+  duration: Int
+  executionState: String
+  id: String
+  outcome: String
+  startTime: String
+  studentId: String
+  studentName: String
+}
+
+type WeeklyScheduleGrid {
+  classes: [WeeklyScheduleClass!]
+  id: String
+  teacherId: String
+  weekEnd: String
+  weekStart: String
+}
+
+type WeeklyWorkloadMetrics {
+  classCount: Int
+  id: String
+  totalMinutes: Int
+  weeklyHoursWorked: String
 }

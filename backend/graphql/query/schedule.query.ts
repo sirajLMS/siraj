@@ -1,5 +1,6 @@
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
+import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   DailyScheduleListPothosObject,
@@ -8,6 +9,7 @@ import {
   RescheduleTrackingMetricsPothosObject,
   RescheduleTrackingRowPothosObject,
 } from "../pothos/schedule.pothos";
+import { WeeklyScheduleGridPothosObject, WeeklyWorkloadMetricsPothosObject } from "../pothos/weekly-schedule.pothos";
 
 gqlSchemaBuilder.queryField("dailyScheduleMetrics", t =>
   t.field({
@@ -90,6 +92,44 @@ gqlSchemaBuilder.queryField("rescheduleTrackingMetrics", t =>
         throw new Error(tFunc("unauthorized"));
       }
       return ScheduleService.getRescheduleTrackingMetrics(ctx.user.id, ctx.locale);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("teacherWeeklyScheduleGrid", t =>
+  t.field({
+    type: WeeklyScheduleGridPothosObject,
+    args: {
+      teacherId: t.arg.string({ required: false }),
+      weekDate: t.arg.string({ required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      return await WeeklyScheduleService.getWeeklySchedule(
+        ctx.user?.id || "",
+        args.teacherId || null,
+        args.weekDate,
+        ctx.locale
+      );
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("teacherWorkloadMetrics", t =>
+  t.field({
+    type: WeeklyWorkloadMetricsPothosObject,
+    args: {
+      teacherId: t.arg.string({ required: false }),
+      weekDate: t.arg.string({ required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      return await WeeklyScheduleService.getWorkloadMetrics(
+        ctx.user?.id || "",
+        args.teacherId || null,
+        args.weekDate,
+        ctx.locale
+      );
     },
   })
 );

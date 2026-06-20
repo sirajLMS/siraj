@@ -55,6 +55,7 @@ export enum AppPermission {
   ResourcesDelete = 'RESOURCES_DELETE',
   ResourcesList = 'RESOURCES_LIST',
   ResourcesUpload = 'RESOURCES_UPLOAD',
+  ScheduleCreateClass = 'SCHEDULE_CREATE_CLASS',
   ScheduleDstMigrate = 'SCHEDULE_DST_MIGRATE',
   ScheduleFilterAdvanced = 'SCHEDULE_FILTER_ADVANCED',
   ScheduleManageRecurring = 'SCHEDULE_MANAGE_RECURRING',
@@ -64,6 +65,8 @@ export enum AppPermission {
   ScheduleViewFamily = 'SCHEDULE_VIEW_FAMILY',
   ScheduleViewList = 'SCHEDULE_VIEW_LIST',
   ScheduleViewTimezones = 'SCHEDULE_VIEW_TIMEZONES',
+  ScheduleViewWeekly = 'SCHEDULE_VIEW_WEEKLY',
+  ScheduleViewWorkload = 'SCHEDULE_VIEW_WORKLOAD',
   SessionActivateClass = 'SESSION_ACTIVATE_CLASS',
   SessionActivateOverride = 'SESSION_ACTIVATE_OVERRIDE',
   SessionOverrideActions = 'SESSION_OVERRIDE_ACTIONS',
@@ -76,6 +79,7 @@ export enum AppPermission {
   StaffCreate = 'STAFF_CREATE',
   StaffEdit = 'STAFF_EDIT',
   StaffList = 'STAFF_LIST',
+  StaffViewDirectory = 'STAFF_VIEW_DIRECTORY',
   StudentsChangeStatus = 'STUDENTS_CHANGE_STATUS',
   StudentsChangeTeacher = 'STUDENTS_CHANGE_TEACHER',
   StudentsEdit = 'STUDENTS_EDIT',
@@ -462,6 +466,28 @@ export type CreatePermissionGroupInput = {
   permissionIds: Array<Scalars['String']['input']>;
 };
 
+export type CreateRecurringClassInput = {
+  classType: InputMaybe<Scalars['String']['input']>;
+  days: Array<RecurringClassDayInput>;
+  defaultStartTime: Scalars['String']['input'];
+  durationMinutes: Scalars['Int']['input'];
+  effectiveFrom: InputMaybe<Scalars['String']['input']>;
+  effectiveUntil: InputMaybe<Scalars['String']['input']>;
+  generateInstancesForWeeks: InputMaybe<Scalars['Int']['input']>;
+  studentId: Scalars['String']['input'];
+  teacherId: Scalars['String']['input'];
+  timezone: Scalars['String']['input'];
+  timezoneId: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type CreateRecurringClassResult = {
+  __typename?: 'CreateRecurringClassResult';
+  classInstanceCount: Maybe<Scalars['Int']['output']>;
+  classInstanceIds: Maybe<Array<Scalars['String']['output']>>;
+  id: Maybe<Scalars['String']['output']>;
+  recurringScheduleId: Maybe<Scalars['String']['output']>;
+};
+
 export type DailyScheduleList = {
   __typename?: 'DailyScheduleList';
   duration: Maybe<Scalars['Int']['output']>;
@@ -703,6 +729,7 @@ export type Mutation = {
   copyStorageItems: Maybe<BulkOperationResult>;
   createFolder: Maybe<FileOperationResult>;
   createPermissionGroup: Maybe<PermissionGroup>;
+  createRecurringClass: Maybe<CreateRecurringClassResult>;
   createTeacherManualClassEntry: Maybe<ClassInstanceDetail>;
   createTestEntities: Maybe<TestEntities>;
   deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
@@ -783,6 +810,11 @@ export type MutationCreateFolderArgs = {
 
 export type MutationCreatePermissionGroupArgs = {
   input: CreatePermissionGroupInput;
+};
+
+
+export type MutationCreateRecurringClassArgs = {
+  input: CreateRecurringClassInput;
 };
 
 
@@ -1020,8 +1052,11 @@ export type Query = {
   students: StudentsWithFiltersResponse;
   teacherActiveDashboard: Maybe<TeacherDashboard>;
   teacherDashboard: Maybe<TeacherDashboard>;
+  teacherDirectory: Maybe<TeacherDirectory>;
   teacherFutureSchedule: Maybe<TeacherFutureSchedule>;
   teacherHandbookUrl: Maybe<TeacherHandbookUrl>;
+  teacherWeeklyScheduleGrid: Maybe<WeeklyScheduleGrid>;
+  teacherWorkloadMetrics: Maybe<WeeklyWorkloadMetrics>;
   teachers: Maybe<Array<TeacherSimple>>;
   translatedMessage: Maybe<Scalars['String']['output']>;
   unpaidInvoicesAlert: Maybe<UnpaidInvoicesSummary>;
@@ -1150,6 +1185,25 @@ export type QueryTeacherDashboardArgs = {
 };
 
 
+export type QueryTeacherDirectoryArgs = {
+  limit: InputMaybe<Scalars['Int']['input']>;
+  offset: InputMaybe<Scalars['Int']['input']>;
+  search: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryTeacherWeeklyScheduleGridArgs = {
+  teacherId: InputMaybe<Scalars['String']['input']>;
+  weekDate: Scalars['String']['input'];
+};
+
+
+export type QueryTeacherWorkloadMetricsArgs = {
+  teacherId: InputMaybe<Scalars['String']['input']>;
+  weekDate: Scalars['String']['input'];
+};
+
+
 export type QueryTeachersArgs = {
   limit: Scalars['Int']['input'];
   search: Scalars['String']['input'];
@@ -1174,6 +1228,12 @@ export type QueryUserOverridesArgs = {
 
 export type QueryUserPermissionGroupsArgs = {
   userId: Scalars['String']['input'];
+};
+
+export type RecurringClassDayInput = {
+  dayOfWeek: Scalars['String']['input'];
+  isActive: Scalars['Boolean']['input'];
+  startTime: Scalars['String']['input'];
 };
 
 export type RefreshTokenResponse = {
@@ -1476,6 +1536,32 @@ export type TeacherDashboardScheduleRow = {
   zoomMeetingUrl: Maybe<Scalars['String']['output']>;
 };
 
+export type TeacherDirectory = {
+  __typename?: 'TeacherDirectory';
+  id: Maybe<Scalars['String']['output']>;
+  metrics: Maybe<TeacherDirectoryMetrics>;
+  rows: Maybe<Array<TeacherDirectoryRow>>;
+  totalTeachers: Maybe<Scalars['Int']['output']>;
+};
+
+export type TeacherDirectoryMetrics = {
+  __typename?: 'TeacherDirectoryMetrics';
+  activated: Maybe<Scalars['Int']['output']>;
+  deactivated: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+};
+
+export type TeacherDirectoryRow = {
+  __typename?: 'TeacherDirectoryRow';
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  index: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  zoomLink: Maybe<Scalars['String']['output']>;
+};
+
 export type TeacherFutureSchedule = {
   __typename?: 'TeacherFutureSchedule';
   classes: Maybe<Array<FutureClass>>;
@@ -1587,4 +1673,33 @@ export type UserOverride = {
 export type UserOverrideInput = {
   permissionId: Scalars['String']['input'];
   state: Scalars['String']['input'];
+};
+
+export type WeeklyScheduleClass = {
+  __typename?: 'WeeklyScheduleClass';
+  day: Maybe<Scalars['String']['output']>;
+  duration: Maybe<Scalars['Int']['output']>;
+  executionState: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  outcome: Maybe<Scalars['String']['output']>;
+  startTime: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+};
+
+export type WeeklyScheduleGrid = {
+  __typename?: 'WeeklyScheduleGrid';
+  classes: Maybe<Array<WeeklyScheduleClass>>;
+  id: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
+  weekEnd: Maybe<Scalars['String']['output']>;
+  weekStart: Maybe<Scalars['String']['output']>;
+};
+
+export type WeeklyWorkloadMetrics = {
+  __typename?: 'WeeklyWorkloadMetrics';
+  classCount: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  totalMinutes: Maybe<Scalars['Int']['output']>;
+  weeklyHoursWorked: Maybe<Scalars['String']['output']>;
 };

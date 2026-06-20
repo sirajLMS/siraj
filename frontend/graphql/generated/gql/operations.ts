@@ -37,6 +37,7 @@ export type AppPermission =
   | 'RESOURCES_DELETE'
   | 'RESOURCES_LIST'
   | 'RESOURCES_UPLOAD'
+  | 'SCHEDULE_CREATE_CLASS'
   | 'SCHEDULE_DST_MIGRATE'
   | 'SCHEDULE_FILTER_ADVANCED'
   | 'SCHEDULE_MANAGE_RECURRING'
@@ -46,6 +47,8 @@ export type AppPermission =
   | 'SCHEDULE_VIEW_FAMILY'
   | 'SCHEDULE_VIEW_LIST'
   | 'SCHEDULE_VIEW_TIMEZONES'
+  | 'SCHEDULE_VIEW_WEEKLY'
+  | 'SCHEDULE_VIEW_WORKLOAD'
   | 'SESSION_ACTIVATE_CLASS'
   | 'SESSION_ACTIVATE_OVERRIDE'
   | 'SESSION_OVERRIDE_ACTIONS'
@@ -58,6 +61,7 @@ export type AppPermission =
   | 'STAFF_CREATE'
   | 'STAFF_EDIT'
   | 'STAFF_LIST'
+  | 'STAFF_VIEW_DIRECTORY'
   | 'STUDENTS_CHANGE_STATUS'
   | 'STUDENTS_CHANGE_TEACHER'
   | 'STUDENTS_EDIT'
@@ -100,6 +104,20 @@ export type CreatePermissionGroupInput = {
   permissionIds: Array<string>;
 };
 
+export type CreateRecurringClassInput = {
+  classType: string | null | undefined;
+  days: Array<RecurringClassDayInput>;
+  defaultStartTime: string;
+  durationMinutes: number;
+  effectiveFrom: string | null | undefined;
+  effectiveUntil: string | null | undefined;
+  generateInstancesForWeeks: number | null | undefined;
+  studentId: string;
+  teacherId: string;
+  timezone: string;
+  timezoneId: number | null | undefined;
+};
+
 /** Input for the demo fast login mutation. */
 export type DemoLoginInput = {
   /** The unique slug of the permission group to authenticate as. */
@@ -131,6 +149,12 @@ export type PaginationArgs = {
   maxCount: number | null | undefined;
   page: number | null | undefined;
   skip: number | null | undefined;
+};
+
+export type RecurringClassDayInput = {
+  dayOfWeek: string;
+  isActive: boolean;
+  startTime: string;
 };
 
 export type RescheduleClassInput = {
@@ -643,6 +667,18 @@ export type UpdateUserOverridesMutationVariables = Exact<{
 
 export type UpdateUserOverridesMutation = UpdateUserOverridesMutation_Mutation;
 
+export type CreateRecurringClassMutation_createRecurringClass_CreateRecurringClassResult = { id: string | null, recurringScheduleId: string | null, classInstanceIds: Array<string> | null, classInstanceCount: number | null };
+
+export type CreateRecurringClassMutation_Mutation = { createRecurringClass: CreateRecurringClassMutation_createRecurringClass_CreateRecurringClassResult | null };
+
+
+export type CreateRecurringClassMutationVariables = Exact<{
+  input: Types.CreateRecurringClassInput;
+}>;
+
+
+export type CreateRecurringClassMutation = CreateRecurringClassMutation_Mutation;
+
 export type DailyScheduleMetricsQuery_dailyScheduleMetrics_DailyScheduleMetrics = { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 
 export type DailyScheduleMetricsQuery_Query = { dailyScheduleMetrics: DailyScheduleMetricsQuery_dailyScheduleMetrics_DailyScheduleMetrics | null };
@@ -695,6 +731,24 @@ export type RescheduleTrackingMetricsQueryVariables = Exact<{ [key: string]: nev
 
 
 export type RescheduleTrackingMetricsQuery = RescheduleTrackingMetricsQuery_Query;
+
+export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_metrics_TeacherDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null };
+
+export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_rows_TeacherDirectoryRow = { id: string | null, index: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, zoomLink: string | null };
+
+export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory = { id: string | null, totalTeachers: number | null, metrics: TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_metrics_TeacherDirectoryMetrics | null, rows: Array<TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_rows_TeacherDirectoryRow> | null };
+
+export type TeacherDirectoryQuery_Query = { teacherDirectory: TeacherDirectoryQuery_teacherDirectory_TeacherDirectory | null };
+
+
+export type TeacherDirectoryQueryVariables = Exact<{
+  search: string | null | undefined;
+  limit: number | null | undefined;
+  offset: number | null | undefined;
+}>;
+
+
+export type TeacherDirectoryQuery = TeacherDirectoryQuery_Query;
 
 export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
 
@@ -885,3 +939,31 @@ export type TranslatedMessageQueryVariables = Exact<{
 
 
 export type TranslatedMessageQuery = TranslatedMessageQuery_Query;
+
+export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass = { id: string | null, studentName: string | null, studentId: string | null, duration: number | null, startTime: string | null, day: string | null, executionState: string | null, outcome: string | null };
+
+export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid = { id: string | null, teacherId: string | null, weekStart: string | null, weekEnd: string | null, classes: Array<TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass> | null };
+
+export type TeacherWeeklyScheduleGridQuery_Query = { teacherWeeklyScheduleGrid: TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid | null };
+
+
+export type TeacherWeeklyScheduleGridQueryVariables = Exact<{
+  teacherId: string | null | undefined;
+  weekDate: string;
+}>;
+
+
+export type TeacherWeeklyScheduleGridQuery = TeacherWeeklyScheduleGridQuery_Query;
+
+export type TeacherWorkloadMetricsQuery_teacherWorkloadMetrics_WeeklyWorkloadMetrics = { id: string | null, weeklyHoursWorked: string | null, totalMinutes: number | null, classCount: number | null };
+
+export type TeacherWorkloadMetricsQuery_Query = { teacherWorkloadMetrics: TeacherWorkloadMetricsQuery_teacherWorkloadMetrics_WeeklyWorkloadMetrics | null };
+
+
+export type TeacherWorkloadMetricsQueryVariables = Exact<{
+  teacherId: string | null | undefined;
+  weekDate: string;
+}>;
+
+
+export type TeacherWorkloadMetricsQuery = TeacherWorkloadMetricsQuery_Query;

@@ -1787,18 +1787,18 @@ createRecurringClass: t.field({
   ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `TeacherDirectoryPothosObject` exposes `id`, `metrics`, `rows`, `totalTeachers`
-- [ ] `WeeklyScheduleGridPothosObject` exposes `id`, `teacherId`, `weekStart`, `weekEnd`, `classes`
-- [ ] `WeeklyWorkloadMetricsPothosObject` exposes `id`, `weeklyHoursWorked`, `totalMinutes`, `classCount`
-- [ ] `CreateRecurringClassInputPothosObject` accepts all required fields
-- [ ] `CreateRecurringClassResultPothosObject` exposes `id`, `recurringScheduleId`, `classInstanceIds`, `classInstanceCount`
-- [ ] All query resolvers delegate to service layer with `ctx.locale` propagation
-- [ ] `bun run generate:gqlSchema` succeeds
-- [ ] `bun codegen` succeeds
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings
-- [ ] `loop over tsgo, biome:check, lint` on working files till no issues at all
+- [x] `TeacherDirectoryPothosObject` exposes `id`, `metrics`, `rows`, `totalTeachers`
+- [x] `WeeklyScheduleGridPothosObject` exposes `id`, `teacherId`, `weekStart`, `weekEnd`, `classes`
+- [x] `WeeklyWorkloadMetricsPothosObject` exposes `id`, `weeklyHoursWorked`, `totalMinutes`, `classCount`
+- [x] `CreateRecurringClassInputPothosObject` accepts all required fields
+- [x] `CreateRecurringClassResultPothosObject` exposes `id`, `recurringScheduleId`, `classInstanceIds`, `classInstanceCount`
+- [x] All query resolvers delegate to service layer with `ctx.locale` propagation
+- [x] `bun run generate:gqlSchema` succeeds
+- [x] `bun codegen` succeeds
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings
+- [x] `loop over tsgo, biome:check, lint` on working files till no issues at all
 
 ---
 
@@ -1953,17 +1953,17 @@ bun codegen
   ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `teacherDirectoryQueryDocument` typed correctly with generated types
-- [ ] `teacherWeeklyScheduleGridQueryDocument` typed correctly
-- [ ] `teacherWorkloadMetricsQueryDocument` typed correctly
-- [ ] `createRecurringClassMutationDocument` typed correctly
-- [ ] All documents include `id` fields on every object type
-- [ ] `bun run generate:gqlSchema` succeeds
-- [ ] `bun codegen` succeeds
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings
-- [ ] `loop over tsgo, biome:check, lint` on working files till no issues at all
+- [x] `teacherDirectoryQueryDocument` typed correctly with generated types
+- [x] `teacherWeeklyScheduleGridQueryDocument` typed correctly
+- [x] `teacherWorkloadMetricsQueryDocument` typed correctly
+- [x] `createRecurringClassMutationDocument` typed correctly
+- [x] All documents include `id` fields on every object type
+- [x] `bun run generate:gqlSchema` succeeds
+- [x] `bun codegen` succeeds
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings
+- [x] `loop over tsgo, biome:check, lint` on working files till no issues at all
 
 ---
 
