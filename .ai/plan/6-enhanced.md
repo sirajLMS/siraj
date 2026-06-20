@@ -1419,22 +1419,22 @@ export namespace RecurringClassService {
   ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `StaffDirectoryService.getDirectory()` gates access behind `STAFF_VIEW_DIRECTORY` permission
-- [ ] `StaffDirectoryService.getDirectory()` returns directory rows with metrics
-- [ ] `WeeklyScheduleService.getWeeklySchedule()` gates access behind `SCHEDULE_VIEW_WEEKLY` permission
-- [ ] `WeeklyScheduleService.getWeeklySchedule()` enforces self-scoping for teachers
-- [ ] `WeeklyScheduleService.getWeeklySchedule()` allows admin to query any teacher
-- [ ] `WeeklyScheduleService.getWorkloadMetrics()` gates access behind `SCHEDULE_VIEW_WORKLOAD` permission
-- [ ] `WeeklyScheduleService.getWorkloadMetrics()` enforces self-scoping for teachers
-- [ ] `RecurringClassService.createRecurringClass()` gates access behind `SCHEDULE_CREATE_CLASS` permission
-- [ ] `RecurringClassService.createRecurringClass()` validates input (days, duration)
-- [ ] All services use `getBackendTranslations` for error messages
-- [ ] All services use `logger` for error logging
-- [ ] `bun run test:db` passes with 0 failures
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings
-- [ ] `loop over tsgo, biome:check, lint` on working files till no issues at all
+- [x] `StaffDirectoryService.getDirectory()` gates access behind `STAFF_VIEW_DIRECTORY` permission
+- [x] `StaffDirectoryService.getDirectory()` returns directory rows with metrics
+- [x] `WeeklyScheduleService.getWeeklySchedule()` gates access behind `SCHEDULE_VIEW_WEEKLY` permission
+- [x] `WeeklyScheduleService.getWeeklySchedule()` enforces self-scoping for teachers
+- [x] `WeeklyScheduleService.getWeeklySchedule()` allows admin to query any teacher
+- [x] `WeeklyScheduleService.getWorkloadMetrics()` gates access behind `SCHEDULE_VIEW_WORKLOAD` permission
+- [x] `WeeklyScheduleService.getWorkloadMetrics()` enforces self-scoping for teachers
+- [x] `RecurringClassService.createRecurringClass()` gates access behind `SCHEDULE_CREATE_CLASS` permission
+- [x] `RecurringClassService.createRecurringClass()` validates input (days, duration)
+- [x] All services use `getBackendTranslations` for error messages
+- [x] All services use `logger` for error logging
+- [x] `bun run test:db` passes with 0 failures
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings
+- [x] `loop over tsgo, biome:check, lint` on working files till no issues at all
 
 ---
 

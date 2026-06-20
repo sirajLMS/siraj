@@ -66,4 +66,5 @@ export interface ErrorsLabels {
   readonly permissionGroupInvalidName: string;
   readonly cannotModifySuperAdmin: string;
   readonly leaveQuotaExceeded: string;
+  readonly invalidInput: string;
 }
