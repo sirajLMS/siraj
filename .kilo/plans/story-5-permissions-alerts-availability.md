@@ -1361,9 +1361,9 @@ bun run test:graphql
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] 3 new document files created with proper `TypedDocumentNode` typing.
-- [ ] Codegen runs successfully, generating `NotificationAlertsQuery`, `UnpaidInvoicesAlertQuery`, `SearchTeacherAvailabilityQuery` types.
-- [ ] `bun run test:graphql` passes with 0 failures.
+- [x] 3 new document files created with proper `TypedDocumentNode` typing.
+- [x] Codegen runs successfully, generating `NotificationAlertsQuery`, `UnpaidInvoicesAlertQuery`, `SearchTeacherAvailabilityQuery` types.
+- [x] `bun run test:graphql` passes with 0 failures.
 
 ---
 

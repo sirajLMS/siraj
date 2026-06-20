@@ -79,6 +79,12 @@ export type AssignPermissionGroupToUserInput = {
   userId: string;
 };
 
+export type AvailabilitySearchInput = {
+  fromTime: string;
+  gender: string | null | undefined;
+  toTime: string;
+};
+
 export type CreateManualClassEntryInput = {
   classType: string | null | undefined;
   durationMinutes: number;
@@ -298,6 +304,34 @@ export type RefreshTokenMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type RefreshTokenMutation = RefreshTokenMutation_Mutation;
 
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap = { id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: string | null, gapStartTime: string | null, gapEndTime: string | null, timezone: string | null };
+
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher = { id: string | null, name: string | null, gender: string | null, timezone: string | null, gaps: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap> | null };
+
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult = { id: string | null, totalGaps: number | null, teachers: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher> | null };
+
+export type SearchTeacherAvailabilityQuery_Query = { searchTeacherAvailability: SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult | null };
+
+
+export type SearchTeacherAvailabilityQueryVariables = Exact<{
+  input: Types.AvailabilitySearchInput;
+}>;
+
+
+export type SearchTeacherAvailabilityQuery = SearchTeacherAvailabilityQuery_Query;
+
+export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary_items_UnpaidInvoiceItem = { id: string | null, userId: string | null, userName: string | null, userEmail: string | null, totalUnpaidAmount: string | null, currency: string | null, overdueCount: number | null, oldestDueDate: string | null };
+
+export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary = { id: string | null, totalOverdueInvoices: number | null, totalOverdueAmount: string | null, items: Array<UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary_items_UnpaidInvoiceItem> | null };
+
+export type UnpaidInvoicesAlertQuery_Query = { unpaidInvoicesAlert: UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary | null };
+
+
+export type UnpaidInvoicesAlertQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UnpaidInvoicesAlertQuery = UnpaidInvoicesAlertQuery_Query;
+
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo = { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null };
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo = { id: string | null, name: string | null, title: string | null, avatarUrl: string | null };
@@ -437,6 +471,18 @@ export type DeleteClassInstanceMutationVariables = Exact<{
 
 
 export type DeleteClassInstanceMutation = DeleteClassInstanceMutation_Mutation;
+
+export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert = { id: string | null, type: string | null, title: string | null, body: string | null, createdAt: string | null, severity: string | null };
+
+export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult = { id: string | null, totalCount: number | null, unreadCount: number | null, alerts: Array<NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert> | null };
+
+export type NotificationAlertsQuery_Query = { notificationAlerts: NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult | null };
+
+
+export type NotificationAlertsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type NotificationAlertsQuery = NotificationAlertsQuery_Query;
 
 export type PermissionFieldsFragment = { id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null };
 
