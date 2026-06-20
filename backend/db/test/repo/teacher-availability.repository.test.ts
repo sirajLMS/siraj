@@ -52,6 +52,52 @@ async function createRecurringUnavailability(
   return unavail;
 }
 
+type DBTx = Parameters<typeof runInRollback>[0] extends (tx: infer T) => unknown ? T : never;
+
+async function setupTwoTestTeachers(
+  tx: DBTx,
+  options: {
+    teacher1Name: string;
+    teacher1Status: "ACTIVATED" | "DEACTIVATED";
+    teacher1Gender?: "MALE" | "FEMALE";
+    teacher2Name: string;
+    teacher2Status: "ACTIVATED" | "DEACTIVATED";
+    teacher2Gender?: "MALE" | "FEMALE";
+    fromTime?: string;
+    toTime?: string;
+  }
+) {
+  const user1 = await createTestUser(tx, { name: options.teacher1Name, email: `t1-${randomUUID()}@test.com` });
+  const teacher1 = await createTestTeacher(tx, user1.id, {
+    status: options.teacher1Status,
+    gender: options.teacher1Gender,
+  });
+
+  const user2 = await createTestUser(tx, { name: options.teacher2Name, email: `t2-${randomUUID()}@test.com` });
+  const teacher2 = await createTestTeacher(tx, user2.id, {
+    status: options.teacher2Status,
+    gender: options.teacher2Gender,
+  });
+
+  const from = options.fromTime ?? "08:00";
+  const to = options.toTime ?? "12:00";
+
+  await createAvailabilityWindow(tx, teacher1.id, DayOfWeek.MONDAY, from, to);
+  await createAvailabilityWindow(tx, teacher2.id, DayOfWeek.MONDAY, from, to);
+
+  return { teacher1, teacher2 };
+}
+
+async function performSearchAndAssert(
+  tx: DBTx,
+  searchOptions: Parameters<typeof TeacherAvailabilityRepository.searchCrossStaffAvailability>[0],
+  expectedTeacherName: string
+) {
+  const result = await TeacherAvailabilityRepository.searchCrossStaffAvailability(searchOptions, tx);
+  expect(result.teachers).toHaveLength(1);
+  expect(result.teachers[0].name).toBe(expectedTeacherName);
+}
+
 describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
   test("throws error when fromTime >= toTime", async () => {
     await runInRollback(async tx => {
@@ -104,22 +150,16 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
 
   test("filters teachers by gender", async () => {
     await runInRollback(async tx => {
-      const maleUser = await createTestUser(tx, { name: "Male Teacher", email: `male-${randomUUID()}@test.com` });
-      const maleTeacher = await createTestTeacher(tx, maleUser.id, { status: "ACTIVATED", gender: "MALE" });
+      await setupTwoTestTeachers(tx, {
+        teacher1Name: "Male Teacher",
+        teacher1Status: "ACTIVATED",
+        teacher1Gender: "MALE",
+        teacher2Name: "Female Teacher",
+        teacher2Status: "ACTIVATED",
+        teacher2Gender: "FEMALE",
+      });
 
-      const femaleUser = await createTestUser(tx, { name: "Female Teacher", email: `female-${randomUUID()}@test.com` });
-      const femaleTeacher = await createTestTeacher(tx, femaleUser.id, { status: "ACTIVATED", gender: "FEMALE" });
-
-      await createAvailabilityWindow(tx, maleTeacher.id, DayOfWeek.MONDAY, "08:00", "12:00");
-      await createAvailabilityWindow(tx, femaleTeacher.id, DayOfWeek.MONDAY, "08:00", "12:00");
-
-      const result = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
-        { fromTime: "08:00", toTime: "12:00", gender: Gender.MALE },
-        tx
-      );
-
-      expect(result.teachers).toHaveLength(1);
-      expect(result.teachers[0].name).toBe("Male Teacher");
+      await performSearchAndAssert(tx, { fromTime: "08:00", toTime: "12:00", gender: Gender.MALE }, "Male Teacher");
     });
   });
 
@@ -149,25 +189,16 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
 
   test("excludes deactivated teachers", async () => {
     await runInRollback(async tx => {
-      const activeUser = await createTestUser(tx, { name: "Active Teacher", email: `active-${randomUUID()}@test.com` });
-      const activeTeacher = await createTestTeacher(tx, activeUser.id, { status: "ACTIVATED" });
-
-      const inactiveUser = await createTestUser(tx, {
-        name: "Inactive Teacher",
-        email: `inactive-${randomUUID()}@test.com`,
+      await setupTwoTestTeachers(tx, {
+        teacher1Name: "Active Teacher",
+        teacher1Status: "ACTIVATED",
+        teacher2Name: "Inactive Teacher",
+        teacher2Status: "DEACTIVATED",
+        fromTime: "09:00",
+        toTime: "11:00",
       });
-      const inactiveTeacher = await createTestTeacher(tx, inactiveUser.id, { status: "DEACTIVATED" });
 
-      await createAvailabilityWindow(tx, activeTeacher.id, DayOfWeek.MONDAY, "08:00", "12:00");
-      await createAvailabilityWindow(tx, inactiveTeacher.id, DayOfWeek.MONDAY, "08:00", "12:00");
-
-      const result = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
-        { fromTime: "08:00", toTime: "12:00" },
-        tx
-      );
-
-      expect(result.teachers).toHaveLength(1);
-      expect(result.teachers[0].name).toBe("Active Teacher");
+      await performSearchAndAssert(tx, { fromTime: "09:00", toTime: "11:00" }, "Active Teacher");
     });
   });
 

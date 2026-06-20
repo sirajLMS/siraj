@@ -1057,6 +1057,54 @@ export namespace SchedulingRepository {
     quotaDeducted?: boolean;
   }
 
+  export async function handleQuotaDeduction(
+    t: DBTransaction,
+    studentId: string,
+    quotaDeducted: boolean,
+    locale?: string
+  ): Promise<void> {
+    if (!quotaDeducted) return;
+
+    const [student] = await t
+      .select({ classesRemaining: students.classesRemaining })
+      .from(students)
+      .where(eq(students.id, studentId))
+      .limit(1);
+
+    if (!student || student.classesRemaining <= 0) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("outOfQuota"));
+    }
+
+    await t
+      .update(students)
+      .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
+      .where(eq(students.id, studentId));
+  }
+
+  export async function validateRecurringScheduleAvailability(
+    t: DBTransaction,
+    studentId: string,
+    teacherId: string,
+    scheduledStartAt: Date,
+    scheduledEndAt: Date,
+    locale?: string
+  ): Promise<void> {
+    await acquireLocks(t, teacherId, studentId);
+    await validateTeacherAssignment(t, studentId, teacherId, scheduledStartAt, locale);
+    await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, scheduledStartAt, scheduledEndAt, t);
+    await checkOverlaps(
+      t,
+      {
+        studentId,
+        teacherId,
+        startTime: scheduledStartAt,
+        endTime: scheduledEndAt,
+      },
+      locale
+    );
+  }
+
   async function createSingleRecurringInstance(
     t: DBTransaction,
     recurringScheduleId: string,
@@ -1077,42 +1125,16 @@ export namespace SchedulingRepository {
     );
     const scheduledEndAt = new Date(scheduledStartAt.getTime() + input.durationMinutes * 60000);
 
-    await acquireLocks(t, input.teacherId, input.studentId);
-    await validateTeacherAssignment(t, input.studentId, input.teacherId, scheduledStartAt, locale);
-    await TeacherAvailabilityRepository.validateBookingAvailability(
+    await validateRecurringScheduleAvailability(
+      t,
+      input.studentId,
       input.teacherId,
       scheduledStartAt,
       scheduledEndAt,
-      t
-    );
-    await checkOverlaps(
-      t,
-      {
-        studentId: input.studentId,
-        teacherId: input.teacherId,
-        startTime: scheduledStartAt,
-        endTime: scheduledEndAt,
-      },
       locale
     );
 
-    if (input.quotaDeducted) {
-      const [student] = await t
-        .select({ classesRemaining: students.classesRemaining })
-        .from(students)
-        .where(eq(students.id, input.studentId))
-        .limit(1);
-
-      if (!student || student.classesRemaining <= 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("outOfQuota"));
-      }
-
-      await t
-        .update(students)
-        .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
-        .where(eq(students.id, input.studentId));
-    }
+    await handleQuotaDeduction(t, input.studentId, !!input.quotaDeducted, locale);
 
     const idempotencyKey = `recurring-${recurringScheduleId}-${day.dayOfWeek}-${scheduledStartAt.toISOString()}`;
 

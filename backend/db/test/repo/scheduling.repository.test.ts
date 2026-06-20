@@ -969,9 +969,9 @@ describe("Scheduling Repository logic", () => {
       });
     });
 
-    test("createRecurringScheduleWithInstances success and conflict checks", async () => {
+    test("createRecurringScheduleWithInstances success", async () => {
       await runInRollback(async tx => {
-        const { student, teacher, now } = await setupTestEntities(tx, "RecClass", { skipInstance: true });
+        const { student, teacher } = await setupTestEntities(tx, "RecClass", { skipInstance: true });
 
         await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
 
@@ -1019,6 +1019,34 @@ describe("Scheduling Repository logic", () => {
           .where(eq(classInstances.id, result.classInstanceIds[0]));
         expect(instance.bookingTimezone).toBe("UTC");
         expect(instance.bookingUtcOffset).toBe(0);
+      });
+    });
+
+    test("createRecurringScheduleWithInstances conflict checks", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher, now } = await setupTestEntities(tx, "RecClass", { skipInstance: true });
+
+        await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
+
+        const effectiveFrom = new Date("2026-06-22T00:00:00Z");
+        const effectiveUntil = new Date("2026-07-22T00:00:00Z");
+
+        await SchedulingRepository.createRecurringScheduleWithInstances(
+          {
+            studentId: student.id,
+            teacherId: teacher.id,
+            durationMinutes: 60,
+            defaultStartTime: "10:00:00",
+            timezone: "UTC",
+            effectiveFrom,
+            effectiveUntil,
+            days: [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }],
+            classType: "REGULAR",
+            generateInstancesForWeeks: 1,
+            quotaDeducted: false,
+          },
+          tx
+        );
 
         const { student: student2 } = await setupTestEntities(tx, "RecClass2", { skipInstance: true });
         await tx.insert(teacherAssignments).values({ studentId: student2.id, teacherId: teacher.id, assignedAt: now });

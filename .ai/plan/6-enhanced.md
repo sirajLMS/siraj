@@ -2544,6 +2544,12 @@ Test cases:
 - `getTeacherDirectoryMetrics` returns correct activated count
 - `getTeacherDirectoryMetrics` returns correct deactivated count
 - `getTeacherDirectoryMetrics` handles empty table gracefully
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all
+
 
 *Step 2: Database repository tests for weekly schedule*
 
@@ -2556,6 +2562,11 @@ Test cases:
 - `getWeeklyWorkloadMetrics` returns correct formatted hours string
 - `getWeeklyWorkloadMetrics` excludes NOT_ACTIVATED instances
 - `getWeeklyWorkloadMetrics` returns zeros for teacher with no classes
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all
 
 *Step 3: Database repository tests for recurring schedule creation*
 
@@ -2568,6 +2579,11 @@ Test cases:
 - `createRecurringScheduleWithInstances` throws on teacher unavailability conflict
 - `createRecurringScheduleWithInstances` throws on missing teacher assignment
 - `createRecurringScheduleWithInstances` rolls back all inserts on failure
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all
 
 *Step 4: GraphQL integration tests*
 
@@ -2582,6 +2598,11 @@ Test cases:
 - `createRecurringClass` mutation creates recurring schedule for admin
 - `createRecurringClass` mutation returns error for teacher
 - `createRecurringClass` mutation returns error for invalid input (no days)
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all
 
 **Test Execution Requirements:**
 - Run all tests:
@@ -2591,13 +2612,13 @@ Test cases:
   ```
 
 **Success Criteria / Check Progress Points:**
-- [x] All teacher directory repository tests pass
-- [x] All weekly schedule repository tests pass
-- [x] All workload metrics repository tests pass
-- [x] All recurring schedule creation repository tests pass
-- [x] All GraphQL integration tests pass
-- [x] `bun run test:db` passes with 0 failures
-- [x] `bun run test:graphql` passes with 0 failures
+- [ ] All teacher directory repository tests pass
+- [ ] All weekly schedule repository tests pass
+- [ ] All workload metrics repository tests pass
+- [ ] All recurring schedule creation repository tests pass
+- [ ] All GraphQL integration tests pass
+- [ ] `bun run test:db` passes with 0 failures
+- [ ] `bun run test:graphql` passes with 0 failures
 
 ---
 

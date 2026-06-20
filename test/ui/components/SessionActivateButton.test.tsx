@@ -17,13 +17,23 @@ const mockLabels = {
   connectingLabel: "Connecting...",
 };
 
+function renderButton(options: { disabled?: boolean; isConnecting?: boolean; onActivate?: () => void }) {
+  const onActivate = options.onActivate ?? mock(() => {});
+  renderWithWrapper(
+    <SessionActivateButton
+      disabled={options.disabled ?? false}
+      isConnecting={options.isConnecting ?? false}
+      onActivate={onActivate}
+      {...mockLabels}
+    />,
+    { permissions: [] }
+  );
+  return { onActivate };
+}
+
 describe("SessionActivateButton", () => {
   test("renders activate button in ready state", () => {
-    const onActivate = mock(() => {});
-    renderWithWrapper(
-      <SessionActivateButton disabled={false} isConnecting={false} onActivate={onActivate} {...mockLabels} />,
-      { permissions: [] }
-    );
+    renderButton({ disabled: false, isConnecting: false });
 
     const button = screen.getByRole("button", { name: /activate session/i });
     expect(button).toBeVisible();
@@ -31,11 +41,7 @@ describe("SessionActivateButton", () => {
   });
 
   test("renders connecting state with spinner", () => {
-    const onActivate = mock(() => {});
-    renderWithWrapper(
-      <SessionActivateButton disabled={false} isConnecting={true} onActivate={onActivate} {...mockLabels} />,
-      { permissions: [] }
-    );
+    renderButton({ disabled: false, isConnecting: true });
 
     const button = screen.getByRole("button", { name: /connecting/i });
     expect(button).toBeVisible();
@@ -43,11 +49,7 @@ describe("SessionActivateButton", () => {
   });
 
   test("button is disabled when disabled prop is true", () => {
-    const onActivate = mock(() => {});
-    renderWithWrapper(
-      <SessionActivateButton disabled={true} isConnecting={false} onActivate={onActivate} {...mockLabels} />,
-      { permissions: [] }
-    );
+    renderButton({ disabled: true, isConnecting: false });
 
     const button = screen.getByRole("button", { name: /activate session/i });
     expect(button).toBeDisabled();
@@ -55,10 +57,7 @@ describe("SessionActivateButton", () => {
 
   test("clicking button calls onActivate", async () => {
     const onActivate = mock(() => {});
-    renderWithWrapper(
-      <SessionActivateButton disabled={false} isConnecting={false} onActivate={onActivate} {...mockLabels} />,
-      { permissions: [] }
-    );
+    renderButton({ disabled: false, isConnecting: false, onActivate });
 
     const user = userEvent.setup();
     const button = screen.getByRole("button", { name: /activate session/i });
@@ -69,10 +68,7 @@ describe("SessionActivateButton", () => {
 
   test("disabled button does not trigger onActivate", () => {
     const onActivate = mock(() => {});
-    renderWithWrapper(
-      <SessionActivateButton disabled={true} isConnecting={false} onActivate={onActivate} {...mockLabels} />,
-      { permissions: [] }
-    );
+    renderButton({ disabled: true, isConnecting: false, onActivate });
 
     const button = screen.getByRole("button", { name: /activate session/i });
     expect(button).toBeDisabled();

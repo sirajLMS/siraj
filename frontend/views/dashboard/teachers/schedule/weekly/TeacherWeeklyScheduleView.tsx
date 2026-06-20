@@ -23,6 +23,63 @@ interface TeacherWeeklyScheduleViewProps {
   readonly onAddClass?: () => void;
 }
 
+interface ScheduleFooterLegendProps {
+  readonly bookedClassLabel: string;
+  readonly availableSlotLabel: string;
+  readonly lastUpdatedText: string;
+}
+
+export function ScheduleFooterLegend({
+  bookedClassLabel,
+  availableSlotLabel,
+  lastUpdatedText,
+}: Readonly<ScheduleFooterLegendProps>) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        justifyContent: "space-between",
+        alignItems: { xs: "flex-start", md: "center" },
+        gap: 2,
+        mt: 2,
+      }}
+    >
+      <Stack direction="row" spacing={3} sx={{ alignItems: "center" }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <Box
+            sx={theme => ({
+              width: 12,
+              height: 12,
+              bgcolor: theme.palette.primary.main,
+              borderRadius: 0.5,
+            })}
+          />
+          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {bookedClassLabel}
+          </Typography>
+        </Stack>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <Box
+            sx={theme => ({
+              width: 12,
+              height: 12,
+              border: `1px solid ${theme.palette.border.light}`,
+              borderRadius: 0.5,
+            })}
+          />
+          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {availableSlotLabel}
+          </Typography>
+        </Stack>
+      </Stack>
+      <Typography variant="caption" sx={theme => ({ color: theme.palette.text.disabled })}>
+        {lastUpdatedText}
+      </Typography>
+    </Box>
+  );
+}
+
 export default function TeacherWeeklyScheduleView({
   schedule,
   onRemoveClass,
@@ -108,48 +165,11 @@ export default function TeacherWeeklyScheduleView({
       </SectionPanel>
 
       {/* Footer Legend */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          justifyContent: "space-between",
-          alignItems: { xs: "flex-start", md: "center" },
-          gap: 2,
-          mt: 2,
-        }}
-      >
-        <Stack direction="row" spacing={3} sx={{ alignItems: "center" }}>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <Box
-              sx={theme => ({
-                width: 12,
-                height: 12,
-                bgcolor: theme.palette.primary.main,
-                borderRadius: 0.5,
-              })}
-            />
-            <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {t("grid.bookedClass")}
-            </Typography>
-          </Stack>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <Box
-              sx={theme => ({
-                width: 12,
-                height: 12,
-                border: `1px solid ${theme.palette.border.light}`,
-                borderRadius: 0.5,
-              })}
-            />
-            <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {t("grid.availableSlot")}
-            </Typography>
-          </Stack>
-        </Stack>
-        <Typography variant="caption" sx={theme => ({ color: theme.palette.text.disabled })}>
-          {t("grid.lastUpdated", { time: schedule.lastUpdated })}
-        </Typography>
-      </Box>
+      <ScheduleFooterLegend
+        bookedClassLabel={t("grid.bookedClass")}
+        availableSlotLabel={t("grid.availableSlot")}
+        lastUpdatedText={t("grid.lastUpdated", { time: schedule.lastUpdated })}
+      />
     </PageContainer>
   );
 }
