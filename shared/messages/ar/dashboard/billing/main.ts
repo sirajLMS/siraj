@@ -11,6 +11,9 @@ export const billing: BillingLabels = {
   viewAllNegativeBalance: "عرض جميع الطلاب برصيد سالب",
   requiresAttention: "يتطلب اهتماماً",
   showingResults: "عرض {shown} من {total} نتيجة",
+  invalidUserId: "معرف المستخدم غير صالح",
+  billingProfileTitle: "الملف المالي للمستخدم",
+  profileForUser: "تفاصيل الملف المالي للمستخدم {userId}",
   adminMetrics: {
     totalOutstanding: "إجمالي المستحقات",
     pendingInvoices: "الفواتير المعلقة",

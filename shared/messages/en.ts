@@ -1659,6 +1659,9 @@ const en: MessageSchema = {
       viewAllNegativeBalance: "View All Students with Negative Balance",
       requiresAttention: "Requires Attention",
       showingResults: "Showing {shown} of {total} results",
+      invalidUserId: "Invalid User ID",
+      billingProfileTitle: "User Billing Profile",
+      profileForUser: "Billing profile details for user {userId}",
       adminMetrics: {
         totalOutstanding: "Total Outstanding",
         pendingInvoices: "Pending Invoices",

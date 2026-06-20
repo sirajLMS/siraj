@@ -15,6 +15,9 @@ function buildPageLabels(t: BillingTranslator) {
     viewAllNegativeBalance: t("viewAllNegativeBalance"),
     requiresAttention: t("requiresAttention"),
     showingResults: t.raw("showingResults") as string,
+    invalidUserId: t("invalidUserId"),
+    billingProfileTitle: t("billingProfileTitle"),
+    profileForUser: t.raw("profileForUser") as string,
   };
 }
 

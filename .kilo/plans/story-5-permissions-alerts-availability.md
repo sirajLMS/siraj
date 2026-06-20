@@ -2251,12 +2251,12 @@ bun run test:ui:components
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] Sidebar shows "Schedule Search" nav item for users with `schedule.search_availability`.
-- [ ] `/search-schedule` route is accessible.
-- [ ] `/users/[id]/billing-profile` route is accessible and gated by `user.view_profile`.
-- [ ] All new i18n keys added to English and Arabic.
-- [ ] Navigation config updated with proper permission gate.
-- [ ] `bun run test:ui:components` passes with 0 failures.
+- [x] Sidebar shows "Schedule Search" nav item for users with `schedule.search_availability`.
+- [x] `/search-schedule` route is accessible.
+- [x] `/users/[id]/billing-profile` route is accessible and gated by `user.view_profile`.
+- [x] All new i18n keys added to English and Arabic.
+- [x] Navigation config updated with proper permission gate.
+- [x] `bun run test:ui:components` passes with 0 failures.
 
 ---
 

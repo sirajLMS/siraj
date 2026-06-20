@@ -12,6 +12,9 @@ export interface BillingLabels {
   readonly viewAllNegativeBalance: string;
   readonly requiresAttention: string;
   readonly showingResults: string;
+  readonly invalidUserId: string;
+  readonly billingProfileTitle: string;
+  readonly profileForUser: string;
   readonly adminMetrics: {
     readonly totalOutstanding: string;
     readonly pendingInvoices: string;
