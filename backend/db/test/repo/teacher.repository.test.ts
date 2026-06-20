@@ -95,4 +95,12 @@ describe("TeacherRepository", () => {
       expect(afterDelete.length).toBe(0);
     });
   });
+
+  it("getTeacherDirectoryMetrics handles empty table gracefully", async () => {
+    await runInRollback(async tx => {
+      const metrics = await TeacherRepository.getTeacherDirectoryMetrics(tx);
+      expect(metrics.activated).toBeGreaterThanOrEqual(0);
+      expect(metrics.deactivated).toBeGreaterThanOrEqual(0);
+    });
+  });
 });

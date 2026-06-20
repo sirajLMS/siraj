@@ -1,10 +1,16 @@
 import { describe, expect, test } from "bun:test";
 import { teachers as demoTeachers } from "@/shared/demo-users";
 import { demoLoginMutationDocument } from "../sharedDocuments/auth.documents";
+import { createRecurringClassMutationDocument } from "../sharedDocuments/recurring-class.documents";
 import {
   dailyScheduleListQueryDocument,
   dailyScheduleMetricsQueryDocument,
 } from "../sharedDocuments/schedule.documents";
+import {
+  teacherWeeklyScheduleGridQueryDocument,
+  teacherWorkloadMetricsQueryDocument,
+} from "../sharedDocuments/weekly-schedule.documents";
+import { fetchFirstStudentTeacherPair, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -142,6 +148,186 @@ describe("GraphQL Schedule Integration Tests", () => {
       context: {
         headers: {
           Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+
+    expect(result.error).toBeDefined();
+  });
+
+  test("teacherWeeklyScheduleGrid returns schedule for admin", async () => {
+    if (!authToken) throw new Error("No auth token");
+
+    const { teacherId } = await fetchFirstStudentTeacherPair(authToken, testDate);
+
+    const result = await testClient.query({
+      query: teacherWeeklyScheduleGridQueryDocument,
+      variables: {
+        teacherId,
+        weekDate: testDate,
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      },
+    });
+
+    expect(result.data).toBeDefined();
+    expect(result.error).toBeUndefined();
+    const schedule = result.data?.teacherWeeklyScheduleGrid;
+    if (!schedule) throw new Error("No schedule returned");
+
+    expect(schedule.id).toBeDefined();
+    expect(schedule.teacherId).toBe(teacherId);
+    expect(Array.isArray(schedule.classes)).toBeTrue();
+  });
+
+  test("teacherWeeklyScheduleGrid returns own schedule for teacher", async () => {
+    const teacherToken = await loginDemoUser("teacher_default");
+
+    const result = await testClient.query({
+      query: teacherWeeklyScheduleGridQueryDocument,
+      variables: {
+        teacherId: null,
+        weekDate: testDate,
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+
+    expect(result.data).toBeDefined();
+    expect(result.error).toBeUndefined();
+    const schedule = result.data?.teacherWeeklyScheduleGrid;
+    if (!schedule) throw new Error("No schedule returned");
+
+    expect(schedule.id).toBeDefined();
+    expect(schedule.teacherId).toBeDefined();
+    expect(Array.isArray(schedule.classes)).toBeTrue();
+  });
+
+  test("teacherWeeklyScheduleGrid denies cross-teacher access", async () => {
+    if (!authToken) throw new Error("No auth token");
+    const teacherToken = await loginDemoUser("teacher_default");
+
+    const { teacherId: adminTeacherId } = await fetchFirstStudentTeacherPair(authToken, testDate);
+
+    const result = await testClient.query({
+      query: teacherWeeklyScheduleGridQueryDocument,
+      variables: {
+        teacherId: adminTeacherId,
+        weekDate: testDate,
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+
+    expect(result.error).toBeDefined();
+  });
+
+  test("teacherWorkloadMetrics returns metrics for admin", async () => {
+    if (!authToken) throw new Error("No auth token");
+
+    const { teacherId } = await fetchFirstStudentTeacherPair(authToken, testDate);
+
+    const result = await testClient.query({
+      query: teacherWorkloadMetricsQueryDocument,
+      variables: {
+        teacherId,
+        weekDate: testDate,
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      },
+    });
+
+    expect(result.data).toBeDefined();
+    expect(result.error).toBeUndefined();
+    const metrics = result.data?.teacherWorkloadMetrics;
+    if (!metrics) throw new Error("No metrics returned");
+
+    expect(metrics.id).toBeDefined();
+    expect(metrics.weeklyHoursWorked).toBeDefined();
+    expect(metrics.totalMinutes).toBeGreaterThanOrEqual(0);
+    expect(metrics.classCount).toBeGreaterThanOrEqual(0);
+  });
+
+  test("teacherWorkloadMetrics returns own metrics for teacher", async () => {
+    const teacherToken = await loginDemoUser("teacher_default");
+
+    const result = await testClient.query({
+      query: teacherWorkloadMetricsQueryDocument,
+      variables: {
+        teacherId: null,
+        weekDate: testDate,
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+
+    expect(result.data).toBeDefined();
+    expect(result.error).toBeUndefined();
+    const metrics = result.data?.teacherWorkloadMetrics;
+    if (!metrics) throw new Error("No metrics returned");
+
+    expect(metrics.id).toBeDefined();
+    expect(metrics.weeklyHoursWorked).toBeDefined();
+  });
+
+  test("createRecurringClass denied for teacher role", async () => {
+    const teacherToken = await loginDemoUser("teacher_default");
+
+    const result = await testClient.mutate({
+      mutation: createRecurringClassMutationDocument,
+      variables: {
+        input: {
+          studentId: "fake-student-id",
+          teacherId: "fake-teacher-id",
+          durationMinutes: 60,
+          defaultStartTime: "10:00:00",
+          timezone: "UTC",
+          days: [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }],
+        },
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+
+    expect(result.error).toBeDefined();
+  });
+
+  test("createRecurringClass denied for invalid input (no days)", async () => {
+    if (!authToken) throw new Error("No auth token");
+
+    const result = await testClient.mutate({
+      mutation: createRecurringClassMutationDocument,
+      variables: {
+        input: {
+          studentId: "fake-student-id",
+          teacherId: "fake-teacher-id",
+          durationMinutes: 60,
+          defaultStartTime: "10:00:00",
+          timezone: "UTC",
+          days: [],
+        },
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
         },
       },
     });

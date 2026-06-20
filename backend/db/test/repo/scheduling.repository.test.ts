@@ -1076,5 +1076,193 @@ describe("Scheduling Repository logic", () => {
         expect(errorCaught).toBe(true);
       });
     });
+
+    test("getWeeklyScheduleGrid returns empty array for teacher with no classes", async () => {
+      await runInRollback(async tx => {
+        const { teacher } = await setupTestEntities(tx, "WeeklyEmpty", { skipInstance: true });
+        const weekStart = new Date("2026-06-22T00:00:00Z");
+        const weekEnd = new Date("2026-06-29T00:00:00Z");
+
+        const { getWeeklyScheduleGrid } = await import("@/backend/db/repo/scheduling-queries.repository");
+        const grid = await getWeeklyScheduleGrid(teacher.id, weekStart, weekEnd, tx);
+        expect(grid.length).toBe(0);
+      });
+    });
+
+    test("getWeeklyScheduleGrid excludes soft-deleted instances", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "WeeklyDeleted", { skipInstance: true });
+
+        const c1 = await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: new Date("2026-06-22T10:00:00Z"),
+          scheduledEndAt: new Date("2026-06-22T11:00:00Z"),
+          durationMinutes: 60,
+          executionState: "ACTIVATED",
+        });
+
+        await tx.update(classInstances).set({ deletedAt: new Date() }).where(eq(classInstances.id, c1.id));
+
+        const { getWeeklyScheduleGrid } = await import("@/backend/db/repo/scheduling-queries.repository");
+        const grid = await getWeeklyScheduleGrid(
+          teacher.id,
+          new Date("2026-06-22T00:00:00Z"),
+          new Date("2026-06-29T00:00:00Z"),
+          tx
+        );
+        expect(grid.length).toBe(0);
+      });
+    });
+
+    test("getWeeklyWorkloadMetrics returns zeros for teacher with no classes", async () => {
+      await runInRollback(async tx => {
+        const { teacher } = await setupTestEntities(tx, "WorkloadEmpty", { skipInstance: true });
+        const weekStart = new Date("2026-06-22T00:00:00Z");
+        const weekEnd = new Date("2026-06-29T00:00:00Z");
+
+        const { getWeeklyWorkloadMetrics } = await import("@/backend/db/repo/scheduling-queries.repository");
+        const workload = await getWeeklyWorkloadMetrics(teacher.id, weekStart, weekEnd, tx);
+        expect(workload.classCount).toBe(0);
+        expect(workload.totalMinutes).toBe(0);
+        expect(workload.totalHoursFormatted).toBe("0:00");
+      });
+    });
+
+    test("createRecurringScheduleWithInstances skips inactive days", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "RecSkipInactive", { skipInstance: true });
+        await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
+
+        const result = await SchedulingRepository.createRecurringScheduleWithInstances(
+          {
+            studentId: student.id,
+            teacherId: teacher.id,
+            durationMinutes: 60,
+            defaultStartTime: "10:00:00",
+            timezone: "UTC",
+            effectiveFrom: new Date("2026-06-22T00:00:00Z"),
+            effectiveUntil: new Date("2026-07-22T00:00:00Z"),
+            days: [
+              { dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true },
+              { dayOfWeek: "TUESDAY", startTime: "11:00:00", isActive: false },
+              { dayOfWeek: "WEDNESDAY", startTime: "12:00:00", isActive: true },
+            ],
+            classType: "REGULAR",
+            generateInstancesForWeeks: 1,
+            quotaDeducted: true,
+          },
+          tx
+        );
+
+        expect(result.classInstanceIds.length).toBe(2);
+      });
+    });
+
+    test("createRecurringScheduleWithInstances creates correct day rows", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "RecDayRows", { skipInstance: true });
+        await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
+
+        const result = await SchedulingRepository.createRecurringScheduleWithInstances(
+          {
+            studentId: student.id,
+            teacherId: teacher.id,
+            durationMinutes: 60,
+            defaultStartTime: "10:00:00",
+            timezone: "UTC",
+            effectiveFrom: new Date("2026-06-22T00:00:00Z"),
+            effectiveUntil: new Date("2026-07-22T00:00:00Z"),
+            days: [
+              { dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true },
+              { dayOfWeek: "WEDNESDAY", startTime: "14:00:00", isActive: true },
+              { dayOfWeek: "FRIDAY", startTime: "09:00:00", isActive: false },
+            ],
+            classType: "REGULAR",
+            generateInstancesForWeeks: 1,
+            quotaDeducted: true,
+          },
+          tx
+        );
+
+        const { recurringScheduleDays } = await import("@/backend/db/schema");
+        const days = await tx
+          .select()
+          .from(recurringScheduleDays)
+          .where(eq(recurringScheduleDays.recurringScheduleId, result.recurringScheduleId));
+
+        expect(days.length).toBe(3);
+        expect(days.some(d => d.dayOfWeek === "MONDAY")).toBe(true);
+        expect(days.some(d => d.dayOfWeek === "WEDNESDAY")).toBe(true);
+        expect(days.some(d => d.dayOfWeek === "FRIDAY")).toBe(true);
+      });
+    });
+
+    test("createRecurringScheduleWithInstances applies time overrides per day", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "RecTimeOverride", { skipInstance: true });
+        await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
+
+        const result = await SchedulingRepository.createRecurringScheduleWithInstances(
+          {
+            studentId: student.id,
+            teacherId: teacher.id,
+            durationMinutes: 60,
+            defaultStartTime: "10:00:00",
+            timezone: "UTC",
+            effectiveFrom: new Date("2026-06-22T00:00:00Z"),
+            effectiveUntil: new Date("2026-07-22T00:00:00Z"),
+            days: [
+              { dayOfWeek: "MONDAY", startTime: "08:00:00", isActive: true },
+              { dayOfWeek: "WEDNESDAY", startTime: "16:00:00", isActive: true },
+            ],
+            classType: "REGULAR",
+            generateInstancesForWeeks: 1,
+            quotaDeducted: true,
+          },
+          tx
+        );
+
+        const instances = await tx
+          .select()
+          .from(classInstances)
+          .where(eq(classInstances.recurringScheduleId, result.recurringScheduleId));
+
+        expect(instances.length).toBe(2);
+
+        const monInstance = instances.find(i => i.scheduledStartAt.getUTCDay() === 1);
+        const wedInstance = instances.find(i => i.scheduledStartAt.getUTCDay() === 3);
+
+        expect(monInstance?.scheduledStartAt.getUTCHours()).toBe(8);
+        expect(wedInstance?.scheduledStartAt.getUTCHours()).toBe(16);
+      });
+    });
+
+    testRepoError("createRecurringScheduleWithInstances throws on missing teacher assignment", async tx => {
+      const { teacher } = await setupTestEntities(tx, "RecNoAssign1", { skipInstance: true });
+      const { student: unassignedStudent } = await setupStudent(
+        tx,
+        { name: "RecNoAssign Parent", email: `recnoassign-parent-${randomUUID()}@example.com` },
+        {},
+        { name: "RecNoAssign Student" }
+      );
+
+      await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, unassignedStudent.id));
+
+      await SchedulingRepository.createRecurringScheduleWithInstances(
+        {
+          studentId: unassignedStudent.id,
+          teacherId: teacher.id,
+          durationMinutes: 60,
+          defaultStartTime: "10:00:00",
+          timezone: "UTC",
+          effectiveFrom: new Date("2026-06-22T00:00:00Z"),
+          effectiveUntil: new Date("2026-07-22T00:00:00Z"),
+          days: [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }],
+          classType: "REGULAR",
+          generateInstancesForWeeks: 1,
+          quotaDeducted: false,
+        },
+        tx
+      );
+    });
   });
 });
