@@ -1,0 +1,97 @@
+import { and, desc, eq, isNull } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
+import { complaints, notificationDeliveries } from "@/backend/db/schema";
+import { getBackendTranslations } from "@/backend/lib/intl";
+import { logger } from "@/backend/lib/logger";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { AppPermission, ComplaintStatus, NotificationDeliveryStatus } from "@/shared/lib/enum";
+
+export interface SystemAlert {
+  id: string;
+  type: "complaint" | "notification" | "system";
+  title: string;
+  body: string | null;
+  createdAt: Date;
+  severity: "info" | "warning" | "error";
+}
+
+export interface NotificationAlertsResult {
+  id: string;
+  alerts: SystemAlert[];
+  totalCount: number;
+  unreadCount: number;
+}
+
+export namespace NotificationAlertsService {
+  export async function getAlerts(userId: string, locale?: string): Promise<NotificationAlertsResult> {
+    try {
+      const canViewAlerts = await PermissionsService.hasPermission(userId, AppPermission.NOTIFICATION_VIEW_ALERTS);
+      if (!canViewAlerts) {
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(t("unauthorizedAction"));
+      }
+
+      const unansweredComplaints = await db
+        .select({
+          id: complaints.id,
+          body: complaints.body,
+          createdAt: complaints.createdAt,
+        })
+        .from(complaints)
+        .where(and(eq(complaints.status, ComplaintStatus.UNANSWERED), isNull(complaints.deletedAt)))
+        .orderBy(desc(complaints.createdAt))
+        .limit(20);
+
+      const recentNotifications = await db
+        .select({
+          id: notificationDeliveries.id,
+          title: notificationDeliveries.title,
+          body: notificationDeliveries.body,
+          createdAt: notificationDeliveries.createdAt,
+          status: notificationDeliveries.status,
+        })
+        .from(notificationDeliveries)
+        .where(eq(notificationDeliveries.userId, userId))
+        .orderBy(desc(notificationDeliveries.createdAt))
+        .limit(20);
+
+      const alerts: SystemAlert[] = [];
+
+      for (const complaint of unansweredComplaints) {
+        alerts.push({
+          id: `complaint-${complaint.id}`,
+          type: "complaint",
+          title: "New Unanswered Complaint",
+          body: complaint.body.length > 100 ? `${complaint.body.substring(0, 100)}...` : complaint.body,
+          createdAt: complaint.createdAt,
+          severity: "warning",
+        });
+      }
+
+      for (const notification of recentNotifications) {
+        alerts.push({
+          id: `notification-${notification.id}`,
+          type: "notification",
+          title: notification.title ?? "System Notification",
+          body: notification.body,
+          createdAt: notification.createdAt,
+          severity: notification.status === NotificationDeliveryStatus.FAILED ? "error" : "info",
+        });
+      }
+
+      alerts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+      const unreadCount = recentNotifications.filter(n => n.status !== NotificationDeliveryStatus.OPENED).length;
+
+      return {
+        id: `notification-alerts-${userId}`,
+        alerts,
+        totalCount: alerts.length,
+        unreadCount,
+      };
+    } catch (error) {
+      logger.error("Error fetching notification alerts", { userId, error });
+      throw error;
+    }
+  }
+}
