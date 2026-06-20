@@ -568,6 +568,42 @@ VALUES (
         'View specific user comprehensive account and billing details',
         'Users',
         true
+    ),
+    (
+        gen_random_uuid (),
+        'staff.view_directory',
+        'staff',
+        'view_directory',
+        'Access the global Teachers Directory with summary metrics and data table',
+        'Administration',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'schedule.view_weekly',
+        'schedule',
+        'view_weekly',
+        'View a specific teacher weekly calendar grid with colored time-blocks',
+        'Scheduling',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'schedule.view_workload',
+        'schedule',
+        'view_workload',
+        'View aggregated weekly capacity metrics (Weekly hours worked)',
+        'Scheduling',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'schedule.create_class',
+        'schedule',
+        'create_class',
+        'Access the Add Class workflow and create new recurring scheduled sessions',
+        'Scheduling',
+        true
     ) ON CONFLICT (key) DO
 UPDATE
 SET
@@ -727,7 +763,11 @@ WHERE
         'permission_groups.assign',
         'notification.view_alerts',
         'billing.view_unpaid_invoices',
-        'user.view_profile'
+        'user.view_profile',
+        'staff.view_directory',
+        'schedule.view_weekly',
+        'schedule.view_workload',
+        'schedule.create_class'
     );
 
 INSERT INTO
@@ -760,7 +800,11 @@ WHERE
         'notification.view_alerts',
         'billing.view_unpaid_invoices',
         'user.view_profile',
-        'schedule.search_availability'
+        'schedule.search_availability',
+        'staff.view_directory',
+        'schedule.view_weekly',
+        'schedule.view_workload',
+        'schedule.create_class'
     );
 
 INSERT INTO
@@ -780,7 +824,9 @@ WHERE
         'session.update_status.absent',
         'session.update_status.leave',
         'teacher.view_dashboard',
-        'resources.list'
+        'resources.list',
+        'schedule.view_weekly',
+        'schedule.view_workload'
     );
 
 INSERT INTO

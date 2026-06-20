@@ -13,6 +13,15 @@ import { DayOfWeek, VacationRequestStatus } from "@/shared/lib/enum";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
+type TeacherGender = string | null;
+
+interface TeacherShortInfo {
+  teacherId: string;
+  teacherName: string | null;
+  teacherGender: TeacherGender;
+  teacherTimezone: string;
+}
+
 const JS_DAY_TO_ENUM: Record<number, DayOfWeek> = {
   0: DayOfWeek.SUNDAY,
   1: DayOfWeek.MONDAY,
@@ -73,6 +82,138 @@ function isWithinTimeWindow(
   windowEndMinutes: number
 ): boolean {
   return bookingStartMinutes >= windowStartMinutes && bookingEndMinutes <= windowEndMinutes;
+}
+
+function getBlockedRanges(
+  dayUnavail: Types.TeacherRecurringUnavailabilitySelectType[],
+  searchStart: number,
+  searchEnd: number
+): { start: number; end: number }[] {
+  const blockedRanges: { start: number; end: number }[] = [];
+  for (const u of dayUnavail) {
+    const uStart = timeToMinutes(u.startTime);
+    const uEnd = timeToMinutes(u.endTime);
+    if (uStart < searchEnd && uEnd > searchStart) {
+      blockedRanges.push({
+        start: Math.max(uStart, searchStart),
+        end: Math.min(uEnd, searchEnd),
+      });
+    }
+  }
+  return blockedRanges;
+}
+
+function mergeBlockedRanges(blockedRanges: { start: number; end: number }[]): { start: number; end: number }[] {
+  const sorted = [...blockedRanges].sort((a, b) => a.start - b.start);
+  const mergedBlocked: { start: number; end: number }[] = [];
+  for (const range of sorted) {
+    if (mergedBlocked.length > 0 && range.start <= mergedBlocked[mergedBlocked.length - 1].end) {
+      mergedBlocked[mergedBlocked.length - 1].end = Math.max(mergedBlocked[mergedBlocked.length - 1].end, range.end);
+    } else {
+      mergedBlocked.push({ ...range });
+    }
+  }
+  return mergedBlocked;
+}
+
+function createGap(
+  teacher: TeacherShortInfo,
+  day: DayOfWeek,
+  startMinutes: number,
+  endMinutes: number
+): Types.TeacherAvailabilityGap {
+  const startHoursStr = String(Math.floor(startMinutes / 60)).padStart(2, "0");
+  const startMinutesStr = String(startMinutes % 60).padStart(2, "0");
+  const endHoursStr = String(Math.floor(endMinutes / 60)).padStart(2, "0");
+  const endMinutesStr = String(endMinutes % 60).padStart(2, "0");
+
+  return {
+    id: `${teacher.teacherId}-${day}-${startMinutes}-${endMinutes}`,
+    teacherId: teacher.teacherId,
+    teacherName: teacher.teacherName ?? "Unknown",
+    teacherGender: teacher.teacherGender,
+    dayOfWeek: day,
+    gapStartTime: `${startHoursStr}:${startMinutesStr}`,
+    gapEndTime: `${endHoursStr}:${endMinutesStr}`,
+    timezone: teacher.teacherTimezone,
+  };
+}
+
+function generateGapsFromBlocked(
+  teacher: TeacherShortInfo,
+  day: DayOfWeek,
+  searchStart: number,
+  searchEnd: number,
+  mergedBlocked: { start: number; end: number }[]
+): Types.TeacherAvailabilityGap[] {
+  const gaps: Types.TeacherAvailabilityGap[] = [];
+  let cursor = searchStart;
+  for (const blocked of mergedBlocked) {
+    if (cursor < blocked.start) {
+      gaps.push(createGap(teacher, day, cursor, blocked.start));
+    }
+    cursor = Math.max(cursor, blocked.end);
+  }
+  if (cursor < searchEnd) {
+    gaps.push(createGap(teacher, day, cursor, searchEnd));
+  }
+  return gaps;
+}
+
+function findGapsForWindow(
+  teacher: TeacherShortInfo,
+  day: DayOfWeek,
+  window: Types.TeacherAvailabilityWindowSelectType,
+  dayUnavail: Types.TeacherRecurringUnavailabilitySelectType[],
+  fromMinutes: number,
+  toMinutes: number
+): Types.TeacherAvailabilityGap[] {
+  const windowStart = timeToMinutes(window.startTime);
+  const windowEnd = timeToMinutes(window.endTime);
+
+  const searchStart = Math.max(windowStart, fromMinutes);
+  const searchEnd = Math.min(windowEnd, toMinutes);
+
+  if (searchStart >= searchEnd) return [];
+
+  const blockedRanges = getBlockedRanges(dayUnavail, searchStart, searchEnd);
+  const mergedBlocked = mergeBlockedRanges(blockedRanges);
+
+  return generateGapsFromBlocked(teacher, day, searchStart, searchEnd, mergedBlocked);
+}
+
+function findGapsForDay(
+  teacher: TeacherShortInfo,
+  day: DayOfWeek,
+  dayWindows: Types.TeacherAvailabilityWindowSelectType[],
+  dayUnavail: Types.TeacherRecurringUnavailabilitySelectType[],
+  fromMinutes: number,
+  toMinutes: number
+): Types.TeacherAvailabilityGap[] {
+  const gaps: Types.TeacherAvailabilityGap[] = [];
+  for (const window of dayWindows) {
+    const windowGaps = findGapsForWindow(teacher, day, window, dayUnavail, fromMinutes, toMinutes);
+    gaps.push(...windowGaps);
+  }
+  return gaps;
+}
+
+function findGapsForTeacher(
+  teacher: TeacherShortInfo,
+  daysOfWeek: DayOfWeek[],
+  windows: Types.TeacherAvailabilityWindowSelectType[],
+  unavailabilities: Types.TeacherRecurringUnavailabilitySelectType[],
+  fromMinutes: number,
+  toMinutes: number
+): Types.TeacherAvailabilityGap[] {
+  const gaps: Types.TeacherAvailabilityGap[] = [];
+  for (const day of daysOfWeek) {
+    const dayWindows = windows.filter(w => (w.dayOfWeek as DayOfWeek) === day);
+    const dayUnavail = unavailabilities.filter(u => (u.dayOfWeek as DayOfWeek) === day);
+    const dayGaps = findGapsForDay(teacher, day, dayWindows, dayUnavail, fromMinutes, toMinutes);
+    gaps.push(...dayGaps);
+  }
+  return gaps;
 }
 
 export namespace TeacherAvailabilityRepository {
@@ -495,76 +636,7 @@ export namespace TeacherAvailabilityRepository {
         .from(teacherRecurringUnavailability)
         .where(eq(teacherRecurringUnavailability.teacherId, teacher.teacherId));
 
-      const gaps: Types.TeacherAvailabilityGap[] = [];
-
-      for (const day of daysOfWeek) {
-        const dayWindows = windows.filter(w => (w.dayOfWeek as DayOfWeek) === day);
-        const dayUnavail = unavailabilities.filter(u => (u.dayOfWeek as DayOfWeek) === day);
-
-        for (const window of dayWindows) {
-          const windowStart = timeToMinutes(window.startTime);
-          const windowEnd = timeToMinutes(window.endTime);
-
-          const searchStart = Math.max(windowStart, fromMinutes);
-          const searchEnd = Math.min(windowEnd, toMinutes);
-
-          if (searchStart >= searchEnd) continue;
-
-          const blockedRanges: { start: number; end: number }[] = [];
-
-          for (const u of dayUnavail) {
-            const uStart = timeToMinutes(u.startTime);
-            const uEnd = timeToMinutes(u.endTime);
-            if (uStart < searchEnd && uEnd > searchStart) {
-              blockedRanges.push({ start: Math.max(uStart, searchStart), end: Math.min(uEnd, searchEnd) });
-            }
-          }
-
-          blockedRanges.sort((a, b) => a.start - b.start);
-
-          const mergedBlocked: { start: number; end: number }[] = [];
-          for (const range of blockedRanges) {
-            if (mergedBlocked.length > 0 && range.start <= mergedBlocked[mergedBlocked.length - 1].end) {
-              mergedBlocked[mergedBlocked.length - 1].end = Math.max(
-                mergedBlocked[mergedBlocked.length - 1].end,
-                range.end
-              );
-            } else {
-              mergedBlocked.push({ ...range });
-            }
-          }
-
-          let cursor = searchStart;
-          for (const blocked of mergedBlocked) {
-            if (cursor < blocked.start) {
-              gaps.push({
-                id: `${teacher.teacherId}-${day}-${cursor}-${blocked.start}`,
-                teacherId: teacher.teacherId,
-                teacherName: teacher.teacherName ?? "Unknown",
-                teacherGender: teacher.teacherGender,
-                dayOfWeek: day,
-                gapStartTime: `${String(Math.floor(cursor / 60)).padStart(2, "0")}:${String(cursor % 60).padStart(2, "0")}`,
-                gapEndTime: `${String(Math.floor(blocked.start / 60)).padStart(2, "0")}:${String(blocked.start % 60).padStart(2, "0")}`,
-                timezone: teacher.teacherTimezone,
-              });
-            }
-            cursor = Math.max(cursor, blocked.end);
-          }
-
-          if (cursor < searchEnd) {
-            gaps.push({
-              id: `${teacher.teacherId}-${day}-${cursor}-${searchEnd}`,
-              teacherId: teacher.teacherId,
-              teacherName: teacher.teacherName ?? "Unknown",
-              teacherGender: teacher.teacherGender,
-              dayOfWeek: day,
-              gapStartTime: `${String(Math.floor(cursor / 60)).padStart(2, "0")}:${String(cursor % 60).padStart(2, "0")}`,
-              gapEndTime: `${String(Math.floor(searchEnd / 60)).padStart(2, "0")}:${String(searchEnd % 60).padStart(2, "0")}`,
-              timezone: teacher.teacherTimezone,
-            });
-          }
-        }
-      }
+      const gaps = findGapsForTeacher(teacher, daysOfWeek, windows, unavailabilities, fromMinutes, toMinutes);
 
       if (gaps.length > 0) {
         result.push({
