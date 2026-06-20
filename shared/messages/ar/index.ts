@@ -34,6 +34,7 @@ import {
 import { suggestions as suggestionsLabels } from "./dashboard/suggestions";
 import {
   availability as teacherAvailability,
+  teacherCreateRecurringClass,
   dashboard as teacherDashboard,
   futureSchedule as teacherFutureSchedule,
   onboarding as teacherOnboarding,
@@ -82,6 +83,7 @@ export const arTranslations = {
     classDetails,
     classAudit,
     createRecurringClass,
+    teacherCreateRecurringClass,
     teacherAvailability,
     teacherWeeklySchedule,
     teacherFutureSchedule,

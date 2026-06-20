@@ -39,6 +39,7 @@ import type {
 import type { SuggestionsLabels } from "./dashboard/suggestions";
 import type {
   TeacherAvailabilityLabels,
+  TeacherCreateRecurringClassLabels,
   TeacherDashboardLabels,
   TeacherFutureScheduleLabels,
   TeacherOnboardingLabels,
@@ -110,6 +111,7 @@ export type MessageSchema = {
     readonly classDetails: ClassDetailsLabels;
     readonly classAudit: ClassAuditLabels;
     readonly createRecurringClass: CreateRecurringClassLabels;
+    readonly teacherCreateRecurringClass: TeacherCreateRecurringClassLabels;
     readonly teacherAvailability: TeacherAvailabilityLabels;
     readonly teacherWeeklySchedule: TeacherWeeklyScheduleLabels;
     readonly teacherFutureSchedule: TeacherFutureScheduleLabels;

@@ -34,7 +34,7 @@ interface CreateRecurringClassDialogProps {
 }
 
 export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<CreateRecurringClassDialogProps>) {
-  const t = useTranslations("dashboard.createRecurringClass");
+  const t = useTranslations("dashboard.teacherCreateRecurringClass");
   const { isDialogOpen, closeDialog, days, toggleDay, setTimeOverride, toggleTimeOverride, resetDays } =
     useCreateRecurringClassStore();
 

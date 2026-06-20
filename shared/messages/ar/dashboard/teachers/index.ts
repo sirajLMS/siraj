@@ -1,4 +1,5 @@
 export * from "./availability";
+export * from "./create.recurring.class";
 export * from "./dashboard";
 export * from "./directory";
 export * from "./future.schedule";

@@ -891,6 +891,47 @@ const en: MessageSchema = {
         durationMinutesMax: "Minutes cannot exceed 59",
       },
     },
+    teacherCreateRecurringClass: {
+      dialogTitle: "Add Class",
+      fields: {
+        student: "Student",
+        studentPlaceholder: "Search and select a student...",
+        teacher: "Teacher",
+        teacherPlaceholder: "Search and select a teacher...",
+        time: "Time",
+        duration: "Duration",
+        durationMinutes: "Duration (minutes)",
+        days: "Recurring Days",
+        timezone: "Timezone",
+      },
+      days: {
+        monday: "Monday",
+        tuesday: "Tuesday",
+        wednesday: "Wednesday",
+        thursday: "Thursday",
+        friday: "Friday",
+        saturday: "Saturday",
+        sunday: "Sunday",
+      },
+      timeOverride: {
+        addOverride: "Add time override",
+        removeOverride: "Remove override",
+        label: "Custom time",
+      },
+      actions: {
+        create: "Create Class",
+        cancel: "Cancel",
+      },
+      success: {
+        title: "Class Created",
+        description: "Successfully created {count} class instances for the recurring schedule.",
+      },
+      errors: {
+        noDaysSelected: "Please select at least one day for the recurring schedule.",
+        noStudentSelected: "Please select a student.",
+        creationFailed: "Failed to create recurring class. Please try again.",
+      },
+    },
     teacherAvailability: {
       pageTitle: "Teacher Availability Tool",
       pageSubtitle: "Visualize and search available time slots across your faculty workforce.",
