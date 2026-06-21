@@ -31,6 +31,49 @@ Your implementation plan (`implementation_plan.md` or similar) must be **hyper-d
 - **Per-Task Length**: Each task within Section 6 must be at least **300 to 600+ lines long**. You must write out complete code snippets, database schemas, full query logic, and precise UI states.
 - **Zero Placeholder Code**: No `...` inside code blocks. Code examples must be written out fully, displaying exact variable names, typings, error handlers, and imports.
 
+### 📂 Split-File Output Format (MANDATORY)
+Implementation plans MUST NOT be written as a single monolithic `implementation_plan.md` file. Instead, every plan MUST be split into **separate markdown files** inside a dedicated sprint directory at `.ai/siraj_stories/<sprint-number>/`.
+
+This mirrors the sprint 8 layout and keeps each section/task independently readable, reviewable, and editable by both humans and agents.
+
+#### Directory Layout
+```
+.ai/siraj_stories/<N>/                        # One directory per sprint (N = sprint number)
+├── section-0-metadata.md                     # Story Metadata & Context (Section 0)
+├── section-1-core-principles.md              # Core Principles & Strict Rules (Section 1)
+├── section-2-rbac-permissions.md             # RBAC Permissions (Section 2)
+├── section-3-state-machine.md                # State Machine & Threat Alignment (Section 3, omit if N/A)
+├── section-4-security-threats.md             # Security Threat Remediation (Section 4)
+├── section-5-prerequisites.md                # Prerequisites Verification (Section 5)
+├── section-6-tasks/                          # One file per task (Section 6)
+│   ├── task-a-....
+│   ├── task-b-....
+│   └── ...                                   # as needed
+├── section-7-final-verification.md           # Final Verification & Integrity Protocol (Section 7)
+└── appendix.md                               # Appendices (file creation summary, dependency graph, etc.)
+```
+
+#### File Naming Rules
+- **Lowercase kebab-case** for every file and directory name (no spaces, no underscores, no camelCase).
+- **Section files** are named exactly `section-<N>-<short-slug>.md` where `<N>` matches the section number (0–7) and `<short-slug>` is a 1–3 word descriptor (e.g., `core-principles`, `rbac-permissions`, `security-threats`).
+- **Task files** are named `task-<letter>-<short-slug>.md` where `<letter>` is the task letter (a, b, c, ...) and `<short-slug>` describes the task's primary concern (e.g., `migration-enum`, `repositories`, `repo-tests`, `services`, `graphql-pothos`, `frontend-documents`, `graphql-tests`, `frontend-views`, `i18n`).
+- **Appendix** is a single file named `appendix.md`. If multiple appendices are needed, split into `appendix-a-file-summary.md`, `appendix-b-dependency-graph.md`, etc.
+- **Optional sections** (e.g., Section 3 when no state machine applies) may be omitted entirely — do NOT create an empty placeholder file.
+
+#### Content Rules Per File
+- **One section per file** — do NOT mix sections. `section-2-rbac-permissions.md` contains ONLY Section 2 content.
+- **One task per file** — do NOT combine multiple tasks into a single file. Task A goes in `task-a-*.md`, Task B in `task-b-*.md`, etc.
+- **Each file starts with a level-2 heading** matching its section/task title (e.g., `## Section 2: RBAC Permissions (Canonical)` or `### Task A — Repository: <Feature> CRUD Operations`).
+- **Cross-references between files** use relative markdown links, e.g., `See [Task B](./task-b-repositories.md)` or `See [Section 5](./section-5-prerequisites.md)`.
+- **Code blocks must be complete** in every task file — no `...`, no "same as Task A", no placeholders. Each task file must be self-contained and readable on its own.
+
+#### Authoring Workflow
+1. **Create the sprint directory first**: `mkdir -p .ai/siraj_stories/<N>/section-6-tasks`.
+2. **Write sections 0–5 and 7 + appendix as individual files** (one file per section).
+3. **Write each task as its own file** inside `section-6-tasks/`.
+4. **Do NOT generate a combined `implementation_plan.md`** — the split files ARE the plan.
+5. **After writing all files**, list the final directory tree at the end of the chat response so the user can see what was produced.
+
 ---
 
 ## 3. Plan Section Outline & Concrete Examples
