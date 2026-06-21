@@ -1,6 +1,8 @@
 import { expect } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
+import type { CreateRecurringClassInput } from "../generated/gql/graphql-types";
 import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocuments/auth.documents";
+import { createRecurringClassMutationDocument } from "../sharedDocuments/recurring-class.documents";
 import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
 import { testClient } from "./testClient";
 
@@ -119,4 +121,75 @@ export async function fetchFirstStudentTeacherPair(
     studentId: found.student.id,
     teacherId: found.teacher.id,
   };
+}
+
+/**
+ * Verifies that the weekly schedule grid structure has valid shape and correct teacher ID.
+ */
+export function verifyWeeklyScheduleGrid(
+  schedule: { id: string | null; teacherId?: string | null; classes?: unknown[] | null } | null | undefined,
+  expectedTeacherId?: string | null
+): void {
+  expect(schedule).toBeDefined();
+  if (!schedule) throw new Error("No schedule returned");
+  expect(schedule.id).toBeDefined();
+  if (expectedTeacherId !== undefined) {
+    expect(schedule.teacherId).toBe(expectedTeacherId);
+  } else {
+    expect(schedule.teacherId).toBeDefined();
+  }
+  expect(Array.isArray(schedule.classes)).toBeTrue();
+}
+
+/**
+ * Verifies that workload metrics structure is valid.
+ */
+export function verifyWorkloadMetrics(
+  metrics: { id: string | null; weeklyHoursWorked?: unknown } | null | undefined
+): void {
+  expect(metrics).toBeDefined();
+  if (!metrics) throw new Error("No metrics returned");
+  expect(metrics.id).toBeDefined();
+  expect(metrics.weeklyHoursWorked).toBeDefined();
+}
+
+/**
+ * Sends a mutation to create a recurring class.
+ */
+export async function mutateCreateRecurringClass(token: string, input: CreateRecurringClassInput) {
+  return await testClient.mutate({
+    mutation: createRecurringClassMutationDocument,
+    variables: {
+      input,
+    },
+    errorPolicy: "all",
+    context: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  });
+}
+
+/**
+ * Asserts that a recurring class creation request is denied (raises error).
+ */
+export async function assertRecurringClassDenied(
+  token: string,
+  days: { dayOfWeek: string; startTime: string; isActive: boolean }[]
+): Promise<void> {
+  const result = await mutateCreateRecurringClass(token, {
+    studentId: "fake-student-id",
+    teacherId: "fake-teacher-id",
+    durationMinutes: 60,
+    defaultStartTime: "10:00:00",
+    timezone: "UTC",
+    days,
+    classType: "REGULAR",
+    generateInstancesForWeeks: 4,
+    effectiveFrom: null,
+    effectiveUntil: null,
+    timezoneId: null,
+  });
+  expect(result.error).toBeDefined();
 }

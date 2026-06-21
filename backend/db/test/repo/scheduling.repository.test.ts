@@ -1127,29 +1127,40 @@ describe("Scheduling Repository logic", () => {
       });
     });
 
+    const getRecurringPayload = (
+      studentId: string,
+      teacherId: string,
+      days: {
+        dayOfWeek: "FRIDAY" | "MONDAY" | "SATURDAY" | "SUNDAY" | "THURSDAY" | "TUESDAY" | "WEDNESDAY";
+        startTime: string;
+        isActive: boolean;
+      }[],
+      quotaDeducted = true
+    ) => ({
+      studentId,
+      teacherId,
+      durationMinutes: 60,
+      defaultStartTime: "10:00:00",
+      timezone: "UTC",
+      effectiveFrom: new Date("2026-06-22T00:00:00Z"),
+      effectiveUntil: new Date("2026-07-22T00:00:00Z"),
+      days,
+      classType: "REGULAR" as const,
+      generateInstancesForWeeks: 1,
+      quotaDeducted,
+    });
+
     test("createRecurringScheduleWithInstances skips inactive days", async () => {
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "RecSkipInactive", { skipInstance: true });
         await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
 
         const result = await SchedulingRepository.createRecurringScheduleWithInstances(
-          {
-            studentId: student.id,
-            teacherId: teacher.id,
-            durationMinutes: 60,
-            defaultStartTime: "10:00:00",
-            timezone: "UTC",
-            effectiveFrom: new Date("2026-06-22T00:00:00Z"),
-            effectiveUntil: new Date("2026-07-22T00:00:00Z"),
-            days: [
-              { dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true },
-              { dayOfWeek: "TUESDAY", startTime: "11:00:00", isActive: false },
-              { dayOfWeek: "WEDNESDAY", startTime: "12:00:00", isActive: true },
-            ],
-            classType: "REGULAR",
-            generateInstancesForWeeks: 1,
-            quotaDeducted: true,
-          },
+          getRecurringPayload(student.id, teacher.id, [
+            { dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true },
+            { dayOfWeek: "TUESDAY", startTime: "11:00:00", isActive: false },
+            { dayOfWeek: "WEDNESDAY", startTime: "12:00:00", isActive: true },
+          ]),
           tx
         );
 
@@ -1163,23 +1174,11 @@ describe("Scheduling Repository logic", () => {
         await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
 
         const result = await SchedulingRepository.createRecurringScheduleWithInstances(
-          {
-            studentId: student.id,
-            teacherId: teacher.id,
-            durationMinutes: 60,
-            defaultStartTime: "10:00:00",
-            timezone: "UTC",
-            effectiveFrom: new Date("2026-06-22T00:00:00Z"),
-            effectiveUntil: new Date("2026-07-22T00:00:00Z"),
-            days: [
-              { dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true },
-              { dayOfWeek: "WEDNESDAY", startTime: "14:00:00", isActive: true },
-              { dayOfWeek: "FRIDAY", startTime: "09:00:00", isActive: false },
-            ],
-            classType: "REGULAR",
-            generateInstancesForWeeks: 1,
-            quotaDeducted: true,
-          },
+          getRecurringPayload(student.id, teacher.id, [
+            { dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true },
+            { dayOfWeek: "WEDNESDAY", startTime: "14:00:00", isActive: true },
+            { dayOfWeek: "FRIDAY", startTime: "09:00:00", isActive: false },
+          ]),
           tx
         );
 
@@ -1202,22 +1201,10 @@ describe("Scheduling Repository logic", () => {
         await tx.update(students).set({ classesRemaining: 5 }).where(eq(students.id, student.id));
 
         const result = await SchedulingRepository.createRecurringScheduleWithInstances(
-          {
-            studentId: student.id,
-            teacherId: teacher.id,
-            durationMinutes: 60,
-            defaultStartTime: "10:00:00",
-            timezone: "UTC",
-            effectiveFrom: new Date("2026-06-22T00:00:00Z"),
-            effectiveUntil: new Date("2026-07-22T00:00:00Z"),
-            days: [
-              { dayOfWeek: "MONDAY", startTime: "08:00:00", isActive: true },
-              { dayOfWeek: "WEDNESDAY", startTime: "16:00:00", isActive: true },
-            ],
-            classType: "REGULAR",
-            generateInstancesForWeeks: 1,
-            quotaDeducted: true,
-          },
+          getRecurringPayload(student.id, teacher.id, [
+            { dayOfWeek: "MONDAY", startTime: "08:00:00", isActive: true },
+            { dayOfWeek: "WEDNESDAY", startTime: "16:00:00", isActive: true },
+          ]),
           tx
         );
 

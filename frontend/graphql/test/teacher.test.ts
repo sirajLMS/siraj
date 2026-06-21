@@ -3,9 +3,33 @@ import { teachers as demoTeachers } from "@/shared/demo-users";
 import { demoLoginMutationDocument } from "../sharedDocuments/auth.documents";
 import { teacherDirectoryQueryDocument } from "../sharedDocuments/staff-directory.documents";
 import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
-import { loginDemoUser } from "./helpers";
+import { authenticatedRequest, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
+
+async function queryTeachers(token: string, search: string, limit: number) {
+  const data = await authenticatedRequest(token, "query", teachersQueryDocument, {
+    search,
+    limit,
+  });
+  if (!data?.teachers) throw new Error("No teachers returned");
+  return data.teachers;
+}
+
+async function queryTeacherDirectory(
+  token: string,
+  search: string | null = null,
+  limit: number | null = null,
+  offset: number | null = null
+) {
+  const data = await authenticatedRequest(token, "query", teacherDirectoryQueryDocument, {
+    search,
+    limit,
+    offset,
+  });
+  if (!data?.teacherDirectory) throw new Error("No directory returned");
+  return data.teacherDirectory;
+}
 
 describe("GraphQL Teacher Integration Tests", () => {
   setupTestServerLifecycle();
@@ -46,23 +70,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   test("returns list of teachers when authenticated", async () => {
     if (!authToken) throw new Error("No auth token");
 
-    const result = await testClient.query({
-      query: teachersQueryDocument,
-      variables: {
-        search: "",
-        limit: 10,
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      },
-    });
-
-    expect(result.data).toBeDefined();
-    expect(result.error).toBeUndefined();
-    const teachersList = result.data?.teachers;
-    if (!teachersList) throw new Error("No teachers returned");
+    const teachersList = await queryTeachers(authToken, "", 10);
 
     expect(Array.isArray(teachersList)).toBeTrue();
     expect(teachersList.length).toBeGreaterThan(0);
@@ -81,23 +89,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     if (!authToken) throw new Error("No auth token");
 
     // Search using the name from demo-users
-    const result = await testClient.query({
-      query: teachersQueryDocument,
-      variables: {
-        search: expectedTeacher.name,
-        limit: 10,
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      },
-    });
-
-    expect(result.data).toBeDefined();
-    expect(result.error).toBeUndefined();
-    const teachersList = result.data?.teachers;
-    if (!teachersList) throw new Error("No teachers returned");
+    const teachersList = await queryTeachers(authToken, expectedTeacher.name, 10);
 
     expect(Array.isArray(teachersList)).toBeTrue();
 
@@ -108,23 +100,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   test("respects limit argument on teacher query", async () => {
     if (!authToken) throw new Error("No auth token");
 
-    const result = await testClient.query({
-      query: teachersQueryDocument,
-      variables: {
-        search: "",
-        limit: 1,
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      },
-    });
-
-    expect(result.data).toBeDefined();
-    expect(result.error).toBeUndefined();
-    const teachersList = result.data?.teachers;
-    if (!teachersList) throw new Error("No teachers returned");
+    const teachersList = await queryTeachers(authToken, "", 1);
 
     expect(Array.isArray(teachersList)).toBeTrue();
     expect(teachersList.length).toBeLessThanOrEqual(1);
@@ -153,24 +129,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   test("teacherDirectory returns directory data for authorized admin", async () => {
     if (!authToken) throw new Error("No auth token");
 
-    const result = await testClient.query({
-      query: teacherDirectoryQueryDocument,
-      variables: {
-        search: null,
-        limit: null,
-        offset: null,
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      },
-    });
-
-    expect(result.data).toBeDefined();
-    expect(result.error).toBeUndefined();
-    const directory = result.data?.teacherDirectory;
-    if (!directory) throw new Error("No directory returned");
+    const directory = await queryTeacherDirectory(authToken, null, null, null);
 
     expect(directory.id).toBeDefined();
     expect(directory.metrics).toBeDefined();
@@ -185,24 +144,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     const expectedTeacher = demoTeachers[0];
     if (!expectedTeacher) throw new Error("No demo teachers");
 
-    const result = await testClient.query({
-      query: teacherDirectoryQueryDocument,
-      variables: {
-        search: expectedTeacher.name,
-        limit: null,
-        offset: null,
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      },
-    });
-
-    expect(result.data).toBeDefined();
-    expect(result.error).toBeUndefined();
-    const directory = result.data?.teacherDirectory;
-    if (!directory) throw new Error("No directory returned");
+    const directory = await queryTeacherDirectory(authToken, expectedTeacher.name, null, null);
 
     const matched = directory.rows?.some(r => r?.name === expectedTeacher.name);
     expect(matched).toBeTrue();
