@@ -246,7 +246,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           address: "Fake Address",
           dateOfBirth: "1990-01-01",
           gender: "Male",
-          hourlyRate: 20,
+          hourlyRate: "20",
           nationalId: "12345",
           phone: "+1111111111",
           qualifications: "None",
