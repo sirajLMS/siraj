@@ -1,7 +1,7 @@
 # Story 7 Patch Plan — Missing Tests, Security Coverage & Mock Store Cleanup
 
 **Source plan:** `.kilo/plans/story-7-permissions-and-permission-groups.md` (fully implemented)
-**Patch scope:** Address 3 core gaps: (1) missing GraphQL integration tests for 3 features, (2) missing security test coverage for Section 4 threats, (3) residual mock store type import.
+**Patch scope:** Address 5 core gaps: (1) missing GraphQL integration tests for 3 features, (2) missing security test coverage for Section 4 threats, (3) repository coverage verification at 100%, (4) security logic tests for DB trigger compatibility, (5) residual mock store type import.
 **Status:** Planning phase — awaiting approval for execution.
 
 ---
@@ -24,6 +24,8 @@
 |---|---|---|
 | Missing GraphQL integration tests | **HIGH** | Staff profile, DST migration, parent directory have zero frontend integration tests |
 | Missing security test coverage | **HIGH** | Section 4 threats 2-4 have no test cases verifying permission denial |
+| Missing repository coverage verification | **HIGH** | `scheduling.repository.ts` new methods (`deleteRecurringClass`, `clearWeeklySchedule`) need 100% coverage verification via `bun run test:coverage` |
+| Missing security logic tests | **MEDIUM** | Schedule deletion uses soft delete — need to verify no DB trigger conflicts in `backend/db/test/logic/` |
 | Residual mock store type import | **LOW** | `ParentsContainer.tsx` imports `ParentAccountStatus` type from `mockParentsStore` |
 
 ---
@@ -34,14 +36,33 @@
 - [ ] **Security threats map 1:1 to test cases** — Each threat from Section 4 of the original plan must have a corresponding test case.
 - [ ] **No mock data in test assertions** — Tests use real seeded database data via the existing test lifecycle helpers.
 - [ ] **Test placement follows AGENTS.md rules** — GraphQL tests go in `frontend/graphql/test/`, immediately after the features they verify.
+- [ ] **100% repository coverage** — All new/modified repository methods must achieve 100% line + function coverage. Run `bun run test:coverage backend/db/test/repo/<domain>.repository.test.ts` to verify.
+- [ ] **Security logic tests** — Verify DB triggers don't conflict with soft delete operations. Run tests in `backend/db/test/logic/` to confirm.
+- [ ] **IDOR protection** — Repository tests verify cross-user access denial; service layer tests verify admin override. GraphQL tests verify the full IDOR chain end-to-end.
 
 ---
 
 ## Section 5: Prerequisites Verification (BLOCKING)
 
+### 5.0 Security Artifact Verification (Story 7 extends scheduling repository from prior sprints)
+
+| **Artifact** | **Path** | **Verification** | **Success Criteria** |
+|---|---|---|---|
+| Permission catalog | `backend/db/migration/3-system_permissions_and_groups.sql` | Check new Story 7 permissions exist | `schedule.delete_class`, `schedule.clear_weekly`, `staff.edit_profile`, `system.bulk_update_dst`, `parent.view_directory` seeded ✅ |
+| Scheduling repo tests | `backend/db/test/repo/scheduling.repository.test.ts` | `bun run test:coverage` | 100% coverage on `deleteRecurringClass` + `clearWeeklySchedule` |
+| State trigger (if applicable) | `backend/db/migration/*_state_transition_trigger.sql` | Verify soft delete doesn't conflict with state machine trigger | Trigger allows `deleted_at` updates without blocking |
+| Security tests (prior sprints) | `backend/db/test/logic/*_security.test.ts` | `bun test` | All pass ✅ |
+| PermissionsService | `backend/services/auth/permissions.service.ts` | Verify `hasPermission()` and `hasAnyPermission()` exist | ✅ (verified) |
+
+### 5.1 Test Suite Verification
+
 - [ ] Run `bun run test:db` — all existing database tests pass (0 failures). ✅ (verified)
 - [ ] Run `bun run test:graphql` — all existing GraphQL tests pass (0 failures).
 - [ ] Run `bun tsgo` — TypeScript compilation passes with zero errors.
+- [ ] Run `bun run test:coverage backend/db/test/repo/scheduling.repository.test.ts` — verify 100% coverage on Story 7 methods.
+
+### 5.2 Test Infrastructure Verification
+
 - [ ] Verify test helpers exist: `frontend/graphql/test/helpers.ts` ✅ (verified)
 - [ ] Verify test lifecycle setup: `frontend/graphql/test/lifecycle.ts` ✅ (verified)
 - [ ] Verify seeded test data includes: admin user, teacher user, parent user, teacher profiles, parents, recurring schedules ✅ (verified — existing seed data covers these)
@@ -288,11 +309,108 @@ bun run test:ui:components
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `ParentsContainer.tsx` no longer imports from `mockParentsStore`
-- [ ] Type comes from generated GraphQL types or shared enum
-- [ ] `rg "mockParentsStore|mockDstMigrationStore" frontend/views --glob "!**/*.stories.tsx"` returns empty
-- [ ] `bun tsgo` passes with 0 errors
-- [ ] `bun run test:ui:components` passes
+- [x] `ParentsContainer.tsx` no longer imports from `mockParentsStore`
+- [x] Type comes from generated GraphQL types or shared enum
+- [x] `rg "mockParentsStore|mockDstMigrationStore" frontend/views --glob "!**/*.stories.tsx"` returns empty
+- [x] `bun tsgo` passes with 0 errors
+- [x] `bun run test:ui:components` passes
+
+**Quality Gate — Per-File Validation:**
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+
+**Quality Gate — Task Completion Validation:**
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+
+---
+
+### Task D — Repository Coverage Verification & Security Logic Tests
+
+**Objective:** Verify 100% line + function coverage on all Story 7 repository methods, and confirm no DB trigger conflicts with soft delete operations.
+
+**Dependencies:** None — depends only on current project state (repository methods and tests already implemented).
+
+**Layer-Specific Rules (per AGENTS.md Section 1.7):**
+- 100% line + function coverage on all new/modified repository methods.
+- Security logic tests in `backend/db/test/logic/` must verify DB triggers don't block soft delete operations.
+- IDOR protection tests must verify cross-user access denial and admin override.
+
+**Target Files:**
+- `backend/db/test/repo/scheduling.repository.test.ts` — Verify/add tests for 100% coverage
+- `backend/db/test/repo/teacher.repository.test.ts` — Verify/add tests for `updateTeacherProfile` coverage
+- `backend/db/test/logic/scheduling_security.test.ts` — Add soft delete trigger compatibility test (if not already covered)
+
+**Detailed Implementation Steps:**
+
+*Step 1: Run coverage verification on scheduling repository*
+
+```bash
+bun run test:coverage backend/db/test/repo/scheduling.repository.test.ts
+```
+
+Check output for 100% line + function coverage on:
+- `deleteRecurringClass` — success path (soft delete sets `deletedAt`), failure path (non-existent ID returns `false`)
+- `clearWeeklySchedule` — success path (bulk soft delete in transaction), failure path (teacher with no schedules returns `false`)
+
+If coverage is below 100%, add missing test cases:
+- Transaction rollback behavior
+- Edge case: deleting already-deleted instance (idempotent)
+- Edge case: clearing schedule for deactivated teacher
+
+*Step 2: Run coverage verification on teacher repository*
+
+```bash
+bun run test:coverage backend/db/test/repo/teacher.repository.test.ts
+```
+
+Check output for 100% line + function coverage on:
+- `updateTeacherProfile` — success path (updates teacher row), failure path (non-existent teacher ID)
+
+If coverage is below 100%, add missing test cases.
+
+*Step 3: Verify security logic tests cover soft delete compatibility*
+
+Verify that existing security logic tests in `backend/db/test/logic/` don't conflict with Story 7's soft delete approach:
+- State machine trigger (`fn_enforce_class_instance_transition`) should NOT block `deleted_at` updates
+- Soft delete bypasses state machine validation (it's a deletion, not a state transition)
+- If the trigger blocks soft deletes, a fix is needed in the trigger function
+
+Run:
+```bash
+bun run test:db
+```
+
+All tests must pass, including any security logic tests.
+
+*Step 4: Verify IDOR protection in repository tests*
+
+Confirm existing repo tests cover:
+- Teacher cannot call `deleteRecurringClass` on another teacher's class → returns `false` or is blocked by permission check in service layer
+- Teacher cannot call `clearWeeklySchedule` on another teacher's ID → returns `false` or is blocked by permission check in service layer
+- Admin CAN call both methods on any teacher → succeeds
+
+Note: IDOR enforcement happens at the **service layer** (permission check), not the repository layer. Repository methods are role-agnostic. The GraphQL integration tests in Tasks A and B verify the full IDOR chain.
+
+**Test Execution Requirements:**
+```bash
+bun run test:coverage backend/db/test/repo/scheduling.repository.test.ts
+bun run test:coverage backend/db/test/repo/teacher.repository.test.ts
+bun run test:db
+```
+
+**Success Criteria / Check Progress Points:**
+- [ ] `bun run test:coverage` on `scheduling.repository.test.ts` shows 100% line + function coverage on `deleteRecurringClass` and `clearWeeklySchedule`
+- [ ] `bun run test:coverage` on `teacher.repository.test.ts` shows 100% line + function coverage on `updateTeacherProfile`
+- [ ] Security logic tests pass — no DB trigger conflicts with soft delete
+- [ ] `bun run test:db` passes with 0 failures (all existing + new tests)
+- [ ] IDOR enforcement verified at service layer (covered by Tasks A and B GraphQL tests)
 
 **Quality Gate — Per-File Validation:**
 - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
@@ -319,33 +437,45 @@ Execute the following commands in order:
 bun tsgo
 ```
 
-### 7.2 GraphQL Integration Tests
+### 7.2 Database Tests
+```bash
+bun run test:db
+```
+
+### 7.2b Repository Coverage Verification
+```bash
+bun run test:coverage backend/db/test/repo/scheduling.repository.test.ts
+bun run test:coverage backend/db/test/repo/teacher.repository.test.ts
+```
+Output must show 100% line + function coverage on all Story 7 repository methods (`deleteRecurringClass`, `clearWeeklySchedule`, `updateTeacherProfile`).
+
+### 7.3 GraphQL Integration Tests
 ```bash
 bun run test:graphql
 ```
 
-### 7.3 UI Component Tests
+### 7.4 UI Component Tests
 ```bash
 bun run test:ui:components
 ```
 
-### 7.4 Full Test Suite
+### 7.5 Full Test Suite
 ```bash
 bun run test
 ```
 
-### 7.5 Quality Gate
+### 7.6 Quality Gate
 ```bash
 bun quality-gate
 ```
 
-### 7.6 Prohibited Pattern Check
+### 7.7 Prohibited Pattern Check
 ```bash
 rg -i "TODO|FIXME|not implemented|placeholder|for now" backend frontend shared --glob "!**/*.md" --glob "!**/generated/**"
 ```
 Output MUST be empty.
 
-### 7.7 Mock Data Leak Check
+### 7.8 Mock Data Leak Check
 ```bash
 rg "mockParentsStore|mockDstMigrationStore" frontend/views --glob "!**/*.stories.tsx"
 ```
@@ -355,23 +485,28 @@ Output MUST be empty.
 
 ## Test Case Summary
 
-| # | Test Case | File | Threat | Type |
+| # | Test Case | File | Task | Type |
 |---|---|---|---|---|
-| 1 | `teacherProfileForEdit` — admin succeeds | `teacher.test.ts` | — | Success |
-| 2 | `teacherProfileForEdit` — teacher denied | `teacher.test.ts` | Threat 2 | Denial |
-| 3 | `updateTeacherProfile` — admin succeeds | `teacher.test.ts` | — | Success |
-| 4 | `updateTeacherProfile` — teacher denied | `teacher.test.ts` | Threat 2 | Denial |
-| 5 | `updateTeacherProfile` — non-existent teacher | `teacher.test.ts` | Threat 2 | Edge case |
-| 6 | `updateTeacherProfile` — admin edits any teacher | `teacher.test.ts` | Threat 2 | IDOR |
-| 7 | `executeDstBulkUpdate` — system admin succeeds | `dst-migration.test.ts` or `schedule.test.ts` | — | Success |
-| 8 | `executeDstBulkUpdate` — academy admin denied | `dst-migration.test.ts` or `schedule.test.ts` | Threat 3 | Denial |
-| 9 | `executeDstBulkUpdate` — teacher denied | `dst-migration.test.ts` or `schedule.test.ts` | Threat 3 | Denial |
-| 10 | `parentDirectory` — admin sees data with metrics | `parent.test.ts` | — | Success |
-| 11 | `parentDirectory` — admin search filter | `parent.test.ts` | — | Success |
-| 12 | `parentDirectory` — teacher denied | `parent.test.ts` | Threat 4 | Denial |
-| 13 | `parentDirectory` — parent denied | `parent.test.ts` | Threat 4 | Denial |
-| 14 | `deleteRecurringClass` — teacher denied (other's class) | `schedule.test.ts` | Threat 1 | IDOR |
-| 15 | `clearWeeklySchedule` — teacher denied (other's schedule) | `schedule.test.ts` | Threat 1 | IDOR |
-| 16 | `deleteRecurringClass` — admin succeeds (any class) | `schedule.test.ts` | Threat 1 | Admin override |
+| 1 | `teacherProfileForEdit` — admin succeeds | `teacher.test.ts` | A | Success |
+| 2 | `teacherProfileForEdit` — teacher denied | `teacher.test.ts` | A | Denial |
+| 3 | `updateTeacherProfile` — admin succeeds | `teacher.test.ts` | A | Success |
+| 4 | `updateTeacherProfile` — teacher denied | `teacher.test.ts` | A | Denial |
+| 5 | `updateTeacherProfile` — non-existent teacher | `teacher.test.ts` | A | Edge case |
+| 6 | `updateTeacherProfile` — admin edits any teacher | `teacher.test.ts` | B | IDOR |
+| 7 | `executeDstBulkUpdate` — system admin succeeds | `schedule.test.ts` | A | Success |
+| 8 | `executeDstBulkUpdate` — academy admin denied | `schedule.test.ts` | A | Denial |
+| 9 | `executeDstBulkUpdate` — teacher denied | `schedule.test.ts` | A | Denial |
+| 10 | `parentDirectory` — admin sees data with metrics | `parent.test.ts` | A | Success |
+| 11 | `parentDirectory` — admin search filter | `parent.test.ts` | A | Success |
+| 12 | `parentDirectory` — teacher denied | `parent.test.ts` | A | Denial |
+| 13 | `parentDirectory` — parent denied | `parent.test.ts` | A | Denial |
+| 14 | `deleteRecurringClass` — teacher denied (other's class) | `schedule.test.ts` | B | IDOR |
+| 15 | `clearWeeklySchedule` — teacher denied (other's schedule) | `schedule.test.ts` | B | IDOR |
+| 16 | `deleteRecurringClass` — admin succeeds (any class) | `schedule.test.ts` | B | Admin override |
+| 17 | `deleteRecurringClass` — 100% coverage verified | `scheduling.repository.test.ts` | D | Coverage |
+| 18 | `clearWeeklySchedule` — 100% coverage verified | `scheduling.repository.test.ts` | D | Coverage |
+| 19 | `updateTeacherProfile` — 100% coverage verified | `teacher.repository.test.ts` | D | Coverage |
+| 20 | Soft delete doesn't conflict with state trigger | `scheduling_security.test.ts` | D | Security logic |
 
-**Total: 16 new test cases** covering all 4 threats from Section 4.
+**Total: 16 new GraphQL test cases** (Tasks A+B) covering all 4 threats from Section 4.
+**Plus: 4 repository coverage/security logic verifications** (Task D) ensuring 100% coverage and trigger compatibility.

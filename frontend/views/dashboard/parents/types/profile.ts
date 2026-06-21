@@ -1,4 +1,4 @@
-import type { ParentAccountStatus } from "@/frontend/stores/mockParentsStore";
+import type { ParentAccountStatus } from "@/frontend/views/dashboard/parents/types/directory";
 
 export interface ParentStudent {
   readonly id: string;

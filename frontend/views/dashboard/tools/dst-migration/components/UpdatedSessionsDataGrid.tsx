@@ -6,7 +6,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui";
-import type { UpdatedSession } from "@/frontend/stores/mockDstMigrationStore";
+import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/types";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];

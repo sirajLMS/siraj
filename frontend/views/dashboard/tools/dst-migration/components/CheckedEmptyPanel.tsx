@@ -3,7 +3,7 @@
 import { CheckOutlined, ReportProblemOutlined } from "@mui/icons-material";
 import { alpha, Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { CheckedEmptyItem } from "@/frontend/stores/mockDstMigrationStore";
+import type { CheckedEmptyItem } from "@/frontend/views/dashboard/tools/dst-migration/types";
 
 interface Props {
   readonly items: readonly CheckedEmptyItem[];

@@ -3,7 +3,7 @@
 import { CheckCircleOutlined, SyncOutlined } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { MigrationStatus } from "@/frontend/stores/mockDstMigrationStore";
+import type { MigrationStatus } from "@/frontend/views/dashboard/tools/dst-migration/types";
 
 interface Props {
   readonly status: MigrationStatus;

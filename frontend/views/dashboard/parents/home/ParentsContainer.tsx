@@ -14,8 +14,8 @@ import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
-import type { ParentAccountStatus } from "@/frontend/stores/mockParentsStore";
 import { logger } from "@/frontend/utils/logger";
+import type { ParentAccountStatus } from "@/frontend/views/dashboard/parents/types/directory";
 import { ParentsView } from "./ParentsView";
 
 export function ParentsContainer() {

@@ -10,7 +10,7 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
-import type { ParentDirectoryRow } from "@/frontend/stores/mockParentsStore";
+import type { ParentDirectoryRow } from "@/frontend/views/dashboard/parents/types/directory";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { ParentCardList, type ParentCardListLabels } from "./ParentCardList";
 import { ParentsDataGrid, type ParentsDataGridLabels } from "./ParentsDataGrid";

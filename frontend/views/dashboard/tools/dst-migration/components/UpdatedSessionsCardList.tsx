@@ -3,7 +3,7 @@
 import { ArrowForwardOutlined, CheckCircleOutlined } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { UpdatedSession } from "@/frontend/stores/mockDstMigrationStore";
+import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/types";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];
