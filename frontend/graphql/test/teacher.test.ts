@@ -183,8 +183,9 @@ describe("GraphQL Teacher Integration Tests", () => {
 
   test("teacherProfileForEdit — admin can read teacher profile", async () => {
     const teacherId = await getSeededTeacherId();
+    if (!authToken) throw new Error("No auth token");
 
-    const profileData = await authenticatedRequest(authToken!, "query", teacherProfileForEditQueryDocument, {
+    const profileData = await authenticatedRequest(authToken, "query", teacherProfileForEditQueryDocument, {
       teacherId,
     });
     expect(profileData.teacherProfileForEdit).toBeDefined();
@@ -199,7 +200,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     const teacherToken = await loginDemoUser("teacher_default");
     const teacherId = await getSeededTeacherId();
 
-    const result = await testClient.query({
+    const editProfileResult = await testClient.query({
       query: teacherProfileForEditQueryDocument,
       variables: { teacherId },
       context: {
@@ -209,30 +210,14 @@ describe("GraphQL Teacher Integration Tests", () => {
       },
       errorPolicy: "all",
     });
-    expect(result.error).toBeDefined();
-  });
-
-  test("updateTeacherProfile — admin can update teacher profile", async () => {
-    const teacherId = await getSeededTeacherId();
-
-    const newPhone = "+1234567890";
-    const updateData = await authenticatedRequest(authToken, "mutate", updateTeacherProfileMutationDocument, {
-      teacherId,
-      input: makeUpdateInput({
-        phone: newPhone,
-        timezone: "America/New_York",
-      }),
-    });
-    expect(updateData.updateTeacherProfile).toBeDefined();
-    expect(updateData.updateTeacherProfile?.id).toBe(teacherId);
-    expect(updateData.updateTeacherProfile?.phone).toBe(newPhone);
+    expect(editProfileResult.error).toBeDefined();
   });
 
   test("updateTeacherProfile — teacher role is denied to update profile", async () => {
     const teacherToken = await loginDemoUser("teacher_default");
     const teacherId = await getSeededTeacherId();
 
-    const result = await testClient.mutate({
+    const updateProfileDeniedResult = await testClient.mutate({
       mutation: updateTeacherProfileMutationDocument,
       variables: {
         teacherId,
@@ -247,19 +232,31 @@ describe("GraphQL Teacher Integration Tests", () => {
       },
       errorPolicy: "all",
     });
-    expect(result.error).toBeDefined();
+    expect(updateProfileDeniedResult.error).toBeDefined();
   });
 
   test("updateTeacherProfile — returns error for non-existent teacher", async () => {
     if (!authToken) throw new Error("No auth token");
-    const fakeTeacherId = "00000000-0000-0000-0000-000000000000";
-    const result = await testClient.mutate({
+    const fakeTeacherIdVal = "00000000-0000-0000-0000-000000000000";
+    const updateNonExistentResult = await testClient.mutate({
       mutation: updateTeacherProfileMutationDocument,
       variables: {
-        teacherId: fakeTeacherId,
-        input: makeUpdateInput({
+        teacherId: fakeTeacherIdVal,
+        input: {
+          address: "Fake Address",
+          dateOfBirth: "1990-01-01",
+          gender: "Male",
+          hourlyRate: 20,
+          nationalId: "12345",
           phone: "+1111111111",
-        }),
+          qualifications: "None",
+          rateCurrency: "USD",
+          skypeId: "fake_skype",
+          timezone: "UTC",
+          zoomLink: "https://zoom.us/j/123",
+          zoomPassword: "password",
+          zoomUsername: "username",
+        },
       },
       context: {
         headers: {
@@ -268,20 +265,61 @@ describe("GraphQL Teacher Integration Tests", () => {
       },
       errorPolicy: "all",
     });
-    expect(result.error).toBeDefined();
+    expect(updateNonExistentResult.error).toBeDefined();
+  });
+
+  test("updateTeacherProfile — admin can update teacher profile", async () => {
+    const targetTeacherIdForAdmin = await getSeededTeacherId();
+    if (!authToken) throw new Error("No auth token");
+
+    const newTeacherPhoneString = "+1234567890";
+    const updateProfileData = await authenticatedRequest(authToken, "mutate", updateTeacherProfileMutationDocument, {
+      teacherId: targetTeacherIdForAdmin,
+      input: {
+        address: null,
+        dateOfBirth: null,
+        gender: "Female",
+        hourlyRate: null,
+        nationalId: null,
+        phone: newTeacherPhoneString,
+        qualifications: null,
+        rateCurrency: null,
+        skypeId: null,
+        timezone: "America/New_York",
+        zoomLink: null,
+        zoomPassword: null,
+        zoomUsername: null,
+      },
+    });
+    expect(updateProfileData.updateTeacherProfile).toBeDefined();
+    expect(updateProfileData.updateTeacherProfile?.id).toBe(targetTeacherIdForAdmin);
+    expect(updateProfileData.updateTeacherProfile?.phone).toBe(newTeacherPhoneString);
   });
 
   test("updateTeacherProfile — admin can edit any teacher (no IDOR for admins)", async () => {
-    const teacherId = await getSeededTeacherId();
+    const adminEditTeacherTargetId = await getSeededTeacherId();
+    if (!authToken) throw new Error("No auth token");
 
-    const updateData = await authenticatedRequest(authToken, "mutate", updateTeacherProfileMutationDocument, {
-      teacherId,
-      input: makeUpdateInput({
-        address: "Updated by admin",
-      }),
+    const updateAnyTeacherData = await authenticatedRequest(authToken, "mutate", updateTeacherProfileMutationDocument, {
+      teacherId: adminEditTeacherTargetId,
+      input: {
+        address: "Updated by admin and verified by tests",
+        dateOfBirth: "1985-05-15",
+        gender: "Male",
+        hourlyRate: "50",
+        nationalId: "999888",
+        phone: null,
+        qualifications: "Certified Instructor",
+        rateCurrency: "USD",
+        skypeId: "admin.instructor",
+        timezone: "UTC",
+        zoomLink: null,
+        zoomPassword: null,
+        zoomUsername: null,
+      },
     });
-    expect(updateData.updateTeacherProfile).toBeDefined();
-    expect(updateData.updateTeacherProfile?.id).toBe(teacherId);
-    expect(updateData.updateTeacherProfile?.address).toBe("Updated by admin");
+    expect(updateAnyTeacherData.updateTeacherProfile).toBeDefined();
+    expect(updateAnyTeacherData.updateTeacherProfile?.id).toBe(adminEditTeacherTargetId);
+    expect(updateAnyTeacherData.updateTeacherProfile?.address).toBe("Updated by admin and verified by tests");
   });
 });

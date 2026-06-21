@@ -159,7 +159,10 @@ describe("BillingRepository — getInvoicesForParent", () => {
 
   test("excludes soft-deleted invoices", async () => {
     await runInRollback(async tx => {
-      const parentUser = await createTestUser(tx, { name: "Billing Parent Soft", email: `billing-soft-${randomUUID()}@test.com` });
+      const parentUser = await createTestUser(tx, {
+        name: "Billing Parent Soft",
+        email: `billing-soft-${randomUUID()}@test.com`,
+      });
       const parent = await createTestParent(tx, parentUser.id);
 
       const now = new Date();
