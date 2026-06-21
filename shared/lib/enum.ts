@@ -469,6 +469,13 @@ export enum AppPermission {
   STAFF_EDIT_PROFILE = "staff.edit_profile",
   SYSTEM_BULK_UPDATE_DST = "system.bulk_update_dst",
   PARENT_VIEW_DIRECTORY = "parent.view_directory",
+  // Parent Profile & Account Lifecycle Management
+  PARENT_VIEW_PROFILE = "parent.view_profile",
+  PARENT_MANAGE_STATUS = "parent.manage_status",
+  STUDENT_VIEW_ASSOCIATED = "student.view_associated",
+  STUDENT_EDIT_QUOTA = "student.edit_quota",
+  BILLING_VIEW_HISTORY = "billing.view_history",
+  DOCUMENT_MANAGE_PARENT_DOCS = "document.manage_parent_docs",
   TEST_SYSTEM_ONLY = "test.system_only",
   TEST_CUSTOM_ONLY = "test.custom_only",
 }

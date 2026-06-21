@@ -1,10 +1,10 @@
 {
-  "id": "d9eb5ee5-c601-44b2-bdc2-1926fcf2e7ac",
-  "prevIds": [
-    "fe8c8446-8e42-4b5b-a0c0-44b83af3bf97"
-  ],
   "version": "8",
   "dialect": "postgres",
+  "id": "3453a99d-a72c-43ce-a8f4-211ab5cc8724",
+  "prevIds": [
+    "5a434cec-6160-46fb-a873-ccad5d9865f6"
+  ],
   "ddl": [
     {
       "values": [
@@ -97,6 +97,12 @@
         "staff.edit_profile",
         "system.bulk_update_dst",
         "parent.view_directory",
+        "parent.view_profile",
+        "parent.manage_status",
+        "student.view_associated",
+        "student.edit_quota",
+        "billing.view_history",
+        "document.manage_parent_docs",
         "test.system_only",
         "test.custom_only"
       ],

@@ -649,6 +649,61 @@ VALUES (
         'Access global Parents Directory with status metrics and unpaid invoices',
         'Parents',
         true
+    ),
+    -- Story 8: Parent Profile & Account Lifecycle
+    (
+        gen_random_uuid (),
+        'parent.view_profile',
+        'parent',
+        'view_profile',
+        'Access detailed Parent Profile view with PII, social media links, and fee details',
+        'Parents',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'parent.manage_status',
+        'parent',
+        'manage_status',
+        'Suspend or revoke a parent''s access to the LMS by setting account status to DEACTIVATED',
+        'Parents',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'student.view_associated',
+        'student',
+        'view_associated',
+        'View the aggregated list of students associated with a specific parent, including teacher and quota data',
+        'Students',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'student.edit_quota',
+        'student',
+        'edit_quota',
+        'Manually override a student''s classesRemaining integer, directly impacting billing cycle triggers',
+        'Students',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'billing.view_history',
+        'billing',
+        'view_history',
+        'Access the full invoice ledger for a single parent, including paid and unpaid invoices',
+        'Billing',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'document.manage_parent_docs',
+        'document',
+        'manage_parent_docs',
+        'Attach and view external files (contracts, ID verification) linked to a specific Parent record',
+        'Documents',
+        true
     ) ON CONFLICT (key) DO
 UPDATE
 SET
@@ -817,7 +872,13 @@ WHERE
         'schedule.clear_weekly',
         'staff.edit_profile',
         'system.bulk_update_dst',
-        'parent.view_directory'
+        'parent.view_directory',
+        'parent.view_profile',
+        'parent.manage_status',
+        'student.view_associated',
+        'student.edit_quota',
+        'billing.view_history',
+        'document.manage_parent_docs'
     );
 
 INSERT INTO
@@ -858,7 +919,13 @@ WHERE
         'schedule.delete_class',
         'schedule.clear_weekly',
         'staff.edit_profile',
-        'parent.view_directory'
+        'parent.view_directory',
+        'parent.view_profile',
+        'parent.manage_status',
+        'student.view_associated',
+        'student.edit_quota',
+        'billing.view_history',
+        'document.manage_parent_docs'
     );
 
 INSERT INTO
