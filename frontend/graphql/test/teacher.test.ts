@@ -1,11 +1,35 @@
 import { describe, expect, test } from "bun:test";
+import type { TeacherProfileUpdateInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teachers as demoTeachers } from "@/shared/demo-users";
 import { demoLoginMutationDocument } from "../sharedDocuments/auth.documents";
 import { teacherDirectoryQueryDocument } from "../sharedDocuments/staff-directory.documents";
+import {
+  teacherProfileForEditQueryDocument,
+  updateTeacherProfileMutationDocument,
+} from "../sharedDocuments/staff-profile.documents";
 import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
 import { authenticatedRequest, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
+
+function makeUpdateInput(overrides: Partial<TeacherProfileUpdateInput>): TeacherProfileUpdateInput {
+  return {
+    address: null,
+    dateOfBirth: null,
+    gender: null,
+    hourlyRate: null,
+    nationalId: null,
+    phone: null,
+    qualifications: null,
+    rateCurrency: null,
+    skypeId: null,
+    timezone: null,
+    zoomLink: null,
+    zoomPassword: null,
+    zoomUsername: null,
+    ...overrides,
+  };
+}
 
 async function queryTeachers(token: string, search: string, limit: number) {
   const data = await authenticatedRequest(token, "query", teachersQueryDocument, {
@@ -148,5 +172,121 @@ describe("GraphQL Teacher Integration Tests", () => {
 
     const matched = directory.rows?.some(r => r?.name === expectedTeacher.name);
     expect(matched).toBeTrue();
+  });
+
+  test("teacherProfileForEdit — admin can read teacher profile", async () => {
+    if (!authToken) throw new Error("No auth token");
+    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
+    const teacherId = directory.rows?.[0]?.id;
+    if (!teacherId) throw new Error("No seeded teacher found in directory");
+
+    const profileData = await authenticatedRequest(authToken, "query", teacherProfileForEditQueryDocument, {
+      teacherId,
+    });
+    expect(profileData.teacherProfileForEdit).toBeDefined();
+    expect(profileData.teacherProfileForEdit?.id).toBe(teacherId);
+    expect(profileData.teacherProfileForEdit?.name).toBeDefined();
+    expect(profileData.teacherProfileForEdit?.email).toBeDefined();
+    expect(profileData.teacherProfileForEdit?.timezone).toBeDefined();
+    expect(profileData.teacherProfileForEdit?.status).toBeDefined();
+  });
+
+  test("teacherProfileForEdit — teacher role is denied access", async () => {
+    const teacherToken = await loginDemoUser("teacher_default");
+    if (!authToken) throw new Error("No auth token");
+    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
+    const teacherId = directory.rows?.[0]?.id;
+    if (!teacherId) throw new Error("No seeded teacher found in directory");
+
+    const result = await testClient.query({
+      query: teacherProfileForEditQueryDocument,
+      variables: { teacherId },
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+    expect(result.error).toBeDefined();
+  });
+
+  test("updateTeacherProfile — admin can update teacher profile", async () => {
+    if (!authToken) throw new Error("No auth token");
+    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
+    const teacherId = directory.rows?.[0]?.id;
+    if (!teacherId) throw new Error("No seeded teacher found in directory");
+
+    const newPhone = "+1234567890";
+    const updateData = await authenticatedRequest(authToken, "mutate", updateTeacherProfileMutationDocument, {
+      teacherId,
+      input: makeUpdateInput({
+        phone: newPhone,
+        timezone: "America/New_York",
+      }),
+    });
+    expect(updateData.updateTeacherProfile).toBeDefined();
+    expect(updateData.updateTeacherProfile?.id).toBe(teacherId);
+    expect(updateData.updateTeacherProfile?.phone).toBe(newPhone);
+  });
+
+  test("updateTeacherProfile — teacher role is denied to update profile", async () => {
+    const teacherToken = await loginDemoUser("teacher_default");
+    if (!authToken) throw new Error("No auth token");
+    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
+    const teacherId = directory.rows?.[0]?.id;
+    if (!teacherId) throw new Error("No seeded teacher found in directory");
+
+    const result = await testClient.mutate({
+      mutation: updateTeacherProfileMutationDocument,
+      variables: {
+        teacherId,
+        input: makeUpdateInput({
+          phone: "+9999999999",
+        }),
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+    expect(result.error).toBeDefined();
+  });
+
+  test("updateTeacherProfile — returns error for non-existent teacher", async () => {
+    if (!authToken) throw new Error("No auth token");
+    const fakeTeacherId = "00000000-0000-0000-0000-000000000000";
+    const result = await testClient.mutate({
+      mutation: updateTeacherProfileMutationDocument,
+      variables: {
+        teacherId: fakeTeacherId,
+        input: makeUpdateInput({
+          phone: "+1111111111",
+        }),
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      },
+    });
+    expect(result.error).toBeDefined();
+  });
+
+  test("updateTeacherProfile — admin can edit any teacher (no IDOR for admins)", async () => {
+    if (!authToken) throw new Error("No auth token");
+    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
+    const teacherId = directory.rows?.[0]?.id;
+    if (!teacherId) throw new Error("No seeded teacher found in directory");
+
+    const updateData = await authenticatedRequest(authToken, "mutate", updateTeacherProfileMutationDocument, {
+      teacherId,
+      input: makeUpdateInput({
+        address: "Updated by admin",
+      }),
+    });
+    expect(updateData.updateTeacherProfile).toBeDefined();
+    expect(updateData.updateTeacherProfile?.id).toBe(teacherId);
+    expect(updateData.updateTeacherProfile?.address).toBe("Updated by admin");
   });
 });

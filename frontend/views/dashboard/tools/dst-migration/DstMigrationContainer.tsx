@@ -1,47 +1,56 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useDstMigrationStore } from "@/frontend/stores/mockDstMigrationStore";
+import { useMutation } from "@apollo/client/react";
+import { useState } from "react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { executeDstBulkUpdateMutationDocument } from "@/frontend/graphql/sharedDocuments/dst-migration.documents";
+import { logger } from "@/frontend/utils/logger";
 import { DstMigrationView } from "./DstMigrationView";
 
 export function DstMigrationContainer() {
-  const metrics = useDstMigrationStore(state => state.metrics);
-  const updatedSessions = useDstMigrationStore(state => state.updatedSessions);
-  const conflictGroups = useDstMigrationStore(state => state.conflictGroups);
-  const checkedEmptyItems = useDstMigrationStore(state => state.checkedEmptyItems);
-  const migrationStatus = useDstMigrationStore(state => state.migrationStatus);
-  const runMigration = useDstMigrationStore(state => state.runMigration);
-  const resetMigrationStatus = useDstMigrationStore(state => state.resetMigrationStatus);
+  const [executeDstUpdate, { loading, data }] = useMutation(executeDstBulkUpdateMutationDocument);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  useEffect(() => {
-    if (migrationStatus !== "complete") return undefined;
-    setShowSuccess(true);
-    const timer = setTimeout(() => {
-      resetMigrationStatus();
-    }, 3000);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [migrationStatus, resetMigrationStatus]);
-
-  const handleUpdate = () => {
-    void runMigration();
+  const handleUpdate = async () => {
+    try {
+      await executeDstUpdate({
+        variables: {
+          offsetMinutes: 60,
+          description: "DST adjustment executed by admin",
+        },
+      });
+      setShowSuccess(true);
+    } catch (error) {
+      logger.error("DST bulk update failed", { error });
+    }
   };
 
+  const report = data?.executeDstBulkUpdate;
+
+  const metrics = {
+    totalAudited: report?.total ?? 0,
+    successful: report?.updated ?? 0,
+    conflicts: report?.conflicts ?? 0,
+    unchanged: report?.unchanged ?? 0,
+  };
+
+  const migrationStatus = loading ? "running" : report ? "complete" : "idle";
+
   return (
-    <DstMigrationView
-      metrics={metrics}
-      updatedSessions={updatedSessions}
-      conflictGroups={conflictGroups}
-      checkedEmptyItems={checkedEmptyItems}
-      migrationStatus={migrationStatus}
-      showSuccess={showSuccess}
-      onUpdate={handleUpdate}
-      onDismissSuccess={() => {
-        setShowSuccess(false);
-        resetMigrationStatus();
-      }}
-    />
+    <RequirePermission permissions={[AppPermission.SystemBulkUpdateDst]}>
+      <DstMigrationView
+        metrics={metrics}
+        updatedSessions={[]}
+        conflictGroups={[]}
+        checkedEmptyItems={[]}
+        migrationStatus={migrationStatus}
+        showSuccess={showSuccess}
+        onUpdate={handleUpdate}
+        onDismissSuccess={() => {
+          setShowSuccess(false);
+        }}
+      />
+    </RequirePermission>
   );
 }

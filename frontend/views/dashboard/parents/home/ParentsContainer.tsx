@@ -1,12 +1,89 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
+import {
+  BlockOutlined,
+  CancelOutlined,
+  EventBusyOutlined,
+  HowToRegOutlined,
+  TimerOutlined,
+  VerifiedUserOutlined,
+} from "@mui/icons-material";
 import { useTranslations } from "next-intl";
-import { type ParentAccountStatus, useParentsStore } from "@/frontend/stores/mockParentsStore";
+import { useState } from "react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
+import type { ParentAccountStatus } from "@/frontend/stores/mockParentsStore";
+import { logger } from "@/frontend/utils/logger";
 import { ParentsView } from "./ParentsView";
 
 export function ParentsContainer() {
   const t = useTranslations("dashboard.parentsDirectory");
-  const { metrics, rows, setSearchQuery } = useParentsStore();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { data } = useQuery(parentDirectoryQueryDocument, {
+    variables: {
+      search: searchQuery || null,
+      limit: 50,
+      offset: 0,
+    },
+  });
+
+  const directory = data?.parentDirectory;
+
+  const metrics = directory?.metrics
+    ? [
+        {
+          key: "activated",
+          count: directory.metrics.activated ?? 0,
+          labelKey: "dashboard.parentsDirectory.metrics.activated",
+          icon: HowToRegOutlined,
+        },
+        {
+          key: "deactivated",
+          count: directory.metrics.deactivated ?? 0,
+          labelKey: "dashboard.parentsDirectory.metrics.deactivated",
+          icon: CancelOutlined,
+        },
+        {
+          key: "regular",
+          count: directory.metrics.regular ?? 0,
+          labelKey: "dashboard.parentsDirectory.metrics.regular",
+          icon: VerifiedUserOutlined,
+        },
+        {
+          key: "on_leave",
+          count: directory.metrics.onLeave ?? 0,
+          labelKey: "dashboard.parentsDirectory.metrics.onLeave",
+          icon: EventBusyOutlined,
+        },
+        {
+          key: "suspended",
+          count: directory.metrics.suspended ?? 0,
+          labelKey: "dashboard.parentsDirectory.metrics.suspended",
+          icon: BlockOutlined,
+        },
+        {
+          key: "on_trial",
+          count: directory.metrics.onTrial ?? 0,
+          labelKey: "dashboard.parentsDirectory.metrics.onTrial",
+          icon: TimerOutlined,
+        },
+      ]
+    : [];
+
+  const rows = (directory?.rows ?? []).map(row => ({
+    id: row.id ?? "",
+    index: row.index ?? 0,
+    name: row.name ?? "",
+    email: row.email ?? "",
+    avatarUrl: row.avatarUrl ?? undefined,
+    guardianOf: row.guardianOf ?? "",
+    time: row.time ?? "",
+    accountStatus: (row.accountStatus as ParentAccountStatus) || "regular",
+    unpaidInvoices: row.unpaidInvoices ?? 0,
+  }));
 
   const labels = {
     pageTitle: t("pageTitle"),
@@ -62,16 +139,15 @@ export function ParentsContainer() {
   };
 
   return (
-    <ParentsView
-      metrics={metrics}
-      rows={rows}
-      labels={labels}
-      onAddParent={handleAddParent}
-      onOpenSettings={handleOpenSettings}
-      onSearch={handleSearch}
-    />
+    <RequirePermission permissions={[AppPermission.ParentViewDirectory]}>
+      <ParentsView
+        metrics={metrics}
+        rows={rows}
+        labels={labels}
+        onAddParent={handleAddParent}
+        onOpenSettings={handleOpenSettings}
+        onSearch={handleSearch}
+      />
+    </RequirePermission>
   );
 }
-
-// Add logger import
-import { logger } from "@/frontend/utils/logger";

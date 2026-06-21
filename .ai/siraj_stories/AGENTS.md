@@ -129,8 +129,28 @@ The following patterns are **strictly prohibited**:
 - [ ] **Diagnostic-only logging** — `logger.info` must NEVER substitute for implementing user-facing functionality.
 
 ### 1.7 Testing Requirements
-- [ ] **Repository coverage** — Tests for all new/modified repository methods in `backend/db/test/repo/`.
-- [ ] **GraphQL integration tests** — Extend test files in `frontend/graphql/test/` for new queries and mutations.
+
+**Repository Tests** (`backend/db/test/repo/`):
+- [ ] **100% line + function coverage** on all new/modified repository methods. Run `bun run test:coverage backend/db/test/repo/<domain>.repository.test.ts` to verify.
+- [ ] **Success AND failure paths** — Every repo method must have tests for: valid input success, invalid input rejection, not-found handling, transaction rollback on failure.
+- [ ] **IDOR protection tests** — If a repo method accesses user-scoped data, tests must verify: User A cannot access User B's data, admin CAN access any user's data, unauthenticated user is rejected.
+
+**Security Logic Tests** (`backend/db/test/logic/`):
+- [ ] **DB trigger tests** — Every database trigger (state machine enforcement, RLS policies, constraints) must have dedicated tests in `backend/db/test/logic/` that verify the trigger allows valid operations and blocks invalid ones.
+- [ ] **State transition tests** — If the story modifies entity state machines, tests must cover every allowed transition and verify blocked transitions throw errors.
+- [ ] **Security regression suite** — When extending prior sprint security work, add new test cases to the existing security test file (e.g., `backend/db/test/logic/<entity>_security.test.ts`).
+
+**GraphQL Integration Tests** (`frontend/graphql/test/`):
+- [ ] **Authorized success + unauthorized denial** — Every new GraphQL query/mutation must have at least one test for authorized success and one test for unauthorized denial.
+- [ ] **Security threat coverage** — Each threat from Section 4 must have a corresponding GraphQL-level test case.
+
+**Coverage Verification Command** (run after every repository task):
+```bash
+bun run test:coverage backend/db/test/repo/<domain>.repository.test.ts
+```
+Output must show 100% line + function coverage on touched methods.
+
+**Other:**
 - [ ] **Database test suite** — Run `bun run test:db` after every repository change.
 - [ ] **Storybook stories** — Mock stores in `*.stories.tsx` files; production containers fully wired to real data.
 ```
@@ -227,6 +247,11 @@ Address specific vulnerabilities such as IDOR, timezone differences, quota leaks
 
 **For each threat, you MUST include Test Requirements** — specific test cases that verify the fix works correctly.
 
+**Test layers for security fixes:**
+- **Repository tests** (`backend/db/test/repo/`) — Verify IDOR protection, admin bypass, cross-user access denial.
+- **Security logic tests** (`backend/db/test/logic/`) — Verify DB triggers enforce state machine transitions, RLS policies filter rows correctly, and constraints block invalid operations.
+- **GraphQL integration tests** (`frontend/graphql/test/`) — Verify permission denial at the API level for unauthorized roles.
+
 #### *Example Section 4:*
 ```markdown
 ## Section 4: Security Threat Remediation
@@ -249,6 +274,19 @@ A checklist to run before executing the plan to confirm previous sprint work is 
 
 Break prerequisites into structured sub-categories for clarity.
 
+#### Security Artifact Verification Table (when extending prior sprint work):
+When a story builds on security remediation from a previous sprint, you MUST include a structured verification table that confirms all prior security artifacts are deployed and functional:
+
+| **Artifact** | **Path** | **Verification** | **Success Criteria** |
+|---|---|---|---|
+| RLS policies | `backend/db/migration/<entity>_rls_policies.sql` | psql query | Policies applied |
+| State trigger | `backend/db/migration/<entity>_state_transition_trigger.sql` | psql query | Function exists |
+| Security tests | `backend/db/test/logic/<entity>_security.test.ts` | `bun test` | All pass |
+| IDOR tests | `backend/db/test/repo/<domain>.repository.test.ts` | `bun run test:coverage` | 100% coverage |
+| Repo docs | `<domain>.repository.ts` header | Manual review | Security model documented |
+
+**If any artifact is missing or failing, the corresponding security task is BLOCKING before story work begins.**
+
 #### Verified Facts Tracking (MANDATORY):
 Every prerequisite item MUST include:
 - **Verification status marker** — Append `✅ (verified)` or `❌ (not verified — needs creation)` to each item so it's immediately clear what already exists vs what must be built.
@@ -258,6 +296,18 @@ Every prerequisite item MUST include:
 #### *Example Section 5:*
 ```markdown
 ## Section 5: Prerequisites Verification (BLOCKING)
+
+### 5.0 Security Artifact Verification (when extending prior sprint work)
+
+| **Artifact** | **Path** | **Verification** | **Success Criteria** |
+|---|---|---|---|
+| RLS policies | `backend/db/migration/<entity>_rls_policies.sql` | psql query | Policies applied ✅ |
+| State trigger | `backend/db/migration/<entity>_state_transition_trigger.sql` | psql query | Function exists ✅ |
+| Security tests | `backend/db/test/logic/<entity>_security.test.ts` | `bun test` | All pass ✅ |
+| IDOR tests | `backend/db/test/repo/<domain>.repository.test.ts` | `bun run test:coverage` | 100% coverage ✅ |
+| Repo docs | `<domain>.repository.ts` header | Manual review | Security model documented ✅ |
+
+**If any artifact is missing or failing, the corresponding security task is BLOCKING.**
 
 ### 5.1 Database Schema Verification
 - [ ] Verify `<table_name>` table exists with columns: `id`, `<col_1>`, `<col_2>`, `<col_3>`. ✅ (verified — backend/db/schema/<domain>.ts:<lines>)
@@ -301,7 +351,7 @@ Break down the implementation into letters. Tasks **MUST** be strictly ordered b
 - **No forward dependencies**: A task MUST NOT call, import, reference, or assume the existence of any code, type, method, schema column, migration, or module that is introduced by a later task.
 - **Build incrementally**: Order tasks so that the dependency chain flows naturally — typically Database/Schema → Repository → Service → **DB/Repo Tests** → GraphQL (Backend) → GraphQL Documents (Frontend) → **GraphQL Tests** → Frontend Stores → Frontend Views. Each layer builds on the one before it, and tests are placed immediately after the layer they verify.
 - **Self-contained per task**: Every task must compile, pass all quality gates, and produce a working project state on its own. After completing Task B, the project must be in a fully working state — it must not be in a broken state waiting for Task C to "fix" or "complete" something.
-- **Declare dependencies explicitly**: Each task's **Dependencies** field must list exactly what it relies on (e.g., "Depends on Task A: `SchedulingRepository.resetClassInstance` method" or "Depends on current project state only").
+- **Declare dependencies explicitly**: Each task's **Dependencies** field must list exactly what it relies on (e.g., "Depends on Task A: `<DomainRepository>.<methodA>` method" or "Depends on current project state only").
 - **Reorder if needed**: If during planning you discover a task needs something from a later task, you MUST reorder the tasks so the dependency comes first. Never work around this by adding stubs, TODOs, or temporary imports.
 - **Test tasks immediately follow their implementation**: Test tasks MUST be placed directly after the implementation task they verify — never deferred to the end of the plan:
   - **DB/Repo/Service tests** (`bun run test:db`, `bun run test:integration`): Must be the very next task after the DB schema, repository, and/or service implementation task that introduces the code under test.
@@ -804,16 +854,20 @@ Execute the following commands in order to guarantee system stability and preven
 10. `bun run test:ui:components` (runs all UI component tests)
 11. `bun run test` (runs all unit and integration tests across backend and frontend)
 
+### 7.3b Repository Coverage Verification (for stories with repository changes)
+12. `bun run test:coverage backend/db/test/repo/<domain>.repository.test.ts`
+    Output must show 100% line + function coverage on all new/modified repository methods.
+
 ### 7.4 Prohibited Pattern Check
-12. `rg -i "TODO|FIXME|not implemented|placeholder|for now" backend frontend shared --glob "!**/*.md" --glob "!**/generated/**"`
+13. `rg -i "TODO|FIXME|not implemented|placeholder|for now" backend frontend shared --glob "!**/*.md" --glob "!**/generated/**"`
     Output MUST be empty.
 
 ### 7.5 Mock Data Leak Check (when applicable)
-13. `rg "mockXxxStore" frontend/views --glob "!**/*.stories.tsx"`
+14. `rg "mockXxxStore" frontend/views --glob "!**/*.stories.tsx"`
     Output MUST be empty — mock stores must not be imported in production view files.
 
 ### 7.6 Permission Enforcement Verification (when applicable)
-14. Verify that all new views are properly gated:
+15. Verify that all new views are properly gated:
     ```bash
     rg "RequirePermission" frontend/views/dashboard/<domain>/components/<NewContainer>.tsx
     ```

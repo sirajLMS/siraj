@@ -36,6 +36,12 @@ export function TeacherProfileContainer() {
             hourlyRate: String(formData.baseSalary),
             rateCurrency: formData.currency,
             zoomLink: formData.zoomLink || null,
+            dateOfBirth: null,
+            nationalId: null,
+            qualifications: null,
+            skypeId: null,
+            zoomPassword: null,
+            zoomUsername: null,
           },
         },
       });
@@ -47,11 +53,12 @@ export function TeacherProfileContainer() {
 
   const profile = data?.teacherProfileForEdit
     ? {
-        fullName: data.teacherProfileForEdit.name,
-        email: data.teacherProfileForEdit.email,
+        id: data.teacherProfileForEdit.id ?? "",
+        fullName: data.teacherProfileForEdit.name ?? "",
+        email: data.teacherProfileForEdit.email ?? "",
         phone: data.teacherProfileForEdit.phone ?? "",
         gender: (data.teacherProfileForEdit.gender?.toLowerCase() as "male" | "female") ?? "female",
-        timezone: data.teacherProfileForEdit.timezone,
+        timezone: data.teacherProfileForEdit.timezone ?? "",
         address: data.teacherProfileForEdit.address ?? "",
         baseSalary: Number.parseFloat(data.teacherProfileForEdit.hourlyRate ?? "0"),
         currency: data.teacherProfileForEdit.rateCurrency ?? "USD",

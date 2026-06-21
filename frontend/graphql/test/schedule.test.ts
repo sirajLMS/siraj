@@ -1,9 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { teachers as demoTeachers } from "@/shared/demo-users";
+import { executeDstBulkUpdateMutationDocument } from "../sharedDocuments/dst-migration.documents";
 import {
   dailyScheduleListQueryDocument,
   dailyScheduleMetricsQueryDocument,
 } from "../sharedDocuments/schedule.documents";
+import {
+  clearWeeklyScheduleMutationDocument,
+  deleteRecurringClassMutationDocument,
+} from "../sharedDocuments/schedule-deletion.documents";
 import {
   teacherWeeklyScheduleGridQueryDocument,
   teacherWorkloadMetricsQueryDocument,
@@ -177,5 +182,115 @@ describe("GraphQL Schedule Integration Tests", () => {
   test("createRecurringClass denied for invalid input (no days)", async () => {
     if (!authToken) throw new Error("No auth token");
     await assertRecurringClassDenied(authToken, []);
+  });
+
+  // DST Migration tests
+  test("executeDstBulkUpdate — system admin succeeds", async () => {
+    if (!authToken) throw new Error("No auth token");
+    const data = await authenticatedRequest(authToken, "mutate", executeDstBulkUpdateMutationDocument, {
+      offsetMinutes: 60,
+      description: "Test DST adjustment",
+    });
+    expect(data.executeDstBulkUpdate).toBeDefined();
+    expect(data.executeDstBulkUpdate?.runId).toBeDefined();
+    expect(data.executeDstBulkUpdate?.updated).toBeGreaterThanOrEqual(0);
+    expect(data.executeDstBulkUpdate?.conflicts).toBeGreaterThanOrEqual(0);
+    expect(data.executeDstBulkUpdate?.unchanged).toBeGreaterThanOrEqual(0);
+    expect(data.executeDstBulkUpdate?.total).toBeGreaterThanOrEqual(0);
+  });
+
+  test("executeDstBulkUpdate — academy admin denied", async () => {
+    const academyToken = await loginDemoUser("academy_admin");
+    const result = await testClient.mutate({
+      mutation: executeDstBulkUpdateMutationDocument,
+      variables: {
+        offsetMinutes: 60,
+        description: "Should fail",
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${academyToken}`,
+        },
+      },
+    });
+    expect(result.error).toBeDefined();
+  });
+
+  test("executeDstBulkUpdate — teacher denied", async () => {
+    const teacherToken = await loginDemoUser("teacher_default");
+    const result = await testClient.mutate({
+      mutation: executeDstBulkUpdateMutationDocument,
+      variables: {
+        offsetMinutes: 60,
+        description: "Should fail",
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+    expect(result.error).toBeDefined();
+  });
+
+  // Schedule deletion tests (including security/IDOR coverage)
+  test("deleteRecurringClass — teacher denied (other's class)", async () => {
+    if (!authToken) throw new Error("No auth token");
+    const teacherToken = await loginDemoUser("teacher_default");
+    const { teacherId } = await fetchFirstStudentTeacherPair(authToken, testDate);
+    const gridData = await authenticatedRequest(authToken, "query", teacherWeeklyScheduleGridQueryDocument, {
+      teacherId,
+      weekDate: testDate,
+    });
+    const classItem = gridData.teacherWeeklyScheduleGrid?.classes?.[0];
+    if (!classItem?.id) throw new Error("No class instance found in teacher schedule");
+
+    const result = await testClient.mutate({
+      mutation: deleteRecurringClassMutationDocument,
+      variables: {
+        classInstanceId: classItem.id,
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+    expect(result.error).toBeDefined();
+  });
+
+  test("clearWeeklySchedule — teacher denied (other's schedule)", async () => {
+    if (!authToken) throw new Error("No auth token");
+    const teacherToken = await loginDemoUser("teacher_default");
+    const { teacherId } = await fetchFirstStudentTeacherPair(authToken, testDate);
+
+    const result = await testClient.mutate({
+      mutation: clearWeeklyScheduleMutationDocument,
+      variables: {
+        teacherId,
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+    expect(result.error).toBeDefined();
+  });
+
+  test("deleteRecurringClass — admin succeeds (any class)", async () => {
+    if (!authToken) throw new Error("No auth token");
+    const { teacherId } = await fetchFirstStudentTeacherPair(authToken, testDate);
+    const gridData = await authenticatedRequest(authToken, "query", teacherWeeklyScheduleGridQueryDocument, {
+      teacherId,
+      weekDate: testDate,
+    });
+    const classItem = gridData.teacherWeeklyScheduleGrid?.classes?.[0];
+    if (!classItem?.id) throw new Error("No class instance found in teacher schedule");
+
+    const deleteData = await authenticatedRequest(authToken, "mutate", deleteRecurringClassMutationDocument, {
+      classInstanceId: classItem.id,
+    });
+    expect(deleteData.deleteRecurringClass).toBeTrue();
   });
 });

@@ -2650,21 +2650,21 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `ParentsContainer` wrapped in `<RequirePermission permissions={[AppPermission.ParentViewDirectory]}>`.
-- [ ] Real `useQuery` fetches parent directory data.
-- [ ] Metrics mapped from GraphQL response to view props.
-- [ ] Rows mapped with `unpaidInvoices` field.
-- [ ] Search functionality works with real query refetch.
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+- [x] `ParentsContainer` wrapped in `<RequirePermission permissions={[AppPermission.ParentViewDirectory]}>`.
+- [x] Real `useQuery` fetches parent directory data.
+- [x] Metrics mapped from GraphQL response to view props.
+- [x] Rows mapped with `unpaidInvoices` field.
+- [x] Search functionality works with real query refetch.
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 
 ---
 
@@ -2817,20 +2817,20 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] All English translation keys added to `shared/messages/en.ts`.
-- [ ] All Arabic translation keys added to corresponding files.
-- [ ] Translation schema types updated (if needed).
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
-- [ ] No missing translation keys in views.
+- [x] All English translation keys added to `shared/messages/en.ts`.
+- [x] All Arabic translation keys added to corresponding files.
+- [x] Translation schema types updated (if needed).
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+- [x] No missing translation keys in views.
 
 ---
 
