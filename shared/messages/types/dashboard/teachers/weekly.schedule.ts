@@ -10,6 +10,8 @@ export interface TeacherWeeklyScheduleLabels {
   readonly actions: {
     readonly addSlot: string;
     readonly delete: string;
+    readonly clearSchedule: string;
+    readonly deleteClass: string;
   };
   readonly grid: {
     readonly teacherTime: string;
@@ -38,5 +40,11 @@ export interface TeacherWeeklyScheduleLabels {
   readonly dialogs: {
     readonly deleteConfirm: string;
     readonly deleteConfirmClass: string;
+    readonly deleteClassTitle: string;
+    readonly deleteClassMessage: string;
+    readonly clearScheduleTitle: string;
+    readonly clearScheduleMessage: string;
+    readonly confirmYes: string;
+    readonly cancel: string;
   };
 }

@@ -12,6 +12,8 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export interface ScheduledClass {
   readonly id: string;
@@ -45,11 +47,11 @@ const TIMES = [
 interface SlotItemProps {
   readonly classItem: ScheduledClass;
   readonly onRemove: (id: string) => void;
-  readonly deleteConfirmMessage: string;
 }
 
-function SlotItem({ classItem, onRemove, deleteConfirmMessage }: Readonly<SlotItemProps>) {
+function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("dashboard.teacherWeeklySchedule");
 
   const handleDeleteClick = () => {
     setOpen(true);
@@ -84,29 +86,31 @@ function SlotItem({ classItem, onRemove, deleteConfirmMessage }: Readonly<SlotIt
             {classItem.studentName} ({classItem.duration}m)
           </Typography>
         </Box>
-        <Box
-          component="span"
-          className="material-symbols-outlined"
-          sx={theme => ({
-            fontSize: 18,
-            cursor: "pointer",
-            "&:hover": { color: theme.palette.error.main },
-          })}
-          onClick={handleDeleteClick}
-        >
-          delete
-        </Box>
+        <RequirePermission permissions={[AppPermission.ScheduleDeleteClass]}>
+          <Box
+            component="span"
+            className="material-symbols-outlined"
+            sx={theme => ({
+              fontSize: 18,
+              cursor: "pointer",
+              "&:hover": { color: theme.palette.error.main },
+            })}
+            onClick={handleDeleteClick}
+          >
+            delete
+          </Box>
+        </RequirePermission>
       </Box>
 
       <Dialog open={open} onClose={handleCancel}>
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle>{t("dialogs.deleteClassTitle")}</DialogTitle>
         <DialogContent>
-          <DialogContentText>{deleteConfirmMessage}</DialogContentText>
+          <DialogContentText>{t("dialogs.deleteClassMessage")}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel}>Cancel</Button>
+          <Button onClick={handleCancel}>{t("dialogs.cancel")}</Button>
           <Button onClick={handleConfirm} color="error" variant="contained" autoFocus>
-            Delete
+            {t("dialogs.confirmYes")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -227,14 +231,7 @@ function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
                 </Typography>
               </Box>
             ) : (
-              slotClasses.map(c => (
-                <SlotItem
-                  key={c.id}
-                  classItem={c}
-                  onRemove={onRemoveClass}
-                  deleteConfirmMessage={t("dialogs.deleteConfirm")}
-                />
-              ))
+              slotClasses.map(c => <SlotItem key={c.id} classItem={c} onRemove={onRemoveClass} />)
             )}
           </Box>
         );

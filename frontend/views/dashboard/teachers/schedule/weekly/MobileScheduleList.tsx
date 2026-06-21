@@ -13,6 +13,8 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ScheduledClass } from "./WeeklyScheduleGrid";
 
 interface MobileScheduleListProps {
@@ -23,11 +25,11 @@ interface MobileScheduleListProps {
 interface MobileSlotItemProps {
   readonly classItem: ScheduledClass;
   readonly onRemove: (id: string) => void;
-  readonly deleteConfirmMessage: string;
 }
 
-function MobileSlotItem({ classItem, onRemove, deleteConfirmMessage }: Readonly<MobileSlotItemProps>) {
+function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("dashboard.teacherWeeklySchedule");
 
   const handleDeleteClick = () => {
     setOpen(true);
@@ -63,29 +65,31 @@ function MobileSlotItem({ classItem, onRemove, deleteConfirmMessage }: Readonly<
             {classItem.studentName} ({classItem.duration}m)
           </Typography>
         </Box>
-        <Box
-          component="span"
-          className="material-symbols-outlined"
-          sx={theme => ({
-            fontSize: 20,
-            cursor: "pointer",
-            "&:hover": { color: theme.palette.error.light },
-          })}
-          onClick={handleDeleteClick}
-        >
-          delete
-        </Box>
+        <RequirePermission permissions={[AppPermission.ScheduleDeleteClass]}>
+          <Box
+            component="span"
+            className="material-symbols-outlined"
+            sx={theme => ({
+              fontSize: 20,
+              cursor: "pointer",
+              "&:hover": { color: theme.palette.error.light },
+            })}
+            onClick={handleDeleteClick}
+          >
+            delete
+          </Box>
+        </RequirePermission>
       </Box>
 
       <Dialog open={open} onClose={handleCancel}>
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle>{t("dialogs.deleteClassTitle")}</DialogTitle>
         <DialogContent>
-          <DialogContentText>{deleteConfirmMessage}</DialogContentText>
+          <DialogContentText>{t("dialogs.deleteClassMessage")}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <MuiButton onClick={handleCancel}>Cancel</MuiButton>
+          <MuiButton onClick={handleCancel}>{t("dialogs.cancel")}</MuiButton>
           <MuiButton onClick={handleConfirm} color="error" variant="contained" autoFocus>
-            Delete
+            {t("dialogs.confirmYes")}
           </MuiButton>
         </DialogActions>
       </Dialog>
@@ -191,12 +195,7 @@ function TimeSlotRow({ time, slotClasses, onRemoveClass }: Readonly<TimeSlotRowP
     content = (
       <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 1 }}>
         {slotClasses.map(c => (
-          <MobileSlotItem
-            key={c.id}
-            classItem={c}
-            onRemove={onRemoveClass}
-            deleteConfirmMessage={t("dialogs.deleteConfirmClass")}
-          />
+          <MobileSlotItem key={c.id} classItem={c} onRemove={onRemoveClass} />
         ))}
       </Box>
     );

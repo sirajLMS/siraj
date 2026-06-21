@@ -1616,21 +1616,21 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] All Pothos types created with proper `id` fields.
-- [ ] All mutations and queries delegate to service layer.
-- [ ] GraphQL schema generates successfully (`bun run generate:gqlSchema`).
-- [ ] Codegen completes without errors (`bun codegen`).
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
-- [ ] All resolvers propagate `ctx.locale` to services.
+- [x] All Pothos types created with proper `id` fields.
+- [x] All mutations and queries delegate to service layer.
+- [x] GraphQL schema generates successfully (`bun run generate:gqlSchema`).
+- [x] Codegen completes without errors (`bun codegen`).
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+- [x] All resolvers propagate `ctx.locale` to services.
 
 ---
 
@@ -1980,20 +1980,20 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] All GraphQL documents created with proper `TypedDocumentNode` types.
-- [ ] All queries include `id` fields on every object.
-- [ ] `bun run generate:gqlSchema` succeeds.
-- [ ] `bun codegen` generates types without errors.
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+- [x] All GraphQL documents created with proper `TypedDocumentNode` types.
+- [x] All queries include `id` fields on every object.
+- [x] `bun run generate:gqlSchema` succeeds.
+- [x] `bun codegen` generates types without errors.
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 
 ---
 
@@ -2292,23 +2292,23 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] Delete button on class slots wrapped in `<RequirePermission permissions={[AppPermission.ScheduleDeleteClass]}>`.
-- [ ] Clear schedule button wrapped in `<RequirePermission permissions={[AppPermission.ScheduleClearWeekly]}>`.
-- [ ] Both actions use MUI `<Dialog>` for confirmation (no browser `confirm()`).
-- [ ] All dialog text uses `useTranslations` with proper keys.
-- [ ] `clearWeeklySchedule` mutation integrated into container.
-- [ ] Schedule refetches after deletion/clear operations.
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
-- [ ] Component tests pass (`bun run test:ui:components`).
+- [x] Delete button on class slots wrapped in `<RequirePermission permissions={[AppPermission.ScheduleDeleteClass]}>`.
+- [x] Clear schedule button wrapped in `<RequirePermission permissions={[AppPermission.ScheduleClearWeekly]}>`.
+- [x] Both actions use MUI `<Dialog>` for confirmation (no browser `confirm()`).
+- [x] All dialog text uses `useTranslations` with proper keys.
+- [x] `clearWeeklySchedule` mutation integrated into container.
+- [x] Schedule refetches after deletion/clear operations.
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+- [x] Component tests pass (`bun run test:ui:components`).
 
 ---
 

@@ -241,6 +241,22 @@ export type StudentsOrderByColumn =
   | 'STATUS'
   | 'UPDATED_AT';
 
+export type TeacherProfileUpdateInput = {
+  address: string | null | undefined;
+  dateOfBirth: string | null | undefined;
+  gender: string | null | undefined;
+  hourlyRate: string | null | undefined;
+  nationalId: string | null | undefined;
+  phone: string | null | undefined;
+  qualifications: string | null | undefined;
+  rateCurrency: string | null | undefined;
+  skypeId: string | null | undefined;
+  timezone: string | null | undefined;
+  zoomLink: string | null | undefined;
+  zoomPassword: string | null | undefined;
+  zoomUsername: string | null | undefined;
+};
+
 export type UpdatePermissionGroupInput = {
   description: string | null | undefined;
   groupId: string;
@@ -501,6 +517,19 @@ export type DeleteClassInstanceMutationVariables = Exact<{
 
 export type DeleteClassInstanceMutation = DeleteClassInstanceMutation_Mutation;
 
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport = { id: string | null, runId: string | null, updated: number | null, conflicts: number | null, unchanged: number | null, total: number | null };
+
+export type ExecuteDstBulkUpdateMutation_Mutation = { executeDstBulkUpdate: ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport | null };
+
+
+export type ExecuteDstBulkUpdateMutationVariables = Exact<{
+  offsetMinutes: number;
+  description: string;
+}>;
+
+
+export type ExecuteDstBulkUpdateMutation = ExecuteDstBulkUpdateMutation_Mutation;
+
 export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert = { id: string | null, type: string | null, title: string | null, body: string | null, createdAt: string | null, severity: string | null };
 
 export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult = { id: string | null, totalCount: number | null, unreadCount: number | null, alerts: Array<NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert> | null };
@@ -512,6 +541,24 @@ export type NotificationAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type NotificationAlertsQuery = NotificationAlertsQuery_Query;
+
+export type ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null, regular: number | null, onLeave: number | null, suspended: number | null, onTrial: number | null };
+
+export type ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow = { id: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, accountStatus: string | null, unpaidInvoices: number | null };
+
+export type ParentDirectoryQuery_parentDirectory_ParentDirectory = { id: string | null, totalParents: number | null, metrics: ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics | null, rows: Array<ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow> | null };
+
+export type ParentDirectoryQuery_Query = { parentDirectory: ParentDirectoryQuery_parentDirectory_ParentDirectory | null };
+
+
+export type ParentDirectoryQueryVariables = Exact<{
+  search: string | null | undefined;
+  limit: number | null | undefined;
+  offset: number | null | undefined;
+}>;
+
+
+export type ParentDirectoryQuery = ParentDirectoryQuery_Query;
 
 export type PermissionFieldsFragment = { id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null };
 
@@ -684,6 +731,26 @@ export type CreateRecurringClassMutationVariables = Exact<{
 
 export type CreateRecurringClassMutation = CreateRecurringClassMutation_Mutation;
 
+export type DeleteRecurringClassMutation_Mutation = { deleteRecurringClass: boolean | null };
+
+
+export type DeleteRecurringClassMutationVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type DeleteRecurringClassMutation = DeleteRecurringClassMutation_Mutation;
+
+export type ClearWeeklyScheduleMutation_Mutation = { clearWeeklySchedule: boolean | null };
+
+
+export type ClearWeeklyScheduleMutationVariables = Exact<{
+  teacherId: string | number;
+}>;
+
+
+export type ClearWeeklyScheduleMutation = ClearWeeklyScheduleMutation_Mutation;
+
 export type DailyScheduleMetricsQuery_dailyScheduleMetrics_DailyScheduleMetrics = { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 
 export type DailyScheduleMetricsQuery_Query = { dailyScheduleMetrics: DailyScheduleMetricsQuery_dailyScheduleMetrics_DailyScheduleMetrics | null };
@@ -754,6 +821,31 @@ export type TeacherDirectoryQueryVariables = Exact<{
 
 
 export type TeacherDirectoryQuery = TeacherDirectoryQuery_Query;
+
+export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: string | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: string | null };
+
+export type TeacherProfileForEditQuery_Query = { teacherProfileForEdit: TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult | null };
+
+
+export type TeacherProfileForEditQueryVariables = Exact<{
+  teacherId: string | number;
+}>;
+
+
+export type TeacherProfileForEditQuery = TeacherProfileForEditQuery_Query;
+
+export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: string | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: string | null };
+
+export type UpdateTeacherProfileMutation_Mutation = { updateTeacherProfile: UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult | null };
+
+
+export type UpdateTeacherProfileMutationVariables = Exact<{
+  teacherId: string | number;
+  input: Types.TeacherProfileUpdateInput;
+}>;
+
+
+export type UpdateTeacherProfileMutation = UpdateTeacherProfileMutation_Mutation;
 
 export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
 

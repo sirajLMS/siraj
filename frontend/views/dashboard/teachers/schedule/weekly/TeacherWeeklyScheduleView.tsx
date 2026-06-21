@@ -1,8 +1,22 @@
 "use client";
 
 import { AddOutlined, DeleteOutlined, TimerOutlined } from "@mui/icons-material";
-import { Box, IconButton, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Stack,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { MetricCard, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -20,6 +34,7 @@ export interface TeacherWeeklySchedule {
 interface TeacherWeeklyScheduleViewProps {
   readonly schedule: TeacherWeeklySchedule | null;
   readonly onRemoveClass: (id: string) => void;
+  readonly onClearSchedule?: () => void;
   readonly onAddClass?: () => void;
 }
 
@@ -83,13 +98,28 @@ export function ScheduleFooterLegend({
 export default function TeacherWeeklyScheduleView({
   schedule,
   onRemoveClass,
+  onClearSchedule,
   onAddClass,
 }: Readonly<TeacherWeeklyScheduleViewProps>) {
   const t = useTranslations("dashboard.teacherWeeklySchedule");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
   if (!schedule) return null;
+
+  const handleClearClick = () => {
+    setClearDialogOpen(true);
+  };
+
+  const handleConfirmClear = () => {
+    setClearDialogOpen(false);
+    onClearSchedule?.();
+  };
+
+  const handleCancelClear = () => {
+    setClearDialogOpen(false);
+  };
 
   const breadcrumbs = [{ label: t("breadcrumbs.teachers"), href: "/teachers" }, { label: t("breadcrumbs.schedule") }];
 
@@ -106,16 +136,19 @@ export default function TeacherWeeklyScheduleView({
                   {t("actions.addSlot")}
                 </PrimaryPageAction>
               </RequirePermission>
-              <IconButton
-                sx={theme => ({
-                  bgcolor: theme.palette.error.main,
-                  color: theme.palette.onError,
-                  borderRadius: 2,
-                  "&:hover": { bgcolor: theme.palette.error.dark },
-                })}
-              >
-                <DeleteOutlined />
-              </IconButton>
+              <RequirePermission permissions={[AppPermission.ScheduleClearWeekly]}>
+                <IconButton
+                  onClick={handleClearClick}
+                  sx={theme => ({
+                    bgcolor: theme.palette.error.main,
+                    color: theme.palette.onError,
+                    borderRadius: 2,
+                    "&:hover": { bgcolor: theme.palette.error.dark },
+                  })}
+                >
+                  <DeleteOutlined />
+                </IconButton>
+              </RequirePermission>
             </Stack>
           )
         }
@@ -135,12 +168,17 @@ export default function TeacherWeeklyScheduleView({
 
       {/* Mobile Actions */}
       {isMobile && (
-        <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
-          <Stack direction="row" spacing={2} sx={{ mb: 2, alignItems: "center" }}>
-            <PrimaryPageAction startIcon={<AddOutlined />} onClick={onAddClass} sx={{ flex: 1, py: 1.5 }}>
-              {t("actions.addSlot")}
-            </PrimaryPageAction>
+        <Stack direction="row" spacing={2} sx={{ mb: 2, alignItems: "center" }}>
+          <Box sx={{ flex: 1 }}>
+            <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
+              <PrimaryPageAction startIcon={<AddOutlined />} onClick={onAddClass} sx={{ width: "100%", py: 1.5 }}>
+                {t("actions.addSlot")}
+              </PrimaryPageAction>
+            </RequirePermission>
+          </Box>
+          <RequirePermission permissions={[AppPermission.ScheduleClearWeekly]}>
             <IconButton
+              onClick={handleClearClick}
               sx={theme => ({
                 bgcolor: theme.palette.error.main,
                 color: theme.palette.onError,
@@ -151,8 +189,8 @@ export default function TeacherWeeklyScheduleView({
             >
               <DeleteOutlined />
             </IconButton>
-          </Stack>
-        </RequirePermission>
+          </RequirePermission>
+        </Stack>
       )}
 
       {/* Schedule Content */}
@@ -170,6 +208,20 @@ export default function TeacherWeeklyScheduleView({
         availableSlotLabel={t("grid.availableSlot")}
         lastUpdatedText={t("grid.lastUpdated", { time: schedule.lastUpdated })}
       />
+
+      {/* Clear Schedule Confirmation Dialog */}
+      <Dialog open={clearDialogOpen} onClose={handleCancelClear}>
+        <DialogTitle>{t("dialogs.clearScheduleTitle")}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{t("dialogs.clearScheduleMessage")}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelClear}>{t("dialogs.cancel")}</Button>
+          <Button onClick={handleConfirmClear} color="error" variant="contained" autoFocus>
+            {t("dialogs.confirmYes")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </PageContainer>
   );
 }

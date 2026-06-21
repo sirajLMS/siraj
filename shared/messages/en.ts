@@ -987,6 +987,8 @@ const en: MessageSchema = {
       actions: {
         addSlot: "ADD SLOT",
         delete: "DELETE",
+        clearSchedule: "Clear Schedule",
+        deleteClass: "Delete Class",
       },
       grid: {
         teacherTime: "Teacher-Time",
@@ -1015,6 +1017,12 @@ const en: MessageSchema = {
       dialogs: {
         deleteConfirm: "Are you sure you want to remove this booking?",
         deleteConfirmClass: "Are you sure you want to remove this class from your schedule?",
+        deleteClassTitle: "Confirm Delete",
+        deleteClassMessage: "Are you sure that you want to delete this class?",
+        clearScheduleTitle: "Clear Weekly Schedule",
+        clearScheduleMessage: "Are you sure that you want to delete the schedule?",
+        confirmYes: "YES",
+        cancel: "Cancel",
       },
     },
     teacherFutureSchedule: {

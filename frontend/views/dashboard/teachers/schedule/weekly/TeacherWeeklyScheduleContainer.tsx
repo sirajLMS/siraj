@@ -3,7 +3,10 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { deleteClassInstanceMutationDocument } from "@/frontend/graphql/sharedDocuments/class-session.documents";
+import {
+  clearWeeklyScheduleMutationDocument,
+  deleteRecurringClassMutationDocument,
+} from "@/frontend/graphql/sharedDocuments/schedule-deletion.documents";
 import { teacherDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
 import {
   teacherWeeklyScheduleGridQueryDocument,
@@ -44,7 +47,8 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
     skip: !isAdmin,
   });
 
-  const [deleteClassInstance] = useMutation(deleteClassInstanceMutationDocument);
+  const [deleteRecurringClass] = useMutation(deleteRecurringClassMutationDocument);
+  const [clearWeeklySchedule] = useMutation(clearWeeklyScheduleMutationDocument);
 
   const schedule = scheduleData?.teacherWeeklyScheduleGrid;
   const workload = workloadData?.teacherWorkloadMetrics;
@@ -54,13 +58,25 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
 
   const handleRemoveClass = async (classInstanceId: string) => {
     try {
-      await deleteClassInstance({
+      await deleteRecurringClass({
         variables: { classInstanceId },
       });
       await refetchSchedule();
       await refetchWorkload();
     } catch (error) {
       logger.error("Failed to delete class instance", { error });
+    }
+  };
+
+  const handleClearSchedule = async () => {
+    try {
+      await clearWeeklySchedule({
+        variables: { teacherId },
+      });
+      await refetchSchedule();
+      await refetchWorkload();
+    } catch (error) {
+      logger.error("Failed to clear weekly schedule", { error });
     }
   };
 
@@ -93,6 +109,7 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
           lastUpdated: new Date().toLocaleTimeString(),
         }}
         onRemoveClass={handleRemoveClass}
+        onClearSchedule={handleClearSchedule}
         onAddClass={openDialog}
       />
       <CreateRecurringClassDialog teacherId={teacherId} onRefetch={handleRefetch} />

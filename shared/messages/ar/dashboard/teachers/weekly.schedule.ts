@@ -12,6 +12,8 @@ export const weeklySchedule: TeacherWeeklyScheduleLabels = {
   actions: {
     addSlot: "إضافة فترة",
     delete: "حذف",
+    clearSchedule: "مسح الجدول",
+    deleteClass: "حذف الحصة",
   },
   grid: {
     teacherTime: "وقت المعلم",
@@ -40,5 +42,11 @@ export const weeklySchedule: TeacherWeeklyScheduleLabels = {
   dialogs: {
     deleteConfirm: "هل أنت متأكد أنك تريد إزالة هذا الحجز؟",
     deleteConfirmClass: "هل أنت متأكد أنك تريد إزالة هذه الحصة من جدولك؟",
+    deleteClassTitle: "تأكيد الحذف",
+    deleteClassMessage: "هل أنت متأكد أنك تريد حذف هذه الحصة؟",
+    clearScheduleTitle: "مسح الجدول الأسبوعي",
+    clearScheduleMessage: "هل أنت متأكد أنك تريد حذف الجدول؟",
+    confirmYes: "نعم",
+    cancel: "إلغاء",
   },
 };
