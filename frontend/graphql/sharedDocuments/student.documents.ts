@@ -23,3 +23,21 @@ export const studentsQueryDocument: TypedDocumentNode<Operations.StudentsQuery, 
     }
   }
 `;
+
+export const studentByIdQueryDocument: TypedDocumentNode<Operations.StudentByIdQuery, Types.QueryStudentByIdArgs> = gql`
+  query StudentById($studentId: String!) {
+    studentById(studentId: $studentId) {
+      id
+      name
+      status
+      primaryTeacherId
+      teacherName
+      hoursPerWeek
+      classesRemaining
+      classesTotal
+      language
+      gender
+      updatedAt
+    }
+  }
+`;

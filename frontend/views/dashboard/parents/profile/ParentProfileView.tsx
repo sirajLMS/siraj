@@ -11,9 +11,10 @@ import ParentStudentsDataGrid from "./ParentStudentsDataGrid";
 
 interface ParentProfileViewProps {
   readonly parent: ParentProfileData;
+  readonly parentId: string;
 }
 
-const ParentProfileView: React.FC<ParentProfileViewProps> = ({ parent }) => {
+const ParentProfileView: React.FC<ParentProfileViewProps> = ({ parent, parentId }) => {
   const t = useTranslations("dashboard.parentProfile");
   const theme = useTheme();
 
@@ -23,7 +24,7 @@ const ParentProfileView: React.FC<ParentProfileViewProps> = ({ parent }) => {
 
       <ParentProfileHeader name={parent.name} avatarUrl={parent.avatarUrl} status={parent.status} />
 
-      <ParentProfileActions />
+      <ParentProfileActions parentId={parentId} />
 
       <ParentProfileDetails parent={parent} />
 

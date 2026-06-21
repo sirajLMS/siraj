@@ -11,6 +11,7 @@ export type AppLanguage =
 export type AppPermission =
   | 'AUTH_LOGIN'
   | 'AUTH_VIEW_OWN_PROFILE'
+  | 'BILLING_VIEW_HISTORY'
   | 'BILLING_VIEW_UNPAID_INVOICES'
   | 'COMPLAINTS_DELETE'
   | 'COMPLAINTS_LIST'
@@ -20,6 +21,7 @@ export type AppPermission =
   | 'DASHBOARD_SEARCH'
   | 'DASHBOARD_VIEW'
   | 'DASHBOARD_VIEW_METRICS'
+  | 'DOCUMENT_MANAGE_PARENT_DOCS'
   | 'HISTORY_VIEW_CALENDAR'
   | 'HISTORY_VIEW_DETAILS'
   | 'INVOICES_CREATE'
@@ -31,7 +33,9 @@ export type AppPermission =
   | 'PARENTS_CREATE'
   | 'PARENTS_EDIT'
   | 'PARENTS_LIST'
+  | 'PARENT_MANAGE_STATUS'
   | 'PARENT_VIEW_DIRECTORY'
+  | 'PARENT_VIEW_PROFILE'
   | 'PERMISSION_GROUPS_ASSIGN'
   | 'PERMISSION_GROUPS_MANAGE'
   | 'REPORTS_GENERATE'
@@ -71,6 +75,8 @@ export type AppPermission =
   | 'STUDENTS_EDIT'
   | 'STUDENTS_LIST'
   | 'STUDENTS_OVERRIDE_QUOTA'
+  | 'STUDENT_EDIT_QUOTA'
+  | 'STUDENT_VIEW_ASSOCIATED'
   | 'SYSTEM_BULK_UPDATE_DST'
   | 'SYSTEM_ENFORCE_LEAVE_LIMIT'
   | 'SYSTEM_ENFORCE_TIME_WINDOW'
@@ -542,6 +548,18 @@ export type NotificationAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type NotificationAlertsQuery = NotificationAlertsQuery_Query;
 
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: string | null, status: string | null, invoiceType: string | null, studentId: string | null };
+
+export type ParentInvoiceHistoryQuery_Query = { parentInvoiceHistory: Array<ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceRow> | null };
+
+
+export type ParentInvoiceHistoryQueryVariables = Exact<{
+  parentId: string;
+}>;
+
+
+export type ParentInvoiceHistoryQuery = ParentInvoiceHistoryQuery_Query;
+
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null, regular: number | null, onLeave: number | null, suspended: number | null, onTrial: number | null };
 
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow = { id: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, accountStatus: string | null, unpaidInvoices: number | null };
@@ -559,6 +577,82 @@ export type ParentDirectoryQueryVariables = Exact<{
 
 
 export type ParentDirectoryQuery = ParentDirectoryQuery_Query;
+
+export type ParentDocumentsQuery_parentDocuments_ParentDocument = { id: string | null, fileId: string | null, filePath: string | null, isProtected: boolean | null, usageType: string | null, createdAt: string | null };
+
+export type ParentDocumentsQuery_Query = { parentDocuments: Array<ParentDocumentsQuery_parentDocuments_ParentDocument> | null };
+
+
+export type ParentDocumentsQueryVariables = Exact<{
+  parentId: string;
+}>;
+
+
+export type ParentDocumentsQuery = ParentDocumentsQuery_Query;
+
+export type LinkDocumentToParentMutation_linkDocumentToParent_ParentDocument = { id: string | null, fileId: string | null, filePath: string | null, isProtected: boolean | null, usageType: string | null, createdAt: string | null };
+
+export type LinkDocumentToParentMutation_Mutation = { linkDocumentToParent: LinkDocumentToParentMutation_linkDocumentToParent_ParentDocument | null };
+
+
+export type LinkDocumentToParentMutationVariables = Exact<{
+  parentId: string;
+  fileId: string;
+  usageType: string;
+}>;
+
+
+export type LinkDocumentToParentMutation = LinkDocumentToParentMutation_Mutation;
+
+export type ParentProfileQuery_parentProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, skype: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type ParentProfileQuery_Query = { parentProfile: ParentProfileQuery_parentProfile_ParentProfile | null };
+
+
+export type ParentProfileQueryVariables = Exact<{
+  parentId: string;
+}>;
+
+
+export type ParentProfileQuery = ParentProfileQuery_Query;
+
+export type ParentAssociatedStudentsQuery_parentAssociatedStudents_AssociatedStudent = { id: string | null, name: string | null, status: string | null, primaryTeacherId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, updatedAt: string | null };
+
+export type ParentAssociatedStudentsQuery_Query = { parentAssociatedStudents: Array<ParentAssociatedStudentsQuery_parentAssociatedStudents_AssociatedStudent> | null };
+
+
+export type ParentAssociatedStudentsQueryVariables = Exact<{
+  parentId: string;
+}>;
+
+
+export type ParentAssociatedStudentsQuery = ParentAssociatedStudentsQuery_Query;
+
+export type DeactivateParentMutation_deactivateParent_DeactivateParentResult = { id: string | null, userId: string | null, status: string | null };
+
+export type DeactivateParentMutation_Mutation = { deactivateParent: DeactivateParentMutation_deactivateParent_DeactivateParentResult | null };
+
+
+export type DeactivateParentMutationVariables = Exact<{
+  parentId: string;
+}>;
+
+
+export type DeactivateParentMutation = DeactivateParentMutation_Mutation;
+
+export type UpdateStudentQuotaMutation_updateStudentQuota_EditQuotaResult = { id: string | null, classesRemaining: number | null, classesTotal: number | null, version: number | null };
+
+export type UpdateStudentQuotaMutation_Mutation = { updateStudentQuota: UpdateStudentQuotaMutation_updateStudentQuota_EditQuotaResult | null };
+
+
+export type UpdateStudentQuotaMutationVariables = Exact<{
+  studentId: string;
+  newClassesRemaining: number;
+  expectedVersion: number | null | undefined;
+}>;
+
+
+export type UpdateStudentQuotaMutation = UpdateStudentQuotaMutation_Mutation;
 
 export type PermissionFieldsFragment = { id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null };
 
@@ -894,6 +988,18 @@ export type StudentsQueryVariables = Exact<{
 
 
 export type StudentsQuery = StudentsQuery_Query;
+
+export type StudentByIdQuery_studentById_AssociatedStudent = { id: string | null, name: string | null, status: string | null, primaryTeacherId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, updatedAt: string | null };
+
+export type StudentByIdQuery_Query = { studentById: StudentByIdQuery_studentById_AssociatedStudent | null };
+
+
+export type StudentByIdQueryVariables = Exact<{
+  studentId: string;
+}>;
+
+
+export type StudentByIdQuery = StudentByIdQuery_Query;
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics = { total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 

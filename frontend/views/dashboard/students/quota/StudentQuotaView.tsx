@@ -9,7 +9,7 @@ import {
   ScheduleOutlined,
   SyncOutlined,
 } from "@mui/icons-material";
-import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
+import { Avatar, Box, Button, CircularProgress, IconButton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
@@ -230,7 +230,13 @@ export function StudentQuotaView({
   };
 
   if (isLoading || !studentData) {
-    return <PageContainer>Loading...</PageContainer>;
+    return (
+      <PageContainer>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+          <CircularProgress />
+        </Box>
+      </PageContainer>
+    );
   }
 
   return (

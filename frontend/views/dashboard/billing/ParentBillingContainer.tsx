@@ -1,11 +1,13 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useParentBillingStore } from "@/frontend/stores/moackParentBillingStore";
-import { useUserStore } from "@/frontend/stores/mockUserStore";
-import { logger } from "@/frontend/utils/logger";
+import { parentInvoiceHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { ParentBillingView } from "./ParentBillingView";
 import type { ParentBillingViewProps } from "./types/billingViewTypes";
 import { filterParentInvoices } from "./utils/billingFilters";
@@ -13,41 +15,75 @@ import { buildBillingLabels } from "./utils/buildBillingLabels";
 
 export function ParentBillingContainer() {
   const t = useTranslations("dashboard.billing");
-  const permissions = useUserStore(state => state.permissions);
+  const params = useParams();
+  const parentId = typeof params?.id === "string" ? params.id : "";
   const labels = buildBillingLabels(t);
 
-  const canManage = permissions.includes(AppPermission.InvoicesEdit);
-  const canView = permissions.includes(AppPermission.InvoicesList);
-  const canCreate = permissions.includes(AppPermission.InvoicesCreate);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const searchQuery = useParentBillingStore(state => state.searchQuery);
-  const summary = useParentBillingStore(state => state.summary);
-  const invoices = useParentBillingStore(state => state.invoices);
-  const setSearchQuery = useParentBillingStore(state => state.setSearchQuery);
-  const payNow = useParentBillingStore(state => state.payNow);
-  const downloadPdf = useParentBillingStore(state => state.downloadPdf);
+  const { data, loading, error } = useQuery(parentInvoiceHistoryQueryDocument, {
+    variables: { parentId },
+    skip: !parentId,
+  });
 
-  const filteredInvoices = useMemo(() => filterParentInvoices(invoices, searchQuery), [invoices, searchQuery]);
+  const invoices = useMemo(() => data?.parentInvoiceHistory ?? [], [data?.parentInvoiceHistory]);
 
-  if (!canView) {
-    return null;
+  const filteredInvoices = useMemo(
+    () =>
+      filterParentInvoices(
+        invoices.map(inv => ({
+          id: inv.id ?? "",
+          invoiceNumber: (inv.id ?? "").slice(0, 8).toUpperCase(),
+          month: inv.issueDate ? new Date(inv.issueDate).toLocaleString("en", { month: "long" }) : "",
+          issueDate: inv.issueDate ?? "",
+          dueDate: inv.dueDate ?? "",
+          paidDate: inv.paidDate ?? "—",
+          fee: `${inv.currency} ${inv.amount}`,
+          status: (inv.status?.toLowerCase() ?? "unpaid") as "paid" | "unpaid",
+        })),
+        searchQuery
+      ),
+    [invoices, searchQuery]
+  );
+
+  if (!parentId) {
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidId")}</Typography>;
+  }
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{error.message}</Typography>;
   }
 
   const viewProps: ParentBillingViewProps = {
     labels,
-    summary,
+    summary: {
+      outstandingBalance: "",
+      paidThisTerm: "",
+      nextDueDate: "",
+      activeStudents: "",
+    },
     invoices: filteredInvoices,
     searchQuery,
-    canManage,
-    canView,
-    canCreate,
+    canManage: false,
+    canView: true,
+    canCreate: false,
     onSearchChange: setSearchQuery,
-    onPayNow: payNow,
-    onDownloadPdf: downloadPdf,
-    onQuickPay: () => {
-      logger.info("Quick pay requested");
-    },
+    onPayNow: () => undefined,
+    onDownloadPdf: () => undefined,
+    onQuickPay: () => undefined,
   };
 
-  return <ParentBillingView {...viewProps} />;
+  return (
+    <RequirePermission permissions={[AppPermission.BillingViewHistory]}>
+      <ParentBillingView {...viewProps} />
+    </RequirePermission>
+  );
 }

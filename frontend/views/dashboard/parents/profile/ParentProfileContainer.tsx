@@ -1,62 +1,162 @@
 "use client";
 
-import type React from "react";
-import { useMemo } from "react";
-import type { ParentProfileData } from "../types/profile";
+import { useQuery } from "@apollo/client/react";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { parentAssociatedStudentsQueryDocument, parentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import type { ParentProfileData, ParentStudent } from "../types/profile";
 import ParentProfileView from "./ParentProfileView";
 
 interface ParentProfileContainerProps {
   readonly id: string;
 }
 
-const MOCK_PARENT: ParentProfileData = {
-  id: "par-001",
-  name: "Omar Ahmed",
-  avatarUrl: "/demo/avatars/01.png",
-  status: "regular",
-  nationality: "Egyptian",
-  email: "omar@email.com",
-  phone: "+20 123 456 789",
-  address: "Cairo, Egypt",
-  facebook: "omar.ahmed.9",
-  whatsapp: "+20 123 456 789",
-  skype: "omar_skype_edu",
-  zoomLink: "zoom.us/j/123456789",
-  invoiceType: "Per Classes",
-  feeAmount: 50,
-  paymentMethod: "PayPal",
-  currency: "USD",
-  students: [
-    {
-      id: "std-001",
-      name: "Ali Ahmed",
-      teacher: "Dr. Sarah Mansour",
-      hoursPerWeek: 4,
-      classesLeft: 12,
-      totalClasses: 12,
-      language: "Arabic",
-      gender: "male",
-      status: "regular",
-    },
-    {
-      id: "std-002",
-      name: "Sara Ahmed",
-      teacher: "Prof. Ahmed Omar",
-      hoursPerWeek: 6,
-      classesLeft: 8,
-      totalClasses: 12,
-      language: "English",
-      gender: "female",
-      status: "regular",
-    },
-  ],
-};
+type ParentAccountStatus = ParentProfileData["status"];
 
-const ParentProfileContainer: React.FC<ParentProfileContainerProps> = ({ id: _id }) => {
-  // In a real app, we would fetch the parent by ID using _id
-  const parent = useMemo(() => MOCK_PARENT, []);
+function isNonEmpty(value: string | null | undefined): value is string {
+  return typeof value === "string" && value.length > 0;
+}
 
-  return <ParentProfileView parent={parent} />;
-};
+function mapStudent(raw: {
+  readonly id: string | null | undefined;
+  readonly name: string | null | undefined;
+  readonly teacherName: string | null | undefined;
+  readonly hoursPerWeek: string | null | undefined;
+  readonly classesRemaining: number | null | undefined;
+  readonly classesTotal: number | null | undefined;
+  readonly language: string | null | undefined;
+  readonly gender: string | null | undefined;
+  readonly status: string | null | undefined;
+}): ParentStudent | null {
+  if (!isNonEmpty(raw.id) || !isNonEmpty(raw.name)) return null;
+  return {
+    id: raw.id,
+    name: raw.name,
+    teacher: raw.teacherName ?? "",
+    hoursPerWeek: Number(raw.hoursPerWeek ?? 0),
+    classesLeft: raw.classesRemaining ?? 0,
+    totalClasses: raw.classesTotal ?? 0,
+    language: raw.language ?? "",
+    gender: (raw.gender?.toLowerCase() ?? "male") as ParentStudent["gender"],
+    status: (raw.status?.toLowerCase() ?? "regular") as ParentStudent["status"],
+  };
+}
+
+function mapProfileData(
+  profile: {
+    readonly id: string | null;
+    readonly name: string | null;
+    readonly email: string | null;
+    readonly avatarUrl: string | null;
+    readonly status: string | null;
+    readonly phone: string | null;
+    readonly nationality: string | null;
+    readonly address: string | null;
+    readonly facebook: string | null;
+    readonly whatsapp: string | null;
+    readonly skype: string | null;
+    readonly defaultZoomLink: string | null;
+    readonly invoiceType: string | null;
+    readonly feeAmount: string | null;
+    readonly paymentMethod: string | null;
+    readonly currency: string | null;
+  },
+  associatedStudents: ReadonlyArray<{
+    readonly id: string | null;
+    readonly name: string | null;
+    readonly teacherName: string | null;
+    readonly hoursPerWeek: string | null;
+    readonly classesRemaining: number | null;
+    readonly classesTotal: number | null;
+    readonly language: string | null;
+    readonly gender: string | null;
+    readonly status: string | null;
+  }>
+): ParentProfileData | null {
+  if (!isNonEmpty(profile.id) || !isNonEmpty(profile.name) || !isNonEmpty(profile.email)) {
+    return null;
+  }
+
+  const students: ParentStudent[] = [];
+  for (const raw of associatedStudents) {
+    const mapped = mapStudent(raw);
+    if (mapped) students.push(mapped);
+  }
+
+  return {
+    id: profile.id,
+    name: profile.name,
+    email: profile.email,
+    avatarUrl: profile.avatarUrl ?? undefined,
+    status: (profile.status?.toLowerCase() ?? "regular") as ParentAccountStatus,
+    nationality: profile.nationality ?? "",
+    phone: profile.phone ?? "",
+    address: profile.address ?? "",
+    facebook: profile.facebook ?? undefined,
+    whatsapp: profile.whatsapp ?? undefined,
+    skype: profile.skype ?? undefined,
+    zoomLink: profile.defaultZoomLink ?? undefined,
+    invoiceType: profile.invoiceType ?? "",
+    feeAmount: profile.feeAmount ? Number(profile.feeAmount) : 0,
+    paymentMethod: profile.paymentMethod ?? "",
+    currency: profile.currency ?? "",
+    students,
+  };
+}
+
+export function ParentProfileContainer({ id }: ParentProfileContainerProps) {
+  const t = useTranslations("dashboard.parentProfile");
+  const params = useParams();
+  const parentId = typeof params?.id === "string" ? params.id : id || "";
+
+  const {
+    data: profileData,
+    loading: profileLoading,
+    error: profileError,
+  } = useQuery(parentProfileQueryDocument, {
+    variables: { parentId },
+    skip: !parentId,
+  });
+
+  const { data: studentsData, loading: studentsLoading } = useQuery(parentAssociatedStudentsQueryDocument, {
+    variables: { parentId },
+    skip: !parentId,
+  });
+
+  if (!parentId) {
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidId")}</Typography>;
+  }
+
+  if (profileLoading || studentsLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (profileError || !profileData?.parentProfile) {
+    return (
+      <Typography sx={{ color: theme => theme.palette.error.main }}>
+        {profileError?.message ?? t("errors.notFound")}
+      </Typography>
+    );
+  }
+
+  const parentData = mapProfileData(profileData.parentProfile, studentsData?.parentAssociatedStudents ?? []);
+
+  if (!parentData) {
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidData")}</Typography>;
+  }
+
+  return (
+    <RequirePermission permissions={[AppPermission.ParentViewProfile]}>
+      <ParentProfileView parent={parentData} parentId={parentId} />
+    </RequirePermission>
+  );
+}
 
 export default ParentProfileContainer;

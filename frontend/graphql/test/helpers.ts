@@ -26,6 +26,35 @@ export async function loginDemoUser(groupSlug: string): Promise<string> {
 }
 
 /**
+ * Logs in as the specified role and asserts that a GraphQL operation is denied.
+ * Centralizes the common denial-test pattern to avoid duplication across test files.
+ */
+export async function assertOperationDenied<TData = unknown, TVars extends OperationVariables = OperationVariables>(
+  roleGroupSlug: string,
+  type: "query" | "mutate",
+  document: TypedDocumentNode<TData, TVars>,
+  variables: TVars
+): Promise<void> {
+  const token = await loginDemoUser(roleGroupSlug);
+  const context = { headers: { Authorization: `Bearer ${token}` } };
+
+  const result =
+    type === "query"
+      ? await testClient.query({
+          query: document,
+          variables,
+          context,
+        } as Parameters<typeof testClient.query>[0])
+      : await testClient.mutate({
+          mutation: document,
+          variables,
+          context,
+        } as Parameters<typeof testClient.mutate>[0]);
+
+  expect(result.error).toBeDefined();
+}
+
+/**
  * Logs in a standard user using email and password, returning their auth token.
  */
 export async function loginUser(email: string, password = "password"): Promise<string> {

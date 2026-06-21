@@ -1,8 +1,7 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { ParentRepository } from "@/backend/db/repo/parent.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
-import { parents, teachers } from "@/backend/db/schema";
+import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -10,15 +9,11 @@ import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ScheduleService {
   async function resolveViewerTimezone(userId: string): Promise<string> {
-    const [teacher] = await db
-      .select({ tz: teachers.timezone })
-      .from(teachers)
-      .where(eq(teachers.userId, userId))
-      .limit(1);
-    if (teacher?.tz) return teacher.tz;
+    const teacher = await TeacherRepository.findByUserId(userId);
+    if (teacher?.timezone) return teacher.timezone;
 
-    const [parent] = await db.select({ tz: parents.timezone }).from(parents).where(eq(parents.userId, userId)).limit(1);
-    if (parent?.tz) return parent.tz;
+    const parent = await ParentRepository.findByUserId(userId);
+    if (parent?.timezone) return parent.timezone;
 
     return await SystemSettingsRepository.getStringValue("default_timezone", "UTC");
   }

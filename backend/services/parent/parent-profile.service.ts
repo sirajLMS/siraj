@@ -114,6 +114,30 @@ export namespace ParentProfileService {
   }
 
   /**
+   * Returns a single student's profile data by studentId.
+   * Requires: student.view_associated permission.
+   */
+  export async function getStudentById(
+    actorUserId: string,
+    studentId: string,
+    locale?: string
+  ): Promise<AssociatedStudentResult> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_ASSOCIATED);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    const student = await ParentRepository.getAssociatedStudentById(studentId);
+    if (!student) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("studentNotFound", { id: studentId }));
+    }
+
+    return student;
+  }
+
+  /**
    * Deactivates a parent account by setting status to DEACTIVATED.
    * Requires: parent.manage_status permission.
    * Also invalidates all active sessions for the parent's userId.

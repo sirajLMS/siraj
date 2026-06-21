@@ -29,6 +29,7 @@ export enum AppLanguage {
 export enum AppPermission {
   AuthLogin = 'AUTH_LOGIN',
   AuthViewOwnProfile = 'AUTH_VIEW_OWN_PROFILE',
+  BillingViewHistory = 'BILLING_VIEW_HISTORY',
   BillingViewUnpaidInvoices = 'BILLING_VIEW_UNPAID_INVOICES',
   ComplaintsDelete = 'COMPLAINTS_DELETE',
   ComplaintsList = 'COMPLAINTS_LIST',
@@ -38,6 +39,7 @@ export enum AppPermission {
   DashboardSearch = 'DASHBOARD_SEARCH',
   DashboardView = 'DASHBOARD_VIEW',
   DashboardViewMetrics = 'DASHBOARD_VIEW_METRICS',
+  DocumentManageParentDocs = 'DOCUMENT_MANAGE_PARENT_DOCS',
   HistoryViewCalendar = 'HISTORY_VIEW_CALENDAR',
   HistoryViewDetails = 'HISTORY_VIEW_DETAILS',
   InvoicesCreate = 'INVOICES_CREATE',
@@ -49,7 +51,9 @@ export enum AppPermission {
   ParentsCreate = 'PARENTS_CREATE',
   ParentsEdit = 'PARENTS_EDIT',
   ParentsList = 'PARENTS_LIST',
+  ParentManageStatus = 'PARENT_MANAGE_STATUS',
   ParentViewDirectory = 'PARENT_VIEW_DIRECTORY',
+  ParentViewProfile = 'PARENT_VIEW_PROFILE',
   PermissionGroupsAssign = 'PERMISSION_GROUPS_ASSIGN',
   PermissionGroupsManage = 'PERMISSION_GROUPS_MANAGE',
   ReportsGenerate = 'REPORTS_GENERATE',
@@ -89,6 +93,8 @@ export enum AppPermission {
   StudentsEdit = 'STUDENTS_EDIT',
   StudentsList = 'STUDENTS_LIST',
   StudentsOverrideQuota = 'STUDENTS_OVERRIDE_QUOTA',
+  StudentEditQuota = 'STUDENT_EDIT_QUOTA',
+  StudentViewAssociated = 'STUDENT_VIEW_ASSOCIATED',
   SystemBulkUpdateDst = 'SYSTEM_BULK_UPDATE_DST',
   SystemEnforceLeaveLimit = 'SYSTEM_ENFORCE_LEAVE_LIMIT',
   SystemEnforceTimeWindow = 'SYSTEM_ENFORCE_TIME_WINDOW',
@@ -105,6 +111,21 @@ export enum AppPermission {
 export type AssignPermissionGroupToUserInput = {
   groupId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
+};
+
+export type AssociatedStudent = {
+  __typename?: 'AssociatedStudent';
+  classesRemaining: Maybe<Scalars['Int']['output']>;
+  classesTotal: Maybe<Scalars['Int']['output']>;
+  gender: Maybe<Scalars['String']['output']>;
+  hoursPerWeek: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  language: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  primaryTeacherId: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type AvailabilitySearchInput = {
@@ -528,6 +549,13 @@ export type DailyScheduleMetrics = {
   trial: Maybe<Scalars['Int']['output']>;
 };
 
+export type DeactivateParentResult = {
+  __typename?: 'DeactivateParentResult';
+  id: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
+};
+
 /** Input for the demo fast login mutation. */
 export type DemoLoginInput = {
   /** The unique slug of the permission group to authenticate as. */
@@ -581,6 +609,14 @@ export type DstMigrationReport = {
   total: Maybe<Scalars['Int']['output']>;
   unchanged: Maybe<Scalars['Int']['output']>;
   updated: Maybe<Scalars['Int']['output']>;
+};
+
+export type EditQuotaResult = {
+  __typename?: 'EditQuotaResult';
+  classesRemaining: Maybe<Scalars['Int']['output']>;
+  classesTotal: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  version: Maybe<Scalars['Int']['output']>;
 };
 
 export type FileInfo = StorageObject & {
@@ -748,6 +784,7 @@ export type Mutation = {
   createRecurringClass: Maybe<CreateRecurringClassResult>;
   createTeacherManualClassEntry: Maybe<ClassInstanceDetail>;
   createTestEntities: Maybe<TestEntities>;
+  deactivateParent: Maybe<DeactivateParentResult>;
   deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
   deleteFile: Maybe<FileOperationResult>;
   deletePermissionGroup: Maybe<Scalars['Boolean']['output']>;
@@ -757,6 +794,7 @@ export type Mutation = {
   /** Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables. */
   demoLogin: Maybe<LoginResponse>;
   executeDstBulkUpdate: Maybe<DstMigrationReport>;
+  linkDocumentToParent: Maybe<ParentDocument>;
   logTeacherSupportRequest: Maybe<SupportRequestResult>;
   login: Maybe<LoginResponse>;
   logout: Maybe<Scalars['Boolean']['output']>;
@@ -775,6 +813,7 @@ export type Mutation = {
   updateSessionStatusAbsent: Maybe<ClassInstanceDetail>;
   updateSessionStatusLeave: Maybe<LeaveProcessResult>;
   updateSessionStatusStart: Maybe<ClassInstanceDetail>;
+  updateStudentQuota: Maybe<EditQuotaResult>;
   updateTeacherProfile: Maybe<TeacherProfileResult>;
   updateUserOverrides: Maybe<Scalars['Boolean']['output']>;
 };
@@ -853,6 +892,11 @@ export type MutationCreateTestEntitiesArgs = {
 };
 
 
+export type MutationDeactivateParentArgs = {
+  parentId: Scalars['String']['input'];
+};
+
+
 export type MutationDeleteClassInstanceArgs = {
   classInstanceId: Scalars['ID']['input'];
 };
@@ -891,6 +935,13 @@ export type MutationDemoLoginArgs = {
 export type MutationExecuteDstBulkUpdateArgs = {
   description: Scalars['String']['input'];
   offsetMinutes: Scalars['Int']['input'];
+};
+
+
+export type MutationLinkDocumentToParentArgs = {
+  fileId: Scalars['String']['input'];
+  parentId: Scalars['String']['input'];
+  usageType: Scalars['String']['input'];
 };
 
 
@@ -976,6 +1027,13 @@ export type MutationUpdateSessionStatusStartArgs = {
 };
 
 
+export type MutationUpdateStudentQuotaArgs = {
+  expectedVersion: InputMaybe<Scalars['Int']['input']>;
+  newClassesRemaining: Scalars['Int']['input'];
+  studentId: Scalars['String']['input'];
+};
+
+
 export type MutationUpdateTeacherProfileArgs = {
   input: TeacherProfileUpdateInput;
   teacherId: Scalars['ID']['input'];
@@ -1056,6 +1114,54 @@ export type ParentDirectoryRow = {
   unpaidInvoices: Maybe<Scalars['Int']['output']>;
 };
 
+export type ParentDocument = {
+  __typename?: 'ParentDocument';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  fileId: Maybe<Scalars['String']['output']>;
+  filePath: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isProtected: Maybe<Scalars['Boolean']['output']>;
+  usageType: Maybe<Scalars['String']['output']>;
+};
+
+export type ParentInvoiceRow = {
+  __typename?: 'ParentInvoiceRow';
+  amount: Maybe<Scalars['String']['output']>;
+  currency: Maybe<Scalars['String']['output']>;
+  dueDate: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  invoiceType: Maybe<Scalars['String']['output']>;
+  issueDate: Maybe<Scalars['String']['output']>;
+  paidDate: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+};
+
+export type ParentProfile = {
+  __typename?: 'ParentProfile';
+  address: Maybe<Scalars['String']['output']>;
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  currency: Maybe<Scalars['String']['output']>;
+  defaultZoomLink: Maybe<Scalars['String']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  facebook: Maybe<Scalars['String']['output']>;
+  feeAmount: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  invoiceType: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  nationality: Maybe<Scalars['String']['output']>;
+  paymentMethod: Maybe<Scalars['String']['output']>;
+  phone: Maybe<Scalars['String']['output']>;
+  skype: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<Scalars['String']['output']>;
+  twitter: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
+  whatsapp: Maybe<Scalars['String']['output']>;
+};
+
 export type PartialStudentUpdateInput = {
   classesRemaining: InputMaybe<Scalars['Int']['input']>;
   classesTotal: InputMaybe<Scalars['Int']['input']>;
@@ -1108,7 +1214,11 @@ export type Query = {
   listFiles: Maybe<StorageObjectList>;
   me: Maybe<User>;
   notificationAlerts: Maybe<NotificationAlertsResult>;
+  parentAssociatedStudents: Maybe<Array<AssociatedStudent>>;
   parentDirectory: Maybe<ParentDirectory>;
+  parentDocuments: Maybe<Array<ParentDocument>>;
+  parentInvoiceHistory: Maybe<Array<ParentInvoiceRow>>;
+  parentProfile: Maybe<ParentProfile>;
   /** Fetch a single permission group by ID. */
   permissionGroup: Maybe<PermissionGroup>;
   /** List all permission groups with their permission IDs. */
@@ -1121,6 +1231,7 @@ export type Query = {
   searchTeacherAvailability: Maybe<AvailabilitySearchResult>;
   storageStats: Maybe<StorageStats>;
   student: Maybe<Student>;
+  studentById: Maybe<AssociatedStudent>;
   studentClassHistory: Maybe<StudentClassHistory>;
   studentClassSessionDetail: Maybe<StudentSessionDetail>;
   students: StudentsWithFiltersResponse;
@@ -1198,10 +1309,30 @@ export type QueryListFilesArgs = {
 };
 
 
+export type QueryParentAssociatedStudentsArgs = {
+  parentId: Scalars['String']['input'];
+};
+
+
 export type QueryParentDirectoryArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   search: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryParentDocumentsArgs = {
+  parentId: Scalars['String']['input'];
+};
+
+
+export type QueryParentInvoiceHistoryArgs = {
+  parentId: Scalars['String']['input'];
+};
+
+
+export type QueryParentProfileArgs = {
+  parentId: Scalars['String']['input'];
 };
 
 
@@ -1235,6 +1366,11 @@ export type QueryStorageStatsArgs = {
 
 export type QueryStudentArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type QueryStudentByIdArgs = {
+  studentId: Scalars['String']['input'];
 };
 
 

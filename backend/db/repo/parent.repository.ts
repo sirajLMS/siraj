@@ -159,6 +159,12 @@ export namespace ParentRepository {
     return results[0] ?? null;
   };
 
+  export const findByUserId = async (userId: string, tx?: DBTransaction) => {
+    const queryDb = tx ?? db;
+    const [parent] = await queryDb.select().from(parents).where(eq(parents.userId, userId)).limit(1);
+    return parent ?? null;
+  };
+
   export type DeactivatedParentResult = {
     id: string;
     userId: string;
@@ -258,5 +264,51 @@ export namespace ParentRepository {
       gender: r.gender ?? null,
       updatedAt: r.updatedAt,
     }));
+  };
+
+  export const getAssociatedStudentById = async (
+    studentId: string,
+    tx?: DBTransaction
+  ): Promise<AssociatedStudentRow | null> => {
+    const queryDb = tx ?? db;
+
+    const results = await queryDb
+      .select({
+        id: students.id,
+        name: students.name,
+        status: students.status,
+        primaryTeacherId: students.primaryTeacherId,
+        teacherName: users.name,
+        hoursPerWeek: students.hoursPerWeek,
+        classesRemaining: students.classesRemaining,
+        classesTotal: students.classesTotal,
+        language: students.language,
+        gender: students.gender,
+        updatedAt: students.updatedAt,
+      })
+      .from(students)
+      .leftJoin(teachers, eq(students.primaryTeacherId, teachers.id))
+      .leftJoin(users, eq(teachers.userId, users.id))
+      .where(eq(students.id, studentId))
+      .limit(1);
+
+    if (results.length === 0) {
+      return null;
+    }
+
+    const r = results[0];
+    return {
+      id: r.id,
+      name: r.name,
+      status: r.status,
+      primaryTeacherId: r.primaryTeacherId,
+      teacherName: r.teacherName ?? null,
+      hoursPerWeek: r.hoursPerWeek,
+      classesRemaining: r.classesRemaining,
+      classesTotal: r.classesTotal,
+      language: r.language ?? null,
+      gender: r.gender ?? null,
+      updatedAt: r.updatedAt,
+    };
   };
 }

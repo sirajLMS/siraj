@@ -6,6 +6,7 @@ enum AppLanguage {
 enum AppPermission {
   AUTH_LOGIN
   AUTH_VIEW_OWN_PROFILE
+  BILLING_VIEW_HISTORY
   BILLING_VIEW_UNPAID_INVOICES
   COMPLAINTS_DELETE
   COMPLAINTS_LIST
@@ -15,6 +16,7 @@ enum AppPermission {
   DASHBOARD_SEARCH
   DASHBOARD_VIEW
   DASHBOARD_VIEW_METRICS
+  DOCUMENT_MANAGE_PARENT_DOCS
   HISTORY_VIEW_CALENDAR
   HISTORY_VIEW_DETAILS
   INVOICES_CREATE
@@ -26,7 +28,9 @@ enum AppPermission {
   PARENTS_CREATE
   PARENTS_EDIT
   PARENTS_LIST
+  PARENT_MANAGE_STATUS
   PARENT_VIEW_DIRECTORY
+  PARENT_VIEW_PROFILE
   PERMISSION_GROUPS_ASSIGN
   PERMISSION_GROUPS_MANAGE
   REPORTS_GENERATE
@@ -66,6 +70,8 @@ enum AppPermission {
   STUDENTS_EDIT
   STUDENTS_LIST
   STUDENTS_OVERRIDE_QUOTA
+  STUDENT_EDIT_QUOTA
+  STUDENT_VIEW_ASSOCIATED
   SYSTEM_BULK_UPDATE_DST
   SYSTEM_ENFORCE_LEAVE_LIMIT
   SYSTEM_ENFORCE_TIME_WINDOW
@@ -82,6 +88,20 @@ enum AppPermission {
 input AssignPermissionGroupToUserInput {
   groupId: String!
   userId: String!
+}
+
+type AssociatedStudent {
+  classesRemaining: Int
+  classesTotal: Int
+  gender: String
+  hoursPerWeek: String
+  id: String
+  language: String
+  name: String
+  primaryTeacherId: String
+  status: String
+  teacherName: String
+  updatedAt: DateTime
 }
 
 input AvailabilitySearchInput {
@@ -502,6 +522,12 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
+type DeactivateParentResult {
+  id: String
+  status: String
+  userId: String
+}
+
 """Input for the demo fast login mutation."""
 input DemoLoginInput {
   """The unique slug of the permission group to authenticate as."""
@@ -552,6 +578,13 @@ type DstMigrationReport {
   total: Int
   unchanged: Int
   updated: Int
+}
+
+type EditQuotaResult {
+  classesRemaining: Int
+  classesTotal: Int
+  id: String
+  version: Int
 }
 
 """A type representing a validated email address"""
@@ -715,6 +748,7 @@ type Mutation {
   createRecurringClass(input: CreateRecurringClassInput!): CreateRecurringClassResult
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
+  deactivateParent(parentId: String!): DeactivateParentResult
   deleteClassInstance(classInstanceId: ID!): Boolean
   deleteFile(path: String!): FileOperationResult
   deletePermissionGroup(groupId: String!): Boolean
@@ -727,6 +761,7 @@ type Mutation {
   """
   demoLogin(input: DemoLoginInput!): LoginResponse
   executeDstBulkUpdate(description: String!, offsetMinutes: Int!): DstMigrationReport
+  linkDocumentToParent(fileId: String!, parentId: String!, usageType: String!): ParentDocument
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
   logout: Boolean
@@ -745,6 +780,7 @@ type Mutation {
   updateSessionStatusAbsent(classInstanceId: ID!): ClassInstanceDetail
   updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
   updateSessionStatusStart(classInstanceId: ID!): ClassInstanceDetail
+  updateStudentQuota(expectedVersion: Int, newClassesRemaining: Int!, studentId: String!): EditQuotaResult
   updateTeacherProfile(input: TeacherProfileUpdateInput!, teacherId: ID!): TeacherProfileResult
   updateUserOverrides(overrides: [UserOverrideInput!]!, userId: String!): Boolean
 }
@@ -813,6 +849,51 @@ type ParentDirectoryRow {
   unpaidInvoices: Int
 }
 
+type ParentDocument {
+  createdAt: DateTime
+  fileId: String
+  filePath: String
+  id: String
+  isProtected: Boolean
+  usageType: String
+}
+
+type ParentInvoiceRow {
+  amount: String
+  currency: String
+  dueDate: String
+  id: String
+  invoiceType: String
+  issueDate: String
+  paidDate: String
+  status: String
+  studentId: String
+}
+
+type ParentProfile {
+  address: String
+  avatarUrl: String
+  createdAt: DateTime
+  currency: String
+  defaultZoomLink: String
+  email: String
+  facebook: String
+  feeAmount: String
+  id: String
+  invoiceType: String
+  name: String
+  nationality: String
+  paymentMethod: String
+  phone: String
+  skype: String
+  status: String
+  timezone: String
+  twitter: String
+  updatedAt: DateTime
+  userId: String
+  whatsapp: String
+}
+
 input PartialStudentUpdateInput {
   classesRemaining: Int
   classesTotal: Int
@@ -871,7 +952,11 @@ type Query {
   listFiles(input: FilesListInput!): StorageObjectList
   me: User
   notificationAlerts: NotificationAlertsResult
+  parentAssociatedStudents(parentId: String!): [AssociatedStudent!]
   parentDirectory(limit: Int = 50, offset: Int = 0, search: String): ParentDirectory
+  parentDocuments(parentId: String!): [ParentDocument!]
+  parentInvoiceHistory(parentId: String!): [ParentInvoiceRow!]
+  parentProfile(parentId: String!): ParentProfile
 
   """Fetch a single permission group by ID."""
   permissionGroup(id: String!): PermissionGroup
@@ -904,6 +989,7 @@ type Query {
     path: String
   ): StorageStats
   student(id: String!): Student
+  studentById(studentId: String!): AssociatedStudent
   studentClassHistory(month: Int!, studentId: ID!, year: Int!): StudentClassHistory
   studentClassSessionDetail(classInstanceId: ID!): StudentSessionDetail
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
