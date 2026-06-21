@@ -67,7 +67,7 @@ export namespace DstMigrationRepository {
 
   export const recordMigrationEntry = async (
     runId: string,
-    classInstanceId: string,
+    recurringScheduleId: string,
     result: "UPDATED" | "CONFLICT" | "UNCHANGED",
     conflictDetail: string | null,
     tx?: DBTransaction
@@ -75,7 +75,7 @@ export namespace DstMigrationRepository {
     const queryDb = tx ?? db;
     await queryDb.insert(dstMigrationEntries).values({
       runId,
-      classInstanceId,
+      recurringScheduleId,
       result,
       conflictDetail,
     });

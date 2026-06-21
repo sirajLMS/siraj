@@ -16,6 +16,7 @@ import {
   dstMigrationEntries,
   leaveRequests,
   parents,
+  recurringSchedules,
   studentProgress,
   students,
   teachers,
@@ -118,8 +119,11 @@ describe("Timezone Handling & DST Adjustment", () => {
           .delete(dstMigrationEntries)
           .where(
             inArray(
-              dstMigrationEntries.classInstanceId,
-              db.select({ id: classInstances.id }).from(classInstances).where(eq(classInstances.studentId, studentId))
+              dstMigrationEntries.recurringScheduleId,
+              db
+                .select({ id: recurringSchedules.id })
+                .from(recurringSchedules)
+                .where(eq(recurringSchedules.studentId, studentId))
             )
           );
         await db

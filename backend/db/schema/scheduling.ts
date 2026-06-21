@@ -283,9 +283,9 @@ export const dstMigrationEntries = pgTable(
     runId: uuid("run_id")
       .notNull()
       .references(() => dstMigrationRuns.id, { onDelete: "cascade" }),
-    classInstanceId: uuid("class_instance_id")
+    recurringScheduleId: uuid("recurring_schedule_id")
       .notNull()
-      .references(() => classInstances.id, { onDelete: "restrict" }),
+      .references(() => recurringSchedules.id, { onDelete: "restrict" }),
     result: dstMigrationResultEnum("result").notNull(),
     conflictDetail: text("conflict_detail"),
   },

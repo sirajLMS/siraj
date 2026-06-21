@@ -369,7 +369,7 @@ CREATE TABLE "class_status_events" (
 CREATE TABLE "dst_migration_entries" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"run_id" uuid NOT NULL,
-	"class_instance_id" uuid NOT NULL,
+	"recurring_schedule_id" uuid NOT NULL,
 	"result" "dst_migration_result" NOT NULL,
 	"conflict_detail" text
 );
@@ -974,7 +974,7 @@ ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_force_activated_by
 ALTER TABLE "class_status_events" ADD CONSTRAINT "class_status_events_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "class_status_events" ADD CONSTRAINT "class_status_events_actor_user_id_users_id_fkey" FOREIGN KEY ("actor_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "dst_migration_entries" ADD CONSTRAINT "dst_migration_entries_run_id_dst_migration_runs_id_fkey" FOREIGN KEY ("run_id") REFERENCES "dst_migration_runs"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "dst_migration_entries" ADD CONSTRAINT "dst_migration_entries_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "dst_migration_entries" ADD CONSTRAINT "dst_migration_entries_dPOpe6uBtrd8_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "dst_migration_runs" ADD CONSTRAINT "dst_migration_runs_run_by_user_id_users_id_fkey" FOREIGN KEY ("run_by_user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "leave_quota_usage" ADD CONSTRAINT "leave_quota_usage_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "leave_quota_usage" ADD CONSTRAINT "leave_quota_usage_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint

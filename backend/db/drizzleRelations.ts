@@ -247,6 +247,10 @@ export const relations = defineRelations(schema, r => ({
       from: r.recurringSchedules.id,
       to: r.classInstances.recurringScheduleId,
     }),
+    dstMigrationEntries: r.many.dstMigrationEntries({
+      from: r.recurringSchedules.id,
+      to: r.dstMigrationEntries.recurringScheduleId,
+    }),
   },
   recurringScheduleDays: {
     recurringSchedule: r.one.recurringSchedules({
@@ -282,10 +286,6 @@ export const relations = defineRelations(schema, r => ({
     leaveRequests: r.many.leaveRequests({
       from: r.classInstances.id,
       to: r.leaveRequests.classInstanceId,
-    }),
-    dstMigrationEntries: r.many.dstMigrationEntries({
-      from: r.classInstances.id,
-      to: r.dstMigrationEntries.classInstanceId,
     }),
     performance: r.one.classInstancePerformance({
       from: r.classInstances.id,
@@ -347,9 +347,9 @@ export const relations = defineRelations(schema, r => ({
       from: r.dstMigrationEntries.runId,
       to: r.dstMigrationRuns.id,
     }),
-    classInstance: r.one.classInstances({
-      from: r.dstMigrationEntries.classInstanceId,
-      to: r.classInstances.id,
+    recurringSchedule: r.one.recurringSchedules({
+      from: r.dstMigrationEntries.recurringScheduleId,
+      to: r.recurringSchedules.id,
     }),
   },
   invoices: {
