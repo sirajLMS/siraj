@@ -127,11 +127,19 @@ async function performStage(stage: QualityStage): Promise<boolean> {
       return true;
     }
     case "SONAR_SCAN": {
+      if (process.argv.includes("--skip-sonar")) {
+        console.log("\n📡 Skipping SonarQube Scan stage...");
+        return true;
+      }
       console.log("\n📡 Running SonarQube Scan...");
       const scan = await runCommand("bun", ["sonar-scan"]);
       return scan.success;
     }
     case "SONAR_RESULTS": {
+      if (process.argv.includes("--skip-sonar")) {
+        console.log("\n📡 Skipping SonarQube Results check stage...");
+        return true;
+      }
       return await checkSonarResults();
     }
   }

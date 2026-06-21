@@ -27,6 +27,57 @@ import type React from "react";
 import { useState } from "react";
 import { deactivateParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
 
+interface DeactivateParentDialogProps {
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly onConfirm: () => void;
+  readonly deactivating: boolean;
+  readonly error: { message: string } | null | undefined;
+}
+
+const DeactivateParentDialog: React.FC<DeactivateParentDialogProps> = ({
+  open,
+  onClose,
+  onConfirm,
+  deactivating,
+  error,
+}) => {
+  const t = useTranslations("dashboard.parentProfile.actions");
+
+  return (
+    <Dialog
+      open={open}
+      onClose={() => !deactivating && onClose()}
+      aria-labelledby="deactivate-parent-dialog-title"
+      aria-describedby="deactivate-parent-dialog-desc"
+    >
+      <DialogTitle id="deactivate-parent-dialog-title">{t("deactivateDialogTitle")}</DialogTitle>
+      <DialogContent>
+        <DialogContentText id="deactivate-parent-dialog-desc">{t("deactivateConfirmText")}</DialogContentText>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error.message}
+          </Alert>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} disabled={deactivating} variant="outlined">
+          {t("cancel")}
+        </Button>
+        <Button
+          onClick={onConfirm}
+          disabled={deactivating}
+          sx={{ bgcolor: theme => theme.palette.error.main, color: theme => theme.palette.onError }}
+          variant="contained"
+          startIcon={deactivating ? <CircularProgress size={16} sx={{ color: "inherit" }} /> : undefined}
+        >
+          {deactivating ? t("deactivating") : t("deactivateAccount")}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 interface ParentProfileActionsProps {
   readonly parentId: string;
 }
@@ -125,36 +176,13 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId })
         </Link>
       </Stack>
 
-      <Dialog
+      <DeactivateParentDialog
         open={deactivateDialogOpen}
-        onClose={() => !deactivating && setDeactivateDialogOpen(false)}
-        aria-labelledby="deactivate-parent-dialog-title"
-        aria-describedby="deactivate-parent-dialog-desc"
-      >
-        <DialogTitle id="deactivate-parent-dialog-title">{t("deactivateDialogTitle")}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="deactivate-parent-dialog-desc">{t("deactivateConfirmText")}</DialogContentText>
-          {deactivateError && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {deactivateError.message}
-            </Alert>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeactivateDialogOpen(false)} disabled={deactivating} variant="outlined">
-            {t("cancel")}
-          </Button>
-          <Button
-            onClick={handleDeactivateConfirm}
-            disabled={deactivating}
-            sx={{ bgcolor: theme => theme.palette.error.main, color: theme => theme.palette.onError }}
-            variant="contained"
-            startIcon={deactivating ? <CircularProgress size={16} sx={{ color: "inherit" }} /> : undefined}
-          >
-            {deactivating ? t("deactivating") : t("deactivateAccount")}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onClose={() => setDeactivateDialogOpen(false)}
+        onConfirm={handleDeactivateConfirm}
+        deactivating={deactivating}
+        error={deactivateError}
+      />
 
       <Snackbar
         open={snackbarOpen}

@@ -225,13 +225,8 @@ export namespace ParentRepository {
     updatedAt: Date;
   };
 
-  export const getAssociatedStudents = async (
-    parentId: string,
-    tx?: DBTransaction
-  ): Promise<AssociatedStudentRow[]> => {
-    const queryDb = tx ?? db;
-
-    const results = await queryDb
+  const getAssociatedStudentsBaseQuery = (queryDb: typeof db | DBTransaction) => {
+    return queryDb
       .select({
         id: students.id,
         name: students.name,
@@ -247,23 +242,46 @@ export namespace ParentRepository {
       })
       .from(students)
       .leftJoin(teachers, eq(students.primaryTeacherId, teachers.id))
-      .leftJoin(users, eq(teachers.userId, users.id))
+      .leftJoin(users, eq(teachers.userId, users.id));
+  };
+
+  const mapAssociatedStudentRow = (r: {
+    id: string;
+    name: string;
+    status: string;
+    primaryTeacherId: string | null;
+    teacherName: string | null;
+    hoursPerWeek: string;
+    classesRemaining: number;
+    classesTotal: number;
+    language: string | null;
+    gender: string | null;
+    updatedAt: Date;
+  }): AssociatedStudentRow => ({
+    id: r.id,
+    name: r.name,
+    status: r.status,
+    primaryTeacherId: r.primaryTeacherId,
+    teacherName: r.teacherName ?? null,
+    hoursPerWeek: r.hoursPerWeek,
+    classesRemaining: r.classesRemaining,
+    classesTotal: r.classesTotal,
+    language: r.language ?? null,
+    gender: r.gender ?? null,
+    updatedAt: r.updatedAt,
+  });
+
+  export const getAssociatedStudents = async (
+    parentId: string,
+    tx?: DBTransaction
+  ): Promise<AssociatedStudentRow[]> => {
+    const queryDb = tx ?? db;
+
+    const results = await getAssociatedStudentsBaseQuery(queryDb)
       .where(eq(students.parentId, parentId))
       .orderBy(students.name);
 
-    return results.map(r => ({
-      id: r.id,
-      name: r.name,
-      status: r.status,
-      primaryTeacherId: r.primaryTeacherId,
-      teacherName: r.teacherName ?? null,
-      hoursPerWeek: r.hoursPerWeek,
-      classesRemaining: r.classesRemaining,
-      classesTotal: r.classesTotal,
-      language: r.language ?? null,
-      gender: r.gender ?? null,
-      updatedAt: r.updatedAt,
-    }));
+    return results.map(mapAssociatedStudentRow);
   };
 
   export const getAssociatedStudentById = async (
@@ -272,43 +290,12 @@ export namespace ParentRepository {
   ): Promise<AssociatedStudentRow | null> => {
     const queryDb = tx ?? db;
 
-    const results = await queryDb
-      .select({
-        id: students.id,
-        name: students.name,
-        status: students.status,
-        primaryTeacherId: students.primaryTeacherId,
-        teacherName: users.name,
-        hoursPerWeek: students.hoursPerWeek,
-        classesRemaining: students.classesRemaining,
-        classesTotal: students.classesTotal,
-        language: students.language,
-        gender: students.gender,
-        updatedAt: students.updatedAt,
-      })
-      .from(students)
-      .leftJoin(teachers, eq(students.primaryTeacherId, teachers.id))
-      .leftJoin(users, eq(teachers.userId, users.id))
-      .where(eq(students.id, studentId))
-      .limit(1);
+    const results = await getAssociatedStudentsBaseQuery(queryDb).where(eq(students.id, studentId)).limit(1);
 
     if (results.length === 0) {
       return null;
     }
 
-    const r = results[0];
-    return {
-      id: r.id,
-      name: r.name,
-      status: r.status,
-      primaryTeacherId: r.primaryTeacherId,
-      teacherName: r.teacherName ?? null,
-      hoursPerWeek: r.hoursPerWeek,
-      classesRemaining: r.classesRemaining,
-      classesTotal: r.classesTotal,
-      language: r.language ?? null,
-      gender: r.gender ?? null,
-      updatedAt: r.updatedAt,
-    };
+    return mapAssociatedStudentRow(results[0]);
   };
 }
