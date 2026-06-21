@@ -2,33 +2,18 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { Gender } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
+import type { StudentEntity, TeacherEntity, UserEntity } from "../../../types";
 import { SchedulingRepository } from "../../repo";
-import { parents, students, teacherAssignments, teachers, users } from "../../schema";
+import { students, teacherAssignments, teachers, users } from "../../schema";
+import { createTestParent, createTestUser } from "../entity-setup";
 import { type DbTransaction, runInRollback } from "../test-utils";
 
-async function createTestParent(tx: DbTransaction, now: Date) {
-  const [parentUser] = (await tx
-    .insert(users)
-    .values({
-      name: "Overlap Parent",
-      email: `parent-overlap-${randomUUID()}@example.com`,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
-
-  const [parent] = (await tx
-    .insert(parents)
-    .values({
-      userId: parentUser.id,
-      status: "REGULAR",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [ParentEntity];
-  return parent;
+async function setupTestParent(tx: DbTransaction) {
+  const user = await createTestUser(tx, {
+    name: "Overlap Parent",
+    email: `parent-overlap-${randomUUID()}@example.com`,
+  });
+  return createTestParent(tx, user.id);
 }
 
 async function createTestTeachers(tx: DbTransaction, now: Date) {
@@ -94,7 +79,7 @@ async function createTestStudents(tx: DbTransaction, parentId: string, now: Date
 async function setupTestContext(tx: DbTransaction) {
   const now = new Date();
 
-  const parent = await createTestParent(tx, now);
+  const parent = await setupTestParent(tx);
   const [teacher1, teacher2] = await createTestTeachers(tx, now);
   const [student1, student2] = await createTestStudents(tx, parent.id, now);
 

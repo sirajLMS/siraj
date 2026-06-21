@@ -44,8 +44,11 @@ describe("StorageDbRepository — getFilesForParent & linkFileToParent", () => {
       const file1 = await createTestFile(tx, "path1.pdf");
       const file2 = await createTestFile(tx, "path2.pdf");
 
-      await StorageDbRepository.linkFileToParent(parent.id, file1.id, "DOC1", tx);
-      await StorageDbRepository.linkFileToParent(parent.id, file2.id, "DOC2", tx);
+      const now = new Date();
+      const past = new Date(now.getTime() - 10000); // 10 seconds in the past
+
+      await StorageDbRepository.linkFileToParent(parent.id, file1.id, "DOC1", tx, past);
+      await StorageDbRepository.linkFileToParent(parent.id, file2.id, "DOC2", tx, now);
 
       const files = await StorageDbRepository.getFilesForParent(parent.id, tx);
       expect(files).toHaveLength(2);

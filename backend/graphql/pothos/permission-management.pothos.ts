@@ -5,7 +5,6 @@ import type {
   GroupWithPermissionIds,
   PermissionEntity,
   UserOverrideEntity,
-  UserOverrideInput,
 } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
@@ -235,10 +234,11 @@ gqlSchemaBuilder.mutationFields(t => ({
         if (o.state !== "GRANTED" && o.state !== "DENIED") {
           throw new Error("Invalid override state. Must be 'GRANTED' or 'DENIED'.");
         }
+        const state = o.state === "GRANTED" ? ("GRANTED" as const) : ("DENIED" as const);
         return {
           permissionId: o.permissionId,
-          state: o.state,
-        } as UserOverrideInput;
+          state,
+        };
       });
       await PermissionManagementService.updateUserOverrides(
         ctx.user?.id || "",

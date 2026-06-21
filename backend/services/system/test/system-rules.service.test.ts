@@ -1,38 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
-import type { TeacherEntity, UserEntity } from "@/backend/types";
 import { testLogger } from "@/shared/lib/testlogger";
-import { leaveQuotaUsage, systemSettings, teachers, users } from "../../../db/schema";
+import { setupTeacher } from "../../../db/test/entity-setup";
+import { leaveQuotaUsage, systemSettings } from "../../../db/schema";
 import { type DbTransaction, runInRollback } from "../../../db/test/test-utils";
-
-async function setupTeacher(tx: DbTransaction): Promise<{ user: UserEntity; teacher: TeacherEntity }> {
-  const now = new Date();
-  const [user] = (await tx
-    .insert(users)
-    .values({
-      name: "Rules Test Teacher",
-      email: `rules-teacher-${randomUUID()}@example.com`,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
-
-  const [teacher] = (await tx
-    .insert(teachers)
-    .values({
-      userId: user.id,
-      status: "ACTIVATED",
-      timezone: "UTC",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [TeacherEntity];
-
-  return { user, teacher };
-}
 
 async function setTeacherMaxLeaves(tx: DbTransaction, value: string) {
   await tx

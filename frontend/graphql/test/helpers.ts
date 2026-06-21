@@ -4,6 +4,7 @@ import type { CreateRecurringClassInput } from "../generated/gql/graphql-types";
 import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocuments/auth.documents";
 import { createRecurringClassMutationDocument } from "../sharedDocuments/recurring-class.documents";
 import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
+import { createTestEntitiesMutationDocument } from "../sharedDocuments/test-helper.documents";
 import { testClient } from "./testClient";
 
 /**
@@ -75,6 +76,32 @@ export async function loginUser(email: string, password = "password"): Promise<s
 }
 
 /**
+ * Provisions isolated test entities via the admin token, then logs in as the
+ * created teacher. Returns all entity IDs plus the teacher's auth token.
+ */
+export async function provisionTestEntities(adminToken: string, prefix: string, classesRemaining = 10) {
+  const setupRes = await authenticatedRequest(adminToken, "mutate", createTestEntitiesMutationDocument, {
+    prefix,
+    classesRemaining,
+  });
+  const entities = setupRes.createTestEntities;
+  if (!entities) throw new Error("Failed to create test entities");
+
+  if (!entities.teacherUserEmail) throw new Error("Teacher email not returned");
+  const teacherToken = await loginUser(entities.teacherUserEmail, "password");
+
+  return {
+    studentId: entities.studentId,
+    teacherId: entities.teacherId,
+    studentUserId: entities.studentUserId,
+    teacherUserId: entities.teacherUserId,
+    parentUserId: entities.parentUserId,
+    parentId: entities.parentId,
+    teacherToken,
+  };
+}
+
+/**
  * Helper to perform an authenticated GraphQL request (query or mutation) with a Bearer token.
  * Automatically handles standard assertions for result data presence and lack of errors.
  *
@@ -137,19 +164,17 @@ export async function fetchFirstStudentTeacherPair(
   });
 
   const list = result.data?.dailyScheduleList;
-  if (!Array.isArray(list)) {
-    throw new TypeError("No daily schedule list returned");
+  if (Array.isArray(list)) {
+    const found = list.find(item => item?.student?.id && item?.teacher?.id);
+    if (found?.student?.id && found?.teacher?.id) {
+      return {
+        studentId: found.student.id,
+        teacherId: found.teacher.id,
+      };
+    }
   }
 
-  const found = list.find(item => item?.student?.id && item?.teacher?.id);
-  if (!found?.student?.id || !found?.teacher?.id) {
-    throw new Error("Could not find matching student/teacher pair");
-  }
-
-  return {
-    studentId: found.student.id,
-    teacherId: found.teacher.id,
-  };
+  throw new Error("Could not find matching student/teacher pair");
 }
 
 /**

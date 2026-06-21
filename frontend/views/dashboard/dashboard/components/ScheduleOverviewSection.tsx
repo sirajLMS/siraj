@@ -12,9 +12,6 @@ import { ScheduleOverviewDataGrid } from "./ScheduleOverviewDataGrid";
 
 export interface ScheduleOverviewSectionProps extends ScheduleOverviewData {
   readonly title: string;
-  readonly loadingTeachers?: boolean;
-  readonly teacherSearchValue?: string;
-  readonly onTeacherSearchChange?: (search: string) => void;
 }
 
 const SectionFooter = ({ showingText }: { showingText: string }) => {
@@ -59,9 +56,6 @@ const DesktopLayout = ({
   teacherValue,
   submitLabel,
   teachers,
-  loadingTeachers,
-  teacherSearchValue,
-  onTeacherSearchChange,
   onDateChange,
   onTeacherChange,
   onSubmit,
@@ -122,9 +116,6 @@ const DesktopLayout = ({
               teacherValue={teacherValue}
               submitLabel={submitLabel}
               teachers={teachers}
-              loadingTeachers={loadingTeachers}
-              teacherSearchValue={teacherSearchValue}
-              onTeacherSearchChange={onTeacherSearchChange}
               onDateChange={onDateChange}
               onTeacherChange={onTeacherChange}
               onSubmit={onSubmit}

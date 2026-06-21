@@ -29,11 +29,11 @@ const cacheRtl = createCache({
 });
 
 interface TestWrapperProps {
-  locale?: "ar" | "en";
-  themeMode?: "dark" | "light";
-  permissions?: AppPermission[];
-  mocks?: MockLink.MockedResponse[];
-  children: ReactNode;
+  readonly locale?: "ar" | "en";
+  readonly themeMode?: "dark" | "light";
+  readonly permissions?: readonly AppPermission[];
+  readonly mocks?: readonly MockLink.MockedResponse[];
+  readonly children: ReactNode;
 }
 
 export function TestWrapper({

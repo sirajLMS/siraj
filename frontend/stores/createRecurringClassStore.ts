@@ -1,14 +1,9 @@
 import { create } from "zustand";
+import type { DayScheduleConfig as BaseDayScheduleConfig } from "@/frontend/stores/recurring-schedule-types";
 
 export type DayOfWeek = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
 
-export interface DayScheduleConfig {
-  readonly day: DayOfWeek;
-  readonly enabled: boolean;
-  readonly timeOverride: string;
-  readonly showOverride: boolean;
-  readonly isWeekend: boolean;
-}
+export type DayScheduleConfig = BaseDayScheduleConfig<DayOfWeek>;
 
 export const DEFAULT_DAY_SCHEDULE: readonly DayScheduleConfig[] = [
   { day: "MONDAY", enabled: true, timeOverride: "09:00", showOverride: false, isWeekend: false },

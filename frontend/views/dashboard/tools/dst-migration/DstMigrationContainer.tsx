@@ -35,7 +35,14 @@ export function DstMigrationContainer() {
     unchanged: report?.unchanged ?? 0,
   };
 
-  const migrationStatus = loading ? "running" : report ? "complete" : "idle";
+  let migrationStatus: "running" | "complete" | "idle";
+  if (loading) {
+    migrationStatus = "running";
+  } else if (report) {
+    migrationStatus = "complete";
+  } else {
+    migrationStatus = "idle";
+  }
 
   return (
     <RequirePermission permissions={[AppPermission.SystemBulkUpdateDst]}>

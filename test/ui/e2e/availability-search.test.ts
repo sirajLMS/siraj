@@ -24,7 +24,7 @@ describe("Availability Search E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
     const navItem = page.getByText("Schedule Search");
-    await expect(navItem).toBeVisible();
+    expect(navItem).toBeVisible();
   });
 
   test("Clicking nav item navigates to search-schedule page", async () => {
@@ -38,7 +38,7 @@ describe("Availability Search E2E", () => {
     await page.waitForURL("**/search-schedule**");
     expect(page.url()).toContain("/search-schedule");
 
-    await expect(page.getByText("Schedule Availability Search")).toBeVisible();
+    expect(page.getByText("Schedule Availability Search")).toBeVisible();
   });
 
   test("Search form renders with From/To time inputs and Gender dropdown", async () => {
@@ -49,10 +49,10 @@ describe("Availability Search E2E", () => {
     await page.goto("/ar/search-schedule");
     await page.waitForURL("**/search-schedule**");
 
-    await expect(page.getByLabel("From")).toBeVisible();
-    await expect(page.getByLabel("To")).toBeVisible();
-    await expect(page.getByLabel("Gender")).toBeVisible();
-    await expect(page.getByRole("button", { name: /search/i })).toBeVisible();
+    expect(page.getByLabel("From")).toBeVisible();
+    expect(page.getByLabel("To")).toBeVisible();
+    expect(page.getByLabel("Gender")).toBeVisible();
+    expect(page.getByRole("button", { name: /search/i })).toBeVisible();
   });
 
   test("Submitting form shows results or no-results message", async () => {
@@ -69,7 +69,7 @@ describe("Availability Search E2E", () => {
     const hasResults = page.getByText(/teachers with.*available slots/);
     const noResults = page.getByText("No available time slots found for the selected criteria.");
 
-    await expect(hasResults.or(noResults)).toBeVisible();
+    expect(hasResults.or(noResults)).toBeVisible();
   });
 
   test("Teacher does NOT see Schedule Search nav item", async () => {
@@ -89,7 +89,7 @@ describe("Availability Search E2E", () => {
     await page.goto("/ar/search-schedule");
     await page.waitForURL("**/search-schedule**");
 
-    await expect(page.getByText("Schedule Availability Search")).toBeVisible();
-    await expect(page.getByRole("button", { name: /search/i })).toBeVisible();
+    expect(page.getByText("Schedule Availability Search")).toBeVisible();
+    expect(page.getByRole("button", { name: /search/i })).toBeVisible();
   });
 });

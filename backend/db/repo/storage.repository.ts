@@ -572,7 +572,8 @@ export namespace StorageDbRepository {
     parentId: string,
     fileId: string,
     usageType: string,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    createdAt: Date = new Date()
   ): Promise<{ id: string; fileId: string; parentId: string; usageType: string; createdAt: Date }> => {
     const queryDb = tx ?? db;
 
@@ -582,7 +583,7 @@ export namespace StorageDbRepository {
         fileId,
         parentId,
         usageType,
-        createdAt: new Date(),
+        createdAt,
       })
       .returning();
 

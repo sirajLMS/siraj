@@ -23,7 +23,7 @@ describe("Admin Dashboard E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
-    await expect(page.getByRole("textbox")).toBeVisible();
+    expect(page.getByRole("textbox")).toBeVisible();
   });
 
   test("Academy Admin sees timezone columns", async () => {
@@ -31,7 +31,7 @@ describe("Admin Dashboard E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
-    await expect(page.getByText("Your Time")).toBeVisible();
+    expect(page.getByText("Your Time")).toBeVisible();
   });
 
   test("Search filters schedule grid", async () => {
@@ -68,7 +68,7 @@ describe("Admin Dashboard E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.teacher.groupSlug);
 
     const textboxes = page.getByRole("textbox");
-    await expect(textboxes).toBeEmpty();
+    expect(textboxes).toBeEmpty();
   });
 
   test("Mobile: card list renders instead of data grid", async () => {
@@ -77,6 +77,6 @@ describe("Admin Dashboard E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
     const cardList = page.locator('[class*="MuiPaper-root"]').filter({ hasText: /CLS-/ });
-    await expect(cardList.first()).toBeVisible();
+    expect(cardList.first()).toBeVisible();
   });
 });

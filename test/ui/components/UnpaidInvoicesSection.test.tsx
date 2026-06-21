@@ -1,5 +1,3 @@
-import { mock } from "bun:test";
-
 const mockPush = mock(() => {});
 
 mock.module("next/navigation", () => ({
@@ -8,7 +6,7 @@ mock.module("next/navigation", () => ({
   usePathname: () => "/en/dashboard",
 }));
 
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";

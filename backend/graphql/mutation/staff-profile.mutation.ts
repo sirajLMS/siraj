@@ -22,7 +22,7 @@ gqlSchemaBuilder.queryField("teacherProfileForEdit", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return StaffProfileService.getTeacherProfileForEdit(userId, args.teacherId as string, ctx.locale);
+      return StaffProfileService.getTeacherProfileForEdit(userId, args.teacherId, ctx.locale);
     },
   })
 );
@@ -37,7 +37,7 @@ gqlSchemaBuilder.mutationField("updateTeacherProfile", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return StaffProfileService.updateTeacherProfile(userId, args.teacherId as string, args.input, ctx.locale);
+      return StaffProfileService.updateTeacherProfile(userId, args.teacherId, args.input, ctx.locale);
     },
   })
 );

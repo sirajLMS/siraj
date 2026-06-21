@@ -1,12 +1,10 @@
-import { mock } from "bun:test";
-
 mock.module("next/navigation", () => ({
   useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}) }),
   useParams: () => ({ locale: "en" }),
   usePathname: () => "/en/search-schedule",
 }));
 
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";

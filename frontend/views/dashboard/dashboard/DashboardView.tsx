@@ -15,9 +15,6 @@ interface AdminDashboardViewProps extends ScheduleOverviewData {
   readonly selectedMetricKey?: string;
 
   readonly scheduleTitle: string;
-  readonly loadingTeachers?: boolean;
-  readonly teacherSearchValue?: string;
-  readonly onTeacherSearchChange?: (search: string) => void;
 }
 
 export function DashboardView({
@@ -35,9 +32,6 @@ export function DashboardView({
   teacherValue,
   submitLabel,
   teachers,
-  loadingTeachers,
-  teacherSearchValue,
-  onTeacherSearchChange,
   rows,
   headers,
   statusLabels,
@@ -78,9 +72,6 @@ export function DashboardView({
           teacherValue={teacherValue}
           submitLabel={submitLabel}
           teachers={teachers}
-          loadingTeachers={loadingTeachers}
-          teacherSearchValue={teacherSearchValue}
-          onTeacherSearchChange={onTeacherSearchChange}
           rows={rows}
           headers={headers}
           statusLabels={statusLabels}

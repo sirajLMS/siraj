@@ -1,2 +1,1 @@
-// backend/graphql/pothos/schedule-deletion.pothos.ts
-export {};
+// Schedule deletion Pothos schema - no direct exports

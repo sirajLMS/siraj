@@ -80,7 +80,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
 
   const students = studentsData?.students?.data || [];
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);

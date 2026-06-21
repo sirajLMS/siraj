@@ -408,8 +408,8 @@ describe("PermissionManagementService Business Logic", () => {
 
       // Verify effective permissions combining overrides
       const effective = await PermissionManagementService.getEffectiveUserPermissions(adminUser.id, regularUser.id);
-      expect(effective).toContain(perm1.key as AppPermission);
-      expect(effective).not.toContain(perm2.key as AppPermission);
+      expect(effective).toContain(perm1.key);
+      expect(effective).not.toContain(perm2.key);
 
       // Clean up overrides
       await PermissionManagementService.updateUserOverrides(adminUser.id, {

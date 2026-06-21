@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { DayScheduleConfig as BaseDayScheduleConfig } from "@/frontend/stores/recurring-schedule-types";
 
 export type DayOfWeek = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
 
@@ -7,13 +8,7 @@ export interface StudentGroup {
   readonly name: string;
 }
 
-export interface DayScheduleConfig {
-  readonly day: DayOfWeek;
-  readonly enabled: boolean;
-  readonly timeOverride: string;
-  readonly showOverride: boolean;
-  readonly isWeekend: boolean;
-}
+export type DayScheduleConfig = BaseDayScheduleConfig<DayOfWeek>;
 
 interface CreateRecurringClassState {
   readonly studentGroups: readonly StudentGroup[];

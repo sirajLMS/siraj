@@ -19,7 +19,9 @@ export function setupBrowserLifecycle() {
   });
 }
 
-export async function createContext(viewport = { width: 1280, height: 720 }): Promise<BrowserContext> {
+const DEFAULT_VIEWPORT = { width: 1280, height: 720 } as const;
+
+export async function createContext(viewport = DEFAULT_VIEWPORT): Promise<BrowserContext> {
   if (!browser) {
     throw new Error("Browser not initialized. Call setupBrowserLifecycle() first.");
   }

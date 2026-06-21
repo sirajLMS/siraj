@@ -245,9 +245,6 @@ export function AdminDashboardContainer() {
       teacherValue={filters.teacherId}
       submitLabel={t("admin.submit")}
       teachers={teachers}
-      loadingTeachers={loadingTeachers}
-      teacherSearchValue={teacherSearchQuery}
-      onTeacherSearchChange={setTeacherSearchQuery}
       rows={paginatedRows}
       headers={headers}
       statusLabels={statusLabels}

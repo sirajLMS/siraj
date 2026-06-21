@@ -3,76 +3,10 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
 import { testLogger } from "@/shared/lib/testlogger";
-import type { LeaveQuotaUsageEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
-import { leaveQuotaUsage, parents, students, systemSettings, teachers, users } from "../../schema";
+import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
+import { leaveQuotaUsage, systemSettings } from "../../schema";
+import { setupTeacher, setupStudent } from "../entity-setup";
 import { type DbTransaction, runInRollback } from "../test-utils";
-
-async function createTestTeacher(tx: DbTransaction, name: string, email: string): Promise<TeacherEntity> {
-  const now = new Date();
-  const [user] = (await tx
-    .insert(users)
-    .values({
-      name,
-      email,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
-
-  const [teacher] = (await tx
-    .insert(teachers)
-    .values({
-      userId: user.id,
-      status: "ACTIVATED",
-      timezone: "UTC",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [TeacherEntity];
-
-  return teacher;
-}
-
-async function createTestStudent(tx: DbTransaction, studentName: string, parentEmail: string): Promise<StudentEntity> {
-  const now = new Date();
-  const [parentUser] = (await tx
-    .insert(users)
-    .values({
-      name: "Quota Parent",
-      email: parentEmail,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
-
-  const [parent] = (await tx
-    .insert(parents)
-    .values({
-      userId: parentUser.id,
-      status: "REGULAR",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [ParentEntity];
-
-  const [student] = (await tx
-    .insert(students)
-    .values({
-      parentId: parent.id,
-      name: studentName,
-      status: "REGULAR",
-      classesTotal: 10,
-      classesRemaining: 5,
-      idempotencyKey: randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [StudentEntity];
-
-  return student;
-}
 
 async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
   try {
@@ -121,14 +55,20 @@ async function setLeaveLimit(tx: DbTransaction, key: "teacher_max_leaves" | "stu
 }
 
 async function withTeacher(tx: DbTransaction, fn: (teacher: TeacherEntity) => Promise<void>) {
-  const email = `teacher-leave-${randomUUID()}@example.com`;
-  const teacher = await createTestTeacher(tx, "Quota Teacher", email);
+  const { teacher } = await setupTeacher(tx, {
+    name: "Quota Teacher",
+    email: `teacher-leave-${randomUUID()}@example.com`,
+  });
   await fn(teacher);
 }
 
 async function withStudent(tx: DbTransaction, fn: (student: StudentEntity) => Promise<void>) {
-  const email = `parent-leave-${randomUUID()}@example.com`;
-  const student = await createTestStudent(tx, "Quota Student", email);
+  const { student } = await setupStudent(
+    tx,
+    { name: "Quota Parent", email: `parent-leave-${randomUUID()}@example.com` },
+    {},
+    { name: "Quota Student", classesTotal: 10, classesRemaining: 5 }
+  );
   await fn(student);
 }
 
@@ -339,63 +279,17 @@ describe("Leave Quota Repository Methods", () => {
 async function setupTeacherAndStudent(
   tx: DbTransaction
 ): Promise<{ user: UserEntity; teacher: TeacherEntity; student: StudentEntity }> {
-  const now = new Date();
-  const [user] = (await tx
-    .insert(users)
-    .values({
-      name: "Quota Teacher User",
-      email: `quota-teacher-${randomUUID()}@example.com`,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
+  const { user, teacher } = await setupTeacher(tx, {
+    name: "Quota Teacher User",
+    email: `quota-teacher-${randomUUID()}@example.com`,
+  });
 
-  const [teacher] = (await tx
-    .insert(teachers)
-    .values({
-      userId: user.id,
-      status: "ACTIVATED",
-      timezone: "UTC",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [TeacherEntity];
-
-  const [parentUser] = (await tx
-    .insert(users)
-    .values({
-      name: "Quota Parent User",
-      email: `quota-parent-${randomUUID()}@example.com`,
-      password: "password",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [UserEntity];
-
-  const [parent] = (await tx
-    .insert(parents)
-    .values({
-      userId: parentUser.id,
-      status: "REGULAR",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [ParentEntity];
-
-  const [student] = (await tx
-    .insert(students)
-    .values({
-      parentId: parent.id,
-      name: "Quota Student",
-      status: "REGULAR",
-      classesTotal: 10,
-      classesRemaining: 10,
-      idempotencyKey: randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning()) as [StudentEntity];
+  const { student } = await setupStudent(
+    tx,
+    { name: "Quota Parent User", email: `quota-parent-${randomUUID()}@example.com` },
+    {},
+    { name: "Quota Student", classesTotal: 10, classesRemaining: 10 }
+  );
 
   return { user, teacher, student };
 }

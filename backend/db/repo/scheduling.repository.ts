@@ -1168,17 +1168,19 @@ export namespace SchedulingRepository {
     );
   }
 
-  async function createSingleRecurringInstance(
-    t: DBTransaction,
-    recurringScheduleId: string,
-    day: { dayOfWeek: string; startTime: string; isActive: boolean },
-    weekOffset: number,
-    effectiveStartDate: Date,
-    input: CreateRecurringScheduleInput,
-    utcOffsetSnapshot: number | null,
-    now: Date,
-    locale?: string
-  ): Promise<string> {
+  async function createSingleRecurringInstance(params: {
+    t: DBTransaction;
+    recurringScheduleId: string;
+    day: { dayOfWeek: string; startTime: string; isActive: boolean };
+    weekOffset: number;
+    effectiveStartDate: Date;
+    input: CreateRecurringScheduleInput;
+    utcOffsetSnapshot: number | null;
+    now: Date;
+    locale?: string;
+  }): Promise<string> {
+    const { t, recurringScheduleId, day, weekOffset, effectiveStartDate, input, utcOffsetSnapshot, now, locale } =
+      params;
     const scheduledStartAt = computeScheduledStartForDay(
       day.dayOfWeek,
       day.startTime,
@@ -1281,17 +1283,17 @@ export namespace SchedulingRepository {
         for (const day of insertedDays) {
           if (!day.isActive) continue;
 
-          const instanceId = await createSingleRecurringInstance(
+          const instanceId = await createSingleRecurringInstance({
             t,
-            recurringSchedule.id,
+            recurringScheduleId: recurringSchedule.id,
             day,
             weekOffset,
             effectiveStartDate,
             input,
             utcOffsetSnapshot,
             now,
-            locale
-          );
+            locale,
+          });
           classInstanceIds.push(instanceId);
         }
       }

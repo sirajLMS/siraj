@@ -19,6 +19,12 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { notificationAlertsQueryDocument } from "@/frontend/graphql/sharedDocuments/notification-alerts.documents";
 import { UnpaidInvoicesSection } from "./UnpaidInvoicesSection";
 
+function getSeverityColor(severity: string | null | undefined, theme: { palette: { error: { main: string }; warning: { main: string }; info: { main: string } } }) {
+  if (severity === "error") return theme.palette.error.main;
+  if (severity === "warning") return theme.palette.warning.main;
+  return theme.palette.info.main;
+}
+
 function getSeverityIcon(severity: string) {
   switch (severity) {
     case "error":
@@ -100,12 +106,7 @@ export function NotificationPanel() {
                 <ListItemIcon
                   sx={theme => ({
                     minWidth: 36,
-                    color:
-                      alert.severity === "error"
-                        ? theme.palette.error.main
-                        : alert.severity === "warning"
-                          ? theme.palette.warning.main
-                          : theme.palette.info.main,
+                    color: getSeverityColor(alert.severity, theme),
                   })}
                 >
                   {getSeverityIcon(alert.severity ?? "info")}

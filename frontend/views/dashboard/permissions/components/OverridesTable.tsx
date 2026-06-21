@@ -80,14 +80,16 @@ export function OverridesTable({
 
                 const overrideState: OverrideState = localOverrides[p.id] || "INHERIT";
 
-                const effectiveState: "allowed" | "denied" | "not_set" =
-                  overrideState === "GRANTED"
-                    ? "allowed"
-                    : overrideState === "DENIED"
-                      ? "denied"
-                      : isAllowedByGroup
-                        ? "allowed"
-                        : "not_set";
+                let effectiveState: "allowed" | "denied" | "not_set";
+                if (overrideState === "GRANTED") {
+                  effectiveState = "allowed";
+                } else if (overrideState === "DENIED") {
+                  effectiveState = "denied";
+                } else if (isAllowedByGroup) {
+                  effectiveState = "allowed";
+                } else {
+                  effectiveState = "not_set";
+                }
 
                 return (
                   <OverridesTableRow

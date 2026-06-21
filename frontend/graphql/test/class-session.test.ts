@@ -13,11 +13,8 @@ import {
   createTeacherManualClassEntryMutationDocument,
   teacherDashboardQueryDocument,
 } from "../sharedDocuments/teacher-dashboard.documents";
-import {
-  cleanupTestEntitiesMutationDocument,
-  createTestEntitiesMutationDocument,
-} from "../sharedDocuments/test-helper.documents";
-import { authenticatedRequest, loginDemoUser, loginUser } from "./helpers";
+import { cleanupTestEntitiesMutationDocument } from "../sharedDocuments/test-helper.documents";
+import { authenticatedRequest, loginDemoUser, provisionTestEntities } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -75,24 +72,14 @@ describe("GraphQL Class Session Integration Tests", () => {
     adminToken = await loginDemoUser("academy_admin");
     expect(adminToken).not.toBeNull();
 
-    // 1. Provision isolated test entities
-    const setupRes = await authenticatedRequest(adminToken, "mutate", createTestEntitiesMutationDocument, {
-      prefix: "SessionIntTest",
-      classesRemaining: 10,
-    });
-    const entities = setupRes.createTestEntities;
-    if (!entities) throw new Error("Failed to create test entities");
-
-    studentId = entities.studentId;
-    teacherId = entities.teacherId;
-    studentUserId = entities.studentUserId;
-    teacherUserId = entities.teacherUserId;
-    parentUserId = entities.parentUserId;
-    parentId = entities.parentId;
-
-    // 2. Login as the newly created teacher to get their isolated token
-    if (!entities.teacherUserEmail) throw new Error("Teacher email not returned");
-    teacherToken = await loginUser(entities.teacherUserEmail, "password");
+    const result = await provisionTestEntities(adminToken, "SessionIntTest");
+    studentId = result.studentId;
+    teacherId = result.teacherId;
+    studentUserId = result.studentUserId;
+    teacherUserId = result.teacherUserId;
+    parentUserId = result.parentUserId;
+    parentId = result.parentId;
+    teacherToken = result.teacherToken;
     expect(teacherToken).not.toBeNull();
   });
 

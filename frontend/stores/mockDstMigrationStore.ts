@@ -1,42 +1,13 @@
 // cspell:disable
 import { create } from "zustand";
 import { logger } from "@/frontend/utils/logger";
-
-export interface UpdatedSession {
-  readonly id: string;
-  readonly className: string;
-  readonly section: string;
-  readonly teacher: string;
-  readonly fromTime: string;
-  readonly toTime: string;
-}
-
-export interface ConflictItem {
-  readonly id: string;
-  readonly className: string;
-  readonly message: string;
-}
-
-export interface ConflictGroup {
-  readonly id: string;
-  readonly teacherName: string;
-  readonly conflicts: readonly ConflictItem[];
-}
-
-export interface CheckedEmptyItem {
-  readonly id: string;
-  readonly title: string;
-  readonly description: string;
-}
-
-export interface DstMigrationMetrics {
-  readonly totalAudited: number;
-  readonly successful: number;
-  readonly conflicts: number;
-  readonly unchanged: number;
-}
-
-export type MigrationStatus = "idle" | "running" | "complete";
+import type {
+  CheckedEmptyItem,
+  ConflictGroup,
+  DstMigrationMetrics,
+  MigrationStatus,
+  UpdatedSession,
+} from "@/frontend/views/dashboard/tools/dst-migration/types";
 
 interface DstMigrationState {
   readonly metrics: DstMigrationMetrics;

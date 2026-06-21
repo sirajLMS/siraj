@@ -24,6 +24,23 @@ import {
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
+async function assertDstBulkUpdateFails(token: string) {
+  const result = await testClient.mutate({
+    mutation: executeDstBulkUpdateMutationDocument,
+    variables: {
+      offsetMinutes: 60,
+      description: "Should fail",
+    },
+    errorPolicy: "all",
+    context: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  });
+  expect(result.error).toBeDefined();
+}
+
 describe("GraphQL Schedule Integration Tests", () => {
   setupTestServerLifecycle();
 
@@ -198,23 +215,6 @@ describe("GraphQL Schedule Integration Tests", () => {
     expect(data.executeDstBulkUpdate?.unchanged).toBeGreaterThanOrEqual(0);
     expect(data.executeDstBulkUpdate?.total).toBeGreaterThanOrEqual(0);
   });
-
-  async function assertDstBulkUpdateFails(token: string) {
-    const result = await testClient.mutate({
-      mutation: executeDstBulkUpdateMutationDocument,
-      variables: {
-        offsetMinutes: 60,
-        description: "Should fail",
-      },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    });
-    expect(result.error).toBeDefined();
-  }
 
   test("executeDstBulkUpdate — academy admin denied", async () => {
     const academyToken = await loginDemoUser("academy_admin");
