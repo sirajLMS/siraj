@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
-import { users } from "@/backend/db/schema";
+import { teachers, users } from "@/backend/db/schema";
 import { setupTeacher } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
@@ -101,6 +101,38 @@ describe("TeacherRepository", () => {
       const metrics = await TeacherRepository.getTeacherDirectoryMetrics(tx);
       expect(metrics.activated).toBeGreaterThanOrEqual(0);
       expect(metrics.deactivated).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  describe("updateTeacherProfile", () => {
+    it("successfully updates the teacher profile", async () => {
+      await runInRollback(async tx => {
+        const { teacher } = await setupTeacher(tx, { name: "Update Test Teacher" });
+        const newAddress = "123 Updated Street";
+        const newPhone = "+1234567890";
+
+        const result = await TeacherRepository.updateTeacherProfile(
+          teacher.id,
+          { address: newAddress, phone: newPhone },
+          tx
+        );
+
+        expect(result).toBe(true);
+        const [updated] = await tx.select().from(teachers).where(eq(teachers.id, teacher.id));
+        expect(updated.address).toBe(newAddress);
+        expect(updated.phone).toBe(newPhone);
+      });
+    });
+
+    it("returns false for non-existent teacher", async () => {
+      await runInRollback(async tx => {
+        const result = await TeacherRepository.updateTeacherProfile(
+          "00000000-0000-0000-0000-000000000000",
+          { address: "Nowhere" },
+          tx
+        );
+        expect(result).toBe(false);
+      });
     });
   });
 });

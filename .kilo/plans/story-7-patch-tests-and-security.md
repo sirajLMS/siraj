@@ -406,25 +406,25 @@ bun run test:db
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `bun run test:coverage` on `scheduling.repository.test.ts` shows 100% line + function coverage on `deleteRecurringClass` and `clearWeeklySchedule`
-- [ ] `bun run test:coverage` on `teacher.repository.test.ts` shows 100% line + function coverage on `updateTeacherProfile`
-- [ ] Security logic tests pass — no DB trigger conflicts with soft delete
-- [ ] `bun run test:db` passes with 0 failures (all existing + new tests)
-- [ ] IDOR enforcement verified at service layer (covered by Tasks A and B GraphQL tests)
+- [x] `bun run test:coverage` on `scheduling.repository.test.ts` shows 100% line + function coverage on `deleteRecurringClass` and `clearWeeklySchedule`
+- [x] `bun run test:coverage` on `teacher.repository.test.ts` shows 100% line + function coverage on `updateTeacherProfile`
+- [x] Security logic tests pass — no DB trigger conflicts with soft delete
+- [x] `bun run test:db` passes with 0 failures (all existing + new tests)
+- [x] IDOR enforcement verified at service layer (verified in scheduling_security.test.ts, timezone_dst.test.ts, teacher_profile.test.ts, parent_directory.test.ts)
 
 **Quality Gate — Per-File Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
 
 **Quality Gate — Task Completion Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 
 ---
 

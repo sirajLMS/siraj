@@ -1,10 +1,15 @@
+// cspell:ignore: proname prosecdef pronamespace nspname
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, inArray, sql } from "drizzle-orm";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
+import { AppPermission } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
+import { getErrorMessage } from "@/shared/utils/error";
 import type * as Types from "../../../types";
 import { db } from "../../drizzleDb";
-import { SchedulingRepository } from "../../repo";
+import { DstMigrationRepository, SchedulingRepository } from "../../repo";
 import {
   classInstances,
   classStatusEvents,
@@ -186,19 +191,8 @@ describe("Timezone Handling & DST Adjustment", () => {
   test("auto_adjust_dst_bookings detects and fixes DST drift", async () => {
     if (!testStudent || !testTeacher) throw new Error("Setup failed");
 
-    // In July, Cairo is UTC+3 (if DST is active) or UTC+2 if not.
-    // Let's assume we booked a class for 3 PM Local (13:00 UTC) when it was UTC+2.
-    // Now we shift that class to July.
-
     const startTime = new Date("2026-07-15T13:00:00Z");
     const endTime = new Date("2026-07-15T14:00:00Z");
-
-    // Create a class with a MANUALLY incorrect offset to simulate a DST rule change or drift
-    // We want 15:00 Local.
-    // If July is UTC+3, 15:00 Local is 12:00 UTC.
-    // If we have 13:00 UTC and say "Offset was +2", that means we intended 15:00 Local.
-    // The function should see that currently 13:00 UTC is 16:00 Local in July (+3 offset),
-    // and shift the UTC to 12:00 UTC.
 
     const [driftedClass] = await db
       .insert(classInstances)
@@ -228,10 +222,6 @@ describe("Timezone Handling & DST Adjustment", () => {
 
     const [updatedClass] = await db.select().from(classInstances).where(eq(classInstances.id, driftedClass.id));
 
-    // If Cairo July is UTC+3, the offset is 180.
-    // Shift = 120 - 180 = -60 minutes.
-    // New UTC = 13:00 - 60 mins = 12:00.
-
     // Check if it shifted
     if (updatedCount > 0) {
       expect(updatedClass.scheduledStartAt.toISOString()).toBe("2026-07-15T12:00:00.000Z");
@@ -240,5 +230,50 @@ describe("Timezone Handling & DST Adjustment", () => {
     } else {
       testLogger.warn("No classes were adjusted. Check if Africa/Cairo actually has DST in July 2026 in the OS/DB.");
     }
+  });
+
+  describe("DstMigrationService Permission Gating", () => {
+    const originalHasPermission = PermissionsService.hasPermission;
+    const originalGetActiveSchedules = DstMigrationRepository.getActiveRecurringSchedules;
+    const mockPermissions = new Map<string, boolean>();
+
+    beforeAll(() => {
+      PermissionsService.hasPermission = async (userId: string, permissionKey: AppPermission) => {
+        const key = `${userId}:${permissionKey}`;
+        return mockPermissions.get(key) ?? false;
+      };
+      Object.defineProperty(DstMigrationRepository, "getActiveRecurringSchedules", {
+        value: async () => [],
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    afterAll(() => {
+      PermissionsService.hasPermission = originalHasPermission;
+      Object.defineProperty(DstMigrationRepository, "getActiveRecurringSchedules", {
+        value: originalGetActiveSchedules,
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    test("executeBulkDstUpdate: enforces permission checks", async () => {
+      if (!testUser) throw new Error("Setup failed");
+      const actorUserId = testUser.id;
+
+      // Case 1: Lacks permission
+      const error = await DstMigrationService.executeBulkDstUpdate(actorUserId, 60, "DST adjustment").catch(e => e);
+      expect(error).toBeInstanceOf(Error);
+      expect(getErrorMessage(error)).toContain("Insufficient permissions");
+
+      // Case 2: Has permission
+      mockPermissions.set(`${actorUserId}:${AppPermission.SYSTEM_BULK_UPDATE_DST}`, true);
+      const report = await DstMigrationService.executeBulkDstUpdate(actorUserId, 60, "DST adjustment");
+      expect(report.total).toBe(0);
+      expect(report.updated).toBe(0);
+      expect(report.conflicts).toBe(0);
+      expect(report.unchanged).toBe(0);
+    });
   });
 });
