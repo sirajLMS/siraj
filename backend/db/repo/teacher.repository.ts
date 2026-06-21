@@ -26,6 +26,12 @@ export namespace TeacherRepository {
     return teacher ?? null;
   };
 
+  export const findById = async (id: string, tx?: DBTransaction) => {
+    const queryDb = tx ?? db;
+    const [teacher] = await queryDb.select().from(teachers).where(eq(teachers.id, id)).limit(1);
+    return teacher ?? null;
+  };
+
   export const searchTeachers = async (searchQuery: string, limit: number, tx?: DBTransaction) => {
     const queryDb = tx ?? db;
     return await queryDb

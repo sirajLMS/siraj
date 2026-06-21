@@ -21,7 +21,9 @@ function getFullErrorMessage(error: Error): string {
   return `${error.message} ${cause?.message ?? ""}`;
 }
 
-async function setupRegularStudent(tx: Parameters<typeof runInRollback>[0] extends (tx: infer T) => unknown ? T : never) {
+async function setupRegularStudent(
+  tx: Parameters<typeof runInRollback>[0] extends (tx: infer T) => unknown ? T : never
+) {
   const { student } = await setupStudent(
     tx,
     { name: "Trans P", email: `trans-${randomUUID()}@t.com` },
@@ -70,7 +72,10 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
   });
 
   describe("Valid transitions from ON_TRIAL", () => {
-    for (const [target, label] of [["REGULAR", "activate"], ["DEACTIVATED", "deactivate"]] as const) {
+    for (const [target, label] of [
+      ["REGULAR", "activate"],
+      ["DEACTIVATED", "deactivate"],
+    ] as const) {
       test(`ON_TRIAL → ${target}: allowed`, async () => {
         await runInRollback(async tx => {
           const { student } = await setupStudent(
@@ -87,7 +92,10 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
   });
 
   describe("Valid secondary transitions", () => {
-    for (const [via, target] of [["SUSPENDED", "DEACTIVATED"], ["ON_LEAVE", "DEACTIVATED"]] as const) {
+    for (const [via, target] of [
+      ["SUSPENDED", "DEACTIVATED"],
+      ["ON_LEAVE", "DEACTIVATED"],
+    ] as const) {
       test(`REGULAR → ${via} → ${target}: allowed`, async () => {
         await runInRollback(async tx => {
           const student = await setupRegularStudent(tx);
@@ -124,7 +132,9 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
           {},
           { status: StudentStatus.ON_TRIAL }
         );
-        const error = await expectRepoError(() => StudentRepository.changeStatus(student.id, "GRADUATED", undefined, tx));
+        const error = await expectRepoError(() =>
+          StudentRepository.changeStatus(student.id, "GRADUATED", undefined, tx)
+        );
         expect(getFullErrorMessage(error)).toContain("Invalid status transition");
       });
     });
@@ -148,7 +158,9 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
     test("REGULAR → ON_TRIAL: rejected", async () => {
       await runInRollback(async tx => {
         const student = await setupRegularStudent(tx);
-        const error = await expectRepoError(() => StudentRepository.changeStatus(student.id, "ON_TRIAL", undefined, tx));
+        const error = await expectRepoError(() =>
+          StudentRepository.changeStatus(student.id, "ON_TRIAL", undefined, tx)
+        );
         expect(getFullErrorMessage(error)).toContain("Invalid status transition");
       });
     });

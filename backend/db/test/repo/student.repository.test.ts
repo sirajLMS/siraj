@@ -22,12 +22,37 @@ function getFullErrorMessage(error: Error): string {
   return `${error.message} ${cause?.message ?? ""}`;
 }
 
-async function makeStudent(tx: Parameters<typeof runInRollback>[0] extends (tx: infer T) => unknown ? T : never, prefix: string, overrides = {}) {
-  return setupStudent(tx, { name: `${prefix} P`, email: `${prefix.toLowerCase()}-${randomUUID()}@t.com` }, {}, overrides);
+async function makeStudent(
+  tx: Parameters<typeof runInRollback>[0] extends (tx: infer T) => unknown ? T : never,
+  prefix: string,
+  overrides = {}
+) {
+  return setupStudent(
+    tx,
+    { name: `${prefix} P`, email: `${prefix.toLowerCase()}-${randomUUID()}@t.com` },
+    {},
+    overrides
+  );
 }
 
-async function makeTeacher(tx: Parameters<typeof runInRollback>[0] extends (tx: infer T) => unknown ? T : never, prefix: string) {
+async function makeTeacher(
+  tx: Parameters<typeof runInRollback>[0] extends (tx: infer T) => unknown ? T : never,
+  prefix: string
+) {
   return setupTeacher(tx, { name: `${prefix} T`, email: `${prefix.toLowerCase()}-t-${randomUUID()}@t.com` });
+}
+
+type Tx = Parameters<typeof runInRollback>[0] extends (tx: infer T) => unknown ? T : never;
+type TestStudent = Awaited<ReturnType<typeof makeStudent>>["student"];
+
+function testVersionMismatch(name: string, action: (tx: Tx, student: TestStudent) => Promise<unknown>) {
+  test(name, async () => {
+    await runInRollback(async tx => {
+      const { student } = await makeStudent(tx, `VM_${name.slice(0, 6)}`);
+      const error = await expectRepoError(() => action(tx, student));
+      expect(error.message).toContain("Version mismatch");
+    });
+  });
 }
 
 describe("StudentRepository — setClassesRemaining", () => {
@@ -53,13 +78,9 @@ describe("StudentRepository — setClassesRemaining", () => {
     });
   });
 
-  test("throws on version mismatch (optimistic locking)", async () => {
-    await runInRollback(async tx => {
-      const { student } = await makeStudent(tx, "Ver", { classesTotal: 10, classesRemaining: 5 });
-      const error = await expectRepoError(() => StudentRepository.setClassesRemaining(student.id, 3, student.version + 999, tx));
-      expect(error.message).toContain("Version mismatch");
-    });
-  });
+  testVersionMismatch("throws on version mismatch (optimistic locking)", (tx, student) =>
+    StudentRepository.setClassesRemaining(student.id, 3, student.version + 999, tx)
+  );
 
   test("sets classesRemaining to 0 successfully", async () => {
     await runInRollback(async tx => {
@@ -85,18 +106,16 @@ describe("StudentRepository — reassignTeacher", () => {
   test("throws studentNotFound for unknown studentId", async () => {
     await runInRollback(async tx => {
       const { teacher } = await makeTeacher(tx, "Target");
-      const error = await expectRepoError(() => StudentRepository.reassignTeacher(randomUUID(), teacher.id, undefined, tx));
+      const error = await expectRepoError(() =>
+        StudentRepository.reassignTeacher(randomUUID(), teacher.id, undefined, tx)
+      );
       expect(error.message).toContain("not found");
     });
   });
 
-  test("throws on version mismatch", async () => {
-    await runInRollback(async tx => {
-      const { student } = await makeStudent(tx, "VerR");
-      const { teacher: nt } = await makeTeacher(tx, "VerRT");
-      const error = await expectRepoError(() => StudentRepository.reassignTeacher(student.id, nt.id, student.version + 999, tx));
-      expect(error.message).toContain("Version mismatch");
-    });
+  testVersionMismatch("throws on version mismatch", async (tx, student) => {
+    const { teacher } = await makeTeacher(tx, "VerRT");
+    return StudentRepository.reassignTeacher(student.id, teacher.id, student.version + 999, tx);
   });
 
   test("succeeds when expectedVersion matches", async () => {
@@ -147,16 +166,14 @@ describe("StudentRepository — changeStatus", () => {
 
   test("throws studentNotFound for unknown studentId", async () => {
     await runInRollback(async tx => {
-      const error = await expectRepoError(() => StudentRepository.changeStatus(randomUUID(), "SUSPENDED", undefined, tx));
+      const error = await expectRepoError(() =>
+        StudentRepository.changeStatus(randomUUID(), "SUSPENDED", undefined, tx)
+      );
       expect(error.message).toContain("not found");
     });
   });
 
-  test("throws on version mismatch", async () => {
-    await runInRollback(async tx => {
-      const { student } = await makeStudent(tx, "VerStat");
-      const error = await expectRepoError(() => StudentRepository.changeStatus(student.id, "SUSPENDED", student.version + 999, tx));
-      expect(error.message).toContain("Version mismatch");
-    });
-  });
+  testVersionMismatch("throws on version mismatch", (tx, student) =>
+    StudentRepository.changeStatus(student.id, "SUSPENDED", student.version + 999, tx)
+  );
 });
