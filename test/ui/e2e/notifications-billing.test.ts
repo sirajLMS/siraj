@@ -64,9 +64,7 @@ describe("Notifications & Billing E2E", () => {
 
   test("Teacher does NOT see notification bell icon", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.teacher.groupSlug);
-    const bellIcon = p.locator(
-      '[data-testid="NotificationsOutlinedIcon"], svg[data-testid="NotificationsOutlined"]'
-    );
+    const bellIcon = p.locator('[data-testid="NotificationsOutlinedIcon"], svg[data-testid="NotificationsOutlined"]');
     expect(await bellIcon.count()).toBe(0);
   });
 

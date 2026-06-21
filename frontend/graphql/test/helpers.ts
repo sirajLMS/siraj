@@ -7,23 +7,22 @@ import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.docu
 import { createTestEntitiesMutationDocument } from "../sharedDocuments/test-helper.documents";
 import { testClient } from "./testClient";
 
-/**
- * Logs in a demo user using their group slug and returns the auth token.
- */
-export async function loginDemoUser(groupSlug: string): Promise<string> {
-  const result = await testClient.mutate({
-    mutation: demoLoginMutationDocument,
-    variables: {
-      input: {
-        groupSlug,
-      },
-    },
-  });
-  const token = result.data?.demoLogin?.token;
+async function executeLogin<TData, TVars>(
+  mutation: TypedDocumentNode<TData, TVars>,
+  variables: TVars,
+  extractToken: (data: TData | null | undefined) => string | null | undefined,
+  errorLabel: string
+): Promise<string> {
+  const result = await testClient.mutate({ mutation, variables } as unknown as Parameters<typeof testClient.mutate>[0]);
+  const token = extractToken(result.data as TData | null | undefined);
   if (!token) {
-    throw new Error(`Failed to login demo user: ${groupSlug}`);
+    throw new Error(`Failed to login: ${errorLabel}`);
   }
   return token;
+}
+
+export async function loginDemoUser(groupSlug: string): Promise<string> {
+  return executeLogin(demoLoginMutationDocument, { input: { groupSlug } }, data => data?.demoLogin?.token, groupSlug);
 }
 
 /**
@@ -59,20 +58,7 @@ export async function assertOperationDenied<TData = unknown, TVars extends Opera
  * Logs in a standard user using email and password, returning their auth token.
  */
 export async function loginUser(email: string, password = "password"): Promise<string> {
-  const result = await testClient.mutate({
-    mutation: loginMutationDocument,
-    variables: {
-      input: {
-        email,
-        password,
-      },
-    },
-  });
-  const token = result.data?.login?.token;
-  if (!token) {
-    throw new Error(`Failed to login user: ${email}`);
-  }
-  return token;
+  return executeLogin(loginMutationDocument, { input: { email, password } }, data => data?.login?.token, email);
 }
 
 /**

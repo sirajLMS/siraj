@@ -19,7 +19,10 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { notificationAlertsQueryDocument } from "@/frontend/graphql/sharedDocuments/notification-alerts.documents";
 import { UnpaidInvoicesSection } from "./UnpaidInvoicesSection";
 
-function getSeverityColor(severity: string | null | undefined, theme: { palette: { error: { main: string }; warning: { main: string }; info: { main: string } } }) {
+function getSeverityColor(
+  severity: string | null | undefined,
+  theme: { palette: { error: { main: string }; warning: { main: string }; info: { main: string } } }
+) {
   if (severity === "error") return theme.palette.error.main;
   if (severity === "warning") return theme.palette.warning.main;
   return theme.palette.info.main;

@@ -5,7 +5,7 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
 import { leaveQuotaUsage, systemSettings } from "../../schema";
-import { setupTeacher, setupStudent } from "../entity-setup";
+import { setupStudent, setupTeacher } from "../entity-setup";
 import { type DbTransaction, runInRollback } from "../test-utils";
 
 async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {

@@ -64,18 +64,7 @@ export function FutureScheduleContainer() {
     );
   }
 
-  const classes = (schedule.classes ?? []).map(cls => ({
-    id: cls.id ?? "",
-    subjectName: cls.courseName ?? "",
-    status: (cls.isRescheduled ? "rescheduled" : "regular") as "regular" | "rescheduled",
-    startTime: cls.startTime ?? "",
-    endTime: cls.endTime ?? "",
-    date: cls.scheduledDate ?? "",
-    location: cls.location ?? "",
-    studentCount: cls.studentCount ?? 0,
-    leaveRequestDisabled: cls.leaveRequestDisabled ?? false,
-    leaveRequestDisabledReason: (cls.leaveRequestDisabledReason as "time" | "quota" | undefined) ?? undefined,
-  }));
+  const classes = schedule.classes ?? [];
 
   return (
     <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>

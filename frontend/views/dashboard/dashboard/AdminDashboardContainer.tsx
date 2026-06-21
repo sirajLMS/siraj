@@ -66,7 +66,7 @@ export function AdminDashboardContainer() {
     },
   });
 
-  const [teacherSearchQuery, setTeacherSearchQuery] = useState("");
+  const [teacherSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const pageSize = 10;
 
@@ -76,7 +76,7 @@ export function AdminDashboardContainer() {
   }, []);
 
   // Fetch teachers list using the new teachers query
-  const { data: teachersData, loading: loadingTeachers } = useQuery(teachersQueryDocument, {
+  const { data: teachersData } = useQuery(teachersQueryDocument, {
     variables: {
       search: teacherSearchQuery,
       limit: 10,

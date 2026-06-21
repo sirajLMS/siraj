@@ -2,18 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
-import {
-  classInstances,
-  recurringSchedules,
-  students,
-  teacherAssignments,
-} from "@/backend/db/schema";
-import {
-  createMockClassInstance,
-  setupStudent,
-  setupTeacher,
-  setupTestEntities,
-} from "../entity-setup";
+import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
+import { createMockClassInstance, setupStudent, setupTeacher, setupTestEntities } from "../entity-setup";
 import { type DbTransaction, runInRollback } from "../test-utils";
 
 async function expectRepositoryError(fn: () => Promise<unknown>) {

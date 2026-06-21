@@ -4,7 +4,7 @@ import { Alert, Box, Grid, Stack, Typography, useMediaQuery, useTheme } from "@m
 import { useTranslations } from "next-intl";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
-import type { FutureClass } from "@/frontend/stores/mockTeacherScheduleStore";
+import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
 import { FutureClassCard } from "./components/FutureClassCard";
 import { ImportantNotes } from "./components/ImportantNotes";
 import { JumpToDateHeader } from "./components/JumpToDateHeader";
@@ -84,7 +84,13 @@ export function FutureScheduleView({
             </Box>
 
             {classes.map(item => (
-              <FutureClassCard key={item.id} item={item} onRequestLeave={() => onRequestLeave(item.id)} />
+              <FutureClassCard
+                key={item.id ?? ""}
+                item={item}
+                onRequestLeave={() => {
+                  if (item.id) onRequestLeave(item.id);
+                }}
+              />
             ))}
           </Stack>
         </Grid>

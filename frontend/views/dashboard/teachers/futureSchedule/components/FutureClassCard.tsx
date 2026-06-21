@@ -11,7 +11,7 @@ import { alpha, Box, Button, Stack, Typography, useMediaQuery, useTheme } from "
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { FutureClass } from "@/frontend/stores/mockTeacherScheduleStore";
+import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface FutureClassCardProps {
   readonly item: FutureClass;
@@ -63,13 +63,13 @@ function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isReschedu
 
 function ClassInfo({ item, isMobile }: Readonly<{ item: FutureClass; isMobile: boolean }>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
-  const isRescheduled = item.status === "rescheduled";
+  const isRescheduled = item.isRescheduled === true;
 
   return (
     <Box sx={{ flex: 1 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
         <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-          {item.subjectName}
+          {item.courseName}
         </Typography>
         {isRescheduled && <StatusBadge category="trackingStatus" status="rescheduled" label={t("reScheduled")} />}
       </Box>
@@ -180,7 +180,7 @@ function ActionButtons({
 export function FutureClassCard({ item, onRequestLeave }: Readonly<FutureClassCardProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isRescheduled = item.status === "rescheduled";
+  const isRescheduled = item.isRescheduled === true;
 
   return (
     <BaseCard
@@ -198,7 +198,7 @@ export function FutureClassCard({ item, onRequestLeave }: Readonly<FutureClassCa
         }}
       >
         <Stack direction="row" spacing={2} sx={{ flex: 1 }}>
-          <DateSquare date={item.date} isRescheduled={isRescheduled} />
+          <DateSquare date={item.scheduledDate ?? ""} isRescheduled={isRescheduled} />
           <ClassInfo item={item} isMobile={isMobile} />
         </Stack>
         <ActionButtons item={item} isMobile={isMobile} onRequestLeave={onRequestLeave} />

@@ -382,4 +382,96 @@ export namespace BillingRepository {
       studentId: r.studentId ?? null,
     }));
   };
+
+  export const deleteInvoice = async (
+    invoiceId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<Types.InvoiceSelectType> => {
+    const runner = async (t: DBTransaction) => {
+      await acquireInvoiceLock(t, invoiceId);
+
+      const existing = await t
+        .select()
+        .from(invoices)
+        .where(and(eq(invoices.id, invoiceId), isNull(invoices.deletedAt)))
+        .limit(1);
+
+      if (existing.length === 0) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("invoiceNotFound", { id: invoiceId }));
+      }
+
+      const now = new Date();
+      const [deleted] = await t
+        .update(invoices)
+        .set({
+          deletedAt: now,
+          updatedAt: now,
+          version: sql`${invoices.version} + 1`,
+        })
+        .where(eq(invoices.id, invoiceId))
+        .returning();
+
+      return deleted;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  export const markInvoiceAsPaid = async (
+    invoiceId: string,
+    expectedVersion?: number,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<Types.InvoiceSelectType> => {
+    const runner = async (t: DBTransaction) => {
+      await acquireInvoiceLock(t, invoiceId);
+
+      const existing = await t
+        .select()
+        .from(invoices)
+        .where(and(eq(invoices.id, invoiceId), isNull(invoices.deletedAt)))
+        .limit(1);
+
+      if (existing.length === 0) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("invoiceNotFound", { id: invoiceId }));
+      }
+
+      const current = existing[0];
+
+      if (current.status !== "UNPAID") {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("invoiceAlreadyPaid", { id: invoiceId, status: current.status }));
+      }
+
+      if (expectedVersion !== undefined && current.version !== expectedVersion) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(
+          tFunc("invoiceVersionMismatch", {
+            id: invoiceId,
+            expectedVersion,
+            gotVersion: current.version,
+          })
+        );
+      }
+
+      const paidDate = new Date();
+      const [updated] = await t
+        .update(invoices)
+        .set({
+          status: "PAID",
+          paidDate: paidDate.toISOString().split("T")[0],
+          version: sql`${invoices.version} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(invoices.id, invoiceId))
+        .returning();
+
+      return updated;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  };
 }

@@ -1,11 +1,6 @@
 import { PermissionManagementRepository } from "@/backend/db/repo";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
-import type {
-  GroupUserEntity,
-  GroupWithPermissionIds,
-  PermissionEntity,
-  UserOverrideEntity,
-} from "@/backend/types";
+import type { GroupUserEntity, GroupWithPermissionIds, PermissionEntity, UserOverrideEntity } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────

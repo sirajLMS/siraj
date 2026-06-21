@@ -1,5 +1,7 @@
-// cspell:disable
 import { create } from "zustand";
+import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
+
+export type { FutureClass };
 
 export interface ScheduledClass {
   readonly id: string;
@@ -16,22 +18,6 @@ export interface TeacherWeeklySchedule {
   readonly weeklyHoursWorked: string;
   readonly classes: readonly ScheduledClass[];
   readonly lastUpdated: string;
-}
-
-export type FutureClassStatus = "regular" | "rescheduled";
-export type LeaveDisabledReason = "time" | "quota";
-
-export interface FutureClass {
-  readonly id: string;
-  readonly subjectName: string;
-  readonly status: FutureClassStatus;
-  readonly startTime: string;
-  readonly endTime: string;
-  readonly date: string; // ISO format
-  readonly location: string;
-  readonly studentCount: number;
-  readonly leaveRequestDisabled?: boolean;
-  readonly leaveRequestDisabledReason?: LeaveDisabledReason;
 }
 
 export interface FutureSchedule {
@@ -97,36 +83,44 @@ const MOCK_FUTURE_SCHEDULE: FutureSchedule = {
   totalClasses: 12,
   classes: [
     {
+      __typename: "FutureClass",
       id: "fc-1",
-      subjectName: "Advanced Mathematics - Group A",
-      status: "rescheduled",
+      courseName: "Advanced Mathematics - Group A",
+      isRescheduled: true,
       startTime: "09:00 AM",
       endTime: "10:30 AM",
-      date: "2023-10-24",
+      scheduledDate: "2023-10-24",
       location: "Virtual Room 12",
       studentCount: 18,
+      durationMinutes: 90,
       leaveRequestDisabled: true,
       leaveRequestDisabledReason: "time",
     },
     {
+      __typename: "FutureClass",
       id: "fc-2",
-      subjectName: "Physics 101: Mechanics",
-      status: "regular",
+      courseName: "Physics 101: Mechanics",
+      isRescheduled: false,
       startTime: "11:00 AM",
       endTime: "12:30 PM",
-      date: "2023-10-24",
+      scheduledDate: "2023-10-24",
       location: "Hall B - Campus",
       studentCount: 24,
+      durationMinutes: 90,
+      leaveRequestDisabled: false,
+      leaveRequestDisabledReason: null,
     },
     {
+      __typename: "FutureClass",
       id: "fc-3",
-      subjectName: "Intro to Arabic Literature",
-      status: "rescheduled",
+      courseName: "Intro to Arabic Literature",
+      isRescheduled: true,
       startTime: "02:00 PM",
       endTime: "03:30 PM",
-      date: "2023-10-25",
+      scheduledDate: "2023-10-25",
       location: "Virtual Room 04",
       studentCount: 12,
+      durationMinutes: 90,
       leaveRequestDisabled: true,
       leaveRequestDisabledReason: "quota",
     },
