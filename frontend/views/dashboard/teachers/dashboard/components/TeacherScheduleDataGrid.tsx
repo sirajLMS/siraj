@@ -5,7 +5,7 @@ import { IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui";
-import type { TeacherScheduleRow } from "@/frontend/stores/mockTeacherDashboardTypes";
+import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 import { TeacherScheduleStatusContent } from "./TeacherScheduleStatusContent";
 import { TeacherScheduleStudentCell } from "./TeacherScheduleStudentCell";

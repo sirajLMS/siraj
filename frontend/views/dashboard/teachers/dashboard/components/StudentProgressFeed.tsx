@@ -2,7 +2,7 @@
 
 import { DescriptionOutlined, GradeOutlined, LoginOutlined } from "@mui/icons-material";
 import { Avatar, Box, Paper, Stack, Typography } from "@mui/material";
-import type { StudentProgressFeedItem } from "@/frontend/stores/mockTeacherDashboardTypes";
+import type { StudentProgressFeedItem } from "@/frontend/stores/teacherDashboardTypes";
 
 interface StudentProgressFeedProps {
   readonly items: readonly StudentProgressFeedItem[];

@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TeacherScheduleRow } from "@/frontend/stores/mockTeacherDashboardTypes";
+import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
 import { SessionActivateButton } from "./SessionActivateButton";

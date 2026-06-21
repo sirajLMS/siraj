@@ -1,6 +1,5 @@
-// cspell:disable
 import { create } from "zustand";
-import type { TeacherDashboardState } from "./mockTeacherDashboardTypes";
+import type { TeacherDashboardState } from "./teacherDashboardTypes";
 
 const INITIAL_STATE: TeacherDashboardState = {
   metrics: {

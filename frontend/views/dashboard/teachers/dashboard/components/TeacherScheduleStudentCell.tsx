@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, Box, Typography } from "@mui/material";
-import type { TeacherScheduleRow } from "@/frontend/stores/mockTeacherDashboardTypes";
+import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 
 export function TeacherScheduleStudentCell({ row }: Readonly<{ row: TeacherScheduleRow }>) {
   return (

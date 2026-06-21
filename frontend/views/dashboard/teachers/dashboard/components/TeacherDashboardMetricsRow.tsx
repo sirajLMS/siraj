@@ -3,7 +3,7 @@
 import { CheckCircleOutlined, EventBusyOutlined, EventOutlined, GroupsOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import { MetricCard } from "@/frontend/components/ui";
-import type { TeacherDashboardMetrics } from "@/frontend/stores/mockTeacherDashboardTypes";
+import type { TeacherDashboardMetrics } from "@/frontend/stores/teacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 
 interface TeacherDashboardMetricsRowProps {
