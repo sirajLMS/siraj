@@ -172,6 +172,13 @@ export type BulkOperationResult = {
   successfulItems: Maybe<Array<StorageObject>>;
 };
 
+export type ChangeStudentStatusResult = {
+  __typename?: 'ChangeStudentStatusResult';
+  id: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  version: Maybe<Scalars['Int']['output']>;
+};
+
 export type ClassInstanceDetail = {
   __typename?: 'ClassInstanceDetail';
   courseName: Maybe<Scalars['String']['output']>;
@@ -562,6 +569,15 @@ export type DeactivateParentResult = {
   userId: Maybe<Scalars['String']['output']>;
 };
 
+export type DeleteInvoiceResult = {
+  __typename?: 'DeleteInvoiceResult';
+  deletedAt: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  notificationSummaryUpdated: Maybe<Scalars['Boolean']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
+  version: Maybe<Scalars['Int']['output']>;
+};
+
 /** Input for the demo fast login mutation. */
 export type DemoLoginInput = {
   /** The unique slug of the permission group to authenticate as. */
@@ -775,6 +791,32 @@ export type LoginResponse = {
   user: Maybe<User>;
 };
 
+export type ManualInvoiceResult = {
+  __typename?: 'ManualInvoiceResult';
+  amount: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  currency: Maybe<Scalars['String']['output']>;
+  dueDate: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  invoiceType: Maybe<Scalars['String']['output']>;
+  issueDate: Maybe<Scalars['String']['output']>;
+  paidDate: Maybe<Scalars['String']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  version: Maybe<Scalars['Int']['output']>;
+};
+
+export type MarkInvoicePaidResult = {
+  __typename?: 'MarkInvoicePaidResult';
+  id: Maybe<Scalars['String']['output']>;
+  notificationSummaryUpdated: Maybe<Scalars['Boolean']['output']>;
+  paidDate: Maybe<Scalars['String']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  version: Maybe<Scalars['Int']['output']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   activateClass: Maybe<ClassInstanceDetail>;
@@ -782,10 +824,12 @@ export type Mutation = {
   assignPermissionGroupToUser: Maybe<Scalars['Boolean']['output']>;
   bulkAssignUsersToGroup: Maybe<Scalars['Boolean']['output']>;
   bulkRevokeUsersFromGroup: Maybe<Scalars['Boolean']['output']>;
+  changeStudentStatus: Maybe<ChangeStudentStatusResult>;
   cleanupTestEntities: Maybe<Scalars['Boolean']['output']>;
   clearWeeklySchedule: Maybe<Scalars['Boolean']['output']>;
   copyStorageItems: Maybe<BulkOperationResult>;
   createFolder: Maybe<FileOperationResult>;
+  createManualInvoice: Maybe<ManualInvoiceResult>;
   createPermissionGroup: Maybe<PermissionGroup>;
   createRecurringClass: Maybe<CreateRecurringClassResult>;
   createTeacherManualClassEntry: Maybe<ClassInstanceDetail>;
@@ -793,6 +837,7 @@ export type Mutation = {
   deactivateParent: Maybe<DeactivateParentResult>;
   deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
   deleteFile: Maybe<FileOperationResult>;
+  deleteInvoice: Maybe<DeleteInvoiceResult>;
   deletePermissionGroup: Maybe<Scalars['Boolean']['output']>;
   deleteRecurringClass: Maybe<Scalars['Boolean']['output']>;
   deleteStorageItems: Maybe<BulkOperationResult>;
@@ -804,9 +849,11 @@ export type Mutation = {
   logTeacherSupportRequest: Maybe<SupportRequestResult>;
   login: Maybe<LoginResponse>;
   logout: Maybe<Scalars['Boolean']['output']>;
+  markInvoicePaid: Maybe<MarkInvoicePaidResult>;
   moveStorageItems: Maybe<BulkOperationResult>;
   partiallyUpdateStudent: Maybe<Student>;
   prepareUpload: Maybe<UploadPreparation>;
+  reassignStudentTeacher: Maybe<ReassignStudentTeacherResult>;
   refreshToken: Maybe<RefreshTokenResponse>;
   renameFile: Maybe<FileOperationResult>;
   rescheduleClass: Maybe<ClassInstanceDetail>;
@@ -852,6 +899,13 @@ export type MutationBulkRevokeUsersFromGroupArgs = {
 };
 
 
+export type MutationChangeStudentStatusArgs = {
+  expectedVersion: InputMaybe<Scalars['Int']['input']>;
+  newStatus: Scalars['String']['input'];
+  studentId: Scalars['String']['input'];
+};
+
+
 export type MutationCleanupTestEntitiesArgs = {
   parentId: Scalars['String']['input'];
   parentUserId: Scalars['String']['input'];
@@ -874,6 +928,19 @@ export type MutationCopyStorageItemsArgs = {
 
 export type MutationCreateFolderArgs = {
   input: FolderCreateInput;
+};
+
+
+export type MutationCreateManualInvoiceArgs = {
+  amount: Scalars['String']['input'];
+  currency: Scalars['String']['input'];
+  dueDate: Scalars['String']['input'];
+  exchangeRateSnapshot: InputMaybe<Scalars['String']['input']>;
+  exchangeRateSource: InputMaybe<Scalars['String']['input']>;
+  invoiceType: Scalars['String']['input'];
+  issueDate: Scalars['String']['input'];
+  parentId: Scalars['String']['input'];
+  studentId: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -910,6 +977,11 @@ export type MutationDeleteClassInstanceArgs = {
 
 export type MutationDeleteFileArgs = {
   path: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteInvoiceArgs = {
+  invoiceId: Scalars['String']['input'];
 };
 
 
@@ -961,6 +1033,12 @@ export type MutationLoginArgs = {
 };
 
 
+export type MutationMarkInvoicePaidArgs = {
+  expectedVersion: InputMaybe<Scalars['Int']['input']>;
+  invoiceId: Scalars['String']['input'];
+};
+
+
 export type MutationMoveStorageItemsArgs = {
   input: StorageItemsMoveInput;
 };
@@ -973,6 +1051,13 @@ export type MutationPartiallyUpdateStudentArgs = {
 
 export type MutationPrepareUploadArgs = {
   input: UploadPreparationInput;
+};
+
+
+export type MutationReassignStudentTeacherArgs = {
+  expectedVersion: InputMaybe<Scalars['Int']['input']>;
+  newTeacherId: Scalars['String']['input'];
+  studentId: Scalars['String']['input'];
 };
 
 
@@ -1457,6 +1542,13 @@ export type QueryUserOverridesArgs = {
 
 export type QueryUserPermissionGroupsArgs = {
   userId: Scalars['String']['input'];
+};
+
+export type ReassignStudentTeacherResult = {
+  __typename?: 'ReassignStudentTeacherResult';
+  id: Maybe<Scalars['String']['output']>;
+  primaryTeacherId: Maybe<Scalars['String']['output']>;
+  version: Maybe<Scalars['Int']['output']>;
 };
 
 export type RecurringClassDayInput = {

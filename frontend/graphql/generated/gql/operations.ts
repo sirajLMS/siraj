@@ -389,6 +389,51 @@ export type UnpaidInvoicesAlertQueryVariables = Exact<{ [key: string]: never; }>
 
 export type UnpaidInvoicesAlertQuery = UnpaidInvoicesAlertQuery_Query;
 
+export type CreateManualInvoiceMutation_createManualInvoice_ManualInvoiceResult = { id: string | null, parentId: string | null, studentId: string | null, amount: string | null, currency: string | null, status: string | null, invoiceType: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, version: number | null, createdAt: string | null };
+
+export type CreateManualInvoiceMutation_Mutation = { createManualInvoice: CreateManualInvoiceMutation_createManualInvoice_ManualInvoiceResult | null };
+
+
+export type CreateManualInvoiceMutationVariables = Exact<{
+  parentId: string;
+  studentId: string | null | undefined;
+  amount: string;
+  currency: string;
+  invoiceType: string;
+  issueDate: string;
+  dueDate: string;
+  exchangeRateSnapshot: string | null | undefined;
+  exchangeRateSource: string | null | undefined;
+}>;
+
+
+export type CreateManualInvoiceMutation = CreateManualInvoiceMutation_Mutation;
+
+export type MarkInvoicePaidMutation_markInvoicePaid_MarkInvoicePaidResult = { id: string | null, parentId: string | null, status: string | null, paidDate: string | null, version: number | null, notificationSummaryUpdated: boolean | null };
+
+export type MarkInvoicePaidMutation_Mutation = { markInvoicePaid: MarkInvoicePaidMutation_markInvoicePaid_MarkInvoicePaidResult | null };
+
+
+export type MarkInvoicePaidMutationVariables = Exact<{
+  invoiceId: string;
+  expectedVersion: number | null | undefined;
+}>;
+
+
+export type MarkInvoicePaidMutation = MarkInvoicePaidMutation_Mutation;
+
+export type DeleteInvoiceMutation_deleteInvoice_DeleteInvoiceResult = { id: string | null, parentId: string | null, deletedAt: string | null, version: number | null, notificationSummaryUpdated: boolean | null };
+
+export type DeleteInvoiceMutation_Mutation = { deleteInvoice: DeleteInvoiceMutation_deleteInvoice_DeleteInvoiceResult | null };
+
+
+export type DeleteInvoiceMutationVariables = Exact<{
+  invoiceId: string;
+}>;
+
+
+export type DeleteInvoiceMutation = DeleteInvoiceMutation_Mutation;
+
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo = { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null };
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo = { id: string | null, name: string | null, title: string | null, avatarUrl: string | null };
@@ -976,6 +1021,34 @@ export type StudentClassSessionDetailQueryVariables = Exact<{
 
 
 export type StudentClassSessionDetailQuery = StudentClassSessionDetailQuery_Query;
+
+export type ReassignStudentTeacherMutation_reassignStudentTeacher_ReassignStudentTeacherResult = { id: string | null, primaryTeacherId: string | null, version: number | null };
+
+export type ReassignStudentTeacherMutation_Mutation = { reassignStudentTeacher: ReassignStudentTeacherMutation_reassignStudentTeacher_ReassignStudentTeacherResult | null };
+
+
+export type ReassignStudentTeacherMutationVariables = Exact<{
+  studentId: string;
+  newTeacherId: string;
+  expectedVersion: number | null | undefined;
+}>;
+
+
+export type ReassignStudentTeacherMutation = ReassignStudentTeacherMutation_Mutation;
+
+export type ChangeStudentStatusMutation_changeStudentStatus_ChangeStudentStatusResult = { id: string | null, status: string | null, version: number | null };
+
+export type ChangeStudentStatusMutation_Mutation = { changeStudentStatus: ChangeStudentStatusMutation_changeStudentStatus_ChangeStudentStatusResult | null };
+
+
+export type ChangeStudentStatusMutationVariables = Exact<{
+  studentId: string;
+  newStatus: string;
+  expectedVersion: number | null | undefined;
+}>;
+
+
+export type ChangeStudentStatusMutation = ChangeStudentStatusMutation_Mutation;
 
 export type StudentsQuery_students_StudentsWithFiltersResponse_data_Student = { id: string, name: string };
 

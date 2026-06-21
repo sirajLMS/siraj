@@ -144,6 +144,12 @@ type BulkOperationResult {
   successfulItems: [StorageObject!]
 }
 
+type ChangeStudentStatusResult {
+  id: String
+  status: String
+  version: Int
+}
+
 type ClassInstanceDetail {
   courseName: String
   durationMinutes: Int
@@ -534,6 +540,14 @@ type DeactivateParentResult {
   userId: String
 }
 
+type DeleteInvoiceResult {
+  deletedAt: String
+  id: String
+  notificationSummaryUpdated: Boolean
+  parentId: String
+  version: Int
+}
+
 """Input for the demo fast login mutation."""
 input DemoLoginInput {
   """The unique slug of the permission group to authenticate as."""
@@ -740,16 +754,42 @@ type LoginResponse {
   user: User
 }
 
+type ManualInvoiceResult {
+  amount: String
+  createdAt: DateTime
+  currency: String
+  dueDate: String
+  id: String
+  invoiceType: String
+  issueDate: String
+  paidDate: String
+  parentId: String
+  status: String
+  studentId: String
+  version: Int
+}
+
+type MarkInvoicePaidResult {
+  id: String
+  notificationSummaryUpdated: Boolean
+  paidDate: String
+  parentId: String
+  status: String
+  version: Int
+}
+
 type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
   assignPermissionGroupToUser(input: AssignPermissionGroupToUserInput!): Boolean
   bulkAssignUsersToGroup(groupId: String!, userIds: [String!]!): Boolean
   bulkRevokeUsersFromGroup(groupId: String!, userIds: [String!]!): Boolean
+  changeStudentStatus(expectedVersion: Int, newStatus: String!, studentId: String!): ChangeStudentStatusResult
   cleanupTestEntities(parentId: String!, parentUserId: String!, studentId: String!, studentUserId: String!, teacherId: String!, teacherUserId: String!): Boolean
   clearWeeklySchedule(teacherId: ID!): Boolean
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createFolder(input: FolderCreateInput!): FileOperationResult
+  createManualInvoice(amount: String!, currency: String!, dueDate: String!, exchangeRateSnapshot: String, exchangeRateSource: String, invoiceType: String!, issueDate: String!, parentId: String!, studentId: String): ManualInvoiceResult
   createPermissionGroup(input: CreatePermissionGroupInput!): PermissionGroup
   createRecurringClass(input: CreateRecurringClassInput!): CreateRecurringClassResult
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
@@ -757,6 +797,7 @@ type Mutation {
   deactivateParent(parentId: String!): DeactivateParentResult
   deleteClassInstance(classInstanceId: ID!): Boolean
   deleteFile(path: String!): FileOperationResult
+  deleteInvoice(invoiceId: String!): DeleteInvoiceResult
   deletePermissionGroup(groupId: String!): Boolean
   deleteRecurringClass(classInstanceId: ID!): Boolean
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
@@ -771,9 +812,11 @@ type Mutation {
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
   logout: Boolean
+  markInvoicePaid(expectedVersion: Int, invoiceId: String!): MarkInvoicePaidResult
   moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
+  reassignStudentTeacher(expectedVersion: Int, newTeacherId: String!, studentId: String!): ReassignStudentTeacherResult
   refreshToken: RefreshTokenResponse
   renameFile(input: FileRenameInput!): FileOperationResult
   rescheduleClass(classInstanceId: ID!, input: RescheduleClassInput!): ClassInstanceDetail
@@ -1019,6 +1062,12 @@ type Query {
   userPermissionGroups(userId: String!): [String!]
   users: [User!]
   welcomeMessage: String
+}
+
+type ReassignStudentTeacherResult {
+  id: String
+  primaryTeacherId: String
+  version: Int
 }
 
 input RecurringClassDayInput {

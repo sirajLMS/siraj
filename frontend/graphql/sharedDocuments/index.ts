@@ -1,6 +1,7 @@
 export * from "./auth.documents";
 export * from "./availability-search.documents";
 export * from "./billing-alerts.documents";
+export * from "./billing-management.documents";
 export * from "./class-session.documents";
 export * from "./dst-migration.documents";
 export * from "./notification-alerts.documents";
@@ -16,6 +17,7 @@ export * from "./staff-directory.documents";
 export * from "./staff-profile.documents";
 export * from "./student.documents";
 export * from "./student-history.documents";
+export * from "./student-lifecycle.documents";
 export * from "./teacher.documents";
 export * from "./teacher-dashboard.documents";
 export * from "./test-helper.documents";
