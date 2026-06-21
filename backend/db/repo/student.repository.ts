@@ -345,16 +345,10 @@ export namespace StudentRepository {
 
   export const changeStatus = async (
     studentId: string,
-    newStatus: string,
+    newStatus: Types.StudentEntity["status"],
     expectedVersion?: number,
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.StudentEntity> =>
-    runStudentUpdate(
-      studentId,
-      () => ({ status: newStatus as Types.StudentEntity["status"] }),
-      expectedVersion,
-      tx,
-      locale
-    );
+    runStudentUpdate(studentId, () => ({ status: newStatus }), expectedVersion, tx, locale);
 }
