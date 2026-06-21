@@ -7,7 +7,8 @@ This directory contains database integration tests. Follow these guidelines to e
 1. **Use Transaction Rollbacks (`runInRollback`)**
    - Every database test MUST run inside the `runInRollback` wrapper imported from `./test-utils`.
    - Never perform database operations outside a rolled-back transaction unless testing explicit non-transactional RLS role creation/session teardown.
-   - Always pass the transaction instance (`tx` or `t`) to all repository methods and queries to execute operations within the transaction scope.
+   - Always pass the transaction instance (`tx` or `t`) to **ALL** repository methods AND direct Drizzle queries. If you write `await tx.select(...)`, the repo call must also receive `tx`: `await SomeRepository.someMethod(arg1, tx)`. Mixing `tx` queries with `db`-backed repo calls causes deadlocks and state pollution.
+   - Use the `DbTransaction` type from `./test-utils` for any helper function parameters that accept a transaction — **NEVER** type transaction parameters as `any`.
 
 2. **Clean Setup Helpers**
    - Utilize existing helper functions in [entity-setup.ts] (e.g., `createTestUser`, `createTestTeacher`, `createTestStudent`, `setupTeacher`, `setupStudent`) to create test entities.
@@ -15,8 +16,21 @@ This directory contains database integration tests. Follow these guidelines to e
    - Generate unique emails, names, and idempotency keys using `randomUUID()` or distinct prefixes (e.g., `prefix: "swapA"`) to avoid unique constraint violations.
 
 3. **Verify Constraints and Errors Cleanly**
-   - Use `expect(...).rejects.toThrow()` or write custom assertion helpers (like `expectConstraintViolation`) to assert that operations fail with specific constraint names or error messages.
-   - Do not catch errors manually unless performing specific conditional assertions, and always re-throw unexpected errors.
+   - **NEVER use `expect(...).rejects.toThrow()` inside `runInRollback`** — this causes deadlocks/timeouts because the rejected promise interacts poorly with the transaction rollback mechanism. Instead, use a **try/catch helper** pattern:
+     ```typescript
+     async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
+       let errorCaught: unknown = null;
+       try {
+         await fn();
+       } catch (error) {
+         errorCaught = error;
+       }
+       expect(errorCaught).not.toBeNull();
+       return errorCaught as Error;
+     }
+     ```
+   - Assert on the error message using `.toContain()` with a substring from the **translated** message (e.g., `"not found"`, `"Version mismatch"`, `"already deactivated"`), NOT the raw translation key (e.g., `"studentNotFound"`). Repository methods produce human-readable localized messages — the raw key never appears in `error.message`.
+   - Do not catch errors manually outside of a reusable helper like the one above.
 
 4. **Code Cleanliness, Strict Linting & Type Checking**
    - Clean up all unused imports and unused variables (especially those destructured from setup helpers).
@@ -71,3 +85,33 @@ This directory contains database integration tests. Follow these guidelines to e
 14. **Coverage Requirements**
     - All repository tests located in the `repo/` directory MUST achieve **100% code coverage** (lines and functions).
     - After writing or updating a repository test, always verify coverage by running `bun test --coverage <path-to-test-file>` or `bun run test:db:coverage` for the full suite.
+
+15. **Always Create Test Data — Never Query Seed Data**
+    - Tests MUST create their own data using entity-setup helpers (`createTestUser`, `createTestParent`, `createTestStudent`, `setupStudent`, etc.) inside the `runInRollback` transaction.
+    - **NEVER** query the database for pre-existing seed data (e.g., `db.select().from(parents).limit(1)`) and use it as test input. Seed data is not guaranteed to be present or stable, and queries outside the transaction break isolation.
+    - For "not found" / "empty result" tests, use a known non-existent UUID like `"00000000-0000-0000-0000-000000000000"` or generate one with `randomUUID()`.
+
+16. **Always Pass `tx` to Repository Methods**
+    - Every repository method accepts an optional `tx` (transaction) parameter. When inside `runInRollback`, you **MUST** pass `tx` as the transaction argument to all repo method calls.
+    - Failing to pass `tx` causes the repo method to use the global `db` connection, which is outside the rollback transaction — leading to state pollution, deadlocks, and non-deterministic test results.
+    - **Check the actual parameter position** of `tx` in each repo method signature before calling — it varies:
+      - `ParentRepository.getParentProfile(parentId, tx?)` — `tx` is 2nd param
+      - `StudentRepository.setClassesRemaining(studentId, value, expectedVersion?, tx?)` — `tx` is 4th param
+      - `StorageDbRepository.linkFileToParent(parentId, fileId, usageType, tx?)` — `tx` is 4th param
+
+17. **Verify Entity Setup Helper Signatures Before Use**
+    - Always read the actual function signature in `entity-setup.ts` before calling a helper. Common mistakes:
+      - `setupStudent(tx, userOverrides, parentOverrides, studentOverrides)` — takes 4 args (tx + 3 override objects), NOT `(tx, parentId, overrides)`.
+      - `createTestParent(tx, userId, overrides)` — requires a `userId` from a previously created user, NOT a standalone call.
+      - `createTestStudent(tx, parentId, overrides)` — requires a `parentId` from a previously created parent.
+    - When in doubt, read the helper source in `entity-setup.ts` before writing the test.
+
+18. **Verify Schema Columns Before Writing Test Setup**
+    - Before inserting test data into any table (directly or via helpers), **read the schema definition** in `backend/db/schema/` to confirm the actual columns and their types.
+    - **NEVER assume** a table has columns like `mimeType`, `size`, `bucket`, `createdAt`, `updatedAt` — many tables (e.g., `storageFiles`) only have minimal columns (`id`, `path`, `isProtected`).
+    - This applies to both direct `tx.insert()` calls and when passing `overrides` to entity-setup helpers.
+
+19. **Do Not Call `getBackendTranslations` Directly in Tests**
+    - Repository methods internally call `getBackendTranslations` to produce localized error messages. Tests should **NOT** call this function directly to construct expected error strings.
+    - Instead, use the `expectRepoError` try/catch pattern (see Rule 3) and assert on substrings of the translated message (e.g., `expect(error.message).toContain("not found")`).
+    - This avoids potential hangs from the next-intl translation loader in the test environment and keeps tests decoupled from the translation system's internal state.

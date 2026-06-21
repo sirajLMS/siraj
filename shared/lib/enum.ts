@@ -24,6 +24,8 @@ export enum AccountStatus {
 }
 
 export enum ParentStatus {
+  ACTIVATED = "ACTIVATED",
+  DEACTIVATED = "DEACTIVATED",
   REGULAR = "REGULAR",
   ON_LEAVE = "ON_LEAVE",
   SUSPENDED = "SUSPENDED",

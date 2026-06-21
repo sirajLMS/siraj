@@ -18,7 +18,7 @@ CREATE TYPE "leave_requester_type" AS ENUM('TEACHER', 'PARENT', 'ADMIN');--> sta
 CREATE TYPE "notification_channel" AS ENUM('EMAIL', 'SMS', 'PUSH');--> statement-breakpoint
 CREATE TYPE "notification_delivery_status" AS ENUM('PENDING', 'SENT', 'DELIVERED', 'OPENED', 'FAILED');--> statement-breakpoint
 CREATE TYPE "notification_event_type" AS ENUM('CLASS_REMINDER', 'INVOICE_GENERATED', 'COMPLAINT_RESPONSE', 'BANKING_DETAILS_CHANGED');--> statement-breakpoint
-CREATE TYPE "parent_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL');--> statement-breakpoint
+CREATE TYPE "parent_status" AS ENUM('ACTIVATED', 'DEACTIVATED', 'REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL');--> statement-breakpoint
 CREATE TYPE "payment_method" AS ENUM('PAYPAL', 'BANK_ACCOUNT');--> statement-breakpoint
 CREATE TYPE "student_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL', 'DEACTIVATED', 'GRADUATED');--> statement-breakpoint
 CREATE TYPE "vacation_request_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');--> statement-breakpoint

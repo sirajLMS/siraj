@@ -113,3 +113,76 @@ describe("BillingRepository.getUnpaidInvoicesSummary", () => {
     });
   });
 });
+
+describe("BillingRepository — getInvoicesForParent", () => {
+  test("returns invoice history for a parent with invoices", async () => {
+    await runInRollback(async tx => {
+      const parentUser = await createTestUser(tx, {
+        name: "Billing Parent Hist",
+        email: `billing-hist-${randomUUID()}@test.com`,
+      });
+      const parent = await createTestParent(tx, parentUser.id);
+
+      const inv1 = await createOverdueInvoice(tx, parent.id, "120.00", -5, "UNPAID");
+      const inv2 = await createOverdueInvoice(tx, parent.id, "80.00", -10, "PAID");
+
+      const history = await BillingRepository.getInvoicesForParent(parent.id, tx);
+
+      expect(Array.isArray(history)).toBeTrue();
+      expect(history.length).toBe(2);
+
+      const itemsMap = new Map(history.map(item => [item.id, item]));
+
+      const item1 = itemsMap.get(inv1.id);
+      expect(item1).toBeDefined();
+      expect(item1?.issueDate).toBe(inv1.issueDate);
+      expect(item1?.dueDate).toBe(inv1.dueDate);
+      expect(item1?.amount).toBe("120.00");
+      expect(item1?.currency).toBe("USD");
+      expect(item1?.status).toBe("UNPAID");
+      expect(item1?.invoiceType).toBe("MONTHLY");
+      expect(item1?.paidDate).toBeNull();
+
+      const item2 = itemsMap.get(inv2.id);
+      expect(item2).toBeDefined();
+      expect(item2?.amount).toBe("80.00");
+      expect(item2?.status).toBe("PAID");
+    });
+  });
+
+  test("returns empty array for parent with no invoices", async () => {
+    await runInRollback(async tx => {
+      const result = await BillingRepository.getInvoicesForParent("00000000-0000-0000-0000-000000000000", tx);
+      expect(result).toEqual([]);
+    });
+  });
+
+  test("excludes soft-deleted invoices", async () => {
+    await runInRollback(async tx => {
+      const parentUser = await createTestUser(tx, { name: "Billing Parent Soft", email: `billing-soft-${randomUUID()}@test.com` });
+      const parent = await createTestParent(tx, parentUser.id);
+
+      const now = new Date();
+      // create a soft-deleted invoice directly
+      const [softDeletedInv] = await tx
+        .insert(invoices)
+        .values({
+          parentId: parent.id,
+          issueDate: now.toISOString().split("T")[0],
+          dueDate: now.toISOString().split("T")[0],
+          amount: "150.00",
+          currency: "USD",
+          status: "UNPAID",
+          invoiceType: "MONTHLY",
+          idempotencyKey: randomUUID(),
+          deletedAt: now,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      const result = await BillingRepository.getInvoicesForParent(parent.id, tx);
+      expect(result.some(item => item.id === softDeletedInv.id)).toBeFalse();
+    });
+  });
+});
