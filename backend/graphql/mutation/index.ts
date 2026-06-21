@@ -5,3 +5,6 @@ import "./class-session.mutation";
 import "./teacher-dashboard.mutation";
 import "./test-helper.mutation";
 import "./schedule.mutation";
+import "./schedule-deletion.mutation";
+import "./staff-profile.mutation";
+import "./dst-migration.mutation";

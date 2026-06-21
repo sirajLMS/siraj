@@ -101,4 +101,78 @@ export namespace TeacherRepository {
       deactivated: metrics?.deactivated ?? 0,
     };
   };
+
+  export type TeacherProfileResult = {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    nationalId: string | null;
+    dateOfBirth: string | null;
+    gender: string | null;
+    address: string | null;
+    qualifications: string | null;
+    skypeId: string | null;
+    zoomLink: string | null;
+    zoomUsername: string | null;
+    timezone: string;
+    hourlyRate: string | null;
+    rateCurrency: string | null;
+    status: string;
+  };
+
+  export const getTeacherProfileForEdit = async (
+    teacherId: string,
+    tx?: DBTransaction
+  ): Promise<TeacherProfileResult | null> => {
+    const queryDb = tx ?? db;
+    const [teacher] = await queryDb
+      .select({
+        id: teachers.id,
+        name: users.name,
+        email: users.email,
+        phone: teachers.phone,
+        nationalId: teachers.nationalId,
+        dateOfBirth: teachers.dateOfBirth,
+        gender: teachers.gender,
+        address: teachers.address,
+        qualifications: teachers.qualifications,
+        skypeId: teachers.skypeId,
+        zoomLink: teachers.zoomLink,
+        zoomUsername: teachers.zoomUsername,
+        timezone: teachers.timezone,
+        hourlyRate: teachers.hourlyRate,
+        rateCurrency: teachers.rateCurrency,
+        status: teachers.status,
+      })
+      .from(teachers)
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .where(eq(teachers.id, teacherId))
+      .limit(1);
+
+    if (!teacher) return null;
+
+    return {
+      ...teacher,
+      dateOfBirth: teacher.dateOfBirth ? new Date(teacher.dateOfBirth).toISOString() : null,
+    };
+  };
+
+  export const updateTeacherProfile = async (
+    teacherId: string,
+    input: Partial<typeof teachers.$inferInsert>,
+    tx?: DBTransaction
+  ): Promise<boolean> => {
+    const queryDb = tx ?? db;
+    const now = new Date();
+    const [updated] = await queryDb
+      .update(teachers)
+      .set({
+        ...input,
+        updatedAt: now,
+      })
+      .where(eq(teachers.id, teacherId))
+      .returning({ id: teachers.id });
+    return !!updated;
+  };
 }

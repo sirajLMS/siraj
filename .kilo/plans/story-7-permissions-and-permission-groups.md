@@ -603,12 +603,12 @@ bun run test:db
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `deleteRecurringClass` method is implemented with soft delete support.
-- [ ] `clearWeeklySchedule` method is implemented with transaction wrapping.
-- [ ] Both methods handle non-existent records gracefully (return `false`).
-- [ ] Unit tests pass for success and failure cases.
-- [ ] `bun run test:db` passes with 0 failures.
-- [ ] No TypeScript compilation errors in repository file.
+- [x] `deleteRecurringClass` method is implemented with soft delete support.
+- [x] `clearWeeklySchedule` method is implemented with transaction wrapping.
+- [x] Both methods handle non-existent records gracefully (return `false`).
+- [x] Unit tests pass for success and failure cases.
+- [x] `bun run test:db` passes with 0 failures.
+- [x] No TypeScript compilation errors in repository file.
 
 ---
 
@@ -617,6 +617,7 @@ bun run test:db
 **Objective:** Implement domain-driven service methods for all 4 permission groups with proper permission checking, error handling, and localization.
 
 **Layer-Specific Rules (Backend Services - Flattened from `backend/services/AGENTS.md`):**
+- services are not allowed to import anything from db/drizzle, they can only depend on repo layer, so some of the following examples are not exactly valid at all, as they import depend on db which is prohibited, you must implement the service without relying on db layer at all, only repo layer
 - Services must be scoped to their domain. NO monoliths.
 - All permission checks happen in services, NOT repositories or resolvers.
 - Use `getBackendTranslations` for localized error messages.
@@ -1173,14 +1174,24 @@ bun run test:db
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `ScheduleDeletionService` created with `deleteClass` and `clearWeeklySchedule` methods.
-- [ ] `StaffProfileService` created with `updateTeacherProfile` and `getTeacherProfileForEdit` methods.
-- [ ] `DstMigrationService` created with `executeBulkDstUpdate` method including conflict detection.
-- [ ] `ParentDirectoryService` created with `getParentDirectory` method including metrics and unpaid invoices.
-- [ ] All service methods check permissions before executing business logic.
-- [ ] All error messages use `getBackendTranslations` for localization.
-- [ ] No TypeScript compilation errors.
-- [ ] `bun run test:db` passes.
+- [x] `ScheduleDeletionService` created with `deleteClass` and `clearWeeklySchedule` methods.
+- [x] `StaffProfileService` created with `updateTeacherProfile` and `getTeacherProfileForEdit` methods.
+- [x] `DstMigrationService` created with `executeBulkDstUpdate` method including conflict detection.
+- [x] `ParentDirectoryService` created with `getParentDirectory` method including metrics and unpaid invoices.
+- [x] All service methods check permissions before executing business logic.
+- [x] All error messages use `getBackendTranslations` for localization.
+- [x] No TypeScript compilation errors.
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+
 
 ---
 
@@ -1609,7 +1620,16 @@ bun tsgo
 - [ ] All mutations and queries delegate to service layer.
 - [ ] GraphQL schema generates successfully (`bun run generate:gqlSchema`).
 - [ ] Codegen completes without errors (`bun codegen`).
-- [ ] TypeScript compilation passes (`bun tsgo`).
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 - [ ] All resolvers propagate `ctx.locale` to services.
 
 ---
@@ -1747,6 +1767,16 @@ bun run test:db
 - [ ] Academy Admin group assigned 4 permissions (excluding `system.bulk_update_dst`).
 - [ ] Teacher Default and Parent Default groups have NONE of these permissions.
 - [ ] Migration runs successfully without conflicts.
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 - [ ] `bun run test:db` passes.
 
 ---
@@ -1954,7 +1984,16 @@ bun tsgo
 - [ ] All queries include `id` fields on every object.
 - [ ] `bun run generate:gqlSchema` succeeds.
 - [ ] `bun codegen` generates types without errors.
-- [ ] `bun tsgo` passes TypeScript compilation.
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 
 ---
 
@@ -2259,7 +2298,16 @@ bun tsgo
 - [ ] All dialog text uses `useTranslations` with proper keys.
 - [ ] `clearWeeklySchedule` mutation integrated into container.
 - [ ] Schedule refetches after deletion/clear operations.
-- [ ] TypeScript compilation passes (`bun tsgo`).
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 - [ ] Component tests pass (`bun run test:ui:components`).
 
 ---
@@ -2366,7 +2414,16 @@ bun tsgo
 - [ ] Real `useMutation` updates teacher profile.
 - [ ] Form data maps correctly to GraphQL input type.
 - [ ] Error handling uses `logger.error`.
-- [ ] TypeScript compilation passes.
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 
 ---
 
@@ -2450,7 +2507,16 @@ bun tsgo
 - [ ] `executeDstBulkUpdate` mutation integrated.
 - [ ] Migration report data maps to view props.
 - [ ] Error handling uses `logger.error`.
-- [ ] TypeScript compilation passes.
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 
 ---
 
@@ -2589,7 +2655,16 @@ bun tsgo
 - [ ] Metrics mapped from GraphQL response to view props.
 - [ ] Rows mapped with `unpaidInvoices` field.
 - [ ] Search functionality works with real query refetch.
-- [ ] TypeScript compilation passes.
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 
 ---
 
@@ -2745,7 +2820,16 @@ bun tsgo
 - [ ] All English translation keys added to `shared/messages/en.ts`.
 - [ ] All Arabic translation keys added to corresponding files.
 - [ ] Translation schema types updated (if needed).
-- [ ] TypeScript compilation passes.
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 - [ ] No missing translation keys in views.
 
 ---

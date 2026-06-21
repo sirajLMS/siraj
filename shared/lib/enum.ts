@@ -464,6 +464,11 @@ export enum AppPermission {
   NOTIFICATION_VIEW_ALERTS = "notification.view_alerts",
   BILLING_VIEW_UNPAID_INVOICES = "billing.view_unpaid_invoices",
   USER_VIEW_PROFILE = "user.view_profile",
+  SCHEDULE_DELETE_CLASS = "schedule.delete_class",
+  SCHEDULE_CLEAR_WEEKLY = "schedule.clear_weekly",
+  STAFF_EDIT_PROFILE = "staff.edit_profile",
+  SYSTEM_BULK_UPDATE_DST = "system.bulk_update_dst",
+  PARENT_VIEW_DIRECTORY = "parent.view_directory",
   TEST_SYSTEM_ONLY = "test.system_only",
   TEST_CUSTOM_ONLY = "test.custom_only",
 }

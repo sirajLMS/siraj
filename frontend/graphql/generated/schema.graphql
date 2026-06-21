@@ -26,13 +26,16 @@ enum AppPermission {
   PARENTS_CREATE
   PARENTS_EDIT
   PARENTS_LIST
+  PARENT_VIEW_DIRECTORY
   PERMISSION_GROUPS_ASSIGN
   PERMISSION_GROUPS_MANAGE
   REPORTS_GENERATE
   RESOURCES_DELETE
   RESOURCES_LIST
   RESOURCES_UPLOAD
+  SCHEDULE_CLEAR_WEEKLY
   SCHEDULE_CREATE_CLASS
+  SCHEDULE_DELETE_CLASS
   SCHEDULE_DST_MIGRATE
   SCHEDULE_FILTER_ADVANCED
   SCHEDULE_MANAGE_RECURRING
@@ -55,6 +58,7 @@ enum AppPermission {
   SESSION_VIEW_DETAILS
   STAFF_CREATE
   STAFF_EDIT
+  STAFF_EDIT_PROFILE
   STAFF_LIST
   STAFF_VIEW_DIRECTORY
   STUDENTS_CHANGE_STATUS
@@ -62,6 +66,7 @@ enum AppPermission {
   STUDENTS_EDIT
   STUDENTS_LIST
   STUDENTS_OVERRIDE_QUOTA
+  SYSTEM_BULK_UPDATE_DST
   SYSTEM_ENFORCE_LEAVE_LIMIT
   SYSTEM_ENFORCE_TIME_WINDOW
   TEACHERS_CREATE
@@ -540,6 +545,15 @@ input DirectoryPermissionsUpdateInput {
   permissions: DirectoryPermissionsInput!
 }
 
+type DstMigrationReport {
+  conflicts: Int
+  id: String
+  runId: String
+  total: Int
+  unchanged: Int
+  updated: Int
+}
+
 """A type representing a validated email address"""
 scalar Email
 
@@ -694,6 +708,7 @@ type Mutation {
   bulkAssignUsersToGroup(groupId: String!, userIds: [String!]!): Boolean
   bulkRevokeUsersFromGroup(groupId: String!, userIds: [String!]!): Boolean
   cleanupTestEntities(parentId: String!, parentUserId: String!, studentId: String!, studentUserId: String!, teacherId: String!, teacherUserId: String!): Boolean
+  clearWeeklySchedule(teacherId: ID!): Boolean
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createFolder(input: FolderCreateInput!): FileOperationResult
   createPermissionGroup(input: CreatePermissionGroupInput!): PermissionGroup
@@ -703,6 +718,7 @@ type Mutation {
   deleteClassInstance(classInstanceId: ID!): Boolean
   deleteFile(path: String!): FileOperationResult
   deletePermissionGroup(groupId: String!): Boolean
+  deleteRecurringClass(classInstanceId: ID!): Boolean
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
   deleteStudent(id: String!): Student
 
@@ -710,6 +726,7 @@ type Mutation {
   Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
   """
   demoLogin(input: DemoLoginInput!): LoginResponse
+  executeDstBulkUpdate(description: String!, offsetMinutes: Int!): DstMigrationReport
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
   logout: Boolean
@@ -728,6 +745,7 @@ type Mutation {
   updateSessionStatusAbsent(classInstanceId: ID!): ClassInstanceDetail
   updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
   updateSessionStatusStart(classInstanceId: ID!): ClassInstanceDetail
+  updateTeacherProfile(input: TeacherProfileUpdateInput!, teacherId: ID!): TeacherProfileResult
   updateUserOverrides(overrides: [UserOverrideInput!]!, userId: String!): Boolean
 }
 
@@ -764,6 +782,35 @@ input PaginationArgs {
   maxCount: Int = 100
   page: Int
   skip: Int
+}
+
+type ParentDirectory {
+  id: String
+  metrics: ParentDirectoryMetrics
+  rows: [ParentDirectoryRow!]
+  totalParents: Int
+}
+
+type ParentDirectoryMetrics {
+  activated: Int
+  deactivated: Int
+  id: String
+  onLeave: Int
+  onTrial: Int
+  regular: Int
+  suspended: Int
+}
+
+type ParentDirectoryRow {
+  accountStatus: String
+  avatarUrl: String
+  email: String
+  guardianOf: String
+  id: String
+  index: Int
+  name: String
+  time: String
+  unpaidInvoices: Int
 }
 
 input PartialStudentUpdateInput {
@@ -824,6 +871,7 @@ type Query {
   listFiles(input: FilesListInput!): StorageObjectList
   me: User
   notificationAlerts: NotificationAlertsResult
+  parentDirectory(limit: Int = 50, offset: Int = 0, search: String): ParentDirectory
 
   """Fetch a single permission group by ID."""
   permissionGroup(id: String!): PermissionGroup
@@ -864,6 +912,7 @@ type Query {
   teacherDirectory(limit: Int, offset: Int, search: String): TeacherDirectory
   teacherFutureSchedule: TeacherFutureSchedule
   teacherHandbookUrl: TeacherHandbookUrl
+  teacherProfileForEdit(teacherId: ID!): TeacherProfileResult
   teacherWeeklyScheduleGrid(teacherId: String, weekDate: String!): WeeklyScheduleGrid
   teacherWorkloadMetrics(teacherId: String, weekDate: String!): WeeklyWorkloadMetrics
   teachers(limit: Int!, search: String!): [TeacherSimple!]
@@ -1206,6 +1255,41 @@ type TeacherFutureSchedule {
 type TeacherHandbookUrl {
   id: String
   url: String
+}
+
+type TeacherProfileResult {
+  address: String
+  dateOfBirth: String
+  email: String
+  gender: String
+  hourlyRate: String
+  id: String
+  name: String
+  nationalId: String
+  phone: String
+  qualifications: String
+  rateCurrency: String
+  skypeId: String
+  status: String
+  timezone: String
+  zoomLink: String
+  zoomUsername: String
+}
+
+input TeacherProfileUpdateInput {
+  address: String
+  dateOfBirth: String
+  gender: String
+  hourlyRate: String
+  nationalId: String
+  phone: String
+  qualifications: String
+  rateCurrency: String
+  skypeId: String
+  timezone: String
+  zoomLink: String
+  zoomPassword: String
+  zoomUsername: String
 }
 
 type TeacherProgressFeedItem {

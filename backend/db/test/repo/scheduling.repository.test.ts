@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
 import {
   classInstances,
@@ -1250,6 +1250,99 @@ describe("Scheduling Repository logic", () => {
         },
         tx
       );
+    });
+  });
+
+  describe("deleteRecurringClass", () => {
+    test("should soft delete a class instance", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "DeleteRecurring", { skipInstance: true });
+        const instance = await createMockClassInstance(tx, student.id, teacher.id);
+
+        const result = await SchedulingRepository.deleteRecurringClass(instance.id, tx);
+
+        expect(result).toBe(true);
+        const [deleted] = await tx.select().from(classInstances).where(eq(classInstances.id, instance.id));
+        expect(deleted.deletedAt).not.toBeNull();
+      });
+    });
+
+    test("should return false for non-existent class instance", async () => {
+      await runInRollback(async tx => {
+        const result = await SchedulingRepository.deleteRecurringClass(randomUUID(), tx);
+        expect(result).toBe(false);
+      });
+    });
+  });
+
+  describe("clearWeeklySchedule", () => {
+    test("should soft delete all recurring schedules for a teacher", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "ClearWeekly1", { skipInstance: true });
+        const { student: student2 } = await setupTestEntities(tx, "ClearWeekly2", { skipInstance: true });
+
+        await tx.insert(teacherAssignments).values({
+          studentId: student2.id,
+          teacherId: teacher.id,
+          assignedAt: new Date(),
+        });
+
+        await tx.update(students).set({ classesRemaining: 10 }).where(eq(students.id, student.id));
+        await tx.update(students).set({ classesRemaining: 10 }).where(eq(students.id, student2.id));
+
+        await SchedulingRepository.createRecurringScheduleWithInstances(
+          {
+            studentId: student.id,
+            teacherId: teacher.id,
+            durationMinutes: 60,
+            defaultStartTime: "10:00:00",
+            timezone: "UTC",
+            effectiveFrom: new Date("2026-06-22T00:00:00Z"),
+            effectiveUntil: new Date("2026-07-22T00:00:00Z"),
+            days: [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }],
+            classType: "REGULAR",
+            generateInstancesForWeeks: 1,
+            quotaDeducted: false,
+          },
+          tx
+        );
+
+        await SchedulingRepository.createRecurringScheduleWithInstances(
+          {
+            studentId: student2.id,
+            teacherId: teacher.id,
+            durationMinutes: 60,
+            defaultStartTime: "14:00:00",
+            timezone: "UTC",
+            effectiveFrom: new Date("2026-06-22T00:00:00Z"),
+            effectiveUntil: new Date("2026-07-22T00:00:00Z"),
+            days: [{ dayOfWeek: "WEDNESDAY", startTime: "14:00:00", isActive: true }],
+            classType: "REGULAR",
+            generateInstancesForWeeks: 1,
+            quotaDeducted: false,
+          },
+          tx
+        );
+
+        const clearResult = await SchedulingRepository.clearWeeklySchedule(teacher.id, tx);
+
+        expect(clearResult).toBe(true);
+
+        const remaining = await tx
+          .select()
+          .from(recurringSchedules)
+          .where(and(eq(recurringSchedules.teacherId, teacher.id), isNull(recurringSchedules.deletedAt)));
+        expect(remaining.length).toBe(0);
+      });
+    });
+
+    test("should return false for teacher with no schedules", async () => {
+      await runInRollback(async tx => {
+        const { teacher } = await setupTestEntities(tx, "ClearWeeklyEmpty", { skipInstance: true });
+
+        const result = await SchedulingRepository.clearWeeklySchedule(teacher.id, tx);
+        expect(result).toBe(false);
+      });
     });
   });
 });

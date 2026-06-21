@@ -910,6 +910,69 @@ export namespace SchedulingRepository {
   };
 
   /**
+   * Deletes a specific recurring class instance.
+   * Uses soft delete by setting deleted_at timestamp.
+   */
+  export async function deleteRecurringClass(classInstanceId: string, tx?: DBTransaction): Promise<boolean> {
+    const runner = async (t: DBTransaction) => {
+      const now = new Date();
+
+      // Soft delete the class instance
+      const [deleted] = await t
+        .update(classInstances)
+        .set({
+          deletedAt: now,
+          updatedAt: now,
+        })
+        .where(eq(classInstances.id, classInstanceId))
+        .returning({ id: classInstances.id });
+
+      return !!deleted;
+    };
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  }
+
+  /**
+   * Clears all recurring schedules for a specific teacher.
+   * This is a destructive operation that removes all scheduled classes.
+   */
+  export async function clearWeeklySchedule(teacherId: string, tx?: DBTransaction): Promise<boolean> {
+    const runner = async (t: DBTransaction) => {
+      const now = new Date();
+
+      // Find all recurring schedules for this teacher
+      const schedules = await t
+        .select({ id: recurringSchedules.id })
+        .from(recurringSchedules)
+        .where(and(eq(recurringSchedules.teacherId, teacherId), isNull(recurringSchedules.deletedAt)));
+
+      if (schedules.length === 0) {
+        return false;
+      }
+
+      const scheduleIds = schedules.map(s => s.id);
+
+      // Soft delete associated recurring schedule days
+      await t
+        .update(recurringScheduleDays)
+        .set({ isActive: false })
+        .where(inArray(recurringScheduleDays.recurringScheduleId, scheduleIds));
+
+      // Soft delete the recurring schedules
+      await t
+        .update(recurringSchedules)
+        .set({
+          deletedAt: now,
+          updatedAt: now,
+        })
+        .where(inArray(recurringSchedules.id, scheduleIds));
+
+      return true;
+    };
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  }
+
+  /**
    * Validates if a class instance can be rescheduled.
    */
   async function validateRescheduleState(

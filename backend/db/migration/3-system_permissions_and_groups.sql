@@ -604,6 +604,51 @@ VALUES (
         'Access the Add Class workflow and create new recurring scheduled sessions',
         'Scheduling',
         true
+    ),
+    (
+        gen_random_uuid (),
+        'schedule.delete_class',
+        'schedule',
+        'delete_class',
+        'Delete a specific recurring class block from a teacher schedule',
+        'Scheduling',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'schedule.clear_weekly',
+        'schedule',
+        'clear_weekly',
+        'Bulk erase a teacher entire weekly schedule in a single action',
+        'Scheduling',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'staff.edit_profile',
+        'staff',
+        'edit_profile',
+        'Edit teacher profile including PII, salary, and official details',
+        'Administration',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'system.bulk_update_dst',
+        'system',
+        'bulk_update_dst',
+        'Execute global DST adjustment algorithm across entire database',
+        'System',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'parent.view_directory',
+        'parent',
+        'view_directory',
+        'Access global Parents Directory with status metrics and unpaid invoices',
+        'Parents',
+        true
     ) ON CONFLICT (key) DO
 UPDATE
 SET
@@ -767,7 +812,12 @@ WHERE
         'staff.view_directory',
         'schedule.view_weekly',
         'schedule.view_workload',
-        'schedule.create_class'
+        'schedule.create_class',
+        'schedule.delete_class',
+        'schedule.clear_weekly',
+        'staff.edit_profile',
+        'system.bulk_update_dst',
+        'parent.view_directory'
     );
 
 INSERT INTO
@@ -804,7 +854,11 @@ WHERE
         'staff.view_directory',
         'schedule.view_weekly',
         'schedule.view_workload',
-        'schedule.create_class'
+        'schedule.create_class',
+        'schedule.delete_class',
+        'schedule.clear_weekly',
+        'staff.edit_profile',
+        'parent.view_directory'
     );
 
 INSERT INTO
