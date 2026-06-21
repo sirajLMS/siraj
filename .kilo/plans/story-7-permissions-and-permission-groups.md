@@ -2409,21 +2409,21 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `TeacherProfileContainer` wrapped in `<RequirePermission permissions={[AppPermission.StaffEditProfile]}>`.
-- [ ] Real `useQuery` fetches teacher profile data.
-- [ ] Real `useMutation` updates teacher profile.
-- [ ] Form data maps correctly to GraphQL input type.
-- [ ] Error handling uses `logger.error`.
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+- [x] `TeacherProfileContainer` wrapped in `<RequirePermission permissions={[AppPermission.StaffEditProfile]}>`.
+- [x] Real `useQuery` fetches teacher profile data.
+- [x] Real `useMutation` updates teacher profile.
+- [x] Form data maps correctly to GraphQL input type.
+- [x] Error handling uses `logger.error`.
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 
 ---
 
@@ -2503,20 +2503,20 @@ bun tsgo
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `DstMigrationContainer` wrapped in `<RequirePermission permissions={[AppPermission.SystemBulkUpdateDst]}>`.
-- [ ] `executeDstBulkUpdate` mutation integrated.
-- [ ] Migration report data maps to view props.
-- [ ] Error handling uses `logger.error`.
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+- [x] `DstMigrationContainer` wrapped in `<RequirePermission permissions={[AppPermission.SystemBulkUpdateDst]}>`.
+- [x] `executeDstBulkUpdate` mutation integrated.
+- [x] Migration report data maps to view props.
+- [x] Error handling uses `logger.error`.
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors  & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 
 ---
 

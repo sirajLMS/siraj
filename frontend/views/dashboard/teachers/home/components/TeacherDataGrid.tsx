@@ -122,12 +122,14 @@ export function TeacherDataGrid({ rows }: Readonly<TeacherDataGridProps>) {
       width: 100,
       align: "center",
       headerAlign: "center",
-      renderCell: () => (
+      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
         <TeacherActionButton
           icon={<SettingsOutlined />}
           variant="primary"
           onClick={() => {
-            /* Handle settings click */
+            if (params.row.id) {
+              router.push(`/${locale}/teachers/${params.row.id}/profile`);
+            }
           }}
         />
       ),

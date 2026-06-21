@@ -114,7 +114,14 @@ export function TeacherCardList({ rows, searchQuery, onSearchChange }: Readonly<
                 >
                   <CalendarTodayOutlined sx={{ fontSize: 20 }} />
                 </IconButton>
-                <IconButton sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}>
+                <IconButton
+                  sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
+                  onClick={() => {
+                    if (row.id) {
+                      router.push(`/${locale}/teachers/${row.id}/profile`);
+                    }
+                  }}
+                >
                   <MoreVertOutlined sx={{ fontSize: 20 }} />
                 </IconButton>
               </Box>

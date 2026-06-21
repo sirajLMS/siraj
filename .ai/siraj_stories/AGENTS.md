@@ -12,10 +12,10 @@ Before writing any code or proposing an implementation plan, you must perform de
 - **Trace the full stack**: Plan for Drizzle (DB), Domain Services (Logic), Pothos (Backend API), Apollo Documents (Frontend API), Zustand Stores (State), and React Components (Views).
 - **Verified Repository Facts (DO NOT CONTRADICT)**:
   1. **Permission Catalog**: System permissions are now defined in `backend/db/migration/3-system_permissions_and_groups.sql` and seeded via the migration system, NOT `backend/db/seeds/permission-catalog.ts`. The enum values still exist in `shared/lib/enum.ts`.
-  2. **GraphQL Types**: Backend GraphQL class/session object and input types are in `backend/graphql/pothos/class-session.pothos.ts` (or relevant pothos files), NOT a separate types file.
+  2. **GraphQL Types**: Backend GraphQL object and input types are in `backend/graphql/pothos/<domain>.pothos.ts` (or relevant pothos files), NOT a separate types file.
   3. **i18n Localization**: Uses `shared/messages/en.ts` and `shared/messages/ar/` directories. DO NOT create `frontend/locales/` or `backend/locales/` directories.
-  4. **Permission Enums**: Values use PascalCase (e.g., `SESSION_FORCE_ACTIVATE = "session.force_activate"`) in `shared/lib/enum.ts`.
-  5. **Schema Accuracy**: Do not hallucinate column names. Verify them (e.g., use `remarks`, not `remarksByTeacher`). If a column like `payrollCredited` does not exist, explicitly plan a database migration/schema update first.
+  4. **Permission Enums**: Values use PascalCase (e.g., `DOMAIN_ACTION_NAME = "domain.action_name"`) in `shared/lib/enum.ts`.
+  5. **Schema Accuracy**: Do not hallucinate column names. Verify them against the actual schema files. If a column does not exist, explicitly plan a database migration/schema update first.
   6. **Existing Database Triggers**: Check existing DB triggers before writing new ones. For example, the existing state transition trigger uses a blacklist-style approach; do not overwrite it with a whitelist-style approach without explicit validation.
 - **Transitioning from Mock to Real**: Hook up real backend repositories, real GraphQL queries, replace mock data with real stateful Apollo hooks (`useQuery`), and migrate layout wrappers.
 - **Data Seeding Lifecycle**: Update seeders in `backend/db/seeds`. Run `bun run scripts/dbActions.ts push` before seeding. Ensure constraints and exact enums are respected.
@@ -27,7 +27,7 @@ Before writing any code or proposing an implementation plan, you must perform de
 Your implementation plan (`implementation_plan.md` or similar) must be **hyper-detailed, lengthy, and exhaustive**. 
 
 ### 📏 Length & Detail Thresholds:
-- **Total Plan Length**: Must be at least **2,500+ lines of markdown** (similar to `.ai/plan/2-enhanced.md` which is 3,300+ lines). Plans that are short, high-level summaries will be rejected.
+- **Total Plan Length**: Must be at least **2,500+ lines of markdown**. Plans that are short, high-level summaries will be rejected.
 - **Per-Task Length**: Each task within Section 6 must be at least **300 to 600+ lines long**. You must write out complete code snippets, database schemas, full query logic, and precise UI states.
 - **Zero Placeholder Code**: No `...` inside code blocks. Code examples must be written out fully, displaying exact variable names, typings, error handlers, and imports.
 
@@ -44,22 +44,22 @@ Provide clear metadata links and brief business objectives.
 ```markdown
 ## Section 0: Story Metadata & Context
 
-- **Source story:** `.ai/siraj_stories/2.md` (Part 3 - Live Session Control, timestamps 00:00 - 01:58)  
-- **Security baseline:** `.ai/done/service/1-sprint_1__db_repo_service_enhancments.md` (mandatory prerequisite)  
-- **Story scope:** Implement live session control toolbar with Start, Absent, Leave, and Reset actions.
-- **Target roles:** Academy Admin (full override + reset), Teacher (standard lifecycle management).
+- **Source story:** `.ai/siraj_stories/<N>.md` (Part <X> - <Feature Name>, timestamps 00:00 - 01:58)  
+- **Security baseline:** `.ai/done/service/<previous-sprint>.md` (mandatory prerequisite)  
+- **Story scope:** <Brief description of what this story implements>.
+- **Target roles:** <Role A> (full access), <Role B> (restricted access).
 - **Status:** Planning phase - awaiting approval for execution.
 
 ### 0.1 Business Objectives (Recommended)
 Explain the WHY behind each feature. Example:
-1. **Separation of Duties**: The `resetClassInstance` permission is strictly reserved for Admins — Teachers cannot reset their own sessions, ensuring accountability.
-2. **Data Privacy**: Workload metrics are self-scoped; teachers see only their own hours, not colleagues'.
+1. **Separation of Duties**: The `<permission.action>` permission is strictly reserved for Admins — lower roles cannot perform this action, ensuring accountability.
+2. **Data Privacy**: Sensitive metrics are self-scoped; users see only their own data, not others'.
 
 ### 0.2 Scope Boundaries (Required for complex stories)
 Clearly define what IS and IS NOT included in this story:
 
 **In scope:**
-- New migration file for permissions
+- New migration file for permissions (if applicable)
 - Backend repository methods for new queries
 - Domain services with permission gating
 - GraphQL Pothos objects and resolvers
@@ -68,10 +68,9 @@ Clearly define what IS and IS NOT included in this story:
 - RBAC enforcement via `<RequirePermission>`
 
 **Out of scope:**
-- Teacher onboarding flow (separate story)
-- Student management (separate story)
-- Billing/payroll integration (display only)
-- Parent-facing views (separate story)
+- <Feature X> (separate story)
+- <Feature Y> (separate story)
+- <Integration Z> (display only, no backend logic)
 ```
 
 ---
@@ -84,7 +83,7 @@ Include general system rules, a ban on monolithic services, and the **Zero Incom
 ## Section 1: Core Principles & Strict Rules (Mandatory Checklist)
 
 ### 1.1 Service Layer Architecture
-- [ ] **NO monolithic services** - Scoped strictly to domain-driven services (e.g. `ClassSessionService`).
+- [ ] **NO monolithic services** - Scoped strictly to domain-driven services (e.g. `<DomainName>Service`).
 - [ ] **Business logic centralization** - All orchestration, validation, and permission checks reside in services, NOT repositories or resolvers.
 - [ ] **🚫 Services MUST NOT import from DB/Drizzle** - Services can ONLY depend on the repository layer (`backend/db/repo/`). Importing from `drizzle-orm`, `backend/db/schema`, `backend/db/index`, or any Drizzle-related module is **strictly forbidden**. All database access must go through repo methods. This rule must be explicitly noted in every service layer task in Section 6.
 
@@ -149,30 +148,29 @@ Map the exact permission strings from the sprint rules to the database catalog a
 
 | **Permission Key** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Mutation** |
 |---|---|---|---|---|
-| `session.activate_override` | Academy Admin | Live toolbar visibility | `ClassSessionService.activateOverride()` | `activateOverrideClass` |
-| `session.reset` | Academy Admin | Reset button | `ClassSessionService.reset()` | `resetClass` |
+| `<domain>.<action_1>` | <Role A> | <Component X> visibility | `<Domain>Service.<methodA>()` | `<mutationNameA>` |
+| `<domain>.<action_2>` | <Role A> | <Button Y> | `<Domain>Service.<methodB>()` | `<mutationNameB>` |
 
 ### 2.2 Permission Mapping to Existing Permissions
 Show how new permissions relate to existing ones (complementary, granular, superset):
 
 | **Story Permission** | **Existing Related Permission** | **Relationship** |
 |---|---|---|
-| `schedule.view_weekly` | `schedule.view_assigned` (teacher self), `schedule.view_all` (admin) | Granular — `schedule.view_weekly` specifically gates the weekly grid view |
-| `schedule.view_workload` | `dashboard.view_metrics` | Complementary — `dashboard.view_metrics` gates daily metrics; `schedule.view_workload` gates weekly workload hours |
+| `<domain>.<new_perm>` | `<domain>.<existing_perm>` | Granular — the new permission specifically gates a sub-feature |
+| `<domain>.<new_perm>` | `<other_domain>.<existing_perm>` | Complementary — each gates a different scope of the same data |
 
 ### 2.3 Permission Group Assignments
-Map new permissions to permission groups (super_admin, academy_admin, teacher_default):
+Map new permissions to permission groups:
 
 | **Permission Group** | **Slug** | **New Permissions Assigned** |
 |---|---|---|
-| Super Admin | `super_admin` | `schedule.view_weekly`, `schedule.view_workload` |
-| Academy Admin | `academy_admin` | `schedule.view_weekly`, `schedule.view_workload` |
-| Teacher Default | `teacher_default` | `schedule.view_weekly` (self-scoped), `schedule.view_workload` (self-scoped) |
+| <Role A> | `<role_a_slug>` | `<domain>.<action_1>`, `<domain>.<action_2>` |
+| <Role B> | `<role_b_slug>` | `<domain>.<action_1>` (self-scoped) |
 
 ### 2.4 Self-Scoping vs Any-Scoping (when applicable)
 Some permissions have dual scoping — same permission key, different data access:
-- **Teacher (self-scoped):** The service layer enforces that teachers can only query their own `teacherId`. The GraphQL resolver resolves `teacherId` from the authenticated user's teacher record.
-- **Admin (any-scoped):** The service layer allows admins to pass any `teacherId` parameter.
+- **Lower role (self-scoped):** The service layer enforces that users can only query their own data. The GraphQL resolver resolves the actor's ID from the authenticated user's record.
+- **Admin (any-scoped):** The service layer allows admins to pass any user/resource ID parameter.
 
 This scoping is enforced in the service layer, NOT via separate permission keys.
 ```
@@ -190,36 +188,35 @@ Define the state machine diagrams and database transition rules. When your imple
 
 #### *Example Section 3:*
 ```markdown
-## Section 3: Session State Machine & Threat Alignment
+## Section 3: <Entity> State Machine & Threat Alignment
 
 ```mermaid
 stateDiagram-v2
-    [*] --> NOT_ACTIVATED
-    NOT_ACTIVATED --> ACTIVATED : session.activate_override
-    ACTIVATED --> RUNNING : session.update_status.start
-    ACTIVATED --> COMPLETED : session.update_status.absent (outcome=ABSENT)
-    RUNNING --> COMPLETED : session.update_status.leave (outcome=LEAVE)
-    COMPLETED --> NOT_ACTIVATED : session.reset (Admin-only)
+    [*] --> STATE_A
+    STATE_A --> STATE_B : <domain>.<permission_action_1>
+    STATE_B --> STATE_C : <domain>.<permission_action_2>
+    STATE_A --> STATE_D : <domain>.<permission_action_3> (outcome=<OUTCOME>)
+    STATE_D --> STATE_A : <domain>.<admin_reset_action> (Admin-only)
 ```
 
-**State Transition Guards (Threat 3):**
-- DB trigger `fn_enforce_class_instance_transition()` enforces allowed state paths.
-- Repo guard `runStateChange()` validates transition outcome alignment.
+**State Transition Guards:**
+- DB trigger `fn_enforce_<entity>_transition()` enforces allowed state paths.
+- Repo guard `<entity>StateChange()` validates transition outcome alignment.
 
-#### Quota Enforcement State Machine (if applicable):
+#### Quota/Lifecycle State Machine (if applicable):
 ```mermaid
 stateDiagram-v2
     [*] --> QuotaAvailable
-    QuotaAvailable --> QuotaExhausted: Leave processed (usedCount reaches max)
-    QuotaExhausted --> LeaveBlocked: 3rd attempt blocked
-    QuotaExhausted --> QuotaAvailable: New calendar month (reset)
+    QuotaAvailable --> QuotaExhausted: Action processed (usedCount reaches max)
+    QuotaExhausted --> ActionBlocked: Nth attempt blocked
+    QuotaExhausted --> QuotaAvailable: New period (reset)
 ```
 
 #### Diagram Requirements:
 - Use `stateDiagram-v2` syntax (not `graph` or `flowchart`).
 - Label every transition with the permission/action that triggers it.
 - Use `note` annotations to highlight critical business rules or admin bypass paths.
-- Show rollback/failure paths explicitly (e.g., `QuotaGate --> ACTIVATED: Error: leaveQuotaExceeded`).
+- Show rollback/failure paths explicitly (e.g., `QuotaGate --> STATE_A: Error: <errorKey>`).
 - Include choice nodes (`<<choice>>`) for conditional branching (e.g., quota check pass/fail).
 ```
 
@@ -234,14 +231,14 @@ Address specific vulnerabilities such as IDOR, timezone differences, quota leaks
 ```markdown
 ## Section 4: Security Threat Remediation
 
-### Threat 1: IDOR Scoping (Cross-Teacher Access)
-**Current Gap:** Repository `runStateChange` checks relationships but doesn't support Admin overrides.
-**Fix in `scheduling.repository.ts`:** Before the ownership check, call `PermissionsService.hasAnyPermission(actorUserId, [SESSION_OVERRIDE_ACTIONS, SESSION_RESET])` to determine if the actor is a privileged admin. If not privileged, verify `instance.teacherUserId === actorUserId` and throw a localized unauthorized error if they don't match.
+### Threat 1: IDOR Scoping (Cross-User Access)
+**Current Gap:** Repository `<entity>StateChange` checks ownership but doesn't support Admin overrides.
+**Fix in `<domain>.repository.ts`:** Before the ownership check, call `PermissionsService.hasAnyPermission(actorUserId, [<OVERRIDE_PERMISSION>, <RESET_PERMISSION>])` to determine if the actor is a privileged admin. If not privileged, verify `instance.ownerUserId === actorUserId` and throw a localized unauthorized error if they don't match.
 
 **Test Requirements:**
-- Teacher A cannot reset Teacher B's class instance → `unauthorized` error
-- Teacher A can reset their own class instance → succeeds
-- Academy Admin can reset any teacher's class instance → succeeds
+- User A cannot modify User B's entity → `unauthorized` error
+- User A can modify their own entity → succeeds
+- Admin can modify any user's entity → succeeds
 - Unauthenticated user → `unauthorized`
 ```
 
@@ -250,20 +247,26 @@ Address specific vulnerabilities such as IDOR, timezone differences, quota leaks
 ### Section 5: Prerequisites Verification (BLOCKING)
 A checklist to run before executing the plan to confirm previous sprint work is fully deployed.
 
-Break prerequisites into structured sub-categories for clarity:
+Break prerequisites into structured sub-categories for clarity.
+
+#### Verified Facts Tracking (MANDATORY):
+Every prerequisite item MUST include:
+- **Verification status marker** — Append `✅ (verified)` or `❌ (not verified — needs creation)` to each item so it's immediately clear what already exists vs what must be built.
+- **Location reference** — Document *where* each fact was verified using exact file path and line number (e.g., `✅ (verified — backend/db/schema/billing.ts:42)`). If something doesn't exist yet, state that explicitly (e.g., `❌ (not verified — missing from shared/lib/enum.ts, needs creation)`).
+- This prevents agents from hallucinating column names, enum values, or existing methods.
 
 #### *Example Section 5:*
 ```markdown
 ## Section 5: Prerequisites Verification (BLOCKING)
 
 ### 5.1 Database Schema Verification
-- [ ] Verify `classInstances` table exists with columns: `id`, `teacherUserId`, `studentId`, `executionState`, `outcome`, `quotaDeducted`, `isRescheduled`, `remarks`.
-- [ ] Verify `recurringSchedules` table exists with required columns.
+- [ ] Verify `<table_name>` table exists with columns: `id`, `<col_1>`, `<col_2>`, `<col_3>`. ✅ (verified — backend/db/schema/<domain>.ts:<lines>)
+- [ ] Verify `<related_table>` table exists with required columns. ✅ (verified — backend/db/schema/<domain>.ts:<lines>)
 
 ### 5.2 Migration Verification
 - [ ] Run `bun run scripts/dbActions.ts push` to ensure all migrations are applied.
-- [ ] Verify `backend/db/migration/3-system_permissions_and_groups.sql` is applied (existing permissions seeded).
-- [ ] Verify the `protect_system_permissions` trigger is active on `permissions` and `permission_groups` tables.
+- [ ] Verify `backend/db/migration/3-system_permissions_and_groups.sql` is applied (existing permissions seeded). ✅ (verified)
+- [ ] Verify the `protect_system_permissions` trigger is active on `permissions` and `permission_groups` tables. ✅ (verified)
 
 ### 5.3 Test Suite Verification
 - [ ] Run `bun run test:db` — all existing database tests pass (0 failures).
@@ -271,15 +274,15 @@ Break prerequisites into structured sub-categories for clarity:
 - [ ] Run `bun tsgo` — TypeScript compilation passes with zero errors.
 
 ### 5.4 Existing Code Verification
-- [ ] Verify `SchedulingRepository.resetClassInstance()` exists and works.
-- [ ] Verify `TeacherRepository.findByUserId()` exists and works.
-- [ ] Verify `PermissionsService.hasPermission()` and `PermissionsService.hasAnyPermission()` exist and work.
-- [ ] Verify `getBackendTranslations()` helper is available and functional.
+- [ ] Verify `<DomainRepository>.<methodA>()` exists and works. ✅ (verified — backend/db/repo/<domain>.repository.ts:<line>)
+- [ ] Verify `<OtherRepository>.<methodB>()` exists and works. ✅ (verified — backend/db/repo/<other>.repository.ts:<line>)
+- [ ] Verify `PermissionsService.hasPermission()` and `PermissionsService.hasAnyPermission()` exist and work. ✅ (verified — backend/services/auth/permissions.service.ts)
+- [ ] Verify `getBackendTranslations()` helper is available and functional. ✅ (verified — backend/lib/intl.ts)
 
 ### 5.5 Frontend Verification (when applicable)
-- [ ] Verify `TeachersContainer` currently imports from `mockTeachersStore`.
-- [ ] Verify `WeeklyScheduleGrid` uses `globalThis.confirm()` for delete (needs MUI Dialog replacement).
-- [ ] Verify i18n keys exist for relevant namespaces.
+- [ ] Verify `<FeatureContainer>` currently imports from `<mockStore>`. ✅ (verified — frontend/views/dashboard/<path>/<Container>.tsx:<line>)
+- [ ] Verify `<ComponentName>` uses `globalThis.confirm()` for destructive actions (needs MUI Dialog replacement). ✅ (verified — frontend/views/dashboard/<path>/<Component>.tsx:<line>)
+- [ ] Verify i18n keys exist for relevant namespaces. ✅ (verified — shared/messages/en.ts)
 ```
 
 ---
@@ -334,31 +337,30 @@ Every task's **Success Criteria** section **MUST** include the following quality
 
 #### *Example Task A (Database & Repo):*
 ```markdown
-### Task A — Repository: Reset, Absent, Leave
+### Task A — Repository: <Feature> CRUD Operations
 
-**Objective:** Implement transactional repository methods for `resetClassInstance` and `processClassLeave`.
+**Objective:** Implement transactional repository methods for `<methodA>` and `<methodB>`.
 
-**Dependencies:** None — depends only on current project state (existing Drizzle schema and `classInstances` table).
+**Dependencies:** None — depends only on current project state (existing Drizzle schema and `<table_name>` table).
 
 **Layer-Specific Rules (Database Repositories - Flattened from backend/db/repo/AGENTS.md):**
-- Use Drizzle standard syntax `db.select().from(classInstances).leftJoin()` instead of relational `findMany` when multiple joins are needed to avoid type compilation slow downs.
+- Use Drizzle standard syntax `db.select().from(<table>).leftJoin()` instead of relational `findMany` when multiple joins are needed to avoid type compilation slow downs.
 - Wrap all repository changes modifying multiple tables in an atomic `db.transaction()`.
 
 **Target Files:**
-- `backend/db/repo/scheduling.repository.ts`
-- `backend/db/test/repo/scheduling.repository.test.ts`
+- `backend/db/repo/<domain>.repository.ts`
+- `backend/db/test/repo/<domain>.repository.test.ts`
 
 **Detailed Implementation Steps:**
 
-*Step 1: Write `resetClassInstance` with Quota Restoration*
+*Step 1: Write `<methodA>` with required business logic*
 
-Implement as a namespace function in `SchedulingRepository`:
-- Fetch the existing class instance by ID
-- If `quotaDeducted` is true, call `adjustQuotaOnUpdate` to restore the student's quota
-- Update the instance state to `NOT_ACTIVATED`, reset outcome to `PENDING`, and clear payroll/quota/rescheduled flags
-- Wrap all operations in a `db.transaction()` for atomicity
+Implement as a namespace function in `<DomainRepository>`:
+- Fetch the existing entity by ID
+- Apply any conditional logic (e.g., quota restoration, status checks)
+- Update the entity state within a `db.transaction()` for atomicity
 
-*Step 2: Add comprehensive unit tests in `scheduling.repository.test.ts`*
+*Step 2: Add comprehensive unit tests in `<domain>.repository.test.ts`*
 Ensure unit tests verify both success states and rollback behavior on invalid inputs.
 
 **Test Execution Requirements:**
@@ -368,42 +370,32 @@ Ensure unit tests verify both success states and rollback behavior on invalid in
   ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `resetClassInstance` is fully implemented and resets the table state.
-- [ ] Student quota is restored successfully if it was deducted.
+- [ ] `<methodA>` is fully implemented and updates entity state correctly.
+- [ ] All conditional logic (quota, status, flags) works as expected.
 - [ ] No compilation errors when compiling the database repository.
 - [ ] `bun run test:db` passes successfully for all database tests (0 failures).
 
 **Quality Gate — Per-File Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+(standard quality gate checklist)
 
 **Quality Gate — Task Completion Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
-
-- [ ] `bun run test:db` passes successfully for all database tests (0 failures).
+(standard quality gate checklist)
 ```
 
 #### *Example Task B (Frontend & Views):*
 ```markdown
-### Task B — Frontend: Live Session Control Dialogs & No-Casts
+### Task B — Frontend: <Feature> Dialogs & No-Casts
 
-**Objective:** Integrate the live session control buttons inside `LiveSessionToolbar` using proper MUI modals, removing browser alerts, and eliminating blind castings.
+**Objective:** Integrate the <feature> action buttons inside `<FeatureToolbar>` using proper MUI modals, removing browser alerts, and eliminating blind castings.
 
-**Dependencies:** Depends on Task A — uses `SchedulingRepository.resetClassInstance` and `SchedulingRepository.processClassLeave` via GraphQL mutations exposed in prior tasks. Also depends on existing GraphQL schema and generated frontend types.
+**Dependencies:** Depends on Task A — uses `<DomainRepository>.<methodA>` and `<DomainRepository>.<methodB>` via GraphQL mutations exposed in prior tasks. Also depends on existing GraphQL schema and generated frontend types.
 
 **Layer-Specific Rules (Frontend Views - Flattened from frontend/views/AGENTS.md):**
 - BANNED: Do not use inline styling or arbitrary tailwind classes. Use Material UI theme tokens.
 - Maintain localized text strings utilizing translation hooks.
 
 **Target Files:**
-- `frontend/views/dashboard/classes/details/components/LiveSessionToolbar.tsx`
+- `frontend/views/dashboard/<domain>/components/<FeatureToolbar>.tsx`
 
 **Detailed Implementation Steps:**
 
@@ -423,23 +415,15 @@ Define a `dialogState` with open/type fields using `useState`. Render an accessi
 
 **Success Criteria / Check Progress Points:**
 - [ ] The browser `confirm()` and `prompt()` functions are completely deleted.
-- [ ] MUI Dialog functions correctly for both Leave requests and Reset actions.
+- [ ] MUI Dialog functions correctly for all action types.
 - [ ] Typescript compilation is fully successful (no `any` or blind casts in modified components).
 - [ ] Complete frontend integration and GraphQL queries compile without errors.
 
 **Quality Gate — Per-File Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+(standard quality gate checklist)
 
 **Quality Gate — Task Completion Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+(standard quality gate checklist)
 ```
 
 #### *Example Task C (Backend GraphQL — Pothos Objects & Resolvers):*
@@ -459,7 +443,7 @@ Define a `dialogState` with open/type fields using `useState`. Render an accessi
 - **🚫 NO DB/Repo Imports**: Resolvers can ONLY depend on `backend/services/`.
 
 **Target Files:**
-- `backend/graphql/pothos/class-session.pothos.ts` — Add/modify Pothos objects
+- `backend/graphql/pothos/<domain>.pothos.ts` — Add/modify Pothos objects
 - `backend/graphql/pothos/index.ts` — Export new modules
 
 **Detailed Implementation Steps:**
@@ -521,7 +505,7 @@ Run `bun run generate:gqlSchema` then `bun codegen` to update the GraphQL schema
 - **🚫 NO DB/Repo Imports**: Frontend GraphQL can ONLY depend on generated types.
 
 **Target Files:**
-- `frontend/graphql/sharedDocuments/class-session.documents.ts` — New file
+- `frontend/graphql/sharedDocuments/<domain>.documents.ts` — New file
 - `frontend/graphql/sharedDocuments/index.ts` — Export new documents
 
 **Detailed Implementation Steps:**
@@ -578,7 +562,7 @@ Run `bun run generate:gqlSchema` then `bun codegen` to generate TypeScript types
 - **No mock data in production** — Mock stores only in `*.stories.tsx` files.
 
 **Target Files:**
-- `frontend/stores/classSessionStore.ts` — New file (or modify existing)
+- `frontend/stores/<domain>Store.ts` — New file (or modify existing)
 
 **Detailed Implementation Steps:**
 
@@ -626,7 +610,7 @@ Store actions use `useQuery` with `TypedDocumentNode` from Task D. Store manages
 - **Mock Data Ban**: Mock data is strictly forbidden in production. Migrate to real components. (`*.stories.tsx` MUST KEEP dummy data).
 
 **Target Files:**
-- `frontend/views/dashboard/classes/details/components/LiveSessionToolbar.tsx` — Replace mock store with `useQuery`
+- `frontend/views/dashboard/<domain>/components/<FeatureToolbar>.tsx` — Replace mock store with `useQuery`
 
 **Detailed Implementation Steps:**
 
@@ -636,7 +620,7 @@ Remove mock store imports. Use `useQuery` with `TypedDocumentNode` from Task D. 
 
 *Step 2: Add `<RequirePermission>` wrapper*
 
-Wrap component content in `<RequirePermission permissions={["session.activate_override"]}>` to gate visibility.
+Wrap component content in `<RequirePermission permissions={["<domain>.<action>"]}>` to gate visibility.
 
 *Step 3: Replace `globalThis.confirm()` with MUI Dialog*
 
@@ -680,9 +664,9 @@ Replace browser `confirm()` with MUI `<Dialog>` component. Use localized text fr
 - No hardcoded errors/messages in services — use `getBackendTranslations`.
 
 **Target Files:**
-- `shared/messages/types/dashboard/classes/live.session.ts` — New type file
+- `shared/messages/types/dashboard/<domain>/<feature>.ts` — New type file
 - `shared/messages/en.ts` — Add English translations
-- `shared/messages/ar/dashboard/classes/live.session.ts` — New Arabic translation file
+- `shared/messages/ar/dashboard/<domain>/<feature>.ts` — New Arabic translation file
 
 **Detailed Implementation Steps:**
 
@@ -721,6 +705,80 @@ Add exports in type and translation index files.
 **Quality Gate — Task Completion Validation:**
 (standard quality gate checklist)
 ```
+
+#### *Example Task H (Navigation, Routing & Infrastructure):*
+```markdown
+### Task H — Navigation, Routing & Infrastructure
+
+**Objective:** Add sidebar navigation items, create Next.js App Router page files for new parent routes, and wire permission gates on navigation entries.
+
+**Dependencies:** Depends on the earlier tasks that implement the view components and i18n strings for the new feature.
+
+**When to use this task type:** Only when the story introduces **new parent pages** that need their own route. Do NOT create this task for sub-components rendered inside an existing view, or for stories that only modify existing pages.
+
+**Layer-Specific Rules:**
+- Navigation items use the project's navigation config type (e.g., `NavItem`).
+- Each nav item MUST include a `permission` field gating visibility via the RBAC system.
+- Next.js App Router pages go in `app/[locale]/(dashboard)/<route>/page.tsx`.
+- Page files are thin wrappers that import and render the Container component.
+
+**Target Files:**
+- Navigation config file — Add nav items with permission gates
+- `app/[locale]/(dashboard)/<new-route>/page.tsx` — Create parent page files (NEW, only if story introduces new routes)
+- New view directories under `frontend/views/dashboard/` as needed
+
+**Detailed Implementation Steps:**
+
+*Step 1: Add nav items to navigation config*
+
+Add new sidebar navigation entries with `permission` field set to the correct `AppPermission` enum value. Nav items are only visible to users who hold the required permission.
+
+*Step 2: Create Next.js App Router page files for parent routes*
+
+For each new parent route, create a thin `page.tsx` file in the `app/[locale]/(dashboard)/` directory that imports and renders the corresponding Container component. Dynamic routes use `params: Promise<{ id: string }>` pattern with `await params`.
+
+*Step 3: Verify routes are accessible and permission-gated*
+
+Confirm that each new route renders correctly and that the navigation config properly gates visibility.
+
+**Test Execution Requirements:**
+- Run UI component tests:
+  ```bash
+  bun run test:ui:components
+  ```
+
+**Success Criteria / Check Progress Points:**
+- [ ] Sidebar shows new nav items only for users with the correct permission
+- [ ] Each parent route has a `page.tsx` file in `app/[locale]/(dashboard)/`
+- [ ] Navigation config entries include `permission` field
+- [ ] Dynamic routes use safe param extraction (no blind casts)
+
+**Quality Gate — Per-File Validation:**
+(standard quality gate checklist)
+
+**Quality Gate — Task Completion Validation:**
+(standard quality gate checklist)
+```
+
+#### Frontend View Component Composition Pattern (when applicable):
+
+When a story's frontend feature involves **all three** of: user input, data display, and per-item detail rendering, agents MUST break it into a **Container → Form → View → Detail** component composition — NOT a single monolithic component.
+
+For simpler features (e.g., modifying an existing component, adding a single dialog, or replacing a mock store), this pattern is NOT required — use the existing component structure.
+
+**Component Roles:**
+- **Container** (`XxxContainer.tsx`) — Manages state (form inputs, filters), triggers the GraphQL `useQuery`, handles loading/error states, and composes the child components. This is the orchestrator.
+- **Form** (`XxxForm.tsx`) — Renders user input fields (text fields, selects, date pickers). Receives an `onSubmit` callback from the Container. Pure presentational — no GraphQL calls.
+- **View** (`XxxView.tsx`) — Renders the query results (lists, grids, cards). Receives typed data as props from the Container. Pure presentational — no GraphQL calls.
+- **Detail** (`XxxGrid.tsx`, `XxxCard.tsx`, `XxxItem.tsx`) — Renders individual items within the View (e.g., per-teacher grid, per-invoice card, per-gap time slot). Receives a single typed item as a prop.
+
+**Rules:**
+- Only the **Container** imports Apollo hooks (`useQuery`, `useMutation`) and Zustand stores.
+- **Form**, **View**, and **Detail** components receive data via props — they never call hooks or access stores directly.
+- All components use `useTranslations` for localized text.
+- All components use MUI theme tokens — no hardcoded colors.
+- Storybook stories (`*.stories.tsx`) are created for the Container with mock data.
+
 Outline the list of commands to verify the entire system compiles and passes all checks.
 
 #### *Example Section 7:*
@@ -757,7 +815,7 @@ Execute the following commands in order to guarantee system stability and preven
 ### 7.6 Permission Enforcement Verification (when applicable)
 14. Verify that all new views are properly gated:
     ```bash
-    rg "RequirePermission" frontend/views/path/to/NewContainer.tsx
+    rg "RequirePermission" frontend/views/dashboard/<domain>/components/<NewContainer>.tsx
     ```
     Each file must contain a `<RequirePermission>` wrapper with the correct permission key.
 ```
@@ -821,13 +879,13 @@ Provide a table listing every file that will be created or modified, with the ac
 | **File** | **Action** | **Task** |
 |---|---|---|
 | `shared/lib/enum.ts` | Modify | A |
-| `backend/db/migration/4-story_permissions.sql` | Create | A |
-| `backend/db/repo/scheduling.repository.ts` | Modify | B |
-| `backend/services/class-session.service.ts` | Create | C |
-| `backend/graphql/pothos/class-session.pothos.ts` | Modify | D |
-| `frontend/graphql/sharedDocuments/class-session.documents.ts` | Create | E |
-| `frontend/stores/classSessionStore.ts` | Create | F |
-| `frontend/views/dashboard/classes/details/components/LiveSessionToolbar.tsx` | Modify | G |
+| `backend/db/migration/<N>-story<_N>_permissions.sql` | Create | A |
+| `backend/db/repo/<domain>.repository.ts` | Modify | B |
+| `backend/services/<domain>/<feature>.service.ts` | Create | C |
+| `backend/graphql/pothos/<domain>.pothos.ts` | Modify | D |
+| `frontend/graphql/sharedDocuments/<domain>.documents.ts` | Create | E |
+| `frontend/stores/<domain>Store.ts` | Create | F |
+| `frontend/views/dashboard/<domain>/components/<Feature>.tsx` | Modify | G |
 | `shared/messages/en.ts` | Modify | H |
 
 ### Appendix B: Dependency Graph
@@ -841,9 +899,8 @@ Task A (Migration + Enum)
                        └──► Task E (Frontend Apollo Documents)
                               └──► Task F (Frontend Stores)
                                      └──► Task G (Frontend Views)
-                                            └──► Task H (i18n)
-                                                   └──► Task I (Tests)
-                                                          └──► Section 7 (Final Verification)
+                                            └──► Task H (Navigation/Routing/i18n)
+                                                   └──► Section 7 (Final Verification)
 ```
 
 Tasks are strictly sequential — each depends on the previous. Tests are placed immediately after the layer they verify (per Section 6 task ordering rules), not consolidated at the end.
