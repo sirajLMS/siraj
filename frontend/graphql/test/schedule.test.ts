@@ -199,38 +199,31 @@ describe("GraphQL Schedule Integration Tests", () => {
     expect(data.executeDstBulkUpdate?.total).toBeGreaterThanOrEqual(0);
   });
 
-  test("executeDstBulkUpdate — academy admin denied", async () => {
-    const academyToken = await loginDemoUser("academy_admin");
+  async function assertDstBulkUpdateFails(token: string) {
     const result = await testClient.mutate({
       mutation: executeDstBulkUpdateMutationDocument,
       variables: {
         offsetMinutes: 60,
         description: "Should fail",
       },
+      errorPolicy: "all",
       context: {
         headers: {
-          Authorization: `Bearer ${academyToken}`,
+          Authorization: `Bearer ${token}`,
         },
       },
     });
     expect(result.error).toBeDefined();
+  }
+
+  test("executeDstBulkUpdate — academy admin denied", async () => {
+    const academyToken = await loginDemoUser("academy_admin");
+    await assertDstBulkUpdateFails(academyToken);
   });
 
   test("executeDstBulkUpdate — teacher denied", async () => {
     const teacherToken = await loginDemoUser("teacher_default");
-    const result = await testClient.mutate({
-      mutation: executeDstBulkUpdateMutationDocument,
-      variables: {
-        offsetMinutes: 60,
-        description: "Should fail",
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
-    });
-    expect(result.error).toBeDefined();
+    await assertDstBulkUpdateFails(teacherToken);
   });
 
   // Schedule deletion tests (including security/IDOR coverage)
@@ -250,6 +243,7 @@ describe("GraphQL Schedule Integration Tests", () => {
       variables: {
         classInstanceId: classItem.id,
       },
+      errorPolicy: "all",
       context: {
         headers: {
           Authorization: `Bearer ${teacherToken}`,
@@ -269,6 +263,7 @@ describe("GraphQL Schedule Integration Tests", () => {
       variables: {
         teacherId,
       },
+      errorPolicy: "all",
       context: {
         headers: {
           Authorization: `Bearer ${teacherToken}`,

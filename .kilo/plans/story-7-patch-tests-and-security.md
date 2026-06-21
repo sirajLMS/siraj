@@ -169,25 +169,25 @@ bun run test:graphql
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] 5 staff profile tests pass (2 success + 3 denial)
-- [ ] 3 DST migration tests pass (1 success + 2 denial)
-- [ ] 4 parent directory tests pass (2 success + 2 denial)
-- [ ] `bun run test:graphql` passes with 0 failures (all existing + new tests)
-- [ ] All tests use seeded data — no manual inserts or mock data
+- [x] 5 staff profile tests pass (2 success + 3 denial)
+- [x] 3 DST migration tests pass (1 success + 2 denial)
+- [x] 4 parent directory tests pass (2 success + 2 denial)
+- [x] `bun run test:graphql` passes with 0 failures (all existing + new tests)
+- [x] All tests use seeded data — no manual inserts or mock data
 
 **Quality Gate — Per-File Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
 
 **Quality Gate — Task Completion Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 
 ---
 
@@ -239,27 +239,27 @@ bun run test:graphql
 ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] Section 4 Threat 1 covered: teacher cannot delete another teacher's class (IDOR denied)
-- [ ] Section 4 Threat 1 covered: teacher cannot clear another teacher's schedule (IDOR denied)
-- [ ] Section 4 Threat 1 covered: admin can delete any teacher's class (admin override works)
-- [ ] Section 4 Threat 2 covered: admin can edit any teacher's profile (no IDOR restriction for admins)
-- [ ] Section 4 Threat 3 covered: academy admin denied `executeDstBulkUpdate` (system admin only — from Task A)
-- [ ] Section 4 Threat 4 covered: teacher and parent denied `parentDirectory` (from Task A)
-- [ ] `bun run test:graphql` passes with 0 failures
+- [x] Section 4 Threat 1 covered: teacher cannot delete another teacher's class (IDOR denied)
+- [x] Section 4 Threat 1 covered: teacher cannot clear another teacher's schedule (IDOR denied)
+- [x] Section 4 Threat 1 covered: admin can delete any teacher's class (admin override works)
+- [x] Section 4 Threat 2 covered: admin can edit any teacher's profile (no IDOR restriction for admins)
+- [x] Section 4 Threat 3 covered: academy admin denied `executeDstBulkUpdate` (system admin only — from Task A)
+- [x] Section 4 Threat 4 covered: teacher and parent denied `parentDirectory` (from Task A)
+- [x] `bun run test:graphql` passes with 0 failures
 
 **Quality Gate — Per-File Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
 
 **Quality Gate — Task Completion Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+- [x] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
+- [x] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [x] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 
 ---
 

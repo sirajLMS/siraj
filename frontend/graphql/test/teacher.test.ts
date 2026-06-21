@@ -14,20 +14,19 @@ import { testClient } from "./testClient";
 
 function makeUpdateInput(overrides: Partial<TeacherProfileUpdateInput>): TeacherProfileUpdateInput {
   return {
-    address: null,
-    dateOfBirth: null,
-    gender: null,
-    hourlyRate: null,
-    nationalId: null,
-    phone: null,
-    qualifications: null,
-    rateCurrency: null,
-    skypeId: null,
-    timezone: null,
-    zoomLink: null,
-    zoomPassword: null,
-    zoomUsername: null,
-    ...overrides,
+    address: overrides.address ?? null,
+    dateOfBirth: overrides.dateOfBirth ?? null,
+    gender: overrides.gender ?? null,
+    hourlyRate: overrides.hourlyRate ?? null,
+    nationalId: overrides.nationalId ?? null,
+    phone: overrides.phone ?? null,
+    qualifications: overrides.qualifications ?? null,
+    rateCurrency: overrides.rateCurrency ?? null,
+    skypeId: overrides.skypeId ?? null,
+    timezone: overrides.timezone ?? "UTC",
+    zoomLink: overrides.zoomLink ?? null,
+    zoomPassword: overrides.zoomPassword ?? null,
+    zoomUsername: overrides.zoomUsername ?? null,
   };
 }
 
@@ -51,7 +50,7 @@ async function queryTeacherDirectory(
     limit,
     offset,
   });
-  if (!data?.teacherDirectory) throw new Error("No directory returned");
+  if (!data?.teacherDirectory) throw new Error("No teacher directory returned");
   return data.teacherDirectory;
 }
 
@@ -59,6 +58,14 @@ describe("GraphQL Teacher Integration Tests", () => {
   setupTestServerLifecycle();
 
   let authToken: string | null = null;
+
+  async function getSeededTeacherId(): Promise<string> {
+    if (!authToken) throw new Error("No auth token");
+    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
+    const teacherId = directory.rows?.[0]?.id;
+    if (!teacherId) throw new Error("No seeded teacher found in directory");
+    return teacherId;
+  }
 
   const expectedTeacher = demoTeachers[0];
   if (!expectedTeacher) throw new Error("No demo teachers defined in demo-users");
@@ -175,12 +182,9 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("teacherProfileForEdit — admin can read teacher profile", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
-    const teacherId = directory.rows?.[0]?.id;
-    if (!teacherId) throw new Error("No seeded teacher found in directory");
+    const teacherId = await getSeededTeacherId();
 
-    const profileData = await authenticatedRequest(authToken, "query", teacherProfileForEditQueryDocument, {
+    const profileData = await authenticatedRequest(authToken!, "query", teacherProfileForEditQueryDocument, {
       teacherId,
     });
     expect(profileData.teacherProfileForEdit).toBeDefined();
@@ -193,10 +197,7 @@ describe("GraphQL Teacher Integration Tests", () => {
 
   test("teacherProfileForEdit — teacher role is denied access", async () => {
     const teacherToken = await loginDemoUser("teacher_default");
-    if (!authToken) throw new Error("No auth token");
-    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
-    const teacherId = directory.rows?.[0]?.id;
-    if (!teacherId) throw new Error("No seeded teacher found in directory");
+    const teacherId = await getSeededTeacherId();
 
     const result = await testClient.query({
       query: teacherProfileForEditQueryDocument,
@@ -206,15 +207,13 @@ describe("GraphQL Teacher Integration Tests", () => {
           Authorization: `Bearer ${teacherToken}`,
         },
       },
+      errorPolicy: "all",
     });
     expect(result.error).toBeDefined();
   });
 
   test("updateTeacherProfile — admin can update teacher profile", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
-    const teacherId = directory.rows?.[0]?.id;
-    if (!teacherId) throw new Error("No seeded teacher found in directory");
+    const teacherId = await getSeededTeacherId();
 
     const newPhone = "+1234567890";
     const updateData = await authenticatedRequest(authToken, "mutate", updateTeacherProfileMutationDocument, {
@@ -231,10 +230,7 @@ describe("GraphQL Teacher Integration Tests", () => {
 
   test("updateTeacherProfile — teacher role is denied to update profile", async () => {
     const teacherToken = await loginDemoUser("teacher_default");
-    if (!authToken) throw new Error("No auth token");
-    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
-    const teacherId = directory.rows?.[0]?.id;
-    if (!teacherId) throw new Error("No seeded teacher found in directory");
+    const teacherId = await getSeededTeacherId();
 
     const result = await testClient.mutate({
       mutation: updateTeacherProfileMutationDocument,
@@ -249,6 +245,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           Authorization: `Bearer ${teacherToken}`,
         },
       },
+      errorPolicy: "all",
     });
     expect(result.error).toBeDefined();
   });
@@ -269,15 +266,13 @@ describe("GraphQL Teacher Integration Tests", () => {
           Authorization: `Bearer ${authToken}`,
         },
       },
+      errorPolicy: "all",
     });
     expect(result.error).toBeDefined();
   });
 
   test("updateTeacherProfile — admin can edit any teacher (no IDOR for admins)", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
-    const teacherId = directory.rows?.[0]?.id;
-    if (!teacherId) throw new Error("No seeded teacher found in directory");
+    const teacherId = await getSeededTeacherId();
 
     const updateData = await authenticatedRequest(authToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
