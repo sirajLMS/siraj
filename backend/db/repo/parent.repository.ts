@@ -1,6 +1,7 @@
 import { and, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { invoices, parents, students, users } from "@/backend/db/schema";
+import { invoices, parents, students, teachers, users } from "@/backend/db/schema";
+import { getBackendTranslations } from "@/backend/lib/intl";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -97,5 +98,165 @@ export namespace ParentRepository {
   export const getStudentsForParent = async (parentId: string, tx?: DBTransaction): Promise<{ name: string }[]> => {
     const queryDb = tx ?? db;
     return await queryDb.select({ name: students.name }).from(students).where(eq(students.parentId, parentId)).limit(5);
+  };
+
+  export type ParentProfileResult = {
+    id: string;
+    userId: string;
+    name: string;
+    email: string;
+    avatarUrl: string | null;
+    status: string;
+    phone: string | null;
+    nationality: string | null;
+    address: string | null;
+    facebook: string | null;
+    whatsapp: string | null;
+    twitter: string | null;
+    skype: string | null;
+    defaultZoomLink: string | null;
+    invoiceType: string | null;
+    feeAmount: string | null;
+    paymentMethod: string | null;
+    currency: string | null;
+    timezone: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+
+  export const getParentProfile = async (parentId: string, tx?: DBTransaction): Promise<ParentProfileResult | null> => {
+    const queryDb = tx ?? db;
+
+    const results = await queryDb
+      .select({
+        id: parents.id,
+        userId: parents.userId,
+        name: users.name,
+        email: users.email,
+        avatarUrl: users.avatarUrl,
+        status: parents.status,
+        phone: parents.phone,
+        nationality: parents.nationality,
+        address: parents.address,
+        facebook: parents.facebook,
+        whatsapp: parents.whatsapp,
+        twitter: parents.twitter,
+        skype: parents.skype,
+        defaultZoomLink: parents.defaultZoomLink,
+        invoiceType: parents.invoiceType,
+        feeAmount: parents.feeAmount,
+        paymentMethod: parents.paymentMethod,
+        currency: parents.currency,
+        timezone: parents.timezone,
+        createdAt: parents.createdAt,
+        updatedAt: parents.updatedAt,
+      })
+      .from(parents)
+      .innerJoin(users, eq(parents.userId, users.id))
+      .where(eq(parents.id, parentId))
+      .limit(1);
+
+    return results[0] ?? null;
+  };
+
+  export type DeactivatedParentResult = {
+    id: string;
+    userId: string;
+    status: string;
+    updatedAt: Date;
+  };
+
+  export const deactivateParent = async (
+    parentId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<DeactivatedParentResult> => {
+    const queryDb = tx ?? db;
+
+    // Fetch current record first to confirm existence
+    const existing = await queryDb
+      .select({ id: parents.id, userId: parents.userId, status: parents.status })
+      .from(parents)
+      .where(eq(parents.id, parentId))
+      .limit(1);
+
+    if (existing.length === 0) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("parentNotFound", { id: parentId }));
+    }
+
+    const current = existing[0];
+    if (current.status === "DEACTIVATED") {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("parentAlreadyDeactivated", { id: parentId }));
+    }
+
+    const [updated] = await queryDb
+      .update(parents)
+      .set({ status: "DEACTIVATED", updatedAt: new Date() })
+      .where(eq(parents.id, parentId))
+      .returning({
+        id: parents.id,
+        userId: parents.userId,
+        status: parents.status,
+        updatedAt: parents.updatedAt,
+      });
+
+    return updated;
+  };
+
+  export type AssociatedStudentRow = {
+    id: string;
+    name: string;
+    status: string;
+    primaryTeacherId: string | null;
+    teacherName: string | null;
+    hoursPerWeek: string;
+    classesRemaining: number;
+    classesTotal: number;
+    language: string | null;
+    gender: string | null;
+    updatedAt: Date;
+  };
+
+  export const getAssociatedStudents = async (
+    parentId: string,
+    tx?: DBTransaction
+  ): Promise<AssociatedStudentRow[]> => {
+    const queryDb = tx ?? db;
+
+    const results = await queryDb
+      .select({
+        id: students.id,
+        name: students.name,
+        status: students.status,
+        primaryTeacherId: students.primaryTeacherId,
+        teacherName: users.name,
+        hoursPerWeek: students.hoursPerWeek,
+        classesRemaining: students.classesRemaining,
+        classesTotal: students.classesTotal,
+        language: students.language,
+        gender: students.gender,
+        updatedAt: students.updatedAt,
+      })
+      .from(students)
+      .leftJoin(teachers, eq(students.primaryTeacherId, teachers.id))
+      .leftJoin(users, eq(teachers.userId, users.id))
+      .where(eq(students.parentId, parentId))
+      .orderBy(students.name);
+
+    return results.map(r => ({
+      id: r.id,
+      name: r.name,
+      status: r.status,
+      primaryTeacherId: r.primaryTeacherId,
+      teacherName: r.teacherName ?? null,
+      hoursPerWeek: r.hoursPerWeek,
+      classesRemaining: r.classesRemaining,
+      classesTotal: r.classesTotal,
+      language: r.language ?? null,
+      gender: r.gender ?? null,
+      updatedAt: r.updatedAt,
+    }));
   };
 }

@@ -1,4 +1,4 @@
-import { and, desc, eq, type SQL, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, type SQL, sql } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -334,5 +334,52 @@ export namespace BillingRepository {
       totalOverdueAmount: totalAmount.toFixed(2),
       items,
     };
+  };
+
+  export type ParentInvoiceHistoryRow = {
+    id: string;
+    issueDate: string;
+    dueDate: string;
+    paidDate: string | null;
+    amount: string;
+    currency: string;
+    status: string;
+    invoiceType: string;
+    studentId: string | null;
+  };
+
+  export const getInvoicesForParent = async (
+    parentId: string,
+    tx?: DBTransaction
+  ): Promise<ParentInvoiceHistoryRow[]> => {
+    const queryDb = tx ?? db;
+
+    const results = await queryDb
+      .select({
+        id: invoices.id,
+        issueDate: invoices.issueDate,
+        dueDate: invoices.dueDate,
+        paidDate: invoices.paidDate,
+        amount: invoices.amount,
+        currency: invoices.currency,
+        status: invoices.status,
+        invoiceType: invoices.invoiceType,
+        studentId: invoices.studentId,
+      })
+      .from(invoices)
+      .where(and(eq(invoices.parentId, parentId), isNull(invoices.deletedAt)))
+      .orderBy(desc(invoices.issueDate));
+
+    return results.map(r => ({
+      id: r.id,
+      issueDate: r.issueDate,
+      dueDate: r.dueDate,
+      paidDate: r.paidDate ?? null,
+      amount: r.amount,
+      currency: r.currency,
+      status: r.status,
+      invoiceType: r.invoiceType,
+      studentId: r.studentId ?? null,
+    }));
   };
 }

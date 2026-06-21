@@ -313,4 +313,51 @@ export namespace StudentRepository {
 
     return tx ? runner(tx) : db.transaction(runner);
   };
+
+  export const setClassesRemaining = async (
+    studentId: string,
+    newClassesRemaining: number,
+    expectedVersion?: number,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<Types.StudentEntity> => {
+    const runner = async (t: DBTransaction) => {
+      // Acquire advisory lock to prevent concurrent modifications
+      await t.execute(sql`SELECT pg_advisory_xact_lock(hashtext('student_' || ${studentId}::text))`);
+
+      const results = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
+      if (results.length === 0) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("studentNotFound", { id: studentId }));
+      }
+      const current = results[0];
+
+      if (expectedVersion !== undefined && current.version !== expectedVersion) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(
+          tFunc("studentVersionMismatch", {
+            id: studentId,
+            expectedVersion,
+            gotVersion: current.version,
+          })
+        );
+      }
+
+      // newClassesRemaining >= 0 is enforced by DB CHECK constraint
+      // newClassesRemaining <= classesTotal is validated in service layer (not repo)
+      const [updated] = await t
+        .update(students)
+        .set({
+          classesRemaining: newClassesRemaining,
+          version: sql`${students.version} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(students.id, studentId))
+        .returning();
+
+      return updated;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  };
 }

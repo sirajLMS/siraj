@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
   classInstanceFiles,
@@ -528,5 +528,64 @@ export namespace StorageDbRepository {
     } catch (error) {
       return { success: false, message: `Failed to set protection: ${error}` };
     }
+  };
+
+  type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+  export type ParentFileRow = {
+    id: string;
+    fileId: string;
+    filePath: string;
+    isProtected: boolean;
+    usageType: string;
+    createdAt: Date;
+  };
+
+  export const getFilesForParent = async (parentId: string, tx?: DBTransaction): Promise<ParentFileRow[]> => {
+    const queryDb = tx ?? db;
+
+    const results = await queryDb
+      .select({
+        id: parentFiles.id,
+        fileId: parentFiles.fileId,
+        filePath: storageFiles.path,
+        isProtected: storageFiles.isProtected,
+        usageType: parentFiles.usageType,
+        createdAt: parentFiles.createdAt,
+      })
+      .from(parentFiles)
+      .innerJoin(storageFiles, eq(parentFiles.fileId, storageFiles.id))
+      .where(eq(parentFiles.parentId, parentId))
+      .orderBy(desc(parentFiles.createdAt));
+
+    return results.map(r => ({
+      id: r.id,
+      fileId: r.fileId,
+      filePath: r.filePath,
+      isProtected: r.isProtected,
+      usageType: r.usageType,
+      createdAt: r.createdAt,
+    }));
+  };
+
+  export const linkFileToParent = async (
+    parentId: string,
+    fileId: string,
+    usageType: string,
+    tx?: DBTransaction
+  ): Promise<{ id: string; fileId: string; parentId: string; usageType: string; createdAt: Date }> => {
+    const queryDb = tx ?? db;
+
+    const [result] = await queryDb
+      .insert(parentFiles)
+      .values({
+        fileId,
+        parentId,
+        usageType,
+        createdAt: new Date(),
+      })
+      .returning();
+
+    return result;
   };
 }
