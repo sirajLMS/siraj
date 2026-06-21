@@ -5,7 +5,7 @@ import { Avatar, Box, Button, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
-import type { AdminInvoiceRow, AdminInvoiceStatus } from "@/frontend/stores/mockAdminBillingStore";
+import type { AdminInvoiceRow, AdminInvoiceStatus } from "../types/billingViewTypes";
 
 export interface AdminInvoicesDataGridLabels {
   readonly invoiceId: string;

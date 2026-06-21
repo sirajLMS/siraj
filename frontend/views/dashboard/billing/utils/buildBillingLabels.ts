@@ -121,6 +121,8 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
     ...buildTableLabels(t),
     ...buildStatusLabels(t),
     manual: buildManualInvoiceLabels((key: string) => t(`manual.${key}`)),
+    markAsPaidSuccess: t("markAsPaidSuccess"),
+    deleteInvoiceSuccess: t("deleteInvoiceSuccess"),
     errors: {
       invalidId: t("errors.invalidId"),
     },

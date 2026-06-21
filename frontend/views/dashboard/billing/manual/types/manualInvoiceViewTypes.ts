@@ -1,8 +1,13 @@
-import type { ParentInvoiceOption } from "@/frontend/stores/mocKAdminManualInvoiceStore";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 import type { ManualInvoiceFormData } from "../schemas/manualInvoiceSchema";
 
 export type ManualInvoiceLabels = BillingManualLabels;
+
+export interface ParentInvoiceOption {
+  readonly id: string;
+  readonly name: string;
+  readonly label: string;
+}
 
 export interface ManualInvoiceViewProps {
   readonly labels: ManualInvoiceLabels;

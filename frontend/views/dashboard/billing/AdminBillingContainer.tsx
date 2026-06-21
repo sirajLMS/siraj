@@ -1,57 +1,169 @@
 "use client";
 
+import { useMutation, useQuery } from "@apollo/client/react";
+import { Alert, Snackbar } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useAdminBillingStore } from "@/frontend/stores/mockAdminBillingStore";
-import { useUserStore } from "@/frontend/stores/mockUserStore";
+import { deleteInvoiceMutationDocument, markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { parentInvoiceHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { AdminBillingView } from "./AdminBillingView";
-import type { AdminBillingViewProps } from "./types/billingViewTypes";
+import type { AdminBillingSummary, AdminInvoiceRow, AdminInvoiceStatus } from "./types/billingViewTypes";
 import { filterAdminInvoices } from "./utils/billingFilters";
 import { buildBillingLabels } from "./utils/buildBillingLabels";
 
-export function AdminBillingContainer() {
+interface AdminBillingContainerProps {
+  readonly parentId?: string;
+}
+
+function mapInvoiceStatus(gqlStatus: string | null, dueDate: string | null): AdminInvoiceStatus {
+  if (gqlStatus === "PAID") return "paid";
+  if (dueDate && new Date(dueDate) < new Date()) return "overdue";
+  return "pending";
+}
+
+function formatCurrency(amount: string | null, currency: string | null): string {
+  const numAmount = Number(amount ?? 0);
+  const curr = currency ?? "USD";
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: curr }).format(numAmount);
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function deriveInitials(studentId: string | null): string {
+  if (!studentId) return "?";
+  return studentId.slice(0, 2).toUpperCase();
+}
+
+export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) {
   const t = useTranslations("dashboard.billing");
   const router = useRouter();
   const locale = useLocale();
-  const permissions = useUserStore(state => state.permissions);
   const labels = buildBillingLabels(t);
 
-  const canManage = permissions.includes(AppPermission.InvoicesEdit);
-  const canView = permissions.includes(AppPermission.InvoicesList);
-  const canCreate = permissions.includes(AppPermission.InvoicesCreate);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
-  const searchQuery = useAdminBillingStore(state => state.searchQuery);
-  const summary = useAdminBillingStore(state => state.summary);
-  const invoices = useAdminBillingStore(state => state.invoices);
-  const creditRows = useAdminBillingStore(state => state.creditRows);
-  const setSearchQuery = useAdminBillingStore(state => state.setSearchQuery);
-  const markAsPaid = useAdminBillingStore(state => state.markAsPaid);
-  const sendReminder = useAdminBillingStore(state => state.sendReminder);
+  const showFeedback = (message: string, severity: "success" | "error") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const { data: invoicesData, refetch: refetchInvoices } = useQuery(parentInvoiceHistoryQueryDocument, {
+    variables: { parentId: parentId ?? "" },
+    skip: !parentId,
+  });
+
+  const [markAsPaidMutation, { loading: markingPaid }] = useMutation(markInvoicePaidMutationDocument, {
+    onCompleted: () => {
+      showFeedback(labels.markAsPaidSuccess, "success");
+      void refetchInvoices();
+    },
+    onError: error => {
+      showFeedback(error.message, "error");
+    },
+  });
+
+  const [deleteInvoiceMutation, { loading: deletingInvoice }] = useMutation(deleteInvoiceMutationDocument, {
+    onCompleted: () => {
+      showFeedback(labels.deleteInvoiceSuccess, "success");
+      void refetchInvoices();
+    },
+    onError: error => {
+      showFeedback(error.message, "error");
+    },
+  });
+
+  const invoices: AdminInvoiceRow[] = useMemo(
+    () =>
+      (invoicesData?.parentInvoiceHistory ?? []).map(inv => ({
+        id: inv.id ?? "",
+        studentName: inv.studentId ?? "Student",
+        studentInitials: deriveInitials(inv.studentId),
+        dateIssued: formatDate(inv.issueDate),
+        amount: formatCurrency(inv.amount, inv.currency),
+        status: mapInvoiceStatus(inv.status, inv.dueDate),
+      })),
+    [invoicesData?.parentInvoiceHistory]
+  );
 
   const filteredInvoices = useMemo(() => filterAdminInvoices(invoices, searchQuery), [invoices, searchQuery]);
 
-  if (!canManage) {
-    return null;
-  }
+  const summary: AdminBillingSummary = useMemo(
+    () => ({
+      totalOutstanding: formatCurrency(
+        String(
+          invoices
+            .filter(i => i.status !== "paid")
+            .reduce((sum, i) => sum + Number(i.amount.replace(/[^0-9.-]/g, "")), 0)
+        ),
+        "USD"
+      ),
+      pendingInvoices: invoices.filter(i => i.status !== "paid").length,
+      negativeBalanceCount: "0 Students",
+      mtdRevenue: formatCurrency(
+        String(
+          invoices
+            .filter(i => i.status === "paid")
+            .reduce((sum, i) => sum + Number(i.amount.replace(/[^0-9.-]/g, "")), 0)
+        ),
+        "USD"
+      ),
+    }),
+    [invoices]
+  );
 
-  const viewProps: AdminBillingViewProps = {
-    labels,
-    summary,
-    invoices: filteredInvoices,
-    creditRows,
-    searchQuery,
-    canManage,
-    canView,
-    canCreate,
-    onSearchChange: setSearchQuery,
-    onMarkAsPaid: markAsPaid,
-    onSendReminder: sendReminder,
-    onManualInvoice: () => {
-      router.push(`/${locale}/billing/manual`);
-    },
+  const handleMarkAsPaid = (invoiceId: string) => {
+    void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null } });
   };
 
-  return <AdminBillingView {...viewProps} />;
+  const handleDeleteInvoice = (invoiceId: string) => {
+    void deleteInvoiceMutation({ variables: { invoiceId } });
+  };
+
+  return (
+    <RequirePermission permissions={[AppPermission.BillingViewHistory]} fallback={null}>
+      <AdminBillingView
+        labels={labels}
+        summary={summary}
+        invoices={filteredInvoices}
+        creditRows={[]}
+        searchQuery={searchQuery}
+        canManage
+        canView
+        canCreate
+        onSearchChange={setSearchQuery}
+        onMarkAsPaid={handleMarkAsPaid}
+        onSendReminder={() => {}}
+        onManualInvoice={() => {
+          router.push(`/${locale}/billing/manual`);
+        }}
+        onDeleteInvoice={handleDeleteInvoice}
+        markingPaid={markingPaid}
+        deletingInvoice={deletingInvoice}
+      />
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </RequirePermission>
+  );
 }

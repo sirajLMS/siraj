@@ -80,6 +80,8 @@ export interface BillingLabels {
   readonly invoiceStatus: Record<AdminInvoiceStatus | ParentInvoiceStatus, string>;
   readonly creditStatus: Record<StudentCreditStatus, string>;
   readonly manual: BillingManualLabels;
+  readonly markAsPaidSuccess: string;
+  readonly deleteInvoiceSuccess: string;
   readonly errors: {
     readonly invalidId: string;
   };

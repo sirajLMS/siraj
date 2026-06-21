@@ -121,7 +121,11 @@ export function ParentProfileContainer({ id }: ParentProfileContainerProps) {
     skip: !parentId,
   });
 
-  const { data: studentsData, loading: studentsLoading } = useQuery(parentAssociatedStudentsQueryDocument, {
+  const {
+    data: studentsData,
+    loading: studentsLoading,
+    refetch: refetchStudents,
+  } = useQuery(parentAssociatedStudentsQueryDocument, {
     variables: { parentId },
     skip: !parentId,
   });
@@ -154,7 +158,7 @@ export function ParentProfileContainer({ id }: ParentProfileContainerProps) {
 
   return (
     <RequirePermission permissions={[AppPermission.ParentViewProfile]}>
-      <ParentProfileView parent={parentData} parentId={parentId} />
+      <ParentProfileView parent={parentData} parentId={parentId} onRefetchStudents={() => void refetchStudents()} />
     </RequirePermission>
   );
 }

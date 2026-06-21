@@ -1,4 +1,7 @@
+import type { Gender, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ParentAccountStatus } from "@/frontend/views/dashboard/parents/types/directory";
+
+export type ParentStudentStatus = `${Lowercase<StudentStatus>}`;
 
 export interface ParentStudent {
   readonly id: string;
@@ -9,8 +12,8 @@ export interface ParentStudent {
   readonly classesLeft: number;
   readonly totalClasses: number;
   readonly language: string;
-  readonly gender: "male" | "female";
-  readonly status: "regular" | "on_trial" | "on_leave";
+  readonly gender: Gender;
+  readonly status: ParentStudentStatus;
 }
 
 export interface ParentProfileData {

@@ -76,4 +76,8 @@ export const errors: ErrorsLabels = {
   quotaMustBeNonNegative: "يجب أن يكون عدد الحصص المتبقية عددًا صحيحًا غير سالب.",
   quotaExceedsTotal: "لا يمكن تعيين الحصص المتبقية ({requested}) أعلى من إجمالي الحصص المشتراة ({total}).",
   invalidFileId: "مطلوب معرف ملف صالح.",
+  invalidParentId: "معرف ولي الأمر مفقود أو غير صالح",
+  invalidInvoiceAmount: "يجب أن يكون مبلغ الفاتورة رقمًا موجبًا",
+  invoiceAlreadyPaid: "الفاتورة {id} مُحددة بالفعل كمدفوعة (الحالة الحالية: {status})",
+  invalidStatusTransition: "تحول الحالة غير صالح: {currentStatus} \u2192 {newStatus} غير مسموح به",
 };

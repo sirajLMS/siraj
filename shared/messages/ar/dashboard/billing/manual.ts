@@ -18,6 +18,7 @@ export const billingManual: BillingManualLabels = {
   submit: "إرسال",
   submitAndSendEmail: "إرسال وإرسال بريد إلكتروني",
   successMessage: "تم إرسال الفاتورة اليدوية بنجاح.",
+  createSuccess: "تم إنشاء الفاتورة {id} بنجاح",
   months: {
     jan: "يناير",
     feb: "فبراير",

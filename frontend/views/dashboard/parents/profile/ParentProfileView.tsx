@@ -12,9 +12,10 @@ import ParentStudentsDataGrid from "./ParentStudentsDataGrid";
 interface ParentProfileViewProps {
   readonly parent: ParentProfileData;
   readonly parentId: string;
+  readonly onRefetchStudents?: () => void;
 }
 
-const ParentProfileView: React.FC<ParentProfileViewProps> = ({ parent, parentId }) => {
+const ParentProfileView: React.FC<ParentProfileViewProps> = ({ parent, parentId, onRefetchStudents }) => {
   const t = useTranslations("dashboard.parentProfile");
   const theme = useTheme();
 
@@ -58,7 +59,7 @@ const ParentProfileView: React.FC<ParentProfileViewProps> = ({ parent, parentId 
           <GroupOutlined />
           <Typography variant="titleLg">{t("sections.parentStudents")}</Typography>
         </Box>
-        <ParentStudentsDataGrid rows={parent.students} />
+        <ParentStudentsDataGrid rows={parent.students} onRefetch={onRefetchStudents} />
         <Box
           sx={{
             p: 2,

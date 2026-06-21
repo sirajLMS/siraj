@@ -72,4 +72,8 @@ export interface ErrorsLabels {
   readonly quotaMustBeNonNegative: string;
   readonly quotaExceedsTotal: string;
   readonly invalidFileId: string;
+  readonly invalidParentId: string;
+  readonly invalidInvoiceAmount: string;
+  readonly invoiceAlreadyPaid: string;
+  readonly invalidStatusTransition: string;
 }

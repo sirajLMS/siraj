@@ -3,13 +3,13 @@
 import { Box } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PageHeader } from "@/frontend/components/ui";
-import type { ParentInvoiceOption } from "@/frontend/stores/mocKAdminManualInvoiceStore";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 import { BillingMonthSelector } from "./components/BillingMonthSelector";
 import { InvoiceDraftSummaryCard } from "./components/InvoiceDraftSummaryCard";
 import { ManualInvoiceActions } from "./components/ManualInvoiceActions";
 import { ManualInvoiceFormFields } from "./components/ManualInvoiceFormFields";
 import type { ManualInvoiceFormData } from "./schemas/manualInvoiceSchema";
+import type { ParentInvoiceOption } from "./types/manualInvoiceViewTypes";
 
 interface ManualInvoiceMobileViewProps {
   readonly labels: BillingManualLabels;

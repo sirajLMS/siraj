@@ -52,4 +52,29 @@ export interface ParentProfileLabels {
     readonly status: string;
     readonly viewAllStudents: string;
   };
+  readonly students: {
+    readonly reassignTeacherTitle: string;
+    readonly currentTeacher: string;
+    readonly selectNewTeacher: string;
+    readonly selectTeacherPlaceholder: string;
+    readonly cancel: string;
+    readonly reassigning: string;
+    readonly confirmReassign: string;
+    readonly reassignSuccess: string;
+    readonly changeStatusTitle: string;
+    readonly currentStatus: string;
+    readonly selectNewStatus: string;
+    readonly noStatusTransitionsAvailable: string;
+    readonly changingStatus: string;
+    readonly confirmStatusChange: string;
+    readonly statusChangeSuccess: string;
+    readonly statusLabel: {
+      readonly regular: string;
+      readonly suspended: string;
+      readonly on_leave: string;
+      readonly deactivated: string;
+      readonly graduated: string;
+      readonly on_trial: string;
+    };
+  };
 }

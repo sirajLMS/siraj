@@ -22,6 +22,7 @@ export function buildManualInvoiceLabels(t: BillingManualTranslator): BillingMan
     submit: t("submit"),
     submitAndSendEmail: t("submitAndSendEmail"),
     successMessage: t("successMessage"),
+    createSuccess: t("createSuccess"),
     months: {
       jan: t("months.jan"),
       feb: t("months.feb"),

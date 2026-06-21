@@ -5,7 +5,7 @@ import { Box, Button, Chip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui";
-import type { StudentCreditRow, StudentCreditStatus } from "@/frontend/stores/mockAdminBillingStore";
+import type { StudentCreditRow, StudentCreditStatus } from "../types/billingViewTypes";
 
 export interface StudentCreditDataGridLabels {
   readonly student: string;

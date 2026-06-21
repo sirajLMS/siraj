@@ -1,6 +1,35 @@
 import type { ParentBillingSummary, ParentInvoiceRow } from "@/frontend/stores/moackParentBillingStore";
-import type { AdminBillingSummary, AdminInvoiceRow, StudentCreditRow } from "@/frontend/stores/mockAdminBillingStore";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
+
+export type AdminInvoiceStatus = "overdue" | "pending" | "paid";
+
+export type StudentCreditStatus = "negative_balance" | "active_credit";
+
+export interface AdminBillingSummary {
+  readonly totalOutstanding: string;
+  readonly pendingInvoices: number;
+  readonly negativeBalanceCount: string;
+  readonly mtdRevenue: string;
+}
+
+export interface AdminInvoiceRow {
+  readonly id: string;
+  readonly studentName: string;
+  readonly studentInitials: string;
+  readonly dateIssued: string;
+  readonly amount: string;
+  readonly status: AdminInvoiceStatus;
+}
+
+export interface StudentCreditRow {
+  readonly id: string;
+  readonly studentName: string;
+  readonly parentEmail: string;
+  readonly planType: string;
+  readonly classesLeft: number;
+  readonly classesTotal: number;
+  readonly status: StudentCreditStatus;
+}
 
 export interface BillingCapabilityProps {
   readonly canManage: boolean;
@@ -18,6 +47,9 @@ export interface AdminBillingViewProps extends BillingCapabilityProps {
   readonly onMarkAsPaid: (id: string) => void;
   readonly onSendReminder: (id: string) => void;
   readonly onManualInvoice: () => void;
+  readonly onDeleteInvoice?: (id: string) => void;
+  readonly markingPaid?: boolean;
+  readonly deletingInvoice?: boolean;
 }
 
 export interface ParentBillingViewProps extends BillingCapabilityProps {

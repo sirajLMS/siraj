@@ -33,6 +33,7 @@ export interface BillingManualLabels {
   readonly submit: string;
   readonly submitAndSendEmail: string;
   readonly successMessage: string;
+  readonly createSuccess: string;
   readonly months: Record<BillingMonthId, string>;
   readonly validation: BillingManualValidationLabels;
   readonly support: {

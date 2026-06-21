@@ -9,9 +9,9 @@ import {
   WarningAmberOutlined,
 } from "@mui/icons-material";
 import type { ParentBillingSummary } from "@/frontend/stores/moackParentBillingStore";
-import type { AdminBillingSummary } from "@/frontend/stores/mockAdminBillingStore";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 import type { BillingMetricItem } from "../components/BillingMetricsRow";
+import type { AdminBillingSummary } from "../types/billingViewTypes";
 
 export function buildAdminMetrics(summary: AdminBillingSummary, labels: BillingLabels): BillingMetricItem[] {
   return [

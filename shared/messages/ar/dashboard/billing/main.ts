@@ -87,6 +87,8 @@ export const billing: BillingLabels = {
     active_credit: "رصيد نشط",
   },
   manual: billingManual,
+  markAsPaidSuccess: "تم تحديد الفاتورة كمدفوعة بنجاح",
+  deleteInvoiceSuccess: "تم حذف الفاتورة بنجاح",
   errors: {
     invalidId: "معرف ولي الأمر غير صالح في عرض الفواتير.",
   },

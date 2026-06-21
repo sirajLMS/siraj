@@ -2,7 +2,7 @@
 
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Paper, Typography } from "@mui/material";
-import type { StudentCreditRow, StudentCreditStatus } from "@/frontend/stores/mockAdminBillingStore";
+import type { StudentCreditRow, StudentCreditStatus } from "../types/billingViewTypes";
 
 interface StudentCreditCardListLabels {
   readonly classesLeft: string;
