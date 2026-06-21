@@ -478,6 +478,15 @@ export enum AppPermission {
   STUDENT_EDIT_QUOTA = "student.edit_quota",
   BILLING_VIEW_HISTORY = "billing.view_history",
   DOCUMENT_MANAGE_PARENT_DOCS = "document.manage_parent_docs",
+  //Invoice Generation & Processing
+  BILLING_CREATE_INVOICE = "billing.create_invoice",
+  BILLING_UPDATE_STATUS_PAID = "billing.update_status_paid",
+  BILLING_DELETE_INVOICE = "billing.delete_invoice",
+  // Student Metadata & Lifecycle Management
+  STUDENT_REASSIGN_TEACHER = "student.reassign_teacher",
+  STUDENT_MANAGE_STATUS = "student.manage_status",
+  // Automated System Synchronization
+  SYSTEM_SYNC_NOTIFICATIONS = "system.sync_notifications",
   TEST_SYSTEM_ONLY = "test.system_only",
   TEST_CUSTOM_ONLY = "test.custom_only",
 }

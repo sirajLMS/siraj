@@ -2,8 +2,11 @@
 
 **Source plan:** `.kilo/plans/done/4-leave-quota-enforcement.md` (fully implemented — all 8 tasks A-H marked DONE, 319+ DB/GraphQL tests passing)
 **Compliance standard:** `.ai/siraj_stories/AGENTS_STORY_PLANNING.md` (1004 lines)
-**Patch scope:** Retroactively bring the plan document into compliance with the planning standard by adding 9 missing core structural elements. This is a **documentation patch only** — no source code changes are required unless a gap task reveals a real implementation regression.
-**Status:** Patch document — implementation complete; patch is for plan-file compliance and residual verification.
+**Patch scope:** Retroactively bring the plan document into compliance with the planning standard by adding 9 missing core structural elements, plus implement 2 residual implementation gaps (Tasks I and J).
+**Status:** ✅ PATCH COMPLETE — documentation gaps patched, Tasks I and J implemented and verified on 2026-06-21.
+**Implementation results:**
+- Task I (GraphQL integration tests for `teacherFutureSchedule`): 3/3 tests pass, `frontend/graphql/test/teacher-dashboard.test.ts` now has 7/7 tests passing
+- Task J (repository coverage for Story 4 methods): 3 new tests added to `backend/db/test/repo/scheduling.repository.test.ts` covering `getTeacherFutureClasses` (empty result, date-range + state filter + student join, soft-delete exclusion); full DB suite: 343 pass / 0 fail
 **Codebase audit date:** 2026-06-21 (paths, method signatures, and test locations verified against live repo).
 
 ---
@@ -498,7 +501,7 @@ Tasks are strictly incremental. Tests are placed immediately after the layer the
 
 ### Task I — GraphQL Integration Test: `teacherFutureSchedule` Query
 
-**Status:** Pending (residual implementation gap — no test exists today)
+**Status:** ✅ Completed (2026-06-21) — 3/3 tests pass; `frontend/graphql/test/teacher-dashboard.test.ts` now has 7/7 tests passing.
 
 **Objective:** Add frontend GraphQL integration tests in `frontend/graphql/test/teacher-dashboard.test.ts` covering the `teacherFutureSchedule` query for authorized success, unauthorized denial, and non-teacher rejection. This fulfills AGENTS §1.7 requirement: "Every new GraphQL query/mutation must have at least one test for authorized success and one test for unauthorized denial."
 
@@ -611,7 +614,7 @@ Ensure `setupTestServerLifecycle()` is called at the describe root of the enclos
 
 ### Task J — Repository Coverage Verification (100% Line + Function)
 
-**Status:** Pending (residual implementation gap — no coverage report has been run on Story 4 repository methods)
+**Status:** ✅ Completed (2026-06-21) — 3 new `getTeacherFutureClasses` tests added to `backend/db/test/repo/scheduling.repository.test.ts`; full DB suite: 343 pass / 0 fail. `scheduling-queries.repository.ts` Story 4 methods coverage: `getTeacherLeaveQuotaUsage` (299-319) ✅, `incrementTeacherLeaveQuota` (321-346) ✅, `getTeacherFutureClasses` (372-402) ✅, `getTeacherByUserId` (348-358) ✅ (covered by `leave_quota.test.ts`).
 
 **Objective:** Verify that `backend/db/test/repo/scheduling.repository.test.ts` and `backend/db/test/logic/leave_quota.test.ts` achieve **100% line + function coverage** on all Story 4-introduced repository methods: `getTeacherLeaveQuotaUsage`, `incrementTeacherLeaveQuota`, `getTeacherFutureClasses`, `getTeacherByUserId`. AGENTS §1.7 mandates: "100% line + function coverage on all new/modified repository methods."
 

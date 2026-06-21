@@ -185,6 +185,8 @@ const en: MessageSchema = {
       unpaidInvoicesTitle: "Unpaid Invoices",
       noUnpaidInvoices: "There is no invoices to be paid.",
       loadingBilling: "Loading billing data...",
+      newUnansweredComplaint: "New Unanswered Complaint",
+      defaultSystemNotification: "System Notification",
     },
     searchSchedule: {
       pageTitle: "Schedule Availability Search",

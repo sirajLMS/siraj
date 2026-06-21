@@ -2,12 +2,16 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availab
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { AppPermission, type Gender } from "@/shared/lib/enum";
+import { AppPermission, Gender } from "@/shared/lib/enum";
 
 export interface AvailabilitySearchServiceInput {
   fromTime: string;
   toTime: string;
   gender?: string | null;
+}
+
+function isGender(value: string): value is Gender {
+  return value === Gender.MALE || value === Gender.FEMALE;
 }
 
 export namespace AvailabilitySearchService {
@@ -19,7 +23,7 @@ export namespace AvailabilitySearchService {
         throw new Error(t("unauthorizedAction"));
       }
 
-      const genderFilter = input.gender ? (input.gender as Gender) : null;
+      const genderFilter = input.gender && isGender(input.gender) ? input.gender : null;
 
       return await TeacherAvailabilityRepository.searchCrossStaffAvailability({
         fromTime: input.fromTime,

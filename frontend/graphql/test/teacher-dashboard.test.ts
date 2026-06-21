@@ -4,6 +4,7 @@ import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.docu
 import {
   createTeacherManualClassEntryMutationDocument,
   teacherDashboardQueryDocument,
+  teacherFutureScheduleQueryDocument,
 } from "../sharedDocuments/teacher-dashboard.documents";
 import {
   cleanupTestEntitiesMutationDocument,
@@ -193,6 +194,66 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
       },
     });
     expect(deleteRes.error).toBeUndefined();
+  });
+
+  test("teacherFutureSchedule — authorized teacher receives future schedule with quota data", async () => {
+    if (!teacherToken) throw new Error("No teacher token");
+
+    const result = await testClient.query({
+      query: teacherFutureScheduleQueryDocument,
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.data?.teacherFutureSchedule).toBeDefined();
+    const schedule = result.data?.teacherFutureSchedule;
+    if (!schedule) throw new Error("No teacherFutureSchedule data returned");
+
+    expect(schedule.id).toBeDefined();
+    expect(typeof schedule.leaveQuotaUsed).toBe("number");
+    expect(typeof schedule.leaveQuotaTotal).toBe("number");
+    expect((schedule.leaveQuotaTotal ?? 0) >= 2).toBeTrue();
+    expect(typeof schedule.totalClasses).toBe("number");
+    expect(Array.isArray(schedule.classes)).toBeTrue();
+
+    for (const cls of schedule.classes ?? []) {
+      if (!cls) continue;
+      expect(cls.id).toBeDefined();
+      expect(typeof cls.isRescheduled).toBe("boolean");
+      expect(typeof cls.leaveRequestDisabled).toBe("boolean");
+      if (cls.leaveRequestDisabledReason !== null) {
+        expect(["time", "quota"]).toContain(cls.leaveRequestDisabledReason);
+      }
+    }
+  });
+
+  test("teacherFutureSchedule — denied when user has no teacher record (academy admin)", async () => {
+    if (!adminToken) throw new Error("No admin token");
+
+    const result = await testClient.query({
+      query: teacherFutureScheduleQueryDocument,
+      errorPolicy: "all",
+      context: {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      },
+    });
+
+    expect(result.error).toBeDefined();
+  });
+
+  test("teacherFutureSchedule — denied when unauthenticated", async () => {
+    const result = await testClient.query({
+      query: teacherFutureScheduleQueryDocument,
+      errorPolicy: "all",
+    });
+
+    expect(result.error).toBeDefined();
   });
 
   afterAll(async () => {

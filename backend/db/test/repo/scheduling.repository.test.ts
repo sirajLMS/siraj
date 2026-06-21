@@ -1345,4 +1345,93 @@ describe("Scheduling Repository logic", () => {
       });
     });
   });
+
+  describe("getTeacherFutureClasses", () => {
+    test("returns empty array when teacher has no classes in the date range", async () => {
+      await runInRollback(async tx => {
+        const { teacher } = await setupTestEntities(tx, "FutureClassesEmpty", { skipInstance: true });
+
+        const fromDate = new Date("2099-01-01T00:00:00Z");
+        const toDate = new Date("2099-01-31T23:59:59Z");
+
+        const rows = await SchedulingRepository.getTeacherFutureClasses(teacher.id, fromDate, toDate, tx);
+        expect(rows).toEqual([]);
+      });
+    });
+
+    test("returns only NOT_ACTIVATED and ACTIVATED classes within the date range, with student data", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "FutureClassesRange", { skipInstance: true });
+        const { teacher: otherTeacher } = await setupTeacher(tx, { name: "FutureOtherTeacher" });
+
+        const fromDate = new Date("2099-06-01T00:00:00Z");
+        const toDate = new Date("2099-06-30T23:59:59Z");
+
+        const inRangeActivated = await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: new Date("2099-06-10T10:00:00Z"),
+          scheduledEndAt: new Date("2099-06-10T11:00:00Z"),
+          executionState: "ACTIVATED",
+          isRescheduled: true,
+        });
+
+        const inRangeNotActivated = await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: new Date("2099-06-15T10:00:00Z"),
+          scheduledEndAt: new Date("2099-06-15T11:00:00Z"),
+          executionState: "NOT_ACTIVATED",
+        });
+
+        await createMockClassInstance(tx, student.id, otherTeacher.id, {
+          scheduledStartAt: new Date("2099-06-20T10:00:00Z"),
+          scheduledEndAt: new Date("2099-06-20T11:00:00Z"),
+          executionState: "NOT_ACTIVATED",
+        });
+
+        await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: new Date("2099-07-05T10:00:00Z"),
+          scheduledEndAt: new Date("2099-07-05T11:00:00Z"),
+          executionState: "NOT_ACTIVATED",
+        });
+
+        const rows = await SchedulingRepository.getTeacherFutureClasses(teacher.id, fromDate, toDate, tx);
+
+        expect(rows).toHaveLength(2);
+        const ids = rows.map(r => r.id);
+        expect(ids).toContain(inRangeActivated.id);
+        expect(ids).toContain(inRangeNotActivated.id);
+
+        const rescheduledRow = rows.find(r => r.id === inRangeActivated.id);
+        expect(rescheduledRow?.isRescheduled).toBe(true);
+        expect(rescheduledRow?.studentId).toBe(student.id);
+        expect(rescheduledRow?.studentName).toBeTruthy();
+        expect(rescheduledRow?.durationMinutes).toBe(60);
+      });
+    });
+
+    test("excludes soft-deleted classes", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "FutureClassesSoftDel", { skipInstance: true });
+
+        const fromDate = new Date("2099-08-01T00:00:00Z");
+        const toDate = new Date("2099-08-31T23:59:59Z");
+
+        await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: new Date("2099-08-10T10:00:00Z"),
+          scheduledEndAt: new Date("2099-08-10T11:00:00Z"),
+          executionState: "NOT_ACTIVATED",
+          deletedAt: new Date(),
+        });
+
+        const kept = await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: new Date("2099-08-12T10:00:00Z"),
+          scheduledEndAt: new Date("2099-08-12T11:00:00Z"),
+          executionState: "NOT_ACTIVATED",
+        });
+
+        const rows = await SchedulingRepository.getTeacherFutureClasses(teacher.id, fromDate, toDate, tx);
+
+        expect(rows).toHaveLength(1);
+        expect(rows[0]?.id).toBe(kept.id);
+      });
+    });
+  });
 });

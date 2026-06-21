@@ -5,4 +5,6 @@ export interface NotificationsLabels {
   readonly unpaidInvoicesTitle: string;
   readonly noUnpaidInvoices: string;
   readonly loadingBilling: string;
+  readonly newUnansweredComplaint: string;
+  readonly defaultSystemNotification: string;
 }

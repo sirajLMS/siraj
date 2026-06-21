@@ -16,14 +16,6 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: AppPermission.DashboardViewMetrics,
   },
   {
-    key: "schedule",
-    labelKey: "dashboard.nav.schedule",
-    icon: CalendarTodayOutlined,
-    href: "/schedule",
-    section: "main",
-    permission: AppPermission.ScheduleViewList,
-  },
-  {
     key: "search-schedule",
     labelKey: "dashboard.nav.scheduleSearch",
     icon: SearchOutlined,

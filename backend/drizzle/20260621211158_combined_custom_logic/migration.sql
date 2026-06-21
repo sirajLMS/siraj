@@ -717,6 +717,63 @@ VALUES (
         'Attach and view external files (contracts, ID verification) linked to a specific Parent record',
         'Documents',
         true
+    ),
+    -- Story 9: Invoice Generation & Processing (billing domain)
+    (
+        gen_random_uuid (),
+        'billing.create_invoice',
+        'billing',
+        'create_invoice',
+        'Manually generate a custom invoice outside the automated package renewal cycle',
+        'Billing',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'billing.update_status_paid',
+        'billing',
+        'update_status_paid',
+        'Manually verify and log the settlement of an outstanding invoice by marking it as Paid',
+        'Billing',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'billing.delete_invoice',
+        'billing',
+        'delete_invoice',
+        'Destructively remove a financial record from the parent billing ledger',
+        'Billing',
+        true
+    ),
+    -- Story 9: Student Metadata & Lifecycle Management
+    (
+        gen_random_uuid (),
+        'student.reassign_teacher',
+        'student',
+        'reassign_teacher',
+        'Dynamically change a student assigned instructor from the parent profile view',
+        'Students',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'student.manage_status',
+        'student',
+        'manage_status',
+        'Alter a student global enrollment state (Regular, On Leave, Suspended) from parent profile',
+        'Students',
+        true
+    ),
+    -- Story 9: Automated System Synchronization
+    (
+        gen_random_uuid (),
+        'system.sync_notifications',
+        'system',
+        'sync_notifications',
+        'Internal rule that forces the global notification tray to reflect real-time billing changes',
+        'System',
+        true
     ) ON CONFLICT (key) DO
 UPDATE
 SET
@@ -891,7 +948,13 @@ WHERE
         'student.view_associated',
         'student.edit_quota',
         'billing.view_history',
-        'document.manage_parent_docs'
+        'document.manage_parent_docs',
+        'billing.create_invoice',
+        'billing.update_status_paid',
+        'billing.delete_invoice',
+        'student.reassign_teacher',
+        'student.manage_status',
+        'system.sync_notifications'
     );
 
 INSERT INTO
@@ -938,7 +1001,12 @@ WHERE
         'student.view_associated',
         'student.edit_quota',
         'billing.view_history',
-        'document.manage_parent_docs'
+        'document.manage_parent_docs',
+        'billing.create_invoice',
+        'billing.update_status_paid',
+        'billing.delete_invoice',
+        'student.reassign_teacher',
+        'student.manage_status'
     );
 
 INSERT INTO
@@ -1008,7 +1076,8 @@ WHERE
     g.slug = 'system_automated'
     AND p.key IN (
         'system.enforce_time_window',
-        'system.enforce_leave_limit'
+        'system.enforce_leave_limit',
+        'system.sync_notifications'
     );
 
 -- Triggers to protect system permissions and groups from deletion or mutation of is_system

@@ -7,4 +7,6 @@ export const notifications: NotificationsLabels = {
   unpaidInvoicesTitle: "الفواتير غير المدفوعة",
   noUnpaidInvoices: "لا توجد فواتير بحاجة للدفع.",
   loadingBilling: "جاري تحميل بيانات الفواتير...",
+  newUnansweredComplaint: "شكوى جديدة غير مجاب عليها",
+  defaultSystemNotification: "إشعار النظام",
 };

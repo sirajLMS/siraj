@@ -1,8 +1,8 @@
 {
-  "id": "ed6829c0-a9c5-47b1-84f5-89d36d8add68",
-  "prevIds": ["de1fb62e-e1a8-4e5a-a964-de056de45f18"],
   "version": "8",
   "dialect": "postgres",
+  "id": "efc177a5-f8fd-4dc9-90db-ce3344c0050b",
+  "prevIds": ["da887ed8-90df-4c90-ab9d-0bb9c0c8d602"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
@@ -95,6 +95,12 @@
         "student.edit_quota",
         "billing.view_history",
         "document.manage_parent_docs",
+        "billing.create_invoice",
+        "billing.update_status_paid",
+        "billing.delete_invoice",
+        "student.reassign_teacher",
+        "student.manage_status",
+        "system.sync_notifications",
         "test.system_only",
         "test.custom_only"
       ],

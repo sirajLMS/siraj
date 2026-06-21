@@ -31,6 +31,8 @@ export namespace NotificationAlertsService {
         throw new Error(t("unauthorizedAction"));
       }
 
+      const tNotifications = await getBackendTranslations({ locale, namespace: "dashboard.notifications" });
+
       const unansweredComplaints = await db
         .select({
           id: complaints.id,
@@ -61,7 +63,7 @@ export namespace NotificationAlertsService {
         alerts.push({
           id: `complaint-${complaint.id}`,
           type: "complaint",
-          title: "New Unanswered Complaint",
+          title: tNotifications("newUnansweredComplaint"),
           body: complaint.body.length > 100 ? `${complaint.body.substring(0, 100)}...` : complaint.body,
           createdAt: complaint.createdAt,
           severity: "warning",
@@ -72,7 +74,7 @@ export namespace NotificationAlertsService {
         alerts.push({
           id: `notification-${notification.id}`,
           type: "notification",
-          title: notification.title ?? "System Notification",
+          title: notification.title ?? tNotifications("defaultSystemNotification"),
           body: notification.body,
           createdAt: notification.createdAt,
           severity: notification.status === NotificationDeliveryStatus.FAILED ? "error" : "info",
