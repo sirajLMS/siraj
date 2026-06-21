@@ -97,5 +97,8 @@ export const testClient = new ApolloClient({
       errorPolicy: "all",
       fetchPolicy: "no-cache",
     },
+    mutate: {
+      errorPolicy: "all",
+    },
   },
 });

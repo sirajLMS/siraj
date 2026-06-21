@@ -71,6 +71,9 @@ export function TestWrapper({
             errorPolicy: "all",
             fetchPolicy: "no-cache",
           },
+          mutate: {
+            errorPolicy: "all",
+          },
         },
       }),
     [mocks]

@@ -120,7 +120,7 @@ describe("ParentRepository — deactivateParent", () => {
       const error = await expectRepoError(() =>
         ParentRepository.deactivateParent("00000000-0000-0000-0000-000000000000", tx)
       );
-      expect(error.message).toContain("parentNotFound");
+      expect(error.message).toContain("was not found");
     });
   });
 
@@ -151,7 +151,7 @@ describe("ParentRepository — deactivateParent", () => {
       const parent = await createTestParent(tx, user.id, { status: "DEACTIVATED" });
 
       const error = await expectRepoError(() => ParentRepository.deactivateParent(parent.id, tx));
-      expect(error.message).toContain("parentAlreadyDeactivated");
+      expect(error.message).toContain("already deactivated");
     });
   });
 });

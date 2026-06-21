@@ -165,12 +165,13 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
   test("parentProfile — returns null for unknown parentId (not a data leak)", async () => {
     if (!adminToken) throw new Error("No auth token");
 
-    const data = await authenticatedRequest(adminToken, "query", parentProfileQueryDocument, {
-      parentId: "00000000-0000-0000-0000-000000000000",
+    const result = await testClient.query({
+      query: parentProfileQueryDocument,
+      variables: { parentId: "00000000-0000-0000-0000-000000000000" },
+      context: { headers: { Authorization: `Bearer ${adminToken}` } },
     });
 
-    // parentProfile is nullable: null is the correct response for unknown ID
-    expect(data.parentProfile === null || data.parentProfile === undefined).toBeTrue();
+    expect(result.data?.parentProfile).toBeNull();
   });
 });
 
@@ -234,15 +235,9 @@ describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
   });
 
   test("deactivateParent — teacher role is denied", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
-
-    const result = await testClient.mutate({
-      mutation: deactivateParentMutationDocument,
-      variables: { parentId: "00000000-0000-0000-0000-000000000000" },
-      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+    await assertOperationDenied("teacher_default", "mutate", deactivateParentMutationDocument, {
+      parentId: "00000000-0000-0000-0000-000000000000",
     });
-
-    expect(result.error).toBeDefined();
   });
 
   test("deactivateParent — unknown parentId throws parentNotFound", async () => {

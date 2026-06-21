@@ -67,4 +67,9 @@ export interface ErrorsLabels {
   readonly cannotModifySuperAdmin: string;
   readonly leaveQuotaExceeded: string;
   readonly invalidInput: string;
+  readonly parentNotFound: string;
+  readonly parentAlreadyDeactivated: string;
+  readonly quotaMustBeNonNegative: string;
+  readonly quotaExceedsTotal: string;
+  readonly invalidFileId: string;
 }

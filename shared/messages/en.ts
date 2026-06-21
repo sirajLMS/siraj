@@ -96,6 +96,11 @@ const en: MessageSchema = {
     cannotModifySuperAdmin: "Cannot modify permissions of a SuperAdmin user",
     leaveQuotaExceeded: "Leave quota exceeded. Maximum allowed leaves per month is {maxLeaves}.",
     invalidInput: "Invalid input data",
+    parentNotFound: "Parent with ID {id} was not found.",
+    parentAlreadyDeactivated: "Parent with ID {id} is already deactivated.",
+    quotaMustBeNonNegative: "Classes remaining must be a non-negative integer.",
+    quotaExceedsTotal: "Cannot set classes remaining ({requested}) above the total classes purchased ({total}).",
+    invalidFileId: "A valid file ID is required.",
   },
   auth: {
     login: {
@@ -452,6 +457,9 @@ const en: MessageSchema = {
         totalClassesMin: "Total classes must be at least 0",
         classesLeftRequired: "Classes left is required",
         classesLeftMin: "Classes left must be at least 0",
+      },
+      errors: {
+        invalidId: "Invalid student ID.",
       },
     },
     studentHistory: {
@@ -1222,6 +1230,16 @@ const en: MessageSchema = {
         addNewStudent: "Add New Student",
         viewInvoices: "View Invoices",
         deactivateAccount: "Deactivate Account",
+        deactivateDialogTitle: "Deactivate Parent Account",
+        deactivateConfirmText:
+          "Are you sure that you want to deactivate this account? The parent will be immediately logged out and lose access to the LMS.",
+        cancel: "Cancel",
+        deactivating: "Deactivating...",
+        deactivateSuccess: "Parent account has been deactivated successfully.",
+      },
+      errors: {
+        invalidId: "Invalid parent ID.",
+        notFound: "Parent not found.",
       },
       sections: {
         parentInfo: "Parent Information",
@@ -1839,6 +1857,9 @@ const en: MessageSchema = {
             body: "Invoices can be saved as drafts before finalizing institutional release.",
           },
         },
+      },
+      errors: {
+        invalidId: "Invalid parent ID in billing view.",
       },
     },
     suggestions: {

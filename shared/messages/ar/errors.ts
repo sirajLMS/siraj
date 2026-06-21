@@ -71,4 +71,9 @@ export const errors: ErrorsLabels = {
   cannotModifySuperAdmin: "لا يمكن تعديل صلاحيات مستخدم SuperAdmin",
   leaveQuotaExceeded: "تم تجاوز حد الإجازات. الحد الأقصى المسموح به هو {maxLeaves} إجازات شهرياً.",
   invalidInput: "بيانات إدخال غير صالحة",
+  parentNotFound: "لم يتم العثور على ولي الأمر ذو المعرف {id}.",
+  parentAlreadyDeactivated: "حساب ولي الأمر ذو المعرف {id} معطل بالفعل.",
+  quotaMustBeNonNegative: "يجب أن يكون عدد الحصص المتبقية عددًا صحيحًا غير سالب.",
+  quotaExceedsTotal: "لا يمكن تعيين الحصص المتبقية ({requested}) أعلى من إجمالي الحصص المشتراة ({total}).",
+  invalidFileId: "مطلوب معرف ملف صالح.",
 };

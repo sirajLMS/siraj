@@ -10,6 +10,15 @@ export interface ParentProfileLabels {
     readonly addNewStudent: string;
     readonly viewInvoices: string;
     readonly deactivateAccount: string;
+    readonly deactivateDialogTitle: string;
+    readonly deactivateConfirmText: string;
+    readonly cancel: string;
+    readonly deactivating: string;
+    readonly deactivateSuccess: string;
+  };
+  readonly errors: {
+    readonly invalidId: string;
+    readonly notFound: string;
   };
   readonly sections: {
     readonly parentInfo: string;

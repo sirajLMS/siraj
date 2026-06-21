@@ -50,4 +50,7 @@ export const quota: StudentQuotaLabels = {
     classesLeftRequired: "الحصص المتبقية مطلوبة",
     classesLeftMin: "يجب أن تكون الحصص المتبقية 0 على الأقل",
   },
+  errors: {
+    invalidId: "معرف الطالب غير صالح.",
+  },
 };

@@ -47,4 +47,7 @@ export interface StudentQuotaLabels {
     readonly classesLeftRequired: string;
     readonly classesLeftMin: string;
   };
+  readonly errors: {
+    readonly invalidId: string;
+  };
 }

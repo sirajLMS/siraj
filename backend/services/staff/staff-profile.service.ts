@@ -60,6 +60,9 @@ export namespace StaffProfileService {
     if (input.dateOfBirth) {
       updateInput.dateOfBirth = input.dateOfBirth;
     }
+    if (input.gender) {
+      updateInput.gender = input.gender.toUpperCase();
+    }
 
     const success = await TeacherRepository.updateTeacherProfile(teacherId, updateInput);
 

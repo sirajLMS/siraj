@@ -87,4 +87,7 @@ export const billing: BillingLabels = {
     active_credit: "رصيد نشط",
   },
   manual: billingManual,
+  errors: {
+    invalidId: "معرف ولي الأمر غير صالح في عرض الفواتير.",
+  },
 };

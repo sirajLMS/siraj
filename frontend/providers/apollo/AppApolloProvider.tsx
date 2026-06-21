@@ -100,6 +100,9 @@ export const AppApolloProvider: React.FC<{
             query: {
               errorPolicy: "all",
             },
+            mutate: {
+              errorPolicy: "all",
+            },
           },
         })
       );

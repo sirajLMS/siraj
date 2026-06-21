@@ -9,6 +9,9 @@ declare module "@apollo/client" {
       interface Query {
         errorPolicy: "all";
       }
+      interface Mutate {
+        errorPolicy: "all";
+      }
     }
   }
 }

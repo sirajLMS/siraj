@@ -12,6 +12,16 @@ export const profile: ParentProfileLabels = {
     addNewStudent: "إضافة طالب جديد",
     viewInvoices: "عرض الفواتير",
     deactivateAccount: "تعطيل الحساب",
+    deactivateDialogTitle: "تعطيل حساب ولي الأمر",
+    deactivateConfirmText:
+      "هل أنت متأكد من رغبتك في تعطيل هذا الحساب؟ سيتم تسجيل خروج ولي الأمر فورًا ويفقد صلاحية الوصول إلى نظام إدارة التعلم (LMS).",
+    cancel: "إلغاء",
+    deactivating: "جاري التعطيل...",
+    deactivateSuccess: "تم تعطيل حساب ولي الأمر بنجاح.",
+  },
+  errors: {
+    invalidId: "معرف ولي الأمر غير صالح.",
+    notFound: "ولي الأمر غير موجود.",
   },
   sections: {
     parentInfo: "معلومات ولي الأمر",
