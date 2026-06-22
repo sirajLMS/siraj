@@ -3,7 +3,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import type { StudentDirectoryRow } from "@/frontend/stores/mockStudentsStore";
+import type { StudentDirectoryRow } from "../types";
 import { ClassesLeftProgress } from "./ClassesLeftProgress";
 
 interface StudentDirectoryCardFooterProps {

@@ -3,14 +3,10 @@
 import { AddOutlined, PersonAddAltOutlined, SearchOutlined } from "@mui/icons-material";
 import { Box, Fab, IconButton, InputAdornment, TextField } from "@mui/material";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import type {
-  StudentAccountStatus,
-  StudentDirectoryRow,
-  StudentEnrollmentStatus,
-} from "@/frontend/stores/mockStudentsStore";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentDirectoryCardList } from "./components/StudentDirectoryCardList";
 import { StudentMobileMetricsScroll } from "./components/StudentMobileMetricsScroll";
+import type { StudentAccountStatus, StudentDirectoryRow, StudentEnrollmentStatus } from "./types";
 
 interface StudentsMobileViewProps {
   readonly pageTitle: string;

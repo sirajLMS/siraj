@@ -1,10 +1,11 @@
 import { create } from "zustand";
+import type { ManagerRole, ManagerStatus } from "@/frontend/views/dashboard/managers/home/types";
 
 export interface Manager {
   id: string;
   name: string;
-  role: "admin" | "staff";
-  status: "active" | "offline";
+  role: ManagerRole;
+  status: ManagerStatus;
   email: string;
   skypeId: string;
   phone: string;

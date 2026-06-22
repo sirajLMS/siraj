@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import type { StudentAccountStatus, StudentEnrollmentStatus } from "@/frontend/stores/mockStudentsStore";
-import { MOBILE_METRIC_ICONS, MOBILE_METRIC_KEYS, useStudentsStore } from "@/frontend/stores/mockStudentsStore";
+import { MOBILE_METRIC_ICONS, useStudentsStore } from "@/frontend/stores/mockStudentsStore";
 import { StudentsView } from "./StudentsView";
+import type { StudentAccountStatus, StudentEnrollmentStatus } from "./types";
+import { MOBILE_METRIC_KEYS } from "./types";
 
 function getMetricTranslationKey(key: string): string {
   if (key === "on_leave") return "onLeave";

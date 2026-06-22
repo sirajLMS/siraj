@@ -1,6 +1,6 @@
-import type { LearningResourceRow, ResourceFilterType, ResourceSortBy } from "@/frontend/stores/mockResourcesStore";
 import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 import type { ResourceUploadFormData } from "../schemas/resourceUploadSchema";
+import type { LearningResourceRow, ResourceFilterType, ResourceSortBy } from "./resourcesTypes";
 
 export interface ResourcesViewProps {
   readonly labels: ResourcesLabels;

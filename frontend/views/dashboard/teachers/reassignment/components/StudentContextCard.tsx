@@ -3,7 +3,7 @@
 import { Avatar, Box, Grid, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui";
-import type { StudentDirectoryRow } from "@/frontend/stores/mockStudentsStore";
+import type { StudentDirectoryRow } from "@/frontend/views/dashboard/students/home/types";
 
 interface StudentContextCardProps {
   readonly student: StudentDirectoryRow;

@@ -1,4 +1,4 @@
-import type { ResourceFileType } from "@/frontend/stores/mockResourcesStore";
+import type { ResourceFileType } from "../types/resourcesTypes";
 
 const EXTENSION_MAP: Record<string, ResourceFileType> = {
   pdf: "pdf",

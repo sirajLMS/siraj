@@ -1,14 +1,10 @@
 "use client";
 
 import { useMediaQuery, useTheme } from "@mui/material";
-import type {
-  StudentAccountStatus,
-  StudentDirectoryRow,
-  StudentEnrollmentStatus,
-} from "@/frontend/stores/mockStudentsStore";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentsDesktopView } from "./StudentsDesktopView";
 import { StudentsMobileView } from "./StudentsMobileView";
+import type { StudentAccountStatus, StudentDirectoryRow, StudentEnrollmentStatus } from "./types";
 
 export interface StudentsViewLabels {
   readonly pageTitle: string;

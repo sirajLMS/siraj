@@ -1,11 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
-import type {
-  StudentAccountStatus,
-  StudentDirectoryRow,
-  StudentEnrollmentStatus,
-} from "@/frontend/stores/mockStudentsStore";
+import type { StudentAccountStatus, StudentDirectoryRow, StudentEnrollmentStatus } from "../types";
 import { StudentDirectoryCard } from "./StudentDirectoryCard";
 
 interface StudentDirectoryCardListLabels {

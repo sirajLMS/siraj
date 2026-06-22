@@ -7,7 +7,7 @@ import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { StudentAccountStatus, StudentDirectoryRow } from "@/frontend/stores/mockStudentsStore";
+import type { StudentAccountStatus, StudentDirectoryRow } from "../types";
 import { ClassesLeftProgress } from "./ClassesLeftProgress";
 
 export interface StudentDirectoryDataGridLabels {

@@ -11,25 +11,15 @@ import {
   WarningAmberOutlined,
 } from "@mui/icons-material";
 import { create } from "zustand";
+import type { StudentDirectoryRow } from "@/frontend/views/dashboard/students/home/types";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
-export type StudentAccountStatus = "activated" | "deactivated" | "regular" | "on_leave" | "suspended" | "on_trial";
-
-export type StudentEnrollmentStatus = "regular" | "prospect" | "withdrawn";
-
-export interface StudentDirectoryRow {
-  readonly id: string;
-  readonly index: number;
-  readonly name: string;
-  readonly email: string;
-  readonly avatarUrl?: string;
-  readonly accountStatus: StudentAccountStatus;
-  readonly enrollmentStatus: StudentEnrollmentStatus;
-  readonly hoursPerWeek: number;
-  readonly classesRemaining: number;
-  readonly classesTotal: number;
-  readonly isDeactivated?: boolean;
-}
+export type {
+  StudentAccountStatus,
+  StudentDirectoryRow,
+  StudentEnrollmentStatus,
+} from "@/frontend/views/dashboard/students/home/types";
+export { MOBILE_METRIC_KEYS } from "@/frontend/views/dashboard/students/home/types";
 
 interface StudentsState {
   readonly metrics: readonly MetricItem[];
@@ -177,9 +167,6 @@ const MOCK_ROWS: StudentDirectoryRow[] = [
     isDeactivated: true,
   },
 ];
-
-/** Mobile metric subset shown in horizontal scroll */
-export const MOBILE_METRIC_KEYS = ["activated", "regular", "on_leave", "suspended"] as const;
 
 export const MOBILE_METRIC_ICONS = {
   activated: HowToRegOutlined,

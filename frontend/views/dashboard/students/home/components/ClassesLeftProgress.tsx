@@ -2,7 +2,7 @@
 
 import { Box, LinearProgress, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import type { StudentAccountStatus } from "@/frontend/stores/mockStudentsStore";
+import type { StudentAccountStatus } from "../types";
 
 interface ClassesLeftProgressProps {
   readonly remaining: number;

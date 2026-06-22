@@ -5,7 +5,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
-import type { Manager } from "@/frontend/stores/mockManagersStore";
+import type { Manager } from "./types";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Styled Components — Extracted inline sx styles for reusability & consistency

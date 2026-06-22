@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import type { StudentDirectoryRow, StudentEnrollmentStatus } from "@/frontend/stores/mockStudentsStore";
+import type { StudentDirectoryRow, StudentEnrollmentStatus } from "../types";
 
 interface StudentDirectoryCardStatsProps {
   readonly row: StudentDirectoryRow;

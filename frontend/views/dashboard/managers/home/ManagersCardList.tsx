@@ -3,7 +3,7 @@ import { Avatar, Box, Chip, IconButton, Stack, Typography } from "@mui/material"
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { BaseCard, StatusBadge } from "@/frontend/components/ui";
-import type { Manager } from "@/frontend/stores/mockManagersStore";
+import type { Manager } from "./types";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Styled Components — Extracted inline sx styles for reusability & consistency

@@ -3,7 +3,7 @@
 import { ArticleOutlined, PictureAsPdfOutlined, SlideshowOutlined, TableChartOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import type { ResourceFileType } from "@/frontend/stores/mockResourcesStore";
+import type { ResourceFileType } from "../types/resourcesTypes";
 
 interface ResourceFileTypeIconProps {
   readonly fileType: ResourceFileType;

@@ -2,7 +2,7 @@
 
 import { Avatar, Box, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { StudentAccountStatus, StudentDirectoryRow } from "@/frontend/stores/mockStudentsStore";
+import type { StudentAccountStatus, StudentDirectoryRow } from "../types";
 
 interface StudentDirectoryCardHeaderProps {
   readonly row: StudentDirectoryRow;

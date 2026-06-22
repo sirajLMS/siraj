@@ -1,4 +1,4 @@
-import type { LearningResourceRow, ResourceFilterType, ResourceSortBy } from "@/frontend/stores/mockResourcesStore";
+import type { LearningResourceRow, ResourceFilterType, ResourceSortBy } from "../types/resourcesTypes";
 
 export function filterResources(
   rows: readonly LearningResourceRow[],

@@ -1,23 +1,20 @@
-// cspell:disable
 import { create } from "zustand";
 import { logger } from "@/frontend/utils/logger";
-import type { ResourceUploadFormData } from "@/frontend/views/dashboard/resources/schemas/resourceUploadSchema";
+import type {
+  LearningResourceRow,
+  ResourceFilterType,
+  ResourceSortBy,
+  ResourceUploadFormData,
+} from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 import { inferResourceFileType } from "@/frontend/views/dashboard/resources/utils/resourceFileTypeUtils";
 
-export type ResourceFileType = "pdf" | "pptx" | "xlsx" | "docx";
-
-export type ResourceSortBy = "date" | "name";
-
-export type ResourceFilterType = ResourceFileType | "all";
-
-export interface LearningResourceRow {
-  readonly id: string;
-  readonly title: string;
-  readonly fileName: string;
-  readonly fileType: ResourceFileType;
-  readonly uploadedAt: string;
-  readonly uploadedAtTimestamp: number;
-}
+export type {
+  LearningResourceRow,
+  ResourceFileType,
+  ResourceFilterType,
+  ResourceSortBy,
+  ResourceUploadFormData,
+} from "@/frontend/views/dashboard/resources/types/resourcesTypes";
 
 interface ResourcesState {
   readonly resources: readonly LearningResourceRow[];
