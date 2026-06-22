@@ -2,6 +2,7 @@
 
 import { MoreVert as MoreVertIcon } from "@mui/icons-material";
 import { Box, IconButton, Paper, Stack, type Theme, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
@@ -37,6 +38,86 @@ function getLeftBorderColor(status: ClassStatus, theme: Theme): string {
   }
 }
 
+// Centered message shown when there are no schedule rows
+const StyledEmptyStateBox = styled(Box)(({ theme }) => ({
+  paddingTop: theme.spacing(4),
+  paddingBottom: theme.spacing(4),
+  textAlign: "center",
+}));
+
+// Individual schedule card with status-based left border and surface background
+const StyledScheduleCard = styled(Paper, {
+  shouldForwardProp: prop => prop !== "status" && prop !== "isAbsent",
+})<{ status: ClassStatus; isAbsent: boolean }>(({ theme, status, isAbsent }) => ({
+  padding: theme.spacing(2),
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  opacity: isAbsent ? 0.8 : 1,
+  backgroundColor: theme.palette.surfaceContainerLowest,
+  border: `1px solid ${theme.palette.border.light}`,
+  borderLeft: `4px solid ${getLeftBorderColor(status, theme)}`,
+  boxShadow: theme.shadows[1],
+}));
+
+// Flex row splitting card content between info and actions
+const StyledCardHeaderRow = styled(Box)({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+});
+
+// Meta row containing class ID, dot separator, and time
+const StyledCardMetaRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+  marginBottom: theme.spacing(0.5),
+}));
+
+// Uppercase class ID label
+const StyledCardIdLabel = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  textTransform: "uppercase",
+}));
+
+// Small dot separator between meta items
+const StyledDotSeparator = styled(Box)(({ theme }) => ({
+  width: 4,
+  height: 4,
+  borderRadius: "50%",
+  backgroundColor: theme.palette.border.light,
+}));
+
+// Time display - highlighted when class is in progress
+const StyledCardTimeText = styled(Typography, {
+  shouldForwardProp: prop => prop !== "isInProgress",
+})<{ isInProgress: boolean }>(({ theme, isInProgress }) => ({
+  fontWeight: 700,
+  color: isInProgress ? theme.palette.primary.main : theme.palette.text.secondary,
+}));
+
+// Student name displayed prominently in the card
+const StyledStudentNameText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onSurface,
+  marginBottom: theme.spacing(0.25),
+}));
+
+// Right-aligned column containing status badge and details button
+const StyledCardActionsColumn = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-end",
+  gap: theme.spacing(1),
+}));
+
+// Details action button with hover state
+const StyledDetailsIconButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  "&:hover": {
+    backgroundColor: "transparent",
+    color: theme.palette.primary.main,
+  },
+}));
+
 export function ScheduleOverviewCardList({
   rows,
   statusLabels,
@@ -48,11 +129,11 @@ export function ScheduleOverviewCardList({
 
   if (rows.length === 0) {
     return (
-      <Box sx={{ py: 4, textAlign: "center" }}>
+      <StyledEmptyStateBox>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {emptyMessage}
         </Typography>
-      </Box>
+      </StyledEmptyStateBox>
     );
   }
 
@@ -62,83 +143,38 @@ export function ScheduleOverviewCardList({
         const isAbsent = row.status === "absent";
 
         return (
-          <Paper
-            key={row.id}
-            elevation={0}
-            sx={theme => ({
-              p: 2,
-              borderRadius: 2,
-              opacity: isAbsent ? 0.8 : 1,
-              bgcolor: theme.palette.surfaceContainerLowest,
-              border: `1px solid ${theme.palette.border.light}`,
-              borderLeft: `4px solid ${getLeftBorderColor(row.status, theme)}`,
-              boxShadow: theme.shadows[1],
-            })}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <StyledScheduleCard key={row.id} elevation={0} status={row.status} isAbsent={isAbsent}>
+            <StyledCardHeaderRow>
+              {/* Left side: class ID, time, and student name */}
               <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                  <Typography
-                    variant="labelMd"
-                    sx={theme => ({
-                      color: theme.palette.text.secondary,
-                      textTransform: "uppercase",
-                    })}
-                  >
-                    ID: {row.classId.replace("#CLS-", "")}
-                  </Typography>
-                  <Box
-                    sx={theme => ({
-                      width: 4,
-                      height: 4,
-                      borderRadius: "50%",
-                      bgcolor: theme.palette.border.light,
-                    })}
-                  />
-                  <Typography
-                    variant="bodyMd"
-                    sx={theme => ({
-                      fontWeight: 700,
-                      color: row.status === "in_progress" ? theme.palette.primary.main : theme.palette.text.secondary,
-                    })}
-                  >
+                <StyledCardMetaRow>
+                  <StyledCardIdLabel variant="labelMd">ID: {row.classId.replace("#CLS-", "")}</StyledCardIdLabel>
+                  <StyledDotSeparator />
+                  <StyledCardTimeText variant="bodyMd" isInProgress={row.status === "in_progress"}>
                     {row.time}
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="titleLg"
-                  sx={theme => ({
-                    color: theme.palette.onSurface,
-                    mb: 0.25,
-                  })}
-                >
-                  {row.student}
-                </Typography>
+                  </StyledCardTimeText>
+                </StyledCardMetaRow>
+                <StyledStudentNameText variant="titleLg">{row.student}</StyledStudentNameText>
               </Box>
-              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
+
+              {/* Right side: status badge and details button */}
+              <StyledCardActionsColumn>
                 <StatusBadge
                   category="classStatus"
                   status={CLASS_STATUS_MAP[row.status]}
                   label={statusLabels[row.status]}
                   size="small"
                 />
-                <IconButton
+                <StyledDetailsIconButton
                   size="small"
                   onClick={() => router.push(`/${locale}/classes/${row.id}`)}
                   aria-label={detailsLabel}
-                  sx={theme => ({
-                    color: theme.palette.text.secondary,
-                    "&:hover": {
-                      bgcolor: "transparent",
-                      color: theme.palette.primary.main,
-                    },
-                  })}
                 >
                   <MoreVertIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            </Box>
-          </Paper>
+                </StyledDetailsIconButton>
+              </StyledCardActionsColumn>
+            </StyledCardHeaderRow>
+          </StyledScheduleCard>
         );
       })}
     </Stack>

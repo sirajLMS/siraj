@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight, SearchOutlined } from "@mui/icons-material";
 import { Box, IconButton, InputAdornment, Paper, Stack, TextField, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -10,35 +11,85 @@ import { ScheduleFilters } from "./ScheduleFilters";
 import { ScheduleOverviewCardList } from "./ScheduleOverviewCardList";
 import { ScheduleOverviewDataGrid } from "./ScheduleOverviewDataGrid";
 
+// Footer bar showing pagination info at bottom of the schedule panel
+const StyledSectionFooter = styled(Box)(({ theme }) => ({
+  paddingInline: theme.spacing(3),
+  paddingBlock: theme.spacing(1.5),
+  display: "flex",
+  justifyContent: "flex-end",
+  borderTop: `1px solid ${theme.palette.border.light}`,
+}));
+
+// Pagination label text in the section footer
+const StyledSectionFooterText = styled(Typography)(({ theme }) => ({
+  fontFamily: '"Inter", sans-serif',
+  fontSize: "12px",
+  color: theme.palette.onSurfaceVariant,
+}));
+
+// Desktop panel wrapper with rounded border and hidden overflow
+const StyledDesktopPanel = styled(Paper)(({ theme }) => ({
+  borderRadius: Number(theme.shape.borderRadius) * 2,
+  border: `1px solid ${theme.palette.border.light}`,
+  overflow: "hidden",
+}));
+
+// Container for the date and teacher filters inside the desktop layout
+const StyledFilterContainer = styled(Box)(({ theme }) => ({
+  paddingInline: theme.spacing(3),
+  paddingBlock: theme.spacing(2.5),
+  backgroundColor: theme.palette.background.default,
+  borderBottom: `1px solid ${theme.palette.border.light}`,
+}));
+
+// Search icon styled consistently for both desktop and mobile search fields
+const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
+  fontSize: 18,
+  color: theme.palette.onSurfaceVariant,
+}));
+
+// Mobile section title displayed in primary color
+const StyledMobileSectionTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+// Pagination bar at bottom of mobile layout showing count and nav buttons
+const StyledPaginationFooter = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  paddingInline: theme.spacing(1),
+}));
+
+// Page count label in the mobile pagination footer
+const StyledPageCountLabel = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Bordered navigation button for mobile pagination with disabled state
+const StyledPageNavButton = styled(IconButton)(({ theme }) => ({
+  border: `1px solid ${theme.palette.border.light}`,
+  borderRadius: Number(theme.shape.borderRadius),
+  backgroundColor: theme.palette.surfaceContainerLowest,
+  "&.Mui-disabled": {
+    opacity: 0.5,
+  },
+}));
+
 export interface ScheduleOverviewSectionProps extends ScheduleOverviewData {
   readonly title: string;
 }
 
+// Footer showing pagination/row count info at the bottom of the schedule panel
 const SectionFooter = ({ showingText }: { showingText: string }) => {
   return (
-    <Box
-      sx={theme => ({
-        px: 3,
-        py: 1.5,
-        display: "flex",
-        justifyContent: "flex-end",
-        borderTop: `1px solid ${theme.palette.border.light}`,
-      })}
-    >
-      <Typography
-        sx={theme => ({
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "12px",
-          color: theme.palette.onSurfaceVariant,
-        })}
-      >
-        {showingText}
-      </Typography>
-    </Box>
+    <StyledSectionFooter>
+      <StyledSectionFooterText>{showingText}</StyledSectionFooterText>
+    </StyledSectionFooter>
   );
 };
 
-// Desktop Layout Component
+// Desktop Layout Component - shows data grid with filters and search
 const DesktopLayout = ({
   title,
   searchPlaceholder,
@@ -61,14 +112,7 @@ const DesktopLayout = ({
   onSubmit,
 }: ScheduleOverviewSectionProps) => (
   <Box sx={{ display: { xs: "none", md: "block" } }}>
-    <Paper
-      elevation={0}
-      sx={theme => ({
-        borderRadius: 3,
-        border: `1px solid ${theme.palette.border.light}`,
-        overflow: "hidden",
-      })}
-    >
+    <StyledDesktopPanel elevation={0}>
       <SectionPanel
         title={title}
         actions={
@@ -84,7 +128,7 @@ const DesktopLayout = ({
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchOutlined sx={theme => ({ fontSize: 18, color: theme.palette.onSurfaceVariant })} />
+                      <StyledSearchIcon />
                     </InputAdornment>
                   ),
                 },
@@ -99,16 +143,9 @@ const DesktopLayout = ({
           </RequirePermission>
         }
       >
-        {/* Filters */}
+        {/* Filters - date picker and teacher autocomplete */}
         <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>
-          <Box
-            sx={theme => ({
-              px: 3,
-              py: 2.5,
-              bgcolor: theme.palette.background.default,
-              borderBottom: `1px solid ${theme.palette.border.light}`,
-            })}
-          >
+          <StyledFilterContainer>
             <ScheduleFilters
               dateLabel={dateLabel}
               dateValue={dateValue}
@@ -120,10 +157,10 @@ const DesktopLayout = ({
               onTeacherChange={onTeacherChange}
               onSubmit={onSubmit}
             />
-          </Box>
+          </StyledFilterContainer>
         </RequirePermission>
 
-        {/* Table */}
+        {/* Desktop data grid table */}
         <ScheduleOverviewDataGrid
           rows={rows}
           headers={headers}
@@ -134,11 +171,11 @@ const DesktopLayout = ({
 
         <SectionFooter showingText={showingText} />
       </SectionPanel>
-    </Paper>
+    </StyledDesktopPanel>
   </Box>
 );
 
-// Mobile Layout Component
+// Mobile Layout Component - shows card list with search and pagination
 const MobileLayout = ({
   title,
   searchPlaceholder,
@@ -161,17 +198,10 @@ const MobileLayout = ({
       gap: 2,
     }}
   >
-    {/* Title */}
-    <Typography
-      variant="titleLg"
-      sx={theme => ({
-        color: theme.palette.primary.main,
-      })}
-    >
-      {title}
-    </Typography>
+    {/* Mobile section title */}
+    <StyledMobileSectionTitle variant="titleLg">{title}</StyledMobileSectionTitle>
 
-    {/* Search */}
+    {/* Mobile search field */}
     <Box sx={{ display: "flex", gap: 1.5 }}>
       <RequirePermission permissions={[AppPermission.DashboardSearch]}>
         <TextField
@@ -186,7 +216,7 @@ const MobileLayout = ({
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchOutlined sx={theme => ({ fontSize: 18, color: theme.palette.onSurfaceVariant })} />
+                  <StyledSearchIcon />
                 </InputAdornment>
               ),
             },
@@ -201,7 +231,7 @@ const MobileLayout = ({
       </RequirePermission>
     </Box>
 
-    {/* Card List */}
+    {/* Mobile card list of schedule items */}
     <ScheduleOverviewCardList
       rows={rows}
       statusLabels={statusLabels}
@@ -209,63 +239,33 @@ const MobileLayout = ({
       emptyMessage={emptyMessage}
     />
 
-    {/* Pagination Footer */}
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        px: 1,
-      }}
-    >
-      <Typography
-        variant="labelMd"
-        sx={theme => ({
-          color: theme.palette.text.secondary,
-        })}
-      >
-        {showingText}
-      </Typography>
+    {/* Mobile pagination footer with count and nav buttons */}
+    <StyledPaginationFooter>
+      <StyledPageCountLabel variant="labelMd">{showingText}</StyledPageCountLabel>
       <Box sx={{ display: "flex", gap: 1 }}>
-        <IconButton
-          size="small"
-          disabled={page === 0}
-          onClick={() => onPageChange(page - 1)}
-          sx={theme => ({
-            border: `1px solid ${theme.palette.border.light}`,
-            borderRadius: 1,
-            bgcolor: theme.palette.surfaceContainerLowest,
-            "&.Mui-disabled": {
-              opacity: 0.5,
-            },
-          })}
-        >
+        <StyledPageNavButton size="small" disabled={page === 0} onClick={() => onPageChange(page - 1)}>
           <ChevronLeft fontSize="small" />
-        </IconButton>
-        <IconButton
+        </StyledPageNavButton>
+        <StyledPageNavButton
           size="small"
           disabled={page >= Math.ceil(totalCount / pageSize) - 1}
           onClick={() => onPageChange(page + 1)}
-          sx={theme => ({
-            border: `1px solid ${theme.palette.border.light}`,
-            borderRadius: 1,
-            bgcolor: theme.palette.surfaceContainerLowest,
-            "&.Mui-disabled": {
-              opacity: 0.5,
-            },
-          })}
         >
           <ChevronRight fontSize="small" />
-        </IconButton>
+        </StyledPageNavButton>
       </Box>
-    </Box>
+    </StyledPaginationFooter>
   </Stack>
 );
 
+// Schedule Overview Section - renders desktop data grid or mobile card list
+// depending on viewport width, with shared filters and search
 export function ScheduleOverviewSection(props: ScheduleOverviewSectionProps) {
   return (
     <>
+      {/* Desktop: data grid with filters, search, and footer */}
       <DesktopLayout {...props} />
+      {/* Mobile: card list with search and pagination */}
       <MobileLayout {...props} />
     </>
   );

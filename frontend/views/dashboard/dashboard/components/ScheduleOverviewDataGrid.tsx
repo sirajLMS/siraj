@@ -2,7 +2,7 @@
 
 import { Details as DetailsIcon } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
@@ -12,6 +12,43 @@ import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { ClassStatus, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
+
+// Monospace-styled label for IDs and time values in data grid cells
+const StyledMonospaceLabel = styled(Typography)(({ theme }) => ({
+  fontFamily: "monospace",
+  color: theme.palette.text.secondary,
+  fontWeight: 500,
+  alignSelf: "center",
+}));
+
+// Student name displayed with medium weight in grid cell
+const StyledStudentNameText = styled(Typography)({
+  fontWeight: 500,
+  alignSelf: "center",
+});
+
+// Teacher name displayed in secondary color in grid cell
+const StyledTeacherNameText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  alignSelf: "center",
+}));
+
+// Centered container for action buttons inside a grid cell
+const StyledActionsCellBox = styled(Box)({
+  display: "flex",
+  justifyContent: "center",
+  width: "100%",
+  alignSelf: "center",
+  height: "100%",
+});
+
+// Details icon button with primary color and subtle alpha hover background
+const StyledGridDetailsIconButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+  },
+}));
 
 interface ScheduleOverviewDataGridProps {
   readonly rows: readonly ScheduleRow[];
@@ -58,29 +95,21 @@ export function ScheduleOverviewDataGrid({
         field: "classId",
         headerName: headers.classId,
         width: 120,
-        renderCell: ({ row }) => <MonospaceLabel value={row.classId} />,
+        renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.classId}</StyledMonospaceLabel>,
       },
       {
         field: "student",
         headerName: headers.student,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={{ fontWeight: 500, alignSelf: "center" }}>
-            {row.student}
-          </Typography>
-        ),
+        renderCell: ({ row }) => <StyledStudentNameText variant="bodyMd">{row.student}</StyledStudentNameText>,
       },
       {
         field: "teacher",
         headerName: headers.teacher,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, alignSelf: "center" })}>
-            {row.teacher}
-          </Typography>
-        ),
+        renderCell: ({ row }) => <StyledTeacherNameText variant="bodyMd">{row.teacher}</StyledTeacherNameText>,
       },
     ];
 
@@ -91,21 +120,25 @@ export function ScheduleOverviewDataGrid({
           headerName: headers.yourTime,
           width: 150,
           flex: 1,
-          renderCell: ({ row }) => <MonospaceLabel value={row.yourTime} />,
+          renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.yourTime}</StyledMonospaceLabel>,
         },
         {
           field: "teacherTime",
           headerName: headers.teacherTime,
           width: 150,
           flex: 1,
-          renderCell: ({ row }) => <MonospaceLabel value={row.teacherTime ?? ""} />,
+          renderCell: ({ row }) => (
+            <StyledMonospaceLabel variant="labelMd">{row.teacherTime ?? ""}</StyledMonospaceLabel>
+          ),
         },
         {
           field: "studentTime",
           headerName: headers.studentTime,
           width: 150,
           flex: 1,
-          renderCell: ({ row }) => <MonospaceLabel value={row.studentTime ?? ""} />,
+          renderCell: ({ row }) => (
+            <StyledMonospaceLabel variant="labelMd">{row.studentTime ?? ""}</StyledMonospaceLabel>
+          ),
         }
       );
     } else {
@@ -114,7 +147,7 @@ export function ScheduleOverviewDataGrid({
         headerName: headers.time,
         width: 130,
         flex: 1,
-        renderCell: ({ row }) => <MonospaceLabel value={row.time} />,
+        renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.time}</StyledMonospaceLabel>,
       });
     }
 
@@ -135,24 +168,15 @@ export function ScheduleOverviewDataGrid({
         align: "center",
         headerAlign: "center",
         renderCell: ({ row }) => (
-          <Box sx={{ display: "flex", justifyContent: "center", width: "100%", alignSelf: "center", height: "100%" }}>
+          <StyledActionsCellBox>
             <Box>
               <Tooltip title={detailsLabel}>
-                <IconButton
-                  size="small"
-                  onClick={() => router.push(`/${locale}/classes/${row.id}`)}
-                  sx={theme => ({
-                    color: theme.palette.primary.main,
-                    "&:hover": {
-                      bgcolor: alpha(theme.palette.primary.main, 0.08),
-                    },
-                  })}
-                >
+                <StyledGridDetailsIconButton size="small" onClick={() => router.push(`/${locale}/classes/${row.id}`)}>
                   <DetailsIcon fontSize="small" />
-                </IconButton>
+                </StyledGridDetailsIconButton>
               </Tooltip>
             </Box>
-          </Box>
+          </StyledActionsCellBox>
         ),
       }
     );
@@ -195,21 +219,5 @@ export function ScheduleOverviewDataGrid({
         },
       }}
     />
-  );
-}
-
-function MonospaceLabel({ value }: Readonly<{ value: string }>) {
-  return (
-    <Typography
-      variant="labelMd"
-      sx={theme => ({
-        fontFamily: "monospace",
-        color: theme.palette.text.secondary,
-        fontWeight: 500,
-        alignSelf: "center",
-      })}
-    >
-      {value}
-    </Typography>
   );
 }

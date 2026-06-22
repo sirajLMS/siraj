@@ -30,18 +30,20 @@ import type { ClassStatus, MetricItem, ScheduleRow } from "@/frontend/views/dash
 import { DashboardView } from "./DashboardView";
 import { useAdminDashboardLabels } from "./utils";
 
+// Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
+// This container component handles all GraphQL queries, filter state, and metric/row transformations
 export function AdminDashboardContainer() {
   const t = useTranslations("dashboard");
 
   // Load user details and RBAC validation hook
   const { hasPermission } = useUserStore();
 
-  // Filter state managed via the new real Zustand store
+  // Filter state managed via the new real Zustand store (date, teacher, search, selected status)
   const { filters, setDateFilter, setTeacherFilter, setSearchQuery, setSelectedStatus } = useDashboardStore();
 
   const { headers, statusLabels } = useAdminDashboardLabels();
 
-  // Fetch metrics using active filters
+  // Fetch metrics using active filters (date and teacherId)
   const {
     data: metricsData,
     loading: loadingMetrics,
@@ -53,7 +55,7 @@ export function AdminDashboardContainer() {
     },
   });
 
-  // Fetch daily list using active filters
+  // Fetch daily schedule list using active filters (date, teacherId, search)
   const {
     data: listData,
     loading: loadingList,
@@ -93,6 +95,7 @@ export function AdminDashboardContainer() {
     name: t?.name ?? "",
   }));
 
+  // Handle metric card clicks - enforces DashboardFilterMetrics permission before toggling status selection
   const handleMetricClick = (key: string) => {
     // Enforce dashboard.filter_metrics permission for card clicking
     if (!hasPermission(AppPermission.DashboardFilterMetrics)) {
@@ -106,7 +109,7 @@ export function AdminDashboardContainer() {
     }
   };
 
-  // Map API metrics back to the required frontend MetricItem[] structure
+  // Map API metrics back to the required frontend MetricItem[] structure for TodayClassesSection
   const rawMetrics = metricsData?.dailyScheduleMetrics;
   const metricsList: MetricItem[] = [
     { key: "total", count: rawMetrics?.total ?? 0, labelKey: "dashboard.admin.metrics.total", icon: CalendarToday },
@@ -173,10 +176,10 @@ export function AdminDashboardContainer() {
     },
   ];
 
-  // Map and filter raw schedule list to rows
+  // Map and filter raw schedule list to rows with safe status mapping
   const rawList = listData?.dailyScheduleList ?? [];
   const mappedRows: ScheduleRow[] = rawList.map(item => {
-    // Determine the status mapping safely
+    // Determine the status mapping safely from API response
     let status: ClassStatus = "pending";
     if (
       item.status &&
@@ -198,9 +201,9 @@ export function AdminDashboardContainer() {
     };
   });
 
-  // Client-side filtering
+  // Client-side filtering by selected status card
   const filteredRows = mappedRows.filter(row => {
-    // Selected Status card filtering
+    // Selected Status card filtering - maps metric keys to class statuses
     if (filters.selectedStatus && filters.selectedStatus !== "total") {
       const statusMapping: Record<string, string> = {
         pending: "pending",
@@ -219,7 +222,7 @@ export function AdminDashboardContainer() {
     return true;
   });
 
-  // Client-side pagination
+  // Client-side pagination on filtered rows
   const paginatedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
 
   const showingText = t("admin.showingOf", {

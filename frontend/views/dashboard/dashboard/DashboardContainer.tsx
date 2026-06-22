@@ -27,6 +27,8 @@ function shouldShowTeacherDashboard(permissions: readonly AppPermission[], modeP
   );
 }
 
+// Dashboard Container - root orchestrator that determines which dashboard type to render
+// Based on user permissions and mode parameters, delegates to ParentTeacherAdmin dashboards
 export function DashboardContainer() {
   const { user, setUser } = useUserStore();
   const searchParams = useSearchParams();
@@ -56,5 +58,6 @@ export function DashboardContainer() {
     return <TeacherDashboardContainer />;
   }
 
+  // Default: render admin dashboard with metrics, filters, and schedule overview
   return <AdminDashboardContainer />;
 }

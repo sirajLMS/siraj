@@ -1,10 +1,23 @@
 "use client";
 
 import { Autocomplete, Box, TextField } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { format, isValid, parse } from "date-fns";
 import { AppDatePicker } from "@/frontend/components/ui/form/AppDatePicker";
 
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
+
+// Styled container for the filter row - responsive layout with column on mobile, row on desktop
+const StyledFiltersContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(2),
+  alignItems: "stretch",
+  [theme.breakpoints.up("sm")]: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+}));
 
 interface ScheduleFiltersProps {
   readonly dateLabel: string;
@@ -54,14 +67,7 @@ export function ScheduleFilters({
   const selectedTeacher = teachers.find(t => t.id === teacherValue) || null;
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: { xs: "column", sm: "row" },
-        gap: 2,
-        alignItems: { xs: "stretch", sm: "flex-end" },
-      }}
-    >
+    <StyledFiltersContainer>
       <AppDatePicker
         label={dateLabel}
         value={selectedDate}
@@ -114,6 +120,6 @@ export function ScheduleFilters({
       >
         {submitLabel}
       </Button> */}
-    </Box>
+    </StyledFiltersContainer>
   );
 }

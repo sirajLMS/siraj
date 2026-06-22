@@ -17,6 +17,9 @@ interface AdminDashboardViewProps extends ScheduleOverviewData {
   readonly scheduleTitle: string;
 }
 
+// Admin Dashboard View - composed of two permission-gated sections:
+// 1. TodayClassesSection: metric cards showing class statistics for the day
+// 2. ScheduleOverviewSection: filterable data grid/card list of scheduled classes
 export function DashboardView({
   todayClassesTitle,
   lastUpdated,
@@ -49,7 +52,7 @@ export function DashboardView({
 }: AdminDashboardViewProps) {
   return (
     <PageContainer>
-      {/* Today Classes Section */}
+      {/* Today's Classes Section - metric cards with click-to-filter, requires DashboardViewMetrics permission */}
       <RequirePermission permissions={[AppPermission.DashboardViewMetrics]}>
         <TodayClassesSection
           title={todayClassesTitle}
@@ -60,7 +63,7 @@ export function DashboardView({
         />
       </RequirePermission>
 
-      {/* Schedule Overview Section */}
+      {/* Schedule Overview Section - desktop data grid or mobile card list with filters and search, requires ScheduleViewList permission */}
       <RequirePermission permissions={[AppPermission.ScheduleViewList]}>
         <ScheduleOverviewSection
           title={scheduleTitle}

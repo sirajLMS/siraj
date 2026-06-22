@@ -10,6 +10,7 @@ interface TodayClassesMobileScrollProps {
   readonly selectedKey?: string;
 }
 
+// Horizontally scrollable container for metric cards on mobile viewport
 const StyledScrollGrid = styled(Grid)(({ theme }) => ({
   overflowX: "auto",
   scrollbarWidth: "none",
@@ -18,6 +19,7 @@ const StyledScrollGrid = styled(Grid)(({ theme }) => ({
   borderRadius: 16,
 }));
 
+// Individual metric card in horizontal scroll - handles selection state and tap feedback
 const StyledMetricCard = styled(Grid, {
   shouldForwardProp: prop => prop !== "isSelected",
 })<{ isSelected: boolean }>(({ theme, isSelected }) => ({
@@ -37,6 +39,7 @@ const StyledMetricCard = styled(Grid, {
   flex: "0 0 auto",
 }));
 
+// Circular icon wrapper - changes border color based on error/warning metric types
 const StyledIconWrapper = styled(Grid, {
   shouldForwardProp: prop => prop !== "isError",
 })<{ isError: boolean }>(({ theme, isError }) => ({
@@ -50,12 +53,14 @@ const StyledIconWrapper = styled(Grid, {
   color: isError ? theme.palette.error.main : theme.palette.header,
 }));
 
+// Vertical container for metric count and label text
 const StyledTextContainer = styled(Grid)(() => ({
   display: "flex",
   flexDirection: "column",
   gap: 8,
 }));
 
+// Numeric count displayed in large bold primary color
 const MetricCount = styled(Typography)(({ theme }) => ({
   fontFamily: theme.typography.h3.fontFamily,
   fontWeight: 700,
@@ -63,11 +68,14 @@ const MetricCount = styled(Typography)(({ theme }) => ({
   lineHeight: 1,
 }));
 
+// Metric name label in secondary text color with uppercase variant
 const MetricLabel = styled(Typography)(({ theme }) => ({
   fontFamily: theme.typography.caption.fontFamily,
   color: theme.palette.text.secondary,
 }));
 
+// Mobile scrollable list of metric cards for the Today's Classes section
+// Each card displays a metric icon, count, and label, and supports click filtering
 export function TodayClassesMobileScroll({ metrics, onMetricClick, selectedKey }: TodayClassesMobileScrollProps) {
   const t = useTranslations();
   return (
@@ -84,9 +92,11 @@ export function TodayClassesMobileScroll({ metrics, onMetricClick, selectedKey }
             isSelected={isSelected}
             onClick={() => onMetricClick?.(metric.key)}
           >
+            {/* Metric icon in circular wrapper with error-aware border color */}
             <StyledIconWrapper size={16} isError={isError}>
               <MetricIcon sx={{ fontSize: 20 }} />
             </StyledIconWrapper>
+            {/* Metric count and label text */}
             <StyledTextContainer size="auto">
               <MetricCount>
                 {typeof metric.count === "number" ? metric.count.toLocaleString() : metric.count}
