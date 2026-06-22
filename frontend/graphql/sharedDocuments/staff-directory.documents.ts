@@ -27,3 +27,19 @@ export const teacherDirectoryQueryDocument: TypedDocumentNode<
     }
   }
 `;
+
+export const managerDirectoryQueryDocument: TypedDocumentNode<Operations.ManagerDirectoryQuery> = gql`
+  query managerDirectory {
+    managerDirectory {
+      id
+      staffProfileId
+      name
+      email
+      phone
+      skypeId
+      status
+      roleSlug
+      roleName
+    }
+  }
+`;

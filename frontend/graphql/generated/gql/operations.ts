@@ -190,6 +190,12 @@ export type RescheduleTrackingInput = {
   status: string | null | undefined;
 };
 
+export type ResourceUploadInput = {
+  displayName: string;
+  fileId: string | number;
+  filePath: string;
+};
+
 export type RevokePermissionGroupFromUserInput = {
   groupId: string;
   userId: string;
@@ -590,6 +596,32 @@ export type ExecuteDstBulkUpdateMutationVariables = Exact<{
 
 export type ExecuteDstBulkUpdateMutation = ExecuteDstBulkUpdateMutation_Mutation;
 
+export type LearningResourceRowFragmentFragment = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
+
+export type LearningResourcesQuery_learningResources_LearningResourceRow = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
+
+export type LearningResourcesQuery_Query = { learningResources: Array<LearningResourcesQuery_learningResources_LearningResourceRow> | null };
+
+
+export type LearningResourcesQueryVariables = Exact<{
+  searchQuery: string | null | undefined;
+}>;
+
+
+export type LearningResourcesQuery = LearningResourcesQuery_Query;
+
+export type UploadLearningResourceMutation_uploadLearningResource_LearningResourceRow = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
+
+export type UploadLearningResourceMutation_Mutation = { uploadLearningResource: UploadLearningResourceMutation_uploadLearningResource_LearningResourceRow | null };
+
+
+export type UploadLearningResourceMutationVariables = Exact<{
+  input: Types.ResourceUploadInput;
+}>;
+
+
+export type UploadLearningResourceMutation = UploadLearningResourceMutation_Mutation;
+
 export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert = { id: string | null, type: string | null, title: string | null, body: string | null, createdAt: string | null, severity: string | null };
 
 export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult = { id: string | null, totalCount: number | null, unreadCount: number | null, alerts: Array<NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert> | null };
@@ -984,6 +1016,16 @@ export type TeacherDirectoryQueryVariables = Exact<{
 
 export type TeacherDirectoryQuery = TeacherDirectoryQuery_Query;
 
+export type ManagerDirectoryQuery_managerDirectory_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, skypeId: string | null, status: string | null, roleSlug: string | null, roleName: string | null };
+
+export type ManagerDirectoryQuery_Query = { managerDirectory: Array<ManagerDirectoryQuery_managerDirectory_ManagerDirectoryRow> | null };
+
+
+export type ManagerDirectoryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ManagerDirectoryQuery = ManagerDirectoryQuery_Query;
+
 export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: string | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: string | null };
 
 export type TeacherProfileForEditQuery_Query = { teacherProfileForEdit: TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult | null };
@@ -1008,6 +1050,22 @@ export type UpdateTeacherProfileMutationVariables = Exact<{
 
 
 export type UpdateTeacherProfileMutation = UpdateTeacherProfileMutation_Mutation;
+
+export type StudentDirectoryRowFragmentFragment = { id: string | null, name: string | null, email: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: string | null, parentName: string | null, teacherName: string | null, createdAt: string | null };
+
+export type StudentDirectoryQuery_studentDirectory_StudentDirectoryRow = { id: string | null, name: string | null, email: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: string | null, parentName: string | null, teacherName: string | null, createdAt: string | null };
+
+export type StudentDirectoryQuery_Query = { studentDirectory: Array<StudentDirectoryQuery_studentDirectory_StudentDirectoryRow> | null };
+
+
+export type StudentDirectoryQueryVariables = Exact<{
+  paginationArgs: Types.PaginationArgs | null | undefined;
+  orderBy: Array<Types.StudentsOrderByClause> | Types.StudentsOrderByClause | null | undefined;
+  filterArgs: Types.StudentFilterArgs | null | undefined;
+}>;
+
+
+export type StudentDirectoryQuery = StudentDirectoryQuery_Query;
 
 export type StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
 
