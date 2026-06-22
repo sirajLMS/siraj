@@ -105,6 +105,10 @@ const en: MessageSchema = {
     invalidInvoiceAmount: "Invoice amount must be a positive number",
     invoiceAlreadyPaid: "Invoice {id} is already marked as paid (current status: {status})",
     invalidStatusTransition: "Invalid status transition: {currentStatus} \u2192 {newStatus} is not permitted",
+    staffProfileNotFound: "Staff profile not found",
+    staffProfileUpdateFailed: "Failed to update staff profile",
+    resourceCreateFailed: "Failed to create learning resource",
+    resourceNotFound: "Learning resource not found",
   },
   auth: {
     login: {

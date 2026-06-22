@@ -1,8 +1,9 @@
 import { and, eq, gt, inArray, lt, or, sql } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
+import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
-import { students } from "@/backend/db/schema";
+import { parents, students, teachers, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import * as Types from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
@@ -351,4 +352,78 @@ export namespace StudentRepository {
     locale?: string
   ): Promise<Types.StudentEntity> =>
     runStudentUpdate(studentId, () => ({ status: newStatus }), expectedVersion, tx, locale);
+
+  export interface StudentDirectoryRow {
+    readonly id: string;
+    readonly name: string;
+    readonly email: string;
+    readonly status: string;
+    readonly classesRemaining: number;
+    readonly classesTotal: number;
+    readonly hoursPerWeek: string;
+    readonly parentName: string;
+    readonly teacherName: string | null;
+    readonly createdAt: Date;
+  }
+
+  export interface StudentDirectoryResult {
+    readonly rows: StudentDirectoryRow[];
+    readonly totalCount: number;
+  }
+
+  export const getDirectoryRows = async (
+    paginationArgs: Types.PaginationArgs | null,
+    filters?: Types.StudentFilterArgs | null,
+    orderBy?: Types.StudentsOrderByClause[] | null,
+    tx?: DBTransaction
+  ): Promise<StudentDirectoryResult> => {
+    const queryDb = tx ?? db;
+
+    const parentUsers = alias(users, "parent_users");
+    const teacherUsers = alias(users, "teacher_users");
+
+    let baseQuery = queryDb
+      .select({
+        id: students.id,
+        name: students.name,
+        email: sql<string>`COALESCE(${parentUsers.email}, '')`,
+        status: students.status,
+        classesRemaining: students.classesRemaining,
+        classesTotal: students.classesTotal,
+        hoursPerWeek: students.hoursPerWeek,
+        parentName: sql<string>`COALESCE(${parentUsers.name}, '')`,
+        teacherName: sql<string | null>`COALESCE(${teacherUsers.name}, NULL)`,
+        createdAt: students.createdAt,
+      })
+      .from(students)
+      .innerJoin(parents, eq(students.parentId, parents.id))
+      .leftJoin(parentUsers, eq(parents.userId, parentUsers.id))
+      .leftJoin(teachers, eq(students.primaryTeacherId, teachers.id))
+      .leftJoin(teacherUsers, eq(teachers.userId, teacherUsers.id))
+      .$dynamic();
+
+    if (filters) {
+      baseQuery = StudentFilterUtils.applyFilters(baseQuery, filters);
+    }
+
+    if (orderBy) {
+      baseQuery = StudentFilterUtils.applyOrdering(baseQuery, orderBy);
+    }
+
+    if (paginationArgs) {
+      baseQuery = queryWithPagination(baseQuery, paginationArgs);
+    }
+
+    let countQuery = queryDb.select({ count: sql<number>`count(*)::int` }).from(students).$dynamic();
+
+    if (filters) {
+      countQuery = StudentFilterUtils.applyFilters(countQuery, filters);
+    }
+
+    const [rows, countResult] = await Promise.all([baseQuery, countQuery]);
+
+    const totalCount = countResult[0]?.count ?? 0;
+
+    return { rows, totalCount };
+  };
 }

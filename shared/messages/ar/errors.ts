@@ -80,4 +80,8 @@ export const errors: ErrorsLabels = {
   invalidInvoiceAmount: "يجب أن يكون مبلغ الفاتورة رقمًا موجبًا",
   invoiceAlreadyPaid: "الفاتورة {id} مُحددة بالفعل كمدفوعة (الحالة الحالية: {status})",
   invalidStatusTransition: "تحول الحالة غير صالح: {currentStatus} \u2192 {newStatus} غير مسموح به",
+  staffProfileNotFound: "لم يتم العثور على الملف الشخصي للموظف",
+  staffProfileUpdateFailed: "فشل تحديث الملف الشخصي للموظف",
+  resourceCreateFailed: "فشل إنشاء المورد التعليمي",
+  resourceNotFound: "لم يتم العثور على المورد التعليمي",
 };
