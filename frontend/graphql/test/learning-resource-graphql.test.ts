@@ -72,8 +72,6 @@ async function testQueryLearningResources(role: string) {
 describe("learningResources and uploadLearningResource GraphQL Integration Tests", () => {
   setupTestServerLifecycle();
 
-
-
   test("Teacher can query learning resources", async () => {
     await testQueryLearningResources("teacher_default");
   });

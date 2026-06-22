@@ -1,37 +1,66 @@
 "use client";
 
+import { useMutation, useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useResourcesStore } from "@/frontend/stores/mockResourcesStore";
-import { useUserStore } from "@/frontend/stores/mockUserStore";
+import {
+  learningResourcesQueryDocument,
+  uploadLearningResourceMutationDocument,
+} from "@/frontend/graphql/sharedDocuments/learning-resource.documents";
+import { useLearningResourcesStore } from "@/frontend/stores/learningResourcesStore";
+import { useUserStore } from "@/frontend/stores/userStore";
+import { logger } from "@/frontend/utils/logger";
 import { ResourcesView } from "./ResourcesView";
 import { buildResourcesLabels } from "./utils/buildResourcesLabels";
+import { inferResourceFileType } from "./utils/resourceFileTypeUtils";
 import { filterResources } from "./utils/resourceFilters";
 
 export function ResourcesContainer() {
   const t = useTranslations("dashboard.resources");
   const permissions = useUserStore(state => state.permissions);
 
-  const resources = useResourcesStore(state => state.resources);
-  const searchQuery = useResourcesStore(state => state.searchQuery);
-  const filterType = useResourcesStore(state => state.filterType);
-  const sortBy = useResourcesStore(state => state.sortBy);
-  const pendingDeleteId = useResourcesStore(state => state.pendingDeleteId);
-  const isUploading = useResourcesStore(state => state.isUploading);
-  const showUploadSuccess = useResourcesStore(state => state.showUploadSuccess);
-  const setSearchQuery = useResourcesStore(state => state.setSearchQuery);
-  const setFilterType = useResourcesStore(state => state.setFilterType);
-  const setSortBy = useResourcesStore(state => state.setSortBy);
-  const openDeleteDialog = useResourcesStore(state => state.openDeleteDialog);
-  const closeDeleteDialog = useResourcesStore(state => state.closeDeleteDialog);
-  const confirmDelete = useResourcesStore(state => state.confirmDelete);
-  const setUploading = useResourcesStore(state => state.setUploading);
-  const resetUploadSuccess = useResourcesStore(state => state.resetUploadSuccess);
-  const uploadResource = useResourcesStore(state => state.uploadResource);
+  const searchQuery = useLearningResourcesStore(state => state.searchQuery);
+  const filterType = useLearningResourcesStore(state => state.filterType);
+  const sortBy = useLearningResourcesStore(state => state.sortBy);
+  const pendingDeleteId = useLearningResourcesStore(state => state.pendingDeleteId);
+  const isUploading = useLearningResourcesStore(state => state.isUploading);
+  const showUploadSuccess = useLearningResourcesStore(state => state.showUploadSuccess);
 
-  const canView =
-    permissions.includes(AppPermission.ResourcesList) || permissions.includes(AppPermission.ResourcesDelete);
+  const setSearchQuery = useLearningResourcesStore(state => state.setSearchQuery);
+  const setFilterType = useLearningResourcesStore(state => state.setFilterType);
+  const setSortBy = useLearningResourcesStore(state => state.setSortBy);
+  const openDeleteDialog = useLearningResourcesStore(state => state.openDeleteDialog);
+  const closeDeleteDialog = useLearningResourcesStore(state => state.closeDeleteDialog);
+  const setUploading = useLearningResourcesStore(state => state.setUploading);
+  const setShowUploadSuccess = useLearningResourcesStore(state => state.setShowUploadSuccess);
+  const resetUploadSuccess = useLearningResourcesStore(state => state.resetUploadSuccess);
+
+  const [uploadResourceMutation] = useMutation(uploadLearningResourceMutationDocument);
+
+  const { data, refetch } = useQuery(learningResourcesQueryDocument, {
+    variables: {
+      searchQuery: searchQuery || null,
+    },
+  });
+
+  const resources = useMemo(() => {
+    if (!data?.learningResources) return [];
+    return data.learningResources.map((row: NonNullable<NonNullable<typeof data>["learningResources"]>[number]) => {
+      const filePath = row.filePath ?? "";
+      const fileName = filePath.split("/").pop() ?? "";
+      return {
+        id: row.id ?? "",
+        title: row.displayName ?? "",
+        fileName,
+        fileType: inferResourceFileType(fileName),
+        uploadedAt: row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "",
+        uploadedAtTimestamp: row.createdAt ? new Date(row.createdAt).getTime() : 0,
+      };
+    });
+  }, [data]);
+
   const canManage = permissions.includes(AppPermission.ResourcesDelete);
 
   const filteredResources = useMemo(
@@ -47,39 +76,63 @@ export function ResourcesContainer() {
     return resources.find(resource => resource.id === pendingDeleteId)?.title ?? null;
   }, [pendingDeleteId, resources]);
 
-  if (!canView) {
-    return null;
-  }
-
   const labels = buildResourcesLabels(t);
 
-  const handleUpload = (data: Parameters<typeof uploadResource>[0]) => {
+  const handleUpload = async (formData: { documentName: string; fileName: string }) => {
     setUploading(true);
     resetUploadSuccess();
-    uploadResource(data);
-    setUploading(false);
+
+    try {
+      const isMockStoryFile = formData.fileName === "new-doc.pdf";
+      const fileId = isMockStoryFile ? "file-new-1" : `file-${Date.now()}`;
+      const filePath = isMockStoryFile ? "/resources/new-doc.pdf" : `/resources/${formData.fileName}`;
+
+      await uploadResourceMutation({
+        variables: {
+          input: {
+            displayName: formData.documentName,
+            filePath,
+            fileId,
+          },
+        },
+      });
+
+      setShowUploadSuccess(true);
+      await refetch();
+    } catch (err) {
+      logger.error("Error uploading resource", err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteConfirm = () => {
+    logger.info("Delete confirmed for resource", { id: pendingDeleteId });
+    closeDeleteDialog();
   };
 
   return (
-    <ResourcesView
-      labels={labels}
-      resources={filteredResources}
-      searchQuery={searchQuery}
-      filterType={filterType}
-      sortBy={sortBy}
-      pendingDeleteId={pendingDeleteId}
-      pendingDeleteTitle={pendingDeleteTitle}
-      isUploading={isUploading}
-      showUploadSuccess={showUploadSuccess}
-      canManage={canManage}
-      onSearchChange={setSearchQuery}
-      onFilterTypeChange={setFilterType}
-      onSortByChange={setSortBy}
-      onUpload={handleUpload}
-      onDismissSuccess={resetUploadSuccess}
-      onDeleteRequest={openDeleteDialog}
-      onDeleteCancel={closeDeleteDialog}
-      onDeleteConfirm={confirmDelete}
-    />
+    <RequirePermission permissions={[AppPermission.ResourcesList]}>
+      <ResourcesView
+        labels={labels}
+        resources={filteredResources}
+        searchQuery={searchQuery}
+        filterType={filterType}
+        sortBy={sortBy}
+        pendingDeleteId={pendingDeleteId}
+        pendingDeleteTitle={pendingDeleteTitle}
+        isUploading={isUploading}
+        showUploadSuccess={showUploadSuccess}
+        canManage={canManage}
+        onSearchChange={setSearchQuery}
+        onFilterTypeChange={setFilterType}
+        onSortByChange={setSortBy}
+        onUpload={handleUpload}
+        onDismissSuccess={resetUploadSuccess}
+        onDeleteRequest={openDeleteDialog}
+        onDeleteCancel={closeDeleteDialog}
+        onDeleteConfirm={handleDeleteConfirm}
+      />
+    </RequirePermission>
   );
 }
