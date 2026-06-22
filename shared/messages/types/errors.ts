@@ -80,4 +80,6 @@ export interface ErrorsLabels {
   readonly staffProfileUpdateFailed: string;
   readonly resourceCreateFailed: string;
   readonly resourceNotFound: string;
+  readonly permissionDenied: string;
+  readonly insufficientPrivilege: string;
 }

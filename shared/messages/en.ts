@@ -109,6 +109,8 @@ const en: MessageSchema = {
     staffProfileUpdateFailed: "Failed to update staff profile",
     resourceCreateFailed: "Failed to create learning resource",
     resourceNotFound: "Learning resource not found",
+    permissionDenied: "You do not have permission to perform this action.",
+    insufficientPrivilege: "You do not have sufficient privilege to edit administrative accounts.",
   },
   auth: {
     login: {
