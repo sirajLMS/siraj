@@ -1,4 +1,3 @@
-// cspell:ignore hanken
 "use client";
 
 import { AddOutlined, FilterListOutlined } from "@mui/icons-material";

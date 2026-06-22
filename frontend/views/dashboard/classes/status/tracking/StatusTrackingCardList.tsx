@@ -16,7 +16,7 @@ interface StatusTrackingCardListProps {
     readonly verifyDocuments: string;
     readonly sessionLocked: string;
     readonly seeAll: string;
-    readonly todaysSchedule: string;
+    readonly todaySchedule: string;
     readonly regular: string;
     readonly suspendedPending: string;
     readonly onLeave: string;
