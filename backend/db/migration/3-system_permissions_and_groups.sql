@@ -780,6 +780,16 @@ VALUES (
         'Automated workflow that marks future classes as excused and queues rescheduling when student is On Leave',
         'System',
         true
+    ),
+    -- Story 11: System-Level Resource Access Restriction
+    (
+        gen_random_uuid (),
+        'system.restrict_resource_access',
+        'system',
+        'restrict_resource_access',
+        'Enforce isolation of learning resources storage from unauthorized external access',
+        'System',
+        true
     ) ON CONFLICT (key) DO
 UPDATE
 SET
@@ -1012,7 +1022,9 @@ WHERE
         'billing.update_status_paid',
         'billing.delete_invoice',
         'student.reassign_teacher',
-        'student.manage_status'
+        'student.manage_status',
+        'students.list',
+        'resources.upload'
     );
 
 INSERT INTO
@@ -1085,7 +1097,8 @@ WHERE
         'system.enforce_leave_limit',
         'system.sync_notifications',
         'system.enforce_suspended_lock',
-        'system.process_student_leave'
+        'system.process_student_leave',
+        'system.restrict_resource_access'
     );
 
 -- Triggers to protect system permissions and groups from deletion or mutation of is_system

@@ -1,6 +1,6 @@
 {
-  "id": "aa77732e-6c7f-4e50-bebc-d14d3ca65963",
-  "prevIds": ["1819d4ab-57a6-420b-b617-2c12cf0cdd43"],
+  "id": "5949835a-8452-46b2-b9bb-6082bbe2374f",
+  "prevIds": ["15e45052-97dc-44b2-823a-997f4f14f9b3"],
   "version": "8",
   "dialect": "postgres",
   "ddl": [
@@ -103,6 +103,7 @@
         "system.sync_notifications",
         "system.enforce_suspended_lock",
         "system.process_student_leave",
+        "system.restrict_resource_access",
         "test.system_only",
         "test.custom_only"
       ],

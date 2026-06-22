@@ -487,9 +487,11 @@ export enum AppPermission {
   STUDENT_MANAGE_STATUS = "student.manage_status",
   // Automated System Synchronization
   SYSTEM_SYNC_NOTIFICATIONS = "system.sync_notifications",
-  // Story 10: Automated Student Status Enforcement
+  // Automated Student Status Enforcement
   SYSTEM_ENFORCE_SUSPENDED_LOCK = "system.enforce_suspended_lock",
   SYSTEM_PROCESS_STUDENT_LEAVE = "system.process_student_leave",
+  // System-Level Resource Access Restriction
+  SYSTEM_RESTRICT_RESOURCE_ACCESS = "system.restrict_resource_access",
   TEST_SYSTEM_ONLY = "test.system_only",
   TEST_CUSTOM_ONLY = "test.custom_only",
 }

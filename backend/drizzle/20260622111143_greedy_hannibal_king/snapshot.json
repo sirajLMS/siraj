@@ -1,8 +1,8 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "1819d4ab-57a6-420b-b617-2c12cf0cdd43",
-  "prevIds": ["12f8011f-a044-4090-898d-f694f8faf0d2"],
+  "id": "15e45052-97dc-44b2-823a-997f4f14f9b3",
+  "prevIds": ["071952fe-9fec-4835-bcce-3898c8e77e09"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
@@ -103,6 +103,7 @@
         "system.sync_notifications",
         "system.enforce_suspended_lock",
         "system.process_student_leave",
+        "system.restrict_resource_access",
         "test.system_only",
         "test.custom_only"
       ],
