@@ -1329,6 +1329,55 @@ export namespace SchedulingRepository {
   export const bulkFreezeStudentClasses = bulkFreezeStudentClassesFn;
   export const bulkUnfreezeStudentClasses = bulkUnfreezeStudentClassesFn;
   export const getStudentFutureClasses = getStudentFutureClassesFn;
+
+  export async function processAutomatedClassLeave(
+    id: string,
+    reason: string | null,
+    actorUserId: string,
+    tx?: DBTransaction
+  ): Promise<{ originalId: string; successorId: string | null }> {
+    const runner = async (t: DBTransaction) => {
+      const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
+      if (!existing) {
+        const tFunc = await getBackendTranslations({ locale: undefined, namespace: "errors" });
+        throw new Error(tFunc("classInstanceNotFound", { id }));
+      }
+      const offsetDays = await SystemSettingsRepository.getIntValue("session_leave_reschedule_offset_days", 7, t);
+      const successor = await createRescheduledSuccessor(t, existing, offsetDays, "Automated leave reschedule");
+      await t
+        .update(classInstances)
+        .set({ outcome: "LEAVE", isRescheduled: true, updatedAt: new Date() })
+        .where(eq(classInstances.id, id));
+      if (existing.quotaDeducted) {
+        await t
+          .update(students)
+          .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
+          .where(eq(students.id, existing.studentId));
+      }
+      const now = new Date();
+      await t
+        .insert(leaveRequests)
+        .values({
+          classInstanceId: id,
+          requestedByUserId: actorUserId,
+          requesterType: "ADMIN",
+          reason,
+          status: "RESCHEDULED",
+          createdAt: now,
+          processedAt: now,
+          processedByUserId: actorUserId,
+        })
+        .onConflictDoNothing();
+      const [teacherRow] = await t
+        .select({ id: teachers.id })
+        .from(teachers)
+        .where(eq(teachers.id, existing.teacherId))
+        .limit(1);
+      if (teacherRow) await incrementTeacherLeaveQuotaFn(teacherRow.id, t);
+      return { originalId: id, successorId: successor.id };
+    };
+    return tx ? runner(tx) : db.transaction((t: DBTransaction) => runner(t));
+  }
 }
 
 function computeScheduledStartForDay(
