@@ -2,6 +2,7 @@
 
 import { AccountCircleOutlined, EventNoteOutlined, HistoryOutlined, UpdateOutlined } from "@mui/icons-material";
 import { alpha, Box, Chip, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { BaseCard } from "@/frontend/components/ui";
 import type { ClassAuditData } from "@/frontend/stores/mockClassAuditStore";
@@ -26,6 +27,110 @@ interface DetailFieldProps {
   readonly children: ReactNode;
 }
 
+// Uppercase muted label used as a detail-field caption
+const StyledDetailLabel = styled(Typography)(({ theme }) => ({
+  textTransform: "uppercase",
+  color: theme.palette.onSurfaceVariant,
+}));
+
+// Primary-colored header strip at the top of the audit card
+const StyledHeaderBar = styled(Box)(({ theme }) => ({
+  paddingInline: theme.spacing(3),
+  paddingBlock: theme.spacing(2),
+  bgcolor: theme.palette.primary.main,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: theme.spacing(1.5),
+}));
+
+// Event icon rendered on the primary header (onPrimary tint)
+const StyledHeaderEventIcon = styled(EventNoteOutlined)(({ theme }) => ({
+  color: theme.palette.onPrimary,
+  fontSize: 28,
+}));
+
+// Header title text rendered on the primary background
+const StyledHeaderTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onPrimary,
+}));
+
+// Status chip displayed in the header (paper background with primary accent border)
+const StyledStatusChip = styled(Chip)(({ theme }) => ({
+  bgcolor: theme.palette.background.paper,
+  color: theme.palette.primary.main,
+  typography: "labelUppercase",
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+}));
+
+// Bold primary-colored body text used for emphasized field values (course code, rescheduled date)
+const StyledEmphasizedFieldValue = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  color: theme.palette.primary.main,
+}));
+
+// Primary-tinted icon used beside teacher name
+const StyledTeacherIcon = styled(AccountCircleOutlined)(({ theme }) => ({
+  fontSize: 20,
+  color: theme.palette.primary.main,
+}));
+
+// Default onSurface body text for generic field values
+const StyledFieldValueText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onSurface,
+}));
+
+// Muted line-through text used for the original (superseded) date
+const StyledOriginalDateText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onSurfaceVariant,
+  textDecoration: "line-through",
+  opacity: 0.6,
+}));
+
+// Low-surface section container for the audit trail (top border + surfaceContainerLow bg)
+const StyledAuditTrailSection = styled(Box)(({ theme }) => ({
+  paddingInline: theme.spacing(3),
+  paddingBlock: theme.spacing(3),
+  bgcolor: theme.palette.surfaceContainerLow,
+  borderTop: `1px solid ${theme.palette.border.light}`,
+}));
+
+// Primary-colored icon paired with the audit trail section title
+const StyledAuditTrailIcon = styled(HistoryOutlined)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+// Primary-colored section title text
+const StyledSectionTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+// Paper-background quote block with left accent border used for the audit remark
+const StyledRemarkQuoteBlock = styled(Box)(({ theme }) => ({
+  bgcolor: theme.palette.background.paper,
+  padding: theme.spacing(2),
+  borderRadius: 2,
+  borderLeft: `4px solid ${theme.palette.header}`,
+  boxShadow: theme.palette.shadow.card,
+}));
+
+// Italic body text used for the audit remark quote
+const StyledRemarkItalicText = styled(Typography)(({ theme }) => ({
+  fontStyle: "italic",
+  color: theme.palette.onSurface,
+  lineHeight: 1.6,
+}));
+
+// Muted metadata row beneath the remark (timestamp + icon)
+const StyledRemarkMetaRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(0.75),
+  marginTop: theme.spacing(1.5),
+  color: theme.palette.onSurfaceVariant,
+}));
+
 function DetailField({ label, children }: DetailFieldProps) {
   return (
     <Box
@@ -35,15 +140,7 @@ function DetailField({ label, children }: DetailFieldProps) {
         alignItems: "center",
       }}
     >
-      <Typography
-        variant="labelMd"
-        sx={theme => ({
-          textTransform: "uppercase",
-          color: theme.palette.onSurfaceVariant,
-        })}
-      >
-        {label} :
-      </Typography>
+      <StyledDetailLabel variant="labelMd">{label} :</StyledDetailLabel>
       {children}
     </Box>
   );
@@ -63,35 +160,13 @@ export function ClassAuditDetailsCard({ audit, labels }: ClassAuditDetailsCardPr
 
 function ClassAuditHeader({ auditName, statusLabel }: Readonly<{ auditName: string; statusLabel: string }>) {
   return (
-    <Box
-      sx={theme => ({
-        px: 3,
-        py: 2,
-        bgcolor: theme.palette.primary.main,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: 1.5,
-      })}
-    >
+    <StyledHeaderBar>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <EventNoteOutlined sx={theme => ({ color: theme.palette.onPrimary, fontSize: 28 })} />
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onPrimary })}>
-          {auditName}
-        </Typography>
+        <StyledHeaderEventIcon />
+        <StyledHeaderTitle variant="titleLg">{auditName}</StyledHeaderTitle>
       </Box>
-      <Chip
-        label={statusLabel}
-        size="small"
-        sx={theme => ({
-          bgcolor: theme.palette.background.paper,
-          color: theme.palette.primary.main,
-          typography: "labelUppercase",
-          border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-        })}
-      />
-    </Box>
+      <StyledStatusChip label={statusLabel} size="small" />
+    </StyledHeaderBar>
   );
 }
 
@@ -107,40 +182,25 @@ function ClassAuditFields({ audit, labels }: ClassAuditDetailsCardProps) {
       }}
     >
       <DetailField label={labels.courseCode}>
-        <Typography variant="bodyLg" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-          {audit.courseCode}
-        </Typography>
+        <StyledEmphasizedFieldValue variant="bodyLg">{audit.courseCode}</StyledEmphasizedFieldValue>
       </DetailField>
       <DetailField label={labels.teacher}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <AccountCircleOutlined sx={theme => ({ fontSize: 20, color: theme.palette.primary.main })} />
-          <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.onSurface })}>
-            {audit.teacherName}
-          </Typography>
+          <StyledTeacherIcon />
+          <StyledFieldValueText variant="bodyLg">{audit.teacherName}</StyledFieldValueText>
         </Box>
       </DetailField>
       <DetailField label={labels.originalDate}>
-        <Typography
-          variant="bodyLg"
-          sx={theme => ({ color: theme.palette.onSurfaceVariant, textDecoration: "line-through", opacity: 0.6 })}
-        >
-          {audit.originalDate}
-        </Typography>
+        <StyledOriginalDateText variant="bodyLg">{audit.originalDate}</StyledOriginalDateText>
       </DetailField>
       <DetailField label={labels.rescheduledDate}>
-        <Typography variant="bodyLg" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-          {audit.rescheduledDate}
-        </Typography>
+        <StyledEmphasizedFieldValue variant="bodyLg">{audit.rescheduledDate}</StyledEmphasizedFieldValue>
       </DetailField>
       <DetailField label={labels.timeSlot}>
-        <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.onSurface })}>
-          {audit.timeSlot}
-        </Typography>
+        <StyledFieldValueText variant="bodyLg">{audit.timeSlot}</StyledFieldValueText>
       </DetailField>
       <DetailField label={labels.venue}>
-        <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.onSurface })}>
-          {audit.venue}
-        </Typography>
+        <StyledFieldValueText variant="bodyLg">{audit.venue}</StyledFieldValueText>
       </DetailField>
     </Box>
   );
@@ -148,48 +208,18 @@ function ClassAuditFields({ audit, labels }: ClassAuditDetailsCardProps) {
 
 function ClassAuditTrail({ audit, labels }: ClassAuditDetailsCardProps) {
   return (
-    <Box
-      sx={theme => ({
-        px: 3,
-        py: 3,
-        bgcolor: theme.palette.surfaceContainerLow,
-        borderTop: `1px solid ${theme.palette.border.light}`,
-      })}
-    >
+    <StyledAuditTrailSection>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-        <HistoryOutlined sx={theme => ({ color: theme.palette.primary.main })} />
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-          {labels.auditTrailTitle}
-        </Typography>
+        <StyledAuditTrailIcon />
+        <StyledSectionTitle variant="titleLg">{labels.auditTrailTitle}</StyledSectionTitle>
       </Box>
-      <Box
-        sx={theme => ({
-          bgcolor: theme.palette.background.paper,
-          p: 2,
-          borderRadius: 2,
-          borderLeft: `4px solid ${theme.palette.header}`,
-          boxShadow: theme.palette.shadow.card,
-        })}
-      >
-        <Typography
-          variant="bodyMd"
-          sx={theme => ({ fontStyle: "italic", color: theme.palette.onSurface, lineHeight: 1.6 })}
-        >
-          &ldquo;{audit.auditRemark}&rdquo;
-        </Typography>
-        <Box
-          sx={theme => ({
-            display: "flex",
-            alignItems: "center",
-            gap: 0.75,
-            mt: 1.5,
-            color: theme.palette.onSurfaceVariant,
-          })}
-        >
+      <StyledRemarkQuoteBlock>
+        <StyledRemarkItalicText variant="bodyMd">&ldquo;{audit.auditRemark}&rdquo;</StyledRemarkItalicText>
+        <StyledRemarkMetaRow>
           <UpdateOutlined sx={{ fontSize: 14 }} />
           <Typography variant="labelMd">{audit.auditLoggedAt}</Typography>
-        </Box>
-      </Box>
-    </Box>
+        </StyledRemarkMetaRow>
+      </StyledRemarkQuoteBlock>
+    </StyledAuditTrailSection>
   );
 }

@@ -2,6 +2,7 @@
 
 import { TuneOutlined } from "@mui/icons-material";
 import { Box, Checkbox, FormControlLabel, IconButton, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { format, isValid, parse } from "date-fns";
 import { AppTimePicker } from "@/frontend/components/ui/form";
 import type { DayScheduleConfig } from "@/frontend/stores/mockCreateRecurringClassStore";
@@ -15,6 +16,52 @@ function parseTimeValue(timeStr: string): Date | null {
   const parsed = parse(timeStr, TIME_FORMAT, new Date());
   return isValid(parsed) ? parsed : null;
 }
+
+// Row container for a day schedule entry with dynamic border/bg based on override state
+const StyledDayScheduleRowContainer = styled(Box, {
+  shouldForwardProp: prop => prop !== "isActiveOverride",
+})<{ isActiveOverride: boolean }>(({ theme, isActiveOverride }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  p: 1.5,
+  borderRadius: 3,
+  border: isActiveOverride ? 2 : 1,
+  borderColor: isActiveOverride ? theme.palette.sidebar : theme.palette.outlineVariant,
+  bgcolor: isActiveOverride ? theme.palette.surfaceContainerHigh : theme.palette.surface,
+  transition: "background-color 0.2s",
+  "&:hover": {
+    bgcolor: isActiveOverride ? theme.palette.surfaceContainerHighest : theme.palette.surfaceContainerLow,
+  },
+}));
+
+// Toggle icon button for time override with dynamic color based on override state
+const StyledOverrideToggleIconButton = styled(IconButton, {
+  shouldForwardProp: prop => prop !== "isActiveOverride",
+})<{ isActiveOverride: boolean }>(({ theme, isActiveOverride }) => ({
+  color: isActiveOverride ? theme.palette.sidebar : theme.palette.onSurfaceVariant,
+  bgcolor: isActiveOverride ? theme.palette.surfaceContainerHighest : undefined,
+  "&:hover": {
+    color: theme.palette.sidebar,
+    bgcolor: theme.palette.surfaceContainerHighest,
+  },
+}));
+
+// Checkbox for enabling/disabling a day with outline and primary checked colors
+const StyledDayCheckbox = styled(Checkbox)(({ theme }) => ({
+  color: theme.palette.outline,
+  "&.Mui-checked": {
+    color: theme.palette.primary.main,
+  },
+}));
+
+// Day label typography with dynamic color based on override state
+const StyledDayLabelTypography = styled(Typography, {
+  shouldForwardProp: prop => prop !== "isActiveOverride",
+})<{ isActiveOverride: boolean }>(({ theme, isActiveOverride }) => ({
+  fontWeight: 600,
+  color: isActiveOverride ? theme.palette.sidebar : theme.palette.primary.main,
+}));
 
 interface DayScheduleRowProps {
   readonly day: DayScheduleConfig;
@@ -60,7 +107,7 @@ export function DayScheduleRow({
   }
 
   return (
-    <DayScheduleRowContainer isActiveOverride={isActiveOverride}>
+    <StyledDayScheduleRowContainer isActiveOverride={isActiveOverride}>
       <DayScheduleLabel
         dayLabel={dayLabel}
         enabled={day.enabled}
@@ -99,51 +146,18 @@ export function DayScheduleRow({
             }}
           />
         )}
-        <IconButton
+        <StyledOverrideToggleIconButton
+          isActiveOverride={isActiveOverride}
           onClick={() => {
             onToggleOverride(index);
           }}
           disabled={!day.enabled}
-          sx={theme => ({
-            color: isActiveOverride ? theme.palette.sidebar : theme.palette.onSurfaceVariant,
-            bgcolor: isActiveOverride ? theme.palette.surfaceContainerHighest : undefined,
-            "&:hover": {
-              color: theme.palette.sidebar,
-              bgcolor: theme.palette.surfaceContainerHighest,
-            },
-          })}
           aria-label={timeOverrideLabel}
         >
           <TuneOutlined />
-        </IconButton>
+        </StyledOverrideToggleIconButton>
       </Box>
-    </DayScheduleRowContainer>
-  );
-}
-
-function DayScheduleRowContainer({
-  isActiveOverride,
-  children,
-}: Readonly<{ isActiveOverride: boolean; children: React.ReactNode }>) {
-  return (
-    <Box
-      sx={theme => ({
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        p: 1.5,
-        borderRadius: 3,
-        border: isActiveOverride ? 2 : 1,
-        borderColor: isActiveOverride ? theme.palette.sidebar : theme.palette.outlineVariant,
-        bgcolor: isActiveOverride ? theme.palette.surfaceContainerHigh : theme.palette.surface,
-        transition: "background-color 0.2s",
-        "&:hover": {
-          bgcolor: isActiveOverride ? theme.palette.surfaceContainerHighest : theme.palette.surfaceContainerLow,
-        },
-      })}
-    >
-      {children}
-    </Box>
+    </StyledDayScheduleRowContainer>
   );
 }
 
@@ -161,29 +175,14 @@ function DayScheduleLabel({
   return (
     <FormControlLabel
       control={
-        <Checkbox
+        <StyledDayCheckbox
           checked={enabled}
           onChange={e => {
             onToggle(e.target.checked);
           }}
-          sx={theme => ({
-            color: theme.palette.outline,
-            "&.Mui-checked": {
-              color: theme.palette.primary.main,
-            },
-          })}
         />
       }
-      label={
-        <Typography
-          sx={theme => ({
-            fontWeight: 600,
-            color: isActiveOverride ? theme.palette.sidebar : theme.palette.primary.main,
-          })}
-        >
-          {dayLabel}
-        </Typography>
-      }
+      label={<StyledDayLabelTypography isActiveOverride={isActiveOverride}>{dayLabel}</StyledDayLabelTypography>}
       sx={{ ml: 0 }}
     />
   );
