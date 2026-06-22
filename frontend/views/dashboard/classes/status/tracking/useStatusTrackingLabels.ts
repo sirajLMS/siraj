@@ -1,0 +1,57 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
+export function useStatusTrackingLabels() {
+  const t = useTranslations("dashboard.statusTracking");
+
+  return {
+    pageTitle: t("pageTitle"),
+    pageSubtitle: t("pageSubtitle"),
+    filters: t("filters"),
+    newReport: t("newReport"),
+    todaysClassSchedule: t("todaysClassSchedule"),
+    totalSessions: t.raw("totalSessions") as string,
+    studentClass: t("table.studentClass"),
+    teacher: t("table.teacher"),
+    schedule: t("table.schedule"),
+    status: t("table.status"),
+    actions: t("table.actions"),
+    showingOf: t.raw("showingOf") as string,
+    previous: t("previous"),
+    next: t("next"),
+    joinSession: t("actions.joinSession"),
+    activate: t("actions.activate"),
+    reschedule: t("actions.reschedule"),
+    verifyDocuments: t("actions.verifyDocuments"),
+    sessionLocked: t("actions.sessionLocked"),
+    administrativeHold: t("administrativeHold"),
+    holdDescription: t("holdDescription"),
+    seeAll: t("seeAll"),
+    todaysSchedule: t("todaysSchedule"),
+    regular: t("status.regular"),
+    suspendedPending: t("status.suspendedPending"),
+    onLeave: t("status.onLeave"),
+    pendingVerification: t("status.pendingVerification"),
+    regularSubLabel: t("subLabels.regular"),
+    pendingSubLabel: t("subLabels.pending"),
+    suspendedSubLabel: t("subLabels.suspended"),
+    onLeaveSubLabel: t("subLabels.onLeave"),
+    suspensionAnalytics: t("analytics.title"),
+    analyticsNote: t("analytics.note"),
+    urgentTask: t("analytics.urgentTask"),
+    accountsLocked: t.raw("analytics.accountsLocked") as string,
+    auditDescription: t("analytics.auditDescription"),
+    openAuditLogs: t("analytics.openAuditLogs"),
+    noEntries: t("noEntries"),
+    days: [
+      t("days.mon"),
+      t("days.tue"),
+      t("days.wed"),
+      t("days.thu"),
+      t("days.fri"),
+      t("days.sat"),
+      t("days.sun"),
+    ] as const,
+  };
+}
