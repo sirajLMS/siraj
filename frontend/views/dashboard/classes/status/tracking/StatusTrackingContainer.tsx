@@ -1,24 +1,55 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
+import type { SvgIconComponent } from "@mui/icons-material";
+import {
+  BlockOutlined,
+  CheckCircleOutlineOutlined,
+  EventAvailableOutlined,
+  PendingActionsOutlined,
+} from "@mui/icons-material";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
+import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
 import { useRescheduleStore } from "@/frontend/stores/mockRescheduleStore";
-import { useStatusTrackingStore } from "@/frontend/stores/mockStatusTrackingStore";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
 import { StatusTrackingView } from "./StatusTrackingView";
+import { computeSessionStatus, type StatusTrackingRow } from "./types";
 
 export function StatusTrackingContainer() {
   const t = useTranslations("dashboard.statusTracking");
   const router = useRouter();
   const setRescheduleSession = useRescheduleStore(state => state.setSession);
 
-  const rawMetrics = useStatusTrackingStore(state => state.metrics);
-  const rows = useStatusTrackingStore(state => state.rows);
-  const totalSessions = useStatusTrackingStore(state => state.totalSessions);
-  const activateSession = useStatusTrackingStore(state => state.activateSession);
-  const verifySession = useStatusTrackingStore(state => state.verifySession);
+  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
 
-  const suspendedCount = Number(rawMetrics.find(m => m.key === "suspended")?.count ?? 0);
+  const { data } = useQuery(statusTrackingScheduleQueryDocument, {
+    variables: { date: today, search: null, viewerTimezone: null },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const rows: readonly StatusTrackingRow[] = useMemo(() => data?.statusTrackingSchedule ?? [], [data?.statusTrackingSchedule]);
+  const totalSessions = rows.length;
+
+  const suspendedCount = useMemo(
+    () =>
+      rows.filter(r => computeSessionStatus(r.studentStatus, r.isFrozen, r.executionState) === "suspended_pending")
+        .length,
+    [rows]
+  );
+
+  const metricCounts = useMemo(() => {
+    const counts = { regular: 0, pending: 0, suspended: 0, on_leave: 0 };
+    for (const row of rows) {
+      const status = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
+      if (status === "regular") counts.regular += 1;
+      else if (status === "pending_verification") counts.pending += 1;
+      else if (status === "suspended_pending") counts.suspended += 1;
+      else if (status === "on_leave") counts.on_leave += 1;
+    }
+    return counts;
+  }, [rows]);
 
   const subLabelMap: Record<string, string> = {
     regular: t("subLabels.regular"),
@@ -26,6 +57,40 @@ export function StatusTrackingContainer() {
     suspended: t("subLabels.suspended"),
     on_leave: t("subLabels.onLeave"),
   };
+
+  const rawMetrics: readonly {
+    key: string;
+    count: number;
+    labelKey: string;
+    icon: SvgIconComponent;
+    variant?: MetricItem["variant"];
+  }[] = [
+    {
+      key: "regular",
+      count: metricCounts.regular,
+      labelKey: "dashboard.statusTracking.metrics.regular",
+      icon: CheckCircleOutlineOutlined,
+    },
+    {
+      key: "pending",
+      count: metricCounts.pending,
+      labelKey: "dashboard.statusTracking.metrics.pending",
+      icon: PendingActionsOutlined,
+    },
+    {
+      key: "suspended",
+      count: metricCounts.suspended,
+      labelKey: "dashboard.statusTracking.metrics.suspended",
+      icon: BlockOutlined,
+      variant: "error",
+    },
+    {
+      key: "on_leave",
+      count: metricCounts.on_leave,
+      labelKey: "dashboard.statusTracking.metrics.onLeave",
+      icon: EventAvailableOutlined,
+    },
+  ];
 
   const metrics: readonly MetricItem[] = rawMetrics.map(m => ({
     ...m,
@@ -86,17 +151,25 @@ export function StatusTrackingContainer() {
     // Navigate or open modal in future
   };
 
+  const handleActivate = (_id: string) => {
+    // Admin-only activation — future sprint wires up the mutation
+  };
+
   const handleReschedule = (id: string) => {
     const row = rows.find(session => session.id === id);
     if (row) {
       setRescheduleSession({
         sessionId: id,
-        teacherName: row.teacherName,
-        studentName: row.studentName,
+        teacherName: row.teacherName ?? "",
+        studentName: row.studentName ?? "",
         teacherTimezone: "Africa/Cairo",
       });
     }
     router.push("/reschedule");
+  };
+
+  const handleVerify = (_id: string) => {
+    // Document verification — future sprint
   };
 
   return (
@@ -106,9 +179,9 @@ export function StatusTrackingContainer() {
       totalSessions={totalSessions}
       suspendedCount={suspendedCount}
       labels={labels}
-      onActivate={activateSession}
+      onActivate={handleActivate}
       onReschedule={handleReschedule}
-      onVerify={verifySession}
+      onVerify={handleVerify}
       onNewReport={handleNewReport}
     />
   );

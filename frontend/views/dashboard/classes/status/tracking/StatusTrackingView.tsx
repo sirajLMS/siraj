@@ -5,11 +5,11 @@ import { Box, Fab, useMediaQuery, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import type { StatusSessionRow } from "@/frontend/stores/mockStatusTrackingStore";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StatusTrackingCardList } from "./StatusTrackingCardList";
 import { StatusTrackingDataGrid } from "./StatusTrackingDataGrid";
 import { SuspensionAnalytics, type SuspensionAnalyticsLabels } from "./SuspensionAnalytics";
+import type { StatusTrackingRow } from "./types";
 
 // Primary-colored fixed FAB used on mobile to create a new report
 const StyledMobileFab = styled(Fab)(({ theme }) => ({
@@ -94,7 +94,7 @@ export interface StatusTrackingLabels {
 
 interface StatusTrackingViewProps {
   readonly metrics: readonly MetricItem[];
-  readonly rows: readonly StatusSessionRow[];
+  readonly rows: readonly StatusTrackingRow[];
   readonly totalSessions: number;
   readonly suspendedCount: number;
   readonly labels: StatusTrackingLabels;

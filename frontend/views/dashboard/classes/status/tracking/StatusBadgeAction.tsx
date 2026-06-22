@@ -7,10 +7,11 @@ import {
   PowerSettingsNewOutlined,
 } from "@mui/icons-material";
 import { Box, Button, type SxProps, styled, type Theme, Tooltip, Typography, useTheme } from "@mui/material";
-import type { StatusSessionRow } from "@/frontend/stores/mockStatusTrackingStore";
+import type { StatusTrackingRow } from "./types";
+import { computeSessionStatus } from "./types";
 
 interface StatusActionProps {
-  readonly row: StatusSessionRow;
+  readonly row: StatusTrackingRow;
   readonly labels: {
     readonly joinSession: string;
     readonly activate: string;
@@ -107,11 +108,13 @@ const ActionButtonWrapper = ({
 
 export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }: StatusActionProps) {
   const theme = useTheme();
+  const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
+  const rowId = row.id ?? "";
 
-  if (row.status === "regular") {
+  if (sessionStatus === "regular") {
     return (
       <ActionButtonWrapper
-        id={`join-session-${row.id}`}
+        id={`join-session-${rowId}`}
         label={labels.joinSession}
         icon={
           <LoginOutlined
@@ -136,10 +139,10 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
     );
   }
 
-  if (row.status === "suspended_pending") {
+  if (sessionStatus === "suspended_pending") {
     return (
       <ActionButtonWrapper
-        id={`activate-session-${row.id}`}
+        id={`activate-session-${rowId}`}
         label={labels.activate}
         icon={<PowerSettingsNewOutlined />}
         tooltipTitle={
@@ -155,7 +158,7 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
             >
               {labels.administrativeHold}
             </Typography>
-            <Typography sx={{ fontSize: "11px" }}>{row.holdNote ?? labels.holdDescription}</Typography>
+            <Typography sx={{ fontSize: "11px" }}>{labels.holdDescription}</Typography>
           </Box>
         }
         variant="outlined"
@@ -166,16 +169,16 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
         })}
         disabled
         onClick={() => {
-          onActivate(row.id);
+          onActivate(rowId);
         }}
       />
     );
   }
 
-  if (row.status === "on_leave") {
+  if (sessionStatus === "on_leave") {
     return (
       <ActionButtonWrapper
-        id={`reschedule-session-${row.id}`}
+        id={`reschedule-session-${rowId}`}
         label={labels.reschedule}
         icon={<EventRepeatOutlined />}
         tooltipTitle={labels.reschedule}
@@ -188,7 +191,7 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
           },
         })}
         onClick={() => {
-          onReschedule(row.id);
+          onReschedule(rowId);
         }}
       />
     );
@@ -196,7 +199,7 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
 
   return (
     <ActionButtonWrapper
-      id={`verify-session-${row.id}`}
+      id={`verify-session-${rowId}`}
       label={labels.verifyDocuments}
       icon={<AssignmentTurnedInOutlined />}
       tooltipTitle={labels.verifyDocuments}
@@ -209,7 +212,7 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
         },
       })}
       onClick={() => {
-        onVerify(row.id);
+        onVerify(rowId);
       }}
     />
   );
