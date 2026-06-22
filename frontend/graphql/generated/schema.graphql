@@ -79,7 +79,9 @@ enum AppPermission {
   STUDENT_VIEW_ASSOCIATED
   SYSTEM_BULK_UPDATE_DST
   SYSTEM_ENFORCE_LEAVE_LIMIT
+  SYSTEM_ENFORCE_SUSPENDED_LOCK
   SYSTEM_ENFORCE_TIME_WINDOW
+  SYSTEM_PROCESS_STUDENT_LEAVE
   SYSTEM_SYNC_NOTIFICATIONS
   TEACHERS_CREATE
   TEACHERS_EDIT
@@ -1031,6 +1033,7 @@ type Query {
     searchTerm: String!
   ): StorageObjectList
   searchTeacherAvailability(input: AvailabilitySearchInput!): AvailabilitySearchResult
+  statusTrackingSchedule(date: String!, search: String, viewerTimezone: String): [StatusTrackingScheduleRow!]
   storageStats(
     """
     Folder path to get stats for (optional, gets stats for entire bucket if not specified)
@@ -1121,6 +1124,22 @@ type RescheduleTrackingRow {
 input RevokePermissionGroupFromUserInput {
   groupId: String!
   userId: String!
+}
+
+type StatusTrackingScheduleRow {
+  durationMinutes: Int
+  executionState: String
+  id: String
+  isFrozen: Boolean
+  outcome: String
+  scheduledEndAt: DateTime
+  scheduledStartAt: DateTime
+  studentId: String
+  studentInitials: String
+  studentName: String
+  studentStatus: String
+  teacherId: String
+  teacherName: String
 }
 
 input StorageItemProtectionUpdateInput {

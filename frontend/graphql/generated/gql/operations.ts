@@ -84,7 +84,9 @@ export type AppPermission =
   | 'STUDENT_VIEW_ASSOCIATED'
   | 'SYSTEM_BULK_UPDATE_DST'
   | 'SYSTEM_ENFORCE_LEAVE_LIMIT'
+  | 'SYSTEM_ENFORCE_SUSPENDED_LOCK'
   | 'SYSTEM_ENFORCE_TIME_WINDOW'
+  | 'SYSTEM_PROCESS_STUDENT_LEAVE'
   | 'SYSTEM_SYNC_NOTIFICATIONS'
   | 'TEACHERS_CREATE'
   | 'TEACHERS_EDIT'
@@ -948,6 +950,20 @@ export type RescheduleTrackingMetricsQueryVariables = Exact<{ [key: string]: nev
 
 
 export type RescheduleTrackingMetricsQuery = RescheduleTrackingMetricsQuery_Query;
+
+export type StatusTrackingScheduleQuery_statusTrackingSchedule_StatusTrackingScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentStatus: string | null, teacherId: string | null, teacherName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: string | null, outcome: string | null, isFrozen: boolean | null };
+
+export type StatusTrackingScheduleQuery_Query = { statusTrackingSchedule: Array<StatusTrackingScheduleQuery_statusTrackingSchedule_StatusTrackingScheduleRow> | null };
+
+
+export type StatusTrackingScheduleQueryVariables = Exact<{
+  date: string;
+  search: string | null | undefined;
+  viewerTimezone: string | null | undefined;
+}>;
+
+
+export type StatusTrackingScheduleQuery = StatusTrackingScheduleQuery_Query;
 
 export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_metrics_TeacherDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null };
 

@@ -82,3 +82,42 @@ export const rescheduleTrackingMetricsQueryDocument: TypedDocumentNode<Operation
     }
   }
 `;
+
+// ─── Status Tracking Schedule Query ───────────────────────────────────────────
+
+/**
+ * Fetches all class instances for the status tracking admin dashboard.
+ *
+ * Returns class rows for a given date, enriched with student status and
+ * isFrozen flag. Used by StatusTrackingContainer to display real data
+ * with correct session status badges and action button states.
+ *
+ * Permission required: SCHEDULE_VIEW_ALL or DASHBOARD_VIEW_METRICS
+ * (checked in ScheduleQueryService — unauthorized actors get an error)
+ *
+ * @param date - ISO date string (YYYY-MM-DD) for which to fetch classes
+ * @param search - Optional search filter (matches student name or teacher name)
+ * @param viewerTimezone - Optional IANA timezone for day boundary calculation
+ */
+export const statusTrackingScheduleQueryDocument: TypedDocumentNode<
+  Operations.StatusTrackingScheduleQuery,
+  Types.QueryStatusTrackingScheduleArgs
+> = gql`
+  query statusTrackingSchedule($date: String!, $search: String, $viewerTimezone: String) {
+    statusTrackingSchedule(date: $date, search: $search, viewerTimezone: $viewerTimezone) {
+      id
+      studentId
+      studentName
+      studentInitials
+      studentStatus
+      teacherId
+      teacherName
+      scheduledStartAt
+      scheduledEndAt
+      durationMinutes
+      executionState
+      outcome
+      isFrozen
+    }
+  }
+`;

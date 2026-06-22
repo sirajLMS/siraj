@@ -1,3 +1,4 @@
+import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 export type DailyScheduleMetricsDefinition = {
@@ -150,3 +151,74 @@ export const RescheduleTrackingInputPothosObject = gqlSchemaBuilder
       offset: t.int(),
     }),
   });
+
+// ─── Status Tracking Schedule Row ─────────────────────────────────────────────
+
+/**
+ * GraphQL object type representing a single class instance row in the
+ * Status Tracking admin dashboard. Returned by the statusTrackingSchedule query.
+ *
+ * Fields include student status and isFrozen flag to support the
+ * frontend's mapToSessionStatus() logic in StatusTrackingContainer.
+ */
+export type StatusTrackingScheduleRowDefinition = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentInitials: string;
+  studentStatus: string;
+  teacherId: string;
+  teacherName: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  executionState: string;
+  outcome: string;
+  isFrozen: boolean;
+};
+
+const StatusTrackingScheduleRowRef =
+  gqlSchemaBuilder.objectRef<StatusTrackingScheduleRowDefinition>("StatusTrackingScheduleRow");
+
+export const StatusTrackingScheduleRowPothosObject = StatusTrackingScheduleRowRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    studentId: t.exposeString("studentId"),
+    studentName: t.exposeString("studentName"),
+    studentInitials: t.exposeString("studentInitials"),
+    studentStatus: t.exposeString("studentStatus"),
+    teacherId: t.exposeString("teacherId"),
+    teacherName: t.exposeString("teacherName"),
+    scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
+    scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
+    durationMinutes: t.exposeInt("durationMinutes"),
+    executionState: t.exposeString("executionState"),
+    outcome: t.exposeString("outcome"),
+    isFrozen: t.exposeBoolean("isFrozen"),
+  }),
+});
+
+// ─── Status Tracking Schedule Query ───────────────────────────────────────────
+
+gqlSchemaBuilder.queryField("statusTrackingSchedule", t =>
+  t.field({
+    type: [StatusTrackingScheduleRowRef],
+    args: {
+      date: t.arg.string({ required: true }),
+      search: t.arg.string({ required: false }),
+      viewerTimezone: t.arg.string({ required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const date = new Date(args.date);
+      return ScheduleQueryService.getStatusTrackingSchedule(
+        ctx.user?.id ?? "",
+        date,
+        {
+          search: args.search ?? undefined,
+          viewerTimezone: args.viewerTimezone ?? undefined,
+        },
+        ctx.locale
+      );
+    },
+  })
+);

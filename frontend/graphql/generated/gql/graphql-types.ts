@@ -102,7 +102,9 @@ export enum AppPermission {
   StudentViewAssociated = 'STUDENT_VIEW_ASSOCIATED',
   SystemBulkUpdateDst = 'SYSTEM_BULK_UPDATE_DST',
   SystemEnforceLeaveLimit = 'SYSTEM_ENFORCE_LEAVE_LIMIT',
+  SystemEnforceSuspendedLock = 'SYSTEM_ENFORCE_SUSPENDED_LOCK',
   SystemEnforceTimeWindow = 'SYSTEM_ENFORCE_TIME_WINDOW',
+  SystemProcessStudentLeave = 'SYSTEM_PROCESS_STUDENT_LEAVE',
   SystemSyncNotifications = 'SYSTEM_SYNC_NOTIFICATIONS',
   TeachersCreate = 'TEACHERS_CREATE',
   TeachersEdit = 'TEACHERS_EDIT',
@@ -1320,6 +1322,7 @@ export type Query = {
   rescheduleTrackingRows: Maybe<Array<RescheduleTrackingRow>>;
   searchFiles: Maybe<StorageObjectList>;
   searchTeacherAvailability: Maybe<AvailabilitySearchResult>;
+  statusTrackingSchedule: Maybe<Array<StatusTrackingScheduleRow>>;
   storageStats: Maybe<StorageStats>;
   student: Maybe<Student>;
   studentById: Maybe<AssociatedStudent>;
@@ -1447,6 +1450,13 @@ export type QuerySearchFilesArgs = {
 
 export type QuerySearchTeacherAvailabilityArgs = {
   input: AvailabilitySearchInput;
+};
+
+
+export type QueryStatusTrackingScheduleArgs = {
+  date: Scalars['String']['input'];
+  search: InputMaybe<Scalars['String']['input']>;
+  viewerTimezone: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1605,6 +1615,23 @@ export type RescheduleTrackingRow = {
 export type RevokePermissionGroupFromUserInput = {
   groupId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
+};
+
+export type StatusTrackingScheduleRow = {
+  __typename?: 'StatusTrackingScheduleRow';
+  durationMinutes: Maybe<Scalars['Int']['output']>;
+  executionState: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isFrozen: Maybe<Scalars['Boolean']['output']>;
+  outcome: Maybe<Scalars['String']['output']>;
+  scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
+  scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  studentInitials: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+  studentStatus: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
 };
 
 export type StorageItemProtectionUpdateInput = {
