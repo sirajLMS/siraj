@@ -8,6 +8,10 @@ import { ManagersDataGrid } from "./ManagersDataGrid";
 import { ManagersFilterBar } from "./ManagersFilterBar";
 import { ManagersMetrics } from "./ManagersMetrics";
 
+/* ────────────────────────────────────────────────────────────────────────────
+ * Component Interface
+ * ──────────────────────────────────────────────────────────────────────────── */
+
 interface ManagersViewProps {
   managers: Manager[];
   metrics: {
@@ -23,6 +27,42 @@ interface ManagersViewProps {
   onStatusFilterChange: (status: "all" | "active" | "offline") => void;
 }
 
+/* ────────────────────────────────────────────────────────────────────────────
+ * ManagersView Component
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Main view component for the Managers Directory page.
+ *
+ * Structure:
+ * ┌─────────────────────────────────────────────────────────────┐
+ * │ PageContainer                                               │
+ * │  ├── PageHeader (title, subtitle, add manager action)       │
+ * │  ├── ManagersMetrics (4 stat cards in grid)                 │
+ * │  └── SectionPanel (bordered content area)                   │
+ * │       ├── ManagersFilterBar (role/status dropdown filters)  │
+ * │       └── Box (responsive container)                        │
+ * │            ├── ManagersCardList (mobile view < md)          │
+ * │            └── ManagersDataGrid (desktop view >= md)        │
+ * └─────────────────────────────────────────────────────────────┘
+ *
+ * Components:
+ * - PageContainer: Main content wrapper with section spacing
+ * - PageHeader: Page title, subtitle, and "Add Manager" action button
+ * - ManagersMetrics: Grid of 4 MetricCards showing key stats
+ * - SectionPanel: Bordered container for the table/list section
+ * - ManagersFilterBar: Role and status filter dropdowns
+ * - ManagersCardList: Mobile-optimized card list (shown on < md screens)
+ * - ManagersDataGrid: Desktop data grid with columns (shown on >= md screens)
+ *
+ * @param managers - Filtered list of managers to display
+ * @param metrics - Summary statistics for metrics cards
+ * @param totalManagers - Total count before filtering (for pagination info)
+ * @param roleFilter - Current role filter selection
+ * @param statusFilter - Current status filter selection
+ * @param onRoleFilterChange - Callback for role filter changes
+ * @param onStatusFilterChange - Callback for status filter changes
+ */
 export function ManagersView({
   managers,
   metrics,
@@ -44,17 +84,23 @@ export function ManagersView({
 
   return (
     <PageContainer>
+      {/* Page header with title, subtitle, and "Add Manager" action */}
       <PageHeader title={isMobile ? t("mobileTitle") : t("pageTitle")} subtitle={t("pageSubtitle")} actions={actions} />
 
+      {/* Metrics overview: 4 stat cards (Admin, Staff, Active, Alerts) */}
       <ManagersMetrics metrics={metrics} />
 
+      {/* Main content section with filters and data display */}
       <SectionPanel>
+        {/* Filter controls: Role and Status dropdowns */}
         <ManagersFilterBar
           roleFilter={roleFilter}
           statusFilter={statusFilter}
           onRoleFilterChange={onRoleFilterChange}
           onStatusFilterChange={onStatusFilterChange}
         />
+
+        {/* Responsive data display: cards on mobile, grid on desktop */}
         <Box sx={{ width: "100%" }}>
           {isMobile ? (
             <ManagersCardList managers={managers} total={totalManagers} />

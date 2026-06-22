@@ -1,17 +1,13 @@
 "use client";
 
 import { Box, Button, Grid, MenuItem, Select, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import { SectionPanel } from "@/frontend/components/ui/SectionPanel";
 import type { ManagerAccountType, ManagerOnboardingFormData } from "./schemas/managerOnboardingSchema";
-
-interface Props {
-  readonly control: Control<ManagerOnboardingFormData>;
-  readonly errors: FieldErrors<ManagerOnboardingFormData>;
-}
 
 const ACCOUNT_TYPES: readonly ManagerAccountType[] = ["manager", "admin"];
 
@@ -22,6 +18,49 @@ const DEPARTMENTS = [
   { value: "it_support", labelKey: "itSupport" },
 ] as const;
 
+/* ────────────────────────────────────────────────────────────────────────────
+ * Styled Components — Extracted inline sx styles for reusability & consistency
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Container for account type toggle buttons.
+ * Provides rounded background matching surface container.
+ */
+const StyledAccountTypeContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  padding: theme.spacing(0.5),
+  borderRadius: Number(theme.shape.borderRadius) * 2,
+  backgroundColor: theme.palette.surfaceContainer,
+  width: "100%",
+}));
+
+/**
+ * Individual toggle button within the account type selector.
+ * Changes appearance based on selected state.
+ */
+const StyledAccountTypeButton = styled(Button, {
+  shouldForwardProp: prop => prop !== "isSelected",
+})<{ isSelected: boolean }>(({ theme, isSelected }) => ({
+  flex: 1,
+  padding: `${theme.spacing(1.5)}`,
+  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+  fontWeight: 700,
+  letterSpacing: "0.1em",
+  backgroundColor: isSelected ? theme.palette.primary.main : "transparent",
+  color: isSelected ? theme.palette.onPrimary : theme.palette.onSurfaceVariant,
+  "&:hover": {
+    backgroundColor: isSelected ? theme.palette.primary.main : theme.palette.action.hover,
+  },
+}));
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Account Type Toggle Sub-component
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Toggle control for selecting manager or admin account type.
+ * Renders two styled buttons within a container.
+ */
 function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboardingFormData> }) {
   const t = useTranslations("dashboard.managerOnboarding");
 
@@ -30,47 +69,36 @@ function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboa
       name="accountType"
       control={control}
       render={({ field }) => (
-        <Box
-          sx={theme => ({
-            display: "flex",
-            p: 0.5,
-            borderRadius: 2,
-            bgcolor: theme.palette.surfaceContainer,
-            width: "100%",
-          })}
-        >
+        <StyledAccountTypeContainer>
           {ACCOUNT_TYPES.map(type => {
             const isSelected = field.value === type;
             return (
-              <Button
+              <StyledAccountTypeButton
                 key={type}
                 type="button"
+                variant="text"
+                isSelected={isSelected}
                 onClick={() => {
                   field.onChange(type);
                 }}
-                sx={theme => ({
-                  flex: 1,
-                  py: 1.5,
-                  borderRadius: 1.5,
-                  fontWeight: 700,
-                  letterSpacing: "0.1em",
-                  bgcolor: isSelected ? theme.palette.primary.main : "transparent",
-                  color: isSelected ? theme.palette.onPrimary : theme.palette.onSurfaceVariant,
-                  "&:hover": {
-                    bgcolor: isSelected ? theme.palette.primary.main : theme.palette.action.hover,
-                  },
-                })}
               >
                 {t(`options.accountType.${type}`)}
-              </Button>
+              </StyledAccountTypeButton>
             );
           })}
-        </Box>
+        </StyledAccountTypeContainer>
       )}
     />
   );
 }
 
+/* ────────────────────────────────────────────────────────────────────────────
+ * Department Select Sub-component
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Department selection dropdown with error handling.
+ */
 function DepartmentSelect({
   control,
   errors,
@@ -106,6 +134,28 @@ function DepartmentSelect({
   );
 }
 
+/* ────────────────────────────────────────────────────────────────────────────
+ * Component Interface
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+interface Props {
+  readonly control: Control<ManagerOnboardingFormData>;
+  readonly errors: FieldErrors<ManagerOnboardingFormData>;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * SystemAccessSection Component
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * System access configuration section for manager onboarding.
+ *
+ * Contains:
+ * - Account Type Toggle: Choose between "manager" or "admin"
+ * - Department Select: Assign department to the new staff member
+ *
+ * Displays a dynamic description based on the selected account type.
+ */
 export function SystemAccessSection({ control, errors }: Props) {
   const t = useTranslations("dashboard.managerOnboarding");
   const accountType = useWatch({ control, name: "accountType" });

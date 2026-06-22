@@ -1,5 +1,36 @@
-import { Box, MenuItem, Select, useTheme } from "@mui/material";
+import { Box, MenuItem, Select } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Styled Components — Extracted inline sx styles for reusability & consistency
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Main container for the filter bar.
+ * Provides flex layout with wrapping, spacing, and bottom border separator.
+ */
+const StyledFilterContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: theme.spacing(2),
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: theme.layout.cardPadding,
+  borderBottom: `1px solid ${theme.palette.border.light}`,
+}));
+
+/**
+ * Groups filter controls (Select dropdowns) together horizontally.
+ */
+const StyledInputGroup = styled(Box)(({ theme }) => ({
+  display: "flex",
+  gap: theme.spacing(2),
+}));
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Component Interface
+ * ──────────────────────────────────────────────────────────────────────────── */
 
 interface ManagersFilterBarProps {
   roleFilter: "all" | "admin" | "staff";
@@ -8,6 +39,20 @@ interface ManagersFilterBarProps {
   onStatusFilterChange: (status: "all" | "active" | "offline") => void;
 }
 
+/* ────────────────────────────────────────────────────────────────────────────
+ * ManagersFilterBar Component
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Filter bar for the Managers directory page.
+ *
+ * Renders role and status filter dropdowns within a SectionPanel.
+ *
+ * @param roleFilter - Current role filter value ("all" | "admin" | "staff")
+ * @param statusFilter - Current status filter value ("all" | "active" | "offline")
+ * @param onRoleFilterChange - Callback when role filter changes
+ * @param onStatusFilterChange - Callback when status filter changes
+ */
 export function ManagersFilterBar({
   roleFilter,
   statusFilter,
@@ -15,21 +60,11 @@ export function ManagersFilterBar({
   onStatusFilterChange,
 }: Readonly<ManagersFilterBarProps>) {
   const t = useTranslations("dashboard.managersDirectory.filters");
-  const theme = useTheme();
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 2,
-        alignItems: "center",
-        justifyContent: "space-between",
-        p: theme.layout.cardPadding,
-        borderBottom: `1px solid ${theme.palette.border.light}`,
-      }}
-    >
-      <Box sx={{ display: "flex", gap: 2 }}>
+    <StyledFilterContainer>
+      {/* Filter dropdowns grouped together */}
+      <StyledInputGroup>
         <Select
           size="small"
           value={roleFilter}
@@ -55,10 +90,9 @@ export function ManagersFilterBar({
           <MenuItem value="active">{t("active")}</MenuItem>
           <MenuItem value="offline">{t("inactive")}</MenuItem>
         </Select>
-      </Box>
+      </StyledInputGroup>
 
       {/* Grid vs List view toggle can be added here if needed, but AppDataGrid / CardList handle responsive layout natively */}
-      {/* <FilterButton /> */}
-    </Box>
+    </StyledFilterContainer>
   );
 }
