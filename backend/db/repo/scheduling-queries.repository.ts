@@ -499,3 +499,161 @@ export const getWeeklyWorkloadMetrics = async (
     classCount: metrics?.classCount ?? 0,
   };
 };
+
+export type StatusTrackingRow = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentInitials: string;
+  studentStatus: string;
+  teacherId: string;
+  teacherName: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  executionState: string;
+  outcome: string;
+  isFrozen: boolean;
+};
+
+export const getStatusTrackingRows = async (
+  date: Date,
+  options?: { search?: string; viewerTimezone?: string },
+  tx?: DBTransaction
+): Promise<StatusTrackingRow[]> => {
+  const runner = async (t: DBTransaction): Promise<StatusTrackingRow[]> => {
+    const { getDayBoundaries } = await import("@/backend/lib/timezone");
+    const viewerTimezone = options?.viewerTimezone ?? "UTC";
+    const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(date, viewerTimezone);
+    const search = options?.search;
+
+    const rows = await t
+      .select({
+        id: classInstances.id,
+        studentId: students.id,
+        studentName: students.name,
+        studentStatus: students.status,
+        teacherId: classInstances.teacherId,
+        scheduledStartAt: classInstances.scheduledStartAt,
+        scheduledEndAt: classInstances.scheduledEndAt,
+        durationMinutes: classInstances.durationMinutes,
+        executionState: classInstances.executionState,
+        outcome: classInstances.outcome,
+        isFrozen: classInstances.isFrozen,
+        teacherUserName: users.name,
+      })
+      .from(classInstances)
+      .innerJoin(students, eq(classInstances.studentId, students.id))
+      .innerJoin(teachers, eq(classInstances.teacherId, teachers.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .where(
+        and(
+          isNull(classInstances.deletedAt),
+          gte(classInstances.scheduledStartAt, startOfDayUtc),
+          lt(classInstances.scheduledStartAt, endOfDayUtc)
+        )
+      )
+      .orderBy(classInstances.scheduledStartAt);
+
+    let results = rows.map(r => ({
+      id: r.id,
+      studentId: r.studentId,
+      studentName: r.studentName,
+      studentInitials: r.studentName
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((w: string) => w[0]?.toUpperCase() ?? "")
+        .join(""),
+      studentStatus: r.studentStatus as string,
+      teacherId: r.teacherId,
+      teacherName: r.teacherUserName,
+      scheduledStartAt: r.scheduledStartAt,
+      scheduledEndAt: r.scheduledEndAt,
+      durationMinutes: r.durationMinutes,
+      executionState: r.executionState as string,
+      outcome: r.outcome as string,
+      isFrozen: r.isFrozen,
+    }));
+
+    if (search) {
+      const lower = search.toLowerCase();
+      results = results.filter(
+        r => r.studentName.toLowerCase().includes(lower) || r.teacherName.toLowerCase().includes(lower)
+      );
+    }
+
+    return results;
+  };
+
+  return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+};
+
+export const bulkFreezeStudentClasses = async (
+  studentId: string,
+  fromDate: Date,
+  tx?: DBTransaction
+): Promise<number> => {
+  return setStudentClassesFrozenState(studentId, fromDate, true, undefined, tx);
+};
+
+export const bulkUnfreezeStudentClasses = async (
+  studentId: string,
+  fromDate: Date,
+  tx?: DBTransaction
+): Promise<number> => {
+  return setStudentClassesFrozenState(studentId, fromDate, false, eq(classInstances.isFrozen, true), tx);
+};
+
+async function setStudentClassesFrozenState(
+  studentId: string,
+  fromDate: Date,
+  isFrozen: boolean,
+  extraPredicate: ReturnType<typeof eq> | undefined,
+  tx?: DBTransaction
+): Promise<number> {
+  const runner = async (t: DBTransaction): Promise<number> => {
+    const conditions = and(
+      eq(classInstances.studentId, studentId),
+      isNull(classInstances.deletedAt),
+      gte(classInstances.scheduledStartAt, fromDate),
+      extraPredicate
+    );
+    const result = await t
+      .update(classInstances)
+      .set({ isFrozen, updatedAt: new Date() })
+      .where(conditions)
+      .returning({ id: classInstances.id });
+    return result.length;
+  };
+  return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+}
+
+export const getStudentFutureClasses = async (
+  studentId: string,
+  fromDate: Date,
+  tx?: DBTransaction
+): Promise<{ id: string; executionState: string; scheduledStartAt: Date }[]> => {
+  const queryDb = tx ?? db;
+  const rows = await queryDb
+    .select({
+      id: classInstances.id,
+      executionState: classInstances.executionState,
+      scheduledStartAt: classInstances.scheduledStartAt,
+    })
+    .from(classInstances)
+    .where(
+      and(
+        eq(classInstances.studentId, studentId),
+        isNull(classInstances.deletedAt),
+        gte(classInstances.scheduledStartAt, fromDate),
+        inArray(classInstances.executionState, ["NOT_ACTIVATED", "ACTIVATED"])
+      )
+    )
+    .orderBy(classInstances.scheduledStartAt);
+  return rows.map(r => ({
+    id: r.id,
+    executionState: r.executionState as string,
+    scheduledStartAt: r.scheduledStartAt,
+  }));
+};

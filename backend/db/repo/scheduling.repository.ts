@@ -1,6 +1,8 @@
 import { and, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
+  bulkFreezeStudentClasses as bulkFreezeStudentClassesFn,
+  bulkUnfreezeStudentClasses as bulkUnfreezeStudentClassesFn,
   type DailyScheduleResult as DailyScheduleResultType,
   type FutureClassRow as FutureClassRowType,
   getClassStatusEvents as getClassStatusEventsFn,
@@ -8,11 +10,14 @@ import {
   getDailySchedule as getDailyScheduleFn,
   getRescheduleTrackingMetrics as getRescheduleTrackingMetricsFn,
   getRescheduleTrackingRows as getRescheduleTrackingRowsFn,
+  getStatusTrackingRows as getStatusTrackingRowsFn,
+  getStudentFutureClasses as getStudentFutureClassesFn,
   getTeacherByUserId as getTeacherByUserIdFn,
   getTeacherFutureClasses as getTeacherFutureClassesFn,
   getTeacherLeaveQuotaUsage as getTeacherLeaveQuotaUsageFn,
   getTeacherProgressFeed as getTeacherProgressFeedFn,
   incrementTeacherLeaveQuota as incrementTeacherLeaveQuotaFn,
+  type StatusTrackingRow as StatusTrackingRowType,
 } from "@/backend/db/repo/scheduling-queries.repository";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
@@ -1309,6 +1314,7 @@ export namespace SchedulingRepository {
 
   export type DailyScheduleResult = DailyScheduleResultType;
   export type FutureClassRow = FutureClassRowType;
+  export type StatusTrackingRow = StatusTrackingRowType;
   export const getDailyMetrics = getDailyMetricsFn;
   export const getDailySchedule = getDailyScheduleFn;
   export const getClassStatusEvents = getClassStatusEventsFn;
@@ -1319,6 +1325,10 @@ export namespace SchedulingRepository {
   export const incrementTeacherLeaveQuota = incrementTeacherLeaveQuotaFn;
   export const getTeacherByUserId = getTeacherByUserIdFn;
   export const getTeacherFutureClasses = getTeacherFutureClassesFn;
+  export const getStatusTrackingRows = getStatusTrackingRowsFn;
+  export const bulkFreezeStudentClasses = bulkFreezeStudentClassesFn;
+  export const bulkUnfreezeStudentClasses = bulkUnfreezeStudentClassesFn;
+  export const getStudentFutureClasses = getStudentFutureClassesFn;
 }
 
 function computeScheduledStartForDay(
