@@ -1,4 +1,7 @@
+import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+
+// ─── Object Types ─────────────────────────────────────────────────────────────
 
 export type TeacherDirectoryRowDefinition = {
   id: string;
@@ -58,3 +61,50 @@ export const TeacherDirectoryPothosObject = TeacherDirectoryRef.implement({
     totalTeachers: t.exposeInt("totalTeachers"),
   }),
 });
+
+// ─── Manager Directory Types & Queries ──────────────────────────────────────────
+
+export interface ManagerDirectoryRowDefinition {
+  readonly id: string;
+  readonly staffProfileId: string;
+  readonly name: string;
+  readonly email: string;
+  readonly phone: string | null;
+  readonly skypeId: string | null;
+  readonly status: string;
+  readonly roleSlug: string | null;
+  readonly roleName: string | null;
+}
+
+const ManagerDirectoryRowRef = gqlSchemaBuilder.objectRef<ManagerDirectoryRowDefinition>("ManagerDirectoryRow");
+
+export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    staffProfileId: t.exposeString("staffProfileId"),
+    name: t.exposeString("name"),
+    email: t.exposeString("email"),
+    phone: t.exposeString("phone", { nullable: true }),
+    skypeId: t.exposeString("skypeId", { nullable: true }),
+    status: t.exposeString("status"),
+    roleSlug: t.exposeString("roleSlug", { nullable: true }),
+    roleName: t.exposeString("roleName", { nullable: true }),
+  }),
+});
+
+// ─── Queries ──────────────────────────────────────────────────────────────────
+
+gqlSchemaBuilder.queryField("managerDirectory", t =>
+  t.field({
+    type: [ManagerDirectoryRowPothosObject],
+    resolve: async (_root, _args, ctx) => {
+      const locale = ctx.locale || "en";
+      const userId = ctx.user?.id || "";
+
+      const result = await ManagerDirectoryService.getManagerDirectory(userId, locale);
+
+      return result.rows;
+    },
+    description: "Lists all staff members with administrative access.",
+  })
+);

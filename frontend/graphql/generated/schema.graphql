@@ -82,6 +82,7 @@ enum AppPermission {
   SYSTEM_ENFORCE_SUSPENDED_LOCK
   SYSTEM_ENFORCE_TIME_WINDOW
   SYSTEM_PROCESS_STUDENT_LEAVE
+  SYSTEM_RESTRICT_RESOURCE_ACCESS
   SYSTEM_SYNC_NOTIFICATIONS
   TEACHERS_CREATE
   TEACHERS_EDIT
@@ -734,6 +735,17 @@ type GroupUser {
 """A type representing arbitrary JSON values"""
 scalar JSON
 
+type LearningResourceRow {
+  contentType: String
+  createdAt: DateTime
+  displayName: String
+  filePath: String
+  fileSize: Float
+  id: String
+  uploadedByUserId: String
+  uploadedByUserName: String
+}
+
 type LeaveProcessResult {
   completedInstance: ClassInstanceDetail
   completedInstanceId: String
@@ -754,6 +766,18 @@ input LoginInput {
 type LoginResponse {
   token: String
   user: User
+}
+
+type ManagerDirectoryRow {
+  email: String
+  id: String
+  name: String
+  phone: String
+  roleName: String
+  roleSlug: String
+  skypeId: String
+  staffProfileId: String
+  status: String
 }
 
 type ManualInvoiceResult {
@@ -834,6 +858,9 @@ type Mutation {
   updateStudentQuota(expectedVersion: Int, newClassesRemaining: Int!, studentId: String!): EditQuotaResult
   updateTeacherProfile(input: TeacherProfileUpdateInput!, teacherId: ID!): TeacherProfileResult
   updateUserOverrides(overrides: [UserOverrideInput!]!, userId: String!): Boolean
+
+  """Uploads a new learning resource to the academy library."""
+  uploadLearningResource(input: ResourceUploadInput!): LearningResourceRow
 }
 
 type NotificationAlertsResult {
@@ -1000,7 +1027,13 @@ type Query {
   fileInfo(path: String!): FileInfo
   fileUsage(input: FileUsageCheckInput!): FileUsageResult
   folderInfo(path: String!): DirectoryInfo
+
+  """Lists all learning resources available to the academy."""
+  learningResources(searchQuery: String): [LearningResourceRow!]
   listFiles(input: FilesListInput!): StorageObjectList
+
+  """Lists all staff members with administrative access."""
+  managerDirectory: [ManagerDirectoryRow!]
   me: User
   notificationAlerts: NotificationAlertsResult
   parentAssociatedStudents(parentId: String!): [AssociatedStudent!]
@@ -1044,6 +1077,9 @@ type Query {
   studentById(studentId: String!): AssociatedStudent
   studentClassHistory(month: Int!, studentId: ID!, year: Int!): StudentClassHistory
   studentClassSessionDetail(classInstanceId: ID!): StudentSessionDetail
+
+  """Fetches the global student directory with cross-relational data."""
+  studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): [StudentDirectoryRow!]
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
   teacherActiveDashboard(date: String!): TeacherDashboard
   teacherDashboard(date: String!): TeacherDashboard
@@ -1119,6 +1155,12 @@ type RescheduleTrackingRow {
   teacherAvatarUrl: String
   teacherId: String
   teacherName: String
+}
+
+input ResourceUploadInput {
+  displayName: String!
+  fileId: ID!
+  filePath: String!
 }
 
 input RevokePermissionGroupFromUserInput {
@@ -1220,6 +1262,19 @@ input StudentCreateInput {
   parentId: String!
   primaryTeacherId: String
   status: StudentStatus!
+}
+
+type StudentDirectoryRow {
+  classesRemaining: Int
+  classesTotal: Int
+  createdAt: DateTime
+  email: String
+  hoursPerWeek: String
+  id: String
+  name: String
+  parentName: String
+  status: String
+  teacherName: String
 }
 
 input StudentFilterArgs {

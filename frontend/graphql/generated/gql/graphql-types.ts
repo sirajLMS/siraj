@@ -105,6 +105,7 @@ export enum AppPermission {
   SystemEnforceSuspendedLock = 'SYSTEM_ENFORCE_SUSPENDED_LOCK',
   SystemEnforceTimeWindow = 'SYSTEM_ENFORCE_TIME_WINDOW',
   SystemProcessStudentLeave = 'SYSTEM_PROCESS_STUDENT_LEAVE',
+  SystemRestrictResourceAccess = 'SYSTEM_RESTRICT_RESOURCE_ACCESS',
   SystemSyncNotifications = 'SYSTEM_SYNC_NOTIFICATIONS',
   TeachersCreate = 'TEACHERS_CREATE',
   TeachersEdit = 'TEACHERS_EDIT',
@@ -769,6 +770,18 @@ export type GroupUser = {
   name: Maybe<Scalars['String']['output']>;
 };
 
+export type LearningResourceRow = {
+  __typename?: 'LearningResourceRow';
+  contentType: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  displayName: Maybe<Scalars['String']['output']>;
+  filePath: Maybe<Scalars['String']['output']>;
+  fileSize: Maybe<Scalars['Float']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  uploadedByUserId: Maybe<Scalars['String']['output']>;
+  uploadedByUserName: Maybe<Scalars['String']['output']>;
+};
+
 export type LeaveProcessResult = {
   __typename?: 'LeaveProcessResult';
   completedInstance: Maybe<ClassInstanceDetail>;
@@ -791,6 +804,19 @@ export type LoginResponse = {
   __typename?: 'LoginResponse';
   token: Maybe<Scalars['String']['output']>;
   user: Maybe<User>;
+};
+
+export type ManagerDirectoryRow = {
+  __typename?: 'ManagerDirectoryRow';
+  email: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  phone: Maybe<Scalars['String']['output']>;
+  roleName: Maybe<Scalars['String']['output']>;
+  roleSlug: Maybe<Scalars['String']['output']>;
+  skypeId: Maybe<Scalars['String']['output']>;
+  staffProfileId: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
 };
 
 export type ManualInvoiceResult = {
@@ -871,6 +897,8 @@ export type Mutation = {
   updateStudentQuota: Maybe<EditQuotaResult>;
   updateTeacherProfile: Maybe<TeacherProfileResult>;
   updateUserOverrides: Maybe<Scalars['Boolean']['output']>;
+  /** Uploads a new learning resource to the academy library. */
+  uploadLearningResource: Maybe<LearningResourceRow>;
 };
 
 
@@ -1138,6 +1166,11 @@ export type MutationUpdateUserOverridesArgs = {
   userId: Scalars['String']['input'];
 };
 
+
+export type MutationUploadLearningResourceArgs = {
+  input: ResourceUploadInput;
+};
+
 export type NotificationAlertsResult = {
   __typename?: 'NotificationAlertsResult';
   alerts: Maybe<Array<SystemAlert>>;
@@ -1304,7 +1337,11 @@ export type Query = {
   fileInfo: Maybe<FileInfo>;
   fileUsage: Maybe<FileUsageResult>;
   folderInfo: Maybe<DirectoryInfo>;
+  /** Lists all learning resources available to the academy. */
+  learningResources: Maybe<Array<LearningResourceRow>>;
   listFiles: Maybe<StorageObjectList>;
+  /** Lists all staff members with administrative access. */
+  managerDirectory: Maybe<Array<ManagerDirectoryRow>>;
   me: Maybe<User>;
   notificationAlerts: Maybe<NotificationAlertsResult>;
   parentAssociatedStudents: Maybe<Array<AssociatedStudent>>;
@@ -1328,6 +1365,8 @@ export type Query = {
   studentById: Maybe<AssociatedStudent>;
   studentClassHistory: Maybe<StudentClassHistory>;
   studentClassSessionDetail: Maybe<StudentSessionDetail>;
+  /** Fetches the global student directory with cross-relational data. */
+  studentDirectory: Maybe<Array<StudentDirectoryRow>>;
   students: StudentsWithFiltersResponse;
   teacherActiveDashboard: Maybe<TeacherDashboard>;
   teacherDashboard: Maybe<TeacherDashboard>;
@@ -1395,6 +1434,11 @@ export type QueryFileUsageArgs = {
 
 export type QueryFolderInfoArgs = {
   path: Scalars['String']['input'];
+};
+
+
+export type QueryLearningResourcesArgs = {
+  searchQuery: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1484,6 +1528,13 @@ export type QueryStudentClassHistoryArgs = {
 
 export type QueryStudentClassSessionDetailArgs = {
   classInstanceId: Scalars['ID']['input'];
+};
+
+
+export type QueryStudentDirectoryArgs = {
+  filterArgs: InputMaybe<StudentFilterArgs>;
+  orderBy: InputMaybe<Array<StudentsOrderByClause>>;
+  paginationArgs: InputMaybe<PaginationArgs>;
 };
 
 
@@ -1612,6 +1663,12 @@ export type RescheduleTrackingRow = {
   teacherName: Maybe<Scalars['String']['output']>;
 };
 
+export type ResourceUploadInput = {
+  displayName: Scalars['String']['input'];
+  fileId: Scalars['ID']['input'];
+  filePath: Scalars['String']['input'];
+};
+
 export type RevokePermissionGroupFromUserInput = {
   groupId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
@@ -1713,6 +1770,20 @@ export type StudentCreateInput = {
   parentId: Scalars['String']['input'];
   primaryTeacherId: InputMaybe<Scalars['String']['input']>;
   status: StudentStatus;
+};
+
+export type StudentDirectoryRow = {
+  __typename?: 'StudentDirectoryRow';
+  classesRemaining: Maybe<Scalars['Int']['output']>;
+  classesTotal: Maybe<Scalars['Int']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  hoursPerWeek: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  parentName: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
 };
 
 export type StudentFilterArgs = {
