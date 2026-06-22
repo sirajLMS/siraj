@@ -18,6 +18,8 @@ Before writing any code or proposing an implementation plan, you must perform de
   5. **Schema Accuracy**: Do not hallucinate column names. Verify them against the actual schema files. If a column does not exist, explicitly plan a database migration/schema update first.
   6. **Existing Database Triggers**: Check existing DB triggers before writing new ones. For example, the existing state transition trigger uses a blacklist-style approach; do not overwrite it with a whitelist-style approach without explicit validation.
 - **Transitioning from Mock to Real**: Hook up real backend repositories, real GraphQL queries, replace mock data with real stateful Apollo hooks (`useQuery`), and migrate layout wrappers.
+- **Type Extraction from Mock Stores**: When migrating containers from mock stores, types defined inside mock store files (interfaces, type aliases, union types) MUST be extracted to dedicated `types.ts` files in the same directory as the view components. Before defining any custom type, you MUST first check `frontend/graphql/generated/gql/graphql-types.ts` for generated GraphQL types produced by codegen from the new GraphQL documents. Use generated types directly where possible; only define UI-specific types that have no generated equivalent.
+- **Storybook MockedProvider Migration**: When containers migrate from mock stores to `useQuery`, their corresponding `*.stories.tsx` files MUST be updated to use Apollo's `MockedProvider` with mock GraphQL responses instead of relying on Zustand mock stores. Containers remain the top-level story components. Mock data is defined as constants/hooks within the story file itself.
 - **Data Seeding Lifecycle**: Update seeders in `backend/db/seeds`. Run `bun run scripts/dbActions.ts push` before seeding. Ensure constraints and exact enums are respected.
 
 ---
@@ -56,7 +58,7 @@ This mirrors the sprint 8 layout and keeps each section/task independently reada
 #### File Naming Rules
 - **Lowercase kebab-case** for every file and directory name (no spaces, no underscores, no camelCase).
 - **Section files** are named exactly `section-<N>-<short-slug>.md` where `<N>` matches the section number (0–7) and `<short-slug>` is a 1–3 word descriptor (e.g., `core-principles`, `rbac-permissions`, `security-threats`).
-- **Task files** are named `task-<letter>-<short-slug>.md` where `<letter>` is the task letter (a, b, c, ...) and `<short-slug>` describes the task's primary concern (e.g., `migration-enum`, `repositories`, `repo-tests`, `services`, `graphql-pothos`, `frontend-documents`, `graphql-tests`, `frontend-views`, `i18n`).
+- **Task files** are named `task-<letter>-<short-slug>.md` where `<letter>` is the task letter (a, b, c, ...) and `<short-slug>` describes the task's primary concern (e.g., `migration-enum`, `repositories`, `repo-tests`, `services`, `graphql-pothos`, `frontend-documents`, `types-extraction`, `graphql-tests`, `storybook-migration`, `frontend-stores`, `frontend-views`, `i18n`).
 - **Appendix** is a single file named `appendix.md`. If multiple appendices are needed, split into `appendix-a-file-summary.md`, `appendix-b-dependency-graph.md`, etc.
 - **Optional sections** (e.g., Section 3 when no state machine applies) may be omitted entirely — do NOT create an empty placeholder file.
 
@@ -139,7 +141,7 @@ Include general system rules, a ban on monolithic services, and the **Zero Incom
 
 ### 1.2b Task Ordering & Dependency Integrity
 - [ ] **No forward dependencies** - A task MUST NOT depend on code, types, schemas, or modules introduced by a later task. Tasks can only depend on the current project state or on earlier tasks.
-- [ ] **Incremental build order** - Tasks must be ordered so the dependency chain flows naturally: Database/Schema → Repository → Service → **DB/Repo Tests** → GraphQL (Backend) → GraphQL Documents (Frontend) → **GraphQL Tests** → Frontend Stores → Frontend Views. Tests immediately follow the layer they verify.
+- [ ] **Incremental build order** - Tasks must be ordered so the dependency chain flows naturally: Database/Schema → Repository → Service → **DB/Repo Tests** → GraphQL (Backend) → GraphQL Documents (Frontend) → **Type Extraction** → **GraphQL Tests** + **Storybook Migration** → Frontend Stores → Frontend Views. Tests immediately follow the layer they verify. Type extraction happens before stores/views so types are available. Storybook migration happens before container migration so stories are ready when containers switch to `useQuery`.
 - [ ] **Self-contained tasks** - After completing each task, the project must compile and pass all quality gates. No task should leave the project in a broken state waiting for a later task to fix it.
 - [ ] **Explicit dependency declaration** - Each task must list its dependencies (earlier task letters or "current project state only") in its Dependencies field.
 - [ ] **Test tasks immediately follow implementation** - DB/repo/service tests come directly after the DB/repo/service implementation task. GraphQL tests come directly after the frontend GraphQL documents task. Tests are never deferred to the end.
@@ -156,6 +158,9 @@ The following patterns are **strictly prohibited**:
 | Service importing from `drizzle-orm` or `backend/db/schema` | Service depends ONLY on `backend/db/repo/` | `rg "from ['\"]drizzle\|from ['\"]backend/db/schema" backend/services/` |
 | GraphQL resolver importing from `backend/db/repo/` | Resolver depends ONLY on `backend/services/` | `rg "from ['\"]backend/db" backend/graphql/pothos/` |
 | Mock store in production views | Real `useQuery` with `TypedDocumentNode` | `rg "mock.*Store" frontend/views --glob "!**/*.stories.tsx"` |
+| Types defined in mock stores | Types extracted to `types.ts`, mock stores re-import | `rg "export (type|interface)" frontend/stores/mock*.ts` |
+| Story without MockedProvider | `MockedProvider` decorator with mock GraphQL responses | `rg "MockedProvider" frontend/views/**/*.stories.tsx` |
+| Custom type when generated exists | Re-export from `graphql-types.ts` | Manual review of `types.ts` files |
 
 ### 1.4 SSR Compatibility (when applicable)
 - [ ] **Services must work in Next.js Server Components** — Services can be used directly by SSR or Server Actions without GraphQL-specific context dependencies.
@@ -164,7 +169,15 @@ The following patterns are **strictly prohibited**:
 ### 1.5 Data Persistence & Mock Migration
 - [ ] **NO dummy data in production** — Replace all mock stores (`mockXxxStore`) with real GraphQL-backed stores using `useQuery` and generated `TypedDocumentNode`.
 - [ ] **Complete transaction boundaries** — Multi-table writes must be atomic (wrapped in `db.transaction()`).
-- [ ] **Mock stores preserved for Storybook** — `*.stories.tsx` files MUST keep dummy data via mock store aliases. Production containers use real stores.
+- [ ] **Type extraction before migration** — Before migrating any container from mock stores, extract all shared types (interfaces, type aliases, union types, constants) from the mock store file into a dedicated `types.ts` file in the view component's directory. Mock stores then re-import from the `types.ts` file for backward compatibility with Storybook stories.
+- [ ] **Generated GraphQL types first** — Before defining any custom type in a `types.ts` file, check `frontend/graphql/generated/gql/graphql-types.ts` for the generated equivalent. If the generated type matches the UI's needs, re-export it from the `types.ts` file and use it directly. Only define UI-specific types when the generated type is missing fields, has incompatible nullability, or doesn't exist yet.
+- [ ] **Storybook MockedProvider migration** — When a container migrates from mock stores to `useQuery`, its `*.stories.tsx` file MUST be updated to:
+  1. Use `MockedProvider` from `@apollo/client/testing` as a decorator
+  2. Define mock GraphQL responses as constants within the story file (using `__typename` and generated type shapes)
+  3. Keep the container as the top-level story component
+  4. Mock permission gates (e.g., `<RequirePermission>`) via decorators or store state overrides
+  5. Provide multiple story variants (Default, Empty, Loading) where applicable
+- [ ] **Mock stores preserved for Storybook** — `*.stories.tsx` files MUST keep dummy data available, but the delivery mechanism changes from Zustand store imports to `MockedProvider` mock responses. The mock store files themselves retain their mock data arrays for backward compatibility with any remaining imports.
 
 ### 1.6 Logging & Observability
 - [ ] **Logger utility mandatory** — Use `import { logger } from '@/frontend/utils/logger'` (frontend) or `import { logger } from '@/backend/lib/logger'` (backend).
@@ -195,7 +208,7 @@ Output must show 100% line + function coverage on touched methods.
 
 **Other:**
 - [ ] **Database test suite** — Run `bun run test:db` after every repository change.
-- [ ] **Storybook stories** — Mock stores in `*.stories.tsx` files; production containers fully wired to real data.
+- [ ] **Storybook stories** — Stories use `MockedProvider` with mock GraphQL responses; containers are top-level components; permission gates are mocked; no production store imports.
 ```
 
 ---
@@ -392,13 +405,26 @@ Break down the implementation into letters. Tasks **MUST** be strictly ordered b
 
 #### Task Ordering Rules (MANDATORY):
 - **No forward dependencies**: A task MUST NOT call, import, reference, or assume the existence of any code, type, method, schema column, migration, or module that is introduced by a later task.
-- **Build incrementally**: Order tasks so that the dependency chain flows naturally — typically Database/Schema → Repository → Service → **DB/Repo Tests** → GraphQL (Backend) → GraphQL Documents (Frontend) → **GraphQL Tests** → Frontend Stores → Frontend Views. Each layer builds on the one before it, and tests are placed immediately after the layer they verify.
+- **Build incrementally**: Order tasks so that the dependency chain flows naturally — typically Database/Schema → Repository → Service → **DB/Repo Tests** → GraphQL (Backend) → GraphQL Documents (Frontend) → **Type Extraction** → **GraphQL Tests** + **Storybook Migration** → Frontend Stores → Frontend Views → i18n. Each layer builds on the one before it, and tests are placed immediately after the layer they verify.
 - **Self-contained per task**: Every task must compile, pass all quality gates, and produce a working project state on its own. After completing Task B, the project must be in a fully working state — it must not be in a broken state waiting for Task C to "fix" or "complete" something.
 - **Declare dependencies explicitly**: Each task's **Dependencies** field must list exactly what it relies on (e.g., "Depends on Task A: `<DomainRepository>.<methodA>` method" or "Depends on current project state only").
 - **Reorder if needed**: If during planning you discover a task needs something from a later task, you MUST reorder the tasks so the dependency comes first. Never work around this by adding stubs, TODOs, or temporary imports.
 - **Test tasks immediately follow their implementation**: Test tasks MUST be placed directly after the implementation task they verify — never deferred to the end of the plan:
   - **DB/Repo/Service tests** (`bun run test:db`, `bun run test:integration`): Must be the very next task after the DB schema, repository, and/or service implementation task that introduces the code under test.
   - **GraphQL tests** (`bun run test:graphql`): Must be the very next task after the frontend GraphQL documents/queries/mutations implementation task that introduces the operations under test.
+- **Type Extraction task** (when migrating from mock stores): When a story migrates containers from mock stores to real data, a dedicated Type Extraction task MUST be included. This task:
+  1. Audits `frontend/graphql/generated/gql/graphql-types.ts` for types generated by the story's new GraphQL documents.
+  2. Extracts all shared types from mock store files into dedicated `types.ts` files in the view component directories.
+  3. Re-exports generated GraphQL types where available; defines UI-specific types only where no generated equivalent exists.
+  4. Updates mock store files to re-import types from the new `types.ts` files.
+  5. Updates sub-component imports to reference `types.ts` files instead of mock stores.
+  6. This task MUST come after Frontend Apollo Documents (so codegen has run and generated types are available) and BEFORE Frontend Stores/Views.
+- **Storybook Migration task** (when migrating from mock stores): When containers switch from mock stores to `useQuery`, a dedicated Storybook Migration task MUST be included. This task:
+  1. Updates `*.stories.tsx` files to use `MockedProvider` decorators with mock GraphQL responses.
+  2. Defines mock data as constants within story files using generated type shapes (with `__typename`).
+  3. Keeps containers as top-level story components.
+  4. Mocks permission gates so containers render in stories.
+  5. This task MUST come AFTER Type Extraction (so types are available) and BEFORE Frontend Stores/Views (so stories are ready when containers switch).
 - **Database Migration task protocol** (typically the first task): When a plan includes schema changes, new columns, or new permissions, the Database Migration task MUST:
   - Add any new permissions to `backend/db/migration/3-system_permissions_and_groups.sql` (NOT to a separate seed file).
   - Run the following commands **in exact order** after writing the migration:
@@ -853,6 +879,141 @@ Confirm that each new route renders correctly and that the navigation config pro
 (standard quality gate checklist)
 ```
 
+#### *Example Task I (Type Extraction — Mock Store Types → `.types.ts`):*
+```markdown
+### Task I — Type Extraction: Move Shared Types from Mock Stores to Dedicated `.types.ts` Files
+
+**Objective:** Extract all shared TypeScript interfaces and types currently defined inside mock store files into dedicated `types.ts` files. Cross-reference with generated GraphQL types in `frontend/graphql/generated/gql/graphql-types.ts` to use generated types where available.
+
+**Dependencies:** Depends on Task <GraphQL Documents> — codegen has run and generated types are available.
+
+**Layer-Specific Rules:**
+- **Generated types first**: Before defining any custom type, check `frontend/graphql/generated/gql/graphql-types.ts` for the generated equivalent. Use generated types directly where possible.
+- **One types file per domain**: Types go in `<domain>.types.ts` or `types.ts` in the same directory as the view components.
+- **Mock stores import from types files**: After extraction, mock stores re-import from `types.ts` files. No type definitions remain in mock store files.
+- **No circular dependencies**: Types files must not import from stores, containers, or services.
+
+**Target Files:**
+- `frontend/views/dashboard/<domain>/types.ts` — NEW (extracted types)
+- `frontend/stores/mock<Domain>Store.ts` — MODIFY (remove types, re-import from types file)
+
+**Detailed Implementation Steps:**
+
+*Step 1: Audit generated GraphQL types*
+
+Check `frontend/graphql/generated/gql/graphql-types.ts` for types generated by the story's new GraphQL documents. Create a reconciliation table mapping mock types to generated equivalents:
+
+| **Mock Type** | **Generated Equivalent** | **Decision** |
+|---|---|---|
+| `<MockRow>` | `<GeneratedRow>` | Use generated type, re-export from types.ts |
+| `<UIStatus>` | N/A | Keep as UI-specific type |
+
+*Step 2: Create `types.ts` file*
+
+Re-export generated types and define UI-specific types:
+
+```typescript
+// Re-export generated GraphQL type
+export type { <GeneratedRow> } from "@/frontend/graphql/generated/gql/graphql-types";
+
+// UI-specific types not in GraphQL schema
+export type <UIStatus> = "value_a" | "value_b";
+```
+
+*Step 3: Update mock stores to import from types files*
+
+Remove locally-defined types. Add imports from the new types file. Re-export for backward compatibility.
+
+*Step 4: Update sub-component imports*
+
+Change imports from mock stores to import from `types.ts` files instead.
+
+**Success Criteria / Check Progress Points:**
+- [ ] All types extracted from mock stores to `types.ts` files
+- [ ] Generated GraphQL types used where available
+- [ ] Mock stores re-import from `types.ts` for backward compatibility
+- [ ] Sub-components import from `types.ts` not mock stores
+- [ ] No circular dependencies
+- [ ] `bun tsgo` passes with 0 errors
+
+(standard quality gate checklists)
+```
+
+#### *Example Task J (Storybook Migration — MockedProvider):*
+```markdown
+### Task J — Storybook Migration: Mock Stores → MockedProvider Hooks
+
+**Objective:** Update `*.stories.tsx` files so they work with containers that use `useQuery` instead of mock stores. Stories use Apollo's `MockedProvider` to provide mock GraphQL responses.
+
+**Dependencies:** Depends on Type Extraction task (types available) and the preceding GraphQL documents task (document imports available).
+
+**Layer-Specific Rules:**
+- **Containers are top-level story components** — Stories render the actual Container, not sub-components.
+- **MockedProvider decorator** — Every story MUST be wrapped in a `MockedProvider` decorator from `@apollo/client/testing`.
+- **Mock data as constants** — Mock GraphQL responses are defined as typed constants within the story file, using `__typename` and generated type shapes.
+- **Permission mocking** — If containers have `<RequirePermission>` gates, stories MUST mock the permission context via decorators or store overrides.
+- **Multiple variants** — Provide Default, Empty, and Loading story variants where applicable.
+
+**Target Files:**
+- `frontend/views/dashboard/<domain>/<Container>.stories.tsx` — MODIFY
+
+**Detailed Implementation Steps:**
+
+*Step 1: Define mock GraphQL response data*
+
+```typescript
+const MOCK_ROWS = [
+  {
+    __typename: "<GeneratedType>" as const,
+    id: "mock-1",
+    // ... all fields from the generated type
+  },
+];
+```
+
+*Step 2: Create mock request/response pairs*
+
+```typescript
+const mocks = [
+  {
+    request: { query: <queryDocument>, variables: {} },
+    result: { data: { <queryName>: MOCK_ROWS } },
+  },
+];
+```
+
+*Step 3: Update story meta with MockedProvider decorator*
+
+```typescript
+const meta: Meta<typeof Container> = {
+  title: "Views/dashboard/<domain>/<Container>",
+  component: Container,
+  decorators: [
+    (Story) => (
+      <MockedProvider mocks={mocks} addTypename={true}>
+        <Story />
+      </MockedProvider>
+    ),
+  ],
+};
+```
+
+*Step 4: Add Empty and Loading variants*
+
+Create additional story exports that override the mocks to return empty arrays or simulate loading.
+
+**Success Criteria / Check Progress Points:**
+- [ ] Stories use `MockedProvider` with mock GraphQL responses
+- [ ] Mock data uses generated type shapes (with `__typename`)
+- [ ] Containers remain top-level story components
+- [ ] Permission gates are properly mocked
+- [ ] Empty state stories work
+- [ ] No imports from production stores in story files
+- [ ] `bun tsgo` passes with 0 errors
+
+(standard quality gate checklists)
+```
+
 #### Frontend View Component Composition Pattern (when applicable):
 
 When a story's frontend feature involves **all three** of: user input, data display, and per-item detail rendering, agents MUST break it into a **Container → Form → View → Detail** component composition — NOT a single monolithic component.
@@ -870,7 +1031,7 @@ For simpler features (e.g., modifying an existing component, adding a single dia
 - **Form**, **View**, and **Detail** components receive data via props — they never call hooks or access stores directly.
 - All components use `useTranslations` for localized text.
 - All components use MUI theme tokens — no hardcoded colors.
-- Storybook stories (`*.stories.tsx`) are created for the Container with mock data.
+- Storybook stories (`*.stories.tsx`) are created for the Container using `MockedProvider` with mock GraphQL data (see Example Task J above).
 
 Outline the list of commands to verify the entire system compiles and passes all checks.
 
@@ -909,6 +1070,20 @@ Execute the following commands in order to guarantee system stability and preven
 14. `rg "mockXxxStore" frontend/views --glob "!**/*.stories.tsx"`
     Output MUST be empty — mock stores must not be imported in production view files.
 
+### 7.5b Type Extraction Verification (when applicable)
+15. Verify types are extracted from mock stores:
+    ```bash
+    rg "export (type|interface)" frontend/stores/mock<Domain>Store.ts
+    ```
+    Output should show only re-exports from `types.ts` files, not locally-defined types.
+
+### 7.5c Storybook MockedProvider Verification (when applicable)
+16. Verify stories use `MockedProvider`:
+    ```bash
+    rg "MockedProvider" frontend/views/dashboard/<domain>/*.stories.tsx
+    ```
+    Each story file must contain a `MockedProvider` decorator.
+
 ### 7.6 Permission Enforcement Verification (when applicable)
 15. Verify that all new views are properly gated:
     ```bash
@@ -943,10 +1118,25 @@ Execute the following commands in order to guarantee system stability and preven
 
 ### E. Frontend Stores (`frontend/stores/`)
 - **Zustand Types**: Strictly use generated GraphQL types from `frontend/graphql/generated/gql/graphql-types.ts`. NO intermediate mappings.
+- **Type Sources**: Stores MUST import shared types from the extracted `types.ts` files in the view component directories, NOT from mock store files.
 
 ### F. Frontend Views (`frontend/views/`)
 - **Sprint-Specific RBAC Enforcement**: Use `<RequirePermission permissions={["domain.action"]} />`.
-- **Mock Data Ban (Production)**: Mock data is strictly forbidden in production. Migrate to real components. (Storybooks `*.stories.tsx` MUST KEEP dummy data).
+- **Mock Data Ban (Production)**: Mock data is strictly forbidden in production. Migrate to real components. (Storybooks `*.stories.tsx` use `MockedProvider` with mock GraphQL responses — see Section 1.5).
+- **Type Files**: Each view domain MUST have a `types.ts` file containing shared types. Types are sourced from generated GraphQL types where available; UI-specific types are defined locally.
+
+### F2. Frontend Types (`frontend/views/<domain>/types.ts`)
+- **Generated types first**: Before defining any custom type, check `frontend/graphql/generated/gql/graphql-types.ts` for the generated equivalent produced by codegen from the story's GraphQL documents. Re-export generated types directly.
+- **UI-specific types only**: Only define types in `types.ts` that have no generated equivalent (e.g., filter unions, display status mappings, metric interfaces).
+- **Leaf dependency**: Types files must not import from stores, containers, services, or any other application code. They are leaf dependencies only.
+- **Mock store backward compatibility**: After extraction, mock store files re-import types from `types.ts` and re-export them for any remaining consumers.
+
+### F3. Storybook Stories (`*.stories.tsx`)
+- **MockedProvider required**: Every story for a container that uses `useQuery` MUST be wrapped in a `MockedProvider` decorator from `@apollo/client/testing`.
+- **Mock data as constants**: Mock GraphQL responses are defined as typed constants within the story file, using `__typename` and generated type shapes.
+- **Container as top-level**: Stories render the actual Container component — NOT sub-components or wrapper elements.
+- **Permission mocking**: If containers have `<RequirePermission>` gates, stories MUST mock the permission context so the container renders.
+- **No production store imports**: Stories must not import from production Zustand stores. Mock data comes from `MockedProvider` responses.
 
 ### G. Backend Localization & next-intl (`backend/`)
 - **No Hardcoded Errors/Messages**: Always use `getBackendTranslations({ locale, namespace })`. Propagate `locale` through the stack.
@@ -978,12 +1168,17 @@ Provide a table listing every file that will be created or modified, with the ac
 | `shared/lib/enum.ts` | Modify | A |
 | `backend/db/migration/<N>-story<_N>_permissions.sql` | Create | A |
 | `backend/db/repo/<domain>.repository.ts` | Modify | B |
-| `backend/services/<domain>/<feature>.service.ts` | Create | C |
-| `backend/graphql/pothos/<domain>.pothos.ts` | Modify | D |
-| `frontend/graphql/sharedDocuments/<domain>.documents.ts` | Create | E |
-| `frontend/stores/<domain>Store.ts` | Create | F |
-| `frontend/views/dashboard/<domain>/components/<Feature>.tsx` | Modify | G |
-| `shared/messages/en.ts` | Modify | H |
+| `backend/db/test/repo/<domain>.repository.test.ts` | Create | C |
+| `backend/services/<domain>/<feature>.service.ts` | Create | D |
+| `backend/graphql/pothos/<domain>.pothos.ts` | Modify | E |
+| `frontend/graphql/sharedDocuments/<domain>.documents.ts` | Create | F |
+| `frontend/views/dashboard/<domain>/types.ts` | Create | G |
+| `frontend/stores/mock<Domain>Store.ts` | Modify | G |
+| `frontend/graphql/test/<domain>-graphql.test.ts` | Create | H |
+| `frontend/views/dashboard/<domain>/<Container>.stories.tsx` | Modify | I |
+| `frontend/stores/<domain>Store.ts` | Create | K |
+| `frontend/views/dashboard/<domain>/components/<Feature>.tsx` | Modify | L |
+| `shared/messages/en.ts` | Modify | J |
 
 ### Appendix B: Dependency Graph
 Show the task-to-task dependency chain as a visual text diagram:
@@ -991,13 +1186,17 @@ Show the task-to-task dependency chain as a visual text diagram:
 ```
 Task A (Migration + Enum)
   └──► Task B (Repository)
-         └──► Task C (Services)
-                └──► Task D (GraphQL Pothos + Resolvers)
-                       └──► Task E (Frontend Apollo Documents)
-                              └──► Task F (Frontend Stores)
-                                     └──► Task G (Frontend Views)
-                                            └──► Task H (Navigation/Routing/i18n)
-                                                   └──► Section 7 (Final Verification)
+         └──► Task C (Repo Tests)
+                └──► Task D (Services)
+                       └──► Task E (GraphQL Pothos + Resolvers)
+                              └──► Task F (Frontend Apollo Documents)
+                                     └──► Task G (Type Extraction)
+                                            ├──► Task H (GraphQL Tests)
+                                            └──► Task I (Storybook Migration)
+                                                   └──► Task J (i18n)
+                                                   └──► Task K (Frontend Stores)
+                                                          └──► Task L (Frontend Views)
+                                                                 └──► Section 7 (Final Verification)
 ```
 
-Tasks are strictly sequential — each depends on the previous. Tests are placed immediately after the layer they verify (per Section 6 task ordering rules), not consolidated at the end.
+Tasks H and I are both dependent on G but are independent of each other — they MAY be run in parallel. Task I (Storybook Migration) prepares the story infrastructure (`MockedProvider` decorators) before containers are migrated. Task J (i18n) can run after stories are prepared. Task K (Frontend Stores) depends on G for types. Task L (Frontend Views) depends on K for stores and I for story readiness.
