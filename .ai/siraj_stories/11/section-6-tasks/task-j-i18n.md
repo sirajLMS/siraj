@@ -2,7 +2,7 @@
 
 **Objective:** Add backend translation keys for new error messages introduced by Story 11 services. Frontend i18n keys already exist for all three domains (`dashboard.studentDirectory`, `dashboard.managersDirectory`, `dashboard.resources`).
 
-**Dependencies:** Depends on Task I — view components are implemented and any new UI strings are identified.
+**Dependencies:** Depends on Task L — view components are implemented and any new UI strings are identified.
 
 **Layer-Specific Rules (i18n — Flattened from AGENTS_STORY_PLANNING.md):**
 - Uses `shared/messages/en.ts` and `shared/messages/ar/` directories.

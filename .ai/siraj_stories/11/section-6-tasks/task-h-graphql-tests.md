@@ -1,4 +1,4 @@
-### Task G — GraphQL Integration Tests: Permission Enforcement for New Operations
+### Task H — GraphQL Integration Tests: Permission Enforcement for New Operations
 
 **Objective:** Write GraphQL integration tests for all new queries and mutations. Each test verifies authorized success and unauthorized denial, covering security threats from Section 4.
 

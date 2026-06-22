@@ -1,8 +1,8 @@
-### Task H — Frontend Stores: Replace Mock Stores with Real Zustand + Apollo Stores
+### Task K — Frontend Stores: Replace Mock Stores with Real Zustand + Apollo Stores
 
 **Objective:** Create real Zustand stores that use generated GraphQL types and Apollo hooks to fetch data from the backend, replacing `mockStudentsStore`, `mockManagersStore`, and `mockResourcesStore` in production containers.
 
-**Dependencies:** Depends on Task F — frontend GraphQL documents are created and codegen has run.
+**Dependencies:** Depends on Task G (types extracted from mock stores to `.types.ts` files) and Task I (Storybook stories prepared with `MockedProvider`). Stores import UI-specific types from the extracted `.types.ts` files.
 
 **Layer-Specific Rules (Frontend Stores — Flattened from frontend/stores/AGENTS.md):**
 - Zustand for global state management.
@@ -95,7 +95,7 @@ Create `frontend/stores/learningResourcesStore.ts`. This store manages the resou
 
 ```typescript
 import { create } from "zustand";
-import type { ResourceFileType, ResourceFilterType, ResourceSortBy } from "./mockResourcesStore";
+import type { ResourceFileType, ResourceFilterType, ResourceSortBy } from "@/frontend/views/dashboard/resources/types";
 
 interface LearningResourcesState {
   readonly searchQuery: string;
@@ -132,7 +132,7 @@ export const useLearningResourcesStore = create<LearningResourcesState>((set) =>
 }));
 ```
 
-**Note:** The `ResourceFileType`, `ResourceFilterType`, and `ResourceSortBy` types are imported from the existing `mockResourcesStore.ts` since they are shared type definitions. In the future, these could be moved to a dedicated types file.
+**Note:** The `ResourceFileType`, `ResourceFilterType`, and `ResourceSortBy` types are imported from the extracted `frontend/views/dashboard/resources/types.ts` file (created in Task G). This file re-exports generated GraphQL types and defines UI-specific types. Mock stores also import from this file for backward compatibility.
 
 ---
 
@@ -148,7 +148,8 @@ export const useLearningResourcesStore = create<LearningResourcesState>((set) =>
 - [ ] `learningResourcesStore` manages search, filter, sort, upload, and delete dialog state.
 - [ ] All stores use generated GraphQL types where applicable.
 - [ ] No mock data in production stores.
-- [ ] Mock stores remain untouched for Storybook stories (`*.stories.tsx`).
+- [ ] Types imported from extracted `.types.ts` files (Task G), not from mock stores.
+- [ ] Mock stores updated to import types from `.types.ts` files (Task G).
 - [ ] `bun tsgo` passes with 0 errors.
 
 **Quality Gate — Per-File Validation:**

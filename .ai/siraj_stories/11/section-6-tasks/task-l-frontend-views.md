@@ -1,8 +1,8 @@
-### Task I — Frontend Views: Migrate Containers from Mock Stores to Real Data + RBAC Enforcement
+### Task L — Frontend Views: Migrate Containers from Mock Stores to Real Data + RBAC Enforcement
 
 **Objective:** Replace mock store imports in production containers with real Apollo `useQuery` hooks. Add RBAC gates via `<RequirePermission>`. Replace `globalThis.confirm()` with MUI Dialog where applicable.
 
-**Dependencies:** Depends on Task H — Zustand stores are created.
+**Dependencies:** Depends on Task K — Zustand stores are created. Also depends on Task G — types extracted from mock stores to `.types.ts` files, and sub-component imports updated. Also depends on Task I — Storybook stories prepared with `MockedProvider` to support the migrated containers.
 
 **Layer-Specific Rules (Frontend Views — Flattened from frontend/views/AGENTS.md):**
 - Functional Components only.
@@ -133,7 +133,8 @@ The existing `*.stories.tsx` files (`StudentsContainer.stories.tsx`, `ManagersCo
 - [ ] No `mockUserStore` imports in production container files.
 - [ ] No `any` or blind casts in modified components.
 - [ ] `globalThis.confirm()` replaced with MUI Dialog (if applicable).
-- [ ] Storybook stories (`*.stories.tsx`) continue using mock stores.
+- [ ] Types imported from extracted `.types.ts` files (Task G), not from mock stores.
+- [ ] Container components are suitable as top-level Storybook components (no hard dependency on production auth context).
 - [ ] `bun tsgo` passes with 0 errors.
 
 **Quality Gate — Per-File Validation:**

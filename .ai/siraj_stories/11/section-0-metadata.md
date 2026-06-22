@@ -40,6 +40,8 @@
 - GraphQL integration tests for all new operations
 - New Zustand stores replacing mock stores for students directory, managers directory, and resources
 - Migration of `StudentsContainer.tsx`, `ManagersContainer.tsx`, `ResourcesContainer.tsx` to real `useQuery` + RBAC gates
+- Type extraction from mock stores to dedicated `.types.ts` files (re-exporting generated GraphQL types where available)
+- Storybook migration: stories use `MockedProvider` with mock GraphQL responses instead of Zustand mock stores; containers remain top-level story components
 - i18n keys for any new UI strings
 - Repository tests for all new repository methods
 - Navigation config permission gate updates
@@ -56,4 +58,4 @@
 - Automated email/push notifications on resource upload
 - File storage adapter changes (existing `StorageService` handles disk/cloud)
 - New Next.js App Router page files (routes for `/students`, `/managers`, `/resources` already exist)
-- Storybook story file modifications (mock stores remain for `*.stories.tsx` files)
+- New database schema columns for type extraction (types are extracted from existing mock store definitions)
