@@ -1,4 +1,4 @@
-import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { logger } from "@/backend/lib/logger";
 import { AppPermission } from "@/shared/lib/enum";
 

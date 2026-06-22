@@ -1,5 +1,5 @@
 import { ClassPerformanceRepository } from "@/backend/db/repo/class-performance.repository";
-import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceDetailDefinition } from "../pothos/class-session.pothos";
 

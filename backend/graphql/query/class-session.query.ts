@@ -1,5 +1,5 @@
 import { ClassPerformanceRepository } from "@/backend/db/repo/class-performance.repository";
-import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";

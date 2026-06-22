@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
 import { leaveQuotaUsage, systemSettings } from "../../schema";

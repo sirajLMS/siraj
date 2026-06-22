@@ -1,4 +1,4 @@
-import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceEntity } from "@/backend/types";

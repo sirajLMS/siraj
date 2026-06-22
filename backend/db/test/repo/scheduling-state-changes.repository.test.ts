@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, leaveQuotaUsage, students, teacherAssignments } from "@/backend/db/schema";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { AppPermission } from "@/shared/lib/enum";

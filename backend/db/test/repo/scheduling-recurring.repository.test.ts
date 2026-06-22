@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
-import { SchedulingRepository } from "@/backend/db/repo/scheduling.repository";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
 import { createMockClassInstance, setupStudent, setupTeacher, setupTestEntities } from "../entity-setup";
 import { type DbTransaction, runInRollback } from "../test-utils";
@@ -28,7 +28,7 @@ async function setupEmptyTeacherWeeklyContext(tx: DbTransaction, prefix: string)
   const { teacher } = await setupTestEntities(tx, prefix, { skipInstance: true });
   const weekStart = new Date("2026-06-22T00:00:00Z");
   const weekEnd = new Date("2026-06-29T00:00:00Z");
-  const queries = await import("@/backend/db/repo/scheduling-queries.repository");
+  const queries = await import("@/backend/db/repo/scheduling/scheduling-queries.repository");
   return { teacher, weekStart, weekEnd, queries };
 }
 
@@ -55,7 +55,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
         });
 
         const { getWeeklyScheduleGrid, getWeeklyWorkloadMetrics } = await import(
-          "@/backend/db/repo/scheduling-queries.repository"
+          "@/backend/db/repo/scheduling/scheduling-queries.repository"
         );
         const grid = await getWeeklyScheduleGrid(teacher.id, weekStart, weekEnd, tx);
         expect(grid.length).toBe(2);
@@ -94,7 +94,7 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
 
         await tx.update(classInstances).set({ deletedAt: new Date() }).where(eq(classInstances.id, c1.id));
 
-        const { getWeeklyScheduleGrid } = await import("@/backend/db/repo/scheduling-queries.repository");
+        const { getWeeklyScheduleGrid } = await import("@/backend/db/repo/scheduling/scheduling-queries.repository");
         const grid = await getWeeklyScheduleGrid(
           teacher.id,
           new Date("2026-06-22T00:00:00Z"),
