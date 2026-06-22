@@ -774,6 +774,25 @@ VALUES (
         'Internal rule that forces the global notification tray to reflect real-time billing changes',
         'System',
         true
+    ),
+    -- Story 10: Automated Student Status Enforcement
+    (
+        gen_random_uuid (),
+        'system.enforce_suspended_lock',
+        'system',
+        'enforce_suspended_lock',
+        'Automated rule that locks UI controls on teacher schedule when student is Suspended',
+        'System',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'system.process_student_leave',
+        'system',
+        'process_student_leave',
+        'Automated workflow that marks future classes as excused and queues rescheduling when student is On Leave',
+        'System',
+        true
     ) ON CONFLICT (key) DO
 UPDATE
 SET
@@ -1077,7 +1096,9 @@ WHERE
     AND p.key IN (
         'system.enforce_time_window',
         'system.enforce_leave_limit',
-        'system.sync_notifications'
+        'system.sync_notifications',
+        'system.enforce_suspended_lock',
+        'system.process_student_leave'
     );
 
 -- Triggers to protect system permissions and groups from deletion or mutation of is_system

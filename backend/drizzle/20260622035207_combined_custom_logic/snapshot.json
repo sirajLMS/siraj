@@ -1,6 +1,6 @@
 {
-  "id": "aacd1e84-53b2-4935-8dfe-d3308435e550",
-  "prevIds": ["efc177a5-f8fd-4dc9-90db-ce3344c0050b"],
+  "id": "aa77732e-6c7f-4e50-bebc-d14d3ca65963",
+  "prevIds": ["1819d4ab-57a6-420b-b617-2c12cf0cdd43"],
   "version": "8",
   "dialect": "postgres",
   "ddl": [
@@ -101,6 +101,8 @@
         "student.reassign_teacher",
         "student.manage_status",
         "system.sync_notifications",
+        "system.enforce_suspended_lock",
+        "system.process_student_leave",
         "test.system_only",
         "test.custom_only"
       ],
