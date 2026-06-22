@@ -2,6 +2,7 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { AdminInvoicesDataGrid } from "./components/AdminInvoicesDataGrid";
 import { BillingMetricsRow } from "./components/BillingMetricsRow";
@@ -10,6 +11,19 @@ import { StudentCreditDataGrid } from "./components/StudentCreditDataGrid";
 import type { AdminBillingViewProps } from "./types/billingViewTypes";
 import { buildAdminMetrics } from "./utils/billingMetrics";
 import { getAdminInvoiceGridLabels, getStudentCreditGridLabels } from "./utils/label-mappers";
+
+// Chip indicating items requiring attention, styled with error colors
+const StyledAttentionChip = styled(Chip)(({ theme }) => ({
+  backgroundColor: theme.palette.error.main,
+  color: theme.palette.onError,
+}));
+
+// Footer box for the student credit section with a top border separator
+const StyledCreditFooterBox = styled(Box)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
+  borderTop: `1px solid ${theme.palette.outlineVariant}`,
+}));
 
 export function AdminBillingDesktopView({
   labels,
@@ -62,16 +76,7 @@ export function AdminBillingDesktopView({
       {canManage && (
         <SectionPanel
           title={labels.sections.studentCreditStatus}
-          actions={
-            <Chip
-              label={labels.requiresAttention}
-              size="small"
-              sx={theme => ({
-                bgcolor: theme.palette.error.main,
-                color: theme.palette.onError,
-              })}
-            />
-          }
+          actions={<StyledAttentionChip label={labels.requiresAttention} size="small" />}
         >
           <StudentCreditDataGrid
             rows={creditRows}
@@ -79,18 +84,11 @@ export function AdminBillingDesktopView({
             onSendReminder={onSendReminder}
             labels={getStudentCreditGridLabels(labels)}
           />
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              py: 2,
-              borderTop: theme => `1px solid ${theme.palette.outlineVariant}`,
-            }}
-          >
+          <StyledCreditFooterBox sx={{ py: 2 }}>
             <Button variant="text" sx={{ fontWeight: 700 }}>
               {labels.viewAllNegativeBalance}
             </Button>
-          </Box>
+          </StyledCreditFooterBox>
         </SectionPanel>
       )}
     </PageContainer>

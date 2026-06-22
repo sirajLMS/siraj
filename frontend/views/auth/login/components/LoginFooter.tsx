@@ -2,67 +2,61 @@
 
 import { HelpOutlined, Language } from "@mui/icons-material";
 import { Box, IconButton, Link, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
+
+// Main footer container - centers content and adds top margin
+const StyledFooterContainer = styled(Box)({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+});
+
+// Text with secondary color and centered alignment
+const StyledFooterText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  textAlign: "center",
+}));
+
+// Register link with primary color and bold weight
+const StyledRegisterLink = styled(Link)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  fontWeight: 600,
+}));
+
+// Icon button row container
+const StyledIconRow = styled(Box)({
+  display: "flex",
+});
+
+// Footer icon buttons with hover effect
+const StyledFooterIconButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  "&:hover": {
+    color: theme.palette.primary.main,
+  },
+}));
 
 export function LoginFooter() {
   const t = useTranslations("auth.login");
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 2,
-        mt: 3,
-      }}
-    >
-      <Typography
-        variant="bodyMd"
-        sx={theme => ({
-          color: theme.palette.text.secondary,
-          textAlign: "center",
-        })}
-      >
+    <StyledFooterContainer sx={{ gap: 2, mt: 3 }}>
+      <StyledFooterText variant="bodyMd">
         {t("noAccount")}{" "}
-        <Link
-          href="#"
-          underline="hover"
-          sx={theme => ({
-            color: theme.palette.primary.main,
-            fontWeight: 600,
-          })}
-        >
+        <StyledRegisterLink href="#" underline="hover">
           {t("register")}
-        </Link>
-      </Typography>
+        </StyledRegisterLink>
+      </StyledFooterText>
 
-      <Box sx={{ display: "flex", gap: 1 }}>
-        <IconButton
-          size="small"
-          sx={theme => ({
-            color: theme.palette.text.secondary,
-            "&:hover": {
-              color: theme.palette.primary.main,
-            },
-          })}
-          aria-label="Help"
-        >
+      <StyledIconRow sx={{ gap: 1 }}>
+        <StyledFooterIconButton size="small" aria-label="Help">
           <HelpOutlined />
-        </IconButton>
-        <IconButton
-          size="small"
-          sx={theme => ({
-            color: theme.palette.text.secondary,
-            "&:hover": {
-              color: theme.palette.primary.main,
-            },
-          })}
-          aria-label="Language"
-        >
+        </StyledFooterIconButton>
+        <StyledFooterIconButton size="small" aria-label="Language">
           <Language />
-        </IconButton>
-      </Box>
-    </Box>
+        </StyledFooterIconButton>
+      </StyledIconRow>
+    </StyledFooterContainer>
   );
 }

@@ -2,6 +2,7 @@
 
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui";
@@ -32,6 +33,18 @@ function formatClassesLeft(row: StudentCreditRow): string {
   return `${row.classesLeft} / ${row.classesTotal}`;
 }
 
+// Student name styled with primary color and bold weight for grid emphasis
+const StyledStudentNameTypography = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  color: theme.palette.primary.main,
+}));
+
+// Small warning icon for negative balance indicators, styled with error color
+const StyledWarningIcon = styled(WarningAmberOutlined)(({ theme }) => ({
+  fontSize: 16,
+  color: theme.palette.error.main,
+}));
+
 export function StudentCreditDataGrid({
   rows,
   labels,
@@ -46,9 +59,7 @@ export function StudentCreditDataGrid({
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-            {row.studentName}
-          </Typography>
+          <StyledStudentNameTypography variant="bodyMd">{row.studentName}</StyledStudentNameTypography>
         ),
       },
       {
@@ -83,7 +94,7 @@ export function StudentCreditDataGrid({
                   color: isNegative ? theme.palette.error.main : theme.palette.onSecondaryContainer,
                 })}
               />
-              {isNegative && <WarningAmberOutlined sx={theme => ({ fontSize: 16, color: theme.palette.error.main })} />}
+              {isNegative && <StyledWarningIcon />}
             </Box>
           );
         },

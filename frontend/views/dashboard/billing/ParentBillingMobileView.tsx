@@ -2,12 +2,33 @@
 
 import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Fab, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { BillingMetricsRow } from "./components/BillingMetricsRow";
 import { BillingMobileSearchBar } from "./components/BillingMobileSearchBar";
 import { ParentInvoicesCardList } from "./components/ParentInvoicesCardList";
 import type { ParentBillingViewProps } from "./types/billingViewTypes";
 import { buildParentMetrics } from "./utils/billingMetrics";
+
+// Subtitle text for the empty state, styled with secondary text color
+const StyledEmptySubtitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Floating action button for quick pay, fixed at bottom-right with uppercase text
+const StyledQuickPayFab = styled(Fab)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  position: "fixed",
+  bottom: theme.spacing(3),
+  right: theme.spacing(3),
+  zIndex: theme.zIndex.speedDial,
+  textTransform: "uppercase",
+  fontWeight: 700,
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+  },
+}));
 
 export function ParentBillingMobileView({
   labels,
@@ -40,9 +61,7 @@ export function ParentBillingMobileView({
             <Typography variant="headlineMd" sx={{ mb: 1 }}>
               {labels.parentTable.emptyTitle}
             </Typography>
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {labels.parentTable.emptySubtitle}
-            </Typography>
+            <StyledEmptySubtitle variant="bodyMd">{labels.parentTable.emptySubtitle}</StyledEmptySubtitle>
           </Box>
         ) : (
           <ParentInvoicesCardList
@@ -60,27 +79,10 @@ export function ParentBillingMobileView({
         )}
       </PageContainer>
       {showQuickPayFab && (
-        <Fab
-          variant="extended"
-          aria-label={labels.quickPay}
-          onClick={onQuickPay}
-          sx={theme => ({
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            position: "fixed",
-            bottom: theme.spacing(3),
-            right: theme.spacing(3),
-            zIndex: theme.zIndex.speedDial,
-            textTransform: "uppercase",
-            fontWeight: 700,
-            "&:hover": {
-              bgcolor: theme.palette.primary.dark,
-            },
-          })}
-        >
+        <StyledQuickPayFab variant="extended" aria-label={labels.quickPay} onClick={onQuickPay}>
           <AddCardOutlined sx={{ mr: 1 }} />
           {labels.quickPay}
-        </Fab>
+        </StyledQuickPayFab>
       )}
     </>
   );

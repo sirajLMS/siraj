@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Checkbox, FormControlLabel, FormHelperText, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
@@ -13,6 +14,12 @@ interface BillingMonthSelectorProps {
   readonly labels: BillingManualLabels;
   readonly variant: "desktop" | "mobile";
 }
+
+// Section label with uppercase transformation and surface variant color
+const StyledSectionLabel = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onSurfaceVariant,
+  textTransform: "uppercase",
+}));
 
 function getMonthChipLabel(monthId: string, labels: BillingManualLabels, variant: "desktop" | "mobile"): string {
   if (variant === "mobile") {
@@ -28,12 +35,7 @@ export function BillingMonthSelector({ control, errors, labels, variant }: Reado
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography
-        variant="labelMd"
-        sx={theme => ({ color: theme.palette.onSurfaceVariant, textTransform: "uppercase" })}
-      >
-        {sectionLabel}
-      </Typography>
+      <StyledSectionLabel variant="labelMd">{sectionLabel}</StyledSectionLabel>
 
       <Controller
         name="billingMonths"

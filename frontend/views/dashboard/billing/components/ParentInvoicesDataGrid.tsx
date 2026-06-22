@@ -2,6 +2,7 @@
 
 import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
@@ -30,6 +31,12 @@ interface ParentInvoicesDataGridProps {
   readonly onPayNow: (id: string) => void;
   readonly onDownloadPdf: (id: string) => void;
 }
+
+// Fee amount text styled with primary color and bold weight for emphasis
+const StyledFeeTypography = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  color: theme.palette.primary.main,
+}));
 
 export function ParentInvoicesDataGrid({
   rows,
@@ -84,11 +91,7 @@ export function ParentInvoicesDataGrid({
         headerName: labels.fee,
         flex: 0.7,
         minWidth: 100,
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-            {row.fee}
-          </Typography>
-        ),
+        renderCell: ({ row }) => <StyledFeeTypography variant="bodyMd">{row.fee}</StyledFeeTypography>,
       },
       {
         field: "status",

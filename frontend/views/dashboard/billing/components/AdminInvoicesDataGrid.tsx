@@ -2,6 +2,7 @@
 
 import { CheckCircleOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
@@ -27,6 +28,30 @@ interface AdminInvoicesDataGridProps {
   readonly onMarkAsPaid: (id: string) => void;
 }
 
+// Invoice ID text styled with primary color and bold weight for emphasis
+const StyledInvoiceIdTypography = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  color: theme.palette.primary.main,
+}));
+
+// Small avatar for student initials in the data grid rows
+const StyledStudentAvatarSmall = styled(Avatar)(({ theme }) => ({
+  width: 32,
+  height: 32,
+  backgroundColor: theme.palette.secondaryContainer,
+  fontSize: 12,
+}));
+
+// Date text styled with secondary color for subdued appearance in grid cells
+const StyledDateTypography = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Check icon displayed when an invoice is already paid, using outline variant color
+const StyledPaidCheckIcon = styled(CheckCircleOutlined)(({ theme }) => ({
+  color: theme.palette.outlineVariant,
+}));
+
 function renderInvoiceAction(
   row: AdminInvoiceRow,
   labels: AdminInvoicesDataGridLabels,
@@ -35,7 +60,7 @@ function renderInvoiceAction(
 ) {
   if (!canManage || row.status === "paid") {
     if (row.status === "paid") {
-      return <CheckCircleOutlined sx={theme => ({ color: theme.palette.outlineVariant })} />;
+      return <StyledPaidCheckIcon />;
     }
     return null;
   }
@@ -76,9 +101,9 @@ export function AdminInvoicesDataGrid({ rows, labels, canManage, onMarkAsPaid }:
         flex: 0.8,
         minWidth: 120,
         renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
+          <StyledInvoiceIdTypography variant="bodyMd">
             {row.id.replace("inv-", "INV-").toUpperCase()}
-          </Typography>
+          </StyledInvoiceIdTypography>
         ),
       },
       {
@@ -88,9 +113,7 @@ export function AdminInvoicesDataGrid({ rows, labels, canManage, onMarkAsPaid }:
         minWidth: 200,
         renderCell: ({ row }) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "100%" }}>
-            <Avatar sx={theme => ({ width: 32, height: 32, bgcolor: theme.palette.secondaryContainer, fontSize: 12 })}>
-              {row.studentInitials}
-            </Avatar>
+            <StyledStudentAvatarSmall>{row.studentInitials}</StyledStudentAvatarSmall>
             <Typography variant="bodyMd">{row.studentName}</Typography>
           </Box>
         ),
@@ -100,11 +123,7 @@ export function AdminInvoicesDataGrid({ rows, labels, canManage, onMarkAsPaid }:
         headerName: labels.dateIssued,
         flex: 0.9,
         minWidth: 130,
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {row.dateIssued}
-          </Typography>
-        ),
+        renderCell: ({ row }) => <StyledDateTypography variant="bodyMd">{row.dateIssued}</StyledDateTypography>,
       },
       {
         field: "amount",

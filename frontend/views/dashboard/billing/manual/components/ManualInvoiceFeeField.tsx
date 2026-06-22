@@ -2,6 +2,7 @@
 
 import { PaymentsOutlined } from "@mui/icons-material";
 import { InputAdornment, TextField, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
@@ -13,6 +14,17 @@ interface ManualInvoiceFeeFieldProps {
   readonly labels: BillingManualLabels;
   readonly variant: "desktop" | "mobile";
 }
+
+// Currency label for mobile view styled with primary color and bold weight
+const StyledCurrencyLabel = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  color: theme.palette.primary.main,
+}));
+
+// Payments icon styled with primary color for the fee field adornment
+const StyledPaymentsIcon = styled(PaymentsOutlined)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
 
 export function ManualInvoiceFeeField({ control, errors, labels, variant }: Readonly<ManualInvoiceFeeFieldProps>) {
   const isMobile = variant === "mobile";
@@ -33,11 +45,7 @@ export function ManualInvoiceFeeField({ control, errors, labels, variant }: Read
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  {isMobile ? (
-                    <Typography sx={{ fontWeight: 700, color: theme => theme.palette.primary.main }}>AED</Typography>
-                  ) : (
-                    <PaymentsOutlined sx={theme => ({ color: theme.palette.primary.main })} />
-                  )}
+                  {isMobile ? <StyledCurrencyLabel>AED</StyledCurrencyLabel> : <StyledPaymentsIcon />}
                 </InputAdornment>
               ),
               inputProps: { step: "0.01", min: "0" },

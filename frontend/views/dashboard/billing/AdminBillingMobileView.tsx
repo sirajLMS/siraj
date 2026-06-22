@@ -2,6 +2,7 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Fab, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { AdminInvoicesCardList } from "./components/AdminInvoicesCardList";
 import { BillingMetricsRow } from "./components/BillingMetricsRow";
@@ -9,6 +10,19 @@ import { BillingMobileSearchBar } from "./components/BillingMobileSearchBar";
 import { StudentCreditCardList } from "./components/StudentCreditCardList";
 import type { AdminBillingViewProps } from "./types/billingViewTypes";
 import { buildAdminMetrics } from "./utils/billingMetrics";
+
+// Floating action button for creating a manual invoice, fixed at bottom-right with primary colors
+const StyledManualInvoiceFab = styled(Fab)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  position: "fixed",
+  bottom: theme.spacing(3),
+  right: theme.spacing(3),
+  zIndex: theme.zIndex.speedDial,
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+  },
+}));
 
 export function AdminBillingMobileView({
   labels,
@@ -62,23 +76,9 @@ export function AdminBillingMobileView({
         )}
       </PageContainer>
       {canCreate && (
-        <Fab
-          aria-label={labels.manualInvoice}
-          onClick={onManualInvoice}
-          sx={theme => ({
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            position: "fixed",
-            bottom: theme.spacing(3),
-            right: theme.spacing(3),
-            zIndex: theme.zIndex.speedDial,
-            "&:hover": {
-              bgcolor: theme.palette.primary.dark,
-            },
-          })}
-        >
+        <StyledManualInvoiceFab aria-label={labels.manualInvoice} onClick={onManualInvoice}>
           <AddOutlined />
-        </Fab>
+        </StyledManualInvoiceFab>
       )}
     </>
   );

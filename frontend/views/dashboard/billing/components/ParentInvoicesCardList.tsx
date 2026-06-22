@@ -2,6 +2,7 @@
 
 import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import type { ParentInvoiceRow, ParentInvoiceStatus } from "@/frontend/stores/moackParentBillingStore";
 
@@ -20,6 +21,30 @@ interface ParentInvoicesCardListProps {
   readonly onDownloadPdf: (id: string) => void;
 }
 
+// Invoice card with outline border and surface background for mobile card list
+const StyledInvoiceCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: theme.layout.radius.card,
+  border: `1px solid ${theme.palette.outlineVariant}`,
+  backgroundColor: theme.palette.surfaceContainerLowest,
+}));
+
+// Month label styled with secondary text color for subdued appearance
+const StyledMonthTypography = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Fee label styled with secondary text color for subdued appearance
+const StyledFeeLabelTypography = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Container for action icon buttons aligned at the end of a row
+const StyledActionsContainer = styled(Box)({
+  display: "flex",
+  justifyContent: "flex-end",
+});
+
 export function ParentInvoicesCardList({
   rows,
   labels,
@@ -30,31 +55,18 @@ export function ParentInvoicesCardList({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       {rows.map(row => (
-        <Paper
-          key={row.id}
-          elevation={0}
-          sx={theme => ({
-            p: 2,
-            borderRadius: theme.layout.radius.card,
-            border: `1px solid ${theme.palette.outlineVariant}`,
-            bgcolor: theme.palette.surfaceContainerLowest,
-          })}
-        >
+        <StyledInvoiceCard key={row.id} elevation={0}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
             <Box>
               <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
                 {row.invoiceNumber}
               </Typography>
-              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                {row.month}
-              </Typography>
+              <StyledMonthTypography variant="bodyMd">{row.month}</StyledMonthTypography>
             </Box>
             <StatusBadge category="invoice" status={row.status} label={labels.statusLabels[row.status]} />
           </Box>
           <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, mb: 1.5 }}>
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {row.issueDate}
-            </Typography>
+            <StyledFeeLabelTypography variant="labelMd">{row.issueDate}</StyledFeeLabelTypography>
             <Typography variant="labelMd" sx={{ textAlign: "end", fontWeight: 700 }}>
               {row.fee}
             </Typography>
@@ -70,7 +82,7 @@ export function ParentInvoicesCardList({
             </PrimaryPageAction>
           )}
           {canView && row.status === "paid" && (
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
+            <StyledActionsContainer sx={{ gap: 0.5 }}>
               <IconButton size="small" aria-label={labels.viewDetails}>
                 <VisibilityOutlined fontSize="small" />
               </IconButton>
@@ -83,9 +95,9 @@ export function ParentInvoicesCardList({
               >
                 <DownloadOutlined fontSize="small" />
               </IconButton>
-            </Box>
+            </StyledActionsContainer>
           )}
-        </Paper>
+        </StyledInvoiceCard>
       ))}
     </Box>
   );

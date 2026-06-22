@@ -2,6 +2,7 @@
 
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Paper, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { StudentCreditRow, StudentCreditStatus } from "../types/billingViewTypes";
 
 interface StudentCreditCardListLabels {
@@ -21,6 +22,25 @@ function formatClassesLeft(row: StudentCreditRow): string {
   return `${row.classesLeft} / ${row.classesTotal}`;
 }
 
+// Credit card with outline border and surface background for student credit info
+const StyledCreditCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: theme.layout.radius.card,
+  border: `1px solid ${theme.palette.outlineVariant}`,
+  backgroundColor: theme.palette.surfaceContainerLowest,
+}));
+
+// Student name styled with primary color and bold weight for emphasis
+const StyledStudentNameTypography = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  color: theme.palette.primary.main,
+}));
+
+// Plan type text styled with secondary color for subdued appearance
+const StyledPlanTypography = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
 export function StudentCreditCardList({
   rows,
   labels,
@@ -33,28 +53,16 @@ export function StudentCreditCardList({
         const isNegative = row.status === "negative_balance";
 
         return (
-          <Paper
-            key={row.id}
-            elevation={0}
-            sx={theme => ({
-              p: 2,
-              borderRadius: theme.layout.radius.card,
-              border: `1px solid ${theme.palette.outlineVariant}`,
-              bgcolor: theme.palette.surfaceContainerLowest,
-            })}
-          >
-            <Typography
-              variant="titleLg"
-              sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main, mb: 0.5 })}
-            >
+          <StyledCreditCard key={row.id} elevation={0}>
+            <StyledStudentNameTypography variant="titleLg" sx={{ mb: 0.5 }}>
               {row.studentName}
-            </Typography>
+            </StyledStudentNameTypography>
             <Typography variant="bodyMd" sx={{ mb: 1 }}>
               {row.parentEmail}
             </Typography>
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mb: 1.5 })}>
+            <StyledPlanTypography variant="labelMd" sx={{ mb: 1.5 }}>
               {row.planType}
-            </Typography>
+            </StyledPlanTypography>
             <Box
               sx={{
                 display: "flex",
@@ -98,7 +106,7 @@ export function StudentCreditCardList({
                 {labels.sendReminder}
               </Button>
             )}
-          </Paper>
+          </StyledCreditCard>
         );
       })}
     </Box>

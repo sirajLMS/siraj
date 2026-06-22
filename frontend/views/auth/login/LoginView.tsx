@@ -1,9 +1,20 @@
 import { Box, Card, CardContent } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { DemoFastLogin } from "./components/DemoFastLogin";
 import { LoginFooter } from "./components/LoginFooter";
 import { LoginForm, type LoginFormProps } from "./components/LoginForm";
 import { LoginHeader } from "./components/LoginHeader";
 import { ThemeLanguageControls } from "./components/ThemeLanguageControls";
+
+// Full viewport container with centered content and default background
+const StyledPageContainer = styled(Box)(({ theme }) => ({
+  minHeight: "100vh",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  position: "relative",
+  backgroundColor: theme.palette.background.default,
+}));
 
 export interface LoginViewProps extends LoginFormProps {
   isDemo?: boolean;
@@ -13,17 +24,7 @@ export interface LoginViewProps extends LoginFormProps {
 
 export function LoginView({ isDemo, demoGroups, onFastLogin, ...formProps }: Readonly<LoginViewProps>) {
   return (
-    <Box
-      sx={theme => ({
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        px: 2,
-        bgcolor: theme.palette.background.default,
-      })}
-    >
+    <StyledPageContainer sx={{ px: 2 }}>
       <ThemeLanguageControls />
 
       <Card
@@ -44,6 +45,6 @@ export function LoginView({ isDemo, demoGroups, onFastLogin, ...formProps }: Rea
           <LoginFooter />
         </CardContent>
       </Card>
-    </Box>
+    </StyledPageContainer>
   );
 }

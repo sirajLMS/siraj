@@ -2,6 +2,7 @@
 
 import { HistoryOutlined, ReceiptLongOutlined, SecurityOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
 
@@ -14,6 +15,11 @@ const SUPPORT_CARDS = [
   { key: "automatedLedgers", icon: ReceiptLongOutlined },
   { key: "draftMode", icon: HistoryOutlined },
 ] as const;
+
+// Support card body text styled with secondary color for subdued appearance
+const StyledSupportBody = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
 
 export function ManualInvoiceSupportCards({ labels }: Readonly<ManualInvoiceSupportCardsProps>) {
   return (
@@ -31,13 +37,11 @@ export function ManualInvoiceSupportCards({ labels }: Readonly<ManualInvoiceSupp
 
         return (
           <BaseCard key={card.key}>
-            <Icon sx={theme => ({ color: theme.palette.primary.main, mb: 1.5 })} />
+            <Icon sx={{ color: theme => theme.palette.primary.main, mb: 1.5 }} />
             <Typography variant="titleLg" sx={{ mb: 1 }}>
               {cardLabels.title}
             </Typography>
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {cardLabels.body}
-            </Typography>
+            <StyledSupportBody variant="bodyMd">{cardLabels.body}</StyledSupportBody>
           </BaseCard>
         );
       })}

@@ -2,6 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
@@ -12,6 +13,11 @@ import { ParentBillingView } from "./ParentBillingView";
 import type { ParentBillingViewProps } from "./types/billingViewTypes";
 import { filterParentInvoices } from "./utils/billingFilters";
 import { buildBillingLabels } from "./utils/buildBillingLabels";
+
+// Typography styled with error color for displaying error messages
+const StyledErrorTypography = styled(Typography)(({ theme }) => ({
+  color: theme.palette.error.main,
+}));
 
 export function ParentBillingContainer() {
   const t = useTranslations("dashboard.billing");
@@ -47,7 +53,7 @@ export function ParentBillingContainer() {
   );
 
   if (!parentId) {
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidId")}</Typography>;
+    return <StyledErrorTypography>{t("errors.invalidId")}</StyledErrorTypography>;
   }
 
   if (loading) {
@@ -59,7 +65,7 @@ export function ParentBillingContainer() {
   }
 
   if (error) {
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{error.message}</Typography>;
+    return <StyledErrorTypography>{error.message}</StyledErrorTypography>;
   }
 
   const viewProps: ParentBillingViewProps = {

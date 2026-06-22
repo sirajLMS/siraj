@@ -2,6 +2,7 @@
 
 import { FamilyRestroomOutlined } from "@mui/icons-material";
 import { Autocomplete, InputAdornment, TextField } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
@@ -14,6 +15,11 @@ interface ManualInvoiceParentFieldProps {
   readonly labels: BillingManualLabels;
   readonly parentOptions: readonly ParentInvoiceOption[];
 }
+
+// Family icon for the parent selection field styled with primary color
+const StyledParentIcon = styled(FamilyRestroomOutlined)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
 
 export function ManualInvoiceParentField({
   control,
@@ -52,7 +58,7 @@ export function ManualInvoiceParentField({
                     startAdornment: (
                       <>
                         <InputAdornment position="start">
-                          <FamilyRestroomOutlined sx={theme => ({ color: theme.palette.primary.main })} />
+                          <StyledParentIcon />
                         </InputAdornment>
                         {params.slotProps.input.startAdornment}
                       </>

@@ -15,11 +15,47 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { type Control, Controller, type FieldErrors, useForm } from "react-hook-form";
 import { mockLogin } from "../actions/mockLogin";
 import { createLoginSchema, type LoginFormData } from "../schemas/loginSchema";
+
+// Person icon for email field with secondary color
+const StyledPersonIcon = styled(Person)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Lock icon for password field with secondary color
+const StyledLockIcon = styled(Lock)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Form actions container with flex layout for remember me and forgot password
+const StyledFormActionsContainer = styled(Box)({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+});
+
+// Remember me label text with secondary color
+const StyledRememberMeLabel = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Forgot password link with primary color
+const StyledForgotPasswordLink = styled(Link)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  fontSize: "14px",
+  fontWeight: 500,
+}));
+
+// Submit button with custom padding and margin
+const StyledSubmitButton = styled(Button)({
+  paddingTop: 12,
+  paddingBottom: 12,
+});
 
 const FormFields = ({
   control,
@@ -54,7 +90,7 @@ const FormFields = ({
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Person sx={theme => ({ color: theme.palette.text.secondary })} />
+                    <StyledPersonIcon />
                   </InputAdornment>
                 ),
               },
@@ -79,7 +115,7 @@ const FormFields = ({
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Lock sx={theme => ({ color: theme.palette.text.secondary })} />
+                    <StyledLockIcon />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -109,39 +145,21 @@ const FormActions = ({ control, isSubmitting }: { control: Control<LoginFormData
   const t = useTranslations("auth.login");
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
+    <StyledFormActionsContainer>
       <Controller
         name="rememberMe"
         control={control}
         render={({ field }) => (
           <FormControlLabel
             control={<Checkbox {...field} checked={field.value} disabled={isSubmitting} />}
-            label={
-              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                {t("rememberMe")}
-              </Typography>
-            }
+            label={<StyledRememberMeLabel variant="bodyMd">{t("rememberMe")}</StyledRememberMeLabel>}
           />
         )}
       />
-      <Link
-        href="#"
-        underline="hover"
-        sx={theme => ({
-          color: theme.palette.primary.main,
-          fontSize: "14px",
-          fontWeight: 500,
-        })}
-      >
+      <StyledForgotPasswordLink href="#" underline="hover">
         {t("forgotPassword")}
-      </Link>
-    </Box>
+      </StyledForgotPasswordLink>
+    </StyledFormActionsContainer>
   );
 };
 
@@ -252,19 +270,16 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
 
       <FormActions control={control} isSubmitting={isSubmitting} />
 
-      <Button
+      <StyledSubmitButton
         type="submit"
         variant="contained"
         size="large"
         disabled={isSubmitting}
         fullWidth
-        sx={{
-          py: 1.5,
-          mt: 1,
-        }}
+        sx={{ mt: 1 }}
       >
         {isSubmitting ? <CircularProgress size={24} color="inherit" /> : t("signIn")}
-      </Button>
+      </StyledSubmitButton>
     </Box>
   );
 }

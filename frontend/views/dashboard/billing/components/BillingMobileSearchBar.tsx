@@ -2,6 +2,13 @@
 
 import { FilterListOutlined, SearchOutlined } from "@mui/icons-material";
 import { Box, IconButton, InputAdornment, TextField } from "@mui/material";
+import { styled } from "@mui/material/styles";
+
+// Filter icon button with outline border matching card radius
+const StyledFilterIconButton = styled(IconButton)(({ theme }) => ({
+  border: `1px solid ${theme.palette.outlineVariant}`,
+  borderRadius: theme.layout.radius.card,
+}));
 
 interface BillingMobileSearchBarProps {
   readonly value: string;
@@ -37,15 +44,9 @@ export function BillingMobileSearchBar({
           htmlInput: { autoComplete: "off" },
         }}
       />
-      <IconButton
-        aria-label={filterLabel}
-        sx={theme => ({
-          border: `1px solid ${theme.palette.outlineVariant}`,
-          borderRadius: theme.layout.radius.card,
-        })}
-      >
+      <StyledFilterIconButton aria-label={filterLabel}>
         <FilterListOutlined />
-      </IconButton>
+      </StyledFilterIconButton>
     </Box>
   );
 }

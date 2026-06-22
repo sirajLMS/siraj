@@ -4,7 +4,13 @@ import { AdminPanelSettings, Badge, FamilyRestroom, Group as GroupIcon, School }
 import { Box, Button, type ButtonProps, Divider, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 
-// Extending ButtonProps in case you need to type check somewhere, or just use it inline
+// Main container for the demo fast login section
+const StyledContainer = styled(Box)({
+  display: "flex",
+  flexDirection: "column",
+});
+
+// Fast login button with hover effects and transitions
 const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
   paddingTop: theme.spacing(1),
   paddingBottom: theme.spacing(1),
@@ -31,6 +37,19 @@ const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
   },
 }));
 
+// Divider label text with secondary color and spacing
+const StyledDividerLabel = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontWeight: 500,
+  letterSpacing: "0.5px",
+}));
+
+// Grid container for fast login buttons
+const StyledButtonGrid = styled(Box)({
+  display: "grid",
+  gridTemplateColumns: "repeat(2, 1fr)",
+});
+
 export interface DemoFastLoginProps {
   groups: { slug: string; name: string; description: string | null }[];
   onFastLogin: (groupSlug: string) => void;
@@ -50,28 +69,14 @@ export function DemoFastLogin({ groups, onFastLogin }: Readonly<DemoFastLoginPro
   if (!groups || groups.length === 0) return null;
 
   return (
-    <Box sx={{ mt: 3, mb: 1 }}>
+    <StyledContainer sx={{ mt: 3, mb: 1 }}>
       <Divider sx={{ mb: 2 }}>
-        <Typography
-          variant="bodyMd"
-          sx={theme => ({
-            color: theme.palette.text.secondary,
-            px: 1,
-            fontWeight: 500,
-            letterSpacing: "0.5px",
-          })}
-        >
+        <StyledDividerLabel variant="bodyMd" sx={{ px: 1 }}>
           {t("orQuickLogin")}
-        </Typography>
+        </StyledDividerLabel>
       </Divider>
 
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: 1.5,
-        }}
-      >
+      <StyledButtonGrid sx={{ gap: 1.5 }}>
         {groups.map(group => (
           <FastLoginButton
             key={group.slug}
@@ -83,7 +88,7 @@ export function DemoFastLogin({ groups, onFastLogin }: Readonly<DemoFastLoginPro
             {group.name}
           </FastLoginButton>
         ))}
-      </Box>
-    </Box>
+      </StyledButtonGrid>
+    </StyledContainer>
   );
 }

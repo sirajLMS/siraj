@@ -1,36 +1,33 @@
 "use client";
 
 import { Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { LanguageSwitcher, ThemeSwitcher } from "@/frontend/views/dashboard/components/navbar";
+
+// Main container positioned at top-right with flex layout
+const StyledContainer = styled(Box)({
+  position: "absolute",
+  top: 16,
+  right: 16,
+  display: "flex",
+  alignItems: "center",
+});
+
+// Wrapper for each switcher with header container background
+const StyledSwitcherWrapper = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.headerContainer,
+  borderRadius: theme.shape.borderRadius,
+}));
 
 export function ThemeLanguageControls() {
   return (
-    <Box
-      sx={{
-        position: "absolute",
-        top: 16,
-        right: 16,
-        display: "flex",
-        gap: 2,
-        alignItems: "center",
-      }}
-    >
-      <Box
-        sx={theme => ({
-          backgroundColor: theme.palette.headerContainer,
-          borderRadius: theme.shape.borderRadius,
-        })}
-      >
+    <StyledContainer sx={{ gap: 2 }}>
+      <StyledSwitcherWrapper>
         <LanguageSwitcher />
-      </Box>
-      <Box
-        sx={theme => ({
-          backgroundColor: theme.palette.headerContainer,
-          borderRadius: theme.shape.borderRadius,
-        })}
-      >
+      </StyledSwitcherWrapper>
+      <StyledSwitcherWrapper>
         <ThemeSwitcher />
-      </Box>
-    </Box>
+      </StyledSwitcherWrapper>
+    </StyledContainer>
   );
 }

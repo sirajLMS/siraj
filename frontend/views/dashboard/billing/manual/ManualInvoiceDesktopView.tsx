@@ -3,6 +3,7 @@
 
 import { ArrowBackOutlined } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PageHeader } from "@/frontend/components/ui";
 import type { BillingManualLabels } from "@/shared/messages/types/dashboard/billing/manual";
@@ -13,6 +14,12 @@ import { ManualInvoiceFormFields } from "./components/ManualInvoiceFormFields";
 import { ManualInvoiceSupportCards } from "./components/ManualInvoiceSupportCards";
 import type { ManualInvoiceFormData } from "./schemas/manualInvoiceSchema";
 import type { ParentInvoiceOption } from "./types/manualInvoiceViewTypes";
+
+// Back navigation button styled with primary color and bold weight
+const StyledBackButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  fontWeight: 700,
+}));
 
 interface ManualInvoiceDesktopViewProps {
   readonly labels: BillingManualLabels;
@@ -47,13 +54,9 @@ export function ManualInvoiceDesktopView({
         title={labels.pageTitle}
         subtitle={labels.pageSubtitle}
         actions={
-          <Button
-            startIcon={<ArrowBackOutlined />}
-            onClick={onBack}
-            sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}
-          >
+          <StyledBackButton startIcon={<ArrowBackOutlined />} onClick={onBack}>
             {labels.backToFinancials}
-          </Button>
+          </StyledBackButton>
         }
       />
 
