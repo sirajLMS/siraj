@@ -1,8 +1,8 @@
 "use client";
 
 import { BlockOutlined, PersonOutlined, ScheduleOutlined, WarningAmberOutlined } from "@mui/icons-material";
-import { Box, Button, Card, CardContent, Typography } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
+import { Box, Button, Card, CardContent, Typography, useTheme } from "@mui/material";
+import { styled, type Theme } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/components/ui";
 import type { StatusSessionRow } from "@/frontend/stores/mockStatusTrackingStore";
 
@@ -37,6 +37,85 @@ const STATUS_LABEL_KEYS: Record<
   pending_verification: "pendingVerification",
 };
 
+// Common base styles shared by every card action button (uppercase label look)
+const StyledCardActionButtonBase = styled(Button)(({ theme }) => ({
+  fontFamily: theme.typography.labelUppercase.fontFamily,
+  fontSize: "12px",
+  fontWeight: 700,
+  letterSpacing: "0.1em",
+  textTransform: "uppercase",
+  paddingBlock: theme.spacing(1.25),
+  borderRadius: 2,
+  marginTop: theme.spacing(2),
+}));
+
+// Outlined primary-colored activate button used when a session is suspended_pending
+const StyledActivateActionButton = styled(StyledCardActionButtonBase)(({ theme }) => ({
+  borderWidth: 2,
+  color: theme.palette.primary.main,
+  borderColor: theme.palette.primary.main,
+  "&:hover": { borderWidth: 2 },
+}));
+
+// Bold primary-colored title text for the student name row
+const StyledStudentNameText = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  fontSize: "15px",
+  color: theme.palette.text.primary,
+}));
+
+// Muted primary-colored subtitle text for the class name row
+const StyledClassNameText = styled(Typography)(({ theme }) => ({
+  fontSize: "12px",
+  color: theme.palette.primary.main,
+  fontWeight: 500,
+}));
+
+// Secondary-colored flex row used to render meta info pairs (teacher + schedule)
+const StyledMetaInfoRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: 0.75,
+  color: theme.palette.text.secondary,
+}));
+
+// Primary-colored headline used as the "Today's Schedule" section title
+const StyledSectionTitle = styled(Typography)(({ theme }) => ({
+  fontFamily: theme.typography.fontFamily,
+  fontSize: "18px",
+  fontWeight: 700,
+  color: theme.palette.primary.main,
+}));
+
+// Small uppercase primary-colored "See All" button in the section header
+const StyledSeeAllButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  fontFamily: theme.typography.labelUppercase.fontFamily,
+  fontSize: "11px",
+  fontWeight: 700,
+  letterSpacing: "0.1em",
+  textTransform: "uppercase",
+}));
+
+// Circular student-initials avatar whose background and text follow the session status palette
+const StyledStatusAvatar = styled(Box, {
+  shouldForwardProp: prop => prop !== "bgcolorToken" && prop !== "colorToken",
+})<{ bgcolorToken: string; colorToken: string }>(({ theme, bgcolorToken, colorToken }) => ({
+  width: 48,
+  height: 48,
+  borderRadius: "50%",
+  bgcolor: bgcolorToken,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontFamily: theme.typography.labelUppercase.fontFamily,
+  fontSize: "14px",
+  fontWeight: 700,
+  color: colorToken,
+  flexShrink: 0,
+  border: `1px solid ${theme.palette.border.light}`,
+}));
+
 function getStatusIcon(status: StatusSessionRow["status"]) {
   if (status === "suspended_pending") {
     return <BlockOutlined sx={{ fontSize: 12 }} />;
@@ -53,75 +132,55 @@ function getCardActionButton(
   onActivate: (id: string) => void,
   onVerify: (id: string) => void
 ) {
-  const commonSx = (theme: Theme) => ({
-    fontFamily: theme.typography.labelUppercase.fontFamily,
-    fontSize: "12px",
-    fontWeight: 700,
-    letterSpacing: "0.1em",
-    textTransform: "uppercase" as const,
-    py: 1.25,
-    borderRadius: 2,
-    mt: 2,
-  });
-
   if (row.status === "regular") {
     return (
-      <Button
+      <StyledCardActionButtonBase
         id={`mobile-join-${row.id}`}
         fullWidth
         variant="contained"
         onClick={() => {
           /* join session */
         }}
-        sx={commonSx}
       >
         {labels.joinSession}
-      </Button>
+      </StyledCardActionButtonBase>
     );
   }
 
   if (row.status === "suspended_pending") {
     return (
-      <Button
+      <StyledActivateActionButton
         id={`mobile-activate-${row.id}`}
         fullWidth
         variant="outlined"
         onClick={() => {
           onActivate(row.id);
         }}
-        sx={theme => ({
-          ...commonSx(theme),
-          borderWidth: 2,
-          color: theme.palette.primary.main,
-          borderColor: theme.palette.primary.main,
-          "&:hover": { borderWidth: 2 },
-        })}
       >
         {labels.activate}
-      </Button>
+      </StyledActivateActionButton>
     );
   }
 
   if (row.status === "on_leave") {
     return (
-      <Button id={`mobile-locked-${row.id}`} fullWidth disabled sx={commonSx}>
+      <StyledCardActionButtonBase id={`mobile-locked-${row.id}`} fullWidth disabled>
         {labels.sessionLocked}
-      </Button>
+      </StyledCardActionButtonBase>
     );
   }
 
   return (
-    <Button
+    <StyledCardActionButtonBase
       id={`mobile-verify-${row.id}`}
       fullWidth
       variant="contained"
       onClick={() => {
         onVerify(row.id);
       }}
-      sx={commonSx}
     >
       {labels.verifyDocuments}
-    </Button>
+    </StyledCardActionButtonBase>
   );
 }
 
@@ -161,6 +220,8 @@ function StatusTrackingCard({
   readonly onActivate: (id: string) => void;
   readonly onVerify: (id: string) => void;
 }) {
+  const theme = useTheme();
+  const avatarStyles = getAvatarStyles(theme, row.status);
   return (
     <Card
       elevation={0}
@@ -174,39 +235,16 @@ function StatusTrackingCard({
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
         <Box sx={{ display: "flex", gap: 2 }}>
           {/* Avatar */}
-          <Box
-            sx={theme => {
-              const styles = getAvatarStyles(theme, row.status);
-              return {
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                bgcolor: styles.bgcolor,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: theme.typography.labelUppercase.fontFamily,
-                fontSize: "14px",
-                fontWeight: 700,
-                color: styles.color,
-                flexShrink: 0,
-                border: `1px solid ${theme.palette.border.light}`,
-              };
-            }}
-          >
+          <StyledStatusAvatar bgcolorToken={avatarStyles.bgcolor} colorToken={avatarStyles.color}>
             {row.studentInitials}
-          </Box>
+          </StyledStatusAvatar>
 
           {/* Content */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1 }}>
               <Box sx={{ minWidth: 0 }}>
-                <Typography sx={theme => ({ fontWeight: 700, fontSize: "15px", color: theme.palette.text.primary })}>
-                  {row.studentName}
-                </Typography>
-                <Typography sx={theme => ({ fontSize: "12px", color: theme.palette.primary.main, fontWeight: 500 })}>
-                  {row.className}
-                </Typography>
+                <StyledStudentNameText>{row.studentName}</StyledStudentNameText>
+                <StyledClassNameText>{row.className}</StyledClassNameText>
               </Box>
               <StatusBadge
                 category="sessionTracking"
@@ -218,28 +256,14 @@ function StatusTrackingCard({
 
             {/* Meta info */}
             <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 0.75 }}>
-              <Box
-                sx={theme => ({
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.75,
-                  color: theme.palette.text.secondary,
-                })}
-              >
+              <StyledMetaInfoRow>
                 <PersonOutlined sx={{ fontSize: 16 }} />
                 <Typography sx={{ fontSize: "13px" }}>{row.teacherName}</Typography>
-              </Box>
-              <Box
-                sx={theme => ({
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.75,
-                  color: theme.palette.text.secondary,
-                })}
-              >
+              </StyledMetaInfoRow>
+              <StyledMetaInfoRow>
                 <ScheduleOutlined sx={{ fontSize: 16 }} />
                 <Typography sx={{ fontSize: "13px" }}>{row.schedule}</Typography>
-              </Box>
+              </StyledMetaInfoRow>
             </Box>
           </Box>
         </Box>
@@ -263,36 +287,22 @@ export function StatusTrackingCardList({
     <Box>
       {/* Section header */}
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-        <Typography
-          sx={theme => ({
-            fontFamily: theme.typography.fontFamily,
-            fontSize: "18px",
-            fontWeight: 700,
-            color: theme.palette.primary.main,
-          })}
-        >
+        <StyledSectionTitle>
           {labels.todaysSchedule}{" "}
           <Box
             component="span"
-            sx={theme => ({ color: theme.palette.text.secondary, fontWeight: 400, fontSize: "14px" })}
+            sx={theme => ({
+              color: theme.palette.text.secondary,
+              fontWeight: 400,
+              fontSize: "14px",
+            })}
           >
             ({totalSessions})
           </Box>
-        </Typography>
-        <Button
-          id="status-see-all-btn"
-          size="small"
-          sx={theme => ({
-            color: theme.palette.primary.main,
-            fontFamily: theme.typography.labelUppercase.fontFamily,
-            fontSize: "11px",
-            fontWeight: 700,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-          })}
-        >
+        </StyledSectionTitle>
+        <StyledSeeAllButton id="status-see-all-btn" size="small">
           {labels.seeAll}
-        </Button>
+        </StyledSeeAllButton>
       </Box>
 
       {/* Cards */}

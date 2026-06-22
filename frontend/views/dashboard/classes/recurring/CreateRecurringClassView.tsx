@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircleOutlined, CloseOutlined } from "@mui/icons-material";
 import { alpha, Box, IconButton, Snackbar, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
@@ -22,6 +23,32 @@ interface CreateRecurringClassViewProps {
   readonly onSubmit: (data: RecurringClassFormData) => void;
   readonly onDismissSuccess: () => void;
 }
+
+// Sidebar-container-tinted pill content inside the success snackbar
+const StyledSuccessSnackbarContent = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1.5),
+  paddingInline: theme.spacing(3),
+  paddingBlock: theme.spacing(1.5),
+  borderRadius: 10,
+  bgcolor: theme.palette.sidebarContainer,
+  color: theme.palette.onSidebarContainer,
+  boxShadow: theme.palette.shadow.card,
+}));
+
+// Primary-container-tinted circular check icon leading the success snackbar
+const StyledSuccessCheckIcon = styled(CheckCircleOutlined)(({ theme }) => ({
+  bgcolor: theme.palette.primaryContainer,
+  color: theme.palette.onPrimaryContainer,
+  borderRadius: "50%",
+  padding: theme.spacing(0.5),
+}));
+
+// Muted onSurfaceVariant close icon button used in the page header actions slot
+const StyledHeaderCloseButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.onSurfaceVariant,
+}));
 
 function buildFormLabels(labels: CreateRecurringClassLabels) {
   return {
@@ -60,27 +87,8 @@ function SuccessSnackbar({
       sx={{ bottom: { xs: 96, sm: 96 } }}
       onClose={onClose}
     >
-      <Box
-        sx={theme => ({
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          px: 3,
-          py: 1.5,
-          borderRadius: 10,
-          bgcolor: theme.palette.sidebarContainer,
-          color: theme.palette.onSidebarContainer,
-          boxShadow: theme.palette.shadow.card,
-        })}
-      >
-        <CheckCircleOutlined
-          sx={theme => ({
-            bgcolor: theme.palette.primaryContainer,
-            color: theme.palette.onPrimaryContainer,
-            borderRadius: "50%",
-            p: 0.5,
-          })}
-        />
+      <StyledSuccessSnackbarContent>
+        <StyledSuccessCheckIcon />
         <Typography
           variant="labelUppercase"
           sx={{
@@ -91,7 +99,7 @@ function SuccessSnackbar({
         >
           {labels}
         </Typography>
-      </Box>
+      </StyledSuccessSnackbarContent>
     </Snackbar>
   );
 }
@@ -154,13 +162,9 @@ export function CreateRecurringClassView({
         titleVariant={isMobile ? "headlineMd" : "headlineLg"}
         breadcrumbs={breadcrumbs}
         actions={
-          <IconButton
-            onClick={onClose}
-            aria-label={labels.close}
-            sx={theme => ({ color: theme.palette.onSurfaceVariant })}
-          >
+          <StyledHeaderCloseButton onClick={onClose} aria-label={labels.close}>
             <CloseOutlined />
-          </IconButton>
+          </StyledHeaderCloseButton>
         }
       />
 

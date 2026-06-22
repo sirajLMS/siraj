@@ -3,6 +3,7 @@
 
 import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Fab, useMediaQuery, useTheme } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import type { StatusSessionRow } from "@/frontend/stores/mockStatusTrackingStore";
@@ -10,6 +11,43 @@ import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StatusTrackingCardList } from "./StatusTrackingCardList";
 import { StatusTrackingDataGrid } from "./StatusTrackingDataGrid";
 import { SuspensionAnalytics, type SuspensionAnalyticsLabels } from "./SuspensionAnalytics";
+
+// Primary-colored fixed FAB used on mobile to create a new report
+const StyledMobileFab = styled(Fab)(({ theme }) => ({
+  position: "fixed",
+  bottom: 88,
+  right: 24,
+  bgcolor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  "&:hover": { bgcolor: theme.palette.primary.dark },
+}));
+
+// Selected-action pill badge showing the total-sessions count in the section header
+const StyledTotalSessionsBadge = styled(Box)(({ theme }) => ({
+  paddingInline: theme.spacing(2),
+  paddingBlock: theme.spacing(0.5),
+  bgcolor: theme.palette.action.selected,
+  borderRadius: 10,
+  fontSize: "12px",
+  color: theme.palette.text.secondary,
+  fontFamily: theme.typography.fontFamily,
+  fontWeight: 500,
+}));
+
+// Primary-colored fixed FAB used on desktop to create a new report (scales on hover/active)
+const StyledDesktopFab = styled(Fab)(({ theme }) => ({
+  position: "fixed",
+  bottom: 32,
+  right: 32,
+  bgcolor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  "&:hover": {
+    bgcolor: theme.palette.primary.dark,
+    transform: "scale(1.1)",
+  },
+  transition: "transform 0.15s ease, background-color 0.15s ease",
+  "&:active": { transform: "scale(0.95)" },
+}));
 
 export interface StatusTrackingLabels {
   readonly pageTitle: string;
@@ -117,20 +155,9 @@ function MobileLayout({
         />
 
         {/* Mobile FAB */}
-        <Fab
-          id="status-fab-btn"
-          aria-label={labels.newReport}
-          sx={theme => ({
-            position: "fixed",
-            bottom: 88,
-            right: 24,
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            "&:hover": { bgcolor: theme.palette.primary.dark },
-          })}
-        >
+        <StyledMobileFab id="status-fab-btn" aria-label={labels.newReport}>
           <AddOutlined />
-        </Fab>
+        </StyledMobileFab>
       </Box>
     </PageContainer>
   );
@@ -170,20 +197,9 @@ function DesktopLayout({
       <SectionPanel
         title={labels.todaysClassSchedule}
         actions={
-          <Box
-            sx={theme => ({
-              px: 2,
-              py: 0.5,
-              bgcolor: theme.palette.action.selected,
-              borderRadius: 10,
-              fontSize: "12px",
-              color: theme.palette.text.secondary,
-              fontFamily: theme.typography.fontFamily,
-              fontWeight: 500,
-            })}
-          >
+          <StyledTotalSessionsBadge>
             {labels.totalSessions.replace("{total}", String(totalSessions))}
-          </Box>
+          </StyledTotalSessionsBadge>
         }
       >
         <StatusTrackingDataGrid
@@ -215,23 +231,9 @@ function DesktopLayout({
       <SuspensionAnalytics labels={analyticsLabels} suspendedCount={suspendedCount} />
 
       {/* Desktop FAB */}
-      <Fab
-        id="status-desktop-fab-btn"
-        aria-label={labels.newReport}
-        onClick={onNewReport}
-        sx={theme => ({
-          position: "fixed",
-          bottom: 32,
-          right: 32,
-          bgcolor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-          "&:hover": { bgcolor: theme.palette.primary.dark, transform: "scale(1.1)" },
-          transition: "transform 0.15s ease, background-color 0.15s ease",
-          "&:active": { transform: "scale(0.95)" },
-        })}
-      >
+      <StyledDesktopFab id="status-desktop-fab-btn" aria-label={labels.newReport} onClick={onNewReport}>
         <AddOutlined />
-      </Fab>
+      </StyledDesktopFab>
     </PageContainer>
   );
 }

@@ -2,6 +2,7 @@
 
 import { MapOutlined, MeetingRoomOutlined } from "@mui/icons-material";
 import { Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
 import type { VenueInfo } from "@/frontend/stores/mockClassAuditStore";
 
@@ -16,53 +17,120 @@ interface VenueLocationCardProps {
   readonly onViewMap: () => void;
 }
 
+// Primary-colored section title used on the desktop card header
+const StyledSectionTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+// Hover-tinted preview container used for both mobile header and desktop venue image area
+const StyledVenuePreviewContainer = styled(Box)(({ theme }) => ({
+  bgcolor: theme.palette.action.hover,
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
+
+// Disabled meeting-room icon shown in the mobile preview (smaller + 0.4 opacity)
+const StyledMobileDoorIcon = styled(MeetingRoomOutlined)(({ theme }) => ({
+  fontSize: 48,
+  color: theme.palette.text.disabled,
+  opacity: 0.4,
+}));
+
+// Disabled meeting-room icon shown in the desktop preview (larger + 0.3 opacity)
+const StyledDesktopDoorIcon = styled(MeetingRoomOutlined)(({ theme }) => ({
+  fontSize: 64,
+  color: theme.palette.text.disabled,
+  opacity: 0.3,
+}));
+
+// Header-tinted capacity badge positioned at the top-right of the mobile preview
+const StyledCapacityBadge = styled(Box)(({ theme }) => ({
+  position: "absolute",
+  top: 8,
+  right: 8,
+  bgcolor: theme.palette.header,
+  color: theme.palette.onHeader,
+  paddingInline: theme.spacing(1),
+  paddingBlock: theme.spacing(0.5),
+  borderRadius: 1,
+  typography: "labelUppercase",
+  boxShadow: theme.palette.shadow.card,
+}));
+
+// Primary-colored venue name used in the mobile card's detail section
+const StyledMobileVenueName = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+// Secondary muted text used for the floor/hall location line
+const StyledLocationText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Scrim-gradient overlay covering the desktop preview to lift text at the bottom
+const StyledDesktopScrimOverlay = styled(Box)(({ theme }) => ({
+  position: "absolute",
+  inset: 0,
+  background: `linear-gradient(to top, ${theme.palette.scrim}, transparent)`,
+  display: "flex",
+  alignItems: "flex-end",
+  padding: theme.spacing(2),
+}));
+
+// Bold onPrimary venue name shown atop the desktop scrim overlay
+const StyledOverlayVenueName = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onPrimary,
+  fontWeight: 700,
+}));
+
+// OnPrimary caption shown next to the venue name in the desktop overlay
+const StyledOverlayLocationText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onPrimary,
+}));
+
+// PrimaryContainer-tinted capacity info row at the bottom of the desktop card
+const StyledCapacityInfoRow = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1.5),
+  padding: theme.spacing(1.5),
+  bgcolor: theme.palette.primaryContainer,
+  borderRadius: 2,
+}));
+
+// OnPrimaryContainer icon leading the desktop capacity row
+const StyledCapacityInfoIcon = styled(MeetingRoomOutlined)(({ theme }) => ({
+  color: theme.palette.onPrimaryContainer,
+}));
+
+// Bold onPrimaryContainer label used for the capacity count
+const StyledCapacityCountLabel = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  color: theme.palette.onPrimaryContainer,
+}));
+
+// OnPrimaryContainer uppercase text used for the features list
+const StyledFeaturesText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onPrimaryContainer,
+}));
+
 const MobileVenueCard = ({ venue, labels, onViewMap }: VenueLocationCardProps) => {
   const capacityBadge = labels.capacityBadge.replace("{count}", String(venue.capacity));
 
   return (
     <BaseCard sx={{ p: 0, overflow: "hidden" }}>
-      <Box
-        sx={theme => ({
-          height: 128,
-          bgcolor: theme.palette.action.hover,
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        })}
-      >
-        <MeetingRoomOutlined
-          sx={theme => ({
-            fontSize: 48,
-            color: theme.palette.text.disabled,
-            opacity: 0.4,
-          })}
-        />
-        <Box
-          sx={theme => ({
-            position: "absolute",
-            top: 8,
-            right: 8,
-            bgcolor: theme.palette.header,
-            color: theme.palette.onHeader,
-            px: 1,
-            py: 0.5,
-            borderRadius: 1,
-            typography: "labelUppercase",
-            boxShadow: theme.palette.shadow.card,
-          })}
-        >
-          {capacityBadge}
-        </Box>
-      </Box>
+      <StyledVenuePreviewContainer sx={{ height: 128 }}>
+        <StyledMobileDoorIcon />
+        <StyledCapacityBadge>{capacityBadge}</StyledCapacityBadge>
+      </StyledVenuePreviewContainer>
       <Box sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
-          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-            {venue.name}
-          </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+          <StyledMobileVenueName variant="titleLg">{venue.name}</StyledMobileVenueName>
+          <StyledLocationText variant="bodyMd">
             {venue.floor}, {venue.hall}
-          </Typography>
+          </StyledLocationText>
         </Box>
         <Button
           id="venue-view-map-mobile"
@@ -83,33 +151,19 @@ const DesktopVenueCard = ({ venue, labels }: Omit<VenueLocationCardProps, "onVie
 
   return (
     <BaseCard>
-      <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, mb: 2 })}>
+      <StyledSectionTitle variant="titleLg" sx={{ mb: 2 }}>
         {labels.title}
-      </Typography>
-      <Box
-        sx={theme => ({
+      </StyledSectionTitle>
+      <StyledVenuePreviewContainer
+        sx={{
           aspectRatio: "16/9",
           borderRadius: 2,
-          bgcolor: theme.palette.action.hover,
-          position: "relative",
           overflow: "hidden",
           mb: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        })}
+        }}
       >
-        <MeetingRoomOutlined sx={theme => ({ fontSize: 64, color: theme.palette.text.disabled, opacity: 0.3 })} />
-        <Box
-          sx={theme => ({
-            position: "absolute",
-            inset: 0,
-            background: `linear-gradient(to top, ${theme.palette.scrim}, transparent)`,
-            display: "flex",
-            alignItems: "flex-end",
-            p: 2,
-          })}
-        >
+        <StyledDesktopDoorIcon />
+        <StyledDesktopScrimOverlay>
           <Box
             sx={{
               display: "flex",
@@ -117,26 +171,15 @@ const DesktopVenueCard = ({ venue, labels }: Omit<VenueLocationCardProps, "onVie
               alignItems: "center",
             }}
           >
-            <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.onPrimary, fontWeight: 700 })}>
-              {venue.name}:
-            </Typography>
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onPrimary })}>
+            <StyledOverlayVenueName variant="bodyLg">{venue.name}:</StyledOverlayVenueName>
+            <StyledOverlayLocationText variant="labelMd">
               {venue.floor}, {venue.hall}
-            </Typography>
+            </StyledOverlayLocationText>
           </Box>
-        </Box>
-      </Box>
-      <Box
-        sx={theme => ({
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          p: 1.5,
-          bgcolor: theme.palette.primaryContainer,
-          borderRadius: 2,
-        })}
-      >
-        <MeetingRoomOutlined sx={theme => ({ color: theme.palette.onPrimaryContainer })} />
+        </StyledDesktopScrimOverlay>
+      </StyledVenuePreviewContainer>
+      <StyledCapacityInfoRow>
+        <StyledCapacityInfoIcon />
         <Box
           sx={{
             display: "flex",
@@ -144,14 +187,10 @@ const DesktopVenueCard = ({ venue, labels }: Omit<VenueLocationCardProps, "onVie
             alignItems: "center",
           }}
         >
-          <Typography variant="labelMd" sx={theme => ({ fontWeight: 700, color: theme.palette.onPrimaryContainer })}>
-            {capacityText}:
-          </Typography>
-          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onPrimaryContainer })}>
-            {venue.features}
-          </Typography>
+          <StyledCapacityCountLabel variant="labelMd">{capacityText}:</StyledCapacityCountLabel>
+          <StyledFeaturesText variant="labelUppercase">{venue.features}</StyledFeaturesText>
         </Box>
-      </Box>
+      </StyledCapacityInfoRow>
     </BaseCard>
   );
 };

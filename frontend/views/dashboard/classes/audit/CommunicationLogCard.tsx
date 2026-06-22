@@ -2,6 +2,7 @@
 
 import { CheckCircleOutlined, EmailOutlined, RadioButtonUncheckedOutlined, SmsOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
 import type { CommunicationLogEntry, CommunicationType } from "@/frontend/stores/mockClassAuditStore";
 
@@ -19,13 +20,59 @@ const COMMUNICATION_ICONS: Record<CommunicationType, typeof EmailOutlined> = {
   sms: SmsOutlined,
 };
 
+// Success-colored icon indicating a delivered communication entry
+const StyledDeliveredIcon = styled(CheckCircleOutlined)(({ theme }) => ({
+  color: theme.palette.success.main,
+}));
+
+// Muted icon indicating an undelivered communication entry
+const StyledUndeliveredIcon = styled(RadioButtonUncheckedOutlined)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Secondary-colored description caption beneath a log entry title
+const StyledEntryDescription = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Primary-colored uppercase timestamp label shown beneath the entry description
+const StyledEntryTimestamp = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+// Primary-colored card title used in both mobile header and desktop body
+const StyledSectionTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+// Outlined resend button used in the mobile header (primary border + hover tint)
+const StyledMobileResendButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  borderColor: theme.palette.primary.main,
+  typography: "labelUppercase",
+  borderRadius: 1.5,
+  "&:hover": {
+    borderColor: theme.palette.primary.dark,
+    bgcolor: alpha(theme.palette.primary.main, 0.04),
+  },
+}));
+
+// Full-width desktop resend button with muted border that transitions to primary on hover
+const StyledDesktopResendButton = styled(Button)(({ theme }) => ({
+  borderColor: theme.palette.border.light,
+  color: theme.palette.text.secondary,
+  typography: "labelUppercase",
+  borderRadius: 2,
+  "&:hover": {
+    borderColor: theme.palette.primary.main,
+    color: theme.palette.primary.main,
+    bgcolor: alpha(theme.palette.primary.main, 0.04),
+  },
+}));
+
 const LogEntryItem = ({ entry, isMobile }: { entry: CommunicationLogEntry; isMobile: boolean }) => {
   const Icon = COMMUNICATION_ICONS[entry.type];
-  const deliveryIcon = entry.isDelivered ? (
-    <CheckCircleOutlined sx={theme => ({ color: theme.palette.success.main })} />
-  ) : (
-    <RadioButtonUncheckedOutlined sx={theme => ({ color: theme.palette.text.secondary })} />
-  );
+  const deliveryIcon = entry.isDelivered ? <StyledDeliveredIcon /> : <StyledUndeliveredIcon />;
 
   return (
     <Box
@@ -60,19 +107,11 @@ const LogEntryItem = ({ entry, isMobile }: { entry: CommunicationLogEntry; isMob
           <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
             {entry.title}
           </Typography>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {entry.description}
-          </Typography>
+          <StyledEntryDescription variant="labelMd">{entry.description}</StyledEntryDescription>
           {entry.timestamp ? (
-            <Typography
-              variant="labelUppercase"
-              sx={theme => ({
-                color: theme.palette.primary.main,
-                mt: 0.5,
-              })}
-            >
+            <StyledEntryTimestamp variant="labelUppercase" sx={{ mt: 0.5 }}>
               {entry.timestamp}
-            </Typography>
+            </StyledEntryTimestamp>
           ) : null}
         </Box>
       </Box>
@@ -89,34 +128,18 @@ export function CommunicationLogCard({ entries, labels, onResend }: Communicatio
     <Box>
       {isMobile ? (
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5, px: 0.5 }}>
-          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-            {labels.title}
-          </Typography>
-          <Button
-            onClick={onResend}
-            variant="outlined"
-            size="small"
-            sx={theme => ({
-              color: theme.palette.primary.main,
-              borderColor: theme.palette.primary.main,
-              typography: "labelUppercase",
-              borderRadius: 1.5,
-              "&:hover": {
-                borderColor: theme.palette.primary.dark,
-                bgcolor: alpha(theme.palette.primary.main, 0.04),
-              },
-            })}
-          >
+          <StyledSectionTitle variant="titleLg">{labels.title}</StyledSectionTitle>
+          <StyledMobileResendButton onClick={onResend} variant="outlined" size="small">
             {labels.resendNotifications}
-          </Button>
+          </StyledMobileResendButton>
         </Box>
       ) : null}
 
       <BaseCard sx={{ p: 3 }}>
         {!isMobile && (
-          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, mb: 2 })}>
+          <StyledSectionTitle variant="titleLg" sx={{ mb: 2 }}>
             {labels.title}
-          </Typography>
+          </StyledSectionTitle>
         )}
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: isMobile ? 1 : 2 }}>
@@ -126,27 +149,15 @@ export function CommunicationLogCard({ entries, labels, onResend }: Communicatio
         </Box>
 
         {!isMobile && (
-          <Button
+          <StyledDesktopResendButton
             id="audit-resend-notifications-btn"
             fullWidth
             variant="outlined"
             onClick={onResend}
-            sx={theme => ({
-              mt: 3,
-              py: 1,
-              borderColor: theme.palette.border.light,
-              color: theme.palette.text.secondary,
-              typography: "labelUppercase",
-              borderRadius: 2,
-              "&:hover": {
-                borderColor: theme.palette.primary.main,
-                color: theme.palette.primary.main,
-                bgcolor: alpha(theme.palette.primary.main, 0.04),
-              },
-            })}
+            sx={{ mt: 3, py: 1 }}
           >
             {labels.resendNotifications}
-          </Button>
+          </StyledDesktopResendButton>
         )}
       </BaseCard>
     </Box>

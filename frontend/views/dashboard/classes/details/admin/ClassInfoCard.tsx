@@ -3,6 +3,7 @@
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LanguageIcon from "@mui/icons-material/Language";
 import { Avatar, Box, Chip, Divider, Stack, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
 import { avatarInitials } from "@/frontend/utils/avatar";
 import type { StudentInfo, TeacherInfo } from "@/frontend/views/dashboard/types/dashboard";
@@ -21,49 +22,110 @@ interface ClassInfoCardProps {
   };
 }
 
+// Primary-background LIVE INSTANCE chip shown in the card header
+const StyledLiveInstanceChip = styled(Chip)(({ theme }) => ({
+  bgcolor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  typography: "labelUppercase",
+  opacity: 0.8,
+  "& .MuiChip-label": {
+    paddingInline: theme.spacing(1.5),
+  },
+}));
+
+// Primary-colored h3 course name heading
+const StyledCourseNameHeading = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+// Secondary-colored body text for the instance ID label
+const StyledInstanceIdLabel = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Small active-status dot colored with the status.active palette token
+const StyledActiveStatusDot = styled(FiberManualRecordIcon)(({ theme }) => ({
+  fontSize: 12,
+  color: theme.palette.status.active,
+}));
+
+// Uppercase secondary-colored caption next to the active status dot
+const StyledActiveConnectionCaption = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+}));
+
+// Default-background avatar used for the student slot
+const StyledStudentAvatar = styled(Avatar)(({ theme }) => ({
+  width: 64,
+  height: 64,
+  bgcolor: theme.palette.background.default,
+  color: theme.palette.primary.main,
+}));
+
+// PrimaryContainer-tinted avatar used for the teacher slot
+const StyledTeacherAvatar = styled(Avatar)(({ theme }) => ({
+  width: 64,
+  height: 64,
+  bgcolor: theme.palette.primaryContainer,
+  color: theme.palette.onPrimaryContainer,
+}));
+
+// Block-display secondary caption used above a person's role (Student / Module Instructor)
+const StyledPersonRoleCaption = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  display: "block",
+}));
+
+// Block-display primary name used for student / teacher name
+const StyledPersonNameText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  display: "block",
+}));
+
+// Secondary caption used for student grade+ID or teacher title beneath the name
+const StyledPersonDetailCaption = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
+// Absolute-positioned decorative Language icon rendered at near-invisible opacity
+const StyledDecorativeIconWrapper = styled(Box)(({ theme }) => ({
+  position: "absolute",
+  right: -16,
+  bottom: -16,
+  opacity: 0.03,
+  pointerEvents: "none",
+  color: theme.palette.primary.main,
+}));
+
 export function ClassInfoCard({ courseName, instanceId, student, teacher, isActive, labels }: ClassInfoCardProps) {
   return (
     <BaseCard sx={{ position: "relative", overflow: "hidden", height: "100%" }}>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
         <Box>
-          <Chip
-            label={labels.liveInstance}
-            size="small"
-            sx={theme => ({
-              bgcolor: theme.palette.primary.main,
-              color: theme.palette.onPrimary,
-              typography: "labelUppercase",
-              mb: 1.5,
-              opacity: 0.8,
-              "& .MuiChip-label": { px: 1.5 },
-            })}
-          />
-          <Typography variant="h3" sx={theme => ({ color: theme.palette.primary.main, mb: 0.5 })}>
+          <StyledLiveInstanceChip label={labels.liveInstance} size="small" sx={{ mb: 1.5 }} />
+          <StyledCourseNameHeading variant="h3" sx={{ mb: 0.5 }}>
             {courseName}
-          </Typography>
-          <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
+          </StyledCourseNameHeading>
+          <StyledInstanceIdLabel variant="body2">
             Instance ID:{" "}
             <Box
               component="span"
-              sx={theme => ({ fontFamily: "monospace", fontWeight: 700, color: theme.palette.primary.main })}
+              sx={theme => ({
+                fontFamily: "monospace",
+                fontWeight: 700,
+                color: theme.palette.primary.main,
+              })}
             >
               {instanceId}
             </Box>
-          </Typography>
+          </StyledInstanceIdLabel>
         </Box>
         {isActive && (
           <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-            <FiberManualRecordIcon sx={theme => ({ fontSize: 12, color: theme.palette.status.active })} />
-            <Typography
-              variant="caption"
-              sx={theme => ({
-                color: theme.palette.text.secondary,
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              })}
-            >
-              {labels.activeConnection}
-            </Typography>
+            <StyledActiveStatusDot />
+            <StyledActiveConnectionCaption variant="caption">{labels.activeConnection}</StyledActiveConnectionCaption>
           </Stack>
         )}
       </Stack>
@@ -71,28 +133,15 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
       <Stack direction="row" sx={{ gap: 4, mt: 2 }}>
         {/* Student */}
         <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
-          <Avatar
-            src={student.avatarUrl}
-            alt={student.name}
-            sx={theme => ({
-              width: 64,
-              height: 64,
-              bgcolor: theme.palette.background.default,
-              color: theme.palette.primary.main,
-            })}
-          >
+          <StyledStudentAvatar src={student.avatarUrl} alt={student.name}>
             {avatarInitials(student.name)}
-          </Avatar>
+          </StyledStudentAvatar>
           <Box>
-            <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, display: "block" })}>
-              {labels.student}
-            </Typography>
-            <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, display: "block" })}>
-              {student.name}
-            </Typography>
-            <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
+            <StyledPersonRoleCaption variant="caption">{labels.student}</StyledPersonRoleCaption>
+            <StyledPersonNameText variant="titleLg">{student.name}</StyledPersonNameText>
+            <StyledPersonDetailCaption variant="caption">
               {student.grade} • ID: {student.id}
-            </Typography>
+            </StyledPersonDetailCaption>
           </Box>
         </Stack>
 
@@ -100,45 +149,21 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
 
         {/* Teacher */}
         <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
-          <Avatar
-            sx={theme => ({
-              width: 64,
-              height: 64,
-              bgcolor: theme.palette.primaryContainer,
-              color: theme.palette.onPrimaryContainer,
-            })}
-            alt={teacher.name}
-            src={teacher.avatarUrl}
-          >
+          <StyledTeacherAvatar alt={teacher.name} src={teacher.avatarUrl}>
             {avatarInitials(teacher.name)}
-          </Avatar>
+          </StyledTeacherAvatar>
           <Box>
-            <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, display: "block" })}>
-              {labels.moduleInstructor}
-            </Typography>
-            <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, display: "block" })}>
-              {teacher.name}
-            </Typography>
-            <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {teacher.title}
-            </Typography>
+            <StyledPersonRoleCaption variant="caption">{labels.moduleInstructor}</StyledPersonRoleCaption>
+            <StyledPersonNameText variant="titleLg">{teacher.name}</StyledPersonNameText>
+            <StyledPersonDetailCaption variant="caption">{teacher.title}</StyledPersonDetailCaption>
           </Box>
         </Stack>
       </Stack>
 
       {/* Decorative background icon */}
-      <Box
-        sx={theme => ({
-          position: "absolute",
-          right: -16,
-          bottom: -16,
-          opacity: 0.03,
-          pointerEvents: "none",
-          color: theme.palette.primary.main,
-        })}
-      >
+      <StyledDecorativeIconWrapper>
         <LanguageIcon sx={{ fontSize: 200 }} />
-      </Box>
+      </StyledDecorativeIconWrapper>
     </BaseCard>
   );
 }

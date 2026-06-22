@@ -6,6 +6,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Stack, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import type { PerformanceMetric } from "@/frontend/views/dashboard/types/dashboard";
 
@@ -28,6 +29,26 @@ interface LivePerformanceGridProps {
   };
 }
 
+// Primary-colored headline used as the section title
+const StyledSectionTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+// Bordered paper-background chip that displays the time-range caption
+const StyledTimeRangeChip = styled(Box)(({ theme }) => ({
+  paddingInline: theme.spacing(2),
+  paddingBlock: theme.spacing(0.75),
+  border: 1,
+  borderColor: theme.palette.border.light,
+  borderRadius: 2,
+  bgcolor: theme.palette.background.paper,
+}));
+
+// Muted secondary-colored caption used inside the time-range chip
+const StyledTimeRangeCaption = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
 export function LivePerformanceGrid({ metrics, labels }: LivePerformanceGridProps) {
   const labelMap: Record<string, string> = {
     engagementScore: labels.engagementScore,
@@ -48,23 +69,10 @@ export function LivePerformanceGrid({ metrics, labels }: LivePerformanceGridProp
   return (
     <Box>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
-          {labels.livePerformanceOverview}
-        </Typography>
-        <Box
-          sx={theme => ({
-            px: 2,
-            py: 0.75,
-            border: 1,
-            borderColor: theme.palette.border.light,
-            borderRadius: 2,
-            bgcolor: theme.palette.background.paper,
-          })}
-        >
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {labels.last30Mins}
-          </Typography>
-        </Box>
+        <StyledSectionTitle variant="headlineMd">{labels.livePerformanceOverview}</StyledSectionTitle>
+        <StyledTimeRangeChip>
+          <StyledTimeRangeCaption variant="caption">{labels.last30Mins}</StyledTimeRangeCaption>
+        </StyledTimeRangeChip>
       </Stack>
 
       <MetricCardGrid metrics={metricItems} size={{ md: 3, lg: "grow" }} />

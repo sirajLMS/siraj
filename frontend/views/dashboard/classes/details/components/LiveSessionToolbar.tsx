@@ -3,7 +3,6 @@
 import { ExitToAppOutlined, HighlightOffOutlined, PlayArrowOutlined, RestartAltOutlined } from "@mui/icons-material";
 import {
   Alert,
-  alpha,
   Box,
   Button,
   CircularProgress,
@@ -14,6 +13,7 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
@@ -41,6 +41,41 @@ export interface LiveSessionToolbarProps {
 
 import type { SxProps, Theme } from "@mui/material";
 
+// Success-tinted contained button used for the start action
+const StyledStartActionButton = styled(Button)(({ theme }) => ({
+  bgcolor: theme.palette.success.main,
+  color: theme.palette.onSuccess,
+  borderRadius: theme.layout.radius.button,
+  "&:hover": { bgcolor: theme.palette.success.dark },
+}));
+
+// Warning-tinted contained button used for the mark-absent action
+const StyledAbsentActionButton = styled(Button)(({ theme }) => ({
+  bgcolor: theme.palette.warning.main,
+  color: theme.palette.onWarning,
+  borderRadius: theme.layout.radius.button,
+  "&:hover": { bgcolor: theme.palette.warning.dark },
+}));
+
+// Secondary-colored outlined button used for the leave action
+const StyledLeaveActionButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.secondary.main,
+  borderColor: theme.palette.secondary.main,
+  borderRadius: theme.layout.radius.button,
+  "&:hover": {
+    borderColor: theme.palette.secondary.dark,
+    bgcolor: theme.palette.action.hover,
+  },
+}));
+
+// Error-tinted contained button used for the reset action
+const StyledResetActionButton = styled(Button)(({ theme }) => ({
+  bgcolor: theme.palette.error.main,
+  color: theme.palette.onError,
+  borderRadius: theme.layout.radius.button,
+  "&:hover": { bgcolor: theme.palette.error.dark },
+}));
+
 interface ActionButtonProps {
   readonly id: string;
   readonly disabled: boolean;
@@ -50,7 +85,8 @@ interface ActionButtonProps {
   readonly permission: AppPermission;
   readonly icon: React.ReactNode;
   readonly variant?: "contained" | "outlined";
-  readonly sx: SxProps<Theme>;
+  readonly component?: React.ElementType;
+  readonly sx?: SxProps<Theme>;
 }
 
 function ActionButton({
@@ -62,11 +98,12 @@ function ActionButton({
   permission,
   icon,
   variant = "contained",
+  component: Component = Button,
   sx,
 }: ActionButtonProps) {
   return (
     <RequirePermission permissions={[permission]}>
-      <Button
+      <Component
         id={id}
         variant={variant}
         disabled={disabled}
@@ -75,7 +112,7 @@ function ActionButton({
         sx={sx}
       >
         {label}
-      </Button>
+      </Component>
     </RequirePermission>
   );
 }
@@ -199,12 +236,7 @@ function ActionButtonsGroup({
             label={labels.startButton}
             permission={AppPermission.SessionUpdateStatusStart}
             icon={<PlayArrowOutlined />}
-            sx={theme => ({
-              bgcolor: theme.palette.success.main,
-              color: theme.palette.onSuccess,
-              borderRadius: theme.layout.radius.button,
-              "&:hover": { bgcolor: theme.palette.success.dark },
-            })}
+            component={StyledStartActionButton}
           />
           <ActionButton
             id={`live-absent-${classInstanceId}`}
@@ -214,12 +246,7 @@ function ActionButtonsGroup({
             label={labels.absentButton}
             permission={AppPermission.SessionUpdateStatusAbsent}
             icon={<HighlightOffOutlined />}
-            sx={theme => ({
-              bgcolor: theme.palette.warning.main,
-              color: theme.palette.onWarning,
-              borderRadius: theme.layout.radius.button,
-              "&:hover": { bgcolor: theme.palette.warning.dark },
-            })}
+            component={StyledAbsentActionButton}
           />
           <ActionButton
             id={`live-leave-${classInstanceId}`}
@@ -230,15 +257,7 @@ function ActionButtonsGroup({
             label={labels.leaveButton}
             permission={AppPermission.SessionUpdateStatusLeave}
             icon={<ExitToAppOutlined />}
-            sx={theme => ({
-              color: theme.palette.secondary.main,
-              borderColor: theme.palette.secondary.main,
-              borderRadius: theme.layout.radius.button,
-              "&:hover": {
-                borderColor: theme.palette.secondary.dark,
-                bgcolor: alpha(theme.palette.secondary.main, 0.08),
-              },
-            })}
+            component={StyledLeaveActionButton}
           />
         </>
       )}
@@ -251,12 +270,7 @@ function ActionButtonsGroup({
         label={labels.resetButton}
         permission={AppPermission.SessionReset}
         icon={<RestartAltOutlined />}
-        sx={theme => ({
-          bgcolor: theme.palette.error.main,
-          color: theme.palette.onError,
-          borderRadius: theme.layout.radius.button,
-          "&:hover": { bgcolor: theme.palette.error.dark },
-        })}
+        component={StyledResetActionButton}
       />
     </Box>
   );

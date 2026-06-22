@@ -1,9 +1,17 @@
 "use client";
 
 import { Box, FormHelperText, TextField, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { durationBoxSx, labelSx } from "@/frontend/components/ui/form";
 import type { RecurringClassFormData } from "./recurringClassSchema";
+
+// Uppercase onSurfaceVariant label-sized caption used beside the duration input as a unit label
+const StyledDurationUnitLabel = styled(Typography)(({ theme }) => ({
+  ...theme.typography.labelMd,
+  color: theme.palette.onSurfaceVariant,
+  textTransform: "uppercase",
+}));
 
 interface DurationInputProps {
   readonly register: UseFormRegister<RecurringClassFormData>;
@@ -92,17 +100,7 @@ function DurationField({ register, fieldName, label, unit, max, isSubmitting, is
           variant="standard"
           sx={{ flex: 1 }}
         />
-        {!isMobile && (
-          <Typography
-            sx={theme => ({
-              ...theme.typography.labelMd,
-              color: theme.palette.onSurfaceVariant,
-              textTransform: "uppercase",
-            })}
-          >
-            {unit}
-          </Typography>
-        )}
+        {!isMobile && <StyledDurationUnitLabel>{unit}</StyledDurationUnitLabel>}
       </Box>
     </Box>
   );

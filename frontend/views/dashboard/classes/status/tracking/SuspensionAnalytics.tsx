@@ -2,6 +2,7 @@
 
 import { OpenInNewOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { SuspensionAnalyticsChart } from "./SuspensionAnalyticsChart";
 
 export interface SuspensionAnalyticsLabels {
@@ -20,112 +21,133 @@ export interface SuspensionAnalyticsProps {
   readonly labels: SuspensionAnalyticsLabels;
 }
 
+// Primary-dark flex column container used for the urgent CTA card
+const StyledCtaContainer = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(3),
+  borderRadius: 3,
+  bgcolor: theme.palette.primary.dark,
+  position: "relative",
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  minHeight: 220,
+}));
+
+// Decorative top-right blurred blob in the CTA background
+const StyledTopRightBlob = styled(Box)(({ theme }) => ({
+  position: "absolute",
+  top: "-20%",
+  right: "-15%",
+  width: 200,
+  height: 200,
+  borderRadius: "50%",
+  bgcolor: alpha(theme.palette.primary.dark, 0.04),
+  filter: "blur(40px)",
+  pointerEvents: "none",
+}));
+
+// Decorative bottom-left blurred blob in the CTA background
+const StyledBottomLeftBlob = styled(Box)(({ theme }) => ({
+  position: "absolute",
+  bottom: "-10%",
+  left: "-10%",
+  width: 160,
+  height: 160,
+  borderRadius: "50%",
+  bgcolor: alpha(theme.palette.primary.main, 0.3),
+  filter: "blur(32px)",
+  pointerEvents: "none",
+}));
+
+// Translucent primaryContainer pill marking the urgent-task header inside the CTA
+const StyledUrgentTaskBadge = styled(Box)(({ theme }) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: theme.spacing(0.75),
+  paddingInline: theme.spacing(1.5),
+  paddingBlock: theme.spacing(0.5),
+  bgcolor: alpha(theme.palette.primaryContainer, 0.3),
+  borderRadius: 10,
+}));
+
+// Warning-colored icon leading the urgent-task badge
+const StyledUrgentTaskIcon = styled(WarningAmberOutlined)(({ theme }) => ({
+  fontSize: 14,
+  color: theme.palette.warning.main,
+}));
+
+// OnPrimary caption text inside the urgent-task badge
+const StyledUrgentTaskText = styled(Typography)(({ theme }) => ({
+  fontSize: "11px",
+  fontWeight: 600,
+  color: theme.palette.onPrimary,
+}));
+
+// Hanken Grotesk headline inside the CTA announcing the account-lock count
+const StyledCtaHeadline = styled(Typography)(({ theme }) => ({
+  fontFamily: '"Hanken Grotesk", sans-serif',
+  fontSize: "24px",
+  fontWeight: 700,
+  color: theme.palette.onPrimary,
+  lineHeight: 1.2,
+}));
+
+// OnPrimary body caption describing the audit action beneath the headline
+const StyledCtaDescription = styled(Typography)(({ theme }) => ({
+  fontSize: "14px",
+  color: theme.palette.onPrimary,
+  opacity: 0.8,
+}));
+
+// Primary-colored contained button that opens the audit logs
+const StyledOpenAuditLogsButton = styled(Button)(({ theme }) => ({
+  position: "relative",
+  zIndex: 1,
+  bgcolor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  fontFamily: '"Inter", sans-serif',
+  fontWeight: 700,
+  fontSize: "13px",
+  letterSpacing: "0.04em",
+  alignSelf: "flex-start",
+  paddingInline: theme.spacing(3),
+  paddingBlock: theme.spacing(1.25),
+  borderRadius: 2,
+  "&:hover": {
+    bgcolor: theme.palette.primary.light,
+  },
+}));
+
 const Cta = ({ labels, suspendedCount }: SuspensionAnalyticsProps) => {
   return (
-    <Box
-      sx={theme => ({
-        p: 3,
-        borderRadius: 3,
-        bgcolor: theme.palette.primary.dark,
-        position: "relative",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        minHeight: 220,
-      })}
-    >
+    <StyledCtaContainer>
       {/* Background blobs */}
-      <Box
-        sx={theme => ({
-          position: "absolute",
-          top: "-20%",
-          right: "-15%",
-          width: 200,
-          height: 200,
-          borderRadius: "50%",
-          bgcolor: alpha(theme.palette.primary.dark, 0.04),
-          filter: "blur(40px)",
-          pointerEvents: "none",
-        })}
-      />
-      <Box
-        sx={theme => ({
-          position: "absolute",
-          bottom: "-10%",
-          left: "-10%",
-          width: 160,
-          height: 160,
-          borderRadius: "50%",
-          bgcolor: alpha(theme.palette.primary.main, 0.3),
-          filter: "blur(32px)",
-          pointerEvents: "none",
-        })}
-      />
+      <StyledTopRightBlob />
+      <StyledBottomLeftBlob />
 
       {/* Content */}
       <Box sx={{ position: "relative", zIndex: 1 }}>
-        <Box
-          sx={theme => ({
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.75,
-            px: 1.5,
-            py: 0.5,
-            bgcolor: alpha(theme.palette.primaryContainer, 0.3),
-            borderRadius: 10,
-            mb: 2,
-          })}
-        >
-          <WarningAmberOutlined sx={theme => ({ fontSize: 14, color: theme.palette.warning.main })} />
-          <Typography sx={theme => ({ fontSize: "11px", fontWeight: 600, color: theme.palette.onPrimary })}>
-            {labels.urgentTask}
-          </Typography>
-        </Box>
+        <StyledUrgentTaskBadge sx={{ mb: 2 }}>
+          <StyledUrgentTaskIcon />
+          <StyledUrgentTaskText>{labels.urgentTask}</StyledUrgentTaskText>
+        </StyledUrgentTaskBadge>
 
-        <Typography
-          sx={theme => ({
-            fontFamily: '"Hanken Grotesk", sans-serif',
-            fontSize: "24px",
-            fontWeight: 700,
-            color: theme.palette.onPrimary,
-            lineHeight: 1.2,
-            mb: 1,
-          })}
-        >
+        <StyledCtaHeadline sx={{ mb: 1 }}>
           {labels.accountsLocked.replace("{count}", String(suspendedCount))}
-        </Typography>
+        </StyledCtaHeadline>
 
-        <Typography sx={theme => ({ fontSize: "14px", color: theme.palette.onPrimary, opacity: 0.8, mb: 3 })}>
-          {labels.auditDescription}
-        </Typography>
+        <StyledCtaDescription sx={{ mb: 3 }}>{labels.auditDescription}</StyledCtaDescription>
       </Box>
 
-      <Button
+      <StyledOpenAuditLogsButton
         id="open-audit-logs-btn"
         variant="contained"
         startIcon={<OpenInNewOutlined sx={{ fontSize: 18 }} />}
-        sx={theme => ({
-          position: "relative",
-          zIndex: 1,
-          bgcolor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-          fontFamily: '"Inter", sans-serif',
-          fontWeight: 700,
-          fontSize: "13px",
-          letterSpacing: "0.04em",
-          alignSelf: "flex-start",
-          px: 3,
-          py: 1.25,
-          borderRadius: 2,
-          "&:hover": {
-            bgcolor: theme.palette.primary.light,
-          },
-        })}
       >
         {labels.openAuditLogs}
-      </Button>
-    </Box>
+      </StyledOpenAuditLogsButton>
+    </StyledCtaContainer>
   );
 };
 

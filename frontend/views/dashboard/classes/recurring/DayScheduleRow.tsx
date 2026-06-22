@@ -63,6 +63,21 @@ const StyledDayLabelTypography = styled(Typography, {
   color: isActiveOverride ? theme.palette.sidebar : theme.palette.primary.main,
 }));
 
+// Sidebar-tinted outlined time-picker text field used when a day has an active override
+const overrideTimePickerTextFieldSx = (theme: { palette: { sidebar: string } }) => ({
+  width: 150,
+  "& .MuiOutlinedInput-root": {
+    borderColor: theme.palette.sidebar,
+    borderWidth: 2,
+  },
+});
+
+// Bold sidebar-colored input typography for the override time picker value
+const overrideTimePickerInputSx = (theme: { palette: { sidebar: string } }) => ({
+  fontWeight: 700,
+  color: theme.palette.sidebar,
+});
+
 interface DayScheduleRowProps {
   readonly day: DayScheduleConfig;
   readonly dayLabel: string;
@@ -127,19 +142,10 @@ export function DayScheduleRow({
             slotProps={{
               textField: {
                 size: "small",
-                sx: theme => ({
-                  width: 150,
-                  "& .MuiOutlinedInput-root": {
-                    borderColor: theme.palette.sidebar,
-                    borderWidth: 2,
-                  },
-                }),
+                sx: overrideTimePickerTextFieldSx,
                 slotProps: {
                   input: {
-                    sx: theme => ({
-                      fontWeight: 700,
-                      color: theme.palette.sidebar,
-                    }),
+                    sx: overrideTimePickerInputSx,
                   },
                 },
               },

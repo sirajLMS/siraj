@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Chip, Grid, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
 import type { ClassAuditData } from "@/frontend/stores/mockClassAuditStore";
 import { AdminNoteCard } from "./AdminNoteCard";
@@ -75,6 +76,35 @@ interface ClassAuditViewProps {
   readonly onEditAdminNote: () => void;
 }
 
+// Primary-colored mobile class title using the Hanken Grotesk display font
+const StyledMobileClassTitle = styled(Typography)(({ theme }) => ({
+  fontFamily: '"Hanken Grotesk", sans-serif',
+  fontSize: "24px",
+  fontWeight: 600,
+  color: theme.palette.primary.main,
+  lineHeight: 1.2,
+}));
+
+// Uppercase status chip with primaryContainer background shown in the mobile header
+const StyledMobileStatusChip = styled(Chip)(({ theme }) => ({
+  bgcolor: theme.palette.primaryContainer,
+  color: theme.palette.onPrimaryContainer,
+  fontFamily: '"Inter", sans-serif',
+  fontSize: "11px",
+  fontWeight: 700,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+}));
+
+// Generate-report FilterButton with paper bg that darkens on hover
+const StyledGenerateReportButton = styled(FilterButton)(({ theme }) => ({
+  bgcolor: theme.palette.background.paper,
+  "&:hover": {
+    bgcolor: theme.palette.action.selected,
+    borderColor: theme.palette.primary.dark,
+  },
+}));
+
 export function ClassAuditView({
   audit,
   labels,
@@ -106,31 +136,8 @@ export function ClassAuditView({
     <PageContainer>
       {isMobile ? (
         <Box sx={{ mb: 3 }}>
-          <Typography
-            sx={theme => ({
-              fontFamily: '"Hanken Grotesk", sans-serif',
-              fontSize: "24px",
-              fontWeight: 600,
-              color: theme.palette.primary.main,
-              lineHeight: 1.2,
-              mb: 1,
-            })}
-          >
-            {audit.className}
-          </Typography>
-          <Chip
-            label={labels.statusRescheduled}
-            size="small"
-            sx={theme => ({
-              bgcolor: theme.palette.primaryContainer,
-              color: theme.palette.onPrimaryContainer,
-              fontFamily: '"Inter", sans-serif',
-              fontSize: "11px",
-              fontWeight: 700,
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-            })}
-          />
+          <StyledMobileClassTitle sx={{ mb: 1 }}>{audit.className}</StyledMobileClassTitle>
+          <StyledMobileStatusChip label={labels.statusRescheduled} size="small" />
         </Box>
       ) : (
         <PageHeader
@@ -142,16 +149,9 @@ export function ClassAuditView({
           ]}
           actions={
             <>
-              <FilterButton
-                id="audit-generate-report-btn"
-                onClick={onGenerateReport}
-                sx={theme => ({
-                  bgcolor: theme.palette.background.paper,
-                  "&:hover": { bgcolor: theme.palette.action.selected, borderColor: theme.palette.primary.dark },
-                })}
-              >
+              <StyledGenerateReportButton id="audit-generate-report-btn" onClick={onGenerateReport}>
                 {labels.generateReport}
-              </FilterButton>
+              </StyledGenerateReportButton>
               <PrimaryPageAction id="audit-edit-class-btn" onClick={onEditClass}>
                 {labels.editClass}
               </PrimaryPageAction>

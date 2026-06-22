@@ -2,6 +2,7 @@
 
 import { AdminPanelSettingsOutlined, StickyNote2Outlined } from "@mui/icons-material";
 import { alpha, Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
 import type { AdminNote } from "@/frontend/stores/mockClassAuditStore";
 
@@ -24,6 +25,47 @@ interface NoteHeaderProps {
   readonly titleMobile: string;
 }
 
+interface NoteFooterMobileProps {
+  readonly updateLabel: string;
+  readonly editLabel: string;
+  readonly onUpdate: () => void;
+  readonly onEdit: () => void;
+}
+
+interface NoteFooterDesktopProps {
+  readonly lastUpdatedText: string;
+  readonly updateLabel: string;
+  readonly onUpdate: () => void;
+}
+
+// Outlined mobile edit button with onSidebar tint and outlineVariant border
+const StyledMobileEditButton = styled(Button)(({ theme }) => ({
+  color: theme.palette.onSidebar,
+  borderColor: theme.palette.outlineVariant,
+  typography: "labelUppercase",
+  "&:hover": {
+    bgcolor: alpha(theme.palette.onSidebar, 0.1),
+    borderColor: theme.palette.onSidebar,
+  },
+}));
+
+// Contained mobile update button using header background and onPrimary text
+const StyledMobileUpdateButton = styled(Button)(({ theme }) => ({
+  bgcolor: theme.palette.header,
+  color: theme.palette.onPrimary,
+  typography: "labelUppercase",
+  boxShadow: theme.palette.shadow.button,
+}));
+
+// Desktop footer strip with outlineVariant top border separating the note body from actions
+const StyledDesktopFooter = styled(Box)(({ theme }) => ({
+  pt: 2,
+  borderTop: `1px solid ${theme.palette.outlineVariant}`,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+}));
+
 function NoteHeader({ isMobile, title, titleMobile }: NoteHeaderProps) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: isMobile ? 2 : 1.5 }}>
@@ -33,63 +75,22 @@ function NoteHeader({ isMobile, title, titleMobile }: NoteHeaderProps) {
   );
 }
 
-interface NoteFooterMobileProps {
-  readonly updateLabel: string;
-  readonly editLabel: string;
-  readonly onUpdate: () => void;
-  readonly onEdit: () => void;
-}
-
 function NoteFooterMobile({ updateLabel, editLabel, onUpdate, onEdit }: NoteFooterMobileProps) {
   return (
     <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-      <Button
-        id="admin-note-edit-mobile"
-        variant="outlined"
-        onClick={onEdit}
-        sx={theme => ({
-          color: theme.palette.onSidebar,
-          borderColor: theme.palette.outlineVariant,
-          typography: "labelUppercase",
-          "&:hover": { bgcolor: alpha(theme.palette.onSidebar, 0.1), borderColor: theme.palette.onSidebar },
-        })}
-      >
+      <StyledMobileEditButton id="admin-note-edit-mobile" variant="outlined" onClick={onEdit}>
         {editLabel}
-      </Button>
-      <Button
-        id="admin-note-update-mobile"
-        variant="contained"
-        onClick={onUpdate}
-        sx={theme => ({
-          bgcolor: theme.palette.header,
-          color: theme.palette.onPrimary,
-          typography: "labelUppercase",
-          boxShadow: theme.palette.shadow.button,
-        })}
-      >
+      </StyledMobileEditButton>
+      <StyledMobileUpdateButton id="admin-note-update-mobile" variant="contained" onClick={onUpdate}>
         {updateLabel}
-      </Button>
+      </StyledMobileUpdateButton>
     </Box>
   );
 }
 
-interface NoteFooterDesktopProps {
-  readonly lastUpdatedText: string;
-  readonly updateLabel: string;
-  readonly onUpdate: () => void;
-}
-
 function NoteFooterDesktop({ lastUpdatedText, updateLabel, onUpdate }: NoteFooterDesktopProps) {
   return (
-    <Box
-      sx={theme => ({
-        pt: 2,
-        borderTop: `1px solid ${theme.palette.outlineVariant}`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-      })}
-    >
+    <StyledDesktopFooter>
       <Typography variant="labelUppercase" sx={{ opacity: 0.6 }}>
         {lastUpdatedText}
       </Typography>
@@ -108,7 +109,7 @@ function NoteFooterDesktop({ lastUpdatedText, updateLabel, onUpdate }: NoteFoote
       >
         {updateLabel}
       </Typography>
-    </Box>
+    </StyledDesktopFooter>
   );
 }
 

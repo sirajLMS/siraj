@@ -2,12 +2,18 @@
 
 import { ScheduleOutlined } from "@mui/icons-material";
 import { InputAdornment, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { format, isValid, parse } from "date-fns";
 import { type Control, Controller } from "react-hook-form";
 import { AppTimePicker, labelSx, timeInputOutlinedSx, timeInputStandardSx } from "@/frontend/components/ui/form";
 import type { RecurringClassFormData } from "./recurringClassSchema";
 
 const TIME_FORMAT = "HH:mm";
+
+// Primary-colored schedule icon used as the leading adornment of the time input
+const StyledScheduleLeadingIcon = styled(ScheduleOutlined)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
 
 function parseTimeValue(timeStr: string): Date | null {
   if (!timeStr) return null;
@@ -50,7 +56,7 @@ export function TimeInput({ label, control, isSubmitting, isMobile, error }: Tim
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
-                        <ScheduleOutlined sx={theme => ({ color: theme.palette.primary.main })} />
+                        <StyledScheduleLeadingIcon />
                       </InputAdornment>
                     ),
                   },

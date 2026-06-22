@@ -2,13 +2,20 @@
 
 import { BlockOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { Avatar, Box, type Theme, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { StatusSessionRow } from "@/frontend/stores/mockStatusTrackingStore";
 import { StatusAction } from "./StatusBadgeAction";
+
+// Muted secondary-colored class-name caption displayed beneath the student name in each row
+const StyledClassNameText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  whiteSpace: "normal",
+  wordBreak: "break-word",
+}));
 
 interface StatusTrackingDataGridLabels {
   readonly studentClass: string;
@@ -135,16 +142,7 @@ export function StatusTrackingDataGrid({
                 <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
                   {row.studentName}
                 </Typography>
-                <Typography
-                  variant="labelMd"
-                  sx={theme => ({
-                    color: theme.palette.text.secondary,
-                    whiteSpace: "normal",
-                    wordBreak: "break-word",
-                  })}
-                >
-                  {row.className}
-                </Typography>
+                <StyledClassNameText variant="labelMd">{row.className}</StyledClassNameText>
               </Box>
             </Box>
           );

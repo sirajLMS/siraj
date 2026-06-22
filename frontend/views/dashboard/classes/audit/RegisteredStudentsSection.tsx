@@ -2,6 +2,7 @@
 
 import { FileDownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Avatar, Box, IconButton, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ExportButton, SectionPanel, StatusBadge } from "@/frontend/components/ui";
@@ -26,6 +27,16 @@ interface RegisteredStudentsSectionProps {
   readonly onExport: () => void;
   readonly onViewStudent: (id: string) => void;
 }
+
+// Muted onSurfaceVariant text used for the student ID number cell
+const StyledStudentIdText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onSurfaceVariant,
+}));
+
+// Primary-colored icon button used as the row view action
+const StyledViewActionButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
 
 function getAttendanceChipProps(
   status: AttendanceStatus,
@@ -85,11 +96,7 @@ export function RegisteredStudentsSection({
         headerName: labels.idNumber,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {row.studentId}
-          </Typography>
-        ),
+        renderCell: ({ row }) => <StyledStudentIdText variant="bodyMd">{row.studentId}</StyledStudentIdText>,
       },
       {
         field: "attendanceStatus",
@@ -109,16 +116,15 @@ export function RegisteredStudentsSection({
         align: "right",
         headerAlign: "center",
         renderCell: ({ row }) => (
-          <IconButton
+          <StyledViewActionButton
             size="small"
             onClick={() => {
               onViewStudent(row.id);
             }}
-            sx={theme => ({ color: theme.palette.primary.main })}
             aria-label={`View ${row.name}`}
           >
             <VisibilityOutlined fontSize="small" />
-          </IconButton>
+          </StyledViewActionButton>
         ),
       },
     ],

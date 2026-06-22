@@ -7,6 +7,7 @@ import HelpOutlinedIcon from "@mui/icons-material/HelpOutlined";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 import { alpha, Box, Grid, Stack, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { BaseCard } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -55,6 +56,44 @@ interface ActionsPanelProps {
   };
 }
 
+// Header-colored strip at the top of the actions card
+const StyledActionsHeader = styled(Box)(({ theme }) => ({
+  bgcolor: theme.palette.header,
+  paddingBlock: theme.spacing(2),
+  paddingInline: theme.spacing(3),
+}));
+
+// OnHeader flex-row title that leads with a bolt icon
+const StyledActionsTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onHeader,
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+}));
+
+// Default-background rounded help block beneath the action grid
+const StyledHelpContainer = styled(Stack)(({ theme }) => ({
+  gap: theme.spacing(1.5),
+  padding: theme.spacing(2),
+  bgcolor: theme.palette.background.default,
+  borderRadius: 1.5,
+  alignItems: "flex-start",
+}));
+
+// Muted onSurfaceVariant text/icon color used for the contextual help area
+const StyledHelpText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onSurfaceVariant,
+  lineHeight: 1.6,
+}));
+
+// Muted onSurfaceVariant icon used as the contextual help indicator
+const StyledHelpIcon = styled(HelpOutlinedIcon)(({ theme }) => ({
+  color: theme.palette.onSurfaceVariant,
+  fontSize: 20,
+  marginTop: theme.spacing(0.25),
+  flexShrink: 0,
+}));
+
 export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels }: ActionsPanelProps) {
   const handlers: Record<string, () => void> = {
     activate: onActivate,
@@ -73,20 +112,12 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
   return (
     <BaseCard sx={{ p: 0, overflow: "hidden" }}>
       {/* Action header */}
-      <Box sx={theme => ({ bgcolor: theme.palette.header, py: 2, px: 3 })}>
-        <Typography
-          variant="titleLg"
-          sx={theme => ({
-            color: theme.palette.onHeader,
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-          })}
-        >
+      <StyledActionsHeader>
+        <StyledActionsTitle variant="titleLg">
           <BoltIcon />
           {labels.actions}
-        </Typography>
-      </Box>
+        </StyledActionsTitle>
+      </StyledActionsHeader>
 
       <Box sx={{ p: 3 }}>
         {/* 2×2 action button grid */}
@@ -152,24 +183,10 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
         </Grid>
 
         {/* Contextual help */}
-        <Stack
-          direction="row"
-          sx={theme => ({
-            gap: 1.5,
-            mt: 2.5,
-            p: 2,
-            bgcolor: theme.palette.background.default,
-            borderRadius: 1.5,
-            alignItems: "flex-start",
-          })}
-        >
-          <HelpOutlinedIcon
-            sx={theme => ({ color: theme.palette.onSurfaceVariant, fontSize: 20, mt: 0.25, flexShrink: 0 })}
-          />
-          <Typography variant="caption" sx={theme => ({ color: theme.palette.onSurfaceVariant, lineHeight: 1.6 })}>
-            {labels.contextualHelp}
-          </Typography>
-        </Stack>
+        <StyledHelpContainer direction="row" sx={{ mt: 2.5 }}>
+          <StyledHelpIcon />
+          <StyledHelpText variant="caption">{labels.contextualHelp}</StyledHelpText>
+        </StyledHelpContainer>
       </Box>
     </BaseCard>
   );

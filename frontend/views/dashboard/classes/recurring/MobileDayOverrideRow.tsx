@@ -73,6 +73,9 @@ const StyledScheduleIcon = styled(ScheduleOutlined)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
 }));
 
+// Title-sized typography used as the mobile override time picker input
+const mobileOverrideInputSx = { typography: "titleLg" as const };
+
 interface MobileDayOverrideRowProps {
   readonly day: DayScheduleConfig;
   readonly dayLabel: string;
@@ -131,7 +134,7 @@ export function MobileDayOverrideRow({
                 slotProps: {
                   input: {
                     disableUnderline: true,
-                    sx: theme => ({ typography: theme.typography.titleLg }),
+                    sx: mobileOverrideInputSx,
                   },
                 },
               },

@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Divider, Stack, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useEffect, useRef, useState } from "react";
 import { BaseCard } from "@/frontend/components/ui";
 
@@ -17,6 +18,49 @@ interface Bar {
   id: string;
   height: number;
 }
+
+// Paper-background header strip with a light bottom border above the bars
+const StyledHeatmapHeader = styled(Stack)(({ theme }) => ({
+  justifyContent: "space-between",
+  alignItems: "center",
+  paddingInline: theme.spacing(3),
+  paddingBlock: theme.spacing(2.5),
+  borderBottom: 1,
+  borderColor: theme.palette.border.light,
+  bgcolor: theme.palette.background.paper,
+}));
+
+// Primary-colored section title used in the heatmap header
+const StyledSectionTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+// Primary-colored square swatch used as the "student input" legend indicator
+const StyledStudentInputSwatch = styled(Box)(({ theme }) => ({
+  width: 12,
+  height: 12,
+  bgcolor: theme.palette.primary.main,
+  borderRadius: 0.5,
+}));
+
+// Secondary-colored square swatch used as the "teacher response" legend indicator
+const StyledTeacherResponseSwatch = styled(Box)(({ theme }) => ({
+  width: 12,
+  height: 12,
+  bgcolor: theme.palette.secondary.main,
+  borderRadius: 0.5,
+}));
+
+// Muted onSurfaceVariant caption used for legend labels
+const StyledLegendCaption = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onSurfaceVariant,
+}));
+
+// Faint outlineVariant grid line drawn across the bars area
+const StyledGridDivider = styled(Divider)(({ theme }) => ({
+  borderColor: theme.palette.outlineVariant,
+  opacity: 0.4,
+}));
 
 export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
   const [bars, setBars] = useState<Bar[]>(() => data.map((h, i) => ({ id: `bar-${i}`, height: h })));
@@ -42,50 +86,19 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
 
   return (
     <BaseCard sx={{ p: 0, overflow: "hidden", mt: 3 }}>
-      <Stack
-        direction="row"
-        sx={theme => ({
-          justifyContent: "space-between",
-          alignItems: "center",
-          px: 3,
-          py: 2.5,
-          borderBottom: 1,
-          borderColor: theme.palette.border.light,
-          bgcolor: theme.palette.background.paper,
-        })}
-      >
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-          {labels.activityHeatmap}
-        </Typography>
+      <StyledHeatmapHeader direction="row">
+        <StyledSectionTitle variant="titleLg">{labels.activityHeatmap}</StyledSectionTitle>
         <Stack direction="row" sx={{ gap: 3 }}>
           <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-            <Box
-              sx={theme => ({
-                width: 12,
-                height: 12,
-                bgcolor: theme.palette.primary.main,
-                borderRadius: 0.5,
-              })}
-            />
-            <Typography variant="caption" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {labels.studentInput}
-            </Typography>
+            <StyledStudentInputSwatch />
+            <StyledLegendCaption variant="caption">{labels.studentInput}</StyledLegendCaption>
           </Stack>
           <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-            <Box
-              sx={theme => ({
-                width: 12,
-                height: 12,
-                bgcolor: theme.palette.secondary.main,
-                borderRadius: 0.5,
-              })}
-            />
-            <Typography variant="caption" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {labels.teacherResponse}
-            </Typography>
+            <StyledTeacherResponseSwatch />
+            <StyledLegendCaption variant="caption">{labels.teacherResponse}</StyledLegendCaption>
           </Stack>
         </Stack>
-      </Stack>
+      </StyledHeatmapHeader>
 
       <Box sx={{ px: 4, pb: 4, pt: 2, height: 300, position: "relative" }}>
         {/* Grid lines */}
@@ -100,7 +113,7 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
           }}
         >
           {[0, 1, 2].map(i => (
-            <Divider key={i} sx={theme => ({ borderColor: theme.palette.outlineVariant, opacity: 0.4 })} />
+            <StyledGridDivider key={i} />
           ))}
         </Box>
 
