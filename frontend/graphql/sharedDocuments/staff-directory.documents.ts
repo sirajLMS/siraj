@@ -43,3 +43,22 @@ export const managerDirectoryQueryDocument: TypedDocumentNode<Operations.Manager
     }
   }
 `;
+
+export const updateManagerProfileMutationDocument: TypedDocumentNode<
+  Operations.UpdateManagerProfileMutation,
+  Types.MutationUpdateManagerProfileArgs
+> = gql`
+  mutation updateManagerProfile($staffProfileId: ID!, $input: UpdateManagerProfileInput!) {
+    updateManagerProfile(staffProfileId: $staffProfileId, input: $input) {
+      id
+      staffProfileId
+      name
+      email
+      phone
+      skypeId
+      status
+      roleSlug
+      roleName
+    }
+  }
+`;

@@ -1,5 +1,10 @@
 import { db } from "@/backend/db/drizzleDb";
-import { permissionGroups as permissionGroupsSchema, userPermissionGroups, users } from "@/backend/db/schema";
+import {
+  permissionGroups as permissionGroupsSchema,
+  staffProfiles,
+  userPermissionGroups,
+  users,
+} from "@/backend/db/schema";
 import { hashPassword } from "@/backend/lib/auth/password";
 import logger from "@/backend/lib/logger";
 import type { PermissionGroupEntity } from "@/backend/types/auth.types";
@@ -38,6 +43,18 @@ async function seedUser(u: (typeof INTERNAL_DEMO_USERS)[0], groupMap: Map<string
         assignedAt: now,
       })
       .onConflictDoNothing();
+
+    if (["super_admin", "academy_admin", "staff_default"].includes(u.groupSlug)) {
+      await db
+        .insert(staffProfiles)
+        .values({
+          userId: insertedUser.id,
+          status: "ACTIVATED",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoNothing();
+    }
   }
 
   return insertedUser;

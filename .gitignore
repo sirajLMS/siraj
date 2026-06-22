@@ -87,3 +87,5 @@ storybook-static
 # Stakpak session files
 .stakpak/session*
 .stakpak
+
+storage

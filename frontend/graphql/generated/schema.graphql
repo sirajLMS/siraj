@@ -851,6 +851,9 @@ type Mutation {
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
   stopClass(classInstanceId: ID!): ClassInstanceDetail
   updateDirectoryPermissions(input: DirectoryPermissionsUpdateInput!): FileOperationResult
+
+  """Updates a manager's profile fields."""
+  updateManagerProfile(input: UpdateManagerProfileInput!, staffProfileId: ID!): ManagerDirectoryRow
   updatePermissionGroup(input: UpdatePermissionGroupInput!): PermissionGroup
   updateSessionStatusAbsent(classInstanceId: ID!): ClassInstanceDetail
   updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
@@ -1546,6 +1549,11 @@ type UnpaidInvoicesSummary {
   items: [UnpaidInvoiceItem!]
   totalOverdueAmount: String
   totalOverdueInvoices: Int
+}
+
+input UpdateManagerProfileInput {
+  phone: String
+  skypeId: String
 }
 
 input UpdatePermissionGroupInput {

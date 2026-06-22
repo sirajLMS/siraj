@@ -1037,6 +1037,7 @@ WHERE
         'student.reassign_teacher',
         'student.manage_status',
         'students.list',
+        'resources.list',
         'resources.upload'
     );
 

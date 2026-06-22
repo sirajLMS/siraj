@@ -890,6 +890,8 @@ export type Mutation = {
   setStorageItemProtection: Maybe<FileOperationResult>;
   stopClass: Maybe<ClassInstanceDetail>;
   updateDirectoryPermissions: Maybe<FileOperationResult>;
+  /** Updates a manager's profile fields. */
+  updateManagerProfile: Maybe<ManagerDirectoryRow>;
   updatePermissionGroup: Maybe<PermissionGroup>;
   updateSessionStatusAbsent: Maybe<ClassInstanceDetail>;
   updateSessionStatusLeave: Maybe<LeaveProcessResult>;
@@ -1124,6 +1126,12 @@ export type MutationStopClassArgs = {
 
 export type MutationUpdateDirectoryPermissionsArgs = {
   input: DirectoryPermissionsUpdateInput;
+};
+
+
+export type MutationUpdateManagerProfileArgs = {
+  input: UpdateManagerProfileInput;
+  staffProfileId: Scalars['ID']['input'];
 };
 
 
@@ -2076,6 +2084,11 @@ export type UnpaidInvoicesSummary = {
   items: Maybe<Array<UnpaidInvoiceItem>>;
   totalOverdueAmount: Maybe<Scalars['String']['output']>;
   totalOverdueInvoices: Maybe<Scalars['Int']['output']>;
+};
+
+export type UpdateManagerProfileInput = {
+  phone: InputMaybe<Scalars['String']['input']>;
+  skypeId: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdatePermissionGroupInput = {

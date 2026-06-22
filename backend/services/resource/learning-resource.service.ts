@@ -43,6 +43,11 @@ export namespace LearningResourceService {
   ): Promise<LearningResourceRow> {
     const t = await getBackendTranslations({ locale, namespace: "errors" });
 
+    // Step 0: Validate input
+    if (!input.displayName || input.displayName.trim() === "") {
+      throw new Error(t("invalidInput"));
+    }
+
     // Step 1: Verify upload permission
     const hasUploadPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_UPLOAD);
     if (!hasUploadPermission) {

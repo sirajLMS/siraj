@@ -108,3 +108,37 @@ gqlSchemaBuilder.queryField("managerDirectory", t =>
     description: "Lists all staff members with administrative access.",
   })
 );
+
+// ─── Mutations ────────────────────────────────────────────────────────────────
+
+export interface UpdateManagerProfileInputDefinition {
+  phone?: string | null;
+  skypeId?: string | null;
+}
+
+export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
+  .inputRef<UpdateManagerProfileInputDefinition>("UpdateManagerProfileInput")
+  .implement({
+    fields: t => ({
+      phone: t.string({ required: false }),
+      skypeId: t.string({ required: false }),
+    }),
+  });
+
+gqlSchemaBuilder.mutationField("updateManagerProfile", t =>
+  t.field({
+    type: ManagerDirectoryRowPothosObject,
+    args: {
+      staffProfileId: t.arg.id({ required: true }),
+      input: t.arg({ type: UpdateManagerProfileInputPothosObject, required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const { ManagerProfileService } = await import("@/backend/services/staff/manager-profile.service");
+      const locale = ctx.locale || "en";
+      const actorUserId = ctx.user?.id || "";
+
+      return await ManagerProfileService.updateManagerProfile(actorUserId, args.staffProfileId, args.input, locale);
+    },
+    description: "Updates a manager's profile fields.",
+  })
+);

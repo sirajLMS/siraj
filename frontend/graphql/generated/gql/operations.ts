@@ -278,12 +278,28 @@ export type TeacherProfileUpdateInput = {
   zoomUsername: string | null | undefined;
 };
 
+export type UpdateManagerProfileInput = {
+  phone: string | null | undefined;
+  skypeId: string | null | undefined;
+};
+
 export type UpdatePermissionGroupInput = {
   description: string | null | undefined;
   groupId: string;
   name: string | null | undefined;
   permissionIds: Array<string> | null | undefined;
 };
+
+export type UploadPreparationInput = {
+  contentHash: string;
+  contentType: string;
+  fileSize: number;
+  path: string;
+};
+
+export type UploadType =
+  | 'SIGNED_URL'
+  | 'VERCEL_BLOB_CLIENT';
 
 export type UserOverrideInput = {
   permissionId: string;
@@ -621,6 +637,18 @@ export type UploadLearningResourceMutationVariables = Exact<{
 
 
 export type UploadLearningResourceMutation = UploadLearningResourceMutation_Mutation;
+
+export type PrepareUploadMutation_prepareUpload_UploadPreparation = { id: string, url: string, uploadType: Types.UploadType };
+
+export type PrepareUploadMutation_Mutation = { prepareUpload: PrepareUploadMutation_prepareUpload_UploadPreparation | null };
+
+
+export type PrepareUploadMutationVariables = Exact<{
+  input: Types.UploadPreparationInput;
+}>;
+
+
+export type PrepareUploadMutation = PrepareUploadMutation_Mutation;
 
 export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert = { id: string | null, type: string | null, title: string | null, body: string | null, createdAt: string | null, severity: string | null };
 
@@ -1025,6 +1053,19 @@ export type ManagerDirectoryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type ManagerDirectoryQuery = ManagerDirectoryQuery_Query;
+
+export type UpdateManagerProfileMutation_updateManagerProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, skypeId: string | null, status: string | null, roleSlug: string | null, roleName: string | null };
+
+export type UpdateManagerProfileMutation_Mutation = { updateManagerProfile: UpdateManagerProfileMutation_updateManagerProfile_ManagerDirectoryRow | null };
+
+
+export type UpdateManagerProfileMutationVariables = Exact<{
+  staffProfileId: string | number;
+  input: Types.UpdateManagerProfileInput;
+}>;
+
+
+export type UpdateManagerProfileMutation = UpdateManagerProfileMutation_Mutation;
 
 export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: string | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: string | null };
 

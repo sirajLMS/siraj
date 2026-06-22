@@ -38,3 +38,16 @@ export const uploadLearningResourceMutationDocument: TypedDocumentNode<
     }
   }
 `;
+
+export const prepareUploadMutationDocument: TypedDocumentNode<
+  Operations.PrepareUploadMutation,
+  Types.MutationPrepareUploadArgs
+> = gql`
+  mutation prepareUpload($input: UploadPreparationInput!) {
+    prepareUpload(input: $input) {
+      id
+      url
+      uploadType
+    }
+  }
+`;
