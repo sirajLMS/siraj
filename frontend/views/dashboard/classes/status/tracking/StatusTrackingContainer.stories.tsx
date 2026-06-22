@@ -1,9 +1,270 @@
+import {
+  BlockOutlined,
+  CheckCircleOutlineOutlined,
+  EventAvailableOutlined,
+  PendingActionsOutlined,
+} from "@mui/icons-material";
 import type { Meta, StoryObj } from "@storybook/react";
-import { StatusTrackingContainer } from "./StatusTrackingContainer";
+import { useTranslations } from "next-intl";
+import { create } from "zustand";
+import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useRescheduleStore } from "@/frontend/stores/mockRescheduleStore";
+import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import { useRouter } from "@/shared/i18n/routing";
+import { StatusTrackingView } from "./StatusTrackingView";
+import type { StatusTrackingRow } from "./types";
 
-const meta: Meta<typeof StatusTrackingContainer> = {
+// ─── Mock Store (story-only) ─────────────────────────────────────────────────
+
+interface StoryStatusTrackingState {
+  readonly metrics: readonly MetricItem[];
+  readonly rows: readonly StatusTrackingRow[];
+  readonly totalSessions: number;
+  activateSession: (id: string) => void;
+  verifySession: (id: string) => void;
+}
+
+const STORY_METRICS: MetricItem[] = [
+  {
+    key: "regular",
+    count: 1248,
+    labelKey: "dashboard.statusTracking.metrics.regular",
+    icon: CheckCircleOutlineOutlined,
+  },
+  { key: "pending", count: 84, labelKey: "dashboard.statusTracking.metrics.pending", icon: PendingActionsOutlined },
+  {
+    key: "suspended",
+    count: 32,
+    labelKey: "dashboard.statusTracking.metrics.suspended",
+    icon: BlockOutlined,
+    variant: "error",
+  },
+  { key: "on_leave", count: 15, labelKey: "dashboard.statusTracking.metrics.onLeave", icon: EventAvailableOutlined },
+];
+
+const STORY_ROWS: StatusTrackingRow[] = [
+  {
+    __typename: "StatusTrackingScheduleRow",
+    id: "s1",
+    studentId: "st1",
+    studentName: "Zaid Al-Harbi",
+    studentInitials: "ZA",
+    studentStatus: StudentStatus.Regular,
+    teacherId: "t1",
+    teacherName: "Sheikh Omar Farouk",
+    scheduledStartAt: "2026-06-22T10:30:00Z",
+    scheduledEndAt: "2026-06-22T11:30:00Z",
+    durationMinutes: 60,
+    executionState: "ACTIVATED",
+    outcome: "PENDING",
+    isFrozen: false,
+  },
+  {
+    __typename: "StatusTrackingScheduleRow",
+    id: "s2",
+    studentId: "st2",
+    studentName: "Maryam Khan",
+    studentInitials: "MK",
+    studentStatus: StudentStatus.Suspended,
+    teacherId: "t2",
+    teacherName: "Ustaza Fatima Ali",
+    scheduledStartAt: "2026-06-22T11:00:00Z",
+    scheduledEndAt: "2026-06-22T12:00:00Z",
+    durationMinutes: 60,
+    executionState: "ACTIVATED",
+    outcome: "PENDING",
+    isFrozen: true,
+  },
+  {
+    __typename: "StatusTrackingScheduleRow",
+    id: "s3",
+    studentId: "st3",
+    studentName: "Sami Yusuf",
+    studentInitials: "SY",
+    studentStatus: StudentStatus.OnLeave,
+    teacherId: "t3",
+    teacherName: "Hafiz Abdul Rahman",
+    scheduledStartAt: "2026-06-22T11:45:00Z",
+    scheduledEndAt: "2026-06-22T13:00:00Z",
+    durationMinutes: 75,
+    executionState: "ACTIVATED",
+    outcome: "PENDING",
+    isFrozen: false,
+  },
+  {
+    __typename: "StatusTrackingScheduleRow",
+    id: "s4",
+    studentId: "st4",
+    studentName: "Omar Saeed",
+    studentInitials: "OS",
+    studentStatus: StudentStatus.Regular,
+    teacherId: "t4",
+    teacherName: "Dr. Ibrahim Khalil",
+    scheduledStartAt: "2026-06-22T14:00:00Z",
+    scheduledEndAt: "2026-06-22T15:00:00Z",
+    durationMinutes: 60,
+    executionState: "ACTIVATED",
+    outcome: "PENDING",
+    isFrozen: true,
+  },
+  {
+    __typename: "StatusTrackingScheduleRow",
+    id: "s5",
+    studentId: "st5",
+    studentName: "Noor Ahmed",
+    studentInitials: "NA",
+    studentStatus: StudentStatus.Regular,
+    teacherId: "t5",
+    teacherName: "Ustaza Sara Mansour",
+    scheduledStartAt: "2026-06-22T15:30:00Z",
+    scheduledEndAt: "2026-06-22T16:30:00Z",
+    durationMinutes: 60,
+    executionState: "NOT_ACTIVATED",
+    outcome: "PENDING",
+    isFrozen: false,
+  },
+];
+
+const useStoryStatusTrackingStore = create<StoryStatusTrackingState>(set => ({
+  metrics: STORY_METRICS,
+  rows: STORY_ROWS,
+  totalSessions: 142,
+
+  activateSession: (id: string) => {
+    set(state => ({
+      rows: state.rows.map(row =>
+        row.id === id
+          ? { ...row, studentStatus: StudentStatus.Regular, isFrozen: false, executionState: "ACTIVATED" }
+          : row
+      ),
+    }));
+  },
+
+  verifySession: (id: string) => {
+    set(state => ({
+      rows: state.rows.map(row =>
+        row.id === id
+          ? { ...row, studentStatus: StudentStatus.Regular, isFrozen: false, executionState: "ACTIVATED" }
+          : row
+      ),
+    }));
+  },
+}));
+
+// ─── Story Container (mock-data version of StatusTrackingContainer) ──────────
+
+function StoryStatusTrackingContainer() {
+  const t = useTranslations("dashboard.statusTracking");
+  const router = useRouter();
+  const setRescheduleSession = useRescheduleStore(state => state.setSession);
+
+  const rawMetrics = useStoryStatusTrackingStore(state => state.metrics);
+  const rows = useStoryStatusTrackingStore(state => state.rows);
+  const totalSessions = useStoryStatusTrackingStore(state => state.totalSessions);
+  const activateSession = useStoryStatusTrackingStore(state => state.activateSession);
+  const verifySession = useStoryStatusTrackingStore(state => state.verifySession);
+
+  const suspendedCount = Number(rawMetrics.find(m => m.key === "suspended")?.count ?? 0);
+
+  const subLabelMap: Record<string, string> = {
+    regular: t("subLabels.regular"),
+    pending: t("subLabels.pending"),
+    suspended: t("subLabels.suspended"),
+    on_leave: t("subLabels.onLeave"),
+  };
+
+  const metrics: readonly MetricItem[] = rawMetrics.map(m => ({
+    ...m,
+    subLabel: subLabelMap[m.key],
+  }));
+
+  const labels = {
+    pageTitle: t("pageTitle"),
+    pageSubtitle: t("pageSubtitle"),
+    filters: t("filters"),
+    newReport: t("newReport"),
+    todaysClassSchedule: t("todaysClassSchedule"),
+    totalSessions: t.raw("totalSessions") as string,
+    studentClass: t("table.studentClass"),
+    teacher: t("table.teacher"),
+    schedule: t("table.schedule"),
+    status: t("table.status"),
+    actions: t("table.actions"),
+    showingOf: t.raw("showingOf") as string,
+    previous: t("previous"),
+    next: t("next"),
+    joinSession: t("actions.joinSession"),
+    activate: t("actions.activate"),
+    reschedule: t("actions.reschedule"),
+    verifyDocuments: t("actions.verifyDocuments"),
+    sessionLocked: t("actions.sessionLocked"),
+    administrativeHold: t("administrativeHold"),
+    holdDescription: t("holdDescription"),
+    seeAll: t("seeAll"),
+    todaysSchedule: t("todaysSchedule"),
+    regular: t("status.regular"),
+    suspendedPending: t("status.suspendedPending"),
+    onLeave: t("status.onLeave"),
+    pendingVerification: t("status.pendingVerification"),
+    regularSubLabel: t("subLabels.regular"),
+    pendingSubLabel: t("subLabels.pending"),
+    suspendedSubLabel: t("subLabels.suspended"),
+    onLeaveSubLabel: t("subLabels.onLeave"),
+    suspensionAnalytics: t("analytics.title"),
+    analyticsNote: t("analytics.note"),
+    urgentTask: t("analytics.urgentTask"),
+    accountsLocked: t.raw("analytics.accountsLocked") as string,
+    auditDescription: t("analytics.auditDescription"),
+    openAuditLogs: t("analytics.openAuditLogs"),
+    noEntries: t("noEntries"),
+    days: [
+      t("days.mon"),
+      t("days.tue"),
+      t("days.wed"),
+      t("days.thu"),
+      t("days.fri"),
+      t("days.sat"),
+      t("days.sun"),
+    ] as const,
+  };
+
+  const handleNewReport = () => {
+    // Navigate or open modal in future
+  };
+
+  const handleReschedule = (id: string) => {
+    const row = rows.find(session => session.id === id);
+    if (row) {
+      setRescheduleSession({
+        sessionId: id,
+        teacherName: row.teacherName ?? "",
+        studentName: row.studentName ?? "",
+        teacherTimezone: "Africa/Cairo",
+      });
+    }
+    router.push("/reschedule");
+  };
+
+  return (
+    <StatusTrackingView
+      metrics={metrics}
+      rows={rows}
+      totalSessions={totalSessions}
+      suspendedCount={suspendedCount}
+      labels={labels}
+      onActivate={activateSession}
+      onReschedule={handleReschedule}
+      onVerify={verifySession}
+      onNewReport={handleNewReport}
+    />
+  );
+}
+
+// ─── Storybook Meta ──────────────────────────────────────────────────────────
+
+const meta: Meta<typeof StoryStatusTrackingContainer> = {
   title: "Views/dashboard/classes/status/tracking/StatusTrackingContainer",
-  component: StatusTrackingContainer,
+  component: StoryStatusTrackingContainer,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
@@ -11,7 +272,7 @@ const meta: Meta<typeof StatusTrackingContainer> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof StatusTrackingContainer>;
+type Story = StoryObj<typeof StoryStatusTrackingContainer>;
 
 export const Default: Story = {
   args: {},

@@ -29,7 +29,10 @@ export function StatusTrackingContainer() {
     fetchPolicy: "cache-and-network",
   });
 
-  const rows: readonly StatusTrackingRow[] = useMemo(() => data?.statusTrackingSchedule ?? [], [data?.statusTrackingSchedule]);
+  const rows: readonly StatusTrackingRow[] = useMemo(
+    () => data?.statusTrackingSchedule ?? [],
+    [data?.statusTrackingSchedule]
+  );
   const totalSessions = rows.length;
 
   const suspendedCount = useMemo(
