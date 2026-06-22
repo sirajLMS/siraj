@@ -2,6 +2,11 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { InputAdornment, TextField } from "@mui/material";
+import { styled } from "@mui/material/styles";
+
+const StyledSearchField = styled(TextField)({
+  minWidth: 240,
+});
 
 interface ComplaintsSearchBarProps {
   readonly value: string;
@@ -11,7 +16,7 @@ interface ComplaintsSearchBarProps {
 
 export function ComplaintsSearchBar({ value, placeholder, onChange }: Readonly<ComplaintsSearchBarProps>) {
   return (
-    <TextField
+    <StyledSearchField
       size="small"
       value={value}
       placeholder={placeholder}
@@ -28,7 +33,6 @@ export function ComplaintsSearchBar({ value, placeholder, onChange }: Readonly<C
         },
         htmlInput: { autoComplete: "off" },
       }}
-      sx={{ minWidth: 240 }}
     />
   );
 }

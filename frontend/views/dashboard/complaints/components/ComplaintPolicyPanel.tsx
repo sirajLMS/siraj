@@ -1,7 +1,25 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
+
+const StyledPolicyPanelBox = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(4),
+  padding: theme.spacing(3),
+  borderRadius: theme.layout.radius.card,
+  backgroundColor: theme.palette.primaryContainer,
+  border: `1px solid ${theme.palette.outlineVariant}`,
+}));
+
+const StyledPolicyTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledPolicyBody = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onSurfaceVariant,
+}));
 
 interface ComplaintPolicyPanelProps {
   readonly labels: ComplaintsParentLabels;
@@ -9,21 +27,9 @@ interface ComplaintPolicyPanelProps {
 
 export function ComplaintPolicyPanel({ labels }: Readonly<ComplaintPolicyPanelProps>) {
   return (
-    <Box
-      sx={theme => ({
-        mt: 4,
-        p: 3,
-        borderRadius: theme.layout.radius.card,
-        bgcolor: theme.palette.primaryContainer,
-        border: `1px solid ${theme.palette.outlineVariant}`,
-      })}
-    >
-      <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, mb: 1 })}>
-        {labels.policyTitle}
-      </Typography>
-      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-        {labels.policyBody}
-      </Typography>
-    </Box>
+    <StyledPolicyPanelBox>
+      <StyledPolicyTitle variant="titleLg">{labels.policyTitle}</StyledPolicyTitle>
+      <StyledPolicyBody variant="bodyMd">{labels.policyBody}</StyledPolicyBody>
+    </StyledPolicyPanelBox>
   );
 }

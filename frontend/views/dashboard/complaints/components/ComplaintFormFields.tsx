@@ -2,11 +2,66 @@
 
 import { DescriptionOutlined, EmailOutlined, RateReviewOutlined } from "@mui/icons-material";
 import { Box, FormControl, InputAdornment, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import type { ParentStudentOption } from "@/frontend/stores/mockParentComplaintsStore";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import type { ComplaintFormData } from "../schemas/complaintFormSchema";
+
+/** Styled field label with uppercase text and surface-variant color */
+const StyledFieldLabel = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onSurfaceVariant,
+  textTransform: "uppercase",
+  fontWeight: 500,
+}));
+
+/** Main form layout container with responsive gap based on viewport */
+const StyledFormContainer = styled(Box, {
+  shouldForwardProp: prop => prop !== "isMobile",
+})<{ isMobile: boolean }>(({ theme, isMobile }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(isMobile ? 3 : 4),
+}));
+
+/** Form header row containing the icon and form title */
+const StyledFormHeaderBox = styled(Box, {
+  shouldForwardProp: prop => prop !== "isMobile",
+})<{ isMobile: boolean }>(({ theme, isMobile }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+  marginBottom: theme.spacing(isMobile ? 0 : 1),
+}));
+
+/** Error message displayed below a form field when validation fails */
+const StyledFieldErrorMessage = styled(Typography)(({ theme }) => ({
+  color: theme.palette.error.main,
+  marginTop: theme.spacing(0.5),
+}));
+
+/** Rate review icon in primary color for the form header */
+const StyledFormHeaderIcon = styled(RateReviewOutlined)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+/** Email icon in primary color for the contact email field */
+const StyledEmailIcon = styled(EmailOutlined)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+/** Description icon in primary color for the details field */
+const StyledDescriptionIcon = styled(DescriptionOutlined)(({ theme }) => ({
+  color: theme.palette.primary.main,
+}));
+
+/** Wrapper for each form field group (label + input + error) */
+const StyledFormFieldGroup = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(1),
+}));
 
 interface ComplaintFormFieldsProps {
   readonly control: Control<ComplaintFormData>;
@@ -17,18 +72,7 @@ interface ComplaintFormFieldsProps {
 }
 
 function FieldLabel({ children }: Readonly<{ children: string }>) {
-  return (
-    <Typography
-      variant="labelMd"
-      sx={theme => ({
-        color: theme.palette.onSurfaceVariant,
-        textTransform: "uppercase",
-        fontWeight: 500,
-      })}
-    >
-      {children}
-    </Typography>
-  );
+  return <StyledFieldLabel variant="labelMd">{children}</StyledFieldLabel>;
 }
 
 export function ComplaintFormFields({
@@ -41,13 +85,15 @@ export function ComplaintFormFields({
   const isMobile = variant === "mobile";
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: isMobile ? 3 : 4 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: isMobile ? 0 : 1 }}>
-        <RateReviewOutlined sx={theme => ({ color: theme.palette.primary.main })} />
+    <StyledFormContainer isMobile={isMobile}>
+      {/* Form header with icon and title */}
+      <StyledFormHeaderBox isMobile={isMobile}>
+        <StyledFormHeaderIcon />
         <Typography variant="titleLg">{labels.formTitle}</Typography>
-      </Box>
+      </StyledFormHeaderBox>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      {/* Student select field */}
+      <StyledFormFieldGroup>
         <FieldLabel>{labels.student}</FieldLabel>
         <Controller
           name="studentId"
@@ -72,16 +118,15 @@ export function ComplaintFormFields({
                 ))}
               </Select>
               {errors.studentId?.message ? (
-                <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main, mt: 0.5 })}>
-                  {errors.studentId.message}
-                </Typography>
+                <StyledFieldErrorMessage variant="bodyMd">{errors.studentId.message}</StyledFieldErrorMessage>
               ) : null}
             </FormControl>
           )}
         />
-      </Box>
+      </StyledFormFieldGroup>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      {/* Contact email text field */}
+      <StyledFormFieldGroup>
         <FieldLabel>{labels.contactEmail}</FieldLabel>
         <Controller
           name="contactEmail"
@@ -97,7 +142,7 @@ export function ComplaintFormFields({
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <EmailOutlined sx={theme => ({ color: theme.palette.primary.main })} />
+                      <StyledEmailIcon />
                     </InputAdornment>
                   ),
                 },
@@ -106,9 +151,10 @@ export function ComplaintFormFields({
             />
           )}
         />
-      </Box>
+      </StyledFormFieldGroup>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      {/* Complaint details multi-line text field */}
+      <StyledFormFieldGroup>
         <FieldLabel>{labels.complaintDetails}</FieldLabel>
         <Controller
           name="complaintDetails"
@@ -126,7 +172,7 @@ export function ComplaintFormFields({
                 input: {
                   startAdornment: (
                     <InputAdornment position="start" sx={{ alignSelf: "flex-start", mt: 1 }}>
-                      <DescriptionOutlined sx={theme => ({ color: theme.palette.primary.main })} />
+                      <StyledDescriptionIcon />
                     </InputAdornment>
                   ),
                 },
@@ -135,7 +181,7 @@ export function ComplaintFormFields({
             />
           )}
         />
-      </Box>
-    </Box>
+      </StyledFormFieldGroup>
+    </StyledFormContainer>
   );
 }

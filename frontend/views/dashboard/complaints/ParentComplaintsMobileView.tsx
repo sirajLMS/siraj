@@ -1,6 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
 import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/stores/mockParentComplaintsStore";
@@ -10,6 +11,21 @@ import { ComplaintFormFields } from "./components/ComplaintFormFields";
 import { ComplaintPolicyPanel } from "./components/ComplaintPolicyPanel";
 import { ComplaintRecordCardList } from "./components/ComplaintRecordCardList";
 import type { ComplaintFormData } from "./schemas/complaintFormSchema";
+
+/** Mobile success banner wrapper with padding */
+const StyledMobileSuccessBannerBox = styled(Box)(({ theme }) => ({
+  paddingLeft: theme.spacing(2),
+  paddingRight: theme.spacing(2),
+  paddingTop: theme.spacing(1),
+}));
+
+/** Mobile view content column container with spacing */
+const StyledMobileContentColumn = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(3),
+  paddingBottom: theme.spacing(4),
+}));
 
 interface ParentComplaintsMobileViewProps {
   readonly labels: ComplaintsParentLabels;
@@ -42,16 +58,19 @@ export function ParentComplaintsMobileView({
 }: Readonly<ParentComplaintsMobileViewProps>) {
   return (
     <>
+      {/* Success banner displayed at top of mobile view after form submission */}
       {showSuccess ? (
-        <Box sx={{ px: 2, pt: 1 }}>
+        <StyledMobileSuccessBannerBox>
           <SubmissionSuccessBanner message={labels.successMessage} onDismiss={onDismissSuccess} />
-        </Box>
+        </StyledMobileSuccessBannerBox>
       ) : null}
 
       <PageContainer>
         <PageHeader title={labels.pageTitle} titleVariant="headlineMd" />
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pb: 4 }}>
+        {/* Vertical stack containing form card, complaint history list, and policy panel */}
+        <StyledMobileContentColumn>
+          {/* Complaint form with student select, email, and details fields */}
           <BaseCard>
             <ComplaintFormFields
               control={control}
@@ -70,6 +89,7 @@ export function ParentComplaintsMobileView({
             </PrimaryPageAction>
           </BaseCard>
 
+          {/* List of past complaint records */}
           <ComplaintRecordCardList
             records={records}
             labels={labels}
@@ -77,8 +97,9 @@ export function ParentComplaintsMobileView({
             onLoadOlderRecords={onLoadOlderRecords}
           />
 
+          {/* Policy information panel shown below the form */}
           <ComplaintPolicyPanel labels={labels} />
-        </Box>
+        </StyledMobileContentColumn>
       </PageContainer>
     </>
   );

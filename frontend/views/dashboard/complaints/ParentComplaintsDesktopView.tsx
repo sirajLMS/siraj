@@ -42,12 +42,15 @@ export function ParentComplaintsDesktopView({
 }: Readonly<ParentComplaintsDesktopViewProps>) {
   return (
     <PageContainer>
+      {/* Success banner shown after complaint submission */}
       {showSuccess ? <SubmissionSuccessBanner message={labels.successMessage} onDismiss={onDismissSuccess} /> : null}
 
       <PageHeader title={labels.pageTitle} />
 
       <Grid container spacing={4}>
+        {/* Left column: complaint form and policy information */}
         <Grid size={{ xs: 12, lg: 5 }}>
+          {/* Complaint form card with student select, email, and details fields */}
           <BaseCard>
             <ComplaintFormFields
               control={control}
@@ -65,9 +68,11 @@ export function ParentComplaintsDesktopView({
               {labels.submit}
             </PrimaryPageAction>
           </BaseCard>
+          {/* Policy information panel shown below the form card */}
           <ComplaintPolicyPanel labels={labels} />
         </Grid>
 
+        {/* Right column: list of past complaint records */}
         <Grid size={{ xs: 12, lg: 7 }}>
           <ComplaintRecordCardList
             records={records}

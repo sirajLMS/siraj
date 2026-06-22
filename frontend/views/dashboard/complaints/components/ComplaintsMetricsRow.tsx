@@ -2,10 +2,17 @@
 
 import { CheckCircleOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type { AdminComplaintsSummary } from "@/frontend/stores/mockAdminComplaintsStore";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { AdminQueueEfficiencyBanner } from "@/frontend/views/dashboard/shared/AdminQueueEfficiencyBanner";
 import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
+
+const StyledMetricsContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(2),
+}));
 
 interface ComplaintsMetricsRowProps {
   readonly summary: AdminComplaintsSummary;
@@ -32,13 +39,13 @@ export function ComplaintsMetricsRow({ summary, labels, compact = false }: Reado
   ];
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+    <StyledMetricsContainer>
       <BillingMetricsRow metrics={metrics} compact={compact} />
       <AdminQueueEfficiencyBanner
         avgLabel={labels.metrics.avgResolution}
         avgValue={summary.avgResolutionHours}
         efficiencyNote={labels.metrics.efficiencyNote}
       />
-    </Box>
+    </StyledMetricsContainer>
   );
 }

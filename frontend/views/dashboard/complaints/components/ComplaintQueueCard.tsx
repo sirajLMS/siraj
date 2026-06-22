@@ -2,9 +2,146 @@
 
 import { AlternateEmailOutlined, CheckCircleOutlined, SendOutlined } from "@mui/icons-material";
 import { Avatar, Box, Paper, TextField, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import type { AdminComplaintRow, ComplaintPriority } from "@/frontend/stores/mockAdminComplaintsStore";
 import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
+
+/** Container for an already-answered complaint response with surface background */
+const StyledAnsweredResponseBox = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: theme.layout.radius.card,
+  backgroundColor: theme.palette.surfaceContainerLow,
+  border: `1px solid ${theme.palette.outlineVariant}`,
+}));
+
+/** Header row inside the answered response section */
+const StyledAnsweredResponseHeader = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+}));
+
+/** Check icon indicating the complaint has been answered */
+const StyledAnsweredIcon = styled(CheckCircleOutlined)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  fontSize: 18,
+}));
+
+/** Bold label for the answered response section title */
+const StyledAnsweredResponseLabel = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  color: theme.palette.primary.main,
+}));
+
+/** Timestamp for when the complaint was answered */
+const StyledAnsweredResponseTime = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  marginLeft: "auto",
+}));
+
+/** Uppercase label above the draft response text field */
+const StyledResponseInputLabel = styled(Typography)({
+  fontWeight: 700,
+  marginBottom: "0.5rem",
+  textTransform: "uppercase",
+});
+
+/** Actions row containing the answer and email buttons */
+const StyledResponseActionsBox = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "flex-end",
+  gap: theme.spacing(1.5),
+  [theme.breakpoints.up("sm")]: {
+    flexDirection: "row",
+  },
+}));
+
+/** Primary-colored Answer and Email button */
+const StyledEmailActionButton = styled(FilterButton)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  borderColor: theme.palette.primary.main,
+  "&:hover": { backgroundColor: theme.palette.primary.dark },
+}));
+
+/** Root card paper with conditional background based on answered/unanswered status */
+const StyledQueueCardPaper = styled(Paper, {
+  shouldForwardProp: prop => prop !== "isUnanswered",
+})<{ isUnanswered: boolean }>(({ theme, isUnanswered }) => ({
+  padding: theme.spacing(3),
+  borderRadius: theme.layout.radius.card,
+  border: `1px solid ${theme.palette.outlineVariant}`,
+  backgroundColor: isUnanswered ? theme.palette.surface : theme.palette.surfaceContainerLow,
+  transition: "background-color 0.15s ease",
+}));
+
+/** Card header containing submitter info and status/priority */
+const StyledQueueCardHeader = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  [theme.breakpoints.up("sm")]: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+}));
+
+/** Submitter avatar and name info group */
+const StyledSubmitterInfoBox = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(2),
+}));
+
+/** Submitter avatar with initials fallback */
+const StyledSubmitterAvatar = styled(Avatar)(({ theme }) => ({
+  width: 48,
+  height: 48,
+  ...theme.typography.labelMd,
+}));
+
+/** Bold submitter name display */
+const StyledSubmitterName = styled(Typography)({
+  fontWeight: 700,
+});
+
+/** Uppercase submitter role label */
+const StyledSubmitterRole = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  textTransform: "uppercase",
+}));
+
+/** Right-aligned status badge and received timestamp */
+const StyledQueueCardStatusBox = styled(Box)(({ theme }) => ({
+  textAlign: "left",
+  [theme.breakpoints.up("sm")]: {
+    textAlign: "right",
+  },
+}));
+
+/** Timestamp showing when the complaint was received */
+const StyledReceivedTimeLabel = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  marginTop: theme.spacing(1),
+}));
+
+/** Complaint text container with left border accent and conditional bottom margin */
+const StyledComplaintTextBox = styled(Box, {
+  shouldForwardProp: prop => prop !== "isUnanswered",
+})<{ isUnanswered: boolean }>(({ theme, isUnanswered }) => ({
+  marginBottom: theme.spacing(isUnanswered ? 3 : 2),
+  padding: theme.spacing(2),
+  backgroundColor: theme.palette.surfaceContainerLowest,
+  borderRadius: theme.layout.radius.card,
+  borderLeft: `4px solid ${theme.palette.primary.main}`,
+}));
 
 interface ComplaintQueueCardProps {
   readonly row: AdminComplaintRow;
@@ -48,30 +185,20 @@ function ComplaintResponseSection({
   onAnswer: (options: { readonly sendEmail: boolean }) => void;
 }>) {
   if (row.status === "answered") {
+    // Already-answered response display
     return (
-      <Box
-        sx={theme => ({
-          p: 2,
-          borderRadius: theme.layout.radius.card,
-          bgcolor: theme.palette.surfaceContainerLow,
-          border: `1px solid ${theme.palette.outlineVariant}`,
-        })}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-          <CheckCircleOutlined sx={theme => ({ color: theme.palette.primary.main, fontSize: 18 })} />
-          <Typography variant="labelMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-            {labels.queue.adminResponse}
-          </Typography>
+      <StyledAnsweredResponseBox>
+        <StyledAnsweredResponseHeader>
+          <StyledAnsweredIcon />
+          <StyledAnsweredResponseLabel variant="labelMd">{labels.queue.adminResponse}</StyledAnsweredResponseLabel>
           {row.answeredAt ? (
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, ml: "auto" })}>
-              {row.answeredAt}
-            </Typography>
+            <StyledAnsweredResponseTime variant="labelMd">{row.answeredAt}</StyledAnsweredResponseTime>
           ) : null}
-        </Box>
+        </StyledAnsweredResponseHeader>
         <Typography variant="bodyMd" sx={{ fontStyle: "italic" }}>
           {row.adminResponse}
         </Typography>
-      </Box>
+      </StyledAnsweredResponseBox>
     );
   }
 
@@ -79,11 +206,10 @@ function ComplaintResponseSection({
     return null;
   }
 
+  // Draft response input section for unanswered complaints
   return (
     <Box>
-      <Typography variant="labelMd" sx={{ fontWeight: 700, mb: 1, textTransform: "uppercase" }}>
-        {labels.queue.yourResponse}
-      </Typography>
+      <StyledResponseInputLabel variant="labelMd">{labels.queue.yourResponse}</StyledResponseInputLabel>
       <TextField
         fullWidth
         multiline
@@ -95,15 +221,7 @@ function ComplaintResponseSection({
         }}
         slotProps={{ htmlInput: { autoComplete: "off" } }}
       />
-      <Box
-        sx={{
-          mt: 2,
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          justifyContent: "flex-end",
-          gap: 1.5,
-        }}
-      >
+      <StyledResponseActionsBox>
         <PrimaryPageAction
           startIcon={<SendOutlined />}
           disabled={draftResponse.trim().length === 0}
@@ -113,22 +231,16 @@ function ComplaintResponseSection({
         >
           {labels.queue.answer}
         </PrimaryPageAction>
-        <FilterButton
+        <StyledEmailActionButton
           startIcon={<AlternateEmailOutlined />}
           disabled={draftResponse.trim().length === 0}
           onClick={() => {
             onAnswer({ sendEmail: true });
           }}
-          sx={theme => ({
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            borderColor: theme.palette.primary.main,
-            "&:hover": { bgcolor: theme.palette.primary.dark },
-          })}
         >
           {labels.queue.answerAndEmail}
-        </FilterButton>
-      </Box>
+        </StyledEmailActionButton>
+      </StyledResponseActionsBox>
     </Box>
   );
 }
@@ -144,66 +256,36 @@ export function ComplaintQueueCard({
   const isUnanswered = row.status === "unanswered";
 
   return (
-    <Paper
-      elevation={0}
-      sx={theme => ({
-        p: 3,
-        borderRadius: theme.layout.radius.card,
-        border: `1px solid ${theme.palette.outlineVariant}`,
-        bgcolor: isUnanswered ? theme.palette.surface : theme.palette.surfaceContainerLow,
-        transition: "background-color 0.15s ease",
-      })}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          justifyContent: "space-between",
-          alignItems: { xs: "flex-start", sm: "flex-start" },
-          gap: 2,
-          mb: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Avatar src={row.avatarUrl || undefined} sx={{ width: 48, height: 48, typography: "labelMd" }}>
+    <StyledQueueCardPaper elevation={0} isUnanswered={isUnanswered}>
+      {/* Submitter info and priority/status header */}
+      <StyledQueueCardHeader>
+        <StyledSubmitterInfoBox>
+          <StyledSubmitterAvatar src={row.avatarUrl || undefined}>
             {getInitials(row.submitterName)}
-          </Avatar>
+          </StyledSubmitterAvatar>
           <Box>
-            <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
-              {row.submitterName}
-            </Typography>
-            <Typography
-              variant="labelMd"
-              sx={theme => ({ color: theme.palette.text.secondary, textTransform: "uppercase" })}
-            >
-              {row.submitterRole}
-            </Typography>
+            <StyledSubmitterName variant="titleLg">{row.submitterName}</StyledSubmitterName>
+            <StyledSubmitterRole variant="labelMd">{row.submitterRole}</StyledSubmitterRole>
           </Box>
-        </Box>
-        <Box sx={{ textAlign: { xs: "left", sm: "right" } }}>
+        </StyledSubmitterInfoBox>
+        <StyledQueueCardStatusBox>
           <StatusBadge
             category="classStatus"
             status={mapPriorityForBadge(row.priority)}
             label={labels.priorityLabels[row.priority]}
           />
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mt: 1 })}>
+          <StyledReceivedTimeLabel variant="labelMd">
             {labels.queue.received}: {row.receivedAt}
-          </Typography>
-        </Box>
-      </Box>
+          </StyledReceivedTimeLabel>
+        </StyledQueueCardStatusBox>
+      </StyledQueueCardHeader>
 
-      <Box
-        sx={theme => ({
-          mb: isUnanswered ? 3 : 2,
-          p: 2,
-          bgcolor: theme.palette.surfaceContainerLowest,
-          borderRadius: theme.layout.radius.card,
-          borderLeft: `4px solid ${theme.palette.primary.main}`,
-        })}
-      >
+      {/* Complaint text with left accent border */}
+      <StyledComplaintTextBox isUnanswered={isUnanswered}>
         <Typography variant="bodyLg">{row.complaintText}</Typography>
-      </Box>
+      </StyledComplaintTextBox>
 
+      {/* Response section (answered display or draft input) */}
       <ComplaintResponseSection
         row={row}
         labels={labels}
@@ -212,6 +294,6 @@ export function ComplaintQueueCard({
         onDraftChange={onDraftChange}
         onAnswer={onAnswer}
       />
-    </Paper>
+    </StyledQueueCardPaper>
   );
 }

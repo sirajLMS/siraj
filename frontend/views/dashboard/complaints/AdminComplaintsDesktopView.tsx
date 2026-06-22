@@ -24,13 +24,17 @@ export function AdminComplaintsDesktopView({
     <PageContainer>
       <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
+      {/* Summary metrics row with unanswered/answered counts and efficiency banner */}
       <ComplaintsMetricsRow summary={summary} labels={labels} />
 
+      {/* Main section panel with search bar action slot */}
       <SectionPanel
         actions={
+          /* Search input for filtering complaints in the queue */
           <ComplaintsSearchBar value={searchQuery} placeholder={labels.searchPlaceholder} onChange={onSearchChange} />
         }
       >
+        {/* Tab bar switching between unanswered and answered complaint queues */}
         <ComplaintsTabBar
           activeTab={activeTab}
           unansweredCount={summary.unanswered}
@@ -38,6 +42,7 @@ export function AdminComplaintsDesktopView({
           labels={labels}
           onTabChange={onTabChange}
         />
+        {/* Filtered list of complaint queue cards with draft response support */}
         <ComplaintQueueCardList
           rows={rows}
           labels={labels}
