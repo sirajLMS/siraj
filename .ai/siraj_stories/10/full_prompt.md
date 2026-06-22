@@ -1,7 +1,3 @@
-You are writing a hyper-detailed implementation plan for Story 10 of the Siraj LMS project. The sprint directory already exists at `C:\Users\PC\Projects\siraj\.ai\siraj_stories\10\` and `C:\Users\PC\Projects\siraj\.ai\siraj_stories\10\section-6-tasks\`.
-
-You have full write access to this directory. Write ALL of the following files using `write_to_file` tool. Do NOT use artifact metadata — these are project files, not artifacts. Set `Overwrite: false` for all.
-
 ## VERIFIED FACTS (do NOT guess or deviate)
 
 ### Permissions (from actual file reads):
