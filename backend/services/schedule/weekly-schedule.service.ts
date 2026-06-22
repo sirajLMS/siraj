@@ -1,4 +1,7 @@
-import { getWeeklyScheduleGrid, getWeeklyWorkloadMetrics } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
+import {
+  getWeeklyScheduleGrid,
+  getWeeklyWorkloadMetrics,
+} from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";

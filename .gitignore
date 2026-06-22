@@ -83,3 +83,7 @@ storybook-static
 .next-test
 
 .idea
+
+# Stakpak session files
+.stakpak/session*
+.stakpak
