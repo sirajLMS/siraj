@@ -1,7 +1,3 @@
 {
-  "mcpServers": {
-    "siraj": {
-      "httpUrl": "http://localhost:6006/mcp"
-    }
-  }
+  "mcpServers": {}
 }

@@ -17,24 +17,6 @@
         "@mui/mcp@latest"
       ]
     },
-    "drizzle-docs": {
-      "command": "bun",
-      "args": [
-        "x",
-        "-y",
-        "drizzle-docs-mcp-server"
-      ]
-    },
-    "context7_remote": {
-      "serverUrl": "https://mcp.context7.com/mcp",
-      "headers": {
-        "CONTEXT7_API_KEY": "ctx7sk-a8e0ca40-1512-4d30-8279-7815d52e77d3"
-      }
-    },
-    "siraj": {
-      "url": "http://localhost:6006/mcp",
-      "type": "http"
-    },
     "playwright": {
       "type": "local",
       "command": [

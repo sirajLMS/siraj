@@ -81,3 +81,5 @@ storybook-static
 .playwright-mcp
 
 .next-test
+
+.idea
