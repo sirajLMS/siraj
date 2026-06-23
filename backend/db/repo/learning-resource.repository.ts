@@ -134,4 +134,60 @@ export namespace LearningResourceRepository {
 
     return results[0] ?? null;
   }
+
+  /**
+   * Hard deletes a learning resource from the database.
+   *
+   * @description
+   * This method forcefully drops the relational record from the learning_resources table.
+   * It intentionally does NOT orchestrate the deletion of the physical file from the
+   * storage infrastructure; that responsibility belongs strictly to the Service layer
+   * to maintain Separation of Concerns (SoC).
+   *
+   * @param id - The unique UUID of the learning resource to be deleted.
+   * @param locale - The optional locale for localized error messages.
+   * @param tx - The optional database transaction.
+   * @returns Promise<boolean> - Returns true if the deletion was successful.
+   * @throws Error - If the learning resource does not exist prior to deletion.
+   */
+  export async function deleteResource(id: string, locale?: string, tx?: DBTransaction): Promise<boolean> {
+    const execute = async (t: DBTransaction): Promise<boolean> => {
+      const t18n = await getBackendTranslations({ locale, namespace: "errors" });
+      logger.debug(`[LearningResourceRepository.deleteResource] Attempting deletion for ID: ${id}`);
+
+      // 1. Pre-deletion Verification
+      const existingRecord = await t
+        .select({
+          id: learningResources.id,
+          filePath: learningResources.filePath,
+          displayName: learningResources.displayName,
+        })
+        .from(learningResources)
+        .where(and(eq(learningResources.id, id), isNull(learningResources.deletedAt)))
+        .limit(1);
+
+      // If the array is empty, the record does not exist
+      if (existingRecord.length === 0) {
+        logger.warn(`[LearningResourceRepository.deleteResource] Resource ID not found: ${id}`);
+        throw new Error(t18n("resourceNotFound"));
+      }
+
+      // Log the metadata of what we are about to destroy
+      logger.info(
+        `[LearningResourceRepository.deleteResource] Hard deleting resource: ${existingRecord[0].displayName} (${existingRecord[0].filePath})`
+      );
+
+      // 2. Execution of Hard Delete
+      await t.delete(learningResources).where(eq(learningResources.id, id));
+
+      logger.debug(`[LearningResourceRepository.deleteResource] Successfully deleted ID: ${id}`);
+
+      return true;
+    };
+
+    if (tx) {
+      return await execute(tx);
+    }
+    return await db.transaction(execute);
+  }
 }
