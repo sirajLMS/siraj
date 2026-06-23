@@ -798,6 +798,11 @@ export type GroupUser = {
   name: Maybe<Scalars['String']['output']>;
 };
 
+export enum InvoiceType {
+  Monthly = 'MONTHLY',
+  PerClasses = 'PER_CLASSES'
+}
+
 export type LearningResourceRow = {
   __typename?: 'LearningResourceRow';
   contentType: Maybe<Scalars['String']['output']>;
@@ -834,6 +839,12 @@ export type LoginResponse = {
   user: Maybe<User>;
 };
 
+/** Account type for new manager */
+export enum ManagerAccountType {
+  Admin = 'admin',
+  Manager = 'manager'
+}
+
 export type ManagerDirectoryRow = {
   __typename?: 'ManagerDirectoryRow';
   email: Maybe<Scalars['String']['output']>;
@@ -845,6 +856,27 @@ export type ManagerDirectoryRow = {
   skypeId: Maybe<Scalars['String']['output']>;
   staffProfileId: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
+};
+
+/** Input for creating a new manager/staff account with RBAC assignment */
+export type ManagerOnboardingInput = {
+  accountType: ManagerAccountType;
+  email: Scalars['Email']['input'];
+  name: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+  phone: InputMaybe<Scalars['String']['input']>;
+  skypeId: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Result of manager onboarding operation */
+export type ManagerOnboardingResult = {
+  __typename?: 'ManagerOnboardingResult';
+  assignedGroupSlug: Maybe<Scalars['String']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  staffProfileId: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
 };
 
 export type ManualInvoiceResult = {
@@ -885,9 +917,15 @@ export type Mutation = {
   clearWeeklySchedule: Maybe<Scalars['Boolean']['output']>;
   copyStorageItems: Maybe<BulkOperationResult>;
   createFolder: Maybe<FileOperationResult>;
+  /** Create a new manager/staff account (System Admin only) */
+  createManager: Maybe<ManagerOnboardingResult>;
   createManualInvoice: Maybe<ManualInvoiceResult>;
+  /** Create a new parent account with billing configuration */
+  createParent: Maybe<ParentOnboardingResult>;
   createPermissionGroup: Maybe<PermissionGroup>;
   createRecurringClass: Maybe<CreateRecurringClassResult>;
+  /** Create a new teacher account with comprehensive profile */
+  createTeacher: Maybe<TeacherOnboardingResult>;
   createTeacherManualClassEntry: Maybe<ClassInstanceDetail>;
   createTestEntities: Maybe<TestEntities>;
   deactivateParent: Maybe<DeactivateParentResult>;
@@ -993,6 +1031,11 @@ export type MutationCreateFolderArgs = {
 };
 
 
+export type MutationCreateManagerArgs = {
+  input: ManagerOnboardingInput;
+};
+
+
 export type MutationCreateManualInvoiceArgs = {
   amount: Scalars['String']['input'];
   currency: Scalars['String']['input'];
@@ -1006,6 +1049,11 @@ export type MutationCreateManualInvoiceArgs = {
 };
 
 
+export type MutationCreateParentArgs = {
+  input: ParentOnboardingInput;
+};
+
+
 export type MutationCreatePermissionGroupArgs = {
   input: CreatePermissionGroupInput;
 };
@@ -1013,6 +1061,11 @@ export type MutationCreatePermissionGroupArgs = {
 
 export type MutationCreateRecurringClassArgs = {
   input: CreateRecurringClassInput;
+};
+
+
+export type MutationCreateTeacherArgs = {
+  input: TeacherOnboardingInput;
 };
 
 
@@ -1306,6 +1359,38 @@ export type ParentInvoiceRow = {
   studentId: Maybe<Scalars['String']['output']>;
 };
 
+/** Input for creating a new parent account with billing configuration */
+export type ParentOnboardingInput = {
+  address: InputMaybe<Scalars['String']['input']>;
+  currency: InputMaybe<Scalars['String']['input']>;
+  defaultZoomLink: InputMaybe<Scalars['String']['input']>;
+  email: Scalars['Email']['input'];
+  facebook: InputMaybe<Scalars['String']['input']>;
+  feeAmount: InputMaybe<Scalars['String']['input']>;
+  invoiceType: InputMaybe<InvoiceType>;
+  name: Scalars['String']['input'];
+  nationality: InputMaybe<Scalars['String']['input']>;
+  password: Scalars['String']['input'];
+  paymentMethod: InputMaybe<PaymentMethod>;
+  phone: InputMaybe<Scalars['String']['input']>;
+  skype: InputMaybe<Scalars['String']['input']>;
+  timezone: InputMaybe<Scalars['String']['input']>;
+  twitter: InputMaybe<Scalars['String']['input']>;
+  whatsapp: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Result of parent onboarding operation */
+export type ParentOnboardingResult = {
+  __typename?: 'ParentOnboardingResult';
+  currency: Maybe<Scalars['String']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  invoiceType: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
+};
+
 export type ParentProfile = {
   __typename?: 'ParentProfile';
   address: Maybe<Scalars['String']['output']>;
@@ -1343,6 +1428,11 @@ export type PartialStudentUpdateInput = {
   primaryTeacherId: InputMaybe<Scalars['String']['input']>;
   status: InputMaybe<StudentStatus>;
 };
+
+export enum PaymentMethod {
+  BankAccount = 'BANK_ACCOUNT',
+  Paypal = 'PAYPAL'
+}
 
 export type Permission = {
   __typename?: 'Permission';
@@ -2050,6 +2140,75 @@ export type TeacherHandbookUrl = {
   __typename?: 'TeacherHandbookUrl';
   id: Maybe<Scalars['String']['output']>;
   url: Maybe<Scalars['String']['output']>;
+};
+
+/** Input for creating a new teacher account with comprehensive profile */
+export type TeacherOnboardingInput = {
+  /** Bank account number */
+  accountNumber: InputMaybe<Scalars['String']['input']>;
+  /** Teacher address */
+  address: InputMaybe<Scalars['String']['input']>;
+  /** Bank name */
+  bankName: InputMaybe<Scalars['String']['input']>;
+  /** Banking beneficiary name */
+  beneficiaryName: InputMaybe<Scalars['String']['input']>;
+  /** Teacher country code */
+  countryCode: InputMaybe<CountryCode>;
+  /** Teacher date of birth (ISO date string) */
+  dateOfBirth: InputMaybe<Scalars['String']['input']>;
+  /** Teacher email address */
+  email: Scalars['Email']['input'];
+  /** Teacher gender */
+  gender: InputMaybe<Gender>;
+  /** Teacher hourly rate */
+  hourlyRate: InputMaybe<Scalars['String']['input']>;
+  /** IBAN */
+  iban: InputMaybe<Scalars['String']['input']>;
+  /** Teacher full name */
+  name: Scalars['String']['input'];
+  /** Teacher national ID (encrypted) */
+  nationalId: InputMaybe<Scalars['String']['input']>;
+  /** Teacher nationality (country code) */
+  nationality: InputMaybe<Scalars['String']['input']>;
+  /** Teacher password */
+  password: Scalars['String']['input'];
+  /** Teacher phone number */
+  phone: InputMaybe<Scalars['String']['input']>;
+  /** Teacher qualifications */
+  qualifications: InputMaybe<Scalars['String']['input']>;
+  /** Currency for hourly rate */
+  rateCurrency: InputMaybe<Scalars['String']['input']>;
+  /** Bank routing number */
+  routingNumber: InputMaybe<Scalars['String']['input']>;
+  /** Teacher Skype ID */
+  skypeId: InputMaybe<Scalars['String']['input']>;
+  /** SWIFT/BIC code */
+  swiftBic: InputMaybe<Scalars['String']['input']>;
+  /** IANA timezone identifier */
+  timezone: Scalars['String']['input'];
+  /** Timezone ID reference */
+  timezoneId: InputMaybe<Scalars['Int']['input']>;
+  /** Teacher Zoom meeting link */
+  zoomLink: InputMaybe<Scalars['String']['input']>;
+  /** Teacher Zoom password (encrypted) */
+  zoomPassword: InputMaybe<Scalars['String']['input']>;
+  /** Teacher Zoom username */
+  zoomUsername: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Result of teacher onboarding operation */
+export type TeacherOnboardingResult = {
+  __typename?: 'TeacherOnboardingResult';
+  /** Teacher email */
+  email: Maybe<Scalars['String']['output']>;
+  /** Teacher name */
+  name: Maybe<Scalars['String']['output']>;
+  /** Teacher account status */
+  status: Maybe<Scalars['String']['output']>;
+  /** Created teacher profile ID */
+  teacherId: Maybe<Scalars['String']['output']>;
+  /** Created user ID */
+  userId: Maybe<Scalars['String']['output']>;
 };
 
 export type TeacherProfileResult = {

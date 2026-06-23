@@ -8,3 +8,4 @@ import "./schedule.mutation";
 import "./schedule-deletion.mutation";
 import "./staff-profile.mutation";
 import "./dst-migration.mutation";
+import "./onboarding.mutation";

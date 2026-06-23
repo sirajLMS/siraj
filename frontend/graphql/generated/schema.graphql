@@ -761,6 +761,11 @@ type GroupUser {
   name: String
 }
 
+enum InvoiceType {
+  MONTHLY
+  PER_CLASSES
+}
+
 """A type representing arbitrary JSON values"""
 scalar JSON
 
@@ -797,6 +802,12 @@ type LoginResponse {
   user: User
 }
 
+"""Account type for new manager"""
+enum ManagerAccountType {
+  admin
+  manager
+}
+
 type ManagerDirectoryRow {
   email: String
   id: String
@@ -807,6 +818,26 @@ type ManagerDirectoryRow {
   skypeId: String
   staffProfileId: String
   status: String
+}
+
+"""Input for creating a new manager/staff account with RBAC assignment"""
+input ManagerOnboardingInput {
+  accountType: ManagerAccountType!
+  email: Email!
+  name: String!
+  password: String!
+  phone: String
+  skypeId: String
+}
+
+"""Result of manager onboarding operation"""
+type ManagerOnboardingResult {
+  assignedGroupSlug: String
+  email: String
+  name: String
+  staffProfileId: String
+  status: String
+  userId: String
 }
 
 type ManualInvoiceResult {
@@ -844,9 +875,18 @@ type Mutation {
   clearWeeklySchedule(teacherId: ID!): Boolean
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createFolder(input: FolderCreateInput!): FileOperationResult
+
+  """Create a new manager/staff account (System Admin only)"""
+  createManager(input: ManagerOnboardingInput!): ManagerOnboardingResult
   createManualInvoice(amount: String!, currency: String!, dueDate: String!, exchangeRateSnapshot: String, exchangeRateSource: String, invoiceType: String!, issueDate: String!, parentId: String!, studentId: String): ManualInvoiceResult
+
+  """Create a new parent account with billing configuration"""
+  createParent(input: ParentOnboardingInput!): ParentOnboardingResult
   createPermissionGroup(input: CreatePermissionGroupInput!): PermissionGroup
   createRecurringClass(input: CreateRecurringClassInput!): CreateRecurringClassResult
+
+  """Create a new teacher account with comprehensive profile"""
+  createTeacher(input: TeacherOnboardingInput!): TeacherOnboardingResult
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
   deactivateParent(parentId: String!): DeactivateParentResult
@@ -988,6 +1028,37 @@ type ParentInvoiceRow {
   studentId: String
 }
 
+"""Input for creating a new parent account with billing configuration"""
+input ParentOnboardingInput {
+  address: String
+  currency: String
+  defaultZoomLink: String
+  email: Email!
+  facebook: String
+  feeAmount: String
+  invoiceType: InvoiceType
+  name: String!
+  nationality: String
+  password: String!
+  paymentMethod: PaymentMethod
+  phone: String
+  skype: String
+  timezone: String
+  twitter: String
+  whatsapp: String
+}
+
+"""Result of parent onboarding operation"""
+type ParentOnboardingResult {
+  currency: String
+  email: String
+  invoiceType: String
+  name: String
+  parentId: String
+  status: String
+  userId: String
+}
+
 type ParentProfile {
   address: String
   avatarUrl: String
@@ -1023,6 +1094,11 @@ input PartialStudentUpdateInput {
   parentId: String
   primaryTeacherId: String
   status: StudentStatus
+}
+
+enum PaymentMethod {
+  BANK_ACCOUNT
+  PAYPAL
 }
 
 type Permission {
@@ -1519,6 +1595,102 @@ type TeacherFutureSchedule {
 type TeacherHandbookUrl {
   id: String
   url: String
+}
+
+"""Input for creating a new teacher account with comprehensive profile"""
+input TeacherOnboardingInput {
+  """Bank account number"""
+  accountNumber: String
+
+  """Teacher address"""
+  address: String
+
+  """Bank name"""
+  bankName: String
+
+  """Banking beneficiary name"""
+  beneficiaryName: String
+
+  """Teacher country code"""
+  countryCode: CountryCode
+
+  """Teacher date of birth (ISO date string)"""
+  dateOfBirth: String
+
+  """Teacher email address"""
+  email: Email!
+
+  """Teacher gender"""
+  gender: Gender
+
+  """Teacher hourly rate"""
+  hourlyRate: String
+
+  """IBAN"""
+  iban: String
+
+  """Teacher full name"""
+  name: String!
+
+  """Teacher national ID (encrypted)"""
+  nationalId: String
+
+  """Teacher nationality (country code)"""
+  nationality: String
+
+  """Teacher password"""
+  password: String!
+
+  """Teacher phone number"""
+  phone: String
+
+  """Teacher qualifications"""
+  qualifications: String
+
+  """Currency for hourly rate"""
+  rateCurrency: String
+
+  """Bank routing number"""
+  routingNumber: String
+
+  """Teacher Skype ID"""
+  skypeId: String
+
+  """SWIFT/BIC code"""
+  swiftBic: String
+
+  """IANA timezone identifier"""
+  timezone: String!
+
+  """Timezone ID reference"""
+  timezoneId: Int
+
+  """Teacher Zoom meeting link"""
+  zoomLink: String
+
+  """Teacher Zoom password (encrypted)"""
+  zoomPassword: String
+
+  """Teacher Zoom username"""
+  zoomUsername: String
+}
+
+"""Result of teacher onboarding operation"""
+type TeacherOnboardingResult {
+  """Teacher email"""
+  email: String
+
+  """Teacher name"""
+  name: String
+
+  """Teacher account status"""
+  status: String
+
+  """Created teacher profile ID"""
+  teacherId: String
+
+  """Created user ID"""
+  userId: String
 }
 
 type TeacherProfileResult {
