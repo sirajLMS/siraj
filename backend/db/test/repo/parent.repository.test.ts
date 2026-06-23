@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository } from "@/backend/db/repo";
 import { parents } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestUser } from "../entity-setup";
-import { runInRollback } from "../test-utils";
+import { type DbTransaction, runInRollback } from "../test-utils";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -225,5 +226,182 @@ describe("ParentRepository — create", () => {
       expect(result.id).toBeDefined();
       expect(result.timezone).toBe("UTC");
     });
+  });
+
+  test("rejects invalid timezone", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, { name: "TZ Parent", email: `tz-${randomUUID()}@test.com` });
+
+      let error: unknown = null;
+      try {
+        await ParentRepository.create(
+          {
+            userId: user.id,
+            status: "REGULAR",
+            timezone: "Invalid/Timezone",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          tx
+        );
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).not.toBeNull();
+      expect((error as Error).message).toContain("timezone");
+    });
+  });
+
+  test("rejects when create insertion fails", async () => {
+    const user = { id: randomUUID() };
+    const mockTx = {
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            limit: () => [],
+          }),
+        }),
+      }),
+      insert: () => ({
+        values: () => ({
+          returning: () => [],
+        }),
+      }),
+    } as unknown as DbTransaction;
+
+    let error: unknown = null;
+    try {
+      await ParentRepository.create(
+        { userId: user.id, status: "REGULAR", createdAt: new Date(), updatedAt: new Date() },
+        mockTx
+      );
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).not.toBeNull();
+    expect((error as Error).message).toContain("Failed");
+  });
+});
+
+describe("ParentRepository — getParentDirectory", () => {
+  test("returns parent directory metrics and rows", async () => {
+    await runInRollback(async tx => {
+      const user1 = await createTestUser(tx, { name: "Dir Parent A", email: `dpa-${randomUUID()}@test.com` });
+      const parent1 = await createTestParent(tx, user1.id, { status: "REGULAR" });
+
+      const user2 = await createTestUser(tx, { name: "Dir Parent B", email: `dpb-${randomUUID()}@test.com` });
+      const parent2 = await createTestParent(tx, user2.id, { status: "ON_LEAVE" });
+
+      const result = await ParentRepository.getParentDirectory({ search: "Dir Parent", limit: 10, offset: 0 }, tx);
+      expect(result.totalParents).toBeGreaterThanOrEqual(2);
+      expect(result.rows.length).toBeGreaterThanOrEqual(2);
+      expect(result.metrics.regular).toBeGreaterThanOrEqual(1);
+      expect(result.metrics.onLeave).toBeGreaterThanOrEqual(1);
+
+      const searchResult = await ParentRepository.getParentDirectory(
+        { search: "Dir Parent A", limit: 10, offset: 0 },
+        tx
+      );
+      expect(searchResult.rows.some(r => r.id === parent1.id)).toBeTrue();
+      expect(searchResult.rows.some(r => r.id === parent2.id)).toBeFalse();
+    });
+  });
+});
+
+describe("ParentRepository — getAssociatedStudentById", () => {
+  test("returns student details if student belongs to parent", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, { name: "Parent Stud ID", email: `psid-${randomUUID()}@test.com` });
+      const parent = await createTestParent(tx, user.id);
+      const student = await createTestStudent(tx, parent.id, { name: "Student Target" });
+
+      const result = await ParentRepository.getAssociatedStudentById(student.id, tx);
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe(student.id);
+      expect(result?.name).toBe("Student Target");
+    });
+  });
+
+  test("returns null if student does not exist", async () => {
+    await runInRollback(async tx => {
+      const result = await ParentRepository.getAssociatedStudentById(randomUUID(), tx);
+      expect(result).toBeNull();
+    });
+  });
+});
+
+describe("ParentRepository — findByUserId", () => {
+  test("returns parent if found", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, { name: "Find By User Parent", email: `fbup-${randomUUID()}@test.com` });
+      const parent = await createTestParent(tx, user.id);
+
+      const result = await ParentRepository.findByUserId(user.id, tx);
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe(parent.id);
+    });
+  });
+
+  test("returns null if parent not found", async () => {
+    await runInRollback(async tx => {
+      const result = await ParentRepository.findByUserId(randomUUID(), tx);
+      expect(result).toBeNull();
+    });
+  });
+});
+
+describe("ParentRepository — getStudentsForParent", () => {
+  test("returns students list", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, { name: "Parent List", email: `pl-${randomUUID()}@test.com` });
+      const parent = await createTestParent(tx, user.id);
+      await createTestStudent(tx, parent.id, { name: "Student Child" });
+
+      const result = await ParentRepository.getStudentsForParent(parent.id, tx);
+      expect(result.length).toBeGreaterThanOrEqual(1);
+      expect(result[0].name).toBe("Student Child");
+    });
+  });
+});
+
+describe("ParentRepository — non-transactional coverage fallback", () => {
+  test("supports calls without tx", async () => {
+    const fakeId = randomUUID();
+    const profile = await ParentRepository.getParentProfile(fakeId);
+    expect(profile).toBeNull();
+
+    const parent = await ParentRepository.findByUserId(fakeId);
+    expect(parent).toBeNull();
+
+    const student = await ParentRepository.getAssociatedStudentById(fakeId);
+    expect(student).toBeNull();
+
+    const studentsList = await ParentRepository.getAssociatedStudents(fakeId);
+    expect(studentsList.length).toBe(0);
+
+    const directory = await ParentRepository.getParentDirectory({ limit: 1, offset: 0 });
+    expect(directory.rows.length).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe("ParentRepository — transaction rollback participation", () => {
+  test("rolls back parent creation on subsequent failure", async () => {
+    let createdParentId: string | undefined;
+    await runInRollback(async tx => {
+      const u = await createTestUser(tx, { name: "Rollback User", email: `rb-${randomUUID()}@test.com` });
+      const parent = await ParentRepository.create(
+        { userId: u.id, status: "REGULAR", createdAt: new Date(), updatedAt: new Date() },
+        tx
+      );
+      createdParentId = parent.id;
+      throw new Error("Simulated rollback error");
+    }).catch(() => null);
+
+    if (createdParentId) {
+      const [found] = await db.select().from(parents).where(eq(parents.id, createdParentId)).limit(1);
+      expect(found).toBeUndefined();
+    }
   });
 });

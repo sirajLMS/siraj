@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
 import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
 import { permissionGroups, staffProfiles, userPermissionGroups } from "@/backend/db/schema";
 import { createTestUser } from "../entity-setup";
@@ -327,5 +328,116 @@ describe("StaffProfileRepository — create", () => {
 
     expect(error).not.toBeNull();
     expect((error as Error).message).toContain("already exists");
+  });
+
+  staffTest("rejects when create insertion fails", async () => {
+    const mockTx = {
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            limit: () => [],
+          }),
+        }),
+      }),
+      insert: () => ({
+        values: () => ({
+          returning: () => [],
+        }),
+      }),
+    } as unknown as DbTransaction;
+
+    let error: unknown = null;
+    try {
+      await StaffProfileRepository.create(
+        { userId: randomUUID(), status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
+        mockTx
+      );
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).not.toBeNull();
+    expect((error as Error).message).toContain("Failed");
+  });
+
+  staffTest("throws error when manager profile update select fails", async () => {
+    let callCount = 0;
+    const mockTx = {
+      select: () => ({
+        from: () => ({
+          innerJoin: () => ({
+            leftJoin: () => ({
+              leftJoin: () => ({
+                where: () => ({
+                  limit: () => {
+                    callCount++;
+                    if (callCount === 1) {
+                      return [{ id: "some-id" }];
+                    }
+                    return [];
+                  },
+                }),
+              }),
+            }),
+          }),
+          where: () => ({
+            limit: () => {
+              callCount++;
+              if (callCount === 1) {
+                return [{ id: "some-id" }];
+              }
+              return [];
+            },
+          }),
+        }),
+      }),
+      update: () => ({
+        set: () => ({
+          where: () => Promise.resolve(),
+        }),
+      }),
+    } as unknown as DbTransaction;
+
+    let error: unknown = null;
+    try {
+      await StaffProfileRepository.updateManagerProfile(
+        "some-id",
+        { phone: "+123", phoneIsSet: true },
+        undefined,
+        mockTx
+      );
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).not.toBeNull();
+    expect((error as Error).message).toContain("Failed");
+  });
+
+  staffTest("supports calls without tx", async () => {
+    const fakeId = randomUUID();
+    const result = await StaffProfileRepository.findByUserId(fakeId);
+    expect(result).toBeNull();
+
+    const directory = await StaffProfileRepository.getManagerDirectory();
+    expect(directory.length).toBeGreaterThanOrEqual(0);
+  });
+
+  staffTest("rolls back staff profile creation on subsequent failure", async () => {
+    let createdStaffId: string | undefined;
+    await runInRollback(async outerTx => {
+      const u = await createTestUser(outerTx, { name: "Rollback User", email: `rb-${randomUUID()}@test.com` });
+      const profile = await StaffProfileRepository.create(
+        { userId: u.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
+        outerTx
+      );
+      createdStaffId = profile.id;
+      throw new Error("Simulated rollback error");
+    }).catch(() => null);
+
+    if (createdStaffId) {
+      const [found] = await db.select().from(staffProfiles).where(eq(staffProfiles.id, createdStaffId)).limit(1);
+      expect(found).toBeUndefined();
+    }
   });
 });

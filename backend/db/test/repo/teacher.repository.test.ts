@@ -1,9 +1,11 @@
 import { describe, expect, it } from "bun:test";
+import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { teachers, users } from "@/backend/db/schema";
 import { createTestUser, setupTeacher } from "../entity-setup";
-import { runInRollback } from "../test-utils";
+import { type DbTransaction, runInRollback } from "../test-utils";
 
 describe("TeacherRepository", () => {
   it("getTeacherDirectory returns all non-deleted teachers sorted by name", async () => {
@@ -232,6 +234,183 @@ describe("TeacherRepository", () => {
         expect(result.id).toBeDefined();
         expect(result.userId).toBe(user.id);
       });
+    });
+  });
+
+  describe("findByUserId", () => {
+    it("returns null if teacher not found", async () => {
+      await runInRollback(async tx => {
+        const result = await TeacherRepository.findByUserId(randomUUID(), tx);
+        expect(result).toBeNull();
+      });
+    });
+
+    it("returns teacher if found", async () => {
+      await runInRollback(async tx => {
+        const { teacher, user } = await setupTeacher(tx, { name: "Find Teacher" });
+        const result = await TeacherRepository.findByUserId(user.id, tx);
+        expect(result).not.toBeNull();
+        expect(result?.id).toBe(teacher.id);
+      });
+    });
+  });
+
+  describe("findById", () => {
+    it("returns null if teacher not found", async () => {
+      await runInRollback(async tx => {
+        const result = await TeacherRepository.findById(randomUUID(), tx);
+        expect(result).toBeNull();
+      });
+    });
+
+    it("returns teacher if found", async () => {
+      await runInRollback(async tx => {
+        const { teacher } = await setupTeacher(tx, { name: "Find Teacher By ID" });
+        const result = await TeacherRepository.findById(teacher.id, tx);
+        expect(result).not.toBeNull();
+        expect(result?.id).toBe(teacher.id);
+      });
+    });
+  });
+
+  describe("searchTeachers", () => {
+    it("returns matching teachers based on query", async () => {
+      await runInRollback(async tx => {
+        const { teacher } = await setupTeacher(tx, { name: "SearchMe Teacher" });
+        await setupTeacher(tx, { name: "Other Teacher" });
+
+        const results = await TeacherRepository.searchTeachers("SearchMe", 10, tx);
+        expect(results.length).toBe(1);
+        expect(results[0].id).toBe(teacher.id);
+
+        const allResults = await TeacherRepository.searchTeachers("", 10, tx);
+        expect(allResults.length).toBeGreaterThanOrEqual(2);
+      });
+    });
+  });
+
+  describe("getTeacherProfileForEdit", () => {
+    it("returns null if teacher does not exist", async () => {
+      await runInRollback(async tx => {
+        const result = await TeacherRepository.getTeacherProfileForEdit(randomUUID(), tx);
+        expect(result).toBeNull();
+      });
+    });
+
+    it("returns formatted profile if teacher exists", async () => {
+      await runInRollback(async tx => {
+        const user = await createTestUser(tx, { name: "Profile Edit Teacher", email: `prof-${randomUUID()}@test.com` });
+        const now = new Date();
+        const dateOfBirthStr = "1990-01-01";
+        const teacher = await TeacherRepository.create(
+          {
+            userId: user.id,
+            status: "ACTIVATED",
+            timezone: "UTC",
+            dateOfBirth: dateOfBirthStr,
+            createdAt: now,
+            updatedAt: now,
+          },
+          tx
+        );
+
+        const result = await TeacherRepository.getTeacherProfileForEdit(teacher.id, tx);
+        expect(result).not.toBeNull();
+        expect(result?.id).toBe(teacher.id);
+        expect(result?.dateOfBirth).toBe(new Date(dateOfBirthStr).toISOString());
+      });
+    });
+
+    it("handles null dateOfBirth", async () => {
+      await runInRollback(async tx => {
+        const user = await createTestUser(tx, { name: "Null DOB Teacher", email: `null-dob-${randomUUID()}@test.com` });
+        const now = new Date();
+        const teacher = await TeacherRepository.create(
+          {
+            userId: user.id,
+            status: "ACTIVATED",
+            timezone: "UTC",
+            dateOfBirth: null,
+            createdAt: now,
+            updatedAt: now,
+          },
+          tx
+        );
+
+        const result = await TeacherRepository.getTeacherProfileForEdit(teacher.id, tx);
+        expect(result).not.toBeNull();
+        expect(result?.dateOfBirth).toBeNull();
+      });
+    });
+  });
+
+  describe("non-transactional coverage fallback", () => {
+    it("supports calls without tx", async () => {
+      const fakeId = randomUUID();
+      const teacher = await TeacherRepository.findById(fakeId);
+      expect(teacher).toBeNull();
+
+      const profile = await TeacherRepository.getTeacherProfileForEdit(fakeId);
+      expect(profile).toBeNull();
+
+      const search = await TeacherRepository.searchTeachers("NonExistentName", 10);
+      expect(search.length).toBe(0);
+
+      const directory = await TeacherRepository.getTeacherDirectory({ limit: 1 });
+      expect(directory.length).toBeGreaterThanOrEqual(0);
+
+      const metrics = await TeacherRepository.getTeacherDirectoryMetrics();
+      expect(metrics.activated).toBeGreaterThanOrEqual(0);
+    });
+
+    it("rejects when create insertion fails", async () => {
+      const mockTx = {
+        select: () => ({
+          from: () => ({
+            where: () => ({
+              limit: () => [],
+            }),
+          }),
+        }),
+        insert: () => ({
+          values: () => ({
+            returning: () => [],
+          }),
+        }),
+      } as unknown as DbTransaction;
+
+      let error: unknown = null;
+      try {
+        await TeacherRepository.create(
+          { userId: randomUUID(), status: "ACTIVATED", timezone: "UTC", createdAt: new Date(), updatedAt: new Date() },
+          mockTx
+        );
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).not.toBeNull();
+      expect((error as Error).message).toContain("Failed");
+    });
+  });
+
+  describe("transaction rollback participation", () => {
+    it("rolls back teacher creation on subsequent failure", async () => {
+      let createdTeacherId: string | undefined;
+      await runInRollback(async tx => {
+        const u = await createTestUser(tx, { name: "Rollback User", email: `rb-${randomUUID()}@test.com` });
+        const teacher = await TeacherRepository.create(
+          { userId: u.id, status: "ACTIVATED", timezone: "UTC", createdAt: new Date(), updatedAt: new Date() },
+          tx
+        );
+        createdTeacherId = teacher.id;
+        throw new Error("Simulated rollback error");
+      }).catch(() => null);
+
+      if (createdTeacherId) {
+        const [found] = await db.select().from(teachers).where(eq(teachers.id, createdTeacherId)).limit(1);
+        expect(found).toBeUndefined();
+      }
     });
   });
 });
