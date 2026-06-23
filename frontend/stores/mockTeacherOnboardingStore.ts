@@ -1,30 +1,8 @@
 import { create } from "zustand";
+import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/types";
 
-export interface TeacherOnboardingData {
-  readonly fullName: string;
-  readonly email: string;
-  readonly nationality: string;
-  readonly nationalId: string;
-  readonly phone: string;
-  readonly age: string;
-  readonly gender: "male" | "female" | "";
-  readonly address: string;
-  readonly qualifications: string;
-  readonly skypeId: string;
-  readonly zoomLink: string;
-  readonly country: string;
-  readonly zoomUsername: string;
-  readonly zoomPassword: string;
-  readonly timezone: string;
-  readonly salaryAmount: string;
-  readonly currency: string;
-  readonly beneficiaryName: string;
-  readonly bankName: string;
-  readonly accountNumber: string;
-  readonly routingNumber: string;
-  readonly swiftBic: string;
-  readonly iban: string;
-}
+export type { TeacherOnboardingFormData };
+export type TeacherOnboardingData = TeacherOnboardingFormData;
 
 interface TeacherOnboardingState {
   readonly data: TeacherOnboardingData;

@@ -1,4 +1,7 @@
 import { z } from "zod";
+import type { ParentOnboardingFormData } from "../types";
+
+export type { ParentOnboardingFormData };
 
 export const parentOnboardingSchema = z.object({
   fullName: z.string().min(1, "fullNameRequired"),
@@ -26,5 +29,3 @@ export const parentOnboardingSchema = z.object({
     }),
   currency: z.string().min(1, "currencyRequired"),
 });
-
-export type ParentOnboardingFormData = z.infer<typeof parentOnboardingSchema>;

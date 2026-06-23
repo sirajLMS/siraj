@@ -1,4 +1,7 @@
 import { z } from "zod";
+import type { ManagerAccountType, ManagerOnboardingFormData } from "../types";
+
+export type { ManagerAccountType, ManagerOnboardingFormData };
 
 const departmentValues = ["academic", "operations", "human_resources", "it_support"] as const;
 const accountTypeValues = ["manager", "admin"] as const;
@@ -17,6 +20,4 @@ export const managerOnboardingSchema = z.object({
     }),
 });
 
-export type ManagerOnboardingFormData = z.infer<typeof managerOnboardingSchema>;
-export type ManagerAccountType = (typeof accountTypeValues)[number];
 export type ManagerDepartment = (typeof departmentValues)[number];

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ManagerOnboardingFormData } from "@/frontend/views/dashboard/managers/onboarding/schemas/managerOnboardingSchema";
+import type { ManagerOnboardingFormData } from "@/frontend/views/dashboard/managers/onboarding/types";
 
 interface ManagerOnboardingState {
   readonly data: ManagerOnboardingFormData;

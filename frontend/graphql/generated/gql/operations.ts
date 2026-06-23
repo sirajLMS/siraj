@@ -122,6 +122,254 @@ export type AvailabilitySearchInput = {
   toTime: string;
 };
 
+export type CountryCode =
+  | 'AD'
+  | 'AE'
+  | 'AF'
+  | 'AG'
+  | 'AI'
+  | 'AL'
+  | 'AM'
+  | 'AO'
+  | 'AQ'
+  | 'AR'
+  | 'AS'
+  | 'AT'
+  | 'AU'
+  | 'AW'
+  | 'AX'
+  | 'AZ'
+  | 'BA'
+  | 'BB'
+  | 'BD'
+  | 'BE'
+  | 'BF'
+  | 'BG'
+  | 'BH'
+  | 'BI'
+  | 'BJ'
+  | 'BL'
+  | 'BM'
+  | 'BN'
+  | 'BO'
+  | 'BR'
+  | 'BS'
+  | 'BT'
+  | 'BV'
+  | 'BW'
+  | 'BY'
+  | 'BZ'
+  | 'CA'
+  | 'CC'
+  | 'CD'
+  | 'CF'
+  | 'CG'
+  | 'CH'
+  | 'CI'
+  | 'CK'
+  | 'CL'
+  | 'CM'
+  | 'CN'
+  | 'CO'
+  | 'CR'
+  | 'CU'
+  | 'CV'
+  | 'CW'
+  | 'CX'
+  | 'CY'
+  | 'CZ'
+  | 'DE'
+  | 'DJ'
+  | 'DK'
+  | 'DM'
+  | 'DO'
+  | 'DZ'
+  | 'EC'
+  | 'EE'
+  | 'EG'
+  | 'EH'
+  | 'ER'
+  | 'ES'
+  | 'ET'
+  | 'FI'
+  | 'FJ'
+  | 'FK'
+  | 'FM'
+  | 'FO'
+  | 'FR'
+  | 'GA'
+  | 'GB'
+  | 'GD'
+  | 'GE'
+  | 'GF'
+  | 'GG'
+  | 'GH'
+  | 'GI'
+  | 'GL'
+  | 'GM'
+  | 'GN'
+  | 'GP'
+  | 'GQ'
+  | 'GR'
+  | 'GS'
+  | 'GT'
+  | 'GU'
+  | 'GW'
+  | 'GY'
+  | 'HK'
+  | 'HM'
+  | 'HN'
+  | 'HR'
+  | 'HT'
+  | 'HU'
+  | 'ID'
+  | 'IE'
+  | 'IM'
+  | 'IN'
+  | 'IO'
+  | 'IQ'
+  | 'IR'
+  | 'IS'
+  | 'IT'
+  | 'JE'
+  | 'JM'
+  | 'JO'
+  | 'JP'
+  | 'KE'
+  | 'KG'
+  | 'KH'
+  | 'KI'
+  | 'KM'
+  | 'KN'
+  | 'KP'
+  | 'KR'
+  | 'KW'
+  | 'KY'
+  | 'KZ'
+  | 'LA'
+  | 'LB'
+  | 'LC'
+  | 'LI'
+  | 'LK'
+  | 'LR'
+  | 'LS'
+  | 'LT'
+  | 'LU'
+  | 'LV'
+  | 'LY'
+  | 'MA'
+  | 'MC'
+  | 'MD'
+  | 'ME'
+  | 'MF'
+  | 'MG'
+  | 'MH'
+  | 'MK'
+  | 'ML'
+  | 'MM'
+  | 'MN'
+  | 'MO'
+  | 'MP'
+  | 'MQ'
+  | 'MR'
+  | 'MS'
+  | 'MT'
+  | 'MU'
+  | 'MV'
+  | 'MW'
+  | 'MX'
+  | 'MY'
+  | 'MZ'
+  | 'NA'
+  | 'NC'
+  | 'NE'
+  | 'NF'
+  | 'NG'
+  | 'NI'
+  | 'NL'
+  | 'NO'
+  | 'NP'
+  | 'NR'
+  | 'NU'
+  | 'NZ'
+  | 'OM'
+  | 'PA'
+  | 'PE'
+  | 'PF'
+  | 'PG'
+  | 'PH'
+  | 'PK'
+  | 'PL'
+  | 'PM'
+  | 'PN'
+  | 'PR'
+  | 'PS'
+  | 'PT'
+  | 'PW'
+  | 'PY'
+  | 'QA'
+  | 'RE'
+  | 'RO'
+  | 'RS'
+  | 'RU'
+  | 'RW'
+  | 'SA'
+  | 'SB'
+  | 'SC'
+  | 'SD'
+  | 'SE'
+  | 'SG'
+  | 'SH'
+  | 'SI'
+  | 'SJ'
+  | 'SK'
+  | 'SL'
+  | 'SM'
+  | 'SN'
+  | 'SO'
+  | 'SR'
+  | 'SS'
+  | 'ST'
+  | 'SV'
+  | 'SX'
+  | 'SY'
+  | 'SZ'
+  | 'TC'
+  | 'TD'
+  | 'TF'
+  | 'TG'
+  | 'TH'
+  | 'TJ'
+  | 'TK'
+  | 'TL'
+  | 'TM'
+  | 'TN'
+  | 'TO'
+  | 'TR'
+  | 'TV'
+  | 'TW'
+  | 'TZ'
+  | 'UA'
+  | 'UG'
+  | 'US'
+  | 'UY'
+  | 'UZ'
+  | 'VA'
+  | 'VC'
+  | 'VE'
+  | 'VG'
+  | 'VI'
+  | 'VN'
+  | 'VU'
+  | 'WF'
+  | 'WS'
+  | 'XK'
+  | 'YE'
+  | 'YT'
+  | 'ZA'
+  | 'ZM'
+  | 'ZW';
+
 export type CreateManualClassEntryInput = {
   classType: string | null | undefined;
   durationMinutes: number;
@@ -161,6 +409,10 @@ export type Gender =
   | 'FEMALE'
   | 'MALE';
 
+export type InvoiceType =
+  | 'MONTHLY'
+  | 'PER_CLASSES';
+
 export type LogSupportRequestInput = {
   reason: string;
 };
@@ -168,6 +420,21 @@ export type LogSupportRequestInput = {
 export type LoginInput = {
   email: string;
   password: string;
+};
+
+/** Account type for new manager */
+export type ManagerAccountType =
+  | 'admin'
+  | 'manager';
+
+/** Input for creating a new manager/staff account with RBAC assignment */
+export type ManagerOnboardingInput = {
+  accountType: ManagerAccountType;
+  email: string;
+  name: string;
+  password: string;
+  phone: string | null | undefined;
+  skypeId: string | null | undefined;
 };
 
 export type OrderSortDirection =
@@ -183,6 +450,30 @@ export type PaginationArgs = {
   page: number | null | undefined;
   skip: number | null | undefined;
 };
+
+/** Input for creating a new parent account with billing configuration */
+export type ParentOnboardingInput = {
+  address: string | null | undefined;
+  currency: string | null | undefined;
+  defaultZoomLink: string | null | undefined;
+  email: string;
+  facebook: string | null | undefined;
+  feeAmount: string | null | undefined;
+  invoiceType: InvoiceType | null | undefined;
+  name: string;
+  nationality: string | null | undefined;
+  password: string;
+  paymentMethod: PaymentMethod | null | undefined;
+  phone: string | null | undefined;
+  skype: string | null | undefined;
+  timezone: string | null | undefined;
+  twitter: string | null | undefined;
+  whatsapp: string | null | undefined;
+};
+
+export type PaymentMethod =
+  | 'BANK_ACCOUNT'
+  | 'PAYPAL';
 
 export type RecurringClassDayInput = {
   dayOfWeek: string;
@@ -279,6 +570,60 @@ export type StudentsOrderByColumn =
   | 'PARENT_ID'
   | 'STATUS'
   | 'UPDATED_AT';
+
+/** Input for creating a new teacher account with comprehensive profile */
+export type TeacherOnboardingInput = {
+  /** Bank account number */
+  accountNumber: string | null | undefined;
+  /** Teacher address */
+  address: string | null | undefined;
+  /** Bank name */
+  bankName: string | null | undefined;
+  /** Banking beneficiary name */
+  beneficiaryName: string | null | undefined;
+  /** Teacher country code */
+  countryCode: CountryCode | null | undefined;
+  /** Teacher date of birth (ISO date string) */
+  dateOfBirth: string | null | undefined;
+  /** Teacher email address */
+  email: string;
+  /** Teacher gender */
+  gender: Gender | null | undefined;
+  /** Teacher hourly rate */
+  hourlyRate: string | null | undefined;
+  /** IBAN */
+  iban: string | null | undefined;
+  /** Teacher full name */
+  name: string;
+  /** Teacher national ID (encrypted) */
+  nationalId: string | null | undefined;
+  /** Teacher nationality (country code) */
+  nationality: string | null | undefined;
+  /** Teacher password */
+  password: string;
+  /** Teacher phone number */
+  phone: string | null | undefined;
+  /** Teacher qualifications */
+  qualifications: string | null | undefined;
+  /** Currency for hourly rate */
+  rateCurrency: string | null | undefined;
+  /** Bank routing number */
+  routingNumber: string | null | undefined;
+  /** Teacher Skype ID */
+  skypeId: string | null | undefined;
+  /** SWIFT/BIC code */
+  swiftBic: string | null | undefined;
+  /** IANA timezone identifier */
+  timezone: string;
+  /** Timezone ID reference */
+  timezoneId: number | null | undefined;
+  /** Teacher Zoom meeting link */
+  zoomLink: string | null | undefined;
+  /** Teacher Zoom password (encrypted) */
+  zoomPassword: string | null | undefined;
+  /** Teacher Zoom username */
+  zoomUsername: string | null | undefined;
+};
 
 export type TeacherProfileUpdateInput = {
   address: string | null | undefined;
@@ -678,6 +1023,18 @@ export type DeleteLearningResourceMutationVariables = Exact<{
 
 export type DeleteLearningResourceMutation = DeleteLearningResourceMutation_Mutation;
 
+export type CreateManagerMutation_createManager_ManagerOnboardingResult = { userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, status: string | null, assignedGroupSlug: string | null };
+
+export type CreateManagerMutation_Mutation = { createManager: CreateManagerMutation_createManager_ManagerOnboardingResult | null };
+
+
+export type CreateManagerMutationVariables = Exact<{
+  input: Types.ManagerOnboardingInput;
+}>;
+
+
+export type CreateManagerMutation = CreateManagerMutation_Mutation;
+
 export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert = { id: string | null, type: string | null, title: string | null, body: string | null, createdAt: string | null, severity: string | null };
 
 export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult = { id: string | null, totalCount: number | null, unreadCount: number | null, alerts: Array<NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert> | null };
@@ -745,6 +1102,18 @@ export type LinkDocumentToParentMutationVariables = Exact<{
 
 
 export type LinkDocumentToParentMutation = LinkDocumentToParentMutation_Mutation;
+
+export type CreateParentMutation_createParent_ParentOnboardingResult = { userId: string | null, parentId: string | null, name: string | null, email: string | null, status: string | null, invoiceType: string | null, currency: string | null };
+
+export type CreateParentMutation_Mutation = { createParent: CreateParentMutation_createParent_ParentOnboardingResult | null };
+
+
+export type CreateParentMutationVariables = Exact<{
+  input: Types.ParentOnboardingInput;
+}>;
+
+
+export type CreateParentMutation = CreateParentMutation_Mutation;
 
 export type ParentProfileQuery_parentProfile_ParentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, skype: string | null, defaultZoomLink: string | null, invoiceType: string | null, feeAmount: string | null, paymentMethod: string | null, currency: string | null, timezone: string | null, createdAt: string | null, updatedAt: string | null };
 
@@ -1317,6 +1686,18 @@ export type TeacherHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type TeacherHandbookUrlQuery = TeacherHandbookUrlQuery_Query;
+
+export type CreateTeacherMutation_createTeacher_TeacherOnboardingResult = { userId: string | null, teacherId: string | null, name: string | null, email: string | null, status: string | null };
+
+export type CreateTeacherMutation_Mutation = { createTeacher: CreateTeacherMutation_createTeacher_TeacherOnboardingResult | null };
+
+
+export type CreateTeacherMutationVariables = Exact<{
+  input: Types.TeacherOnboardingInput;
+}>;
+
+
+export type CreateTeacherMutation = CreateTeacherMutation_Mutation;
 
 export type TeachersQuery_teachers_TeacherSimple = { id: string | null, name: string | null };
 

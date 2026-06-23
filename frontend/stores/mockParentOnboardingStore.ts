@@ -1,21 +1,8 @@
 import { create } from "zustand";
+import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/parents/onboarding/types";
 
-export interface ParentOnboardingData {
-  readonly fullName: string;
-  readonly email: string;
-  readonly phone: string;
-  readonly nationality: string;
-  readonly address: string;
-  readonly whatsapp: string;
-  readonly facebook: string;
-  readonly twitter: string;
-  readonly skype: string;
-  readonly zoomId: string;
-  readonly invoiceType: "per_class" | "monthly" | "semester" | "";
-  readonly feeAmount: string;
-  readonly paymentMethod: "bank_transfer" | "credit_card" | "cash" | "paypal" | "";
-  readonly currency: string;
-}
+export type { ParentOnboardingFormData };
+export type ParentOnboardingData = ParentOnboardingFormData;
 
 interface ParentOnboardingState {
   readonly data: ParentOnboardingData;
