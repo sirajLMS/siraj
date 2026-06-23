@@ -3,7 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useCreateManagerMutation, useManagerOnboardingStore } from "@/frontend/stores/managerOnboardingStore";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useCreateManagerMutation } from "@/frontend/stores/managerOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
 import { ManagerOnboardingView } from "./ManagerOnboardingView";
@@ -22,8 +24,7 @@ const defaultValues: ManagerOnboardingFormData = {
 
 export function ManagerOnboardingContainer() {
   const router = useRouter();
-  const { isSubmitting, reset } = useManagerOnboardingStore();
-  const { execute } = useCreateManagerMutation();
+  const { execute, loading } = useCreateManagerMutation();
   const [showSuccess, setShowSuccess] = useState(false);
 
   const {
@@ -54,7 +55,6 @@ export function ManagerOnboardingContainer() {
       logger.info("Manager onboarding form submitted successfully");
       setShowSuccess(true);
       resetForm();
-      reset();
     } catch (error) {
       logger.error("Failed to submit manager onboarding form", { error });
     }
@@ -65,18 +65,20 @@ export function ManagerOnboardingContainer() {
   };
 
   return (
-    <ManagerOnboardingView
-      register={register}
-      control={control}
-      errors={errors}
-      handleSubmit={handleSubmit}
-      isSubmitting={isSubmitting}
-      showSuccess={showSuccess}
-      onSubmit={onSubmit}
-      onCancel={onCancel}
-      onDismissSuccess={() => {
-        setShowSuccess(false);
-      }}
-    />
+    <RequirePermission permissions={[AppPermission.StaffCreate]}>
+      <ManagerOnboardingView
+        register={register}
+        control={control}
+        errors={errors}
+        handleSubmit={handleSubmit}
+        isSubmitting={loading}
+        showSuccess={showSuccess}
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+        onDismissSuccess={() => {
+          setShowSuccess(false);
+        }}
+      />
+    </RequirePermission>
   );
 }
