@@ -9,6 +9,8 @@ import logger from "@/backend/lib/logger";
 import type { PaginatedUsersResponseSelectType, PaginationArgs, UserCreateInput, UserEntity } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 
+type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
 export namespace UserRepository {
   /**
    * Internal helper to find a single user by a condition
@@ -23,8 +25,9 @@ export namespace UserRepository {
     }
   }
 
-  export const existsByEmail = async (email: string): Promise<boolean> => {
-    return (await db.$count(users, eq(users.email, email))) > 0;
+  export const existsByEmail = async (email: string, tx?: DBTransaction): Promise<boolean> => {
+    const queryDb = tx ?? db;
+    return (await queryDb.$count(users, eq(users.email, email))) > 0;
   };
 
   export const findUserByIdOrThrow = async (id: string, locale?: string): Promise<UserEntity> => {
@@ -102,8 +105,9 @@ export namespace UserRepository {
     };
   };
 
-  export const create = async (input: UserCreateInput, locale?: string): Promise<UserEntity> => {
-    const exists = await existsByEmail(input.email.value);
+  export const create = async (input: UserCreateInput, locale?: string, tx?: DBTransaction): Promise<UserEntity> => {
+    const queryDb = tx ?? db;
+    const exists = await existsByEmail(input.email.value, tx);
     const t = await getBackendTranslations({ locale, namespace: "errors" });
     if (exists) {
       throw new Error(t("userEmailExists", { email: input.email.value }));
@@ -114,7 +118,7 @@ export namespace UserRepository {
     const hashedPassword = await bcrypt.hash(input.password, 12);
 
     try {
-      const [result] = await db
+      const [result] = await queryDb
         .insert(users)
         .values({
           name: input.name,
