@@ -3,14 +3,34 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { useParentOnboardingStore } from "@/frontend/stores/mockParentOnboardingStore";
+import { useCreateParentMutation, useParentOnboardingStore } from "@/frontend/stores/parentOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentOnboardingView } from "./ParentOnboardingView";
 import { type ParentOnboardingFormData, parentOnboardingSchema } from "./schemas/parentOnboardingSchema";
 
+import { InvoiceType, PaymentMethod } from "./types";
+
+const defaultValues: ParentOnboardingFormData = {
+  name: "",
+  email: "",
+  phone: "",
+  nationality: "",
+  address: "",
+  whatsapp: "",
+  facebook: "",
+  twitter: "",
+  skype: "",
+  defaultZoomLink: "",
+  invoiceType: InvoiceType.Monthly,
+  feeAmount: "",
+  paymentMethod: PaymentMethod.Paypal,
+  currency: "USD",
+};
+
 export function ParentOnboardingContainer() {
   const t = useTranslations("dashboard.parentOnboarding");
-  const { data, isSubmitting, setSubmitting, reset } = useParentOnboardingStore();
+  const { isSubmitting, reset } = useParentOnboardingStore();
+  const { execute } = useCreateParentMutation();
 
   const {
     register,
@@ -19,23 +39,19 @@ export function ParentOnboardingContainer() {
     reset: resetForm,
   } = useForm<ParentOnboardingFormData>({
     resolver: zodResolver(parentOnboardingSchema),
-    defaultValues: data as ParentOnboardingFormData,
+    defaultValues,
   });
 
   const onSubmit = async (formData: ParentOnboardingFormData) => {
-    setSubmitting(true);
     try {
       logger.info("Submitting parent onboarding form", { formData });
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await execute(formData);
       logger.info("Parent onboarding form submitted successfully");
       alert(t("actions.successMessage"));
       resetForm();
       reset();
     } catch (error) {
       logger.error("Failed to submit parent onboarding form", { error });
-    } finally {
-      setSubmitting(false);
     }
   };
 

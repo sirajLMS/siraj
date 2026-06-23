@@ -1,6 +1,8 @@
 import type { TeacherOnboardingInput, TeacherOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
+import { CountryCode, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export type { TeacherOnboardingInput, TeacherOnboardingResult };
+export { CountryCode, Gender };
 
 type CleanField<T> = T extends null ? undefined : T;
 type CleanInput<T> = {
@@ -14,29 +16,27 @@ export type TeacherOnboardingFormData = Omit<
   CleanInput<TeacherOnboardingInput>,
   | "password"
   | "timezoneId"
-  | "name"
-  | "dateOfBirth"
-  | "countryCode"
-  | "hourlyRate"
-  | "rateCurrency"
-  | "gender"
   | "nationalId"
   | "phone"
+  | "countryCode"
+  | "timezone"
+  | "hourlyRate"
+  | "rateCurrency"
   | "beneficiaryName"
   | "bankName"
   | "accountNumber"
   | "iban"
+  | "gender"
 > & {
-  fullName: string;
-  age?: string;
-  country: string;
-  salaryAmount: string;
-  currency: string;
-  gender: "male" | "female" | "";
   nationalId: string;
   phone: string;
+  countryCode: CountryCode;
+  timezone: string;
+  hourlyRate: string;
+  rateCurrency: string;
   beneficiaryName: string;
   bankName: string;
   accountNumber: string;
   iban: string;
+  gender: Gender;
 };

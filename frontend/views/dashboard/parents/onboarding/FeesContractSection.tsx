@@ -6,6 +6,7 @@ import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import { SectionPanel } from "@/frontend/components/ui/SectionPanel";
 import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema";
+import { InvoiceType, PaymentMethod } from "./types";
 
 interface SectionProps {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
@@ -31,9 +32,8 @@ function InvoiceFields({ register, errors }: SectionProps) {
             defaultValue=""
           >
             <MenuItem value="">{t("placeholders.invoiceType")}</MenuItem>
-            <MenuItem value="per_class">{t("options.invoiceType.perClass")}</MenuItem>
-            <MenuItem value="monthly">{t("options.invoiceType.monthly")}</MenuItem>
-            <MenuItem value="semester">{t("options.invoiceType.semester")}</MenuItem>
+            <MenuItem value={InvoiceType.PerClasses}>{t("options.invoiceType.perClass")}</MenuItem>
+            <MenuItem value={InvoiceType.Monthly}>{t("options.invoiceType.monthly")}</MenuItem>
           </Select>
         </FieldWrapper>
       </Grid>
@@ -89,10 +89,8 @@ function PaymentFields({ register, errors }: SectionProps) {
             defaultValue=""
           >
             <MenuItem value="">{t("placeholders.paymentMethod")}</MenuItem>
-            <MenuItem value="bank_transfer">{t("options.paymentMethod.bankTransfer")}</MenuItem>
-            <MenuItem value="credit_card">{t("options.paymentMethod.creditCard")}</MenuItem>
-            <MenuItem value="cash">{t("options.paymentMethod.cash")}</MenuItem>
-            <MenuItem value="paypal">{t("options.paymentMethod.paypal")}</MenuItem>
+            <MenuItem value={PaymentMethod.BankAccount}>{t("options.paymentMethod.bankTransfer")}</MenuItem>
+            <MenuItem value={PaymentMethod.Paypal}>{t("options.paymentMethod.paypal")}</MenuItem>
           </Select>
         </FieldWrapper>
       </Grid>

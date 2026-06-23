@@ -36,10 +36,10 @@ export function SalaryDetailsSection({ register, errors, labels }: Readonly<Sala
           </Box>
         </Box>
         <Input
-          {...register("salaryAmount")}
+          {...register("hourlyRate")}
           placeholder={labels.placeholders.salaryAmount}
           type="number"
-          error={!!errors.salaryAmount}
+          error={!!errors.hourlyRate}
           fullWidth
           sx={standardInputSx}
           startAdornment={
@@ -56,9 +56,9 @@ export function SalaryDetailsSection({ register, errors, labels }: Readonly<Sala
             </InputAdornment>
           }
         />
-        {errors.salaryAmount ? (
+        {errors.hourlyRate ? (
           <Typography variant="labelMd" sx={theme => ({ color: theme.palette.error.main, mt: 0.5, display: "block" })}>
-            {errors.salaryAmount.message}
+            {errors.hourlyRate.message}
           </Typography>
         ) : null}
       </Grid>
@@ -66,7 +66,7 @@ export function SalaryDetailsSection({ register, errors, labels }: Readonly<Sala
         <Box component="label" sx={labelSx}>
           {labels.fields.currency}
         </Box>
-        <Select {...register("currency")} defaultValue="USD" fullWidth sx={outlinedInputSx}>
+        <Select {...register("rateCurrency")} defaultValue="USD" fullWidth sx={outlinedInputSx}>
           <MenuItem value="USD">USD</MenuItem>
           <MenuItem value="EGP">EGP</MenuItem>
           <MenuItem value="SAR">SAR</MenuItem>

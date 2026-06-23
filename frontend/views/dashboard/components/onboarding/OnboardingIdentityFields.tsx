@@ -5,7 +5,8 @@ import type { FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 
 interface IdentityFieldShape {
-  readonly fullName: string;
+  readonly fullName?: string;
+  readonly name?: string;
   readonly email: string;
   readonly phone?: string;
 }
@@ -28,9 +29,11 @@ export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldVal
   translate,
   phoneRequired = false,
 }: Props<T>) {
-  const fullNameField = "fullName" as Path<T>;
+  const nameField = ("name" in errors || !("fullName" in errors) ? "name" : "fullName") as Path<T>;
   const emailField = "email" as Path<T>;
   const phoneField = "phone" as Path<T>;
+
+  const nameError = nameField === "name" ? errors.name : errors.fullName;
 
   return (
     <>
@@ -38,12 +41,12 @@ export function OnboardingIdentityFields<T extends IdentityFieldShape & FieldVal
         <FieldWrapper
           label={translate("fields.fullName")}
           required
-          error={validationMessage(translate, errors.fullName?.message as string | undefined)}
+          error={validationMessage(translate, nameError?.message as string | undefined)}
         >
           <Input
-            {...register(fullNameField)}
+            {...register(nameField)}
             placeholder={translate("placeholders.fullName")}
-            error={!!errors.fullName}
+            error={!!nameError}
             fullWidth
             sx={standardInputSx}
           />

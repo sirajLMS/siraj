@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { TeacherOnboardingFormData } from "../types";
+import { CountryCode, Gender, type TeacherOnboardingFormData } from "../types";
 
 export type { TeacherOnboardingFormData };
 
@@ -21,25 +21,28 @@ export const teacherOnboardingSchema = (validationLabels: {
   readonly urlInvalid: string;
 }) =>
   z.object({
-    fullName: z.string().min(1, validationLabels.fullNameRequired),
+    name: z.string().min(1, validationLabels.fullNameRequired),
     email: z.email({ message: validationLabels.emailInvalid }),
     nationality: z.string().optional(),
     nationalId: z.string().min(1, validationLabels.nationalIdRequired),
     phone: z.string().min(1, validationLabels.phoneRequired),
-    age: z.string().optional(),
-    gender: z.enum(["male", "female", ""]).refine(val => val !== "", {
+    dateOfBirth: z.string().optional(),
+    gender: z.custom<Gender>(val => typeof val === "string" && Object.values(Gender).includes(val as Gender), {
       message: validationLabels.genderRequired,
     }),
     address: z.string().optional(),
     qualifications: z.string().optional(),
     skypeId: z.string().optional(),
     zoomLink: z.url({ message: validationLabels.urlInvalid }).or(z.literal("")).optional(),
-    country: z.string().min(1, validationLabels.countryRequired),
+    countryCode: z.custom<CountryCode>(
+      val => typeof val === "string" && Object.values(CountryCode).includes(val as CountryCode),
+      { message: validationLabels.countryRequired }
+    ),
     zoomUsername: z.string().optional(),
     zoomPassword: z.string().optional(),
     timezone: z.string().min(1, validationLabels.timezoneRequired),
-    salaryAmount: z.string().min(1, validationLabels.salaryAmountRequired),
-    currency: z.string().min(1, validationLabels.currencyRequired),
+    hourlyRate: z.string().min(1, validationLabels.salaryAmountRequired),
+    rateCurrency: z.string().min(1, validationLabels.currencyRequired),
     beneficiaryName: z.string().min(1, validationLabels.beneficiaryNameRequired),
     bankName: z.string().min(1, validationLabels.bankNameRequired),
     accountNumber: z.string().min(1, validationLabels.accountNumberRequired),

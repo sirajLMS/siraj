@@ -1,6 +1,8 @@
 import type { ParentOnboardingInput, ParentOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
+import { InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export type { ParentOnboardingInput, ParentOnboardingResult };
+export { InvoiceType, PaymentMethod };
 
 type CleanField<T> = T extends null ? undefined : T;
 type CleanInput<T> = {
@@ -12,23 +14,12 @@ type CleanInput<T> = {
 // Derived directly from generated GQL input type using Omit
 export type ParentOnboardingFormData = Omit<
   CleanInput<ParentOnboardingInput>,
-  | "password"
-  | "name"
-  | "defaultZoomLink"
-  | "invoiceType"
-  | "paymentMethod"
-  | "phone"
-  | "address"
-  | "feeAmount"
-  | "currency"
-  | "timezone"
+  "password" | "phone" | "address" | "feeAmount" | "currency" | "invoiceType" | "paymentMethod"
 > & {
-  fullName: string;
-  zoomId?: string;
-  invoiceType: string;
-  paymentMethod: string;
   phone: string;
   address: string;
   feeAmount: string;
   currency: string;
+  invoiceType: InvoiceType;
+  paymentMethod: PaymentMethod;
 };

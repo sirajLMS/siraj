@@ -5,6 +5,8 @@ import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
 import type { TeacherOnboardingFormData } from "../schemas/teacherOnboardingSchema";
 
+import { Gender } from "../types";
+
 interface SectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
@@ -46,15 +48,15 @@ export function BasicInfoFields({ register, errors, labels }: Readonly<SectionPr
           </Box>
         </Box>
         <Input
-          {...register("fullName")}
+          {...register("name")}
           placeholder={labels.placeholders.fullName}
-          error={!!errors.fullName}
+          error={!!errors.name}
           fullWidth
           sx={standardInputSx}
         />
-        {errors.fullName ? (
+        {errors.name ? (
           <Typography variant="caption" sx={theme => ({ color: theme.palette.error.main })}>
-            {errors.fullName.message}
+            {errors.name.message}
           </Typography>
         ) : null}
       </Grid>
@@ -143,7 +145,7 @@ export function IdentityFields({ register, errors, labels }: Readonly<SectionPro
               {labels.fields.age}
             </Box>
             <Input
-              {...register("age")}
+              {...register("dateOfBirth")}
               placeholder={labels.placeholders.age}
               type="number"
               fullWidth
@@ -157,13 +159,13 @@ export function IdentityFields({ register, errors, labels }: Readonly<SectionPro
               </Box>
               <RadioGroup row name="gender">
                 <FormControlLabel
-                  value="male"
+                  value={Gender.Male}
                   control={<Radio {...register("gender")} sx={theme => ({ color: theme.palette.primary.main })} />}
                   label={labels.fields.male}
                   slotProps={{ typography: { variant: "bodyMd" } }}
                 />
                 <FormControlLabel
-                  value="female"
+                  value={Gender.Female}
                   control={<Radio {...register("gender")} sx={theme => ({ color: theme.palette.primary.main })} />}
                   label={labels.fields.female}
                   slotProps={{ typography: { variant: "bodyMd" } }}

@@ -6,6 +6,8 @@ import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { labelSx, outlinedInputSx, standardInputSx } from "@/frontend/components/ui/form";
 import type { TeacherOnboardingFormData } from "../schemas/teacherOnboardingSchema";
 
+import { CountryCode } from "../types";
+
 interface OfficialDetailsSectionProps {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
@@ -70,12 +72,12 @@ export function OfficialDetailsSection({ register, errors, labels }: Readonly<Of
             *
           </Box>
         </Box>
-        <Select {...register("country")} defaultValue="Egypt" fullWidth sx={outlinedInputSx}>
-          <MenuItem value="Egypt">Egypt</MenuItem>
-          <MenuItem value="United Arab Emirates">United Arab Emirates</MenuItem>
-          <MenuItem value="Saudi Arabia">Saudi Arabia</MenuItem>
-          <MenuItem value="United Kingdom">United Kingdom</MenuItem>
-          <MenuItem value="United States">United States</MenuItem>
+        <Select {...register("countryCode")} defaultValue={CountryCode.Eg} fullWidth sx={outlinedInputSx}>
+          <MenuItem value={CountryCode.Eg}>Egypt</MenuItem>
+          <MenuItem value={CountryCode.Ae}>United Arab Emirates</MenuItem>
+          <MenuItem value={CountryCode.Sa}>Saudi Arabia</MenuItem>
+          <MenuItem value={CountryCode.Gb}>United Kingdom</MenuItem>
+          <MenuItem value={CountryCode.Us}>United States</MenuItem>
         </Select>
       </Grid>
       <Grid size={{ xs: 12, md: 3 }}>

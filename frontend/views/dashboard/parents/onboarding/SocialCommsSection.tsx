@@ -87,7 +87,7 @@ export function SocialCommsSection({ register }: Props) {
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <FieldWrapper label={t("fields.zoomId")}>
             <Input
-              {...register("zoomId")}
+              {...register("defaultZoomLink")}
               placeholder={t("placeholders.zoomId")}
               fullWidth
               sx={standardInputSx}

@@ -13,6 +13,7 @@ import { SalaryDetailsSection } from "./components/SalaryDetailsSection";
 import { TeacherInfoSection } from "./components/TeacherInfoSection";
 import type { TeacherOnboardingFormData } from "./schemas/teacherOnboardingSchema";
 import { teacherOnboardingSchema } from "./schemas/teacherOnboardingSchema";
+import { CountryCode, Gender } from "./types";
 
 interface TeacherOnboardingViewProps {
   readonly isSubmitting: boolean;
@@ -105,10 +106,10 @@ export function TeacherOnboardingView({
   } = useForm<TeacherOnboardingFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      gender: "",
-      country: "Egypt",
+      gender: Gender.Male,
+      countryCode: CountryCode.Eg,
       timezone: "(GMT+02:00) Cairo",
-      currency: "USD",
+      rateCurrency: "USD",
     },
   });
 

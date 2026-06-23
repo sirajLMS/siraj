@@ -7,9 +7,10 @@ import type { Control, FieldErrors } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import { SectionPanel } from "@/frontend/components/ui/SectionPanel";
-import type { ManagerAccountType, ManagerOnboardingFormData } from "./schemas/managerOnboardingSchema";
+import type { ManagerOnboardingFormData } from "./schemas/managerOnboardingSchema";
+import { ManagerAccountType } from "./types";
 
-const ACCOUNT_TYPES: readonly ManagerAccountType[] = ["manager", "admin"];
+const ACCOUNT_TYPES: readonly ManagerAccountType[] = [ManagerAccountType.Manager, ManagerAccountType.Admin];
 
 const DEPARTMENTS = [
   { value: "academic", labelKey: "academic" },
@@ -82,7 +83,7 @@ function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboa
                   field.onChange(type);
                 }}
               >
-                {t(`options.accountType.${type}`)}
+                {t(`options.accountType.${type.toLowerCase()}`)}
               </StyledAccountTypeButton>
             );
           })}
@@ -160,7 +161,9 @@ export function SystemAccessSection({ control, errors }: Props) {
   const t = useTranslations("dashboard.managerOnboarding");
   const accountType = useWatch({ control, name: "accountType" });
   const descriptionKey =
-    accountType === "admin" ? "options.accountTypeDescriptions.admin" : "options.accountTypeDescriptions.manager";
+    accountType === ManagerAccountType.Admin
+      ? "options.accountTypeDescriptions.admin"
+      : "options.accountTypeDescriptions.manager";
 
   return (
     <SectionPanel title={t("sections.systemAccess")}>

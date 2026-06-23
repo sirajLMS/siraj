@@ -1,17 +1,18 @@
 import { z } from "zod";
-import type { ManagerAccountType, ManagerOnboardingFormData } from "../types";
+import { ManagerAccountType, type ManagerOnboardingFormData } from "../types";
 
-export type { ManagerAccountType, ManagerOnboardingFormData };
+export type { ManagerOnboardingFormData };
 
 const departmentValues = ["academic", "operations", "human_resources", "it_support"] as const;
-const accountTypeValues = ["manager", "admin"] as const;
 
 export const managerOnboardingSchema = z.object({
-  fullName: z.string().min(1, "fullNameRequired"),
+  name: z.string().min(1, "fullNameRequired"),
   email: z.email({ message: "emailInvalid" }),
   phone: z.string().optional(),
   skypeId: z.string().optional(),
-  accountType: z.enum(accountTypeValues),
+  accountType: z.custom<ManagerAccountType>(
+    val => typeof val === "string" && Object.values(ManagerAccountType).includes(val as ManagerAccountType)
+  ),
   department: z
     .string()
     .min(1, "departmentRequired")

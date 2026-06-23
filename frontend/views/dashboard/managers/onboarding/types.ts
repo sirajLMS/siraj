@@ -1,8 +1,8 @@
 import type { ManagerOnboardingInput, ManagerOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ManagerAccountType } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export type { ManagerOnboardingInput, ManagerOnboardingResult };
-
-export type ManagerAccountType = "admin" | "manager";
+export { ManagerAccountType };
 
 type CleanField<T> = T extends null ? undefined : T;
 type CleanInput<T> = {
@@ -12,11 +12,6 @@ type CleanInput<T> = {
 };
 
 // Derived directly from generated GQL input type using Omit
-export type ManagerOnboardingFormData = Omit<
-  CleanInput<ManagerOnboardingInput>,
-  "password" | "name" | "accountType"
-> & {
-  fullName: string;
-  accountType: ManagerAccountType;
-  department: string;
+export type ManagerOnboardingFormData = Omit<CleanInput<ManagerOnboardingInput>, "password"> & {
+  department: string; // UI specific
 };
