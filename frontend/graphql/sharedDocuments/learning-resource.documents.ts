@@ -51,3 +51,12 @@ export const prepareUploadMutationDocument: TypedDocumentNode<
     }
   }
 `;
+
+export const deleteLearningResourceMutationDocument: TypedDocumentNode<
+  Operations.DeleteLearningResourceMutation,
+  Types.MutationDeleteLearningResourceArgs
+> = gql`
+  mutation DeleteLearningResource($id: ID!) {
+    deleteLearningResource(id: $id)
+  }
+`;

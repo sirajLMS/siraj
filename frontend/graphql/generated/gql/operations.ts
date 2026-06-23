@@ -105,6 +105,17 @@ export type AssignPermissionGroupToUserInput = {
   userId: string;
 };
 
+/** Filters applied to the dynamic attendance query engine. */
+export type AttendanceReportFiltersInput = {
+  /** ISO Date String representing start bound */
+  fromDate: string;
+  groupBy: ReportGroupingMode;
+  /** Optional UUID to filter by a specific teacher */
+  teacherId: string | null | undefined;
+  /** ISO Date String representing end bound */
+  toDate: string;
+};
+
 export type AvailabilitySearchInput = {
   fromTime: string;
   gender: string | null | undefined;
@@ -178,6 +189,11 @@ export type RecurringClassDayInput = {
   isActive: boolean;
   startTime: string;
 };
+
+/** Determines how the attendance data is aggregated. */
+export type ReportGroupingMode =
+  | 'DATE'
+  | 'TEACHER';
 
 export type RescheduleClassInput = {
   durationMinutes: number;
@@ -652,6 +668,16 @@ export type PrepareUploadMutationVariables = Exact<{
 
 export type PrepareUploadMutation = PrepareUploadMutation_Mutation;
 
+export type DeleteLearningResourceMutation_Mutation = { deleteLearningResource: boolean | null };
+
+
+export type DeleteLearningResourceMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeleteLearningResourceMutation = DeleteLearningResourceMutation_Mutation;
+
 export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert = { id: string | null, type: string | null, title: string | null, body: string | null, createdAt: string | null, severity: string | null };
 
 export type NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult = { id: string | null, totalCount: number | null, unreadCount: number | null, alerts: Array<NotificationAlertsQuery_notificationAlerts_NotificationAlertsResult_alerts_SystemAlert> | null };
@@ -940,6 +966,18 @@ export type CreateRecurringClassMutationVariables = Exact<{
 
 
 export type CreateRecurringClassMutation = CreateRecurringClassMutation_Mutation;
+
+export type GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportRow = { id: string | null, groupKey: string | null, groupLabel: string | null, takenClasses: number | null, absentClasses: number | null, leaveClasses: number | null, pendingClasses: number | null, totalHours: number | null, paidEGP: number | null, paidUSD: number | null };
+
+export type GenerateAttendanceReportQuery_Query = { generateAttendanceReport: Array<GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportRow> | null };
+
+
+export type GenerateAttendanceReportQueryVariables = Exact<{
+  filters: Types.AttendanceReportFiltersInput;
+}>;
+
+
+export type GenerateAttendanceReportQuery = GenerateAttendanceReportQuery_Query;
 
 export type DeleteRecurringClassMutation_Mutation = { deleteRecurringClass: boolean | null };
 

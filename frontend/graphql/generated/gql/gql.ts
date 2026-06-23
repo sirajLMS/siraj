@@ -42,6 +42,7 @@ type Documents = {
     "\n  \n  query learningResources($searchQuery: String) {\n    learningResources(searchQuery: $searchQuery) {\n      ...LearningResourceRowFragment\n    }\n  }\n": typeof types.LearningResourcesDocument,
     "\n  \n  mutation uploadLearningResource($input: ResourceUploadInput!) {\n    uploadLearningResource(input: $input) {\n      ...LearningResourceRowFragment\n    }\n  }\n": typeof types.UploadLearningResourceDocument,
     "\n  mutation prepareUpload($input: UploadPreparationInput!) {\n    prepareUpload(input: $input) {\n      id\n      url\n      uploadType\n    }\n  }\n": typeof types.PrepareUploadDocument,
+    "\n  mutation DeleteLearningResource($id: ID!) {\n    deleteLearningResource(id: $id)\n  }\n": typeof types.DeleteLearningResourceDocument,
     "\n  query notificationAlerts {\n    notificationAlerts {\n      id\n      totalCount\n      unreadCount\n      alerts {\n        id\n        type\n        title\n        body\n        createdAt\n        severity\n      }\n    }\n  }\n": typeof types.NotificationAlertsDocument,
     "\n  query ParentInvoiceHistory($parentId: String!) {\n    parentInvoiceHistory(parentId: $parentId) {\n      id\n      issueDate\n      dueDate\n      paidDate\n      amount\n      currency\n      status\n      invoiceType\n      studentId\n    }\n  }\n": typeof types.ParentInvoiceHistoryDocument,
     "\n  query parentDirectory($search: String, $limit: Int, $offset: Int) {\n    parentDirectory(search: $search, limit: $limit, offset: $offset) {\n      id\n      metrics {\n        id\n        activated\n        deactivated\n        regular\n        onLeave\n        suspended\n        onTrial\n      }\n      rows {\n        id\n        index\n        name\n        email\n        avatarUrl\n        guardianOf\n        time\n        accountStatus\n        unpaidInvoices\n      }\n      totalParents\n    }\n  }\n": typeof types.ParentDirectoryDocument,
@@ -69,6 +70,7 @@ type Documents = {
     "\n  mutation bulkRevokeUsersFromGroup($groupId: String!, $userIds: [String!]!) {\n    bulkRevokeUsersFromGroup(groupId: $groupId, userIds: $userIds)\n  }\n": typeof types.BulkRevokeUsersFromGroupDocument,
     "\n  mutation updateUserOverrides($userId: String!, $overrides: [UserOverrideInput!]!) {\n    updateUserOverrides(userId: $userId, overrides: $overrides)\n  }\n": typeof types.UpdateUserOverridesDocument,
     "\n  mutation createRecurringClass($input: CreateRecurringClassInput!) {\n    createRecurringClass(input: $input) {\n      id\n      recurringScheduleId\n      classInstanceIds\n      classInstanceCount\n    }\n  }\n": typeof types.CreateRecurringClassDocument,
+    "\n  query GenerateAttendanceReport($filters: AttendanceReportFiltersInput!) {\n    generateAttendanceReport(filters: $filters) {\n      id\n      groupKey\n      groupLabel\n      takenClasses\n      absentClasses\n      leaveClasses\n      pendingClasses\n      totalHours\n      paidEGP\n      paidUSD\n    }\n  }\n": typeof types.GenerateAttendanceReportDocument,
     "\n  mutation deleteRecurringClass($classInstanceId: ID!) {\n    deleteRecurringClass(classInstanceId: $classInstanceId)\n  }\n": typeof types.DeleteRecurringClassDocument,
     "\n  mutation clearWeeklySchedule($teacherId: ID!) {\n    clearWeeklySchedule(teacherId: $teacherId)\n  }\n": typeof types.ClearWeeklyScheduleDocument,
     "\n  query dailyScheduleMetrics($date: String!, $teacherId: String) {\n    dailyScheduleMetrics(date: $date, teacherId: $teacherId) {\n      id\n      total\n      regular\n      trial\n      advance\n      rescheduled\n      suspended\n      taken\n      pending\n      activated\n      running\n      absent\n      leave\n    }\n  }\n": typeof types.DailyScheduleMetricsDocument,
@@ -132,6 +134,7 @@ const documents: Documents = {
     "\n  \n  query learningResources($searchQuery: String) {\n    learningResources(searchQuery: $searchQuery) {\n      ...LearningResourceRowFragment\n    }\n  }\n": types.LearningResourcesDocument,
     "\n  \n  mutation uploadLearningResource($input: ResourceUploadInput!) {\n    uploadLearningResource(input: $input) {\n      ...LearningResourceRowFragment\n    }\n  }\n": types.UploadLearningResourceDocument,
     "\n  mutation prepareUpload($input: UploadPreparationInput!) {\n    prepareUpload(input: $input) {\n      id\n      url\n      uploadType\n    }\n  }\n": types.PrepareUploadDocument,
+    "\n  mutation DeleteLearningResource($id: ID!) {\n    deleteLearningResource(id: $id)\n  }\n": types.DeleteLearningResourceDocument,
     "\n  query notificationAlerts {\n    notificationAlerts {\n      id\n      totalCount\n      unreadCount\n      alerts {\n        id\n        type\n        title\n        body\n        createdAt\n        severity\n      }\n    }\n  }\n": types.NotificationAlertsDocument,
     "\n  query ParentInvoiceHistory($parentId: String!) {\n    parentInvoiceHistory(parentId: $parentId) {\n      id\n      issueDate\n      dueDate\n      paidDate\n      amount\n      currency\n      status\n      invoiceType\n      studentId\n    }\n  }\n": types.ParentInvoiceHistoryDocument,
     "\n  query parentDirectory($search: String, $limit: Int, $offset: Int) {\n    parentDirectory(search: $search, limit: $limit, offset: $offset) {\n      id\n      metrics {\n        id\n        activated\n        deactivated\n        regular\n        onLeave\n        suspended\n        onTrial\n      }\n      rows {\n        id\n        index\n        name\n        email\n        avatarUrl\n        guardianOf\n        time\n        accountStatus\n        unpaidInvoices\n      }\n      totalParents\n    }\n  }\n": types.ParentDirectoryDocument,
@@ -159,6 +162,7 @@ const documents: Documents = {
     "\n  mutation bulkRevokeUsersFromGroup($groupId: String!, $userIds: [String!]!) {\n    bulkRevokeUsersFromGroup(groupId: $groupId, userIds: $userIds)\n  }\n": types.BulkRevokeUsersFromGroupDocument,
     "\n  mutation updateUserOverrides($userId: String!, $overrides: [UserOverrideInput!]!) {\n    updateUserOverrides(userId: $userId, overrides: $overrides)\n  }\n": types.UpdateUserOverridesDocument,
     "\n  mutation createRecurringClass($input: CreateRecurringClassInput!) {\n    createRecurringClass(input: $input) {\n      id\n      recurringScheduleId\n      classInstanceIds\n      classInstanceCount\n    }\n  }\n": types.CreateRecurringClassDocument,
+    "\n  query GenerateAttendanceReport($filters: AttendanceReportFiltersInput!) {\n    generateAttendanceReport(filters: $filters) {\n      id\n      groupKey\n      groupLabel\n      takenClasses\n      absentClasses\n      leaveClasses\n      pendingClasses\n      totalHours\n      paidEGP\n      paidUSD\n    }\n  }\n": types.GenerateAttendanceReportDocument,
     "\n  mutation deleteRecurringClass($classInstanceId: ID!) {\n    deleteRecurringClass(classInstanceId: $classInstanceId)\n  }\n": types.DeleteRecurringClassDocument,
     "\n  mutation clearWeeklySchedule($teacherId: ID!) {\n    clearWeeklySchedule(teacherId: $teacherId)\n  }\n": types.ClearWeeklyScheduleDocument,
     "\n  query dailyScheduleMetrics($date: String!, $teacherId: String) {\n    dailyScheduleMetrics(date: $date, teacherId: $teacherId) {\n      id\n      total\n      regular\n      trial\n      advance\n      rescheduled\n      suspended\n      taken\n      pending\n      activated\n      running\n      absent\n      leave\n    }\n  }\n": types.DailyScheduleMetricsDocument,
@@ -323,6 +327,10 @@ export function graphql(source: "\n  mutation prepareUpload($input: UploadPrepar
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  mutation DeleteLearningResource($id: ID!) {\n    deleteLearningResource(id: $id)\n  }\n"): (typeof documents)["\n  mutation DeleteLearningResource($id: ID!) {\n    deleteLearningResource(id: $id)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  query notificationAlerts {\n    notificationAlerts {\n      id\n      totalCount\n      unreadCount\n      alerts {\n        id\n        type\n        title\n        body\n        createdAt\n        severity\n      }\n    }\n  }\n"): (typeof documents)["\n  query notificationAlerts {\n    notificationAlerts {\n      id\n      totalCount\n      unreadCount\n      alerts {\n        id\n        type\n        title\n        body\n        createdAt\n        severity\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -428,6 +436,10 @@ export function graphql(source: "\n  mutation updateUserOverrides($userId: Strin
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation createRecurringClass($input: CreateRecurringClassInput!) {\n    createRecurringClass(input: $input) {\n      id\n      recurringScheduleId\n      classInstanceIds\n      classInstanceCount\n    }\n  }\n"): (typeof documents)["\n  mutation createRecurringClass($input: CreateRecurringClassInput!) {\n    createRecurringClass(input: $input) {\n      id\n      recurringScheduleId\n      classInstanceIds\n      classInstanceCount\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query GenerateAttendanceReport($filters: AttendanceReportFiltersInput!) {\n    generateAttendanceReport(filters: $filters) {\n      id\n      groupKey\n      groupLabel\n      takenClasses\n      absentClasses\n      leaveClasses\n      pendingClasses\n      totalHours\n      paidEGP\n      paidUSD\n    }\n  }\n"): (typeof documents)["\n  query GenerateAttendanceReport($filters: AttendanceReportFiltersInput!) {\n    generateAttendanceReport(filters: $filters) {\n      id\n      groupKey\n      groupLabel\n      takenClasses\n      absentClasses\n      leaveClasses\n      pendingClasses\n      totalHours\n      paidEGP\n      paidUSD\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

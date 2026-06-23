@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import crypto from "node:crypto";
 import {
+  deleteLearningResourceMutationDocument,
   learningResourcesQueryDocument,
   prepareUploadMutationDocument,
   uploadLearningResourceMutationDocument,
@@ -177,5 +178,89 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
 
     // Pothos or service layer should throw validation error
     expect(result.error).toBeDefined();
+  });
+
+  test("Academy Admin can delete learning resource successfully", async () => {
+    const adminToken = await loginDemoUser("academy_admin");
+
+    // 1. Upload a resource first
+    const file = await uploadDummyFile(adminToken);
+    const displayName = `Delete Test Resource ${Date.now()}`;
+    const uploadResult = await authenticatedRequest(adminToken, "mutate", uploadLearningResourceMutationDocument, {
+      input: {
+        displayName,
+        filePath: file.path,
+        fileId: file.id,
+      },
+    });
+
+    const resource = uploadResult?.uploadLearningResource;
+    if (typeof resource?.id !== "string") {
+      throw new Error("Failed to upload learning resource record");
+    }
+
+    // 2. Delete the resource
+    const deleteResult = await testClient.mutate({
+      mutation: deleteLearningResourceMutationDocument,
+      variables: {
+        id: resource.id,
+      },
+      errorPolicy: "all",
+      context: {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      },
+    });
+
+    expect(deleteResult.error).toBeUndefined();
+    expect(deleteResult.data?.deleteLearningResource).toBe(true);
+
+    // 3. Verify it's no longer in list
+    const list = await testQueryLearningResources("academy_admin");
+    const found = list.find(r => r.id === resource.id);
+    expect(found).toBeUndefined();
+  });
+
+  test("Teacher denied from deleting learning resource", async () => {
+    const adminToken = await loginDemoUser("academy_admin");
+    const teacherToken = await loginDemoUser("teacher_default");
+
+    // 1. Upload a resource first
+    const file = await uploadDummyFile(adminToken);
+    const displayName = `Delete Test Resource ${Date.now()}`;
+    const uploadResult = await authenticatedRequest(adminToken, "mutate", uploadLearningResourceMutationDocument, {
+      input: {
+        displayName,
+        filePath: file.path,
+        fileId: file.id,
+      },
+    });
+
+    const resource = uploadResult?.uploadLearningResource;
+    if (typeof resource?.id !== "string") {
+      throw new Error("Failed to upload learning resource record");
+    }
+
+    // 2. Teacher tries to delete it but gets denied
+    const deleteResult = await testClient.mutate({
+      mutation: deleteLearningResourceMutationDocument,
+      variables: {
+        id: resource.id,
+      },
+      errorPolicy: "all",
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+
+    expect(deleteResult.error).toBeDefined();
+
+    // 3. Verify it is still in the list
+    const list = await testQueryLearningResources("academy_admin");
+    const found = list.find(r => r.id === resource.id);
+    expect(found).toBeDefined();
   });
 });

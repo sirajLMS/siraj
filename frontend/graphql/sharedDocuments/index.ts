@@ -12,6 +12,7 @@ export * from "./parent-documents.documents";
 export * from "./parent-profile.documents";
 export * from "./permission-management.documents";
 export * from "./recurring-class.documents";
+export * from "./report.documents";
 export * from "./schedule.documents";
 export * from "./schedule-deletion.documents";
 export * from "./staff-directory.documents";
