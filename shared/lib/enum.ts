@@ -431,6 +431,7 @@ export enum AppPermission {
   SYSTEM_ENFORCE_TIME_WINDOW = "system.enforce_time_window",
   SYSTEM_ENFORCE_LEAVE_LIMIT = "system.enforce_leave_limit",
   TEACHERS_LIST = "teachers.list",
+  // Teacher Management
   TEACHERS_CREATE = "teachers.create",
   TEACHERS_EDIT = "teachers.edit",
   TEACHERS_MANAGE_SCHEDULE = "teachers.manage_schedule",
@@ -439,6 +440,7 @@ export enum AppPermission {
   SCHEDULE_VIEW_WORKLOAD = "schedule.view_workload",
   SCHEDULE_CREATE_CLASS = "schedule.create_class",
   PARENTS_LIST = "parents.list",
+  // Parent Management
   PARENTS_CREATE = "parents.create",
   PARENTS_EDIT = "parents.edit",
   STUDENTS_LIST = "students.list",
@@ -461,6 +463,7 @@ export enum AppPermission {
   COMPLAINTS_DELETE = "complaints.delete",
   COMPLAINTS_RESPOND = "complaints.respond",
   STAFF_LIST = "staff.list",
+  // Staff/Manager Management
   STAFF_CREATE = "staff.create",
   STAFF_EDIT = "staff.edit",
   PERMISSION_GROUPS_MANAGE = "permission_groups.manage",

@@ -1062,7 +1062,9 @@ WHERE
         'resources.upload',
         'resources.delete',
         'report.generate_custom',
-        'report.view_financials'
+        'report.view_financials',
+        'teachers.create',
+        'parents.create'
     );
 
 INSERT INTO
