@@ -1,0 +1,370 @@
+### Task G — Frontend GraphQL: Apollo TypedDocumentNodes for Suggestion Management & Complaint Files
+
+---
+
+#### Objective
+
+Add new Apollo `TypedDocumentNode` query and mutation documents for all Sprint 15 GraphQL operations in the suggestions and complaints domain. Extend existing document files with new operations for parent suggestion history, duplicate search, admin response, duplicate marking, suggestion deletion, and complaint file retrieval. Update the existing `submitComplaint` mutation to include `filePaths`. Run codegen to generate TypeScript types for all new and updated documents.
+
+---
+
+#### Dependencies
+
+- **Task F** — Backend GraphQL Pothos extensions must be complete. The GraphQL schema must be generated and include all new types: `SuggestionStatus` enum, `SuggestionSearchResult` object, `ComplaintFile` object, new input types (`RespondToSuggestionInput`, `MarkSuggestionDuplicateInput`, `ParentSuggestionOptions`), new queries (`parentSuggestions`, `searchSuggestions`, `complaintFiles`), and new mutations (`respondToSuggestion`, `markSuggestionDuplicate`, `deleteSuggestion`).
+- Generated GraphQL types must exist in `frontend/graphql/generated/gql/graphql-types.ts` and operations in `frontend/graphql/generated/gql/operations.ts`.
+
+---
+
+#### Layer-Specific Rules
+
+- **One file per domain**: `<domain>.documents.ts`
+- **Import from `"@apollo/client"`** — never from `"@apollo/client/core"`
+- **TypedDocumentNode naming convention**: `<camelCaseName>QueryDocument` / `<camelCaseName>MutationDocument`
+- **Every selection set must include `id` field** on every named object type for Apollo cache normalization
+- **NO `useLazyQuery`** — use stateful `useQuery` exclusively
+- **🚫 NO DB/Repo Imports**: Frontend GraphQL can ONLY depend on generated types.
+
+---
+
+#### Target Files
+
+| # | File | Status |
+|---|------|--------|
+| 1 | `frontend/graphql/sharedDocuments/suggestion.documents.ts` | MODIFY — add 5 new documents |
+| 2 | `frontend/graphql/sharedDocuments/complaint.documents.ts` | MODIFY — add 1 new document, update 1 existing document |
+
+---
+
+#### Detailed Implementation Steps
+
+---
+
+##### Step 1 — Extend `frontend/graphql/sharedDocuments/suggestion.documents.ts`
+
+Open the existing `frontend/graphql/sharedDocuments/suggestion.documents.ts` file. This file was created in Sprint 14 and contains `adminSuggestionsQueryDocument`, `submitSuggestionMutationDocument`, and `markSuggestionReviewedMutationDocument`.
+
+Add the following 5 new documents after the existing ones.
+
+**1a. Query: `parentSuggestions`**
+
+```typescript
+// ─── Query: parentSuggestions ───────────────────────────────────────────────
+
+export const parentSuggestionsQueryDocument: TypedDocumentNode<
+  Operations.ParentSuggestionsQuery,
+  Types.QueryParentSuggestionsArgs
+> = gql`
+  query ParentSuggestions($options: ParentSuggestionOptionsInput!) {
+    parentSuggestions(options: $options) {
+      id
+      parentId
+      submitterName
+      body
+      status
+      duplicateOfId
+      adminResponse
+      reviewedAt
+      createdAt
+      duplicateOf {
+        id
+        body
+        submitterName
+        parentName
+      }
+    }
+  }
+`;
+```
+
+**Key points for `parentSuggestionsQueryDocument`:**
+- Accepts required `ParentSuggestionOptionsInput` with `limit` and `offset`.
+- Returns array of `Suggestion` objects with review-related fields: `status`, `duplicateOfId`, `adminResponse`, `reviewedAt`.
+- Includes `duplicateOf` nested object with `id`, `body`, `submitterName`, `parentName` for duplicate preview display.
+- Both the top-level `Suggestion` and nested `duplicateOf` include `id` for Apollo cache normalization.
+
+**1b. Query: `searchSuggestions`**
+
+```typescript
+// ─── Query: searchSuggestions ───────────────────────────────────────────────
+
+export const searchSuggestionsQueryDocument: TypedDocumentNode<
+  Operations.SearchSuggestionsQuery,
+  Types.QuerySearchSuggestionsArgs
+> = gql`
+  query SearchSuggestions($query: String!, $excludeId: String!) {
+    searchSuggestions(query: $query, excludeId: $excludeId) {
+      id
+      parentId
+      submitterName
+      body
+      status
+      createdAt
+      parentName
+    }
+  }
+`;
+```
+
+**Key points for `searchSuggestionsQueryDocument`:**
+- Accepts required `query: String!` for search text and `excludeId: String!` to prevent self-duplicate.
+- Returns array of `SuggestionSearchResult` objects — a lightweight type for autocomplete dropdown.
+- All fields included: `id`, `parentId`, `submitterName`, `body`, `status`, `createdAt`, `parentName`.
+- Used by the admin UI's "mark as duplicate" dialog autocomplete.
+
+**1c. Mutation: `respondToSuggestion`**
+
+```typescript
+// ─── Mutation: respondToSuggestion ──────────────────────────────────────────
+
+export const respondToSuggestionMutationDocument: TypedDocumentNode<
+  Operations.RespondToSuggestionMutation,
+  Types.MutationRespondToSuggestionArgs
+> = gql`
+  mutation RespondToSuggestion($input: RespondToSuggestionInput!) {
+    respondToSuggestion(input: $input) {
+      id
+      status
+      adminResponse
+      reviewedAt
+    }
+  }
+`;
+```
+
+**Key points for `respondToSuggestionMutationDocument`:**
+- Accepts required `RespondToSuggestionInput` with `suggestionId` and `adminResponse`.
+- Returns minimal fields needed to confirm the response action: `id`, `status`, `adminResponse`, `reviewedAt`.
+- The `status` field will be `REVIEWED` after successful response.
+
+**1d. Mutation: `markSuggestionDuplicate`**
+
+```typescript
+// ─── Mutation: markSuggestionDuplicate ──────────────────────────────────────
+
+export const markSuggestionDuplicateMutationDocument: TypedDocumentNode<
+  Operations.MarkSuggestionDuplicateMutation,
+  Types.MutationMarkSuggestionDuplicateArgs
+> = gql`
+  mutation MarkSuggestionDuplicate($input: MarkSuggestionDuplicateInput!) {
+    markSuggestionDuplicate(input: $input) {
+      id
+      status
+      duplicateOfId
+      duplicateOf {
+        id
+        body
+      }
+    }
+  }
+`;
+```
+
+**Key points for `markSuggestionDuplicateMutationDocument`:**
+- Accepts required `MarkSuggestionDuplicateInput` with `suggestionId` and `duplicateOfId`.
+- Returns `id`, `status` (will be `DUPLICATE`), `duplicateOfId`, and nested `duplicateOf` with `id` and `body`.
+- The nested `duplicateOf` includes `id` for Apollo cache normalization.
+
+**1e. Mutation: `deleteSuggestion`**
+
+```typescript
+// ─── Mutation: deleteSuggestion ─────────────────────────────────────────────
+
+export const deleteSuggestionMutationDocument: TypedDocumentNode<
+  Operations.DeleteSuggestionMutation,
+  Types.MutationDeleteSuggestionArgs
+> = gql`
+  mutation DeleteSuggestion($suggestionId: String!) {
+    deleteSuggestion(suggestionId: $suggestionId)
+  }
+`;
+```
+
+**Key points for `deleteSuggestionMutationDocument`:**
+- Accepts scalar `suggestionId: String!`.
+- Returns `Boolean` — `true` on successful soft-delete.
+- No object types in selection set, so no `id` requirement.
+
+---
+
+##### Step 2 — Extend `frontend/graphql/sharedDocuments/complaint.documents.ts`
+
+Open the existing `frontend/graphql/sharedDocuments/complaint.documents.ts` file. This file was created in Sprint 14 and contains `parentComplaintsQueryDocument`, `adminComplaintQueueQueryDocument`, `submitComplaintMutationDocument`, `respondToComplaintMutationDocument`, and `deleteComplaintMutationDocument`.
+
+**2a. Add new query: `complaintFiles`**
+
+Add after the existing `adminComplaintQueueQueryDocument`:
+
+```typescript
+// ─── Query: complaintFiles ──────────────────────────────────────────────────
+
+export const complaintFilesQueryDocument: TypedDocumentNode<
+  Operations.ComplaintFilesQuery,
+  Types.QueryComplaintFilesArgs
+> = gql`
+  query ComplaintFiles($complaintId: String!) {
+    complaintFiles(complaintId: $complaintId) {
+      fileId
+      filePath
+      isProtected
+      usageType
+      createdAt
+    }
+  }
+`;
+```
+
+**Key points for `complaintFilesQueryDocument`:**
+- Accepts required `complaintId: String!`.
+- Returns array of `ComplaintFile` objects with all fields: `fileId`, `filePath`, `isProtected`, `usageType`, `createdAt`.
+- Note: `ComplaintFile` uses `fileId` as its identifier (not `id`) since it represents a junction between `complaintFiles` and `storageFiles` tables.
+- No named object types in the selection set require `id` — `fileId` serves as the unique identifier for cache purposes.
+
+**2b. Update existing `submitComplaintMutationDocument`**
+
+Replace the existing `submitComplaintMutationDocument` to include the new `filePaths` field in the input:
+
+```typescript
+// ─── Mutation: submitComplaint (UPDATED) ────────────────────────────────────
+
+export const submitComplaintMutationDocument: TypedDocumentNode<
+  Operations.SubmitComplaintMutation,
+  Types.MutationSubmitComplaintArgs
+> = gql`
+  mutation SubmitComplaint($input: SubmitComplaintInput!) {
+    submitComplaint(input: $input) {
+      id
+      category
+      body
+      status
+      createdAt
+    }
+  }
+`;
+```
+
+**Key points for updated `submitComplaintMutationDocument`:**
+- The GraphQL operation string remains the same — the `SubmitComplaintInput` type now includes the optional `filePaths` field on the backend schema side.
+- The `TypedDocumentNode` type parameters automatically pick up the updated `MutationSubmitComplaintArgs` from codegen, which now includes `filePaths` in the input type.
+- No changes to the selection set — the mutation still returns the same complaint fields.
+- The frontend caller can now pass `filePaths: string[]` as part of the `input` object.
+
+---
+
+##### Step 3 — Run schema generation and codegen
+
+After all document files are updated, run the codegen pipeline to generate TypeScript types for the new and updated operations:
+
+```bash
+~/.bun/bin/bun run generate:gqlSchema
+~/.bun/bin/bun codegen
+```
+
+Both commands must pass with zero errors. The generated types should include:
+
+| Generated Type | Source |
+|---|---|
+| `Operations.ParentSuggestionsQuery` | `parentSuggestions` query |
+| `Types.QueryParentSuggestionsArgs` | `parentSuggestions` query variables |
+| `Operations.SearchSuggestionsQuery` | `searchSuggestions` query |
+| `Types.QuerySearchSuggestionsArgs` | `searchSuggestions` query variables |
+| `Operations.RespondToSuggestionMutation` | `respondToSuggestion` mutation |
+| `Types.MutationRespondToSuggestionArgs` | `respondToSuggestion` mutation variables |
+| `Operations.MarkSuggestionDuplicateMutation` | `markSuggestionDuplicate` mutation |
+| `Types.MutationMarkSuggestionDuplicateArgs` | `markSuggestionDuplicate` mutation variables |
+| `Operations.DeleteSuggestionMutation` | `deleteSuggestion` mutation |
+| `Types.MutationDeleteSuggestionArgs` | `deleteSuggestion` mutation variables |
+| `Operations.ComplaintFilesQuery` | `complaintFiles` query |
+| `Types.QueryComplaintFilesArgs` | `complaintFiles` query variables |
+| `Types.SubmitComplaintInput` (updated) | `submitComplaint` mutation input (now includes `filePaths`) |
+
+---
+
+##### Step 4 — Verify TypeScript compilation
+
+After codegen succeeds, verify that all new and updated documents compile without errors:
+
+```bash
+~/.bun/bin/bun tsgo
+```
+
+This must pass with zero TypeScript errors. If errors occur, verify that:
+1. The generated types match the expected naming convention.
+2. The GraphQL operation names in the `gql` template literals match the TypedDocumentNode type parameters.
+3. All imports resolve correctly from `@/frontend/graphql/generated/gql/`.
+4. The `ParentSuggestionOptionsInput` type name matches the backend Pothos input name (`ParentSuggestionOptions`).
+5. The `RespondToSuggestionInput` and `MarkSuggestionDuplicateInput` type names match the backend Pothos input names.
+
+---
+
+#### File Modification Order
+
+Execute the steps in this exact order to satisfy incremental type-checking:
+
+1. `frontend/graphql/sharedDocuments/suggestion.documents.ts` — Add 5 new documents (2 queries, 3 mutations)
+2. `frontend/graphql/sharedDocuments/complaint.documents.ts` — Add 1 new document, update 1 existing document
+3. Run `bun run generate:gqlSchema` and `bun codegen`
+4. Run `bun tsgo` to verify compilation
+
+After modifying each file, run the Quality Gate — Per-File Validation checklist before proceeding to the next file.
+
+---
+
+#### Test Execution Requirements
+
+After completing all files and codegen, run the following to verify correctness:
+
+```bash
+~/.bun/bin/bun run generate:gqlSchema
+~/.bun/bin/bun codegen
+```
+
+Verify TypeScript compilation:
+
+```bash
+~/.bun/bin/bun tsgo
+```
+
+If GraphQL integration tests exist for the complaint/suggestion domain:
+
+```bash
+~/.bun/bin/bun run test:graphql
+```
+
+---
+
+#### Success Criteria
+
+- [ ] `suggestion.documents.ts` contains all 8 documents: 3 existing (`adminSuggestionsQueryDocument`, `submitSuggestionMutationDocument`, `markSuggestionReviewedMutationDocument`) + 5 new (`parentSuggestionsQueryDocument`, `searchSuggestionsQueryDocument`, `respondToSuggestionMutationDocument`, `markSuggestionDuplicateMutationDocument`, `deleteSuggestionMutationDocument`)
+- [ ] `complaint.documents.ts` contains all 6 documents: 5 existing (`parentComplaintsQueryDocument`, `adminComplaintQueueQueryDocument`, `submitComplaintMutationDocument`, `respondToComplaintMutationDocument`, `deleteComplaintMutationDocument`) + 1 new (`complaintFilesQueryDocument`)
+- [ ] `submitComplaintMutationDocument` updated — `SubmitComplaintInput` now includes optional `filePaths` via codegen types
+- [ ] All documents use correct TypedDocumentNode pattern with `Operations.*` and `Types.*` generated types
+- [ ] All documents import from `"@apollo/client"` (not `"@apollo/client/core"`)
+- [ ] All documents use generated types from `graphql-types.ts` and `operations.ts`
+- [ ] All selection sets include `id` on every named object type (except `ComplaintFile` which uses `fileId`, and `Boolean` return types)
+- [ ] `parentSuggestionsQueryDocument` includes nested `duplicateOf` with `id`, `body`, `submitterName`, `parentName`
+- [ ] `searchSuggestionsQueryDocument` includes all `SuggestionSearchResult` fields
+- [ ] `respondToSuggestionMutationDocument` returns `id`, `status`, `adminResponse`, `reviewedAt`
+- [ ] `markSuggestionDuplicateMutationDocument` returns `id`, `status`, `duplicateOfId`, nested `duplicateOf` with `id`, `body`
+- [ ] `deleteSuggestionMutationDocument` returns `Boolean`
+- [ ] `complaintFilesQueryDocument` returns `fileId`, `filePath`, `isProtected`, `usageType`, `createdAt`
+- [ ] No DB/repo imports in any document file
+- [ ] `bun run generate:gqlSchema` succeeds with zero errors
+- [ ] `bun codegen` succeeds with zero errors
+- [ ] `bun tsgo` passes with zero TypeScript errors
+- [ ] Generated types include all 6 new operations (3 queries + 3 mutations) plus 1 updated mutation input
+
+---
+
+**Quality Gate — Per-File Validation:**
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+
+**Quality Gate — Task Completion Validation:**
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
+- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
