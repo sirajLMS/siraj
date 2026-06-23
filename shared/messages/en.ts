@@ -112,6 +112,32 @@ const en: MessageSchema = {
     resourceDeleteFailed: "Failed to delete learning resource",
     permissionDenied: "You do not have permission to perform this action.",
     insufficientPrivilege: "You do not have sufficient privilege to edit administrative accounts.",
+    teacher: {
+      alreadyExists: "A teacher profile for this user already exists.",
+      invalidTimezone: "The provided timezone is not valid.",
+      createFailed: "Failed to create teacher profile.",
+    },
+    parent: {
+      alreadyExists: "A parent profile for this user already exists.",
+      invalidTimezone: "The provided timezone is not valid.",
+      createFailed: "Failed to create parent profile.",
+    },
+    staff: {
+      alreadyExists: "A staff profile for this user already exists.",
+      createFailed: "Failed to create staff profile.",
+    },
+    manager: {
+      onlySuperAdminCanCreate: "Only System Administrators can create manager accounts.",
+    },
+    auth: {
+      invalidRoleTab: "The selected role tab is not valid.",
+    },
+    user: {
+      emailAlreadyExists: "An account with this email address already exists.",
+    },
+    permission: {
+      groupNotFound: "The required permission group was not found.",
+    },
   },
   auth: {
     login: {

@@ -2,10 +2,80 @@ import { and, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { invoices, parents, students, teachers, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import type { ParentCreateResult, ParentEntityInput } from "@/backend/types";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export namespace ParentRepository {
+  export async function create(
+    input: ParentEntityInput,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<ParentCreateResult> {
+    const queryDb = tx ?? db;
+
+    // Verify the user exists and doesn't already have a parent profile
+    const existingParent = await queryDb
+      .select({ id: parents.id })
+      .from(parents)
+      .where(eq(parents.userId, input.userId))
+      .limit(1);
+
+    if (existingParent.length > 0) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("parent.alreadyExists"));
+    }
+
+    // Validate timezone if provided
+    const timezone = input.timezone ?? "UTC";
+    try {
+      Intl.DateTimeFormat(undefined, { timeZone: timezone });
+    } catch {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("parent.invalidTimezone"));
+    }
+
+    const [created] = await queryDb
+      .insert(parents)
+      .values({
+        userId: input.userId,
+        status: input.status,
+        phone: input.phone ?? null,
+        nationality: input.nationality ?? null,
+        address: input.address ?? null,
+        facebook: input.facebook ?? null,
+        whatsapp: input.whatsapp ?? null,
+        twitter: input.twitter ?? null,
+        skype: input.skype ?? null,
+        defaultZoomLink: input.defaultZoomLink ?? null,
+        invoiceType: input.invoiceType ?? null,
+        feeAmount: input.feeAmount ?? null,
+        paymentMethod: input.paymentMethod ?? null,
+        currency: input.currency ?? null,
+        timezone: timezone,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    if (!created) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("parent.createFailed"));
+    }
+
+    return {
+      id: created.id,
+      userId: created.userId,
+      status: created.status,
+      invoiceType: created.invoiceType,
+      feeAmount: created.feeAmount,
+      paymentMethod: created.paymentMethod,
+      currency: created.currency,
+      timezone: created.timezone,
+      createdAt: created.createdAt,
+    };
+  }
+
   export type ParentDirectoryMetrics = {
     activated: number;
     deactivated: number;

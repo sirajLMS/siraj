@@ -8,6 +8,7 @@ export * from "./parent.types";
 export * from "./permission-management.types";
 export * from "./scheduling.types";
 export * from "./soft-delete.types";
+export * from "./staff-profile.types";
 export * from "./storage.types";
 export * from "./student.types";
 export * from "./system-settings.types";

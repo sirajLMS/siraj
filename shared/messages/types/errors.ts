@@ -83,4 +83,30 @@ export interface ErrorsLabels {
   readonly resourceDeleteFailed: string;
   readonly permissionDenied: string;
   readonly insufficientPrivilege: string;
+  readonly teacher: {
+    readonly alreadyExists: string;
+    readonly invalidTimezone: string;
+    readonly createFailed: string;
+  };
+  readonly parent: {
+    readonly alreadyExists: string;
+    readonly invalidTimezone: string;
+    readonly createFailed: string;
+  };
+  readonly staff: {
+    readonly alreadyExists: string;
+    readonly createFailed: string;
+  };
+  readonly manager: {
+    readonly onlySuperAdminCanCreate: string;
+  };
+  readonly auth: {
+    readonly invalidRoleTab: string;
+  };
+  readonly user: {
+    readonly emailAlreadyExists: string;
+  };
+  readonly permission: {
+    readonly groupNotFound: string;
+  };
 }

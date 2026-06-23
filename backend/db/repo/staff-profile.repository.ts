@@ -3,6 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
+import type { StaffProfileCreateResult, StaffProfileEntityInput } from "@/backend/types";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -26,6 +27,52 @@ export interface ManagerProfileUpdateInput {
 }
 
 export namespace StaffProfileRepository {
+  export async function create(
+    input: StaffProfileEntityInput,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<StaffProfileCreateResult> {
+    const queryDb = tx ?? db;
+
+    // Verify the user exists and doesn't already have a staff profile
+    const existingProfile = await queryDb
+      .select({ id: staffProfiles.id })
+      .from(staffProfiles)
+      .where(eq(staffProfiles.userId, input.userId))
+      .limit(1);
+
+    if (existingProfile.length > 0) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("staff.alreadyExists"));
+    }
+
+    const [created] = await queryDb
+      .insert(staffProfiles)
+      .values({
+        userId: input.userId,
+        phone: input.phone ?? null,
+        skypeId: input.skypeId ?? null,
+        status: input.status,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    if (!created) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("staff.createFailed"));
+    }
+
+    return {
+      id: created.id,
+      userId: created.userId,
+      status: created.status,
+      phone: created.phone,
+      skypeId: created.skypeId,
+      createdAt: created.createdAt,
+    };
+  }
+
   const MANAGER_DIRECTORY_SELECT = {
     id: users.id,
     staffProfileId: staffProfiles.id,

@@ -1,10 +1,79 @@
 import { and, eq, ilike, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { teachers, users } from "@/backend/db/schema";
+import { getBackendTranslations } from "@/backend/lib/intl";
+import type { TeacherCreateResult, TeacherEntityInput } from "@/backend/types";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export namespace TeacherRepository {
+  export async function create(
+    input: TeacherEntityInput,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<TeacherCreateResult> {
+    const queryDb = tx ?? db;
+
+    // Verify the user exists and doesn't already have a teacher profile
+    const existingTeacher = await queryDb
+      .select({ id: teachers.id })
+      .from(teachers)
+      .where(eq(teachers.userId, input.userId))
+      .limit(1);
+
+    if (existingTeacher.length > 0) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("teacher.alreadyExists"));
+    }
+
+    // Validate timezone format
+    try {
+      Intl.DateTimeFormat(undefined, { timeZone: input.timezone });
+    } catch {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("teacher.invalidTimezone"));
+    }
+
+    const [created] = await queryDb
+      .insert(teachers)
+      .values({
+        userId: input.userId,
+        status: input.status,
+        nationality: input.nationality ?? null,
+        nationalId: input.nationalId ?? null,
+        phone: input.phone ?? null,
+        dateOfBirth: input.dateOfBirth ?? null,
+        gender: input.gender ?? null,
+        address: input.address ?? null,
+        qualifications: input.qualifications ?? null,
+        skypeId: input.skypeId ?? null,
+        zoomLink: input.zoomLink ?? null,
+        zoomUsername: input.zoomUsername ?? null,
+        zoomPassword: input.zoomPassword ?? null,
+        countryCode: input.countryCode ?? null,
+        timezoneId: input.timezoneId ?? null,
+        timezone: input.timezone,
+        hourlyRate: input.hourlyRate ?? null,
+        rateCurrency: input.rateCurrency ?? null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    if (!created) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("teacher.createFailed"));
+    }
+
+    return {
+      id: created.id,
+      userId: created.userId,
+      status: created.status,
+      timezone: created.timezone,
+      createdAt: created.createdAt,
+    };
+  }
+
   export type TeacherDirectoryRow = {
     id: string;
     userId: string;

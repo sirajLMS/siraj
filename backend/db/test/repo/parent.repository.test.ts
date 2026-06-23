@@ -155,3 +155,75 @@ describe("ParentRepository — deactivateParent", () => {
     });
   });
 });
+
+describe("ParentRepository — create", () => {
+  test("creates parent profile successfully with billing configuration", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, { name: "Test Parent", email: `parent-${randomUUID()}@test.com` });
+
+      const result = await ParentRepository.create(
+        {
+          userId: user.id,
+          status: "REGULAR",
+          phone: "+1234567890",
+          nationality: "US",
+          address: "123 Main St",
+          invoiceType: "MONTHLY",
+          feeAmount: "500.00",
+          paymentMethod: "BANK_ACCOUNT",
+          currency: "USD",
+          timezone: "America/Chicago",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        tx
+      );
+
+      expect(result.id).toBeDefined();
+      expect(result.userId).toBe(user.id);
+      expect(result.status).toBe("REGULAR");
+      expect(result.invoiceType).toBe("MONTHLY");
+      expect(result.feeAmount).toBe("500.00");
+      expect(result.paymentMethod).toBe("BANK_ACCOUNT");
+      expect(result.currency).toBe("USD");
+    });
+  });
+
+  test("rejects duplicate parent profile for same user", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, { name: "Dup Parent", email: `dupp-${randomUUID()}@test.com` });
+
+      await ParentRepository.create(
+        { userId: user.id, status: "REGULAR", createdAt: new Date(), updatedAt: new Date() },
+        tx
+      );
+
+      let error: unknown = null;
+      try {
+        await ParentRepository.create(
+          { userId: user.id, status: "REGULAR", createdAt: new Date(), updatedAt: new Date() },
+          tx
+        );
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).not.toBeNull();
+      expect((error as Error).message).toContain("already exists");
+    });
+  });
+
+  test("creates parent with default UTC timezone", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, { name: "UTC Parent", email: `utc-${randomUUID()}@test.com` });
+
+      const result = await ParentRepository.create(
+        { userId: user.id, status: "REGULAR", createdAt: new Date(), updatedAt: new Date() },
+        tx
+      );
+
+      expect(result.id).toBeDefined();
+      expect(result.timezone).toBe("UTC");
+    });
+  });
+});

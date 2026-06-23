@@ -283,3 +283,49 @@ describe("StaffProfileRepository — getUserPermissionGroupSlugs", () => {
     expect(slugs).toEqual([group.slug]);
   });
 });
+
+describe("StaffProfileRepository — create", () => {
+  staffTest("creates staff profile successfully", async tx => {
+    const user = await createTestUser(tx, { name: "Test Staff", email: `staff-${randomUUID()}@test.com` });
+
+    const result = await StaffProfileRepository.create(
+      {
+        userId: user.id,
+        status: "ACTIVATED",
+        phone: "+1234567890",
+        skypeId: "test_skype",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      tx
+    );
+
+    expect(result.id).toBeDefined();
+    expect(result.userId).toBe(user.id);
+    expect(result.status).toBe("ACTIVATED");
+    expect(result.phone).toBe("+1234567890");
+    expect(result.skypeId).toBe("test_skype");
+  });
+
+  staffTest("rejects duplicate staff profile for same user", async tx => {
+    const user = await createTestUser(tx, { name: "Dup Staff", email: `dups-${randomUUID()}@test.com` });
+
+    await StaffProfileRepository.create(
+      { userId: user.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
+      tx
+    );
+
+    let error: unknown = null;
+    try {
+      await StaffProfileRepository.create(
+        { userId: user.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
+        tx
+      );
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).not.toBeNull();
+    expect((error as Error).message).toContain("already exists");
+  });
+});

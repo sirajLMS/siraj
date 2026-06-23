@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { teachers, users } from "@/backend/db/schema";
-import { setupTeacher } from "../entity-setup";
+import { createTestUser, setupTeacher } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
 describe("TeacherRepository", () => {
@@ -132,6 +132,105 @@ describe("TeacherRepository", () => {
           tx
         );
         expect(result).toBe(false);
+      });
+    });
+  });
+
+  describe("create", () => {
+    it("creates teacher profile successfully", async () => {
+      await runInRollback(async tx => {
+        const user = await createTestUser(tx, { name: "Test Teacher", email: "teacher@test.com" });
+
+        const result = await TeacherRepository.create(
+          {
+            userId: user.id,
+            status: "ACTIVATED",
+            timezone: "America/New_York",
+            nationality: "US",
+            phone: "+1234567890",
+            gender: "MALE",
+            hourlyRate: "25.00",
+            rateCurrency: "USD",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          tx
+        );
+
+        expect(result.id).toBeDefined();
+        expect(result.userId).toBe(user.id);
+        expect(result.status).toBe("ACTIVATED");
+        expect(result.timezone).toBe("America/New_York");
+        expect(result.createdAt).toBeInstanceOf(Date);
+      });
+    });
+
+    it("rejects duplicate teacher profile for same user", async () => {
+      await runInRollback(async tx => {
+        const user = await createTestUser(tx, { name: "Dup Teacher", email: "dup@test.com" });
+
+        await TeacherRepository.create(
+          { userId: user.id, status: "ACTIVATED", timezone: "UTC", createdAt: new Date(), updatedAt: new Date() },
+          tx
+        );
+
+        let error: unknown = null;
+        try {
+          await TeacherRepository.create(
+            { userId: user.id, status: "ACTIVATED", timezone: "UTC", createdAt: new Date(), updatedAt: new Date() },
+            tx
+          );
+        } catch (e) {
+          error = e;
+        }
+
+        expect(error).not.toBeNull();
+        expect((error as Error).message).toContain("already exists");
+      });
+    });
+
+    it("rejects invalid timezone", async () => {
+      await runInRollback(async tx => {
+        const user = await createTestUser(tx, { name: "TZ Teacher", email: "tz@test.com" });
+
+        let error: unknown = null;
+        try {
+          await TeacherRepository.create(
+            {
+              userId: user.id,
+              status: "ACTIVATED",
+              timezone: "Invalid/Timezone",
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            tx
+          );
+        } catch (e) {
+          error = e;
+        }
+
+        expect(error).not.toBeNull();
+        expect((error as Error).message).toContain("timezone");
+      });
+    });
+
+    it("creates teacher with minimal required fields", async () => {
+      await runInRollback(async tx => {
+        const user = await createTestUser(tx, { name: "Min Teacher", email: "min@test.com" });
+
+        const result = await TeacherRepository.create(
+          {
+            userId: user.id,
+            status: "ACTIVATED",
+            timezone: "Europe/London",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          tx
+        );
+
+        expect(result.id).toBeDefined();
+        expect(result.userId).toBe(user.id);
       });
     });
   });

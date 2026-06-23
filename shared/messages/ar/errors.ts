@@ -87,4 +87,30 @@ export const errors: ErrorsLabels = {
   resourceDeleteFailed: "فشل حذف المورد التعليمي",
   permissionDenied: "ليس لديك صلاحية لتنفيذ هذا الإجراء.",
   insufficientPrivilege: "ليس لديك صلاحية كافية لتعديل حسابات المسؤولين.",
+  teacher: {
+    alreadyExists: "الملف التدريسي لهذا المستخدم موجود بالفعل.",
+    invalidTimezone: "المنطقة الزمنية غير صالحة.",
+    createFailed: "فشل إنشاء الملف التدريسي.",
+  },
+  parent: {
+    alreadyExists: "ملف ولي الأمر لهذا المستخدم موجود بالفعل.",
+    invalidTimezone: "المنطقة الزمنية غير صالحة.",
+    createFailed: "فشل إنشاء ملف ولي الأمر.",
+  },
+  staff: {
+    alreadyExists: "الملف الوظيفي لهذا المستخدم موجود بالفعل.",
+    createFailed: "فشل إنشاء الملف الوظيفي.",
+  },
+  manager: {
+    onlySuperAdminCanCreate: "فقط المسؤولون النظاميون يمكنهم إنشاء حسابات المدراء.",
+  },
+  auth: {
+    invalidRoleTab: "علامة التبويب المحددة للدور غير صالحة.",
+  },
+  user: {
+    emailAlreadyExists: "الحساب بهذا البريد الإلكتروني موجود بالفعل.",
+  },
+  permission: {
+    groupNotFound: "مجموعة الأذونات المطلوبة غير موجودة.",
+  },
 };

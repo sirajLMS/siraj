@@ -26,3 +26,5 @@ export type CreateTeacherPaymentInput = {
   paymentDate: Date;
   isTestPayment?: boolean;
 };
+
+export type TeacherCreateResult = Pick<TeacherEntity, "id" | "userId" | "status" | "timezone" | "createdAt">;
