@@ -14,11 +14,7 @@ export interface ComplaintResponseInput {
 }
 
 export namespace ComplaintResponseRepository {
-  export const createResponse = async (
-    input: ComplaintResponseInput,
-    tx?: DBTransaction,
-    locale?: string
-  ) => {
+  export const createResponse = async (input: ComplaintResponseInput, tx?: DBTransaction, locale?: string) => {
     const runner = async (t: DBTransaction) => {
       const now = new Date();
 
@@ -49,10 +45,7 @@ export namespace ComplaintResponseRepository {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
-  export const getResponsesByComplaint = async (
-    complaintId: string,
-    tx?: DBTransaction
-  ) => {
+  export const getResponsesByComplaint = async (complaintId: string, tx?: DBTransaction) => {
     const queryDb = tx ?? db;
 
     return queryDb

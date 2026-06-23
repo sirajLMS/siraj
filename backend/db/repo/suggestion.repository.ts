@@ -33,11 +33,7 @@ export type SuggestionMetrics = {
 };
 
 export namespace SuggestionRepository {
-  export const submitSuggestion = async (
-    input: SuggestionSubmitInput,
-    tx?: DBTransaction,
-    locale?: string
-  ) => {
+  export const submitSuggestion = async (input: SuggestionSubmitInput, tx?: DBTransaction, locale?: string) => {
     const queryDb = tx ?? db;
     const now = new Date();
 
@@ -110,9 +106,7 @@ export namespace SuggestionRepository {
     };
   };
 
-  export const getSuggestionMetrics = async (
-    tx?: DBTransaction
-  ): Promise<SuggestionMetrics> => {
+  export const getSuggestionMetrics = async (tx?: DBTransaction): Promise<SuggestionMetrics> => {
     const queryDb = tx ?? db;
 
     const [pendingResult] = await queryDb
@@ -143,11 +137,7 @@ export namespace SuggestionRepository {
     };
   };
 
-  export const markSuggestionReviewed = async (
-    suggestionId: string,
-    tx?: DBTransaction,
-    locale?: string
-  ) => {
+  export const markSuggestionReviewed = async (suggestionId: string, tx?: DBTransaction, locale?: string) => {
     const queryDb = tx ?? db;
     const now = new Date();
 

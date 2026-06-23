@@ -127,6 +127,7 @@ export enum NotificationChannel {
   EMAIL = "EMAIL",
   SMS = "SMS",
   PUSH = "PUSH",
+  ON_APP = "ON_APP",
 }
 
 export enum NotificationEventType {
@@ -134,6 +135,8 @@ export enum NotificationEventType {
   INVOICE_GENERATED = "INVOICE_GENERATED",
   COMPLAINT_RESPONSE = "COMPLAINT_RESPONSE",
   BANKING_DETAILS_CHANGED = "BANKING_DETAILS_CHANGED",
+  NEW_COMPLAINT = "NEW_COMPLAINT",
+  NEW_SUGGESTION = "NEW_SUGGESTION",
 }
 
 export enum NotificationDeliveryStatus {

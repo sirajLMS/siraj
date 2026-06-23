@@ -41,11 +41,7 @@ export type ComplaintMetrics = {
 };
 
 export namespace ComplaintRepository {
-  export const submitComplaint = async (
-    input: ComplaintSubmitInput,
-    tx?: DBTransaction,
-    locale?: string
-  ) => {
+  export const submitComplaint = async (input: ComplaintSubmitInput, tx?: DBTransaction, locale?: string) => {
     const queryDb = tx ?? db;
     const now = new Date();
 
@@ -71,10 +67,7 @@ export namespace ComplaintRepository {
     return created;
   };
 
-  export const getComplaintsByParent = async (
-    parentId: string,
-    tx?: DBTransaction
-  ) => {
+  export const getComplaintsByParent = async (parentId: string, tx?: DBTransaction) => {
     const queryDb = tx ?? db;
 
     return queryDb
@@ -154,10 +147,7 @@ export namespace ComplaintRepository {
     };
   };
 
-  export const getComplaintById = async (
-    complaintId: string,
-    tx?: DBTransaction
-  ) => {
+  export const getComplaintById = async (complaintId: string, tx?: DBTransaction) => {
     const queryDb = tx ?? db;
 
     const results = await queryDb
@@ -184,9 +174,7 @@ export namespace ComplaintRepository {
     return results[0] ?? null;
   };
 
-  export const getComplaintMetrics = async (
-    tx?: DBTransaction
-  ): Promise<ComplaintMetrics> => {
+  export const getComplaintMetrics = async (tx?: DBTransaction): Promise<ComplaintMetrics> => {
     const queryDb = tx ?? db;
 
     const statusCounts = await queryDb
@@ -219,10 +207,7 @@ export namespace ComplaintRepository {
     };
   };
 
-  export const getUnansweredComplaints = async (
-    limit: number,
-    tx?: DBTransaction
-  ) => {
+  export const getUnansweredComplaints = async (limit: number, tx?: DBTransaction) => {
     const queryDb = tx ?? db;
 
     return queryDb
