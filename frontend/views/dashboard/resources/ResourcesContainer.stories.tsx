@@ -1,158 +1,346 @@
-import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import {
-  learningResourcesQueryDocument,
-  uploadLearningResourceMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/learning-resource.documents";
 import { useUserStore as useMockUserStore } from "@/frontend/stores/mockUserStore";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { ResourcesContainer } from "./ResourcesContainer";
+import { logger } from "@/frontend/utils/logger";
+import { ResourcesView } from "./ResourcesView";
+import type { ResourceFilterType, ResourceSortBy, ResourceUploadFormData } from "./types/resourcesTypes";
 
-const MOCK_RESOURCE_ROWS = [
+const mockLabels = {
+  pageTitle: "Resource Library",
+  pageSubtitle: "Access and manage academy materials",
+  upload: {
+    sectionTitle: "Upload New Resource",
+    documentName: "Document Name",
+    documentNamePlaceholder: "Enter a descriptive name",
+    dropzoneTitle: "Choose a file or drag it here",
+    dropzoneHint: "PDF, Word, Excel, PowerPoint up to 10MB",
+    supportedFormats: "Supported formats: PDF, DOCX, XLSX, PPTX",
+    submit: "Upload File",
+    successMessage: "Resource uploaded successfully!",
+  },
+  guidelines: {
+    title: "Upload Guidelines",
+    items: [
+      "File size must not exceed 10MB.",
+      "Ensure document names are clear and professional.",
+      "Only upload approved curriculum materials.",
+    ],
+  },
+  governance: {
+    title: "Material Governance",
+    body: "All uploaded resources are subjected to verification by the administration team.",
+  },
+  library: {
+    title: "All Materials",
+    filter: "Filter by type",
+    sortByDate: "Sort by date",
+    sortByName: "Sort by name",
+    typeAll: "All Types",
+    uploaded: "Uploaded",
+    noEntries: "No resources found.",
+  },
+  deleteDialog: {
+    title: "Delete Resource",
+    body: "Are you sure you want to permanently delete this resource? This action cannot be undone.",
+    confirm: "Delete",
+    cancel: "Cancel",
+  },
+  validation: {
+    documentNameRequired: "Document name is required",
+    fileRequired: "File selection is required",
+  },
+};
+
+const mockResources = [
   {
-    __typename: "LearningResourceRow" as const,
     id: "res-1",
-    displayName: "English Grammar Handbook",
-    filePath: "/resources/grammar-handbook.pdf",
-    uploadedByUserId: "user-admin-1",
-    uploadedByUserName: "Admin User",
-    fileSize: 2450000,
-    contentType: "application/pdf",
-    createdAt: "2025-03-01T09:00:00Z",
+    title: "English Grammar Handbook",
+    fileName: "grammar-handbook.pdf",
+    fileType: "pdf" as const,
+    uploadedAt: "3/1/2025",
+    uploadedAtTimestamp: 1740819600000,
   },
   {
-    __typename: "LearningResourceRow" as const,
     id: "res-2",
-    displayName: "Math Worksheets Grade 5",
-    filePath: "/resources/math-worksheets.xlsx",
-    uploadedByUserId: "user-admin-1",
-    uploadedByUserName: "Admin User",
-    fileSize: 890000,
-    contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    createdAt: "2025-03-10T11:30:00Z",
+    title: "Math Worksheets Grade 5",
+    fileName: "math-worksheets.xlsx",
+    fileType: "xlsx" as const,
+    uploadedAt: "3/10/2025",
+    uploadedAtTimestamp: 1741599600000,
   },
 ];
 
-const resourceMocks = [
-  {
-    request: {
-      query: learningResourcesQueryDocument,
-      variables: {},
-    },
-    result: {
-      data: {
-        learningResources: MOCK_RESOURCE_ROWS,
-      },
-    },
+const baseArgs = {
+  labels: mockLabels,
+  resources: mockResources,
+  searchQuery: "",
+  filterType: "all" as const,
+  sortBy: "date" as const,
+  pendingDeleteId: null,
+  pendingDeleteTitle: null,
+  isUploading: false,
+  isDeleting: false,
+  showUploadSuccess: false,
+  canManage: true,
+  onSearchChange: (query: string) => {
+    logger.info("onSearchChange:", query);
   },
-  {
-    request: {
-      query: learningResourcesQueryDocument,
-      variables: { searchQuery: "" },
-    },
-    result: {
-      data: {
-        learningResources: MOCK_RESOURCE_ROWS,
-      },
-    },
+  onFilterTypeChange: (type: ResourceFilterType) => {
+    logger.info("onFilterTypeChange:", type);
   },
-  {
-    request: {
-      query: learningResourcesQueryDocument,
-      variables: { searchQuery: undefined },
-    },
-    result: {
-      data: {
-        learningResources: MOCK_RESOURCE_ROWS,
-      },
-    },
+  onSortByChange: (sort: ResourceSortBy) => {
+    logger.info("onSortByChange:", sort);
   },
-  {
-    request: {
-      query: uploadLearningResourceMutationDocument,
-      variables: {
-        input: {
-          displayName: "New Document",
-          filePath: "/resources/new-doc.pdf",
-          fileId: "file-new-1",
-        },
-      },
-    },
-    result: {
-      data: {
-        uploadLearningResource: {
-          __typename: "LearningResourceRow",
-          id: "res-new",
-          displayName: "New Document",
-          filePath: "/resources/new-doc.pdf",
-          uploadedByUserId: "user-admin-1",
-          uploadedByUserName: "Admin User",
-          fileSize: 500000,
-          contentType: "application/pdf",
-          createdAt: "2025-03-15T10:00:00Z",
-        },
-      },
-    },
+  onUpload: (data: ResourceUploadFormData) => {
+    logger.info("onUpload:", data);
   },
-];
+  onDismissSuccess: () => {
+    logger.info("onDismissSuccess");
+  },
+  onDeleteRequest: (id: string) => {
+    logger.info("onDeleteRequest:", id);
+  },
+  onDeleteCancel: () => {
+    logger.info("onDeleteCancel");
+  },
+  onDeleteConfirm: () => {
+    logger.info("onDeleteConfirm");
+  },
+};
 
-const meta: Meta<typeof ResourcesContainer> = {
-  title: "Views/dashboard/resources/ResourcesContainer",
-  component: ResourcesContainer,
+const meta: Meta<typeof ResourcesView> = {
+  title: "Views/dashboard/resources/ResourcesView",
+  component: ResourcesView,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
   },
+};
+
+export default meta;
+type Story = StoryObj<typeof ResourcesView>;
+
+export const Default: Story = {
+  args: baseArgs,
   decorators: [
     Story => {
-      const perms = [
-        AppPermission.StudentsList,
-        AppPermission.StaffViewDirectory,
-        AppPermission.ResourcesList,
-        AppPermission.ResourcesUpload,
-        AppPermission.StaffEditProfile,
-      ];
-      useUserStore.setState({ permissions: perms });
-      useMockUserStore.setState({ permissions: perms });
-      return (
-        <MockedProvider mocks={resourceMocks}>
-          <Story />
-        </MockedProvider>
-      );
+      const perms = [AppPermission.ResourcesList, AppPermission.ResourcesUpload, AppPermission.ResourcesDelete];
+      useUserStore.setState({
+        permissions: perms,
+        user: {
+          id: "mock-id",
+          name: "Mock User",
+          role: "Mock Role",
+          avatarUrl: "",
+          permissions: perms,
+          notificationCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          emailVerifiedAt: new Date().toISOString(),
+          email: "mock@example.com",
+          __typename: "User",
+        },
+      });
+      useMockUserStore.setState({
+        permissions: perms,
+        user: {
+          id: "mock-id",
+          name: "Mock User",
+          role: "Mock Role",
+          avatarUrl: "",
+          permissions: perms,
+          notificationCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          emailVerifiedAt: new Date().toISOString(),
+          email: "mock@example.com",
+          __typename: "User",
+        },
+      });
+      return <Story />;
     },
   ],
 };
 
-export default meta;
-type Story = StoryObj<typeof ResourcesContainer>;
-
-export const Default: Story = {
-  args: {},
+export const Empty: Story = {
+  args: {
+    ...baseArgs,
+    resources: [],
+  },
+  decorators: [
+    Story => {
+      const perms = [AppPermission.ResourcesList, AppPermission.ResourcesUpload, AppPermission.ResourcesDelete];
+      useUserStore.setState({
+        permissions: perms,
+        user: {
+          id: "mock-id",
+          name: "Mock User",
+          role: "Mock Role",
+          avatarUrl: "",
+          permissions: perms,
+          notificationCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          emailVerifiedAt: new Date().toISOString(),
+          email: "mock@example.com",
+          __typename: "User",
+        },
+      });
+      useMockUserStore.setState({
+        permissions: perms,
+        user: {
+          id: "mock-id",
+          name: "Mock User",
+          role: "Mock Role",
+          avatarUrl: "",
+          permissions: perms,
+          notificationCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          emailVerifiedAt: new Date().toISOString(),
+          email: "mock@example.com",
+          __typename: "User",
+        },
+      });
+      return <Story />;
+    },
+  ],
 };
 
-export const Empty: Story = {
-  args: {},
+export const ListOnly: Story = {
+  args: {
+    ...baseArgs,
+    canManage: false,
+  },
   decorators: [
-    Story => (
-      <MockedProvider
-        mocks={[
-          {
-            request: { query: learningResourcesQueryDocument, variables: {} },
-            result: { data: { learningResources: [] } },
-          },
-          {
-            request: { query: learningResourcesQueryDocument, variables: { searchQuery: "" } },
-            result: { data: { learningResources: [] } },
-          },
-          {
-            request: { query: learningResourcesQueryDocument, variables: { searchQuery: undefined } },
-            result: { data: { learningResources: [] } },
-          },
-        ]}
-      >
-        <Story />
-      </MockedProvider>
-    ),
+    Story => {
+      const perms = [AppPermission.ResourcesList];
+      useUserStore.setState({
+        permissions: perms,
+        user: {
+          id: "mock-id",
+          name: "Mock User",
+          role: "Mock Role",
+          avatarUrl: "",
+          permissions: perms,
+          notificationCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          emailVerifiedAt: new Date().toISOString(),
+          email: "mock@example.com",
+          __typename: "User",
+        },
+      });
+      useMockUserStore.setState({
+        permissions: perms,
+        user: {
+          id: "mock-id",
+          name: "Mock User",
+          role: "Mock Role",
+          avatarUrl: "",
+          permissions: perms,
+          notificationCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          emailVerifiedAt: new Date().toISOString(),
+          email: "mock@example.com",
+          __typename: "User",
+        },
+      });
+      return <Story />;
+    },
+  ],
+};
+
+export const DeleteInProgress: Story = {
+  args: {
+    ...baseArgs,
+    pendingDeleteId: "res-1",
+    pendingDeleteTitle: "English Grammar Handbook",
+    isDeleting: true,
+  },
+  decorators: [
+    Story => {
+      const perms = [AppPermission.ResourcesList, AppPermission.ResourcesUpload, AppPermission.ResourcesDelete];
+      useUserStore.setState({
+        permissions: perms,
+        user: {
+          id: "mock-id",
+          name: "Mock User",
+          role: "Mock Role",
+          avatarUrl: "",
+          permissions: perms,
+          notificationCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          emailVerifiedAt: new Date().toISOString(),
+          email: "mock@example.com",
+          __typename: "User",
+        },
+      });
+      useMockUserStore.setState({
+        permissions: perms,
+        user: {
+          id: "mock-id",
+          name: "Mock User",
+          role: "Mock Role",
+          avatarUrl: "",
+          permissions: perms,
+          notificationCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          emailVerifiedAt: new Date().toISOString(),
+          email: "mock@example.com",
+          __typename: "User",
+        },
+      });
+      return <Story />;
+    },
+  ],
+};
+
+export const UploadingState: Story = {
+  args: {
+    ...baseArgs,
+    isUploading: true,
+  },
+  decorators: [
+    Story => {
+      const perms = [AppPermission.ResourcesList, AppPermission.ResourcesUpload, AppPermission.ResourcesDelete];
+      useUserStore.setState({
+        permissions: perms,
+        user: {
+          id: "mock-id",
+          name: "Mock User",
+          role: "Mock Role",
+          avatarUrl: "",
+          permissions: perms,
+          notificationCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          emailVerifiedAt: new Date().toISOString(),
+          email: "mock@example.com",
+          __typename: "User",
+        },
+      });
+      useMockUserStore.setState({
+        permissions: perms,
+        user: {
+          id: "mock-id",
+          name: "Mock User",
+          role: "Mock Role",
+          avatarUrl: "",
+          permissions: perms,
+          notificationCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          emailVerifiedAt: new Date().toISOString(),
+          email: "mock@example.com",
+          __typename: "User",
+        },
+      });
+      return <Story />;
+    },
   ],
 };
