@@ -23,11 +23,11 @@ Story 12's destructive features and financial masking depend entirely on the exi
 
 All schema columns used by Story 12's reporting already exist in the database. 
 
-#### `learning_resources` table (`backend/db/schema/learning.ts`):
+#### `learning_resources` table (`backend/db/schema/communications.ts`):
 
 - [ ] `id: uuid` primary key exists.
-- [ ] `url: text` column exists storing the S3/storage path.
-- [ ] `uploadedBy: uuid` column exists tracking the owner.
+- [ ] `filePath: varchar` column exists storing the S3/storage path.
+- [ ] `uploadedByUserId: uuid` column exists tracking the owner.
 - [ ] `deletedAt: timestamp` column exists (even though we perform hard deletions, validating the schema structure is key).
 
 #### `class_instances` table (`backend/db/schema/scheduling.ts`):

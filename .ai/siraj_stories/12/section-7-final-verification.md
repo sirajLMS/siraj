@@ -131,7 +131,7 @@ bun test:db
 ### 7.10 Coverage Report (Final)
 
 ```bash
-bun run test:coverage backend/db/test/repo/learning.repository.test.ts
+bun run test:coverage backend/db/test/repo/learning-resource.repository.test.ts
 bun run test:coverage backend/db/test/repo/reporting.repository.test.ts
 ```
 

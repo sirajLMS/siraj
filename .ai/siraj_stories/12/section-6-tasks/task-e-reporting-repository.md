@@ -32,8 +32,9 @@ We explicitly type the grouping mode using an enum. The output interface explici
 
 import { db } from "../index";
 import { classInstances } from "../schema/scheduling";
-// Note: Depending on your exact schema, 'teachers' might be in staff.ts or users.ts. Adjust imports as necessary.
-import { teachers, staffProfiles } from "../schema/staff"; 
+// Note: 'teachers' is in teachers.ts, 'users' is in users.ts.
+import { teachers } from "../schema/teachers"; 
+import { users } from "../schema/users";
 import { eq, and, gte, lte, sql } from "drizzle-orm";
 import { logger } from "../../lib/logger";
 
@@ -109,11 +110,11 @@ export namespace ReportRepository {
         ? sql<string>`DATE_TRUNC('day', ${classInstances.scheduledStartAt})`
         : classInstances.teacherId;
 
-      // Ensure that if we group by Teacher, we concatenate their name.
-      // Assumes staffProfiles is joined below. If not joined, we fall back to groupKey.
+      // Ensure that if we group by Teacher, we extract their name from users table.
+      // Assumes users is joined below. If not joined, we fall back to groupKey.
       const groupLabelExpr = filters.groupBy === ReportGroupingMode.DATE
         ? sql<string>`TO_CHAR(${classInstances.scheduledStartAt}, 'YYYY-MM-DD')`
-        : sql<string>`MAX(${staffProfiles.firstName} || ' ' || ${staffProfiles.lastName})`;
+        : sql<string>`MAX(${users.name})`;
 
       // 3. Execution of the Base Query
       const query = db.select({
@@ -140,7 +141,7 @@ export namespace ReportRepository {
       if (filters.groupBy === ReportGroupingMode.TEACHER) {
         query
           .leftJoin(teachers, eq(teachers.id, classInstances.teacherId))
-          .leftJoin(staffProfiles, eq(staffProfiles.id, teachers.staffProfileId));
+          .leftJoin(users, eq(users.id, teachers.userId));
       }
 
       // 5. Final Execution with explicit grouping
@@ -165,7 +166,7 @@ export namespace ReportRepository {
 
 ### Pre-Flight Quality Assurance
 
-Check imports: If `teachers` and `staffProfiles` are in `backend/db/schema/users.ts` rather than `staff.ts`, adjust the import paths. Running `tsgo` immediately will alert you to any schema misalignment.
+Check imports: Verify that `teachers` and `users` are properly imported from their respective schema files. Running `tsgo` immediately will alert you to any schema misalignment.
 
 ---
 
