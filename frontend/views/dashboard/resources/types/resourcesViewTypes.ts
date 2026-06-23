@@ -11,6 +11,7 @@ export interface ResourcesViewProps {
   readonly pendingDeleteId: string | null;
   readonly pendingDeleteTitle: string | null;
   readonly isUploading: boolean;
+  readonly isDeleting: boolean;
   readonly showUploadSuccess: boolean;
   readonly canManage: boolean;
   readonly onSearchChange: (query: string) => void;

@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
+  deleteLearningResourceMutationDocument,
   learningResourcesQueryDocument,
   uploadLearningResourceMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/learning-resource.documents";
@@ -38,6 +39,7 @@ export function ResourcesContainer() {
   const resetUploadSuccess = useLearningResourcesStore(state => state.resetUploadSuccess);
 
   const [uploadResourceMutation] = useMutation(uploadLearningResourceMutationDocument);
+  const [deleteResourceMutation, { loading: isDeleting }] = useMutation(deleteLearningResourceMutationDocument);
 
   const { data, refetch } = useQuery(learningResourcesQueryDocument, {
     variables: {
@@ -106,9 +108,24 @@ export function ResourcesContainer() {
     }
   };
 
-  const handleDeleteConfirm = () => {
-    logger.info("Delete confirmed for resource", { id: pendingDeleteId });
-    closeDeleteDialog();
+  const handleDeleteConfirm = async () => {
+    if (!pendingDeleteId) {
+      return;
+    }
+
+    try {
+      await deleteResourceMutation({
+        variables: {
+          id: pendingDeleteId,
+        },
+      });
+      logger.info(`Successfully deleted resource: ${pendingDeleteId}`);
+      await refetch();
+    } catch (err) {
+      logger.error(`Failed to delete resource ${pendingDeleteId}:`, err);
+    } finally {
+      closeDeleteDialog();
+    }
   };
 
   return (
@@ -122,6 +139,7 @@ export function ResourcesContainer() {
         pendingDeleteId={pendingDeleteId}
         pendingDeleteTitle={pendingDeleteTitle}
         isUploading={isUploading}
+        isDeleting={isDeleting}
         showUploadSuccess={showUploadSuccess}
         canManage={canManage}
         onSearchChange={setSearchQuery}

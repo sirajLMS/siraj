@@ -28,6 +28,7 @@ export function ResourcesDesktopView({
   pendingDeleteId,
   pendingDeleteTitle,
   isUploading,
+  isDeleting,
   showUploadSuccess,
   canManage,
   control,
@@ -91,6 +92,7 @@ export function ResourcesDesktopView({
         resourceTitle={pendingDeleteTitle}
         onCancel={onDeleteCancel}
         onConfirm={onDeleteConfirm}
+        loading={isDeleting}
       />
     </PageContainer>
   );

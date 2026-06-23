@@ -3,7 +3,7 @@ import type {
   ReportsSummary,
   ReportTeacherOption,
   ReportType,
-} from "@/frontend/stores/mockReportsStore";
+} from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
 export interface ReportsSummaryLabels {
   readonly engagementRate: string;

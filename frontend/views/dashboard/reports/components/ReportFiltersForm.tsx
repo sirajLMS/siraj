@@ -6,7 +6,7 @@ import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
 import { PrimaryPageAction } from "@/frontend/components/ui";
 import { AppDatePicker } from "@/frontend/components/ui/form/AppDatePicker";
-import type { ReportTeacherOption, ReportType } from "@/frontend/stores/mockReportsStore";
+import type { ReportTeacherOption, ReportType } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
 const DATE_FILTER_FORMAT = "yyyy-MM-dd";
 

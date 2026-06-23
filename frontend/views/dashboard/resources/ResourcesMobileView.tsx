@@ -29,6 +29,7 @@ export function ResourcesMobileView({
   pendingDeleteId,
   pendingDeleteTitle,
   isUploading,
+  isDeleting,
   showUploadSuccess,
   canManage,
   control,
@@ -102,6 +103,7 @@ export function ResourcesMobileView({
           resourceTitle={pendingDeleteTitle}
           onCancel={onDeleteCancel}
           onConfirm={onDeleteConfirm}
+          loading={isDeleting}
         />
       </PageContainer>
     </>

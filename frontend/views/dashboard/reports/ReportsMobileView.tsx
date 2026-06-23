@@ -8,7 +8,7 @@ import type {
   ReportsSummary,
   ReportTeacherOption,
   ReportType,
-} from "@/frontend/stores/mockReportsStore";
+} from "@/frontend/views/dashboard/reports/types/reportsTypes";
 import { EngagementRateCard } from "./components/EngagementRateCard";
 import { FinancialDistributionCard } from "./components/FinancialDistributionCard";
 import { PerformanceLedgerCardList } from "./components/PerformanceLedgerCardList";

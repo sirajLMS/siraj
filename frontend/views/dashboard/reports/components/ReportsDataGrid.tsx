@@ -4,7 +4,9 @@ import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
-import type { ReportLedgerRow } from "@/frontend/stores/mockReportsStore";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/stores/userStore";
+import type { ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
 export interface ReportsDataGridLabels {
   readonly name: string;
@@ -47,8 +49,11 @@ function renderCountCell(value: number, tone: "default" | "error" | "primary" = 
 }
 
 export function ReportsDataGrid({ rows, labels }: Readonly<ReportsDataGridProps>) {
-  const columns = useMemo<GridColDef<ReportLedgerRow>[]>(
-    () => [
+  const { hasPermission } = useUserStore();
+  const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
+
+  const columns = useMemo<GridColDef<ReportLedgerRow>[]>(() => {
+    const cols: GridColDef<ReportLedgerRow>[] = [
       {
         field: "name",
         headerName: labels.name,
@@ -92,45 +97,51 @@ export function ReportsDataGrid({ rows, labels }: Readonly<ReportsDataGridProps>
         headerAlign: "center",
         renderCell: ({ row }) => renderCountCell(row.pending),
       },
-      {
-        field: "hours",
-        headerName: labels.hours,
-        width: 100,
-        align: "center",
-        headerAlign: "center",
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-            {row.hours}
-          </Typography>
-        ),
-      },
-      {
-        field: "paidEgp",
-        headerName: labels.paidEgp,
-        width: 130,
-        align: "right",
-        headerAlign: "right",
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
-            {formatCurrency(row.paidEgp)}
-          </Typography>
-        ),
-      },
-      {
-        field: "paidUsd",
-        headerName: labels.paidUsd,
-        width: 130,
-        align: "right",
-        headerAlign: "right",
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
-            {formatCurrency(row.paidUsd)}
-          </Typography>
-        ),
-      },
-    ],
-    [labels]
-  );
+    ];
+
+    if (showFinancials) {
+      cols.push(
+        {
+          field: "hours",
+          headerName: labels.hours,
+          width: 100,
+          align: "center",
+          headerAlign: "center",
+          renderCell: ({ row }) => (
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+              {row.hours}
+            </Typography>
+          ),
+        },
+        {
+          field: "paidEgp",
+          headerName: labels.paidEgp,
+          width: 130,
+          align: "right",
+          headerAlign: "right",
+          renderCell: ({ row }) => (
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
+              {formatCurrency(row.paidEgp)}
+            </Typography>
+          ),
+        },
+        {
+          field: "paidUsd",
+          headerName: labels.paidUsd,
+          width: 130,
+          align: "right",
+          headerAlign: "right",
+          renderCell: ({ row }) => (
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
+              {formatCurrency(row.paidUsd)}
+            </Typography>
+          ),
+        }
+      );
+    }
+
+    return cols;
+  }, [labels, showFinancials]);
 
   return (
     <Box sx={{ px: { xs: 0, md: 1 }, pb: 1 }}>

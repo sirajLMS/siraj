@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
-import type { LedgerStatus, ReportLedgerRow } from "@/frontend/stores/mockReportsStore";
+import type { LedgerStatus, ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 import { PerformanceLedgerCard } from "./PerformanceLedgerCard";
 
 interface PerformanceLedgerCardListLabels {

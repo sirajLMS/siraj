@@ -2,6 +2,8 @@
 
 import { AttachFileOutlined, DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
 import type { LearningResourceRow } from "../types/resourcesTypes";
 import { ResourceFileTypeIcon } from "./ResourceFileTypeIcon";
@@ -51,16 +53,18 @@ export function ResourceLibraryCard({
         }}
       >
         <ResourceFileTypeIcon fileType={resource.fileType} />
-        {canManage && !isList ? (
-          <IconButton
-            aria-label="Delete resource"
-            onClick={() => {
-              onDeleteRequest(resource.id);
-            }}
-            sx={theme => ({ color: theme.palette.error.main })}
-          >
-            <DeleteOutlined />
-          </IconButton>
+        {!isList ? (
+          <RequirePermission permissions={AppPermission.ResourcesDelete}>
+            <IconButton
+              aria-label="Delete resource"
+              onClick={() => {
+                onDeleteRequest(resource.id);
+              }}
+              sx={theme => ({ color: theme.palette.error.main })}
+            >
+              <DeleteOutlined />
+            </IconButton>
+          </RequirePermission>
         ) : null}
       </Box>
 
@@ -88,16 +92,18 @@ export function ResourceLibraryCard({
         ) : null}
       </Box>
 
-      {canManage && isList ? (
-        <IconButton
-          aria-label="Delete resource"
-          onClick={() => {
-            onDeleteRequest(resource.id);
-          }}
-          sx={theme => ({ color: theme.palette.error.main, position: "absolute", top: 8, right: 8 })}
-        >
-          <DeleteOutlined />
-        </IconButton>
+      {isList ? (
+        <RequirePermission permissions={AppPermission.ResourcesDelete}>
+          <IconButton
+            aria-label="Delete resource"
+            onClick={() => {
+              onDeleteRequest(resource.id);
+            }}
+            sx={theme => ({ color: theme.palette.error.main, position: "absolute", top: 8, right: 8 })}
+          >
+            <DeleteOutlined />
+          </IconButton>
+        </RequirePermission>
       ) : null}
     </Paper>
   );

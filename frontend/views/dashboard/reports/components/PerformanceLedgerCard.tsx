@@ -4,7 +4,9 @@ import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { LedgerStatus, ReportLedgerRow } from "@/frontend/stores/mockReportsStore";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useUserStore } from "@/frontend/stores/userStore";
+import type { LedgerStatus, ReportLedgerRow } from "@/frontend/views/dashboard/reports/types/reportsTypes";
 
 interface PerformanceLedgerCardLabels {
   readonly studentLabel: string;
@@ -63,6 +65,8 @@ function StatCell({
 
 export function PerformanceLedgerCard({ row, labels }: Readonly<PerformanceLedgerCardProps>) {
   const studentText = labels.studentLabel.replace("{name}", row.studentName);
+  const { hasPermission } = useUserStore();
+  const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
   return (
     <BaseCard sx={{ p: 0, overflow: "hidden" }}>
@@ -114,7 +118,7 @@ export function PerformanceLedgerCard({ row, labels }: Readonly<PerformanceLedge
         sx={{
           p: 2,
           display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gridTemplateColumns: showFinancials ? "repeat(3, minmax(0, 1fr))" : "repeat(2, minmax(0, 1fr))",
           gap: 2,
         }}
       >
@@ -122,25 +126,30 @@ export function PerformanceLedgerCard({ row, labels }: Readonly<PerformanceLedge
         <StatCell label={labels.absent} value={row.absent} tone="error" />
         <StatCell label={labels.leave} value={row.leave} />
         <StatCell label={labels.pending} value={row.pending} tone="primary" />
-        <StatCell label={labels.hours} value={row.hours} />
-        <Box
-          sx={theme => ({
-            textAlign: "center",
-            bgcolor: theme.palette.surfaceContainerHigh,
-            borderRadius: theme.layout.radius.badge,
-            p: 1,
-          })}
-        >
-          <Typography variant="labelMd" sx={{ color: theme => theme.palette.primary.main, textTransform: "uppercase" }}>
-            {labels.paid}
-          </Typography>
-          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.primary.main, fontWeight: 700 }}>
-            {formatCurrency(row.paidEgp)} EGP
-          </Typography>
-          <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.secondary }}>
-            ${formatCurrency(row.paidUsd)}
-          </Typography>
-        </Box>
+        {showFinancials && <StatCell label={labels.hours} value={row.hours} />}
+        {showFinancials && (
+          <Box
+            sx={theme => ({
+              textAlign: "center",
+              bgcolor: theme.palette.surfaceContainerHigh,
+              borderRadius: theme.layout.radius.badge,
+              p: 1,
+            })}
+          >
+            <Typography
+              variant="labelMd"
+              sx={{ color: theme => theme.palette.primary.main, textTransform: "uppercase" }}
+            >
+              {labels.paid}
+            </Typography>
+            <Typography variant="bodyMd" sx={{ color: theme => theme.palette.primary.main, fontWeight: 700 }}>
+              {formatCurrency(row.paidEgp)} EGP
+            </Typography>
+            <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.secondary }}>
+              ${formatCurrency(row.paidUsd)}
+            </Typography>
+          </Box>
+        )}
       </Box>
     </BaseCard>
   );
