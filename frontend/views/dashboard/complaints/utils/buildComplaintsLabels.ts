@@ -33,6 +33,11 @@ export function buildComplaintsLabels(t: ComplaintsTranslator): ComplaintsLabels
         pending: t("parent.statusLabels.pending"),
         resolved: t("parent.statusLabels.resolved"),
       },
+      categoryLabels: {
+        REGARDING_TEACHER: t("parent.categoryLabels.REGARDING_TEACHER"),
+        REGARDING_SYSTEM: t("parent.categoryLabels.REGARDING_SYSTEM"),
+        OTHER: t("parent.categoryLabels.OTHER"),
+      },
     },
     admin: {
       pageTitle: t("admin.pageTitle"),
@@ -60,6 +65,11 @@ export function buildComplaintsLabels(t: ComplaintsTranslator): ComplaintsLabels
       priorityLabels: {
         urgent: t("admin.priorityLabels.urgent"),
         general: t("admin.priorityLabels.general"),
+      },
+      categoryLabels: {
+        REGARDING_TEACHER: t("admin.categoryLabels.REGARDING_TEACHER"),
+        REGARDING_SYSTEM: t("admin.categoryLabels.REGARDING_SYSTEM"),
+        OTHER: t("admin.categoryLabels.OTHER"),
       },
     },
   };

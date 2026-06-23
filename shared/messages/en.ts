@@ -224,6 +224,8 @@ const en: MessageSchema = {
       loadingBilling: "Loading billing data...",
       newUnansweredComplaint: "New Unanswered Complaint",
       defaultSystemNotification: "System Notification",
+      complaintResponse: "Your complaint has been answered",
+      suggestionAcknowledged: "Your suggestion has been received",
     },
     searchSchedule: {
       pageTitle: "Schedule Availability Search",
@@ -2020,6 +2022,11 @@ const en: MessageSchema = {
           pending: "Pending",
           resolved: "Resolved",
         },
+        categoryLabels: {
+          REGARDING_TEACHER: "Regarding Teacher",
+          REGARDING_SYSTEM: "Regarding System",
+          OTHER: "Other",
+        },
       },
       admin: {
         pageTitle: "Complaints Resolution Queue",
@@ -2047,6 +2054,11 @@ const en: MessageSchema = {
         priorityLabels: {
           urgent: "Urgent Priority",
           general: "General Inquiry",
+        },
+        categoryLabels: {
+          REGARDING_TEACHER: "Regarding Teacher",
+          REGARDING_SYSTEM: "Regarding System",
+          OTHER: "Other",
         },
       },
     },

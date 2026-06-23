@@ -25,6 +25,7 @@ export interface ComplaintsParentLabels {
   readonly regarding: string;
   readonly validation: ComplaintValidationLabels;
   readonly statusLabels: Record<"pending" | "resolved", string>;
+  readonly categoryLabels: Record<"REGARDING_TEACHER" | "REGARDING_SYSTEM" | "OTHER", string>;
 }
 
 export interface ComplaintsAdminLabels {
@@ -51,6 +52,7 @@ export interface ComplaintsAdminLabels {
     readonly noEntries: string;
   };
   readonly priorityLabels: Record<"urgent" | "general", string>;
+  readonly categoryLabels: Record<"REGARDING_TEACHER" | "REGARDING_SYSTEM" | "OTHER", string>;
 }
 
 export interface ComplaintsLabels {

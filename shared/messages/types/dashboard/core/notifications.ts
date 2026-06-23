@@ -7,4 +7,6 @@ export interface NotificationsLabels {
   readonly loadingBilling: string;
   readonly newUnansweredComplaint: string;
   readonly defaultSystemNotification: string;
+  readonly complaintResponse: string;
+  readonly suggestionAcknowledged: string;
 }

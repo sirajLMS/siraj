@@ -462,6 +462,10 @@ export enum AppPermission {
   COMPLAINTS_LIST = "complaints.list",
   COMPLAINTS_DELETE = "complaints.delete",
   COMPLAINTS_RESPOND = "complaints.respond",
+  SUPPORT_SUBMIT_COMPLAINT = "support.submit_complaint",
+  SUPPORT_VIEW_HISTORY = "support.view_history",
+  COMMUNICATION_SUBMIT_SUGGESTION = "communication.submit_suggestion",
+  SYSTEM_DISPATCH_EMAIL = "system.dispatch_email",
   STAFF_LIST = "staff.list",
   // Staff/Manager Management
   STAFF_CREATE = "staff.create",

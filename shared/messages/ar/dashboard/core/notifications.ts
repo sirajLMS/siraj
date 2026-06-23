@@ -9,4 +9,6 @@ export const notifications: NotificationsLabels = {
   loadingBilling: "جاري تحميل بيانات الفواتير...",
   newUnansweredComplaint: "شكوى جديدة غير مجاب عليها",
   defaultSystemNotification: "إشعار النظام",
+  complaintResponse: "تم الرد على شكواك",
+  suggestionAcknowledged: "تم استلام اقتراحك",
 };

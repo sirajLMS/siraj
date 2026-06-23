@@ -30,6 +30,11 @@ export const complaints: ComplaintsLabels = {
       pending: "Pending",
       resolved: "Resolved",
     },
+    categoryLabels: {
+      REGARDING_TEACHER: "Regarding Teacher",
+      REGARDING_SYSTEM: "Regarding System",
+      OTHER: "Other",
+    },
   },
   admin: {
     pageTitle: "Complaints Resolution Queue",
@@ -57,6 +62,11 @@ export const complaints: ComplaintsLabels = {
     priorityLabels: {
       urgent: "Urgent Priority",
       general: "General Inquiry",
+    },
+    categoryLabels: {
+      REGARDING_TEACHER: "Regarding Teacher",
+      REGARDING_SYSTEM: "Regarding System",
+      OTHER: "Other",
     },
   },
 };

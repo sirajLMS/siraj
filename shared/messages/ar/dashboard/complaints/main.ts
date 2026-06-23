@@ -30,6 +30,11 @@ export const complaints: ComplaintsLabels = {
       pending: "معلقة",
       resolved: "تم الحل",
     },
+    categoryLabels: {
+      REGARDING_TEACHER: "بخصوص المعلم",
+      REGARDING_SYSTEM: "بخصوص النظام",
+      OTHER: "أخرى",
+    },
   },
   admin: {
     pageTitle: "قائمة معالجة الشكاوى",
@@ -57,6 +62,11 @@ export const complaints: ComplaintsLabels = {
     priorityLabels: {
       urgent: "أولوية عاجلة",
       general: "استفسار عام",
+    },
+    categoryLabels: {
+      REGARDING_TEACHER: "بخصوص المعلم",
+      REGARDING_SYSTEM: "بخصوص النظام",
+      OTHER: "أخرى",
     },
   },
 };

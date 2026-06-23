@@ -809,6 +809,43 @@ VALUES (
         'Authorizes the query engine to calculate and render highly sensitive payroll and financial metrics within generated reports.',
         'Reporting',
         true
+    ),
+    -- Story 14: Complaints, Suggestions, Communication Channels
+    (
+        gen_random_uuid (),
+        'support.submit_complaint',
+        'support',
+        'submit_complaint',
+        'Submit a new complaint from the parent dashboard',
+        'Support',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'support.view_history',
+        'support',
+        'view_history',
+        'View own complaint submission history as a parent',
+        'Support',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'communication.submit_suggestion',
+        'communication',
+        'submit_suggestion',
+        'Submit a new suggestion from the parent dashboard',
+        'Communication',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'system.dispatch_email',
+        'system',
+        'dispatch_email',
+        'Internal permission allowing the system to dispatch outbound email notifications',
+        'System',
+        true
     ) ON CONFLICT (key) DO
 UPDATE
 SET
@@ -991,7 +1028,11 @@ WHERE
         'student.manage_status',
         'system.sync_notifications',
         'report.generate_custom',
-        'report.view_financials'
+        'report.view_financials',
+        'support.submit_complaint',
+        'support.view_history',
+        'communication.submit_suggestion',
+        'system.dispatch_email'
     );
 
 INSERT INTO
@@ -1051,7 +1092,10 @@ WHERE
         'report.generate_custom',
         'report.view_financials',
         'teachers.create',
-        'parents.create'
+        'parents.create',
+        'complaints.list',
+        'complaints.delete',
+        'complaints.respond'
     );
 
 INSERT INTO
@@ -1089,7 +1133,9 @@ WHERE
         'schedule.view_family',
         'session.view_details',
         'session.update_status.leave',
-        'complaints.list'
+        'support.submit_complaint',
+        'support.view_history',
+        'communication.submit_suggestion'
     );
 
 INSERT INTO
@@ -1125,7 +1171,8 @@ WHERE
         'system.sync_notifications',
         'system.enforce_suspended_lock',
         'system.process_student_leave',
-        'system.restrict_resource_access'
+        'system.restrict_resource_access',
+        'system.dispatch_email'
     );
 
 -- Triggers to protect system permissions and groups from deletion or mutation of is_system
