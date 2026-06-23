@@ -8,12 +8,13 @@ const createMinimalManagerInput = (
   overrides?: Partial<{
     name: string;
     email: string;
+    accountType: ManagerAccountType;
   }>
 ) => ({
   name: overrides?.name ?? "Test Manager",
   email: overrides?.email ?? `test_manager_${Date.now()}@test.com`,
   password: "TestPassword123!",
-  accountType: ManagerAccountType.Manager,
+  accountType: overrides?.accountType ?? ManagerAccountType.Manager,
   phone: null,
   skypeId: null,
 });
@@ -28,6 +29,7 @@ describe("Manager Onboarding GraphQL API", () => {
       input: createMinimalManagerInput({
         name: "GraphQL Test Admin",
         email: `graphql_admin_${Date.now()}@test.com`,
+        accountType: ManagerAccountType.Admin,
       }),
     });
 
