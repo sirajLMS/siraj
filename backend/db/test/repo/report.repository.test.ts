@@ -1,0 +1,224 @@
+import { describe, expect, test } from "bun:test";
+import { ReportRepository, ReportGroupingMode } from "@/backend/db/repo/report.repository";
+import { setupTestEntities, createMockClassInstance } from "../entity-setup";
+import { type DbTransaction, runInRollback } from "../test-utils";
+
+function reportRepoTest(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+  test(name, async () => {
+    await runInRollback(fn);
+  });
+}
+
+async function setupTestData(tx: DbTransaction) {
+  // Setup teacher and student entities using setupTestEntities helper
+  const { student, teacher, teacherUser } = await setupTestEntities(tx, "rep");
+
+  // Define distinct dates in UTC to avoid timezone alignment variance
+  const date1 = new Date("2026-05-10T10:00:00.000Z");
+  const date2 = new Date("2026-05-11T12:00:00.000Z");
+  const date3 = new Date("2026-05-12T14:00:00.000Z");
+  const date4 = new Date("2026-05-13T16:00:00.000Z");
+
+  // Create class instances with various outcomes and rates
+  // Instance 1: TAKEN, 60 minutes, rate 100.00 EGP
+  await createMockClassInstance(tx, student.id, teacher.id, {
+    scheduledStartAt: date1,
+    scheduledEndAt: new Date(date1.getTime() + 60 * 60 * 1000),
+    durationMinutes: 60,
+    outcome: "TAKEN",
+    executionState: "COMPLETED",
+    actualStartAt: date1,
+    actualEndAt: new Date(date1.getTime() + 60 * 60 * 1000),
+    rateAmount: "100.00",
+    rateCurrency: "EGP",
+  });
+
+  // Instance 2: ABSENT, 90 minutes, rate 150.00 EGP
+  await createMockClassInstance(tx, student.id, teacher.id, {
+    scheduledStartAt: date2,
+    scheduledEndAt: new Date(date2.getTime() + 90 * 60 * 1000),
+    durationMinutes: 90,
+    outcome: "ABSENT",
+    executionState: "COMPLETED",
+    rateAmount: "150.00",
+    rateCurrency: "EGP",
+  });
+
+  // Instance 3: LEAVE, 120 minutes, rate 50.00 USD
+  await createMockClassInstance(tx, student.id, teacher.id, {
+    scheduledStartAt: date3,
+    scheduledEndAt: new Date(date3.getTime() + 120 * 60 * 1000),
+    durationMinutes: 120,
+    outcome: "LEAVE",
+    executionState: "COMPLETED",
+    rateAmount: "50.00",
+    rateCurrency: "USD",
+  });
+
+  // Instance 4: PENDING, 60 minutes, rate 0.00 EGP
+  await createMockClassInstance(tx, student.id, teacher.id, {
+    scheduledStartAt: date4,
+    scheduledEndAt: new Date(date4.getTime() + 60 * 60 * 1000),
+    durationMinutes: 60,
+    outcome: "PENDING",
+    executionState: "NOT_ACTIVATED",
+    rateAmount: "0.00",
+    rateCurrency: "EGP",
+  });
+
+  return { student, teacher, teacherUser, date1, date2, date3, date4 };
+}
+
+describe("ReportRepository — generateAttendanceReport", () => {
+  reportRepoTest("aggregates and groups correctly by DATE", async tx => {
+    // Arrange
+    await setupTestData(tx);
+
+    const filters = {
+      fromDate: new Date("2026-05-01T00:00:00Z"),
+      toDate: new Date("2026-05-31T23:59:59Z"),
+      groupBy: ReportGroupingMode.DATE,
+    };
+
+    // Act
+    const results = await ReportRepository.generateAttendanceReport(filters, tx);
+
+    // Assert
+    expect(results).toBeArray();
+    expect(results.length).toBe(4);
+
+    // Sort results by groupKey to make tests deterministic
+    const sorted = [...results].sort((a, b) => a.groupKey.localeCompare(b.groupKey));
+
+    // date1: TAKEN, 1.0 hour, 100 EGP
+    expect(sorted[0].takenClasses).toBe(1);
+    expect(sorted[0].absentClasses).toBe(0);
+    expect(sorted[0].totalHours).toBe(1.0);
+    expect(sorted[0].paidEGP).toBe(100);
+    expect(sorted[0].paidUSD).toBe(0);
+
+    // date2: ABSENT, 1.5 hours, 150 EGP
+    expect(sorted[1].takenClasses).toBe(0);
+    expect(sorted[1].absentClasses).toBe(1);
+    expect(sorted[1].totalHours).toBe(1.5);
+    expect(sorted[1].paidEGP).toBe(150);
+    expect(sorted[1].paidUSD).toBe(0);
+
+    // date3: LEAVE, 2.0 hours, 50 USD
+    expect(sorted[2].takenClasses).toBe(0);
+    expect(sorted[2].leaveClasses).toBe(1);
+    expect(sorted[2].totalHours).toBe(2.0);
+    expect(sorted[2].paidEGP).toBe(0);
+    expect(sorted[2].paidUSD).toBe(50);
+
+    // date4: PENDING, 1.0 hour, 0 EGP
+    expect(sorted[3].takenClasses).toBe(0);
+    expect(sorted[3].pendingClasses).toBe(1);
+    expect(sorted[3].totalHours).toBe(1.0);
+    expect(sorted[3].paidEGP).toBe(0);
+    expect(sorted[3].paidUSD).toBe(0);
+  });
+
+  reportRepoTest("aggregates and groups correctly by TEACHER", async tx => {
+    // Arrange
+    const { teacher, teacherUser } = await setupTestData(tx);
+
+    const filters = {
+      fromDate: new Date("2026-05-01T00:00:00Z"),
+      toDate: new Date("2026-05-31T23:59:59Z"),
+      groupBy: ReportGroupingMode.TEACHER,
+    };
+
+    // Act
+    const results = await ReportRepository.generateAttendanceReport(filters, tx);
+
+    // Assert
+    expect(results).toBeArray();
+    expect(results.length).toBe(1);
+
+    const row = results[0];
+    expect(row.groupKey).toBe(teacher.id);
+    expect(row.groupLabel).toBe(teacherUser.name);
+    expect(row.takenClasses).toBe(1);
+    expect(row.absentClasses).toBe(1);
+    expect(row.leaveClasses).toBe(1);
+    expect(row.pendingClasses).toBe(1);
+    expect(row.totalHours).toBe(5.5); // 1.0 + 1.5 + 2.0 + 1.0
+    expect(row.paidEGP).toBe(250); // 100 + 150
+    expect(row.paidUSD).toBe(50);
+  });
+
+  reportRepoTest("filters by teacherId correctly", async tx => {
+    // Arrange
+    const { teacher } = await setupTestData(tx);
+
+    // Seed another teacher and student to test teacher filtering isolation
+    const otherSetup = await setupTestEntities(tx, "other");
+    const otherTeacher = otherSetup.teacher;
+    const otherStudent = otherSetup.student;
+
+    await createMockClassInstance(tx, otherStudent.id, otherTeacher.id, {
+      scheduledStartAt: new Date("2026-05-15T10:00:00Z"),
+      scheduledEndAt: new Date("2026-05-15T11:00:00Z"),
+      durationMinutes: 60,
+      outcome: "TAKEN",
+      executionState: "COMPLETED",
+      actualStartAt: new Date("2026-05-15T10:00:00Z"),
+      actualEndAt: new Date("2026-05-15T11:00:00Z"),
+      rateAmount: "300.00",
+      rateCurrency: "EGP",
+    });
+
+    const filters = {
+      fromDate: new Date("2026-05-01T00:00:00Z"),
+      toDate: new Date("2026-05-31T23:59:59Z"),
+      teacherId: teacher.id,
+      groupBy: ReportGroupingMode.TEACHER,
+    };
+
+    // Act
+    const results = await ReportRepository.generateAttendanceReport(filters, tx);
+
+    // Assert
+    expect(results.length).toBe(1);
+    expect(results[0].groupKey).toBe(teacher.id);
+    expect(results[0].paidEGP).toBe(250); // only aggregates filtered teacher's records
+  });
+
+  reportRepoTest("returns empty array if no class instances in date range", async tx => {
+    // Arrange
+    await setupTestData(tx);
+
+    const filters = {
+      fromDate: new Date("2025-01-01T00:00:00Z"),
+      toDate: new Date("2025-12-31T23:59:59Z"),
+      groupBy: ReportGroupingMode.DATE,
+    };
+
+    // Act
+    const results = await ReportRepository.generateAttendanceReport(filters, tx);
+
+    // Assert
+    expect(results).toBeArray();
+    expect(results.length).toBe(0);
+  });
+
+  reportRepoTest("fails and catches error properly when query crashes", async tx => {
+    // Act & Assert
+    // Passing an invalid UUID string for teacherId triggers a PostgreSQL type conversion error.
+    const badFilters = {
+      fromDate: new Date(),
+      toDate: new Date(),
+      teacherId: "not-a-valid-uuid-string",
+      groupBy: ReportGroupingMode.DATE,
+    };
+
+    let errorCaught: unknown = null;
+    try {
+      await ReportRepository.generateAttendanceReport(badFilters, tx);
+    } catch (e) {
+      errorCaught = e;
+    }
+    expect(errorCaught).not.toBeNull();
+  });
+});

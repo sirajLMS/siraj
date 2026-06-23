@@ -205,3 +205,49 @@ describe("LearningResourceRepository — findById", () => {
     expect(found).toBeNull();
   });
 });
+
+describe("LearningResourceRepository — deleteResource", () => {
+  async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
+    let errorCaught: unknown = null;
+    try {
+      await fn();
+    } catch (error) {
+      errorCaught = error;
+    }
+    expect(errorCaught).not.toBeNull();
+    return errorCaught as Error;
+  }
+
+  resTest("successfully hard deletes an existing learning resource", async tx => {
+    const user = await createTestUser(tx, {
+      name: "DeleteUser",
+      email: `delete-${randomUUID()}@t.com`,
+    });
+    const file = await createTestFile(tx);
+    const resource = await createTestResource(tx, user.id, "Delete Doc", "/res/delete.pdf", file.id);
+
+    // Verify it exists in DB
+    const foundBefore = await LearningResourceRepository.findById(resource.id, tx);
+    expect(foundBefore).not.toBeNull();
+
+    // Act
+    const result = await LearningResourceRepository.deleteResource(resource.id, undefined, tx);
+
+    // Assert
+    expect(result).toBe(true);
+
+    // Verify it's gone
+    const foundAfter = await LearningResourceRepository.findById(resource.id, tx);
+    expect(foundAfter).toBeNull();
+  });
+
+  resTest("throws an error when resource ID does not exist", async tx => {
+    const nonExistentId = randomUUID();
+
+    const error = await expectRepoError(async () => {
+      await LearningResourceRepository.deleteResource(nonExistentId, undefined, tx);
+    });
+
+    expect(error.message).toContain("not found");
+  });
+});

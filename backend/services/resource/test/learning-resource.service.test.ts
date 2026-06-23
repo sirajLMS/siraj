@@ -1,0 +1,117 @@
+import { describe, expect, spyOn, test } from "bun:test";
+import { LearningResourceRepository } from "@/backend/db/repo/learning-resource.repository";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import * as storageServiceModule from "@/backend/storage/storage.service";
+import { AppPermission } from "@/shared/lib/enum";
+import { LearningResourceService } from "../learning-resource.service";
+
+describe("LearningResourceService — deleteResource", () => {
+  const dummyResourceId = "00000000-0000-0000-0000-000000000001";
+  const dummyActorId = "00000000-0000-0000-0000-000000000002";
+  const dummyResource = {
+    id: dummyResourceId,
+    displayName: "Test PDF Document",
+    filePath: "curriculum/test.pdf",
+    uploadedByUserId: dummyActorId,
+    uploadedByUserName: null,
+    fileSize: null,
+    contentType: null,
+    createdAt: new Date(),
+  };
+
+  test("throws unauthorized error if actor lacks delete permission", async () => {
+    const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(false);
+
+    let errorCaught: Error | null = null;
+    try {
+      await LearningResourceService.deleteResource(dummyResourceId, dummyActorId);
+    } catch (e) {
+      errorCaught = e as Error;
+    }
+
+    expect(errorCaught).not.toBeNull();
+    if (errorCaught) {
+      expect(errorCaught.message.toLowerCase()).toContain("unauthorized");
+    }
+    expect(hasPermissionSpy).toHaveBeenCalledWith(dummyActorId, AppPermission.RESOURCES_DELETE);
+
+    hasPermissionSpy.mockRestore();
+  });
+
+  test("deletes physical file before DB record when authorized", async () => {
+    const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
+    const findByIdSpy = spyOn(LearningResourceRepository, "findById").mockResolvedValue(dummyResource);
+
+    const storageService = await storageServiceModule.getStorageService();
+    const deleteFileSpy = spyOn(storageService, "deleteFile").mockResolvedValue({
+      success: true,
+      message: "File deleted successfully",
+    });
+    const deleteResourceSpy = spyOn(LearningResourceRepository, "deleteResource").mockResolvedValue(true);
+
+    const result = await LearningResourceService.deleteResource(dummyResourceId, dummyActorId);
+
+    expect(result).toBe(true);
+    expect(deleteFileSpy).toHaveBeenCalledWith("curriculum/test.pdf");
+    expect(deleteResourceSpy).toHaveBeenCalledWith(dummyResourceId, undefined);
+
+    hasPermissionSpy.mockRestore();
+    findByIdSpy.mockRestore();
+    deleteFileSpy.mockRestore();
+    deleteResourceSpy.mockRestore();
+  });
+
+  test("skips database deletion if physical file deletion throws an error", async () => {
+    const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
+    const findByIdSpy = spyOn(LearningResourceRepository, "findById").mockResolvedValue(dummyResource);
+
+    const storageService = await storageServiceModule.getStorageService();
+    const deleteFileSpy = spyOn(storageService, "deleteFile").mockRejectedValue(new Error("AWS S3 Timeout"));
+    const deleteResourceSpy = spyOn(LearningResourceRepository, "deleteResource").mockResolvedValue(true);
+
+    let errorCaught: Error | null = null;
+    try {
+      await LearningResourceService.deleteResource(dummyResourceId, dummyActorId);
+    } catch (e) {
+      errorCaught = e as Error;
+    }
+
+    expect(errorCaught).not.toBeNull();
+    if (errorCaught) {
+      expect(errorCaught.message).toContain("delete");
+      expect(errorCaught.cause).toBeDefined();
+      if (errorCaught.cause) {
+        expect((errorCaught.cause as Error).message).toContain("AWS S3 Timeout");
+      }
+    }
+    expect(deleteResourceSpy).not.toHaveBeenCalled();
+
+    hasPermissionSpy.mockRestore();
+    findByIdSpy.mockRestore();
+    deleteFileSpy.mockRestore();
+    deleteResourceSpy.mockRestore();
+  });
+
+  test("throws error if resource does not exist during initial fetch", async () => {
+    const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
+    const findByIdSpy = spyOn(LearningResourceRepository, "findById").mockResolvedValue(null);
+    const deleteResourceSpy = spyOn(LearningResourceRepository, "deleteResource").mockResolvedValue(true);
+
+    let errorCaught: Error | null = null;
+    try {
+      await LearningResourceService.deleteResource(dummyResourceId, dummyActorId);
+    } catch (e) {
+      errorCaught = e as Error;
+    }
+
+    expect(errorCaught).not.toBeNull();
+    if (errorCaught) {
+      expect(errorCaught.message).toContain("not found");
+    }
+    expect(deleteResourceSpy).not.toHaveBeenCalled();
+
+    hasPermissionSpy.mockRestore();
+    findByIdSpy.mockRestore();
+    deleteResourceSpy.mockRestore();
+  });
+});
