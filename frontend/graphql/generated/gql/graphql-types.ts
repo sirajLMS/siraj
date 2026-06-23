@@ -60,6 +60,8 @@ export enum AppPermission {
   PermissionGroupsAssign = 'PERMISSION_GROUPS_ASSIGN',
   PermissionGroupsManage = 'PERMISSION_GROUPS_MANAGE',
   ReportsGenerate = 'REPORTS_GENERATE',
+  ReportGenerateCustom = 'REPORT_GENERATE_CUSTOM',
+  ReportViewFinancials = 'REPORT_VIEW_FINANCIALS',
   ResourcesDelete = 'RESOURCES_DELETE',
   ResourcesList = 'RESOURCES_LIST',
   ResourcesUpload = 'RESOURCES_UPLOAD',
@@ -135,6 +137,32 @@ export type AssociatedStudent = {
   status: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** Filters applied to the dynamic attendance query engine. */
+export type AttendanceReportFiltersInput = {
+  /** ISO Date String representing start bound */
+  fromDate: Scalars['String']['input'];
+  groupBy: ReportGroupingMode;
+  /** Optional UUID to filter by a specific teacher */
+  teacherId: InputMaybe<Scalars['String']['input']>;
+  /** ISO Date String representing end bound */
+  toDate: Scalars['String']['input'];
+};
+
+/** A single row of the aggregated attendance report. */
+export type AttendanceReportRow = {
+  __typename?: 'AttendanceReportRow';
+  absentClasses: Maybe<Scalars['Int']['output']>;
+  groupKey: Maybe<Scalars['String']['output']>;
+  groupLabel: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  leaveClasses: Maybe<Scalars['Int']['output']>;
+  paidEGP: Maybe<Scalars['Float']['output']>;
+  paidUSD: Maybe<Scalars['Float']['output']>;
+  pendingClasses: Maybe<Scalars['Int']['output']>;
+  takenClasses: Maybe<Scalars['Int']['output']>;
+  totalHours: Maybe<Scalars['Float']['output']>;
 };
 
 export type AvailabilitySearchInput = {
@@ -866,6 +894,8 @@ export type Mutation = {
   deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
   deleteFile: Maybe<FileOperationResult>;
   deleteInvoice: Maybe<DeleteInvoiceResult>;
+  /** Permanently deletes a learning resource from physical storage and the database. */
+  deleteLearningResource: Maybe<Scalars['Boolean']['output']>;
   deletePermissionGroup: Maybe<Scalars['Boolean']['output']>;
   deleteRecurringClass: Maybe<Scalars['Boolean']['output']>;
   deleteStorageItems: Maybe<BulkOperationResult>;
@@ -1014,6 +1044,11 @@ export type MutationDeleteFileArgs = {
 
 export type MutationDeleteInvoiceArgs = {
   invoiceId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteLearningResourceArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1345,6 +1380,8 @@ export type Query = {
   fileInfo: Maybe<FileInfo>;
   fileUsage: Maybe<FileUsageResult>;
   folderInfo: Maybe<DirectoryInfo>;
+  /** Generates dynamic attendance and financial reports. */
+  generateAttendanceReport: Maybe<Array<AttendanceReportRow>>;
   /** Lists all learning resources available to the academy. */
   learningResources: Maybe<Array<LearningResourceRow>>;
   listFiles: Maybe<StorageObjectList>;
@@ -1442,6 +1479,11 @@ export type QueryFileUsageArgs = {
 
 export type QueryFolderInfoArgs = {
   path: Scalars['String']['input'];
+};
+
+
+export type QueryGenerateAttendanceReportArgs = {
+  filters: AttendanceReportFiltersInput;
 };
 
 
@@ -1631,6 +1673,12 @@ export type RefreshTokenResponse = {
   token: Maybe<Scalars['String']['output']>;
   user: Maybe<User>;
 };
+
+/** Determines how the attendance data is aggregated. */
+export enum ReportGroupingMode {
+  Date = 'DATE',
+  Teacher = 'TEACHER'
+}
 
 export type RescheduleClassInput = {
   durationMinutes: Scalars['Int']['input'];

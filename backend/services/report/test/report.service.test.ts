@@ -1,5 +1,5 @@
 import { describe, expect, spyOn, test } from "bun:test";
-import { ReportRepository, ReportGroupingMode } from "@/backend/db/repo/report.repository";
+import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/report.repository";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AppPermission } from "@/shared/lib/enum";
 import { ReportService } from "../report.service";
@@ -46,11 +46,13 @@ describe("ReportService — generateAttendanceReport", () => {
   });
 
   test("masks financial data if actor lacks REPORT_VIEW_FINANCIALS", async () => {
-    const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockImplementation(async (_userId, permission) => {
-      if (permission === AppPermission.REPORT_GENERATE_CUSTOM) return true;
-      if (permission === AppPermission.REPORT_VIEW_FINANCIALS) return false;
-      return false;
-    });
+    const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockImplementation(
+      async (_userId, permission) => {
+        if (permission === AppPermission.REPORT_GENERATE_CUSTOM) return true;
+        if (permission === AppPermission.REPORT_VIEW_FINANCIALS) return false;
+        return false;
+      }
+    );
     const repoSpy = spyOn(ReportRepository, "generateAttendanceReport").mockResolvedValue(mockRepoResults);
 
     const result = await ReportService.generateAttendanceReport(dummyFilters, dummyActorId);

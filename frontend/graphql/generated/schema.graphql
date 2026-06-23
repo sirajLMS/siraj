@@ -37,6 +37,8 @@ enum AppPermission {
   PERMISSION_GROUPS_ASSIGN
   PERMISSION_GROUPS_MANAGE
   REPORTS_GENERATE
+  REPORT_GENERATE_CUSTOM
+  REPORT_VIEW_FINANCIALS
   RESOURCES_DELETE
   RESOURCES_LIST
   RESOURCES_UPLOAD
@@ -111,6 +113,33 @@ type AssociatedStudent {
   status: String
   teacherName: String
   updatedAt: DateTime
+}
+
+"""Filters applied to the dynamic attendance query engine."""
+input AttendanceReportFiltersInput {
+  """ISO Date String representing start bound"""
+  fromDate: String!
+  groupBy: ReportGroupingMode!
+
+  """Optional UUID to filter by a specific teacher"""
+  teacherId: String
+
+  """ISO Date String representing end bound"""
+  toDate: String!
+}
+
+"""A single row of the aggregated attendance report."""
+type AttendanceReportRow {
+  absentClasses: Int
+  groupKey: String
+  groupLabel: String
+  id: String
+  leaveClasses: Int
+  paidEGP: Float
+  paidUSD: Float
+  pendingClasses: Int
+  takenClasses: Int
+  totalHours: Float
 }
 
 input AvailabilitySearchInput {
@@ -824,6 +853,14 @@ type Mutation {
   deleteClassInstance(classInstanceId: ID!): Boolean
   deleteFile(path: String!): FileOperationResult
   deleteInvoice(invoiceId: String!): DeleteInvoiceResult
+
+  """
+  Permanently deletes a learning resource from physical storage and the database.
+  """
+  deleteLearningResource(
+    """The UUID of the resource to delete"""
+    id: ID!
+  ): Boolean
   deletePermissionGroup(groupId: String!): Boolean
   deleteRecurringClass(classInstanceId: ID!): Boolean
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
@@ -1031,6 +1068,9 @@ type Query {
   fileUsage(input: FileUsageCheckInput!): FileUsageResult
   folderInfo(path: String!): DirectoryInfo
 
+  """Generates dynamic attendance and financial reports."""
+  generateAttendanceReport(filters: AttendanceReportFiltersInput!): [AttendanceReportRow!]
+
   """Lists all learning resources available to the academy."""
   learningResources(searchQuery: String): [LearningResourceRow!]
   listFiles(input: FilesListInput!): StorageObjectList
@@ -1121,6 +1161,12 @@ input RecurringClassDayInput {
 type RefreshTokenResponse {
   token: String
   user: User
+}
+
+"""Determines how the attendance data is aggregated."""
+enum ReportGroupingMode {
+  DATE
+  TEACHER
 }
 
 input RescheduleClassInput {

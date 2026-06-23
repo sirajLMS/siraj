@@ -1,9 +1,12 @@
 import type { AttendanceReportFilters, AttendanceReportRow } from "@/backend/db/repo/report.repository";
-import { ReportRepository } from "@/backend/db/repo/report.repository";
+import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/report.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AppPermission } from "@/shared/lib/enum";
+
+export type { AttendanceReportFilters, AttendanceReportRow };
+export { ReportGroupingMode };
 
 export namespace ReportService {
   /**

@@ -14,6 +14,7 @@ export * from "./parent-document.pothos";
 export * from "./parent-profile.pothos";
 export * from "./permission-management.pothos";
 export * from "./recurring-class.pothos";
+export * from "./report.pothos";
 export * from "./schedule.pothos";
 export * from "./schedule-deletion.pothos";
 export * from "./staff-directory.pothos";

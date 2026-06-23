@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { ReportRepository, ReportGroupingMode } from "@/backend/db/repo/report.repository";
-import { setupTestEntities, createMockClassInstance } from "../entity-setup";
+import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/report.repository";
+import { createMockClassInstance, setupTestEntities } from "../entity-setup";
 import { type DbTransaction, runInRollback } from "../test-utils";
 
 function reportRepoTest(name: string, fn: (tx: DbTransaction) => Promise<void>) {

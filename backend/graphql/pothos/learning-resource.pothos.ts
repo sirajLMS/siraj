@@ -74,3 +74,27 @@ gqlSchemaBuilder.mutationField("uploadLearningResource", t =>
     description: "Uploads a new learning resource to the academy library.",
   })
 );
+
+/**
+ * Mutation: deleteLearningResource
+ * Permanently deletes a curriculum file and drops the DB record.
+ */
+gqlSchemaBuilder.mutationField("deleteLearningResource", t =>
+  t.boolean({
+    description: "Permanently deletes a learning resource from physical storage and the database.",
+    args: {
+      id: t.arg.id({ required: true, description: "The UUID of the resource to delete" }),
+    },
+    resolve: async (_root, args, ctx) => {
+      // 1. Authentication Check
+      if (!ctx.user?.id) {
+        throw new Error("unauthenticated");
+      }
+
+      // 2. Delegate to Service Layer
+      // We pass the stringified ID, the actor's ID, and the locale.
+      // The Service Layer handles the RBAC check for 'resources.delete'.
+      return LearningResourceService.deleteResource(String(args.id), ctx.user.id, ctx.locale);
+    },
+  })
+);
