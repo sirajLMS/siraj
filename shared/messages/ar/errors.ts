@@ -84,6 +84,7 @@ export const errors: ErrorsLabels = {
   staffProfileUpdateFailed: "فشل تحديث الملف الشخصي للموظف",
   resourceCreateFailed: "فشل إنشاء المورد التعليمي",
   resourceNotFound: "لم يتم العثور على المورد التعليمي",
+  resourceDeleteFailed: "فشل حذف المورد التعليمي",
   permissionDenied: "ليس لديك صلاحية لتنفيذ هذا الإجراء.",
   insufficientPrivilege: "ليس لديك صلاحية كافية لتعديل حسابات المسؤولين.",
 };

@@ -94,4 +94,76 @@ export namespace LearningResourceService {
 
     return await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_LIST);
   }
+
+  /**
+   * Orchestrates the complete deletion lifecycle of a learning resource.
+   *
+   * @description
+   * This method acts as the centralized authority for dropping learning resources.
+   * It enforces RBAC security checks to ensure the calling user has the right to perform
+   * this destructive action. It then carefully orchestrates the physical storage cleanup
+   * followed by the database cleanup to prevent orphaned files.
+   *
+   * @param resourceId - The unique UUID of the learning resource to delete.
+   * @param actorUserId - The unique UUID of the user attempting the deletion.
+   * @param locale - The optional locale for error translation.
+   * @returns Promise<boolean> - Returns true if the entire deletion process succeeded.
+   * @throws Error("unauthorizedAction") - If the user lacks the 'resources.delete' permission.
+   * @throws Error - If the file cannot be deleted from physical storage or the database.
+   */
+  export async function deleteResource(resourceId: string, actorUserId: string, locale?: string): Promise<boolean> {
+    try {
+      logger.info(
+        `[LearningResourceService.deleteResource] Initiating deletion of resource ${resourceId} by user ${actorUserId}`
+      );
+
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+
+      // 1. Core Permission Check
+      const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_DELETE);
+
+      if (!hasPermission) {
+        logger.warn(
+          `[LearningResourceService.deleteResource] Unauthorized deletion attempt by user ${actorUserId} for resource ${resourceId}`
+        );
+        throw new Error(t("unauthorizedAction"));
+      }
+
+      // 2. Resource Retrieval
+      const resource = await LearningResourceRepository.findById(resourceId);
+      if (!resource) {
+        logger.warn(`[LearningResourceService.deleteResource] Resource ID not found: ${resourceId}`);
+        throw new Error(t("resourceNotFound"));
+      }
+
+      logger.debug(`[LearningResourceService.deleteResource] Resource fetched. Target file path: ${resource.filePath}`);
+
+      // 3. Physical Storage Cleanup
+      logger.debug(`[LearningResourceService.deleteResource] Requesting StorageRepository to drop physical file.`);
+      const storageService = await getStorageService();
+      await storageService.deleteFile(resource.filePath);
+
+      // 4. Database Cleanup
+      logger.debug(
+        `[LearningResourceService.deleteResource] Physical file deleted. Requesting LearningResourceRepository to drop DB record.`
+      );
+      await LearningResourceRepository.deleteResource(resourceId, locale);
+
+      logger.info(`[LearningResourceService.deleteResource] Deletion lifecycle complete for resource ${resourceId}`);
+      return true;
+    } catch (error) {
+      logger.error(
+        `[LearningResourceService.deleteResource] Failed to orchestrate deletion for resource ${resourceId}:`,
+        error
+      );
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      if (
+        error instanceof Error &&
+        (error.message === t("unauthorizedAction") || error.message === t("resourceNotFound"))
+      ) {
+        throw error;
+      }
+      throw new Error(t("resourceDeleteFailed"), { cause: error });
+    }
+  }
 }
