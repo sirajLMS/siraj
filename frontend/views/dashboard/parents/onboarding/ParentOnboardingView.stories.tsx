@@ -22,7 +22,11 @@ const defaultValues: ParentOnboardingFormData = {
 };
 
 function ParentOnboardingStoryWrapper({ isSubmitting }: Readonly<{ isSubmitting: boolean }>) {
-  const { register, handleSubmit, formState: { errors } } = useForm<ParentOnboardingFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ParentOnboardingFormData>({
     defaultValues,
   });
   return (

@@ -1,0 +1,99 @@
+import { describe, expect, test } from "bun:test";
+import { CountryCode, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments/teacher-onboarding.documents";
+import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
+import { setupTestServerLifecycle } from "./lifecycle";
+
+const createMinimalTeacherInput = (
+  overrides?: Partial<{
+    name: string;
+    email: string;
+  }>
+) => ({
+  name: overrides?.name ?? "Test Teacher",
+  email: overrides?.email ?? `test_teacher_${Date.now()}@test.com`,
+  password: "TestPassword123!",
+  timezone: "UTC",
+  timezoneId: null,
+  nationality: CountryCode.Us,
+  countryCode: CountryCode.Us,
+  phone: "+1234567890",
+  gender: Gender.Male,
+  hourlyRate: "25.00",
+  rateCurrency: "USD",
+  accountNumber: "1234567890",
+  address: "123 Main St",
+  bankName: "Bank of America",
+  beneficiaryName: "John Doe",
+  dateOfBirth: "1990-01-01",
+  iban: "US12345678901234567890",
+  nationalId: "ID123456",
+  qualifications: "PhD",
+  routingNumber: "123456789",
+  skypeId: "johndoe",
+  swiftBic: "BOFAUS3N",
+  zoomLink: "https://zoom.us/j/1234567890",
+  zoomPassword: "password123",
+  zoomUsername: "johndoe",
+});
+
+describe("Teacher Onboarding GraphQL API", () => {
+  setupTestServerLifecycle();
+
+  test("Academy Admin can create teacher", async () => {
+    const token = await loginDemoUser("academy_admin");
+
+    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, {
+      input: createMinimalTeacherInput({
+        name: "GraphQL Test Teacher",
+        email: `graphql_teacher_${Date.now()}@test.com`,
+      }),
+    });
+
+    if (!result.createTeacher) throw new Error("createTeacher is null");
+    expect(result.createTeacher.userId).toBeDefined();
+    expect(result.createTeacher.teacherId).toBeDefined();
+    expect(result.createTeacher.name).toBe("GraphQL Test Teacher");
+    expect(result.createTeacher.status).toBe("ACTIVATED");
+  });
+
+  test("Super Admin can create teacher", async () => {
+    const token = await loginDemoUser("super_admin");
+
+    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, {
+      input: createMinimalTeacherInput({
+        name: "Super Admin Teacher",
+        email: `super_teacher_${Date.now()}@test.com`,
+      }),
+    });
+
+    if (!result.createTeacher) throw new Error("createTeacher is null");
+    expect(result.createTeacher.userId).toBeDefined();
+  });
+
+  test("Teacher denied creating teacher", async () => {
+    await assertOperationDenied("teacher_default", "mutate", createTeacherMutationDocument, {
+      input: createMinimalTeacherInput(),
+    });
+  });
+
+  test("Parent denied creating teacher", async () => {
+    await assertOperationDenied("parent_default", "mutate", createTeacherMutationDocument, {
+      input: createMinimalTeacherInput(),
+    });
+  });
+
+  test("Unauthenticated denied creating teacher", async () => {
+    const { testClient } = await import("./testClient");
+
+    const result = await testClient.mutate({
+      mutation: createTeacherMutationDocument,
+      variables: {
+        input: createMinimalTeacherInput(),
+      },
+      errorPolicy: "all",
+    });
+
+    expect(result.error).toBeDefined();
+  });
+});
