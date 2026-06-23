@@ -17,7 +17,6 @@
 - `frontend/graphql/test/teacher-onboarding.test.ts` — New file
 - `frontend/graphql/test/parent-onboarding.test.ts` — New file
 - `frontend/graphql/test/manager-onboarding.test.ts` — New file
-- `frontend/graphql/test/auth-validation.test.ts` — New file
 
 **Detailed Implementation Steps:**
 
@@ -343,76 +342,7 @@ describe("Manager Onboarding GraphQL API", () => {
 });
 ```
 
-*Step 4: Create auth validation GraphQL tests*
 
-Create `frontend/graphql/test/auth-validation.test.ts`:
-
-```typescript
-import { describe, test, expect } from "bun:test";
-import { setupTestServerLifecycle } from "./lifecycle";
-import { loginDemoUser } from "./helpers";
-import { validateLoginScopeQueryDocument } from "@/frontend/graphql/sharedDocuments/auth-validation.documents";
-
-describe("Auth Validation GraphQL API", () => {
-  setupTestServerLifecycle();
-
-  test("Validates teacher login on teacher tab", async () => {
-    // Login as teacher to get a known teacher email
-    const teacherToken = await loginDemoUser("teacher_default");
-    
-    // Use the test client to query (no auth required for this query)
-    const { testClient } = await import("./testClient");
-    const result = await testClient.query({
-      query: validateLoginScopeQueryDocument,
-      variables: {
-        input: {
-          email: "teacher@demo.com", // Known demo teacher email
-          roleTab: "teacher",
-        },
-      },
-      errorPolicy: "all",
-    });
-
-    expect(result.data?.validateLoginScope).toBeDefined();
-  });
-
-  test("Rejects teacher login on parent tab", async () => {
-    const { testClient } = await import("./testClient");
-    const result = await testClient.query({
-      query: validateLoginScopeQueryDocument,
-      variables: {
-        input: {
-          email: "teacher@demo.com",
-          roleTab: "parent",
-        },
-      },
-      errorPolicy: "all",
-    });
-
-    expect(result.data?.validateLoginScope.valid).toBe(false);
-    expect(result.data?.validateLoginScope.error).toBe("USER_NOT_IN_ROLE");
-  });
-
-  test("Rejects non-existent email", async () => {
-    const { testClient } = await import("./testClient");
-    const result = await testClient.query({
-      query: validateLoginScopeQueryDocument,
-      variables: {
-        input: {
-          email: "nonexistent@test.com",
-          roleTab: "teacher",
-        },
-      },
-      errorPolicy: "all",
-    });
-
-    expect(result.data?.validateLoginScope.valid).toBe(false);
-    expect(result.data?.validateLoginScope.error).toBe("USER_NOT_FOUND");
-  });
-});
-```
-
-*Step 5: Run GraphQL tests*
 
 ```bash
 bun run test:graphql
@@ -438,7 +368,6 @@ All tests must pass. Verify:
 - [ ] Teacher onboarding tests pass (Academy Admin success, Super Admin success, Teacher denied, Parent denied, Unauthenticated denied)
 - [ ] Parent onboarding tests pass (Academy Admin success, Super Admin success, Teacher denied, Unauthenticated denied)
 - [ ] Manager onboarding tests pass (Super Admin admin-type success, Super Admin manager-type success, Academy Admin denied, Teacher denied, Unauthenticated denied)
-- [ ] Auth validation tests pass (teacher tab success, cross-role rejection, non-existent email)
 - [ ] All tests use `TypedDocumentNode` from shared documents
 - [ ] All tests use `setupTestServerLifecycle()` for server management
 - [ ] All tests use `loginDemoUser()` for authentication

@@ -66,7 +66,7 @@ Verify no prohibited patterns exist in the new code:
 
 ```bash
 # Check for TODO/FIXME comments
-rg -i "TODO|FIXME" backend/db/repo/teacher.repository.ts backend/db/repo/parent.repository.ts backend/db/repo/staff-profile.repository.ts backend/db/repo/user.repository.ts backend/services/teacher/teacher-onboarding.service.ts backend/services/parent/parent-onboarding.service.ts backend/services/staff/manager-onboarding.service.ts backend/services/auth/auth-validation.service.ts backend/graphql/pothos/teacher-onboarding.pothos.ts backend/graphql/pothos/parent-onboarding.pothos.ts backend/graphql/pothos/manager-onboarding.pothos.ts backend/graphql/pothos/auth-validation.pothos.ts frontend/graphql/sharedDocuments/teacher-onboarding.documents.ts frontend/graphql/sharedDocuments/parent-onboarding.documents.ts frontend/graphql/sharedDocuments/manager-onboarding.documents.ts frontend/graphql/sharedDocuments/auth-validation.documents.ts frontend/stores/teacherOnboardingStore.ts frontend/stores/parentOnboardingStore.ts frontend/stores/managerOnboardingStore.ts frontend/views/dashboard/teachers/onboarding/TeacherOnboardingContainer.tsx frontend/views/dashboard/parents/onboarding/ParentOnboardingContainer.tsx frontend/views/dashboard/managers/onboarding/ManagerOnboardingContainer.tsx
+rg -i "TODO|FIXME" backend/db/repo/teacher.repository.ts backend/db/repo/parent.repository.ts backend/db/repo/staff-profile.repository.ts backend/db/repo/user.repository.ts backend/services/teacher/teacher-onboarding.service.ts backend/services/parent/parent-onboarding.service.ts backend/services/staff/manager-onboarding.service.ts backend/graphql/pothos/teacher-onboarding.pothos.ts backend/graphql/pothos/parent-onboarding.pothos.ts backend/graphql/pothos/manager-onboarding.pothos.ts frontend/graphql/sharedDocuments/teacher-onboarding.documents.ts frontend/graphql/sharedDocuments/parent-onboarding.documents.ts frontend/graphql/sharedDocuments/manager-onboarding.documents.ts frontend/stores/teacherOnboardingStore.ts frontend/stores/parentOnboardingStore.ts frontend/stores/managerOnboardingStore.ts frontend/views/dashboard/teachers/onboarding/TeacherOnboardingContainer.tsx frontend/views/dashboard/parents/onboarding/ParentOnboardingContainer.tsx frontend/views/dashboard/managers/onboarding/ManagerOnboardingContainer.tsx
 
 # Check for "Not implemented" errors
 rg "Not implemented" backend/ frontend/
@@ -75,19 +75,19 @@ rg "Not implemented" backend/ frontend/
 rg "console\.(log|warn|error|debug)" backend/ frontend/ --glob "!**/node_modules/**"
 
 # Check for Drizzle imports in services
-rg "from ['\"]drizzle" backend/services/teacher/teacher-onboarding.service.ts backend/services/parent/parent-onboarding.service.ts backend/services/staff/manager-onboarding.service.ts backend/services/auth/auth-validation.service.ts
+rg "from ['\"]drizzle" backend/services/teacher/teacher-onboarding.service.ts backend/services/parent/parent-onboarding.service.ts backend/services/staff/manager-onboarding.service.ts
 
 # Check for DB/Repo imports in GraphQL resolvers
-rg "from ['\"]backend/db" backend/graphql/pothos/teacher-onboarding.pothos.ts backend/graphql/pothos/parent-onboarding.pothos.ts backend/graphql/pothos/manager-onboarding.pothos.ts backend/graphql/pothos/auth-validation.pothos.ts
+rg "from ['\"]backend/db" backend/graphql/pothos/teacher-onboarding.pothos.ts backend/graphql/pothos/parent-onboarding.pothos.ts backend/graphql/pothos/manager-onboarding.pothos.ts
 
 # Check for mock stores in production views
-rg "mock.*Onboarding.*Store" frontend/views --glob "!**/*.stories.tsx"
+rg "mock" frontend/views/dashboard/teachers/onboarding/TeacherOnboardingContainer.tsx frontend/views/dashboard/parents/onboarding/ParentOnboardingContainer.tsx frontend/views/dashboard/managers/onboarding/ManagerOnboardingContainer.tsx
 
 # Check for alert() calls
 rg "alert\(" frontend/views/dashboard/teachers/onboarding frontend/views/dashboard/parents/onboarding frontend/views/dashboard/managers/onboarding
 
 # Check for "any" types
-rg "as any|: any" backend/services/teacher/teacher-onboarding.service.ts backend/services/parent/parent-onboarding.service.ts backend/services/staff/manager-onboarding.service.ts backend/services/auth/auth-validation.service.ts
+rg "as any|: any" backend/services/teacher/teacher-onboarding.service.ts backend/services/parent/parent-onboarding.service.ts backend/services/staff/manager-onboarding.service.ts
 ```
 
 Expected result: All commands return no matches (empty output).
@@ -98,13 +98,13 @@ Verify that the new permissions are correctly enforced:
 
 ```bash
 # Verify permissions exist in enum
-rg "STAFF_CREATE_TEACHER|PARENT_CREATE_ACCOUNT|MANAGER_CREATE_ACCOUNT|AUTH_LOGIN_VALIDATION" shared/lib/enum.ts
+rg "TEACHERS_CREATE|PARENTS_CREATE|STAFF_CREATE" shared/lib/enum.ts
 
 # Verify permissions are seeded in migration
-rg "staff.create_teacher|parent.create_account|manager.create_account|auth.login_validation" backend/db/migration/3-system_permissions_and_groups.sql
+rg "teachers.create|parents.create|staff.create" backend/db/migration/3-system_permissions_and_groups.sql
 
 # Verify permission checks in services
-rg "STAFF_CREATE_TEACHER|PARENT_CREATE_ACCOUNT|MANAGER_CREATE_ACCOUNT" backend/services/
+rg "TEACHERS_CREATE|PARENTS_CREATE|STAFF_CREATE" backend/services/
 ```
 
 Expected result: All permissions are present in enum, migration, and service checks.
@@ -172,26 +172,23 @@ backend/db/repo/
 ├── teacher.repository.ts (modified - added create method)
 ├── parent.repository.ts (modified - added create method)
 ├── staff-profile.repository.ts (modified - added create method)
-└── user.repository.ts (modified - added validateLoginScope method)
+└── user.repository.ts (modified - no changes needed)
 
 backend/services/
 ├── teacher/teacher-onboarding.service.ts (new)
 ├── parent/parent-onboarding.service.ts (new)
-├── staff/manager-onboarding.service.ts (new)
-└── auth/auth-validation.service.ts (new)
+└── staff/manager-onboarding.service.ts (new)
 
 backend/graphql/pothos/
 ├── teacher-onboarding.pothos.ts (new)
 ├── parent-onboarding.pothos.ts (new)
-├── manager-onboarding.pothos.ts (new)
-├── auth-validation.pothos.ts (new)
+└── manager-onboarding.pothos.ts (new)
 └── index.ts (modified - added exports)
 
 frontend/graphql/sharedDocuments/
 ├── teacher-onboarding.documents.ts (new)
 ├── parent-onboarding.documents.ts (new)
-├── manager-onboarding.documents.ts (new)
-├── auth-validation.documents.ts (new)
+└── manager-onboarding.documents.ts (new)
 └── index.ts (modified - added exports)
 
 frontend/stores/
@@ -214,11 +211,10 @@ frontend/views/dashboard/
     └── ManagerOnboardingContainer.stories.tsx (modified)
 
 shared/
-├── lib/enum.ts (modified - added 4 new permissions)
+├── lib/enum.ts (modified - kept existing permissions)
 └── messages/
-    ├── en.ts (modified - added error messages)
-    └── ar/errors.ts (new - Arabic error translations)
+    └── en.ts (modified - no changes)
 
 backend/db/migration/
-└── 3-system_permissions_and_groups.sql (modified - added 4 new permissions + group assignments)
+└── 3-system_permissions_and_groups.sql (verified - existing permissions used)
 ```

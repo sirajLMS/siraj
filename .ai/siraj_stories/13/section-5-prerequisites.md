@@ -79,9 +79,5 @@
 
 ### 5.6 Enum Verification
 
-- [ ] Verify `AppPermission` enum does NOT contain `STAFF_CREATE_TEACHER`. ✅ (verified — not in enum, needs addition)
-- [ ] Verify `AppPermission` enum does NOT contain `PARENT_CREATE_ACCOUNT`. ✅ (verified — not in enum, needs addition)
-- [ ] Verify `AppPermission` enum does NOT contain `MANAGER_CREATE_ACCOUNT`. ✅ (verified — not in enum, needs addition)
-- [ ] Verify `AppPermission` enum does NOT contain `AUTH_LOGIN_VALIDATION`. ✅ (verified — not in enum, needs addition)
 - [ ] Verify `AppPermission` enum contains `TEACHERS_CREATE`, `PARENTS_CREATE`, `STAFF_CREATE` (existing general permissions). ✅ (verified — `shared/lib/enum.ts:434,442,464`)
 - [ ] Verify `SystemPermissionGroupSlug` enum contains all required groups. ✅ (verified — `shared/lib/enum.ts:501-507`)

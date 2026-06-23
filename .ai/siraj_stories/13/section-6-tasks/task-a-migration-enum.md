@@ -1,129 +1,95 @@
-### Task A — Database Migration & Enum: Add User Provisioning Permissions
+### Task A — Database Migration & Enum: Verify Existing Permissions
 
-**Objective:** Add three new permissions to the system permission catalog and AppPermission enum to enable user provisioning workflows.
+**Objective:** Verify that existing permissions (`teachers.create`, `parents.create`, `staff.create`) are correctly defined in the system permission catalog and AppPermission enum.
 
 **Dependencies:** None — depends only on current project state (existing permission catalog migration and enum definitions).
 
 **Layer-Specific Rules (Database Migrations - Flattened from AGENTS_STORY_PLANNING.md):**
-- New permissions MUST be added to the existing `backend/db/migration/3-system_permissions_and_groups.sql` file, NOT to a separate seed file.
-- Permissions must follow the existing naming convention: `<domain>.<action>` with PascalCase enum values.
-- After modifying the migration, run the full sequence: `bun db cleanGenerate` → `bun db reset` → `bun db seed` → `bun test:db`.
+- **NO new permissions are created.** This sprint reuses existing permissions from the migration file.
+- The existing permissions already follow the naming convention: `<domain>.<action>` with PascalCase enum values.
+- Verify the migration file contains the correct permission definitions and group assignments.
+- Run the full sequence: `bun db cleanGenerate` → `bun db reset` → `bun db seed` → `bun test:db`.
 - All four commands MUST pass before the task is considered complete.
-- The `protect_system_permissions` trigger prevents creating new system permissions via INSERT at runtime. New permissions must be added to the migration file's INSERT block.
-- Enum values in `shared/lib/enum.ts` must use PascalCase with the format: `DOMAIN_ACTION_NAME = "domain.action_name"`.
 
 **Target Files:**
-- `backend/db/migration/3-system_permissions_and_groups.sql` — Add new permission INSERT statements and group assignments
-- `shared/lib/enum.ts` — Add new AppPermission enum values
+- `backend/db/migration/3-system_permissions_and_groups.sql` — Verify existing permission INSERT statements and group assignments
+- `shared/lib/enum.ts` — Verify existing AppPermission enum values
 
 **Detailed Implementation Steps:**
 
-*Step 1: Add new permissions to AppPermission enum*
+*Step 1: Verify existing permissions in AppPermission enum*
 
-Open `shared/lib/enum.ts` and add the following four new enum values to the `AppPermission` enum, inserting them in logical groupings with existing permissions:
+Open `shared/lib/enum.ts` and verify the following enum values exist:
 
 ```typescript
 export enum AppPermission {
   // ... existing permissions ...
   
   // Teacher Management
-  TEACHERS_LIST = "teachers.list",
   TEACHERS_CREATE = "teachers.create",
-  TEACHERS_EDIT = "teachers.edit",
-  TEACHERS_MANAGE_SCHEDULE = "teachers.manage_schedule",
-  STAFF_CREATE_TEACHER = "staff.create_teacher", // NEW: Comprehensive teacher onboarding with salary/banking
   
   // Parent Management
-  PARENTS_LIST = "parents.list",
   PARENTS_CREATE = "parents.create",
-  PARENTS_EDIT = "parents.edit",
-  PARENT_CREATE_ACCOUNT = "parent.create_account", // NEW: Parent onboarding with billing configuration
   
   // Staff/Manager Management
-  STAFF_LIST = "staff.list",
   STAFF_CREATE = "staff.create",
-  STAFF_EDIT = "staff.edit",
-  MANAGER_CREATE_ACCOUNT = "manager.create_account", // NEW: Manager onboarding with RBAC assignment
   
   // ... remaining existing permissions ...
 }
 ```
 
-The exact insertion points:
-- `STAFF_CREATE_TEACHER` → after `TEACHERS_MANAGE_SCHEDULE` (line ~436)
-- `PARENT_CREATE_ACCOUNT` → after `PARENTS_EDIT` (line ~443)
-- `MANAGER_CREATE_ACCOUNT` → after `STAFF_EDIT` (line ~465)
+*Step 2: Verify existing permissions in SQL migration*
 
-*Step 2: Add new permissions to SQL migration*
-
-Open `backend/db/migration/3-system_permissions_and_groups.sql` and add three new INSERT tuples to the permissions INSERT block:
+Open `backend/db/migration/3-system_permissions_and_groups.sql` and verify the following permissions exist in the INSERT block:
 
 ```sql
--- After teachers.manage_schedule (line ~318), add:
+-- teachers.create (around line 295-301)
     (
         gen_random_uuid (),
-        'staff.create_teacher',
-        'staff',
-        'create_teacher',
-        'Create new teacher accounts with comprehensive profiles including personal info, official details, salary, and banking information',
-        'Administration',
+        'teachers.create',
+        'teachers',
+        'create',
+        'Create teacher accounts',
+        'Teachers',
         true
     ),
 
--- After parents.edit (line ~345), add:
+-- parents.create (around line 331-337)
     (
         gen_random_uuid (),
-        'parent.create_account',
-        'parent',
-        'create_account',
-        'Create new parent accounts with billing configuration including invoice type, payment method, and currency',
+        'parents.create',
+        'parents',
+        'create',
+        'Create parent accounts',
         'Parents',
         true
     ),
 
--- After staff.edit (line ~525), add:
+-- staff.create (around line 511-517)
     (
         gen_random_uuid (),
-        'manager.create_account',
-        'manager',
-        'create_account',
-        'Create new manager/staff accounts with explicit RBAC privilege tier assignment (Admin or Manager)',
+        'staff.create',
+        'staff',
+        'create',
+        'Create staff accounts',
         'Administration',
         true
     ),
 ```
 
-*Step 3: Assign new permissions to permission groups*
+*Step 3: Verify permission group assignments*
 
-In the same migration file, update the group_permissions INSERT blocks to include the new permissions:
+In the same migration file, verify the group_permissions assignments:
 
-**Super Admin group** (after line ~994, add to the IN clause):
-```sql
-    g.slug = 'super_admin'
-    AND p.key IN (
-        -- ... all existing permissions ...
-        'report.generate_custom',
-        'report.view_financials',
-        'staff.create_teacher',        -- NEW
-        'parent.create_account',       -- NEW
-        'manager.create_account'       -- NEW
-    );
-```
+**Super Admin group** — Should already include:
+- `teachers.create`
+- `parents.create`
+- `staff.create`
 
-**Academy Admin group** (after line ~1052, add to the IN clause):
-```sql
-    g.slug = 'academy_admin'
-    AND p.key IN (
-        -- ... all existing permissions ...
-        'report.generate_custom',
-        'report.view_financials',
-        'staff.create_teacher',        -- NEW
-        'parent.create_account'        -- NEW
-        -- NOTE: manager.create_account is NOT assigned to academy_admin
-    );
-```
-
-**Teacher Default, Parent Default, Staff Default, System Automated groups** — No new permissions are assigned to these groups. Only Super Admin and Academy Admin receive the new provisioning permissions.
+**Academy Admin group** — Should already include:
+- `teachers.create`
+- `parents.create`
+- **NOT** `staff.create` (this is the security boundary)
 
 *Step 4: Run migration sequence*
 
@@ -133,19 +99,17 @@ Execute the following commands in exact order:
 # Step 4a: Clean and regenerate Drizzle schema from database
 bun db cleanGenerate
 
-# Step 4b: Drop and recreate database with new migration
+# Step 4b: Drop and recreate database with migration
 bun db reset
 
-# Step 4c: Reseed database with updated permission catalog
+# Step 4c: Reseed database with permission catalog
 bun db seed
 
 # Step 4d: Verify migration and seed data
 bun run test:db
 ```
 
-All four commands MUST pass with zero errors. If any command fails:
-1. Fix the migration SQL syntax or constraint violation
-2. Re-run the full sequence from Step 4a (do NOT skip steps)
+All four commands MUST pass with zero errors.
 
 *Step 5: Verify enum compilation*
 
@@ -155,22 +119,22 @@ After the migration passes, verify that the TypeScript enum compiles correctly:
 bun tsgo
 ```
 
-This must pass with zero TypeScript errors. The new enum values should be accessible as:
-- `AppPermission.STAFF_CREATE_TEACHER`
-- `AppPermission.PARENT_CREATE_ACCOUNT`
-- `AppPermission.MANAGER_CREATE_ACCOUNT`
+This must pass with zero TypeScript errors. The enum values should be accessible as:
+- `AppPermission.TEACHERS_CREATE`
+- `AppPermission.PARENTS_CREATE`
+- `AppPermission.STAFF_CREATE`
 
 *Step 6: Verify permission seeding*
 
-Connect to the database and verify the new permissions are seeded:
+Connect to the database and verify the permissions are seeded:
 
 ```sql
 SELECT key, resource, action, category 
 FROM permissions 
 WHERE key IN (
-    'staff.create_teacher',
-    'parent.create_account',
-    'manager.create_account'
+    'teachers.create',
+    'parents.create',
+    'staff.create'
 );
 ```
 
@@ -184,16 +148,17 @@ FROM permission_groups pg
 JOIN group_permissions gp ON gp.group_id = pg.id
 JOIN permissions p ON p.id = gp.permission_id
 WHERE p.key IN (
-    'staff.create_teacher',
-    'parent.create_account',
-    'manager.create_account'
+    'teachers.create',
+    'parents.create',
+    'staff.create'
 )
 ORDER BY pg.slug, p.key;
 ```
 
 Expected result:
-- `super_admin`: `staff.create_teacher`, `parent.create_account`, `manager.create_account`
-- `academy_admin`: `staff.create_teacher`, `parent.create_account`
+- `super_admin`: `teachers.create`, `parents.create`, `staff.create`
+- `academy_admin`: `teachers.create`, `parents.create`
+- `academy_admin` should NOT have `staff.create`
 
 **Test Execution Requirements:**
 - Run the full database test suite:
@@ -210,29 +175,27 @@ Expected result:
   ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] `AppPermission` enum contains all 3 new values with correct string mappings
-- [ ] SQL migration contains all 3 new permission INSERT tuples
+- [ ] `AppPermission` enum contains `TEACHERS_CREATE`, `PARENTS_CREATE`, `STAFF_CREATE` with correct string mappings
+- [ ] SQL migration contains all 3 permission INSERT tuples
 - [ ] SQL migration contains correct group_permission assignments for Super Admin and Academy Admin
 - [ ] `bun db cleanGenerate` passes with zero errors
 - [ ] `bun db reset` passes with zero errors
 - [ ] `bun db seed` passes with zero errors
 - [ ] `bun run test:db` passes with zero failures
 - [ ] `bun tsgo` passes with zero TypeScript errors
-- [ ] Database query confirms 3 new permissions are seeded
+- [ ] Database query confirms 3 permissions are seeded
 - [ ] Database query confirms correct group assignments
-- [ ] `manager.create_account` is NOT assigned to `academy_admin` group
-- [ ] `staff.create_teacher` and `parent.create_account` are assigned to both `super_admin` and `academy_admin`
+- [ ] `staff.create` is NOT assigned to `academy_admin` group
+- [ ] `teachers.create` and `parents.create` are assigned to both `super_admin` and `academy_admin`
 
 **Quality Gate — Per-File Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [ ] `bun lint` on working files passes with 0 errors & 0 warnings
+- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings
 
 **Quality Gate — Task Completion Validation:**
-- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
-- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
-- [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
+- [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings
+- [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings
+- [ ] `bun lint` on working files passes with 0 errors & 0 warnings
+- [ ] `bun codescene` on working files passes with 0 errors & 0 warnings

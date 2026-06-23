@@ -4,14 +4,14 @@
 **Current Gap:** No existing implementation for manager creation. Without proper permission gating, any authenticated user could potentially create a manager account with elevated privileges.
 
 **Fix in `ManagerOnboardingService.createManager()`:**
-Before any database operations, call `PermissionsService.hasPermission(actorUserId, AppPermission.MANAGER_CREATE_ACCOUNT)` to verify the actor is a System Administrator. If the actor lacks this permission, throw a localized unauthorized error immediately without performing any database writes. Additionally, verify that the actor's permission group slug is `super_admin` as a secondary check. The `accountType` field from the form (either `"manager"` or `"admin"`) determines which permission group is assigned to the new manager:
+Before any database operations, call `PermissionsService.hasPermission(actorUserId, AppPermission.STAFF_CREATE)` to verify the actor is a System Administrator. If the actor lacks this permission, throw a localized unauthorized error immediately without performing any database writes. Additionally, verify that the actor's permission group slug is `super_admin` as a secondary check. The `accountType` field from the form (either `"manager"` or `"admin"`) determines which permission group is assigned to the new manager:
 - `"admin"` → assign to `academy_admin` group
 - `"manager"` → assign to `staff_default` group
 
 The service MUST NOT allow the form to specify arbitrary permission group slugs. Only these two mappings are permitted.
 
 **Test Requirements:**
-- Academy Admin attempts to create manager → `unauthorized` error (permission denied)
+- Academy Admin attempts to create manager → `unauthorized` error (permission denied due to missing `staff.create` permission from group assignment)
 - System Admin creates manager with `accountType: "admin"` → succeeds, new user assigned to `academy_admin` group
 - System Admin creates manager with `accountType: "manager"` → succeeds, new user assigned to `staff_default` group
 - Unauthenticated user attempts to create manager → `unauthorized` error

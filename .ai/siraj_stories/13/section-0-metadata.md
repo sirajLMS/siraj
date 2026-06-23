@@ -8,16 +8,16 @@
 
 ### 0.1 Business Objectives
 
-1. **Delegation of Authority:** The `manager.create_account` permission is the gatekeeper of the RBAC system itself. By restricting this permission strictly to System Administrators, standard Academy Admins are prevented from creating rogue administrative accounts or escalating their own colleagues' privileges. This ensures accountability in the organizational hierarchy.
+1. **Delegation of Authority:** The `staff.create` permission is the gatekeeper of the RBAC system itself. By restricting this permission strictly to System Administrators (as defined in the migration), standard Academy Admins are prevented from creating rogue administrative accounts or escalating their own colleagues' privileges. This ensures accountability in the organizational hierarchy.
 
-2. **Financial Pre-configuration:** The `parent.create_account` workflow demonstrates that billing automation is deeply integrated into user onboarding. By forcing the Academy Admin to define the currency, invoice type, and payment method at the moment of creation, the system eliminates the risk of a parent being successfully onboarded but "falling through the cracks" of the invoicing cycle. This ensures every parent account is immediately ready for automated billing.
+2. **Financial Pre-configuration:** The `parents.create` workflow demonstrates that billing automation is deeply integrated into user onboarding. By forcing the Academy Admin to define the currency, invoice type, and payment method at the moment of creation, the system eliminates the risk of a parent being successfully onboarded but "falling through the cracks" of the invoicing cycle. This ensures every parent account is immediately ready for automated billing.
 
-3. **Comprehensive Teacher Onboarding:** The `staff.create_teacher` permission enables Academy Admins to provision new teaching staff with complete profiles including personal demographics, official communication channels (Zoom, Skype), salary details, and banking information. This single workflow activates the teacher's portal access and establishes their operational profile for scheduling, payroll, and communication.
+3. **Comprehensive Teacher Onboarding:** The `teachers.create` permission enables Academy Admins to provision new teaching staff with complete profiles including personal demographics, official communication channels (Zoom, Skype), salary details, and banking information. This single workflow activates the teacher's portal access and establishes their operational profile for scheduling, payroll, and communication.
 
 ### 0.2 Scope Boundaries
 
 **In scope:**
-- New permissions added to `backend/db/migration/3-system_permissions_and_groups.sql`: `staff.create_teacher`, `parent.create_account`, `manager.create_account`
+- Reused existing permissions from `backend/db/migration/3-system_permissions_and_groups.sql`: `teachers.create`, `parents.create`, `staff.create`
 - New enum values added to `shared/lib/enum.ts` (AppPermission enum)
 - Repository create methods for `teachers`, `parents`, and `staffProfiles` tables
 - Domain services for user provisioning with permission gating and transactional orchestration
