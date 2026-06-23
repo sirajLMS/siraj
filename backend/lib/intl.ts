@@ -24,13 +24,14 @@ function getManualTranslations(locale: string, namespace: string) {
   const namespaceObj = resolveNamespace(messages, namespace);
 
   return (key: string, values?: Record<string, unknown>) => {
-    let template = namespaceObj?.[key];
+    // Use resolveNamespace instead of namespaceObj?.[key] to support nested dot-notation paths (e.g. "parent.alreadyExists") in test suites
+    let template = resolveNamespace(namespaceObj, key) as unknown;
 
     if (typeof template !== "string") {
       // Fallback: try English if Arabic fails or vice versa
       const fallbackMessages = locale === "en" ? ar : en;
       const fallbackNamespaceObj = resolveNamespace(fallbackMessages, namespace);
-      const fallbackTemplate = fallbackNamespaceObj?.[key];
+      const fallbackTemplate = resolveNamespace(fallbackNamespaceObj, key) as unknown;
       template = typeof fallbackTemplate === "string" ? fallbackTemplate : key;
     }
 
