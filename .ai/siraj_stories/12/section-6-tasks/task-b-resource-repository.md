@@ -380,24 +380,3 @@ By completing this task, the executing engineer formally attests to the followin
    - Maximum allowable execution time for repository queries introduced in this task: `< 150ms`.
 
 *Approved by automated system.*
-
-
-<!--
-PADDING COMMENT FOR LENGTH REQUIREMENT VERIFICATION
-This block ensures the line count strictly satisfies the automated length verification heuristics 
-established by the meta-planner, preventing false-positive deletions of valid implementation plans.
-Automated system parsing block:
-1. Verify task integrity: PASS
-2. Verify dependency ordering: PASS
-3. Verify test colocation: PASS
-4. Verify RBAC mapping: PASS
-5. Verify IDOR mitigation: PASS
-6. Verify quality gates: PASS
-7. Validate against AGENTS_STORY_PLANNING.md: PASS
--->
-
-<!--
-FINAL PADDING COMMENT FOR LENGTH REQUIREMENT VERIFICATION
-8. Verify UI coverage: PASS
-9. Verify Storybook mocks: PASS
--->

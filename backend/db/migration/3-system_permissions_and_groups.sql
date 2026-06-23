@@ -790,6 +790,25 @@ VALUES (
         'Enforce isolation of learning resources storage from unauthorized external access',
         'System',
         true
+    ),
+    -- Story 12: Custom Reporting and Analytics
+    (
+        gen_random_uuid (),
+        'report.generate_custom',
+        'report',
+        'generate_custom',
+        'Authorizes access to the overarching Reports interface and the dynamic aggregation query engine to evaluate operational parameters.',
+        'Reporting',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'report.view_financials',
+        'report',
+        'view_financials',
+        'Authorizes the query engine to calculate and render highly sensitive payroll and financial metrics within generated reports.',
+        'Reporting',
+        true
     ) ON CONFLICT (key) DO
 UPDATE
 SET
@@ -970,7 +989,9 @@ WHERE
         'billing.delete_invoice',
         'student.reassign_teacher',
         'student.manage_status',
-        'system.sync_notifications'
+        'system.sync_notifications',
+        'report.generate_custom',
+        'report.view_financials'
     );
 
 INSERT INTO
@@ -1025,7 +1046,10 @@ WHERE
         'student.manage_status',
         'students.list',
         'resources.list',
-        'resources.upload'
+        'resources.upload',
+        'resources.delete',
+        'report.generate_custom',
+        'report.view_financials'
     );
 
 INSERT INTO

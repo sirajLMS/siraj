@@ -1170,6 +1170,97 @@ CREATE TRIGGER trg_protect_system_permission_groups
 BEFORE UPDATE OR DELETE ON permission_groups
 FOR EACH ROW EXECUTE FUNCTION protect_system_permissions();
 
+-- Source: 4-story-12-permissions.sql
+-- backend/db/migration/4-story-12-permissions.sql
+
+-- ============================================================================
+-- Story 12 Migration: Resources Deletion and Custom Reporting
+-- ============================================================================
+-- This migration introduces destructive resource management capabilities
+-- and the custom reporting query engine with financial data masking.
+-- ============================================================================
+
+-- 1. Insert new system permissions into the catalog
+-- Using ON CONFLICT DO NOTHING to ensure idempotency and prevent duplicates
+INSERT INTO permissions (id, key, resource, action, description, category, is_system)
+VALUES
+  (
+    gen_random_uuid(),
+    'resources.delete', 
+    'resources',
+    'delete',
+    'Grants authority to permanently drop curriculum files from server storage and remove the relational database records.', 
+    'Resources',
+    false
+  ),
+  (
+    gen_random_uuid(),
+    'report.generate_custom', 
+    'report',
+    'generate_custom',
+    'Authorizes access to the overarching Reports interface and the dynamic aggregation query engine to evaluate operational parameters.', 
+    'Reporting',
+    false
+  ),
+  (
+    gen_random_uuid(),
+    'report.view_financials', 
+    'report',
+    'view_financials',
+    'Authorizes the query engine to calculate and render highly sensitive payroll and financial metrics within generated reports.', 
+    'Reporting',
+    false
+  )
+ON CONFLICT (key) DO NOTHING;
+
+-- 2. Map the new permissions to the Academy Admin group
+DO $$
+DECLARE
+  v_academy_admin_id uuid;
+  v_perm_resource_delete_id uuid;
+  v_perm_report_gen_id uuid;
+  v_perm_report_fin_id uuid;
+BEGIN
+  -- Retrieve the unique ID for the academy_admin group dynamically
+  SELECT id INTO v_academy_admin_id FROM permission_groups WHERE slug = 'academy_admin';
+  
+  -- If the group exists, proceed with linking the permissions
+  IF v_academy_admin_id IS NOT NULL THEN
+    -- Retrieve the unique IDs for the newly inserted permissions
+    SELECT id INTO v_perm_resource_delete_id FROM permissions WHERE key = 'resources.delete';
+    SELECT id INTO v_perm_report_gen_id FROM permissions WHERE key = 'report.generate_custom';
+    SELECT id INTO v_perm_report_fin_id FROM permissions WHERE key = 'report.view_financials';
+    
+    -- Map resources.delete
+    IF v_perm_resource_delete_id IS NOT NULL THEN
+      INSERT INTO group_permissions (group_id, permission_id)
+      VALUES (v_academy_admin_id, v_perm_resource_delete_id)
+      ON CONFLICT DO NOTHING;
+    END IF;
+
+    -- Map report.generate_custom
+    IF v_perm_report_gen_id IS NOT NULL THEN
+      INSERT INTO group_permissions (group_id, permission_id)
+      VALUES (v_academy_admin_id, v_perm_report_gen_id)
+      ON CONFLICT DO NOTHING;
+    END IF;
+
+    -- Map report.view_financials
+    IF v_perm_report_fin_id IS NOT NULL THEN
+      INSERT INTO group_permissions (group_id, permission_id)
+      VALUES (v_academy_admin_id, v_perm_report_fin_id)
+      ON CONFLICT DO NOTHING;
+    END IF;
+    
+    -- Log success
+    RAISE NOTICE 'Successfully mapped Story 12 permissions to academy_admin group.';
+  ELSE
+    -- Log warning if group is missing (unexpected state)
+    RAISE WARNING 'Group academy_admin not found. Permissions were created but not mapped.';
+  END IF;
+END $$;
+
+
 -- Source: audit_log_immutability_trigger.sql
 -- Trigger to prevent modifications to audit_logs table (immutability enforcement)
 -- This ensures audit logs cannot be tampered with for compliance requirements

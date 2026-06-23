@@ -455,6 +455,8 @@ export enum AppPermission {
   RESOURCES_DELETE = "resources.delete",
   RESOURCES_UPLOAD = "resources.upload",
   REPORTS_GENERATE = "reports.generate",
+  REPORT_GENERATE_CUSTOM = "report.generate_custom",
+  REPORT_VIEW_FINANCIALS = "report.view_financials",
   COMPLAINTS_LIST = "complaints.list",
   COMPLAINTS_DELETE = "complaints.delete",
   COMPLAINTS_RESPOND = "complaints.respond",
