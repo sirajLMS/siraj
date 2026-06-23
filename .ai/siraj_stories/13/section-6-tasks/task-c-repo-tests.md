@@ -1,8 +1,8 @@
 ### Task C — Repository Tests: Verify User Provisioning Test Coverage
 
-**Objective:** Verify and achieve 100% line and function coverage on all new repository create methods and login validation query implemented in Task B.
+**Objective:** Verify and achieve 100% line and function coverage on all new repository create methods implemented in Task B.
 
-**Dependencies:** Task B — repository create methods and login validation query are implemented with initial test cases.
+**Dependencies:** Task B — repository create methods are implemented with initial test cases.
 
 **Layer-Specific Rules (Repository Tests - Flattened from backend/db/test/ patterns):**
 - All tests use `bun:test` framework exclusively.
@@ -18,7 +18,6 @@
 - `backend/db/test/repo/teacher.repository.test.ts` — Verify create method tests (already written in Task B)
 - `backend/db/test/repo/parent.repository.test.ts` — Verify create method tests (already written in Task B)
 - `backend/db/test/repo/staff-profile.test.ts` — Verify create method tests (already written in Task B)
-- `backend/db/test/repo/user.repository.test.ts` — Verify login validation tests (already written in Task B)
 
 **Detailed Implementation Steps:**
 
@@ -69,21 +68,7 @@ Expected output must show 100% coverage. If below 100%, add missing test cases f
 - Null phone and skypeId fields
 - Empty string vs null handling
 
-*Step 4: Run coverage on user repository login validation tests*
-
-Execute the coverage command for the user repository test file:
-
-```bash
-bun run test:coverage backend/db/test/repo/user.repository.test.ts
-```
-
-Expected output must show 100% coverage on the `validateLoginScope` method. If below 100%, add missing test cases for:
-- Manager role tab validation (staffProfiles table check)
-- Invalid role tab handling (default case in switch statement)
-- Inactive user rejection (isActive = false)
-- All three role tabs with valid users
-
-*Step 5: Run full database test suite*
+*Step 4: Run full database test suite*
 
 After achieving 100% coverage on individual files, run the full database test suite to ensure no regressions:
 
@@ -97,7 +82,7 @@ Expected output: All tests pass with 0 failures. If any existing tests fail:
 3. Fix the issue (likely a missing `tx` parameter or transaction conflict)
 4. Re-run the full suite
 
-*Step 6: Verify transaction rollback behavior*
+*Step 5: Verify transaction rollback behavior*
 
 Add additional tests to verify that repository methods properly participate in transaction rollbacks. These tests verify that when a subsequent operation fails, the create method's changes are rolled back:
 
@@ -120,36 +105,7 @@ test("teacher create rolls back on subsequent failure", async () => {
 });
 ```
 
-*Step 7: Verify IDOR protection patterns*
-
-Although the create methods don't have IDOR concerns (they create new records, not access existing ones), verify that the `validateLoginScope` method properly scopes queries:
-
-```typescript
-test("validateLoginScope does not leak user existence across roles", async () => {
-  await runInRollback(async tx => {
-    const { user: teacherUser } = await setupTeacher(tx, { name: "Scoped Teacher" });
-    
-    // Teacher should be found on teacher tab
-    const teacherResult = await UserRepository.validateLoginScope({
-      email: teacherUser.email,
-      roleTab: "teacher",
-    });
-    expect(teacherResult.valid).toBe(true);
-    expect(teacherResult.userId).toBe(teacherUser.id);
-    
-    // Same email should NOT be found on parent tab
-    const parentResult = await UserRepository.validateLoginScope({
-      email: teacherUser.email,
-      roleTab: "parent",
-    });
-    expect(parentResult.valid).toBe(false);
-    expect(parentResult.error).toBe("USER_NOT_IN_ROLE");
-    expect(parentResult.userId).toBeUndefined();
-  });
-});
-```
-
-*Step 8: Document test coverage results*
+*Step 6: Run full test suite*
 
 After all tests pass and coverage is at 100%, document the results:
 
@@ -158,7 +114,6 @@ After all tests pass and coverage is at 100%, document the results:
 | `TeacherRepository.create()` | 100% | 100% | 100% | ✅ |
 | `ParentRepository.create()` | 100% | 100% | 100% | ✅ |
 | `StaffProfileRepository.create()` | 100% | 100% | 100% | ✅ |
-| `UserRepository.validateLoginScope()` | 100% | 100% | 100% | ✅ |
 
 **Test Execution Requirements:**
 - Run coverage on all modified test files:
@@ -166,7 +121,6 @@ After all tests pass and coverage is at 100%, document the results:
   bun run test:coverage backend/db/test/repo/teacher.repository.test.ts
   bun run test:coverage backend/db/test/repo/parent.repository.test.ts
   bun run test:coverage backend/db/test/repo/staff-profile.test.ts
-  bun run test:coverage backend/db/test/repo/user.repository.test.ts
   ```
 - Run full database test suite:
   ```bash
@@ -181,12 +135,10 @@ After all tests pass and coverage is at 100%, document the results:
 - [ ] `TeacherRepository.create()` has 100% line, function, and branch coverage
 - [ ] `ParentRepository.create()` has 100% line, function, and branch coverage
 - [ ] `StaffProfileRepository.create()` has 100% line, function, and branch coverage
-- [ ] `UserRepository.validateLoginScope()` has 100% line, function, and branch coverage
 - [ ] All test cases pass for success paths (valid input creates records)
 - [ ] All test cases pass for failure paths (duplicate, invalid timezone, cross-role rejection)
 - [ ] All test cases pass for edge cases (minimal fields, null values, default values)
 - [ ] Transaction rollback behavior verified (no orphaned records on failure)
-- [ ] IDOR protection verified (login validation scopes correctly)
 - [ ] `bun run test:db` passes with zero failures across all test files
 - [ ] `bun tsgo` passes with zero TypeScript errors
 - [ ] No `expect(...).rejects.toThrow()` patterns used inside `runInRollback`

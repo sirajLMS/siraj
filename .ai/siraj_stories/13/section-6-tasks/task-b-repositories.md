@@ -1,8 +1,8 @@
 ### Task B — Repository: User Provisioning Create Methods & Login Validation Query
 
-**Objective:** Implement transactional repository methods for creating teacher, parent, and manager/staff records, and implement role-scoped login validation query in UserRepository.
+**Objective:** Implement transactional repository methods for creating teacher, parent, and manager/staff records.
 
-**Dependencies:** Task A — new permissions are available in the enum and seeded in the database. Depends on existing `UserRepository.create()`, `PermissionManagementRepository.bulkAssignUsersToGroup()`, and `TeacherBankingRepository.submitBankingDetails()`.
+**Dependencies:** Task A — new permissions are available in the enum and seeded in the database. Depends on existing `UserRepository.create()`, `PermissionManagementRepository.bulkAssignUsersToGroup()`, and `TeacherBankingRepository.submitBankingDetails()`. No login validation query is needed — the project uses a single email/password login form with no role tabs.
 
 **Layer-Specific Rules (Database Repositories - Flattened from backend/db/repo/AGENTS.md):**
 - Use Drizzle standard syntax `db.select().from(<table>).leftJoin()` instead of relational `findMany` when multiple joins are needed to avoid type compilation slow downs.
@@ -17,11 +17,9 @@
 - `backend/db/repo/teacher.repository.ts` — Add `create` method
 - `backend/db/repo/parent.repository.ts` — Add `create` method
 - `backend/db/repo/staff-profile.repository.ts` — Add `create` method
-- `backend/db/repo/user.repository.ts` — Add `validateLoginScope` method
 - `backend/db/test/repo/teacher.repository.test.ts` — Add create method tests
 - `backend/db/test/repo/parent.repository.test.ts` — Add create method tests
 - `backend/db/test/repo/staff-profile.test.ts` — Add create method tests
-- `backend/db/test/repo/user.repository.test.ts` — Add login validation tests (create if doesn't exist)
 
 **Detailed Implementation Steps:**
 
@@ -310,93 +308,7 @@ export async function create(
 }
 ```
 
-*Step 4: Add UserRepository.validateLoginScope() method*
-
-Open `backend/db/repo/user.repository.ts` and add the following types and method:
-
-```typescript
-export type LoginValidationInput = {
-  readonly email: string;
-  readonly roleTab: "teacher" | "parent" | "manager";
-};
-
-export type LoginValidationResult = {
-  readonly valid: boolean;
-  readonly error?: "USER_NOT_FOUND" | "USER_NOT_IN_ROLE";
-  readonly userId?: string;
-};
-```
-
-Add the validateLoginScope method inside the `UserRepository` namespace:
-
-```typescript
-export async function validateLoginScope(
-  input: LoginValidationInput,
-  locale?: string
-): Promise<LoginValidationResult> {
-  // First check if the user exists at all
-  const user = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(and(eq(users.email, input.email), isNull(users.deletedAt), eq(users.isActive, true)))
-    .limit(1);
-
-  if (user.length === 0) {
-    return { valid: false, error: "USER_NOT_FOUND" };
-  }
-
-  const userId = user[0].id;
-
-  // Check if the user exists in the role-specific table
-  switch (input.roleTab) {
-    case "teacher": {
-      const teacher = await db
-        .select({ id: teachers.id })
-        .from(teachers)
-        .where(eq(teachers.userId, userId))
-        .limit(1);
-      
-      if (teacher.length === 0) {
-        return { valid: false, error: "USER_NOT_IN_ROLE" };
-      }
-      return { valid: true, userId };
-    }
-
-    case "parent": {
-      const parent = await db
-        .select({ id: parents.id })
-        .from(parents)
-        .where(eq(parents.userId, userId))
-        .limit(1);
-      
-      if (parent.length === 0) {
-        return { valid: false, error: "USER_NOT_IN_ROLE" };
-      }
-      return { valid: true, userId };
-    }
-
-    case "manager": {
-      const staff = await db
-        .select({ id: staffProfiles.id })
-        .from(staffProfiles)
-        .where(eq(staffProfiles.userId, userId))
-        .limit(1);
-      
-      if (staff.length === 0) {
-        return { valid: false, error: "USER_NOT_IN_ROLE" };
-      }
-      return { valid: true, userId };
-    }
-
-    default: {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("auth.invalidRoleTab"));
-    }
-  }
-}
-```
-
-*Step 5: Update repository barrel exports*
+*Step 4: Update repository barrel exports*
 
 Open `backend/db/repo/index.ts` and verify that all modified repositories are exported. The file should already export these modules, but verify the new types are accessible:
 
@@ -409,12 +321,9 @@ export type { ParentCreateInput, ParentCreateResult } from "./parent.repository"
 
 export { StaffProfileRepository } from "./staff-profile.repository";
 export type { StaffProfileCreateInput, StaffProfileCreateResult } from "./staff-profile.repository";
-
-export { UserRepository } from "./user.repository";
-export type { LoginValidationInput, LoginValidationResult } from "./user.repository";
 ```
 
-*Step 6: Write repository tests for TeacherRepository.create()*
+*Step 5: Write repository tests for TeacherRepository.create()*
 
 Open `backend/db/test/repo/teacher.repository.test.ts` and add comprehensive tests:
 
@@ -511,7 +420,7 @@ describe("TeacherRepository.create", () => {
 });
 ```
 
-*Step 7: Write repository tests for ParentRepository.create()*
+*Step 6: Write repository tests for ParentRepository.create()*
 
 Open `backend/db/test/repo/parent.repository.test.ts` and add comprehensive tests:
 
@@ -592,7 +501,7 @@ describe("ParentRepository.create", () => {
 });
 ```
 
-*Step 8: Write repository tests for StaffProfileRepository.create()*
+*Step 7: Write repository tests for StaffProfileRepository.create()*
 
 Open `backend/db/test/repo/staff-profile.test.ts` and add comprehensive tests:
 
@@ -651,105 +560,12 @@ describe("StaffProfileRepository.create", () => {
 });
 ```
 
-*Step 9: Write repository tests for UserRepository.validateLoginScope()*
+*Step 8: Verify all existing tests still pass*
 
-Create or open `backend/db/test/repo/user.repository.test.ts` and add comprehensive tests:
+Run the full database test suite to ensure no regressions from the new repository methods:
 
-```typescript
-import { describe, test, expect } from "bun:test";
-import { runInRollback } from "@/backend/db/test/test-utils";
-import { setupTeacher, setupStudent } from "@/backend/db/test/entity-setup";
-import { UserRepository } from "@/backend/db/repo/user.repository";
-
-describe("UserRepository.validateLoginScope", () => {
-  test("validates teacher login on teacher tab", async () => {
-    await runInRollback(async tx => {
-      const { user } = await setupTeacher(tx, { name: "Login Teacher" });
-      
-      const result = await UserRepository.validateLoginScope({
-        email: user.email,
-        roleTab: "teacher",
-      });
-
-      expect(result.valid).toBe(true);
-      expect(result.userId).toBe(user.id);
-      expect(result.error).toBeUndefined();
-    });
-  });
-
-  test("rejects teacher login on parent tab", async () => {
-    await runInRollback(async tx => {
-      const { user } = await setupTeacher(tx, { name: "Wrong Tab Teacher" });
-      
-      const result = await UserRepository.validateLoginScope({
-        email: user.email,
-        roleTab: "parent",
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe("USER_NOT_IN_ROLE");
-    });
-  });
-
-  test("validates parent login on parent tab", async () => {
-    await runInRollback(async tx => {
-      const { parentUser } = await setupStudent(tx, { parentName: "Login Parent" });
-      
-      const result = await UserRepository.validateLoginScope({
-        email: parentUser.email,
-        roleTab: "parent",
-      });
-
-      expect(result.valid).toBe(true);
-      expect(result.userId).toBe(parentUser.id);
-    });
-  });
-
-  test("rejects parent login on teacher tab", async () => {
-    await runInRollback(async tx => {
-      const { parentUser } = await setupStudent(tx, { parentName: "Wrong Tab Parent" });
-      
-      const result = await UserRepository.validateLoginScope({
-        email: parentUser.email,
-        roleTab: "teacher",
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe("USER_NOT_IN_ROLE");
-    });
-  });
-
-  test("rejects non-existent email", async () => {
-    await runInRollback(async tx => {
-      const result = await UserRepository.validateLoginScope({
-        email: "nonexistent@test.com",
-        roleTab: "teacher",
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe("USER_NOT_FOUND");
-    });
-  });
-
-  test("rejects soft-deleted user", async () => {
-    await runInRollback(async tx => {
-      const { user } = await setupTeacher(tx, { name: "Deleted Teacher" });
-      
-      // Soft delete the user
-      await tx.update(users)
-        .set({ deletedAt: new Date() })
-        .where(eq(users.id, user.id));
-      
-      const result = await UserRepository.validateLoginScope({
-        email: user.email,
-        roleTab: "teacher",
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe("USER_NOT_FOUND");
-    });
-  });
-});
+```bash
+bun run test:db
 ```
 
 **Test Execution Requirements:**
@@ -762,7 +578,6 @@ describe("UserRepository.validateLoginScope", () => {
   bun run test:coverage backend/db/test/repo/teacher.repository.test.ts
   bun run test:coverage backend/db/test/repo/parent.repository.test.ts
   bun run test:coverage backend/db/test/repo/staff-profile.test.ts
-  bun run test:coverage backend/db/test/repo/user.repository.test.ts
   ```
   All must show 100% line + function coverage on new methods.
 - Verify TypeScript compilation:
@@ -774,14 +589,12 @@ describe("UserRepository.validateLoginScope", () => {
 - [ ] `TeacherRepository.create()` is fully implemented with duplicate check and timezone validation
 - [ ] `ParentRepository.create()` is fully implemented with duplicate check and billing field support
 - [ ] `StaffProfileRepository.create()` is fully implemented with duplicate check
-- [ ] `UserRepository.validateLoginScope()` is fully implemented with role-scoped validation
 - [ ] All repository methods accept optional `tx?: DBTransaction` parameter
 - [ ] All repository methods use `getBackendTranslations` for localized error messages
 - [ ] All repository methods throw errors with localized messages on failure
 - [ ] All test cases pass for teacher create (success, duplicate, invalid timezone, minimal fields)
 - [ ] All test cases pass for parent create (success, duplicate, default timezone)
 - [ ] All test cases pass for staff create (success, duplicate)
-- [ ] All test cases pass for login validation (teacher/parent/manager tabs, cross-role rejection, non-existent email, soft-deleted user)
 - [ ] `bun run test:db` passes with zero failures
 - [ ] Coverage reports show 100% line + function coverage on new methods
 - [ ] `bun tsgo` passes with zero TypeScript errors

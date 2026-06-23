@@ -18,7 +18,6 @@
 - `backend/services/teacher/test/teacher-onboarding.service.test.ts` — Verify tests (already written in Task D)
 - `backend/services/parent/test/parent-onboarding.service.test.ts` — Verify tests (already written in Task D)
 - `backend/services/staff/test/manager-onboarding.service.test.ts` — Verify tests (already written in Task D)
-- `backend/services/auth/test/auth-validation.service.test.ts` — Verify tests (already written in Task D)
 
 **Detailed Implementation Steps:**
 
@@ -57,16 +56,7 @@ Verify all tests pass:
 - Manager creation with manager account type (assigned to staff_default)
 - Email collision detection
 
-*Step 4: Run auth validation service tests*
 
-```bash
-bun test backend/services/auth/test/auth-validation.service.test.ts
-```
-
-Verify all tests pass:
-- Teacher login scope validation
-- Cross-role login rejection
-- Invalid role tab rejection
 
 *Step 5: Add transaction rollback integration tests*
 
@@ -185,9 +175,6 @@ Verify no regressions in existing tests.
 - [ ] All teacher onboarding service tests pass (unauthorized, success, email collision, rollback)
 - [ ] All parent onboarding service tests pass (unauthorized, success, email collision)
 - [ ] All manager onboarding service tests pass (non-super-admin, admin type, manager type, email collision)
-- [ ] All auth validation service tests pass (teacher scope, cross-role rejection, invalid tab)
-- [ ] Transaction rollback integration tests pass (banking failure rolls back user + profile)
-- [ ] Permission escalation prevention tests pass (academy admin cannot create manager)
 - [ ] All spies are properly restored after each test
 - [ ] No `expect(...).rejects.toThrow()` patterns used
 - [ ] `bun run test:db` passes with zero failures

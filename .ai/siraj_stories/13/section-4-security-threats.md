@@ -19,33 +19,7 @@ The service MUST NOT allow the form to specify arbitrary permission group slugs.
 
 ---
 
-### Threat 2: Cross-Role Authentication Bypass
-**Current Gap:** The existing `login` mutation authenticates users by email/password without scoping to a specific role. A Teacher with valid credentials could log into the Parent portal by selecting the Parent tab, gaining access to parent-specific data and functionality.
-
-**Fix in `AuthValidationService.validateLoginScope()`:**
-Implement a new query that accepts `{ email: string, roleTab: "teacher" | "parent" | "manager" }` and validates that the user exists in the correct role-specific table:
-- `roleTab: "teacher"` → query checks `users` JOIN `teachers` WHERE `users.email = email`
-- `roleTab: "parent"` → query checks `users` JOIN `parents` WHERE `users.email = email`
-- `roleTab: "manager"` → query checks `users` JOIN `staffProfiles` WHERE `users.email = email`
-
-If the email exists in `users` but NOT in the role-specific table, return `{ valid: false, error: "USER_NOT_IN_ROLE" }`. If the email doesn't exist at all, return `{ valid: false, error: "USER_NOT_FOUND" }`. If the email exists in the correct role table, return `{ valid: true }`.
-
-This validation runs BEFORE the `login` mutation. The frontend login form calls this query when the user submits credentials. If validation fails, display a localized error message: `"PLEASE CHECK THE ERRORS: The user doesn't exist."` and prevent the login mutation from executing.
-
-**Important:** This query does NOT validate the password. It only validates that the user exists in the correct role scope. The password validation still happens in the existing `login` mutation. This two-step approach prevents timing attacks that could reveal whether an email exists in the system.
-
-**Test Requirements:**
-- Teacher email submitted on Teacher tab → `{ valid: true }`
-- Teacher email submitted on Parent tab → `{ valid: false, error: "USER_NOT_IN_ROLE" }`
-- Parent email submitted on Parent tab → `{ valid: true }`
-- Parent email submitted on Teacher tab → `{ valid: false, error: "USER_NOT_IN_ROLE" }`
-- Non-existent email on any tab → `{ valid: false, error: "USER_NOT_FOUND" }`
-- Manager email submitted on Manager tab → `{ valid: true }`
-- Manager email submitted on Teacher tab → `{ valid: false, error: "USER_NOT_IN_ROLE" }`
-
----
-
-### Threat 3: Email Collision During User Provisioning
+### Threat 2: Email Collision During User Provisioning
 **Current Gap:** `UserRepository.create()` checks email uniqueness, but the onboarding forms don't provide real-time email validation feedback. A user could fill out the entire multi-section form only to discover at submission that the email is already taken.
 
 **Fix in all three onboarding services:**
@@ -65,7 +39,7 @@ Additionally, expose a GraphQL query `checkEmailAvailability(email: String!): Em
 
 ---
 
-### Threat 4: Orphaned User Records on Partial Provisioning Failure
+### Threat 3: Orphaned User Records on Partial Provisioning Failure
 **Current Gap:** User provisioning requires creating records in three tables: `users`, role-specific profile (`teachers`/`parents`/`staffProfiles`), and `userPermissionGroups`. If the profile creation fails after the user is created, an orphaned user record remains in the database with no role assignment.
 
 **Fix in all three onboarding services:**
@@ -85,7 +59,7 @@ If ANY step fails, the entire transaction rolls back automatically. No partial s
 
 ---
 
-### Threat 5: Sensitive Data Exposure in Banking Details
+### Threat 4: Sensitive Data Exposure in Banking Details
 **Current Gap:** Teacher onboarding includes salary and banking details (SWIFT, IBAN, account number). These are sensitive PII that must be encrypted at rest.
 
 **Fix in `TeacherOnboardingService.createTeacher()`:**

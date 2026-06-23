@@ -1,11 +1,11 @@
-### Task D — Services: User Provisioning Orchestration & Authentication Validation
+### Task D — Services: User Provisioning Orchestration
 
-**Objective:** Implement domain services for teacher, parent, and manager onboarding with full transactional orchestration, permission gating, and localized error handling. Implement authentication validation service for role-scoped login verification.
+**Objective:** Implement domain services for teacher, parent, and manager onboarding with full transactional orchestration, permission gating, and localized error handling.
 
-**Dependencies:** Task C — repository create methods and login validation query are implemented and tested with 100% coverage. Depends on `UserRepository.create()`, `TeacherRepository.create()`, `ParentRepository.create()`, `StaffProfileRepository.create()`, `PermissionManagementRepository.bulkAssignUsersToGroup()`, `TeacherBankingRepository.submitBankingDetails()`, and `PermissionsService.hasPermission()`.
+**Dependencies:** Task C — repository create methods are implemented and tested with 100% coverage. Depends on `UserRepository.create()`, `TeacherRepository.create()`, `ParentRepository.create()`, `StaffProfileRepository.create()`, `PermissionManagementRepository.bulkAssignUsersToGroup()`, `TeacherBankingRepository.submitBankingDetails()`, and `PermissionsService.hasPermission()`.
 
 **Layer-Specific Rules (Backend Services - Flattened from backend/services/AGENTS.md):**
-- **Domain-Driven Architecture**: Service layers must be constructed per domain of concern: `TeacherOnboardingService`, `ParentOnboardingService`, `ManagerOnboardingService`, `AuthValidationService`.
+- **Domain-Driven Architecture**: Service layers must be constructed per domain of concern: `TeacherOnboardingService`, `ParentOnboardingService`, `ManagerOnboardingService`.
 - **NO Monolithic Services**: Do NOT create a generic `OnboardingService` handling all user types. Each user type gets its own service.
 - **Business Logic Hub**: This layer contains all business rules, orchestration, and complex permission gating before calling the repository layer.
 - **🚫 Services MUST NOT import from DB/Drizzle**: Services can ONLY depend on the repository layer (`backend/db/repo/`). Importing from `drizzle-orm`, `backend/db/schema`, `backend/db/index`, or any Drizzle-related module is **strictly forbidden**. All database access must go through repo methods.
@@ -17,11 +17,9 @@
 - `backend/services/teacher/teacher-onboarding.service.ts` — New file for teacher provisioning
 - `backend/services/parent/parent-onboarding.service.ts` — New file for parent provisioning
 - `backend/services/staff/manager-onboarding.service.ts` — New file for manager provisioning
-- `backend/services/auth/auth-validation.service.ts` — New file for role-scoped login validation
 - `backend/services/teacher/test/teacher-onboarding.service.test.ts` — New test file
 - `backend/services/parent/test/parent-onboarding.service.test.ts` — New test file
 - `backend/services/staff/test/manager-onboarding.service.test.ts` — New test file
-- `backend/services/auth/test/auth-validation.service.test.ts` — New test file
 
 **Detailed Implementation Steps:**
 
@@ -455,61 +453,7 @@ export namespace ManagerOnboardingService {
 }
 ```
 
-*Step 4: Create AuthValidationService*
-
-Create `backend/services/auth/auth-validation.service.ts`:
-
-```typescript
-import { UserRepository } from "@/backend/db/repo";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import { logger } from "@/backend/lib/logger";
-
-export type LoginRoleTab = "teacher" | "parent" | "manager";
-
-export interface LoginValidationInput {
-  readonly email: string;
-  readonly roleTab: LoginRoleTab;
-}
-
-export interface LoginValidationResult {
-  readonly valid: boolean;
-  readonly error?: "USER_NOT_FOUND" | "USER_NOT_IN_ROLE";
-  readonly userId?: string;
-}
-
-export namespace AuthValidationService {
-  export async function validateLoginScope(
-    input: LoginValidationInput,
-    locale?: string
-  ): Promise<LoginValidationResult> {
-    const t = await getBackendTranslations({ locale, namespace: "errors" });
-
-    // Validate role tab value
-    const validRoleTabs: LoginRoleTab[] = ["teacher", "parent", "manager"];
-    if (!validRoleTabs.includes(input.roleTab)) {
-      throw new Error(t("auth.invalidRoleTab"));
-    }
-
-    // Delegate to repository for role-scoped validation
-    const result = await UserRepository.validateLoginScope(
-      { email: input.email, roleTab: input.roleTab },
-      locale
-    );
-
-    if (!result.valid) {
-      logger.info("Login validation failed", {
-        email: input.email,
-        roleTab: input.roleTab,
-        error: result.error,
-      });
-    }
-
-    return result;
-  }
-}
-```
-
-*Step 5: Write service tests for TeacherOnboardingService*
+*Step 4: Write service tests for TeacherOnboardingService*
 
 Create `backend/services/teacher/test/teacher-onboarding.service.test.ts`:
 
@@ -605,7 +549,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
 });
 ```
 
-*Step 6: Write service tests for ParentOnboardingService*
+*Step 5: Write service tests for ParentOnboardingService*
 
 Create `backend/services/parent/test/parent-onboarding.service.test.ts`:
 
@@ -669,7 +613,7 @@ describe("ParentOnboardingService.createParent", () => {
 });
 ```
 
-*Step 7: Write service tests for ManagerOnboardingService*
+*Step 6: Write service tests for ManagerOnboardingService*
 
 Create `backend/services/staff/test/manager-onboarding.service.test.ts`:
 
@@ -766,86 +710,12 @@ describe("ManagerOnboardingService.createManager", () => {
 });
 ```
 
-*Step 8: Write service tests for AuthValidationService*
 
-Create `backend/services/auth/test/auth-validation.service.test.ts`:
-
-```typescript
-import { describe, test, expect, spyOn } from "bun:test";
-import { AuthValidationService } from "@/services/auth/auth-validation.service";
-import { UserRepository } from "@/backend/db/repo";
-
-describe("AuthValidationService.validateLoginScope", () => {
-  test("validates teacher login scope", async () => {
-    const validateSpy = spyOn(UserRepository, "validateLoginScope").mockResolvedValue({
-      valid: true,
-      userId: "teacher-user-id",
-    });
-
-    const result = await AuthValidationService.validateLoginScope({
-      email: "teacher@test.com",
-      roleTab: "teacher",
-    });
-
-    expect(result.valid).toBe(true);
-    expect(result.userId).toBe("teacher-user-id");
-    validateSpy.mockRestore();
-  });
-
-  test("rejects cross-role login attempt", async () => {
-    const validateSpy = spyOn(UserRepository, "validateLoginScope").mockResolvedValue({
-      valid: false,
-      error: "USER_NOT_IN_ROLE",
-    });
-
-    const result = await AuthValidationService.validateLoginScope({
-      email: "teacher@test.com",
-      roleTab: "parent",
-    });
-
-    expect(result.valid).toBe(false);
-    expect(result.error).toBe("USER_NOT_IN_ROLE");
-    validateSpy.mockRestore();
-  });
-
-  test("rejects invalid role tab", async () => {
-    let error: unknown = null;
-    try {
-      await AuthValidationService.validateLoginScope({
-        email: "test@test.com",
-        roleTab: "invalid" as any,
-      });
-    } catch (e) {
-      error = e;
-    }
-
-    expect(error).not.toBeNull();
-  });
-});
-```
-
-**Test Execution Requirements:**
-- Run service tests:
-  ```bash
-  bun test backend/services/teacher/test/teacher-onboarding.service.test.ts
-  bun test backend/services/parent/test/parent-onboarding.service.test.ts
-  bun test backend/services/staff/test/manager-onboarding.service.test.ts
-  bun test backend/services/auth/test/auth-validation.service.test.ts
-  ```
-- Run full database test suite to verify no regressions:
-  ```bash
-  bun run test:db
-  ```
-- Verify TypeScript compilation:
-  ```bash
-  bun tsgo
-  ```
 
 **Success Criteria / Check Progress Points:**
 - [ ] `TeacherOnboardingService.createTeacher()` is fully implemented with permission gating, email validation, and transactional orchestration
 - [ ] `ParentOnboardingService.createParent()` is fully implemented with permission gating, email validation, and billing configuration
 - [ ] `ManagerOnboardingService.createManager()` is fully implemented with super-admin-only check and account type mapping
-- [ ] `AuthValidationService.validateLoginScope()` is fully implemented with role tab validation
 - [ ] All services use `getBackendTranslations` for localized error messages
 - [ ] All services delegate to repository layer (NO direct Drizzle imports)
 - [ ] All multi-table writes are wrapped in `db.transaction()`

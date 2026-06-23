@@ -7,7 +7,6 @@
 | `staff.create_teacher` | Academy Admin | Teacher Onboarding page visibility, "Add Teacher" button | `TeacherOnboardingService.createTeacher()` | `createTeacher` |
 | `parent.create_account` | Academy Admin | Parent Onboarding page visibility, "Add Parent" button | `ParentOnboardingService.createParent()` | `createParent` |
 | `manager.create_account` | System Administrator | Manager Onboarding page visibility, "Add Manager" button | `ManagerOnboardingService.createManager()` | `createManager` |
-| `auth.login_validation` | Unauthenticated User | Login form role tab validation | `AuthValidationService.validateLoginScope()` | `validateLoginScope` (query) |
 
 ### 2.2 Permission Mapping to Existing Permissions
 
@@ -19,20 +18,17 @@
 | `parent.create_account` | `PARENTS_CREATE` (enum) | Complementary — the enum value exists but has no implementation; this story implements the full provisioning workflow |
 | `manager.create_account` | `staff.create` | Granular — `staff.create` is a general permission; `manager.create_account` specifically gates manager provisioning with RBAC privilege tier assignment |
 | `manager.create_account` | `STAFF_CREATE` (enum) | Complementary — the enum value exists but has no implementation; this story implements the full provisioning workflow |
-| `auth.login_validation` | `auth.login` | Complementary — `auth.login` grants access to the login endpoint; `auth.login_validation` adds role-scoped credential validation before session creation |
 
 ### 2.3 Permission Group Assignments
 
 | **Permission Group** | **Slug** | **New Permissions Assigned** |
 |---|---|---|
-| Super Admin | `super_admin` | `staff.create_teacher`, `parent.create_account`, `manager.create_account`, `auth.login_validation` |
-| Academy Admin | `academy_admin` | `staff.create_teacher`, `parent.create_account`, `auth.login_validation` |
-| Teacher Default | `teacher_default` | `auth.login_validation` |
-| Parent Default | `parent_default` | `auth.login_validation` |
-| Staff Default | `staff_default` | `auth.login_validation` |
-| System Automated | `system_automated` | (none — `auth.login_validation` is for unauthenticated users, not system processes) |
-
-**Note on `auth.login_validation`:** This permission is unique because it applies to unauthenticated users attempting to log in. It is assigned to all permission groups because the validation logic runs before a session is created. The permission acts as a system-level security rule that scopes credential validation to specific database tables based on the selected UI role tab.
+| Super Admin | `super_admin` | `staff.create_teacher`, `parent.create_account`, `manager.create_account` |
+| Academy Admin | `academy_admin` | `staff.create_teacher`, `parent.create_account` |
+| Teacher Default | `teacher_default` | (none — teachers do not create accounts) |
+| Parent Default | `parent_default` | (none — parents do not create accounts) |
+| Staff Default | `staff_default` | (none — standard staff do not create accounts) |
+| System Automated | `system_automated` | (none — system processes do not create user accounts manually) |
 
 ### 2.4 Self-Scoping vs Any-Scoping
 
@@ -47,6 +43,3 @@
 **Manager Provisioning (`manager.create_account`):**
 - **System Administrator only (any-scoped):** The service layer enforces that ONLY users with the `super_admin` permission group slug can create manager accounts. Academy Admins are explicitly denied this operation. The account type selection (Admin vs Manager) determines the permission group assigned to the new manager.
 - **Academy Admin (DENIED):** Academy Admins cannot create manager accounts. This is a critical security boundary that prevents privilege escalation.
-
-**Authentication Validation (`auth.login_validation`):**
-- **All roles (self-scoped):** The validation query scopes to the specific role tab selected by the user. A Teacher credential submitted on the Parent tab will be rejected because the query only checks the `parents` table joined with `users`. This scoping is enforced in the service layer, NOT via separate permission keys.

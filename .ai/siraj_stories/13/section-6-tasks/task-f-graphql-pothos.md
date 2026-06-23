@@ -16,7 +16,6 @@
 - `backend/graphql/pothos/teacher-onboarding.pothos.ts` — New file for teacher onboarding GraphQL types and mutations
 - `backend/graphql/pothos/parent-onboarding.pothos.ts` — New file for parent onboarding GraphQL types and mutations
 - `backend/graphql/pothos/manager-onboarding.pothos.ts` — New file for manager onboarding GraphQL types and mutations
-- `backend/graphql/pothos/auth-validation.pothos.ts` — New file for auth validation query
 - `backend/graphql/pothos/index.ts` — Export new Pothos modules
 
 **Detailed Implementation Steps:**
@@ -229,56 +228,7 @@ export function registerManagerOnboardingMutations(t: any) {
 }
 ```
 
-*Step 4: Create auth validation Pothos types and query*
 
-Create `backend/graphql/pothos/auth-validation.pothos.ts`:
-
-```typescript
-import { AuthValidationService } from "@/services/auth/auth-validation.service";
-import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-
-export const LoginRoleTabPothosEnum = gqlSchemaBuilder.enumType(
-  { teacher: "teacher", parent: "parent", manager: "manager" },
-  { name: "LoginRoleTab", description: "Role tab selected on login form" }
-);
-
-export const LoginValidationInputPothosObject = gqlSchemaBuilder
-  .inputRef<LoginValidationInput>("LoginValidationInput")
-  .implement({
-    description: "Input for validating login credentials against role scope",
-    fields: t => ({
-      email: t.field({ type: "Email", required: true }),
-      roleTab: t.field({ type: LoginRoleTabPothosEnum, required: true }),
-    }),
-  });
-
-export const LoginValidationResultPothosObject = gqlSchemaBuilder
-  .objectRef<LoginValidationResult>("LoginValidationResult")
-  .implement({
-    description: "Result of login scope validation",
-    fields: t => ({
-      valid: t.exposeBoolean("valid"),
-      error: t.exposeString("error", { nullable: true }),
-      userId: t.exposeString("userId", { nullable: true }),
-    }),
-  });
-
-export function registerAuthValidationQueries(t: any) {
-  t.field("validateLoginScope", {
-    type: LoginValidationResultPothosObject,
-    description: "Validate that a user exists in the selected role scope before login",
-    args: {
-      input: t.arg({ type: LoginValidationInputPothosObject, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const result = await AuthValidationService.validateLoginScope(args.input, ctx.locale);
-      return result;
-    },
-  });
-}
-```
-
-*Step 5: Register new Pothos modules in index.ts*
 
 Open `backend/graphql/pothos/index.ts` and add exports for the new modules:
 
@@ -312,18 +262,15 @@ export {
 } from "./auth-validation.pothos";
 ```
 
-*Step 6: Register mutations and queries in the schema builder*
+*Step 5: Register mutations in the schema builder*
 
-Open the main schema builder file (typically `backend/graphql/gqlSchemaBuilder.ts` or the file that assembles the schema) and register the new mutations and queries:
+Open the main schema builder file (typically `backend/graphql/gqlSchemaBuilder.ts` or the file that assembles the schema) and register the new mutations:
 
 ```typescript
 // In the mutation builder section:
 registerTeacherOnboardingMutations(mutationBuilder);
 registerParentOnboardingMutations(mutationBuilder);
 registerManagerOnboardingMutations(mutationBuilder);
-
-// In the query builder section:
-registerAuthValidationQueries(queryBuilder);
 ```
 
 *Step 7: Run schema generation and codegen*
@@ -355,14 +302,13 @@ Both commands must pass with zero errors. The generated schema should include:
 - [ ] All Pothos input types are defined with correct field types and nullability
 - [ ] All Pothos result types expose all fields from service result interfaces
 - [ ] All mutation resolvers delegate to service layer with `ctx.userId` and `ctx.locale` propagation
-- [ ] Auth validation query resolver delegates to service with `ctx.locale` propagation
 - [ ] No DB/repo imports in any Pothos files
 - [ ] All new modules are exported from `index.ts`
-- [ ] All mutations and queries are registered in the schema builder
+- [ ] All mutations are registered in the schema builder
 - [ ] `bun run generate:gqlSchema` succeeds with zero errors
 - [ ] `bun codegen` succeeds with zero errors
 - [ ] `bun tsgo` passes with zero TypeScript errors
-- [ ] Generated GraphQL schema includes all 4 new operations
+- [ ] Generated GraphQL schema includes all 3 new operations
 
 **Quality Gate — Per-File Validation:**
 - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file

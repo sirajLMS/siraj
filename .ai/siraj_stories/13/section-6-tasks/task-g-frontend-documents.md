@@ -16,7 +16,6 @@
 - `frontend/graphql/sharedDocuments/teacher-onboarding.documents.ts` — New file
 - `frontend/graphql/sharedDocuments/parent-onboarding.documents.ts` — New file
 - `frontend/graphql/sharedDocuments/manager-onboarding.documents.ts` — New file
-- `frontend/graphql/sharedDocuments/auth-validation.documents.ts` — New file
 - `frontend/graphql/sharedDocuments/index.ts` — Export new documents
 
 **Detailed Implementation Steps:**
@@ -99,30 +98,7 @@ export const createManagerMutationDocument: TypedDocumentNode<
 `;
 ```
 
-*Step 4: Create auth validation documents*
 
-Create `frontend/graphql/sharedDocuments/auth-validation.documents.ts`:
-
-```typescript
-import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
-
-export const validateLoginScopeQueryDocument: TypedDocumentNode<
-  Operations.ValidateLoginScopeQuery,
-  Types.QueryValidateLoginScopeArgs
-> = gql`
-  query validateLoginScope($input: LoginValidationInput!) {
-    validateLoginScope(input: $input) {
-      valid
-      error
-      userId
-    }
-  }
-`;
-```
-
-*Step 5: Export from index.ts*
 
 Open `frontend/graphql/sharedDocuments/index.ts` and add barrel exports:
 
@@ -161,14 +137,14 @@ Both commands must pass. The generated types should include:
 
 **Success Criteria / Check Progress Points:**
 - [ ] All mutation documents use correct TypedDocumentNode pattern
-- [ ] All query documents use correct TypedDocumentNode pattern
+- [ ] All mutation documents use correct TypedDocumentNode pattern
 - [ ] All documents import from `"@apollo/client"` (not `"@apollo/client/core"`)
 - [ ] All documents use generated types from `graphql-types.ts`
 - [ ] All documents are exported from `index.ts`
 - [ ] `bun run generate:gqlSchema` succeeds
 - [ ] `bun codegen` succeeds
 - [ ] `bun tsgo` passes with zero TypeScript errors
-- [ ] Generated types include all 4 new operations
+- [ ] Generated types include all 3 new operations
 
 **Quality Gate — Per-File Validation:**
 - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file

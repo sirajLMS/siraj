@@ -69,7 +69,6 @@ The following patterns are **strictly prohibited**:
 
 **Security Logic Tests** (`backend/db/test/logic/`):
 - [ ] **Permission constraint tests** — Verify that only users with correct permission group can execute provisioning mutations.
-- [ ] **Role-scoped authentication tests** — Verify that `auth.login_validation` correctly scopes queries to the selected role tab's database table.
 
 **Service Tests** (`backend/services/*/test/`):
 - [ ] **Permission gating tests** — Verify that service methods reject unauthorized users before any database operations.
@@ -77,9 +76,8 @@ The following patterns are **strictly prohibited**:
 - [ ] **Error propagation tests** — Verify that localized error messages propagate correctly through the service layer.
 
 **GraphQL Integration Tests** (`frontend/graphql/test/`):
-- [ ] **Authorized success + unauthorized denial** — Every new GraphQL query/mutation must have at least one test for authorized success and one test for unauthorized denial.
+- [ ] **Authorized success + unauthorized denial** — Every new GraphQL mutation must have at least one test for authorized success and one test for unauthorized denial.
 - [ ] **Security threat coverage** — Each threat from Section 4 must have a corresponding GraphQL-level test case.
-- [ ] **Role-scoped validation tests** — Verify that login validation correctly rejects cross-role login attempts.
 
 **Coverage Verification Command** (run after every repository task):
 ```bash
