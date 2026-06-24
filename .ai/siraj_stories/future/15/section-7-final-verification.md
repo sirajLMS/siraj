@@ -150,6 +150,10 @@ Both MUST succeed. Verify generated types include:
 - [ ] Zero service imports from drizzle/schema
 - [ ] Zero GraphQL resolver imports from DB/repo
 - [ ] Zero mock store imports in production files
+- [ ] **Zero local type definitions in repository, service, or Pothos files**
+- [ ] **All entity types imported from canonical `backend/types/{entity}.types.ts` files**
+- [ ] **Single GraphQL object per entity (no duplicate Pothos objects)**
+- [ ] **Canonical type files exist for all Sprint 15 tables (suggestions, complaints, notification-deliveries, user-notification-preferences, complaint-responses)**
 - [ ] All 3 new permissions exist in database with correct group assignments
 - [ ] All 6 schema changes applied (5 columns + deletedAt)
 - [ ] ON_APP channel added to NotificationChannel enum

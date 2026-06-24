@@ -23,8 +23,9 @@ Extend the existing `NotificationRepository` namespace in `backend/db/repo/notif
 |------|--------|
 | `backend/types/user-notification-preferences.types.ts` | CREATE or UPDATE — define canonical types for user_notification_preferences table |
 | `backend/types/notification-deliveries.types.ts` | CREATE or UPDATE — define canonical types for notification_deliveries table |
-| `backend/db/repo/notification.repository.ts` | MODIFY — add 5 new methods, add 2 new imports |
-| `backend/types/communications.types.ts` | MODIFY — add 1 new input type |
+| `backend/db/repo/notification.repository.ts` | MODIFY — add 5 new methods, import canonical types |
+| `backend/types/user-notification-preferences.types.ts` | CREATE or UPDATE — define canonical types for user_notification_preferences table |
+| `backend/types/notification-deliveries.types.ts` | CREATE or UPDATE — define canonical types for notification_deliveries table |
 
 ---
 

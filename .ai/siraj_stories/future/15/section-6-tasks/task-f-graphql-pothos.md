@@ -990,10 +990,11 @@ If `codegen` fails, check for:
 
 Execute the steps in this exact order to satisfy incremental type-checking:
 
-1. `backend/types/communications.types.ts` — Add shared types (no new internal dependencies)
-2. `backend/graphql/pothos/suggestion.pothos.ts` — Extend Suggestion objects, add new objects, queries, mutations
-3. `backend/graphql/pothos/complaint.pothos.ts` — Add ComplaintFile object, extend existing objects, add query, extend mutation input
-4. Run `bun run generate:gqlSchema` and `bun codegen`
+1. `backend/types/suggestions.types.ts` — Verify or create canonical types for suggestions table
+2. `backend/types/complaints.types.ts` — Update canonical types with complaint file types
+3. `backend/graphql/pothos/suggestion.pothos.ts` — Extend Suggestion objects, add new objects, queries, mutations (import from canonical types)
+4. `backend/graphql/pothos/complaint.pothos.ts` — Add ComplaintFile object, extend existing objects, add query, extend mutation input (import from canonical types)
+5. Run `bun run generate:gqlSchema` and `bun codegen`
 
 After creating/modifying each file, run the Quality Gate — Per-File Validation checklist before proceeding to the next file.
 
@@ -1025,9 +1026,11 @@ Runs all GraphQL integration tests to ensure no regressions in existing queries/
 
 #### Success Criteria
 
-- [ ] `backend/types/communications.types.ts` includes all new shared type definitions: `SuggestionStatusValue`, `SuggestionWithStatusShape`, `SuggestionWithResponseShape`, `SuggestionSearchResultShape`, `DuplicateSuggestionInputShape`, `RespondToSuggestionInputShape`, `ParentSuggestionOptionsShape`, `ComplaintFileShape`, `SubmitComplaintWithFilesInputShape`
+- [ ] `backend/types/suggestions.types.ts` contains canonical types: `SuggestionSelectType`, `SuggestionInsertType`, `SuggestionReturnType`, `SuggestionSubmitInput`, `SuggestionQueueFilter`, `SuggestionMetrics`, `DuplicateSuggestionInput`, `RespondToSuggestionInput`, `ParentSuggestionOptions`
+- [ ] `backend/types/complaints.types.ts` contains `ComplaintFileReturnType` and `SubmitComplaintWithFilesInput`
+- [ ] NO local type definitions in Pothos files — all types imported from canonical `backend/types/` files
 - [ ] `backend/graphql/pothos/suggestion.pothos.ts` defines `SuggestionStatus` Pothos enum with `PENDING`, `REVIEWED`, `DUPLICATE` values
-- [ ] `SuggestionDefinition` and `SuggestionPothosObject` extended with 5 new fields: `status`, `duplicateOfId`, `adminResponse`, `reviewedByUserId`, `reviewedAt`
+- [ ] Single `Suggestion` GraphQL object using `SuggestionReturnType` extended with 5 new fields: `status`, `duplicateOfId`, `adminResponse`, `reviewedByUserId`, `reviewedAt`
 - [ ] `SuggestionPothosObject` includes `duplicateOf` self-referencing nullable field
 - [ ] `SuggestionPothosObject` includes `reviewedByName` nullable string field
 - [ ] New `SuggestionSearchResult` object defined with `id`, `parentId`, `submitterName`, `body`, `status`, `createdAt`, `parentName`
@@ -1036,9 +1039,9 @@ Runs all GraphQL integration tests to ensure no regressions in existing queries/
 - [ ] New mutation fields defined: `respondToSuggestion`, `markSuggestionDuplicate`, `deleteSuggestion`
 - [ ] Existing `submitSuggestion` and `markSuggestionReviewed` mutation resolvers updated with new return fields
 - [ ] Existing `adminSuggestions` query resolver updated with new row fields
-- [ ] `backend/graphql/pothos/complaint.pothos.ts` defines new `ComplaintFile` object with `fileId`, `filePath`, `isProtected`, `usageType`, `createdAt`
-- [ ] `ParentComplaintRecordDefinition` and `ComplaintQueueRowDefinition` extended with `files: ComplaintFileDefinition[]`
-- [ ] `SubmitComplaintInputDefinition` extended with optional `filePaths: string[]`
+- [ ] `backend/graphql/pothos/complaint.pothos.ts` defines new `ComplaintFile` object using `ComplaintFileReturnType` with `fileId`, `filePath`, `isProtected`, `usageType`, `createdAt`
+- [ ] Single `Complaint` GraphQL object extended with `files: ComplaintFile[]`
+- [ ] `SubmitComplaintInput` extended with optional `filePaths: string[]`
 - [ ] New `complaintFiles` query field defined
 - [ ] Existing `parentComplaints` resolver includes `files: []` in return mapping
 - [ ] Existing `adminComplaintQueue` resolver includes `files: []` in return mapping

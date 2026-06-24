@@ -150,7 +150,7 @@ Include general system rules, a ban on monolithic services, and the **Zero Incom
 
 ### 1.2b Task Ordering & Dependency Integrity
 - [ ] **No forward dependencies** - A task MUST NOT depend on code, types, schemas, or modules introduced by a later task. Tasks can only depend on the current project state or on earlier tasks.
-- [ ] **Incremental build order** - Tasks must be ordered so the dependency chain flows naturally: Database/Schema → Repository → Service → **DB/Repo Tests** → GraphQL (Backend) → GraphQL Documents (Frontend) → **Type Extraction** → **GraphQL Tests** + **Storybook Migration** → Frontend Stores → Frontend Views. Tests immediately follow the layer they verify. Type extraction happens before stores/views so types are available. Storybook migration happens before container migration so stories are ready when containers switch to `useQuery`.
+- [ ] **Incremental build order** - Tasks must be ordered so the dependency chain flows naturally: Database/Schema → **Canonical Types** → Repository → Service → **DB/Repo Tests** → GraphQL (Backend) → GraphQL Documents (Frontend) → **Type Extraction** → **GraphQL Tests** + **Storybook Migration** → Frontend Stores → Frontend Views. Tests immediately follow the layer they verify. Type extraction happens before stores/views so types are available. Storybook migration happens before container migration so stories are ready when containers switch to `useQuery`. **Canonical types are created BEFORE repositories** so all layers can import from them.
 - [ ] **Self-contained tasks** - After completing each task, the project must compile and pass all quality gates. No task should leave the project in a broken state waiting for a later task to fix it.
 - [ ] **Explicit dependency declaration** - Each task must list its dependencies (earlier task letters or "current project state only") in its Dependencies field.
 - [ ] **Test tasks immediately follow implementation** - DB/repo/service tests come directly after the DB/repo/service implementation task. GraphQL tests come directly after the frontend GraphQL documents task. Tests are never deferred to the end.
@@ -170,6 +170,11 @@ The following patterns are **strictly prohibited**:
 | Types defined in mock stores | Types extracted to `types.ts`, mock stores re-import | `rg "export (type|interface)" frontend/stores/mock*.ts` |
 | Story without MockedProvider | `MockedProvider` decorator with mock GraphQL responses | `rg "MockedProvider" frontend/views/**/*.stories.tsx` |
 | Custom type when generated exists | Re-export from `graphql-types.ts` | Manual review of `types.ts` files |
+| **Local type definitions in Pothos files** | **Import from `backend/types/{entity}.types.ts`** | `rg "export type.*Definition" backend/graphql/pothos/` |
+| **Local entity types in repository files** | **Import from `backend/types/{entity}.types.ts`** | `rg "export type.*Row\s*=" backend/db/repo/` |
+| **Local entity types in service files** | **Import from `backend/types/{entity}.types.ts`** | `rg "export type.*Shape\s*=" backend/services/` |
+| **Multiple types files for same table** | **Single canonical `.types.ts` per table** | Manual review of `backend/types/` |
+| **Types for different tables in same file** | **Separate `.types.ts` per table** | Manual review of `backend/types/` |
 
 ### 1.4 SSR Compatibility (when applicable)
 - [ ] **Services must work in Next.js Server Components** — Services can be used directly by SSR or Server Actions without GraphQL-specific context dependencies.
@@ -436,6 +441,7 @@ Break down the implementation into letters. Tasks **MUST** be strictly ordered b
   5. This task MUST come AFTER Type Extraction (so types are available) and BEFORE Frontend Stores/Views (so stories are ready when containers switch).
 - **Database Migration task protocol** (typically the first task): When a plan includes schema changes, new columns, or new permissions, the Database Migration task MUST:
   - Add any new permissions to `backend/db/migration/3-system_permissions_and_groups.sql` (NOT to a separate seed file).
+  - **Create or update canonical `.types.ts` files** in `backend/types/` for all new/modified tables. Each table gets exactly one canonical file using `$inferSelect`/`$inferInsert` as foundation.
   - Run the following commands **in exact order** after writing the migration:
     1. `bun db cleanGenerate` — regenerates Drizzle schema from the updated database
     2. `bun db reset` — drops and recreates the database with the new migration
@@ -1140,6 +1146,16 @@ Execute the following commands in order to guarantee system stability and preven
 13. `rg -i "TODO|FIXME|not implemented|placeholder|for now" backend frontend shared --glob "!**/*.md" --glob "!**/generated/**"`
     Output MUST be empty.
 
+### 7.4b Single Canonical Object Type Pattern Check
+14. `rg "export type.*Definition" backend/graphql/pothos/`
+    Output MUST be empty — no local type definitions in Pothos files.
+15. `rg "export type.*Row\s*=" backend/db/repo/`
+    Output MUST be empty — no local entity types in repository files.
+16. `rg "export type.*Shape\s*=" backend/services/`
+    Output MUST be empty — no local entity types in service files.
+17. Verify each table has exactly one canonical `.types.ts` file in `backend/types/`.
+18. Verify canonical types use `$inferSelect` and `$inferInsert` from Drizzle.
+
 ### 7.5 Mock Data Leak Check (when applicable)
 14. `rg "mockXxxStore" frontend/views --glob "!**/*.stories.tsx"`
     Output MUST be empty — mock stores must not be imported in production view files.
@@ -1173,6 +1189,14 @@ Execute the following commands in order to guarantee system stability and preven
 ### A. Database Layer (`backend/db/repo/`)
 - **Drizzle Constraints**: Avoid `db.query.tableName.findMany` with deeply nested `with`. Use standard `db.select().from(table).leftJoin(...)`.
 - **Migration Protocol**: New permissions MUST be added to `backend/db/migration/3-system_permissions_and_groups.sql`. After writing any migration, run the full sequence: `bun db cleanGenerate` → `bun db reset` → `bun db seed` → `bun test:db`. All four must pass.
+- **🚫 NO Local Type Definitions**: Repository files MUST NOT define local entity types. All types MUST be imported from canonical `backend/types/{entity}.types.ts` files.
+
+### A2. Backend Types Layer (`backend/types/`)
+- **One File Per Table**: Each database table MUST have exactly one canonical `.types.ts` file. Example: `backend/types/complaints.types.ts` for the `complaints` table.
+- **Canonical Type Naming**: Use `{Entity}SelectType`, `{Entity}InsertType`, `{Entity}ReturnType`, `{Entity}SubmitInput`, `{Entity}UpdateInput` naming conventions.
+- **Type Foundation**: Define types using Drizzle's `$inferSelect` and `$inferInsert` as the foundation, then extend with resolved properties and proper enum typing.
+- **No Type Mixing**: A `.types.ts` file MUST NOT contain types for multiple tables. Each table gets its own file.
+- **Single Source of Truth**: All other layers (Repository, Service, GraphQL, Test) MUST import types from these canonical files. NO local type definitions allowed in other layers.
 
 ### B. Service Layer (`backend/services/`)
 - **Domain-Driven Design**: Services must be scoped to their domain. NO Monoliths.
@@ -1253,6 +1277,7 @@ Provide a table listing every file that will be created or modified, with the ac
 |---|---|---|
 | `shared/lib/enum.ts` | Modify | A |
 | `backend/db/migration/<N>-story<_N>_permissions.sql` | Create | A |
+| `backend/types/{entity}.types.ts` | Create/Modify | A |
 | `backend/db/repo/<domain>.repository.ts` | Modify | B |
 | `backend/db/test/repo/<domain>.repository.test.ts` | Create | C |
 | `backend/services/<domain>/<feature>.service.ts` | Create | D |
@@ -1270,11 +1295,11 @@ Provide a table listing every file that will be created or modified, with the ac
 Show the task-to-task dependency chain as a visual text diagram:
 
 ```
-Task A (Migration + Enum)
-  └──► Task B (Repository)
+Task A (Migration + Enum + Canonical Types)
+  └──► Task B (Repository — imports canonical types)
          └──► Task C (Repo Tests)
-                └──► Task D (Services)
-                       └──► Task E (GraphQL Pothos + Resolvers)
+                └──► Task D (Services — imports canonical types)
+                       └──► Task E (GraphQL Pothos + Resolvers — imports canonical types)
                               └──► Task F (Frontend Apollo Documents)
                                      └──► Task G (Type Extraction)
                                             ├──► Task H (GraphQL Tests)
@@ -1286,3 +1311,5 @@ Task A (Migration + Enum)
 ```
 
 Tasks H and I are both dependent on G but are independent of each other — they MAY be run in parallel. Task I (Storybook Migration) prepares the story infrastructure (`MockedProvider` decorators) before containers are migrated. Task J (i18n) can run after stories are prepared. Task K (Frontend Stores) depends on G for types. Task L (Frontend Views) depends on K for stores and I for story readiness.
+
+**Canonical Types** are created in Task A alongside the migration and enum definitions. They are the foundation that all subsequent layers import from. Each table gets exactly one canonical `.types.ts` file in `backend/types/`.

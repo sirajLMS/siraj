@@ -17,6 +17,7 @@
 - **Soft-Delete Infrastructure:** New soft-deletable entities must be registered in `backend/types/soft-delete.types.ts` (type maps) AND `backend/db/repo/soft-delete.repository.ts` (runtime config + convenience method). The `AuditEntityType` union in `backend/types/audit.types.ts` must also be extended.
 - **Database Migration Task Protocol:** After writing the migration, run in exact order: `bun db cleanGenerate` → `bun db reset` → `bun db seed` → `bun test:db`. All four must pass before the task is complete.
 - **No `console` methods** — ESLint will error. Use `logger` utility if logging is needed.
+- **Canonical Types Creation:** This task MUST create or update canonical `.types.ts` files for all new/modified tables. Each table gets exactly one canonical file in `backend/types/`. Types use `$inferSelect`/`$inferInsert` from Drizzle as foundation.
 
 ---
 
@@ -30,6 +31,7 @@
 6. `backend/types/soft-delete.types.ts` — Add `suggestions` to `SoftDeletableTableName`, `SoftDeletableEntityMap`, and `SoftDeletableAuditEntityMap`
 7. `backend/db/repo/soft-delete.repository.ts` — Add `suggestions` to `SOFT_DELETE_TABLES` config and add `softDeleteSuggestion()` convenience method
 8. `backend/db/migration/3-system_permissions_and_groups.sql` — Add `CREATE TYPE`, `ALTER TYPE` statements, `ALTER TABLE` for 6 columns, 4 `CREATE INDEX` statements, 3 new permission INSERTs, and group_permissions assignments for `super_admin` and `academy_admin`
+9. `backend/types/suggestions.types.ts` — CREATE — canonical types for suggestions table (SuggestionSelectType, SuggestionInsertType, SuggestionReturnType, SuggestionSubmitInput, SuggestionQueueFilter, SuggestionMetrics, SuggestionQueueResult)
 
 ---
 
@@ -800,6 +802,91 @@ All four commands must pass with exit code 0. If any command fails, fix the migr
 
 ---
 
+#### Step 12: Create Canonical Types for Suggestions Table
+
+Create `backend/types/suggestions.types.ts` with canonical types for the suggestions table. These types will be imported by all subsequent layers (Repository, Service, GraphQL, Tests).
+
+```typescript
+import type { suggestions } from "@/backend/db/schema";
+import type { SuggestionStatus } from "@/shared/lib/enum";
+
+export type SuggestionSelectType = typeof suggestions.$inferSelect;
+export type SuggestionInsertType = typeof suggestions.$inferInsert;
+
+export type SuggestionReturnType = Omit<SuggestionSelectType,
+  | "deletedAt"
+> & {
+  status: SuggestionStatus;
+  parentName?: string | null;
+  reviewedByUserName?: string | null;
+  duplicateOfBody?: string | null;
+  duplicateOfSubmitterName?: string | null;
+  responseCount?: number | null;
+};
+
+export type SuggestionSubmitInput = Omit<
+  SuggestionInsertType,
+  | "status"
+  | "createdAt"
+  | "updatedAt"
+  | "deletedAt"
+  | "reviewedAt"
+  | "reviewedByUserId"
+  | "duplicateOfId"
+  | "parentId"
+>;
+
+export type SuggestionQueueFilter = {
+  search?: string | null;
+  status?: SuggestionStatus | null;
+  limit: number;
+  offset: number;
+};
+
+export type SuggestionMetrics = {
+  id: string;
+  pending: number;
+  reviewed: number;
+  duplicate: number;
+  totalCount: number;
+};
+
+export type SuggestionQueueResult = {
+  id: string;
+  suggestions: ReadonlyArray<SuggestionReturnType>;
+  metrics: SuggestionMetrics;
+};
+
+export type DuplicateSuggestionInput = {
+  readonly suggestionId: string;
+  readonly duplicateOfId: string;
+};
+
+export type RespondToSuggestionInput = {
+  readonly suggestionId: string;
+  readonly adminResponse: string;
+};
+
+export type ParentSuggestionOptions = {
+  readonly limit: number;
+  readonly offset: number;
+};
+```
+
+**Key points:**
+- Uses `$inferSelect` and `$inferInsert` from Drizzle as foundation
+- `SuggestionReturnType` omits `deletedAt` (forbidden field) and adds resolved properties
+- `SuggestionSubmitInput` omits server-managed fields (status, timestamps, parentId)
+- All types are in ONE file for the suggestions table — no type mixing
+- These types are consumed by Repository (Task B1), Service (Task E1), and GraphQL (Task F) layers
+
+**Verification:**
+```bash
+bun tsgo backend/types/suggestions.types.ts
+```
+
+---
+
 **Success Criteria / Check Progress Points:**
 
 - [ ] `SuggestionStatus` enum added to `shared/lib/enum.ts` with `PENDING`, `REVIEWED`, `DUPLICATE` values
@@ -828,6 +915,10 @@ All four commands must pass with exit code 0. If any command fails, fix the migr
 - [ ] `bun db reset` passes with exit code 0
 - [ ] `bun db seed` passes with exit code 0
 - [ ] `bun test:db` passes with 0 failures
+- [ ] `backend/types/suggestions.types.ts` created with canonical types using `$inferSelect`/`$inferInsert`
+- [ ] Canonical types include `SuggestionSelectType`, `SuggestionInsertType`, `SuggestionReturnType`, `SuggestionSubmitInput`, `SuggestionQueueFilter`, `SuggestionMetrics`, `SuggestionQueueResult`
+- [ ] `SuggestionReturnType` omits `deletedAt` and adds resolved properties (`parentName`, `reviewedByUserName`, `duplicateOfBody`, `duplicateOfSubmitterName`)
+- [ ] NO local type definitions in any other layer files — all types sourced from canonical file
 
 **Quality Gate — Per-File Validation:**
 - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file

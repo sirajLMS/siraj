@@ -64,3 +64,12 @@
 - [ ] Verify `ComplaintFormFields` exists. ✅ (verified)
 - [ ] Verify `ResourceUploadDropzone` exists as reference pattern. ✅ (verified — `frontend/views/dashboard/resources/components/ResourceUploadDropzone.tsx`)
 - [ ] Verify i18n keys exist for `dashboard.complaints` and `dashboard.suggestions` namespaces. ✅ (verified)
+
+### 5.6 Canonical Types Verification
+
+- [ ] Verify `backend/types/complaint.types.ts` exists with `ComplaintSelectType`, `ComplaintInsertType`, `ComplaintReturnType`, `ComplaintSubmitInput`. ✅ (verified)
+- [ ] Verify `backend/types/complaintResponses.types.ts` exists. ✅ (verified)
+- [ ] Verify `backend/types/suggestions.types.ts` exists or will be created in Task B1. ❌ (not verified — needs creation in Task B1)
+- [ ] Verify `backend/types/notificationDeliveries.types.ts` exists or will be created in Task B2. ❌ (not verified — needs creation in Task B2)
+- [ ] Verify `backend/types/userNotificationPreferences.types.ts` exists or will be created in Task B2. ❌ (not verified — needs creation in Task B2)
+- [ ] Verify NO local type definitions exist in current Pothos files that should be in canonical types. ❌ (needs cleanup in Task F)
