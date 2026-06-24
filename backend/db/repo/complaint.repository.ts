@@ -2,57 +2,31 @@ import { and, count, desc, eq, ilike, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { complaints, parents, students, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import { ComplaintStatus } from "@/shared/lib/enum";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-export interface ComplaintSubmitInput {
-  parentId: string;
-  studentId?: string | null;
-  category: "REGARDING_TEACHER" | "REGARDING_SYSTEM" | "OTHER";
-  submitterEmail: string;
-  body: string;
-}
-
-export type AdminComplaintQueueRow = {
-  id: string;
-  parentId: string;
-  parentName: string | null;
-  studentId: string | null;
-  studentName: string | null;
-  category: string;
-  submitterEmail: string;
-  body: string;
-  status: string;
-  responseCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type AdminComplaintQueueResult = {
-  rows: AdminComplaintQueueRow[];
-  totalCount: number;
-};
-
-export type ComplaintMetrics = {
-  unanswered: number;
-  answered: number;
-  avgResolutionHours: number;
-};
+import type {
+  AdminComplaintQueueResult,
+  ComplaintMetrics,
+  ComplaintQueueRowType,
+  ComplaintResponseWithResponderType,
+  ComplaintSelectType,
+  ComplaintSubmitInput,
+  ComplaintWithResponsesType,
+} from "@/backend/types";
+import { type ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
+import type { DBTransaction } from "../db.types";
 
 export namespace ComplaintRepository {
-  export const submitComplaint = async (input: ComplaintSubmitInput, tx?: DBTransaction, locale?: string) => {
+  export const submitComplaint = async (
+    input: ComplaintSubmitInput,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<ComplaintSelectType> => {
     const queryDb = tx ?? db;
     const now = new Date();
 
     const [created] = await queryDb
       .insert(complaints)
       .values({
-        parentId: input.parentId,
-        studentId: input.studentId ?? null,
-        category: input.category,
-        submitterEmail: input.submitterEmail,
-        body: input.body,
+        ...input,
         status: ComplaintStatus.UNANSWERED,
         createdAt: now,
         updatedAt: now,
@@ -64,13 +38,18 @@ export namespace ComplaintRepository {
       throw new Error(t("complaint.createFailed"));
     }
 
-    return created;
+    return {
+      ...created,
+    };
   };
 
-  export const getComplaintsByParent = async (parentId: string, tx?: DBTransaction) => {
+  export const getComplaintsByParent = async (
+    parentId: string,
+    tx?: DBTransaction
+  ): Promise<ComplaintWithResponsesType[]> => {
     const queryDb = tx ?? db;
 
-    return queryDb
+    const results = await queryDb
       .select({
         id: complaints.id,
         parentId: complaints.parentId,
@@ -87,6 +66,20 @@ export namespace ComplaintRepository {
       .leftJoin(students, eq(complaints.studentId, students.id))
       .where(and(eq(complaints.parentId, parentId), isNull(complaints.deletedAt)))
       .orderBy(desc(complaints.createdAt));
+
+    return results.map(r => ({
+      id: r.id,
+      parentId: r.parentId,
+      studentId: r.studentId ?? null,
+      category: r.category as ComplaintCategory,
+      submitterEmail: r.submitterEmail,
+      body: r.body,
+      status: r.status as ComplaintStatus,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+      studentName: r.studentName ?? null,
+      responses: [] as ReadonlyArray<ComplaintResponseWithResponderType>,
+    }));
   };
 
   export const getAdminComplaintQueue = async (
@@ -141,8 +134,23 @@ export namespace ComplaintRepository {
       .leftJoin(users, eq(parents.userId, users.id))
       .where(whereClause);
 
+    const typedRows: ComplaintQueueRowType[] = rows.map(r => ({
+      id: r.id,
+      parentId: r.parentId,
+      studentId: r.studentId ?? null,
+      category: r.category as ComplaintCategory,
+      submitterEmail: r.submitterEmail,
+      body: r.body,
+      status: r.status as ComplaintStatus,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+      parentName: r.parentName ?? null,
+      studentName: r.studentName ?? null,
+      responseCount: r.responseCount,
+    }));
+
     return {
-      rows,
+      rows: typedRows,
       totalCount: totalCount?.count ?? 0,
     };
   };

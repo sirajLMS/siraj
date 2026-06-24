@@ -1,15 +1,6 @@
-import { logger } from "@/backend/lib/logger";
-import { EmailChannel } from "@/backend/services/communication/channels/email.channel";
-import { OnAppChannel } from "@/backend/services/communication/channels/on-app.channel";
-import type { NotificationEventType } from "@/shared/lib/enum";
-
-export interface CommunicationPayload {
-  readonly userId: string;
-  readonly title: string;
-  readonly body: string | null;
-  readonly channel: "on_app" | "email";
-  readonly eventType: NotificationEventType;
-}
+import { logger } from "@/backend/lib";
+import { EmailChannel, OnAppChannel } from "@/backend/services";
+import type { CommunicationPayload } from "@/backend/types";
 
 export namespace CommunicationService {
   export async function dispatch(payload: CommunicationPayload, locale?: string): Promise<void> {

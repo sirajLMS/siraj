@@ -4,34 +4,18 @@ import {
   ParentRepository,
   SoftDeleteRepository,
 } from "@/backend/db/repo";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { CommunicationService } from "@/backend/services/communication/communication.service";
+import { getBackendTranslations, logger } from "@/backend/lib";
+import { CommunicationService, PermissionsService } from "@/backend/services";
 import type {
   AdminComplaintQueueResultType,
+  AdminQueueOptions,
   ComplaintQueueRowType,
   ComplaintSelectType,
   ComplaintWithResponsesType,
+  RespondToComplaintResult,
   SubmitComplaintInputType,
-} from "@/backend/types/communications.types";
+} from "@/backend/types";
 import { AppPermission, NotificationEventType } from "@/shared/lib/enum";
-
-interface RespondToComplaintResult {
-  readonly id: string;
-  readonly complaintId: string;
-  readonly responderUserId: string | null;
-  readonly body: string;
-  readonly emailSent: boolean;
-  readonly createdAt: Date;
-}
-
-interface AdminQueueOptions {
-  readonly limit: number;
-  readonly offset: number;
-  readonly statusFilter?: string | null;
-  readonly search?: string | null;
-}
 
 export namespace ComplaintService {
   export async function submitComplaint(
@@ -104,13 +88,22 @@ export namespace ComplaintService {
 
     try {
       const complaints = await ComplaintRepository.getComplaintsByParent(parent.id);
-
       const results: ComplaintWithResponsesType[] = [];
+
       for (const complaint of complaints) {
         const responses = await ComplaintResponseRepository.getResponsesByComplaint(complaint.id);
         results.push({
-          ...complaint,
-          responses,
+          id: complaint.id,
+          parentId: complaint.parentId,
+          studentId: complaint.studentId,
+          category: complaint.category,
+          submitterEmail: complaint.submitterEmail,
+          body: complaint.body,
+          status: complaint.status,
+          createdAt: complaint.createdAt,
+          updatedAt: complaint.updatedAt,
+          studentName: complaint.studentName,
+          responses: responses,
         });
       }
 

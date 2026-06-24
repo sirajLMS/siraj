@@ -1,21 +1,13 @@
 import { ParentRepository, SuggestionRepository } from "@/backend/db/repo";
-import { getBackendTranslations } from "@/backend/lib/intl";
-import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { CommunicationService } from "@/backend/services/communication/communication.service";
+import { getBackendTranslations, logger } from "@/backend/lib";
+import { CommunicationService, PermissionsService } from "@/backend/services";
 import type {
+  AdminSuggestionOptions,
   AdminSuggestionResultType,
   SubmitSuggestionInputType,
   SuggestionSelectType,
-} from "@/backend/types/communications.types";
+} from "@/backend/types";
 import { AppPermission, NotificationEventType } from "@/shared/lib/enum";
-
-interface AdminSuggestionOptions {
-  readonly limit: number;
-  readonly offset: number;
-  readonly status?: string | null;
-  readonly search?: string | null;
-}
 
 export namespace SuggestionService {
   export async function submitSuggestion(

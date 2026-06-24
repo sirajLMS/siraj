@@ -1,6 +1,6 @@
 import { NotificationRepository } from "@/backend/db/repo";
-import { logger } from "@/backend/lib/logger";
-import type { CommunicationPayload } from "@/backend/services/communication/communication.service";
+import { logger } from "@/backend/lib";
+import type { CommunicationPayload } from "@/backend/types";
 import { NotificationChannel } from "@/shared/lib/enum";
 
 export namespace OnAppChannel {

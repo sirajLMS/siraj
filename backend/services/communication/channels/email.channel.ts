@@ -1,5 +1,5 @@
 import { logger } from "@/backend/lib/logger";
-import type { CommunicationPayload } from "@/backend/services/communication/communication.service";
+import type { CommunicationPayload } from "@/backend/types";
 
 export namespace EmailChannel {
   export async function send(payload: CommunicationPayload, _locale?: string): Promise<void> {

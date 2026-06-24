@@ -2,4 +2,6 @@ export * from "./auth";
 export * from "./email";
 export * from "./enum";
 export * from "./env";
+export * from "./intl";
+export * from "./logger";
 export * from "./phoneNumber";

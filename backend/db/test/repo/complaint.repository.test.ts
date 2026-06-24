@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { ComplaintRepository } from "@/backend/db/repo/complaint.repository";
 import { complaints } from "@/backend/db/schema";
-import { ComplaintStatus } from "@/shared/lib/enum";
+import { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import { createTestParent, createTestStudent, createTestUser } from "../entity-setup";
 import { type DbTransaction, runInRollback } from "../test-utils";
 
@@ -73,7 +73,7 @@ describe("ComplaintRepository — submitComplaint", () => {
       {
         parentId: parent.id,
         studentId: student.id,
-        category: "REGARDING_TEACHER",
+        category: ComplaintCategory.REGARDING_TEACHER,
         submitterEmail: "parent@test.com",
         body: "Teacher was rude",
       },
@@ -99,7 +99,7 @@ describe("ComplaintRepository — submitComplaint", () => {
       {
         parentId: parent.id,
         studentId: null,
-        category: "REGARDING_SYSTEM",
+        category: ComplaintCategory.REGARDING_SYSTEM,
         submitterEmail: "null-stud@test.com",
         body: "System is slow",
       },
@@ -117,7 +117,7 @@ describe("ComplaintRepository — submitComplaint", () => {
     const result = await ComplaintRepository.submitComplaint(
       {
         parentId: parent.id,
-        category: "OTHER",
+        category: ComplaintCategory.OTHER,
         submitterEmail: "no-stud@test.com",
         body: "General feedback",
       },
@@ -133,7 +133,7 @@ describe("ComplaintRepository — submitComplaint", () => {
       ComplaintRepository.submitComplaint(
         {
           parentId: "00000000-0000-0000-0000-000000000000",
-          category: "OTHER",
+          category: ComplaintCategory.OTHER,
           submitterEmail: "bad@test.com",
           body: "Should fail",
         },
@@ -485,7 +485,7 @@ describe("ComplaintRepository — transaction rollback", () => {
       const created = await ComplaintRepository.submitComplaint(
         {
           parentId: parent.id,
-          category: "OTHER",
+          category: ComplaintCategory.OTHER,
           submitterEmail: "rb@test.com",
           body: "Should be rolled back",
         },
