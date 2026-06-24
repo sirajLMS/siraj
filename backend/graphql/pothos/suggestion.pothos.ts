@@ -1,10 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { SuggestionService } from "@/backend/services/communication/suggestion.service";
-import type {
-  AdminSuggestionResultType,
-  SubmitSuggestionInputType,
-  SuggestionSelectType,
-} from "@/backend/types/communications.types";
+import type { AdminSuggestionResultType, SubmitSuggestionInputType, SuggestionSelectType } from "@/backend/types";
 
 export type SuggestionPothosType = SuggestionSelectType & {
   parentName: string;

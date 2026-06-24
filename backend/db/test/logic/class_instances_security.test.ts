@@ -5,9 +5,9 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students } from "@/backend/db/schema";
 import { setupTestEntities } from "@/backend/db/test/entity-setup";
-import type { DBTransaction } from "@/backend/db/test/test-utils";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { getErrorMessage } from "@/shared/utils/error";
+import type { DBTransaction } from "../../db.types";
 
 async function createTestInstance(
   tx: DBTransaction,

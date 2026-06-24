@@ -3,9 +3,10 @@ import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { ParentEntity, StudentEntity, UserEntity } from "../../../types";
+import type { DBTransaction } from "../../db.types";
 import { db } from "../../drizzleDb";
 import { parents, students, users } from "../../schema";
-import { type DBTransaction, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { setupRlsRole, teardownRlsRole } from "../test-utils";
 
 /**
  * Helper to setup common test data for RLS tests

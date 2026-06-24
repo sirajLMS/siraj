@@ -19,18 +19,16 @@ import type {
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
-import type { DBTransaction } from "../test/test-utils";
+import type { DBTransaction } from "../db.types";
 
 export namespace PermissionManagementRepository {
-  type QueryContext = DBTransaction | typeof db;
-
   /**
    * List all permission catalog entries.
    * NOTE: The is_system field for permissions is protected by a database trigger (trg_protect_system_permissions).
    * Creating any new permission with is_system = true or updating an existing custom permission
    * to be a system permission is strictly prohibited by the database schema.
    */
-  export async function listAllPermissions(tx?: QueryContext): Promise<PermissionEntity[]> {
+  export async function listAllPermissions(tx?: DBTransaction): Promise<PermissionEntity[]> {
     try {
       const client = tx ?? db;
       return await client
@@ -46,7 +44,7 @@ export namespace PermissionManagementRepository {
   /**
    * Returns left-joined aggregation of groups and their permissionIds.
    */
-  export async function listAllGroups(tx?: QueryContext): Promise<GroupWithPermissionIds[]> {
+  export async function listAllGroups(tx?: DBTransaction): Promise<GroupWithPermissionIds[]> {
     try {
       const client = tx ?? db;
       const allGroups = await client.select().from(permissionGroups);
@@ -75,7 +73,7 @@ export namespace PermissionManagementRepository {
   /**
    * Returns a group by its ID including its permissionIds.
    */
-  export async function getGroupById(groupId: string, tx?: QueryContext): Promise<GroupWithPermissionIds | null> {
+  export async function getGroupById(groupId: string, tx?: DBTransaction): Promise<GroupWithPermissionIds | null> {
     try {
       const client = tx ?? db;
       const [group] = await client.select().from(permissionGroups).where(eq(permissionGroups.id, groupId)).limit(1);
@@ -104,7 +102,7 @@ export namespace PermissionManagementRepository {
   /**
    * Atomic transaction inserting group + permissions.
    */
-  export async function createGroup(input: CreateGroupInput, tx?: QueryContext): Promise<GroupWithPermissionIds> {
+  export async function createGroup(input: CreateGroupInput, tx?: DBTransaction): Promise<GroupWithPermissionIds> {
     const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
       const now = new Date();
       const [insertedGroup] = await t
@@ -159,7 +157,7 @@ export namespace PermissionManagementRepository {
   export async function updateGroup(
     input: UpdateGroupInput,
     locale?: string,
-    tx?: QueryContext
+    tx?: DBTransaction
   ): Promise<GroupWithPermissionIds> {
     const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
       const [existing] = await t.select().from(permissionGroups).where(eq(permissionGroups.id, input.id)).limit(1);
@@ -229,7 +227,7 @@ export namespace PermissionManagementRepository {
   /**
    * Deletes a permission group. Throws if isSystem.
    */
-  export async function deleteGroup(groupId: string, locale?: string, tx?: QueryContext): Promise<{ id: string }> {
+  export async function deleteGroup(groupId: string, locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
     const run = async (t: DBTransaction): Promise<{ id: string }> => {
       const [existing] = await t.select().from(permissionGroups).where(eq(permissionGroups.id, groupId)).limit(1);
 
@@ -261,7 +259,7 @@ export namespace PermissionManagementRepository {
   /**
    * Returns users currently holding a specific groupId.
    */
-  export async function listUsersInGroup(groupId: string, tx?: QueryContext): Promise<GroupUserEntity[]> {
+  export async function listUsersInGroup(groupId: string, tx?: DBTransaction): Promise<GroupUserEntity[]> {
     try {
       const client = tx ?? db;
       return await client
@@ -286,7 +284,7 @@ export namespace PermissionManagementRepository {
     userIds: string[],
     groupId: string,
     assignedByUserId?: string | null,
-    tx?: QueryContext
+    tx?: DBTransaction
   ): Promise<void> {
     if (userIds.length === 0) return;
 
@@ -320,7 +318,11 @@ export namespace PermissionManagementRepository {
   /**
    * Bulk revokes users from a group. Uses tx.delete().where(inArray()).
    */
-  export async function bulkRevokeUsersFromGroup(userIds: string[], groupId: string, tx?: QueryContext): Promise<void> {
+  export async function bulkRevokeUsersFromGroup(
+    userIds: string[],
+    groupId: string,
+    tx?: DBTransaction
+  ): Promise<void> {
     if (userIds.length === 0) return;
 
     const run = async (t: DBTransaction): Promise<void> => {
@@ -344,7 +346,7 @@ export namespace PermissionManagementRepository {
   /**
    * Returns all explicit GRANTS and DENIES for a single user.
    */
-  export async function getUserOverrides(userId: string, tx?: QueryContext): Promise<UserOverrideEntity[]> {
+  export async function getUserOverrides(userId: string, tx?: DBTransaction): Promise<UserOverrideEntity[]> {
     try {
       const client = tx ?? db;
       return await client.select().from(userPermissionOverrides).where(eq(userPermissionOverrides.userId, userId));
@@ -361,7 +363,7 @@ export namespace PermissionManagementRepository {
     userId: string,
     overrides: UserOverrideInput[],
     assignedByUserId?: string | null,
-    tx?: QueryContext
+    tx?: DBTransaction
   ): Promise<void> {
     const run = async (t: DBTransaction): Promise<void> => {
       await t.delete(userPermissionOverrides).where(eq(userPermissionOverrides.userId, userId));

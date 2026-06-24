@@ -219,12 +219,12 @@ describe("Class Quota System Constraints & Triggers", () => {
 
   test("Prevents concurrent race conditions via Advisory Locks", async () => {
     testLogger.info("Testing concurrent race condition prevention...");
-    
+
     // Generate unique identifiers to prevent conflicts across parallel test runs
     const uniqueSuffix = randomUUID();
     const parentEmail = `parent-race-${uniqueSuffix}@example.com`;
     const teacherEmail = `teacher-race-${uniqueSuffix}@example.com`;
-    
+
     const { student, teacher, parentUser, teacherUser, parent } = await createBaseTestData(db, {
       parentEmail,
       teacherEmail,
@@ -273,7 +273,7 @@ describe("Class Quota System Constraints & Triggers", () => {
 
       // Verify final state in DB has classesRemaining = 0
       await expectStudentQuota(db, student.id, 0);
-      
+
       testLogger.info("Race condition test passed with unique data isolation.");
     } finally {
       // Always clean up created records to prevent interference with other tests

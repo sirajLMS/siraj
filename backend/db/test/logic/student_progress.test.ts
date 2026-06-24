@@ -6,8 +6,9 @@ import { testLogger } from "@/shared/lib/testlogger";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
 import type { ClassInstanceEntity } from "../../../types/scheduling.types";
 import type { StudentProgressSelectType } from "../../../types/student.types";
+import type { DBTransaction } from "../../db.types";
 import { classInstances, parents, studentProgress, students, teacherAssignments, teachers, users } from "../../schema";
-import { type DBTransaction, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 async function setupTestEnvironment(tx: DBTransaction, now: Date) {
   const [userP] = (await tx
