@@ -28,7 +28,8 @@ export type AuditEntityType =
   | "RECURRING_SCHEDULE"
   | "LEAVE_REQUEST"
   | "COMPLAINT"
-  | "LEARNING_RESOURCE";
+  | "LEARNING_RESOURCE"
+  | "SUGGESTION";
 
 /**
  * Action types for audit logs

@@ -23,6 +23,7 @@ import {
   ParentStatus,
   PaymentMethod,
   StudentStatus,
+  SuggestionStatus,
   VacationRequestStatus,
 } from "@/shared/lib/enum";
 import { createPgEnumFromEnum } from "../../utils/db.utils";
@@ -54,6 +55,8 @@ export const paymentMethodEnum = createPgEnumFromEnum("payment_method", PaymentM
 export const complaintCategoryEnum = createPgEnumFromEnum("complaint_category", ComplaintCategory);
 
 export const complaintStatusEnum = createPgEnumFromEnum("complaint_status", ComplaintStatus);
+
+export const suggestionStatusEnum = createPgEnumFromEnum("suggestion_status", SuggestionStatus);
 
 export const leaveRequestStatusEnum = createPgEnumFromEnum("leave_request_status", LeaveRequestStatus);
 

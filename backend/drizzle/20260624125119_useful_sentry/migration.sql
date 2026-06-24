@@ -1,6 +1,6 @@
 CREATE TYPE "account_status" AS ENUM('ACTIVATED', 'DEACTIVATED');--> statement-breakpoint
 CREATE TYPE "app_language" AS ENUM('ar', 'en');--> statement-breakpoint
-CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile', 'schedule.delete_class', 'schedule.clear_weekly', 'staff.edit_profile', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_profile', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'test.system_only', 'test.custom_only');--> statement-breakpoint
+CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile', 'schedule.delete_class', 'schedule.clear_weekly', 'staff.edit_profile', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_profile', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'suggestions.list', 'suggestions.review', 'suggestions.delete', 'test.system_only', 'test.custom_only');--> statement-breakpoint
 CREATE TYPE "class_execution_state" AS ENUM('NOT_ACTIVATED', 'ACTIVATED', 'RUNNING', 'COMPLETED');--> statement-breakpoint
 CREATE TYPE "class_outcome" AS ENUM('PENDING', 'TAKEN', 'ABSENT', 'LEAVE');--> statement-breakpoint
 CREATE TYPE "class_type" AS ENUM('REGULAR', 'TRIAL', 'ADVANCE');--> statement-breakpoint
@@ -15,12 +15,13 @@ CREATE TYPE "invoice_status" AS ENUM('UNPAID', 'PAID');--> statement-breakpoint
 CREATE TYPE "invoice_type" AS ENUM('PER_CLASSES', 'MONTHLY');--> statement-breakpoint
 CREATE TYPE "leave_request_status" AS ENUM('PENDING', 'APPROVED', 'RESCHEDULED', 'CANCELLED');--> statement-breakpoint
 CREATE TYPE "leave_requester_type" AS ENUM('TEACHER', 'PARENT', 'ADMIN');--> statement-breakpoint
-CREATE TYPE "notification_channel" AS ENUM('EMAIL', 'SMS', 'PUSH');--> statement-breakpoint
+CREATE TYPE "notification_channel" AS ENUM('EMAIL', 'SMS', 'PUSH', 'ON_APP');--> statement-breakpoint
 CREATE TYPE "notification_delivery_status" AS ENUM('PENDING', 'SENT', 'DELIVERED', 'OPENED', 'FAILED');--> statement-breakpoint
-CREATE TYPE "notification_event_type" AS ENUM('CLASS_REMINDER', 'INVOICE_GENERATED', 'COMPLAINT_RESPONSE', 'BANKING_DETAILS_CHANGED');--> statement-breakpoint
+CREATE TYPE "notification_event_type" AS ENUM('CLASS_REMINDER', 'INVOICE_GENERATED', 'COMPLAINT_RESPONSE', 'BANKING_DETAILS_CHANGED', 'NEW_COMPLAINT', 'NEW_SUGGESTION', 'SUGGESTION_ACKNOWLEDGED', 'SUGGESTION_DUPLICATE_MARKED');--> statement-breakpoint
 CREATE TYPE "parent_status" AS ENUM('ACTIVATED', 'DEACTIVATED', 'REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL');--> statement-breakpoint
 CREATE TYPE "payment_method" AS ENUM('PAYPAL', 'BANK_ACCOUNT');--> statement-breakpoint
 CREATE TYPE "student_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL', 'DEACTIVATED', 'GRADUATED');--> statement-breakpoint
+CREATE TYPE "suggestion_status" AS ENUM('PENDING', 'REVIEWED', 'DUPLICATE');--> statement-breakpoint
 CREATE TYPE "vacation_request_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');--> statement-breakpoint
 CREATE TABLE "admin_audit_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -198,8 +199,14 @@ CREATE TABLE "suggestions" (
 	"parent_id" uuid NOT NULL,
 	"submitter_name" varchar(255) NOT NULL,
 	"body" text NOT NULL,
+	"status" "suggestion_status" DEFAULT 'PENDING'::"suggestion_status" NOT NULL,
+	"duplicate_of_id" uuid,
+	"admin_response" text,
+	"reviewed_by_user_id" uuid,
+	"reviewed_at" timestamp(3) with time zone,
 	"email_sent_at" timestamp(3) with time zone,
-	"created_at" timestamp(3) with time zone NOT NULL
+	"created_at" timestamp(3) with time zone NOT NULL,
+	"deleted_at" timestamp(3) with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "user_device_tokens" (
@@ -833,6 +840,10 @@ CREATE INDEX "notification_deliveries_channel_idx" ON "notification_deliveries" 
 CREATE INDEX "notification_deliveries_created_at_idx" ON "notification_deliveries" ("created_at");--> statement-breakpoint
 CREATE INDEX "notification_deliveries_provider_message_id_idx" ON "notification_deliveries" ("provider_message_id");--> statement-breakpoint
 CREATE INDEX "suggestions_parent_id_idx" ON "suggestions" ("parent_id");--> statement-breakpoint
+CREATE INDEX "suggestions_status_idx" ON "suggestions" ("status");--> statement-breakpoint
+CREATE INDEX "suggestions_duplicate_of_id_idx" ON "suggestions" ("duplicate_of_id");--> statement-breakpoint
+CREATE INDEX "suggestions_reviewed_by_user_id_idx" ON "suggestions" ("reviewed_by_user_id");--> statement-breakpoint
+CREATE INDEX "suggestions_deleted_at_idx" ON "suggestions" ("deleted_at");--> statement-breakpoint
 CREATE INDEX "user_device_tokens_user_id_idx" ON "user_device_tokens" ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "user_device_tokens_token_unique_idx" ON "user_device_tokens" ("token");--> statement-breakpoint
 CREATE INDEX "user_notification_preferences_user_id_idx" ON "user_notification_preferences" ("user_id");--> statement-breakpoint
@@ -951,6 +962,8 @@ ALTER TABLE "learning_resources" ADD CONSTRAINT "learning_resources_uploaded_by_
 ALTER TABLE "notification_deliveries" ADD CONSTRAINT "notification_deliveries_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "notification_deliveries" ADD CONSTRAINT "notification_deliveries_wsuupd9kUEsX_fkey" FOREIGN KEY ("device_token_id") REFERENCES "user_device_tokens"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_duplicate_of_id_suggestions_id_fkey" FOREIGN KEY ("duplicate_of_id") REFERENCES "suggestions"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_reviewed_by_user_id_users_id_fkey" FOREIGN KEY ("reviewed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "user_device_tokens" ADD CONSTRAINT "user_device_tokens_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "user_notification_preferences" ADD CONSTRAINT "user_notification_preferences_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "parents" ADD CONSTRAINT "parents_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint

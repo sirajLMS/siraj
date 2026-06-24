@@ -14,6 +14,36 @@ $$ LANGUAGE plpgsql STABLE;
 -- Migration: Seed System Permissions and Groups
 -- Auto-generated
 
+-- Story 15: Suggestion Review Workflow — New enum type
+DO $$ BEGIN
+  CREATE TYPE suggestion_status AS ENUM ('PENDING', 'REVIEWED', 'DUPLICATE');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
+-- Story 15: Add ON_APP notification channel
+ALTER TYPE notification_channel ADD VALUE IF NOT EXISTS 'ON_APP';
+
+-- Story 15: Add new notification event types for suggestions and complaints
+ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'NEW_COMPLAINT';
+ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'NEW_SUGGESTION';
+ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'SUGGESTION_ACKNOWLEDGED';
+ALTER TYPE notification_event_type ADD VALUE IF NOT EXISTS 'SUGGESTION_DUPLICATE_MARKED';
+
+-- Story 15: Add new columns to suggestions table
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS status suggestion_status NOT NULL DEFAULT 'PENDING';
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS duplicate_of_id uuid REFERENCES suggestions(id) ON DELETE SET NULL;
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS admin_response text;
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS reviewed_by_user_id uuid REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS reviewed_at timestamptz;
+ALTER TABLE suggestions ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+
+-- Story 15: Add indexes for new suggestions columns
+CREATE INDEX IF NOT EXISTS suggestions_status_idx ON suggestions (status);
+CREATE INDEX IF NOT EXISTS suggestions_duplicate_of_id_idx ON suggestions (duplicate_of_id);
+CREATE INDEX IF NOT EXISTS suggestions_reviewed_by_user_id_idx ON suggestions (reviewed_by_user_id);
+CREATE INDEX IF NOT EXISTS suggestions_deleted_at_idx ON suggestions (deleted_at);
+
 INSERT INTO
     permissions (
         id,
@@ -859,6 +889,34 @@ VALUES (
         'Internal permission allowing the system to dispatch outbound email notifications',
         'System',
         true
+    ),
+    -- Story 15: Suggestion Review Workflow
+    (
+        gen_random_uuid (),
+        'suggestions.list',
+        'suggestions',
+        'list',
+        'List and filter all parent suggestions with review status and duplicate grouping',
+        'Communications',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'suggestions.review',
+        'suggestions',
+        'review',
+        'Review a suggestion: mark as reviewed with admin response or mark as duplicate of another suggestion',
+        'Communications',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'suggestions.delete',
+        'suggestions',
+        'delete',
+        'Soft-delete a suggestion record from the system',
+        'Communications',
+        true
     ) ON CONFLICT (key) DO
 UPDATE
 SET
@@ -1045,7 +1103,10 @@ WHERE
         'support.submit_complaint',
         'support.view_history',
         'communication.submit_suggestion',
-        'system.dispatch_email'
+        'system.dispatch_email',
+        'suggestions.list',
+        'suggestions.review',
+        'suggestions.delete'
     );
 
 INSERT INTO
@@ -1108,7 +1169,9 @@ WHERE
         'parents.create',
         'complaints.list',
         'complaints.delete',
-        'complaints.respond'
+        'complaints.respond',
+        'suggestions.list',
+        'suggestions.review'
     );
 
 INSERT INTO

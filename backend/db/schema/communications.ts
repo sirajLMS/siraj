@@ -6,6 +6,7 @@ import {
   notificationChannelEnum,
   notificationDeliveryStatusEnum,
   notificationEventTypeEnum,
+  suggestionStatusEnum,
 } from "./enums";
 import { parents } from "./parents";
 import { students } from "./students";
@@ -147,6 +148,8 @@ export const complaintResponses = pgTable(
   table => [index("complaint_responses_complaint_id_idx").on(table.complaintId)]
 );
 
+// NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
+// Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
 export const suggestions = pgTable(
   "suggestions",
   {
@@ -156,10 +159,22 @@ export const suggestions = pgTable(
       .references(() => parents.id, { onDelete: "restrict" }),
     submitterName: varchar("submitter_name", { length: 255 }).notNull(),
     body: text("body").notNull(),
+    status: suggestionStatusEnum("status").notNull().default("PENDING"),
+    duplicateOfId: uuid("duplicate_of_id").references(() => suggestions.id, { onDelete: "set null" }),
+    adminResponse: text("admin_response"),
+    reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true, precision: 3 }),
     emailSentAt: timestamp("email_sent_at", { withTimezone: true, precision: 3 }),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
-  table => [index("suggestions_parent_id_idx").on(table.parentId)]
+  table => [
+    index("suggestions_parent_id_idx").on(table.parentId),
+    index("suggestions_status_idx").on(table.status),
+    index("suggestions_duplicate_of_id_idx").on(table.duplicateOfId),
+    index("suggestions_reviewed_by_user_id_idx").on(table.reviewedByUserId),
+    index("suggestions_deleted_at_idx").on(table.deletedAt),
+  ]
 );
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.

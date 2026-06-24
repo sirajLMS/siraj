@@ -35,6 +35,10 @@ export const relations = defineRelations(schema, r => ({
       from: r.users.id,
       to: r.learningResources.uploadedByUserId,
     }),
+    reviewedSuggestions: r.many.suggestions({
+      from: r.users.id,
+      to: r.suggestions.reviewedByUserId,
+    }),
   },
   permissions: {
     groupPermissions: r.many.groupPermissions({
@@ -414,6 +418,18 @@ export const relations = defineRelations(schema, r => ({
     parent: r.one.parents({
       from: r.suggestions.parentId,
       to: r.parents.id,
+    }),
+    duplicateOf: r.one.suggestions({
+      from: r.suggestions.duplicateOfId,
+      to: r.suggestions.id,
+    }),
+    duplicates: r.many.suggestions({
+      from: r.suggestions.id,
+      to: r.suggestions.duplicateOfId,
+    }),
+    reviewedBy: r.one.users({
+      from: r.suggestions.reviewedByUserId,
+      to: r.users.id,
     }),
   },
   learningResources: {

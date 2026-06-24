@@ -7,6 +7,7 @@ import {
   invoices,
   learningResources,
   recurringSchedules,
+  suggestions,
   users,
 } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -37,6 +38,10 @@ const SOFT_DELETE_TABLES = {
   invoices: {
     table: invoices,
     entityType: "INVOICE" as const,
+  },
+  suggestions: {
+    table: suggestions,
+    entityType: "SUGGESTION" as const,
   },
 } as const;
 
@@ -163,6 +168,14 @@ export namespace SoftDeleteRepository {
     tx?: DBTransaction
   ): Promise<Types.SoftDeleteResult<Types.SoftDeletableEntityMap["invoices"]>> => {
     return softDelete({ tableName: "invoices", entityId: invoiceId, actorUserId }, tx);
+  };
+
+  export const softDeleteSuggestion = async (
+    suggestionId: string,
+    actorUserId?: string | null,
+    tx?: DBTransaction
+  ): Promise<Types.SoftDeleteResult<Types.SoftDeletableEntityMap["suggestions"]>> => {
+    return softDelete({ tableName: "suggestions", entityId: suggestionId, actorUserId }, tx);
   };
 
   /**

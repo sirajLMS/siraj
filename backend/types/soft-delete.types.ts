@@ -4,6 +4,7 @@ import type {
   invoices,
   learningResources,
   recurringSchedules,
+  suggestions,
   users,
 } from "@/backend/db/schema";
 import type { AuditEntityType } from "./audit.types";
@@ -14,7 +15,8 @@ export type SoftDeletableTableName =
   | "class_instances"
   | "complaints"
   | "learning_resources"
-  | "invoices";
+  | "invoices"
+  | "suggestions";
 
 export type SoftDeleteInput = {
   tableName: SoftDeletableTableName;
@@ -36,6 +38,7 @@ export type SoftDeletableEntityMap = {
   complaints: typeof complaints.$inferSelect;
   learning_resources: typeof learningResources.$inferSelect;
   invoices: typeof invoices.$inferSelect;
+  suggestions: typeof suggestions.$inferSelect;
 };
 
 export type SoftDeletableAuditEntityMap = {
@@ -45,4 +48,5 @@ export type SoftDeletableAuditEntityMap = {
   complaints: Extract<AuditEntityType, "COMPLAINT">;
   learning_resources: Extract<AuditEntityType, "LEARNING_RESOURCE">;
   invoices: Extract<AuditEntityType, "INVOICE">;
+  suggestions: Extract<AuditEntityType, "SUGGESTION">;
 };

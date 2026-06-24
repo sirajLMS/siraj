@@ -87,6 +87,12 @@ export enum ComplaintStatus {
   ANSWERED = "ANSWERED",
 }
 
+export enum SuggestionStatus {
+  PENDING = "PENDING",
+  REVIEWED = "REVIEWED",
+  DUPLICATE = "DUPLICATE",
+}
+
 export enum LeaveRequestStatus {
   PENDING = "PENDING",
   APPROVED = "APPROVED",
@@ -137,6 +143,8 @@ export enum NotificationEventType {
   BANKING_DETAILS_CHANGED = "BANKING_DETAILS_CHANGED",
   NEW_COMPLAINT = "NEW_COMPLAINT",
   NEW_SUGGESTION = "NEW_SUGGESTION",
+  SUGGESTION_ACKNOWLEDGED = "SUGGESTION_ACKNOWLEDGED",
+  SUGGESTION_DUPLICATE_MARKED = "SUGGESTION_DUPLICATE_MARKED",
 }
 
 export enum NotificationDeliveryStatus {
@@ -504,6 +512,9 @@ export enum AppPermission {
   SYSTEM_PROCESS_STUDENT_LEAVE = "system.process_student_leave",
   // System-Level Resource Access Restriction
   SYSTEM_RESTRICT_RESOURCE_ACCESS = "system.restrict_resource_access",
+  SUGGESTIONS_LIST = "suggestions.list",
+  SUGGESTIONS_REVIEW = "suggestions.review",
+  SUGGESTIONS_DELETE = "suggestions.delete",
   TEST_SYSTEM_ONLY = "test.system_only",
   TEST_CUSTOM_ONLY = "test.custom_only",
 }
