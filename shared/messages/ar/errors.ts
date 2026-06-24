@@ -87,6 +87,13 @@ export const errors: ErrorsLabels = {
   resourceDeleteFailed: "فشل حذف المورد التعليمي",
   permissionDenied: "ليس لديك صلاحية لتنفيذ هذا الإجراء.",
   insufficientPrivilege: "ليس لديك صلاحية كافية لتعديل حسابات المسؤولين.",
+  complaintSubmitFailed: "فشل في إرسال الشكوى",
+  complaintAlreadyAnswered: "تم الرد على هذه الشكوى بالفعل",
+  complaintResponseFailed: "فشل في إرسال الرد على الشكوى",
+  complaintUnauthorized: "غير مصرح لك بتنفيذ هذا الإجراء",
+  suggestionSubmitFailed: "فشل في إرسال الاقتراح",
+  suggestionNotFound: "الاقتراح غير موجود",
+  suggestionAlreadyReviewed: "تمت مراجعة هذا الاقتراح بالفعل",
   teacher: {
     alreadyExists: "الملف التدريسي لهذا المستخدم موجود بالفعل.",
     invalidTimezone: "المنطقة الزمنية غير صالحة.",

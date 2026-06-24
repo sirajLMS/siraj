@@ -20,7 +20,7 @@ export type UserEntityInput = typeof users.$inferInsert;
 
 export type SafeUser = Omit<UserEntity, "password" | "rememberTokenHash" | "deletedAt">;
 
-// TODO: role field exists on PermissionsService.getUserContext() and DashboardLayout — needs cleanup (see .ai/todo/fix-user-role.md)
+// Note: role field exists on PermissionsService.getUserContext() and DashboardLayout — needs cleanup (see .ai/task-files/fix-user-role.md)
 export type CurrentUserProfile = SafeUser & {
   permissions: AppPermission[];
   notificationCount: number;

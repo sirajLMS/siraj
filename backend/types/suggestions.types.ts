@@ -53,3 +53,8 @@ export type ParentSuggestionOptions = {
   readonly limit: number;
   readonly offset: number;
 };
+
+export type SubmitSuggestionInputType = {
+  readonly submitterName: string;
+  readonly body: string;
+};

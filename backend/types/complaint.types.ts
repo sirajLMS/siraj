@@ -72,3 +72,9 @@ export type ComplaintFileReturnType = {
   usageType: string;
   createdAt: Date;
 };
+
+export type FileMetadata = {
+  readonly path: string;
+  readonly mimeType: string;
+  readonly sizeBytes: number;
+};

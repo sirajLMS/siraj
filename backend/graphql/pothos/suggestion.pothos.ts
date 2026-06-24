@@ -1,6 +1,7 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { SuggestionService } from "@/backend/services/communication/suggestion.service";
-import type { AdminSuggestionResultType, SubmitSuggestionInputType, SuggestionSelectType } from "@/backend/types";
+import type { SubmitSuggestionInputType, SuggestionQueueResult, SuggestionSelectType } from "@/backend/types";
+import type { SuggestionStatus } from "@/shared/lib/enum";
 
 export type SuggestionPothosType = SuggestionSelectType & {
   parentName: string;
@@ -102,30 +103,30 @@ gqlSchemaBuilder.queryField("adminSuggestions", t =>
         throw new Error("unauthenticated");
       }
 
-      const result: AdminSuggestionResultType = await SuggestionService.getAdminSuggestions(
+      const result: SuggestionQueueResult = await SuggestionService.getAdminSuggestions(
         ctx.user.id,
         {
           limit: args.filter.limit,
           offset: args.filter.offset,
-          status: args.filter.status ?? null,
+          status: (args.filter.status as SuggestionStatus | null) ?? null,
           search: args.filter.search ?? null,
         },
         ctx.locale
       );
 
       return {
-        id: "admin-suggestion-result",
+        id: result.id,
         rows: result.suggestions.map((s: SuggestionSelectType) => ({
           ...s,
           parentName: "",
         })),
         metrics: {
-          id: "suggestion-metrics",
-          pending: result.pendingCount,
-          reviewed: result.reviewedCount,
+          id: result.metrics.id,
+          pending: result.metrics.pending,
+          reviewed: result.metrics.reviewed,
           avgResponseTime: null,
         },
-        totalCount: result.totalCount,
+        totalCount: result.metrics.totalCount,
       };
     },
   })

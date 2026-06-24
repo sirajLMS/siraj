@@ -2,9 +2,10 @@ import { ParentRepository, SuggestionRepository } from "@/backend/db/repo";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type {
-  AdminSuggestionOptions,
-  AdminSuggestionResultType,
   SubmitSuggestionInputType,
+  SuggestionQueueFilter,
+  SuggestionQueueResult,
+  SuggestionReturnType,
   SuggestionSelectType,
 } from "@/backend/types";
 import { AppPermission, NotificationEventType } from "@/shared/lib/enum";
@@ -67,9 +68,9 @@ export namespace SuggestionService {
 
   export async function getAdminSuggestions(
     actorUserId: string,
-    options: AdminSuggestionOptions,
+    options: SuggestionQueueFilter,
     locale?: string
-  ): Promise<AdminSuggestionResultType> {
+  ): Promise<SuggestionQueueResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -77,18 +78,25 @@ export namespace SuggestionService {
     }
 
     try {
-      const result = await SuggestionRepository.getSuggestionsForAdmin({
+      const result = await SuggestionRepository.getAdminSuggestionQueue({
         limit: options.limit,
         offset: options.offset,
         status: options.status ?? null,
         search: options.search ?? null,
       });
 
+      const metrics = await SuggestionRepository.getSuggestionMetrics();
+
       return {
-        suggestions: result.rows,
-        totalCount: result.totalCount,
-        pendingCount: 0,
-        reviewedCount: 0,
+        id: "admin-suggestion-result",
+        suggestions: result.rows as unknown as SuggestionReturnType[],
+        metrics: {
+          id: "suggestion-metrics",
+          pending: metrics.pending,
+          reviewed: metrics.reviewed,
+          duplicate: metrics.duplicate,
+          totalCount: result.totalCount,
+        },
       };
     } catch (error) {
       logger.error("Failed to get admin suggestions", { actorUserId, options, error });
@@ -108,7 +116,14 @@ export namespace SuggestionService {
     }
 
     try {
-      const updated = await SuggestionRepository.markSuggestionReviewed(suggestionId, undefined, locale);
+      const updated = await SuggestionRepository.markSuggestionReviewed(
+        {
+          suggestionId,
+          reviewedByUserId: actorUserId,
+        },
+        undefined,
+        locale
+      );
 
       logger.info("Suggestion marked as reviewed", {
         actorUserId,

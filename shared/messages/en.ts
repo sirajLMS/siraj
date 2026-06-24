@@ -112,6 +112,13 @@ const en: MessageSchema = {
     resourceDeleteFailed: "Failed to delete learning resource",
     permissionDenied: "You do not have permission to perform this action.",
     insufficientPrivilege: "You do not have sufficient privilege to edit administrative accounts.",
+    complaintSubmitFailed: "Failed to submit complaint",
+    complaintAlreadyAnswered: "This complaint has already been answered",
+    complaintResponseFailed: "Failed to submit complaint response",
+    complaintUnauthorized: "You are not authorized to perform this action",
+    suggestionSubmitFailed: "Failed to submit suggestion",
+    suggestionNotFound: "Suggestion not found",
+    suggestionAlreadyReviewed: "This suggestion has already been reviewed",
     teacher: {
       alreadyExists: "A teacher profile for this user already exists.",
       invalidTimezone: "The provided timezone is not valid.",

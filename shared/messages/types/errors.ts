@@ -83,6 +83,13 @@ export interface ErrorsLabels {
   readonly resourceDeleteFailed: string;
   readonly permissionDenied: string;
   readonly insufficientPrivilege: string;
+  readonly complaintSubmitFailed: string;
+  readonly complaintAlreadyAnswered: string;
+  readonly complaintResponseFailed: string;
+  readonly complaintUnauthorized: string;
+  readonly suggestionSubmitFailed: string;
+  readonly suggestionNotFound: string;
+  readonly suggestionAlreadyReviewed: string;
   readonly teacher: {
     readonly alreadyExists: string;
     readonly invalidTimezone: string;
