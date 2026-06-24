@@ -4,9 +4,7 @@ import type { SuggestionStatus } from "@/shared/lib/enum";
 export type SuggestionSelectType = typeof suggestions.$inferSelect;
 export type SuggestionInsertType = typeof suggestions.$inferInsert;
 
-export type SuggestionReturnType = Omit<SuggestionSelectType,
-  | "deletedAt"
-> & {
+export type SuggestionReturnType = Omit<SuggestionSelectType, "deletedAt"> & {
   status: SuggestionStatus;
   parentName?: string | null;
   reviewedByUserName?: string | null;
@@ -17,13 +15,7 @@ export type SuggestionReturnType = Omit<SuggestionSelectType,
 
 export type SuggestionSubmitInput = Omit<
   SuggestionInsertType,
-  | "status"
-  | "createdAt"
-  | "deletedAt"
-  | "reviewedAt"
-  | "reviewedByUserId"
-  | "duplicateOfId"
-  | "parentId"
+  "status" | "createdAt" | "deletedAt" | "reviewedAt" | "reviewedByUserId" | "duplicateOfId"
 >;
 
 export type SuggestionQueueFilter = {

@@ -64,3 +64,11 @@ export type ComplaintQueueResult = {
   complaints: ReadonlyArray<ComplaintReturnType>;
   metrics: ComplaintMetrics;
 };
+
+export type ComplaintFileReturnType = {
+  fileId: string;
+  filePath: string;
+  isProtected: boolean;
+  usageType: string;
+  createdAt: Date;
+};

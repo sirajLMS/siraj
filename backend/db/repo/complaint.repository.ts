@@ -1,8 +1,9 @@
 import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { complaints, parents, students, users } from "@/backend/db/schema";
+import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
+  ComplaintFileReturnType,
   ComplaintMetrics,
   ComplaintQueueResult,
   ComplaintResponse,
@@ -249,5 +250,25 @@ export namespace ComplaintRepository {
       .where(and(eq(complaints.status, ComplaintStatus.UNANSWERED), isNull(complaints.deletedAt)))
       .orderBy(desc(complaints.createdAt))
       .limit(limit);
+  };
+
+  export const getComplaintFiles = async (
+    complaintId: string,
+    tx?: DBTransaction
+  ): Promise<ComplaintFileReturnType[]> => {
+    const queryDb = tx ?? db;
+
+    return queryDb
+      .select({
+        fileId: storageFiles.id,
+        filePath: storageFiles.path,
+        isProtected: storageFiles.isProtected,
+        usageType: complaintFiles.usageType,
+        createdAt: complaintFiles.createdAt,
+      })
+      .from(complaintFiles)
+      .innerJoin(storageFiles, eq(complaintFiles.fileId, storageFiles.id))
+      .where(eq(complaintFiles.complaintId, complaintId))
+      .orderBy(desc(complaintFiles.createdAt));
   };
 }

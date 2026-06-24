@@ -1,9 +1,22 @@
-import { and, count, eq, gte, lte, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { notificationDeliveries, userDeviceTokens } from "@/backend/db/schema";
+import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type * as Types from "@/backend/types";
-import { NotificationDeliveryStatus } from "@/shared/lib/enum";
+import type {
+  CreateNotificationDeliveryInput,
+  NotificationDeliveryAnalyticsFilter,
+  NotificationDeliveryAnalyticsResult,
+  NotificationDeliverySelectType,
+  NotificationDeliveryStatusCount,
+  UpdateDeliveryStatusInput,
+  UserDeliveryHistoryResult,
+} from "@/backend/types/notificationDeliveries.types";
+import type { RegisterDeviceTokenInput, UserDeviceTokenSelectType } from "@/backend/types/userDeviceTokens.types";
+import type {
+  SetNotificationPreferenceInput,
+  UserNotificationPreferenceSelectType,
+} from "@/backend/types/userNotificationPreferences.types";
+import { NotificationChannel, NotificationDeliveryStatus, type NotificationEventType } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {
@@ -50,7 +63,7 @@ export namespace NotificationRepository {
   function buildStatusTimestamps(
     status: NotificationDeliveryStatus,
     now: Date
-  ): Pick<Types.NotificationDeliverySelectType, "sentAt" | "deliveredAt" | "openedAt" | "failedAt"> {
+  ): Pick<NotificationDeliverySelectType, "sentAt" | "deliveredAt" | "openedAt" | "failedAt"> {
     switch (status) {
       case NotificationDeliveryStatus.SENT:
         return { sentAt: now, deliveredAt: null, openedAt: null, failedAt: null };
@@ -66,9 +79,9 @@ export namespace NotificationRepository {
   }
 
   export const registerDeviceToken = async (
-    input: Types.RegisterDeviceTokenInput,
+    input: RegisterDeviceTokenInput,
     tx?: DBTransaction
-  ): Promise<Types.UserDeviceTokenSelectType> => {
+  ): Promise<UserDeviceTokenSelectType> => {
     const runner = async (t: DBTransaction) => {
       await acquireDeviceTokenLock(t, input.userId);
       const now = new Date();
@@ -108,7 +121,7 @@ export namespace NotificationRepository {
     userId: string,
     token: string,
     tx?: DBTransaction
-  ): Promise<Types.UserDeviceTokenSelectType | null> => {
+  ): Promise<UserDeviceTokenSelectType | null> => {
     const runner = async (t: DBTransaction) => {
       await acquireDeviceTokenLock(t, userId);
       const now = new Date();
@@ -131,7 +144,7 @@ export namespace NotificationRepository {
   export const getActiveDeviceTokensForUser = async (
     userId: string,
     tx?: DBTransaction
-  ): Promise<Types.UserDeviceTokenSelectType[]> => {
+  ): Promise<UserDeviceTokenSelectType[]> => {
     const t = tx ?? db;
     return t
       .select()
@@ -140,9 +153,9 @@ export namespace NotificationRepository {
   };
 
   export const createDelivery = async (
-    input: Types.CreateNotificationDeliveryInput,
+    input: CreateNotificationDeliveryInput,
     tx?: DBTransaction
-  ): Promise<Types.NotificationDeliverySelectType> => {
+  ): Promise<NotificationDeliverySelectType> => {
     const runner = async (t: DBTransaction) => {
       const now = new Date();
 
@@ -168,10 +181,10 @@ export namespace NotificationRepository {
   };
 
   export const updateDeliveryStatus = async (
-    input: Types.UpdateDeliveryStatusInput,
+    input: UpdateDeliveryStatusInput,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<Types.NotificationDeliverySelectType> => {
+  ): Promise<NotificationDeliverySelectType> => {
     const runner = async (t: DBTransaction) => {
       await acquireDeliveryLock(t, input.deliveryId);
       const now = new Date();
@@ -219,7 +232,7 @@ export namespace NotificationRepository {
     webhookPayload?: Record<string, unknown> | null,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<Types.NotificationDeliverySelectType> => {
+  ): Promise<NotificationDeliverySelectType> => {
     return updateDeliveryStatus(
       {
         deliveryId,
@@ -234,7 +247,7 @@ export namespace NotificationRepository {
   export const getDeliveryByProviderMessageId = async (
     providerMessageId: string,
     tx?: DBTransaction
-  ): Promise<Types.NotificationDeliverySelectType | null> => {
+  ): Promise<NotificationDeliverySelectType | null> => {
     const t = tx ?? db;
     const results = await t
       .select()
@@ -262,7 +275,7 @@ export namespace NotificationRepository {
     input: DeliveryWebhookInput,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<Types.NotificationDeliverySelectType> => {
+  ): Promise<NotificationDeliverySelectType> => {
     const { providerMessageId, status, webhookPayload, failureReason } = input;
 
     const runner = async (t: DBTransaction) => {
@@ -289,9 +302,9 @@ export namespace NotificationRepository {
   };
 
   export const getDeliveryAnalytics = async (
-    filters: Types.NotificationDeliveryAnalyticsFilter = {},
+    filters: NotificationDeliveryAnalyticsFilter = {},
     tx?: DBTransaction
-  ): Promise<Types.NotificationDeliveryAnalyticsResult> => {
+  ): Promise<NotificationDeliveryAnalyticsResult> => {
     const t = tx ?? db;
     const conditions = [];
 
@@ -327,7 +340,7 @@ export namespace NotificationRepository {
       .where(whereClause)
       .groupBy(notificationDeliveries.status);
 
-    const normalizedStatusCounts: Types.NotificationDeliveryStatusCount[] = statusCounts.map(row => ({
+    const normalizedStatusCounts: NotificationDeliveryStatusCount[] = statusCounts.map(row => ({
       status: row.status as NotificationDeliveryStatus,
       count: row.count,
     }));
@@ -342,6 +355,150 @@ export namespace NotificationRepository {
       statusCounts: normalizedStatusCounts,
       openRate: totalDeliveries === 0 ? 0 : openedCount / totalDeliveries,
       failureRate: totalDeliveries === 0 ? 0 : failedCount / totalDeliveries,
+    };
+  };
+
+  export const getPreference = async (
+    userId: string,
+    channel: NotificationChannel,
+    eventType: NotificationEventType,
+    tx?: DBTransaction
+  ): Promise<UserNotificationPreferenceSelectType | null> => {
+    const queryDb = tx ?? db;
+
+    const results = await queryDb
+      .select()
+      .from(userNotificationPreferences)
+      .where(
+        and(
+          eq(userNotificationPreferences.userId, userId),
+          eq(userNotificationPreferences.channel, channel),
+          eq(userNotificationPreferences.eventType, eventType)
+        )
+      )
+      .limit(1);
+
+    return results[0] ?? null;
+  };
+
+  export const setPreference = async (
+    input: SetNotificationPreferenceInput,
+    tx?: DBTransaction
+  ): Promise<UserNotificationPreferenceSelectType> => {
+    const runner = async (t: DBTransaction) => {
+      await t.execute(
+        sql`SELECT pg_advisory_xact_lock(hashtext('notification_pref_' || ${input.userId}::text || '_' || ${input.channel}::text || '_' || ${input.eventType}::text))`
+      );
+
+      const now = new Date();
+
+      const [result] = await t
+        .insert(userNotificationPreferences)
+        .values({
+          userId: input.userId,
+          channel: input.channel,
+          eventType: input.eventType,
+          enabled: input.enabled,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: [
+            userNotificationPreferences.userId,
+            userNotificationPreferences.channel,
+            userNotificationPreferences.eventType,
+          ],
+          set: {
+            enabled: input.enabled,
+            updatedAt: now,
+          },
+        })
+        .returning();
+
+      return result;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  export const createDeliveriesBatch = async (
+    inputs: CreateNotificationDeliveryInput[],
+    tx?: DBTransaction
+  ): Promise<NotificationDeliverySelectType[]> => {
+    const runner = async (t: DBTransaction) => {
+      const now = new Date();
+
+      const values = inputs.map(input => ({
+        userId: input.userId,
+        deviceTokenId: input.deviceTokenId ?? null,
+        channel: input.channel,
+        eventType: input.eventType,
+        status: NotificationDeliveryStatus.PENDING,
+        title: input.title ?? null,
+        body: input.body ?? null,
+        createdAt: now,
+        updatedAt: now,
+      }));
+
+      const created = await t.insert(notificationDeliveries).values(values).returning();
+
+      return created;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  export const getSmsCountInLastHour = async (userId: string, tx?: DBTransaction): Promise<number> => {
+    const queryDb = tx ?? db;
+
+    const [result] = await queryDb
+      .select({
+        count: sql<number>`COUNT(*)`.mapWith(Number),
+      })
+      .from(notificationDeliveries)
+      .where(
+        and(
+          eq(notificationDeliveries.userId, userId),
+          eq(notificationDeliveries.channel, NotificationChannel.SMS),
+          gt(notificationDeliveries.createdAt, sql`NOW() - INTERVAL '1 hour'`)
+        )
+      );
+
+    return result?.count ?? 0;
+  };
+
+  export const getDeliveriesByUser = async (
+    userId: string,
+    options: { limit: number; offset: number; channel?: NotificationChannel; eventType?: NotificationEventType },
+    tx?: DBTransaction
+  ): Promise<UserDeliveryHistoryResult> => {
+    const queryDb = tx ?? db;
+
+    const conditions = [eq(notificationDeliveries.userId, userId)];
+
+    if (options.channel) {
+      conditions.push(eq(notificationDeliveries.channel, options.channel));
+    }
+
+    if (options.eventType) {
+      conditions.push(eq(notificationDeliveries.eventType, options.eventType));
+    }
+
+    const whereClause = and(...conditions);
+
+    const rows = await queryDb
+      .select()
+      .from(notificationDeliveries)
+      .where(whereClause)
+      .orderBy(desc(notificationDeliveries.createdAt))
+      .limit(options.limit)
+      .offset(options.offset);
+
+    const [totalCount] = await queryDb.select({ count: count() }).from(notificationDeliveries).where(whereClause);
+
+    return {
+      rows,
+      totalCount: totalCount?.count ?? 0,
     };
   };
 }

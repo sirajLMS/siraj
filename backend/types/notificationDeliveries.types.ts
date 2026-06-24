@@ -39,3 +39,8 @@ export type NotificationDeliveryAnalyticsFilter = {
   startDate?: Date;
   endDate?: Date;
 };
+
+export type UserDeliveryHistoryResult = {
+  rows: NotificationDeliverySelectType[];
+  totalCount: number;
+};
