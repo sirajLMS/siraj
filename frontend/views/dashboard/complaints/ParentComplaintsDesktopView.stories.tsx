@@ -1,0 +1,173 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { Meta, StoryObj } from "@storybook/react";
+import { useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
+import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useUserStore as useMockUserStore } from "@/frontend/stores/mockUserStore";
+import { useUserStore } from "@/frontend/stores/userStore";
+import { logger } from "@/frontend/utils/logger";
+import { ParentComplaintsDesktopView } from "./ParentComplaintsDesktopView";
+import type { ComplaintFormData } from "./schemas/complaintFormSchema";
+import { complaintFormSchema } from "./schemas/complaintFormSchema";
+import type { ParentComplaintRecord, ParentStudentOption } from "./types/complaints.types";
+import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
+
+const MOCK_PARENT_COMPLAINTS: readonly ParentComplaintRecord[] = [
+  {
+    id: "rec-1001",
+    regarding: "Tuition Fee Processing",
+    summary: "The online payment portal is not reflecting the scholarship discount for Semester 2.",
+    status: ComplaintStatus.Answered,
+    adminResponse: {
+      text: "We have updated the ledger to reflect the 15% academic scholarship. Please refresh your portal; the balance should now be correct.",
+      answeredAt: "Oct 24, 2023 • 10:15 AM",
+    },
+  },
+  {
+    id: "rec-1002",
+    regarding: "Transportation Service",
+    summary: "Bus #42 was delayed by 30 minutes this morning without notification.",
+    status: ComplaintStatus.Unanswered,
+  },
+  {
+    id: "rec-1003",
+    regarding: "Grade Discrepancy",
+    summary: "Mathematics mid-term score shows 78, but the physical script has 87.",
+    status: ComplaintStatus.Answered,
+    adminResponse: {
+      text: "This was a clerical error during data entry. The system has been updated to reflect the correct score of 87. Apologies for the confusion.",
+      answeredAt: "Sep 12, 2023 • 02:45 PM",
+    },
+  },
+];
+
+const MOCK_STUDENT_OPTIONS: readonly ParentStudentOption[] = [
+  { id: "stu-zaid", label: "Zaid Ahmad (Grade 4-B)" },
+  { id: "stu-ayesha", label: "Ayesha Ahmad (Grade 1-A)" },
+];
+
+const PARENT_PERMISSIONS = [AppPermission.SupportSubmitComplaint, AppPermission.SupportViewHistory];
+
+const mockActions = {
+  onDismissSuccess: () => {
+    logger.info("onDismissSuccess");
+  },
+  onFormSubmit: () => {
+    logger.info("onFormSubmit");
+  },
+  onLoadOlderRecords: () => {
+    logger.info("onLoadOlderRecords");
+  },
+};
+
+interface ParentComplaintsDesktopStoryProps {
+  readonly records: readonly ParentComplaintRecord[];
+  readonly studentOptions: readonly ParentStudentOption[];
+  readonly hasOlderRecords: boolean;
+  readonly isSubmitting: boolean;
+  readonly showSuccess: boolean;
+  readonly canSubmit: boolean;
+}
+
+function ParentComplaintsDesktopStoryRenderer({
+  records,
+  studentOptions,
+  hasOlderRecords,
+  isSubmitting,
+  showSuccess,
+  canSubmit,
+}: Readonly<ParentComplaintsDesktopStoryProps>) {
+  const t = useTranslations("dashboard.complaints");
+  const labels = buildComplaintsLabels(t).parent;
+  const {
+    control,
+    formState: { errors },
+  } = useForm<ComplaintFormData>({
+    resolver: zodResolver(complaintFormSchema(labels.validation)),
+    defaultValues: {
+      studentId: "",
+      contactEmail: "",
+      complaintDetails: "",
+    },
+  });
+
+  return (
+    <ParentComplaintsDesktopView
+      labels={labels}
+      records={records}
+      studentOptions={studentOptions}
+      hasOlderRecords={hasOlderRecords}
+      control={control}
+      errors={errors}
+      isSubmitting={isSubmitting}
+      showSuccess={showSuccess}
+      canSubmit={canSubmit}
+      {...mockActions}
+    />
+  );
+}
+
+const meta: Meta<typeof ParentComplaintsDesktopStoryRenderer> = {
+  title: "Views/dashboard/complaints/ParentComplaintsDesktopView",
+  component: ParentComplaintsDesktopStoryRenderer,
+  tags: ["autodocs"],
+  parameters: {
+    layout: "fullscreen",
+  },
+  decorators: [
+    Story => {
+      const mockUser = {
+        id: "mock-parent-id",
+        name: "Sarah Jenkins",
+        role: "Parent",
+        avatarUrl: "",
+        permissions: PARENT_PERMISSIONS,
+        notificationCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        emailVerifiedAt: new Date().toISOString(),
+        email: "sarah.j@example.com",
+        __typename: "User" as const,
+      };
+      useUserStore.setState({ permissions: PARENT_PERMISSIONS, user: mockUser });
+      useMockUserStore.setState({ permissions: PARENT_PERMISSIONS, user: mockUser });
+      return <Story />;
+    },
+  ],
+};
+
+export default meta;
+type Story = StoryObj<typeof ParentComplaintsDesktopStoryRenderer>;
+
+export const Default: Story = {
+  args: {
+    records: MOCK_PARENT_COMPLAINTS,
+    studentOptions: MOCK_STUDENT_OPTIONS,
+    hasOlderRecords: true,
+    isSubmitting: false,
+    showSuccess: false,
+    canSubmit: true,
+  },
+};
+
+export const Empty: Story = {
+  args: {
+    ...Default.args,
+    records: [],
+    hasOlderRecords: false,
+  },
+};
+
+export const Submitting: Story = {
+  args: {
+    ...Default.args,
+    isSubmitting: true,
+  },
+};
+
+export const Success: Story = {
+  args: {
+    ...Default.args,
+    showSuccess: true,
+  },
+};
