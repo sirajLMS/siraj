@@ -1,4 +1,4 @@
-import { and, count, desc, eq, ilike, isNull, ne, sql } from "drizzle-orm";
+import { aliasedTable, and, count, desc, eq, ilike, isNull, ne, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -36,7 +36,7 @@ export namespace SuggestionRepository {
   ): Promise<SuggestionReturnType[]> => {
     const queryDb = tx ?? db;
 
-    const dupSuggestions = suggestions;
+    const dupSuggestions = aliasedTable(suggestions, "dup_suggestions");
 
     const rows = await queryDb
       .select({
@@ -90,7 +90,7 @@ export namespace SuggestionRepository {
   ): Promise<AdminSuggestionQueueResult> => {
     const queryDb = tx ?? db;
 
-    const dupSuggestions = suggestions;
+    const dupSuggestions = aliasedTable(suggestions, "dup_suggestions");
 
     const conditions = [isNull(suggestions.deletedAt)];
 
@@ -167,8 +167,8 @@ export namespace SuggestionRepository {
   ): Promise<SuggestionDetailRow | null> => {
     const queryDb = tx ?? db;
 
-    const dupSuggestions = suggestions;
-    const reviewerUsers = users;
+    const dupSuggestions = aliasedTable(suggestions, "dup_suggestions");
+    const reviewerUsers = aliasedTable(users, "reviewer_users");
 
     const results = await queryDb
       .select({

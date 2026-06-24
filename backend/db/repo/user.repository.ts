@@ -6,7 +6,13 @@ import { users } from "@/backend/db/schema";
 import { PaginationArgsDefault } from "@/backend/graphql/pothos";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
-import type { PaginatedUsersResponseSelectType, PaginationArgs, UserCreateInput, UserEntity } from "@/backend/types";
+import type {
+  PaginatedUsersResponseSelectType,
+  PaginationArgs,
+  SafeUser,
+  UserCreateInput,
+  UserEntity,
+} from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 import type { DBTransaction } from "../db.types";
 
@@ -40,6 +46,32 @@ export namespace UserRepository {
 
   export const findById = async (id: string): Promise<UserEntity | null> => {
     return findOne(eq(users.id, id));
+  };
+
+  export const findSafeById = async (id: string): Promise<SafeUser | null> => {
+    try {
+      const results = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          emailVerifiedAt: users.emailVerifiedAt,
+          avatarFilePath: users.avatarFilePath,
+          avatarUrl: users.avatarUrl,
+          isActive: users.isActive,
+          isSuperAdmin: users.isSuperAdmin,
+          lastLoginAt: users.lastLoginAt,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        })
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1);
+      return results[0] ?? null;
+    } catch (error) {
+      logger.error("Error finding safe user by id:", error);
+      return null;
+    }
   };
 
   export const findByEmail = async (email: string): Promise<UserEntity | null> => {

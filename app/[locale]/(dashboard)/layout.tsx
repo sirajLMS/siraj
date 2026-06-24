@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { DashboardLayoutContainer } from "@/frontend/views/dashboard/components/DashboardLayoutContainer";
 
@@ -18,7 +19,7 @@ export default async function DashboardLayout({
     redirect(`/${locale}/login`);
   }
 
-  // We verified access server-side.
-  // Pass user info if we want, but currently DashboardLayoutContainer fetches via Apollo `useQuery(meQueryDocument)` client-side.
-  return <DashboardLayoutContainer>{children}</DashboardLayoutContainer>;
+  const userProfile = await getCurrentUser(userId);
+
+  return <DashboardLayoutContainer userProfile={userProfile}>{children}</DashboardLayoutContainer>;
 }

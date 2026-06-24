@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ComplaintRepository } from "@/backend/db/repo";
-import { complaints } from "@/backend/db/schema";
+import { complaintFiles, complaints, storageFiles } from "@/backend/db/schema";
 import { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import { createTestParent, createTestStudent, createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
@@ -64,6 +64,17 @@ async function insertComplaint(
     })
     .returning();
   return created;
+}
+
+async function insertStorageFile(tx: DBTransaction, filePath: string) {
+  const [file] = await tx
+    .insert(storageFiles)
+    .values({
+      path: filePath,
+      isProtected: false,
+    })
+    .returning();
+  return file;
 }
 
 describe("ComplaintRepository — submitComplaint", () => {
@@ -443,6 +454,73 @@ describe("ComplaintRepository — getUnansweredComplaints", () => {
   });
 });
 
+describe("ComplaintRepository — getComplaintFiles", () => {
+  complaintTest("returns files with storage file details for a complaint", async tx => {
+    const { parent } = await setupParentWithStudent(tx, "FileGet");
+
+    const complaint = await insertComplaint(tx, parent.id, { body: "Complaint with files" });
+
+    const file1 = await insertStorageFile(tx, `complaints/test-file-1-${randomUUID()}.pdf`);
+    const file2 = await insertStorageFile(tx, `complaints/test-file-2-${randomUUID()}.png`);
+
+    await tx.insert(complaintFiles).values({
+      fileId: file1.id,
+      complaintId: complaint.id,
+      usageType: "attachment",
+    });
+
+    await tx.insert(complaintFiles).values({
+      fileId: file2.id,
+      complaintId: complaint.id,
+      usageType: "attachment",
+    });
+
+    const result = await ComplaintRepository.getComplaintFiles(complaint.id, tx);
+
+    expect(result.length).toBe(2);
+    expect(result.some(f => f.filePath === file1.path)).toBeTrue();
+    expect(result.some(f => f.filePath === file2.path)).toBeTrue();
+    expect(result.every(f => f.usageType === "attachment")).toBeTrue();
+    expect(result.every(f => typeof f.fileId === "string")).toBeTrue();
+  });
+
+  complaintTest("returns empty array for complaint with no files", async tx => {
+    const { parent } = await setupParentWithStudent(tx, "FileEmpty");
+
+    const complaint = await insertComplaint(tx, parent.id, { body: "Complaint without files" });
+
+    const result = await ComplaintRepository.getComplaintFiles(complaint.id, tx);
+
+    expect(result).toEqual([]);
+  });
+
+  complaintTest("returns empty array for unknown complaintId", async tx => {
+    const result = await ComplaintRepository.getComplaintFiles("00000000-0000-0000-0000-000000000000", tx);
+    expect(result).toEqual([]);
+  });
+
+  complaintTest("includes file metadata fields (id, path, usageType, createdAt)", async tx => {
+    const { parent } = await setupParentWithStudent(tx, "FileMeta");
+
+    const complaint = await insertComplaint(tx, parent.id, { body: "Complaint with metadata" });
+    const file = await insertStorageFile(tx, `complaints/meta-file-${randomUUID()}.docx`);
+
+    await tx.insert(complaintFiles).values({
+      fileId: file.id,
+      complaintId: complaint.id,
+      usageType: "evidence",
+    });
+
+    const result = await ComplaintRepository.getComplaintFiles(complaint.id, tx);
+
+    expect(result.length).toBe(1);
+    expect(result[0].fileId).toBe(file.id);
+    expect(result[0].filePath).toBe(file.path);
+    expect(result[0].usageType).toBe("evidence");
+    expect(result[0].createdAt).toBeInstanceOf(Date);
+  });
+});
+
 describe("ComplaintRepository — non-transactional coverage fallback", () => {
   test("supports calls without tx for getComplaintsByParent", async () => {
     const result = await ComplaintRepository.getComplaintsByParent("00000000-0000-0000-0000-000000000000");
@@ -470,6 +548,11 @@ describe("ComplaintRepository — non-transactional coverage fallback", () => {
   test("supports calls without tx for getUnansweredComplaints", async () => {
     const result = await ComplaintRepository.getUnansweredComplaints(1);
     expect(Array.isArray(result)).toBeTrue();
+  });
+
+  test("supports calls without tx for getComplaintFiles", async () => {
+    const result = await ComplaintRepository.getComplaintFiles("00000000-0000-0000-0000-000000000000");
+    expect(result).toEqual([]);
   });
 });
 

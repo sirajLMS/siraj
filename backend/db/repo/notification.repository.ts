@@ -425,6 +425,8 @@ export namespace NotificationRepository {
     inputs: CreateNotificationDeliveryInput[],
     tx?: DBTransaction
   ): Promise<NotificationDeliverySelectType[]> => {
+    if (inputs.length === 0) return [];
+
     const runner = async (t: DBTransaction) => {
       const now = new Date();
 

@@ -1,14 +1,10 @@
 import { SessionRepository } from "@/backend/db/repo";
+import { UserRepository } from "@/backend/db/repo/user.repository";
 import { logger } from "@/backend/lib/logger";
-import type { SessionEntity } from "@/backend/types";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { CurrentUserProfile, SessionEntity } from "@/backend/types";
 
 export namespace SessionService {
-  /**
-   * Validates a session by its ID.
-   *
-   * @param sessionId The ID of the session to validate.
-   * @returns The validated SessionEntity if valid, or null.
-   */
   export async function validateSession(sessionId: string): Promise<SessionEntity | null> {
     try {
       return await SessionRepository.validate(sessionId);
@@ -16,5 +12,22 @@ export namespace SessionService {
       logger.error("Failed to validate session in SessionService", { sessionId, error });
       return null;
     }
+  }
+
+  export async function getCurrentUserProfile(userId: string): Promise<CurrentUserProfile> {
+    const [safeUser, permContext] = await Promise.all([
+      UserRepository.findSafeById(userId),
+      PermissionsService.getUserContext(userId),
+    ]);
+
+    if (!safeUser) {
+      throw new Error(`User not found: ${userId}`);
+    }
+
+    return {
+      ...safeUser,
+      permissions: permContext.permissions,
+      notificationCount: 0,
+    };
   }
 }

@@ -12,10 +12,19 @@ import type {
   users,
 } from "@/backend/db/schema";
 import type { Email } from "@/backend/lib/email";
+import type { AppPermission } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
 export type UserEntity = typeof users.$inferSelect;
 export type UserEntityInput = typeof users.$inferInsert;
+
+export type SafeUser = Omit<UserEntity, "password" | "rememberTokenHash" | "deletedAt">;
+
+// TODO: role field exists on PermissionsService.getUserContext() and DashboardLayout — needs cleanup (see .ai/todo/fix-user-role.md)
+export type CurrentUserProfile = SafeUser & {
+  permissions: AppPermission[];
+  notificationCount: number;
+};
 
 export type UserPothosDefinition = UserEntity & {
   permissionGroups?: PermissionGroupPothosDefinition[];
