@@ -1,6 +1,6 @@
 import type { complaints } from "@/backend/db/schema";
 import type { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
-import type { ComplaintResponse } from "./complaintResponses,types";
+import type { ComplaintResponse } from "./complaintResponses.types";
 
 export type ComplaintSelectType = typeof complaints.$inferSelect;
 export type ComplaintInsertType = typeof complaints.$inferInsert;
@@ -14,6 +14,8 @@ export type ComplaintSubmitInput = Omit<
   | "status"
   | "createdAt"
   | "updatedAt"
+  // resolved from mutation context
+  | "parentId"
 > & {
   // enums
   category: ComplaintCategory;

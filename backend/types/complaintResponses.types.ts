@@ -9,12 +9,6 @@ export type ComplaintResponseInput = Omit<
   "id" | "createdAt"
 >;
 
-export type ComplaintResponsePothosInput = Omit<
-  ComplaintResponseInput,
-  // resolved from mutation context
-  "responderUserId"
->;
-
 export type ComplaintResponse = ComplaintResponseSelect & {
-  responderName: string | null;
+  responderName?: string | null;
 };

@@ -1,4 +1,4 @@
-import { and, count, desc, eq, ilike, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { complaints, parents, students, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -13,9 +13,22 @@ import type {
 import { type ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
+function formatDuration(hours: number): string {
+  if (hours < 1) {
+    return `${Math.round(hours * 60)}m`;
+  } else if (hours < 24) {
+    return `${Math.round(hours)}h`;
+  } else {
+    const days = Math.floor(hours / 24);
+    const remainingHours = Math.round(hours % 24);
+    return `${days}d ${remainingHours}h`;
+  }
+}
+
 export namespace ComplaintRepository {
   export const submitComplaint = async (
     input: ComplaintSubmitInput,
+    parentId: string,
     tx?: DBTransaction,
     locale?: string
   ): Promise<ComplaintSelectType> => {
@@ -26,6 +39,7 @@ export namespace ComplaintRepository {
       .insert(complaints)
       .values({
         ...input,
+        parentId,
         status: ComplaintStatus.UNANSWERED,
         createdAt: now,
         updatedAt: now,
@@ -138,11 +152,12 @@ export namespace ComplaintRepository {
       responseCount: r.responseCount,
     }));
 
+    const metrics = await getComplaintMetrics(whereClause, queryDb);
+
     return {
-      // Type '{ complaints: ComplaintReturnType[]; }' is missing the following properties from type 'ComplaintQueueResult': id, metrics
-      // what should id be?
-      // get mertrics also but for the current where clause only
+      id: `complaint-queue-${Date.now()}`,
       complaints: typedRows,
+      metrics,
     };
   };
 
@@ -173,10 +188,14 @@ export namespace ComplaintRepository {
     return results[0] ?? null;
   };
 
+  export const getComplaintMetrics = async (
+    whereClause?: SQL | undefined,
+    txOrDb?: DBTransaction | typeof db
+  ): Promise<ComplaintMetrics> => {
+    const queryDb = txOrDb ?? db;
 
-  // update this function to accept where clause
-  export const getComplaintMetrics = async (tx?: DBTransaction): Promise<ComplaintMetrics> => {
-    const queryDb = tx ?? db;
+    const baseCondition = isNull(complaints.deletedAt);
+    const finalWhereClause = whereClause ? and(baseCondition, whereClause) : baseCondition;
 
     const statusCounts = await queryDb
       .select({
@@ -184,11 +203,12 @@ export namespace ComplaintRepository {
         count: count(),
       })
       .from(complaints)
-      .where(isNull(complaints.deletedAt))
+      .where(finalWhereClause)
       .groupBy(complaints.status);
 
     const unanswered = statusCounts.find(r => r.status === ComplaintStatus.UNANSWERED)?.count ?? 0;
     const answered = statusCounts.find(r => r.status === ComplaintStatus.ANSWERED)?.count ?? 0;
+    const totalCount = statusCounts.reduce((sum, r) => sum + r.count, 0);
 
     const [avgResult] = await queryDb
       .select({
@@ -201,18 +221,16 @@ export namespace ComplaintRepository {
       .from(complaints)
       .where(and(eq(complaints.status, ComplaintStatus.ANSWERED), isNull(complaints.deletedAt)));
 
-    // const [totalCount] = await queryDb
-    //   .select({ count: count() })
-    //   .from(complaints)
-    //   .leftJoin(parents, eq(complaints.parentId, parents.id))
-    //   .leftJoin(users, eq(parents.userId, users.id))
-    //   .where(whereClause);
+    const avgResolutionHours = Math.round((avgResult?.avgHours ?? 0) * 100) / 100;
+    const avgResolutionTime = avgResolutionHours > 0 ? formatDuration(avgResolutionHours) : null;
 
     return {
+      id: "complaint-metrics",
       unanswered,
       answered,
-      avgResolutionHours: Math.round((avgResult?.avgHours ?? 0) * 100) / 100,
-      // totoalCount
+      avgResolutionHours,
+      avgResolutionTime,
+      totalCount,
     };
   };
 

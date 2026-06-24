@@ -254,10 +254,7 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
     await insertComplaint(tx, parent.id, { status: "UNANSWERED", body: "Unanswered one" });
     await insertComplaint(tx, parent.id, { status: "ANSWERED", body: "Answered one" });
 
-    const unanswered = await ComplaintRepository.getComplaintQueue(
-      { limit: 50, offset: 0, status: "UNANSWERED" },
-      tx
-    );
+    const unanswered = await ComplaintRepository.getComplaintQueue({ limit: 50, offset: 0, status: "UNANSWERED" }, tx);
 
     expect(unanswered.complaints.every(r => r.status === "UNANSWERED")).toBeTrue();
     expect(unanswered.complaints.some(r => r.body === "Answered one")).toBeFalse();

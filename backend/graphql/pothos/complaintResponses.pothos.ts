@@ -1,0 +1,60 @@
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { ComplaintResponseService } from "@/backend/services";
+import type { ComplaintResponse, ComplaintResponseInput } from "@/backend/types";
+
+const ComplaintResponseRef = gqlSchemaBuilder.objectRef<ComplaintResponse>("ComplaintResponse");
+
+export const ComplaintResponsePothosObject = ComplaintResponseRef.implement({
+  description: "A single response to a complaint.",
+  fields: t => ({
+    id: t.exposeString("id"),
+    complaintId: t.exposeString("complaintId"),
+    responderUserId: t.exposeString("responderUserId", { nullable: true }),
+    body: t.exposeString("body"),
+    emailSent: t.exposeBoolean("emailSent"),
+    createdAt: t.expose("createdAt", { type: "DateTime" }),
+    responderName: t.exposeString("responderName", { nullable: true }),
+  }),
+});
+
+export const RespondToComplaintInputPothosObject = gqlSchemaBuilder
+  .inputRef<ComplaintResponseInput>("RespondToComplaintInput")
+  .implement({
+    description: "Input for responding to a complaint.",
+    fields: t => ({
+      complaintId: t.string({ required: true }),
+      body: t.string({ required: true }),
+      emailSent: t.boolean({ required: true, defaultValue: false }),
+    }),
+  });
+
+gqlSchemaBuilder.mutationField("respondToComplaint", t =>
+  t.field({
+    type: ComplaintResponsePothosObject,
+    description: "Creates a response to an existing complaint (admin only).",
+    args: {
+      input: t.arg({ type: RespondToComplaintInputPothosObject, required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      if (!ctx.user?.id) {
+        throw new Error("unauthenticated");
+      }
+
+      const response = await ComplaintResponseService.respondToComplaint(
+        { complaintId: args.input.complaintId, body: args.input.body, emailSent: args.input.emailSent ?? false },
+        ctx.user.id,
+        ctx.locale
+      );
+
+      return {
+        id: response.id,
+        complaintId: response.complaintId,
+        responderUserId: response.responderUserId,
+        body: response.body,
+        emailSent: response.emailSent,
+        createdAt: response.createdAt,
+        responderName: null,
+      };
+    },
+  })
+);

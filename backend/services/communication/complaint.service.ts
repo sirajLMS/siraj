@@ -5,14 +5,14 @@ import {
   SoftDeleteRepository,
 } from "@/backend/db/repo";
 import { getBackendTranslations, logger } from "@/backend/lib";
-import { CommunicationService, PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services";
 import type {
   ComplaintQueueFilter,
   ComplaintReturnType,
   ComplaintSelectType,
   ComplaintSubmitInput,
 } from "@/backend/types";
-import { AppPermission, NotificationEventType } from "@/shared/lib/enum";
+import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ComplaintService {
   export async function submitComplaint(
@@ -43,12 +43,12 @@ export namespace ComplaintService {
     try {
       const created = await ComplaintRepository.submitComplaint(
         {
-          parentId: parent.id,
           studentId: input.studentId ?? null,
           category: input.category,
           submitterEmail: input.submitterEmail,
           body: input.body,
         },
+         parent.id,
         undefined,
         locale
       );
@@ -136,7 +136,7 @@ export namespace ComplaintService {
     }
   }
 
-  export async function getAdminQueueWithMetrics(
+  export async function getQueueWithMetrics(
     actorUserId: string,
     options: ComplaintQueueFilter,
     locale?: string
@@ -159,7 +159,6 @@ export namespace ComplaintService {
       ]);
 
       return {
-        complaints: queueResult.complaints,
         metrics: {
           id: "complaint-metrics",
           unanswered: metrics.unanswered,
@@ -170,85 +169,6 @@ export namespace ComplaintService {
       };
     } catch (error) {
       logger.error("Failed to get admin complaint queue with metrics", { actorUserId, options, error });
-      throw error;
-    }
-  }
-
-  export async function respondToComplaint(
-    actorUserId: string,
-    complaintId: string,
-    body: string,
-    sendEmail: boolean,
-    locale?: string
-  ): Promise<ComplaintReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_RESPOND);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
-
-    const complaint = await ComplaintRepository.getComplaintById(complaintId);
-    if (!complaint) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("complaintNotFound", { id: complaintId }));
-    }
-
-    try {
-      const response = await ComplaintResponseRepository.createResponse(
-        {
-          complaintId,
-          responderUserId: actorUserId,
-          body,
-          emailSent: sendEmail,
-        },
-        undefined,
-        locale
-      );
-
-      if (sendEmail) {
-        await CommunicationService.dispatch(
-          {
-            userId: actorUserId,
-            title: "Complaint Response",
-            body: response.body,
-            channel: "email",
-            eventType: NotificationEventType.COMPLAINT_RESPONSE,
-          },
-          locale
-        );
-      }
-
-      const parent = await ParentRepository.findByUserId(complaint.parentId);
-      const notificationUserId = parent?.userId ?? actorUserId;
-
-      await CommunicationService.dispatch(
-        {
-          userId: notificationUserId,
-          title: "Complaint Response",
-          body: response.body,
-          channel: "on_app",
-          eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        },
-        locale
-      );
-
-      logger.info("Complaint response created", {
-        actorUserId,
-        complaintId,
-        responseId: response.id,
-        sendEmail,
-      });
-
-      return {
-        id: response.id,
-        complaintId: response.complaintId,
-        responderUserId: response.responderUserId ?? null,
-        body: response.body,
-        emailSent: response.emailSent,
-        createdAt: response.createdAt,
-      };
-    } catch (error) {
-      logger.error("Failed to respond to complaint", { actorUserId, complaintId, error });
       throw error;
     }
   }
