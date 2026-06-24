@@ -19,6 +19,12 @@ Add a "My Suggestions" section to the parent suggestion view showing past sugges
 
 ---
 
+## Layer-Specific Rules
+
+- **Generated types only**: View components use types from generated GraphQL types or from extracted `types.ts` files. No local entity type definitions.
+
+---
+
 ## Target Files
 
 | File | Action |
@@ -591,6 +597,7 @@ onClickDuplicate={setViewDuplicateOfId}
 - [ ] No `console.*` calls — use `logger` from `@/frontend/utils/logger` if needed
 - [ ] No nested ternary operators
 - [ ] TypeScript types are fully resolved (no `any`)
+- [ ] No local entity type definitions — all types sourced from generated GraphQL types or extracted `types.ts` files
 
 ---
 

@@ -21,6 +21,7 @@ Write comprehensive repository tests for all new and modified repository methods
 - Use higher-order test wrappers to reduce CodeScene duplication flags.
 - No `console` methods — use `testLogger` or no logging.
 - No `any` type overrides.
+- **Import canonical types**: Test files MUST import types from `backend/types/` canonical type files (e.g., `SuggestionReturnType`, `ComplaintFileReturnType`, `NotificationDeliverySelectType`). NO test-specific type definitions that duplicate canonical types.
 
 **Target Files**
 
@@ -1470,6 +1471,8 @@ bun run test:coverage backend/db/test/repo/complaint.repository.test.ts
 - [ ] No `any` type overrides used
 - [ ] All tests use `runInRollback` wrapper
 - [ ] All repo method calls pass `tx` inside `runInRollback`
+- [ ] Test files import canonical types from `backend/types/` — no test-specific type duplication
+- [ ] No local type definitions in test files that duplicate canonical types
 
 ---
 

@@ -14,11 +14,14 @@ Add a single new method `getComplaintFiles` to the existing `ComplaintRepository
 - **No Hardcoded Error Strings**: Use `getBackendTranslations` with optional `locale?: string` parameter for localized error messages.
 - **Conditional Aggregation**: Use `sql<number>` template literals with `.mapWith(Number)` for count queries (not applicable to this task — no aggregation needed).
 - **Transactions**: Read-only methods use `tx ?? db`.
+- **🚫 NO Local Type Definitions**: Repository files MUST NOT define local types like `ComplaintFileRow`. All types MUST be imported from `backend/types/complaints.types.ts`.
+- **Import canonical types**: Use `ComplaintFileReturnType` from `backend/types/complaints.types.ts`.
 
 **Target Files:**
 | File | Action |
 |------|--------|
-| `backend/db/repo/complaint.repository.ts` | MODIFY — add 1 new method, add 1 new type, add 2 new imports |
+| `backend/db/repo/complaint.repository.ts` | MODIFY — add 1 new method, add 2 new imports (no local types) |
+| `backend/types/complaints.types.ts` | UPDATE — add `ComplaintFileReturnType` to existing canonical types |
 
 ---
 
@@ -26,7 +29,7 @@ Add a single new method `getComplaintFiles` to the existing `ComplaintRepository
 
 #### Step 1 — Update Imports in `complaint.repository.ts`
 
-Open `backend/db/repo/complaint.repository.ts`. Add the missing schema table imports needed by the new method:
+Open `backend/db/repo/complaint.repository.ts`. Add the missing schema table imports and the canonical type import needed by the new method:
 
 ```typescript
 import { and, count, desc, eq, ilike, isNull, sql } from "drizzle-orm";
@@ -34,29 +37,22 @@ import { db } from "@/backend/db/drizzleDb";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ComplaintStatus } from "@/shared/lib/enum";
+import type { ComplaintFileReturnType } from "@/backend/types";
 ```
 
 The existing file from Story 14 already imports `complaints`, `parents`, `students`, `users` from `@/backend/db/schema`. Add `complaintFiles` and `storageFiles` to the same import statement. Verify all Drizzle operators (`and`, `count`, `desc`, `eq`, `ilike`, `isNull`, `sql`) are already imported — they should be from Story 14.
 
 ---
 
-#### Step 2 — Add `ComplaintFileRow` Type and `getComplaintFiles` Method
+#### Step 2 — Add `getComplaintFiles` Method
 
 Add inside the `ComplaintRepository` namespace, after the existing `getUnansweredComplaints` method:
 
 ```typescript
-  export type ComplaintFileRow = {
-    fileId: string;
-    filePath: string;
-    isProtected: boolean;
-    usageType: string;
-    createdAt: Date;
-  };
-
   export const getComplaintFiles = async (
     complaintId: string,
     tx?: DBTransaction
-  ): Promise<ComplaintFileRow[]> => {
+  ): Promise<ComplaintFileReturnType[]> => {
     const queryDb = tx ?? db;
 
     return queryDb
@@ -78,10 +74,10 @@ Add inside the `ComplaintRepository` namespace, after the existing `getUnanswere
 
 - **Join strategy**: Uses `innerJoin` between `complaintFiles` and `storageFiles` on `complaintFiles.fileId = storageFiles.id`. An `innerJoin` is appropriate here because a `complaintFiles` row without a matching `storageFiles` row represents an orphaned junction record (the file was deleted via FK cascade) and should not be returned.
 - **Column selection**: Selects `storageFiles.id` (as `fileId`), `storageFiles.path` (as `filePath`), and `storageFiles.isProtected` from the storage table, plus `complaintFiles.usageType` and `complaintFiles.createdAt` from the junction table.
-- **`storageFiles` schema reference**: The `storageFiles` table (`backend/db/schema/storage.ts:11-15`) has only three columns: `id` (uuid PK), `path` (text, unique, not null), and `isProtected` (boolean, default false). There is no `fileName`, `fileSize`, or `mimeType` column on this table — file metadata is managed at the application/storage service level, not in the database. The `ComplaintFileRow` type reflects the actual schema columns.
+- **`storageFiles` schema reference**: The `storageFiles` table (`backend/db/schema/storage.ts:11-15`) has only three columns: `id` (uuid PK), `path` (text, unique, not null), and `isProtected` (boolean, default false). There is no `fileName`, `fileSize`, or `mimeType` column on this table — file metadata is managed at the application/storage service level, not in the database. The `ComplaintFileReturnType` type reflects the actual schema columns.
 - **No soft-delete filter**: The `complaintFiles` junction table does not have a `deletedAt` column. The `storageFiles` table also does not have soft-delete. If a file is removed, the FK `onDelete: "cascade"` automatically deletes the `complaintFiles` row. No `isNull(deletedAt)` filter is needed.
 - **Ordering**: Results are ordered by `complaintFiles.createdAt DESC` — newest uploads first.
-- **Return type**: Returns an array of `ComplaintFileRow` objects. For a complaint with no attached files, returns an empty array `[]` (not `null`).
+- **Return type**: Returns an array of `ComplaintFileReturnType` objects. For a complaint with no attached files, returns an empty array `[]` (not `null`).
 - **Transaction pattern**: Uses `tx ?? db` — this is a read-only query that does not require transaction wrapping.
 - **No complaint existence check**: The method does NOT verify that the complaint exists or is not soft-deleted. The service layer (`ComplaintService`) is responsible for validating complaint existence and permissions before calling this method. If the `complaintId` does not exist, the `WHERE` clause simply matches zero rows and returns `[]`.
 
@@ -104,8 +100,8 @@ export namespace ComplaintRepository {
   // Story 15 (new):
   //   getComplaintFiles
 
-  // Story 15 (new types):
-  //   ComplaintFileRow
+  // Story 15 (new types — imported from canonical types):
+  //   ComplaintFileReturnType (imported from @/backend/types)
 
   // Story 14 (kept types):
   //   ComplaintSubmitInput
@@ -115,7 +111,7 @@ export namespace ComplaintRepository {
 }
 ```
 
-The new method and type are declared with `export` inside the namespace. The `ComplaintRepository` is already exported from `backend/db/repo/index.ts` (added in Story 14) — no barrel export update needed.
+The new method is declared with `export` inside the namespace. `ComplaintFileReturnType` is imported from `@/backend/types` (canonical types file). The `ComplaintRepository` is already exported from `backend/db/repo/index.ts` (added in Story 14) — no barrel export update needed.
 
 ---
 
@@ -130,7 +126,7 @@ bun tsgo
 Expected: 0 TypeScript errors. Pay attention to:
 - `complaintFiles` and `storageFiles` imports — both must be exported from `backend/db/schema/index.ts` (they are, via `export * from "./storage"` and `export * from "./communications"`).
 - `innerJoin` column reference — `complaintFiles.fileId` references `storageFiles.id` via the FK defined in the schema.
-- `ComplaintFileRow` type shape — must match the select column projection exactly.
+- `ComplaintFileReturnType` type shape — must match the select column projection exactly.
 
 ---
 
@@ -156,7 +152,8 @@ bun lint
 
 ### Success Criteria / Check Progress Points
 
-- [ ] `ComplaintFileRow` type is exported with `fileId`, `filePath`, `isProtected`, `usageType`, `createdAt` fields
+- [ ] `ComplaintFileReturnType` is defined in `backend/types/complaints.types.ts` with `fileId`, `filePath`, `isProtected`, `usageType`, `createdAt` fields
+- [ ] NO local type definitions in repository file — `ComplaintFileReturnType` imported from canonical types
 - [ ] `getComplaintFiles()` joins `complaintFiles` with `storageFiles` via `innerJoin` on `fileId`
 - [ ] `getComplaintFiles()` selects `storageFiles.id`, `storageFiles.path`, `storageFiles.isProtected`, `complaintFiles.usageType`, `complaintFiles.createdAt`
 - [ ] `getComplaintFiles()` filters by `complaintId` and orders by `complaintFiles.createdAt DESC`

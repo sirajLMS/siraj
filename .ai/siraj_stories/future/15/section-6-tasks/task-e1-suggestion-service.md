@@ -21,6 +21,13 @@ Extend `SuggestionService` with review, respond, duplicate marking, soft-delete,
 
 ---
 
+## Layer-Specific Rules
+
+- **🚫 NO Local Type Definitions**: Service files MUST NOT define local types. All entity types MUST be imported from canonical `backend/types/{entity}.types.ts` files.
+- **Import canonical types**: Services MUST import types from `@/backend/types` — use `SuggestionEntity`, `SuggestionWithParent`, `SuggestionWithResponse`, `SoftDeleteResult` etc. from their respective canonical `.types.ts` files.
+
+---
+
 ## Target Files
 
 | File | Action |
@@ -320,6 +327,8 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { AppPermission, SuggestionStatus } from "@/shared/lib/enum";
+import type { SuggestionEntity, SuggestionWithParent, SuggestionWithResponse } from "@/backend/types/suggestions.types";
+import type { SoftDeleteResult } from "@/backend/types/soft-delete.types";
 
 export namespace SuggestionService {
   // --- Existing methods with permission migration ---
@@ -612,6 +621,8 @@ All methods must use `logger` (never `console`):
 - [ ] No hardcoded error strings in the service
 - [ ] TypeScript types are fully resolved (no `any`)
 - [ ] Service can be used from SSR context (no GraphQL-specific dependencies)
+- [ ] NO local type definitions in service files — all types imported from canonical `backend/types/` files
+- [ ] All entity types sourced from their respective canonical `.types.ts` files
 
 ---
 

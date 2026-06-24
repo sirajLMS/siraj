@@ -19,6 +19,12 @@ Add multi-file upload dropzone to the complaint submission form and file display
 
 ---
 
+## Layer-Specific Rules
+
+- **Generated types only**: View components use types from generated GraphQL types or from extracted `types.ts` files. No local entity type definitions.
+
+---
+
 ## Target Files
 
 | File | Action |
@@ -619,6 +625,7 @@ validation: {
 - [ ] No `console.*` calls — use `logger` from `@/frontend/utils/logger` if needed
 - [ ] No nested ternary operators
 - [ ] TypeScript types are fully resolved (no `any`)
+- [ ] No local entity type definitions — all types sourced from generated GraphQL types or extracted `types.ts` files
 
 ---
 

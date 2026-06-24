@@ -25,6 +25,11 @@ Extend the existing complaint and suggestion Pothos GraphQL objects with new fie
 - **Cache Updates**: Ensure `id` fields are always exposed on GraphQL objects so the Apollo client can auto-update its cache.
 - **Locale Propagation & Localized Errors**: GraphQL field resolvers must propagate the request locale (`ctx.locale`) to service calls. Any direct error thrown in resolvers must also be translated using `getBackendTranslations`.
 - **🚫 NO DB/Repo Imports**: Resolvers can ONLY depend on `backend/services/`. Importing from `backend/db/repo/`, `backend/db/schema`, or `drizzle-orm` is **strictly forbidden**.
+- **🚫 NO Local Type Definitions**: NEVER define local types like `SuggestionWithStatusShape`, `ComplaintFileShape`, etc. in Pothos files or in a generic `communications.types.ts` file.
+- **Import canonical types**: All types MUST be imported from their respective canonical type files:
+  - `backend/types/suggestions.types.ts` for suggestion-related types
+  - `backend/types/complaints.types.ts` for complaint-related types
+- **Single GraphQL object per entity**: Create ONE GraphQL object type per entity using `{Entity}ReturnType` from canonical types.
 
 ---
 
@@ -32,9 +37,10 @@ Extend the existing complaint and suggestion Pothos GraphQL objects with new fie
 
 | # | File | Status |
 |---|------|--------|
-| 1 | `backend/graphql/pothos/suggestion.pothos.ts` | MODIFY — extend Suggestion object, add new objects, queries, mutations |
-| 2 | `backend/graphql/pothos/complaint.pothos.ts` | MODIFY — add ComplaintFile object, extend existing objects, add query, extend mutation input |
-| 3 | `backend/types/communications.types.ts` | MODIFY — add new suggestion and complaint file shared types |
+| 1 | `backend/types/suggestions.types.ts` | CREATE or UPDATE — define canonical types for suggestions table (if not already done in Task B1) |
+| 2 | `backend/types/complaints.types.ts` | UPDATE — add complaint file types to existing canonical types |
+| 3 | `backend/graphql/pothos/suggestion.pothos.ts` | MODIFY — extend Suggestion object, add new objects, queries, mutations, import canonical types |
+| 4 | `backend/graphql/pothos/complaint.pothos.ts` | MODIFY — add ComplaintFile object, extend existing objects, add query, extend mutation input, import canonical types |
 
 ---
 
@@ -42,70 +48,90 @@ Extend the existing complaint and suggestion Pothos GraphQL objects with new fie
 
 ---
 
-##### Step 1 — Add new shared types to `backend/types/communications.types.ts`
+##### Step 1 — Verify or Create Canonical Types Files
 
-Open `backend/types/communications.types.ts` and append the following type definitions at the end of the file. These types are shared across the service and GraphQL layers for the new Sprint 15 suggestion management and complaint file features.
+**CRITICAL**: This step ensures canonical types exist in their proper files. If Task B1 already created `backend/types/suggestions.types.ts`, verify it contains all needed types. If not, create or update it now.
+
+**1a. Verify or create `backend/types/suggestions.types.ts`:**
+
+This file should already exist from Task B1. Verify it contains these types (add if missing):
 
 ```typescript
-export type SuggestionStatusValue = "PENDING" | "REVIEWED" | "DUPLICATE";
+import type { suggestions } from "@/backend/db/schema";
+import type { SuggestionStatus } from "@/shared/lib/enum";
 
-export type SuggestionWithStatusShape = {
-  readonly id: string;
-  readonly parentId: string;
-  readonly submitterName: string;
-  readonly body: string;
-  readonly status: SuggestionStatusValue;
-  readonly duplicateOfId: string | null;
-  readonly adminResponse: string | null;
-  readonly reviewedByUserId: string | null;
-  readonly reviewedAt: Date | null;
-  readonly emailSentAt: Date | null;
-  readonly createdAt: Date;
-  readonly parentName: string;
+export type SuggestionSelectType = typeof suggestions.$inferSelect;
+export type SuggestionInsertType = typeof suggestions.$inferInsert;
+
+export type SuggestionReturnType = Omit<SuggestionSelectType, 
+  | "deletedAt"
+> & {
+  status: SuggestionStatus;
+  parentName?: string | null;
+  reviewedByUserName?: string | null;
+  duplicateOfBody?: string | null;
+  duplicateOfSubmitterName?: string | null;
+  responseCount?: number | null;
 };
 
-export type SuggestionWithResponseShape = {
-  readonly id: string;
-  readonly parentId: string;
-  readonly submitterName: string;
-  readonly body: string;
-  readonly status: SuggestionStatusValue;
-  readonly duplicateOfId: string | null;
-  readonly adminResponse: string | null;
-  readonly reviewedByUserId: string | null;
-  readonly reviewedAt: Date | null;
-  readonly emailSentAt: Date | null;
-  readonly createdAt: Date;
-  readonly parentName: string;
-  readonly reviewedByName: string | null;
+export type SuggestionSubmitInput = Omit<
+  SuggestionInsertType,
+  | "status"
+  | "createdAt"
+  | "updatedAt"
+  | "deletedAt"
+  | "reviewedAt"
+  | "reviewedByUserId"
+  | "duplicateOfId"
+  | "parentId"
+>;
+
+export type SuggestionQueueFilter = {
+  search?: string | null;
+  status?: SuggestionStatus | null;
+  limit: number;
+  offset: number;
 };
 
-export type SuggestionSearchResultShape = {
-  readonly id: string;
-  readonly parentId: string;
-  readonly submitterName: string;
-  readonly body: string;
-  readonly status: SuggestionStatusValue;
-  readonly createdAt: Date;
-  readonly parentName: string;
+export type SuggestionMetrics = {
+  id: string;
+  pending: number;
+  reviewed: number;
+  duplicate: number;
+  totalCount: number;
 };
 
-export type DuplicateSuggestionInputShape = {
+export type SuggestionQueueResult = {
+  id: string;
+  suggestions: ReadonlyArray<SuggestionReturnType>;
+  metrics: SuggestionMetrics;
+};
+
+// Additional types for Sprint 15 features
+export type DuplicateSuggestionInput = {
   readonly suggestionId: string;
   readonly duplicateOfId: string;
 };
 
-export type RespondToSuggestionInputShape = {
+export type RespondToSuggestionInput = {
   readonly suggestionId: string;
   readonly adminResponse: string;
 };
 
-export type ParentSuggestionOptionsShape = {
+export type ParentSuggestionOptions = {
   readonly limit: number;
   readonly offset: number;
 };
+```
 
-export type ComplaintFileShape = {
+**1b. Update `backend/types/complaints.types.ts`:**
+
+Add complaint file types to the existing canonical complaints types file:
+
+```typescript
+// Add to existing backend/types/complaints.types.ts
+
+export type ComplaintFileReturnType = {
   readonly fileId: string;
   readonly filePath: string;
   readonly isProtected: boolean;
@@ -113,24 +139,25 @@ export type ComplaintFileShape = {
   readonly createdAt: Date;
 };
 
-export type SubmitComplaintWithFilesInputShape = {
-  readonly studentId?: string | null;
-  readonly category: ComplaintCategoryValue;
-  readonly submitterEmail: string;
-  readonly body: string;
+export type SubmitComplaintWithFilesInput = Omit<
+  ComplaintSubmitInput,
+  never
+> & {
   readonly filePaths: ReadonlyArray<string>;
 };
 ```
 
 **Key points:**
-- `SuggestionStatusValue` mirrors the `SuggestionStatus` enum from `shared/lib/enum.ts` with values `PENDING`, `REVIEWED`, `DUPLICATE`.
-- `SuggestionWithStatusShape` extends the existing `SuggestionShape` with new Sprint 15 columns: `status`, `duplicateOfId`, `adminResponse`, `reviewedByUserId`, `reviewedAt`.
-- `SuggestionWithResponseShape` adds `reviewedByName` for the admin name who reviewed the suggestion.
-- `SuggestionSearchResultShape` is used by the duplicate search autocomplete — includes `parentId` and `parentName` for display enrichment.
-- `ComplaintFileShape` matches the `ComplaintFileRow` type from `ComplaintRepository` — note that `storageFiles` table has only `id`, `path`, `isProtected` columns (no `fileName`, `fileSize`, `mimeType` in the database).
-- `SubmitComplaintWithFilesInputShape` extends the existing `SubmitComplaintInputShape` with an optional `filePaths` array.
-- All types use `readonly` modifier for immutability.
-- These types are consumed by both the Pothos layer and the service layer for type-safe data exchange.
+- **NO generic `communications.types.ts`** — each table gets its own canonical file
+- **NO "Shape" suffix** — use proper naming: `{Entity}ReturnType`, `{Entity}Input`
+- **Single source of truth** — all suggestion types in `suggestions.types.ts`, all complaint types in `complaints.types.ts`
+- **Import from schema** — use Drizzle's `$inferSelect` and `$inferInsert` as foundation
+- **Extend with resolved properties** — add joined fields like `parentName`, `reviewedByUserName` to return types
+
+**Verification:**
+```bash
+bun tsgo backend/types/suggestions.types.ts backend/types/complaints.types.ts
+```
 
 ---
 

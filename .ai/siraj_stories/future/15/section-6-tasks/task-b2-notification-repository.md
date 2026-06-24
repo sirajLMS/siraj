@@ -15,10 +15,14 @@ Extend the existing `NotificationRepository` namespace in `backend/db/repo/notif
 - **Conditional Aggregation**: Use `sql<number>` template literals with `.mapWith(Number)` for count queries.
 - **Transactions**: Mutation methods use the `(args, tx?: DBTransaction) => Promise<T>` pattern. Read-only methods use `tx ?? db`.
 - **Advisory Locks**: Use `pg_advisory_xact_lock` where concurrent writes to the same row are possible (preference upserts, batch deliveries).
+- **🚫 NO Local Type Definitions**: Repository files MUST NOT define local types like `UserDeliveryHistoryRow`, `UserDeliveryHistoryResult`. All types MUST be imported from `backend/types/` canonical type files.
+- **Import canonical types**: Use types from `backend/types/user-notification-preferences.types.ts` and `backend/types/notification-deliveries.types.ts`.
 
 **Target Files:**
 | File | Action |
 |------|--------|
+| `backend/types/user-notification-preferences.types.ts` | CREATE or UPDATE — define canonical types for user_notification_preferences table |
+| `backend/types/notification-deliveries.types.ts` | CREATE or UPDATE — define canonical types for notification_deliveries table |
 | `backend/db/repo/notification.repository.ts` | MODIFY — add 5 new methods, add 2 new imports |
 | `backend/types/communications.types.ts` | MODIFY — add 1 new input type |
 
@@ -39,19 +43,34 @@ import {
   userNotificationPreferences,
 } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type * as Types from "@/backend/types";
+import type {
+  UserNotificationPreferenceSelectType,
+  SetNotificationPreferenceInput,
+} from "@/backend/types/user-notification-preferences.types";
+import type {
+  NotificationDeliverySelectType,
+  CreateNotificationDeliveryInput,
+  UserDeliveryHistoryResult,
+} from "@/backend/types/notification-deliveries.types";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/shared/lib/enum";
 ```
 
-The existing file already imports `and`, `count`, `eq`, `gte`, `lte`, `sql` from `drizzle-orm` and `notificationDeliveries`, `userDeviceTokens` from schema. Add `desc`, `gt` to the Drizzle import and `userNotificationPreferences` to the schema import. Verify `NotificationChannel` is imported from `@/shared/lib/enum` — if not, add it.
+The existing file already imports `and`, `count`, `eq`, `gte`, `lte`, `sql` from `drizzle-orm` and `notificationDeliveries`, `userDeviceTokens` from schema. Add `desc`, `gt` to the Drizzle import and `userNotificationPreferences` to the schema import. Verify `NotificationChannel` is imported from `@/shared/lib/enum` — if not, add it. Replace the `import type * as Types from "@/backend/types"` barrel import with explicit canonical type imports from `backend/types/user-notification-preferences.types.ts` and `backend/types/notification-deliveries.types.ts`.
 
 ---
 
-#### Step 2 — Add `SetPreferenceInput` Type to `communications.types.ts`
+#### Step 2 — Create/Update Canonical Types
 
-Open `backend/types/communications.types.ts` and add the new input type at the end of the file:
+Create or update `backend/types/user-notification-preferences.types.ts` with the following canonical types:
 
 ```typescript
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
+import type { userNotificationPreferences } from "@/backend/db/schema";
+import type { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
+
+export type UserNotificationPreferenceSelectType = InferSelectModel<typeof userNotificationPreferences>;
+export type UserNotificationPreferenceInsertType = InferInsertModel<typeof userNotificationPreferences>;
+
 export type SetNotificationPreferenceInput = {
   userId: string;
   channel: NotificationChannel;
@@ -60,7 +79,34 @@ export type SetNotificationPreferenceInput = {
 };
 ```
 
-This type is used by the `setPreference` method's input parameter. It picks the four essential fields needed for the upsert operation.
+Create or update `backend/types/notification-deliveries.types.ts` with the following canonical types:
+
+```typescript
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
+import type { notificationDeliveries } from "@/backend/db/schema";
+import type { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
+
+export type NotificationDeliverySelectType = InferSelectModel<typeof notificationDeliveries>;
+export type NotificationDeliveryInsertType = InferInsertModel<typeof notificationDeliveries>;
+
+export type CreateNotificationDeliveryInput = {
+  userId: string;
+  deviceTokenId?: string;
+  channel: NotificationChannel;
+  eventType: NotificationEventType;
+  title?: string;
+  body?: string;
+};
+
+export type NotificationDeliveryReturnType = NotificationDeliverySelectType;
+
+export type UserDeliveryHistoryResult = {
+  rows: NotificationDeliverySelectType[];
+  totalCount: number;
+};
+```
+
+All types use Drizzle's `$inferSelect` and `$inferInsert` as foundation. Enums are imported from `@/shared/lib/enum`.
 
 ---
 
@@ -74,7 +120,7 @@ Add inside the `NotificationRepository` namespace, after the existing `getDelive
     channel: NotificationChannel,
     eventType: NotificationEventType,
     tx?: DBTransaction
-  ): Promise<Types.UserNotificationPreferenceSelectType | null> => {
+  ): Promise<UserNotificationPreferenceSelectType | null> => {
     const queryDb = tx ?? db;
 
     const results = await queryDb
@@ -107,9 +153,9 @@ Add after `getPreference`:
 
 ```typescript
   export const setPreference = async (
-    input: Types.SetNotificationPreferenceInput,
+    input: SetNotificationPreferenceInput,
     tx?: DBTransaction
-  ): Promise<Types.UserNotificationPreferenceSelectType> => {
+  ): Promise<UserNotificationPreferenceSelectType> => {
     const runner = async (t: DBTransaction) => {
       await t.execute(
         sql`SELECT pg_advisory_xact_lock(hashtext('notification_pref_' || ${input.userId}::text || '_' || ${input.channel}::text || '_' || ${input.eventType}::text))`
@@ -162,9 +208,9 @@ Add after `setPreference`:
 
 ```typescript
   export const createDeliveriesBatch = async (
-    inputs: Types.CreateNotificationDeliveryInput[],
+    inputs: CreateNotificationDeliveryInput[],
     tx?: DBTransaction
-  ): Promise<Types.NotificationDeliverySelectType[]> => {
+  ): Promise<NotificationDeliverySelectType[]> => {
     const runner = async (t: DBTransaction) => {
       const now = new Date();
 
@@ -247,13 +293,6 @@ Add after `createDeliveriesBatch`:
 Add after `getSmsCountInLastHour`:
 
 ```typescript
-  export type UserDeliveryHistoryRow = Types.NotificationDeliverySelectType;
-
-  export type UserDeliveryHistoryResult = {
-    rows: UserDeliveryHistoryRow[];
-    totalCount: number;
-  };
-
   export const getDeliveriesByUser = async (
     userId: string,
     options: { limit: number; offset: number; channel?: NotificationChannel; eventType?: NotificationEventType },
@@ -298,7 +337,7 @@ Add after `getSmsCountInLastHour`:
 - Supports optional `channel` and `eventType` filters for filtering the delivery history (e.g., "show only SMS deliveries" or "show only complaint response notifications").
 - Orders by `createdAt DESC` — newest deliveries first.
 - Returns paginated results with a separate count query for `totalCount`.
-- The `UserDeliveryHistoryRow` type is an alias for `NotificationDeliverySelectType` — the full row shape is already defined in `communications.types.ts`.
+- The `UserDeliveryHistoryResult` type is imported from `backend/types/notification-deliveries.types.ts` — no local type definitions in the repository file.
 - Read-only query, uses `tx ?? db` pattern.
 - Used by the parent-facing notification history GraphQL query and the corresponding frontend view.
 
@@ -328,9 +367,12 @@ export namespace NotificationRepository {
   //   getSmsCountInLastHour
   //   getDeliveriesByUser
 
-  // Story 15 (new types):
-  //   UserDeliveryHistoryRow
-  //   UserDeliveryHistoryResult
+  // Story 15 (imported canonical types — NOT defined locally):
+  //   UserNotificationPreferenceSelectType  (from backend/types/user-notification-preferences.types.ts)
+  //   SetNotificationPreferenceInput         (from backend/types/user-notification-preferences.types.ts)
+  //   NotificationDeliverySelectType         (from backend/types/notification-deliveries.types.ts)
+  //   CreateNotificationDeliveryInput         (from backend/types/notification-deliveries.types.ts)
+  //   UserDeliveryHistoryResult              (from backend/types/notification-deliveries.types.ts)
 
   // Existing internal helpers (kept):
   //   acquireDeviceTokenLock
@@ -355,7 +397,8 @@ bun tsgo
 
 Expected: 0 TypeScript errors. Pay attention to:
 - `userNotificationPreferences` import — must be exported from `backend/db/schema/index.ts` (it is, via `export * from "./communications"`).
-- `SetNotificationPreferenceInput` type — must be exported from `backend/types/communications.types.ts` and accessible via `Types.SetNotificationPreferenceInput`.
+- Canonical type files (`user-notification-preferences.types.ts`, `notification-deliveries.types.ts`) must exist and export all required types.
+- `SetNotificationPreferenceInput` type — must be exported from `backend/types/user-notification-preferences.types.ts` and imported explicitly.
 - `sql`NOW() - INTERVAL '1 hour'`` — Drizzle's `sql` template literal must correctly embed the PostgreSQL interval expression.
 - `onConflictDoUpdate` target array — the composite target `[userId, channel, eventType]` must match the unique index definition.
 
@@ -383,7 +426,7 @@ bun lint
 
 ### Success Criteria / Check Progress Points
 
-- [ ] `SetNotificationPreferenceInput` type is added to `backend/types/communications.types.ts` with `userId`, `channel`, `eventType`, `enabled` fields
+- [ ] `SetNotificationPreferenceInput` type is defined in `backend/types/user-notification-preferences.types.ts` with `userId`, `channel`, `eventType`, `enabled` fields
 - [ ] `getPreference()` returns the preference row or `null` when no row exists for the given `(userId, channel, eventType)` combination
 - [ ] `getPreference()` uses `tx ?? db` pattern for read-only access
 - [ ] `setPreference()` performs an upsert via `INSERT ... ON CONFLICT DO UPDATE` targeting the `(userId, channel, eventType)` composite unique index
@@ -401,6 +444,9 @@ bun lint
 - [ ] No new hardcoded error strings introduced — all methods remain pure data access
 - [ ] `bun run test:db` passes with zero failures
 - [ ] `bun tsgo` reports zero type errors
+- [ ] Canonical types defined in `backend/types/user-notification-preferences.types.ts` and `backend/types/notification-deliveries.types.ts`
+- [ ] NO local type definitions in repository file — all types imported from canonical files
+- [ ] `SetNotificationPreferenceInput` moved from `communications.types.ts` to `user-notification-preferences.types.ts`
 
 **Quality Gate — Per-File Validation:**
 - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file

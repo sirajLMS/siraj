@@ -20,6 +20,13 @@ Update `CommunicationService` to use the new channel factories and add `dispatch
 
 ---
 
+## Layer-Specific Rules
+
+- **🚫 NO Local Type Definitions**: Service files MUST NOT define local types. All entity types MUST be imported from canonical `backend/types/{entity}.types.ts` files.
+- **Import canonical types**: Services MUST import types from `@/backend/types` — use `CommunicationPayload`, `ChannelDispatchResult`, `CommunicationChannelType`, `CommunicationChannel` etc. from their respective canonical `.types.ts` files.
+
+---
+
 ## Target Files
 
 | File | Action |
@@ -47,23 +54,9 @@ Update `CommunicationService` to use the new channel factories and add `dispatch
 Update the `CommunicationPayload` interface to support all four channels and optional metadata.
 
 ```typescript
-export type CommunicationChannelType = "on_app" | "email" | "sms" | "push";
-
-export interface CommunicationPayload {
-  userId: string;
-  channel: CommunicationChannelType;
-  eventType: string;
-  title: string;
-  body: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface ChannelDispatchResult {
-  channel: CommunicationChannelType;
-  success: boolean;
-  providerMessageId?: string;
-  error?: string;
-}
+// CommunicationChannelType, CommunicationPayload, and ChannelDispatchResult
+// are defined in canonical file: backend/types/communications.types.ts
+// Import them from @/backend/types/communications.types
 ```
 
 ---
@@ -244,24 +237,11 @@ import { getEmailChannel } from "@/backend/services/communication/channels/email
 import { getOnAppChannel } from "@/backend/services/communication/channels/on-app.channel";
 import { getPushChannel } from "@/backend/services/communication/channels/push.channel";
 import { getSmsChannel } from "@/backend/services/communication/channels/sms.channel";
-
-export type CommunicationChannelType = "on_app" | "email" | "sms" | "push";
-
-export interface CommunicationPayload {
-  userId: string;
-  channel: CommunicationChannelType;
-  eventType: string;
-  title: string;
-  body: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface ChannelDispatchResult {
-  channel: CommunicationChannelType;
-  success: boolean;
-  providerMessageId?: string;
-  error?: string;
-}
+import type {
+  CommunicationChannelType,
+  CommunicationPayload,
+  ChannelDispatchResult,
+} from "@/backend/types/communications.types";
 
 export namespace CommunicationService {
   export async function dispatch(
@@ -417,22 +397,11 @@ export namespace CommunicationService {
 
 ## Channel Factory Interface
 
-All channel factories must implement this common interface:
+All channel factories must implement the `CommunicationChannel` interface defined in the canonical file `backend/types/communications.types.ts`:
 
 ```typescript
-export interface CommunicationChannel {
-  send(input: {
-    userId: string;
-    eventType: string;
-    title: string;
-    body: string;
-    metadata?: Record<string, unknown>;
-  }): Promise<{
-    success: boolean;
-    messageId?: string;
-    error?: string;
-  }>;
-}
+// CommunicationChannel interface is defined in @/backend/types/communications.types
+// Import: import type { CommunicationChannel } from "@/backend/types/communications.types";
 ```
 
 ---
@@ -473,6 +442,8 @@ All methods must use `logger` (never `console`):
 - [ ] `dispatch()` catches errors and returns result object (does NOT throw to caller)
 - [ ] All logging uses `logger` (no `console.*` calls)
 - [ ] TypeScript types are fully resolved (no `any`)
+- [ ] NO local type definitions in service files — all types imported from canonical `backend/types/` files
+- [ ] All entity types sourced from their respective canonical `.types.ts` files
 
 ---
 

@@ -18,6 +18,8 @@ Implement the email communication channel using the codebase's established **Int
 - **i18n / Localized Error Messages**: All user-facing error messages must be translated using `getBackendTranslations`, optionally accepting a `locale?: string` parameter.
 - **🚫 Services MUST NOT import from DB/Drizzle**: The adapter can ONLY depend on the repository layer (`backend/db/repo/`). Importing from `drizzle-orm`, `backend/db/schema`, or any Drizzle-related module is **strictly forbidden**.
 - **Logger utility mandatory**: Use `import { logger } from '@/backend/lib/logger'`. Console methods are forbidden.
+- **🚫 NO Local Entity Type Definitions**: Channel adapter files MUST NOT define local entity types. All entity types (like `NotificationDeliverySelectType`, `UserNotificationPreferenceSelectType`) MUST be imported from canonical `backend/types/` files.
+- **Import canonical types**: Adapters MUST import types from `@/backend/types` — use `NotificationDeliverySelectType`, `NotificationDeliveryInsertType`, `SetNotificationPreferenceInput` etc. from their respective canonical files (e.g., `backend/types/notification-deliveries.types.ts`, `backend/types/user-notification-preferences.types.ts`).
 
 **Target Files:**
 
@@ -634,6 +636,8 @@ bun codescene
 - [ ] No direct Drizzle/schema imports in any file — only repository layer access
 - [ ] `bun tsgo` reports zero type errors
 - [ ] `bun run test:db` passes with zero failures
+- [ ] NO local entity type definitions in channel files — all entity types imported from canonical `backend/types/` files
+- [ ] Interface contracts (`IEmailChannel`, `EmailPayload`, `EmailSendResult`) remain as local definitions (these are contracts, not entity types)
 
 **Quality Gate — Per-File Validation:**
 - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file

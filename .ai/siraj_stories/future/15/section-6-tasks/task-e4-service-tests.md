@@ -20,6 +20,13 @@ Write comprehensive tests for all new and modified service methods and channel a
 
 ---
 
+## Layer-Specific Rules
+
+- **🚫 NO Local Type Definitions**: Test files MUST NOT define local entity types. All entity types MUST be imported from canonical `backend/types/{entity}.types.ts` files.
+- **Import canonical types**: Tests MUST import types from `@/backend/types` — use `SuggestionEntity`, `ComplaintEntity`, `CommunicationPayload`, `FileMetadata` etc. from their respective canonical `.types.ts` files when typing mock objects or assertions.
+
+---
+
 ## Target Files
 
 | File | Action |
@@ -1327,6 +1334,8 @@ bun run test:db
 - [ ] CommunicationService tests cover: exhaustive switch check
 - [ ] No `console.*` calls in any test file
 - [ ] No `any` type overrides in any test file
+- [ ] NO local type definitions in test files — all entity types imported from canonical `backend/types/` files
+- [ ] All entity types sourced from their respective canonical `.types.ts` files
 
 ---
 

@@ -969,6 +969,7 @@ EmptyUnanswered.decorators = [
 4. **Permission gates mocked via global decorators** — The `StoryWrapper` provides admin permissions by default. No per-story permission setup needed.
 5. **Multiple story variants** — Each story file includes Default plus variants for edge cases (empty, loading, error states).
 6. **Mock mutations included** — Stories that trigger mutations include mock mutation responses for interactive testing.
+7. **Mock data uses generated type shapes** — Story mock data uses `__typename` and generated type shapes from codegen.
 
 ---
 
@@ -1007,6 +1008,7 @@ Both commands must pass with zero errors.
 - [ ] All mock data field names match generated GraphQL type shapes exactly
 - [ ] No Zustand mock store imports in story files
 - [ ] All stories compile with `bun tsgo` (zero errors)
+- [ ] No local entity type definitions — all types sourced from generated GraphQL types or extracted `types.ts` files
 
 **Quality Gate — Per-File Validation:**
 - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file

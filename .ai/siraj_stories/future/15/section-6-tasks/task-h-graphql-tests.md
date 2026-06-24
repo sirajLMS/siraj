@@ -28,6 +28,7 @@ Write integration tests for all new Sprint 15 GraphQL queries and mutations in t
 - Prefer optional chaining (`?.`) over verbose logical checks for linter compliance.
 - No `console` methods — use `logger` or omit logging.
 - No DB/repo imports — integration tests interact exclusively via the GraphQL API.
+- **Use generated types**: Test files use generated types from `frontend/graphql/generated/gql/`. No local type definitions.
 
 ---
 
@@ -942,6 +943,7 @@ All tests must pass with zero failures. If any test fails:
 - [ ] No DB/repo imports in any test file
 - [ ] No `console` methods used
 - [ ] `bun run test:graphql` passes with zero failures
+- [ ] No local entity type definitions — all types sourced from generated GraphQL types or extracted `types.ts` files
 
 ---
 

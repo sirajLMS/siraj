@@ -577,6 +577,7 @@ export const useParentComplaintsStore = create<ParentComplaintsStoreState>((set,
 6. **Logger utility mandatory** — All logging uses `logger` from `@/frontend/utils/logger`. Never `console`.
 7. **Refetch after mutations** — All mutation actions include `refetchQueries` to update the Apollo cache after successful mutations.
 8. **Error propagation** — Store actions catch errors, log them, and re-throw so components can display error UI.
+9. **Generated types only** — Zustand stores use types from `frontend/graphql/generated/gql/graphql-types.ts`. No local entity type definitions.
 
 ---
 
@@ -629,6 +630,7 @@ Both commands must pass with zero errors.
 - [ ] No mock data in any production store file
 - [ ] No `any`, `unknown`, or casting in store definitions
 - [ ] All `use*` methods are proper React hooks (called inside components)
+- [ ] No local entity type definitions — all types sourced from generated GraphQL types or extracted `types.ts` files
 
 **Quality Gate — Per-File Validation:**
 - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file

@@ -5,6 +5,7 @@
 | Category | New Files | Modified Files |
 |---|---|---|
 | Migration/Schema/Enum | 1 (migration) | 4 (enum.ts, enums.ts, communications.ts, drizzleRelations.ts) |
+| **Canonical Types** | **~4 (suggestions, complaints, notification-deliveries, user-notification-preferences)** | **~2 (complaint-responses, complaint types)** |
 | Repositories | 0 | 3 (suggestion, notification, complaint repos) |
 | Communication Channels | ~12 (interfaces, adapters, factories, templates per channel) | 1 (communication.service.ts) |
 | Services | 0 | 2 (complaint, suggestion services) |
@@ -20,7 +21,7 @@
 | System Settings | 0 | 1 (seeder) |
 | i18n | 0 | ~6 |
 | Env declarations | 0 | 1 (environment.d.ts) |
-| **Total** | **~26 new** | **~59 modified** |
+| **Total** | **~30 new** | **~61 modified** |
 
 ### B. Dependency Graph
 

@@ -14,19 +14,85 @@ Extend the existing `SuggestionRepository` namespace in `backend/db/repo/suggest
 - **No Hardcoded Error Strings**: Use `getBackendTranslations` with optional `locale?: string` parameter for localized error messages.
 - **Conditional Aggregation**: Use `sql<number>` template literals with `.mapWith(Number)` for `CASE WHEN` aggregations.
 - **Transactions**: All mutation methods use the `(args, tx?: DBTransaction, locale?: string) => Promise<T>` pattern. Read-only methods use `tx ?? db`.
+- **🚫 NO Local Type Definitions**: Repository files MUST NOT define local types like `ParentSuggestionRow`, `AdminSuggestionRow`, etc. All types MUST be imported from `backend/types/suggestions.types.ts`.
+- **Import canonical types**: Use `SuggestionSelectType`, `SuggestionInsertType`, `SuggestionReturnType`, `SuggestionSubmitInput` from canonical types file.
 
 **Target Files:**
 | File | Action |
 |------|--------|
-| `backend/db/repo/suggestion.repository.ts` | MODIFY — add 8 new methods, update 2 existing types, remove Story 14 placeholder methods |
+| `backend/types/suggestions.types.ts` | CREATE or UPDATE — define canonical types for suggestions table |
+| `backend/db/repo/suggestion.repository.ts` | MODIFY — add 8 new methods, import canonical types, remove Story 14 placeholder methods |
 
 ---
 
 ### Detailed Implementation Steps
 
+#### Step 0 — Create or Update Canonical Types File
+
+Create or update `backend/types/suggestions.types.ts` with canonical types for the suggestions table:
+
+```typescript
+import type { suggestions } from "@/backend/db/schema";
+import type { SuggestionStatus } from "@/shared/lib/enum";
+
+export type SuggestionSelectType = typeof suggestions.$inferSelect;
+export type SuggestionInsertType = typeof suggestions.$inferInsert;
+
+export type SuggestionReturnType = Omit<SuggestionSelectType, 
+  | "deletedAt"
+> & {
+  status: SuggestionStatus;
+  parentName?: string | null;
+  reviewedByUserName?: string | null;
+  duplicateOfBody?: string | null;
+  duplicateOfSubmitterName?: string | null;
+  responseCount?: number | null;
+};
+
+export type SuggestionSubmitInput = Omit<
+  SuggestionInsertType,
+  | "status"
+  | "createdAt"
+  | "updatedAt"
+  | "deletedAt"
+  | "reviewedAt"
+  | "reviewedByUserId"
+  | "duplicateOfId"
+  | "parentId"
+>;
+
+export type SuggestionQueueFilter = {
+  search?: string | null;
+  status?: SuggestionStatus | null;
+  limit: number;
+  offset: number;
+};
+
+export type SuggestionMetrics = {
+  id: string;
+  pending: number;
+  reviewed: number;
+  duplicate: number;
+  totalCount: number;
+};
+
+export type SuggestionQueueResult = {
+  id: string;
+  suggestions: ReadonlyArray<SuggestionReturnType>;
+  metrics: SuggestionMetrics;
+};
+```
+
+**Verification:**
+```bash
+bun tsgo backend/types/suggestions.types.ts
+```
+
+---
+
 #### Step 1 — Update Imports and Add `SuggestionStatus` Reference
 
-Open `backend/db/repo/suggestion.repository.ts`. Verify the existing imports and add the `SuggestionStatus` enum import and any missing Drizzle operators:
+Open `backend/db/repo/suggestion.repository.ts`. Update imports to use canonical types:
 
 ```typescript
 import { and, count, desc, eq, ilike, isNull, ne, sql } from "drizzle-orm";
@@ -34,11 +100,21 @@ import { db } from "@/backend/db/drizzleDb";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { SuggestionStatus } from "@/shared/lib/enum";
+import type {
+  SuggestionReturnType,
+  SuggestionSelectType,
+  SuggestionSubmitInput,
+  SuggestionQueueFilter,
+  SuggestionQueueResult,
+  SuggestionMetrics,
+} from "@/backend/types";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 ```
 
 If `SuggestionStatus` is not yet imported, add it. If `ne` (not equal) is not yet imported, add it to the `drizzle-orm` import list. The existing file from Story 14 should already have `and`, `count`, `desc`, `eq`, `ilike`, `isNull`, `sql` — verify and add only what is missing.
+
+**CRITICAL**: Remove any local type definitions like `ParentSuggestionRow`, `AdminSuggestionRow`, `AdminSuggestionResult`, `SuggestionMetrics` from this file. All types MUST come from `backend/types/suggestions.types.ts`.
 
 ---
 
@@ -59,28 +135,14 @@ Keep the `SuggestionSubmitInput` interface and `submitSuggestion` method intact 
 
 #### Step 3 — Add `getSuggestionsByParent` Method
 
-Add after `submitSuggestion`:
+Add after `submitSuggestion`. This method uses `SuggestionReturnType` from canonical types:
 
 ```typescript
-  export type ParentSuggestionRow = {
-    id: string;
-    parentId: string;
-    submitterName: string;
-    body: string;
-    status: string;
-    adminResponse: string | null;
-    duplicateOfId: string | null;
-    duplicateOfBody: string | null;
-    duplicateOfSubmitterName: string | null;
-    reviewedAt: Date | null;
-    createdAt: Date;
-  };
-
   export const getSuggestionsByParent = async (
     parentId: string,
     options: { limit: number; offset: number },
     tx?: DBTransaction
-  ): Promise<ParentSuggestionRow[]> => {
+  ): Promise<SuggestionReturnType[]> => {
     const queryDb = tx ?? db;
 
     const dupSuggestions = suggestions;

@@ -50,6 +50,41 @@ rg "RESEND_API_KEY\|TWILIO_AUTH_TOKEN\|FIREBASE_PRIVATE_KEY" backend/ --glob "!*
 
 All five commands MUST return zero matches.
 
+### 7.4b Single Canonical Object Type Pattern Verification
+
+```bash
+# Verify NO local type definitions in repository files
+rg "export type.*Row\s*=" backend/db/repo/suggestion.repository.ts backend/db/repo/notification.repository.ts backend/db/repo/complaint.repository.ts
+# MUST return zero matches — all types imported from backend/types/
+
+# Verify NO local type definitions in service files
+rg "export type.*Shape\s*=" backend/services/communication/ backend/services/
+# MUST return zero matches — all entity types imported from backend/types/
+
+# Verify NO local type definitions in Pothos files
+rg "export type.*Definition\s*=" backend/graphql/pothos/suggestion.pothos.ts backend/graphql/pothos/complaint.pothos.ts
+# MUST return zero matches — all types imported from backend/types/
+
+# Verify canonical type files exist
+ls backend/types/suggestions.types.ts
+ls backend/types/complaints.types.ts
+ls backend/types/notification-deliveries.types.ts
+ls backend/types/user-notification-preferences.types.ts
+ls backend/types/complaint-responses.types.ts
+
+# Verify canonical types use Drizzle inference
+rg "\$inferSelect|\$inferInsert" backend/types/suggestions.types.ts backend/types/complaints.types.ts backend/types/notification-deliveries.types.ts backend/types/user-notification-preferences.types.ts
+# MUST return matches in all files
+
+# Verify single GraphQL object per entity (no duplicate Pothos objects)
+rg "objectRef<" backend/graphql/pothos/suggestion.pothos.ts | wc -l
+# MUST return 1 (single Suggestion object)
+rg "objectRef<" backend/graphql/pothos/complaint.pothos.ts | wc -l
+# MUST return 1 (single Complaint object)
+```
+
+All verification commands MUST pass. Zero local type definitions allowed in repository, service, or Pothos files.
+
 ### 7.5 Schema Verification
 
 ```sql

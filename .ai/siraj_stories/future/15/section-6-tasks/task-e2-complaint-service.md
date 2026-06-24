@@ -19,6 +19,13 @@ Extend `ComplaintService.submitComplaint()` to handle file attachments with vali
 
 ---
 
+## Layer-Specific Rules
+
+- **🚫 NO Local Type Definitions**: Service files MUST NOT define local types. All entity types MUST be imported from canonical `backend/types/{entity}.types.ts` files.
+- **Import canonical types**: Services MUST import types from `@/backend/types` — use `ComplaintEntity`, `ComplaintFileEntity`, `FileMetadata` etc. from their respective canonical `.types.ts` files.
+
+---
+
 ## Target Files
 
 | File | Action |
@@ -67,11 +74,7 @@ const ALLOWED_COMPLAINT_MIME_TYPES: readonly string[] = [
 The method now accepts an optional `filePaths` parameter and optional `fileMetadata` for size validation.
 
 ```typescript
-export interface FileMetadata {
-  path: string;
-  sizeBytes: number;
-  mimeType: string;
-}
+// FileMetadata imported from @/backend/types/complaints.types
 
 export async function submitComplaint(
   actorUserId: string,
@@ -271,6 +274,7 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
+import type { ComplaintEntity, ComplaintFileEntity, FileMetadata } from "@/backend/types/complaints.types";
 
 const ALLOWED_COMPLAINT_MIME_TYPES: readonly string[] = [
   "image/jpeg",
@@ -283,12 +287,6 @@ const ALLOWED_COMPLAINT_MIME_TYPES: readonly string[] = [
   "text/plain",
   "text/markdown",
 ] as const;
-
-export interface FileMetadata {
-  path: string;
-  sizeBytes: number;
-  mimeType: string;
-}
 
 async function validateComplaintFiles(
   files: FileMetadata[],
@@ -497,6 +495,8 @@ All methods must use `logger` (never `console`):
 - [ ] No hardcoded error strings in the service
 - [ ] TypeScript types are fully resolved (no `any`)
 - [ ] Service can be used from SSR context (no GraphQL-specific dependencies)
+- [ ] NO local type definitions in service files — all types imported from canonical `backend/types/` files
+- [ ] All entity types sourced from their respective canonical `.types.ts` files
 
 ---
 

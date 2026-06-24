@@ -883,6 +883,7 @@ import type { ... } from "@/frontend/views/dashboard/complaints/types/complaints
 3. **Define UI-specific types only when needed** — Only define types that have no generated equivalent (e.g., view props, UI state types, summary types).
 4. **No `any`, `unknown`, casting, or mapping** — All types must be strictly typed. No intermediate mapping functions.
 5. **Preserve backward compatibility** — Mock stores re-export types so existing Storybook stories continue to work during migration.
+6. **Backend canonical types flow through** — Frontend `types.ts` files re-export generated GraphQL types (which originate from backend canonical types). No duplication of backend entity structures.
 
 ---
 
@@ -921,6 +922,7 @@ Both commands must pass with zero errors.
 - [ ] No `any`, `unknown`, or casting in any type definition
 - [ ] No circular import dependencies
 - [ ] All mock store mock data updated to match new type shapes (nullable fields included)
+- [ ] No local entity type definitions — all types sourced from generated GraphQL types or extracted `types.ts` files
 
 **Quality Gate — Per-File Validation:**
 - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file

@@ -25,6 +25,22 @@
 - [ ] **No route param casts** — Use safety checks like `typeof params?.id === "string"`.
 - [ ] **Generated GraphQL types first** — Re-export from `graphql-types.ts`; define UI-specific types only when no generated equivalent exists.
 
+### 1.2a Single Canonical Object Type Pattern (CRITICAL RULE)
+
+- [ ] **One .types file per table** — Each database table MUST have exactly one canonical `.types.ts` file in `backend/types/`. NO exceptions.
+  - `backend/types/complaints.types.ts` — for `complaints` table
+  - `backend/types/suggestions.types.ts` — for `suggestions` table
+  - `backend/types/complaint-responses.types.ts` — for `complaint_responses` table
+  - `backend/types/notification-deliveries.types.ts` — for `notification_deliveries` table
+  - `backend/types/user-notification-preferences.types.ts` — for `user_notification_preferences` table
+  - `backend/types/user-device-tokens.types.ts` — for `user_device_tokens` table
+- [ ] **Canonical type naming** — Use `{Entity}SelectType`, `{Entity}InsertType`, `{Entity}ReturnType`, `{Entity}SubmitInput` naming conventions.
+- [ ] **No local type definitions in Pothos** — GraphQL Pothos files MUST import types from `backend/types/`. NEVER define local types like `export type SuggestionDefinition = {...}` or `export type ComplaintSimpleType = {...}`.
+- [ ] **Single GraphQL object per entity** — Create ONE GraphQL object type per entity using the canonical `{Entity}ReturnType`. Add resolved fields (joins, computed values) to the canonical type as needed.
+- [ ] **Type consolidation** — All entity-related types MUST be in the canonical file. Remove duplicate or local type definitions from other layers.
+- [ ] **No type mixing** — A `.types.ts` file MUST NOT contain types for multiple tables. Each table gets its own file.
+- [ ] **Import from canonical types** — Repository, Service, GraphQL, and Test layers MUST import and use canonical types from `backend/types/`.
+
 ### 1.2b Task Ordering & Dependency Integrity
 
 - [ ] **No forward dependencies** — A task MUST NOT depend on code introduced by a later task.

@@ -139,6 +139,15 @@ Include general system rules, a ban on monolithic services, and the **Zero Incom
 - [ ] **Strict Type Narrowing** - BANNED: `any`, `as any`, and `as unknown as`. You must find the actual types. Narrow them using type guards.
 - [ ] **No route param casts** - Instead of `useParams() as { id: string }`, use safety checks like `typeof params?.id === "string" ? params.id : ""`.
 
+### 1.2a Single Canonical Object Type Pattern (CRITICAL RULE)
+- [ ] **One .types file per table** - Each database table MUST have exactly one canonical `.types.ts` file in `backend/types/`. NO exceptions.
+- [ ] **Canonical type naming** - Use `{Entity}SelectType`, `{Entity}InsertType`, `{Entity}ReturnType`, `{Entity}SubmitInput` naming conventions.
+- [ ] **No local type definitions in Pothos** - GraphQL Pothos files MUST import types from `backend/types/`. NEVER define local types like `export type {Entity}Definition = {...}`.
+- [ ] **Single GraphQL object per entity** - Create ONE GraphQL object type per entity using the canonical `{Entity}ReturnType`. Add resolved fields (joins, computed values) to the canonical type as needed.
+- [ ] **Type consolidation** - All entity-related types MUST be in the canonical file. Remove duplicate or local type definitions from other layers.
+- [ ] **No type mixing** - A `.types.ts` file MUST NOT contain types for multiple tables. Each table gets its own file.
+- [ ] **Import from canonical types** - Repository, Service, GraphQL, and Test layers MUST import and use canonical types from `backend/types/`.
+
 ### 1.2b Task Ordering & Dependency Integrity
 - [ ] **No forward dependencies** - A task MUST NOT depend on code, types, schemas, or modules introduced by a later task. Tasks can only depend on the current project state or on earlier tasks.
 - [ ] **Incremental build order** - Tasks must be ordered so the dependency chain flows naturally: Database/Schema → Repository → Service → **DB/Repo Tests** → GraphQL (Backend) → GraphQL Documents (Frontend) → **Type Extraction** → **GraphQL Tests** + **Storybook Migration** → Frontend Stores → Frontend Views. Tests immediately follow the layer they verify. Type extraction happens before stores/views so types are available. Storybook migration happens before container migration so stories are ready when containers switch to `useQuery`.
@@ -465,22 +474,46 @@ Every task's **Success Criteria** section **MUST** include the following quality
 **Layer-Specific Rules (Database Repositories - Flattened from backend/db/repo/AGENTS.md):**
 - Use Drizzle standard syntax `db.select().from(<table>).leftJoin()` instead of relational `findMany` when multiple joins are needed to avoid type compilation slow downs.
 - Wrap all repository changes modifying multiple tables in an atomic `db.transaction()`.
+- **Import canonical types** from `backend/types/{entity}.types.ts` — use `{Entity}SelectType`, `{Entity}InsertType`, `{Entity}ReturnType`.
+- **NO local type definitions** — all types must come from canonical type files.
 
 **Target Files:**
 - `backend/db/repo/<domain>.repository.ts`
 - `backend/db/test/repo/<domain>.repository.test.ts`
+- `backend/types/{entity}.types.ts` — CREATE or UPDATE canonical types (if not already present)
 
 **Detailed Implementation Steps:**
 
-*Step 1: Write `<methodA>` with required business logic*
+*Step 1: Create or verify canonical types in `backend/types/{entity}.types.ts`*
+
+Define canonical types using Drizzle inference:
+```typescript
+import type { <table_name> } from "@/backend/db/schema";
+
+export type {Entity}SelectType = typeof <table_name>.$inferSelect;
+export type {Entity}InsertType = typeof <table_name>.$inferInsert;
+
+export type {Entity}ReturnType = Omit<{Entity}SelectType, 
+  | "deletedAt"
+  | "internalNotes"
+> & {
+  status: StatusEnum;
+  resolvedProperty?: string;
+};
+```
+
+*Step 2: Write `<methodA>` with required business logic*
 
 Implement as a namespace function in `<DomainRepository>`:
 - Fetch the existing entity by ID
 - Apply any conditional logic (e.g., quota restoration, status checks)
 - Update the entity state within a `db.transaction()` for atomicity
+- Use canonical types for parameters and return values
 
-*Step 2: Add comprehensive unit tests in `<domain>.repository.test.ts`*
+*Step 3: Add comprehensive unit tests in `<domain>.repository.test.ts`*
 Ensure unit tests verify both success states and rollback behavior on invalid inputs.
+- Import canonical types from `backend/types/{entity}.types.ts`
+- Use canonical types in test assertions and helper functions
 
 **Test Execution Requirements:**
 - **Run the whole test suite:** Run `bun run test:db` across the database folder to make sure no existing tests are broken.
@@ -489,8 +522,11 @@ Ensure unit tests verify both success states and rollback behavior on invalid in
   ```
 
 **Success Criteria / Check Progress Points:**
+- [ ] Canonical types defined in `backend/types/{entity}.types.ts`
 - [ ] `<methodA>` is fully implemented and updates entity state correctly.
 - [ ] All conditional logic (quota, status, flags) works as expected.
+- [ ] Repository imports and uses canonical types from `backend/types/`.
+- [ ] No local type definitions in repository file.
 - [ ] No compilation errors when compiling the database repository.
 - [ ] `bun run test:db` passes successfully for all database tests (0 failures).
 
@@ -560,6 +596,9 @@ Define a `dialogState` with open/type fields using `useState`. Render an accessi
 - Cache Updates: Ensure `id` fields are always exposed on GraphQL objects.
 - Locale Propagation: Resolvers must propagate `ctx.locale` to service calls.
 - **🚫 NO DB/Repo Imports**: Resolvers can ONLY depend on `backend/services/`.
+- **🚫 NO Local Type Definitions**: NEVER define local types like `export type {Entity}Definition = {...}` in Pothos files.
+- **Import canonical types**: All types MUST be imported from `backend/types/{entity}.types.ts`.
+- **Single GraphQL object per entity**: Create ONE GraphQL object type per entity using `{Entity}ReturnType`.
 
 **Target Files:**
 - `backend/graphql/pothos/<domain>.pothos.ts` — Add/modify Pothos objects
@@ -567,22 +606,54 @@ Define a `dialogState` with open/type fields using `useState`. Render an accessi
 
 **Detailed Implementation Steps:**
 
-*Step 1: Define Pothos object types with `id` field on every object*
+*Step 1: Import canonical types from `backend/types/`*
 
-Create type definitions for all GraphQL objects. Every object MUST expose an `id` field for Apollo cache normalization.
+```typescript
+import type { {Entity}ReturnType, {Entity}SubmitInput } from "@/backend/types";
+```
 
-*Step 2: Wire query and mutation resolvers to service methods*
+*Step 2: Define Pothos object types using canonical types*
+
+Create ONE GraphQL object type per entity using the canonical `{Entity}ReturnType`:
+```typescript
+const {Entity}Ref = gqlSchemaBuilder.objectRef<{Entity}ReturnType>("<Entity>");
+
+export const {Entity}PothosObject = {Entity}Ref.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    // ... other fields from {Entity}ReturnType
+    status: t.expose("status", { type: StatusPothosEnum }),
+    resolvedProperty: t.exposeString("resolvedProperty", { nullable: true }),
+  }),
+});
+```
+
+Every object MUST expose an `id` field for Apollo cache normalization.
+
+*Step 3: Define input types using canonical types*
+
+```typescript
+export const {Entity}SubmitInputPothosObject = gqlSchemaBuilder
+  .inputRef<{Entity}SubmitInput>("<Entity>SubmitInput")
+  .implement({
+    fields: t => ({
+      // ... fields from {Entity}SubmitInput
+    }),
+  });
+```
+
+*Step 4: Wire query and mutation resolvers to service methods*
 
 All resolvers delegate to service methods and propagate `ctx.locale`:
 - Query resolvers call service methods that return data
 - Mutation resolvers call service methods that perform writes
 - All resolvers pass `ctx.userId` and `ctx.locale` to service calls
 
-*Step 3: Register new Pothos modules in `index.ts`*
+*Step 5: Register new Pothos modules in `index.ts`*
 
 Export all new Pothos modules from the barrel file.
 
-*Step 4: Run schema generation and codegen*
+*Step 6: Run schema generation and codegen*
 
 Run `bun run generate:gqlSchema` then `bun codegen` to update the GraphQL schema and TypeScript types.
 
@@ -594,6 +665,9 @@ Run `bun run generate:gqlSchema` then `bun codegen` to update the GraphQL schema
   ```
 
 **Success Criteria / Check Progress Points:**
+- [ ] All types imported from `backend/types/{entity}.types.ts`
+- [ ] NO local type definitions in Pothos file
+- [ ] Single GraphQL object per entity using `{Entity}ReturnType`
 - [ ] All Pothos object types expose `id` field
 - [ ] All resolvers delegate to service layer with `ctx.locale` propagation
 - [ ] `bun run generate:gqlSchema` succeeds
@@ -1106,11 +1180,23 @@ Execute the following commands in order to guarantee system stability and preven
 - **SSR Compatibility**: Services must work in Next.js Server Components without GraphQL-specific context dependencies. No Apollo client, no browser-only APIs.
 - **Logging**: Use `import { logger } from '@/backend/lib/logger'`. No `console.*` calls. `logger.info` must never substitute for implementing user-facing functionality.
 
+### B2. Backend Types Layer (`backend/types/`)
+- **One File Per Table**: Each database table MUST have exactly one canonical `.types.ts` file. Example: `backend/types/complaints.types.ts` for the `complaints` table.
+- **Canonical Type Naming**: Use `{Entity}SelectType`, `{Entity}InsertType`, `{Entity}ReturnType`, `{Entity}SubmitInput`, `{Entity}UpdateInput` naming conventions.
+- **Type Foundation**: Define types using Drizzle's `$inferSelect` and `$inferInsert` as the foundation, then extend with resolved properties and proper enum typing.
+- **No Type Mixing**: A `.types.ts` file MUST NOT contain types for multiple tables. Each table gets its own file.
+- **Forbidden Fields**: Use `Omit` to exclude forbidden properties (like `deletedAt`, internal fields) from return types exposed to GraphQL.
+- **Resolved Properties**: Add resolved properties (from joins, computed values) as optional fields to `{Entity}ReturnType`.
+- **Enum Typing**: Reapply enums with proper typing from shared enum types.
+- **Single Source of Truth**: All other layers (Repository, Service, GraphQL, Test) MUST import types from these canonical files. NO local type definitions allowed in other layers.
+
 ### C. Backend GraphQL Layer (`backend/graphql/pothos/`)
 - **Nullability**: `nullable: false` by default.
 - **Cache Compliance**: Every object returned MUST expose an `id` field.
 - **🚫 NO DB/Repo Imports Allowed**: GraphQL resolvers (Pothos) are **strictly prohibited** from importing anything from `backend/db/`, `backend/db/repo/`, `backend/db/schema`, or `drizzle-orm`. GraphQL resolvers may ONLY depend on the service layer (`backend/services/`). All business logic, validation, and data access orchestration must be delegated to service methods. Resolvers are thin adapters that map GraphQL inputs/outputs to service calls — nothing more.
 - **Locale Propagation**: Resolvers must propagate `ctx.locale` to all service calls.
+- **🚫 NO Local Type Definitions**: Pothos files MUST NOT define local types like `export type {Entity}Definition = {...}`. All types MUST be imported from `backend/types/{entity}.types.ts`.
+- **Single Canonical Object**: Create ONE GraphQL object type per entity using `{Entity}ReturnType` from canonical types. Add resolved fields to the canonical type, not as separate GraphQL objects.
 
 ### D. Frontend GraphQL Layer (`frontend/graphql/`)
 - **Codegen Lifecycle**: Must run `bun run generate:gqlSchema` then `bun codegen`.

@@ -20,6 +20,12 @@ Add all new translation keys for suggestion management (admin actions, response 
 
 ---
 
+## Layer-Specific Rules
+
+- **No local type definitions in i18n files.**
+
+---
+
 ## Target Files
 
 | File | Action |
@@ -648,6 +654,7 @@ export const complaints: ComplaintsLabels = {
 - [ ] All interpolation placeholders (`{count}`, `{max}`, `{maxSize}`) are present in both EN and AR translations
 - [ ] No hardcoded strings in translation files that should be interpolated
 - [ ] TypeScript types compile without errors (`MessageSchema` satisfied)
+- [ ] No local entity type definitions — all types sourced from generated GraphQL types or extracted `types.ts` files
 
 ---
 
