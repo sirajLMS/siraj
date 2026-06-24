@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
 import { createMockClassInstance, setupStudent, setupTeacher, setupTestEntities } from "../entity-setup";
 import { runInRollback } from "../test-utils";

@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { ComplaintRepository } from "@/backend/db/repo/complaint.repository";
+import { ComplaintRepository } from "@/backend/db/repo";
 import { complaints } from "@/backend/db/schema";
 import { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import { createTestParent, createTestStudent, createTestUser } from "../entity-setup";
@@ -72,12 +72,12 @@ describe("ComplaintRepository — submitComplaint", () => {
 
     const result = await ComplaintRepository.submitComplaint(
       {
-        parentId: parent.id,
         studentId: student.id,
         category: ComplaintCategory.REGARDING_TEACHER,
         submitterEmail: "parent@test.com",
         body: "Teacher was rude",
       },
+      parent.id,
       tx
     );
 
@@ -98,12 +98,12 @@ describe("ComplaintRepository — submitComplaint", () => {
 
     const result = await ComplaintRepository.submitComplaint(
       {
-        parentId: parent.id,
         studentId: null,
         category: ComplaintCategory.REGARDING_SYSTEM,
         submitterEmail: "null-stud@test.com",
         body: "System is slow",
       },
+      parent.id,
       tx
     );
 
@@ -117,11 +117,11 @@ describe("ComplaintRepository — submitComplaint", () => {
 
     const result = await ComplaintRepository.submitComplaint(
       {
-        parentId: parent.id,
         category: ComplaintCategory.OTHER,
         submitterEmail: "no-stud@test.com",
         body: "General feedback",
       },
+      parent.id,
       tx
     );
 
@@ -133,11 +133,11 @@ describe("ComplaintRepository — submitComplaint", () => {
     const error = await expectRepoError(() =>
       ComplaintRepository.submitComplaint(
         {
-          parentId: "00000000-0000-0000-0000-000000000000",
           category: ComplaintCategory.OTHER,
           submitterEmail: "bad@test.com",
           body: "Should fail",
         },
+        "00000000-0000-0000-0000-000000000000",
         tx
       )
     );
@@ -238,7 +238,7 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
 
     const result = await ComplaintRepository.getComplaintQueue({ limit: 50, offset: 0 }, tx);
 
-    expect(result.totalCount).toBeGreaterThanOrEqual(1);
+    expect(result.metrics.totalCount).toBeGreaterThanOrEqual(1);
     expect(result.complaints.length).toBeGreaterThanOrEqual(1);
 
     const matched = result.complaints.find(r => r.body === "Admin queue complaint");
@@ -285,7 +285,7 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
 
     expect(page1.complaints.length).toBeLessThanOrEqual(2);
     expect(page2.complaints.length).toBeLessThanOrEqual(2);
-    expect(page1.totalCount).toBeGreaterThanOrEqual(3);
+    expect(page1.metrics.totalCount).toBeGreaterThanOrEqual(3);
   });
 
   complaintTest("excludes soft-deleted complaints", async tx => {
@@ -341,7 +341,7 @@ describe("ComplaintRepository — getComplaintMetrics", () => {
   complaintTest("returns correct counts for unanswered and answered", async tx => {
     const { parent } = await setupParentWithStudent(tx, "Metrics");
 
-    const beforeMetrics = await ComplaintRepository.getComplaintMetrics(tx);
+    const beforeMetrics = await ComplaintRepository.getComplaintMetrics(undefined, tx);
     const initialUnanswered = beforeMetrics.unanswered;
     const initialAnswered = beforeMetrics.answered;
 
@@ -349,7 +349,7 @@ describe("ComplaintRepository — getComplaintMetrics", () => {
     await insertComplaint(tx, parent.id, { status: "UNANSWERED" });
     await insertComplaint(tx, parent.id, { status: "ANSWERED" });
 
-    const metrics = await ComplaintRepository.getComplaintMetrics(tx);
+    const metrics = await ComplaintRepository.getComplaintMetrics(undefined, tx);
 
     expect(metrics.unanswered).toBe(initialUnanswered + 2);
     expect(metrics.answered).toBe(initialAnswered + 1);
@@ -359,11 +359,11 @@ describe("ComplaintRepository — getComplaintMetrics", () => {
   complaintTest("excludes soft-deleted from metrics", async tx => {
     const { parent } = await setupParentWithStudent(tx, "MetricsSoft");
 
-    const beforeMetrics = await ComplaintRepository.getComplaintMetrics(tx);
+    const beforeMetrics = await ComplaintRepository.getComplaintMetrics(undefined, tx);
 
     await insertComplaint(tx, parent.id, { status: "UNANSWERED", deletedAt: new Date() });
 
-    const afterMetrics = await ComplaintRepository.getComplaintMetrics(tx);
+    const afterMetrics = await ComplaintRepository.getComplaintMetrics(undefined, tx);
 
     expect(afterMetrics.unanswered).toBe(beforeMetrics.unanswered);
   });
@@ -457,7 +457,7 @@ describe("ComplaintRepository — non-transactional coverage fallback", () => {
   test("supports calls without tx for getAdminComplaintQueue", async () => {
     const result = await ComplaintRepository.getComplaintQueue({ limit: 1, offset: 0 });
     expect(result.complaints.length).toBeGreaterThanOrEqual(0);
-    expect(typeof result.totalCount).toBe("number");
+    expect(typeof result.metrics.totalCount).toBe("number");
   });
 
   test("supports calls without tx for getComplaintMetrics", async () => {
@@ -482,11 +482,11 @@ describe("ComplaintRepository — transaction rollback", () => {
 
       const created = await ComplaintRepository.submitComplaint(
         {
-          parentId: parent.id,
           category: ComplaintCategory.OTHER,
           submitterEmail: "rb@test.com",
           body: "Should be rolled back",
         },
+        parent.id,
         tx
       );
       createdId = created.id;

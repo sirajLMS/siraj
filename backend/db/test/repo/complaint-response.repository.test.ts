@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { ComplaintResponseRepository } from "@/backend/db/repo/complaint-response.repository";
+import { ComplaintResponseRepository } from "@/backend/db/repo";
 import { complaintResponses, complaints } from "@/backend/db/schema";
 import { ComplaintStatus } from "@/shared/lib/enum";
 import { createTestParent, createTestUser } from "../entity-setup";

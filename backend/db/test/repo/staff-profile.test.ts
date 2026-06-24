@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
+import { StaffProfileRepository } from "@/backend/db/repo";
 import { permissionGroups, staffProfiles, userPermissionGroups } from "@/backend/db/schema";
 import { createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";

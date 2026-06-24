@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import type { DBTransaction } from "../test-utils";
+import type { DBTransaction } from "../../db.types";
 import { runInRollback } from "../test-utils";
 
 /**

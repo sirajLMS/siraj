@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { StudentRepository } from "@/backend/db/repo/student.repository";
+import { StudentRepository } from "@/backend/db/repo";
 import type { StudentFilterArgs, StudentsOrderByClause } from "@/backend/types";
 import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
 import { OrderSortDirection, StudentStatus } from "@/shared/lib/enum";

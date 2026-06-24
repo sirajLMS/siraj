@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo";
 import { teacherAvailabilityWindows, teacherRecurringUnavailability } from "@/backend/db/schema";
 import { DayOfWeek, Gender } from "@/shared/lib/enum";
 import { createTestTeacher, createTestUser } from "../entity-setup";

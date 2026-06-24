@@ -203,6 +203,8 @@ export namespace ComplaintRepository {
         count: count(),
       })
       .from(complaints)
+      .leftJoin(parents, eq(complaints.parentId, parents.id))
+      .leftJoin(users, eq(parents.userId, users.id))
       .where(finalWhereClause)
       .groupBy(complaints.status);
 

@@ -10,6 +10,7 @@ export { NotificationRepository } from "./notification.repository";
 export { ParentRepository } from "./parent.repository";
 export { PermissionManagementRepository } from "./permission-management.repository";
 export { RateLimitRepository } from "./ratelimit.repository";
+export { ReportGroupingMode, ReportRepository } from "./report.repository";
 export { SchedulingRepository } from "./scheduling";
 export { SessionRepository } from "./session.repository";
 export { SignedUrlRepository } from "./signedUrl.repository";

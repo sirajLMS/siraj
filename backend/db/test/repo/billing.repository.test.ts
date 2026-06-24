@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { BillingRepository } from "@/backend/db/repo/billing.repository";
+import { BillingRepository } from "@/backend/db/repo";
 import { invoices } from "@/backend/db/schema";
 import { createTestParent, createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";

@@ -1,12 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { PermissionManagementRepository } from "@/backend/db/repo/permission-management.repository";
+import { PermissionManagementRepository } from "@/backend/db/repo";
 import { permissionGroups, permissions, users } from "@/backend/db/schema";
 import type { UserEntity } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 import { getErrorMessage } from "@/shared/utils/error";
-import { createTestUser, type DBTransaction, runInRollback } from "../test-utils";
+import type { DBTransaction } from "../../db.types";
+import { createTestUser, runInRollback } from "../test-utils";
 
 function testRepo(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, () => runInRollback(fn));

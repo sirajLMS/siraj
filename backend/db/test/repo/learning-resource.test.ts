@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { LearningResourceRepository } from "@/backend/db/repo/learning-resource.repository";
+import { LearningResourceRepository } from "@/backend/db/repo";
 import { learningResourceFiles, learningResources, storageFiles } from "@/backend/db/schema";
 import { createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
