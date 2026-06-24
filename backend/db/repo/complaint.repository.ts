@@ -3,13 +3,12 @@ import { db } from "@/backend/db/drizzleDb";
 import { complaints, parents, students, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
-  AdminComplaintQueueResult,
   ComplaintMetrics,
-  ComplaintQueueRowType,
-  ComplaintResponseWithResponderType,
+  ComplaintQueueResult,
+  ComplaintResponse,
+  ComplaintReturnType,
   ComplaintSelectType,
   ComplaintSubmitInput,
-  ComplaintWithResponsesType,
 } from "@/backend/types";
 import { type ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
@@ -43,10 +42,7 @@ export namespace ComplaintRepository {
     };
   };
 
-  export const getComplaintsByParent = async (
-    parentId: string,
-    tx?: DBTransaction
-  ): Promise<ComplaintWithResponsesType[]> => {
+  export const getComplaintsByParent = async (parentId: string, tx?: DBTransaction): Promise<ComplaintReturnType[]> => {
     const queryDb = tx ?? db;
 
     const results = await queryDb
@@ -78,14 +74,14 @@ export namespace ComplaintRepository {
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
       studentName: r.studentName ?? null,
-      responses: [] as ReadonlyArray<ComplaintResponseWithResponderType>,
+      responses: [] as ReadonlyArray<ComplaintResponse>,
     }));
   };
 
-  export const getAdminComplaintQueue = async (
+  export const getComplaintQueue = async (
     options: { search?: string | null; status?: string | null; limit: number; offset: number },
     tx?: DBTransaction
-  ): Promise<AdminComplaintQueueResult> => {
+  ): Promise<ComplaintQueueResult> => {
     const queryDb = tx ?? db;
 
     const conditions = [isNull(complaints.deletedAt)];
@@ -127,14 +123,7 @@ export namespace ComplaintRepository {
       .limit(options.limit)
       .offset(options.offset);
 
-    const [totalCount] = await queryDb
-      .select({ count: count() })
-      .from(complaints)
-      .leftJoin(parents, eq(complaints.parentId, parents.id))
-      .leftJoin(users, eq(parents.userId, users.id))
-      .where(whereClause);
-
-    const typedRows: ComplaintQueueRowType[] = rows.map(r => ({
+    const typedRows: ComplaintReturnType[] = rows.map(r => ({
       id: r.id,
       parentId: r.parentId,
       studentId: r.studentId ?? null,
@@ -150,8 +139,10 @@ export namespace ComplaintRepository {
     }));
 
     return {
-      rows: typedRows,
-      totalCount: totalCount?.count ?? 0,
+      // Type '{ complaints: ComplaintReturnType[]; }' is missing the following properties from type 'ComplaintQueueResult': id, metrics
+      // what should id be?
+      // get mertrics also but for the current where clause only
+      complaints: typedRows,
     };
   };
 
@@ -182,6 +173,8 @@ export namespace ComplaintRepository {
     return results[0] ?? null;
   };
 
+
+  // update this function to accept where clause
   export const getComplaintMetrics = async (tx?: DBTransaction): Promise<ComplaintMetrics> => {
     const queryDb = tx ?? db;
 
@@ -208,10 +201,18 @@ export namespace ComplaintRepository {
       .from(complaints)
       .where(and(eq(complaints.status, ComplaintStatus.ANSWERED), isNull(complaints.deletedAt)));
 
+    // const [totalCount] = await queryDb
+    //   .select({ count: count() })
+    //   .from(complaints)
+    //   .leftJoin(parents, eq(complaints.parentId, parents.id))
+    //   .leftJoin(users, eq(parents.userId, users.id))
+    //   .where(whereClause);
+
     return {
       unanswered,
       answered,
       avgResolutionHours: Math.round((avgResult?.avgHours ?? 0) * 100) / 100,
+      // totoalCount
     };
   };
 

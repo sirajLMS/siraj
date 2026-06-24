@@ -7,20 +7,17 @@ import {
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type {
-  AdminComplaintQueueResultType,
-  AdminQueueOptions,
-  ComplaintQueueRowType,
+  ComplaintQueueFilter,
+  ComplaintReturnType,
   ComplaintSelectType,
-  ComplaintWithResponsesType,
-  RespondToComplaintResult,
-  SubmitComplaintInputType,
+  ComplaintSubmitInput,
 } from "@/backend/types";
 import { AppPermission, NotificationEventType } from "@/shared/lib/enum";
 
 export namespace ComplaintService {
   export async function submitComplaint(
     actorUserId: string,
-    input: SubmitComplaintInputType,
+    input: ComplaintSubmitInput,
     locale?: string
   ): Promise<ComplaintSelectType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_SUBMIT_COMPLAINT);
@@ -70,10 +67,7 @@ export namespace ComplaintService {
     }
   }
 
-  export async function getParentComplaints(
-    actorUserId: string,
-    locale?: string
-  ): Promise<ComplaintWithResponsesType[]> {
+  export async function getParentComplaints(actorUserId: string, locale?: string): Promise<ComplaintReturnType[]> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -88,7 +82,7 @@ export namespace ComplaintService {
 
     try {
       const complaints = await ComplaintRepository.getComplaintsByParent(parent.id);
-      const results: ComplaintWithResponsesType[] = [];
+      const results: ComplaintReturnType[] = [];
 
       for (const complaint of complaints) {
         const responses = await ComplaintResponseRepository.getResponsesByComplaint(complaint.id);
@@ -116,9 +110,9 @@ export namespace ComplaintService {
 
   export async function getAdminQueue(
     actorUserId: string,
-    options: AdminQueueOptions,
+    options: ComplaintQueueFilter,
     locale?: string
-  ): Promise<{ complaints: ReadonlyArray<ComplaintQueueRowType>; totalCount: number }> {
+  ): Promise<{ complaints: ReadonlyArray<ComplaintReturnType> }> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -126,16 +120,15 @@ export namespace ComplaintService {
     }
 
     try {
-      const result = await ComplaintRepository.getAdminComplaintQueue({
+      const result = await ComplaintRepository.getComplaintQueue({
         limit: options.limit,
         offset: options.offset,
-        status: options.statusFilter ?? null,
+        status: options.status ?? null,
         search: options.search ?? null,
       });
 
       return {
-        complaints: result.rows,
-        totalCount: result.totalCount,
+        complaints: result.complaints,
       };
     } catch (error) {
       logger.error("Failed to get admin complaint queue", { actorUserId, options, error });
@@ -145,9 +138,9 @@ export namespace ComplaintService {
 
   export async function getAdminQueueWithMetrics(
     actorUserId: string,
-    options: AdminQueueOptions,
+    options: ComplaintQueueFilter,
     locale?: string
-  ): Promise<AdminComplaintQueueResultType> {
+  ): Promise<ComplaintReturnType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -156,23 +149,23 @@ export namespace ComplaintService {
 
     try {
       const [queueResult, metrics] = await Promise.all([
-        ComplaintRepository.getAdminComplaintQueue({
+        ComplaintRepository.getComplaintQueue({
           limit: options.limit,
           offset: options.offset,
-          status: options.statusFilter ?? null,
+          status: options.status ?? null,
           search: options.search ?? null,
         }),
         ComplaintRepository.getComplaintMetrics(),
       ]);
 
       return {
-        complaints: queueResult.rows,
-        totalCount: queueResult.totalCount,
+        complaints: queueResult.complaints,
         metrics: {
           id: "complaint-metrics",
           unanswered: metrics.unanswered,
           answered: metrics.answered,
           avgResolutionHours: metrics.avgResolutionHours,
+          totalCount: queueResult.metrics.totalCount,
         },
       };
     } catch (error) {
@@ -187,7 +180,7 @@ export namespace ComplaintService {
     body: string,
     sendEmail: boolean,
     locale?: string
-  ): Promise<RespondToComplaintResult> {
+  ): Promise<ComplaintReturnType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_RESPOND);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });

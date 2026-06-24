@@ -1,20 +1,14 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintService } from "@/backend/services";
 import type {
-  AdminComplaintQueueResultPothosType,
-  AdminComplaintQueueResultType,
-  ComplaintMetricsPothosType,
-  ComplaintPothosType,
-  ComplaintQueueFilterPothosType,
-  ComplaintQueueRowPothosType,
-  ComplaintQueueRowType,
-  ComplaintResponsePothosType,
-  ComplaintResponseWithResponderType,
+  ComplaintMetrics,
+  ComplaintQueueFilter,
+  ComplaintQueueResult,
+  ComplaintResponsePothosInput,
+  ComplaintResponse,
+  ComplaintReturnType,
   ComplaintSelectType,
-  ComplaintWithResponsesType,
-  ParentComplaintRecordPothosType,
-  RespondToComplaintInputPothosType,
-  SubmitComplaintInputPothosType,
+  SubmitComplaintInputType,
 } from "@/backend/types";
 import { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 
@@ -28,7 +22,7 @@ export const ComplaintStatusPothosEnum = gqlSchemaBuilder.enumType(ComplaintStat
   description: "Status of a complaint in the support queue.",
 });
 
-const ComplaintResponseRef = gqlSchemaBuilder.objectRef<ComplaintResponsePothosType>("ComplaintResponse");
+const ComplaintResponseRef = gqlSchemaBuilder.objectRef<ComplaintResponse>("ComplaintResponse");
 
 export const ComplaintResponsePothosObject = ComplaintResponseRef.implement({
   description: "A single response to a complaint.",
@@ -43,61 +37,26 @@ export const ComplaintResponsePothosObject = ComplaintResponseRef.implement({
   }),
 });
 
-const ComplaintRef = gqlSchemaBuilder.objectRef<ComplaintPothosType>("Complaint");
+const ComplaintRef = gqlSchemaBuilder.objectRef<ComplaintReturnType>("Complaint");
 
 export const ComplaintPothosObject = ComplaintRef.implement({
   description: "A parent complaint with full details and responses.",
   fields: t => ({
     id: t.exposeString("id"),
-    parentId: t.exposeString("parentId"),
-    studentId: t.exposeString("studentId", { nullable: true }),
-    category: t.expose("category", { type: ComplaintCategoryPothosEnum }),
-    submitterEmail: t.exposeString("submitterEmail"),
     body: t.exposeString("body"),
+    parentId: t.exposeString("parentId"),
+    parentName: t.exposeString("parentName"),
+    submitterEmail: t.exposeString("submitterEmail"),
+    studentId: t.exposeString("studentId", { nullable: true }),
+    studentName: t.exposeString("studentName", { nullable: true }),
     status: t.expose("status", { type: ComplaintStatusPothosEnum }),
+    category: t.expose("category", { type: ComplaintCategoryPothosEnum }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
-    parentName: t.exposeString("parentName"),
-    studentName: t.exposeString("studentName", { nullable: true }),
-    responses: t.expose("responses", { type: [ComplaintResponsePothosObject] }),
   }),
 });
 
-const ParentComplaintRecordRef = gqlSchemaBuilder.objectRef<ParentComplaintRecordPothosType>("ParentComplaintRecord");
-
-export const ParentComplaintRecordPothosObject = ParentComplaintRecordRef.implement({
-  description: "A parent-facing view of a single complaint record.",
-  fields: t => ({
-    id: t.exposeString("id"),
-    category: t.expose("category", { type: ComplaintCategoryPothosEnum }),
-    body: t.exposeString("body"),
-    status: t.expose("status", { type: ComplaintStatusPothosEnum }),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
-    studentName: t.exposeString("studentName", { nullable: true }),
-    responses: t.expose("responses", { type: [ComplaintResponsePothosObject] }),
-  }),
-});
-
-const ComplaintQueueRowRef = gqlSchemaBuilder.objectRef<ComplaintQueueRowPothosType>("ComplaintQueueRow");
-
-export const ComplaintQueueRowPothosObject = ComplaintQueueRowRef.implement({
-  description: "A single row in the admin complaint queue.",
-  fields: t => ({
-    id: t.exposeString("id"),
-    parentId: t.exposeString("parentId"),
-    studentId: t.exposeString("studentId", { nullable: true }),
-    category: t.expose("category", { type: ComplaintCategoryPothosEnum }),
-    submitterEmail: t.exposeString("submitterEmail"),
-    body: t.exposeString("body"),
-    status: t.expose("status", { type: ComplaintStatusPothosEnum }),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
-    parentName: t.exposeString("parentName"),
-    studentName: t.exposeString("studentName", { nullable: true }),
-    responseCount: t.exposeInt("responseCount"),
-  }),
-});
-
-const ComplaintMetricsRef = gqlSchemaBuilder.objectRef<ComplaintMetricsPothosType>("ComplaintMetrics");
+const ComplaintMetricsRef = gqlSchemaBuilder.objectRef<ComplaintMetrics>("ComplaintMetrics");
 
 export const ComplaintMetricsPothosObject = ComplaintMetricsRef.implement({
   description: "Aggregate metrics for the complaint queue.",
@@ -109,21 +68,20 @@ export const ComplaintMetricsPothosObject = ComplaintMetricsRef.implement({
   }),
 });
 
-const AdminComplaintQueueResultRef =
-  gqlSchemaBuilder.objectRef<AdminComplaintQueueResultPothosType>("AdminComplaintQueueResult");
+const AdminComplaintQueueResultRef = gqlSchemaBuilder.objectRef<ComplaintQueueResult>("AdminComplaintQueueResult");
 
 export const AdminComplaintQueueResultPothosObject = AdminComplaintQueueResultRef.implement({
   description: "Paginated admin complaint queue with metrics.",
   fields: t => ({
     id: t.exposeString("id"),
-    rows: t.expose("rows", { type: [ComplaintQueueRowPothosObject] }),
+    rows: t.expose("complaints", { type: [ComplaintPothosObject] }),
     metrics: t.expose("metrics", { type: ComplaintMetricsPothosObject }),
     totalCount: t.exposeInt("totalCount"),
   }),
 });
 
 export const SubmitComplaintInputPothosObject = gqlSchemaBuilder
-  .inputRef<SubmitComplaintInputPothosType>("SubmitComplaintInput")
+  .inputRef<SubmitComplaintInputType>("SubmitComplaintInput")
   .implement({
     description: "Input for submitting a new complaint.",
     fields: t => ({
@@ -135,7 +93,7 @@ export const SubmitComplaintInputPothosObject = gqlSchemaBuilder
   });
 
 export const RespondToComplaintInputPothosObject = gqlSchemaBuilder
-  .inputRef<RespondToComplaintInputPothosType>("RespondToComplaintInput")
+  .inputRef<ComplaintResponsePothosInput>("RespondToComplaintInput")
   .implement({
     description: "Input for responding to a complaint.",
     fields: t => ({
@@ -146,7 +104,7 @@ export const RespondToComplaintInputPothosObject = gqlSchemaBuilder
   });
 
 export const ComplaintQueueFilterPothosObject = gqlSchemaBuilder
-  .inputRef<ComplaintQueueFilterPothosType>("ComplaintQueueFilter")
+  .inputRef<ComplaintQueueFilter>("ComplaintQueueFilter")
   .implement({
     description: "Filter and pagination options for the admin complaint queue.",
     fields: t => ({
@@ -159,36 +117,14 @@ export const ComplaintQueueFilterPothosObject = gqlSchemaBuilder
 
 gqlSchemaBuilder.queryField("parentComplaints", t =>
   t.field({
-    type: [ParentComplaintRecordPothosObject],
+    type: [ComplaintPothosObject],
     description: "Returns the authenticated parent's complaint history with responses.",
     resolve: async (_root, _args, ctx) => {
       if (!ctx.user?.id) {
         throw new Error("unauthenticated");
       }
 
-      const complaints = await ComplaintService.getParentComplaints(ctx.user.id, ctx.locale);
-
-      return complaints.map(
-        (c: ComplaintWithResponsesType): ParentComplaintRecordPothosType => ({
-          id: c.id,
-          category: c.category as ComplaintCategory,
-          body: c.body,
-          status: c.status as ComplaintStatus,
-          createdAt: c.createdAt,
-          studentName: c.studentName,
-          responses: c.responses.map(
-            (r: ComplaintResponseWithResponderType): ComplaintResponsePothosType => ({
-              id: r.id,
-              complaintId: r.complaintId,
-              responderUserId: r.responderUserId,
-              body: r.body,
-              emailSent: r.emailSent,
-              createdAt: r.createdAt,
-              responderName: r.responderName,
-            })
-          ),
-        })
-      );
+      return await ComplaintService.getParentComplaints(ctx.user.id, ctx.locale);
     },
   })
 );
@@ -205,7 +141,7 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
         throw new Error("unauthenticated");
       }
 
-      const result: AdminComplaintQueueResultType = await ComplaintService.getAdminQueueWithMetrics(
+      const result: ComplaintQueueResult = await ComplaintService.getAdminQueueWithMetrics(
         ctx.user.id,
         {
           limit: args.filter.limit,
@@ -216,33 +152,18 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
         ctx.locale
       );
 
-      const rows: ComplaintQueueRowPothosType[] = result.complaints.map(
-        (c: ComplaintQueueRowType): ComplaintQueueRowPothosType => ({
-          id: c.id,
-          parentId: c.parentId,
-          studentId: c.studentId,
-          category: c.category as ComplaintCategory,
-          submitterEmail: c.submitterEmail,
-          body: c.body,
-          status: c.status as ComplaintStatus,
-          parentName: c.parentName ?? "",
-          studentName: c.studentName,
-          responseCount: c.responseCount,
-          createdAt: c.createdAt,
-          updatedAt: c.updatedAt,
-        })
-      );
+      const rows = result.complaints;
 
       return {
         id: "admin-complaint-queue",
-        rows,
+        complaints: rows,
         metrics: {
           id: "complaint-metrics",
           unanswered: result.metrics.unanswered,
           answered: result.metrics.answered,
           avgResolutionTime: result.metrics.avgResolutionHours > 0 ? `${result.metrics.avgResolutionHours}h` : null,
+          totalCount: result.totalCount,
         },
-        totalCount: result.totalCount,
       };
     },
   })
@@ -255,7 +176,7 @@ gqlSchemaBuilder.mutationField("submitComplaint", t =>
     args: {
       input: t.arg({ type: SubmitComplaintInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx): Promise<ComplaintPothosType> => {
+    resolve: async (_root, args, ctx): Promise<ComplaintReturnType> => {
       if (!ctx.user?.id) {
         throw new Error("unauthenticated");
       }
@@ -283,7 +204,6 @@ gqlSchemaBuilder.mutationField("submitComplaint", t =>
         updatedAt: created.updatedAt,
         parentName: "",
         studentName: null,
-        responses: [],
       };
     },
   })

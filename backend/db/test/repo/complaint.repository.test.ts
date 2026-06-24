@@ -235,12 +235,12 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
       body: "Admin queue complaint",
     });
 
-    const result = await ComplaintRepository.getAdminComplaintQueue({ limit: 50, offset: 0 }, tx);
+    const result = await ComplaintRepository.getComplaintQueue({ limit: 50, offset: 0 }, tx);
 
     expect(result.totalCount).toBeGreaterThanOrEqual(1);
-    expect(result.rows.length).toBeGreaterThanOrEqual(1);
+    expect(result.complaints.length).toBeGreaterThanOrEqual(1);
 
-    const matched = result.rows.find(r => r.body === "Admin queue complaint");
+    const matched = result.complaints.find(r => r.body === "Admin queue complaint");
     expect(matched).toBeDefined();
     expect(matched?.parentName).toBe("AdminQ Parent");
     expect(matched?.studentName).toBe("AdminQ Student");
@@ -254,13 +254,13 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
     await insertComplaint(tx, parent.id, { status: "UNANSWERED", body: "Unanswered one" });
     await insertComplaint(tx, parent.id, { status: "ANSWERED", body: "Answered one" });
 
-    const unanswered = await ComplaintRepository.getAdminComplaintQueue(
+    const unanswered = await ComplaintRepository.getComplaintQueue(
       { limit: 50, offset: 0, status: "UNANSWERED" },
       tx
     );
 
-    expect(unanswered.rows.every(r => r.status === "UNANSWERED")).toBeTrue();
-    expect(unanswered.rows.some(r => r.body === "Answered one")).toBeFalse();
+    expect(unanswered.complaints.every(r => r.status === "UNANSWERED")).toBeTrue();
+    expect(unanswered.complaints.some(r => r.body === "Answered one")).toBeFalse();
   });
 
   complaintTest("filters by search term on parent name", async tx => {
@@ -270,9 +270,9 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
 
     await insertComplaint(tx, parent.id, { body: "Searchable complaint" });
 
-    const result = await ComplaintRepository.getAdminComplaintQueue({ limit: 50, offset: 0, search: unique }, tx);
+    const result = await ComplaintRepository.getComplaintQueue({ limit: 50, offset: 0, search: unique }, tx);
 
-    expect(result.rows.some(r => r.body === "Searchable complaint")).toBeTrue();
+    expect(result.complaints.some(r => r.body === "Searchable complaint")).toBeTrue();
   });
 
   complaintTest("supports pagination with limit and offset", async tx => {
@@ -282,11 +282,11 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
       await insertComplaint(tx, parent.id, { body: `Paginated complaint ${i}` });
     }
 
-    const page1 = await ComplaintRepository.getAdminComplaintQueue({ limit: 2, offset: 0 }, tx);
-    const page2 = await ComplaintRepository.getAdminComplaintQueue({ limit: 2, offset: 2 }, tx);
+    const page1 = await ComplaintRepository.getComplaintQueue({ limit: 2, offset: 0 }, tx);
+    const page2 = await ComplaintRepository.getComplaintQueue({ limit: 2, offset: 2 }, tx);
 
-    expect(page1.rows.length).toBeLessThanOrEqual(2);
-    expect(page2.rows.length).toBeLessThanOrEqual(2);
+    expect(page1.complaints.length).toBeLessThanOrEqual(2);
+    expect(page2.complaints.length).toBeLessThanOrEqual(2);
     expect(page1.totalCount).toBeGreaterThanOrEqual(3);
   });
 
@@ -296,10 +296,10 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
     await insertComplaint(tx, parent.id, { body: "Visible complaint" });
     await insertComplaint(tx, parent.id, { body: "Hidden complaint", deletedAt: new Date() });
 
-    const result = await ComplaintRepository.getAdminComplaintQueue({ limit: 50, offset: 0 }, tx);
+    const result = await ComplaintRepository.getComplaintQueue({ limit: 50, offset: 0 }, tx);
 
-    expect(result.rows.some(r => r.body === "Visible complaint")).toBeTrue();
-    expect(result.rows.some(r => r.body === "Hidden complaint")).toBeFalse();
+    expect(result.complaints.some(r => r.body === "Visible complaint")).toBeTrue();
+    expect(result.complaints.some(r => r.body === "Hidden complaint")).toBeFalse();
   });
 });
 
@@ -457,8 +457,8 @@ describe("ComplaintRepository — non-transactional coverage fallback", () => {
   });
 
   test("supports calls without tx for getAdminComplaintQueue", async () => {
-    const result = await ComplaintRepository.getAdminComplaintQueue({ limit: 1, offset: 0 });
-    expect(result.rows.length).toBeGreaterThanOrEqual(0);
+    const result = await ComplaintRepository.getComplaintQueue({ limit: 1, offset: 0 });
+    expect(result.complaints.length).toBeGreaterThanOrEqual(0);
     expect(typeof result.totalCount).toBe("number");
   });
 
