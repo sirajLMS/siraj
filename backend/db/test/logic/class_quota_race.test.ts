@@ -219,67 +219,76 @@ describe("Class Quota System Constraints & Triggers", () => {
 
   test("Prevents concurrent race conditions via Advisory Locks", async () => {
     testLogger.info("Testing concurrent race condition prevention...");
+    
+    // Generate unique identifiers to prevent conflicts across parallel test runs
+    const uniqueSuffix = randomUUID();
+    const parentEmail = `parent-race-${uniqueSuffix}@example.com`;
+    const teacherEmail = `teacher-race-${uniqueSuffix}@example.com`;
+    
     const { student, teacher, parentUser, teacherUser, parent } = await createBaseTestData(db, {
-      parentEmail: `parent-race-${randomUUID()}@example.com`,
-      teacherEmail: `teacher-race-${randomUUID()}@example.com`,
-      studentName: "Race Student",
+      parentEmail,
+      teacherEmail,
+      studentName: `Race Student ${uniqueSuffix}`,
       classesRemaining: 1,
     });
 
-    // Execute two concurrent insertions targeting the same student
-    const resultPromises = Promise.allSettled([
-      SchedulingRepository.createClassInstance({
-        studentId: student.id,
-        teacherId: teacher.id,
-        scheduledStartAt: new Date("2026-06-15T15:00:00Z"),
-        scheduledEndAt: new Date("2026-06-15T16:00:00Z"),
-        durationMinutes: 60,
-        classType: "REGULAR",
-        quotaDeducted: true,
-        idempotencyKey: randomUUID(),
-      }),
-      SchedulingRepository.createClassInstance({
-        studentId: student.id,
-        teacherId: teacher.id,
-        scheduledStartAt: new Date("2026-06-15T16:00:00Z"),
-        scheduledEndAt: new Date("2026-06-15T17:00:00Z"),
-        durationMinutes: 60,
-        classType: "REGULAR",
-        quotaDeducted: true,
-        idempotencyKey: randomUUID(),
-      }),
-    ]);
-
-    const results = await resultPromises;
-
-    const successes = results.filter(r => r.status === "fulfilled");
-    const failures = results.filter((r): r is PromiseRejectedResult => r.status === "rejected");
-
-    // Exactly one insertion should succeed, and one should fail
-    expect(successes.length).toBe(1);
-    expect(failures.length).toBe(1);
-
-    const failReason: unknown = failures[0].reason;
-    const message = failReason instanceof Error ? failReason.message : String(failReason);
-    const cause = failReason instanceof Error && failReason.cause instanceof Error ? failReason.cause.message : "";
-    expect(message + cause).toMatch(/students_classes_remaining_chk|outOfQuota/);
-
-    // Verify final state in DB has classesRemaining = 0
-    await expectStudentQuota(db, student.id, 0);
-
-    // Clean up created records since they were outside runInRollback
     try {
-      await cleanupRaceTestData({
-        studentId: student.id,
-        parentUserId: parentUser.id,
-        teacherUserId: teacherUser.id,
-        parentId: parent.id,
-        teacherId: teacher.id,
-      });
-      testLogger.info("Race condition test passed with cleanup completed.");
-    } catch (cleanupError) {
-      testLogger.error("Cleanup failed:", cleanupError);
-      throw cleanupError;
+      // Execute two concurrent insertions targeting the same student
+      const resultPromises = Promise.allSettled([
+        SchedulingRepository.createClassInstance({
+          studentId: student.id,
+          teacherId: teacher.id,
+          scheduledStartAt: new Date("2026-06-15T15:00:00Z"),
+          scheduledEndAt: new Date("2026-06-15T16:00:00Z"),
+          durationMinutes: 60,
+          classType: "REGULAR",
+          quotaDeducted: true,
+          idempotencyKey: randomUUID(),
+        }),
+        SchedulingRepository.createClassInstance({
+          studentId: student.id,
+          teacherId: teacher.id,
+          scheduledStartAt: new Date("2026-06-15T16:00:00Z"),
+          scheduledEndAt: new Date("2026-06-15T17:00:00Z"),
+          durationMinutes: 60,
+          classType: "REGULAR",
+          quotaDeducted: true,
+          idempotencyKey: randomUUID(),
+        }),
+      ]);
+
+      const results = await resultPromises;
+
+      const successes = results.filter(r => r.status === "fulfilled");
+      const failures = results.filter((r): r is PromiseRejectedResult => r.status === "rejected");
+
+      // Exactly one insertion should succeed, and one should fail
+      expect(successes.length).toBe(1);
+      expect(failures.length).toBe(1);
+
+      const failReason: unknown = failures[0].reason;
+      const message = failReason instanceof Error ? failReason.message : String(failReason);
+      const cause = failReason instanceof Error && failReason.cause instanceof Error ? failReason.cause.message : "";
+      expect(message + cause).toMatch(/students_classes_remaining_chk|outOfQuota/);
+
+      // Verify final state in DB has classesRemaining = 0
+      await expectStudentQuota(db, student.id, 0);
+      
+      testLogger.info("Race condition test passed with unique data isolation.");
+    } finally {
+      // Always clean up created records to prevent interference with other tests
+      try {
+        await cleanupRaceTestData({
+          studentId: student.id,
+          parentUserId: parentUser.id,
+          teacherUserId: teacherUser.id,
+          parentId: parent.id,
+          teacherId: teacher.id,
+        });
+      } catch (cleanupError) {
+        testLogger.error("Cleanup failed:", cleanupError);
+        // Don't throw here as it would mask the original test result
+      }
     }
   });
 });
