@@ -5,9 +5,9 @@ import { Box, FormControl, InputAdornment, MenuItem, Select, TextField, Typograp
 import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import type { ParentStudentOption } from "@/frontend/stores/mockParentComplaintsStore";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import type { ComplaintFormData } from "../schemas/complaintFormSchema";
+import type { ParentStudentOption } from "../types/complaints.types";
 
 /** Styled field label with uppercase text and surface-variant color */
 const StyledFieldLabel = styled(Typography)(({ theme }) => ({

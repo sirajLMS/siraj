@@ -1,19 +1,12 @@
 import { create } from "zustand";
 import { logger } from "@/frontend/utils/logger";
 import type { ComplaintFormData } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
+import type {
+  ParentComplaintRecord,
+  ParentStudentOption,
+} from "@/frontend/views/dashboard/complaints/types/complaints.types";
 
-export interface ParentComplaintRecord {
-  readonly id: string;
-  readonly regarding: string;
-  readonly summary: string;
-  readonly status: "pending" | "resolved";
-  readonly adminResponse?: { readonly text: string; readonly answeredAt: string };
-}
-
-export interface ParentStudentOption {
-  readonly id: string;
-  readonly label: string;
-}
+export type { ParentComplaintRecord, ParentStudentOption };
 
 interface ParentComplaintsState {
   readonly studentOptions: readonly ParentStudentOption[];

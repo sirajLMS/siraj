@@ -1,11 +1,12 @@
+import type { ComplaintsLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ComplaintFormData } from "../schemas/complaintFormSchema";
 import type {
   AdminComplaintRow,
   AdminComplaintsSummary,
   ComplaintTab,
-} from "@/frontend/stores/mockAdminComplaintsStore";
-import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/stores/mockParentComplaintsStore";
-import type { ComplaintsLabels } from "@/shared/messages/types/dashboard/complaints/main";
-import type { ComplaintFormData } from "../schemas/complaintFormSchema";
+  ParentComplaintRecord,
+  ParentStudentOption,
+} from "./complaints.types";
 
 export type { ComplaintsLabels };
 

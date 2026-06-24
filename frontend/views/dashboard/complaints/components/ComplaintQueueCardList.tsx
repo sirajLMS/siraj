@@ -2,8 +2,8 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { AdminComplaintRow } from "@/frontend/stores/mockAdminComplaintsStore";
 import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { AdminComplaintRow } from "../types/complaints.types";
 import { ComplaintQueueCard } from "./ComplaintQueueCard";
 
 /** Centered message displayed when the complaint queue has no entries */

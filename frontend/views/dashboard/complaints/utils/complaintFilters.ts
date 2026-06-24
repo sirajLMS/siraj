@@ -1,4 +1,4 @@
-import type { AdminComplaintRow, ComplaintTab } from "@/frontend/stores/mockAdminComplaintsStore";
+import type { AdminComplaintRow, ComplaintTab } from "../types/complaints.types";
 
 export function filterComplaintsByTab(
   rows: readonly AdminComplaintRow[],

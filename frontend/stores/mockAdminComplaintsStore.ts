@@ -1,31 +1,15 @@
 // cspell:disable
 import { create } from "zustand";
 import { logger } from "@/frontend/utils/logger";
+import type {
+  AdminComplaintRow,
+  AdminComplaintsSummary,
+  ComplaintPriority,
+  ComplaintTab,
+} from "@/frontend/views/dashboard/complaints/types/complaints.types";
+import { ComplaintStatus } from "@/frontend/views/dashboard/complaints/types/complaints.types";
 
-export type ComplaintTab = "unanswered" | "answered";
-
-export type ComplaintPriority = "urgent" | "general";
-
-export type ComplaintStatus = "unanswered" | "answered";
-
-export interface AdminComplaintsSummary {
-  readonly unanswered: number;
-  readonly answered: number;
-  readonly avgResolutionHours: string;
-}
-
-export interface AdminComplaintRow {
-  readonly id: string;
-  readonly submitterName: string;
-  readonly submitterRole: string;
-  readonly avatarUrl?: string;
-  readonly priority: ComplaintPriority;
-  readonly receivedAt: string;
-  readonly complaintText: string;
-  readonly status: ComplaintStatus;
-  readonly adminResponse?: string;
-  readonly answeredAt?: string;
-}
+export type { AdminComplaintRow, AdminComplaintsSummary, ComplaintPriority, ComplaintStatus, ComplaintTab };
 
 interface AdminComplaintsState {
   readonly summary: AdminComplaintsSummary;
@@ -55,7 +39,7 @@ const MOCK_ROWS: AdminComplaintRow[] = [
     receivedAt: "2 hours ago",
     complaintText:
       "The digital portal for the Grade 9 Science assignments seems to be malfunctioning. My son cannot upload his final lab report, and the deadline is tonight. We need an extension or a manual upload option.",
-    status: "unanswered",
+    status: ComplaintStatus.Unanswered,
   },
   {
     id: "cmp-1002",
@@ -66,7 +50,7 @@ const MOCK_ROWS: AdminComplaintRow[] = [
     receivedAt: "5 hours ago",
     complaintText:
       "The attendance tracking module for the hybrid lecture sessions is not syncing correctly with the mobile app. Several students were marked absent despite being physically present.",
-    status: "unanswered",
+    status: ComplaintStatus.Unanswered,
   },
   {
     id: "cmp-1003",
@@ -75,7 +59,7 @@ const MOCK_ROWS: AdminComplaintRow[] = [
     priority: "general",
     receivedAt: "Oct 20, 2023",
     complaintText: "The online payment portal is not reflecting the scholarship discount for Semester 2.",
-    status: "answered",
+    status: ComplaintStatus.Answered,
     adminResponse:
       "We have updated the ledger to reflect the 15% academic scholarship. Please refresh your portal; the balance should now be correct.",
     answeredAt: "Oct 24, 2023 • 10:15 AM",
@@ -87,7 +71,7 @@ const MOCK_ROWS: AdminComplaintRow[] = [
     priority: "urgent",
     receivedAt: "Sep 10, 2023",
     complaintText: "Mathematics mid-term score shows 78, but the physical script has 87.",
-    status: "answered",
+    status: ComplaintStatus.Answered,
     adminResponse:
       "This was a clerical error during data entry. The system has been updated to reflect the correct score of 87. Apologies for the confusion.",
     answeredAt: "Sep 12, 2023 • 02:45 PM",
@@ -98,7 +82,7 @@ export const useAdminComplaintsStore = create<AdminComplaintsState>(set => ({
   summary: MOCK_SUMMARY,
   rows: MOCK_ROWS,
   searchQuery: "",
-  activeTab: "unanswered",
+  activeTab: ComplaintStatus.Unanswered,
   draftResponses: {},
   setSearchQuery: query => {
     set({ searchQuery: query });
@@ -128,7 +112,7 @@ export const useAdminComplaintsStore = create<AdminComplaintsState>(set => ({
           row.id === id
             ? {
                 ...row,
-                status: "answered" as const,
+                status: ComplaintStatus.Answered,
                 adminResponse: draft,
                 answeredAt: now,
               }

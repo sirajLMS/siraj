@@ -1,10 +1,6 @@
-import type {
-  AdminSuggestionRow,
-  AdminSuggestionsSummary,
-  SuggestionTab,
-} from "@/frontend/stores/mockAdminSuggestionsStore";
 import type { SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 import type { SuggestionFormData } from "../schemas/suggestionFormSchema";
+import type { AdminSuggestionRow, AdminSuggestionsSummary, SuggestionTab } from "./suggestions.types";
 
 export type { SuggestionsLabels };
 

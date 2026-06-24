@@ -4,8 +4,8 @@ import { AlternateEmailOutlined, CheckCircleOutlined, SendOutlined } from "@mui/
 import { Avatar, Box, Paper, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
-import type { AdminComplaintRow, ComplaintPriority } from "@/frontend/stores/mockAdminComplaintsStore";
 import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import { type AdminComplaintRow, type ComplaintPriority, ComplaintStatus } from "../types/complaints.types";
 
 /** Container for an already-answered complaint response with surface background */
 const StyledAnsweredResponseBox = styled(Box)(({ theme }) => ({
@@ -184,7 +184,7 @@ function ComplaintResponseSection({
   onDraftChange: (text: string) => void;
   onAnswer: (options: { readonly sendEmail: boolean }) => void;
 }>) {
-  if (row.status === "answered") {
+  if (row.status === ComplaintStatus.Answered) {
     // Already-answered response display
     return (
       <StyledAnsweredResponseBox>
@@ -253,7 +253,7 @@ export function ComplaintQueueCard({
   onDraftChange,
   onAnswer,
 }: Readonly<ComplaintQueueCardProps>) {
-  const isUnanswered = row.status === "unanswered";
+  const isUnanswered = row.status === ComplaintStatus.Unanswered;
 
   return (
     <StyledQueueCardPaper elevation={0} isUnanswered={isUnanswered}>

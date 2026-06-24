@@ -4,13 +4,13 @@ import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import type { ParentComplaintRecord, ParentStudentOption } from "@/frontend/stores/mockParentComplaintsStore";
 import { SubmissionSuccessBanner } from "@/frontend/views/dashboard/shared/SubmissionSuccessBanner";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import { ComplaintFormFields } from "./components/ComplaintFormFields";
 import { ComplaintPolicyPanel } from "./components/ComplaintPolicyPanel";
 import { ComplaintRecordCardList } from "./components/ComplaintRecordCardList";
 import type { ComplaintFormData } from "./schemas/complaintFormSchema";
+import type { ParentComplaintRecord, ParentStudentOption } from "./types/complaints.types";
 
 /** Mobile success banner wrapper with padding */
 const StyledMobileSuccessBannerBox = styled(Box)(({ theme }) => ({

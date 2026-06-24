@@ -3,8 +3,8 @@
 import { ExpandMoreOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { ParentComplaintRecord } from "@/frontend/stores/mockParentComplaintsStore";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
+import type { ParentComplaintRecord } from "../types/complaints.types";
 import { ComplaintRecordCard } from "./ComplaintRecordCard";
 
 /** Header row with icon/title on the left and count chip on the right */

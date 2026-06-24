@@ -1,24 +1,14 @@
 // cspell:disable
 import { create } from "zustand";
 import { logger } from "@/frontend/utils/logger";
+import type {
+  AdminSuggestionRow,
+  AdminSuggestionsSummary,
+  SuggestionStatus,
+  SuggestionTab,
+} from "@/frontend/views/dashboard/suggestions/types/suggestions.types";
 
-export type SuggestionStatus = "pending" | "reviewed";
-
-export type SuggestionTab = "pending" | "reviewed";
-
-export interface AdminSuggestionsSummary {
-  readonly pending: number;
-  readonly reviewed: number;
-  readonly avgResponseHours: string;
-}
-
-export interface AdminSuggestionRow {
-  readonly id: string;
-  readonly parentName: string;
-  readonly suggestionPreview: string;
-  readonly status: SuggestionStatus;
-  readonly submittedAt: string;
-}
+export type { AdminSuggestionRow, AdminSuggestionsSummary, SuggestionStatus, SuggestionTab };
 
 interface AdminSuggestionsState {
   readonly summary: AdminSuggestionsSummary;
