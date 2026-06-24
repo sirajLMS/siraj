@@ -3,40 +3,26 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
+import type {
+  AdminSuggestionResultType,
+  SubmitSuggestionInputType,
+  SuggestionSelectType,
+} from "@/backend/types/communications.types";
 import { AppPermission, NotificationEventType } from "@/shared/lib/enum";
 
-export interface SubmitSuggestionInput {
-  readonly submitterName: string;
-  readonly body: string;
-}
-
-export interface SuggestionResult {
-  readonly id: string;
-  readonly parentId: string;
-  readonly submitterName: string;
-  readonly body: string;
-  readonly emailSentAt: Date | null;
-  readonly createdAt: Date;
-}
-
-export interface AdminSuggestionOptions {
+interface AdminSuggestionOptions {
   readonly limit: number;
   readonly offset: number;
   readonly status?: string | null;
   readonly search?: string | null;
 }
 
-export interface AdminSuggestionsResult {
-  readonly suggestions: ReadonlyArray<SuggestionResult>;
-  readonly totalCount: number;
-}
-
 export namespace SuggestionService {
   export async function submitSuggestion(
     actorUserId: string,
-    input: SubmitSuggestionInput,
+    input: SubmitSuggestionInputType,
     locale?: string
-  ): Promise<SuggestionResult> {
+  ): Promise<SuggestionSelectType> {
     const hasPermission = await PermissionsService.hasPermission(
       actorUserId,
       AppPermission.COMMUNICATION_SUBMIT_SUGGESTION
@@ -80,14 +66,7 @@ export namespace SuggestionService {
         parentId: parent.id,
       });
 
-      return {
-        id: created.id,
-        parentId: created.parentId,
-        submitterName: created.submitterName,
-        body: created.body,
-        emailSentAt: created.emailSentAt ?? null,
-        createdAt: created.createdAt,
-      };
+      return created;
     } catch (error) {
       logger.error("Failed to submit suggestion", { actorUserId, error });
       throw error;
@@ -98,7 +77,7 @@ export namespace SuggestionService {
     actorUserId: string,
     options: AdminSuggestionOptions,
     locale?: string
-  ): Promise<AdminSuggestionsResult> {
+  ): Promise<AdminSuggestionResultType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -114,15 +93,10 @@ export namespace SuggestionService {
       });
 
       return {
-        suggestions: result.rows.map(s => ({
-          id: s.id,
-          parentId: s.parentId,
-          submitterName: s.submitterName,
-          body: s.body,
-          emailSentAt: s.emailSentAt ?? null,
-          createdAt: s.createdAt,
-        })),
+        suggestions: result.rows,
         totalCount: result.totalCount,
+        pendingCount: 0,
+        reviewedCount: 0,
       };
     } catch (error) {
       logger.error("Failed to get admin suggestions", { actorUserId, options, error });
@@ -134,7 +108,7 @@ export namespace SuggestionService {
     actorUserId: string,
     suggestionId: string,
     locale?: string
-  ): Promise<SuggestionResult> {
+  ): Promise<SuggestionSelectType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -149,14 +123,7 @@ export namespace SuggestionService {
         suggestionId: updated.id,
       });
 
-      return {
-        id: updated.id,
-        parentId: updated.parentId,
-        submitterName: updated.submitterName,
-        body: updated.body,
-        emailSentAt: updated.emailSentAt ?? null,
-        createdAt: updated.createdAt,
-      };
+      return updated;
     } catch (error) {
       logger.error("Failed to mark suggestion as reviewed", { actorUserId, suggestionId, error });
       throw error;

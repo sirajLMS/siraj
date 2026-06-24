@@ -8,58 +8,16 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
-import { AppPermission, type ComplaintCategory, NotificationEventType } from "@/shared/lib/enum";
+import type {
+  AdminComplaintQueueResultType,
+  ComplaintQueueRowType,
+  ComplaintSelectType,
+  ComplaintWithResponsesType,
+  SubmitComplaintInputType,
+} from "@/backend/types/communications.types";
+import { AppPermission, NotificationEventType } from "@/shared/lib/enum";
 
-export interface SubmitComplaintInput {
-  readonly studentId?: string | null;
-  readonly category: ComplaintCategory;
-  readonly body: string;
-  readonly submitterEmail: string;
-}
-
-export interface ComplaintWithResponses {
-  readonly id: string;
-  readonly parentId: string;
-  readonly studentId: string | null;
-  readonly category: string;
-  readonly submitterEmail: string;
-  readonly body: string;
-  readonly status: string;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
-  readonly responses: ReadonlyArray<{
-    readonly id: string;
-    readonly complaintId: string;
-    readonly responderUserId: string | null;
-    readonly body: string;
-    readonly emailSent: boolean;
-    readonly createdAt: Date;
-  }>;
-}
-
-export interface AdminQueueOptions {
-  readonly limit: number;
-  readonly offset: number;
-  readonly statusFilter?: string | null;
-  readonly search?: string | null;
-}
-
-export interface AdminQueueResult {
-  readonly complaints: ReadonlyArray<{
-    readonly id: string;
-    readonly parentId: string;
-    readonly studentId: string | null;
-    readonly category: string;
-    readonly submitterEmail: string;
-    readonly body: string;
-    readonly status: string;
-    readonly createdAt: Date;
-    readonly updatedAt: Date;
-  }>;
-  readonly totalCount: number;
-}
-
-export interface RespondToComplaintResult {
+interface RespondToComplaintResult {
   readonly id: string;
   readonly complaintId: string;
   readonly responderUserId: string | null;
@@ -68,21 +26,19 @@ export interface RespondToComplaintResult {
   readonly createdAt: Date;
 }
 
+interface AdminQueueOptions {
+  readonly limit: number;
+  readonly offset: number;
+  readonly statusFilter?: string | null;
+  readonly search?: string | null;
+}
+
 export namespace ComplaintService {
   export async function submitComplaint(
     actorUserId: string,
-    input: SubmitComplaintInput,
+    input: SubmitComplaintInputType,
     locale?: string
-  ): Promise<{
-    readonly id: string;
-    readonly parentId: string;
-    readonly studentId: string | null;
-    readonly category: string;
-    readonly submitterEmail: string;
-    readonly body: string;
-    readonly status: string;
-    readonly createdAt: Date;
-  }> {
+  ): Promise<ComplaintSelectType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_SUBMIT_COMPLAINT);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -123,23 +79,17 @@ export namespace ComplaintService {
         category: input.category,
       });
 
-      return {
-        id: created.id,
-        parentId: created.parentId,
-        studentId: created.studentId ?? null,
-        category: created.category,
-        submitterEmail: created.submitterEmail,
-        body: created.body,
-        status: created.status,
-        createdAt: created.createdAt,
-      };
+      return created;
     } catch (error) {
       logger.error("Failed to submit complaint", { actorUserId, error });
       throw error;
     }
   }
 
-  export async function getParentComplaints(actorUserId: string, locale?: string): Promise<ComplaintWithResponses[]> {
+  export async function getParentComplaints(
+    actorUserId: string,
+    locale?: string
+  ): Promise<ComplaintWithResponsesType[]> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -155,27 +105,12 @@ export namespace ComplaintService {
     try {
       const complaints = await ComplaintRepository.getComplaintsByParent(parent.id);
 
-      const results: ComplaintWithResponses[] = [];
+      const results: ComplaintWithResponsesType[] = [];
       for (const complaint of complaints) {
         const responses = await ComplaintResponseRepository.getResponsesByComplaint(complaint.id);
         results.push({
-          id: complaint.id,
-          parentId: complaint.parentId,
-          studentId: complaint.studentId ?? null,
-          category: complaint.category,
-          submitterEmail: complaint.submitterEmail,
-          body: complaint.body,
-          status: complaint.status,
-          createdAt: complaint.createdAt,
-          updatedAt: complaint.updatedAt,
-          responses: responses.map(r => ({
-            id: r.id,
-            complaintId: r.complaintId,
-            responderUserId: r.responderUserId ?? null,
-            body: r.body,
-            emailSent: r.emailSent,
-            createdAt: r.createdAt,
-          })),
+          ...complaint,
+          responses,
         });
       }
 
@@ -190,7 +125,7 @@ export namespace ComplaintService {
     actorUserId: string,
     options: AdminQueueOptions,
     locale?: string
-  ): Promise<AdminQueueResult> {
+  ): Promise<{ complaints: ReadonlyArray<ComplaintQueueRowType>; totalCount: number }> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -206,21 +141,49 @@ export namespace ComplaintService {
       });
 
       return {
-        complaints: result.rows.map(c => ({
-          id: c.id,
-          parentId: c.parentId,
-          studentId: c.studentId ?? null,
-          category: c.category,
-          submitterEmail: c.submitterEmail,
-          body: c.body,
-          status: c.status,
-          createdAt: c.createdAt,
-          updatedAt: c.updatedAt,
-        })),
+        complaints: result.rows,
         totalCount: result.totalCount,
       };
     } catch (error) {
       logger.error("Failed to get admin complaint queue", { actorUserId, options, error });
+      throw error;
+    }
+  }
+
+  export async function getAdminQueueWithMetrics(
+    actorUserId: string,
+    options: AdminQueueOptions,
+    locale?: string
+  ): Promise<AdminComplaintQueueResultType> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    try {
+      const [queueResult, metrics] = await Promise.all([
+        ComplaintRepository.getAdminComplaintQueue({
+          limit: options.limit,
+          offset: options.offset,
+          status: options.statusFilter ?? null,
+          search: options.search ?? null,
+        }),
+        ComplaintRepository.getComplaintMetrics(),
+      ]);
+
+      return {
+        complaints: queueResult.rows,
+        totalCount: queueResult.totalCount,
+        metrics: {
+          id: "complaint-metrics",
+          unanswered: metrics.unanswered,
+          answered: metrics.answered,
+          avgResolutionHours: metrics.avgResolutionHours,
+        },
+      };
+    } catch (error) {
+      logger.error("Failed to get admin complaint queue with metrics", { actorUserId, options, error });
       throw error;
     }
   }

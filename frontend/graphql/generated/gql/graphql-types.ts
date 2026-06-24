@@ -21,6 +21,24 @@ export type Scalars = {
   StringMap: { input: Record<string, string>; output: Record<string, string>; }
 };
 
+/** Paginated admin complaint queue with metrics. */
+export type AdminComplaintQueueResult = {
+  __typename?: 'AdminComplaintQueueResult';
+  id: Maybe<Scalars['String']['output']>;
+  metrics: Maybe<ComplaintMetrics>;
+  rows: Maybe<Array<ComplaintQueueRow>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+/** Paginated admin suggestion list with metrics. */
+export type AdminSuggestionResult = {
+  __typename?: 'AdminSuggestionResult';
+  id: Maybe<Scalars['String']['output']>;
+  metrics: Maybe<SuggestionMetrics>;
+  rows: Maybe<Array<Suggestion>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
 export enum AppLanguage {
   Ar = 'ar',
   En = 'en'
@@ -34,6 +52,7 @@ export enum AppPermission {
   BillingUpdateStatusPaid = 'BILLING_UPDATE_STATUS_PAID',
   BillingViewHistory = 'BILLING_VIEW_HISTORY',
   BillingViewUnpaidInvoices = 'BILLING_VIEW_UNPAID_INVOICES',
+  CommunicationSubmitSuggestion = 'COMMUNICATION_SUBMIT_SUGGESTION',
   ComplaintsDelete = 'COMPLAINTS_DELETE',
   ComplaintsList = 'COMPLAINTS_LIST',
   ComplaintsRespond = 'COMPLAINTS_RESPOND',
@@ -102,7 +121,10 @@ export enum AppPermission {
   StudentManageStatus = 'STUDENT_MANAGE_STATUS',
   StudentReassignTeacher = 'STUDENT_REASSIGN_TEACHER',
   StudentViewAssociated = 'STUDENT_VIEW_ASSOCIATED',
+  SupportSubmitComplaint = 'SUPPORT_SUBMIT_COMPLAINT',
+  SupportViewHistory = 'SUPPORT_VIEW_HISTORY',
   SystemBulkUpdateDst = 'SYSTEM_BULK_UPDATE_DST',
+  SystemDispatchEmail = 'SYSTEM_DISPATCH_EMAIL',
   SystemEnforceLeaveLimit = 'SYSTEM_ENFORCE_LEAVE_LIMIT',
   SystemEnforceSuspendedLock = 'SYSTEM_ENFORCE_SUSPENDED_LOCK',
   SystemEnforceTimeWindow = 'SYSTEM_ENFORCE_TIME_WINDOW',
@@ -271,6 +293,81 @@ export type ClassStatusEvent = {
   eventType: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
 };
+
+/** A parent complaint with full details and responses. */
+export type Complaint = {
+  __typename?: 'Complaint';
+  body: Maybe<Scalars['String']['output']>;
+  category: Maybe<ComplaintCategory>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
+  parentName: Maybe<Scalars['String']['output']>;
+  responses: Maybe<Array<ComplaintResponse>>;
+  status: Maybe<ComplaintStatus>;
+  studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+  submitterEmail: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** Categories for parent complaints. */
+export enum ComplaintCategory {
+  Other = 'OTHER',
+  RegardingSystem = 'REGARDING_SYSTEM',
+  RegardingTeacher = 'REGARDING_TEACHER'
+}
+
+/** Aggregate metrics for the complaint queue. */
+export type ComplaintMetrics = {
+  __typename?: 'ComplaintMetrics';
+  answered: Maybe<Scalars['Int']['output']>;
+  avgResolutionTime: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  unanswered: Maybe<Scalars['Int']['output']>;
+};
+
+/** Filter and pagination options for the admin complaint queue. */
+export type ComplaintQueueFilter = {
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+  search: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<ComplaintStatus>;
+};
+
+/** A single row in the admin complaint queue. */
+export type ComplaintQueueRow = {
+  __typename?: 'ComplaintQueueRow';
+  body: Maybe<Scalars['String']['output']>;
+  category: Maybe<ComplaintCategory>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
+  parentName: Maybe<Scalars['String']['output']>;
+  responseCount: Maybe<Scalars['Int']['output']>;
+  status: Maybe<ComplaintStatus>;
+  studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+  submitterEmail: Maybe<Scalars['String']['output']>;
+};
+
+/** A single response to a complaint. */
+export type ComplaintResponse = {
+  __typename?: 'ComplaintResponse';
+  body: Maybe<Scalars['String']['output']>;
+  complaintId: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  emailSent: Maybe<Scalars['Boolean']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  responderName: Maybe<Scalars['String']['output']>;
+  responderUserId: Maybe<Scalars['String']['output']>;
+};
+
+/** Status of a complaint in the support queue. */
+export enum ComplaintStatus {
+  Answered = 'ANSWERED',
+  Unanswered = 'UNANSWERED'
+}
 
 export enum CountryCode {
   Ad = 'AD',
@@ -930,6 +1027,8 @@ export type Mutation = {
   createTestEntities: Maybe<TestEntities>;
   deactivateParent: Maybe<DeactivateParentResult>;
   deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
+  /** Soft-deletes a complaint (admin only). Returns true on success. */
+  deleteComplaint: Maybe<Scalars['Boolean']['output']>;
   deleteFile: Maybe<FileOperationResult>;
   deleteInvoice: Maybe<DeleteInvoiceResult>;
   /** Permanently deletes a learning resource from physical storage and the database. */
@@ -946,6 +1045,8 @@ export type Mutation = {
   login: Maybe<LoginResponse>;
   logout: Maybe<Scalars['Boolean']['output']>;
   markInvoicePaid: Maybe<MarkInvoicePaidResult>;
+  /** Marks a suggestion as reviewed (admin only). */
+  markSuggestionReviewed: Maybe<Suggestion>;
   moveStorageItems: Maybe<BulkOperationResult>;
   partiallyUpdateStudent: Maybe<Student>;
   prepareUpload: Maybe<UploadPreparation>;
@@ -954,9 +1055,15 @@ export type Mutation = {
   renameFile: Maybe<FileOperationResult>;
   rescheduleClass: Maybe<ClassInstanceDetail>;
   resetClass: Maybe<Scalars['Boolean']['output']>;
+  /** Creates a response to an existing complaint (admin only). */
+  respondToComplaint: Maybe<ComplaintResponse>;
   revokePermissionGroupFromUser: Maybe<Scalars['Boolean']['output']>;
   setStorageItemProtection: Maybe<FileOperationResult>;
   stopClass: Maybe<ClassInstanceDetail>;
+  /** Submits a new complaint from the authenticated parent. */
+  submitComplaint: Maybe<Complaint>;
+  /** Submits a new suggestion from the authenticated parent. */
+  submitSuggestion: Maybe<Suggestion>;
   updateDirectoryPermissions: Maybe<FileOperationResult>;
   /** Updates a manager's profile fields. */
   updateManagerProfile: Maybe<ManagerDirectoryRow>;
@@ -1090,6 +1197,11 @@ export type MutationDeleteClassInstanceArgs = {
 };
 
 
+export type MutationDeleteComplaintArgs = {
+  complaintId: Scalars['String']['input'];
+};
+
+
 export type MutationDeleteFileArgs = {
   path: Scalars['String']['input'];
 };
@@ -1159,6 +1271,11 @@ export type MutationMarkInvoicePaidArgs = {
 };
 
 
+export type MutationMarkSuggestionReviewedArgs = {
+  suggestionId: Scalars['String']['input'];
+};
+
+
 export type MutationMoveStorageItemsArgs = {
   input: StorageItemsMoveInput;
 };
@@ -1197,6 +1314,11 @@ export type MutationResetClassArgs = {
 };
 
 
+export type MutationRespondToComplaintArgs = {
+  input: RespondToComplaintInput;
+};
+
+
 export type MutationRevokePermissionGroupFromUserArgs = {
   input: RevokePermissionGroupFromUserInput;
 };
@@ -1209,6 +1331,16 @@ export type MutationSetStorageItemProtectionArgs = {
 
 export type MutationStopClassArgs = {
   classInstanceId: Scalars['ID']['input'];
+};
+
+
+export type MutationSubmitComplaintArgs = {
+  input: SubmitComplaintInput;
+};
+
+
+export type MutationSubmitSuggestionArgs = {
+  input: SubmitSuggestionInput;
 };
 
 
@@ -1302,6 +1434,18 @@ export type PaginationArgs = {
   maxCount: InputMaybe<Scalars['Int']['input']>;
   page: InputMaybe<Scalars['Int']['input']>;
   skip: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** A parent-facing view of a single complaint record. */
+export type ParentComplaintRecord = {
+  __typename?: 'ParentComplaintRecord';
+  body: Maybe<Scalars['String']['output']>;
+  category: Maybe<ComplaintCategory>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  responses: Maybe<Array<ComplaintResponse>>;
+  status: Maybe<ComplaintStatus>;
+  studentName: Maybe<Scalars['String']['output']>;
 };
 
 export type ParentDirectory = {
@@ -1460,6 +1604,10 @@ export type PermissionGroup = {
 
 export type Query = {
   __typename?: 'Query';
+  /** Returns the paginated admin complaint queue with metrics. */
+  adminComplaintQueue: Maybe<AdminComplaintQueueResult>;
+  /** Returns the paginated admin suggestion list with metrics. */
+  adminSuggestions: Maybe<AdminSuggestionResult>;
   classInstance: Maybe<ClassInstanceDetail>;
   classStatusEvents: Maybe<Array<ClassStatusEvent>>;
   dailyScheduleList: Maybe<Array<DailyScheduleList>>;
@@ -1480,6 +1628,8 @@ export type Query = {
   me: Maybe<User>;
   notificationAlerts: Maybe<NotificationAlertsResult>;
   parentAssociatedStudents: Maybe<Array<AssociatedStudent>>;
+  /** Returns the authenticated parent's complaint history with responses. */
+  parentComplaints: Maybe<Array<ParentComplaintRecord>>;
   parentDirectory: Maybe<ParentDirectory>;
   parentDocuments: Maybe<Array<ParentDocument>>;
   parentInvoiceHistory: Maybe<Array<ParentInvoiceRow>>;
@@ -1521,6 +1671,16 @@ export type Query = {
   userPermissionGroups: Maybe<Array<Scalars['String']['output']>>;
   users: Maybe<Array<User>>;
   welcomeMessage: Maybe<Scalars['String']['output']>;
+};
+
+
+export type QueryAdminComplaintQueueArgs = {
+  filter: ComplaintQueueFilter;
+};
+
+
+export type QueryAdminSuggestionsArgs = {
+  filter: SuggestionFilter;
 };
 
 
@@ -1815,6 +1975,13 @@ export type ResourceUploadInput = {
   filePath: Scalars['String']['input'];
 };
 
+/** Input for responding to a complaint. */
+export type RespondToComplaintInput = {
+  body: Scalars['String']['input'];
+  complaintId: Scalars['String']['input'];
+  sendEmail: Scalars['Boolean']['input'];
+};
+
 export type RevokePermissionGroupFromUserInput = {
   groupId: Scalars['String']['input'];
   userId: Scalars['String']['input'];
@@ -2034,6 +2201,49 @@ export type StudentsWithFiltersResponse = {
   __typename?: 'StudentsWithFiltersResponse';
   data: Array<Student>;
   pageInfo: PageInfo;
+};
+
+/** Input for submitting a new complaint. */
+export type SubmitComplaintInput = {
+  body: Scalars['String']['input'];
+  category: ComplaintCategory;
+  studentId: InputMaybe<Scalars['String']['input']>;
+  submitterEmail: Scalars['String']['input'];
+};
+
+/** Input for submitting a new suggestion. */
+export type SubmitSuggestionInput = {
+  body: Scalars['String']['input'];
+  submitterName: Scalars['String']['input'];
+};
+
+/** A parent suggestion with full details. */
+export type Suggestion = {
+  __typename?: 'Suggestion';
+  body: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  emailSentAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
+  parentName: Maybe<Scalars['String']['output']>;
+  submitterName: Maybe<Scalars['String']['output']>;
+};
+
+/** Filter and pagination options for the admin suggestion list. */
+export type SuggestionFilter = {
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+  search: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Aggregate metrics for the suggestion queue. */
+export type SuggestionMetrics = {
+  __typename?: 'SuggestionMetrics';
+  avgResponseTime: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  pending: Maybe<Scalars['Int']['output']>;
+  reviewed: Maybe<Scalars['Int']['output']>;
 };
 
 export type SupportRequestResult = {

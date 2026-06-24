@@ -2,19 +2,15 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { complaintResponses, complaints, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import type {
+  ComplaintResponseInputType,
+  ComplaintResponseWithResponderType,
+} from "@/backend/types/communications.types";
 import { ComplaintStatus } from "@/shared/lib/enum";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-export interface ComplaintResponseInput {
-  complaintId: string;
-  responderUserId?: string | null;
-  body: string;
-  emailSent: boolean;
-}
+import type { DBTransaction } from "../db.types";
 
 export namespace ComplaintResponseRepository {
-  export const createResponse = async (input: ComplaintResponseInput, tx?: DBTransaction, locale?: string) => {
+  export const createResponse = async (input: ComplaintResponseInputType, tx?: DBTransaction, locale?: string) => {
     const runner = async (t: DBTransaction) => {
       const now = new Date();
 
@@ -45,10 +41,13 @@ export namespace ComplaintResponseRepository {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
-  export const getResponsesByComplaint = async (complaintId: string, tx?: DBTransaction) => {
+  export const getResponsesByComplaint = async (
+    complaintId: string,
+    tx?: DBTransaction
+  ): Promise<ComplaintResponseWithResponderType[]> => {
     const queryDb = tx ?? db;
 
-    return queryDb
+    return await queryDb
       .select({
         id: complaintResponses.id,
         complaintId: complaintResponses.complaintId,

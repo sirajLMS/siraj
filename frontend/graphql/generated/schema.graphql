@@ -1,3 +1,19 @@
+"""Paginated admin complaint queue with metrics."""
+type AdminComplaintQueueResult {
+  id: String
+  metrics: ComplaintMetrics
+  rows: [ComplaintQueueRow!]
+  totalCount: Int
+}
+
+"""Paginated admin suggestion list with metrics."""
+type AdminSuggestionResult {
+  id: String
+  metrics: SuggestionMetrics
+  rows: [Suggestion!]
+  totalCount: Int
+}
+
 enum AppLanguage {
   ar
   en
@@ -11,6 +27,7 @@ enum AppPermission {
   BILLING_UPDATE_STATUS_PAID
   BILLING_VIEW_HISTORY
   BILLING_VIEW_UNPAID_INVOICES
+  COMMUNICATION_SUBMIT_SUGGESTION
   COMPLAINTS_DELETE
   COMPLAINTS_LIST
   COMPLAINTS_RESPOND
@@ -79,7 +96,10 @@ enum AppPermission {
   STUDENT_MANAGE_STATUS
   STUDENT_REASSIGN_TEACHER
   STUDENT_VIEW_ASSOCIATED
+  SUPPORT_SUBMIT_COMPLAINT
+  SUPPORT_VIEW_HISTORY
   SYSTEM_BULK_UPDATE_DST
+  SYSTEM_DISPATCH_EMAIL
   SYSTEM_ENFORCE_LEAVE_LIMIT
   SYSTEM_ENFORCE_SUSPENDED_LOCK
   SYSTEM_ENFORCE_TIME_WINDOW
@@ -237,6 +257,77 @@ type ClassStatusEvent {
   description: String
   eventType: String
   id: String
+}
+
+"""A parent complaint with full details and responses."""
+type Complaint {
+  body: String
+  category: ComplaintCategory
+  createdAt: DateTime
+  id: String
+  parentId: String
+  parentName: String
+  responses: [ComplaintResponse!]
+  status: ComplaintStatus
+  studentId: String
+  studentName: String
+  submitterEmail: String
+  updatedAt: DateTime
+}
+
+"""Categories for parent complaints."""
+enum ComplaintCategory {
+  OTHER
+  REGARDING_SYSTEM
+  REGARDING_TEACHER
+}
+
+"""Aggregate metrics for the complaint queue."""
+type ComplaintMetrics {
+  answered: Int
+  avgResolutionTime: String
+  id: String
+  unanswered: Int
+}
+
+"""Filter and pagination options for the admin complaint queue."""
+input ComplaintQueueFilter {
+  limit: Int!
+  offset: Int!
+  search: String
+  status: ComplaintStatus
+}
+
+"""A single row in the admin complaint queue."""
+type ComplaintQueueRow {
+  body: String
+  category: ComplaintCategory
+  createdAt: DateTime
+  id: String
+  parentId: String
+  parentName: String
+  responseCount: Int
+  status: ComplaintStatus
+  studentId: String
+  studentName: String
+  submitterEmail: String
+}
+
+"""A single response to a complaint."""
+type ComplaintResponse {
+  body: String
+  complaintId: String
+  createdAt: DateTime
+  emailSent: Boolean
+  id: String
+  responderName: String
+  responderUserId: String
+}
+
+"""Status of a complaint in the support queue."""
+enum ComplaintStatus {
+  ANSWERED
+  UNANSWERED
 }
 
 enum CountryCode {
@@ -891,6 +982,9 @@ type Mutation {
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
   deactivateParent(parentId: String!): DeactivateParentResult
   deleteClassInstance(classInstanceId: ID!): Boolean
+
+  """Soft-deletes a complaint (admin only). Returns true on success."""
+  deleteComplaint(complaintId: String!): Boolean
   deleteFile(path: String!): FileOperationResult
   deleteInvoice(invoiceId: String!): DeleteInvoiceResult
 
@@ -916,6 +1010,9 @@ type Mutation {
   login(input: LoginInput!): LoginResponse
   logout: Boolean
   markInvoicePaid(expectedVersion: Int, invoiceId: String!): MarkInvoicePaidResult
+
+  """Marks a suggestion as reviewed (admin only)."""
+  markSuggestionReviewed(suggestionId: String!): Suggestion
   moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
@@ -924,9 +1021,18 @@ type Mutation {
   renameFile(input: FileRenameInput!): FileOperationResult
   rescheduleClass(classInstanceId: ID!, input: RescheduleClassInput!): ClassInstanceDetail
   resetClass(classInstanceId: ID!): Boolean
+
+  """Creates a response to an existing complaint (admin only)."""
+  respondToComplaint(input: RespondToComplaintInput!): ComplaintResponse
   revokePermissionGroupFromUser(input: RevokePermissionGroupFromUserInput!): Boolean
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
   stopClass(classInstanceId: ID!): ClassInstanceDetail
+
+  """Submits a new complaint from the authenticated parent."""
+  submitComplaint(input: SubmitComplaintInput!): Complaint
+
+  """Submits a new suggestion from the authenticated parent."""
+  submitSuggestion(input: SubmitSuggestionInput!): Suggestion
   updateDirectoryPermissions(input: DirectoryPermissionsUpdateInput!): FileOperationResult
 
   """Updates a manager's profile fields."""
@@ -976,6 +1082,17 @@ input PaginationArgs {
   maxCount: Int = 100
   page: Int
   skip: Int
+}
+
+"""A parent-facing view of a single complaint record."""
+type ParentComplaintRecord {
+  body: String
+  category: ComplaintCategory
+  createdAt: DateTime
+  id: String
+  responses: [ComplaintResponse!]
+  status: ComplaintStatus
+  studentName: String
 }
 
 type ParentDirectory {
@@ -1127,6 +1244,11 @@ type PermissionGroup {
 scalar PhoneNumber
 
 type Query {
+  """Returns the paginated admin complaint queue with metrics."""
+  adminComplaintQueue(filter: ComplaintQueueFilter!): AdminComplaintQueueResult
+
+  """Returns the paginated admin suggestion list with metrics."""
+  adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult
   classInstance(id: ID!): ClassInstanceDetail
   classStatusEvents(classInstanceId: ID!): [ClassStatusEvent!]
   dailyScheduleList(date: String!, search: String, teacherId: String): [DailyScheduleList!]
@@ -1156,6 +1278,9 @@ type Query {
   me: User
   notificationAlerts: NotificationAlertsResult
   parentAssociatedStudents(parentId: String!): [AssociatedStudent!]
+
+  """Returns the authenticated parent's complaint history with responses."""
+  parentComplaints: [ParentComplaintRecord!]
   parentDirectory(limit: Int = 50, offset: Int = 0, search: String): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
   parentInvoiceHistory(parentId: String!): [ParentInvoiceRow!]
@@ -1286,6 +1411,13 @@ input ResourceUploadInput {
   displayName: String!
   fileId: ID!
   filePath: String!
+}
+
+"""Input for responding to a complaint."""
+input RespondToComplaintInput {
+  body: String!
+  complaintId: String!
+  sendEmail: Boolean!
 }
 
 input RevokePermissionGroupFromUserInput {
@@ -1500,6 +1632,47 @@ enum StudentsOrderByColumn {
 type StudentsWithFiltersResponse {
   data: [Student!]!
   pageInfo: PageInfo!
+}
+
+"""Input for submitting a new complaint."""
+input SubmitComplaintInput {
+  body: String!
+  category: ComplaintCategory!
+  studentId: String
+  submitterEmail: String!
+}
+
+"""Input for submitting a new suggestion."""
+input SubmitSuggestionInput {
+  body: String!
+  submitterName: String!
+}
+
+"""A parent suggestion with full details."""
+type Suggestion {
+  body: String
+  createdAt: DateTime
+  emailSentAt: DateTime
+  id: String
+  parentId: String
+  parentName: String
+  submitterName: String
+}
+
+"""Filter and pagination options for the admin suggestion list."""
+input SuggestionFilter {
+  limit: Int!
+  offset: Int!
+  search: String
+  status: String
+}
+
+"""Aggregate metrics for the suggestion queue."""
+type SuggestionMetrics {
+  avgResponseTime: String
+  id: String
+  pending: Int
+  reviewed: Int
 }
 
 type SupportRequestResult {

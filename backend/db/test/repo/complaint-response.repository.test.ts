@@ -127,14 +127,12 @@ describe("ComplaintResponseRepository — createResponse", () => {
     expect(error.message.length).toBeGreaterThan(0);
   });
 
-describe("ComplaintResponseRepository — non-transactional coverage fallback", () => {
-  test("supports getResponsesByComplaint without tx", async () => {
-    const result = await ComplaintResponseRepository.getResponsesByComplaint(
-      "00000000-0000-0000-0000-000000000000"
-    );
-    expect(result).toEqual([]);
+  describe("ComplaintResponseRepository — non-transactional coverage fallback", () => {
+    test("supports getResponsesByComplaint without tx", async () => {
+      const result = await ComplaintResponseRepository.getResponsesByComplaint("00000000-0000-0000-0000-000000000000");
+      expect(result).toEqual([]);
+    });
   });
-});
 });
 
 describe("ComplaintResponseRepository — getResponsesByComplaint", () => {
