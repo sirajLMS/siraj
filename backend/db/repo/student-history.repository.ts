@@ -1,8 +1,7 @@
 import { and, eq, sql } from "drizzle-orm";
+import type { DBTransaction } from "../db.types";
 import { db } from "../drizzleDb";
 import { classInstancePerformance, classInstances, teachers, users } from "../schema";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export interface SessionSummary {
   id: string;

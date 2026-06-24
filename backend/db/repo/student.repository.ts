@@ -8,9 +8,7 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import * as Types from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
 import { OrderSortDirection } from "@/shared/lib/enum";
-
-// Extract the transaction type from Drizzle
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 const _processStudentQuery = async (
   query: PgSelect,

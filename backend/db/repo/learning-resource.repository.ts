@@ -4,8 +4,7 @@ import { learningResources } from "@/backend/db/schema";
 import { learningResourceFiles } from "@/backend/db/schema/storage";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 export interface LearningResourceRow {
   readonly id: string;

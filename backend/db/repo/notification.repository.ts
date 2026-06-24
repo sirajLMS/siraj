@@ -4,8 +4,7 @@ import { notificationDeliveries, userDeviceTokens } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import { NotificationDeliveryStatus } from "@/shared/lib/enum";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {
   [NotificationDeliveryStatus.PENDING]: 0,

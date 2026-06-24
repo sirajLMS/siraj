@@ -12,8 +12,7 @@ import {
 } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 type CurrencyExchangeRateUpdateInput = Omit<Types.CurrencyExchangeRateInsertInput, "id" | "createdAt" | "updatedAt">;
 type InvoiceCreateInput = Omit<Types.InvoiceInsertInput, "id" | "createdAt" | "updatedAt">;

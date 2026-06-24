@@ -8,8 +8,7 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import type { PaginatedUsersResponseSelectType, PaginationArgs, UserCreateInput, UserEntity } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 export namespace UserRepository {
   /**

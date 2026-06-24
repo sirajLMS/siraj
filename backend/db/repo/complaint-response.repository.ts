@@ -2,15 +2,13 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { complaintResponses, complaints, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type {
-  ComplaintResponseInputType,
-  ComplaintResponseWithResponderType,
-} from "@/backend/types/communications.types";
+import type { ComplaintResponse, ComplaintResponseInput } from "@/backend/types";
+import type {} from "@/backend/types/communications.types";
 import { ComplaintStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 export namespace ComplaintResponseRepository {
-  export const createResponse = async (input: ComplaintResponseInputType, tx?: DBTransaction, locale?: string) => {
+  export const createResponse = async (input: ComplaintResponseInput, tx?: DBTransaction, locale?: string) => {
     const runner = async (t: DBTransaction) => {
       const now = new Date();
 
@@ -44,7 +42,7 @@ export namespace ComplaintResponseRepository {
   export const getResponsesByComplaint = async (
     complaintId: string,
     tx?: DBTransaction
-  ): Promise<ComplaintResponseWithResponderType[]> => {
+  ): Promise<ComplaintResponse[]> => {
     const queryDb = tx ?? db;
 
     return await queryDb

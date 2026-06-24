@@ -2,9 +2,7 @@ import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { auditLogs } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
-
-// Extract the transaction type from Drizzle
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 /**
  * Helper to execute a function within a transaction if provided, or a new one otherwise

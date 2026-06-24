@@ -6,8 +6,7 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
 import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 const BANKING_DETAIL_FIELDS = [
   "beneficiaryName",

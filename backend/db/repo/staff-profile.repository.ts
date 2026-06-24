@@ -4,8 +4,7 @@ import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type { StaffProfileCreateResult, StaffProfileEntityInput } from "@/backend/types";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 export interface ManagerDirectoryRow {
   readonly id: string;

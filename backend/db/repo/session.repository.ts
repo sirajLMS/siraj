@@ -13,9 +13,7 @@ import type {
   SessionEntityInput,
   SessionMetadataEntity,
 } from "@/backend/types";
-
-// Extract the transaction type from Drizzle
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 // Default session configuration
 const DEFAULT_SESSION_TTL = 7 * 24 * 60 * 60; // 7 days in seconds

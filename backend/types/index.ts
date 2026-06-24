@@ -18,4 +18,5 @@ export * from "./suggestions.types";
 export * from "./system-settings.types";
 export * from "./teacher.types";
 export * from "./teacher-availability.types";
+export * from "./userDeviceTokens.types";
 export * from "./userNotificationPreferences.types";

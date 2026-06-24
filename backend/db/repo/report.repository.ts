@@ -2,8 +2,7 @@ import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, teachers, users } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 export enum ReportGroupingMode {
   DATE = "DATE",

@@ -19,8 +19,7 @@ import type {
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
-
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DbTransaction } from "../test/test-utils";
 
 export namespace PermissionManagementRepository {
   type QueryContext = DbTransaction | typeof db;

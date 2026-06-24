@@ -20,7 +20,6 @@ export const ComplaintStatusPothosEnum = gqlSchemaBuilder.enumType(ComplaintStat
   description: "Status of a complaint in the support queue.",
 });
 
-
 const ComplaintRef = gqlSchemaBuilder.objectRef<ComplaintReturnType>("Complaint");
 
 export const ComplaintPothosObject = ComplaintRef.implement({
@@ -74,8 +73,6 @@ export const SubmitComplaintInputPothosObject = gqlSchemaBuilder
       body: t.string({ required: true }),
     }),
   });
-
-
 
 export const ComplaintQueueFilterPothosObject = gqlSchemaBuilder
   .inputRef<ComplaintQueueFilter>("ComplaintQueueFilter")
@@ -182,8 +179,6 @@ gqlSchemaBuilder.mutationField("submitComplaint", t =>
     },
   })
 );
-
-
 
 gqlSchemaBuilder.mutationField("deleteComplaint", t =>
   t.field({

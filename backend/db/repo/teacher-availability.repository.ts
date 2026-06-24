@@ -10,8 +10,7 @@ import {
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import { DayOfWeek, VacationRequestStatus } from "@/shared/lib/enum";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 type TeacherGender = string | null;
 

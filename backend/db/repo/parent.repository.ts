@@ -3,8 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { invoices, parents, students, teachers, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ParentCreateResult, ParentEntityInput } from "@/backend/types";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 export namespace ParentRepository {
   export async function create(

@@ -48,7 +48,7 @@ export namespace ComplaintService {
           submitterEmail: input.submitterEmail,
           body: input.body,
         },
-         parent.id,
+        parent.id,
         undefined,
         locale
       );
@@ -140,7 +140,10 @@ export namespace ComplaintService {
     actorUserId: string,
     options: ComplaintQueueFilter,
     locale?: string
-  ): Promise<ComplaintReturnType> {
+  ): Promise<{
+    complaints: ReadonlyArray<ComplaintReturnType>;
+    metrics: { id: string; unanswered: number; answered: number; avgResolutionHours: number; totalCount: number };
+  }> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -159,6 +162,7 @@ export namespace ComplaintService {
       ]);
 
       return {
+        complaints: queueResult.complaints,
         metrics: {
           id: "complaint-metrics",
           unanswered: metrics.unanswered,

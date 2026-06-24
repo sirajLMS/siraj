@@ -2,8 +2,7 @@ import { and, count, desc, eq, ilike, isNotNull, isNull, sql } from "drizzle-orm
 import { db } from "@/backend/db/drizzleDb";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import type { DBTransaction } from "../db.types";
 
 export interface SuggestionSubmitInput {
   parentId: string;
