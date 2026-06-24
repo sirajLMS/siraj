@@ -447,11 +447,14 @@ Break down the implementation into letters. Tasks **MUST** be strictly ordered b
   7. **Ensures stores import types from `.types.ts` files** — if any store file defines types locally, those types are moved to `.types.ts` files and re-imported.
   8. This task MUST come after Frontend Apollo Documents (so codegen has run and generated types are available) and BEFORE Frontend Stores/Views.
 - **Storybook Migration task** (when migrating from mock stores): When containers switch from mock stores to `useQuery`, a dedicated Storybook Migration task MUST be included. This task:
-  1. Updates `*.stories.tsx` files to use `MockedProvider` decorators with mock GraphQL responses.
-  2. Defines mock data as constants within story files using generated type shapes (with `__typename`).
-  3. Keeps containers as top-level story components.
-  4. Mocks permission gates so containers render in stories.
-  5. This task MUST come AFTER Type Extraction (so types are available) and BEFORE Frontend Stores/Views (so stories are ready when containers switch).
+  1. Updates `*.stories.tsx` files to render View components (NOT Containers) with mock data and mock action handlers passed as props.
+  2. Removes all Apollo imports (`MockedProvider`, `MockedResponse`, GraphQL documents) from story files.
+  3. Removes all Container imports from story files.
+  4. Defines mock data as typed constants using generated GraphQL types from `graphql-types.ts` or view-level `.types.ts` files.
+  5. Defines mock action handlers as simple functions (e.g., `(id: string) => void`).
+  6. Keeps View components as top-level story components.
+  7. Mocks permission gates via `useUserStore.setState()` in decorators.
+  8. This task MUST come AFTER Type Extraction (so types are available) and BEFORE Frontend Stores/Views (so stories are ready when containers switch).
 - **Database Migration task protocol** (typically the first task): When a plan includes schema changes, new columns, or new permissions, the Database Migration task MUST:
   - Add any new permissions to `backend/db/migration/3-system_permissions_and_groups.sql` (NOT to a separate seed file).
   - **Create or update canonical `.types.ts` files** in `backend/types/` for all new/modified tables. Each table gets exactly one canonical file using `$inferSelect`/`$inferInsert` as foundation.
@@ -1077,76 +1080,101 @@ Change imports from mock stores to import from `types.ts` files instead.
 (standard quality gate checklists)
 ```
 
-#### *Example Task J (Storybook Migration — MockedProvider):*
+#### *Example Task J (Storybook Migration — View Components with Mock Props):*
 ```markdown
-### Task J — Storybook Migration: Mock Stores → MockedProvider Hooks
+### Task J — Storybook Migration: View Components with Mock Props
 
-**Objective:** Update `*.stories.tsx` files so they work with containers that use `useQuery` instead of mock stores. Stories use Apollo's `MockedProvider` to provide mock GraphQL responses.
+**Objective:** Update `*.stories.tsx` files to render View components (NOT Containers) with mock data and mock action handlers passed as props. Stories are pure UI showcases — no Apollo, no GraphQL, no stores.
 
-**Dependencies:** Depends on Type Extraction task (types available) and the preceding GraphQL documents task (document imports available).
+**Dependencies:** Depends on Type Extraction task (types available) and the preceding GraphQL documents task (generated types available).
 
 **Layer-Specific Rules:**
-- **Containers are top-level story components** — Stories render the actual Container, not sub-components.
-- **MockedProvider decorator** — Every story MUST be wrapped in a `MockedProvider` decorator from `@apollo/client/testing`.
-- **Mock data as constants** — Mock GraphQL responses are defined as typed constants within the story file, using `__typename` and generated type shapes.
-- **Permission mocking** — If containers have `<RequirePermission>` gates, stories MUST mock the permission context via decorators or store overrides.
-- **Multiple variants** — Provide Default, Empty, and Loading story variants where applicable.
+- **🚫 NO Apollo imports** — Stories MUST NEVER import `MockedProvider`, `MockedResponse`, or any Apollo testing utilities.
+- **🚫 NO Container imports** — Stories MUST NEVER import or render Container components.
+- **🚫 NO GraphQL document imports** — Stories MUST NEVER import query/mutation documents.
+- **View components only** — Stories render View components (DesktopView, MobileView, or base View) that receive data and actions as props.
+- **Mock data as props** — Stories provide mock data directly as component props using generated GraphQL types.
+- **Mock actions as props** — Stories provide mock action handlers as simple functions.
+- **Generated types only** — Mock data uses generated types from `graphql-types.ts` or view-level `.types.ts`.
 
 **Target Files:**
 - `frontend/views/dashboard/<domain>/<Container>.stories.tsx` — MODIFY
 
 **Detailed Implementation Steps:**
 
-*Step 1: Define mock GraphQL response data*
+*Step 1: Define mock data using generated types*
 
 ```typescript
-const MOCK_ROWS = [
+import type { {Entity}ReturnType } from "@/frontend/views/dashboard/{domain}/types/{entity}ViewTypes";
+
+const MOCK_ROWS: readonly {Entity}ReturnType[] = [
   {
-    __typename: "<GeneratedType>" as const,
     id: "mock-1",
-    // ... all fields from the generated type
+    // ... all fields from generated type
   },
 ];
 ```
 
-*Step 2: Create mock request/response pairs*
+*Step 2: Define mock action handlers*
 
 ```typescript
-const mocks = [
-  {
-    request: { query: <queryDocument>, variables: {} },
-    result: { data: { <queryName>: MOCK_ROWS } },
-  },
-];
-```
-
-*Step 3: Update story meta with MockedProvider decorator*
-
-```typescript
-const meta: Meta<typeof Container> = {
-  title: "Views/dashboard/<domain>/<Container>",
-  component: Container,
-  decorators: [
-    (Story) => (
-      <MockedProvider mocks={mocks} addTypename={true}>
-        <Story />
-      </MockedProvider>
-    ),
-  ],
+const mockActions = {
+  onRespond: (id: string) => { console.log("Respond to", id); },
+  onMarkDuplicate: (id: string, duplicateOfId: string) => { console.log("Mark duplicate", id); },
+  onDelete: (id: string) => { console.log("Delete", id); },
 };
 ```
 
-*Step 4: Add Empty and Loading variants*
+*Step 3: Create story with View component*
 
-Create additional story exports that override the mocks to return empty arrays or simulate loading.
+```typescript
+import type { Meta, StoryObj } from "@storybook/react";
+import { {Entity}DesktopView } from "./{Entity}DesktopView";
+
+const meta: Meta<typeof {Entity}DesktopView> = {
+  title: "Views/dashboard/{domain}/{Entity}DesktopView",
+  component: {Entity}DesktopView,
+  decorators: [
+    (Story) => {
+      useUserStore.setState({ permissions: REQUIRED_PERMISSIONS });
+      return <Story />;
+    },
+  ],
+};
+
+export default meta;
+type Story = StoryObj<typeof {Entity}DesktopView>;
+
+export const Default: Story = {
+  args: {
+    rows: MOCK_ROWS,
+    summary: MOCK_SUMMARY,
+    searchQuery: "",
+    activeTab: "pending",
+    onSearchChange: (query) => console.log("Search:", query),
+    onTabChange: (tab) => console.log("Tab:", tab),
+    ...mockActions,
+  },
+};
+
+export const Empty: Story = {
+  args: {
+    rows: [],
+    summary: EMPTY_SUMMARY,
+    // ... other props
+  },
+};
+```
 
 **Success Criteria / Check Progress Points:**
-- [ ] Stories use `MockedProvider` with mock GraphQL responses
-- [ ] Mock data uses generated type shapes (with `__typename`)
-- [ ] Containers remain top-level story components
-- [ ] Permission gates are properly mocked
-- [ ] Empty state stories work
-- [ ] No imports from production stores in story files
+- [ ] Stories render View components (NOT Containers)
+- [ ] NO Apollo imports in story files
+- [ ] NO Container imports in story files
+- [ ] NO GraphQL document imports in story files
+- [ ] Mock data passed as props using generated types
+- [ ] Mock action handlers passed as props
+- [ ] Permission gates properly mocked via `useUserStore.setState()`
+- [ ] Multiple variants (Default, Empty, Loading) where applicable
 - [ ] `bun tsgo` passes with 0 errors
 
 (standard quality gate checklists)
@@ -1169,7 +1197,7 @@ For simpler features (e.g., modifying an existing component, adding a single dia
 - **Form**, **View**, and **Detail** components receive data via props — they never call hooks or access stores directly.
 - All components use `useTranslations` for localized text.
 - All components use MUI theme tokens — no hardcoded colors.
-- Storybook stories (`*.stories.tsx`) are created for the Container using `MockedProvider` with mock GraphQL data (see Example Task J above).
+- Storybook stories (`*.stories.tsx`) are created for View components (NOT Containers) with mock data and mock action handlers passed as props (see Example Task J above).
 
 Outline the list of commands to verify the entire system compiles and passes all checks.
 
@@ -1305,11 +1333,15 @@ Execute the following commands in order to guarantee system stability and preven
 - **Mock store backward compatibility**: After extraction, mock store files re-import types from `types.ts` and re-export them for any remaining consumers.
 
 ### F3. Storybook Stories (`*.stories.tsx`)
-- **MockedProvider required**: Every story for a container that uses `useQuery` MUST be wrapped in a `MockedProvider` decorator from `@apollo/client/testing`.
-- **Mock data as constants**: Mock GraphQL responses are defined as typed constants within the story file, using `__typename` and generated type shapes.
-- **Container as top-level**: Stories render the actual Container component — NOT sub-components or wrapper elements.
-- **Permission mocking**: If containers have `<RequirePermission>` gates, stories MUST mock the permission context so the container renders.
-- **No production store imports**: Stories must not import from production Zustand stores. Mock data comes from `MockedProvider` responses.
+- **🚫 NO Apollo imports**: Stories MUST NEVER import `MockedProvider`, `MockedResponse`, or any Apollo testing utilities. Stories are NOT GraphQL tests.
+- **🚫 NO Container imports**: Stories MUST NEVER import or render Container components. Containers use Apollo hooks and stores, which violates story isolation.
+- **🚫 NO GraphQL document imports**: Stories MUST NEVER import query/mutation documents from `sharedDocuments/`.
+- **View components only**: Stories MUST render View components (DesktopView, MobileView, or base View) that receive data and actions as props.
+- **Mock data as props**: Stories provide mock data directly as component props using generated GraphQL types and view-level `.types.ts` types.
+- **Mock actions as props**: Stories provide mock action handlers (e.g., `onRespond`, `onMarkDuplicate`, `onDelete`) as props. These are simple `() => void` or `(id: string) => void` functions.
+- **Generated types only**: Mock data shapes MUST use generated GraphQL types and enums from `graphql-types.ts` or view-level `.types.ts` files. NEVER define local enum duplicates or inline type definitions.
+- **Permission mocking**: If views check permissions via `useUserStore`, stories seed the store via `useUserStore.setState()` in decorators.
+- **Multiple variants**: Provide Default, Empty, Loading variants where applicable.
 
 ### G. Backend Localization & next-intl (`backend/`)
 - **No Hardcoded Errors/Messages**: Always use `getBackendTranslations({ locale, namespace })`. Propagate `locale` through the stack.
@@ -1373,8 +1405,10 @@ Task A (Migration + Enum + Canonical Types)
                                                                  └──► Section 7 (Final Verification)
 ```
 
-Tasks H and I are both dependent on G but are independent of each other — they MAY be run in parallel. Task I (Storybook Migration) prepares the story infrastructure (`MockedProvider` decorators) before containers are migrated. Task J (i18n) can run after stories are prepared. Task K (Frontend Stores) depends on G for types. Task L (Frontend Views) depends on K for stores and I for story readiness.
+Tasks H and I are both dependent on G but are independent of each other — they MAY be run in parallel. Task I (Storybook Migration) prepares View component stories with mock props before containers are migrated. Task J (i18n) can run after stories are prepared. Task K (Frontend Stores) depends on G for types. Task L (Frontend Views) depends on K for stores and I for story readiness.
 
 **Canonical Types** are created in Task A alongside the migration and enum definitions. They are the foundation that all subsequent layers import from. Each table gets exactly one canonical `.types.ts` file in `backend/types/`.
 
 **Store Isolation**: Task K (Frontend Stores) creates pure UI state containers. They NEVER import Apollo or GraphQL documents. Task L (Frontend Views) creates container components that bridge Apollo hooks and Zustand stores — containers are the ONLY place where both coexist.
+
+**Storybook Isolation**: Task I (Storybook Migration) creates stories that render View components with mock props. Stories NEVER import Apollo, Containers, or GraphQL documents. Stories are pure UI showcases.
