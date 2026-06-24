@@ -12,6 +12,11 @@
 - Apollo hooks (`useQuery`, `useMutation`) belong in React container components, NOT inside Zustand `create()` calls
 - All imports must use `@/` path aliases — never relative paths crossing domain boundaries
 - No `console` methods — use `logger` from `@/frontend/utils/logger` if logging is needed
+- **🚫 NO Apollo imports** — Store files MUST NEVER import `useQuery`, `useMutation`, `useApolloClient`, `useLazyQuery`, or any Apollo hook/client from `@apollo/client` or any sub-path
+- **🚫 NO GraphQL document imports** — Store files MUST NEVER import from `@/frontend/graphql/sharedDocuments/` or any `.documents.ts` file
+- **🚫 NO type definitions** — Store files MUST NOT define entity types, interfaces, or type aliases for domain data. All types MUST be imported from `.types.ts` files
+- **Fake actions only** — Store actions are simple state setters (e.g., `setSubmitting(true)`, `setActiveTab(tab)`). They do NOT perform network requests, call APIs, or trigger side effects
+- **Generated GQL types and enums only** — When stores need typed values (e.g., status enums, tab types), they MUST import from generated GraphQL types or from view-level `.types.ts` files that re-export generated types. NEVER define local enum duplicates
 
 **Target Files:**
 - `frontend/stores/parentComplaintsStore.ts` — NEW (replaces `mockParentComplaintsStore.ts`)
@@ -406,6 +411,11 @@ If UI end-to-end tests exist:
 - [ ] All stores import types from `.types.ts` files (not from mock stores or inline definitions)
 - [ ] No mock data in any production store file
 - [ ] No Apollo hooks (`useQuery`, `useMutation`) inside any Zustand `create()` call
+- [ ] NO Apollo imports in any store file (`useQuery`, `useMutation`, `useApolloClient`, `useLazyQuery`, etc.)
+- [ ] NO GraphQL document imports in any store file (no `*QueryDocument`, `*MutationDocument` from `sharedDocuments/`)
+- [ ] NO local type definitions in any store file — all types imported from `.types.ts` files
+- [ ] Store actions are simple state setters only — no network requests, no API calls, no side effects
+- [ ] All types use generated GQL types and enums from `graphql-types.ts` or view-level `.types.ts` files
 - [ ] No `console` methods — use `logger` from `@/frontend/utils/logger` if logging is needed
 - [ ] All state properties use `readonly` modifiers
 - [ ] All state interfaces are NOT exported (internal to the store file)

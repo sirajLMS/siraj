@@ -6,7 +6,7 @@
 
 ## Objective
 
-Extend suggestion and complaint stores with new actions for review, respond, duplicate, delete, file upload, and parent suggestion history. Create a new `parentSuggestionsStore.ts` for the parent suggestion history view. All stores use generated GraphQL types from `graphql-types.ts` and Apollo hooks via `TypedDocumentNode` from the frontend documents created in Task G.
+Extend suggestion and complaint stores with new UI state management for review, respond, duplicate, delete, file upload, and parent suggestion history. Create a new `parentSuggestionsStore.ts` for the parent suggestion history view. All stores manage ONLY UI state — Apollo hooks (`useQuery`, `useMutation`) belong in React container components, NOT in Zustand stores.
 
 ---
 
@@ -22,35 +22,28 @@ Extend suggestion and complaint stores with new actions for review, respond, dup
 
 | File | Action |
 |------|--------|
-| `frontend/stores/adminSuggestionsStore.ts` | NEW — Real store replacing `mockAdminSuggestionsStore.ts` |
-| `frontend/stores/parentSuggestionsStore.ts` | NEW — Parent suggestion history store |
-| `frontend/stores/adminComplaintsStore.ts` | NEW — Real store replacing `mockAdminComplaintsStore.ts` |
-| `frontend/stores/parentComplaintsStore.ts` | NEW — Real store replacing `mockParentComplaintsStore.ts` |
+| `frontend/stores/adminSuggestionsStore.ts` | NEW — UI state store replacing `mockAdminSuggestionsStore.ts` |
+| `frontend/stores/parentSuggestionsStore.ts` | NEW — Parent suggestion history UI state store |
+| `frontend/stores/adminComplaintsStore.ts` | NEW — UI state store replacing `mockAdminComplaintsStore.ts` |
+| `frontend/stores/parentComplaintsStore.ts` | NEW — UI state store replacing `mockParentComplaintsStore.ts` |
 
 ---
 
 ## Pre-Implementation Checklist
 
 - [ ] Read `frontend/stores/AGENTS.md` for store layer rules
-- [ ] Verify generated GraphQL documents exist from Task G:
-  - `adminSuggestionsQueryDocument`
-  - `respondToSuggestionMutationDocument`
-  - `markSuggestionDuplicateMutationDocument`
-  - `deleteSuggestionMutationDocument`
-  - `searchSuggestionsQueryDocument`
-  - `markSuggestionReviewedMutationDocument`
-  - `parentSuggestionsQueryDocument`
-  - `submitSuggestionMutationDocument`
-  - `adminComplaintsQueryDocument`
-  - `answerComplaintMutationDocument`
-  - `parentComplaintsQueryDocument`
-  - `submitComplaintMutationDocument`
 - [ ] Verify canonical types exist from Task I:
   - `suggestionsViewTypes.ts` with `AdminSuggestionRow`, `SuggestionStatusType`, `ParentSuggestionRecord`, `SuggestionSearchResult`
   - `complaintsViewTypes.ts` with `AdminComplaintRow`, `ComplaintFileType`, `ParentComplaintRecord`
-- [ ] Verify `useMutation` and `useQuery` are importable from `@apollo/client`
-- [ ] Confirm no `any`, `unknown`, or casting will be used in store definitions
+- [ ] Verify generated GraphQL types exist from codegen:
+  - `SuggestionStatus` enum in `graphql-types.ts`
+  - `ComplaintFile` type in `graphql-types.ts`
+- [ ] Confirm NO `any`, `unknown`, or casting will be used in store definitions
 - [ ] Confirm all stores use `logger` from `@/frontend/utils/logger` (never `console`)
+- [ ] **Confirm NO Apollo imports** — stores MUST NOT import `useQuery`, `useMutation`, `useApolloClient`, or any Apollo hook/client
+- [ ] **Confirm NO GraphQL document imports** — stores MUST NOT import from `@/frontend/graphql/sharedDocuments/`
+- [ ] **Confirm NO type definitions** — stores MUST NOT define entity types, interfaces, or type aliases
+- [ ] **Confirm fake actions only** — store actions are simple state setters, no network requests or API calls
 
 ---
 
@@ -58,33 +51,13 @@ Extend suggestion and complaint stores with new actions for review, respond, dup
 
 ### 1. Admin Suggestions Store
 
-Create `frontend/stores/adminSuggestionsStore.ts` as a real Zustand store that uses Apollo hooks for data fetching and mutations.
+Create `frontend/stores/adminSuggestionsStore.ts` as a UI state store. It does NOT fetch data — Apollo `useQuery` and `useMutation` are called in the container component (`AdminSuggestionsContainer.tsx`). The store holds only client-side UI state.
 
 ```typescript
 import { create } from "zustand";
-import { useMutation, useQuery } from "@apollo/client";
-import { logger } from "@/frontend/utils/logger";
-import {
-  adminSuggestionsQueryDocument,
-  respondToSuggestionMutationDocument,
-  markSuggestionDuplicateMutationDocument,
-  deleteSuggestionMutationDocument,
-  searchSuggestionsQueryDocument,
-  markSuggestionReviewedMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/suggestion.documents";
 import type {
-  AdminSuggestionsQuery,
-  RespondToSuggestionMutation,
-  MarkSuggestionDuplicateMutation,
-  DeleteSuggestionMutation,
-  SearchSuggestionsQuery,
-  MarkSuggestionReviewedMutation,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import type {
-  AdminSuggestionRow,
-  AdminSuggestionsSummary,
-  SuggestionSearchResult,
   SuggestionTab,
+  SuggestionSearchResult,
 } from "@/frontend/views/dashboard/suggestions/types/suggestionsViewTypes";
 
 interface AdminSuggestionsStoreState {
@@ -95,21 +68,21 @@ interface AdminSuggestionsStoreState {
   readonly respondLoading: boolean;
   readonly duplicateLoading: boolean;
   readonly deleteLoading: boolean;
+  readonly markingReviewedId: string;
+  readonly isMarkingReviewed: boolean;
   setSearchQuery: (query: string) => void;
   setActiveTab: (tab: SuggestionTab) => void;
-  useAdminSuggestionsQuery: () => {
-    readonly data: AdminSuggestionsQuery | undefined;
-    readonly loading: boolean;
-    readonly error: string | undefined;
-  };
-  useRespondToSuggestion: () => (suggestionId: string, adminResponse: string) => Promise<void>;
-  useMarkAsDuplicate: () => (suggestionId: string, duplicateOfId: string) => Promise<void>;
-  useDeleteSuggestion: () => (suggestionId: string) => Promise<void>;
-  useSearchSuggestions: () => (query: string, excludeId: string) => Promise<void>;
-  useMarkReviewed: () => (suggestionId: string) => Promise<void>;
+  setSearchResults: (results: readonly SuggestionSearchResult[]) => void;
+  setSearchLoading: (loading: boolean) => void;
+  setRespondLoading: (loading: boolean) => void;
+  setDuplicateLoading: (loading: boolean) => void;
+  setDeleteLoading: (loading: boolean) => void;
+  setMarkingReviewedId: (id: string) => void;
+  setIsMarkingReviewed: (value: boolean) => void;
+  resetMarkingReviewed: () => void;
 }
 
-export const useAdminSuggestionsStore = create<AdminSuggestionsStoreState>((set, get) => ({
+export const useAdminSuggestionsStore = create<AdminSuggestionsStoreState>(set => ({
   searchQuery: "",
   activeTab: "pending",
   searchResults: [],
@@ -117,6 +90,8 @@ export const useAdminSuggestionsStore = create<AdminSuggestionsStoreState>((set,
   respondLoading: false,
   duplicateLoading: false,
   deleteLoading: false,
+  markingReviewedId: "",
+  isMarkingReviewed: false,
 
   setSearchQuery: query => {
     set({ searchQuery: query });
@@ -126,155 +101,74 @@ export const useAdminSuggestionsStore = create<AdminSuggestionsStoreState>((set,
     set({ activeTab: tab });
   },
 
-  useAdminSuggestionsQuery: () => {
-    const { data, loading, error } = useQuery(adminSuggestionsQueryDocument);
-    return {
-      data,
-      loading,
-      error: error?.message,
-    };
+  setSearchResults: results => {
+    set({ searchResults: results });
   },
 
-  useRespondToSuggestion: () => {
-    const [respondMutation] = useMutation(respondToSuggestionMutationDocument);
-
-    return async (suggestionId: string, adminResponse: string) => {
-      set({ respondLoading: true });
-      try {
-        await respondMutation({
-          variables: { suggestionId, adminResponse },
-          refetchQueries: [{ query: adminSuggestionsQueryDocument }],
-        });
-        logger.info("Suggestion responded to successfully", { suggestionId });
-      } catch (err) {
-        logger.error("Failed to respond to suggestion", { suggestionId, error: err });
-        throw err;
-      } finally {
-        set({ respondLoading: false });
-      }
-    };
+  setSearchLoading: loading => {
+    set({ searchLoading: loading });
   },
 
-  useMarkAsDuplicate: () => {
-    const [duplicateMutation] = useMutation(markSuggestionDuplicateMutationDocument);
-
-    return async (suggestionId: string, duplicateOfId: string) => {
-      set({ duplicateLoading: true });
-      try {
-        await duplicateMutation({
-          variables: { suggestionId, duplicateOfId },
-          refetchQueries: [{ query: adminSuggestionsQueryDocument }],
-        });
-        logger.info("Suggestion marked as duplicate", { suggestionId, duplicateOfId });
-      } catch (err) {
-        logger.error("Failed to mark suggestion as duplicate", { suggestionId, error: err });
-        throw err;
-      } finally {
-        set({ duplicateLoading: false });
-      }
-    };
+  setRespondLoading: loading => {
+    set({ respondLoading: loading });
   },
 
-  useDeleteSuggestion: () => {
-    const [deleteMutation] = useMutation(deleteSuggestionMutationDocument);
-
-    return async (suggestionId: string) => {
-      set({ deleteLoading: true });
-      try {
-        await deleteMutation({
-          variables: { suggestionId },
-          refetchQueries: [{ query: adminSuggestionsQueryDocument }],
-        });
-        logger.info("Suggestion deleted successfully", { suggestionId });
-      } catch (err) {
-        logger.error("Failed to delete suggestion", { suggestionId, error: err });
-        throw err;
-      } finally {
-        set({ deleteLoading: false });
-      }
-    };
+  setDuplicateLoading: loading => {
+    set({ duplicateLoading: loading });
   },
 
-  useSearchSuggestions: () => {
-    const [searchQuery] = useQuery(searchSuggestionsQueryDocument, {
-      skip: true,
-    });
-
-    return async (query: string, excludeId: string) => {
-      if (query.length < 3) {
-        set({ searchResults: [], searchLoading: false });
-        return;
-      }
-
-      set({ searchLoading: true });
-      try {
-        const result = await searchQuery({
-          variables: { query, excludeId },
-        });
-        const results = result.data?.searchSuggestions ?? [];
-        set({ searchResults: results as readonly SuggestionSearchResult[], searchLoading: false });
-      } catch (err) {
-        logger.error("Failed to search suggestions", { query, error: err });
-        set({ searchResults: [], searchLoading: false });
-      }
-    };
+  setDeleteLoading: loading => {
+    set({ deleteLoading: loading });
   },
 
-  useMarkReviewed: () => {
-    const [reviewedMutation] = useMutation(markSuggestionReviewedMutationDocument);
+  setMarkingReviewedId: id => {
+    set({ markingReviewedId: id });
+  },
 
-    return async (suggestionId: string) => {
-      try {
-        await reviewedMutation({
-          variables: { suggestionId },
-          refetchQueries: [{ query: adminSuggestionsQueryDocument }],
-        });
-        logger.info("Suggestion marked as reviewed", { suggestionId });
-      } catch (err) {
-        logger.error("Failed to mark suggestion as reviewed", { suggestionId, error: err });
-        throw err;
-      }
-    };
+  setIsMarkingReviewed: value => {
+    set({ isMarkingReviewed: value });
+  },
+
+  resetMarkingReviewed: () => {
+    set({ markingReviewedId: "", isMarkingReviewed: false });
   },
 }));
 ```
+
+**Key points:**
+- Store manages ONLY UI state (search, tab, loading flags, search results)
+- NO Apollo imports — no `useQuery`, `useMutation`, `useApolloClient`
+- NO GraphQL document imports — no `*QueryDocument`, `*MutationDocument`
+- NO type definitions — all types imported from `suggestionsViewTypes.ts`
+- Fake actions only — simple state setters, no network requests
+- Container component uses Apollo hooks and reads store state for UI variables
+- `searchQuery` and `activeTab` are passed as Apollo query variables by the container
+- Loading flags are set by the container before/after Apollo mutations
 
 ---
 
 ### 2. Parent Suggestions Store
 
-Create `frontend/stores/parentSuggestionsStore.ts` as a new Zustand store for the parent suggestion history view. This is a mostly read-only store with a submit action.
+Create `frontend/stores/parentSuggestionsStore.ts` as a UI state store for the parent suggestion history view.
 
 ```typescript
 import { create } from "zustand";
-import { useMutation, useQuery } from "@apollo/client";
-import { logger } from "@/frontend/utils/logger";
-import {
-  parentSuggestionsQueryDocument,
-  submitSuggestionMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/suggestion.documents";
-import type {
-  ParentSuggestionsQuery,
-  SubmitSuggestionMutation,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import type { SuggestionFormData } from "@/frontend/views/dashboard/suggestions/schemas/suggestionFormSchema";
 
 interface ParentSuggestionsStoreState {
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
+  setSubmitting: (value: boolean) => void;
   setShowSuccess: (value: boolean) => void;
   resetSuccess: () => void;
-  useParentSuggestionsQuery: () => {
-    readonly data: ParentSuggestionsQuery | undefined;
-    readonly loading: boolean;
-    readonly error: string | undefined;
-  };
-  useSubmitSuggestion: () => (data: SuggestionFormData) => Promise<void>;
 }
 
-export const useParentSuggestionsStore = create<ParentSuggestionsStoreState>((set) => ({
+export const useParentSuggestionsStore = create<ParentSuggestionsStoreState>(set => ({
   isSubmitting: false,
   showSuccess: false,
+
+  setSubmitting: value => {
+    set({ isSubmitting: value });
+  },
 
   setShowSuccess: value => {
     set({ showSuccess: value });
@@ -283,56 +177,25 @@ export const useParentSuggestionsStore = create<ParentSuggestionsStoreState>((se
   resetSuccess: () => {
     set({ showSuccess: false });
   },
-
-  useParentSuggestionsQuery: () => {
-    const { data, loading, error } = useQuery(parentSuggestionsQueryDocument);
-    return {
-      data,
-      loading,
-      error: error?.message,
-    };
-  },
-
-  useSubmitSuggestion: () => {
-    const [submitMutation] = useMutation(submitSuggestionMutationDocument);
-
-    return async (data: SuggestionFormData) => {
-      set({ isSubmitting: true });
-      try {
-        await submitMutation({
-          variables: { body: data.suggestionText },
-          refetchQueries: [{ query: parentSuggestionsQueryDocument }],
-        });
-        logger.info("Parent suggestion submitted successfully");
-        set({ showSuccess: true, isSubmitting: false });
-      } catch (err) {
-        logger.error("Failed to submit suggestion", { error: err });
-        set({ isSubmitting: false });
-        throw err;
-      }
-    };
-  },
 }));
 ```
+
+**Key points:**
+- Minimal state — the parent suggestion view is a static form with no list, no filters, and no tabs
+- NO Apollo imports — container uses `useMutation(submitSuggestionMutationDocument)`
+- NO type definitions — this store has no domain-specific types
+- Fake actions only — simple state setters
+- `isSubmitting` is set to `true` by the container before the mutation fires and `false` after it resolves
+- `showSuccess` controls the success banner visibility after a suggestion is submitted
 
 ---
 
 ### 3. Admin Complaints Store
 
-Create `frontend/stores/adminComplaintsStore.ts` as a real Zustand store replacing the mock store.
+Create `frontend/stores/adminComplaintsStore.ts` as a UI state store.
 
 ```typescript
 import { create } from "zustand";
-import { useMutation, useQuery } from "@apollo/client";
-import { logger } from "@/frontend/utils/logger";
-import {
-  adminComplaintsQueryDocument,
-  answerComplaintMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/complaint.documents";
-import type {
-  AdminComplaintsQuery,
-  AnswerComplaintMutation,
-} from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ComplaintTab } from "@/frontend/views/dashboard/complaints/types/complaintsViewTypes";
 
 interface AdminComplaintsStoreState {
@@ -340,26 +203,25 @@ interface AdminComplaintsStoreState {
   readonly activeTab: ComplaintTab;
   readonly draftResponses: Readonly<Record<string, string>>;
   readonly answerLoading: boolean;
+  readonly respondingToId: string;
+  readonly isResponding: boolean;
   setSearchQuery: (query: string) => void;
   setActiveTab: (tab: ComplaintTab) => void;
   setDraftResponse: (id: string, text: string) => void;
-  useAdminComplaintsQuery: () => {
-    readonly data: AdminComplaintsQuery | undefined;
-    readonly loading: boolean;
-    readonly error: string | undefined;
-  };
-  useAnswerComplaint: () => (
-    complaintId: string,
-    adminResponse: string,
-    options: { readonly sendEmail: boolean }
-  ) => Promise<void>;
+  clearDraftResponse: (id: string) => void;
+  setAnswerLoading: (loading: boolean) => void;
+  setRespondingToId: (id: string) => void;
+  setIsResponding: (value: boolean) => void;
+  resetResponding: () => void;
 }
 
-export const useAdminComplaintsStore = create<AdminComplaintsStoreState>((set, get) => ({
+export const useAdminComplaintsStore = create<AdminComplaintsStoreState>(set => ({
   searchQuery: "",
   activeTab: "unanswered",
   draftResponses: {},
   answerLoading: false,
+  respondingToId: "",
+  isResponding: false,
 
   setSearchQuery: query => {
     set({ searchQuery: query });
@@ -375,71 +237,49 @@ export const useAdminComplaintsStore = create<AdminComplaintsStoreState>((set, g
     }));
   },
 
-  useAdminComplaintsQuery: () => {
-    const { data, loading, error } = useQuery(adminComplaintsQueryDocument);
-    return {
-      data,
-      loading,
-      error: error?.message,
-    };
+  clearDraftResponse: id => {
+    set(state => ({
+      draftResponses: Object.fromEntries(
+        Object.entries(state.draftResponses).filter(([key]) => key !== id)
+      ),
+    }));
   },
 
-  useAnswerComplaint: () => {
-    const [answerMutation] = useMutation(answerComplaintMutationDocument);
+  setAnswerLoading: loading => {
+    set({ answerLoading: loading });
+  },
 
-    return async (
-      complaintId: string,
-      adminResponse: string,
-      options: { readonly sendEmail: boolean }
-    ) => {
-      set({ answerLoading: true });
-      try {
-        await answerMutation({
-          variables: {
-            complaintId,
-            adminResponse,
-            sendEmail: options.sendEmail,
-          },
-          refetchQueries: [{ query: adminComplaintsQueryDocument }],
-        });
+  setRespondingToId: id => {
+    set({ respondingToId: id });
+  },
 
-        set(state => ({
-          draftResponses: Object.fromEntries(
-            Object.entries(state.draftResponses).filter(([key]) => key !== complaintId)
-          ),
-          answerLoading: false,
-        }));
+  setIsResponding: value => {
+    set({ isResponding: value });
+  },
 
-        logger.info("Complaint answered successfully", { complaintId, sendEmail: options.sendEmail });
-      } catch (err) {
-        logger.error("Failed to answer complaint", { complaintId, error: err });
-        set({ answerLoading: false });
-        throw err;
-      }
-    };
+  resetResponding: () => {
+    set({ respondingToId: "", isResponding: false });
   },
 }));
 ```
+
+**Key points:**
+- Store manages ONLY UI state (search, tab, draft responses, loading flags)
+- NO Apollo imports — container uses `useQuery(adminComplaintsQueryDocument)` and `useMutation(answerComplaintMutationDocument)`
+- NO type definitions — all types imported from `complaintsViewTypes.ts`
+- Fake actions only — simple state setters
+- `searchQuery` and `activeTab` are passed as Apollo query variables by the container
+- `draftResponses` is a `Record<string, string>` keyed by complaint ID — stores the admin's in-progress response text
+- `clearDraftResponse` removes a single entry after a response is successfully submitted
 
 ---
 
 ### 4. Parent Complaints Store
 
-Create `frontend/stores/parentComplaintsStore.ts` as a real Zustand store replacing the mock store, with file upload state management.
+Create `frontend/stores/parentComplaintsStore.ts` as a UI state store with file upload state management.
 
 ```typescript
 import { create } from "zustand";
-import { useMutation, useQuery } from "@apollo/client";
-import { logger } from "@/frontend/utils/logger";
-import {
-  parentComplaintsQueryDocument,
-  submitComplaintMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/complaint.documents";
-import type {
-  ParentComplaintsQuery,
-  SubmitComplaintMutation,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import type { ComplaintFormData } from "@/frontend/views/dashboard/complaints/schemas/complaintFormSchema";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_FILES = 5;
@@ -460,15 +300,12 @@ interface ParentComplaintsStoreState {
   readonly fileValidationErrors: readonly string[];
   setShowSuccess: (value: boolean) => void;
   resetSuccess: () => void;
+  setHasOlderRecords: (value: boolean) => void;
   setFiles: (files: readonly File[]) => void;
   removeFile: (index: number) => void;
   validateFiles: (files: readonly File[]) => boolean;
-  useParentComplaintsQuery: () => {
-    readonly data: ParentComplaintsQuery | undefined;
-    readonly loading: boolean;
-    readonly error: string | undefined;
-  };
-  useSubmitComplaint: () => (data: ComplaintFormData) => Promise<void>;
+  setSubmitting: (value: boolean) => void;
+  clearFiles: () => void;
 }
 
 export const useParentComplaintsStore = create<ParentComplaintsStoreState>((set, get) => ({
@@ -484,6 +321,10 @@ export const useParentComplaintsStore = create<ParentComplaintsStoreState>((set,
 
   resetSuccess: () => {
     set({ showSuccess: false });
+  },
+
+  setHasOlderRecords: value => {
+    set({ hasOlderRecords: value });
   },
 
   setFiles: files => {
@@ -525,59 +366,38 @@ export const useParentComplaintsStore = create<ParentComplaintsStoreState>((set,
     return true;
   },
 
-  useParentComplaintsQuery: () => {
-    const { data, loading, error } = useQuery(parentComplaintsQueryDocument);
-    return {
-      data,
-      loading,
-      error: error?.message,
-    };
+  setSubmitting: value => {
+    set({ isSubmitting: value });
   },
 
-  useSubmitComplaint: () => {
-    const [submitMutation] = useMutation(submitComplaintMutationDocument);
-
-    return async (data: ComplaintFormData) => {
-      set({ isSubmitting: true });
-      try {
-        await submitMutation({
-          variables: {
-            studentId: data.studentId,
-            complaintDetails: data.complaintDetails,
-          },
-          refetchQueries: [{ query: parentComplaintsQueryDocument }],
-        });
-
-        logger.info("Parent complaint submitted successfully");
-        set({
-          showSuccess: true,
-          isSubmitting: false,
-          selectedFiles: [],
-          fileValidationErrors: [],
-        });
-      } catch (err) {
-        logger.error("Failed to submit complaint", { error: err });
-        set({ isSubmitting: false });
-        throw err;
-      }
-    };
+  clearFiles: () => {
+    set({ selectedFiles: [], fileValidationErrors: [] });
   },
 }));
 ```
+
+**Key points:**
+- Store manages ONLY UI state (submitting, success, files, validation errors)
+- NO Apollo imports — container uses `useQuery(parentComplaintsQueryDocument)` and `useMutation(submitComplaintMutationDocument)`
+- NO type definitions — no domain-specific types needed
+- Fake actions only — simple state setters and client-side file validation
+- File validation runs synchronously in `validateFiles()` before any network request
+- Container sets `isSubmitting` before mutation and clears files on success
 
 ---
 
 ## Store Architecture Rules
 
-1. **Zustand for global state** — All stores use `create` from `zustand`.
-2. **Strict typing from generated types** — Store interfaces use types from `frontend/graphql/generated/gql/graphql-types.ts` and canonical view type files. No redefining types.
-3. **Apollo hooks inside store hooks** — Store methods prefixed with `use` (e.g., `useAdminSuggestionsQuery`) are React hooks that call `useQuery` or `useMutation`. They must be called inside React components.
-4. **UI state in Zustand, data in Apollo** — Zustand manages UI state (search query, active tab, loading flags, dialog state). Apollo manages data fetching and caching.
-5. **No mock data in production stores** — Production stores fetch from the backend. Mock data remains only in `*.stories.tsx` files and mock store files.
-6. **Logger utility mandatory** — All logging uses `logger` from `@/frontend/utils/logger`. Never `console`.
-7. **Refetch after mutations** — All mutation actions include `refetchQueries` to update the Apollo cache after successful mutations.
-8. **Error propagation** — Store actions catch errors, log them, and re-throw so components can display error UI.
-9. **Generated types only** — Zustand stores use types from `frontend/graphql/generated/gql/graphql-types.ts`. No local entity type definitions.
+1. **Zustand for UI state** — All stores use `create` from `zustand`.
+2. **Strict typing from generated types** — Store interfaces use types from `frontend/graphql/generated/gql/graphql-types.ts` and view-level `.types.ts` files. No redefining types.
+3. **🚫 NO Apollo imports** — Store files MUST NEVER import `useQuery`, `useMutation`, `useApolloClient`, `useLazyQuery`, or any Apollo hook/client. Apollo belongs in container components ONLY.
+4. **🚫 NO GraphQL document imports** — Store files MUST NEVER import from `@/frontend/graphql/sharedDocuments/` or any `.documents.ts` file.
+5. **🚫 NO type definitions** — Store files MUST NOT define entity types, interfaces, or type aliases. Import all types from `.types.ts` files.
+6. **Fake actions only** — Store actions are simple state setters. They do NOT perform network requests or call APIs. Real data fetching happens in container components.
+7. **Generated GQL types and enums** — Use generated GraphQL types and enums from `graphql-types.ts` or view-level `.types.ts` files that re-export them. NEVER define local enum duplicates.
+8. **No mock data in production stores** — Production stores manage UI state only. Mock data remains only in `*.stories.tsx` files and mock store files.
+9. **Logger utility mandatory** — All logging uses `logger` from `@/frontend/utils/logger`. Never `console`.
+10. **Container = bridge** — Container components are the ONLY place where Apollo hooks and Zustand stores coexist. Containers read store state for UI variables (search, tab, flags), pass them as Apollo query variables, and update store state based on Apollo loading/error/results.
 
 ---
 
@@ -613,24 +433,23 @@ Both commands must pass with zero errors.
 
 ## Success Criteria / Check Progress Points
 
-- [ ] `adminSuggestionsStore.ts` created with `useAdminSuggestionsQuery`, `useRespondToSuggestion`, `useMarkAsDuplicate`, `useDeleteSuggestion`, `useSearchSuggestions`, `useMarkReviewed` hooks
-- [ ] `adminSuggestionsStore.ts` manages UI state: `searchQuery`, `activeTab`, `searchResults`, loading flags
-- [ ] `parentSuggestionsStore.ts` created with `useParentSuggestionsQuery` and `useSubmitSuggestion` hooks
-- [ ] `parentSuggestionsStore.ts` manages UI state: `isSubmitting`, `showSuccess`
-- [ ] `adminComplaintsStore.ts` created with `useAdminComplaintsQuery` and `useAnswerComplaint` hooks
-- [ ] `adminComplaintsStore.ts` manages UI state: `searchQuery`, `activeTab`, `draftResponses`, `answerLoading`
-- [ ] `parentComplaintsStore.ts` created with `useParentComplaintsQuery` and `useSubmitComplaint` hooks
-- [ ] `parentComplaintsStore.ts` manages UI state: `isSubmitting`, `showSuccess`, `selectedFiles`, `fileValidationErrors`
+- [ ] `adminSuggestionsStore.ts` created with UI state: `searchQuery`, `activeTab`, `searchResults`, loading flags, `markingReviewedId`, `isMarkingReviewed`
+- [ ] `parentSuggestionsStore.ts` created with UI state: `isSubmitting`, `showSuccess`
+- [ ] `adminComplaintsStore.ts` created with UI state: `searchQuery`, `activeTab`, `draftResponses`, `answerLoading`, `respondingToId`, `isResponding`
+- [ ] `parentComplaintsStore.ts` created with UI state: `isSubmitting`, `showSuccess`, `selectedFiles`, `fileValidationErrors`, `hasOlderRecords`
 - [ ] `parentComplaintsStore.ts` includes `validateFiles` with file count, size, and MIME type checks
 - [ ] All stores use generated GraphQL types (no intermediate mappings)
 - [ ] All stores use `logger` (no `console` calls)
-- [ ] All mutation actions include `refetchQueries` for cache updates
-- [ ] All mutation actions include proper loading state management
-- [ ] All mutation actions catch errors, log them, and re-throw
+- [ ] **NO Apollo imports in any store file** — no `useQuery`, `useMutation`, `useApolloClient`, `useLazyQuery`
+- [ ] **NO GraphQL document imports in any store file** — no `*QueryDocument`, `*MutationDocument` from `sharedDocuments/`
+- [ ] **NO local type definitions in any store file** — all types imported from `.types.ts` files
+- [ ] **Store actions are simple state setters only** — no network requests, no API calls, no side effects
+- [ ] **All types use generated GQL types and enums** from `graphql-types.ts` or view-level `.types.ts` files
 - [ ] No mock data in any production store file
 - [ ] No `any`, `unknown`, or casting in store definitions
-- [ ] All `use*` methods are proper React hooks (called inside components)
-- [ ] No local entity type definitions — all types sourced from generated GraphQL types or extracted `types.ts` files
+- [ ] All state properties use `readonly` modifiers
+- [ ] All state interfaces are NOT exported (internal to the store file)
+- [ ] No circular import chains between stores and `.types.ts` files
 
 **Quality Gate — Per-File Validation:**
 - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
@@ -650,9 +469,9 @@ Both commands must pass with zero errors.
 
 ## Notes
 
-- The `use*` prefix on store methods (e.g., `useAdminSuggestionsQuery`) indicates these are React hooks that must be called inside functional components. They cannot be called outside of React render context.
+- Stores are PURE UI state containers. They do NOT fetch data or perform mutations.
+- Container components are the bridge — they use Apollo hooks for data fetching and read/update store state for UI variables.
 - The `adminSuggestionsStore` replaces the mock store in production containers. The mock store (`mockAdminSuggestionsStore.ts`) remains for Storybook backward compatibility.
-- The `parentSuggestionsStore` is a new store. There was previously no dedicated parent suggestions store — the mock store only handled form submission. The new store adds query support for the suggestion history view.
+- The `parentSuggestionsStore` is a new store. There was previously no dedicated parent suggestions store — the mock store only handled form submission. The new store adds UI state for the suggestion history view.
 - File validation in `parentComplaintsStore` runs client-side only. Server-side validation will also occur in the backend service, but client-side validation provides immediate feedback to the user.
-- The `searchSuggestions` action uses `useQuery` with `skip: true` initially, then calls it manually with variables when the user types in the duplicate search field. This avoids unnecessary network requests on store initialization.
 - All stores follow the pattern: Zustand manages UI state, Apollo manages data fetching and caching. This separation keeps stores simple and leverages Apollo's built-in cache normalization.

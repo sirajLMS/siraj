@@ -22,6 +22,10 @@ Build new admin UI components for suggestion management: detail dialog, action b
 ## Layer-Specific Rules
 
 - **Generated types only**: View components use types from generated GraphQL types or from extracted `types.ts` files. No local entity type definitions.
+- **Container = bridge**: Container components are the ONLY place where Apollo hooks (`useQuery`, `useMutation`) and Zustand stores coexist. Containers read store state for UI variables (search, tab, flags), pass them as Apollo query variables, and update store state based on Apollo loading/error/results.
+- **🚫 NO Apollo imports in stores**: Store files MUST NEVER import Apollo hooks or GraphQL documents. Apollo belongs in container components ONLY.
+- **🚫 NO type imports from stores**: View components MUST import types from `.types.ts` files, NOT from store files.
+- **Use generated GQL types and enums**: All component props, state, and event handlers must use generated GraphQL types and enums from `graphql-types.ts` or view-level `.types.ts` files.
 
 ---
 

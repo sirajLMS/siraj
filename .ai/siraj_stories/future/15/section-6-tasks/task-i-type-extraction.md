@@ -18,6 +18,19 @@ Extract new types from updated mock stores for suggestion management features (s
 
 ---
 
+## Layer-Specific Rules
+
+- Read `frontend/stores/AGENTS.md` and `frontend/views/AGENTS.md` before starting.
+- **Generated types first** — Before defining any custom type, check `frontend/graphql/generated/gql/graphql-types.ts` for the generated equivalent.
+- **Re-export generated types** — If a generated type exists, re-export it with a type alias.
+- **UI-specific types only** — Only define types that have no generated equivalent.
+- **Backend canonical types flow through** — Frontend `types.ts` files re-export generated GraphQL types (which originate from backend canonical types). No duplication of backend entity structures.
+- **Update components to use generated GQL types and enums** — Replace any locally-defined types, inline enums, or string literals in component files with imports from generated GraphQL types or view-level `.types.ts` files.
+- **Ensure stores import types from `.types.ts` files** — If any store file defines types locally, those types are moved to `.types.ts` files and re-imported. Stores MUST NOT define entity types.
+- **No `any`, `unknown`, casting, or mapping** — All types must be strictly typed.
+
+---
+
 ## Target Files
 
 | File | Action |
@@ -884,6 +897,8 @@ import type { ... } from "@/frontend/views/dashboard/complaints/types/complaints
 4. **No `any`, `unknown`, casting, or mapping** — All types must be strictly typed. No intermediate mapping functions.
 5. **Preserve backward compatibility** — Mock stores re-export types so existing Storybook stories continue to work during migration.
 6. **Backend canonical types flow through** — Frontend `types.ts` files re-export generated GraphQL types (which originate from backend canonical types). No duplication of backend entity structures.
+7. **Update components to use generated GQL types and enums** — When updating component imports, replace any locally-defined types, inline enums, or string literals with imports from generated GraphQL types or view-level `.types.ts` files. Components must use the same types that stores use.
+8. **Ensure stores import types from `.types.ts` files** — If any store file defines types locally, those types are moved to `.types.ts` files and re-imported. Stores MUST NOT define entity types.
 
 ---
 
@@ -919,6 +934,8 @@ Both commands must pass with zero errors.
 - [ ] `mockAdminComplaintsStore.ts` re-imports types from `complaintsViewTypes.ts`
 - [ ] `mockParentComplaintsStore.ts` re-imports types from `complaintsViewTypes.ts`
 - [ ] All ~16 component files updated to import from canonical type files
+- [ ] **All component files updated to use generated GQL types and enums** — no locally-defined types, inline enums, or string literals remain
+- [ ] **All store files import types from `.types.ts` files** — no local type definitions in stores
 - [ ] No `any`, `unknown`, or casting in any type definition
 - [ ] No circular import dependencies
 - [ ] All mock store mock data updated to match new type shapes (nullable fields included)

@@ -17,6 +17,8 @@ Read `frontend/views/AGENTS.md` before starting.
 6. Stories CANNOT import Apollo client instances or call Apollo hooks directly — they receive everything through MockedProvider.
 7. Mock data uses `__typename` fields on every object to match GraphQL response shapes.
 8. Stories follow the existing pattern from `StudentsContainer.stories.tsx` and `ManagersContainer.stories.tsx`.
+9. **🚫 NO store imports for data** — Stories must not import from production Zustand stores for mock data. Mock data comes from `MockedProvider` responses.
+10. **Generated GQL types and enums** — Mock data shapes must use generated GraphQL types and enums from `graphql-types.ts`. NEVER define local enum duplicates or inline type definitions.
 
 **Target Files:**
 - `frontend/views/dashboard/complaints/ParentComplaintsContainer.stories.tsx` — Rewrite
@@ -646,6 +648,8 @@ bun run build-storybook
 - [ ] Permission gates are mocked via `useUserStore.setState()` and `useMockUserStore.setState()` in decorators.
 - [ ] Stories do not import or call Apollo hooks directly.
 - [ ] Stories do not depend on Zustand mock stores for data — all data flows through MockedProvider.
+- [ ] NO store imports for data — mock data comes from `MockedProvider` responses only.
+- [ ] Mock data shapes use generated GraphQL types and enums from `graphql-types.ts` — no local enum duplicates or inline type definitions.
 - [ ] `bun run test:ui:components` passes with zero failures.
 - [ ] `bun run build-storybook` completes without errors.
 - [ ] No TypeScript errors in any of the 4 rewritten story files.

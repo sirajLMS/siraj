@@ -148,6 +148,17 @@ Include general system rules, a ban on monolithic services, and the **Zero Incom
 - [ ] **No type mixing** - A `.types.ts` file MUST NOT contain types for multiple tables. Each table gets its own file.
 - [ ] **Import from canonical types** - Repository, Service, GraphQL, and Test layers MUST import and use canonical types from `backend/types/`.
 
+### 1.2b Frontend Store Isolation (CRITICAL RULE)
+
+**Zustand stores are PURE UI state containers. They are NOT data-fetching layers.**
+
+- [ ] **🚫 NO Apollo imports in stores** - Store files MUST NEVER import `useQuery`, `useMutation`, `useApolloClient`, `useLazyQuery`, or ANY Apollo hook/client from `@apollo/client` or any sub-path. Apollo hooks belong ONLY in React container components.
+- [ ] **🚫 NO GraphQL document imports in stores** - Store files MUST NEVER import from `@/frontend/graphql/sharedDocuments/` or any `.documents.ts` file. GraphQL documents belong ONLY in React container components.
+- [ ] **🚫 NO type definitions in store files** - Store files MUST NEVER define entity types, interfaces, or type aliases for domain data. All types MUST be imported from `.types.ts` files (view-level) or generated GraphQL types.
+- [ ] **Fake actions only** - Store actions are simple state setters (e.g., `setSubmitting(true)`, `setActiveTab(tab)`). They do NOT perform network requests, call APIs, or trigger side effects. Real data fetching and mutations happen in container components via Apollo hooks.
+- [ ] **Generated GQL types and enums only** - When stores need typed values (e.g., status enums, tab types), they MUST import from generated GraphQL types (`frontend/graphql/generated/gql/graphql-types.ts`) or from view-level `.types.ts` files that re-export generated types. NEVER define local enum duplicates.
+- [ ] **Container = bridge** - Container components are the ONLY place where Apollo hooks (`useQuery`, `useMutation`) and Zustand stores coexist. Containers read store state for UI variables (search, tab, flags), pass them as Apollo query variables, and update store state based on Apollo loading/error/results.
+
 ### 1.2b Task Ordering & Dependency Integrity
 - [ ] **No forward dependencies** - A task MUST NOT depend on code, types, schemas, or modules introduced by a later task. Tasks can only depend on the current project state or on earlier tasks.
 - [ ] **Incremental build order** - Tasks must be ordered so the dependency chain flows naturally: Database/Schema → **Canonical Types** → Repository → Service → **DB/Repo Tests** → GraphQL (Backend) → GraphQL Documents (Frontend) → **Type Extraction** → **GraphQL Tests** + **Storybook Migration** → Frontend Stores → Frontend Views. Tests immediately follow the layer they verify. Type extraction happens before stores/views so types are available. Storybook migration happens before container migration so stories are ready when containers switch to `useQuery`. **Canonical types are created BEFORE repositories** so all layers can import from them.
@@ -432,7 +443,9 @@ Break down the implementation into letters. Tasks **MUST** be strictly ordered b
   3. Re-exports generated GraphQL types where available; defines UI-specific types only where no generated equivalent exists.
   4. Updates mock store files to re-import types from the new `types.ts` files.
   5. Updates sub-component imports to reference `types.ts` files instead of mock stores.
-  6. This task MUST come after Frontend Apollo Documents (so codegen has run and generated types are available) and BEFORE Frontend Stores/Views.
+  6. **Updates all component files to use generated GQL types and enums** — replaces any locally-defined types, inline enums, or string literals with imports from generated GraphQL types or view-level `.types.ts` files.
+  7. **Ensures stores import types from `.types.ts` files** — if any store file defines types locally, those types are moved to `.types.ts` files and re-imported.
+  8. This task MUST come after Frontend Apollo Documents (so codegen has run and generated types are available) and BEFORE Frontend Stores/Views.
 - **Storybook Migration task** (when migrating from mock stores): When containers switch from mock stores to `useQuery`, a dedicated Storybook Migration task MUST be included. This task:
   1. Updates `*.stories.tsx` files to use `MockedProvider` decorators with mock GraphQL responses.
   2. Defines mock data as constants within story files using generated type shapes (with `__typename`).
@@ -746,32 +759,71 @@ Run `bun run generate:gqlSchema` then `bun codegen` to generate TypeScript types
 (standard quality gate checklist)
 ```
 
-#### *Example Task E (Frontend Stores — Zustand):*
+#### *Example Task E (Frontend Stores — Zustand UI State):*
 ```markdown
-### Task E — Frontend Stores: Replace Mock Stores with Real Zustand Stores
+### Task E — Frontend Stores: Zustand UI State Management
 
-**Objective:** Create real Zustand stores that use generated GraphQL types and Apollo hooks to fetch data from the backend, replacing mock stores in production containers.
+**Objective:** Create real Zustand stores that manage ONLY UI state (filters, tabs, dialogs, submission flags). These stores replace mock stores for production use. Apollo hooks (`useQuery`, `useMutation`) are used inside React container components — NOT inside Zustand stores.
 
-**Dependencies:** Depends on Task D — frontend GraphQL documents are created and codegen has run.
+**Dependencies:** Depends on Task D — types extracted to `.types` files in view directories.
 
 **Layer-Specific Rules (Frontend Stores — Flattened from frontend/stores/AGENTS.md):**
 - Zustand for global state management.
-- Strict Typing: Stores should be strictly typed using the GraphQL generated types.
-- Direct Assignment: Solve TypeScript errors by adjusting the GraphQL schema or queries. Do NOT create complex intermediate mapping functions.
-- **No mock data in production** — Mock stores only in `*.stories.tsx` files.
+- Strict typing using generated GraphQL types and extracted `.types` files.
+- Direct assignment — solve TypeScript errors by adjusting GraphQL schema/queries, NOT complex intermediate mapping.
+- No mock data in production stores.
+- **🚫 NO Apollo imports** — Store files MUST NEVER import `useQuery`, `useMutation`, `useApolloClient`, or any Apollo hook/client.
+- **🚫 NO GraphQL document imports** — Store files MUST NEVER import from `@/frontend/graphql/sharedDocuments/`.
+- **🚫 NO type definitions** — Store files MUST NOT define entity types. Import from `.types.ts` files.
+- **Fake actions only** — Store actions are simple state setters. No network requests, no API calls.
+- All imports must use `@/` path aliases — never relative paths crossing domain boundaries.
+- No `console` methods — use `logger` from `@/frontend/utils/logger` if logging is needed.
 
 **Target Files:**
-- `frontend/stores/<domain>Store.ts` — New file (or modify existing)
+- `frontend/stores/{entity}Store.ts` — NEW (replaces `mock{Entity}Store.ts`)
 
 **Detailed Implementation Steps:**
 
-*Step 1: Create store with generated GraphQL types*
+*Step 1: Create store with UI state only*
 
-Define store state interface using types from `frontend/graphql/generated/gql/graphql-types.ts`. No intermediate mappings.
+Define store state interface using types from `.types.ts` files. Store manages ONLY UI state:
 
-*Step 2: Implement actions that use Apollo hooks*
+```typescript
+import { create } from "zustand";
+import type { {Entity}Tab } from "@/frontend/views/dashboard/{domain}/types/{entity}ViewTypes";
 
-Store actions use `useQuery` with `TypedDocumentNode` from Task D. Store manages UI state (filters, pagination, dialog open/close) while Apollo manages data fetching.
+interface {Entity}StoreState {
+  readonly searchQuery: string;
+  readonly activeTab: {Entity}Tab;
+  readonly isSubmitting: boolean;
+  readonly showSuccess: boolean;
+  setSearchQuery: (query: string) => void;
+  setActiveTab: (tab: {Entity}Tab) => void;
+  setSubmitting: (value: boolean) => void;
+  setShowSuccess: (value: boolean) => void;
+  resetSuccess: () => void;
+}
+
+export const use{Entity}Store = create<{Entity}StoreState>(set => ({
+  searchQuery: "",
+  activeTab: "default",
+  isSubmitting: false,
+  showSuccess: false,
+  setSearchQuery: query => { set({ searchQuery: query }); },
+  setActiveTab: tab => { set({ activeTab: tab }); },
+  setSubmitting: value => { set({ isSubmitting: value }); },
+  setShowSuccess: value => { set({ showSuccess: value }); },
+  resetSuccess: () => { set({ showSuccess: false }); },
+}));
+```
+
+**Key points:**
+- Store manages ONLY UI state (search, tab, flags)
+- NO Apollo imports — no `useQuery`, `useMutation`, `useApolloClient`
+- NO GraphQL document imports — no `*QueryDocument`, `*MutationDocument`
+- NO type definitions — all types imported from `.types.ts` files
+- Fake actions only — simple state setters, no network requests
+- Container components use Apollo hooks and read store state for UI variables
 
 **Test Execution Requirements:**
 - Run TypeScript check:
@@ -782,7 +834,12 @@ Store actions use `useQuery` with `TypedDocumentNode` from Task D. Store manages
 **Success Criteria / Check Progress Points:**
 - [ ] Store uses generated GraphQL types (no intermediate mappings)
 - [ ] No mock data in production store
-- [ ] Store actions use `useQuery` with `TypedDocumentNode`
+- [ ] NO Apollo imports in store file
+- [ ] NO GraphQL document imports in store file
+- [ ] NO local type definitions in store file
+- [ ] All types imported from `.types.ts` files
+- [ ] Store actions are simple state setters only
+- [ ] No `console` calls — use `logger` if needed
 
 **Quality Gate — Per-File Validation:**
 (standard quality gate checklist)
@@ -797,7 +854,7 @@ Store actions use `useQuery` with `TypedDocumentNode` from Task D. Store manages
 
 **Objective:** Replace mock store imports in production containers with real Apollo `useQuery` hooks. Add RBAC gates via `<RequirePermission>`. Replace `globalThis.confirm()` with MUI Dialog.
 
-**Dependencies:** Depends on Task E — Zustand stores are implemented and use real GraphQL data.
+**Dependencies:** Depends on Task E — Zustand stores are implemented with UI state management.
 
 **Layer-Specific Rules (Frontend Views — Flattened from frontend/views/AGENTS.md):**
 - Functional Components only.
@@ -807,6 +864,7 @@ Store actions use `useQuery` with `TypedDocumentNode` from Task D. Store manages
 - MUI breaking changes: Typography style props via `sx` only. Stack layout props in `sx`.
 - Dashboard UI Patterns: Use `PageContainer`, `PageHeader`, `SectionPanel`, `MetricCard`, `AppDataGrid`.
 - **Mock Data Ban**: Mock data is strictly forbidden in production. Migrate to real components. (`*.stories.tsx` MUST KEEP dummy data).
+- **Container = bridge** — Container components are the ONLY place where Apollo hooks and Zustand stores coexist.
 
 **Target Files:**
 - `frontend/views/dashboard/<domain>/components/<FeatureToolbar>.tsx` — Replace mock store with `useQuery`
@@ -815,7 +873,7 @@ Store actions use `useQuery` with `TypedDocumentNode` from Task D. Store manages
 
 *Step 1: Replace mock store with `useQuery` and Zustand store*
 
-Remove mock store imports. Use `useQuery` with `TypedDocumentNode` from Task D. Use Zustand store from Task E for UI state.
+Remove mock store imports. Use `useQuery` with `TypedDocumentNode` from Task D. Use Zustand store from Task E for UI state. Container reads store state (searchQuery, activeTab) and passes as Apollo query variables.
 
 *Step 2: Add `<RequirePermission>` wrapper*
 
@@ -1227,8 +1285,13 @@ Execute the following commands in order to guarantee system stability and preven
 - **Hook Restrictions**: BANNED from using `useLazyQuery`. Use stateful `useQuery`.
 
 ### E. Frontend Stores (`frontend/stores/`)
-- **Zustand Types**: Strictly use generated GraphQL types from `frontend/graphql/generated/gql/graphql-types.ts`. NO intermediate mappings.
+- **Zustand Types**: Strictly use generated GraphQL types from `frontend/graphql/generated/gql/graphql-types.ts` and view-level `.types.ts` files. NO intermediate mappings.
 - **Type Sources**: Stores MUST import shared types from the extracted `types.ts` files in the view component directories, NOT from mock store files.
+- **🚫 NO Apollo Imports**: Store files MUST NEVER import `useQuery`, `useMutation`, `useApolloClient`, `useLazyQuery`, or any Apollo hook/client. Apollo belongs in container components ONLY.
+- **🚫 NO GraphQL Document Imports**: Store files MUST NEVER import from `@/frontend/graphql/sharedDocuments/` or any `.documents.ts` file.
+- **🚫 NO Type Definitions**: Store files MUST NOT define entity types, interfaces, or type aliases. Import all types from `.types.ts` files.
+- **Fake Actions Only**: Store actions are simple state setters. They do NOT perform network requests or call APIs. Real data fetching happens in container components.
+- **Generated GQL Types and Enums**: Use generated GraphQL types and enums from `graphql-types.ts` or view-level `.types.ts` files that re-export them. NEVER define local enum duplicates.
 
 ### F. Frontend Views (`frontend/views/`)
 - **Sprint-Specific RBAC Enforcement**: Use `<RequirePermission permissions={["domain.action"]} />`.
@@ -1301,15 +1364,17 @@ Task A (Migration + Enum + Canonical Types)
                 └──► Task D (Services — imports canonical types)
                        └──► Task E (GraphQL Pothos + Resolvers — imports canonical types)
                               └──► Task F (Frontend Apollo Documents)
-                                     └──► Task G (Type Extraction)
+                                     └──► Task G (Type Extraction — updates components to use generated GQL types)
                                             ├──► Task H (GraphQL Tests)
                                             └──► Task I (Storybook Migration)
                                                    └──► Task J (i18n)
-                                                   └──► Task K (Frontend Stores)
-                                                          └──► Task L (Frontend Views)
+                                                   └──► Task K (Frontend Stores — UI state only, NO Apollo)
+                                                          └──► Task L (Frontend Views — containers bridge Apollo + stores)
                                                                  └──► Section 7 (Final Verification)
 ```
 
 Tasks H and I are both dependent on G but are independent of each other — they MAY be run in parallel. Task I (Storybook Migration) prepares the story infrastructure (`MockedProvider` decorators) before containers are migrated. Task J (i18n) can run after stories are prepared. Task K (Frontend Stores) depends on G for types. Task L (Frontend Views) depends on K for stores and I for story readiness.
 
 **Canonical Types** are created in Task A alongside the migration and enum definitions. They are the foundation that all subsequent layers import from. Each table gets exactly one canonical `.types.ts` file in `backend/types/`.
+
+**Store Isolation**: Task K (Frontend Stores) creates pure UI state containers. They NEVER import Apollo or GraphQL documents. Task L (Frontend Views) creates container components that bridge Apollo hooks and Zustand stores — containers are the ONLY place where both coexist.
