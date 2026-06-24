@@ -11,7 +11,7 @@ This directory contains database integration tests. Follow these guidelines to e
    - Use the `DBTransaction` type from `./test-utils` for any helper function parameters that accept a transaction — **NEVER** type transaction parameters as `any`.
 
 2. **Clean Setup Helpers**
-   - Utilize existing helper functions in [entity-setup.ts] (e.g., `createTestUser`, `createTestTeacher`, `createTestStudent`, `setupTeacher`, `setupStudent`) to create test entities.
+   - Utilize existing helper functions in [entity-setup.ts] (e.g., `createTestUser`, `createTestStudent`, `createTestTeacher`, `setupTeacher`, `setupStudent`) to create test entities.
    - If custom setup is required, define clear helper functions at the top of the test file.
    - Generate unique emails, names, and idempotency keys using `randomUUID()` or distinct prefixes (e.g., `prefix: "swapA"`) to avoid unique constraint violations.
 
@@ -59,8 +59,8 @@ This directory contains database integration tests. Follow these guidelines to e
    - If you must insert records outside of `runInRollback` (e.g., inside `beforeAll` for shared static data), ensure you provide an `afterAll` hook to hard-delete (`await db.delete(...)`) those specific records so they don't leak into other tests.
 
 10. **Small Methods & Zero Duplication**
-   - Tests must aggressively avoid code duplication. Extract shared setup, common actions, and repetitive assertions into small, focused helper functions (e.g., `setupBaseTest`, `expectConstraintViolation`).
-   - Keep test cases themselves small, readable, and non-complex. If a test case or setup sequence is becoming too long or complex, split the logic into smaller, reusable functions within the file, or move them to `test-utils.ts` / `entity-setup.ts` if they apply globally.
+    - Tests must aggressively avoid code duplication. Extract shared setup, common actions, and repetitive assertions into small, focused helper functions (e.g., `setupBaseTest`, `expectConstraintViolation`).
+    - Keep test cases themselves small, readable, and non-complex. If a test case or setup sequence is becoming too long or complex, split the logic into smaller, reusable functions within the file, or move them to `test-utils.ts` / `entity-setup.ts` if they apply globally.
 
 11. **Directory Structure (`logic` vs `repo`)**
     - `logic/`: Contains tests focusing on business logic workflows, constraints, triggers, and complex multi-entity transactions.
@@ -115,3 +115,5 @@ This directory contains database integration tests. Follow these guidelines to e
     - Repository methods internally call `getBackendTranslations` to produce localized error messages. Tests should **NOT** call this function directly to construct expected error strings.
     - Instead, use the `expectRepoError` try/catch pattern (see Rule 3) and assert on substrings of the translated message (e.g., `expect(error.message).toContain("not found")`).
     - This avoids potential hangs from the next-intl translation loader in the test environment and keeps tests decoupled from the translation system's internal state.
+
+20. **Type Definition Pattern**: Use types defined in `backend/types/` (e.g., `{Entity}SelectType`, `{Entity}InsertType`) for testing purposes rather than creating test-specific type definitions or directly referencing schema types. Import these types from `@/backend/types` and use them in test assertions and helper functions to maintain consistency with the backend architecture.

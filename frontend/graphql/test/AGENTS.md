@@ -25,7 +25,7 @@ Integration tests for GraphQL queries/mutations under `frontend/graphql/test/` m
    - Define queries as `TypedDocumentNode` in `frontend/graphql/sharedDocuments/` files, run `bun run generate:gqlSchema` and `bun codegen`, and pass the imported document node directly to the query call:
      ```typescript
      const result = await testClient.query({
-       query: welcomeMessageQueryDocument,
+       query: {entityName}QueryDocument,
      });
      ```
 
@@ -33,7 +33,7 @@ Integration tests for GraphQL queries/mutations under `frontend/graphql/test/` m
    - Dynamically change headers (such as `Accept-Language` or cookie authentication values) on a per-query basis using Apollo's request context:
      ```typescript
      const result = await testClient.query({
-       query: welcomeMessageQueryDocument,
+       query: {entityName}QueryDocument,
        context: {
          headers: {
            "Accept-Language": "en",

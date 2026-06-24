@@ -18,15 +18,13 @@ The naming follows a strict, predictable pattern derived from the operation name
 
 | Operation | Const name | TypedDocumentNode type |
 |---|---|---|
-| `query classInstance` | `classInstanceQueryDocument` | `TypedDocumentNode<Operations.ClassInstanceQuery, Types.QueryClassInstanceArgs>` |
-| `query teacherDashboard` | `teacherDashboardQueryDocument` | `TypedDocumentNode<Operations.TeacherDashboardQuery, Types.QueryTeacherDashboardArgs>` |
-| `mutation activateClass` | `activateClassMutationDocument` | `TypedDocumentNode<Operations.ActivateClassMutation, Types.MutationActivateClassArgs>` |
-| `mutation logTeacherSupportRequest` | `logTeacherSupportRequestMutationDocument` | `TypedDocumentNode<Operations.LogTeacherSupportRequestMutation, Types.MutationLogTeacherSupportRequestArgs>` |
+| `query <entityName>` | `{entityName}QueryDocument` | `TypedDocumentNode<Operations.{EntityName}Query, Types.Query{EntityName}Args>` |
+| `mutation <entityName>` | `{entityName}MutationDocument` | `TypedDocumentNode<Operations.{EntityName}Mutation, Types.Mutation{EntityName}Args>` |
 
 **Rules:**
 - Query const: `<camelCaseName>QueryDocument` → `TypedDocumentNode<Operations.<PascalCaseName>Query, Types.Query<PascalCaseName>Args>`
 - Mutation const: `<camelCaseName>MutationDocument` → `TypedDocumentNode<Operations.<PascalCaseName>Mutation, Types.Mutation<PascalCaseName>Args>`
-- No-arg queries (e.g., `teacherHandbookUrl`): omit the second type parameter → `TypedDocumentNode<Operations.TeacherHandbookUrlQuery>`
+- No-arg queries: omit the second type parameter → `TypedDocumentNode<Operations.{EntityName}Query>`
 - These types are **always** available after `bun run generate:gqlSchema && bun codegen` — **never** use inline type literals
 
 ## Codegen
