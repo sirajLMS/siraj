@@ -1,10 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import type { UserEntity } from "../../types";
+import type { UserEntity } from "@/backend/types";
+import type { DBTransaction } from "../db.types";
 import { db } from "../drizzleDb";
 import { users } from "../schema";
-
-export type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 /**
  * Runs a function within a database transaction that is always rolled back.
@@ -13,7 +12,7 @@ export type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
  * @param fn The function to run within the transaction.
  * @throws The error thrown by the function, if any.
  */
-export async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
+export async function runInRollback(fn: (tx: DBTransaction) => Promise<void>): Promise<void> {
   let assertionError: unknown = null;
   try {
     await db.transaction(async tx => {
@@ -36,7 +35,7 @@ export async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): P
  * Convenience wrapper for bun:test to automatically run a test case in a rolled-back transaction.
  * Drastically reduces boilerplate and CodeScene structural duplication scores.
  */
-export function testInRollback(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+export function testInRollback(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   // We dynamically import test from bun:test to avoid global pollution if not in test env
   import("bun:test").then(({ test }) => {
     test(name, async () => {
@@ -51,7 +50,7 @@ export function testInRollback(name: string, fn: (tx: DbTransaction) => Promise<
  * @param overrides Optional field overrides
  */
 export async function createTestUser(
-  tx: DbTransaction,
+  tx: DBTransaction,
   overrides: Partial<typeof users.$inferInsert> = {}
 ): Promise<UserEntity> {
   const now = new Date();

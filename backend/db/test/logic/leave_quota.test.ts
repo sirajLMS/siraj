@@ -1,12 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { LeaveQuotaUsageEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
 import { leaveQuotaUsage, systemSettings } from "../../schema";
 import { setupStudent, setupTeacher } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
 async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
   try {
@@ -20,7 +21,7 @@ async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
 }
 
 async function insertLeaveQuota(
-  tx: DbTransaction,
+  tx: DBTransaction,
   params: { teacherId?: string; studentId?: string; year: number; month: number; count: number }
 ): Promise<LeaveQuotaUsageEntity> {
   const [quota] = (await tx
@@ -36,7 +37,7 @@ async function insertLeaveQuota(
   return quota;
 }
 
-async function setLeaveLimit(tx: DbTransaction, key: "teacher_max_leaves" | "student_max_leaves", value: string) {
+async function setLeaveLimit(tx: DBTransaction, key: "teacher_max_leaves" | "student_max_leaves", value: string) {
   await tx
     .insert(systemSettings)
     .values({
@@ -54,7 +55,7 @@ async function setLeaveLimit(tx: DbTransaction, key: "teacher_max_leaves" | "stu
     .execute();
 }
 
-async function withTeacher(tx: DbTransaction, fn: (teacher: TeacherEntity) => Promise<void>) {
+async function withTeacher(tx: DBTransaction, fn: (teacher: TeacherEntity) => Promise<void>) {
   const { teacher } = await setupTeacher(tx, {
     name: "Quota Teacher",
     email: `teacher-leave-${randomUUID()}@example.com`,
@@ -62,7 +63,7 @@ async function withTeacher(tx: DbTransaction, fn: (teacher: TeacherEntity) => Pr
   await fn(teacher);
 }
 
-async function withStudent(tx: DbTransaction, fn: (student: StudentEntity) => Promise<void>) {
+async function withStudent(tx: DBTransaction, fn: (student: StudentEntity) => Promise<void>) {
   const { student } = await setupStudent(
     tx,
     { name: "Quota Parent", email: `parent-leave-${randomUUID()}@example.com` },
@@ -73,7 +74,7 @@ async function withStudent(tx: DbTransaction, fn: (student: StudentEntity) => Pr
 }
 
 async function testInsertQuota(params: {
-  tx: DbTransaction;
+  tx: DBTransaction;
   id: { teacherId?: string; studentId?: string };
   count: number;
   shouldSucceed: boolean;
@@ -92,7 +93,7 @@ async function testInsertQuota(params: {
 }
 
 async function verifyCustomLeaveLimit(params: {
-  tx: DbTransaction;
+  tx: DBTransaction;
   key: "teacher_max_leaves" | "student_max_leaves";
   id: { teacherId?: string; studentId?: string };
   limit: string;
@@ -106,7 +107,7 @@ async function verifyCustomLeaveLimit(params: {
 }
 
 async function runWithEntity(
-  tx: DbTransaction,
+  tx: DBTransaction,
   type: "teacher" | "student",
   fn: (id: { teacherId?: string; studentId?: string }) => Promise<unknown>
 ) {
@@ -277,7 +278,7 @@ describe("Leave Quota Repository Methods", () => {
 });
 
 async function setupTeacherAndStudent(
-  tx: DbTransaction
+  tx: DBTransaction
 ): Promise<{ user: UserEntity; teacher: TeacherEntity; student: StudentEntity }> {
   const { user, teacher } = await setupTeacher(tx, {
     name: "Quota Teacher User",

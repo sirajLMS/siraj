@@ -1,7 +1,7 @@
 import { and, eq, isNull } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { dstMigrationEntries, dstMigrationRuns, recurringSchedules } from "@/backend/db/schema";
-import type { DBTransaction } from "../db.types";
 
 export namespace DstMigrationRepository {
   export type RecurringScheduleRow = {

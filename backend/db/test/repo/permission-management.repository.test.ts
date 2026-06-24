@@ -6,9 +6,9 @@ import { permissionGroups, permissions, users } from "@/backend/db/schema";
 import type { UserEntity } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 import { getErrorMessage } from "@/shared/utils/error";
-import { createTestUser, type DbTransaction, runInRollback } from "../test-utils";
+import { createTestUser, type DBTransaction, runInRollback } from "../test-utils";
 
-function testRepo(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+function testRepo(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, () => runInRollback(fn));
 }
 
@@ -39,7 +39,7 @@ const badTx = {
   delete: () => {
     throw new Error("Mock database error");
   },
-} as unknown as DbTransaction;
+} as unknown as DBTransaction;
 
 describe("PermissionManagementRepository", () => {
   describe("Group Management", () => {

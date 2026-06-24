@@ -1,13 +1,14 @@
 import { describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { testLogger } from "@/shared/lib/testlogger";
 import { BillingRepository, StudentRepository } from "../../repo";
 import { invoices, parents, students, users } from "../../schema";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
 const getCommonDates = () => ({ createdAt: new Date(), updatedAt: new Date() });
 
-async function setupBaseTest(tx: DbTransaction, suffix: string) {
+async function setupBaseTest(tx: DBTransaction, suffix: string) {
   const [testUser] = await tx
     .insert(users)
     .values({
@@ -30,7 +31,7 @@ async function setupBaseTest(tx: DbTransaction, suffix: string) {
   return { testUser, testParent };
 }
 
-async function setupStudentTest(tx: DbTransaction, suffix: string, classesTotal = 10) {
+async function setupStudentTest(tx: DBTransaction, suffix: string, classesTotal = 10) {
   const { testParent } = await setupBaseTest(tx, suffix);
   const [testStudent] = await tx
     .insert(students)
@@ -47,7 +48,7 @@ async function setupStudentTest(tx: DbTransaction, suffix: string, classesTotal 
   return { testStudent };
 }
 
-async function setupInvoiceTest(tx: DbTransaction, suffix: string) {
+async function setupInvoiceTest(tx: DBTransaction, suffix: string) {
   const { testParent } = await setupBaseTest(tx, suffix);
   const [testInvoice] = await tx
     .insert(invoices)

@@ -1,11 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { StorageDbRepository } from "@/backend/db/repo";
 import { storageFiles } from "@/backend/db/schema";
 import { createTestParent, createTestUser } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
-async function createTestFile(tx: DbTransaction, path?: string) {
+async function createTestFile(tx: DBTransaction, path?: string) {
   const [file] = await tx
     .insert(storageFiles)
     .values({

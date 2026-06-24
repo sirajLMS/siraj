@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import type { DbTransaction } from "../test-utils";
+import type { DBTransaction } from "../test-utils";
 import { runInRollback } from "../test-utils";
 
 /**
@@ -21,7 +21,7 @@ export async function expectRepositoryError(fn: () => Promise<unknown>) {
  * HELPER: testRepoError
  * Wrapper to drastically reduce CodeScene structural duplication issues.
  */
-export function testRepoError(name: string, logic: (tx: DbTransaction) => Promise<void>) {
+export function testRepoError(name: string, logic: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     await runInRollback(async tx => {
       await expectRepositoryError(() => logic(tx));

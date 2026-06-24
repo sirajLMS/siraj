@@ -1,11 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
 import { permissionGroups, staffProfiles, userPermissionGroups } from "@/backend/db/schema";
 import { createTestUser } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -18,14 +19,14 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   return errorCaught as Error;
 }
 
-function staffTest(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+function staffTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     await runInRollback(fn);
   });
 }
 
 async function createStaffUser(
-  tx: DbTransaction,
+  tx: DBTransaction,
   name: string,
   overrides: { phone?: string | null; skypeId?: string | null } = {}
 ) {
@@ -52,7 +53,7 @@ async function createStaffUser(
   return { user, profile };
 }
 
-async function createTestPermissionGroup(tx: DbTransaction, name: string, slug: string) {
+async function createTestPermissionGroup(tx: DBTransaction, name: string, slug: string) {
   const now = new Date();
   const groups = await tx
     .insert(permissionGroups)
@@ -71,7 +72,7 @@ async function createTestPermissionGroup(tx: DbTransaction, name: string, slug: 
   return group;
 }
 
-async function assignUserToGroup(tx: DbTransaction, userId: string, groupId: string) {
+async function assignUserToGroup(tx: DBTransaction, userId: string, groupId: string) {
   await tx.insert(userPermissionGroups).values({
     userId,
     groupId,
@@ -344,7 +345,7 @@ describe("StaffProfileRepository — create", () => {
           returning: () => [],
         }),
       }),
-    } as unknown as DbTransaction;
+    } as unknown as DBTransaction;
 
     let error: unknown = null;
     try {
@@ -396,7 +397,7 @@ describe("StaffProfileRepository — create", () => {
           where: () => Promise.resolve(),
         }),
       }),
-    } as unknown as DbTransaction;
+    } as unknown as DBTransaction;
 
     let error: unknown = null;
     try {

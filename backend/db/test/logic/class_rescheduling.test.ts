@@ -1,13 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { Gender } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import { SchedulingRepository } from "../../repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "../../schema";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
-async function createTestUser(tx: DbTransaction, name: string, email: string, now: Date) {
+async function createTestUser(tx: DBTransaction, name: string, email: string, now: Date) {
   const [user] = await tx
     .insert(users)
     .values({ name, email, password: "password", createdAt: now, updatedAt: now })
@@ -16,7 +17,7 @@ async function createTestUser(tx: DbTransaction, name: string, email: string, no
 }
 
 async function setupTestData(
-  tx: DbTransaction,
+  tx: DBTransaction,
   options: { prefix: string; gender?: Gender; classesRemaining?: number }
 ) {
   const { prefix, gender = Gender.MALE, classesRemaining = 5 } = options;
@@ -52,7 +53,7 @@ async function setupTestData(
 }
 
 async function createTestClass(
-  tx: DbTransaction,
+  tx: DBTransaction,
   studentId: string,
   teacherId: string,
   overrides: Partial<Parameters<typeof SchedulingRepository.createClassInstance>[0]> = {}
@@ -72,7 +73,7 @@ async function createTestClass(
   );
 }
 
-async function createOriginalClassWithRate(tx: DbTransaction, studentId: string, teacherId: string) {
+async function createOriginalClassWithRate(tx: DBTransaction, studentId: string, teacherId: string) {
   return createTestClass(tx, studentId, teacherId, {
     quotaDeducted: true,
     rateAmount: "50.00",
@@ -81,7 +82,7 @@ async function createOriginalClassWithRate(tx: DbTransaction, studentId: string,
 }
 
 async function rescheduleTestClass(
-  tx: DbTransaction,
+  tx: DBTransaction,
   originalId: string,
   studentId: string,
   teacherId: string,
@@ -103,7 +104,7 @@ async function rescheduleTestClass(
   );
 }
 
-async function insertClassInstance(tx: DbTransaction, values: Partial<typeof classInstances.$inferInsert>) {
+async function insertClassInstance(tx: DBTransaction, values: Partial<typeof classInstances.$inferInsert>) {
   const now = new Date();
   const [instance] = await tx
     .insert(classInstances)
@@ -122,7 +123,7 @@ async function insertClassInstance(tx: DbTransaction, values: Partial<typeof cla
 }
 
 async function insertRescheduledInstance(
-  tx: DbTransaction,
+  tx: DBTransaction,
   studentId: string,
   teacherId: string,
   overrides: Partial<typeof classInstances.$inferInsert> = {}
@@ -149,16 +150,16 @@ async function expectConstraintViolation(fn: () => Promise<unknown>, constraintN
   }
 }
 
-async function expectStudentQuota(tx: DbTransaction, studentId: string, expected: number) {
+async function expectStudentQuota(tx: DBTransaction, studentId: string, expected: number) {
   const [student] = await tx.select().from(students).where(eq(students.id, studentId));
   expect(student.classesRemaining).toBe(expected);
 }
 
 async function expectViolation(
-  tx: DbTransaction,
+  tx: DBTransaction,
   prefix: string,
   constraint: string,
-  action: (tx: DbTransaction, studentId: string, teacherId: string) => Promise<unknown>
+  action: (tx: DBTransaction, studentId: string, teacherId: string) => Promise<unknown>
 ) {
   const { student, teacher } = await setupTestData(tx, { prefix });
   await expectConstraintViolation(() => action(tx, student.id, teacher.id), constraint);

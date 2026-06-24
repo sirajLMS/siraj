@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { BillingRepository } from "@/backend/db/repo/billing.repository";
 import { invoices } from "@/backend/db/schema";
 import { createTestParent, createTestUser } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -203,7 +204,7 @@ describe("BillingRepository — getInvoicesForParent", () => {
 });
 
 describe("BillingRepository — deleteInvoice", () => {
-  async function setupInvoiceTest(tx: DbTransaction, status: "UNPAID" | "PAID" = "UNPAID") {
+  async function setupInvoiceTest(tx: DBTransaction, status: "UNPAID" | "PAID" = "UNPAID") {
     const parentUser = await createTestUser(tx, {
       name: "Delete Test Parent",
       email: `del-${randomUUID()}@test.com`,
@@ -262,7 +263,7 @@ describe("BillingRepository — deleteInvoice", () => {
 });
 
 describe("BillingRepository — markInvoiceAsPaid", () => {
-  async function setupUnpaidInvoice(tx: DbTransaction) {
+  async function setupUnpaidInvoice(tx: DBTransaction) {
     const parentUser = await createTestUser(tx, {
       name: "MarkPaid Parent",
       email: `markpaid-${randomUUID()}@test.com`,

@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
 import { createMockClassInstance, setupStudent, setupTeacher, setupTestEntities } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
 async function expectRepositoryError(fn: () => Promise<unknown>) {
   let errorCaught: unknown = null;
@@ -16,7 +17,7 @@ async function expectRepositoryError(fn: () => Promise<unknown>) {
   expect(errorCaught).not.toBeNull();
 }
 
-function testRepoError(name: string, logic: (tx: DbTransaction) => Promise<void>) {
+function testRepoError(name: string, logic: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     await runInRollback(async tx => {
       await expectRepositoryError(() => logic(tx));
@@ -24,7 +25,7 @@ function testRepoError(name: string, logic: (tx: DbTransaction) => Promise<void>
   });
 }
 
-async function setupEmptyTeacherWeeklyContext(tx: DbTransaction, prefix: string) {
+async function setupEmptyTeacherWeeklyContext(tx: DBTransaction, prefix: string) {
   const { teacher } = await setupTestEntities(tx, prefix, { skipInstance: true });
   const weekStart = new Date("2026-06-22T00:00:00Z");
   const weekEnd = new Date("2026-06-29T00:00:00Z");

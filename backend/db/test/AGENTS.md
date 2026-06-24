@@ -8,7 +8,7 @@ This directory contains database integration tests. Follow these guidelines to e
    - Every database test MUST run inside the `runInRollback` wrapper imported from `./test-utils`.
    - Never perform database operations outside a rolled-back transaction unless testing explicit non-transactional RLS role creation/session teardown.
    - Always pass the transaction instance (`tx` or `t`) to **ALL** repository methods AND direct Drizzle queries. If you write `await tx.select(...)`, the repo call must also receive `tx`: `await SomeRepository.someMethod(arg1, tx)`. Mixing `tx` queries with `db`-backed repo calls causes deadlocks and state pollution.
-   - Use the `DbTransaction` type from `./test-utils` for any helper function parameters that accept a transaction — **NEVER** type transaction parameters as `any`.
+   - Use the `DBTransaction` type from `./test-utils` for any helper function parameters that accept a transaction — **NEVER** type transaction parameters as `any`.
 
 2. **Clean Setup Helpers**
    - Utilize existing helper functions in [entity-setup.ts] (e.g., `createTestUser`, `createTestTeacher`, `createTestStudent`, `setupTeacher`, `setupStudent`) to create test entities.

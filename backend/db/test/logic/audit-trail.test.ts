@@ -20,7 +20,7 @@ import { AuditRepository } from "../../repo";
 import { auditLogs, users } from "../../schema";
 import { IP_ADDRESS_1 } from "../const";
 
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 describe("Audit Trail System", () => {
   let testUser1: Types.UserEntity;
@@ -365,7 +365,7 @@ describe("Audit Trail System", () => {
   });
 
   test("should prevent audit log updates (immutability)", async () => {
-    await db.transaction(async (tx: DbTransaction) => {
+    await db.transaction(async (tx: DBTransaction) => {
       // Create an audit log
       const auditLog = await AuditRepository.createAuditLog(
         {
@@ -395,7 +395,7 @@ describe("Audit Trail System", () => {
   });
 
   test("should prevent audit log deletion (immutability)", async () => {
-    await db.transaction(async (tx: DbTransaction) => {
+    await db.transaction(async (tx: DBTransaction) => {
       // Create an audit log
       const auditLog = await AuditRepository.createAuditLog(
         {

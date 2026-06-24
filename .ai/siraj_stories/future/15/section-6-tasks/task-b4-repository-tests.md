@@ -49,7 +49,8 @@ import { SuggestionRepository } from "@/backend/db/repo/suggestion.repository";
 import { suggestions } from "@/backend/db/schema";
 import { SuggestionStatus } from "@/shared/lib/enum";
 import { createTestParent, createTestUser } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
+import type { DBTransaction } from "@/backend/db/db.types";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -62,13 +63,13 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   return errorCaught as Error;
 }
 
-function suggestionTest(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+function suggestionTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     await runInRollback(fn);
   });
 }
 
-async function setupParentForSuggestion(tx: DbTransaction, namePrefix: string) {
+async function setupParentForSuggestion(tx: DBTransaction, namePrefix: string) {
   const user = await createTestUser(tx, {
     name: `${namePrefix} Parent`,
     email: `${namePrefix.toLowerCase()}-${randomUUID()}@test.com`,
@@ -78,7 +79,7 @@ async function setupParentForSuggestion(tx: DbTransaction, namePrefix: string) {
 }
 
 async function insertSuggestion(
-  tx: DbTransaction,
+  tx: DBTransaction,
   parentId: string,
   overrides: Partial<{
     submitterName: string;
@@ -814,7 +815,8 @@ import { NotificationRepository } from "@/backend/db/repo/notification.repositor
 import { notificationDeliveries, userNotificationPreferences } from "@/backend/db/schema";
 import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
 import { createTestUser } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
+import type { DBTransaction } from "@/backend/db/db.types";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -827,7 +829,7 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   return errorCaught as Error;
 }
 
-function notificationTest(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+function notificationTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     await runInRollback(fn);
   });
@@ -1285,15 +1287,16 @@ import { db } from "@/backend/db/drizzleDb";
 import { ComplaintRepository } from "@/backend/db/repo/complaint.repository";
 import { complaintFiles, complaints, storageFiles } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestUser } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
+import type { DBTransaction } from "@/backend/db/db.types";
 
-function complaintTest(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+function complaintTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     await runInRollback(fn);
   });
 }
 
-async function setupParentWithStudent(tx: DbTransaction, namePrefix: string) {
+async function setupParentWithStudent(tx: DBTransaction, namePrefix: string) {
   const user = await createTestUser(tx, {
     name: `${namePrefix} Parent`,
     email: `${namePrefix.toLowerCase()}-${randomUUID()}@test.com`,
@@ -1304,7 +1307,7 @@ async function setupParentWithStudent(tx: DbTransaction, namePrefix: string) {
 }
 
 async function insertComplaint(
-  tx: DbTransaction,
+  tx: DBTransaction,
   parentId: string,
   overrides: Partial<{
     studentId: string | null;
@@ -1333,7 +1336,7 @@ async function insertComplaint(
   return created;
 }
 
-async function insertStorageFile(tx: DbTransaction, filePath: string) {
+async function insertStorageFile(tx: DBTransaction, filePath: string) {
   const [file] = await tx
     .insert(storageFiles)
     .values({

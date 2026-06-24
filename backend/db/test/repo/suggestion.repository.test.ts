@@ -1,11 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { SuggestionRepository } from "@/backend/db/repo/suggestion.repository";
 import { suggestions } from "@/backend/db/schema";
 import { createTestParent, createTestUser } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
@@ -18,13 +19,13 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   return errorCaught as Error;
 }
 
-function suggestionTest(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+function suggestionTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     await runInRollback(fn);
   });
 }
 
-async function setupParentForSuggestion(tx: DbTransaction, namePrefix: string) {
+async function setupParentForSuggestion(tx: DBTransaction, namePrefix: string) {
   const user = await createTestUser(tx, {
     name: `${namePrefix} Parent`,
     email: `${namePrefix.toLowerCase()}-${randomUUID()}@test.com`,
@@ -34,7 +35,7 @@ async function setupParentForSuggestion(tx: DbTransaction, namePrefix: string) {
 }
 
 async function insertSuggestion(
-  tx: DbTransaction,
+  tx: DBTransaction,
   parentId: string,
   overrides: Partial<{
     submitterName: string;

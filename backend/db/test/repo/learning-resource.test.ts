@@ -1,18 +1,19 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { LearningResourceRepository } from "@/backend/db/repo/learning-resource.repository";
 import { learningResourceFiles, learningResources, storageFiles } from "@/backend/db/schema";
 import { createTestUser } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
-function resTest(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+function resTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     await runInRollback(fn);
   });
 }
 
-async function createTestFile(tx: DbTransaction, path?: string) {
+async function createTestFile(tx: DBTransaction, path?: string) {
   const files = await tx
     .insert(storageFiles)
     .values({
@@ -27,7 +28,7 @@ async function createTestFile(tx: DbTransaction, path?: string) {
 }
 
 async function createTestResource(
-  tx: DbTransaction,
+  tx: DBTransaction,
   userId: string,
   displayName: string,
   filePath: string,
@@ -45,7 +46,7 @@ async function createTestResource(
   );
 }
 
-async function softDeleteResource(tx: DbTransaction, resourceId: string) {
+async function softDeleteResource(tx: DBTransaction, resourceId: string) {
   await tx.update(learningResources).set({ deletedAt: new Date() }).where(eq(learningResources.id, resourceId));
 }
 

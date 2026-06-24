@@ -1,12 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { TeacherBankingDetailsHistoryInsertInput, TeacherEntityInput } from "../../../types";
 import { teacherBankingDetailsHistory, teachers, users } from "../../schema";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
-async function createTestUser(tx: DbTransaction, uniqueSuffix: string, now: Date) {
+async function createTestUser(tx: DBTransaction, uniqueSuffix: string, now: Date) {
   const email = `teacher-${uniqueSuffix}@example.com`;
   const [user] = await tx
     .insert(users)
@@ -22,7 +23,7 @@ async function createTestUser(tx: DbTransaction, uniqueSuffix: string, now: Date
 }
 
 async function insertTeacherDetails(args: {
-  tx: DbTransaction;
+  tx: DBTransaction;
   userId: string;
   plainZoomPassword: string;
   plainNationalId: string;
@@ -45,7 +46,7 @@ async function insertTeacherDetails(args: {
 }
 
 async function insertBankingDetails(args: {
-  tx: DbTransaction;
+  tx: DBTransaction;
   teacherId: string;
   plainBeneficiaryName: string;
   plainIban: string;
@@ -72,7 +73,7 @@ function verifyCiphertext(value: unknown, plaintext: string) {
 }
 
 async function verifyRawEncryption(
-  tx: DbTransaction,
+  tx: DBTransaction,
   teacherId: string,
   bankingId: string,
   plainValues: { zoomPassword: string; nationalId: string; beneficiaryName: string; iban: string }
@@ -103,7 +104,7 @@ async function verifyRawEncryption(
 }
 
 async function verifyDrizzleDecryption(
-  tx: DbTransaction,
+  tx: DBTransaction,
   teacherId: string,
   bankingId: string,
   plainValues: { zoomPassword: string; nationalId: string; beneficiaryName: string; iban: string }

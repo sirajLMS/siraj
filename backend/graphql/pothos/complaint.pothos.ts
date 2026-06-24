@@ -107,12 +107,12 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
     args: {
       filter: t.arg({ type: ComplaintQueueFilterPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
+    resolve: async (_root, args, ctx): Promise<ComplaintQueueResult> => {
       if (!ctx.user?.id) {
         throw new Error("unauthenticated");
       }
 
-      const result: ComplaintQueueResult = await ComplaintService.getQueueWithMetrics(
+      const result = await ComplaintService.getQueueWithMetrics(
         ctx.user.id,
         {
           limit: args.filter.limit,
@@ -132,8 +132,9 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
           id: "complaint-metrics",
           unanswered: result.metrics.unanswered,
           answered: result.metrics.answered,
+          avgResolutionHours: result.metrics.avgResolutionHours,
           avgResolutionTime: result.metrics.avgResolutionHours > 0 ? `${result.metrics.avgResolutionHours}h` : null,
-          totalCount: result.totalCount,
+          totalCount: result.metrics.totalCount,
         },
       };
     },

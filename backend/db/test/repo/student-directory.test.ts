@@ -1,19 +1,20 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { StudentRepository } from "@/backend/db/repo/student.repository";
 import type { StudentFilterArgs, StudentsOrderByClause } from "@/backend/types";
 import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
 import { OrderSortDirection, StudentStatus } from "@/shared/lib/enum";
 import { setupStudent, setupTeacher } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
-function dirTest(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+function dirTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     await runInRollback(fn);
   });
 }
 
-async function createStudentWithTeacher(tx: DbTransaction, studentName: string, teacherName: string) {
+async function createStudentWithTeacher(tx: DBTransaction, studentName: string, teacherName: string) {
   const { teacher } = await setupTeacher(tx, {
     name: teacherName,
     email: `tch-${teacherName.toLowerCase()}-${randomUUID()}@t.com`,

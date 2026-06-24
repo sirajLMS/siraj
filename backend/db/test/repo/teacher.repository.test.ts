@@ -1,11 +1,12 @@
 import { describe, expect, it } from "bun:test";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { teachers, users } from "@/backend/db/schema";
 import { createTestUser, setupTeacher } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
 describe("TeacherRepository", () => {
   it("getTeacherDirectory returns all non-deleted teachers sorted by name", async () => {
@@ -377,7 +378,7 @@ describe("TeacherRepository", () => {
             returning: () => [],
           }),
         }),
-      } as unknown as DbTransaction;
+      } as unknown as DBTransaction;
 
       let error: unknown = null;
       try {

@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, students, teacherAssignments, users } from "@/backend/db/schema";
 import { createMockClassInstance, setupTestEntities } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
 describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 10)", () => {
   describe("getStatusTrackingRows", () => {
@@ -14,7 +15,7 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
     const LATER_END = new Date("2031-06-15T15:00:00.000Z");
 
     async function setupStatusTrackingTest(
-      tx: DbTransaction,
+      tx: DBTransaction,
       prefix: string,
       overrides: Partial<typeof classInstances.$inferInsert> = {}
     ) {
@@ -283,7 +284,7 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
     const CLASS_END_OFFSET = 3600000;
 
     async function createFrozenClass(
-      tx: DbTransaction,
+      tx: DBTransaction,
       studentId: string,
       teacherId: string,
       scheduledAt: Date

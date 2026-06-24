@@ -1,10 +1,11 @@
 import { describe, expect, it } from "bun:test";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { systemSettings } from "@/backend/db/schema";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
 async function createTestSetting(
-  tx: DbTransaction,
+  tx: DBTransaction,
   key: string,
   value: string,
   dataType: "string" | "integer" | "boolean" | "json" = "string"
@@ -129,7 +130,7 @@ describe("SystemSettingsRepository", () => {
       delete: () => {
         throw new Error("Simulated database failure");
       },
-    } as unknown as DbTransaction;
+    } as unknown as DBTransaction;
 
     const success = await SystemSettingsRepository.deleteSetting("some_key", fakeTx);
     expect(success).toBe(false);

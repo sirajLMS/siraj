@@ -1,15 +1,16 @@
 import { describe, expect, test } from "bun:test";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/report.repository";
 import { createMockClassInstance, setupTestEntities } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
-function reportRepoTest(name: string, fn: (tx: DbTransaction) => Promise<void>) {
+function reportRepoTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     await runInRollback(fn);
   });
 }
 
-async function setupTestData(tx: DbTransaction) {
+async function setupTestData(tx: DBTransaction) {
   // Setup teacher and student entities using setupTestEntities helper
   const { student, teacher, teacherUser } = await setupTestEntities(tx, "rep");
 

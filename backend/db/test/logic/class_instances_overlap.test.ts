@@ -1,14 +1,15 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { Gender } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { StudentEntity, TeacherEntity, UserEntity } from "../../../types";
 import { SchedulingRepository } from "../../repo";
 import { students, teacherAssignments, teachers, users } from "../../schema";
 import { createTestParent, createTestUser } from "../entity-setup";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
-async function setupTestParent(tx: DbTransaction) {
+async function setupTestParent(tx: DBTransaction) {
   const user = await createTestUser(tx, {
     name: "Overlap Parent",
     email: `parent-overlap-${randomUUID()}@example.com`,
@@ -16,7 +17,7 @@ async function setupTestParent(tx: DbTransaction) {
   return createTestParent(tx, user.id);
 }
 
-async function createTestTeachers(tx: DbTransaction, now: Date) {
+async function createTestTeachers(tx: DBTransaction, now: Date) {
   const teachersData = [
     { name: "Overlap Teacher 1", email: `teacher1-${randomUUID()}@example.com` },
     { name: "Overlap Teacher 2", email: `teacher2-${randomUUID()}@example.com` },
@@ -50,7 +51,7 @@ async function createTestTeachers(tx: DbTransaction, now: Date) {
   return createdTeachers;
 }
 
-async function createTestStudents(tx: DbTransaction, parentId: string, now: Date) {
+async function createTestStudents(tx: DBTransaction, parentId: string, now: Date) {
   const studentsData = [
     { name: "Overlap Student 1", gender: Gender.MALE },
     { name: "Overlap Student 2", gender: Gender.FEMALE },
@@ -76,7 +77,7 @@ async function createTestStudents(tx: DbTransaction, parentId: string, now: Date
   return createdStudents;
 }
 
-async function setupTestContext(tx: DbTransaction) {
+async function setupTestContext(tx: DBTransaction) {
   const now = new Date();
 
   const parent = await setupTestParent(tx);
@@ -93,7 +94,7 @@ async function setupTestContext(tx: DbTransaction) {
   return { student1, student2, teacher1, teacher2 };
 }
 
-async function testTeacherOverlaps(tx: DbTransaction, student1Id: string, student2Id: string, teacher1Id: string) {
+async function testTeacherOverlaps(tx: DBTransaction, student1Id: string, student2Id: string, teacher1Id: string) {
   // 1. Two non-overlapping classes for the same teacher
   await SchedulingRepository.createClassInstance(
     {
@@ -141,7 +142,7 @@ async function testTeacherOverlaps(tx: DbTransaction, student1Id: string, studen
   }
 }
 
-async function testStudentOverlap(tx: DbTransaction, student1Id: string, teacher2Id: string) {
+async function testStudentOverlap(tx: DBTransaction, student1Id: string, teacher2Id: string) {
   // 3. Attempt Overlapping Student
   try {
     await SchedulingRepository.createClassInstance(
@@ -163,7 +164,7 @@ async function testStudentOverlap(tx: DbTransaction, student1Id: string, teacher
 }
 
 async function testZoomUrlOverlap(args: {
-  tx: DbTransaction;
+  tx: DBTransaction;
   student1Id: string;
   student2Id: string;
   teacher1Id: string;

@@ -7,9 +7,9 @@ import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../
 import type { ClassInstanceEntity } from "../../../types/scheduling.types";
 import type { StudentProgressSelectType } from "../../../types/student.types";
 import { classInstances, parents, studentProgress, students, teacherAssignments, teachers, users } from "../../schema";
-import { type DbTransaction, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { type DBTransaction, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
-async function setupTestEnvironment(tx: DbTransaction, now: Date) {
+async function setupTestEnvironment(tx: DBTransaction, now: Date) {
   const [userP] = (await tx
     .insert(users)
     .values({

@@ -11,9 +11,9 @@ import { IP_ADDRESS_1, IP_ADDRESS_2 } from "../const";
 // Load Redis-specific environment configuration for tests
 config({ path: ".env.redis", override: true });
 
-type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
-async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<void> {
+async function runInRollback(fn: (tx: DBTransaction) => Promise<void>): Promise<void> {
   try {
     await db.transaction(async tx => {
       await fn(tx);
@@ -27,7 +27,7 @@ async function runInRollback(fn: (tx: DbTransaction) => Promise<void>): Promise<
 }
 
 // Helper to create test user
-async function createTestUser(tx: DbTransaction, email: string) {
+async function createTestUser(tx: DBTransaction, email: string) {
   const [user] = await tx
     .insert(users)
     .values({
@@ -43,7 +43,7 @@ async function createTestUser(tx: DbTransaction, email: string) {
 
 // Helper to create test session
 async function setupTestSession(
-  tx: DbTransaction,
+  tx: DBTransaction,
   emailPrefix: string,
   overrides: Partial<Parameters<typeof SessionRepository.create>[0]> = {}
 ) {

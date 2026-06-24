@@ -19,10 +19,10 @@ import type {
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
-import type { DbTransaction } from "../test/test-utils";
+import type { DBTransaction } from "../test/test-utils";
 
 export namespace PermissionManagementRepository {
-  type QueryContext = DbTransaction | typeof db;
+  type QueryContext = DBTransaction | typeof db;
 
   /**
    * List all permission catalog entries.
@@ -105,7 +105,7 @@ export namespace PermissionManagementRepository {
    * Atomic transaction inserting group + permissions.
    */
   export async function createGroup(input: CreateGroupInput, tx?: QueryContext): Promise<GroupWithPermissionIds> {
-    const run = async (t: DbTransaction): Promise<GroupWithPermissionIds> => {
+    const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
       const now = new Date();
       const [insertedGroup] = await t
         .insert(permissionGroups)
@@ -144,7 +144,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        return await run(tx as DbTransaction);
+        return await run(tx as DBTransaction);
       }
       return await db.transaction(run);
     } catch (error) {
@@ -161,7 +161,7 @@ export namespace PermissionManagementRepository {
     locale?: string,
     tx?: QueryContext
   ): Promise<GroupWithPermissionIds> {
-    const run = async (t: DbTransaction): Promise<GroupWithPermissionIds> => {
+    const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
       const [existing] = await t.select().from(permissionGroups).where(eq(permissionGroups.id, input.id)).limit(1);
 
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -217,7 +217,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        return await run(tx as DbTransaction);
+        return await run(tx as DBTransaction);
       }
       return await db.transaction(run);
     } catch (error) {
@@ -230,7 +230,7 @@ export namespace PermissionManagementRepository {
    * Deletes a permission group. Throws if isSystem.
    */
   export async function deleteGroup(groupId: string, locale?: string, tx?: QueryContext): Promise<{ id: string }> {
-    const run = async (t: DbTransaction): Promise<{ id: string }> => {
+    const run = async (t: DBTransaction): Promise<{ id: string }> => {
       const [existing] = await t.select().from(permissionGroups).where(eq(permissionGroups.id, groupId)).limit(1);
 
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -249,7 +249,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        return await run(tx as DbTransaction);
+        return await run(tx as DBTransaction);
       }
       return await db.transaction(run);
     } catch (error) {
@@ -290,7 +290,7 @@ export namespace PermissionManagementRepository {
   ): Promise<void> {
     if (userIds.length === 0) return;
 
-    const run = async (t: DbTransaction): Promise<void> => {
+    const run = async (t: DBTransaction): Promise<void> => {
       const now = new Date();
       await t
         .insert(userPermissionGroups)
@@ -307,7 +307,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        await run(tx as DbTransaction);
+        await run(tx as DBTransaction);
       } else {
         await db.transaction(run);
       }
@@ -323,7 +323,7 @@ export namespace PermissionManagementRepository {
   export async function bulkRevokeUsersFromGroup(userIds: string[], groupId: string, tx?: QueryContext): Promise<void> {
     if (userIds.length === 0) return;
 
-    const run = async (t: DbTransaction): Promise<void> => {
+    const run = async (t: DBTransaction): Promise<void> => {
       await t
         .delete(userPermissionGroups)
         .where(and(eq(userPermissionGroups.groupId, groupId), inArray(userPermissionGroups.userId, userIds)));
@@ -331,7 +331,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        await run(tx as DbTransaction);
+        await run(tx as DBTransaction);
       } else {
         await db.transaction(run);
       }
@@ -363,7 +363,7 @@ export namespace PermissionManagementRepository {
     assignedByUserId?: string | null,
     tx?: QueryContext
   ): Promise<void> {
-    const run = async (t: DbTransaction): Promise<void> => {
+    const run = async (t: DBTransaction): Promise<void> => {
       await t.delete(userPermissionOverrides).where(eq(userPermissionOverrides.userId, userId));
 
       if (overrides.length > 0) {
@@ -380,7 +380,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        await run(tx as DbTransaction);
+        await run(tx as DBTransaction);
       } else {
         await db.transaction(run);
       }

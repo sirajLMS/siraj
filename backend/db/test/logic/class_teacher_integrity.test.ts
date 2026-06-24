@@ -1,14 +1,15 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { Gender } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
 import { SchedulingRepository } from "../../repo";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "../../schema";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
-async function createTestUser(tx: DbTransaction, name: string, email: string) {
+async function createTestUser(tx: DBTransaction, name: string, email: string) {
   const now = new Date();
   const [user] = (await tx
     .insert(users)
@@ -23,7 +24,7 @@ async function createTestUser(tx: DbTransaction, name: string, email: string) {
   return { user, now };
 }
 
-async function createTestParent(tx: DbTransaction, name: string, email: string) {
+async function createTestParent(tx: DBTransaction, name: string, email: string) {
   const { user, now } = await createTestUser(tx, name, email);
   const [parent] = (await tx
     .insert(parents)
@@ -32,7 +33,7 @@ async function createTestParent(tx: DbTransaction, name: string, email: string) 
   return parent;
 }
 
-async function createTestTeacher(tx: DbTransaction, name: string, email: string) {
+async function createTestTeacher(tx: DBTransaction, name: string, email: string) {
   const { user, now } = await createTestUser(tx, name, email);
   const [teacher] = (await tx
     .insert(teachers)
@@ -41,7 +42,7 @@ async function createTestTeacher(tx: DbTransaction, name: string, email: string)
   return teacher;
 }
 
-async function createTestStudent(tx: DbTransaction, parentId: string, name: string, gender: Gender = Gender.MALE) {
+async function createTestStudent(tx: DBTransaction, parentId: string, name: string, gender: Gender = Gender.MALE) {
   const now = new Date();
   const [student] = (await tx
     .insert(students)
@@ -71,7 +72,7 @@ function getClassParams(studentId: string, teacherId: string) {
   };
 }
 
-async function expectClassCreationToFail(tx: DbTransaction, studentId: string, teacherId: string) {
+async function expectClassCreationToFail(tx: DBTransaction, studentId: string, teacherId: string) {
   try {
     await SchedulingRepository.createClassInstance(getClassParams(studentId, teacherId), tx);
     expect(true).toBe(false); // Should fail

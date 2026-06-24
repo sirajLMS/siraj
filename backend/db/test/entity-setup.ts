@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
-import type { DbTransaction } from "./test-utils";
+import type { DBTransaction } from "./test-utils";
 
 export async function createTestUser(
-  tx: DbTransaction,
+  tx: DBTransaction,
   overrides: Partial<typeof users.$inferInsert> = {}
 ): Promise<UserEntity> {
   const now = new Date();
@@ -23,7 +23,7 @@ export async function createTestUser(
 }
 
 export async function createTestTeacher(
-  tx: DbTransaction,
+  tx: DBTransaction,
   userId: string,
   overrides: Partial<typeof teachers.$inferInsert> = {}
 ): Promise<TeacherEntity> {
@@ -43,7 +43,7 @@ export async function createTestTeacher(
 }
 
 export async function createTestParent(
-  tx: DbTransaction,
+  tx: DBTransaction,
   userId: string,
   overrides: Partial<typeof parents.$inferInsert> = {}
 ): Promise<ParentEntity> {
@@ -62,7 +62,7 @@ export async function createTestParent(
 }
 
 export async function createTestStudent(
-  tx: DbTransaction,
+  tx: DBTransaction,
   parentId: string,
   overrides: Partial<typeof students.$inferInsert> = {}
 ): Promise<StudentEntity> {
@@ -83,7 +83,7 @@ export async function createTestStudent(
 }
 
 export async function setupTeacher(
-  tx: DbTransaction,
+  tx: DBTransaction,
   userOverrides: Partial<typeof users.$inferInsert> = {},
   teacherOverrides: Partial<typeof teachers.$inferInsert> = {}
 ): Promise<{ user: UserEntity; teacher: TeacherEntity }> {
@@ -93,7 +93,7 @@ export async function setupTeacher(
 }
 
 export async function setupStudent(
-  tx: DbTransaction,
+  tx: DBTransaction,
   userOverrides: Partial<typeof users.$inferInsert> = {},
   parentOverrides: Partial<typeof parents.$inferInsert> = {},
   studentOverrides: Partial<typeof students.$inferInsert> = {}
@@ -105,7 +105,7 @@ export async function setupStudent(
 }
 
 export async function createMockClassInstance(
-  tx: DbTransaction,
+  tx: DBTransaction,
   studentId: string,
   teacherId: string,
   overrides: Partial<typeof classInstances.$inferInsert> = {}
@@ -135,7 +135,7 @@ export async function createMockClassInstance(
 }
 
 export async function setupTestEntities(
-  tx: DbTransaction,
+  tx: DBTransaction,
   prefix: string,
   options: { skipInstance?: boolean; classesRemaining?: number } = {}
 ): Promise<{

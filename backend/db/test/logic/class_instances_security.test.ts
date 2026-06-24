@@ -5,12 +5,12 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students } from "@/backend/db/schema";
 import { setupTestEntities } from "@/backend/db/test/entity-setup";
-import type { DbTransaction } from "@/backend/db/test/test-utils";
+import type { DBTransaction } from "@/backend/db/test/test-utils";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { getErrorMessage } from "@/shared/utils/error";
 
 async function createTestInstance(
-  tx: DbTransaction,
+  tx: DBTransaction,
   teacherId: string,
   studentId: string,
   overrides: Partial<typeof classInstances.$inferInsert> = {}
@@ -108,7 +108,7 @@ describe("Class Instances Security Logic", () => {
     }));
 
   describe("Story 2: State Transitions", () => {
-    const testOutcome = async (tx: DbTransaction, key: string, outcome: "ABSENT" | "LEAVE") => {
+    const testOutcome = async (tx: DBTransaction, key: string, outcome: "ABSENT" | "LEAVE") => {
       const { teacher, student } = await setupTestEntities(tx, key, { skipInstance: true });
       const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
 

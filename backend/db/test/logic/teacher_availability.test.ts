@@ -1,12 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { DayOfWeek, Gender, VacationRequestStatus } from "@/shared/lib/enum";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
 import { SchedulingRepository, TeacherAvailabilityRepository } from "../../repo";
 import { parents, students, teacherAssignments, teachers, users } from "../../schema";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
-async function createTestUser(tx: DbTransaction, name: string, emailPrefix: string): Promise<UserEntity> {
+async function createTestUser(tx: DBTransaction, name: string, emailPrefix: string): Promise<UserEntity> {
   const now = new Date();
   const [user] = (await tx
     .insert(users)
@@ -21,7 +22,7 @@ async function createTestUser(tx: DbTransaction, name: string, emailPrefix: stri
   return user;
 }
 
-async function createBookingFixture(tx: DbTransaction): Promise<{
+async function createBookingFixture(tx: DBTransaction): Promise<{
   teacher: TeacherEntity;
   student: StudentEntity;
   teacherUser: UserEntity;
@@ -78,7 +79,7 @@ async function createBookingFixture(tx: DbTransaction): Promise<{
 }
 
 async function createTestClassInstance(args: {
-  tx: DbTransaction;
+  tx: DBTransaction;
   studentId: string;
   teacherId: string;
   start: string | Date;
@@ -101,7 +102,7 @@ async function createTestClassInstance(args: {
 }
 
 async function expectBookingToFail(args: {
-  tx: DbTransaction;
+  tx: DBTransaction;
   studentId: string;
   teacherId: string;
   start: string;
@@ -119,7 +120,7 @@ async function expectBookingToFail(args: {
 }
 
 async function submitTestVacation(args: {
-  tx: DbTransaction;
+  tx: DBTransaction;
   teacherId: string;
   userId: string;
   start: string;
@@ -140,7 +141,7 @@ async function submitTestVacation(args: {
 }
 
 async function runTestInFixture(
-  fn: (tx: DbTransaction, fixture: Awaited<ReturnType<typeof createBookingFixture>>) => Promise<void>
+  fn: (tx: DBTransaction, fixture: Awaited<ReturnType<typeof createBookingFixture>>) => Promise<void>
 ) {
   await runInRollback(async tx => {
     const fixture = await createBookingFixture(tx);

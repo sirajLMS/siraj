@@ -5,12 +5,12 @@ import { testLogger } from "@/shared/lib/testlogger";
 import type { ParentEntity, StudentEntity, UserEntity } from "../../../types";
 import { db } from "../../drizzleDb";
 import { parents, students, users } from "../../schema";
-import { type DbTransaction, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { type DBTransaction, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 /**
  * Helper to setup common test data for RLS tests
  */
-async function setupTestData(tx: DbTransaction) {
+async function setupTestData(tx: DBTransaction) {
   const now = new Date();
   const parentAEmail = `parent-a-${randomUUID()}@example.com`;
   const parentBEmail = `parent-b-${randomUUID()}@example.com`;

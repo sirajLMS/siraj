@@ -2,12 +2,13 @@
 
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { InvoiceInsertInput, PaymentInsertInput } from "../../../types";
 import { invoices, parents, payments, students, users } from "../../schema";
-import { type DbTransaction, runInRollback } from "../test-utils";
+import { runInRollback } from "../test-utils";
 
-async function createTestParent(args: { tx: DbTransaction; suffix: string; now: Date }) {
+async function createTestParent(args: { tx: DBTransaction; suffix: string; now: Date }) {
   const { tx, suffix, now } = args;
   const parentEmail = `parent-${suffix}@example.com`;
   const [parentUser] = await tx
@@ -34,7 +35,7 @@ async function createTestParent(args: { tx: DbTransaction; suffix: string; now: 
   return parentRecord;
 }
 
-async function createTestStudent(args: { tx: DbTransaction; parentId: string; suffix: string; now: Date }) {
+async function createTestStudent(args: { tx: DBTransaction; parentId: string; suffix: string; now: Date }) {
   const { tx, parentId, suffix, now } = args;
   const [studentRecord] = await tx
     .insert(students)
@@ -52,7 +53,7 @@ async function createTestStudent(args: { tx: DbTransaction; parentId: string; su
 }
 
 async function createTestInvoice(args: {
-  tx: DbTransaction;
+  tx: DBTransaction;
   parentId: string;
   studentId: string;
   suffix: string;
