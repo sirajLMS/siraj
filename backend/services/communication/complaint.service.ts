@@ -15,6 +15,22 @@ import type {
 import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ComplaintService {
+  export async function getParentIdForComplaints(actorUserId: string, locale?: string): Promise<string> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_SUBMIT_COMPLAINT);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    const parent = await ParentRepository.findByUserId(actorUserId);
+    if (!parent) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("parentNotFound", { userId: actorUserId }));
+    }
+
+    return parent.id;
+  }
+
   export async function submitComplaint(
     actorUserId: string,
     input: ComplaintSubmitInput,

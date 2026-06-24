@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SuggestionStatus } from "@/frontend/views/dashboard/suggestions/types/suggestions.types";
+import { SuggestionStatus } from "@/shared/lib/enum";
 
 interface AdminSuggestionsState {
   readonly searchQuery: string;
@@ -15,7 +15,7 @@ interface AdminSuggestionsState {
 
 export const useAdminSuggestionsStore = create<AdminSuggestionsState>(set => ({
   searchQuery: "",
-  activeTab: "PENDING",
+  activeTab: SuggestionStatus.PENDING,
   markingReviewedId: "",
   isMarkingReviewed: false,
   setSearchQuery: query => {

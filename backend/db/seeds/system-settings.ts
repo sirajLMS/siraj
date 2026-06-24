@@ -10,7 +10,7 @@ const createSetting = (
   key: string,
   value: string,
   description: string,
-  category: "security" | "system" | "scheduling",
+  category: "security" | "system" | "scheduling" | "communication",
   dataType: "integer" | "string" = "integer"
 ) => ({
   key,
@@ -56,6 +56,14 @@ const SYSTEM_SETTINGS_DATA = [
     "Maximum number of leave requests a student can make per calendar month",
     "scheduling"
   ),
+  createSetting(
+    "complaint_max_file_size_mb",
+    "25",
+    "Maximum file size for complaint attachments in MB",
+    "communication"
+  ),
+  createSetting("complaint_max_files_per_complaint", "5", "Maximum number of files per complaint", "communication"),
+  createSetting("sms_rate_limit_per_hour", "3", "Maximum SMS messages per parent per hour", "communication"),
 ] as const;
 
 export async function seedOrGet() {

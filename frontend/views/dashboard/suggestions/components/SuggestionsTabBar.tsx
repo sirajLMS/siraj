@@ -2,8 +2,8 @@
 
 import { AdminQueueTabBar } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
 import { formatAdminQueueTabLabel } from "@/frontend/views/dashboard/shared/utils";
+import { SuggestionStatus } from "@/shared/lib/enum";
 import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
-import type { SuggestionStatus } from "../types/suggestions.types";
 
 interface SuggestionsTabBarProps {
   readonly activeTab: SuggestionStatus;
@@ -21,8 +21,8 @@ export function SuggestionsTabBar({
   onTabChange,
 }: Readonly<SuggestionsTabBarProps>) {
   const tabs = [
-    { key: "PENDING" as const, label: formatAdminQueueTabLabel(labels.tabs.pending, pendingCount) },
-    { key: "REVIEWED" as const, label: formatAdminQueueTabLabel(labels.tabs.reviewed, reviewedCount) },
+    { key: SuggestionStatus.PENDING, label: formatAdminQueueTabLabel(labels.tabs.pending, pendingCount) },
+    { key: SuggestionStatus.REVIEWED, label: formatAdminQueueTabLabel(labels.tabs.reviewed, reviewedCount) },
   ];
 
   return <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={onTabChange} />;

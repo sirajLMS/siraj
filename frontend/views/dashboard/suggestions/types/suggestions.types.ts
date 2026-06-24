@@ -7,9 +7,15 @@ import type {
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { SuggestionStatus } from "@/shared/lib/enum";
 
-
 // Re-export generated GQL types
-export type { AdminSuggestionResult, SubmitSuggestionInput, Suggestion, SuggestionFilter, SuggestionMetrics, SuggestionStatus};
+export type {
+  AdminSuggestionResult,
+  SubmitSuggestionInput,
+  Suggestion,
+  SuggestionFilter,
+  SuggestionMetrics,
+  SuggestionStatus,
+};
 
 export interface AdminSuggestionsSummary {
   readonly pending: number;

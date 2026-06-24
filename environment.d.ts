@@ -39,6 +39,23 @@ declare global {
       // Cache Configuration
       CACHE_PROVIDER: "redis" | "postgres";
 
+      // Email Configuration
+      EMAIL_PROVIDER?: "resend";
+      RESEND_API_KEY?: string;
+      RESEND_FROM_EMAIL?: string;
+
+      // SMS Configuration
+      SMS_PROVIDER?: "twilio";
+      TWILIO_ACCOUNT_SID?: string;
+      TWILIO_AUTH_TOKEN?: string;
+      TWILIO_FROM_NUMBER?: string;
+
+      // Push Notification Configuration
+      PUSH_PROVIDER?: "fcm";
+      FIREBASE_PROJECT_ID?: string;
+      FIREBASE_PRIVATE_KEY?: string;
+      FIREBASE_CLIENT_EMAIL?: string;
+
       // GraphQL Configuration
       GRAPHQL_ENCRYPTION_KEY: string;
       NEXT_PUBLIC_ENABLE_BINARY_GRAPHQL?: string;

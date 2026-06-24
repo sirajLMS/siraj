@@ -1,53 +1,137 @@
 "use client";
 
+import { useMutation, useQuery } from "@apollo/client/react";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useParentComplaintsStore } from "@/frontend/stores/mockParentComplaintsStore";
-import { useUserStore } from "@/frontend/stores/mockUserStore";
+import { useMemo } from "react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  parentComplaintsQueryDocument,
+  submitComplaintMutationDocument,
+} from "@/frontend/graphql/sharedDocuments/complaint.documents";
+import { parentAssociatedStudentsQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-profile.documents";
+import { useParentComplaintsStore } from "@/frontend/stores/parentComplaintsStore";
 import { ParentComplaintsView } from "./ParentComplaintsView";
+import type { ComplaintFormData } from "./schemas/complaintFormSchema";
+import type { ParentComplaintRecord, ParentStudentOption } from "./types/complaints.types";
 import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
 
-export function ParentComplaintsContainer() {
-  const t = useTranslations("dashboard.complaints");
-  const permissions = useUserStore(state => state.permissions);
+const StyledErrorTypography = styled(Typography)(({ theme }) => ({
+  color: theme.palette.error.main,
+}));
 
-  const studentOptions = useParentComplaintsStore(state => state.studentOptions);
-  const records = useParentComplaintsStore(state => state.records);
-  const hasOlderRecords = useParentComplaintsStore(state => state.hasOlderRecords);
+export interface ParentComplaintsContainerProps {
+  readonly parentId?: string;
+}
+
+export function ParentComplaintsContainer({ parentId }: ParentComplaintsContainerProps) {
+  const t = useTranslations("dashboard.complaints");
+  const labels = buildComplaintsLabels(t);
+
   const isSubmitting = useParentComplaintsStore(state => state.isSubmitting);
   const showSuccess = useParentComplaintsStore(state => state.showSuccess);
   const setSubmitting = useParentComplaintsStore(state => state.setSubmitting);
   const resetSuccess = useParentComplaintsStore(state => state.resetSuccess);
-  const submitComplaint = useParentComplaintsStore(state => state.submitComplaint);
-  const loadOlderRecords = useParentComplaintsStore(state => state.loadOlderRecords);
 
-  const canSubmit = permissions.includes(AppPermission.ComplaintsList);
+  const { data, loading, error, refetch } = useQuery(parentComplaintsQueryDocument, {
+    skip: !parentId,
+  });
 
-  if (!canSubmit) {
-    return null;
+  const { data: studentsData } = useQuery(parentAssociatedStudentsQueryDocument, {
+    variables: { parentId: parentId ?? "" },
+    skip: !parentId,
+  });
+
+  const [submitComplaint] = useMutation(submitComplaintMutationDocument, {
+    onCompleted: () => {
+      setSubmitting(false);
+      useParentComplaintsStore.setState({ showSuccess: true });
+      void refetch();
+    },
+    onError: () => {
+      setSubmitting(false);
+    },
+  });
+
+  const studentOptions: readonly ParentStudentOption[] = useMemo(() => {
+    if (!studentsData?.parentAssociatedStudents) return [];
+    return studentsData.parentAssociatedStudents.map(student => ({
+      id: student.id ?? "",
+      label: student.name ?? "",
+    }));
+  }, [studentsData?.parentAssociatedStudents]);
+
+  const records: readonly ParentComplaintRecord[] = useMemo(() => {
+    if (!data?.parentComplaints) return [];
+    return data.parentComplaints.map(record => ({
+      id: record.id ?? "",
+      regarding: record.studentName ? `Regarding: ${record.studentName}` : "General",
+      summary: record.body ?? "",
+      status: record.status ?? ComplaintStatus.Unanswered,
+      adminResponse:
+        record.responses && record.responses.length > 0
+          ? {
+              text: record.responses[0].body ?? "",
+              answeredAt: record.responses[0].createdAt ?? "",
+            }
+          : undefined,
+    }));
+  }, [data?.parentComplaints]);
+
+  // Client-side guard for empty parentId
+  if (!parentId) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <StyledErrorTypography>
+          Access Denied: You must be logged in as an associated parent to view complaints.
+        </StyledErrorTypography>
+      </Box>
+    );
   }
 
-  const labels = buildComplaintsLabels(t);
-
-  const handleSubmit = (data: Parameters<typeof submitComplaint>[0]) => {
+  const handleSubmit = (formData: ComplaintFormData) => {
     setSubmitting(true);
     resetSuccess();
-    submitComplaint(data);
-    setSubmitting(false);
+    void submitComplaint({
+      variables: {
+        input: {
+          studentId: formData.studentId,
+          submitterEmail: formData.contactEmail,
+          body: formData.complaintDetails,
+          category: ComplaintCategory.Other,
+        },
+      },
+    });
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return <StyledErrorTypography>{error.message}</StyledErrorTypography>;
+  }
+
   return (
-    <ParentComplaintsView
-      labels={labels.parent}
-      studentOptions={studentOptions}
-      records={records}
-      hasOlderRecords={hasOlderRecords}
-      isSubmitting={isSubmitting}
-      showSuccess={showSuccess}
-      canSubmit={canSubmit}
-      onSubmit={handleSubmit}
-      onDismissSuccess={resetSuccess}
-      onLoadOlderRecords={loadOlderRecords}
-    />
+    <RequirePermission permissions={[AppPermission.SupportSubmitComplaint]}>
+      <ParentComplaintsView
+        labels={labels.parent}
+        studentOptions={studentOptions}
+        records={records}
+        hasOlderRecords={false}
+        isSubmitting={isSubmitting}
+        showSuccess={showSuccess}
+        canSubmit={true}
+        onSubmit={handleSubmit}
+        onDismissSuccess={resetSuccess}
+        onLoadOlderRecords={() => void refetch()}
+      />
+    </RequirePermission>
   );
 }
