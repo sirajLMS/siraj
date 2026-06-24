@@ -2,7 +2,8 @@ import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
-import { getBackendTranslations } from "@/backend/lib/intl";
+import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
+import type { ErrorsLabels } from "@/shared/messages/types/errors";
 import type { GroupWithPermissionIds, PermissionEntity, UserOverrideEntity, UserOverrideInput } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 import { PermissionsService } from "./permissions.service";
@@ -28,13 +29,13 @@ export namespace PermissionManagementService {
 
   // ─── Private Helpers ──────────────────────────────────────────────────────
 
-  async function requireUserExists(userId: string, t: Awaited<ReturnType<typeof getBackendTranslations>>) {
+  async function requireUserExists(userId: string, t: TranslationFn<ErrorsLabels>) {
     const [user] = await db.select({ id: users.id }).from(users).where(eq(users.id, userId)).limit(1);
     if (!user) throw new Error(t("userNotFound", { id: userId }));
     return user;
   }
 
-  async function requireUserExistsFull(userId: string, t: Awaited<ReturnType<typeof getBackendTranslations>>) {
+  async function requireUserExistsFull(userId: string, t: TranslationFn<ErrorsLabels>) {
     const [user] = await db
       .select({ id: users.id, isSuperAdmin: users.isSuperAdmin })
       .from(users)
@@ -44,7 +45,7 @@ export namespace PermissionManagementService {
     return user;
   }
 
-  async function requireGroupExists(groupId: string, t: Awaited<ReturnType<typeof getBackendTranslations>>) {
+  async function requireGroupExists(groupId: string, t: TranslationFn<ErrorsLabels>) {
     const group = await PermissionManagementRepository.getGroupById(groupId);
     if (!group) throw new Error(t("permissionGroupNotFound", { id: groupId }));
     return group;
@@ -80,7 +81,7 @@ export namespace PermissionManagementService {
     return t;
   }
 
-  async function validateGroupName(name: string, t: Awaited<ReturnType<typeof getBackendTranslations>>) {
+  async function validateGroupName(name: string, t: TranslationFn<ErrorsLabels>) {
     const trimmedName = name.trim();
     if (!trimmedName) throw new Error(t("permissionGroupNameRequired"));
     if (trimmedName.length > 255) throw new Error(t("permissionGroupNameTooLong"));
@@ -91,7 +92,7 @@ export namespace PermissionManagementService {
     return { trimmedName, slug };
   }
 
-  async function requireNonSuperAdmin(userId: string, t: Awaited<ReturnType<typeof getBackendTranslations>>) {
+  async function requireNonSuperAdmin(userId: string, t: TranslationFn<ErrorsLabels>) {
     const user = await requireUserExistsFull(userId, t);
     if (user.isSuperAdmin) {
       throw new Error(t("cannotModifySuperAdmin"));

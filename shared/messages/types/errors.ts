@@ -109,4 +109,17 @@ export interface ErrorsLabels {
   readonly permission: {
     readonly groupNotFound: string;
   };
+  readonly complaint: {
+    readonly createFailed: string;
+  };
+  readonly complaintResponse: {
+    readonly createFailed: string;
+  };
+  readonly complaintNotFound: string;
+  readonly suggestion: {
+    readonly createFailed: string;
+    readonly notFound: string;
+  };
+  readonly outOfQuota: string;
+  readonly unauthorizedSearch: string;
 }

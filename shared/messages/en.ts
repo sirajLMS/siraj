@@ -138,6 +138,19 @@ const en: MessageSchema = {
     permission: {
       groupNotFound: "The required permission group was not found.",
     },
+    complaint: {
+      createFailed: "Failed to create complaint.",
+    },
+    complaintResponse: {
+      createFailed: "Failed to create complaint response.",
+    },
+    complaintNotFound: "Complaint with ID {id} not found.",
+    suggestion: {
+      createFailed: "Failed to create suggestion.",
+      notFound: "Suggestion with ID {id} not found.",
+    },
+    outOfQuota: "Remaining classes quota has been exhausted.",
+    unauthorizedSearch: "Unauthorized: Missing schedule search permission.",
   },
   auth: {
     login: {

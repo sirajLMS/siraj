@@ -113,4 +113,17 @@ export const errors: ErrorsLabels = {
   permission: {
     groupNotFound: "مجموعة الأذونات المطلوبة غير موجودة.",
   },
+  complaint: {
+    createFailed: "فشل إنشاء الشكوى.",
+  },
+  complaintResponse: {
+    createFailed: "فشل إنشاء الرد على الشكوى.",
+  },
+  complaintNotFound: "الشكوى ذو المعرف {id} غير موجودة.",
+  suggestion: {
+    createFailed: "فشل إنشاء الاقتراح.",
+    notFound: "الاقتراح ذو المعرف {id} غير موجود.",
+  },
+  outOfQuota: "تم استنفاد الحصص المتبقية.",
+  unauthorizedSearch: "غير مصرح: لا توجد صلاحية للبحث في الجداول.",
 };

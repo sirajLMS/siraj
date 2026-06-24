@@ -2,6 +2,33 @@ import { getTranslations } from "next-intl/server";
 import { logger } from "@/backend/lib/logger";
 import ar from "@/shared/messages/ar";
 import en from "@/shared/messages/en";
+import type { CommonLabels } from "@/shared/messages/types/common";
+import type { ErrorsLabels } from "@/shared/messages/types/errors";
+import type { SessionLabels } from "@/shared/messages/types/session";
+import type { NotificationsLabels } from "@/shared/messages/types/dashboard/core/notifications";
+
+interface BackendNamespaceMap {
+  errors: ErrorsLabels;
+  session: SessionLabels;
+  common: CommonLabels;
+  "dashboard.notifications": NotificationsLabels;
+}
+
+type NestedKeyOf<T> = T extends object
+  ? {
+      [K in keyof T & string]: T[K] extends object ? K | `${K}.${NestedKeyOf<T[K]>}` : K;
+    }[keyof T & string]
+  : never;
+
+export type TranslationFn<T> = (key: NestedKeyOf<T>, values?: Record<string, unknown>) => string;
+
+type BackendTranslationFn =
+  | TranslationFn<ErrorsLabels>
+  | TranslationFn<SessionLabels>
+  | TranslationFn<CommonLabels>
+  | TranslationFn<NotificationsLabels>;
+
+export type BackendNamespace = keyof BackendNamespaceMap;
 
 function resolveNamespace(messages: unknown, namespace: string): Record<string, unknown> | undefined {
   if (!namespace) {
@@ -24,11 +51,9 @@ function getManualTranslations(locale: string, namespace: string) {
   const namespaceObj = resolveNamespace(messages, namespace);
 
   return (key: string, values?: Record<string, unknown>) => {
-    // Use resolveNamespace instead of namespaceObj?.[key] to support nested dot-notation paths (e.g. "parent.alreadyExists") in test suites
     let template = resolveNamespace(namespaceObj, key) as unknown;
 
     if (typeof template !== "string") {
-      // Fallback: try English if Arabic fails or vice versa
       const fallbackMessages = locale === "en" ? ar : en;
       const fallbackNamespaceObj = resolveNamespace(fallbackMessages, namespace);
       const fallbackTemplate = resolveNamespace(fallbackNamespaceObj, key) as unknown;
@@ -44,27 +69,42 @@ function getManualTranslations(locale: string, namespace: string) {
     return template.replace(/\{(\w+)\}/g, (match, paramName) => {
       const val = values[paramName];
 
-      // 1. If undefined, leave the tag as is
       if (val === undefined) {
         return match;
       }
 
-      // 2. Safe primitives check: SonarQube can see that structural objects cannot pass this check
       if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") {
         return String(val);
       }
 
-      // 3. Fallback for structural objects, arrays, or null to prevent [object Object]
       return val ? JSON.stringify(val) : "";
     });
   };
 }
 
-export async function getBackendTranslations(opts?: { locale?: string; namespace?: string }) {
+export async function getBackendTranslations(opts: {
+  locale?: string;
+  namespace: "errors";
+}): Promise<TranslationFn<ErrorsLabels>>;
+export async function getBackendTranslations(opts: {
+  locale?: string;
+  namespace: "session";
+}): Promise<TranslationFn<SessionLabels>>;
+export async function getBackendTranslations(opts: {
+  locale?: string;
+  namespace: "dashboard.notifications";
+}): Promise<TranslationFn<NotificationsLabels>>;
+export async function getBackendTranslations(opts: {
+  locale?: string;
+  namespace?: string;
+}): Promise<BackendTranslationFn>;
+export async function getBackendTranslations(): Promise<TranslationFn<CommonLabels>>;
+export async function getBackendTranslations(opts?: {
+  locale?: string;
+  namespace?: string;
+}): Promise<BackendTranslationFn> {
   const namespace = opts?.namespace || "common";
 
-  // Detect if we are running in a test suite.
-  // We check process.env, VITEST, and process.argv (to catch bun test even if NODE_ENV is overridden to development by dotenv)
   const isTest =
     process.env.NODE_ENV === "test" ||
     !!process.env.VITEST ||
@@ -76,17 +116,16 @@ export async function getBackendTranslations(opts?: { locale?: string; namespace
   const locale = opts?.locale || (isTest ? "en" : "ar");
 
   if (isTest) {
-    return getManualTranslations(locale, namespace);
+    return getManualTranslations(locale, namespace) as BackendTranslationFn;
   }
 
   try {
     if (opts?.locale) {
-      return await getTranslations({ locale: opts.locale, namespace });
+      return (await getTranslations({ locale: opts.locale, namespace })) as BackendTranslationFn;
     }
-    return await getTranslations(namespace);
+    return (await getTranslations(namespace)) as BackendTranslationFn;
   } catch (error) {
-    // Graceful fallback outside Next.js request context (e.g. scripts, tests, seeders)
     logger.debug("Failed to retrieve next-intl translations, falling back to manual resolver", { error });
-    return getManualTranslations(locale, namespace);
+    return getManualTranslations(locale, namespace) as BackendTranslationFn;
   }
 }
