@@ -107,3 +107,5 @@ export const arTranslations = {
     searchSchedule,
   },
 };
+
+export default arTranslations;

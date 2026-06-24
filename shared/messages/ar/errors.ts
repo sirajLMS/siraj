@@ -122,6 +122,9 @@ export const errors: ErrorsLabels = {
   },
   complaint: {
     createFailed: "فشل إنشاء الشكوى.",
+    tooManyFiles: "عدد الملفات كبير جداً. الحد الأقصى هو {max} ملفات.",
+    fileTooLarge: "حجم الملف كبير جداً. الحد الأقصى هو {max} ميجابايت.",
+    invalidFileType: "نوع الملف غير مسموح به. الأنواع المسموحة: {allowed}.",
   },
   complaintResponse: {
     createFailed: "فشل إنشاء الرد على الشكوى.",
@@ -130,6 +133,9 @@ export const errors: ErrorsLabels = {
   suggestion: {
     createFailed: "فشل إنشاء الاقتراح.",
     notFound: "الاقتراح ذو المعرف {id} غير موجود.",
+    cannotMarkSelfAsDuplicate: "لا يمكن تعليم الاقتراح كنسخة مكررة من نفسه.",
+    targetIsAlreadyDuplicate: "الاقتراح المستهدف هو بالفعل نسخة مكررة.",
+    cannotCreateCircularDuplicate: "لا يمكن إنشاء تكرار دائري.",
   },
   outOfQuota: "تم استنفاد الحصص المتبقية.",
   unauthorizedSearch: "غير مصرح: لا توجد صلاحية للبحث في الجداول.",

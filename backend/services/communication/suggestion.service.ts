@@ -1,14 +1,15 @@
-import { ParentRepository, SuggestionRepository } from "@/backend/db/repo";
+import { ParentRepository, SoftDeleteRepository, SuggestionRepository } from "@/backend/db/repo";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type {
+  ParentSuggestionOptions,
   SubmitSuggestionInputType,
   SuggestionQueueFilter,
   SuggestionQueueResult,
   SuggestionReturnType,
   SuggestionSelectType,
 } from "@/backend/types";
-import { AppPermission, NotificationEventType } from "@/shared/lib/enum";
+import { AppPermission, NotificationEventType, SuggestionStatus } from "@/shared/lib/enum";
 
 export namespace SuggestionService {
   export async function submitSuggestion(
@@ -133,6 +134,216 @@ export namespace SuggestionService {
       return updated;
     } catch (error) {
       logger.error("Failed to mark suggestion as reviewed", { actorUserId, suggestionId, error });
+      throw error;
+    }
+  }
+
+  export async function getParentSuggestions(
+    actorUserId: string,
+    options: ParentSuggestionOptions,
+    locale?: string
+  ): Promise<ReadonlyArray<SuggestionReturnType>> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    const parent = await ParentRepository.findByUserId(actorUserId);
+    if (!parent) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("parentNotFound", { userId: actorUserId }));
+    }
+
+    try {
+      const suggestions = await SuggestionRepository.getSuggestionsByParent(parent.id, options);
+
+      logger.info("Parent suggestions retrieved", {
+        actorUserId,
+        parentId: parent.id,
+        count: suggestions.length,
+      });
+
+      return suggestions;
+    } catch (error) {
+      logger.error("Failed to get parent suggestions", { actorUserId, parentId: parent.id, error });
+      throw error;
+    }
+  }
+
+  export async function respondToSuggestion(
+    actorUserId: string,
+    suggestionId: string,
+    adminResponse: string,
+    locale?: string
+  ): Promise<SuggestionSelectType> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    const suggestion = await SuggestionRepository.getSuggestionById(suggestionId);
+    if (!suggestion) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("suggestionNotFound", { id: suggestionId }));
+    }
+
+    try {
+      const updated = await SuggestionRepository.respondToSuggestion(
+        {
+          suggestionId,
+          adminResponse,
+          reviewedByUserId: actorUserId,
+        },
+        undefined,
+        locale
+      );
+
+      const parentProfile = await ParentRepository.getParentProfile(suggestion.parentId);
+      if (parentProfile) {
+        await CommunicationService.dispatchMulti(
+          [
+            {
+              userId: parentProfile.userId,
+              title: "Suggestion Response",
+              body: adminResponse,
+              channel: "on_app",
+              eventType: NotificationEventType.SUGGESTION_ACKNOWLEDGED,
+            },
+            {
+              userId: parentProfile.userId,
+              title: "Suggestion Response",
+              body: adminResponse,
+              channel: "email",
+              eventType: NotificationEventType.SUGGESTION_ACKNOWLEDGED,
+            },
+          ],
+          locale
+        );
+      }
+
+      logger.info("Suggestion responded to", {
+        actorUserId,
+        suggestionId,
+        adminResponseLength: adminResponse.length,
+      });
+
+      return updated;
+    } catch (error) {
+      logger.error("Failed to respond to suggestion", { actorUserId, suggestionId, error });
+      throw error;
+    }
+  }
+
+  export async function markAsDuplicate(
+    actorUserId: string,
+    suggestionId: string,
+    duplicateOfId: string,
+    locale?: string
+  ): Promise<SuggestionSelectType> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    if (suggestionId === duplicateOfId) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("suggestion.cannotMarkSelfAsDuplicate"));
+    }
+
+    const sourceSuggestion = await SuggestionRepository.getSuggestionById(suggestionId);
+    if (!sourceSuggestion) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("suggestion.notFound", { id: suggestionId }));
+    }
+
+    const targetSuggestion = await SuggestionRepository.getSuggestionById(duplicateOfId);
+    if (!targetSuggestion) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("suggestion.notFound", { id: duplicateOfId }));
+    }
+
+    if (targetSuggestion.status === SuggestionStatus.DUPLICATE) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("suggestion.targetIsAlreadyDuplicate"));
+    }
+
+    if (targetSuggestion.duplicateOfId === suggestionId) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("suggestion.cannotCreateCircularDuplicate"));
+    }
+
+    try {
+      const updated = await SuggestionRepository.markAsDuplicate(
+        {
+          suggestionId,
+          duplicateOfId,
+          reviewedByUserId: actorUserId,
+        },
+        undefined,
+        locale
+      );
+
+      const parentProfile = await ParentRepository.getParentProfile(sourceSuggestion.parentId);
+      if (parentProfile) {
+        await CommunicationService.dispatch(
+          {
+            userId: parentProfile.userId,
+            title: "Suggestion Marked as Duplicate",
+            body: `Your suggestion has been marked as a duplicate of suggestion #${duplicateOfId.slice(0, 8)}`,
+            channel: "on_app",
+            eventType: NotificationEventType.SUGGESTION_DUPLICATE_MARKED,
+          },
+          locale
+        );
+      }
+
+      logger.info("Suggestion marked as duplicate", {
+        actorUserId,
+        suggestionId,
+        duplicateOfId,
+      });
+
+      return updated;
+    } catch (error) {
+      logger.error("Failed to mark suggestion as duplicate", { actorUserId, suggestionId, duplicateOfId, error });
+      throw error;
+    }
+  }
+
+  export async function deleteSuggestion(
+    actorUserId: string,
+    suggestionId: string,
+    locale?: string
+  ): Promise<{ readonly deletedAt: string }> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_DELETE);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    const suggestion = await SuggestionRepository.getSuggestionById(suggestionId);
+    if (!suggestion) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("suggestionNotFound", { id: suggestionId }));
+    }
+
+    try {
+      const result = await SoftDeleteRepository.softDeleteSuggestion(suggestionId, actorUserId);
+
+      logger.info("Suggestion soft-deleted", {
+        actorUserId,
+        suggestionId,
+        deletedAt: result.deletedAt,
+      });
+
+      return {
+        deletedAt: result.deletedAt.toISOString(),
+      };
+    } catch (error) {
+      logger.error("Failed to delete suggestion", { actorUserId, suggestionId, error });
       throw error;
     }
   }

@@ -3,14 +3,18 @@ import {
   ComplaintResponseRepository,
   ParentRepository,
   SoftDeleteRepository,
+  StorageDbRepository,
+  SystemSettingsRepository,
 } from "@/backend/db/repo";
 import { getBackendTranslations, logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import type {
+  ComplaintFileReturnType,
   ComplaintQueueFilter,
   ComplaintReturnType,
   ComplaintSelectType,
   ComplaintSubmitInput,
+  FileMetadata,
 } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
@@ -33,7 +37,7 @@ export namespace ComplaintService {
 
   export async function submitComplaint(
     actorUserId: string,
-    input: ComplaintSubmitInput,
+    input: ComplaintSubmitInput & { files?: ReadonlyArray<FileMetadata> },
     locale?: string
   ): Promise<ComplaintSelectType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_SUBMIT_COMPLAINT);
@@ -56,6 +60,11 @@ export namespace ComplaintService {
       }
     }
 
+    const files = input.files ?? [];
+    if (files.length > 0) {
+      await validateComplaintFiles(files, locale);
+    }
+
     try {
       const created = await ComplaintRepository.submitComplaint(
         {
@@ -69,11 +78,26 @@ export namespace ComplaintService {
         locale
       );
 
+      if (files.length > 0) {
+        for (const file of files) {
+          await StorageDbRepository.registerFileUsage(
+            {
+              referenceTable: "complaints",
+              referenceId: created.id,
+              usageType: "attachment",
+              filePath: file.path,
+            },
+            locale
+          );
+        }
+      }
+
       logger.info("Complaint submitted", {
         actorUserId,
         complaintId: created.id,
         parentId: parent.id,
         category: input.category,
+        fileCount: files.length,
       });
 
       return created;
@@ -219,6 +243,83 @@ export namespace ComplaintService {
     } catch (error) {
       logger.error("Failed to delete complaint", { actorUserId, complaintId, error });
       throw error;
+    }
+  }
+
+  export async function getComplaintFiles(
+    actorUserId: string,
+    complaintId: string,
+    locale?: string
+  ): Promise<ReadonlyArray<ComplaintFileReturnType>> {
+    const canListComplaints = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
+    const canViewHistory = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY);
+
+    if (!canListComplaints && !canViewHistory) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    const complaint = await ComplaintRepository.getComplaintById(complaintId);
+    if (!complaint) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("complaintNotFound", { id: complaintId }));
+    }
+
+    if (!canListComplaints) {
+      const parent = await ParentRepository.findByUserId(actorUserId);
+      if (!parent || parent.id !== complaint.parentId) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("insufficientPermissions"));
+      }
+    }
+
+    try {
+      const files = await ComplaintRepository.getComplaintFiles(complaintId);
+
+      logger.info("Complaint files retrieved", {
+        actorUserId,
+        complaintId,
+        fileCount: files.length,
+      });
+
+      return files;
+    } catch (error) {
+      logger.error("Failed to get complaint files", { actorUserId, complaintId, error });
+      throw error;
+    }
+  }
+}
+
+async function validateComplaintFiles(files: ReadonlyArray<FileMetadata>, locale?: string): Promise<void> {
+  const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+
+  const maxFiles = await SystemSettingsRepository.getIntValue("complaint_max_files_per_complaint", 5);
+  if (files.length > maxFiles) {
+    throw new Error(tFunc("complaint.tooManyFiles", { max: maxFiles }));
+  }
+
+  const maxSizeMb = await SystemSettingsRepository.getIntValue("complaint_max_file_size_mb", 25);
+  const maxSizeBytes = maxSizeMb * 1024 * 1024;
+
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+    "text/markdown",
+  ];
+
+  for (const file of files) {
+    if (file.sizeBytes > maxSizeBytes) {
+      throw new Error(tFunc("complaint.fileTooLarge", { max: maxSizeMb }));
+    }
+
+    if (!allowedMimeTypes.includes(file.mimeType)) {
+      throw new Error(tFunc("complaint.invalidFileType", { allowed: allowedMimeTypes.join(", ") }));
     }
   }
 }

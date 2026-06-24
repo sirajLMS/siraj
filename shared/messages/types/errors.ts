@@ -118,6 +118,9 @@ export interface ErrorsLabels {
   };
   readonly complaint: {
     readonly createFailed: string;
+    readonly tooManyFiles: string;
+    readonly fileTooLarge: string;
+    readonly invalidFileType: string;
   };
   readonly complaintResponse: {
     readonly createFailed: string;
@@ -126,6 +129,9 @@ export interface ErrorsLabels {
   readonly suggestion: {
     readonly createFailed: string;
     readonly notFound: string;
+    readonly cannotMarkSelfAsDuplicate: string;
+    readonly targetIsAlreadyDuplicate: string;
+    readonly cannotCreateCircularDuplicate: string;
   };
   readonly outOfQuota: string;
   readonly unauthorizedSearch: string;
