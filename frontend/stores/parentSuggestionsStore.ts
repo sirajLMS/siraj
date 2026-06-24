@@ -1,6 +1,4 @@
 import { create } from "zustand";
-import { logger } from "@/frontend/utils/logger";
-import type { SuggestionFormData } from "@/frontend/views/dashboard/suggestions/schemas/suggestionFormSchema";
 
 interface ParentSuggestionsState {
   readonly isSubmitting: boolean;
@@ -8,7 +6,6 @@ interface ParentSuggestionsState {
   setSubmitting: (value: boolean) => void;
   setShowSuccess: (value: boolean) => void;
   resetSuccess: () => void;
-  submitSuggestion: (data: SuggestionFormData) => void;
 }
 
 export const useParentSuggestionsStore = create<ParentSuggestionsState>(set => ({
@@ -22,9 +19,5 @@ export const useParentSuggestionsStore = create<ParentSuggestionsState>(set => (
   },
   resetSuccess: () => {
     set({ showSuccess: false });
-  },
-  submitSuggestion: data => {
-    logger.info("Parent suggestion submitted", { data });
-    set({ showSuccess: true });
   },
 }));
