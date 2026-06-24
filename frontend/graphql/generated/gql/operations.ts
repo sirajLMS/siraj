@@ -126,6 +126,33 @@ export type AvailabilitySearchInput = {
   toTime: string;
 };
 
+/** Categories for parent complaints. */
+export type ComplaintCategory =
+  | 'OTHER'
+  | 'REGARDING_SYSTEM'
+  | 'REGARDING_TEACHER';
+
+/** Filter and pagination options for the admin complaint queue. */
+export type ComplaintQueueFilter = {
+  limit: number;
+  offset: number;
+  search: string | null | undefined;
+  status: ComplaintStatus | null | undefined;
+};
+
+/** Status of a complaint in the support queue. */
+export type ComplaintStatus =
+  | 'ANSWERED'
+  | 'UNANSWERED';
+
+/** Input for submitting a new complaint. */
+export type ComplaintSubmitInput = {
+  body: string;
+  category: ComplaintCategory;
+  studentId: string | null | undefined;
+  submitterEmail: string;
+};
+
 export type CountryCode =
   | 'AD'
   | 'AE'
@@ -509,6 +536,13 @@ export type ResourceUploadInput = {
   filePath: string;
 };
 
+/** Input for responding to a complaint. */
+export type RespondToComplaintInput = {
+  body: string;
+  complaintId: string;
+  emailSent: boolean;
+};
+
 export type RevokePermissionGroupFromUserInput = {
   groupId: string;
   userId: string;
@@ -574,6 +608,20 @@ export type StudentsOrderByColumn =
   | 'PARENT_ID'
   | 'STATUS'
   | 'UPDATED_AT';
+
+/** Input for submitting a new suggestion. */
+export type SubmitSuggestionInput = {
+  body: string;
+  submitterName: string;
+};
+
+/** Filter and pagination options for the admin suggestion list. */
+export type SuggestionFilter = {
+  limit: number;
+  offset: number;
+  search: string | null | undefined;
+  status: string | null | undefined;
+};
 
 /** Input for creating a new teacher account with comprehensive profile */
 export type TeacherOnboardingInput = {
@@ -965,6 +1013,68 @@ export type DeleteClassInstanceMutationVariables = Exact<{
 
 
 export type DeleteClassInstanceMutation = DeleteClassInstanceMutation_Mutation;
+
+export type ParentComplaintsQuery_parentComplaints_Complaint_responses_ComplaintResponse = { id: string | null, body: string | null, emailSent: boolean | null, createdAt: string | null, responderName: string | null };
+
+export type ParentComplaintsQuery_parentComplaints_Complaint = { id: string | null, category: Types.ComplaintCategory | null, body: string | null, status: Types.ComplaintStatus | null, createdAt: string | null, studentName: string | null, responses: Array<ParentComplaintsQuery_parentComplaints_Complaint_responses_ComplaintResponse> | null };
+
+export type ParentComplaintsQuery_Query = { parentComplaints: Array<ParentComplaintsQuery_parentComplaints_Complaint> | null };
+
+
+export type ParentComplaintsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ParentComplaintsQuery = ParentComplaintsQuery_Query;
+
+export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_rows_Complaint = { id: string | null, parentId: string | null, studentId: string | null, category: Types.ComplaintCategory | null, submitterEmail: string | null, body: string | null, status: Types.ComplaintStatus | null, createdAt: string | null, parentName: string | null, studentName: string | null };
+
+export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_metrics_ComplaintMetrics = { id: string | null, unanswered: number | null, answered: number | null, avgResolutionTime: string | null };
+
+export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult = { id: string | null, rows: Array<AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_rows_Complaint> | null, metrics: AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_metrics_ComplaintMetrics | null };
+
+export type AdminComplaintQueueQuery_Query = { adminComplaintQueue: AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult | null };
+
+
+export type AdminComplaintQueueQueryVariables = Exact<{
+  filter: Types.ComplaintQueueFilter;
+}>;
+
+
+export type AdminComplaintQueueQuery = AdminComplaintQueueQuery_Query;
+
+export type SubmitComplaintMutation_submitComplaint_Complaint = { id: string | null, category: Types.ComplaintCategory | null, body: string | null, status: Types.ComplaintStatus | null, createdAt: string | null };
+
+export type SubmitComplaintMutation_Mutation = { submitComplaint: SubmitComplaintMutation_submitComplaint_Complaint | null };
+
+
+export type SubmitComplaintMutationVariables = Exact<{
+  input: Types.ComplaintSubmitInput;
+}>;
+
+
+export type SubmitComplaintMutation = SubmitComplaintMutation_Mutation;
+
+export type RespondToComplaintMutation_respondToComplaint_ComplaintResponse = { id: string | null, body: string | null, emailSent: boolean | null, createdAt: string | null, responderName: string | null };
+
+export type RespondToComplaintMutation_Mutation = { respondToComplaint: RespondToComplaintMutation_respondToComplaint_ComplaintResponse | null };
+
+
+export type RespondToComplaintMutationVariables = Exact<{
+  input: Types.RespondToComplaintInput;
+}>;
+
+
+export type RespondToComplaintMutation = RespondToComplaintMutation_Mutation;
+
+export type DeleteComplaintMutation_Mutation = { deleteComplaint: boolean | null };
+
+
+export type DeleteComplaintMutationVariables = Exact<{
+  complaintId: string;
+}>;
+
+
+export type DeleteComplaintMutation = DeleteComplaintMutation_Mutation;
 
 export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport = { id: string | null, runId: string | null, updated: number | null, conflicts: number | null, unchanged: number | null, total: number | null };
 
@@ -1608,6 +1718,46 @@ export type StudentByIdQueryVariables = Exact<{
 
 
 export type StudentByIdQuery = StudentByIdQuery_Query;
+
+export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion = { id: string | null, parentId: string | null, submitterName: string | null, body: string | null, emailSentAt: string | null, createdAt: string | null, parentName: string | null };
+
+export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_metrics_SuggestionMetrics = { id: string | null, pending: number | null, reviewed: number | null, avgResponseTime: string | null };
+
+export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult = { id: string | null, totalCount: number | null, rows: Array<AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion> | null, metrics: AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_metrics_SuggestionMetrics | null };
+
+export type AdminSuggestionsQuery_Query = { adminSuggestions: AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult | null };
+
+
+export type AdminSuggestionsQueryVariables = Exact<{
+  filter: Types.SuggestionFilter;
+}>;
+
+
+export type AdminSuggestionsQuery = AdminSuggestionsQuery_Query;
+
+export type SubmitSuggestionMutation_submitSuggestion_Suggestion = { id: string | null, submitterName: string | null, body: string | null, createdAt: string | null };
+
+export type SubmitSuggestionMutation_Mutation = { submitSuggestion: SubmitSuggestionMutation_submitSuggestion_Suggestion | null };
+
+
+export type SubmitSuggestionMutationVariables = Exact<{
+  input: Types.SubmitSuggestionInput;
+}>;
+
+
+export type SubmitSuggestionMutation = SubmitSuggestionMutation_Mutation;
+
+export type MarkSuggestionReviewedMutation_markSuggestionReviewed_Suggestion = { id: string | null, emailSentAt: string | null };
+
+export type MarkSuggestionReviewedMutation_Mutation = { markSuggestionReviewed: MarkSuggestionReviewedMutation_markSuggestionReviewed_Suggestion | null };
+
+
+export type MarkSuggestionReviewedMutationVariables = Exact<{
+  suggestionId: string;
+}>;
+
+
+export type MarkSuggestionReviewedMutation = MarkSuggestionReviewedMutation_Mutation;
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics = { total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 

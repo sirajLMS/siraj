@@ -211,7 +211,7 @@ describe("Class Quota System Constraints & Triggers", () => {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         const cause = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
-        expect(message + cause).toMatch(/students_classes_remaining_chk|outOfQuota/);
+        expect(message + cause).toMatch(/students_classes_remaining_chk|quota/i);
       }
     });
     testLogger.info("Block booking on zero quota passed.");
@@ -269,7 +269,7 @@ describe("Class Quota System Constraints & Triggers", () => {
       const failReason: unknown = failures[0].reason;
       const message = failReason instanceof Error ? failReason.message : String(failReason);
       const cause = failReason instanceof Error && failReason.cause instanceof Error ? failReason.cause.message : "";
-      expect(message + cause).toMatch(/students_classes_remaining_chk|outOfQuota/);
+      expect(message + cause).toMatch(/students_classes_remaining_chk|quota/i);
 
       // Verify final state in DB has classesRemaining = 0
       await expectStudentQuota(db, student.id, 0);

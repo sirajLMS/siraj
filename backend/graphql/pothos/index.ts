@@ -5,6 +5,7 @@ export * from "./billing-history.pothos";
 export * from "./billing-management.pothos";
 export * from "./class-session.pothos";
 export * from "./complaint.pothos";
+export * from "./complaintResponses.pothos";
 export * from "./dst-migration.pothos";
 export * from "./enum.pothos";
 export * from "./learning-resource.pothos";

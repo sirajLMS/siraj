@@ -9,6 +9,7 @@ import type {
   ComplaintSubmitInput,
 } from "@/backend/types";
 import { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
+import { ComplaintResponsePothosObject } from "./complaintResponses.pothos";
 
 export const ComplaintCategoryPothosEnum = gqlSchemaBuilder.enumType(ComplaintCategory, {
   name: "ComplaintCategory",
@@ -36,6 +37,7 @@ export const ComplaintPothosObject = ComplaintRef.implement({
     category: t.expose("category", { type: ComplaintCategoryPothosEnum }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
+    responses: t.expose("responses", { type: [ComplaintResponsePothosObject], nullable: true }),
   }),
 });
 
