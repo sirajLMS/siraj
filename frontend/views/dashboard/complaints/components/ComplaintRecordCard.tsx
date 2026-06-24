@@ -6,6 +6,7 @@ import { styled } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/components/ui";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import type { ParentComplaintRecord } from "../types/complaints.types";
+import { ComplaintStatus } from "../types/complaints.types";
 
 /** Root card paper with border, hover transition, and rounded corners */
 const StyledRecordCardPaper = styled(Paper)(({ theme }) => ({
@@ -101,8 +102,8 @@ interface ComplaintRecordCardProps {
   readonly labels: ComplaintsParentLabels;
 }
 
-function mapStatusForBadge(status: ParentComplaintRecord["status"]): string {
-  if (status === "resolved") {
+function mapStatusForBadge(status: ComplaintStatus): string {
+  if (status === ComplaintStatus.Answered) {
     return "paid";
   }
 
@@ -110,7 +111,8 @@ function mapStatusForBadge(status: ParentComplaintRecord["status"]): string {
 }
 
 export function ComplaintRecordCard({ record, labels }: Readonly<ComplaintRecordCardProps>) {
-  const isResolved = record.status === "resolved";
+  const isResolved = record.status === ComplaintStatus.Answered;
+  const labelKey = record.status === ComplaintStatus.Answered ? "resolved" : "pending";
 
   return (
     <StyledRecordCardPaper elevation={0}>
@@ -124,7 +126,7 @@ export function ComplaintRecordCard({ record, labels }: Readonly<ComplaintRecord
           <StatusBadge
             category="invoice"
             status={mapStatusForBadge(record.status)}
-            label={labels.statusLabels[record.status]}
+            label={labels.statusLabels[labelKey]}
           />
         </StyledRecordCardHeader>
 

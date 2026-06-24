@@ -1,4 +1,3 @@
-import { ComplaintCategory, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   Complaint,
   ComplaintMetrics,
@@ -7,9 +6,8 @@ import type {
   ComplaintResponse,
   ComplaintSubmitInput,
 } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ComplaintCategory, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
-// Re-export generated GQL types and enums
-export { ComplaintStatus, ComplaintCategory };
 export type {
   Complaint,
   ComplaintMetrics,
@@ -18,6 +16,8 @@ export type {
   ComplaintResponse,
   ComplaintSubmitInput,
 };
+// Re-export generated GQL types and enums
+export { ComplaintCategory, ComplaintStatus };
 
 // UI/Mock-specific view types (used by mock store and views)
 export type ComplaintTab = ComplaintStatus;

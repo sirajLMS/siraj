@@ -1,6 +1,6 @@
 import type { SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 import type { SuggestionFormData } from "../schemas/suggestionFormSchema";
-import type { AdminSuggestionRow, AdminSuggestionsSummary, SuggestionTab } from "./suggestions.types";
+import type { AdminSuggestionRow, AdminSuggestionsSummary, SuggestionStatus } from "./suggestions.types";
 
 export type { SuggestionsLabels };
 
@@ -18,9 +18,9 @@ export interface AdminSuggestionsViewProps {
   readonly summary: AdminSuggestionsSummary;
   readonly rows: readonly AdminSuggestionRow[];
   readonly searchQuery: string;
-  readonly activeTab: SuggestionTab;
+  readonly activeTab: SuggestionStatus;
   readonly canManage: boolean;
   readonly onSearchChange: (query: string) => void;
-  readonly onTabChange: (tab: SuggestionTab) => void;
+  readonly onTabChange: (tab: SuggestionStatus) => void;
   readonly onMarkReviewed: (id: string) => void;
 }

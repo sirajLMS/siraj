@@ -15,7 +15,7 @@ interface SuggestionsDataGridProps {
 }
 
 function mapStatusForBadge(status: SuggestionStatus): string {
-  if (status === "reviewed") {
+  if (status === "REVIEWED") {
     return "paid";
   }
 
@@ -63,13 +63,16 @@ export function SuggestionsDataGrid({ rows, labels, canManage, onMarkReviewed }:
         headerName: labels.table.status,
         flex: 0.7,
         minWidth: 110,
-        renderCell: ({ row }) => (
-          <StatusBadge
-            category="invoice"
-            status={mapStatusForBadge(row.status)}
-            label={labels.statusLabels[row.status]}
-          />
-        ),
+        renderCell: ({ row }) => {
+          const labelKey = row.status === "REVIEWED" ? "reviewed" : "pending";
+          return (
+            <StatusBadge
+              category="invoice"
+              status={mapStatusForBadge(row.status)}
+              label={labels.statusLabels[labelKey]}
+            />
+          );
+        },
       },
       {
         field: "actions",
@@ -80,7 +83,7 @@ export function SuggestionsDataGrid({ rows, labels, canManage, onMarkReviewed }:
         align: "right",
         headerAlign: "right",
         renderCell: ({ row }) => {
-          if (!canManage || row.status === "reviewed") {
+          if (!canManage || row.status === "REVIEWED") {
             return null;
           }
 

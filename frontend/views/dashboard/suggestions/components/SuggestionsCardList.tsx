@@ -13,7 +13,7 @@ interface SuggestionsCardListProps {
 }
 
 function mapStatusForBadge(status: SuggestionStatus): string {
-  if (status === "reviewed") {
+  if (status === "REVIEWED") {
     return "paid";
   }
 
@@ -32,7 +32,8 @@ export function SuggestionsCardList({ rows, labels, canManage, onMarkReviewed }:
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       {rows.map(row => {
-        const showAction = canManage && row.status === "pending";
+        const showAction = canManage && row.status === "PENDING";
+        const labelKey = row.status === "REVIEWED" ? "reviewed" : "pending";
 
         return (
           <Paper
@@ -57,7 +58,7 @@ export function SuggestionsCardList({ rows, labels, canManage, onMarkReviewed }:
               <StatusBadge
                 category="invoice"
                 status={mapStatusForBadge(row.status)}
-                label={labels.statusLabels[row.status]}
+                label={labels.statusLabels[labelKey]}
               />
             </Box>
             <Typography

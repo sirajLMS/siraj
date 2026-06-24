@@ -3,9 +3,9 @@ import { logger } from "@/backend/lib/logger";
 import ar from "@/shared/messages/ar";
 import en from "@/shared/messages/en";
 import type { CommonLabels } from "@/shared/messages/types/common";
+import type { NotificationsLabels } from "@/shared/messages/types/dashboard/core/notifications";
 import type { ErrorsLabels } from "@/shared/messages/types/errors";
 import type { SessionLabels } from "@/shared/messages/types/session";
-import type { NotificationsLabels } from "@/shared/messages/types/dashboard/core/notifications";
 
 interface BackendNamespaceMap {
   errors: ErrorsLabels;

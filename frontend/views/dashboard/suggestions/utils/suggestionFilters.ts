@@ -1,8 +1,8 @@
-import type { AdminSuggestionRow, SuggestionTab } from "../types/suggestions.types";
+import type { AdminSuggestionRow, SuggestionStatus } from "../types/suggestions.types";
 
 export function filterSuggestionsByTab(
   rows: readonly AdminSuggestionRow[],
-  activeTab: SuggestionTab,
+  activeTab: SuggestionStatus,
   searchQuery: string
 ): AdminSuggestionRow[] {
   const normalizedQuery = searchQuery.trim().toLowerCase();

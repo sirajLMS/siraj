@@ -5,18 +5,17 @@ import type {
   AdminSuggestionRow,
   AdminSuggestionsSummary,
   SuggestionStatus,
-  SuggestionTab,
 } from "@/frontend/views/dashboard/suggestions/types/suggestions.types";
 
-export type { AdminSuggestionRow, AdminSuggestionsSummary, SuggestionStatus, SuggestionTab };
+export type { AdminSuggestionRow, AdminSuggestionsSummary, SuggestionStatus };
 
 interface AdminSuggestionsState {
   readonly summary: AdminSuggestionsSummary;
   readonly rows: readonly AdminSuggestionRow[];
   readonly searchQuery: string;
-  readonly activeTab: SuggestionTab;
+  readonly activeTab: SuggestionStatus;
   setSearchQuery: (query: string) => void;
-  setActiveTab: (tab: SuggestionTab) => void;
+  setActiveTab: (tab: SuggestionStatus) => void;
   markReviewed: (id: string) => void;
 }
 
@@ -31,28 +30,28 @@ const MOCK_ROWS: AdminSuggestionRow[] = [
     id: "sug-1001",
     parentName: "Ahmed Khan",
     suggestionPreview: "Could we add a mobile notification when class schedules change?",
-    status: "pending",
+    status: "PENDING",
     submittedAt: "Oct 24, 2023",
   },
   {
     id: "sug-1002",
     parentName: "Sara Alii",
     suggestionPreview: "It would help to see attendance summaries in the parent dashboard.",
-    status: "pending",
+    status: "PENDING",
     submittedAt: "Oct 23, 2023",
   },
   {
     id: "sug-1003",
     parentName: "John Smith",
     suggestionPreview: "Please offer quarterly billing options for multi-student families.",
-    status: "reviewed",
+    status: "REVIEWED",
     submittedAt: "Oct 20, 2023",
   },
   {
     id: "sug-1004",
     parentName: "Fatima Zayed",
     suggestionPreview: "Add Arabic subtitles to recorded class sessions for review.",
-    status: "reviewed",
+    status: "REVIEWED",
     submittedAt: "Oct 18, 2023",
   },
 ];
@@ -61,7 +60,7 @@ export const useAdminSuggestionsStore = create<AdminSuggestionsState>(set => ({
   summary: MOCK_SUMMARY,
   rows: MOCK_ROWS,
   searchQuery: "",
-  activeTab: "pending",
+  activeTab: "PENDING",
   setSearchQuery: query => {
     set({ searchQuery: query });
   },
@@ -71,7 +70,7 @@ export const useAdminSuggestionsStore = create<AdminSuggestionsState>(set => ({
   markReviewed: id => {
     logger.info("Suggestion marked reviewed", { id });
     set(state => ({
-      rows: state.rows.map(row => (row.id === id ? { ...row, status: "reviewed" } : row)),
+      rows: state.rows.map(row => (row.id === id ? { ...row, status: "REVIEWED" } : row)),
       summary: {
         ...state.summary,
         pending: Math.max(state.summary.pending - 1, 0),
