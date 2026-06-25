@@ -3,6 +3,8 @@ import { teachers } from "@/backend/db/schema/teachers";
 import logger from "@/backend/lib/logger";
 import type { TimezoneEntity, UserEntity } from "@/backend/types";
 import {
+  ALL_ACCOUNT_STATUSES,
+  cycleAtIndex,
   getAvatarFileName,
   loadSeedConfig,
   pickTimezoneForIndex,
@@ -11,12 +13,12 @@ import {
   shouldSeedExtendedFiles,
 } from "./lib";
 
-async function upsertTeacher(userId: string, timezone: TimezoneEntity, now: Date) {
+async function upsertTeacher(userId: string, timezone: TimezoneEntity, status: string, now: Date) {
   const [insertedTeacher] = await db
     .insert(teachers)
     .values({
       userId,
-      status: "ACTIVATED",
+      status,
       timezoneId: timezone.id,
       timezone: timezone.ianaId,
       createdAt: now,
@@ -25,7 +27,7 @@ async function upsertTeacher(userId: string, timezone: TimezoneEntity, now: Date
     .onConflictDoUpdate({
       target: teachers.userId,
       set: {
-        status: "ACTIVATED",
+        status,
         timezoneId: timezone.id,
         timezone: timezone.ianaId,
         updatedAt: now,
@@ -67,7 +69,8 @@ export async function seedOrGet(users: UserEntity[], timezones: TimezoneEntity[]
     const user = teacherUsers[i];
     const tzIana = i === 0 ? "UTC" : pickTimezoneForIndex(i);
     const timezone = resolveTimezone(timezones, tzIana);
-    const teacher = await upsertTeacher(user.id, timezone, now);
+    const status = i === 0 ? ALL_ACCOUNT_STATUSES[0] : cycleAtIndex(ALL_ACCOUNT_STATUSES, i);
+    const teacher = await upsertTeacher(user.id, timezone, status, now);
 
     if (shouldSeedExtendedFiles(seedConfig)) {
       try {

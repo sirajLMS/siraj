@@ -3,9 +3,10 @@ import { invoices } from "@/backend/db/schema/billing";
 import logger from "@/backend/lib/logger";
 import type { ParentEntity, StudentEntity, UserEntity } from "@/backend/types";
 import {
+  ALL_INVOICE_TYPES,
   buildInvoiceAmount,
+  cycleAtIndex,
   DEFAULT_INVOICE_CURRENCY,
-  DEFAULT_INVOICE_TYPE,
   iterateInvoiceMonths,
   loadSeedConfig,
   type SeedConfig,
@@ -32,8 +33,9 @@ export async function seedOrGet(
   const months = [...iterateInvoiceMonths(seedConfig)];
   const parentsToSeed = seedConfig.profile === "standard" ? parentsList : parentsList.slice(0, 1);
 
-  for (const parent of parentsToSeed) {
+  for (const [parentIndex, parent] of parentsToSeed.entries()) {
     const student = studentsList.find(s => s.parentId === parent.id) ?? studentsList[0];
+    const invoiceType = cycleAtIndex(ALL_INVOICE_TYPES, parentIndex);
     const monthsToUse = seedConfig.profile === "standard" ? months : months.slice(0, 1);
 
     for (const monthSpec of monthsToUse) {
@@ -48,10 +50,10 @@ export async function seedOrGet(
           issueDate: monthSpec.issueDate,
           dueDate: monthSpec.dueDate,
           paidDate: monthSpec.paidDate,
-          amount: buildInvoiceAmount(seedConfig, parentsList.indexOf(parent), monthKey),
+          amount: buildInvoiceAmount(seedConfig, parentIndex, monthKey),
           currency: DEFAULT_INVOICE_CURRENCY,
           status: monthSpec.status,
-          invoiceType: DEFAULT_INVOICE_TYPE,
+          invoiceType,
           createdByUserId: adminUser?.id ?? null,
           idempotencyKey,
           createdAt: now,

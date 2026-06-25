@@ -81,7 +81,7 @@ export {
   pickTimezoneForIndex,
   type SeedUserSpec,
 } from "./person-factory";
-export { buildScheduleDaysForStudent, parseTimeToHoursMinutes, type ScheduleDaySpec } from "./schedule-factory";
+export { buildScheduleDaysForStudent, isScheduleDayActive, parseTimeToHoursMinutes, pickScheduleDefaultStartTime, pickScheduleDurationMinutes, type ScheduleDaySpec } from "./schedule-factory";
 export {
   getTotalParents,
   getTotalStudents,

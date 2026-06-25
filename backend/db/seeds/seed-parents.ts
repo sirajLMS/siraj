@@ -3,6 +3,8 @@ import { parents } from "@/backend/db/schema/parents";
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
 import {
+  ALL_PARENT_STATUSES,
+  cycleAtIndex,
   getAvatarFileName,
   loadSeedConfig,
   pickTimezoneForIndex,
@@ -11,12 +13,12 @@ import {
   shouldSeedExtendedFiles,
 } from "./lib";
 
-async function upsertParent(userId: string, timezone: string, now: Date) {
+async function upsertParent(userId: string, timezone: string, status: string, now: Date) {
   const [insertedParent] = await db
     .insert(parents)
     .values({
       userId,
-      status: "REGULAR",
+      status,
       timezone,
       createdAt: now,
       updatedAt: now,
@@ -24,7 +26,7 @@ async function upsertParent(userId: string, timezone: string, now: Date) {
     .onConflictDoUpdate({
       target: parents.userId,
       set: {
-        status: "REGULAR",
+        status,
         timezone,
         updatedAt: now,
       },
@@ -51,7 +53,8 @@ export async function seedOrGet(users: UserEntity[], config?: SeedConfig) {
   for (let i = 0; i < parentUsers.length; i++) {
     const user = parentUsers[i];
     const timezone = i === 0 ? "Africa/Cairo" : pickTimezoneForIndex(i);
-    const parent = await upsertParent(user.id, timezone, now);
+    const status = cycleAtIndex(ALL_PARENT_STATUSES, i);
+    const parent = await upsertParent(user.id, timezone, status, now);
 
     if (shouldSeedExtendedFiles(seedConfig)) {
       try {

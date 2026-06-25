@@ -143,7 +143,14 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   await seedOrGetTeacherRecurringUnavailability(context.teachers, context.timezones, config);
   await seedOrGetTeacherVacationRequests(context.teachers, context.users, context.timezones, config);
 
-  const leaveRequests = await seedOrGetLeaveRequests(context.classInstances, context.teachers, context.users, config);
+  const leaveRequests = await seedOrGetLeaveRequests(
+    context.classInstances,
+    context.teachers,
+    context.users,
+    context.students,
+    context.parents,
+    config
+  );
   await seedOrGetLeaveQuotaUsage(leaveRequests, context.students, config);
   await seedOrGetStudentProgress(context.classInstances, config);
   await seedOrGetStudentStatusHistory(context.students, context.users, config);

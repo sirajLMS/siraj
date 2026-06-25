@@ -30,9 +30,16 @@ export async function seedOrGet(parentsList: ParentEntity[], usersList: UserEnti
         submitterName: parentUser?.name ?? `Parent ${i + 1}`,
         body: buildSuggestionBody(seedConfig, i),
         status,
-        adminResponse: status === SuggestionStatus.REVIEWED ? "Thank you for your feedback." : null,
-        reviewedByUserId: status === SuggestionStatus.REVIEWED ? adminUser?.id : null,
-        reviewedAt: status === SuggestionStatus.REVIEWED ? now : null,
+        adminResponse:
+          status === SuggestionStatus.REVIEWED
+            ? "Thank you for your feedback."
+            : status === SuggestionStatus.DUPLICATE
+              ? "Marked as duplicate of an existing suggestion."
+              : null,
+        reviewedByUserId:
+          status === SuggestionStatus.REVIEWED || status === SuggestionStatus.DUPLICATE ? adminUser?.id : null,
+        reviewedAt:
+          status === SuggestionStatus.REVIEWED || status === SuggestionStatus.DUPLICATE ? now : null,
         createdAt: now,
       })
       .returning();

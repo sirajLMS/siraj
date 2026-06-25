@@ -3,28 +3,33 @@ import { classInstancePerformance } from "@/backend/db/schema/scheduling";
 import logger from "@/backend/lib/logger";
 import type { ClassInstanceEntity } from "@/backend/types";
 import { ClassOutcome } from "@/shared/lib/enum";
-import { daysBetween, getFakerForIndex, loadSeedConfig, type SeedConfig, startOfDay } from "./lib";
+import {
+  ALL_FOCUS_LEVELS,
+  ALL_GRADES,
+  ALL_SESSION_HEALTH,
+  cycleAtIndex,
+  daysBetween,
+  getFakerForIndex,
+  loadSeedConfig,
+  type SeedConfig,
+  startOfDay,
+} from "./lib";
 
-const FOCUS_LEVELS = ["LOW", "MEDIUM", "HIGH"] as const;
-const SESSION_HEALTH = ["POOR", "FAIR", "GOOD", "EXCELLENT"] as const;
-const GRADES = ["A", "A-", "B+", "B", "B-"] as const;
-
-function buildPerformanceRow(instance: ClassInstanceEntity, config: SeedConfig, now: Date) {
+function buildPerformanceRow(instance: ClassInstanceEntity, config: SeedConfig, rowIndex: number, now: Date) {
   const faker = getFakerForIndex(config.fakerSeed, instance.id.length);
-  const lastClassDaysAgo = daysBetween(startOfDay(instance.scheduledStartAt), startOfDay(config.anchorDate));
 
   return {
     classInstanceId: instance.id,
     engagementScore: faker.number.int({ min: 60, max: 100 }),
     assessmentProgress: faker.number.int({ min: 70, max: 100 }),
     assessmentTotal: 100,
-    focusLevel: faker.helpers.arrayElement(FOCUS_LEVELS),
-    sessionHealth: faker.helpers.arrayElement(SESSION_HEALTH),
+    focusLevel: cycleAtIndex(ALL_FOCUS_LEVELS, rowIndex),
+    sessionHealth: cycleAtIndex(ALL_SESSION_HEALTH, rowIndex),
     heatmapData: Array.from({ length: 5 }, () => faker.number.int({ min: 1, max: 5 })),
     latencyMs: faker.number.int({ min: 20, max: 120 }),
     attendanceRate: instance.outcome === ClassOutcome.TAKEN ? 100 : faker.number.int({ min: 0, max: 50 }),
-    avgGrade: faker.helpers.arrayElement(GRADES),
-    lastClassDaysAgo: Math.max(0, lastClassDaysAgo),
+    avgGrade: cycleAtIndex(ALL_GRADES, rowIndex),
+    lastClassDaysAgo: Math.max(0, daysBetween(startOfDay(instance.scheduledStartAt), startOfDay(config.anchorDate))),
     createdAt: instance.actualEndAt ?? instance.scheduledEndAt,
     updatedAt: now,
   };
@@ -41,12 +46,14 @@ export async function seedOrGet(classInstancesList: ClassInstanceEntity[], confi
 
   const results = [];
 
+  let rowIndex = 0;
   for (const instance of classInstancesList) {
     if (instance.outcome !== ClassOutcome.TAKEN) {
       continue;
     }
 
-    const row = buildPerformanceRow(instance, seedConfig, now);
+    const row = buildPerformanceRow(instance, seedConfig, rowIndex, now);
+    rowIndex++;
 
     const [inserted] = await db
       .insert(classInstancePerformance)

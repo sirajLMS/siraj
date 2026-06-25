@@ -2,7 +2,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { recurringScheduleDays } from "@/backend/db/schema/scheduling";
 import logger from "@/backend/lib/logger";
 import type { RecurringScheduleEntity } from "@/backend/types";
-import { buildScheduleDaysForStudent, loadSeedConfig, type SeedConfig } from "./lib";
+import { buildScheduleDaysForStudent, isScheduleDayActive, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(classesList: RecurringScheduleEntity[], config?: SeedConfig) {
   logger.info("Seeding recurring schedule days...");
@@ -18,20 +18,21 @@ export async function seedOrGet(classesList: RecurringScheduleEntity[], config?:
     const schedule = classesList[i];
     const daySpecs = buildScheduleDaysForStudent(seedConfig, i);
 
-    for (const daySpec of daySpecs) {
+    for (let dayIndex = 0; dayIndex < daySpecs.length; dayIndex++) {
+      const daySpec = daySpecs[dayIndex];
       const [inserted] = await db
         .insert(recurringScheduleDays)
         .values({
           recurringScheduleId: schedule.id,
           dayOfWeek: daySpec.dayOfWeek,
           startTime: daySpec.startTime,
-          isActive: true,
+          isActive: isScheduleDayActive(i, dayIndex),
         })
         .onConflictDoUpdate({
           target: [recurringScheduleDays.recurringScheduleId, recurringScheduleDays.dayOfWeek],
           set: {
             startTime: daySpec.startTime,
-            isActive: true,
+            isActive: isScheduleDayActive(i, dayIndex),
           },
         })
         .returning();

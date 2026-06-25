@@ -2,14 +2,39 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { leaveRequests } from "@/backend/db/schema/scheduling";
 import logger from "@/backend/lib/logger";
-import type { ClassInstanceEntity, TeacherEntity, UserEntity } from "@/backend/types";
+import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "@/backend/types";
 import { ClassOutcome, LeaveRequesterType, LeaveRequestStatus } from "@/shared/lib/enum";
-import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
+import {
+  ALL_LEAVE_REQUESTER_TYPES,
+  cycleAtIndex,
+  getFakerForIndex,
+  loadSeedConfig,
+  startOfDay,
+  type SeedConfig,
+} from "./lib";
+
+function resolveRequesterUserId(
+  requesterType: LeaveRequesterType,
+  instance: ClassInstanceEntity,
+  teacherUserMap: Map<string, string>,
+  studentParentUserMap: Map<string, string>,
+  adminUserId: string | undefined
+): string | undefined {
+  if (requesterType === LeaveRequesterType.ADMIN) {
+    return adminUserId;
+  }
+  if (requesterType === LeaveRequesterType.PARENT) {
+    return studentParentUserMap.get(instance.studentId);
+  }
+  return teacherUserMap.get(instance.teacherId);
+}
 
 export async function seedOrGet(
   classInstancesList: ClassInstanceEntity[],
   teachersList: TeacherEntity[],
   usersList: UserEntity[],
+  studentsList: StudentEntity[],
+  parentsList: ParentEntity[],
   config?: SeedConfig
 ) {
   logger.info("Seeding leave requests...");
@@ -20,14 +45,30 @@ export async function seedOrGet(
   }
 
   const leaveInstances = classInstancesList.filter(ci => ci.outcome === ClassOutcome.LEAVE);
+  const pendingFutureInstances = classInstancesList.filter(
+    ci =>
+      ci.outcome === ClassOutcome.PENDING &&
+      startOfDay(ci.scheduledStartAt).getTime() > startOfDay(seedConfig.anchorDate).getTime()
+  );
   const teacherUserMap = new Map(teachersList.map(t => [t.id, t.userId]));
+  const parentById = new Map(parentsList.map(p => [p.id, p]));
+  const studentParentUserMap = new Map(
+    studentsList.map(s => [s.id, parentById.get(s.parentId)?.userId]).filter((entry): entry is [string, string] => !!entry[1])
+  );
   const adminUser = usersList.find(u => u.email === "admin@siraj.local");
   const results = [];
   const maxLeaves = seedConfig.profile === "standard" ? leaveInstances.length : Math.min(2, leaveInstances.length);
 
   for (let i = 0; i < maxLeaves; i++) {
     const instance = leaveInstances[i];
-    const actorUserId = teacherUserMap.get(instance.teacherId) ?? adminUser?.id;
+    const requesterType = cycleAtIndex(ALL_LEAVE_REQUESTER_TYPES, i);
+    const actorUserId = resolveRequesterUserId(
+      requesterType,
+      instance,
+      teacherUserMap,
+      studentParentUserMap,
+      adminUser?.id
+    );
     if (!actorUserId) continue;
 
     const [existing] = await db
@@ -47,12 +88,65 @@ export async function seedOrGet(
       .values({
         classInstanceId: instance.id,
         requestedByUserId: actorUserId,
-        requesterType: LeaveRequesterType.TEACHER,
+        requesterType,
         reason: faker.lorem.sentence(),
         status: LeaveRequestStatus.APPROVED,
         createdAt: instance.scheduledStartAt,
         processedAt: instance.scheduledEndAt,
         processedByUserId: adminUser?.id ?? null,
+      })
+      .returning();
+    results.push(inserted);
+  }
+
+  const supplementalStatuses = [
+    LeaveRequestStatus.PENDING,
+    LeaveRequestStatus.RESCHEDULED,
+    LeaveRequestStatus.CANCELLED,
+  ] as const;
+  const supplementalCount =
+    seedConfig.profile === "standard"
+      ? Math.min(supplementalStatuses.length, pendingFutureInstances.length)
+      : Math.min(1, pendingFutureInstances.length);
+
+  for (let i = 0; i < supplementalCount; i++) {
+    const instance = pendingFutureInstances[i];
+    const status = supplementalStatuses[i];
+    const requesterType = cycleAtIndex(ALL_LEAVE_REQUESTER_TYPES, maxLeaves + i);
+    const actorUserId = resolveRequesterUserId(
+      requesterType,
+      instance,
+      teacherUserMap,
+      studentParentUserMap,
+      adminUser?.id
+    );
+    if (!actorUserId) continue;
+
+    const [existing] = await db
+      .select()
+      .from(leaveRequests)
+      .where(eq(leaveRequests.classInstanceId, instance.id))
+      .limit(1);
+
+    if (existing) {
+      results.push(existing);
+      continue;
+    }
+
+    const faker = getFakerForIndex(seedConfig.fakerSeed, 8000 + i);
+    const isProcessed = status !== LeaveRequestStatus.PENDING;
+
+    const [inserted] = await db
+      .insert(leaveRequests)
+      .values({
+        classInstanceId: instance.id,
+        requestedByUserId: actorUserId,
+        requesterType,
+        reason: faker.lorem.sentence(),
+        status,
+        createdAt: instance.scheduledStartAt,
+        processedAt: isProcessed ? instance.scheduledStartAt : null,
+        processedByUserId: isProcessed ? (adminUser?.id ?? null) : null,
       })
       .returning();
     results.push(inserted);

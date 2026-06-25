@@ -7,7 +7,16 @@ import logger from "@/backend/lib/logger";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
 import type { ParentEntity, TeacherEntity } from "@/backend/types";
-import { buildStudentName, getStudentAvatarFileName, getTotalStudents, loadSeedConfig, type SeedConfig } from "./lib";
+import { StudentStatus } from "@/shared/lib/enum";
+import {
+  ALL_STUDENT_STATUSES,
+  buildStudentName,
+  cycleAtIndex,
+  getStudentAvatarFileName,
+  getTotalStudents,
+  loadSeedConfig,
+  type SeedConfig,
+} from "./lib";
 
 const DEMO_STUDENTS = [
   { name: "Demo Student", idempotencyKey: "demo_student_1", timezoneOverride: null as string | null, avatarIndex: 1 },
@@ -26,6 +35,7 @@ async function upsertStudent(
   timezoneOverride: string | null,
   idempotencyKey: string,
   avatarUrl: string | null,
+  status: StudentStatus,
   now: Date
 ) {
   const [result] = await db
@@ -35,9 +45,9 @@ async function upsertStudent(
       primaryTeacherId: teacherId,
       name,
       avatarUrl,
-      status: "REGULAR",
+      status,
       classesTotal: 10,
-      classesRemaining: 5,
+      classesRemaining: status === StudentStatus.GRADUATED ? 0 : 5,
       version: 1,
       timezoneOverride,
       idempotencyKey,
@@ -49,7 +59,6 @@ async function upsertStudent(
       set: {
         name,
         avatarUrl,
-        status: "REGULAR",
         timezoneOverride,
         primaryTeacherId: teacherId,
         parentId,
@@ -146,7 +155,18 @@ export async function seedOrGet(parentsList: ParentEntity[], teachersList: Teach
       idempotencyKey = `seed_student_${extraIndex}`;
     }
 
-    const student = await upsertStudent(parent.id, teacher.id, name, timezoneOverride, idempotencyKey, avatarUrl, now);
+    const status = i === 0 ? StudentStatus.REGULAR : cycleAtIndex(ALL_STUDENT_STATUSES, i);
+
+    const student = await upsertStudent(
+      parent.id,
+      teacher.id,
+      name,
+      timezoneOverride,
+      idempotencyKey,
+      avatarUrl,
+      status,
+      now
+    );
     results.push(student);
 
     await ensureTeacherAssignment(student.id, teacher.id, assignmentDate);

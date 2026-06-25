@@ -2,8 +2,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { userDeviceTokens } from "@/backend/db/schema/communications";
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
-import { DevicePlatform } from "@/shared/lib/enum";
-import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
+import { ALL_DEVICE_PLATFORMS, cycleAtIndex, getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding user device tokens...");
@@ -30,7 +29,7 @@ export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
       .values({
         userId: user.id,
         token,
-        platform: i % 2 === 0 ? DevicePlatform.WEB : DevicePlatform.ANDROID,
+        platform: cycleAtIndex(ALL_DEVICE_PLATFORMS, i),
         deviceName: faker.internet.userAgent(),
         isActive: true,
         lastUsedAt: now,

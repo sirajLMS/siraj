@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { recurringSchedules } from "@/backend/db/schema/scheduling";
 import logger from "@/backend/lib/logger";
 import type { StudentEntity, TeacherEntity } from "@/backend/types";
-import { formatDateKey, getDateWindow, loadSeedConfig, pickTimezoneForIndex, type SeedConfig } from "./lib";
+import { formatDateKey, getDateWindow, loadSeedConfig, pickScheduleDefaultStartTime, pickScheduleDurationMinutes, pickTimezoneForIndex, type SeedConfig } from "./lib";
 
 export async function seedOrGet(teachersList: TeacherEntity[], studentsList: StudentEntity[], config?: SeedConfig) {
   logger.info("Seeding system classes (recurring schedules)...");
@@ -22,6 +22,9 @@ export async function seedOrGet(teachersList: TeacherEntity[], studentsList: Stu
     const teacher = teachersList[i % teachersList.length];
     const timezone = student.timezoneOverride ?? pickTimezoneForIndex(i);
 
+    const durationMinutes = pickScheduleDurationMinutes(i);
+    const defaultStartTime = pickScheduleDefaultStartTime(i);
+
     const [existing] = await db
       .select()
       .from(recurringSchedules)
@@ -33,8 +36,8 @@ export async function seedOrGet(teachersList: TeacherEntity[], studentsList: Stu
         .update(recurringSchedules)
         .set({
           teacherId: teacher.id,
-          durationMinutes: 60,
-          defaultStartTime: "10:00:00",
+          durationMinutes,
+          defaultStartTime,
           timezone,
           effectiveFrom: formatDateKey(start),
           effectiveUntil: formatDateKey(end),
@@ -51,8 +54,8 @@ export async function seedOrGet(teachersList: TeacherEntity[], studentsList: Stu
       .values({
         teacherId: teacher.id,
         studentId: student.id,
-        durationMinutes: 60,
-        defaultStartTime: "10:00:00",
+        durationMinutes,
+        defaultStartTime,
         timezone,
         effectiveFrom: formatDateKey(start),
         effectiveUntil: formatDateKey(end),

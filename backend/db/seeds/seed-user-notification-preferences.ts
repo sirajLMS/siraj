@@ -2,15 +2,13 @@ import { db } from "@/backend/db/drizzleDb";
 import { userNotificationPreferences } from "@/backend/db/schema/communications";
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
-import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
-import { loadSeedConfig, type SeedConfig } from "./lib";
-
-const DEFAULT_CHANNELS = [NotificationChannel.EMAIL, NotificationChannel.ON_APP] as const;
-const DEFAULT_EVENTS = [
-  NotificationEventType.CLASS_REMINDER,
-  NotificationEventType.INVOICE_GENERATED,
-  NotificationEventType.COMPLAINT_RESPONSE,
-] as const;
+import {
+  ALL_NOTIFICATION_CHANNELS,
+  ALL_NOTIFICATION_EVENT_TYPES,
+  cycleAtIndex,
+  loadSeedConfig,
+  type SeedConfig,
+} from "./lib";
 
 export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding user notification preferences...");
@@ -28,31 +26,31 @@ export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
 
   const results = [];
 
-  for (const user of targetUsers) {
-    for (const channel of DEFAULT_CHANNELS) {
-      for (const eventType of DEFAULT_EVENTS) {
-        const [inserted] = await db
-          .insert(userNotificationPreferences)
-          .values({
-            userId: user.id,
-            channel,
-            eventType,
-            enabled: true,
-            createdAt: now,
-            updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: [
-              userNotificationPreferences.userId,
-              userNotificationPreferences.channel,
-              userNotificationPreferences.eventType,
-            ],
-            set: { enabled: true, updatedAt: now },
-          })
-          .returning();
-        results.push(inserted);
-      }
-    }
+  for (let userIndex = 0; userIndex < targetUsers.length; userIndex++) {
+    const user = targetUsers[userIndex];
+    const channel = cycleAtIndex(ALL_NOTIFICATION_CHANNELS, userIndex);
+    const eventType = cycleAtIndex(ALL_NOTIFICATION_EVENT_TYPES, userIndex);
+
+    const [inserted] = await db
+      .insert(userNotificationPreferences)
+      .values({
+        userId: user.id,
+        channel,
+        eventType,
+        enabled: userIndex % 5 !== 0,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: [
+          userNotificationPreferences.userId,
+          userNotificationPreferences.channel,
+          userNotificationPreferences.eventType,
+        ],
+        set: { enabled: userIndex % 5 !== 0, updatedAt: now },
+      })
+      .returning();
+    results.push(inserted);
   }
 
   logger.info(`User notification preferences seeded (${results.length} rows).`);

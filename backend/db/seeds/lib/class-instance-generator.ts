@@ -121,8 +121,12 @@ export function buildShowcaseInstancesForToday(
     const start = createTimestampOnDate(today, hours);
     const end = new Date(start);
     end.setHours(end.getHours() + 1);
-    const actualStart = state.actualStartAt ?? (state.outcome !== ClassOutcome.PENDING ? start : null);
-    const actualEnd = state.actualEndAt ?? (state.outcome !== ClassOutcome.PENDING ? end : null);
+    const actualStart =
+      state.actualStartAt ??
+      (state.executionState === ClassExecutionState.RUNNING || state.outcome !== ClassOutcome.PENDING ? start : null);
+    const actualEnd =
+      state.actualEndAt ??
+      (state.executionState === ClassExecutionState.RUNNING || state.outcome !== ClassOutcome.PENDING ? end : null);
 
     return {
       recurringScheduleId: schedule.scheduleId,
