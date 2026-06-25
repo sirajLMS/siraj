@@ -28,7 +28,6 @@ export type AdminSuggestionResult = {
   metrics: Maybe<SuggestionMetrics>;
   rows: Maybe<Array<Suggestion>>;
   suggestions: Maybe<Array<Suggestion>>;
-  totalCount: Maybe<Scalars['Int']['output']>;
 };
 
 export enum AppLanguage {

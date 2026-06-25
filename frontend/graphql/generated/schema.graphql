@@ -4,7 +4,6 @@ type AdminSuggestionResult {
   metrics: SuggestionMetrics
   rows: [Suggestion!]
   suggestions: [Suggestion!]
-  totalCount: Int
 }
 
 enum AppLanguage {

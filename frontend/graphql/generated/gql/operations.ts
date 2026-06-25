@@ -1738,9 +1738,9 @@ export type StudentByIdQuery = StudentByIdQuery_Query;
 
 export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion = { id: string | null, parentId: string | null, submitterName: string | null, body: string | null, status: Types.SuggestionStatus | null, emailSentAt: string | null, createdAt: string | null, parentName: string | null };
 
-export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_metrics_SuggestionMetrics = { id: string | null, pending: number | null, reviewed: number | null, avgResponseTime: string | null };
+export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_metrics_SuggestionMetrics = { id: string | null, pending: number | null, reviewed: number | null, avgResponseTime: string | null, totalCount: number | null };
 
-export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult = { id: string | null, totalCount: number | null, rows: Array<AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion> | null, metrics: AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_metrics_SuggestionMetrics | null };
+export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult = { id: string | null, rows: Array<AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion> | null, metrics: AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_metrics_SuggestionMetrics | null };
 
 export type AdminSuggestionsQuery_Query = { adminSuggestions: AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult | null };
 
