@@ -1,49 +1,69 @@
-import { sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { recurringSchedules } from "@/backend/db/schema/scheduling";
 import logger from "@/backend/lib/logger";
 import type { StudentEntity, TeacherEntity } from "@/backend/types";
+import { formatDateKey, getDateWindow, loadSeedConfig, pickTimezoneForIndex, type SeedConfig } from "./lib";
 
-export async function seedOrGet(teachersList: TeacherEntity[], studentsList: StudentEntity[]) {
+export async function seedOrGet(teachersList: TeacherEntity[], studentsList: StudentEntity[], config?: SeedConfig) {
   logger.info("Seeding system classes (recurring schedules)...");
   const now = new Date();
+  const seedConfig = config ?? loadSeedConfig();
+  const { start, end } = getDateWindow(seedConfig.anchorDate, seedConfig.monthsBefore, seedConfig.monthsAfter);
 
-  if (!teachersList || teachersList.length === 0) {
-    throw new Error("No teachers available to link to classes.");
-  }
-  if (!studentsList || studentsList.length === 0) {
-    throw new Error("No students available to link to classes.");
-  }
-
-  const defaultTeacher = teachersList[0];
-  const defaultStudent = studentsList[0];
-
-  // check if exists
-  const [existing] = await db
-    .select()
-    .from(recurringSchedules)
-    .where(
-      sql`${recurringSchedules.teacherId} = ${defaultTeacher.id} AND ${recurringSchedules.studentId} = ${defaultStudent.id}`
-    );
-
-  if (existing) {
-    logger.info("System classes already seeded.");
-    return [existing];
+  if (!teachersList?.length || !studentsList?.length) {
+    throw new Error("Missing teachers or students for recurring schedule seeding.");
   }
 
-  const [insertedClass] = await db
-    .insert(recurringSchedules)
-    .values({
-      teacherId: defaultTeacher.id,
-      studentId: defaultStudent.id,
-      durationMinutes: 60,
-      defaultStartTime: "10:00:00",
-      timezone: "UTC",
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
+  const results = [];
 
-  logger.info("System classes seeded.");
-  return [insertedClass];
+  for (let i = 0; i < studentsList.length; i++) {
+    const student = studentsList[i];
+    const teacher = teachersList[i % teachersList.length];
+    const timezone = student.timezoneOverride ?? pickTimezoneForIndex(i);
+
+    const [existing] = await db
+      .select()
+      .from(recurringSchedules)
+      .where(eq(recurringSchedules.studentId, student.id))
+      .limit(1);
+
+    if (existing) {
+      const [updated] = await db
+        .update(recurringSchedules)
+        .set({
+          teacherId: teacher.id,
+          durationMinutes: 60,
+          defaultStartTime: "10:00:00",
+          timezone,
+          effectiveFrom: formatDateKey(start),
+          effectiveUntil: formatDateKey(end),
+          updatedAt: now,
+        })
+        .where(eq(recurringSchedules.id, existing.id))
+        .returning();
+      results.push(updated);
+      continue;
+    }
+
+    const [insertedClass] = await db
+      .insert(recurringSchedules)
+      .values({
+        teacherId: teacher.id,
+        studentId: student.id,
+        durationMinutes: 60,
+        defaultStartTime: "10:00:00",
+        timezone,
+        effectiveFrom: formatDateKey(start),
+        effectiveUntil: formatDateKey(end),
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+
+    results.push(insertedClass);
+  }
+
+  logger.info(`System classes seeded (${results.length} recurring schedules).`);
+  return results;
 }

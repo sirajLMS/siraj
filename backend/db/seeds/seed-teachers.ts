@@ -2,30 +2,16 @@ import { db } from "@/backend/db/drizzleDb";
 import { teachers } from "@/backend/db/schema/teachers";
 import logger from "@/backend/lib/logger";
 import type { TimezoneEntity, UserEntity } from "@/backend/types";
+import { pickTimezoneForIndex, type SeedConfig } from "./lib";
 
-export async function seedOrGet(users: UserEntity[], timezones: TimezoneEntity[]) {
-  logger.info("Seeding system teachers...");
-  const now = new Date();
-
-  // Find the teacher user
-  const teacherUser = users.find(u => u.email === "teacher@siraj.local");
-  if (!teacherUser) {
-    throw new Error("Teacher user not found in seed data.");
-  }
-
-  // Assign to default timezone (UTC or first available)
-  const defaultTimezone = timezones.find(t => t.ianaId === "UTC") || timezones[0];
-  if (!defaultTimezone) {
-    throw new Error("No timezones found in seed data.");
-  }
-
+async function upsertTeacher(userId: string, timezone: TimezoneEntity, now: Date) {
   const [insertedTeacher] = await db
     .insert(teachers)
     .values({
-      userId: teacherUser.id,
+      userId,
       status: "ACTIVATED",
-      timezoneId: defaultTimezone.id,
-      timezone: defaultTimezone.ianaId,
+      timezoneId: timezone.id,
+      timezone: timezone.ianaId,
       createdAt: now,
       updatedAt: now,
     })
@@ -33,13 +19,50 @@ export async function seedOrGet(users: UserEntity[], timezones: TimezoneEntity[]
       target: teachers.userId,
       set: {
         status: "ACTIVATED",
-        timezoneId: defaultTimezone.id,
-        timezone: defaultTimezone.ianaId,
+        timezoneId: timezone.id,
+        timezone: timezone.ianaId,
         updatedAt: now,
       },
     })
     .returning();
 
-  logger.info("System teachers seeded.");
-  return [insertedTeacher];
+  return insertedTeacher;
+}
+
+function resolveTimezone(timezones: TimezoneEntity[], ianaId: string): TimezoneEntity {
+  const match = timezones.find(t => t.ianaId === ianaId);
+  if (!match) {
+    throw new Error(`Timezone not found: ${ianaId}`);
+  }
+  return match;
+}
+
+export async function seedOrGet(users: UserEntity[], timezones: TimezoneEntity[], _config?: SeedConfig) {
+  logger.info("Seeding system teachers...");
+  const now = new Date();
+
+  const defaultTimezone = timezones.find(t => t.ianaId === "UTC") || timezones[0];
+  if (!defaultTimezone) {
+    throw new Error("No timezones found in seed data.");
+  }
+
+  const teacherUsers = users.filter(
+    u => u.email === "teacher@siraj.local" || /^teacher-\d+@seed\.siraj\.local$/.test(u.email)
+  );
+
+  if (teacherUsers.length === 0) {
+    throw new Error("No teacher users found in seed data.");
+  }
+
+  const results = [];
+  for (let i = 0; i < teacherUsers.length; i++) {
+    const user = teacherUsers[i];
+    const tzIana = i === 0 ? "UTC" : pickTimezoneForIndex(i);
+    const timezone = resolveTimezone(timezones, tzIana);
+    const teacher = await upsertTeacher(user.id, timezone, now);
+    results.push(teacher);
+  }
+
+  logger.info(`System teachers seeded (${results.length} total).`);
+  return results;
 }

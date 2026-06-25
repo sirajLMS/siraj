@@ -9,31 +9,43 @@ import { hashPassword } from "@/backend/lib/auth/password";
 import logger from "@/backend/lib/logger";
 import type { PermissionGroupEntity } from "@/backend/types/auth.types";
 import { INTERNAL_DEMO_USERS } from "@/shared/demo-users";
+import {
+  buildExtraParentUserSpecs,
+  buildExtraTeacherUserSpecs,
+  loadSeedConfig,
+  type SeedConfig,
+  type SeedUserSpec,
+} from "./lib";
 
-async function seedUser(u: (typeof INTERNAL_DEMO_USERS)[0], groupMap: Map<string, string>, now: Date) {
-  const hashedPassword = await hashPassword(u.plainPassword || "12345678");
+async function seedUserFromSpec(
+  spec: SeedUserSpec | (typeof INTERNAL_DEMO_USERS)[0],
+  groupMap: Map<string, string>,
+  now: Date
+) {
+  const plainPassword = "plainPassword" in spec ? (spec.plainPassword ?? "12345678") : "12345678";
+  const hashedPassword = await hashPassword(plainPassword);
 
   const [insertedUser] = await db
     .insert(users)
     .values({
-      name: u.name,
-      email: u.email,
+      name: spec.name,
+      email: spec.email,
       password: hashedPassword,
-      isSuperAdmin: u.isSuperAdmin,
+      isSuperAdmin: spec.isSuperAdmin,
       createdAt: now,
       updatedAt: now,
     })
     .onConflictDoUpdate({
       target: users.email,
       set: {
-        name: u.name,
-        isSuperAdmin: u.isSuperAdmin,
+        name: spec.name,
+        isSuperAdmin: spec.isSuperAdmin,
         updatedAt: now,
       },
     })
     .returning();
 
-  const groupId = groupMap.get(u.groupSlug);
+  const groupId = groupMap.get(spec.groupSlug);
   if (groupId) {
     await db
       .insert(userPermissionGroups)
@@ -44,7 +56,7 @@ async function seedUser(u: (typeof INTERNAL_DEMO_USERS)[0], groupMap: Map<string
       })
       .onConflictDoNothing();
 
-    if (["super_admin", "academy_admin", "staff_default"].includes(u.groupSlug)) {
+    if (["super_admin", "academy_admin", "staff_default"].includes(spec.groupSlug)) {
       await db
         .insert(staffProfiles)
         .values({
@@ -60,21 +72,27 @@ async function seedUser(u: (typeof INTERNAL_DEMO_USERS)[0], groupMap: Map<string
   return insertedUser;
 }
 
-export async function seedOrGet(permissionGroups?: PermissionGroupEntity[]) {
+export async function seedOrGet(permissionGroups?: PermissionGroupEntity[], config?: SeedConfig) {
   logger.info("Seeding system users...");
   const now = new Date();
+  const seedConfig = config ?? loadSeedConfig();
 
-  // Ensure permission groups exist and get them
   const groups = permissionGroups || (await db.select().from(permissionGroupsSchema));
   const groupMap = new Map(groups.map(g => [g.slug, g.id]));
 
   const results = [];
 
   for (const u of INTERNAL_DEMO_USERS) {
-    const insertedUser = await seedUser(u, groupMap, now);
+    const insertedUser = await seedUserFromSpec(u, groupMap, now);
     results.push(insertedUser);
   }
 
-  logger.info("System users seeded.");
+  const extraSpecs = [...buildExtraTeacherUserSpecs(seedConfig), ...buildExtraParentUserSpecs(seedConfig)];
+  for (const spec of extraSpecs) {
+    const insertedUser = await seedUserFromSpec(spec, groupMap, now);
+    results.push(insertedUser);
+  }
+
+  logger.info(`System users seeded (${results.length} total).`);
   return results;
 }

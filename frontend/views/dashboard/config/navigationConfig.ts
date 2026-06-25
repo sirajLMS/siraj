@@ -113,22 +113,6 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: AppPermission.TeachersList,
   },
   {
-    key: "teacher-onboarding",
-    labelKey: "dashboard.nav.teacherOnboarding",
-    icon: PersonAddAltOutlined,
-    href: "/teachers/onboarding",
-    section: "main",
-    permission: AppPermission.TeachersCreate,
-  },
-  {
-    key: "parent-onboarding",
-    labelKey: "dashboard.nav.parentOnboarding",
-    icon: PersonAddAltOutlined,
-    href: "/parents/onboarding",
-    section: "main",
-    permission: AppPermission.ParentsCreate,
-  },
-  {
     key: "manager-onboarding",
     labelKey: "dashboard.nav.managerOnboarding",
     icon: PersonAddAltOutlined,

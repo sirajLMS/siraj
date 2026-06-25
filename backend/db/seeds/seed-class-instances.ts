@@ -2,94 +2,24 @@ import { db } from "@/backend/db/drizzleDb";
 import { classInstances } from "@/backend/db/schema/scheduling";
 import logger from "@/backend/lib/logger";
 import type { RecurringScheduleEntity, StudentEntity, TeacherEntity } from "@/backend/types";
+import {
+  buildScheduleDaysForStudent,
+  buildShowcaseInstancesForToday,
+  generateClassInstancesForSchedule,
+  loadSeedConfig,
+  type ScheduleContext,
+  type SeedConfig,
+} from "./lib";
 
-function generateInstancesData(
-  defaultClass: RecurringScheduleEntity,
-  defaultTeacher: TeacherEntity,
-  defaultStudent: StudentEntity,
+const CHUNK_SIZE = 100;
+
+async function upsertInstancesChunk(
+  instances: (typeof classInstances.$inferInsert)[],
   now: Date
-) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+): Promise<(typeof classInstances.$inferSelect)[]> {
+  const results: (typeof classInstances.$inferSelect)[] = [];
 
-  const createTime = (hours: number) => {
-    const start = new Date(today);
-    start.setHours(hours, 0, 0, 0);
-    const end = new Date(today);
-    end.setHours(hours + 1, 0, 0, 0);
-    return { start, end };
-  };
-
-  const t1 = createTime(10);
-  const t2 = createTime(12);
-  const t3 = createTime(14);
-
-  return [
-    {
-      recurringScheduleId: defaultClass.id,
-      teacherId: defaultTeacher.id,
-      studentId: defaultStudent.id,
-      scheduledStartAt: t1.start,
-      scheduledEndAt: t1.end,
-      durationMinutes: 60,
-      executionState: "NOT_ACTIVATED" as const,
-      outcome: "PENDING" as const,
-      classType: "REGULAR" as const,
-      idempotencyKey: "demo_instance_scheduled_today",
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      recurringScheduleId: defaultClass.id,
-      teacherId: defaultTeacher.id,
-      studentId: defaultStudent.id,
-      scheduledStartAt: t2.start,
-      scheduledEndAt: t2.end,
-      durationMinutes: 60,
-      executionState: "COMPLETED" as const,
-      outcome: "TAKEN" as const,
-      classType: "TRIAL" as const,
-      actualStartAt: t2.start,
-      actualEndAt: t2.end,
-      idempotencyKey: "demo_instance_completed_today",
-      createdAt: now,
-      updatedAt: now,
-    },
-    {
-      recurringScheduleId: defaultClass.id,
-      teacherId: defaultTeacher.id,
-      studentId: defaultStudent.id,
-      scheduledStartAt: t3.start,
-      scheduledEndAt: t3.end,
-      durationMinutes: 60,
-      executionState: "COMPLETED" as const,
-      outcome: "ABSENT" as const,
-      classType: "REGULAR" as const,
-      actualStartAt: t3.start,
-      actualEndAt: t3.end,
-      idempotencyKey: "demo_instance_cancelled_today",
-      createdAt: now,
-      updatedAt: now,
-    },
-  ];
-}
-
-export async function seedOrGet(
-  classesList: RecurringScheduleEntity[],
-  teachersList: TeacherEntity[],
-  studentsList: StudentEntity[]
-) {
-  logger.info("Seeding system class instances...");
-  const now = new Date();
-
-  if (!classesList?.length || !teachersList?.length || !studentsList?.length) {
-    throw new Error("Missing required seed data for class instances.");
-  }
-
-  const instancesData = generateInstancesData(classesList[0], teachersList[0], studentsList[0], now);
-  const results = [];
-
-  for (const instance of instancesData) {
+  for (const instance of instances) {
     const [inserted] = await db
       .insert(classInstances)
       .values(instance)
@@ -100,6 +30,8 @@ export async function seedOrGet(
           scheduledEndAt: instance.scheduledEndAt,
           executionState: instance.executionState,
           outcome: instance.outcome,
+          actualStartAt: instance.actualStartAt,
+          actualEndAt: instance.actualEndAt,
           updatedAt: now,
         },
       })
@@ -107,6 +39,62 @@ export async function seedOrGet(
     results.push(inserted);
   }
 
-  logger.info("System class instances seeded.");
+  return results;
+}
+
+export async function seedOrGet(
+  classesList: RecurringScheduleEntity[],
+  teachersList: TeacherEntity[],
+  studentsList: StudentEntity[],
+  config?: SeedConfig
+) {
+  logger.info("Seeding system class instances...");
+  const now = new Date();
+  const seedConfig = config ?? loadSeedConfig();
+
+  if (!classesList?.length || !teachersList?.length || !studentsList?.length) {
+    throw new Error("Missing required seed data for class instances.");
+  }
+
+  const studentById = new Map(studentsList.map(s => [s.id, s]));
+  const teacherById = new Map(teachersList.map(t => [t.id, t]));
+  const demoStudent = studentsList[0];
+  const allInstances: (typeof classInstances.$inferInsert)[] = [];
+
+  for (let i = 0; i < classesList.length; i++) {
+    const schedule = classesList[i];
+    const student = studentById.get(schedule.studentId);
+    const teacher = teacherById.get(schedule.teacherId);
+    if (!student || !teacher) continue;
+
+    const days = buildScheduleDaysForStudent(seedConfig, i);
+    const isDemoSchedule = student.id === demoStudent.id;
+
+    const context: ScheduleContext = {
+      scheduleId: schedule.id,
+      studentId: student.id,
+      teacherId: teacher.id,
+      durationMinutes: schedule.durationMinutes,
+      days,
+      isDemoSchedule,
+    };
+
+    const generated = generateClassInstancesForSchedule(context, i, seedConfig, now);
+    allInstances.push(...generated);
+
+    if (isDemoSchedule) {
+      allInstances.push(...buildShowcaseInstancesForToday(context, seedConfig, now));
+    }
+  }
+
+  const results = [];
+  for (let i = 0; i < allInstances.length; i += CHUNK_SIZE) {
+    const chunk = allInstances.slice(i, i + CHUNK_SIZE);
+    const inserted = await upsertInstancesChunk(chunk, now);
+    results.push(...inserted);
+    logger.info(`Class instances progress: ${Math.min(i + CHUNK_SIZE, allInstances.length)}/${allInstances.length}`);
+  }
+
+  logger.info(`System class instances seeded (${results.length} total).`);
   return results;
 }

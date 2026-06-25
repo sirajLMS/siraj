@@ -7,6 +7,17 @@ import logger from "@/backend/lib/logger";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
 import type { ParentEntity, TeacherEntity } from "@/backend/types";
+import { buildStudentName, getStudentAvatarFileName, getTotalStudents, loadSeedConfig, type SeedConfig } from "./lib";
+
+const DEMO_STUDENTS = [
+  { name: "Demo Student", idempotencyKey: "demo_student_1", timezoneOverride: null as string | null, avatarIndex: 1 },
+  {
+    name: "Demo Student London",
+    idempotencyKey: "demo_student_london_1",
+    timezoneOverride: "Europe/London",
+    avatarIndex: 2,
+  },
+] as const;
 
 async function upsertStudent(
   parentId: string,
@@ -40,6 +51,8 @@ async function upsertStudent(
         avatarUrl,
         status: "REGULAR",
         timezoneOverride,
+        primaryTeacherId: teacherId,
+        parentId,
         updatedAt: now,
       },
     })
@@ -47,41 +60,24 @@ async function upsertStudent(
   return result;
 }
 
-async function ensureTeacherAssignments(studentIds: string[], teacherId: string) {
-  for (const studentId of studentIds) {
-    const existing = await db
-      .select()
-      .from(teacherAssignments)
-      .where(and(eq(teacherAssignments.studentId, studentId), eq(teacherAssignments.teacherId, teacherId)))
-      .limit(1);
+async function ensureTeacherAssignment(studentId: string, teacherId: string, assignedAt: Date) {
+  const existing = await db
+    .select()
+    .from(teacherAssignments)
+    .where(and(eq(teacherAssignments.studentId, studentId), eq(teacherAssignments.teacherId, teacherId)))
+    .limit(1);
 
-    if (existing.length === 0) {
-      await db.insert(teacherAssignments).values({
-        studentId,
-        teacherId,
-        assignedAt: new Date("2020-01-01"),
-      });
-    }
+  if (existing.length === 0) {
+    await db.insert(teacherAssignments).values({
+      studentId,
+      teacherId,
+      assignedAt,
+    });
   }
 }
 
-export async function seedOrGet(parentsList: ParentEntity[], teachersList: TeacherEntity[]) {
-  logger.info("Seeding system students...");
-  const now = new Date();
-
-  if (!parentsList || parentsList.length === 0) {
-    throw new Error("No parents available to link to students.");
-  }
-  if (!teachersList || teachersList.length === 0) {
-    throw new Error("No teachers available to link to students.");
-  }
-
-  const defaultParent = parentsList[0];
-  const defaultTeacher = teachersList[0];
-
-  logger.info("Initializing student avatar storage...");
-  let avatar1Url: string | null = null;
-  let avatar2Url: string | null = null;
+async function seedAvatarAssets(): Promise<Map<string, string | null>> {
+  const avatarUrls = new Map<string, string | null>();
 
   try {
     const fileSeeder = await createFileSeedingService();
@@ -91,76 +87,85 @@ export async function seedOrGet(parentsList: ParentEntity[], teachersList: Teach
 
     const storageService = await getStorageService();
 
-    // Student 1 Avatar
-    const bucketPath1 = "public/avatars/students/01.png";
-    const localFilePath1 = path.join(__dirname, "assets", "avatars", "students", "01.png");
-    await fileSeeder.seedFile({
-      bucketPath: bucketPath1,
-      localFilePath: localFilePath1,
-    });
-    const fileInfo1 = await storageService.fileInfoByPath(bucketPath1);
-    avatar1Url = fileInfo1?.url ?? null;
+    for (let i = 1; i <= 8; i++) {
+      const fileName = `${String(i).padStart(2, "0")}.png`;
+      const bucketPath = `public/avatars/students/${fileName}`;
+      const localFilePath = path.join(__dirname, "assets", "avatars", "students", fileName);
+      await fileSeeder.seedFile({ bucketPath, localFilePath });
+      const fileInfo = await storageService.fileInfoByPath(bucketPath);
+      avatarUrls.set(fileName, fileInfo?.url ?? null);
+    }
 
-    // Student 2 Avatar
-    const bucketPath2 = "public/avatars/students/02.png";
-    const localFilePath2 = path.join(__dirname, "assets", "avatars", "students", "02.png");
-    await fileSeeder.seedFile({
-      bucketPath: bucketPath2,
-      localFilePath: localFilePath2,
-    });
-    const fileInfo2 = await storageService.fileInfoByPath(bucketPath2);
-    avatar2Url = fileInfo2?.url ?? null;
-
-    logger.info("Student avatars seeded successfully.");
+    logger.info("Student avatar assets seeded successfully.");
   } catch (error) {
     logger.error("Failed to seed student avatars:", error);
   }
 
-  const student1 = await upsertStudent(
-    defaultParent.id,
-    defaultTeacher.id,
-    "Demo Student",
-    null,
-    "demo_student_1",
-    avatar1Url,
-    now
-  );
+  return avatarUrls;
+}
 
-  const student2 = await upsertStudent(
-    defaultParent.id,
-    defaultTeacher.id,
-    "Demo Student London",
-    "Europe/London",
-    "demo_student_london_1",
-    avatar2Url,
-    now
-  );
+function getAvatarUrl(avatarUrls: Map<string, string | null>, index: number): string | null {
+  const fileName = getStudentAvatarFileName(index);
+  return avatarUrls.get(fileName) ?? null;
+}
 
-  await ensureTeacherAssignments([student1.id, student2.id], defaultTeacher.id);
+export async function seedOrGet(parentsList: ParentEntity[], teachersList: TeacherEntity[], config?: SeedConfig) {
+  logger.info("Seeding system students...");
+  const now = new Date();
+  const seedConfig = config ?? loadSeedConfig();
 
-  // Register usages in student_files
-  try {
-    if (avatar1Url) {
-      await StorageDbRepository.registerFileUsage({
-        referenceTable: "students",
-        referenceId: student1.id,
-        usageType: "avatar",
-        filePath: "public/avatars/students/01.png",
-      });
-    }
-    if (avatar2Url) {
-      await StorageDbRepository.registerFileUsage({
-        referenceTable: "students",
-        referenceId: student2.id,
-        usageType: "avatar",
-        filePath: "public/avatars/students/02.png",
-      });
-    }
-    logger.info("Student avatar usages registered successfully.");
-  } catch (error) {
-    logger.error("Failed to register student avatar usages:", error);
+  if (!parentsList?.length) {
+    throw new Error("No parents available to link to students.");
+  }
+  if (!teachersList?.length) {
+    throw new Error("No teachers available to link to students.");
   }
 
-  logger.info("System students seeded.");
-  return [student1, student2];
+  const avatarUrls = await seedAvatarAssets();
+  const totalStudents = getTotalStudents(seedConfig);
+  const results = [];
+  const assignmentDate = new Date("2020-01-01");
+
+  for (let i = 0; i < totalStudents; i++) {
+    const parent = parentsList[i % parentsList.length];
+    const teacher = teachersList[i % teachersList.length];
+    const avatarUrl = getAvatarUrl(avatarUrls, i);
+
+    let name: string;
+    let idempotencyKey: string;
+    let timezoneOverride: string | null = null;
+
+    if (i < DEMO_STUDENTS.length) {
+      const demo = DEMO_STUDENTS[i];
+      name = demo.name;
+      idempotencyKey = demo.idempotencyKey;
+      timezoneOverride = demo.timezoneOverride;
+    } else {
+      const extraIndex = i - DEMO_STUDENTS.length + 1;
+      name = buildStudentName(seedConfig, extraIndex);
+      idempotencyKey = `seed_student_${extraIndex}`;
+    }
+
+    const student = await upsertStudent(parent.id, teacher.id, name, timezoneOverride, idempotencyKey, avatarUrl, now);
+    results.push(student);
+
+    await ensureTeacherAssignment(student.id, teacher.id, assignmentDate);
+
+    if (avatarUrl) {
+      const fileName = getStudentAvatarFileName(i);
+      try {
+        await StorageDbRepository.registerFileUsage({
+          referenceTable: "students",
+          referenceId: student.id,
+          usageType: "avatar",
+          filePath: `public/avatars/students/${fileName}`,
+        });
+      } catch (error) {
+        logger.error(`Failed to register avatar usage for student ${student.id}:`, error);
+      }
+    }
+  }
+
+  logger.info(`System students seeded (${results.length} total).`);
+  return results;
 }

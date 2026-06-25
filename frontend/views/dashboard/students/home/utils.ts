@@ -170,7 +170,10 @@ export function buildLabels(t: ReturnType<typeof useTranslations>): StudentsView
   };
 }
 
-export function buildFilteredRows(rows: StudentDirectoryRowExtended[], searchQuery: string): StudentDirectoryRowExtended[] {
+export function buildFilteredRows(
+  rows: StudentDirectoryRowExtended[],
+  searchQuery: string
+): StudentDirectoryRowExtended[] {
   const query = searchQuery.trim().toLowerCase();
   if (!query) return rows;
   return rows.filter(row => {
