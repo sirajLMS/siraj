@@ -1,3 +1,4 @@
+import { Link } from "@/shared/i18n/routing";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
@@ -6,10 +7,9 @@ import type { ClassSession } from "../types";
 interface ClassSessionListProps {
   dateStr: string;
   sessions: ClassSession[];
-  onSelectSession?: (session: ClassSession) => void;
 }
 
-export function ClassSessionList({ dateStr, sessions, onSelectSession }: Readonly<ClassSessionListProps>) {
+export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionListProps>) {
   const t = useTranslations("dashboard.studentHistory.classDetails");
   const formatDuration = (mins: number) => {
     if (mins < 60) return `${mins}m`;
@@ -39,17 +39,20 @@ export function ClassSessionList({ dateStr, sessions, onSelectSession }: Readonl
         return (
           <Box
             key={session.id}
-            onClick={() => onSelectSession?.(session)}
+            component={Link}
+            href={`/classes/${session.id}`}
             sx={theme => ({
               bgcolor: theme.palette.surfaceContainerLowest,
               borderRadius: "xl",
               boxShadow: theme.palette.shadow.card,
               border: `1px solid ${theme.palette.border.light}`,
-              p: theme.spacing(2), // mapping cardPadding to spacing(2) or similar if not defined
+              p: theme.spacing(2),
               display: "flex",
               alignItems: "center",
               gap: 2,
               transition: "transform 0.2s",
+              textDecoration: "none",
+              color: "inherit",
               "&:hover": { transform: "translateX(4px)" },
               cursor: "pointer",
             })}

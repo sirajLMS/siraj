@@ -10,7 +10,6 @@ interface StudentHistoryDesktopProps {
   currentMonth: Date;
   metrics: StudentHistoryMetrics;
   classes: Readonly<Partial<Record<number, ClassSession>>>;
-  onSelectDay: (day: number) => void;
   onChangeMonth?: () => void;
 }
 
@@ -19,7 +18,6 @@ export function StudentHistoryDesktop({
   currentMonth,
   metrics,
   classes,
-  onSelectDay,
   onChangeMonth,
 }: Readonly<StudentHistoryDesktopProps>) {
   const t = useTranslations("dashboard.studentHistory");
@@ -67,7 +65,7 @@ export function StudentHistoryDesktop({
         />
       </Box>
 
-      <CalendarGrid currentMonth={currentMonth} classes={classes} onSelectDay={onSelectDay} />
+      <CalendarGrid currentMonth={currentMonth} classes={classes} />
     </Box>
   );
 }

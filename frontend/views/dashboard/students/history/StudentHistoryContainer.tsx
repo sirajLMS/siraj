@@ -3,19 +3,15 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { classStatusEventsQueryDocument } from "@/frontend/graphql/sharedDocuments/class-session.documents";
+import { useState } from "react";
 import { studentClassHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-history.documents";
-import { useRouter } from "@/shared/i18n/routing";
 import { StudentHistoryView } from "./StudentHistoryView";
 import type { ClassSession, StudentHistoryMetrics } from "./types";
 
 export function StudentHistoryContainer() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date(2026, 5, 18)); // default to current date/month context
   const [selectedWeek, setSelectedWeek] = useState<number>(3);
-  const [downloadingSessionId, setDownloadingSessionId] = useState<string | null>(null);
 
   // Sync year and month with currentMonth state
   const year = currentMonth.getFullYear();
@@ -25,30 +21,6 @@ export function StudentHistoryContainer() {
     variables: { studentId: params.id, year, month },
     skip: !params.id,
   });
-
-  const { data: eventsData } = useQuery(classStatusEventsQueryDocument, {
-    variables: { classInstanceId: downloadingSessionId ?? "" },
-    skip: !downloadingSessionId,
-    fetchPolicy: "network-only",
-  });
-
-  // Handle downloading of logs when eventsData changes and is loaded
-  useEffect(() => {
-    if (eventsData?.classStatusEvents && downloadingSessionId) {
-      const blob = new Blob([JSON.stringify(eventsData.classStatusEvents, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `class-${downloadingSessionId}-logs.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      setDownloadingSessionId(null);
-    }
-  }, [eventsData, downloadingSessionId]);
 
   if (loading) {
     return (
@@ -94,15 +66,6 @@ export function StudentHistoryContainer() {
     }
   }
 
-  const handleViewAssignments = (_classInstanceId: string) => {
-    // Navigate to localized resources route
-    router.push("/resources");
-  };
-
-  const handleDownloadLogs = (classInstanceId: string) => {
-    setDownloadingSessionId(classInstanceId);
-  };
-
   return (
     <StudentHistoryView
       studentName={studentName}
@@ -112,8 +75,6 @@ export function StudentHistoryContainer() {
       selectedWeek={selectedWeek}
       onSelectWeek={setSelectedWeek}
       onMonthChange={setCurrentMonth}
-      onViewAssignments={handleViewAssignments}
-      onDownloadLogs={handleDownloadLogs}
     />
   );
 }

@@ -21,7 +21,6 @@ interface StudentHistoryMobileProps {
   classes: Readonly<Partial<Record<number, ClassSession>>>;
   selectedWeek: number;
   onSelectWeek: (week: number) => void;
-  onSelectSession?: (session: ClassSession) => void;
   onChangeMonth?: () => void;
 }
 
@@ -32,7 +31,6 @@ export function StudentHistoryMobile({
   classes,
   selectedWeek,
   onSelectWeek,
-  onSelectSession,
   onChangeMonth,
 }: Readonly<StudentHistoryMobileProps>) {
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
@@ -56,7 +54,7 @@ export function StudentHistoryMobile({
       <HistoryMobileActions currentMonth={currentMonth} onChangeMonth={onChangeMonth} />
 
       <MobileWeeklyScroller selectedWeek={selectedWeek} onSelectWeek={onSelectWeek} />
-      <ClassSessionList dateStr={dateStr} sessions={activeClassList} onSelectSession={onSelectSession} />
+      <ClassSessionList dateStr={dateStr} sessions={activeClassList} />
       <PerformanceStreak />
     </Box>
   );

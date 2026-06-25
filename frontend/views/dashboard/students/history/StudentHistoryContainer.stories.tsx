@@ -52,8 +52,6 @@ function MockStudentHistoryContainer() {
       selectedWeek={selectedWeek}
       onSelectWeek={setSelectedWeek}
       onMonthChange={setCurrentMonth}
-      onViewAssignments={id => alert(`View assignments for session: ${id}`)}
-      onDownloadLogs={id => alert(`Download logs for session: ${id}`)}
     />
   );
 }
