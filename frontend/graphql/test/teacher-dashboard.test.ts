@@ -7,7 +7,7 @@ import {
   teacherFutureScheduleQueryDocument,
 } from "../sharedDocuments/teacher-dashboard.documents";
 import { cleanupTestEntitiesMutationDocument } from "../sharedDocuments/test-helper.documents";
-import { authenticatedRequest, loginDemoUser, provisionTestEntities } from "./helpers";
+import { authenticatedRequest, loginAndProvision } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -57,18 +57,15 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   const testDate = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 
   test("login as teacher and academy_admin", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
-
-    const result = await provisionTestEntities(adminToken, "DashTest");
-    studentId = result.studentId;
-    teacherId = result.teacherId;
-    studentUserId = result.studentUserId;
-    teacherUserId = result.teacherUserId;
-    parentUserId = result.parentUserId;
-    parentId = result.parentId;
-    teacherToken = result.teacherToken;
-    expect(teacherToken).not.toBeNull();
+    const r = await loginAndProvision("DashTest");
+    adminToken = r.adminToken;
+    teacherToken = r.teacherToken;
+    studentId = r.studentId;
+    teacherId = r.teacherId;
+    studentUserId = r.studentUserId;
+    teacherUserId = r.teacherUserId;
+    parentUserId = r.parentUserId;
+    parentId = r.parentId;
   });
 
   test("teacherDashboard query returns rows scoped to teacher", async () => {

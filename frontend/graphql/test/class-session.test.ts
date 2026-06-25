@@ -14,7 +14,7 @@ import {
   teacherDashboardQueryDocument,
 } from "../sharedDocuments/teacher-dashboard.documents";
 import { cleanupTestEntitiesMutationDocument } from "../sharedDocuments/test-helper.documents";
-import { authenticatedRequest, loginDemoUser, provisionTestEntities } from "./helpers";
+import { authenticatedRequest, loginAndProvision } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -69,18 +69,15 @@ describe("GraphQL Class Session Integration Tests", () => {
   let outsideDate: string | null = null;
 
   test("login as academy_admin and teacher", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
-
-    const result = await provisionTestEntities(adminToken, "SessionIntTest");
-    studentId = result.studentId;
-    teacherId = result.teacherId;
-    studentUserId = result.studentUserId;
-    teacherUserId = result.teacherUserId;
-    parentUserId = result.parentUserId;
-    parentId = result.parentId;
-    teacherToken = result.teacherToken;
-    expect(teacherToken).not.toBeNull();
+    const r = await loginAndProvision("SessionIntTest");
+    adminToken = r.adminToken;
+    teacherToken = r.teacherToken;
+    studentId = r.studentId;
+    teacherId = r.teacherId;
+    studentUserId = r.studentUserId;
+    teacherUserId = r.teacherUserId;
+    parentUserId = r.parentUserId;
+    parentId = r.parentId;
   });
 
   test("find student and teacher IDs, then clear schedule range to avoid overlaps", async () => {

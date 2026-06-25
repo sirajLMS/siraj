@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore as useMockUserStore } from "@/frontend/stores/mockUserStore";
-import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
+import { createMockAdminDecorator } from "../components/createMockAdminDecorator";
 import { AdminComplaintsDesktopView } from "./AdminComplaintsDesktopView";
 import type { AdminComplaintRow, AdminComplaintsSummary, ComplaintTab } from "./types/complaints.types";
 import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
@@ -101,26 +100,7 @@ const meta: Meta<typeof AdminComplaintsDesktopStoryRenderer> = {
   parameters: {
     layout: "fullscreen",
   },
-  decorators: [
-    Story => {
-      const mockUser = {
-        id: "mock-admin-id",
-        name: "Admin User",
-        role: "Administrator",
-        avatarUrl: "",
-        permissions: ADMIN_PERMISSIONS,
-        notificationCount: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        emailVerifiedAt: new Date().toISOString(),
-        email: "admin@example.com",
-        __typename: "User" as const,
-      };
-      useUserStore.setState({ permissions: ADMIN_PERMISSIONS, user: mockUser });
-      useMockUserStore.setState({ permissions: ADMIN_PERMISSIONS, user: mockUser });
-      return <Story />;
-    },
-  ],
+  decorators: createMockAdminDecorator(ADMIN_PERMISSIONS),
 };
 
 export default meta;

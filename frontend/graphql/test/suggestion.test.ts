@@ -1,13 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import {
   adminSuggestionsQueryDocument,
   markSuggestionReviewedMutationDocument,
   submitSuggestionMutationDocument,
 } from "../sharedDocuments";
-import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
+import { assertOperationDenied, authenticatedRequest, expectMutationError, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -23,19 +21,6 @@ async function submitTestSuggestion(token: string, body: string): Promise<string
   const id = data.submitSuggestion?.id;
   if (!id) throw new Error("No suggestion created");
   return id;
-}
-
-async function expectMutationError<TData, TVars extends OperationVariables>(
-  token: string,
-  document: TypedDocumentNode<TData, TVars>,
-  variables: TVars
-): Promise<void> {
-  const result = await testClient.mutate({
-    mutation: document,
-    variables,
-    context: { headers: { Authorization: `Bearer ${token}` } },
-  } as Parameters<typeof testClient.mutate>[0]);
-  expect(result.error).toBeDefined();
 }
 
 describe("GraphQL: adminSuggestions query", () => {

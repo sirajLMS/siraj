@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { studentClassHistoryQueryDocument } from "../sharedDocuments/student-history.documents";
 import { cleanupTestEntitiesMutationDocument } from "../sharedDocuments/test-helper.documents";
-import { authenticatedRequest, loginDemoUser, provisionTestEntities } from "./helpers";
+import { authenticatedRequest, loginAndProvision } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -22,18 +22,15 @@ describe("GraphQL Student History Integration Tests", () => {
   const currentMonth = now.getMonth() + 1; // 1-indexed (1-12)
 
   test("login as academy_admin and teacher", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
-
-    const result = await provisionTestEntities(adminToken, "HistTest");
-    studentId = result.studentId;
-    teacherId = result.teacherId;
-    studentUserId = result.studentUserId;
-    teacherUserId = result.teacherUserId;
-    parentUserId = result.parentUserId;
-    parentId = result.parentId;
-    teacherToken = result.teacherToken;
-    expect(teacherToken).not.toBeNull();
+    const r = await loginAndProvision("HistTest");
+    adminToken = r.adminToken;
+    teacherToken = r.teacherToken;
+    studentId = r.studentId;
+    teacherId = r.teacherId;
+    studentUserId = r.studentUserId;
+    teacherUserId = r.teacherUserId;
+    parentUserId = r.parentUserId;
+    parentId = r.parentId;
   });
 
   test("academy admin studentClassHistory returns sessions successfully", async () => {

@@ -97,6 +97,23 @@ export async function provisionTestEntities(adminToken: string, prefix: string, 
  * @param variables - Optional variables required for the GraphQL operation.
  * @returns A promise resolving to the data returned by the GraphQL operation.
  */
+export async function loginAndProvision(prefix: string) {
+  const adminToken = await loginDemoUser("academy_admin");
+  expect(adminToken).not.toBeNull();
+  const result = await provisionTestEntities(adminToken, prefix);
+  expect(result.teacherToken).not.toBeNull();
+  return {
+    adminToken,
+    teacherToken: result.teacherToken,
+    studentId: result.studentId,
+    teacherId: result.teacherId,
+    studentUserId: result.studentUserId,
+    teacherUserId: result.teacherUserId,
+    parentUserId: result.parentUserId,
+    parentId: result.parentId,
+  };
+}
+
 export async function authenticatedRequest<TData, TVariables extends OperationVariables = OperationVariables>(
   token: string,
   type: "query" | "mutate",
@@ -214,6 +231,19 @@ export async function mutateCreateRecurringClass(token: string, input: CreateRec
 /**
  * Asserts that a recurring class creation request is denied (raises error).
  */
+export async function expectMutationError<TData, TVars extends OperationVariables>(
+  token: string,
+  document: TypedDocumentNode<TData, TVars>,
+  variables: TVars
+): Promise<void> {
+  const result = await testClient.mutate({
+    mutation: document,
+    variables,
+    context: { headers: { Authorization: `Bearer ${token}` } },
+  } as Parameters<typeof testClient.mutate>[0]);
+  expect(result.error).toBeDefined();
+}
+
 export async function assertRecurringClassDenied(
   token: string,
   days: { dayOfWeek: string; startTime: string; isActive: boolean }[]

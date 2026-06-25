@@ -1,36 +1,10 @@
-// cspell:disable
 import { create } from "zustand";
 import { logger } from "@/frontend/utils/logger";
-
-export type AdminInvoiceStatus = "overdue" | "pending" | "paid";
-
-export type StudentCreditStatus = "negative_balance" | "active_credit";
-
-export interface AdminBillingSummary {
-  readonly totalOutstanding: string;
-  readonly pendingInvoices: number;
-  readonly negativeBalanceCount: string;
-  readonly mtdRevenue: string;
-}
-
-export interface AdminInvoiceRow {
-  readonly id: string;
-  readonly studentName: string;
-  readonly studentInitials: string;
-  readonly dateIssued: string;
-  readonly amount: string;
-  readonly status: AdminInvoiceStatus;
-}
-
-export interface StudentCreditRow {
-  readonly id: string;
-  readonly studentName: string;
-  readonly parentEmail: string;
-  readonly planType: string;
-  readonly classesLeft: number;
-  readonly classesTotal: number;
-  readonly status: StudentCreditStatus;
-}
+import type {
+  AdminBillingSummary,
+  AdminInvoiceRow,
+  StudentCreditRow,
+} from "@/frontend/views/dashboard/billing/types/billingViewTypes";
 
 interface AdminBillingState {
   readonly searchQuery: string;

@@ -1,125 +1,186 @@
-Frontend project's rules: Read frontend/AGENTS.md
+# AGENTS.md
 
-## Layer-Specific Agent Rules
+This document provides essential context for AI agents working in this codebase. It focuses on non-obvious patterns, gotchas, and commands that aren't self-evident from reading individual files.
 
-Before working on any specific layer, you **MUST** read the corresponding `AGENTS.md` file for that layer:
+## Project Overview
 
-- **Database / Repositories**: Read `backend/db/repo/AGENTS.md`
-- **Database / Seeders**: Read `backend/db/seeds/AGENTS.md`
-- **Backend Services**: Read `backend/services/AGENTS.md`
-- **Backend GraphQL / Pothos**: Read `backend/graphql/AGENTS.md`
-- **Frontend GraphQL / Apollo**: Read `frontend/graphql/AGENTS.md`
-- **Frontend Views / UI**: Read `frontend/views/AGENTS.md`
-- **Frontend Stores / Zustand**: Read `frontend/stores/AGENTS.md`
-- **Sprint/Story Planning**: Read `.ai/siraj_stories/AGENTS.md`
+Siraj is a Next.js 16 (App Router) full-stack application using:
+- **Runtime**: Bun (not Node.js)
+- **Frontend**: React 19, MUI v9, Apollo Client v4, Zustand
+- **Backend**: Pothos GraphQL, Drizzle ORM, PostgreSQL
+- **Testing**: Bun test runner, Vitest for Storybook, Playwright for E2E
+- **i18n**: next-intl with locale-based routing (`/[locale]/...`)
+
+## Essential Commands
+
+All commands use Bun. The specific binary path `~/.bun/bin/bun` is required in some environments.
+
+```bash
+# Development
+bun run dev                    # Start dev server with Turbopack on port 3000
+bun run dev:safe               # Safe dev mode via scripts/safe-dev.ts
+
+# Build & Type Check
+bun run build                  # Next.js production build
+bun run tsgo                   # Fast TypeScript checking (tsgo, not tsc)
+
+# Linting & Formatting
+bun run lint                   # ESLint with auto-fix and caching
+bun run format                 # Biome formatter
+bun run biome:check            # Biome lint + format + unsafe fixes
+
+# GraphQL Code Generation (REQUIRED after schema/document changes)
+bun run generate:gqlSchema     # Generate GraphQL schema from Pothos
+bun codegen                    # Generate TypeScript types from schema
+
+# Testing (layer-specific)
+bun run test                   # All tests
+bun run test:db                # Database repository tests (parallel)
+bun run test:db:sequential     # Database tests (sequential, for debugging)
+bun run test:graphql           # GraphQL integration tests
+bun run test:ui:components     # UI component tests
+bun run test:ui:e2e            # End-to-end tests
+
+# Quality Gates
+bun quality-gate               # Automated quality verification (tsgo → biome → lint → codescene → sonar)
+bun quality-gate:fresh         # Reset state and run fresh
+
+# Database
+bun run db                     # Database actions via scripts/dbActions.ts
+```
+
+## Architecture Layers
+
+The codebase follows strict layer separation. Each layer has its own `AGENTS.md` with detailed rules.
+
+### Layer Hierarchy (read layer-specific AGENTS.md before working in each)
+
+| Layer | Path | AGENTS.md Location |
+|-------|------|-------------------|
+| App Router | `app/` | `app/AGENTS.md` |
+| Frontend Views | `frontend/views/` | `frontend/views/AGENTS.md` |
+| Frontend Stores | `frontend/stores/` | `frontend/stores/AGENTS.md` |
+| Frontend GraphQL | `frontend/graphql/` | `frontend/graphql/AGENTS.md` |
+| Backend Services | `backend/services/` | `backend/services/AGENTS.md` |
+| Backend GraphQL/Pothos | `backend/graphql/` | `backend/graphql/AGENTS.md` |
+| Database Repositories | `backend/db/repo/` | `backend/db/repo/AGENTS.md` |
+| Database Seeds | `backend/db/seeds/` | `backend/db/seeds/AGENTS.md` |
+| Backend Types | `backend/types/` | `backend/types/AGENTS.md` |
+
+### Data Flow
+
+```
+Client Component → Apollo Hook → GraphQL API → Pothos Resolver → Service → Repository → Database
+Server Component → Cached Wrapper → Service → Repository → Database
+```
+
+**Critical**: Server Components call services directly (not GraphQL). Client Components use Apollo hooks.
+
+## Non-Obvious Patterns & Gotchas
+
+### Next.js 16 Breaking Changes
+This is NOT standard Next.js. APIs and conventions differ from training data. **Always read `node_modules/next/dist/docs/` before writing Next.js code.**
+
+### Logging
+- **NEVER use `console.*` directly** - ESLint will error
+- Always use: `import { logger } from '@/frontend/utils/logger'` (frontend) or `@/backend/lib/logger` (backend)
+- Methods: `logger.info`, `logger.warn`, `logger.error`, `logger.debug`
+
+### MUI v9 Breaking Changes
+- Style props (`fontWeight`, `textAlign`, `mb`, `mt`, `p`, `display`, etc.) are NOT valid direct props on Typography, Stack, Box, Grid
+- Always use `sx` prop: `<Typography sx={{ fontWeight: 700, mb: 1 }}>`
+- Icon naming changed: `*Outline` → `*Outlined` (e.g., `ErrorOutline` → `ErrorOutlined`)
+- See `frontend/AGENTS.md` for complete list
+
+### React 19 Changes
+- `FormEvent` is deprecated/removed. Use `React.SubmitEvent` or `React.SyntheticEvent<HTMLFormElement>`
+- Cast FormData results: `(formData.get("name") as string | null) ?? ""`
+
+### Database Testing Critical Rules
+- **ALWAYS use `runInRollback` wrapper** for database tests
+- **ALWAYS pass `tx` to ALL repository methods** inside transactions - mixing `tx` queries with `db`-backed repo calls causes deadlocks
+- **NEVER use `expect(...).rejects.toThrow()` inside `runInRollback`** - causes deadlocks. Use try/catch helper pattern instead
+- **NEVER query seed data** - always create test data using helpers in `entity-setup.ts`
+- Verify entity-setup helper signatures before use - they vary significantly
+
+### GraphQL Document Conventions
+- Documents live in `frontend/graphql/sharedDocuments/<domain>.documents.ts`
+- Naming: `{entityName}QueryDocument`, `{entityName}MutationDocument`
+- **Always include `id` field** on every object type for Apollo cache normalization
+- **NO `useLazyQuery`** - use stateful `useQuery` exclusively
+- Import hooks from `"@apollo/client/react"`, not `"@apollo/client"`
+
+### Type Definition Pattern (CRITICAL)
+All layers use types from `backend/types/{entity}.types.ts`:
+- `{Entity}SelectType`, `{Entity}InsertType` - database types
+- `{Entity}ReturnType`, `{Entity}SubmitInput` - service/API types
+- **Never create local type definitions in Pothos files** - always import from `@/backend/types`
+- Single canonical GraphQL object type per entity
+
+### i18n / Localized Errors
+- All user-facing error messages must use `next-intl` via `getBackendTranslations`
+- Accept optional `locale?: string` parameter in services/repositories
+- Never hardcode error strings
+
+### Theme & Styling
+- **NO hardcoded colors** - all colors from theme palette
+- Use theme callback: `sx={(theme) => ({ color: theme.palette.primary.main })}`
+- Use Material 3 `on<Color>` siblings for contrast (e.g., `theme.palette.onPrimary`)
+- See `frontend/THEME_PALETTE.md` for tokens
 
 ## SonarQube Issue Management
 
-- **Existing Results**: When `.scannerwork/sonar-result.json` is present, use `scripts/sonar-manager.ts`. **Do NOT run a new Sonar analysis command.**
-- **Mandatory Priority**: All DUPLICATIONS must be resolved before addressing standard ISSUES.
-- **Parallel Workflow**:
-  1.  **Resolve Duplications**:
-      - Run `bun scripts/sonar-manager.ts list-duplicates`.
-      - Delegate fixing to sub-agents. Assign ALL files in a duplication group to ONE agent.
-      - Clear entries with `bun scripts/sonar-manager.ts delete --file <path>` or `--all-duplicates`.
-  2.  **Resolve Issues**:
-      - Run `bun scripts/sonar-manager.ts list-files`.
-      - Delegate EACH file to a separate sub-agent.
-      - Each sub-agent: `list-issues --file <path>`, apply fix, then `delete --file <path>`.
-  3.  **Final Verification**: Both `list-duplicates` and `list-files` must return empty.
+When `.scannerwork/sonar-result.json` exists:
+1. **DO NOT run new Sonar analysis** - use `scripts/sonar-manager.ts`
+2. **Resolve DUPLICATIONS first** (mandatory priority)
+3. Use `bun scripts/sonar-manager.ts list-duplicates` and `list-files`
+4. Clear entries with `delete --file <path>` or `--all-duplicates`
+5. Final verification: both commands must return empty
+
+## Code Quality Workflow
+
+After making changes:
+1. Run `bun quality-gate` - it handles tsgo, biome, lint, codescene, sonar sequentially
+2. If CODESCENE fails: run `bun run codescene --file <path>` to fix
+3. If SONAR_RESULTS fails: use `bun scripts/sonar-manager.ts`
+4. Re-run `bun quality-gate` to resume from last failed stage
+5. Use `bun quality-gate:fresh` only for clean-slate verification
 
 ## AI Agent Communication Rules
 
-- **NEVER create summary markdown files** for work completed (e.g., `SUMMARY.md`, `CHANGES.md`, `REPORT.md`, `FIXED.md`)
-- **DO respond in chat** with a clear summary of what was done
-- Summary files clutter the repository and are not needed
-- Exception: Documentation files that are part of the project structure (e.g., `README.md`, `CONTRIBUTING.md`, `API.md`)
+- **NEVER create summary markdown files** (SUMMARY.md, CHANGES.md, REPORT.md, etc.)
+- **DO respond in chat** with clear summary of what was done
+- Exception: Documentation files that are part of project structure (README.md, CONTRIBUTING.md)
 
-<!-- BEGIN:nextjs-agent-rules -->
+## File Organization
 
-# This is NOT the Next.js you know
+### Frontend
+- `frontend/views/dashboard/` - Domain-organized page components
+- `frontend/stores/` - Zustand stores (mock stores for Storybook)
+- `frontend/components/ui/` - Shared UI components (AppDataGrid, MetricCard, PageContainer, etc.)
+- `frontend/graphql/sharedDocuments/` - GraphQL documents by domain
+- `frontend/graphql/generated/` - Auto-generated types (do not edit)
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+### Backend
+- `backend/db/schema/` - Drizzle table definitions
+- `backend/db/repo/` - Repository layer (data access only)
+- `backend/services/` - Business logic, organized by domain
+- `backend/graphql/pothos/` - Pothos GraphQL definitions
+- `backend/types/` - Canonical type definitions
+- `backend/lib/` - Utilities (auth, logger, env, etc.)
 
-<!-- END:nextjs-agent-rules -->
+### Testing
+- `backend/db/test/repo/` - Repository unit tests (100% coverage required)
+- `backend/db/test/logic/` - Business logic integration tests
+- `frontend/graphql/test/` - GraphQL integration tests (use testClient, not raw fetch)
+- `test/ui/components/` - Component tests
+- `test/ui/e2e/` - End-to-end tests
 
-## Scripts and Commands
+## Important References
 
-- Prefer Bun's built-in commands over npm equivalents
-- Use `~/.bun/bin/bun create` for scaffolding new projects
-- Use layer-specific test scripts (see `package.json`):
-  - `bun run test:db` — database repository and logic tests (`backend/db/test/`)
-  - `bun run test:graphql` — GraphQL integration tests (`frontend/graphql/test/`)
-  - `bun run test:ui:components` — UI component tests (`test/ui/components/`)
-  - `bun run test:ui:e2e` — UI end-to-end tests (`test/ui/e2e/`)
-  - `bun run test:ui` — all UI tests (components + e2e)
-  - `bun run test` — all tests across all layers
-- Use `~/.bun/bin/bun build` for building projects
-
-## Package Manager Configuration
-
-- Always use Bun as the package manager instead of npm, yarn, or pnpm
-- Use the specific Bun binary path: ~/.bun/bin/bun
-- When installing packages, use: ~/.bun/bin/bun install
-- When adding packages, use: ~/.bun/bin/bun add <package-name>
-- When removing packages, use: ~/.bun/bin/bun remove <package-name>
-- When running scripts, use: ~/.bun/bin/bun run <script-name>
-- When executing files directly, use: ~/.bun/bin/bun <file-path>
-
-## Logging
-
-- **NEVER use `console` methods directly** - ESLint will error
-- **Always use the logger utility**: `import { logger } from '@/src/utils/logger'`
-- Methods: `logger.info`, `logger.warn`, `logger.error`, `logger.debug`
-- `info`, `warn`, and `debug` are suppressed in production; `error` always logs.
-
----
-
-## applyTo: "\*_/_"
-
-These are some guidelines when using the SonarQube MCP server.
-
-# Important Tool Guidelines
-
-## Basic usage
-
-- **IMPORTANT**: After you finish generating or modifying any code files at the very end of the task, you MUST call the `analyze_file_list` tool (if it exists) to analyze the files you created or modified.
-- **IMPORTANT**: When starting a new task, you MUST disable automatic analysis with the `toggle_automatic_analysis` tool if it exists.
-- **IMPORTANT**: When you are done generating code at the very end of the task, you MUST re-enable automatic analysis with the `toggle_automatic_analysis` tool if it exists.
-
-## Project Keys
-
-- When a user mentions a project key, use `search_my_sonarqube_projects` first to find the exact project key
-- Don't guess project keys - always look them up
-
-## Code Language Detection
-
-- When analyzing code snippets, try to detect the programming language from the code syntax
-- If unclear, ask the user or make an educated guess based on syntax
-
-## Branch and Pull Request Context
-
-- Many operations support branch-specific analysis
-- If user mentions working on a feature branch, include the branch parameter
-
-## Code Issues and Violations
-
-- After fixing issues, do not attempt to verify them using `search_sonar_issues_in_projects`, as the server will not yet reflect the updates
-
-# Common Troubleshooting
-
-## Authentication Issues
-
-- SonarQube requires USER tokens (not project tokens)
-- When the error `SonarQube answered with Not authorized` occurs, verify the token type
-
-## Project Not Found
-
-- Use `search_my_sonarqube_projects` to find available projects
-- Verify project key spelling and format
-
-## Code Analysis Issues
-
-- Ensure programming language is correctly specified
-- Remind users that snippet analysis doesn't replace full project scans
-- Provide full file content for better analysis results
+- `frontend/COMPONENT_PATTERNS.md` - Dashboard UI patterns
+- `frontend/IMPLEMENTATION_LEARNINGS.md` - Error resolutions from past mistakes
+- `frontend/NEW_PAGE_WORKFLOW.md` - Required workflow for new pages
+- `frontend/THEME_PALETTE.md` - Color tokens and access patterns
+- `docs/IDEMPOTENCY.md` - Idempotency patterns
+- `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines

@@ -19,11 +19,29 @@ type InvoiceCreateInput = Omit<Types.InvoiceInsertInput, "id" | "createdAt" | "u
 type PaymentRecordInput = Omit<Types.PaymentInsertInput, "id" | "createdAt" | "updatedAt">;
 
 export namespace BillingRepository {
-  /**
-   * Helper to acquire an advisory lock for an invoice
-   */
   async function acquireInvoiceLock(tx: DBTransaction, invoiceId: string): Promise<void> {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('invoice_' || ${invoiceId}::text))`);
+  }
+
+  async function getExistingInvoiceOrThrow(
+    t: DBTransaction,
+    invoiceId: string,
+    locale?: string
+  ): Promise<Types.InvoiceSelectType> {
+    await acquireInvoiceLock(t, invoiceId);
+
+    const existing = await t
+      .select()
+      .from(invoices)
+      .where(and(eq(invoices.id, invoiceId), isNull(invoices.deletedAt)))
+      .limit(1);
+
+    if (existing.length === 0) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("invoiceNotFound", { id: invoiceId }));
+    }
+
+    return existing[0];
   }
 
   async function resolveExchangeRateSnapshot(
@@ -388,18 +406,7 @@ export namespace BillingRepository {
     locale?: string
   ): Promise<Types.InvoiceSelectType> => {
     const runner = async (t: DBTransaction) => {
-      await acquireInvoiceLock(t, invoiceId);
-
-      const existing = await t
-        .select()
-        .from(invoices)
-        .where(and(eq(invoices.id, invoiceId), isNull(invoices.deletedAt)))
-        .limit(1);
-
-      if (existing.length === 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("invoiceNotFound", { id: invoiceId }));
-      }
+      await getExistingInvoiceOrThrow(t, invoiceId, locale);
 
       const now = new Date();
       const [deleted] = await t
@@ -425,20 +432,7 @@ export namespace BillingRepository {
     locale?: string
   ): Promise<Types.InvoiceSelectType> => {
     const runner = async (t: DBTransaction) => {
-      await acquireInvoiceLock(t, invoiceId);
-
-      const existing = await t
-        .select()
-        .from(invoices)
-        .where(and(eq(invoices.id, invoiceId), isNull(invoices.deletedAt)))
-        .limit(1);
-
-      if (existing.length === 0) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("invoiceNotFound", { id: invoiceId }));
-      }
-
-      const current = existing[0];
+      const current = await getExistingInvoiceOrThrow(t, invoiceId, locale);
 
       if (current.status !== "UNPAID") {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });

@@ -1,18 +1,12 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
 import { type ReactNode, useEffect } from "react";
 import type { CurrentUserProfile } from "@/backend/types";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useLayoutStore } from "@/frontend/stores/layoutStore";
 import { useUserStore } from "@/frontend/stores/userStore";
-import {
-  BOTTOM_NAV_ITEMS,
-  getNavItemsForPermissions,
-  SIDEBAR_NAV_ITEMS,
-} from "@/frontend/views/dashboard/config/navigationConfig";
+import { BOTTOM_NAV_ITEMS, SIDEBAR_NAV_ITEMS } from "@/frontend/views/dashboard/config/navigationConfig";
 import { DashboardLayout } from "./DashboardLayout";
+import { useDashboardLayoutProps } from "./useDashboardLayoutProps";
 
 interface DashboardClientBridgeProps {
   readonly children: ReactNode;
@@ -21,12 +15,7 @@ interface DashboardClientBridgeProps {
 }
 
 export function DashboardClientBridge({ children, userProfile, roleLabel }: DashboardClientBridgeProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const locale = useLocale();
-
   const { setUser } = useUserStore();
-  const { sidebarOpen, mobileDrawerOpen, toggleSidebar, toggleMobileDrawer, closeMobileDrawer } = useLayoutStore();
 
   const permissions = userProfile.permissions as unknown as AppPermission[];
 
@@ -45,15 +34,21 @@ export function DashboardClientBridge({ children, userProfile, roleLabel }: Dash
     });
   }, [userProfile, setUser, permissions]);
 
-  const sidebarItems = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, permissions);
-  const bottomNavItems = getNavItemsForPermissions(BOTTOM_NAV_ITEMS, permissions);
-
-  const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/dashboard";
-  const activeNavKey = sidebarItems.find(item => pathWithoutLocale.startsWith(item.href))?.key ?? "home";
-
-  const handleNavigate = (href: string) => {
-    router.push(`/${locale}${href}`);
-  };
+  const {
+    sidebarItems,
+    bottomNavItems,
+    activeNavKey,
+    sidebarOpen,
+    mobileDrawerOpen,
+    toggleSidebar,
+    toggleMobileDrawer,
+    closeMobileDrawer,
+    handleNavigate,
+  } = useDashboardLayoutProps({
+    sidebarNavItems: SIDEBAR_NAV_ITEMS,
+    bottomNavItems: BOTTOM_NAV_ITEMS,
+    permissions,
+  });
 
   return (
     <DashboardLayout
