@@ -3,8 +3,8 @@ import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
 import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/dashboard/utils/adminDashboardMetrics";
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
-import type { DashboardState } from "./dashboardStore";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule-instance-dashboard-status";
+import type { DashboardState } from "./dashboardStore";
 
 const MOCK_TEACHERS: TeacherFilterItem[] = [
   { id: "teacher-ahmed", name: "Ahmed Mohammed" },

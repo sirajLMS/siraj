@@ -108,9 +108,8 @@ export type AdminDashboardScheduleResultDefinition = {
   rows: DailyScheduleListDefinition[];
 };
 
-const AdminDashboardScheduleResultRef = gqlSchemaBuilder.objectRef<AdminDashboardScheduleResultDefinition>(
-  "AdminDashboardScheduleResult"
-);
+const AdminDashboardScheduleResultRef =
+  gqlSchemaBuilder.objectRef<AdminDashboardScheduleResultDefinition>("AdminDashboardScheduleResult");
 
 export const AdminDashboardScheduleResultPothosObject = AdminDashboardScheduleResultRef.implement({
   fields: t => ({

@@ -39,6 +39,14 @@ export interface StudentHistoryLabels {
       readonly present: string;
       readonly absent: string;
       readonly late: string;
+      readonly PENDING: string;
+      readonly TAKEN: string;
+      readonly ABSENT: string;
+      readonly LEAVE: string;
+      readonly NOT_ACTIVATED: string;
+      readonly ACTIVATED: string;
+      readonly RUNNING: string;
+      readonly COMPLETED: string;
     };
   };
   readonly performanceStreak: {

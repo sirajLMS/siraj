@@ -1,15 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { teachers as demoTeachers } from "@/shared/demo-users";
+import { ClassOutcome } from "@/shared/lib/enum";
+import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule-instance-dashboard-status";
 import { executeDstBulkUpdateMutationDocument } from "../sharedDocuments/dst-migration.documents";
 import {
   adminDashboardScheduleQueryDocument,
   dailyScheduleListQueryDocument,
   dailyScheduleMetricsQueryDocument,
 } from "../sharedDocuments/schedule.documents";
-import {
-  resolveClassInstanceDashboardStatus,
-} from "@/shared/lib/schedule-instance-dashboard-status";
-import { ClassOutcome } from "@/shared/lib/enum";
 import {
   clearWeeklyScheduleMutationDocument,
   deleteRecurringClassMutationDocument,
@@ -139,9 +137,7 @@ describe("GraphQL Schedule Integration Tests", () => {
     expect(pendingList.length).toBeLessThanOrEqual(allList.length);
     for (const item of pendingList) {
       if (!item) continue;
-      expect(
-        resolveClassInstanceDashboardStatus(item.outcome, item.executionState)
-      ).toBe(ClassOutcome.PENDING);
+      expect(resolveClassInstanceDashboardStatus(item.outcome, item.executionState)).toBe(ClassOutcome.PENDING);
     }
   });
 
@@ -166,9 +162,7 @@ describe("GraphQL Schedule Integration Tests", () => {
 
     for (const item of result.rows ?? []) {
       if (!item) continue;
-      expect(
-        resolveClassInstanceDashboardStatus(item.outcome, item.executionState)
-      ).toBe(ClassOutcome.PENDING);
+      expect(resolveClassInstanceDashboardStatus(item.outcome, item.executionState)).toBe(ClassOutcome.PENDING);
     }
   });
 

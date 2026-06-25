@@ -5,14 +5,7 @@ mock.module("next/navigation", () => ({
 }));
 
 mock.module("next/link", () => ({
-  default: ({
-    children,
-    href,
-    ...props
-  }: {
-    children: React.ReactNode;
-    href: string;
-  }) => (
+  default: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -142,10 +135,7 @@ describe("ScheduleOverviewDataGrid", () => {
     );
 
     expect(screen.getByRole("link", { name: "Ahmed Hassan" })).toHaveAttribute("href", "/ar/students/student-1");
-    expect(screen.getByRole("link", { name: "Dr. Sarah" })).toHaveAttribute(
-      "href",
-      "/ar/teachers/teacher-1/profile"
-    );
+    expect(screen.getByRole("link", { name: "Dr. Sarah" })).toHaveAttribute("href", "/ar/teachers/teacher-1/profile");
   });
 
   test("renders history and details action links", () => {

@@ -8,47 +8,47 @@ import {
 
 describe("schedule-instance-dashboard-status", () => {
   test("RUNNING execution state maps to running, not pending", () => {
-    const status = resolveClassInstanceDashboardStatus(
-      ClassOutcome.PENDING,
-      ClassExecutionState.RUNNING
-    );
+    const status = resolveClassInstanceDashboardStatus(ClassOutcome.PENDING, ClassExecutionState.RUNNING);
     expect(status).toBe(ClassExecutionState.RUNNING);
-    expect(matchesDashboardMetricFilter(
-      { outcome: ClassOutcome.PENDING, executionState: ClassExecutionState.RUNNING },
-      "pending"
-    )).toBeFalse();
-    expect(matchesDashboardMetricFilter(
-      { outcome: ClassOutcome.PENDING, executionState: ClassExecutionState.RUNNING },
-      "running"
-    )).toBeTrue();
+    expect(
+      matchesDashboardMetricFilter(
+        { outcome: ClassOutcome.PENDING, executionState: ClassExecutionState.RUNNING },
+        "pending"
+      )
+    ).toBeFalse();
+    expect(
+      matchesDashboardMetricFilter(
+        { outcome: ClassOutcome.PENDING, executionState: ClassExecutionState.RUNNING },
+        "running"
+      )
+    ).toBeTrue();
   });
 
   test("COMPLETED maps to outcome for display and metrics", () => {
+    expect(resolveClassInstanceDashboardStatus(ClassOutcome.TAKEN, ClassExecutionState.COMPLETED)).toBe(
+      ClassOutcome.TAKEN
+    );
+    expect(resolveClassInstanceDashboardStatus(ClassOutcome.ABSENT, ClassExecutionState.COMPLETED)).toBe(
+      ClassOutcome.ABSENT
+    );
     expect(
-      resolveClassInstanceDashboardStatus(ClassOutcome.TAKEN, ClassExecutionState.COMPLETED)
-    ).toBe(ClassOutcome.TAKEN);
+      matchesDashboardMetricFilter(
+        { outcome: ClassOutcome.ABSENT, executionState: ClassExecutionState.COMPLETED },
+        "absent"
+      )
+    ).toBeTrue();
     expect(
-      resolveClassInstanceDashboardStatus(ClassOutcome.ABSENT, ClassExecutionState.COMPLETED)
-    ).toBe(ClassOutcome.ABSENT);
-    expect(matchesDashboardMetricFilter(
-      { outcome: ClassOutcome.ABSENT, executionState: ClassExecutionState.COMPLETED },
-      "absent"
-    )).toBeTrue();
-    expect(matchesDashboardMetricFilter(
-      { outcome: ClassOutcome.ABSENT, executionState: ClassExecutionState.COMPLETED },
-      "taken"
-    )).toBeFalse();
+      matchesDashboardMetricFilter(
+        { outcome: ClassOutcome.ABSENT, executionState: ClassExecutionState.COMPLETED },
+        "taken"
+      )
+    ).toBeFalse();
   });
 
   test("ACTIVATED with active timestamps maps to running", () => {
     const startAt = new Date("2028-01-01T10:00:00Z");
     expect(
-      resolveClassInstanceDashboardStatus(
-        ClassOutcome.PENDING,
-        ClassExecutionState.ACTIVATED,
-        startAt,
-        null
-      )
+      resolveClassInstanceDashboardStatus(ClassOutcome.PENDING, ClassExecutionState.ACTIVATED, startAt, null)
     ).toBe(ClassExecutionState.RUNNING);
   });
 

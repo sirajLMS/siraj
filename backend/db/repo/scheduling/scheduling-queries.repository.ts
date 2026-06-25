@@ -14,8 +14,8 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import {
   computeDailyScheduleMetricsFromRows,
-  matchesDashboardMetricFilter,
   type DailyScheduleMetricsCounts,
+  matchesDashboardMetricFilter,
 } from "@/shared/lib/schedule-instance-dashboard-status";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -134,10 +134,7 @@ async function fetchDailyScheduleBaseRows(
     );
   }
 
-  const rows = await t
-    .select({ classInstance: classInstances })
-    .from(classInstances)
-    .where(dayConditions);
+  const rows = await t.select({ classInstance: classInstances }).from(classInstances).where(dayConditions);
 
   return hydrateDailyScheduleRows(
     t,
@@ -185,12 +182,7 @@ export const getAdminDashboardSchedule = async (
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
 
-export const getDailyMetrics = async (
-  date: Date,
-  teacherId?: string,
-  tx?: DBTransaction,
-  viewerTimezone = "UTC"
-) => {
+export const getDailyMetrics = async (date: Date, teacherId?: string, tx?: DBTransaction, viewerTimezone = "UTC") => {
   const { metrics } = await getAdminDashboardSchedule({ date, teacherId, viewerTimezone }, tx);
   return metrics;
 };

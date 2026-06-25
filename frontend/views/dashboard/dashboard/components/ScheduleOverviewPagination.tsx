@@ -3,15 +3,17 @@
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useGridApiContext, useGridSelector } from "@mui/x-data-grid";
 import {
   gridPageCountSelector,
   gridPageSelector,
-  gridPaginationRowCountSelector,
   gridPageSizeSelector,
+  gridPaginationRowCountSelector,
+  useGridApiContext,
+  useGridSelector,
 } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { rtlFlipIconSx } from "@/frontend/utils/rtlFlipIconSx";
 
 interface ScheduleOverviewPaginationControlsProps {
   readonly page: number;
@@ -119,7 +121,7 @@ export function ScheduleOverviewPaginationControls({
               disabled={page <= 0 || safePageCount === 0}
               onClick={() => onPageChange(page - 1)}
             >
-              <ChevronLeft fontSize="small" />
+              <ChevronLeft fontSize="small" sx={rtlFlipIconSx} />
             </StyledPageNavButton>
           </span>
         </Tooltip>
@@ -151,7 +153,7 @@ export function ScheduleOverviewPaginationControls({
               disabled={safePageCount === 0 || page >= safePageCount - 1}
               onClick={() => onPageChange(page + 1)}
             >
-              <ChevronRight fontSize="small" />
+              <ChevronRight fontSize="small" sx={rtlFlipIconSx} />
             </StyledPageNavButton>
           </span>
         </Tooltip>

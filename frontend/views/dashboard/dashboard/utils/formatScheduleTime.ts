@@ -33,8 +33,7 @@ export function formatScheduleYourTime(
   fallbackInstant: string | null | undefined,
   locale: string
 ): string {
-  const instantSource =
-    yourTime && parseScheduleDate(yourTime) && yourTime.includes("T") ? yourTime : fallbackInstant;
+  const instantSource = yourTime && parseScheduleDate(yourTime) && yourTime.includes("T") ? yourTime : fallbackInstant;
   const parsedInstant = parseScheduleDate(instantSource);
 
   const timeLabel = formatScheduleTimeOnly(yourTime ?? instantSource, locale);

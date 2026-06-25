@@ -1,8 +1,8 @@
-import {
-  matchesDashboardMetricFilter,
-  type DailyScheduleMetricFilterKey,
-} from "@/shared/lib/schedule-instance-dashboard-status";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import {
+  type DailyScheduleMetricFilterKey,
+  matchesDashboardMetricFilter,
+} from "@/shared/lib/schedule-instance-dashboard-status";
 
 export type { DailyScheduleMetricFilterKey };
 

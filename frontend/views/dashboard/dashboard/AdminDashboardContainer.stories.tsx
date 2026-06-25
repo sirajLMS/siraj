@@ -6,10 +6,7 @@ import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule-insta
 import { DashboardView } from "./DashboardView";
 import { useAdminDashboardLabels } from "./utils";
 import { buildAdminDashboardMetrics } from "./utils/adminDashboardMetrics";
-import {
-  matchesDailyScheduleMetricFilter,
-  resolveDailyScheduleMetricFilter,
-} from "./utils/dailyScheduleMetricFilter";
+import { matchesDailyScheduleMetricFilter, resolveDailyScheduleMetricFilter } from "./utils/dailyScheduleMetricFilter";
 
 // Reusable mock container that acts exactly like the old AdminDashboardContainer
 export function MockAdminDashboardContainer() {

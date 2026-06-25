@@ -17,7 +17,9 @@ import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardS
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
 type RawMetrics =
-  AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics | null | undefined;
+  | AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics
+  | null
+  | undefined;
 
 interface AdminMetricDefinition {
   readonly key: string;

@@ -97,9 +97,7 @@ function renderStudentCell(row: DailyScheduleRow, locale: string) {
     return <StyledStudentNameText variant="bodyMd">{studentName}</StyledStudentNameText>;
   }
 
-  return (
-    <StyledScheduleNameLink href={`/${locale}/students/${studentId}`}>{studentName}</StyledScheduleNameLink>
-  );
+  return <StyledScheduleNameLink href={`/${locale}/students/${studentId}`}>{studentName}</StyledScheduleNameLink>;
 }
 
 function renderTeacherCell(row: DailyScheduleRow, locale: string) {
@@ -111,7 +109,9 @@ function renderTeacherCell(row: DailyScheduleRow, locale: string) {
   }
 
   return (
-    <StyledScheduleTeacherLink href={`/${locale}/teachers/${teacherId}/profile`}>{teacherName}</StyledScheduleTeacherLink>
+    <StyledScheduleTeacherLink href={`/${locale}/teachers/${teacherId}/profile`}>
+      {teacherName}
+    </StyledScheduleTeacherLink>
   );
 }
 
@@ -154,12 +154,7 @@ function buildActionsColumn(
   };
 }
 
-export function useScheduleColumns({
-  headers,
-  statusLabels,
-  detailsLabel,
-  showTimezones,
-}: UseScheduleColumnsParams) {
+export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTimezones }: UseScheduleColumnsParams) {
   const locale = useLocale();
 
   return useMemo<GridColDef<DailyScheduleRow>[]>(() => {

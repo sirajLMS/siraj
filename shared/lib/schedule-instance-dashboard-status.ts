@@ -14,10 +14,7 @@ export type DailyScheduleMetricFilterKey =
   | "absent"
   | "leave";
 
-export type ClassInstanceDashboardStatus =
-  | ClassOutcome
-  | ClassExecutionState.ACTIVATED
-  | ClassExecutionState.RUNNING;
+export type ClassInstanceDashboardStatus = ClassOutcome | ClassExecutionState.ACTIVATED | ClassExecutionState.RUNNING;
 
 export interface ClassInstanceDashboardStatusInput {
   readonly outcome: ClassOutcome | string | null | undefined;
@@ -71,12 +68,7 @@ export function resolveClassInstanceDashboardStatus(
 export function resolveClassInstanceDashboardStatusFromRow(
   row: ClassInstanceDashboardStatusInput
 ): ClassInstanceDashboardStatus {
-  return resolveClassInstanceDashboardStatus(
-    row.outcome,
-    row.executionState,
-    row.actualStartAt,
-    row.actualEndAt
-  );
+  return resolveClassInstanceDashboardStatus(row.outcome, row.executionState, row.actualStartAt, row.actualEndAt);
 }
 
 function dashboardStatusMatchesMetric(
@@ -164,7 +156,9 @@ const METRIC_KEYS: readonly DailyScheduleMetricFilterKey[] = [
   "leave",
 ];
 
-export function computeDailyScheduleMetricsFromRows(rows: readonly ClassInstanceMetricRow[]): DailyScheduleMetricsCounts {
+export function computeDailyScheduleMetricsFromRows(
+  rows: readonly ClassInstanceMetricRow[]
+): DailyScheduleMetricsCounts {
   const counts: DailyScheduleMetricsCounts = {
     total: rows.length,
     regular: 0,

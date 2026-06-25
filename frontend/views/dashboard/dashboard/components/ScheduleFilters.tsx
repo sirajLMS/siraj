@@ -5,14 +5,14 @@ import { Autocomplete, Box, Button, IconButton, TextField, Tooltip } from "@mui/
 import { styled } from "@mui/material/styles";
 import { format, isValid } from "date-fns";
 import { AppDatePicker } from "@/frontend/components/ui/form/AppDatePicker";
-
-import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
+import { rtlFlipIconSx } from "@/frontend/utils/rtlFlipIconSx";
 import {
   getTodayScheduleFilterDate,
   isScheduleFilterDateToday,
   parseScheduleFilterDate,
   shiftScheduleFilterDate,
 } from "@/frontend/views/dashboard/dashboard/utils/scheduleFilterDate";
+import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 
 const StyledFiltersContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -91,7 +91,7 @@ export function ScheduleFilters({
             aria-label={previousDayLabel}
             onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, -1))}
           >
-            <ChevronLeft fontSize="small" />
+            <ChevronLeft fontSize="small" sx={rtlFlipIconSx} />
           </StyledDateNavButton>
         </Tooltip>
 
@@ -116,7 +116,7 @@ export function ScheduleFilters({
             aria-label={nextDayLabel}
             onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, 1))}
           >
-            <ChevronRight fontSize="small" />
+            <ChevronRight fontSize="small" sx={rtlFlipIconSx} />
           </StyledDateNavButton>
         </Tooltip>
 

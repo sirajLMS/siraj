@@ -1,4 +1,4 @@
-import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule-instance-dashboard-status";
 
 export type ScheduleInstanceDisplayStatus = ClassOutcome | ClassExecutionState;

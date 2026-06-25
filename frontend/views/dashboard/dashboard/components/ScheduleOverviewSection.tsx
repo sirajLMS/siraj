@@ -55,7 +55,9 @@ function ScheduleOverviewTitle({
   return (
     <>
       <StyledSectionTitle variant="titleLg">{title}</StyledSectionTitle>
-      {selectedMetricLabel ? <Chip size="small" color="primary" variant="outlined" label={selectedMetricLabel} /> : null}
+      {selectedMetricLabel ? (
+        <Chip size="small" color="primary" variant="outlined" label={selectedMetricLabel} />
+      ) : null}
     </>
   );
 }
