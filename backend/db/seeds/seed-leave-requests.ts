@@ -9,8 +9,8 @@ import {
   cycleAtIndex,
   getFakerForIndex,
   loadSeedConfig,
-  startOfDay,
   type SeedConfig,
+  startOfDay,
 } from "./lib";
 
 function resolveRequesterUserId(
@@ -53,7 +53,9 @@ export async function seedOrGet(
   const teacherUserMap = new Map(teachersList.map(t => [t.id, t.userId]));
   const parentById = new Map(parentsList.map(p => [p.id, p]));
   const studentParentUserMap = new Map(
-    studentsList.map(s => [s.id, parentById.get(s.parentId)?.userId]).filter((entry): entry is [string, string] => !!entry[1])
+    studentsList
+      .map(s => [s.id, parentById.get(s.parentId)?.userId])
+      .filter((entry): entry is [string, string] => !!entry[1])
   );
   const adminUser = usersList.find(u => u.email === "admin@siraj.local");
   const results = [];

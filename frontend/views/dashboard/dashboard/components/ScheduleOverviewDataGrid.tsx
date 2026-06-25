@@ -1,5 +1,6 @@
 "use client";
 
+import type { GridPaginationModel } from "@mui/x-data-grid";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
@@ -8,6 +9,10 @@ import { useScheduleColumns } from "./useScheduleColumns";
 
 interface ScheduleOverviewDataGridProps {
   readonly rows: readonly ScheduleRow[];
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+  readonly onPageChange: (page: number) => void;
   readonly headers: {
     readonly classId: string;
     readonly student: string;
@@ -26,6 +31,10 @@ interface ScheduleOverviewDataGridProps {
 
 export function ScheduleOverviewDataGrid({
   rows,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
   headers,
   statusLabels,
   detailsLabel,
@@ -36,14 +45,25 @@ export function ScheduleOverviewDataGrid({
 
   const columns = useScheduleColumns({ headers, statusLabels, detailsLabel, showTimezones });
 
+  const paginationModel: GridPaginationModel = {
+    page,
+    pageSize,
+  };
+
   return (
     <AppDataGrid<ScheduleRow>
       rows={rows}
       columns={columns}
       getRowId={row => row.classId}
+      rowCount={totalCount}
+      paginationMode="server"
+      paginationModel={paginationModel}
+      onPaginationModelChange={model => {
+        onPageChange(model.page);
+      }}
+      pageSizeOptions={[pageSize]}
       autoHeight
       rowHeight={60}
-      hideFooter={rows.length <= 10}
       ariaLabel="schedule-overview-table"
       emptyMessage={emptyMessage}
       columnVisibilityModel={{

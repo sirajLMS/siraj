@@ -54,7 +54,7 @@ export function ScheduleFilters({
   // submitLabel,
   teachers,
   loadingTeachers = false,
-  teacherSearchValue = "",
+  teacherSearchValue,
   onTeacherSearchChange,
   onDateChange,
   onTeacherChange,
@@ -90,13 +90,16 @@ export function ScheduleFilters({
         getOptionLabel={option => option.name}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         value={selectedTeacher}
-        inputValue={teacherSearchValue}
-        onInputChange={(_event, newInputValue, reason) => {
-          // Prevent resetting input value when user selects an option
-          if (reason !== "reset" && onTeacherSearchChange) {
-            onTeacherSearchChange(newInputValue);
-          }
-        }}
+        {...(onTeacherSearchChange
+          ? {
+              inputValue: teacherSearchValue ?? "",
+              onInputChange: (_event, newInputValue, reason) => {
+                if (reason !== "reset") {
+                  onTeacherSearchChange(newInputValue);
+                }
+              },
+            }
+          : {})}
         onChange={(_event, newValue) => {
           onTeacherChange(newValue?.id ?? "");
           if (onTeacherSearchChange) {

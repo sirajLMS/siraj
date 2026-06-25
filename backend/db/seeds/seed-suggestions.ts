@@ -38,8 +38,7 @@ export async function seedOrGet(parentsList: ParentEntity[], usersList: UserEnti
               : null,
         reviewedByUserId:
           status === SuggestionStatus.REVIEWED || status === SuggestionStatus.DUPLICATE ? adminUser?.id : null,
-        reviewedAt:
-          status === SuggestionStatus.REVIEWED || status === SuggestionStatus.DUPLICATE ? now : null,
+        reviewedAt: status === SuggestionStatus.REVIEWED || status === SuggestionStatus.DUPLICATE ? now : null,
         createdAt: now,
       })
       .returning();

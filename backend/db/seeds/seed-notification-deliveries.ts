@@ -17,8 +17,7 @@ type DeviceTokenRow = { id: string; userId: string };
 
 function deliveryTimestamps(status: NotificationDeliveryStatus, now: Date) {
   return {
-    sentAt:
-      status === NotificationDeliveryStatus.PENDING || status === NotificationDeliveryStatus.FAILED ? null : now,
+    sentAt: status === NotificationDeliveryStatus.PENDING || status === NotificationDeliveryStatus.FAILED ? null : now,
     deliveredAt:
       status === NotificationDeliveryStatus.DELIVERED || status === NotificationDeliveryStatus.OPENED ? now : null,
     failedAt: status === NotificationDeliveryStatus.FAILED ? now : null,

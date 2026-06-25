@@ -3,7 +3,15 @@ import { db } from "@/backend/db/drizzleDb";
 import { recurringSchedules } from "@/backend/db/schema/scheduling";
 import logger from "@/backend/lib/logger";
 import type { StudentEntity, TeacherEntity } from "@/backend/types";
-import { formatDateKey, getDateWindow, loadSeedConfig, pickScheduleDefaultStartTime, pickScheduleDurationMinutes, pickTimezoneForIndex, type SeedConfig } from "./lib";
+import {
+  formatDateKey,
+  getDateWindow,
+  loadSeedConfig,
+  pickScheduleDefaultStartTime,
+  pickScheduleDurationMinutes,
+  pickTimezoneForIndex,
+  type SeedConfig,
+} from "./lib";
 
 export async function seedOrGet(teachersList: TeacherEntity[], studentsList: StudentEntity[], config?: SeedConfig) {
   logger.info("Seeding system classes (recurring schedules)...");

@@ -13,8 +13,8 @@ import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { ClassStatus, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
 import { DashboardView } from "./DashboardView";
-import { buildAdminDashboardMetrics } from "./utils/adminDashboardMetrics";
 import { useAdminDashboardLabels } from "./utils";
+import { buildAdminDashboardMetrics } from "./utils/adminDashboardMetrics";
 
 // Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
 // This container component handles all GraphQL queries, filter state, and metric/row transformations

@@ -67,11 +67,19 @@ const mockRows: readonly ScheduleRow[] = [
   },
 ];
 
+const defaultPaginationProps = {
+  page: 0,
+  pageSize: 10,
+  totalCount: mockRows.length,
+  onPageChange: mock(() => {}),
+};
+
 describe("ScheduleOverviewDataGrid", () => {
   test("shows timezone columns with ScheduleViewTimezones permission", () => {
     renderWithWrapper(
       <ScheduleOverviewDataGrid
         rows={mockRows}
+        {...defaultPaginationProps}
         headers={headers}
         statusLabels={statusLabels}
         detailsLabel="View Details"
@@ -89,6 +97,7 @@ describe("ScheduleOverviewDataGrid", () => {
     renderWithWrapper(
       <ScheduleOverviewDataGrid
         rows={mockRows}
+        {...defaultPaginationProps}
         headers={headers}
         statusLabels={statusLabels}
         detailsLabel="View Details"
@@ -107,6 +116,7 @@ describe("ScheduleOverviewDataGrid", () => {
     renderWithWrapper(
       <ScheduleOverviewDataGrid
         rows={mockRows}
+        {...defaultPaginationProps}
         headers={headers}
         statusLabels={statusLabels}
         detailsLabel="View Details"
@@ -125,6 +135,10 @@ describe("ScheduleOverviewDataGrid", () => {
     renderWithWrapper(
       <ScheduleOverviewDataGrid
         rows={[]}
+        page={0}
+        pageSize={10}
+        totalCount={0}
+        onPageChange={mock(() => {})}
         headers={headers}
         statusLabels={statusLabels}
         detailsLabel="View Details"

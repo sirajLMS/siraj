@@ -84,11 +84,7 @@ export function TodayClassesSection({
       {isMobile ? (
         <TodayClassesMobileScroll metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
       ) : (
-        <MetricCardGrid
-          metrics={metrics}
-          onMetricClick={onMetricClick}
-          selectedKey={selectedMetricKey}
-        />
+        <MetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
       )}
     </StyledSectionWrapper>
   );

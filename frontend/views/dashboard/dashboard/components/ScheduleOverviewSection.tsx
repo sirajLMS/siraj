@@ -11,22 +11,6 @@ import { ScheduleFilters } from "./ScheduleFilters";
 import { ScheduleOverviewCardList } from "./ScheduleOverviewCardList";
 import { ScheduleOverviewDataGrid } from "./ScheduleOverviewDataGrid";
 
-// Footer bar showing pagination info at bottom of the schedule panel
-const StyledSectionFooter = styled(Box)(({ theme }) => ({
-  paddingInline: theme.spacing(3),
-  paddingBlock: theme.spacing(1.5),
-  display: "flex",
-  justifyContent: "flex-end",
-  borderTop: `1px solid ${theme.palette.border.light}`,
-}));
-
-// Pagination label text in the section footer
-const StyledSectionFooterText = styled(Typography)(({ theme }) => ({
-  fontFamily: '"Inter", sans-serif',
-  fontSize: "12px",
-  color: theme.palette.onSurfaceVariant,
-}));
-
 // Desktop panel wrapper with rounded border and hidden overflow
 const StyledDesktopPanel = styled(Paper)(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 2,
@@ -80,15 +64,6 @@ export interface ScheduleOverviewSectionProps extends ScheduleOverviewData {
   readonly title: string;
 }
 
-// Footer showing pagination/row count info at the bottom of the schedule panel
-const SectionFooter = ({ showingText }: { showingText: string }) => {
-  return (
-    <StyledSectionFooter>
-      <StyledSectionFooterText>{showingText}</StyledSectionFooterText>
-    </StyledSectionFooter>
-  );
-};
-
 // Desktop Layout Component - shows data grid with filters and search
 const DesktopLayout = ({
   title,
@@ -99,7 +74,10 @@ const DesktopLayout = ({
   statusLabels,
   detailsLabel,
   emptyMessage,
-  showingText,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
   onSearchChange,
   dateLabel,
   dateValue,
@@ -163,13 +141,15 @@ const DesktopLayout = ({
         {/* Desktop data grid table */}
         <ScheduleOverviewDataGrid
           rows={rows}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
           headers={headers}
           statusLabels={statusLabels}
           detailsLabel={detailsLabel}
           emptyMessage={emptyMessage}
         />
-
-        <SectionFooter showingText={showingText} />
       </SectionPanel>
     </StyledDesktopPanel>
   </Box>

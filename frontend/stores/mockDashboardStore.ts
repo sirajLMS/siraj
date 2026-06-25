@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { ScheduleRow, TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/dashboard/utils/adminDashboardMetrics";
+import type { ScheduleRow, TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 import type { DashboardState } from "./dashboardStore";
 
 const MOCK_TEACHERS: TeacherFilterItem[] = [

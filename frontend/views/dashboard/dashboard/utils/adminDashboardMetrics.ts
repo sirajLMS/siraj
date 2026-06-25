@@ -30,7 +30,12 @@ const ADMIN_METRIC_DEFINITIONS: readonly AdminMetricDefinition[] = [
   { key: "total", labelKey: "dashboard.admin.metrics.total", icon: CalendarToday, count: m => m?.total ?? 0 },
   { key: "regular", labelKey: "dashboard.admin.metrics.regular", icon: FaceOutlined, count: m => m?.regular ?? 0 },
   { key: "trial", labelKey: "dashboard.admin.metrics.trial", icon: HeadphonesOutlined, count: m => m?.trial ?? 0 },
-  { key: "advance", labelKey: "dashboard.admin.metrics.advance", icon: FastRewindOutlined, count: m => m?.advance ?? 0 },
+  {
+    key: "advance",
+    labelKey: "dashboard.admin.metrics.advance",
+    icon: FastRewindOutlined,
+    count: m => m?.advance ?? 0,
+  },
   {
     key: "rescheduled",
     labelKey: "dashboard.admin.metrics.rescheduled",
@@ -44,8 +49,18 @@ const ADMIN_METRIC_DEFINITIONS: readonly AdminMetricDefinition[] = [
     variant: "error",
     count: m => m?.suspended ?? 0,
   },
-  { key: "taken", labelKey: "dashboard.admin.metrics.taken", icon: CheckCircleOutlineOutlined, count: m => m?.taken ?? 0 },
-  { key: "pending", labelKey: "dashboard.admin.metrics.pending", icon: AccessTimeOutlined, count: m => m?.pending ?? 0 },
+  {
+    key: "taken",
+    labelKey: "dashboard.admin.metrics.taken",
+    icon: CheckCircleOutlineOutlined,
+    count: m => m?.taken ?? 0,
+  },
+  {
+    key: "pending",
+    labelKey: "dashboard.admin.metrics.pending",
+    icon: AccessTimeOutlined,
+    count: m => m?.pending ?? 0,
+  },
   {
     key: "activated",
     labelKey: "dashboard.admin.metrics.activated",
