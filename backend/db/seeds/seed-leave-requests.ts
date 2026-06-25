@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { leaveRequests } from "@/backend/db/schema/scheduling";
 import logger from "@/backend/lib/logger";
 import type { ClassInstanceEntity, TeacherEntity, UserEntity } from "@/backend/types";
-import { ClassOutcome, LeaveRequestStatus, LeaveRequesterType } from "@/shared/lib/enum";
+import { ClassOutcome, LeaveRequesterType, LeaveRequestStatus } from "@/shared/lib/enum";
 import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(
@@ -13,7 +13,6 @@ export async function seedOrGet(
   config?: SeedConfig
 ) {
   logger.info("Seeding leave requests...");
-  const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
 
   if (!seedConfig.enableExtendedScheduling || !classInstancesList?.length) {

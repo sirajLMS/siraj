@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { siteContent } from "@/backend/db/schema/site-content";
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
-import { SITE_CONTENT_SPECS, loadSeedConfig, type SeedConfig } from "./lib";
+import { loadSeedConfig, type SeedConfig, SITE_CONTENT_SPECS } from "./lib";
 
 export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding site content...");

@@ -1,4 +1,3 @@
-import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { studentProgress } from "@/backend/db/schema/students";
 import logger from "@/backend/lib/logger";

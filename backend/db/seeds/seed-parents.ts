@@ -6,9 +6,9 @@ import {
   getAvatarFileName,
   loadSeedConfig,
   pickTimezoneForIndex,
+  type SeedConfig,
   seedEntityFile,
   shouldSeedExtendedFiles,
-  type SeedConfig,
 } from "./lib";
 
 async function upsertParent(userId: string, timezone: string, now: Date) {

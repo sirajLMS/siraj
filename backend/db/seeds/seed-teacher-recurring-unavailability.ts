@@ -7,15 +7,11 @@ import {
   buildLunchUnavailability,
   getAvailabilityEffectiveRange,
   loadSeedConfig,
-  shouldSeedLunchBlock,
   type SeedConfig,
+  shouldSeedLunchBlock,
 } from "./lib";
 
-export async function seedOrGet(
-  teachersList: TeacherEntity[],
-  timezones: TimezoneEntity[],
-  config?: SeedConfig
-) {
+export async function seedOrGet(teachersList: TeacherEntity[], timezones: TimezoneEntity[], config?: SeedConfig) {
   logger.info("Seeding teacher recurring unavailability...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

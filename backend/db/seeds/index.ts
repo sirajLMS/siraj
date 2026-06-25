@@ -131,12 +131,7 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
 
   if (!context.classInstances) {
     logger.log("Seeding system class instances...");
-    context.classInstances = await seedOrGetClassInstances(
-      context.classes,
-      context.teachers,
-      context.students,
-      config
-    );
+    context.classInstances = await seedOrGetClassInstances(context.classes, context.teachers, context.students, config);
   }
 
   logger.log("Seeding class performance and status events...");
@@ -148,12 +143,7 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   await seedOrGetTeacherRecurringUnavailability(context.teachers, context.timezones, config);
   await seedOrGetTeacherVacationRequests(context.teachers, context.users, context.timezones, config);
 
-  const leaveRequests = await seedOrGetLeaveRequests(
-    context.classInstances,
-    context.teachers,
-    context.users,
-    config
-  );
+  const leaveRequests = await seedOrGetLeaveRequests(context.classInstances, context.teachers, context.users, config);
   await seedOrGetLeaveQuotaUsage(leaveRequests, context.students, config);
   await seedOrGetStudentProgress(context.classInstances, config);
   await seedOrGetStudentStatusHistory(context.students, context.users, config);

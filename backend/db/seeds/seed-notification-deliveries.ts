@@ -7,11 +7,7 @@ import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
 
 type DeviceTokenRow = { id: string; userId: string };
 
-export async function seedOrGet(
-  usersList: UserEntity[],
-  deviceTokensList: DeviceTokenRow[],
-  config?: SeedConfig
-) {
+export async function seedOrGet(usersList: UserEntity[], deviceTokensList: DeviceTokenRow[], config?: SeedConfig) {
   logger.info("Seeding notification deliveries...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

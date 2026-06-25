@@ -3,14 +3,14 @@ import { invoices } from "@/backend/db/schema/billing";
 import logger from "@/backend/lib/logger";
 import type { ParentEntity, StudentEntity, UserEntity } from "@/backend/types";
 import {
+  buildInvoiceAmount,
   DEFAULT_INVOICE_CURRENCY,
   DEFAULT_INVOICE_TYPE,
-  buildInvoiceAmount,
   iterateInvoiceMonths,
   loadSeedConfig,
+  type SeedConfig,
   seedEntityFile,
   shouldSeedExtendedFiles,
-  type SeedConfig,
 } from "./lib";
 
 export async function seedOrGet(

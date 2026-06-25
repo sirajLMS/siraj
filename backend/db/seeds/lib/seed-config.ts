@@ -20,10 +20,7 @@ export interface SeedConfig {
   enableExtendedFiles: boolean;
 }
 
-const PROFILE_DEFAULTS: Record<
-  SeedProfile,
-  Omit<SeedConfig, "profile" | "anchorDate">
-> = {
+const PROFILE_DEFAULTS: Record<SeedProfile, Omit<SeedConfig, "profile" | "anchorDate">> = {
   minimal: {
     extraTeachers: 0,
     extraParents: 0,

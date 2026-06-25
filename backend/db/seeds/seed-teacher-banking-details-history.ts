@@ -1,5 +1,3 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
 import { TeacherBankingRepository } from "@/backend/db/repo/teacher-banking.repository";
 import logger from "@/backend/lib/logger";
 import type { TeacherEntity, UserEntity } from "@/backend/types";

@@ -17,7 +17,7 @@ const WEEKDAY_POOL = [
   DayOfWeek.SATURDAY,
 ];
 
-export function buildTeacherAvailabilityWindows(teacherIndex: number): AvailabilityWindowSpec[] {
+export function buildTeacherAvailabilityWindows(_teacherIndex: number): AvailabilityWindowSpec[] {
   return WEEKDAY_POOL.map((day, i) => ({
     dayOfWeek: day,
     startTime: i % 2 === 0 ? "08:00:00" : "09:00:00",

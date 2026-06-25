@@ -3,12 +3,9 @@ import { db } from "@/backend/db/drizzleDb";
 import { teacherPayments } from "@/backend/db/schema/teacher-banking";
 import logger from "@/backend/lib/logger";
 import type { TeacherBankingDetailsHistorySelectType } from "@/backend/types";
-import { addMonths, loadSeedConfig, startOfDay, type SeedConfig } from "./lib";
+import { addMonths, loadSeedConfig, type SeedConfig, startOfDay } from "./lib";
 
-export async function seedOrGet(
-  bankingDetailsList: TeacherBankingDetailsHistorySelectType[],
-  config?: SeedConfig
-) {
+export async function seedOrGet(bankingDetailsList: TeacherBankingDetailsHistorySelectType[], config?: SeedConfig) {
   logger.info("Seeding teacher payments...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();
@@ -28,12 +25,7 @@ export async function seedOrGet(
       const [existing] = await db
         .select()
         .from(teacherPayments)
-        .where(
-          and(
-            eq(teacherPayments.teacherId, banking.teacherId),
-            eq(teacherPayments.paymentDate, paymentDate)
-          )
-        )
+        .where(and(eq(teacherPayments.teacherId, banking.teacherId), eq(teacherPayments.paymentDate, paymentDate)))
         .limit(1);
 
       if (existing) {

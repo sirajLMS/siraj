@@ -4,12 +4,12 @@ import { learningResources } from "@/backend/db/schema/communications";
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
 import {
-  LEARNING_RESOURCE_SPECS,
   buildResourceDisplayName,
+  LEARNING_RESOURCE_SPECS,
   loadSeedConfig,
+  type SeedConfig,
   seedEntityFile,
   shouldSeedExtendedFiles,
-  type SeedConfig,
 } from "./lib";
 
 export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {

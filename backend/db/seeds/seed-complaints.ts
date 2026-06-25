@@ -7,9 +7,9 @@ import {
   loadSeedConfig,
   pickComplaintCategory,
   pickComplaintStatus,
+  type SeedConfig,
   seedEntityFile,
   shouldSeedExtendedFiles,
-  type SeedConfig,
 } from "./lib";
 
 export async function seedOrGet(

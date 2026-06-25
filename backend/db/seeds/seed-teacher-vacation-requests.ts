@@ -4,7 +4,7 @@ import { teacherVacationRequests } from "@/backend/db/schema/teacher-availabilit
 import logger from "@/backend/lib/logger";
 import type { TeacherEntity, TimezoneEntity, UserEntity } from "@/backend/types";
 import { VacationRequestStatus } from "@/shared/lib/enum";
-import { addMonths, loadSeedConfig, startOfDay, type SeedConfig } from "./lib";
+import { addMonths, loadSeedConfig, type SeedConfig, startOfDay } from "./lib";
 
 export async function seedOrGet(
   teachersList: TeacherEntity[],
@@ -21,22 +21,25 @@ export async function seedOrGet(
   }
 
   const adminUser = usersList.find(u => u.email === "admin@siraj.local");
-  const teacherUserMap = new Map(
-    teachersList.map(t => [t.id, usersList.find(u => u.id === t.userId)?.id])
-  );
+  const teacherUserMap = new Map(teachersList.map(t => [t.id, usersList.find(u => u.id === t.userId)?.id]));
   const results = [];
   const anchor = startOfDay(seedConfig.anchorDate);
 
-  const specs = [
+  const specs: Array<{
+    teacherIndex: number;
+    status: VacationRequestStatus;
+    startOffsetMonths: number;
+    durationDays: number;
+  }> = [
     {
       teacherIndex: 0,
-      status: VacationRequestStatus.APPROVED as const,
+      status: VacationRequestStatus.APPROVED,
       startOffsetMonths: 1,
       durationDays: 5,
     },
     {
       teacherIndex: Math.min(1, teachersList.length - 1),
-      status: VacationRequestStatus.PENDING as const,
+      status: VacationRequestStatus.PENDING,
       startOffsetMonths: 2,
       durationDays: 3,
     },

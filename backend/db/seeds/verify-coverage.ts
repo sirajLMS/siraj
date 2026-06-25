@@ -79,7 +79,11 @@ const STANDARD_PROFILE_TABLES = TABLE_COVERAGE.filter(e => e.category === "seede
 
 async function getTableCount(tableName: string): Promise<number> {
   const result = await db.execute(sql.raw(`SELECT COUNT(*)::int AS count FROM "${tableName}"`));
-  const rows = Array.isArray(result) ? result : (result as { rows?: { count: number }[] }).rows ?? [];
+  if (Array.isArray(result)) {
+    const row = result[0] as { count?: number } | undefined;
+    return Number(row?.count ?? 0);
+  }
+  const rows = (result as unknown as { rows?: { count: number }[] }).rows ?? [];
   return Number(rows[0]?.count ?? 0);
 }
 

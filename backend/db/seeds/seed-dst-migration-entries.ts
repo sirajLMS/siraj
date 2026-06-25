@@ -7,10 +7,7 @@ import { DstMigrationResult } from "@/shared/lib/enum";
 
 type DstMigrationRunRow = { id: string };
 
-export async function seedOrGet(
-  runsList: DstMigrationRunRow[],
-  classesList: RecurringScheduleEntity[]
-) {
+export async function seedOrGet(runsList: DstMigrationRunRow[], classesList: RecurringScheduleEntity[]) {
   logger.info("Seeding DST migration entries...");
   if (!runsList?.length || !classesList?.length) {
     return [];
