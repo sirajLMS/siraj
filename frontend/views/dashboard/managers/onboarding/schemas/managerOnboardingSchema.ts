@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { ManagerAccountType, type ManagerOnboardingFormData } from "../types";
+import { ManagerAccountType } from "../types";
 
-export type { ManagerOnboardingFormData };
+export type { ManagerOnboardingFormData } from "../types";
 
 const departmentValues = ["academic", "operations", "human_resources", "it_support"] as const;
 

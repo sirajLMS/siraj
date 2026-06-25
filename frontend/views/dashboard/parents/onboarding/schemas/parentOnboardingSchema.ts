@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { InvoiceType, type ParentOnboardingFormData, PaymentMethod } from "../types";
+import { InvoiceType, PaymentMethod } from "../types";
 
-export type { ParentOnboardingFormData };
+export type { ParentOnboardingFormData } from "../types";
 
 export const parentOnboardingSchema = z.object({
   name: z.string().min(1, "fullNameRequired"),

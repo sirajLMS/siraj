@@ -20,7 +20,7 @@ describe("ReportService — generateAttendanceReport", () => {
       absentClasses: 0,
       leaveClasses: 0,
       pendingClasses: 0,
-      totalHours: 1.0,
+      totalHours: 1,
       paidEGP: 100,
       paidUSD: 0,
     },
@@ -86,7 +86,7 @@ describe("ReportService — generateAttendanceReport", () => {
     expect(result[0].groupLabel).toBe("2026-05-10");
 
     // Financial data must not be zeroed out
-    expect(result[0].totalHours).toBe(1.0);
+    expect(result[0].totalHours).toBe(1);
     expect(result[0].paidEGP).toBe(100);
     expect(result[0].paidUSD).toBe(0);
 

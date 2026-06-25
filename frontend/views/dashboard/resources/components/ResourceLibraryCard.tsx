@@ -53,7 +53,7 @@ export function ResourceLibraryCard({
         }}
       >
         <ResourceFileTypeIcon fileType={resource.fileType} />
-        {!isList ? (
+        {!isList && (
           <RequirePermission permissions={AppPermission.ResourcesDelete}>
             <IconButton
               aria-label="Delete resource"
@@ -65,7 +65,7 @@ export function ResourceLibraryCard({
               <DeleteOutlined />
             </IconButton>
           </RequirePermission>
-        ) : null}
+        )}
       </Box>
 
       <Box sx={{ flex: isList ? 1 : undefined, mt: isList ? 0 : 2, pr: isList && canManage ? 4 : 0 }}>

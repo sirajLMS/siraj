@@ -30,8 +30,8 @@ export class FcmPushAdapter implements IPushChannel {
       throw new Error("FIREBASE_CLIENT_EMAIL environment variable is required for FcmPushAdapter");
     }
 
-    const normalizedPrivateKey = privateKey.replace(/\\n/g, "\n");
-
+    const normalizedPrivateKey = privateKey.replaceAll(String.raw`\n`, "\n");
+    
     if (getApps().length === 0) {
       initializeApp({
         credential: cert({

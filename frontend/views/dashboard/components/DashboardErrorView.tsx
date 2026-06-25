@@ -19,7 +19,7 @@ export function DashboardErrorView({ errorMessage }: DashboardErrorViewProps) {
   const showRetry = !!errorMessage;
 
   const handleRetry = () => {
-    window.location.reload();
+    globalThis.location.reload();
   };
 
   const handleLoginRedirect = () => {

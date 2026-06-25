@@ -64,8 +64,11 @@ async function createTestResource(token: string): Promise<string> {
   });
 
   const resource = uploadResult?.uploadLearningResource;
+
   if (typeof resource?.id !== "string") {
-    throw new Error("Failed to upload learning resource record");
+    throw new TypeError(
+      `Failed to upload learning resource record: expected id to be a string, got ${typeof resource?.id}`
+    );
   }
 
   return resource.id;
@@ -113,7 +116,7 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
 
     const resource = uploadResult?.uploadLearningResource;
     if (!resource) {
-      throw new Error("Failed to upload learning resource record");
+      throw new TypeError("Failed to upload learning resource record");
     }
 
     expect(resource.id).toBeDefined();

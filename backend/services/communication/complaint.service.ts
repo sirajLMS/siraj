@@ -267,7 +267,7 @@ export namespace ComplaintService {
 
     if (!canListComplaints) {
       const parent = await ParentRepository.findByUserId(actorUserId);
-      if (!parent || parent.id !== complaint.parentId) {
+      if (parent?.id !== complaint.parentId) {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(tFunc("insufficientPermissions"));
       }

@@ -138,9 +138,8 @@ export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTi
       },
     ];
 
-    baseCols.push(...buildTimeColumns(showTimezones, headers));
-
     baseCols.push(
+      ...buildTimeColumns(showTimezones, headers),
       {
         field: "status",
         headerName: headers.status,

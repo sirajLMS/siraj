@@ -2,7 +2,7 @@ import { StudentRepository, TeacherRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { AppPermission, type StudentStatus } from "@/shared/lib/enum";
+import { AppPermission } from "@/shared/lib/enum";
 
 export interface ReassignTeacherResult {
   readonly id: string;
@@ -116,13 +116,7 @@ export namespace StudentLifecycleService {
     }
 
     try {
-      const updated = await StudentRepository.changeStatus(
-        studentId,
-        newStatus as StudentStatus,
-        expectedVersion,
-        undefined,
-        locale
-      );
+      const updated = await StudentRepository.changeStatus(studentId, newStatus, expectedVersion, undefined, locale);
 
       logger.info("Student status changed", {
         actorUserId,

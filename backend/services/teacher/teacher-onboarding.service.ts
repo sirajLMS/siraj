@@ -5,7 +5,6 @@ import {
   TeacherRepository,
   UserRepository,
 } from "@/backend/db/repo";
-import type { Email } from "@/backend/lib/email";
 import { getBackendTranslations, type TranslationFn } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -58,7 +57,7 @@ export namespace TeacherOnboardingService {
     txObj: DBTransaction
   ): Promise<{ user: UserEntity; teacher: TeacherCreateResult }> {
     const user = await UserRepository.create(
-      { name: input.name, email: { value: input.email } as Email, password: input.password },
+      { name: input.name, email: { value: input.email }, password: input.password },
       locale,
       txObj
     );

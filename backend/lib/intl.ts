@@ -116,7 +116,7 @@ export async function getBackendTranslations(opts?: {
   const locale = opts?.locale || (isTest ? "en" : "ar");
 
   if (isTest) {
-    return getManualTranslations(locale, namespace) as BackendTranslationFn;
+    return getManualTranslations(locale, namespace);
   }
 
   try {
@@ -126,6 +126,6 @@ export async function getBackendTranslations(opts?: {
     return (await getTranslations(namespace)) as BackendTranslationFn;
   } catch (error) {
     logger.debug("Failed to retrieve next-intl translations, falling back to manual resolver", { error });
-    return getManualTranslations(locale, namespace) as BackendTranslationFn;
+    return getManualTranslations(locale, namespace);
   }
 }

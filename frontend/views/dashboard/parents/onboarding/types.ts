@@ -1,7 +1,8 @@
-import type { ParentOnboardingInput, ParentOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ParentOnboardingInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 
-export type { ParentOnboardingInput, ParentOnboardingResult };
+export type { ParentOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
+export type { ParentOnboardingInput };
 export { InvoiceType, PaymentMethod };
 
 type CleanField<T> = T extends null ? undefined : T;

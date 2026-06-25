@@ -67,7 +67,7 @@ export function AdminComplaintsContainer() {
       submitterName: row.parentName ?? row.submitterEmail ?? "",
       submitterRole: row.studentName ? `Guardian • ${row.studentName}` : "Guardian",
       avatarUrl: "",
-      priority: (row.category?.toLowerCase().includes("urgent") ? "urgent" : "general") as "urgent" | "general",
+      priority: row.category?.toLowerCase().includes("urgent") ? "urgent" : "general",
       receivedAt: row.createdAt ?? "",
       complaintText: row.body ?? "",
       status: row.status ?? ComplaintStatus.Unanswered,

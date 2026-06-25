@@ -190,10 +190,10 @@ export function verifyWeeklyScheduleGrid(
   expect(schedule).toBeDefined();
   if (!schedule) throw new Error("No schedule returned");
   expect(schedule.id).toBeDefined();
-  if (expectedTeacherId !== undefined) {
-    expect(schedule.teacherId).toBe(expectedTeacherId);
-  } else {
+  if (expectedTeacherId === undefined) {
     expect(schedule.teacherId).toBeDefined();
+  } else {
+    expect(schedule.teacherId).toBe(expectedTeacherId);
   }
   expect(Array.isArray(schedule.classes)).toBeTrue();
 }

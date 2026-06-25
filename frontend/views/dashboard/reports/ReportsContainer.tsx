@@ -14,7 +14,7 @@ import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teache
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { ReportsView } from "./ReportsView";
-import type { LedgerStatus, ReportLedgerRow, ReportsSummary, ReportType } from "./types/reportsTypes";
+import type { ReportLedgerRow, ReportsSummary, ReportType } from "./types/reportsTypes";
 
 function formatHours(hours: number): string {
   const h = Math.floor(hours);
@@ -39,7 +39,7 @@ function mapReportRows(reportRows: readonly AttendanceReportRow[] | null | undef
           .slice(0, 2)
           .toUpperCase()
       : "",
-    status: "active" as LedgerStatus,
+    status: "active",
     taken: row.takenClasses ?? 0,
     absent: row.absentClasses ?? 0,
     leave: row.leaveClasses ?? 0,

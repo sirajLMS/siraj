@@ -1,8 +1,8 @@
-import type { ManagerOnboardingInput, ManagerOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
-import { ManagerAccountType } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ManagerOnboardingInput } from "@/frontend/graphql/generated/gql/graphql-types";
 
-export type { ManagerOnboardingInput, ManagerOnboardingResult };
-export { ManagerAccountType };
+export type { ManagerOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
+export { ManagerAccountType } from "@/frontend/graphql/generated/gql/graphql-types";
+export type { ManagerOnboardingInput };
 
 type CleanField<T> = T extends null ? undefined : T;
 type CleanInput<T> = {

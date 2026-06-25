@@ -54,7 +54,7 @@ function mapStatus(status: string | null | undefined): StudentAccountStatus {
     s === "suspended" ||
     s === "regular"
   ) {
-    return s as StudentAccountStatus;
+    return s;
   }
   return "regular";
 }

@@ -1,7 +1,8 @@
-import type { TeacherOnboardingInput, TeacherOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { TeacherOnboardingInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { CountryCode, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 
-export type { TeacherOnboardingInput, TeacherOnboardingResult };
+export type { TeacherOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
+export type { TeacherOnboardingInput };
 export { CountryCode, Gender };
 
 type CleanField<T> = T extends null ? undefined : T;

@@ -1,6 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository, StaffProfileRepository, UserRepository } from "@/backend/db/repo";
-import type { Email } from "@/backend/lib/email";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -60,7 +59,7 @@ export namespace ManagerOnboardingService {
     const run = async (txObj: DBTransaction) => {
       // Step 1: Create user record
       const user = await UserRepository.create(
-        { name: input.name, email: { value: input.email } as Email, password: input.password },
+        { name: input.name, email: { value: input.email }, password: input.password },
         locale,
         txObj
       );

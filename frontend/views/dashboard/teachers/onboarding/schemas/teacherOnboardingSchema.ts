@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { CountryCode, Gender, type TeacherOnboardingFormData } from "../types";
+import { CountryCode, Gender } from "../types";
 
-export type { TeacherOnboardingFormData };
+export type { TeacherOnboardingFormData } from "../types";
 
 export const teacherOnboardingSchema = (validationLabels: {
   readonly fullNameRequired: string;
