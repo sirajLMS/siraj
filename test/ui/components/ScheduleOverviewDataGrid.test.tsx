@@ -10,11 +10,7 @@ import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import {
-  AppPermission,
-  ClassExecutionState,
-  ClassOutcome,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { ScheduleOverviewDataGrid } from "@/frontend/views/dashboard/dashboard/components/ScheduleOverviewDataGrid";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";

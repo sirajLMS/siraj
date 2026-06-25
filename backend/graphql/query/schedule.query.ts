@@ -1,7 +1,7 @@
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
-import { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
+import type { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   DailyScheduleListPothosObject,

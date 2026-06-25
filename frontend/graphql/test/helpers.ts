@@ -158,6 +158,7 @@ export async function fetchFirstStudentTeacherPair(
       date,
       teacherId: null,
       search: null,
+      metricFilter: null,
     },
     context: {
       headers: {

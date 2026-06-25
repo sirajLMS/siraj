@@ -2,16 +2,7 @@
 
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-
-export function resolveScheduleInstanceDisplayStatus(
-  outcome: ClassOutcome | null | undefined,
-  executionState: ClassExecutionState | null | undefined
-): ClassOutcome | ClassExecutionState {
-  if (executionState && executionState !== ClassExecutionState.NotActivated) {
-    return executionState;
-  }
-  return outcome ?? ClassOutcome.Pending;
-}
+import { resolveScheduleInstanceDisplayStatus } from "@/frontend/views/dashboard/dashboard/utils/scheduleInstanceStatus";
 
 interface ScheduleInstanceStatusBadgeProps {
   readonly outcome: ClassOutcome | null | undefined;
@@ -29,11 +20,6 @@ export function ScheduleInstanceStatusBadge({
   const displayStatus = resolveScheduleInstanceDisplayStatus(outcome, executionState);
 
   return (
-    <StatusBadge
-      category="classInstance"
-      status={displayStatus}
-      label={statusLabels[displayStatus]}
-      size={size}
-    />
+    <StatusBadge category="classInstance" status={displayStatus} label={statusLabels[displayStatus]} size={size} />
   );
 }

@@ -18,6 +18,7 @@ async function clearClassesOnDate(token: string, dateVal: string) {
       date: dateVal,
       teacherId: null,
       search: null,
+      metricFilter: null,
     },
     context: {
       headers: {

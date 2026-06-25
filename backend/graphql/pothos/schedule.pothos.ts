@@ -1,5 +1,5 @@
-import type { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
+import type { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { ClassExecutionStatePothosObject, ClassOutcomePothosObject } from "./enum.pothos";
 

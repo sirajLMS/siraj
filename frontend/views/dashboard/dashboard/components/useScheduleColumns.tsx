@@ -92,10 +92,7 @@ function buildActionsColumn(
       <StyledActionsCellBox>
         <Box>
           <Tooltip title={detailsLabel}>
-            <StyledGridDetailsIconButton
-              size="small"
-              onClick={() => router.push(`/${locale}/classes/${row.id ?? ""}`)}
-            >
+            <StyledGridDetailsIconButton size="small" onClick={() => router.push(`/${locale}/classes/${row.id ?? ""}`)}>
               <DetailsIcon fontSize="small" />
             </StyledGridDetailsIconButton>
           </Tooltip>

@@ -18,7 +18,10 @@ import {
  * so a small entity count still exercises almost every UI filter/badge state.
  */
 export function cycleAtIndex<T>(values: readonly T[], index: number): T {
-  return values[index % values.length]!;
+  if (values.length === 0) {
+    throw new Error("cycleAtIndex requires a non-empty values array");
+  }
+  return values[index % values.length] as T;
 }
 
 export const ALL_STUDENT_STATUSES = [

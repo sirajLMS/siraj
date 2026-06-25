@@ -5,15 +5,10 @@ import { Box, IconButton, Paper, Stack, type Theme, Typography } from "@mui/mate
 import { styled } from "@mui/material/styles";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import {
-  ClassExecutionState,
-  ClassOutcome,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
-import {
-  resolveScheduleInstanceDisplayStatus,
-  ScheduleInstanceStatusBadge,
-} from "./ScheduleInstanceStatusBadge";
+import { resolveScheduleInstanceDisplayStatus } from "@/frontend/views/dashboard/dashboard/utils/scheduleInstanceStatus";
+import { ScheduleInstanceStatusBadge } from "./ScheduleInstanceStatusBadge";
 
 interface ScheduleOverviewCardListProps {
   readonly rows: readonly DailyScheduleRow[];
@@ -148,7 +143,9 @@ export function ScheduleOverviewCardList({
                     {row.yourTime ?? ""}
                   </StyledCardTimeText>
                 </StyledCardMetaRow>
-                <StyledStudentNameText variant="titleLg">{row.student?.name ?? "Unknown Student"}</StyledStudentNameText>
+                <StyledStudentNameText variant="titleLg">
+                  {row.student?.name ?? "Unknown Student"}
+                </StyledStudentNameText>
               </Box>
 
               <StyledCardActionsColumn>

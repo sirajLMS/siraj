@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/dashboard/utils/adminDashboardMetrics";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/dashboard/utils/adminDashboardMetrics";
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 import type { DashboardState } from "./dashboardStore";
 

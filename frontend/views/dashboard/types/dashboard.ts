@@ -1,9 +1,5 @@
 import type { SvgIconComponent } from "@mui/icons-material";
-import type {
-  AppPermission,
-  ClassExecutionState,
-  ClassOutcome,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+import type { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
 import type { DashboardNavigationLabels } from "@/shared/messages/types/message";
 

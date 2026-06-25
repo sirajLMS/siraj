@@ -70,6 +70,7 @@ describe("GraphQL Schedule Integration Tests", () => {
       date: testDate,
       teacherId: null,
       search: null,
+      metricFilter: null,
     });
     if (!data.dailyScheduleList) throw new Error("No dailyScheduleList data returned");
     expect(Array.isArray(data.dailyScheduleList)).toBeTrue();
@@ -93,6 +94,7 @@ describe("GraphQL Schedule Integration Tests", () => {
       date: testDate,
       teacherId: null,
       search: expectedTeacher.name,
+      metricFilter: null,
     });
     const list = data.dailyScheduleList;
     if (!list) throw new Error("No dailyScheduleList data returned");
@@ -120,6 +122,7 @@ describe("GraphQL Schedule Integration Tests", () => {
         date: testDate,
         teacherId: null,
         search: expectedTeacher.name,
+        metricFilter: null,
       },
       context: {
         headers: {

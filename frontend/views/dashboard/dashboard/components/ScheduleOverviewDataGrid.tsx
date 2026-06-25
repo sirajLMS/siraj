@@ -2,9 +2,9 @@
 
 import type { GridPaginationModel } from "@mui/x-data-grid";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
 import { useScheduleColumns } from "./useScheduleColumns";
 
