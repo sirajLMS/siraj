@@ -22,81 +22,43 @@ function formatHours(hours: number): string {
   return `${h}:${m.toString().padStart(2, "0")}`;
 }
 
-export function ReportsContainer() {
-  const t = useTranslations("dashboard.reports");
-  const { hasPermission } = useUserStore();
+function mapReportRows(reportRows: readonly AttendanceReportRow[] | null | undefined): readonly ReportLedgerRow[] {
+  if (!reportRows) {
+    return [];
+  }
 
-  const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
+  return reportRows.map((row: AttendanceReportRow, index: number) => ({
+    id: row.id ?? row.groupKey ?? `rep-${index}`,
+    name: row.groupLabel ?? "",
+    studentName: "",
+    avatarInitials: row.groupLabel
+      ? row.groupLabel
+          .split(" ")
+          .map((n: string) => n[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase()
+      : "",
+    status: "active" as LedgerStatus,
+    taken: row.takenClasses ?? 0,
+    absent: row.absentClasses ?? 0,
+    leave: row.leaveClasses ?? 0,
+    pending: row.pendingClasses ?? 0,
+    hours: formatHours(row.totalHours ?? 0),
+    paidEgp: row.paidEGP ?? 0,
+    paidUsd: row.paidUSD ?? 0,
+  }));
+}
 
-  // Manage filter states locally
-  const [fromDate, setFromDate] = useState("2023-08-01");
-  const [toDate, setToDate] = useState("2023-08-31");
-  const [teacherId, setTeacherId] = useState("");
-  const [reportType, setReportType] = useState<ReportType>("by_teacher");
+interface ReportsSummarySectionProps {
+  readonly rows: readonly ReportLedgerRow[];
+  readonly reportData:
+    | { readonly generateAttendanceReport: readonly AttendanceReportRow[] | null | undefined }
+    | undefined;
+  readonly children: (summary: ReportsSummary) => React.ReactNode;
+}
 
-  // Query filters state, initialized to run query on mount
-  const [activeFilters, setActiveFilters] = useState<{
-    readonly fromDate: string;
-    readonly toDate: string;
-    readonly teacherId: string | null;
-    readonly groupBy: ReportGroupingMode;
-  }>({
-    fromDate: "2023-08-01",
-    toDate: "2023-08-31",
-    teacherId: null,
-    groupBy: ReportGroupingMode.Teacher,
-  });
-
-  // Fetch teachers list for the dropdown
-  const { data: teachersData } = useQuery(teachersQueryDocument, {
-    variables: { search: "", limit: 100 },
-  });
-
-  const teachers = useMemo(() => {
-    if (!teachersData?.teachers) {
-      return [];
-    }
-    return teachersData.teachers
-      .filter((t): t is { id: string; name: string } => typeof t.id === "string" && typeof t.name === "string")
-      .map(t => ({ id: t.id, name: t.name }));
-  }, [teachersData]);
-
-  // Fetch reporting data
-  const { data: reportData } = useQuery(generateAttendanceReportQueryDocument, {
-    variables: { filters: activeFilters },
-    fetchPolicy: "network-only",
-  });
-
-  // Map backend AttendanceReportRow to UI ReportLedgerRow
-  const rows = useMemo<readonly ReportLedgerRow[]>(() => {
-    if (!reportData?.generateAttendanceReport) {
-      return [];
-    }
-
-    return reportData.generateAttendanceReport.map((row: AttendanceReportRow, index: number) => ({
-      id: row.id ?? row.groupKey ?? `rep-${index}`,
-      name: row.groupLabel ?? "",
-      studentName: "",
-      avatarInitials: row.groupLabel
-        ? row.groupLabel
-            .split(" ")
-            .map((n: string) => n[0])
-            .join("")
-            .slice(0, 2)
-            .toUpperCase()
-        : "",
-      status: "active" as LedgerStatus,
-      taken: row.takenClasses ?? 0,
-      absent: row.absentClasses ?? 0,
-      leave: row.leaveClasses ?? 0,
-      pending: row.pendingClasses ?? 0,
-      hours: formatHours(row.totalHours ?? 0),
-      paidEgp: row.paidEGP ?? 0,
-      paidUsd: row.paidUSD ?? 0,
-    }));
-  }, [reportData]);
-
-  // Calculate summary statistics
+function ReportsSummarySection({ rows, reportData, children }: ReportsSummarySectionProps) {
   const summary = useMemo<ReportsSummary>(() => {
     if (rows.length === 0) {
       return {
@@ -116,7 +78,7 @@ export function ReportsContainer() {
     const totalAttempted = totalTaken + totalAbsent + totalLeave;
 
     const engagementRate = totalAttempted > 0 ? Math.round((totalTaken / totalAttempted) * 1000) / 10 : 0;
-    const engagementGrowth = 12.4; // historical benchmark
+    const engagementGrowth = 12.4;
 
     const totalHoursFloat =
       reportData?.generateAttendanceReport?.reduce(
@@ -142,29 +104,49 @@ export function ReportsContainer() {
     };
   }, [rows, reportData]);
 
-  const handleSubmit = () => {
-    if (fromDate > toDate) {
-      logger.warn("From date must be before or equal to To date");
-      return;
-    }
+  return children(summary);
+}
 
-    const mappedGroupBy = reportType === "by_date" ? ReportGroupingMode.Date : ReportGroupingMode.Teacher;
+interface ReportsMainContentProps {
+  readonly reportData:
+    | { readonly generateAttendanceReport: readonly AttendanceReportRow[] | null | undefined }
+    | undefined;
+  readonly summary: ReportsSummary;
+  readonly fromDate: string;
+  readonly toDate: string;
+  readonly teacherId: string;
+  readonly reportType: ReportType;
+  readonly teachers: readonly { readonly id: string; readonly name: string }[];
+  readonly canGenerate: boolean;
+  readonly onFromDateChange: (date: string) => void;
+  readonly onToDateChange: (date: string) => void;
+  readonly onTeacherChange: (id: string) => void;
+  readonly onReportTypeChange: (type: ReportType) => void;
+  readonly onSubmit: () => void;
+  readonly onExportCsv: () => void;
+  readonly onPrintReport: () => void;
+}
 
-    setActiveFilters({
-      fromDate,
-      toDate,
-      teacherId: teacherId || null,
-      groupBy: mappedGroupBy,
-    });
-  };
+function ReportsMainContent({
+  reportData,
+  summary,
+  fromDate,
+  toDate,
+  teacherId,
+  reportType,
+  teachers,
+  canGenerate,
+  onFromDateChange,
+  onToDateChange,
+  onTeacherChange,
+  onReportTypeChange,
+  onSubmit,
+  onExportCsv,
+  onPrintReport,
+}: ReportsMainContentProps) {
+  const t = useTranslations("dashboard.reports");
 
-  const handleExportCsv = () => {
-    logger.info("Export CSV requested");
-  };
-
-  const handlePrintReport = () => {
-    logger.info("Print report requested");
-  };
+  const rows = useMemo(() => mapReportRows(reportData?.generateAttendanceReport), [reportData]);
 
   const labels = {
     pageTitle: t("pageTitle"),
@@ -223,25 +205,115 @@ export function ReportsContainer() {
   };
 
   return (
+    <ReportsView
+      labels={labels}
+      fromDate={fromDate}
+      toDate={toDate}
+      teacherId={teacherId}
+      reportType={reportType}
+      teachers={teachers}
+      rows={rows}
+      summary={summary}
+      canGenerate={canGenerate}
+      onFromDateChange={onFromDateChange}
+      onToDateChange={onToDateChange}
+      onTeacherChange={onTeacherChange}
+      onReportTypeChange={onReportTypeChange}
+      onSubmit={onSubmit}
+      onExportCsv={onExportCsv}
+      onPrintReport={onPrintReport}
+    />
+  );
+}
+
+export function ReportsContainer() {
+  const { hasPermission } = useUserStore();
+  const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
+
+  const [fromDate, setFromDate] = useState("2023-08-01");
+  const [toDate, setToDate] = useState("2023-08-31");
+  const [teacherId, setTeacherId] = useState("");
+  const [reportType, setReportType] = useState<ReportType>("by_teacher");
+
+  const [activeFilters, setActiveFilters] = useState<{
+    readonly fromDate: string;
+    readonly toDate: string;
+    readonly teacherId: string | null;
+    readonly groupBy: ReportGroupingMode;
+  }>({
+    fromDate: "2023-08-01",
+    toDate: "2023-08-31",
+    teacherId: null,
+    groupBy: ReportGroupingMode.Teacher,
+  });
+
+  const { data: teachersData } = useQuery(teachersQueryDocument, {
+    variables: { search: "", limit: 100 },
+  });
+
+  const teachers = useMemo(() => {
+    if (!teachersData?.teachers) {
+      return [];
+    }
+    return teachersData.teachers
+      .filter((t): t is { id: string; name: string } => typeof t.id === "string" && typeof t.name === "string")
+      .map(t => ({ id: t.id, name: t.name }));
+  }, [teachersData]);
+
+  const { data: reportData } = useQuery(generateAttendanceReportQueryDocument, {
+    variables: { filters: activeFilters },
+    fetchPolicy: "network-only",
+  });
+
+  const rows = useMemo(() => mapReportRows(reportData?.generateAttendanceReport), [reportData]);
+
+  const handleSubmit = () => {
+    if (fromDate > toDate) {
+      logger.warn("From date must be before or equal to To date");
+      return;
+    }
+
+    const mappedGroupBy = reportType === "by_date" ? ReportGroupingMode.Date : ReportGroupingMode.Teacher;
+
+    setActiveFilters({
+      fromDate,
+      toDate,
+      teacherId: teacherId || null,
+      groupBy: mappedGroupBy,
+    });
+  };
+
+  const handleExportCsv = () => {
+    logger.info("Export CSV requested");
+  };
+
+  const handlePrintReport = () => {
+    logger.info("Print report requested");
+  };
+
+  return (
     <RequirePermission permissions={[AppPermission.ReportGenerateCustom]}>
-      <ReportsView
-        labels={labels}
-        fromDate={fromDate}
-        toDate={toDate}
-        teacherId={teacherId}
-        reportType={reportType}
-        teachers={teachers}
-        rows={rows}
-        summary={summary}
-        canGenerate={canGenerate}
-        onFromDateChange={setFromDate}
-        onToDateChange={setToDate}
-        onTeacherChange={setTeacherId}
-        onReportTypeChange={setReportType}
-        onSubmit={handleSubmit}
-        onExportCsv={handleExportCsv}
-        onPrintReport={handlePrintReport}
-      />
+      <ReportsSummarySection rows={rows} reportData={reportData}>
+        {summary => (
+          <ReportsMainContent
+            reportData={reportData}
+            summary={summary}
+            fromDate={fromDate}
+            toDate={toDate}
+            teacherId={teacherId}
+            reportType={reportType}
+            teachers={teachers}
+            canGenerate={canGenerate}
+            onFromDateChange={setFromDate}
+            onToDateChange={setToDate}
+            onTeacherChange={setTeacherId}
+            onReportTypeChange={setReportType}
+            onSubmit={handleSubmit}
+            onExportCsv={handleExportCsv}
+            onPrintReport={handlePrintReport}
+          />
+        )}
+      </ReportsSummarySection>
     </RequirePermission>
   );
 }

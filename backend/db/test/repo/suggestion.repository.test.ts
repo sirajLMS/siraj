@@ -9,6 +9,8 @@ import { SuggestionStatus } from "@/shared/lib/enum";
 import { createTestParent, createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
+const NIL_UUID = "00000000-0000-0000-0000-000000000000";
+
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
   try {
@@ -83,6 +85,92 @@ async function insertSuggestion(
   return rows[0];
 }
 
+async function insertOriginalDuplicatePair(
+  tx: DBTransaction,
+  parentId: string,
+  overrides: {
+    originalBody?: string;
+    duplicateBody?: string;
+    duplicateStatus?: "PENDING" | "REVIEWED" | "DUPLICATE";
+  } = {}
+) {
+  const original = await insertSuggestion(tx, parentId, {
+    body: overrides.originalBody ?? "Original suggestion",
+    status: "REVIEWED",
+  });
+  const duplicate = await insertSuggestion(tx, parentId, {
+    body: overrides.duplicateBody ?? "Duplicate suggestion",
+    status: overrides.duplicateStatus ?? "DUPLICATE",
+    duplicateOfId: original.id,
+  });
+  return { original, duplicate };
+}
+
+function expectReviewedFields(
+  result: { status: string; reviewedByUserId: string | null; reviewedAt: Date | null },
+  userId: string
+) {
+  expect(result.status).toBe(SuggestionStatus.REVIEWED);
+  expect(result.reviewedByUserId).toBe(userId);
+  expect(result.reviewedAt).not.toBeNull();
+  expect(result.reviewedAt).toBeInstanceOf(Date);
+}
+
+async function expectQueryBodies(
+  queryFn: () => Promise<Array<{ body: string }>>,
+  expectedBodies: string[],
+  unexpectedBodies: string[]
+) {
+  const result = await queryFn();
+  for (const body of expectedBodies) {
+    expect(result.some(r => r.body === body)).toBeTrue();
+  }
+  for (const body of unexpectedBodies) {
+    expect(result.some(r => r.body === body)).toBeFalse();
+  }
+  return result;
+}
+
+function expectDuplicateInfo(
+  result: { status: string; duplicateOfId: string | null; duplicateOfBody?: string | null } | null | undefined,
+  originalId: string,
+  originalBody: string
+) {
+  expect(result).toBeDefined();
+  expect(result?.status).toBe(SuggestionStatus.DUPLICATE);
+  expect(result?.duplicateOfId).toBe(originalId);
+  expect(result?.duplicateOfBody).toBe(originalBody);
+}
+
+async function expectNonExistentError(name: string, operation: (tx: DBTransaction) => Promise<unknown>) {
+  suggestionTest(name, async tx => {
+    await setupParentForSuggestion(tx, "NFSetup");
+    const error = await expectRepoError(() => operation(tx));
+    expect(error.message.length).toBeGreaterThan(0);
+  });
+}
+
+async function verifyRollback(
+  setupAndMutate: (tx: DBTransaction) => Promise<{ targetId: string; originalStatus: string }>
+) {
+  let targetId: string | undefined;
+  let originalStatus: string | undefined;
+
+  await runInRollback(async tx => {
+    const result = await setupAndMutate(tx);
+    targetId = result.targetId;
+    originalStatus = result.originalStatus;
+    throw new Error("Simulated rollback error");
+  }).catch(() => null);
+
+  if (targetId && originalStatus) {
+    const [found] = await db.select().from(suggestions).where(eq(suggestions.id, targetId)).limit(1);
+    if (found) {
+      expect(found.status).toBe(originalStatus);
+    }
+  }
+}
+
 describe("SuggestionRepository — submitSuggestion", () => {
   suggestionTest("creates a suggestion record with valid input", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "Submit15");
@@ -108,7 +196,7 @@ describe("SuggestionRepository — submitSuggestion", () => {
     const error = await expectRepoError(() =>
       SuggestionRepository.submitSuggestion(
         {
-          parentId: "00000000-0000-0000-0000-000000000000",
+          parentId: NIL_UUID,
           submitterName: "Bad Parent",
           body: "Should fail",
         },
@@ -141,14 +229,13 @@ describe("SuggestionRepository — getSuggestionsByParent", () => {
 
   suggestionTest("excludes soft-deleted suggestions", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "SugSoftDel");
-
     await insertSuggestion(tx, parent.id, { body: "Active suggestion" });
     await insertSuggestion(tx, parent.id, { body: "Deleted suggestion", deletedAt: new Date() });
-
-    const result = await SuggestionRepository.getSuggestionsByParent(parent.id, { limit: 50, offset: 0 }, tx);
-
-    expect(result.some(s => s.body === "Active suggestion")).toBeTrue();
-    expect(result.some(s => s.body === "Deleted suggestion")).toBeFalse();
+    await expectQueryBodies(
+      () => SuggestionRepository.getSuggestionsByParent(parent.id, { limit: 50, offset: 0 }, tx),
+      ["Active suggestion"],
+      ["Deleted suggestion"]
+    );
   });
 
   suggestionTest("returns results ordered by createdAt DESC", async tx => {
@@ -170,33 +257,17 @@ describe("SuggestionRepository — getSuggestionsByParent", () => {
 
   suggestionTest("includes duplicate preview when suggestion is DUPLICATE", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "SugDupPrev");
-
-    const original = await insertSuggestion(tx, parent.id, {
-      body: "Original suggestion",
-      status: "REVIEWED",
+    const { original } = await insertOriginalDuplicatePair(tx, parent.id, {
+      originalBody: "Original suggestion",
+      duplicateBody: "Duplicate suggestion",
     });
-
-    await insertSuggestion(tx, parent.id, {
-      body: "Duplicate suggestion",
-      status: "DUPLICATE",
-      duplicateOfId: original.id,
-    });
-
     const result = await SuggestionRepository.getSuggestionsByParent(parent.id, { limit: 50, offset: 0 }, tx);
-
     const dup = result.find(s => s.body === "Duplicate suggestion");
-    expect(dup).toBeDefined();
-    expect(dup?.status).toBe(SuggestionStatus.DUPLICATE);
-    expect(dup?.duplicateOfId).toBe(original.id);
-    expect(dup?.duplicateOfBody).toBe("Original suggestion");
+    expectDuplicateInfo(dup, original.id, "Original suggestion");
   });
 
   suggestionTest("returns empty array for unknown parentId", async tx => {
-    const result = await SuggestionRepository.getSuggestionsByParent(
-      "00000000-0000-0000-0000-000000000000",
-      { limit: 50, offset: 0 },
-      tx
-    );
+    const result = await SuggestionRepository.getSuggestionsByParent(NIL_UUID, { limit: 50, offset: 0 }, tx);
     expect(result).toEqual([]);
   });
 });
@@ -299,17 +370,13 @@ describe("SuggestionRepository — getAdminSuggestionQueue", () => {
 
   suggestionTest("excludes soft-deleted suggestions", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "AdminSugSoft");
-
     await insertSuggestion(tx, parent.id, { body: "Visible admin suggestion" });
-    await insertSuggestion(tx, parent.id, {
-      body: "Hidden admin suggestion",
-      deletedAt: new Date(),
-    });
-
-    const result = await SuggestionRepository.getAdminSuggestionQueue({ limit: 50, offset: 0 }, tx);
-
-    expect(result.rows.some(r => r.body === "Visible admin suggestion")).toBeTrue();
-    expect(result.rows.some(r => r.body === "Hidden admin suggestion")).toBeFalse();
+    await insertSuggestion(tx, parent.id, { body: "Hidden admin suggestion", deletedAt: new Date() });
+    await expectQueryBodies(
+      async () => (await SuggestionRepository.getAdminSuggestionQueue({ limit: 50, offset: 0 }, tx)).rows,
+      ["Visible admin suggestion"],
+      ["Hidden admin suggestion"]
+    );
   });
 });
 
@@ -335,7 +402,7 @@ describe("SuggestionRepository — getSuggestionById", () => {
   });
 
   suggestionTest("returns null for non-existent suggestion ID", async tx => {
-    const result = await SuggestionRepository.getSuggestionById("00000000-0000-0000-0000-000000000000", tx);
+    const result = await SuggestionRepository.getSuggestionById(NIL_UUID, tx);
     expect(result).toBeNull();
   });
 
@@ -353,65 +420,37 @@ describe("SuggestionRepository — getSuggestionById", () => {
 
   suggestionTest("includes duplicate info when status is DUPLICATE", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "ByIdDup");
-
-    const original = await insertSuggestion(tx, parent.id, {
-      body: "Original for byId",
-      status: "REVIEWED",
+    const { original, duplicate } = await insertOriginalDuplicatePair(tx, parent.id, {
+      originalBody: "Original for byId",
+      duplicateBody: "Duplicate for byId",
     });
-
-    const dup = await insertSuggestion(tx, parent.id, {
-      body: "Duplicate for byId",
-      status: "DUPLICATE",
-      duplicateOfId: original.id,
-    });
-
-    const result = await SuggestionRepository.getSuggestionById(dup.id, tx);
-
-    expect(result).not.toBeNull();
-    expect(result?.status).toBe(SuggestionStatus.DUPLICATE);
-    expect(result?.duplicateOfId).toBe(original.id);
-    expect(result?.duplicateOfBody).toBe("Original for byId");
+    const result = await SuggestionRepository.getSuggestionById(duplicate.id, tx);
+    expectDuplicateInfo(result, original.id, "Original for byId");
   });
 });
 
 describe("SuggestionRepository — markSuggestionReviewed (Story 15)", () => {
   suggestionTest("sets status to REVIEWED with reviewedByUserId and reviewedAt", async tx => {
     const { parent, user } = await setupParentForSuggestion(tx, "MarkRev15");
-
     const suggestion = await insertSuggestion(tx, parent.id, { status: "PENDING" });
-
     const result = await SuggestionRepository.markSuggestionReviewed(
       { suggestionId: suggestion.id, reviewedByUserId: user.id },
       tx
     );
-
     expect(result).toBeDefined();
     expect(result.id).toBe(suggestion.id);
-    expect(result.status).toBe(SuggestionStatus.REVIEWED);
-    expect(result.reviewedByUserId).toBe(user.id);
-    expect(result.reviewedAt).not.toBeNull();
-    expect(result.reviewedAt).toBeInstanceOf(Date);
+    expectReviewedFields(result, user.id);
   });
 
-  suggestionTest("throws for non-existent suggestion ID", async tx => {
-    const { user } = await setupParentForSuggestion(tx, "MarkRevNF");
-
-    const error = await expectRepoError(() =>
-      SuggestionRepository.markSuggestionReviewed(
-        { suggestionId: "00000000-0000-0000-0000-000000000000", reviewedByUserId: user.id },
-        tx
-      )
-    );
-    expect(error.message.length).toBeGreaterThan(0);
-  });
+  expectNonExistentError("throws for non-existent suggestion ID", tx =>
+    SuggestionRepository.markSuggestionReviewed({ suggestionId: NIL_UUID, reviewedByUserId: NIL_UUID }, tx)
+  );
 });
 
 describe("SuggestionRepository — respondToSuggestion", () => {
   suggestionTest("sets adminResponse, status=REVIEWED, reviewedByUserId, reviewedAt", async tx => {
     const { parent, user } = await setupParentForSuggestion(tx, "Respond");
-
     const suggestion = await insertSuggestion(tx, parent.id, { status: "PENDING" });
-
     const result = await SuggestionRepository.respondToSuggestion(
       {
         suggestionId: suggestion.id,
@@ -420,31 +459,18 @@ describe("SuggestionRepository — respondToSuggestion", () => {
       },
       tx
     );
-
     expect(result).toBeDefined();
     expect(result.id).toBe(suggestion.id);
     expect(result.adminResponse).toBe("Thank you for your feedback");
-    expect(result.status).toBe(SuggestionStatus.REVIEWED);
-    expect(result.reviewedByUserId).toBe(user.id);
-    expect(result.reviewedAt).not.toBeNull();
-    expect(result.reviewedAt).toBeInstanceOf(Date);
+    expectReviewedFields(result, user.id);
   });
 
-  suggestionTest("throws for non-existent suggestion ID", async tx => {
-    const { user } = await setupParentForSuggestion(tx, "RespondNF");
-
-    const error = await expectRepoError(() =>
-      SuggestionRepository.respondToSuggestion(
-        {
-          suggestionId: "00000000-0000-0000-0000-000000000000",
-          adminResponse: "Should fail",
-          reviewedByUserId: user.id,
-        },
-        tx
-      )
-    );
-    expect(error.message.length).toBeGreaterThan(0);
-  });
+  expectNonExistentError("throws for non-existent suggestion ID", tx =>
+    SuggestionRepository.respondToSuggestion(
+      { suggestionId: NIL_UUID, adminResponse: "Should fail", reviewedByUserId: NIL_UUID },
+      tx
+    )
+  );
 
   suggestionTest("overwrites existing adminResponse on re-response", async tx => {
     const { parent, user } = await setupParentForSuggestion(tx, "ReRespond");
@@ -472,87 +498,48 @@ describe("SuggestionRepository — respondToSuggestion", () => {
 describe("SuggestionRepository — markAsDuplicate", () => {
   suggestionTest("sets status=DUPLICATE, duplicateOfId, reviewedByUserId, reviewedAt", async tx => {
     const { parent, user } = await setupParentForSuggestion(tx, "MarkDup");
-
-    const original = await insertSuggestion(tx, parent.id, {
-      body: "Original suggestion for dup",
-      status: "REVIEWED",
-    });
-
-    const duplicate = await insertSuggestion(tx, parent.id, {
-      body: "Duplicate to mark",
-      status: "PENDING",
-    });
-
+    const original = await insertSuggestion(tx, parent.id, { body: "Original suggestion for dup", status: "REVIEWED" });
+    const duplicate = await insertSuggestion(tx, parent.id, { body: "Duplicate to mark", status: "PENDING" });
     const result = await SuggestionRepository.markAsDuplicate(
-      {
-        suggestionId: duplicate.id,
-        duplicateOfId: original.id,
-        reviewedByUserId: user.id,
-      },
+      { suggestionId: duplicate.id, duplicateOfId: original.id, reviewedByUserId: user.id },
       tx
     );
-
     expect(result).toBeDefined();
     expect(result.id).toBe(duplicate.id);
-    expect(result.status).toBe(SuggestionStatus.DUPLICATE);
     expect(result.duplicateOfId).toBe(original.id);
-    expect(result.reviewedByUserId).toBe(user.id);
-    expect(result.reviewedAt).not.toBeNull();
-    expect(result.reviewedAt).toBeInstanceOf(Date);
+    expectReviewedFields(result, user.id);
+    expect(result.status).toBe(SuggestionStatus.DUPLICATE);
   });
 
-  suggestionTest("throws for non-existent duplicate suggestion ID", async tx => {
-    const { parent, user } = await setupParentForSuggestion(tx, "MarkDupNF");
-
+  expectNonExistentError("throws for non-existent duplicate suggestion ID", async tx => {
+    const { parent } = await setupParentForSuggestion(tx, "MarkDupNF");
     const original = await insertSuggestion(tx, parent.id, { status: "REVIEWED" });
-
-    const error = await expectRepoError(() =>
-      SuggestionRepository.markAsDuplicate(
-        {
-          suggestionId: "00000000-0000-0000-0000-000000000000",
-          duplicateOfId: original.id,
-          reviewedByUserId: user.id,
-        },
-        tx
-      )
+    return SuggestionRepository.markAsDuplicate(
+      { suggestionId: NIL_UUID, duplicateOfId: original.id, reviewedByUserId: NIL_UUID },
+      tx
     );
-    expect(error.message.length).toBeGreaterThan(0);
   });
 
-  suggestionTest("throws for non-existent original suggestion ID (FK violation)", async tx => {
-    const { parent, user } = await setupParentForSuggestion(tx, "MarkDupOrig");
-
+  expectNonExistentError("throws for non-existent original suggestion ID (FK violation)", async tx => {
+    const { parent } = await setupParentForSuggestion(tx, "MarkDupOrig");
     const duplicate = await insertSuggestion(tx, parent.id, { status: "PENDING" });
-
-    const error = await expectRepoError(() =>
-      SuggestionRepository.markAsDuplicate(
-        {
-          suggestionId: duplicate.id,
-          duplicateOfId: "00000000-0000-0000-0000-000000000000",
-          reviewedByUserId: user.id,
-        },
-        tx
-      )
+    return SuggestionRepository.markAsDuplicate(
+      { suggestionId: duplicate.id, duplicateOfId: NIL_UUID, reviewedByUserId: NIL_UUID },
+      tx
     );
-    expect(error.message.length).toBeGreaterThan(0);
   });
 });
 
 describe("SuggestionRepository — searchSuggestions", () => {
   suggestionTest("returns suggestions matching ILIKE search on body", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "SearchSug");
-
     await insertSuggestion(tx, parent.id, { body: "Add dark mode to the dashboard" });
     await insertSuggestion(tx, parent.id, { body: "Improve scheduling page" });
-
-    const result = await SuggestionRepository.searchSuggestions(
-      "dark mode",
-      "00000000-0000-0000-0000-000000000000",
-      tx
+    await expectQueryBodies(
+      () => SuggestionRepository.searchSuggestions("dark mode", NIL_UUID, tx),
+      ["Add dark mode to the dashboard"],
+      ["Improve scheduling page"]
     );
-
-    expect(result.some(s => s.body === "Add dark mode to the dashboard")).toBeTrue();
-    expect(result.some(s => s.body === "Improve scheduling page")).toBeFalse();
   });
 
   suggestionTest("excludes the suggestion being searched from (self-exclusion)", async tx => {
@@ -569,50 +556,27 @@ describe("SuggestionRepository — searchSuggestions", () => {
 
   suggestionTest("excludes soft-deleted suggestions", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "SearchSoft");
-
-    await insertSuggestion(tx, parent.id, {
-      body: "Deleted dark mode suggestion",
-      deletedAt: new Date(),
-    });
+    await insertSuggestion(tx, parent.id, { body: "Deleted dark mode suggestion", deletedAt: new Date() });
     await insertSuggestion(tx, parent.id, { body: "Active dark mode suggestion" });
-
-    const result = await SuggestionRepository.searchSuggestions(
-      "dark mode",
-      "00000000-0000-0000-0000-000000000000",
-      tx
+    await expectQueryBodies(
+      () => SuggestionRepository.searchSuggestions("dark mode", NIL_UUID, tx),
+      ["Active dark mode suggestion"],
+      ["Deleted dark mode suggestion"]
     );
-
-    expect(result.some(s => s.body === "Deleted dark mode suggestion")).toBeFalse();
-    expect(result.some(s => s.body === "Active dark mode suggestion")).toBeTrue();
   });
 
   suggestionTest("excludes suggestions with DUPLICATE status", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "SearchDupExcl");
-
-    const original = await insertSuggestion(tx, parent.id, {
-      body: "Original for search dup",
-      status: "REVIEWED",
+    await insertOriginalDuplicatePair(tx, parent.id, {
+      originalBody: "Original for search dup",
+      duplicateBody: "Duplicate dark mode search",
     });
-
-    await insertSuggestion(tx, parent.id, {
-      body: "Duplicate dark mode search",
-      status: "DUPLICATE",
-      duplicateOfId: original.id,
-    });
-
-    await insertSuggestion(tx, parent.id, {
-      body: "Active dark mode search",
-      status: "PENDING",
-    });
-
-    const result = await SuggestionRepository.searchSuggestions(
-      "dark mode",
-      "00000000-0000-0000-0000-000000000000",
-      tx
+    await insertSuggestion(tx, parent.id, { body: "Active dark mode search", status: "PENDING" });
+    await expectQueryBodies(
+      () => SuggestionRepository.searchSuggestions("dark mode", NIL_UUID, tx),
+      ["Active dark mode search"],
+      ["Duplicate dark mode search"]
     );
-
-    expect(result.some(s => s.body === "Duplicate dark mode search")).toBeFalse();
-    expect(result.some(s => s.body === "Active dark mode search")).toBeTrue();
   });
 
   suggestionTest("limits results to 10", async tx => {
@@ -622,7 +586,7 @@ describe("SuggestionRepository — searchSuggestions", () => {
       await insertSuggestion(tx, parent.id, { body: `Limit test suggestion ${i} with keyword` });
     }
 
-    const result = await SuggestionRepository.searchSuggestions("keyword", "00000000-0000-0000-0000-000000000000", tx);
+    const result = await SuggestionRepository.searchSuggestions("keyword", NIL_UUID, tx);
 
     expect(result.length).toBeLessThanOrEqual(10);
   });
@@ -630,7 +594,7 @@ describe("SuggestionRepository — searchSuggestions", () => {
   suggestionTest("returns empty array for no matches", async tx => {
     const result = await SuggestionRepository.searchSuggestions(
       `nonexistent-${randomUUID().slice(0, 8)}`,
-      "00000000-0000-0000-0000-000000000000",
+      NIL_UUID,
       tx
     );
     expect(result).toEqual([]);
@@ -706,7 +670,7 @@ describe("SuggestionRepository — IDOR protection", () => {
 
 describe("SuggestionRepository — non-transactional coverage fallback (Story 15)", () => {
   test("supports getSuggestionsByParent without tx", async () => {
-    const result = await SuggestionRepository.getSuggestionsByParent("00000000-0000-0000-0000-000000000000", {
+    const result = await SuggestionRepository.getSuggestionsByParent(NIL_UUID, {
       limit: 1,
       offset: 0,
     });
@@ -720,7 +684,7 @@ describe("SuggestionRepository — non-transactional coverage fallback (Story 15
   });
 
   test("supports getSuggestionById without tx", async () => {
-    const result = await SuggestionRepository.getSuggestionById("00000000-0000-0000-0000-000000000000");
+    const result = await SuggestionRepository.getSuggestionById(NIL_UUID);
     expect(result).toBeNull();
   });
 
@@ -732,71 +696,34 @@ describe("SuggestionRepository — non-transactional coverage fallback (Story 15
   });
 
   test("supports searchSuggestions without tx", async () => {
-    const result = await SuggestionRepository.searchSuggestions(
-      `nonexistent-${randomUUID().slice(0, 8)}`,
-      "00000000-0000-0000-0000-000000000000"
-    );
+    const result = await SuggestionRepository.searchSuggestions(`nonexistent-${randomUUID().slice(0, 8)}`, NIL_UUID);
     expect(result).toEqual([]);
   });
 });
 
 describe("SuggestionRepository — transaction rollback (Story 15)", () => {
   test("rolls back respondToSuggestion on subsequent failure", async () => {
-    let suggestionId: string | undefined;
-    let originalStatus: string | undefined;
-
-    await runInRollback(async tx => {
+    await verifyRollback(async tx => {
       const { parent, user } = await setupParentForSuggestion(tx, "RespondRB");
       const suggestion = await insertSuggestion(tx, parent.id, { status: "PENDING" });
-      suggestionId = suggestion.id;
-      originalStatus = suggestion.status;
-
       await SuggestionRepository.respondToSuggestion(
-        {
-          suggestionId: suggestion.id,
-          adminResponse: "Should be rolled back",
-          reviewedByUserId: user.id,
-        },
+        { suggestionId: suggestion.id, adminResponse: "Should be rolled back", reviewedByUserId: user.id },
         tx
       );
-      throw new Error("Simulated rollback error");
-    }).catch(() => null);
-
-    if (suggestionId && originalStatus) {
-      const [found] = await db.select().from(suggestions).where(eq(suggestions.id, suggestionId)).limit(1);
-      if (found) {
-        expect(found.status).toBe(originalStatus);
-      }
-    }
+      return { targetId: suggestion.id, originalStatus: suggestion.status };
+    });
   });
 
   test("rolls back markAsDuplicate on subsequent failure", async () => {
-    let duplicateId: string | undefined;
-    let originalStatus: string | undefined;
-
-    await runInRollback(async tx => {
+    await verifyRollback(async tx => {
       const { parent, user } = await setupParentForSuggestion(tx, "DupRB");
       const original = await insertSuggestion(tx, parent.id, { status: "REVIEWED" });
       const duplicate = await insertSuggestion(tx, parent.id, { status: "PENDING" });
-      duplicateId = duplicate.id;
-      originalStatus = duplicate.status;
-
       await SuggestionRepository.markAsDuplicate(
-        {
-          suggestionId: duplicate.id,
-          duplicateOfId: original.id,
-          reviewedByUserId: user.id,
-        },
+        { suggestionId: duplicate.id, duplicateOfId: original.id, reviewedByUserId: user.id },
         tx
       );
-      throw new Error("Simulated rollback error");
-    }).catch(() => null);
-
-    if (duplicateId && originalStatus) {
-      const [found] = await db.select().from(suggestions).where(eq(suggestions.id, duplicateId)).limit(1);
-      if (found) {
-        expect(found.status).toBe(originalStatus);
-      }
-    }
+      return { targetId: duplicate.id, originalStatus: duplicate.status };
+    });
   });
 });

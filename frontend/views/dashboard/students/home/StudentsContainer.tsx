@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
+import type { SvgIconComponent } from "@mui/icons-material";
 import {
   BlockOutlined,
   CancelOutlined,
@@ -17,10 +18,13 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { StudentDirectoryQuery } from "@/frontend/graphql/generated/gql/operations";
 import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
 import { useStudentDirectoryStore } from "@/frontend/stores/studentDirectoryStore";
+import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { StudentsViewLabels } from "./StudentsView";
 import { StudentsView } from "./StudentsView";
-import type { StudentAccountStatus, StudentEnrollmentStatus } from "./types";
+import type { StudentAccountStatus, StudentDirectoryRow, StudentEnrollmentStatus } from "./types";
 import { MOBILE_METRIC_KEYS } from "./types";
 
 const MOBILE_METRIC_ICONS = {
@@ -29,6 +33,15 @@ const MOBILE_METRIC_ICONS = {
   on_leave: EventBusyOutlined,
   suspended: BlockOutlined,
 } as const;
+
+const METRIC_DEFINITIONS = [
+  { key: "activated" as const, icon: CheckCircleOutlineOutlined },
+  { key: "deactivated" as const, icon: CancelOutlined },
+  { key: "regular" as const, icon: VerifiedUserOutlined },
+  { key: "on_leave" as const, icon: EventBusyOutlined },
+  { key: "suspended" as const, icon: WarningAmberOutlined },
+  { key: "on_trial" as const, icon: TimerOutlined },
+];
 
 function mapStatus(status: string | null | undefined): StudentAccountStatus {
   if (!status) return "regular";
@@ -60,144 +73,75 @@ function getMetricTranslationKey(key: string): string {
   return key;
 }
 
-export function StudentsContainer() {
-  const t = useTranslations("dashboard.studentDirectory");
-  const router = useRouter();
+type RawStudentRow = NonNullable<StudentDirectoryQuery["studentDirectory"]>[number];
 
-  const searchQuery = useStudentDirectoryStore(state => state.searchQuery);
-  const setSearchQuery = useStudentDirectoryStore(state => state.setSearchQuery);
-
-  const { data } = useQuery(studentDirectoryQueryDocument, {
-    variables: {
-      filterArgs: null,
-      orderBy: null,
-      paginationArgs: null,
-    },
-  });
-
-  const rows = useMemo(() => {
-    if (!data?.studentDirectory) return [];
-    return data.studentDirectory.map(
-      (row: NonNullable<NonNullable<typeof data>["studentDirectory"]>[number], index: number) => {
-        const accountStatus = mapStatus(row.status);
-        return {
-          id: row.id ?? "",
-          index: index + 1,
-          name: row.name ?? "",
-          email: row.email ?? "",
-          avatarUrl: `/demo/avatars/${String((index % 8) + 1).padStart(2, "0")}.png`,
-          accountStatus,
-          enrollmentStatus: getEnrollmentStatus(row.status),
-          hoursPerWeek: row.hoursPerWeek ? Number.parseFloat(row.hoursPerWeek) : 0,
-          classesRemaining: row.classesRemaining ?? 0,
-          classesTotal: row.classesTotal ?? 0,
-          isDeactivated: accountStatus === "deactivated",
-        };
-      }
-    );
-  }, [data]);
-
-  const totalStudents = rows.length;
-
-  const counts = useMemo(() => {
-    const res: Record<StudentAccountStatus, number> = {
-      activated: 0,
-      deactivated: 0,
-      regular: 0,
-      on_leave: 0,
-      suspended: 0,
-      on_trial: 0,
-    };
-    for (const r of rows) {
-      res[r.accountStatus] = (res[r.accountStatus] || 0) + 1;
-    }
-    return res;
-  }, [rows]);
-
-  const metrics = [
-    {
-      key: "activated",
-      count: counts.activated,
-      labelKey: "dashboard.studentDirectory.metrics.activated",
-      icon: CheckCircleOutlineOutlined,
-    },
-    {
-      key: "deactivated",
-      count: counts.deactivated,
-      labelKey: "dashboard.studentDirectory.metrics.deactivated",
-      icon: CancelOutlined,
-    },
-    {
-      key: "regular",
-      count: counts.regular,
-      labelKey: "dashboard.studentDirectory.metrics.regular",
-      icon: VerifiedUserOutlined,
-    },
-    {
-      key: "on_leave",
-      count: counts.on_leave,
-      labelKey: "dashboard.studentDirectory.metrics.onLeave",
-      icon: EventBusyOutlined,
-    },
-    {
-      key: "suspended",
-      count: counts.suspended,
-      labelKey: "dashboard.studentDirectory.metrics.suspended",
-      icon: WarningAmberOutlined,
-    },
-    {
-      key: "on_trial",
-      count: counts.on_trial,
-      labelKey: "dashboard.studentDirectory.metrics.onTrial",
-      icon: TimerOutlined,
-    },
-  ];
-
-  const statusLabels: Record<StudentAccountStatus, string> = {
-    activated: t("status.activated"),
-    deactivated: t("status.deactivated"),
-    regular: t("status.regular"),
-    on_leave: t("status.onLeave"),
-    suspended: t("status.suspended"),
-    on_trial: t("status.onTrial"),
-  };
-
-  const enrollmentLabels: Record<StudentEnrollmentStatus, string> = {
-    regular: t("enrollment.regular"),
-    prospect: t("enrollment.prospect"),
-    withdrawn: t("enrollment.withdrawn"),
-  };
-
-  const filteredRows = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return rows;
-    return rows.filter(
-      (row: (typeof rows)[number]) => row.name.toLowerCase().includes(query) || row.email.toLowerCase().includes(query)
-    );
-  }, [rows, searchQuery]);
-
-  const viewMetrics = metrics.map(metric => ({
-    key: metric.key,
-    count: metric.count,
-    labelKey: metric.key,
-    label: t(`metrics.${getMetricTranslationKey(metric.key)}`),
-    icon: metric.icon,
-    variant: metric.key === "suspended" ? ("error" as const) : undefined,
-  }));
-
-  const mobileMetrics = MOBILE_METRIC_KEYS.map(key => {
-    const metric = metrics.find(m => m.key === key);
+function buildStudentRows(data: StudentDirectoryQuery | undefined): StudentDirectoryRow[] {
+  if (!data?.studentDirectory) return [];
+  return data.studentDirectory.map((row: RawStudentRow, index: number) => {
+    const accountStatus = mapStatus(row.status);
     return {
-      key,
-      count: metric?.count ?? 0,
-      labelKey: key,
-      label: t(`metrics.${getMetricTranslationKey(key)}`),
-      icon: MOBILE_METRIC_ICONS[key],
-      variant: key === "suspended" ? ("error" as const) : undefined,
+      id: row.id ?? "",
+      index: index + 1,
+      name: row.name ?? "",
+      email: row.email ?? "",
+      avatarUrl: `/demo/avatars/${String((index % 8) + 1).padStart(2, "0")}.png`,
+      accountStatus,
+      enrollmentStatus: getEnrollmentStatus(row.status),
+      hoursPerWeek: row.hoursPerWeek ? Number.parseFloat(row.hoursPerWeek) : 0,
+      classesRemaining: row.classesRemaining ?? 0,
+      classesTotal: row.classesTotal ?? 0,
+      isDeactivated: accountStatus === "deactivated",
     };
   });
+}
 
-  const labels = {
+function buildStatusCounts(rows: StudentDirectoryRow[]): Record<StudentAccountStatus, number> {
+  const res: Record<StudentAccountStatus, number> = {
+    activated: 0,
+    deactivated: 0,
+    regular: 0,
+    on_leave: 0,
+    suspended: 0,
+    on_trial: 0,
+  };
+  for (const r of rows) {
+    res[r.accountStatus] = (res[r.accountStatus] || 0) + 1;
+  }
+  return res;
+}
+
+function toMetricItem(
+  key: string,
+  count: number,
+  icon: SvgIconComponent,
+  t: ReturnType<typeof useTranslations>
+): MetricItem {
+  return {
+    key,
+    count,
+    labelKey: key,
+    label: t(`metrics.${getMetricTranslationKey(key)}`),
+    icon,
+    variant: key === "suspended" ? ("error" as const) : undefined,
+  };
+}
+
+function buildViewMetrics(
+  counts: Record<StudentAccountStatus, number>,
+  t: ReturnType<typeof useTranslations>
+): MetricItem[] {
+  return METRIC_DEFINITIONS.map(({ key, icon }) => toMetricItem(key, counts[key], icon, t));
+}
+
+function buildMobileMetrics(
+  counts: Record<StudentAccountStatus, number>,
+  t: ReturnType<typeof useTranslations>
+): MetricItem[] {
+  return MOBILE_METRIC_KEYS.map(key => toMetricItem(key, counts[key], MOBILE_METRIC_ICONS[key], t));
+}
+
+function buildLabels(t: ReturnType<typeof useTranslations>): StudentsViewLabels {
+  return {
     pageTitle: t("pageTitle"),
     pageSubtitle: t("pageSubtitle"),
     mobileTitle: t("mobileTitle"),
@@ -220,9 +164,45 @@ export function StudentsContainer() {
     noEntries: t("noEntries"),
     weeklyHours: t("card.weeklyHours"),
     enrollmentStatus: t("card.enrollmentStatus"),
-    statusLabels,
-    enrollmentLabels,
+    statusLabels: {
+      activated: t("status.activated"),
+      deactivated: t("status.deactivated"),
+      regular: t("status.regular"),
+      on_leave: t("status.onLeave"),
+      suspended: t("status.suspended"),
+      on_trial: t("status.onTrial"),
+    },
+    enrollmentLabels: {
+      regular: t("enrollment.regular"),
+      prospect: t("enrollment.prospect"),
+      withdrawn: t("enrollment.withdrawn"),
+    },
   };
+}
+
+function buildFilteredRows(rows: StudentDirectoryRow[], searchQuery: string): StudentDirectoryRow[] {
+  const query = searchQuery.trim().toLowerCase();
+  if (!query) return rows;
+  return rows.filter(row => row.name.toLowerCase().includes(query) || row.email.toLowerCase().includes(query));
+}
+
+export function StudentsContainer() {
+  const t = useTranslations("dashboard.studentDirectory");
+  const router = useRouter();
+
+  const searchQuery = useStudentDirectoryStore(state => state.searchQuery);
+  const setSearchQuery = useStudentDirectoryStore(state => state.setSearchQuery);
+
+  const { data } = useQuery(studentDirectoryQueryDocument, {
+    variables: { filterArgs: null, orderBy: null, paginationArgs: null },
+  });
+
+  const rows = useMemo(() => buildStudentRows(data), [data]);
+  const counts = useMemo(() => buildStatusCounts(rows), [rows]);
+  const filteredRows = useMemo(() => buildFilteredRows(rows, searchQuery), [rows, searchQuery]);
+  const viewMetrics = useMemo(() => buildViewMetrics(counts, t), [counts, t]);
+  const mobileMetrics = useMemo(() => buildMobileMetrics(counts, t), [counts, t]);
+  const labels = useMemo(() => buildLabels(t), [t]);
 
   const handleViewProfile = (id: string) => {
     router.push(`/students/${id}`);
@@ -232,9 +212,7 @@ export function StudentsContainer() {
     router.push(`/students/${id}/history`);
   };
 
-  const handleAddStudent = () => {
-    // Navigate to student onboarding when available
-  };
+  const handleAddStudent = () => {};
 
   return (
     <RequirePermission permissions={[AppPermission.StudentsList]}>
@@ -242,7 +220,7 @@ export function StudentsContainer() {
         metrics={viewMetrics}
         mobileMetrics={mobileMetrics}
         rows={filteredRows}
-        totalStudents={totalStudents}
+        totalStudents={rows.length}
         searchQuery={searchQuery}
         labels={labels}
         onSearchChange={setSearchQuery}

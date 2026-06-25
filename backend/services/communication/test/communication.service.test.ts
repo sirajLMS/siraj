@@ -4,10 +4,33 @@ import { emailChannel } from "@/backend/services/communication/channels/email";
 import { pushChannel } from "@/backend/services/communication/channels/push";
 import { smsChannel } from "@/backend/services/communication/channels/sms";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
-import type { CommunicationPayload } from "@/backend/types";
+import type { ChannelDispatchResult, CommunicationPayload } from "@/backend/types";
 import { NotificationEventType } from "@/shared/lib/enum";
 
 const MOCK_USER_ID = "user-uuid-0001";
+
+function createTestPayload(overrides?: Partial<CommunicationPayload>): CommunicationPayload {
+  return {
+    userId: MOCK_USER_ID,
+    channel: "on_app",
+    eventType: NotificationEventType.COMPLAINT_RESPONSE,
+    title: "Test",
+    body: "Test body",
+    ...overrides,
+  };
+}
+
+function expectDispatchSuccess(result: ChannelDispatchResult, channel: CommunicationPayload["channel"]) {
+  expect(result.channel).toBe(channel);
+  expect(result.success).toBe(true);
+}
+
+function expectDispatchFailure(result: ChannelDispatchResult, errorContains?: string) {
+  expect(result.success).toBe(false);
+  if (errorContains) {
+    expect(result.error).toContain(errorContains);
+  }
+}
 
 describe("CommunicationService", () => {
   let onAppSendSpy: ReturnType<typeof spyOn>;
@@ -31,64 +54,38 @@ describe("CommunicationService", () => {
 
   describe("dispatch — routes to correct channel", () => {
     test("routes on_app payload to OnAppChannel", async () => {
-      const result = await CommunicationService.dispatch({
-        userId: MOCK_USER_ID,
-        channel: "on_app",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        title: "Test",
-        body: "Test body",
-      });
+      const result = await CommunicationService.dispatch(createTestPayload());
 
-      expect(result.channel).toBe("on_app");
-      expect(result.success).toBe(true);
+      expectDispatchSuccess(result, "on_app");
       expect(onAppSendSpy).toHaveBeenCalledTimes(1);
     });
 
     test("routes email payload to emailChannel", async () => {
       emailSendSpy.mockResolvedValue({ success: true, providerMessageId: "email-001" });
 
-      const result = await CommunicationService.dispatch({
-        userId: MOCK_USER_ID,
-        channel: "email",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        title: "Test",
-        body: "Test body",
-        metadata: { to: "user@test.com" },
-      });
+      const result = await CommunicationService.dispatch(
+        createTestPayload({ channel: "email", metadata: { to: "user@test.com" } })
+      );
 
-      expect(result.channel).toBe("email");
-      expect(result.success).toBe(true);
+      expectDispatchSuccess(result, "email");
       expect(result.providerMessageId).toBe("email-001");
     });
 
     test("routes sms payload to smsChannel", async () => {
       smsSendSpy.mockResolvedValue({ success: true, providerMessageId: "sms-001" });
 
-      const result = await CommunicationService.dispatch({
-        userId: MOCK_USER_ID,
-        channel: "sms",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        title: "Test",
-        body: "Test body",
-        metadata: { to: "+1234567890" },
-      });
+      const result = await CommunicationService.dispatch(
+        createTestPayload({ channel: "sms", metadata: { to: "+1234567890" } })
+      );
 
-      expect(result.channel).toBe("sms");
-      expect(result.success).toBe(true);
+      expectDispatchSuccess(result, "sms");
       expect(result.providerMessageId).toBe("sms-001");
     });
 
     test("routes push payload to pushChannel", async () => {
-      const result = await CommunicationService.dispatch({
-        userId: MOCK_USER_ID,
-        channel: "push",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        title: "Test",
-        body: "Test body",
-      });
+      const result = await CommunicationService.dispatch(createTestPayload({ channel: "push" }));
 
-      expect(result.channel).toBe("push");
-      expect(result.success).toBe(true);
+      expectDispatchSuccess(result, "push");
     });
   });
 
@@ -97,21 +94,8 @@ describe("CommunicationService", () => {
       emailSendSpy.mockResolvedValue({ success: true, providerMessageId: "email-multi-001" });
 
       const payloads: CommunicationPayload[] = [
-        {
-          userId: MOCK_USER_ID,
-          channel: "on_app",
-          eventType: NotificationEventType.COMPLAINT_RESPONSE,
-          title: "Response",
-          body: "Body",
-        },
-        {
-          userId: MOCK_USER_ID,
-          channel: "email",
-          eventType: NotificationEventType.COMPLAINT_RESPONSE,
-          title: "Response",
-          body: "Body",
-          metadata: { to: "user@test.com" },
-        },
+        createTestPayload({ title: "Response", body: "Body" }),
+        createTestPayload({ channel: "email", title: "Response", body: "Body", metadata: { to: "user@test.com" } }),
       ];
 
       const results = await CommunicationService.dispatchMulti(payloads);
@@ -128,29 +112,15 @@ describe("CommunicationService", () => {
       emailSendSpy.mockResolvedValue({ success: false, error: "Email provider down" });
 
       const payloads: CommunicationPayload[] = [
-        {
-          userId: MOCK_USER_ID,
-          channel: "on_app",
-          eventType: NotificationEventType.COMPLAINT_RESPONSE,
-          title: "Test",
-          body: "Body",
-        },
-        {
-          userId: MOCK_USER_ID,
-          channel: "email",
-          eventType: NotificationEventType.COMPLAINT_RESPONSE,
-          title: "Test",
-          body: "Body",
-          metadata: { to: "user@test.com" },
-        },
+        createTestPayload({ body: "Body" }),
+        createTestPayload({ channel: "email", body: "Body", metadata: { to: "user@test.com" } }),
       ];
 
       const results = await CommunicationService.dispatchMulti(payloads);
 
       expect(results.length).toBe(2);
       expect(results[0].success).toBe(true);
-      expect(results[1].success).toBe(false);
-      expect(results[1].error).toContain("provider down");
+      expectDispatchFailure(results[1], "provider down");
     });
   });
 
@@ -160,28 +130,15 @@ describe("CommunicationService", () => {
       smsSendSpy.mockResolvedValue({ success: false, error: "SMS service unavailable" });
 
       const payloads: CommunicationPayload[] = [
-        {
-          userId: MOCK_USER_ID,
-          channel: "on_app",
-          eventType: NotificationEventType.COMPLAINT_RESPONSE,
-          title: "Test",
-          body: "Body",
-        },
-        {
-          userId: MOCK_USER_ID,
-          channel: "sms",
-          eventType: NotificationEventType.COMPLAINT_RESPONSE,
-          title: "Test",
-          body: "Body",
-          metadata: { to: "+1234567890" },
-        },
+        createTestPayload({ body: "Body" }),
+        createTestPayload({ channel: "sms", body: "Body", metadata: { to: "+1234567890" } }),
       ];
 
       const results = await CommunicationService.dispatchMulti(payloads);
 
       expect(results.length).toBe(2);
-      expect(results[0].success).toBe(false);
-      expect(results[1].success).toBe(false);
+      expectDispatchFailure(results[0]);
+      expectDispatchFailure(results[1]);
     });
   });
 
@@ -199,14 +156,9 @@ describe("CommunicationService", () => {
       const channels: Array<CommunicationPayload["channel"]> = ["on_app", "email", "sms", "push"];
 
       for (const channel of channels) {
-        const result = await CommunicationService.dispatch({
-          userId: MOCK_USER_ID,
-          channel,
-          eventType: NotificationEventType.COMPLAINT_RESPONSE,
-          title: "Test",
-          body: "Body",
-          metadata: { to: "test@test.com" },
-        });
+        const result = await CommunicationService.dispatch(
+          createTestPayload({ channel, body: "Body", metadata: { to: "test@test.com" } })
+        );
 
         expect(result.channel).toBe(channel);
       }

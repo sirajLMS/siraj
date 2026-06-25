@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationRepository } from "@/backend/db/repo";
+import type { PushSendResult } from "@/backend/services/communication/channels/push";
 import { pushChannel, resetPushChannel } from "@/backend/services/communication/channels/push";
 import type { NotificationDeliverySelectType, UserDeviceTokenSelectType } from "@/backend/types";
 import {
@@ -10,6 +11,29 @@ import {
 } from "@/shared/lib/enum";
 
 const MOCK_USER_ID = "user-uuid-0001";
+
+const MOCK_SEND_PAYLOAD = {
+  userId: MOCK_USER_ID,
+  title: "Test Title",
+  body: "Test body",
+  eventType: NotificationEventType.COMPLAINT_RESPONSE,
+};
+
+async function runSendTest(mockResult: PushSendResult): Promise<PushSendResult> {
+  const sendSpy = spyOn(pushChannel, "send").mockResolvedValue(mockResult);
+  const result = await pushChannel.send(MOCK_SEND_PAYLOAD);
+  expect(sendSpy).toHaveBeenCalledTimes(1);
+  sendSpy.mockRestore();
+  return result;
+}
+
+async function assertSendSuccess(mockResult: PushSendResult): Promise<PushSendResult> {
+  const result = await runSendTest(mockResult);
+  expect(result.success).toBe(true);
+  expect(result.successCount).toBe(mockResult.successCount);
+  expect(result.failureCount).toBe(mockResult.failureCount);
+  return result;
+}
 
 const mockDelivery: NotificationDeliverySelectType = {
   id: "delivery-uuid-0001",
@@ -74,91 +98,47 @@ describe("Push Channel", () => {
 
   describe("send — multicast success", () => {
     test("sends push via FCM multicast and returns success", async () => {
-      const sendSpy = spyOn(pushChannel, "send").mockResolvedValue({
+      await assertSendSuccess({
         success: true,
         successCount: 2,
         failureCount: 0,
       });
-
-      const result = await pushChannel.send({
-        userId: MOCK_USER_ID,
-        title: "Test Title",
-        body: "Test body",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-      });
-
-      expect(result.success).toBe(true);
-      expect(result.successCount).toBe(2);
-      expect(result.failureCount).toBe(0);
-      expect(sendSpy).toHaveBeenCalledTimes(1);
-      sendSpy.mockRestore();
     });
   });
 
   describe("send — partial failure", () => {
     test("returns success with partial failure info", async () => {
-      const sendSpy = spyOn(pushChannel, "send").mockResolvedValue({
+      const result = await runSendTest({
         success: true,
         successCount: 1,
         failureCount: 1,
         errors: ["1 token failed"],
       });
 
-      const result = await pushChannel.send({
-        userId: MOCK_USER_ID,
-        title: "Test Title",
-        body: "Test body",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-      });
-
       expect(result.successCount + result.failureCount).toBe(2);
-      expect(sendSpy).toHaveBeenCalledTimes(1);
-      sendSpy.mockRestore();
     });
   });
 
   describe("token deactivation", () => {
     test("deactivates invalid tokens on FCM invalid token error", async () => {
-      const sendSpy = spyOn(pushChannel, "send").mockResolvedValue({
+      const result = await runSendTest({
         success: false,
         successCount: 0,
         failureCount: 1,
         errors: ["FCM error: token not registered"],
       });
 
-      const result = await pushChannel.send({
-        userId: MOCK_USER_ID,
-        title: "Test Title",
-        body: "Test body",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-      });
-
       expect(result).toBeDefined();
-      expect(sendSpy).toHaveBeenCalledTimes(1);
-      sendSpy.mockRestore();
     });
   });
 
   describe("no tokens", () => {
     test("returns success with zero counts when no tokens exist", async () => {
-      const sendSpy = spyOn(pushChannel, "send").mockResolvedValue({
+      await assertSendSuccess({
         success: true,
         successCount: 0,
         failureCount: 0,
       });
-
-      const result = await pushChannel.send({
-        userId: MOCK_USER_ID,
-        title: "Test Title",
-        body: "Test body",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-      });
-
-      expect(result.success).toBe(true);
-      expect(result.successCount).toBe(0);
-      expect(result.failureCount).toBe(0);
-      expect(sendSpy).toHaveBeenCalledTimes(1);
-      sendSpy.mockRestore();
     });
   });
 

@@ -7,6 +7,19 @@ import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType 
 const MOCK_USER_ID = "user-uuid-0001";
 const MOCK_DELIVERY_ID = "delivery-uuid-0001";
 
+function sendParams() {
+  return {
+    to: "+1234567890",
+    body: "Test SMS body",
+    eventType: NotificationEventType.COMPLAINT_RESPONSE,
+    userId: MOCK_USER_ID,
+  } as const;
+}
+
+function mockSend(result: { success: boolean; providerMessageId?: string; error?: string }) {
+  return spyOn(smsChannel, "send").mockResolvedValue(result);
+}
+
 const mockDelivery: NotificationDeliverySelectType = {
   id: MOCK_DELIVERY_ID,
   userId: MOCK_USER_ID,
@@ -53,17 +66,9 @@ describe("SMS Channel", () => {
 
   describe("send — success", () => {
     test("sends SMS via Twilio and returns success", async () => {
-      const sendSpy = spyOn(smsChannel, "send").mockResolvedValue({
-        success: true,
-        providerMessageId: "twilio-sid-001",
-      });
+      const sendSpy = mockSend({ success: true, providerMessageId: "twilio-sid-001" });
 
-      const result = await smsChannel.send({
-        to: "+1234567890",
-        body: "Test SMS body",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        userId: MOCK_USER_ID,
-      });
+      const result = await smsChannel.send(sendParams());
 
       expect(result.success).toBe(true);
       expect(result.providerMessageId).toBe("twilio-sid-001");
@@ -74,17 +79,9 @@ describe("SMS Channel", () => {
 
   describe("send — failure", () => {
     test("returns failure when Twilio API errors", async () => {
-      const sendSpy = spyOn(smsChannel, "send").mockResolvedValue({
-        success: false,
-        error: "Twilio API error: invalid phone number",
-      });
+      const sendSpy = mockSend({ success: false, error: "Twilio API error: invalid phone number" });
 
-      const result = await smsChannel.send({
-        to: "+1234567890",
-        body: "Test SMS body",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        userId: MOCK_USER_ID,
-      });
+      const result = await smsChannel.send(sendParams());
 
       expect(result.success).toBe(false);
       expect(result.error).toContain("invalid");
@@ -97,12 +94,7 @@ describe("SMS Channel", () => {
     test("returns failure when rate limit exceeded (3/hour)", async () => {
       getSmsCountSpy.mockResolvedValue(3);
 
-      const result = await smsChannel.send({
-        to: "+1234567890",
-        body: "Test SMS body",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        userId: MOCK_USER_ID,
-      });
+      const result = await smsChannel.send(sendParams());
 
       expect(result.success).toBe(false);
       expect(result.rateLimited).toBe(true);
@@ -112,17 +104,9 @@ describe("SMS Channel", () => {
 
     test("allows SMS when under rate limit", async () => {
       getSmsCountSpy.mockResolvedValue(2);
-      const sendSpy = spyOn(smsChannel, "send").mockResolvedValue({
-        success: true,
-        providerMessageId: "twilio-sid-002",
-      });
+      const sendSpy = mockSend({ success: true, providerMessageId: "twilio-sid-002" });
 
-      const result = await smsChannel.send({
-        to: "+1234567890",
-        body: "Test SMS body",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        userId: MOCK_USER_ID,
-      });
+      const result = await smsChannel.send(sendParams());
 
       expect(result.success).toBe(true);
       expect(sendSpy).toHaveBeenCalledTimes(1);

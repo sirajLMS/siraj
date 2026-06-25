@@ -7,6 +7,18 @@ import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType 
 const MOCK_USER_ID = "user-uuid-0001";
 const MOCK_DELIVERY_ID = "delivery-uuid-0001";
 
+const SEND_PAYLOAD = {
+  to: "user@test.com",
+  subject: "Test Subject",
+  html: "<p>Test body</p>",
+  eventType: NotificationEventType.COMPLAINT_RESPONSE,
+  userId: MOCK_USER_ID,
+};
+
+function mockSend(resolvedValue: { success: boolean; providerMessageId?: string; error?: string }) {
+  return spyOn(emailChannel, "send").mockResolvedValue(resolvedValue);
+}
+
 const mockDelivery: NotificationDeliverySelectType = {
   id: MOCK_DELIVERY_ID,
   userId: MOCK_USER_ID,
@@ -48,19 +60,8 @@ describe("Email Channel", () => {
 
   describe("send — success", () => {
     test("sends email via Resend and returns success", async () => {
-      const sendSpy = spyOn(emailChannel, "send").mockResolvedValue({
-        success: true,
-        providerMessageId: "resend-msg-001",
-      });
-
-      const result = await emailChannel.send({
-        to: "user@test.com",
-        subject: "Test Subject",
-        html: "<p>Test body</p>",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        userId: MOCK_USER_ID,
-      });
-
+      const sendSpy = mockSend({ success: true, providerMessageId: "resend-msg-001" });
+      const result = await emailChannel.send(SEND_PAYLOAD);
       expect(result.success).toBe(true);
       expect(result.providerMessageId).toBe("resend-msg-001");
       expect(sendSpy).toHaveBeenCalledTimes(1);
@@ -70,19 +71,8 @@ describe("Email Channel", () => {
 
   describe("send — failure", () => {
     test("returns failure when Resend API errors", async () => {
-      const sendSpy = spyOn(emailChannel, "send").mockResolvedValue({
-        success: false,
-        error: "Resend API error: invalid API key",
-      });
-
-      const result = await emailChannel.send({
-        to: "user@test.com",
-        subject: "Test Subject",
-        html: "<p>Test body</p>",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        userId: MOCK_USER_ID,
-      });
-
+      const sendSpy = mockSend({ success: false, error: "Resend API error: invalid API key" });
+      const result = await emailChannel.send(SEND_PAYLOAD);
       expect(result.success).toBe(false);
       expect(result.error).toContain("invalid");
       expect(sendSpy).toHaveBeenCalledTimes(1);
@@ -92,27 +82,10 @@ describe("Email Channel", () => {
 
   describe("delivery tracking", () => {
     test("creates delivery record before sending", async () => {
-      const sendSpy = spyOn(emailChannel, "send").mockResolvedValue({
-        success: true,
-        providerMessageId: "resend-msg-002",
-      });
-
-      await emailChannel.send({
-        to: "user@test.com",
-        subject: "Test Subject",
-        html: "<p>Test body</p>",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        userId: MOCK_USER_ID,
-      });
-
+      const sendSpy = mockSend({ success: true, providerMessageId: "resend-msg-002" });
+      await emailChannel.send(SEND_PAYLOAD);
       expect(sendSpy).toHaveBeenCalledTimes(1);
-      expect(sendSpy).toHaveBeenCalledWith({
-        to: "user@test.com",
-        subject: "Test Subject",
-        html: "<p>Test body</p>",
-        eventType: "COMPLAINT_RESPONSE",
-        userId: MOCK_USER_ID,
-      });
+      expect(sendSpy).toHaveBeenCalledWith(SEND_PAYLOAD);
       sendSpy.mockRestore();
     });
   });
@@ -124,25 +97,15 @@ describe("Email Channel", () => {
     });
 
     test("validateConfig returns false when RESEND_API_KEY is missing", async () => {
-      // Get the channel instance first with valid env vars
       const channel = await import("@/backend/services/communication/channels/email").then(m => m.getEmailChannel());
-
-      // Now delete the env var
       delete process.env.RESEND_API_KEY;
-
-      // Call validateConfig on the existing instance
       const result = await channel.validateConfig();
       expect(result).toBe(false);
     });
 
     test("validateConfig returns false when RESEND_FROM_EMAIL is missing", async () => {
-      // Get the channel instance first with valid env vars
       const channel = await import("@/backend/services/communication/channels/email").then(m => m.getEmailChannel());
-
-      // Now delete the env var
       delete process.env.RESEND_FROM_EMAIL;
-
-      // Call validateConfig on the existing instance
       const result = await channel.validateConfig();
       expect(result).toBe(false);
     });

@@ -39,21 +39,8 @@ export class TwilioSmsAdapter implements ISmsChannel {
   }
 
   async send(payload: SmsPayload, _locale?: string): Promise<SmsSendResult> {
-    const smsCount = await NotificationRepository.getSmsCountInLastHour(payload.userId);
-
-    if (smsCount >= this.rateLimitConfig.maxSmsPerHour) {
-      logger.warn("SMS rate limit exceeded for user", {
-        userId: payload.userId,
-        smsCount,
-        maxPerHour: this.rateLimitConfig.maxSmsPerHour,
-      });
-
-      return {
-        success: false,
-        rateLimited: true,
-        error: `SMS rate limit exceeded: ${smsCount}/${this.rateLimitConfig.maxSmsPerHour} in the last hour`,
-      };
-    }
+    const rateLimitResult = await this.checkRateLimit(payload.userId);
+    if (rateLimitResult) return rateLimitResult;
 
     const delivery = await NotificationRepository.createDelivery({
       userId: payload.userId,
@@ -63,6 +50,28 @@ export class TwilioSmsAdapter implements ISmsChannel {
       body: payload.to,
     });
 
+    return this.sendTwilioMessage(payload, delivery.id);
+  }
+
+  private async checkRateLimit(userId: string): Promise<SmsSendResult | null> {
+    const smsCount = await NotificationRepository.getSmsCountInLastHour(userId);
+
+    if (smsCount < this.rateLimitConfig.maxSmsPerHour) return null;
+
+    logger.warn("SMS rate limit exceeded for user", {
+      userId,
+      smsCount,
+      maxPerHour: this.rateLimitConfig.maxSmsPerHour,
+    });
+
+    return {
+      success: false,
+      rateLimited: true,
+      error: `SMS rate limit exceeded: ${smsCount}/${this.rateLimitConfig.maxSmsPerHour} in the last hour`,
+    };
+  }
+
+  private async sendTwilioMessage(payload: SmsPayload, deliveryId: string): Promise<SmsSendResult> {
     try {
       const message = await this.context.client.messages.create({
         to: payload.to,
@@ -71,34 +80,17 @@ export class TwilioSmsAdapter implements ISmsChannel {
       });
 
       if (message.errorCode) {
-        logger.error("Twilio API returned an error", {
-          deliveryId: delivery.id,
-          errorCode: message.errorCode,
-          errorMessage: message.errorMessage,
-        });
-
-        await NotificationRepository.updateDeliveryStatus({
-          deliveryId: delivery.id,
-          status: NotificationDeliveryStatus.FAILED,
-          providerMessageId: message.sid,
-          failureReason: message.errorMessage ?? `Twilio error code: ${message.errorCode}`,
-        });
-
-        return {
-          success: false,
-          providerMessageId: message.sid,
-          error: message.errorMessage ?? `Twilio error code: ${message.errorCode}`,
-        };
+        return this.handleTwilioApiError(deliveryId, message);
       }
 
       await NotificationRepository.updateDeliveryStatus({
-        deliveryId: delivery.id,
+        deliveryId,
         status: NotificationDeliveryStatus.SENT,
         providerMessageId: message.sid,
       });
 
       logger.info("SMS sent successfully via Twilio", {
-        deliveryId: delivery.id,
+        deliveryId,
         providerMessageId: message.sid,
       });
 
@@ -110,12 +102,12 @@ export class TwilioSmsAdapter implements ISmsChannel {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
       logger.error("Failed to send SMS via Twilio", {
-        deliveryId: delivery.id,
+        deliveryId,
         error: errorMessage,
       });
 
       await NotificationRepository.updateDeliveryStatus({
-        deliveryId: delivery.id,
+        deliveryId,
         status: NotificationDeliveryStatus.FAILED,
         failureReason: errorMessage,
       });
@@ -125,6 +117,32 @@ export class TwilioSmsAdapter implements ISmsChannel {
         error: errorMessage,
       };
     }
+  }
+
+  private async handleTwilioApiError(
+    deliveryId: string,
+    message: { sid: string; errorCode: number | null; errorMessage: string | null }
+  ): Promise<SmsSendResult> {
+    logger.error("Twilio API returned an error", {
+      deliveryId,
+      errorCode: message.errorCode,
+      errorMessage: message.errorMessage,
+    });
+
+    const failureReason = message.errorMessage ?? `Twilio error code: ${message.errorCode}`;
+
+    await NotificationRepository.updateDeliveryStatus({
+      deliveryId,
+      status: NotificationDeliveryStatus.FAILED,
+      providerMessageId: message.sid,
+      failureReason,
+    });
+
+    return {
+      success: false,
+      providerMessageId: message.sid,
+      error: failureReason,
+    };
   }
 
   async validateConfig(): Promise<boolean> {

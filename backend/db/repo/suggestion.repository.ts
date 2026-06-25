@@ -199,27 +199,22 @@ export namespace SuggestionRepository {
     return (results[0] as SuggestionDetailRow) ?? null;
   };
 
-  export const markSuggestionReviewed = async (
-    input: { suggestionId: string; reviewedByUserId: string },
+  const updateSuggestionStatus = async (
+    suggestionId: string,
+    fields: Partial<typeof suggestions.$inferInsert>,
     tx?: DBTransaction,
     locale?: string
   ) => {
     const runner = async (t: DBTransaction) => {
-      const now = new Date();
-
       const [updated] = await t
         .update(suggestions)
-        .set({
-          status: SuggestionStatus.REVIEWED,
-          reviewedByUserId: input.reviewedByUserId,
-          reviewedAt: now,
-        })
-        .where(and(eq(suggestions.id, input.suggestionId), isNull(suggestions.deletedAt)))
+        .set({ ...fields, reviewedAt: new Date() })
+        .where(and(eq(suggestions.id, suggestionId), isNull(suggestions.deletedAt)))
         .returning();
 
       if (!updated) {
         const t18n = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t18n("suggestion.notFound", { id: input.suggestionId }));
+        throw new Error(t18n("suggestion.notFound", { id: suggestionId }));
       }
 
       return updated;
@@ -227,66 +222,50 @@ export namespace SuggestionRepository {
 
     return tx ? runner(tx) : db.transaction(runner);
   };
+
+  export const markSuggestionReviewed = async (
+    input: { suggestionId: string; reviewedByUserId: string },
+    tx?: DBTransaction,
+    locale?: string
+  ) =>
+    updateSuggestionStatus(
+      input.suggestionId,
+      { status: SuggestionStatus.REVIEWED, reviewedByUserId: input.reviewedByUserId },
+      tx,
+      locale
+    );
 
   export const respondToSuggestion = async (
     input: { suggestionId: string; adminResponse: string; reviewedByUserId: string },
     tx?: DBTransaction,
     locale?: string
-  ) => {
-    const runner = async (t: DBTransaction) => {
-      const now = new Date();
-
-      const [updated] = await t
-        .update(suggestions)
-        .set({
-          status: SuggestionStatus.REVIEWED,
-          adminResponse: input.adminResponse,
-          reviewedByUserId: input.reviewedByUserId,
-          reviewedAt: now,
-        })
-        .where(and(eq(suggestions.id, input.suggestionId), isNull(suggestions.deletedAt)))
-        .returning();
-
-      if (!updated) {
-        const t18n = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t18n("suggestion.notFound", { id: input.suggestionId }));
-      }
-
-      return updated;
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
-  };
+  ) =>
+    updateSuggestionStatus(
+      input.suggestionId,
+      {
+        status: SuggestionStatus.REVIEWED,
+        adminResponse: input.adminResponse,
+        reviewedByUserId: input.reviewedByUserId,
+      },
+      tx,
+      locale
+    );
 
   export const markAsDuplicate = async (
     input: { suggestionId: string; duplicateOfId: string; reviewedByUserId: string },
     tx?: DBTransaction,
     locale?: string
-  ) => {
-    const runner = async (t: DBTransaction) => {
-      const now = new Date();
-
-      const [updated] = await t
-        .update(suggestions)
-        .set({
-          status: SuggestionStatus.DUPLICATE,
-          duplicateOfId: input.duplicateOfId,
-          reviewedByUserId: input.reviewedByUserId,
-          reviewedAt: now,
-        })
-        .where(and(eq(suggestions.id, input.suggestionId), isNull(suggestions.deletedAt)))
-        .returning();
-
-      if (!updated) {
-        const t18n = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t18n("suggestion.notFound", { id: input.suggestionId }));
-      }
-
-      return updated;
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
-  };
+  ) =>
+    updateSuggestionStatus(
+      input.suggestionId,
+      {
+        status: SuggestionStatus.DUPLICATE,
+        duplicateOfId: input.duplicateOfId,
+        reviewedByUserId: input.reviewedByUserId,
+      },
+      tx,
+      locale
+    );
 
   export type SuggestionSearchResult = {
     id: string;

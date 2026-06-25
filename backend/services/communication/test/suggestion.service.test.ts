@@ -107,6 +107,17 @@ const mockParentProfile = {
   updatedAt: new Date(),
 };
 
+async function expectErrorMatching(promise: Promise<unknown>, predicate: (message: string) => boolean) {
+  let errorCaught: Error | null = null;
+  try {
+    await promise;
+  } catch (e) {
+    errorCaught = e as Error;
+  }
+  expect(errorCaught).not.toBeNull();
+  expect(predicate(errorCaught?.message?.toLowerCase() ?? "")).toBe(true);
+}
+
 describe("SuggestionService", () => {
   let hasPermissionSpy: ReturnType<typeof spyOn>;
   let getSuggestionByIdSpy: ReturnType<typeof spyOn>;
@@ -155,6 +166,14 @@ describe("SuggestionService", () => {
     softDeleteSuggestionSpy.mockRestore();
   });
 
+  function mockSuggestionLookup(targetResult?: SuggestionRepository.SuggestionDetailRow | null) {
+    getSuggestionByIdSpy.mockImplementation(async (id: string) => {
+      if (id === MOCK_SUGGESTION_ID) return mockSuggestionRow;
+      if (id === MOCK_DUPLICATE_TARGET_ID) return targetResult ?? null;
+      return null;
+    });
+  }
+
   describe("getParentSuggestions", () => {
     test("returns suggestions for authorized parent with support.view_history", async () => {
       hasPermissionSpy.mockResolvedValue(true);
@@ -170,16 +189,9 @@ describe("SuggestionService", () => {
 
     test("throws unauthorized when lacking support.view_history", async () => {
       hasPermissionSpy.mockResolvedValue(false);
-
-      let errorCaught: Error | null = null;
-      try {
-        await SuggestionService.getParentSuggestions(MOCK_ACTOR_ID, { limit: 10, offset: 0 });
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      expect(errorCaught?.message.toLowerCase()).toContain("permission");
+      await expectErrorMatching(SuggestionService.getParentSuggestions(MOCK_ACTOR_ID, { limit: 10, offset: 0 }), msg =>
+        msg.includes("permission")
+      );
     });
 
     test("IDOR protection: parent can only view own suggestions", async () => {
@@ -217,42 +229,26 @@ describe("SuggestionService", () => {
 
     test("throws unauthorized when parent tries to respond", async () => {
       hasPermissionSpy.mockResolvedValue(false);
-
-      let errorCaught: Error | null = null;
-      try {
-        await SuggestionService.respondToSuggestion(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, "My response");
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      expect(errorCaught?.message.toLowerCase()).toContain("permission");
+      await expectErrorMatching(
+        SuggestionService.respondToSuggestion(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, "My response"),
+        msg => msg.includes("permission")
+      );
     });
 
     test("throws not found when suggestion does not exist", async () => {
       hasPermissionSpy.mockResolvedValue(true);
       getSuggestionByIdSpy.mockResolvedValue(null);
-
-      let errorCaught: Error | null = null;
-      try {
-        await SuggestionService.respondToSuggestion(MOCK_ACTOR_ID, "nonexistent-uuid", "Response");
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      expect(errorCaught?.message.toLowerCase()).toContain("not found");
+      await expectErrorMatching(
+        SuggestionService.respondToSuggestion(MOCK_ACTOR_ID, "nonexistent-uuid", "Response"),
+        msg => msg.includes("not found")
+      );
     });
   });
 
   describe("markAsDuplicate", () => {
     test("valid duplicate marking succeeds", async () => {
       hasPermissionSpy.mockResolvedValue(true);
-      getSuggestionByIdSpy.mockImplementation(async (id: string) => {
-        if (id === MOCK_SUGGESTION_ID) return mockSuggestionRow;
-        if (id === MOCK_DUPLICATE_TARGET_ID) return mockTargetSuggestionRow;
-        return null;
-      });
+      mockSuggestionLookup(mockTargetSuggestionRow);
       markAsDuplicateSpy.mockResolvedValue({
         ...mockSuggestionSelect,
         status: SuggestionStatus.DUPLICATE,
@@ -274,17 +270,10 @@ describe("SuggestionService", () => {
 
     test("self-reference throws validation error", async () => {
       hasPermissionSpy.mockResolvedValue(true);
-
-      let errorCaught: Error | null = null;
-      try {
-        await SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_SUGGESTION_ID, "en");
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      const message = errorCaught?.message?.toLowerCase() ?? "";
-      expect(message.includes("self") || message.includes("نفسه")).toBe(true);
+      await expectErrorMatching(
+        SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_SUGGESTION_ID, "en"),
+        msg => msg.includes("self") || msg.includes("نفسه")
+      );
     });
 
     test("chain error: target already DUPLICATE throws", async () => {
@@ -294,75 +283,38 @@ describe("SuggestionService", () => {
         status: SuggestionStatus.DUPLICATE,
         duplicateOfId: "some-other-uuid",
       };
-      getSuggestionByIdSpy.mockImplementation(async (id: string) => {
-        if (id === MOCK_SUGGESTION_ID) return mockSuggestionRow;
-        if (id === MOCK_DUPLICATE_TARGET_ID) return duplicateTarget;
-        return null;
-      });
-
-      let errorCaught: Error | null = null;
-      try {
-        await SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID, "en");
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      const message = errorCaught?.message?.toLowerCase() ?? "";
-      expect(message.includes("duplicate") || message.includes("مكررة")).toBe(true);
+      mockSuggestionLookup(duplicateTarget);
+      await expectErrorMatching(
+        SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID, "en"),
+        msg => msg.includes("duplicate") || msg.includes("مكررة")
+      );
     });
 
     test("circular reference throws validation error", async () => {
       hasPermissionSpy.mockResolvedValue(true);
       const circularTarget = { ...mockTargetSuggestionRow, duplicateOfId: MOCK_SUGGESTION_ID };
-      getSuggestionByIdSpy.mockImplementation(async (id: string) => {
-        if (id === MOCK_SUGGESTION_ID) return mockSuggestionRow;
-        if (id === MOCK_DUPLICATE_TARGET_ID) return circularTarget;
-        return null;
-      });
-
-      let errorCaught: Error | null = null;
-      try {
-        await SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID, "en");
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      const message = errorCaught?.message?.toLowerCase() ?? "";
-      expect(message.includes("circular") || message.includes("دائري")).toBe(true);
+      mockSuggestionLookup(circularTarget);
+      await expectErrorMatching(
+        SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID, "en"),
+        msg => msg.includes("circular") || msg.includes("دائري")
+      );
     });
 
     test("deleted target throws not found error", async () => {
       hasPermissionSpy.mockResolvedValue(true);
-      getSuggestionByIdSpy.mockImplementation(async (id: string) => {
-        if (id === MOCK_SUGGESTION_ID) return mockSuggestionRow;
-        return null;
-      });
-
-      let errorCaught: Error | null = null;
-      try {
-        await SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID);
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      expect(errorCaught?.message.toLowerCase()).toContain("not found");
+      mockSuggestionLookup();
+      await expectErrorMatching(
+        SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID),
+        msg => msg.includes("not found")
+      );
     });
 
     test("unauthorized actor throws permission error", async () => {
       hasPermissionSpy.mockResolvedValue(false);
-
-      let errorCaught: Error | null = null;
-      try {
-        await SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID);
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      expect(errorCaught?.message.toLowerCase()).toContain("permission");
+      await expectErrorMatching(
+        SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID),
+        msg => msg.includes("permission")
+      );
     });
   });
 
@@ -383,16 +335,9 @@ describe("SuggestionService", () => {
 
     test("unauthorized academy admin cannot delete", async () => {
       hasPermissionSpy.mockResolvedValue(false);
-
-      let errorCaught: Error | null = null;
-      try {
-        await SuggestionService.deleteSuggestion(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID);
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      expect(errorCaught?.message.toLowerCase()).toContain("permission");
+      await expectErrorMatching(SuggestionService.deleteSuggestion(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID), msg =>
+        msg.includes("permission")
+      );
     });
 
     test("soft-delete verification: deletedAt is set", async () => {

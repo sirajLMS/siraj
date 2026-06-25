@@ -6,17 +6,15 @@ import {
   prepareUploadMutationDocument,
   uploadLearningResourceMutationDocument,
 } from "../sharedDocuments/learning-resource.documents";
-import { authenticatedRequest, loginDemoUser } from "./helpers";
+import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
-// Helper to upload a dummy file and get its database file ID
 async function uploadDummyFile(token: string): Promise<{ id: string; path: string }> {
   const fileContent = Buffer.from("hello world");
   const contentHash = crypto.createHash("sha256").update(fileContent).digest("base64");
   const filePath = `public/resources/test-${Date.now()}.pdf`;
 
-  // 1. Prepare upload via mutation
   const prepData = await authenticatedRequest(token, "mutate", prepareUploadMutationDocument, {
     input: {
       path: filePath,
@@ -31,7 +29,6 @@ async function uploadDummyFile(token: string): Promise<{ id: string; path: strin
     throw new Error("Failed to prepare upload");
   }
 
-  // 2. Perform the physical PUT request to the test server running on port 3001
   const uploadUrl = `http://localhost:3001/api/storage/upload/${prep.id}`;
   const response = await Bun.fetch(uploadUrl, {
     method: "PUT",
@@ -53,6 +50,25 @@ async function uploadDummyFile(token: string): Promise<{ id: string; path: strin
     id: result.id,
     path: result.path,
   };
+}
+
+async function createTestResource(token: string): Promise<string> {
+  const file = await uploadDummyFile(token);
+  const displayName = `Test Resource ${Date.now()}`;
+  const uploadResult = await authenticatedRequest(token, "mutate", uploadLearningResourceMutationDocument, {
+    input: {
+      displayName,
+      filePath: file.path,
+      fileId: file.id,
+    },
+  });
+
+  const resource = uploadResult?.uploadLearningResource;
+  if (typeof resource?.id !== "string") {
+    throw new Error("Failed to upload learning resource record");
+  }
+
+  return resource.id;
 }
 
 async function testQueryLearningResources(role: string) {
@@ -84,10 +100,8 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
   test("Academy Admin can upload resource", async () => {
     const adminToken = await loginDemoUser("academy_admin");
 
-    // Upload the file first
     const file = await uploadDummyFile(adminToken);
 
-    // Call upload mutation
     const displayName = `Test Resource ${Date.now()}`;
     const uploadResult = await authenticatedRequest(adminToken, "mutate", uploadLearningResourceMutationDocument, {
       input: {
@@ -110,49 +124,21 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
 
   test("Teacher denied from uploading resource", async () => {
     const adminToken = await loginDemoUser("academy_admin");
-    const teacherToken = await loginDemoUser("teacher_default");
-
-    // Academy Admin prepares the file
     const file = await uploadDummyFile(adminToken);
 
-    // Teacher tries to upload but gets denied
-    const result = await testClient.mutate({
-      mutation: uploadLearningResourceMutationDocument,
-      variables: {
-        input: {
-          displayName: "Teacher Attempt Upload",
-          filePath: file.path,
-          fileId: file.id,
-        },
-      },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
+    await assertOperationDenied("teacher_default", "mutate", uploadLearningResourceMutationDocument, {
+      input: {
+        displayName: "Teacher Attempt Upload",
+        filePath: file.path,
+        fileId: file.id,
       },
     });
-
-    expect(result.error).toBeDefined();
   });
 
   test("Parent denied from resource directory", async () => {
-    const parentToken = await loginDemoUser("parent_default");
-
-    const result = await testClient.query({
-      query: learningResourcesQueryDocument,
-      variables: {
-        searchQuery: null,
-      },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${parentToken}`,
-        },
-      },
+    await assertOperationDenied("parent_default", "query", learningResourcesQueryDocument, {
+      searchQuery: null,
     });
-
-    expect(result.error).toBeDefined();
   });
 
   test("Upload with missing displayName returns validation error", async () => {
@@ -163,12 +149,11 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
       mutation: uploadLearningResourceMutationDocument,
       variables: {
         input: {
-          displayName: "", // missing/empty
+          displayName: "",
           filePath: file.path,
           fileId: file.id,
         },
       },
-      errorPolicy: "all",
       context: {
         headers: {
           Authorization: `Bearer ${adminToken}`,
@@ -176,36 +161,18 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
       },
     });
 
-    // Pothos or service layer should throw validation error
     expect(result.error).toBeDefined();
   });
 
   test("Academy Admin can delete learning resource successfully", async () => {
     const adminToken = await loginDemoUser("academy_admin");
+    const resourceId = await createTestResource(adminToken);
 
-    // 1. Upload a resource first
-    const file = await uploadDummyFile(adminToken);
-    const displayName = `Delete Test Resource ${Date.now()}`;
-    const uploadResult = await authenticatedRequest(adminToken, "mutate", uploadLearningResourceMutationDocument, {
-      input: {
-        displayName,
-        filePath: file.path,
-        fileId: file.id,
-      },
-    });
-
-    const resource = uploadResult?.uploadLearningResource;
-    if (typeof resource?.id !== "string") {
-      throw new Error("Failed to upload learning resource record");
-    }
-
-    // 2. Delete the resource
     const deleteResult = await testClient.mutate({
       mutation: deleteLearningResourceMutationDocument,
       variables: {
-        id: resource.id,
+        id: resourceId,
       },
-      errorPolicy: "all",
       context: {
         headers: {
           Authorization: `Bearer ${adminToken}`,
@@ -216,51 +183,21 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
     expect(deleteResult.error).toBeUndefined();
     expect(deleteResult.data?.deleteLearningResource).toBe(true);
 
-    // 3. Verify it's no longer in list
     const list = await testQueryLearningResources("academy_admin");
-    const found = list.find(r => r.id === resource.id);
+    const found = list.find(r => r.id === resourceId);
     expect(found).toBeUndefined();
   });
 
   test("Teacher denied from deleting learning resource", async () => {
     const adminToken = await loginDemoUser("academy_admin");
-    const teacherToken = await loginDemoUser("teacher_default");
+    const resourceId = await createTestResource(adminToken);
 
-    // 1. Upload a resource first
-    const file = await uploadDummyFile(adminToken);
-    const displayName = `Delete Test Resource ${Date.now()}`;
-    const uploadResult = await authenticatedRequest(adminToken, "mutate", uploadLearningResourceMutationDocument, {
-      input: {
-        displayName,
-        filePath: file.path,
-        fileId: file.id,
-      },
+    await assertOperationDenied("teacher_default", "mutate", deleteLearningResourceMutationDocument, {
+      id: resourceId,
     });
 
-    const resource = uploadResult?.uploadLearningResource;
-    if (typeof resource?.id !== "string") {
-      throw new Error("Failed to upload learning resource record");
-    }
-
-    // 2. Teacher tries to delete it but gets denied
-    const deleteResult = await testClient.mutate({
-      mutation: deleteLearningResourceMutationDocument,
-      variables: {
-        id: resource.id,
-      },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
-    });
-
-    expect(deleteResult.error).toBeDefined();
-
-    // 3. Verify it is still in the list
     const list = await testQueryLearningResources("academy_admin");
-    const found = list.find(r => r.id === resource.id);
+    const found = list.find(r => r.id === resourceId);
     expect(found).toBeDefined();
   });
 });

@@ -5,6 +5,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ComplaintRepository } from "@/backend/db/repo";
 import { complaintFiles, complaints, storageFiles } from "@/backend/db/schema";
+import type { ComplaintSubmitInput } from "@/backend/types";
 import { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import { createTestParent, createTestStudent, createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
@@ -77,6 +78,43 @@ async function insertStorageFile(tx: DBTransaction, filePath: string) {
   return file;
 }
 
+async function submitComplaintWithoutStudent(tx: DBTransaction, namePrefix: string, input: ComplaintSubmitInput) {
+  const { parent } = await setupParentWithStudent(tx, namePrefix);
+  const result = await ComplaintRepository.submitComplaint(input, parent.id, tx);
+  expect(result).toBeDefined();
+  expect(result.studentId).toBeNull();
+  return result;
+}
+
+async function insertTimedComplaintPair(
+  tx: DBTransaction,
+  parentId: string,
+  earlierBody: string,
+  laterBody: string,
+  earlierOffsetMs = 60000
+) {
+  const now = new Date();
+  const earlier = new Date(now.getTime() - earlierOffsetMs);
+  await tx.insert(complaints).values({
+    parentId,
+    category: "OTHER",
+    submitterEmail: `earlier-${randomUUID()}@test.com`,
+    body: earlierBody,
+    status: "UNANSWERED",
+    createdAt: earlier,
+    updatedAt: earlier,
+  });
+  await tx.insert(complaints).values({
+    parentId,
+    category: "OTHER",
+    submitterEmail: `later-${randomUUID()}@test.com`,
+    body: laterBody,
+    status: "UNANSWERED",
+    createdAt: now,
+    updatedAt: now,
+  });
+}
+
 describe("ComplaintRepository — submitComplaint", () => {
   complaintTest("creates a complaint record with valid input", async tx => {
     const { parent, student } = await setupParentWithStudent(tx, "Submit");
@@ -105,39 +143,21 @@ describe("ComplaintRepository — submitComplaint", () => {
   });
 
   complaintTest("creates complaint with null studentId", async tx => {
-    const { parent } = await setupParentWithStudent(tx, "NullStud");
-
-    const result = await ComplaintRepository.submitComplaint(
-      {
-        studentId: null,
-        category: ComplaintCategory.REGARDING_SYSTEM,
-        submitterEmail: "null-stud@test.com",
-        body: "System is slow",
-      },
-      parent.id,
-      tx
-    );
-
-    expect(result).toBeDefined();
-    expect(result.studentId).toBeNull();
+    const result = await submitComplaintWithoutStudent(tx, "NullStud", {
+      studentId: null,
+      category: ComplaintCategory.REGARDING_SYSTEM,
+      submitterEmail: "null-stud@test.com",
+      body: "System is slow",
+    });
     expect(result.category).toBe("REGARDING_SYSTEM");
   });
 
   complaintTest("creates complaint without studentId field", async tx => {
-    const { parent } = await setupParentWithStudent(tx, "NoStud");
-
-    const result = await ComplaintRepository.submitComplaint(
-      {
-        category: ComplaintCategory.OTHER,
-        submitterEmail: "no-stud@test.com",
-        body: "General feedback",
-      },
-      parent.id,
-      tx
-    );
-
-    expect(result).toBeDefined();
-    expect(result.studentId).toBeNull();
+    await submitComplaintWithoutStudent(tx, "NoStud", {
+      category: ComplaintCategory.OTHER,
+      submitterEmail: "no-stud@test.com",
+      body: "General feedback",
+    });
   });
 
   complaintTest("fails with invalid parentId (FK violation)", async tx => {
@@ -190,32 +210,8 @@ describe("ComplaintRepository — getComplaintsByParent", () => {
 
   complaintTest("returns results ordered by createdAt DESC", async tx => {
     const { parent } = await setupParentWithStudent(tx, "OrderDesc");
-
-    const now = new Date();
-    const earlier = new Date(now.getTime() - 60000);
-
-    await tx.insert(complaints).values({
-      parentId: parent.id,
-      category: "OTHER",
-      submitterEmail: "earlier@test.com",
-      body: "Earlier complaint",
-      status: "UNANSWERED",
-      createdAt: earlier,
-      updatedAt: earlier,
-    });
-
-    await tx.insert(complaints).values({
-      parentId: parent.id,
-      category: "OTHER",
-      submitterEmail: "later@test.com",
-      body: "Later complaint",
-      status: "UNANSWERED",
-      createdAt: now,
-      updatedAt: now,
-    });
-
+    await insertTimedComplaintPair(tx, parent.id, "Earlier complaint", "Later complaint");
     const result = await ComplaintRepository.getComplaintsByParent(parent.id, tx);
-
     expect(result.length).toBeGreaterThanOrEqual(2);
     expect(result[0].createdAt.getTime()).toBeGreaterThanOrEqual(result[1].createdAt.getTime());
   });
@@ -421,33 +417,9 @@ describe("ComplaintRepository — getUnansweredComplaints", () => {
 
   complaintTest("returns results ordered by createdAt DESC", async tx => {
     const { parent } = await setupParentWithStudent(tx, "UnansOrder");
-
-    const now = new Date();
-    const earlier = new Date(now.getTime() - 120000);
-
-    await tx.insert(complaints).values({
-      parentId: parent.id,
-      category: "OTHER",
-      submitterEmail: "earlier-order@test.com",
-      body: "Earlier unanswered",
-      status: "UNANSWERED",
-      createdAt: earlier,
-      updatedAt: earlier,
-    });
-
-    await tx.insert(complaints).values({
-      parentId: parent.id,
-      category: "OTHER",
-      submitterEmail: "later-order@test.com",
-      body: "Later unanswered",
-      status: "UNANSWERED",
-      createdAt: now,
-      updatedAt: now,
-    });
-
+    await insertTimedComplaintPair(tx, parent.id, "Earlier unanswered", "Later unanswered", 120000);
     const result = await ComplaintRepository.getUnansweredComplaints(100, tx);
     const filtered = result.filter(r => r.body === "Earlier unanswered" || r.body === "Later unanswered");
-
     expect(filtered.length).toBe(2);
     expect(filtered[0].body).toBe("Later unanswered");
     expect(filtered[1].body).toBe("Earlier unanswered");

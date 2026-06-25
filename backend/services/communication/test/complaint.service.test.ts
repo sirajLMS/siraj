@@ -59,6 +59,45 @@ const validFiles = [
   { path: "uploads/complaints/file2.pdf", sizeBytes: 2 * 1024 * 1024, mimeType: "application/pdf" },
 ];
 
+function mockFileValidationSettings(spy: ReturnType<typeof spyOn>, maxFiles: number, maxSizeMb: number) {
+  spy.mockImplementation(async (key: string) => {
+    if (key === "complaint_max_files_per_complaint") return maxFiles;
+    if (key === "complaint_max_file_size_mb") return maxSizeMb;
+    return 25;
+  });
+}
+
+async function expectThrowsAsync(fn: () => Promise<unknown>, expectedSubstring: string) {
+  let errorCaught: Error | null = null;
+  try {
+    await fn();
+  } catch (e) {
+    errorCaught = e as Error;
+  }
+  expect(errorCaught).not.toBeNull();
+  expect(errorCaught?.message.toLowerCase()).toContain(expectedSubstring);
+}
+
+async function expectSubmitComplaintThrows(
+  files: Array<{ path: string; sizeBytes: number; mimeType: string }>,
+  expectedSubstring: string
+) {
+  await expectThrowsAsync(
+    () =>
+      ComplaintService.submitComplaint(
+        MOCK_ACTOR_ID,
+        {
+          category: ComplaintCategory.OTHER,
+          submitterEmail: "test@test.com",
+          body: "Test",
+          files,
+        },
+        "en"
+      ),
+    expectedSubstring
+  );
+}
+
 describe("ComplaintService", () => {
   let hasPermissionSpy: ReturnType<typeof spyOn>;
   let findByUserIdSpy: ReturnType<typeof spyOn>;
@@ -93,103 +132,40 @@ describe("ComplaintService", () => {
 
   describe("submitComplaint — file validation", () => {
     test("rejects when file count exceeds max", async () => {
-      getIntValueSpy.mockImplementation(async (key: string) => {
-        if (key === "complaint_max_files_per_complaint") return 2;
-        return 25;
-      });
+      mockFileValidationSettings(getIntValueSpy, 2, 25);
 
-      const tooManyFiles = [
-        { path: "f1.jpg", sizeBytes: 100, mimeType: "image/jpeg" },
-        { path: "f2.jpg", sizeBytes: 100, mimeType: "image/jpeg" },
-        { path: "f3.jpg", sizeBytes: 100, mimeType: "image/jpeg" },
-      ];
-
-      let errorCaught: Error | null = null;
-      try {
-        await ComplaintService.submitComplaint(
-          MOCK_ACTOR_ID,
-          {
-            category: ComplaintCategory.OTHER,
-            submitterEmail: "test@test.com",
-            body: "Test",
-            files: tooManyFiles,
-          },
-          "en"
-        );
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      expect(errorCaught?.message.toLowerCase()).toContain("file");
+      await expectSubmitComplaintThrows(
+        [
+          { path: "f1.jpg", sizeBytes: 100, mimeType: "image/jpeg" },
+          { path: "f2.jpg", sizeBytes: 100, mimeType: "image/jpeg" },
+          { path: "f3.jpg", sizeBytes: 100, mimeType: "image/jpeg" },
+        ],
+        "file"
+      );
     });
 
     test("rejects when file size exceeds max", async () => {
-      getIntValueSpy.mockImplementation(async (key: string) => {
-        if (key === "complaint_max_files_per_complaint") return 5;
-        if (key === "complaint_max_file_size_mb") return 1;
-        return 25;
-      });
+      mockFileValidationSettings(getIntValueSpy, 5, 1);
 
-      const oversizedFile = [{ path: "huge.jpg", sizeBytes: 5 * 1024 * 1024, mimeType: "image/jpeg" }];
-
-      let errorCaught: Error | null = null;
-      try {
-        await ComplaintService.submitComplaint(
-          MOCK_ACTOR_ID,
-          {
-            category: ComplaintCategory.OTHER,
-            submitterEmail: "test@test.com",
-            body: "Test",
-            files: oversizedFile,
-          },
-          "en"
-        );
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      expect(errorCaught?.message.toLowerCase()).toContain("large");
+      await expectSubmitComplaintThrows(
+        [{ path: "huge.jpg", sizeBytes: 5 * 1024 * 1024, mimeType: "image/jpeg" }],
+        "large"
+      );
     });
 
     test("rejects invalid MIME type", async () => {
-      getIntValueSpy.mockImplementation(async (key: string) => {
-        if (key === "complaint_max_files_per_complaint") return 5;
-        if (key === "complaint_max_file_size_mb") return 25;
-        return 25;
-      });
+      mockFileValidationSettings(getIntValueSpy, 5, 25);
 
-      const invalidMimeFile = [{ path: "malware.exe", sizeBytes: 100, mimeType: "application/x-executable" }];
-
-      let errorCaught: Error | null = null;
-      try {
-        await ComplaintService.submitComplaint(
-          MOCK_ACTOR_ID,
-          {
-            category: ComplaintCategory.OTHER,
-            submitterEmail: "test@test.com",
-            body: "Test",
-            files: invalidMimeFile,
-          },
-          "en"
-        );
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      expect(errorCaught?.message.toLowerCase()).toContain("type");
+      await expectSubmitComplaintThrows(
+        [{ path: "malware.exe", sizeBytes: 100, mimeType: "application/x-executable" }],
+        "type"
+      );
     });
   });
 
   describe("submitComplaint — file registration in transaction", () => {
     test("registers files after complaint creation", async () => {
-      getIntValueSpy.mockImplementation(async (key: string) => {
-        if (key === "complaint_max_files_per_complaint") return 5;
-        if (key === "complaint_max_file_size_mb") return 25;
-        return 25;
-      });
+      mockFileValidationSettings(getIntValueSpy, 5, 25);
 
       const result = await ComplaintService.submitComplaint(MOCK_ACTOR_ID, {
         category: ComplaintCategory.OTHER,
@@ -238,10 +214,9 @@ describe("ComplaintService", () => {
     });
 
     test("admin can access any complaint files", async () => {
-      hasPermissionSpy.mockImplementation(async (_userId: string, perm: AppPermission) => {
-        if (perm === AppPermission.COMPLAINTS_LIST) return true;
-        return false;
-      });
+      hasPermissionSpy.mockImplementation(
+        async (_userId: string, perm: AppPermission) => perm === AppPermission.COMPLAINTS_LIST
+      );
       getComplaintFilesSpy.mockResolvedValue([]);
 
       const files = await ComplaintService.getComplaintFiles("admin-uuid", MOCK_COMPLAINT_ID);
@@ -252,15 +227,10 @@ describe("ComplaintService", () => {
     test("unauthorized user cannot access complaint files", async () => {
       hasPermissionSpy.mockResolvedValue(false);
 
-      let errorCaught: Error | null = null;
-      try {
-        await ComplaintService.getComplaintFiles("unauthorized-uuid", MOCK_COMPLAINT_ID);
-      } catch (e) {
-        errorCaught = e as Error;
-      }
-
-      expect(errorCaught).not.toBeNull();
-      expect(errorCaught?.message.toLowerCase()).toContain("permission");
+      await expectThrowsAsync(
+        () => ComplaintService.getComplaintFiles("unauthorized-uuid", MOCK_COMPLAINT_ID),
+        "permission"
+      );
     });
   });
 });

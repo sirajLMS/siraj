@@ -5,6 +5,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { NotificationRepository } from "@/backend/db/repo";
 import { notificationDeliveries, userNotificationPreferences } from "@/backend/db/schema";
+import type { CreateNotificationDeliveryInput } from "@/backend/types";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/shared/lib/enum";
 import { createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
@@ -19,6 +20,40 @@ async function makeUser(tx: DBTransaction, prefix: string) {
   return createTestUser(tx, {
     name: `${prefix} User`,
     email: `${prefix.toLowerCase()}-${randomUUID()}@test.com`,
+  });
+}
+
+async function insertTestDelivery(tx: DBTransaction, input: CreateNotificationDeliveryInput, createdAt?: Date) {
+  await tx.insert(notificationDeliveries).values({
+    userId: input.userId,
+    channel: input.channel,
+    eventType: input.eventType,
+    status: NotificationDeliveryStatus.SENT,
+    title: input.title ?? null,
+    ...(createdAt ? { createdAt, updatedAt: createdAt } : {}),
+  });
+}
+
+function runSetPreferenceTest(
+  name: string,
+  prefix: string,
+  channel: NotificationChannel,
+  eventType: NotificationEventType,
+  extraAssert?: (
+    result: NonNullable<Awaited<ReturnType<typeof NotificationRepository.setPreference>>>,
+    userId: string
+  ) => void
+) {
+  notificationTest(name, async tx => {
+    const user = await makeUser(tx, prefix);
+    const result = await NotificationRepository.setPreference(
+      { userId: user.id, channel, eventType, enabled: true },
+      tx
+    );
+    expect(result).toBeDefined();
+    expect(result.channel).toBe(channel);
+    expect(result.eventType).toBe(eventType);
+    extraAssert?.(result, user.id);
   });
 }
 
@@ -62,25 +97,16 @@ describe("NotificationRepository — getPreference", () => {
 });
 
 describe("NotificationRepository — setPreference", () => {
-  notificationTest("creates new preference when none exists", async tx => {
-    const user = await makeUser(tx, "PrefCreate");
-
-    const result = await NotificationRepository.setPreference(
-      {
-        userId: user.id,
-        channel: NotificationChannel.EMAIL,
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-        enabled: true,
-      },
-      tx
-    );
-
-    expect(result).toBeDefined();
-    expect(result.userId).toBe(user.id);
-    expect(result.channel).toBe(NotificationChannel.EMAIL);
-    expect(result.eventType).toBe(NotificationEventType.COMPLAINT_RESPONSE);
-    expect(result.enabled).toBe(true);
-  });
+  runSetPreferenceTest(
+    "creates new preference when none exists",
+    "PrefCreate",
+    NotificationChannel.EMAIL,
+    NotificationEventType.COMPLAINT_RESPONSE,
+    (result, userId) => {
+      expect(result.userId).toBe(userId);
+      expect(result.enabled).toBe(true);
+    }
+  );
 
   notificationTest("updates existing preference on conflict", async tx => {
     const user = await makeUser(tx, "PrefUpdate");
@@ -108,23 +134,12 @@ describe("NotificationRepository — setPreference", () => {
     expect(updated.enabled).toBe(false);
   });
 
-  notificationTest("creates preference for PUSH channel", async tx => {
-    const user = await makeUser(tx, "PrefPush");
-
-    const result = await NotificationRepository.setPreference(
-      {
-        userId: user.id,
-        channel: NotificationChannel.PUSH,
-        eventType: NotificationEventType.INVOICE_GENERATED,
-        enabled: true,
-      },
-      tx
-    );
-
-    expect(result).toBeDefined();
-    expect(result.channel).toBe(NotificationChannel.PUSH);
-    expect(result.eventType).toBe(NotificationEventType.INVOICE_GENERATED);
-  });
+  runSetPreferenceTest(
+    "creates preference for PUSH channel",
+    "PrefPush",
+    NotificationChannel.PUSH,
+    NotificationEventType.INVOICE_GENERATED
+  );
 });
 
 describe("NotificationRepository — createDeliveriesBatch", () => {
@@ -292,28 +307,29 @@ describe("NotificationRepository — getDeliveriesByUser", () => {
 
   notificationTest("filters by channel", async tx => {
     const user = await makeUser(tx, "DelivChan");
-
     const now = new Date();
 
-    await tx.insert(notificationDeliveries).values({
-      userId: user.id,
-      channel: NotificationChannel.EMAIL,
-      eventType: NotificationEventType.COMPLAINT_RESPONSE,
-      status: NotificationDeliveryStatus.SENT,
-      title: "Email delivery filter",
-      createdAt: now,
-      updatedAt: now,
-    });
+    await insertTestDelivery(
+      tx,
+      {
+        userId: user.id,
+        channel: NotificationChannel.EMAIL,
+        eventType: NotificationEventType.COMPLAINT_RESPONSE,
+        title: "Email delivery filter",
+      },
+      now
+    );
 
-    await tx.insert(notificationDeliveries).values({
-      userId: user.id,
-      channel: NotificationChannel.PUSH,
-      eventType: NotificationEventType.COMPLAINT_RESPONSE,
-      status: NotificationDeliveryStatus.SENT,
-      title: "Push delivery filter",
-      createdAt: now,
-      updatedAt: now,
-    });
+    await insertTestDelivery(
+      tx,
+      {
+        userId: user.id,
+        channel: NotificationChannel.PUSH,
+        eventType: NotificationEventType.COMPLAINT_RESPONSE,
+        title: "Push delivery filter",
+      },
+      now
+    );
 
     const result = await NotificationRepository.getDeliveriesByUser(
       user.id,
@@ -328,28 +344,29 @@ describe("NotificationRepository — getDeliveriesByUser", () => {
 
   notificationTest("filters by eventType", async tx => {
     const user = await makeUser(tx, "DelivEvent");
-
     const now = new Date();
 
-    await tx.insert(notificationDeliveries).values({
-      userId: user.id,
-      channel: NotificationChannel.EMAIL,
-      eventType: NotificationEventType.COMPLAINT_RESPONSE,
-      status: NotificationDeliveryStatus.SENT,
-      title: "Complaint event",
-      createdAt: now,
-      updatedAt: now,
-    });
+    await insertTestDelivery(
+      tx,
+      {
+        userId: user.id,
+        channel: NotificationChannel.EMAIL,
+        eventType: NotificationEventType.COMPLAINT_RESPONSE,
+        title: "Complaint event",
+      },
+      now
+    );
 
-    await tx.insert(notificationDeliveries).values({
-      userId: user.id,
-      channel: NotificationChannel.EMAIL,
-      eventType: NotificationEventType.INVOICE_GENERATED,
-      status: NotificationDeliveryStatus.SENT,
-      title: "Invoice event",
-      createdAt: now,
-      updatedAt: now,
-    });
+    await insertTestDelivery(
+      tx,
+      {
+        userId: user.id,
+        channel: NotificationChannel.EMAIL,
+        eventType: NotificationEventType.INVOICE_GENERATED,
+        title: "Invoice event",
+      },
+      now
+    );
 
     const result = await NotificationRepository.getDeliveriesByUser(
       user.id,
