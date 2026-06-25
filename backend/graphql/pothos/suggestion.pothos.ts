@@ -1,11 +1,12 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { SuggestionService } from "@/backend/services/communication/suggestion.service";
-import type { SubmitSuggestionInputType, SuggestionQueueResult, SuggestionSelectType } from "@/backend/types";
+import type {
+  SubmitSuggestionInputType,
+  SuggestionPothosType,
+  SuggestionQueueResult,
+  SuggestionReturnType,
+} from "@/backend/types";
 import type { SuggestionStatus } from "@/shared/lib/enum";
-
-export type SuggestionPothosType = SuggestionSelectType & {
-  parentName: string;
-};
 
 const SuggestionRef = gqlSchemaBuilder.objectRef<SuggestionPothosType>("Suggestion");
 
@@ -116,7 +117,7 @@ gqlSchemaBuilder.queryField("adminSuggestions", t =>
 
       return {
         id: result.id,
-        rows: result.suggestions.map((s: SuggestionSelectType) => ({
+        rows: result.suggestions.map((s: SuggestionReturnType) => ({
           ...s,
           parentName: "",
         })),
@@ -155,6 +156,7 @@ gqlSchemaBuilder.mutationField("submitSuggestion", t =>
 
       return {
         ...created,
+        status: created.status as SuggestionStatus,
         parentName: "",
       };
     },
@@ -177,6 +179,7 @@ gqlSchemaBuilder.mutationField("markSuggestionReviewed", t =>
 
       return {
         ...updated,
+        status: updated.status as SuggestionStatus,
         parentName: "",
       };
     },

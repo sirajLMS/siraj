@@ -58,3 +58,7 @@ export type SubmitSuggestionInputType = {
   readonly submitterName: string;
   readonly body: string;
 };
+
+export type SuggestionPothosType = SuggestionReturnType & {
+  parentName: string;
+};

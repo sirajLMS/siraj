@@ -189,7 +189,10 @@ export namespace SoftDeleteRepository {
   ): Promise<Types.SoftDeletableEntityMap[T]> => {
     const runner = async (t: DBTransaction) => {
       const config = SOFT_DELETE_TABLES[tableName];
-      const deletedResults = await t.delete(config.table).where(eq(config.table.id, entityId)).returning();
+      const deletedResults = (await t
+        .delete(config.table)
+        .where(eq(config.table.id, entityId))
+        .returning()) as unknown[];
 
       if (deletedResults.length === 0) {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });

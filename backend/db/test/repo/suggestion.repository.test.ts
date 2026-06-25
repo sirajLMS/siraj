@@ -762,7 +762,7 @@ describe("SuggestionRepository — transaction rollback (Story 15)", () => {
       throw new Error("Simulated rollback error");
     }).catch(() => null);
 
-    if (suggestionId) {
+    if (suggestionId && originalStatus) {
       const [found] = await db.select().from(suggestions).where(eq(suggestions.id, suggestionId)).limit(1);
       if (found) {
         expect(found.status).toBe(originalStatus);
@@ -792,7 +792,7 @@ describe("SuggestionRepository — transaction rollback (Story 15)", () => {
       throw new Error("Simulated rollback error");
     }).catch(() => null);
 
-    if (duplicateId) {
+    if (duplicateId && originalStatus) {
       const [found] = await db.select().from(suggestions).where(eq(suggestions.id, duplicateId)).limit(1);
       if (found) {
         expect(found.status).toBe(originalStatus);

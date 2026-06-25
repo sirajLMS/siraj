@@ -1,4 +1,15 @@
-import { boolean, index, jsonb, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  foreignKey,
+  index,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 import {
   complaintCategoryEnum,
   complaintStatusEnum,
@@ -160,7 +171,7 @@ export const suggestions = pgTable(
     submitterName: varchar("submitter_name", { length: 255 }).notNull(),
     body: text("body").notNull(),
     status: suggestionStatusEnum("status").notNull().default("PENDING"),
-    duplicateOfId: uuid("duplicate_of_id").references(() => suggestions.id, { onDelete: "set null" }),
+    duplicateOfId: uuid("duplicate_of_id"),
     adminResponse: text("admin_response"),
     reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id, { onDelete: "set null" }),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true, precision: 3 }),
@@ -169,6 +180,11 @@ export const suggestions = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
   table => [
+    foreignKey({
+      columns: [table.duplicateOfId],
+      foreignColumns: [table.id],
+      name: "suggestions_duplicate_of_id_fkey",
+    }).onDelete("set null"),
     index("suggestions_parent_id_idx").on(table.parentId),
     index("suggestions_status_idx").on(table.status),
     index("suggestions_duplicate_of_id_idx").on(table.duplicateOfId),

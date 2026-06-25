@@ -147,6 +147,9 @@ const en: MessageSchema = {
     },
     complaint: {
       createFailed: "Failed to create complaint.",
+      tooManyFiles: "Too many files. Maximum is {max} files.",
+      fileTooLarge: "File size too large. Maximum is {max} MB.",
+      invalidFileType: "File type not allowed. Allowed types: {allowed}.",
     },
     complaintResponse: {
       createFailed: "Failed to create complaint response.",
@@ -155,6 +158,9 @@ const en: MessageSchema = {
     suggestion: {
       createFailed: "Failed to create suggestion.",
       notFound: "Suggestion with ID {id} not found.",
+      cannotMarkSelfAsDuplicate: "Cannot mark a suggestion as a duplicate of itself.",
+      targetIsAlreadyDuplicate: "The target suggestion is already a duplicate.",
+      cannotCreateCircularDuplicate: "Cannot create a circular duplicate.",
     },
     outOfQuota: "Remaining classes quota has been exhausted.",
     unauthorizedSearch: "Unauthorized: Missing schedule search permission.",
