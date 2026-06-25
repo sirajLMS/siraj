@@ -23,7 +23,13 @@ export function formatScheduleTimeOnly(value: string | null | undefined, locale:
     });
   }
 
-  const withoutTimezone = value.replace(/\s*\([^)]*\)\s*$/, "").trim();
+  let withoutTimezone = value.trim();
+  if (withoutTimezone.endsWith(")")) {
+    const lastOpen = withoutTimezone.lastIndexOf("(");
+    if (lastOpen !== -1) {
+      withoutTimezone = withoutTimezone.slice(0, lastOpen).trim();
+    }
+  }
   const timeMatch = withoutTimezone.match(/\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?/i);
   return timeMatch?.[0] ?? withoutTimezone;
 }

@@ -33,7 +33,7 @@ const StyledPaginationRoot = styled(Box, {
   flexWrap: "wrap",
   gap: theme.spacing(1.5),
   width: "100%",
-  paddingInline: theme.spacing(embedded ? 2 : 2),
+  paddingInline: theme.spacing(2),
   paddingBlock: theme.spacing(1.5),
   ...(embedded
     ? {

@@ -14,13 +14,17 @@ export type DailyScheduleMetricFilterKey =
   | "absent"
   | "leave";
 
+export type DateLike = Date | string | null;
+export type OutcomeLike = ClassOutcome | string | null | undefined;
+export type ExecutionStateLike = ClassExecutionState | string | null | undefined;
+
 export type ClassInstanceDashboardStatus = ClassOutcome | ClassExecutionState.ACTIVATED | ClassExecutionState.RUNNING;
 
 export interface ClassInstanceDashboardStatusInput {
-  readonly outcome: ClassOutcome | string | null | undefined;
-  readonly executionState: ClassExecutionState | string | null | undefined;
-  readonly actualStartAt?: Date | string | null;
-  readonly actualEndAt?: Date | string | null;
+  readonly outcome: OutcomeLike;
+  readonly executionState: ExecutionStateLike;
+  readonly actualStartAt?: DateLike;
+  readonly actualEndAt?: DateLike;
 }
 
 export interface ClassInstanceMetricRow extends ClassInstanceDashboardStatusInput {
@@ -29,7 +33,7 @@ export interface ClassInstanceMetricRow extends ClassInstanceDashboardStatusInpu
   readonly isFrozen?: boolean | null;
 }
 
-function toDate(value: Date | string | null | undefined): Date | null {
+function toDate(value: DateLike | undefined): Date | null {
   if (!value) {
     return null;
   }
@@ -37,10 +41,10 @@ function toDate(value: Date | string | null | undefined): Date | null {
 }
 
 export function resolveClassInstanceDashboardStatus(
-  outcome: ClassOutcome | string | null | undefined,
-  executionState: ClassExecutionState | string | null | undefined,
-  actualStartAt?: Date | string | null,
-  actualEndAt?: Date | string | null
+  outcome: OutcomeLike,
+  executionState: ExecutionStateLike,
+  actualStartAt?: DateLike,
+  actualEndAt?: DateLike
 ): ClassInstanceDashboardStatus {
   const normalizedOutcome = (outcome ?? ClassOutcome.PENDING) as ClassOutcome;
   const normalizedExecutionState = (executionState ?? ClassExecutionState.NOT_ACTIVATED) as ClassExecutionState;
