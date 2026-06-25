@@ -3,15 +3,25 @@
 import { useEffect } from "react";
 import type { CurrentUserProfile } from "@/backend/types";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission as BackendAppPermission } from "@/shared/lib/enum";
 import { useUserStore } from "@/frontend/stores/userStore";
 
 interface UserStoreInitializerProps {
   readonly userProfile: CurrentUserProfile;
 }
 
+function isFrontendPermission(key: string): key is AppPermission {
+  return key in BackendAppPermission;
+}
+
 export function UserStoreInitializer({ userProfile }: UserStoreInitializerProps) {
   const setUser = useUserStore(state => state.setUser);
-  const permissions = userProfile.permissions as unknown as AppPermission[];
+  const permissions = userProfile.permissions
+    .map(p => {
+      const entry = Object.entries(BackendAppPermission).find(([_, val]) => val === p);
+      return entry ? entry[0] : "";
+    })
+    .filter(isFrontendPermission);
 
   useEffect(() => {
     setUser({
