@@ -1,11 +1,12 @@
 import { ParentRepository } from "@/backend/db/repo/parent.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import type { DailyScheduleResult } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { AppPermission } from "@/shared/lib/enum";
+import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/shared/lib/enum";
 
 export namespace ScheduleService {
   async function resolveViewerTimezone(userId: string): Promise<string> {
@@ -18,6 +19,113 @@ export namespace ScheduleService {
     return await SystemSettingsRepository.getStringValue("default_timezone", "UTC");
   }
 
+  function mapDailyScheduleListItem(item: DailyScheduleResult) {
+    return {
+      id: item.id,
+      studentTime: item.scheduledStartAt.toISOString(),
+      teacherTime: item.scheduledStartAt.toISOString(),
+      yourTime: item.yourTimeFormatted || item.scheduledStartAt.toISOString(),
+      duration: item.durationMinutes,
+      status: item.outcome || item.executionState,
+      outcome: item.outcome as ClassOutcome,
+      executionState: item.executionState as ClassExecutionState,
+      student: { id: item.studentId, name: item.student?.name || "Unknown" },
+      teacher: { id: item.teacherId, name: item.teacher?.user?.name || "Unknown" },
+    };
+  }
+
+  async function assertDailyScheduleListAccess(
+    userId: string,
+    options: { search?: string; metricFilter?: string },
+    locale?: string
+  ) {
+    const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_LIST);
+    if (!isAuthorized) {
+      logger.warn("Unauthorized access to daily schedule", { userId });
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("unauthorizedViewList"));
+    }
+
+    if (options.search) {
+      const canSearch = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_SEARCH);
+      if (!canSearch) {
+        logger.warn("Unauthorized search access to daily schedule", { userId });
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(t("unauthorizedSearch"));
+      }
+    }
+
+    if (options.metricFilter && options.metricFilter !== "total") {
+      const canFilter = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_FILTER_METRICS);
+      if (!canFilter) {
+        logger.warn("Unauthorized metric filter access to daily schedule", {
+          userId,
+          metricFilter: options.metricFilter,
+        });
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(t("unauthorizedAction"));
+      }
+    }
+  }
+
+  export async function getAdminDashboardSchedule(
+    userId: string,
+    input: {
+      date: string;
+      teacherId?: string | null;
+      search?: string | null;
+      metricFilter?: string | null;
+    },
+    locale?: string
+  ) {
+    try {
+      const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
+      if (!isAuthorized) {
+        logger.warn("Unauthorized access to daily metrics", { userId });
+        const t = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(t("unauthorizedViewMetrics"));
+      }
+
+      await assertDailyScheduleListAccess(
+        userId,
+        {
+          search: input.search || undefined,
+          metricFilter: input.metricFilter || undefined,
+        },
+        locale
+      );
+
+      const viewerTimezone = await resolveViewerTimezone(userId);
+      const targetDate = new Date(input.date);
+      const teacherId = input.teacherId || undefined;
+      const search = input.search || undefined;
+      const metricFilter = input.metricFilter || undefined;
+
+      const { metrics, rows } = await SchedulingRepository.getAdminDashboardSchedule({
+        date: targetDate,
+        teacherId,
+        search,
+        viewerTimezone,
+        metricFilter,
+      });
+
+      const mappedRows = rows.map(mapDailyScheduleListItem);
+
+      return {
+        id: `admin-dashboard-${input.date}-${teacherId || "all"}-${search || ""}`,
+        metrics: {
+          id: `metrics-${targetDate.toISOString()}-${teacherId || "all"}-${search || ""}`,
+          ...metrics,
+        },
+        rows: mappedRows,
+        totalCount: mappedRows.length,
+      };
+    } catch (error) {
+      logger.error("Error fetching admin dashboard schedule", { userId, error });
+      throw error;
+    }
+  }
+
   export async function getDailyMetrics(userId: string, targetDate: Date, teacherId?: string, locale?: string) {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
@@ -27,9 +135,9 @@ export namespace ScheduleService {
         throw new Error(t("unauthorizedViewMetrics"));
       }
 
-      const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacherId);
+      const viewerTimezone = await resolveViewerTimezone(userId);
+      const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacherId, undefined, viewerTimezone);
 
-      // Inject ID for Apollo Cache
       return {
         id: `metrics-${targetDate.toISOString()}-${teacherId || "all"}`,
         ...metrics,
@@ -49,30 +157,7 @@ export namespace ScheduleService {
     locale?: string
   ) {
     try {
-      const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_LIST);
-      if (!isAuthorized) {
-        logger.warn("Unauthorized access to daily schedule", { userId });
-        const t = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(t("unauthorizedViewList"));
-      }
-
-      if (search) {
-        const canSearch = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_SEARCH);
-        if (!canSearch) {
-          logger.warn("Unauthorized search access to daily schedule", { userId });
-          const t = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(t("unauthorizedSearch"));
-        }
-      }
-
-      if (metricFilter && metricFilter !== "total") {
-        const canFilter = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_FILTER_METRICS);
-        if (!canFilter) {
-          logger.warn("Unauthorized metric filter access to daily schedule", { userId, metricFilter });
-          const t = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(t("unauthorizedAction"));
-        }
-      }
+      await assertDailyScheduleListAccess(userId, { search, metricFilter }, locale);
 
       const viewerTimezone = await resolveViewerTimezone(userId);
 
@@ -83,7 +168,7 @@ export namespace ScheduleService {
         metricFilter,
       });
 
-      return list.map(item => ({ ...item }));
+      return list.map(item => mapDailyScheduleListItem(item));
     } catch (error) {
       logger.error("Error fetching daily schedule", { userId, error });
       throw error;

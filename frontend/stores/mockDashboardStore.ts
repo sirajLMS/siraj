@@ -4,27 +4,12 @@ import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/type
 import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/dashboard/utils/adminDashboardMetrics";
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 import type { DashboardState } from "./dashboardStore";
+import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule-instance-dashboard-status";
 
 const MOCK_TEACHERS: TeacherFilterItem[] = [
   { id: "teacher-ahmed", name: "Ahmed Mohammed" },
   { id: "teacher-sarah", name: "Sarah Johnson" },
 ];
-
-const MOCK_METRICS = buildAdminDashboardMetrics({
-  id: "metrics-mock",
-  total: 42,
-  regular: 28,
-  trial: 8,
-  advance: 4,
-  rescheduled: 3,
-  suspended: 1,
-  taken: 22,
-  pending: 12,
-  activated: 5,
-  running: 2,
-  absent: 4,
-  leave: 1,
-});
 
 const MOCK_SCHEDULE: DailyScheduleRow[] = [
   {
@@ -62,6 +47,11 @@ const MOCK_SCHEDULE: DailyScheduleRow[] = [
   },
 ];
 
+const MOCK_METRICS = buildAdminDashboardMetrics({
+  id: "metrics-mock",
+  ...computeDailyScheduleMetricsFromRows(MOCK_SCHEDULE),
+});
+
 export const useMockDashboardStore = create<DashboardState>(set => ({
   todayClasses: MOCK_METRICS,
   lastUpdated: "dashboard.admin.updatedMinutesAgo",
@@ -76,7 +66,7 @@ export const useMockDashboardStore = create<DashboardState>(set => ({
   teachers: MOCK_TEACHERS,
   pagination: {
     page: 0,
-    totalItems: 42,
+    totalItems: MOCK_SCHEDULE.length,
     pageSize: 3,
   },
   setDateFilter: (date: string) => {

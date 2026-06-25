@@ -83,6 +83,44 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
   }),
 });
 
+export type AdminDashboardScheduleInputDefinition = {
+  date: string;
+  teacherId?: string | null;
+  search?: string | null;
+  metricFilter?: string | null;
+};
+
+export const AdminDashboardScheduleInputPothosObject = gqlSchemaBuilder
+  .inputRef<AdminDashboardScheduleInputDefinition>("AdminDashboardScheduleInput")
+  .implement({
+    fields: t => ({
+      date: t.string({ required: true }),
+      teacherId: t.string(),
+      search: t.string(),
+      metricFilter: t.string(),
+    }),
+  });
+
+export type AdminDashboardScheduleResultDefinition = {
+  id: string;
+  totalCount: number;
+  metrics: DailyScheduleMetricsDefinition;
+  rows: DailyScheduleListDefinition[];
+};
+
+const AdminDashboardScheduleResultRef = gqlSchemaBuilder.objectRef<AdminDashboardScheduleResultDefinition>(
+  "AdminDashboardScheduleResult"
+);
+
+export const AdminDashboardScheduleResultPothosObject = AdminDashboardScheduleResultRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    totalCount: t.exposeInt("totalCount"),
+    metrics: t.expose("metrics", { type: DailyScheduleMetricsPothosObject }),
+    rows: t.expose("rows", { type: [DailyScheduleListPothosObject] }),
+  }),
+});
+
 export type RescheduleTrackingRowDefinition = {
   id: string;
   originalClassId: string | null;

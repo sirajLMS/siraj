@@ -2,9 +2,14 @@ import { describe, expect, test } from "bun:test";
 import { teachers as demoTeachers } from "@/shared/demo-users";
 import { executeDstBulkUpdateMutationDocument } from "../sharedDocuments/dst-migration.documents";
 import {
+  adminDashboardScheduleQueryDocument,
   dailyScheduleListQueryDocument,
   dailyScheduleMetricsQueryDocument,
 } from "../sharedDocuments/schedule.documents";
+import {
+  resolveClassInstanceDashboardStatus,
+} from "@/shared/lib/schedule-instance-dashboard-status";
+import { ClassOutcome } from "@/shared/lib/enum";
 import {
   clearWeeklyScheduleMutationDocument,
   deleteRecurringClassMutationDocument,
@@ -134,7 +139,36 @@ describe("GraphQL Schedule Integration Tests", () => {
     expect(pendingList.length).toBeLessThanOrEqual(allList.length);
     for (const item of pendingList) {
       if (!item) continue;
-      expect(item.outcome).toBe("PENDING");
+      expect(
+        resolveClassInstanceDashboardStatus(item.outcome, item.executionState)
+      ).toBe(ClassOutcome.PENDING);
+    }
+  });
+
+  test("adminDashboardSchedule returns aligned metrics and filtered rows", async () => {
+    if (!authToken) throw new Error("No auth token");
+
+    const data = await authenticatedRequest(authToken, "query", adminDashboardScheduleQueryDocument, {
+      input: {
+        date: testDate,
+        teacherId: null,
+        search: null,
+        metricFilter: "pending",
+      },
+    });
+
+    const result = data.adminDashboardSchedule;
+    if (!result) throw new Error("No adminDashboardSchedule data returned");
+
+    expect(result.metrics).toBeDefined();
+    expect(Array.isArray(result.rows)).toBeTrue();
+    expect(result.totalCount).toBe(result.rows?.length ?? 0);
+
+    for (const item of result.rows ?? []) {
+      if (!item) continue;
+      expect(
+        resolveClassInstanceDashboardStatus(item.outcome, item.executionState)
+      ).toBe(ClassOutcome.PENDING);
     }
   });
 

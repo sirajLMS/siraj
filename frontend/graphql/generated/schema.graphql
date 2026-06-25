@@ -1,3 +1,17 @@
+input AdminDashboardScheduleInput {
+  date: String!
+  metricFilter: String
+  search: String
+  teacherId: String
+}
+
+type AdminDashboardScheduleResult {
+  id: String
+  metrics: DailyScheduleMetrics
+  rows: [DailyScheduleList!]
+  totalCount: Int
+}
+
 """Paginated admin suggestion list with metrics."""
 type AdminSuggestionResult {
   id: String
@@ -1288,6 +1302,7 @@ scalar PhoneNumber
 type Query {
   """Returns the paginated admin complaint queue with metrics."""
   adminComplaintQueue(filter: ComplaintQueueFilter!): ComplaintQueueResult
+  adminDashboardSchedule(input: AdminDashboardScheduleInput!): AdminDashboardScheduleResult
 
   """Returns the paginated admin suggestion list with metrics."""
   adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult

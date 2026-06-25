@@ -21,6 +21,21 @@ export type Scalars = {
   StringMap: { input: Record<string, string>; output: Record<string, string>; }
 };
 
+export type AdminDashboardScheduleInput = {
+  date: Scalars['String']['input'];
+  metricFilter: InputMaybe<Scalars['String']['input']>;
+  search: InputMaybe<Scalars['String']['input']>;
+  teacherId: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AdminDashboardScheduleResult = {
+  __typename?: 'AdminDashboardScheduleResult';
+  id: Maybe<Scalars['String']['output']>;
+  metrics: Maybe<DailyScheduleMetrics>;
+  rows: Maybe<Array<DailyScheduleList>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
 /** Paginated admin suggestion list with metrics. */
 export type AdminSuggestionResult = {
   __typename?: 'AdminSuggestionResult';
@@ -1659,6 +1674,7 @@ export type Query = {
   __typename?: 'Query';
   /** Returns the paginated admin complaint queue with metrics. */
   adminComplaintQueue: Maybe<ComplaintQueueResult>;
+  adminDashboardSchedule: Maybe<AdminDashboardScheduleResult>;
   /** Returns the paginated admin suggestion list with metrics. */
   adminSuggestions: Maybe<AdminSuggestionResult>;
   classInstance: Maybe<ClassInstanceDetail>;
@@ -1735,6 +1751,11 @@ export type Query = {
 
 export type QueryAdminComplaintQueueArgs = {
   filter: ComplaintQueueFilter;
+};
+
+
+export type QueryAdminDashboardScheduleArgs = {
+  input: AdminDashboardScheduleInput;
 };
 
 

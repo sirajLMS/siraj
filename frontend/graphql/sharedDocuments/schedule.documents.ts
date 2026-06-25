@@ -2,6 +2,50 @@ import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 
+export const adminDashboardScheduleQueryDocument: TypedDocumentNode<
+  Operations.AdminDashboardScheduleQuery,
+  Types.QueryAdminDashboardScheduleArgs
+> = gql`
+  query adminDashboardSchedule($input: AdminDashboardScheduleInput!) {
+    adminDashboardSchedule(input: $input) {
+      id
+      totalCount
+      metrics {
+        id
+        total
+        regular
+        trial
+        advance
+        rescheduled
+        suspended
+        taken
+        pending
+        activated
+        running
+        absent
+        leave
+      }
+      rows {
+        id
+        yourTime
+        teacherTime
+        studentTime
+        duration
+        outcome
+        executionState
+        student {
+          id
+          name
+        }
+        teacher {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
 export const dailyScheduleMetricsQueryDocument: TypedDocumentNode<
   Operations.DailyScheduleMetricsQuery,
   Types.QueryDailyScheduleMetricsArgs

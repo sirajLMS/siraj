@@ -1,7 +1,8 @@
-export type { DailyScheduleResult, FutureClassRow, StatusTrackingRow } from "./scheduling-queries.repository";
+export type { DailyScheduleResult, FutureClassRow, StatusTrackingRow, AdminDashboardScheduleInput, AdminDashboardScheduleResult } from "./scheduling-queries.repository";
 export {
   bulkFreezeStudentClasses,
   bulkUnfreezeStudentClasses,
+  getAdminDashboardSchedule,
   getClassStatusEvents,
   getDailyMetrics,
   getDailySchedule,

@@ -1,5 +1,6 @@
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
+import Link from "next/link";
 
 export const StyledMonospaceLabel = styled(Typography)(({ theme }) => ({
   fontFamily: "monospace",
@@ -18,6 +19,20 @@ export const StyledTeacherNameText = styled(Typography)(({ theme }) => ({
   alignSelf: "center",
 }));
 
+export const StyledScheduleNameLink = styled(Link)(({ theme }) => ({
+  alignSelf: "center",
+  color: theme.palette.primary.main,
+  fontWeight: 500,
+  textDecoration: "none",
+  "&:hover": {
+    textDecoration: "underline",
+  },
+}));
+
+export const StyledScheduleTeacherLink = styled(StyledScheduleNameLink)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+}));
+
 export const StyledActionsCellBox = styled(Box)({
   display: "flex",
   justifyContent: "center",
@@ -26,7 +41,7 @@ export const StyledActionsCellBox = styled(Box)({
   height: "100%",
 });
 
-export const StyledGridDetailsIconButton = styled(IconButton)(({ theme }) => ({
+export const StyledGridDetailsIconButton = styled(Button)(({ theme }) => ({
   color: theme.palette.primary.main,
   "&:hover": {
     backgroundColor: alpha(theme.palette.primary.main, 0.08),

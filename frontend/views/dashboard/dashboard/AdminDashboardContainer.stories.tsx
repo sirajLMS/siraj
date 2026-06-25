@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMockDashboardStore } from "@/frontend/stores/mockDashboardStore";
+import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule-instance-dashboard-status";
 import { DashboardView } from "./DashboardView";
 import { useAdminDashboardLabels } from "./utils";
+import { buildAdminDashboardMetrics } from "./utils/adminDashboardMetrics";
 import {
   matchesDailyScheduleMetricFilter,
   resolveDailyScheduleMetricFilter,
@@ -15,7 +17,6 @@ export function MockAdminDashboardContainer() {
 
   const { headers, statusLabels } = useAdminDashboardLabels();
 
-  const todayClasses = useMockDashboardStore(state => state.todayClasses);
   const lastUpdatedKey = useMockDashboardStore(state => state.lastUpdated);
   const filters = useMockDashboardStore(state => state.filters);
   const scheduleRows = useMockDashboardStore(state => state.scheduleRows);
@@ -38,32 +39,43 @@ export function MockAdminDashboardContainer() {
 
   const metricFilter = resolveDailyScheduleMetricFilter(filters.selectedStatus);
 
-  const filteredRows = scheduleRows.filter(row => {
-    if (!matchesDailyScheduleMetricFilter(row, metricFilter)) {
-      return false;
-    }
+  const baseRows = useMemo(
+    () =>
+      scheduleRows.filter(row => {
+        if (filters.searchQuery) {
+          const query = filters.searchQuery.toLowerCase();
+          const studentMatch = (row.student?.name ?? "").toLowerCase().includes(query);
+          const classIdMatch = (row.id ?? "").toLowerCase().includes(query);
+          if (!studentMatch && !classIdMatch) {
+            return false;
+          }
+        }
 
-    if (filters.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
-      const studentMatch = (row.student?.name ?? "").toLowerCase().includes(query);
-      const classIdMatch = (row.id ?? "").toLowerCase().includes(query);
-      if (!studentMatch && !classIdMatch) {
-        return false;
-      }
-    }
+        if (filters.teacherId) {
+          const teacherId = filters.teacherId.toLowerCase();
+          const teacherName = (row.teacher?.name ?? "").toLowerCase();
+          const nameParts = teacherId.split("-");
+          const matchesTeacher = nameParts.some(part => teacherName.includes(part));
+          if (!matchesTeacher) {
+            return false;
+          }
+        }
 
-    if (filters.teacherId) {
-      const teacherId = filters.teacherId.toLowerCase();
-      const teacherName = (row.teacher?.name ?? "").toLowerCase();
-      const nameParts = teacherId.split("-");
-      const matchesTeacher = nameParts.some(part => teacherName.includes(part));
-      if (!matchesTeacher) {
-        return false;
-      }
-    }
+        return true;
+      }),
+    [filters.searchQuery, filters.teacherId, scheduleRows]
+  );
 
-    return true;
-  });
+  const metrics = useMemo(
+    () =>
+      buildAdminDashboardMetrics({
+        id: "metrics-mock",
+        ...computeDailyScheduleMetricsFromRows(baseRows),
+      }),
+    [baseRows]
+  );
+
+  const filteredRows = baseRows.filter(row => matchesDailyScheduleMetricFilter(row, metricFilter));
 
   const paginatedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
 
@@ -85,7 +97,7 @@ export function MockAdminDashboardContainer() {
     <DashboardView
       todayClassesTitle={t("admin.todayClasses")}
       lastUpdated={translatedLastUpdated}
-      metrics={todayClasses}
+      metrics={metrics}
       onMetricClick={handleMetricClick}
       selectedMetricKey={filters.selectedStatus ?? undefined}
       scheduleTitle={t("admin.scheduleOverview")}

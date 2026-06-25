@@ -305,6 +305,100 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       });
     });
 
+    test("filters daily schedule by metric filter using dashboard status", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "MetricFilter");
+        const testDate = new Date("2028-02-01T12:00:00Z");
+
+        await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: testDate,
+          scheduledEndAt: new Date(testDate.getTime() + 3600000),
+          classType: "REGULAR",
+          outcome: "PENDING",
+          executionState: "NOT_ACTIVATED",
+        });
+        await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: testDate,
+          scheduledEndAt: new Date(testDate.getTime() + 3600000),
+          classType: "TRIAL",
+          outcome: "PENDING",
+          executionState: "RUNNING",
+        });
+        await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: testDate,
+          scheduledEndAt: new Date(testDate.getTime() + 3600000),
+          classType: "REGULAR",
+          outcome: "TAKEN",
+          executionState: "COMPLETED",
+          actualStartAt: testDate,
+          actualEndAt: new Date(testDate.getTime() + 3600000),
+        });
+
+        const dashboard = await SchedulingRepository.getAdminDashboardSchedule(
+          {
+            date: testDate,
+            teacherId: teacher.id,
+            viewerTimezone: "UTC",
+          },
+          tx
+        );
+
+        expect(dashboard.metrics.pending).toBeGreaterThanOrEqual(1);
+        expect(dashboard.metrics.running).toBeGreaterThanOrEqual(1);
+        expect(dashboard.metrics.taken).toBeGreaterThanOrEqual(1);
+
+        const pendingRows = await SchedulingRepository.getDailySchedule(
+          testDate,
+          { teacherId: teacher.id, metricFilter: "pending" },
+          tx
+        );
+        const runningRows = await SchedulingRepository.getDailySchedule(
+          testDate,
+          { teacherId: teacher.id, metricFilter: "running" },
+          tx
+        );
+
+        expect(pendingRows.every(row => row.outcome === "PENDING" && row.executionState === "NOT_ACTIVATED")).toBe(
+          true
+        );
+        expect(runningRows.some(row => row.executionState === "RUNNING")).toBe(true);
+      });
+    });
+
+    test("search narrows admin dashboard metrics and rows", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "MetricSearch");
+        const testDate = new Date("2028-03-01T12:00:00Z");
+
+        await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: testDate,
+          scheduledEndAt: new Date(testDate.getTime() + 3600000),
+          outcome: "PENDING",
+        });
+
+        const allDashboard = await SchedulingRepository.getAdminDashboardSchedule(
+          {
+            date: testDate,
+            teacherId: teacher.id,
+            viewerTimezone: "UTC",
+          },
+          tx
+        );
+        const searchedDashboard = await SchedulingRepository.getAdminDashboardSchedule(
+          {
+            date: testDate,
+            teacherId: teacher.id,
+            search: student.name,
+            viewerTimezone: "UTC",
+          },
+          tx
+        );
+
+        expect(searchedDashboard.metrics.total).toBeLessThanOrEqual(allDashboard.metrics.total);
+        expect(searchedDashboard.rows.length).toBeGreaterThanOrEqual(1);
+      });
+    });
+
     test("filters daily schedule by metric filter", async () => {
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "MetricFilter");

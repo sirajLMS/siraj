@@ -1,9 +1,10 @@
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
-import type { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
+  AdminDashboardScheduleInputPothosObject,
+  AdminDashboardScheduleResultPothosObject,
   DailyScheduleListPothosObject,
   DailyScheduleMetricsPothosObject,
   RescheduleTrackingInputPothosObject,
@@ -11,6 +12,23 @@ import {
   RescheduleTrackingRowPothosObject,
 } from "../pothos/schedule.pothos";
 import { WeeklyScheduleGridPothosObject, WeeklyWorkloadMetricsPothosObject } from "../pothos/weekly-schedule.pothos";
+
+gqlSchemaBuilder.queryField("adminDashboardSchedule", t =>
+  t.field({
+    type: AdminDashboardScheduleResultPothosObject,
+    args: {
+      input: t.arg({ type: AdminDashboardScheduleInputPothosObject, required: true }),
+    },
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, args, ctx) => {
+      if (!ctx.user) {
+        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+        throw new Error(tFunc("unauthorized"));
+      }
+      return ScheduleService.getAdminDashboardSchedule(ctx.user.id, args.input, ctx.locale);
+    },
+  })
+);
 
 gqlSchemaBuilder.queryField("dailyScheduleMetrics", t =>
   t.field({
@@ -25,7 +43,12 @@ gqlSchemaBuilder.queryField("dailyScheduleMetrics", t =>
         const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
         throw new Error(tFunc("unauthorized"));
       }
-      return ScheduleService.getDailyMetrics(ctx.user.id, new Date(args.date), args.teacherId || undefined, ctx.locale);
+      const result = await ScheduleService.getAdminDashboardSchedule(
+        ctx.user.id,
+        { date: args.date, teacherId: args.teacherId },
+        ctx.locale
+      );
+      return result.metrics;
     },
   })
 );
@@ -45,27 +68,17 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
         const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
         throw new Error(tFunc("unauthorized"));
       }
-      const rawList = await ScheduleService.getDailySchedule(
+      const result = await ScheduleService.getAdminDashboardSchedule(
         ctx.user.id,
-        new Date(args.date),
-        args.teacherId || undefined,
-        args.search || undefined,
-        args.metricFilter || undefined,
+        {
+          date: args.date,
+          teacherId: args.teacherId,
+          search: args.search,
+          metricFilter: args.metricFilter,
+        },
         ctx.locale
       );
-
-      return rawList.map(item => ({
-        id: item.id,
-        studentTime: item.scheduledStartAt.toISOString(),
-        teacherTime: item.scheduledStartAt.toISOString(),
-        yourTime: item.yourTimeFormatted || item.scheduledStartAt.toISOString(),
-        duration: item.durationMinutes,
-        status: item.outcome || item.executionState,
-        outcome: item.outcome as ClassOutcome,
-        executionState: item.executionState as ClassExecutionState,
-        student: { id: item.studentId, name: item.student?.name || "Unknown" },
-        teacher: { id: item.teacherId, name: item.teacher?.user?.name || "Unknown" },
-      }));
+      return result.rows;
     },
   })
 );

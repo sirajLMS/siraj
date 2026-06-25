@@ -1,6 +1,5 @@
 "use client";
 
-import { Details as DetailsIcon } from "@mui/icons-material";
 import { Box, Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
@@ -8,11 +7,14 @@ import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/dashboard/utils/formatScheduleTime";
 import { ScheduleInstanceStatusBadge } from "./ScheduleInstanceStatusBadge";
 import {
   StyledActionsCellBox,
   StyledGridDetailsIconButton,
   StyledMonospaceLabel,
+  StyledScheduleNameLink,
+  StyledScheduleTeacherLink,
   StyledStudentNameText,
   StyledTeacherNameText,
 } from "./ScheduleOverviewDataGrid.styles";
@@ -36,7 +38,8 @@ interface UseScheduleColumnsParams {
 
 function buildTimeColumns(
   showTimezones: boolean,
-  headers: UseScheduleColumnsParams["headers"]
+  headers: UseScheduleColumnsParams["headers"],
+  locale: string
 ): GridColDef<DailyScheduleRow>[] {
   if (showTimezones) {
     return [
@@ -52,14 +55,18 @@ function buildTimeColumns(
         headerName: headers.teacherTime,
         width: 150,
         flex: 1,
-        renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.teacherTime ?? ""}</StyledMonospaceLabel>,
+        renderCell: ({ row }) => (
+          <StyledMonospaceLabel variant="labelMd">{formatScheduleTimeOnly(row.teacherTime, locale)}</StyledMonospaceLabel>
+        ),
       },
       {
         field: "studentTime",
         headerName: headers.studentTime,
         width: 150,
         flex: 1,
-        renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.studentTime ?? ""}</StyledMonospaceLabel>,
+        renderCell: ({ row }) => (
+          <StyledMonospaceLabel variant="labelMd">{formatScheduleTimeOnly(row.studentTime, locale)}</StyledMonospaceLabel>
+        ),
       },
     ];
   }
@@ -75,6 +82,32 @@ function buildTimeColumns(
   ];
 }
 
+function renderStudentCell(row: DailyScheduleRow, locale: string) {
+  const studentName = row.student?.name ?? "Unknown Student";
+  const studentId = row.student?.id;
+
+  if (!studentId) {
+    return <StyledStudentNameText variant="bodyMd">{studentName}</StyledStudentNameText>;
+  }
+
+  return (
+    <StyledScheduleNameLink href={`/${locale}/students/${studentId}`}>{studentName}</StyledScheduleNameLink>
+  );
+}
+
+function renderTeacherCell(row: DailyScheduleRow, locale: string) {
+  const teacherName = row.teacher?.name ?? "Unknown Teacher";
+  const teacherId = row.teacher?.id;
+
+  if (!teacherId) {
+    return <StyledTeacherNameText variant="bodyMd">{teacherName}</StyledTeacherNameText>;
+  }
+
+  return (
+    <StyledScheduleTeacherLink href={`/${locale}/teachers/${teacherId}/profile`}>{teacherName}</StyledScheduleTeacherLink>
+  );
+}
+
 function buildActionsColumn(
   headers: UseScheduleColumnsParams["headers"],
   detailsLabel: string,
@@ -88,12 +121,14 @@ function buildActionsColumn(
     sortable: false,
     align: "center",
     headerAlign: "center",
+    flex: .5,
     renderCell: ({ row }) => (
       <StyledActionsCellBox>
         <Box>
           <Tooltip title={detailsLabel}>
-            <StyledGridDetailsIconButton size="small" onClick={() => router.push(`/${locale}/classes/${row.id ?? ""}`)}>
-              <DetailsIcon fontSize="small" />
+            <StyledGridDetailsIconButton variant="text" size="small" onClick={() => router.push(`/${locale}/classes/${row.id ?? ""}`)}>
+              {/* <DetailsIcon fontSize="small" /> */}
+              {detailsLabel}
             </StyledGridDetailsIconButton>
           </Tooltip>
         </Box>
@@ -121,23 +156,19 @@ export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTi
         headerName: headers.student,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => (
-          <StyledStudentNameText variant="bodyMd">{row.student?.name ?? "Unknown Student"}</StyledStudentNameText>
-        ),
+        renderCell: ({ row }) => renderStudentCell(row, locale),
       },
       {
         field: "teacher",
         headerName: headers.teacher,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => (
-          <StyledTeacherNameText variant="bodyMd">{row.teacher?.name ?? "Unknown Teacher"}</StyledTeacherNameText>
-        ),
+        renderCell: ({ row }) => renderTeacherCell(row, locale),
       },
     ];
 
     baseCols.push(
-      ...buildTimeColumns(showTimezones, headers),
+      ...buildTimeColumns(showTimezones, headers, locale),
       {
         field: "status",
         headerName: headers.status,

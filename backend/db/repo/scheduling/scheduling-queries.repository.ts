@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, isNotNull, isNull, lt, ne, or, sql } from "drizzle-orm";
+import { and, eq, gte, ilike, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -12,6 +12,11 @@ import {
 } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
+import {
+  computeDailyScheduleMetricsFromRows,
+  matchesDashboardMetricFilter,
+  type DailyScheduleMetricsCounts,
+} from "@/shared/lib/schedule-instance-dashboard-status";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -29,101 +34,165 @@ export type DailyScheduleMetricFilter =
   | "absent"
   | "leave";
 
-function buildDailyMetricFilterCondition(metricFilter?: string) {
-  if (!metricFilter || metricFilter === "total") {
-    return undefined;
-  }
+export type DailyScheduleResult = Types.ClassInstanceEntity & {
+  student?: Types.StudentEntity;
+  teacher?: Types.TeacherEntity & { user: Types.UserEntity };
+  yourTimeFormatted?: string;
+};
 
-  switch (metricFilter as DailyScheduleMetricFilter) {
-    case "regular":
-      return eq(classInstances.classType, "REGULAR");
-    case "trial":
-      return eq(classInstances.classType, "TRIAL");
-    case "advance":
-      return eq(classInstances.classType, "ADVANCE");
-    case "rescheduled":
-      return eq(classInstances.isRescheduled, true);
-    case "suspended":
-      return eq(classInstances.isFrozen, true);
-    case "taken":
-      return eq(classInstances.outcome, "TAKEN");
-    case "pending":
-      return eq(classInstances.outcome, "PENDING");
-    case "activated":
-      return eq(classInstances.executionState, "ACTIVATED");
-    case "running":
-      return and(
-        eq(classInstances.executionState, "ACTIVATED"),
-        isNotNull(classInstances.actualStartAt),
-        isNull(classInstances.actualEndAt)
-      );
-    case "absent":
-      return eq(classInstances.outcome, "ABSENT");
-    case "leave":
-      return eq(classInstances.outcome, "LEAVE");
-    default:
-      return undefined;
-  }
+export type AdminDashboardScheduleInput = {
+  date: Date;
+  teacherId?: string;
+  search?: string;
+  viewerTimezone: string;
+  metricFilter?: string;
+};
+
+export type AdminDashboardScheduleResult = {
+  metrics: DailyScheduleMetricsCounts;
+  rows: DailyScheduleResult[];
+};
+
+function buildDailyScheduleDayConditions(
+  date: Date,
+  viewerTimezone: string,
+  teacherId: string | undefined,
+  getDayBoundaries: typeof import("@/backend/lib/timezone").getDayBoundaries
+) {
+  const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(date, viewerTimezone);
+
+  return and(
+    isNull(classInstances.deletedAt),
+    gte(classInstances.scheduledStartAt, startOfDayUtc),
+    lt(classInstances.scheduledStartAt, endOfDayUtc),
+    teacherId ? eq(classInstances.teacherId, teacherId) : undefined
+  );
 }
 
-export const getDailyMetrics = async (date: Date, teacherId?: string, tx?: DBTransaction) => {
-  const runner = async (t: DBTransaction) => {
-    const baseConditions = and(
-      isNull(classInstances.deletedAt),
-      sql`DATE(${classInstances.scheduledStartAt}) = DATE(${date.toISOString()})`,
-      teacherId ? eq(classInstances.teacherId, teacherId) : undefined
-    );
+async function hydrateDailyScheduleRows(
+  t: DBTransaction,
+  instances: (typeof classInstances.$inferSelect)[]
+): Promise<DailyScheduleResult[]> {
+  const studentIds = Array.from(new Set(instances.map(instance => instance.studentId)));
+  const teacherIds = Array.from(new Set(instances.map(instance => instance.teacherId)));
 
-    const metrics = await t
-      .select({
-        total: sql<number>`count(*)`.mapWith(Number),
-        regular: sql<number>`sum(case when ${classInstances.classType} = 'REGULAR' then 1 else 0 end)`.mapWith(Number),
-        trial: sql<number>`sum(case when ${classInstances.classType} = 'TRIAL' then 1 else 0 end)`.mapWith(Number),
-        advance: sql<number>`sum(case when ${classInstances.classType} = 'ADVANCE' then 1 else 0 end)`.mapWith(Number),
-        rescheduled: sql<number>`sum(case when ${classInstances.isRescheduled} = true then 1 else 0 end)`.mapWith(
-          Number
-        ),
-        suspended: sql<number>`sum(case when ${classInstances.isFrozen} = true then 1 else 0 end)`.mapWith(Number),
-        taken: sql<number>`sum(case when ${classInstances.outcome} = 'TAKEN' then 1 else 0 end)`.mapWith(Number),
-        pending: sql<number>`sum(case when ${classInstances.outcome} = 'PENDING' then 1 else 0 end)`.mapWith(Number),
-        activated: sql<number>`sum(case when ${classInstances.executionState} = 'ACTIVATED' then 1 else 0 end)`.mapWith(
-          Number
-        ),
-        running:
-          sql<number>`sum(case when ${classInstances.executionState} = 'ACTIVATED' and ${classInstances.actualStartAt} is not null and ${classInstances.actualEndAt} is null then 1 else 0 end)`.mapWith(
-            Number
-          ),
-        absent: sql<number>`sum(case when ${classInstances.outcome} = 'ABSENT' then 1 else 0 end)`.mapWith(Number),
-        leave: sql<number>`sum(case when ${classInstances.outcome} = 'LEAVE' then 1 else 0 end)`.mapWith(Number),
-      })
+  const studentsData =
+    studentIds.length > 0 ? await t.select().from(students).where(inArray(students.id, studentIds)) : [];
+  const teachersData =
+    teacherIds.length > 0
+      ? await t
+          .select({ teacher: teachers, user: users })
+          .from(teachers)
+          .innerJoin(users, eq(teachers.userId, users.id))
+          .where(inArray(teachers.id, teacherIds))
+      : [];
+
+  const studentMap = new Map(studentsData.map(student => [student.id, student]));
+  const teacherMap = new Map(
+    teachersData.map(teacherRow => [teacherRow.teacher.id, { ...teacherRow.teacher, user: teacherRow.user }])
+  );
+
+  return instances.map(instance => ({
+    ...instance,
+    student: studentMap.get(instance.studentId),
+    teacher: teacherMap.get(instance.teacherId),
+  }));
+}
+
+async function fetchDailyScheduleBaseRows(
+  t: DBTransaction,
+  date: Date,
+  viewerTimezone: string,
+  teacherId?: string,
+  search?: string
+): Promise<DailyScheduleResult[]> {
+  const { getDayBoundaries } = await import("@/backend/lib/timezone");
+  const dayConditions = buildDailyScheduleDayConditions(date, viewerTimezone, teacherId, getDayBoundaries);
+
+  if (search) {
+    const searchPattern = `%${search}%`;
+    const matchedRows = await t
+      .select({ classInstance: classInstances })
       .from(classInstances)
-      .where(baseConditions);
+      .innerJoin(students, eq(classInstances.studentId, students.id))
+      .innerJoin(teachers, eq(classInstances.teacherId, teachers.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .where(
+        and(
+          dayConditions,
+          or(
+            ilike(students.name, searchPattern),
+            ilike(users.name, searchPattern),
+            ilike(sql`${classInstances.id}::text`, searchPattern)
+          )
+        )
+      );
 
-    return (
-      metrics[0] ?? {
-        total: 0,
-        regular: 0,
-        trial: 0,
-        advance: 0,
-        rescheduled: 0,
-        suspended: 0,
-        taken: 0,
-        pending: 0,
-        activated: 0,
-        running: 0,
-        absent: 0,
-        leave: 0,
-      }
+    return hydrateDailyScheduleRows(
+      t,
+      matchedRows.map(row => row.classInstance)
     );
+  }
+
+  const rows = await t
+    .select({ classInstance: classInstances })
+    .from(classInstances)
+    .where(dayConditions);
+
+  return hydrateDailyScheduleRows(
+    t,
+    rows.map(row => row.classInstance)
+  );
+}
+
+async function applyViewerTimezoneFormatting(
+  rows: DailyScheduleResult[],
+  viewerTimezone: string
+): Promise<DailyScheduleResult[]> {
+  const { formatInstantInTimezone } = await import("@/backend/lib/timezone");
+
+  return rows.map(row => ({
+    ...row,
+    yourTimeFormatted: formatInstantInTimezone(row.scheduledStartAt, viewerTimezone),
+  }));
+}
+
+export const getAdminDashboardSchedule = async (
+  input: AdminDashboardScheduleInput,
+  tx?: DBTransaction
+): Promise<AdminDashboardScheduleResult> => {
+  const runner = async (t: DBTransaction): Promise<AdminDashboardScheduleResult> => {
+    const baseRows = await fetchDailyScheduleBaseRows(
+      t,
+      input.date,
+      input.viewerTimezone,
+      input.teacherId,
+      input.search
+    );
+
+    const metrics = computeDailyScheduleMetricsFromRows(baseRows);
+
+    const filteredRows = input.metricFilter
+      ? baseRows.filter(row => matchesDashboardMetricFilter(row, input.metricFilter))
+      : baseRows;
+
+    return {
+      metrics,
+      rows: await applyViewerTimezoneFormatting(filteredRows, input.viewerTimezone),
+    };
   };
 
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
 
-export type DailyScheduleResult = Types.ClassInstanceEntity & {
-  student?: Types.StudentEntity;
-  teacher?: Types.TeacherEntity & { user: Types.UserEntity };
-  yourTimeFormatted?: string;
+export const getDailyMetrics = async (
+  date: Date,
+  teacherId?: string,
+  tx?: DBTransaction,
+  viewerTimezone = "UTC"
+) => {
+  const { metrics } = await getAdminDashboardSchedule({ date, teacherId, viewerTimezone }, tx);
+  return metrics;
 };
 
 export const getDailySchedule = async (
@@ -131,74 +200,23 @@ export const getDailySchedule = async (
   options?: string | { teacherId?: string; search?: string; viewerTimezone?: string; metricFilter?: string },
   tx?: DBTransaction
 ): Promise<DailyScheduleResult[]> => {
-  const runner = async (t: DBTransaction): Promise<DailyScheduleResult[]> => {
-    const teacherId = typeof options === "string" ? options : options?.teacherId;
-    const search = typeof options === "object" ? options?.search : undefined;
-    const viewerTimezone = typeof options === "object" ? options?.viewerTimezone : undefined;
-    const metricFilter = typeof options === "object" ? options?.metricFilter : undefined;
+  const teacherId = typeof options === "string" ? options : options?.teacherId;
+  const search = typeof options === "object" ? options?.search : undefined;
+  const viewerTimezone = typeof options === "object" ? options?.viewerTimezone : undefined;
+  const metricFilter = typeof options === "object" ? options?.metricFilter : undefined;
 
-    const { getDayBoundaries } = await import("@/backend/lib/timezone");
-    const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(date, viewerTimezone || "UTC");
+  const { rows } = await getAdminDashboardSchedule(
+    {
+      date,
+      teacherId,
+      search,
+      viewerTimezone: viewerTimezone || "UTC",
+      metricFilter,
+    },
+    tx
+  );
 
-    const baseConditions = and(
-      isNull(classInstances.deletedAt),
-      gte(classInstances.scheduledStartAt, startOfDayUtc),
-      lt(classInstances.scheduledStartAt, endOfDayUtc),
-      teacherId ? eq(classInstances.teacherId, teacherId) : undefined,
-      buildDailyMetricFilterCondition(metricFilter)
-    );
-
-    const rows = await t
-      .select({
-        classInstance: classInstances,
-      })
-      .from(classInstances)
-      .where(baseConditions);
-
-    const studentIds = Array.from(new Set(rows.map(r => r.classInstance.studentId)));
-    const teacherIds = Array.from(new Set(rows.map(r => r.classInstance.teacherId)));
-
-    const studentsData =
-      studentIds.length > 0 ? await t.select().from(students).where(inArray(students.id, studentIds)) : [];
-    const teachersData =
-      teacherIds.length > 0
-        ? await t
-            .select({ teacher: teachers, user: users })
-            .from(teachers)
-            .innerJoin(users, eq(teachers.userId, users.id))
-            .where(inArray(teachers.id, teacherIds))
-        : [];
-
-    const studentMap = new Map(studentsData.map(s => [s.id, s]));
-    const teacherMap = new Map(teachersData.map(tc => [tc.teacher.id, { ...tc.teacher, user: tc.user }]));
-
-    let results: DailyScheduleResult[] = rows.map(r => ({
-      ...r.classInstance,
-      student: studentMap.get(r.classInstance.studentId),
-      teacher: teacherMap.get(r.classInstance.teacherId),
-    }));
-
-    if (search) {
-      const lowerSearch = search.toLowerCase();
-      results = results.filter(
-        r =>
-          r.student?.name?.toLowerCase().includes(lowerSearch) ||
-          r.teacher?.user?.name?.toLowerCase().includes(lowerSearch)
-      );
-    }
-
-    if (viewerTimezone) {
-      const { formatInstantInTimezone } = await import("@/backend/lib/timezone");
-      return results.map(r => ({
-        ...r,
-        yourTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone),
-      }));
-    }
-
-    return results;
-  };
-
-  return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  return rows;
 };
 
 export const getClassStatusEvents = async (classInstanceId: string, tx?: DBTransaction) => {

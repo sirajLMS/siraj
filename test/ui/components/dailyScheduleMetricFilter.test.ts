@@ -26,7 +26,7 @@ describe("dailyScheduleMetricFilter", () => {
     expect(resolveDailyScheduleMetricFilter("taken")).toBe("taken");
   });
 
-  test("matchesDailyScheduleMetricFilter filters by outcome and executionState", () => {
+  test("matchesDailyScheduleMetricFilter filters by dashboard status", () => {
     const pendingRow = sampleRow({});
     const takenRow = sampleRow({
       outcome: ClassOutcome.Taken,
@@ -42,6 +42,7 @@ describe("dailyScheduleMetricFilter", () => {
     expect(matchesDailyScheduleMetricFilter(takenRow, "pending")).toBeFalse();
     expect(matchesDailyScheduleMetricFilter(takenRow, "taken")).toBeTrue();
     expect(matchesDailyScheduleMetricFilter(runningRow, "running")).toBeTrue();
+    expect(matchesDailyScheduleMetricFilter(runningRow, "pending")).toBeFalse();
     expect(matchesDailyScheduleMetricFilter(runningRow, "taken")).toBeFalse();
   });
 });

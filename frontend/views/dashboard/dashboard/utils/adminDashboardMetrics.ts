@@ -13,10 +13,11 @@ import {
   PowerSettingsNewOutlined,
   ThumbDownOutlined,
 } from "@mui/icons-material";
-import type { DailyScheduleMetricsQuery_dailyScheduleMetrics_DailyScheduleMetrics } from "@/frontend/graphql/generated/gql/operations";
+import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics } from "@/frontend/graphql/generated/gql/operations";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 
-type RawMetrics = DailyScheduleMetricsQuery_dailyScheduleMetrics_DailyScheduleMetrics | null | undefined;
+type RawMetrics =
+  AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics | null | undefined;
 
 interface AdminMetricDefinition {
   readonly key: string;

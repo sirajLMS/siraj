@@ -4,6 +4,21 @@ mock.module("next/navigation", () => ({
   usePathname: () => "/ar/dashboard",
 }));
 
+mock.module("next/link", () => ({
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";
@@ -114,7 +129,7 @@ describe("ScheduleOverviewDataGrid", () => {
     expect(screen.queryByText("Your Time")).toBeNull();
   });
 
-  test("renders student and teacher names in rows", () => {
+  test("renders student and teacher names as profile links", () => {
     renderWithWrapper(
       <ScheduleOverviewDataGrid
         rows={mockRows}
@@ -127,10 +142,11 @@ describe("ScheduleOverviewDataGrid", () => {
       { permissions: [] }
     );
 
-    expect(screen.getAllByText("Ahmed Hassan").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Dr. Sarah").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Fatima Ali").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Mr. Omar").length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: "Ahmed Hassan" })).toHaveAttribute("href", "/ar/students/student-1");
+    expect(screen.getByRole("link", { name: "Dr. Sarah" })).toHaveAttribute(
+      "href",
+      "/ar/teachers/teacher-1/profile"
+    );
   });
 
   test("renders empty message when no rows", () => {
