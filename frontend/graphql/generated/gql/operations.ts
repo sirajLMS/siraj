@@ -135,6 +135,13 @@ export type ComplaintCategory =
   | 'REGARDING_SYSTEM'
   | 'REGARDING_TEACHER';
 
+/** Input metadata for a pre-uploaded complaint attachment. */
+export type ComplaintFileMetadataInput = {
+  mimeType: string;
+  path: string;
+  sizeBytes: number;
+};
+
 /** Filter and pagination options for the admin complaint queue. */
 export type ComplaintQueueFilter = {
   limit: number;
@@ -152,6 +159,7 @@ export type ComplaintStatus =
 export type ComplaintSubmitInput = {
   body: string;
   category: ComplaintCategory;
+  files: Array<ComplaintFileMetadataInput> | null | undefined;
   studentId: string | null | undefined;
   submitterEmail: string;
 };
@@ -623,8 +631,14 @@ export type SuggestionFilter = {
   limit: number;
   offset: number;
   search: string | null | undefined;
-  status: string | null | undefined;
+  status: SuggestionStatus | null | undefined;
 };
+
+/** Status of a suggestion in the review pipeline. */
+export type SuggestionStatus =
+  | 'DUPLICATE'
+  | 'PENDING'
+  | 'REVIEWED';
 
 /** Input for creating a new teacher account with comprehensive profile */
 export type TeacherOnboardingInput = {
@@ -1722,7 +1736,7 @@ export type StudentByIdQueryVariables = Exact<{
 
 export type StudentByIdQuery = StudentByIdQuery_Query;
 
-export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion = { id: string | null, parentId: string | null, submitterName: string | null, body: string | null, emailSentAt: string | null, createdAt: string | null, parentName: string | null };
+export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion = { id: string | null, parentId: string | null, submitterName: string | null, body: string | null, status: Types.SuggestionStatus | null, emailSentAt: string | null, createdAt: string | null, parentName: string | null };
 
 export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_metrics_SuggestionMetrics = { id: string | null, pending: number | null, reviewed: number | null, avgResponseTime: string | null };
 

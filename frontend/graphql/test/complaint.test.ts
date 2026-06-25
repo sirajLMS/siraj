@@ -21,6 +21,7 @@ async function submitTestComplaint(token: string, body: string): Promise<string>
       body,
       studentId: null,
       submitterEmail: "parent@siraj.local",
+      files: null,
     },
   });
   const id = data.submitComplaint?.id;
@@ -189,6 +190,7 @@ describe("GraphQL: submitComplaint mutation", () => {
         body: "Integration test complaint from parent",
         studentId: null,
         submitterEmail: "parent@siraj.local",
+        files: null,
       },
     });
 
@@ -207,6 +209,7 @@ describe("GraphQL: submitComplaint mutation", () => {
         body: "Should be denied",
         studentId: null,
         submitterEmail: "teacher@siraj.local",
+        files: null,
       },
     });
   });
@@ -218,6 +221,7 @@ describe("GraphQL: submitComplaint mutation", () => {
         body: "",
         studentId: null,
         submitterEmail: "parent@siraj.local",
+        files: null,
       },
     });
     expect(data.submitComplaint?.id).toBeDefined();
@@ -230,6 +234,7 @@ describe("GraphQL: submitComplaint mutation", () => {
         body: "IDOR test — should link to own parent",
         studentId: null,
         submitterEmail: "parent@siraj.local",
+        files: null,
       },
     });
 
@@ -403,6 +408,7 @@ describe("GraphQL: Complaint security tests (Section 4)", () => {
         body: "IDOR student test",
         studentId: NIL_UUID,
         submitterEmail: "parent@siraj.local",
+        files: null,
       },
     });
   });

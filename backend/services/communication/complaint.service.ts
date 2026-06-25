@@ -181,6 +181,7 @@ export namespace ComplaintService {
     options: ComplaintQueueFilter,
     locale?: string
   ): Promise<{
+    id: string;
     complaints: ReadonlyArray<ComplaintReturnType>;
     metrics: { id: string; unanswered: number; answered: number; avgResolutionHours: number; totalCount: number };
   }> {
@@ -202,6 +203,7 @@ export namespace ComplaintService {
       ]);
 
       return {
+        id: "complaint-queue-result",
         complaints: queueResult.complaints,
         metrics: {
           id: "complaint-metrics",

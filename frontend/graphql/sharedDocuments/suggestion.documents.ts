@@ -16,6 +16,7 @@ export const adminSuggestionsQueryDocument: TypedDocumentNode<
         parentId
         submitterName
         body
+        status
         emailSentAt
         createdAt
         parentName
@@ -25,8 +26,8 @@ export const adminSuggestionsQueryDocument: TypedDocumentNode<
         pending
         reviewed
         avgResponseTime
+        totalCount
       }
-      totalCount
     }
   }
 `;

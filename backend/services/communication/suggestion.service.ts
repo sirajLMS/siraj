@@ -3,18 +3,19 @@ import { getBackendTranslations, logger } from "@/backend/lib";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type {
   ParentSuggestionOptions,
-  SubmitSuggestionInputType,
   SuggestionQueueFilter,
   SuggestionQueueResult,
   SuggestionReturnType,
+  SuggestionSearchResultType,
   SuggestionSelectType,
+  SuggestionSubmitInputType,
 } from "@/backend/types";
 import { AppPermission, NotificationEventType, SuggestionStatus } from "@/shared/lib/enum";
 
 export namespace SuggestionService {
   export async function submitSuggestion(
     actorUserId: string,
-    input: SubmitSuggestionInputType,
+    input: SuggestionSubmitInputType,
     locale?: string
   ): Promise<SuggestionSelectType> {
     const hasPermission = await PermissionsService.hasPermission(
@@ -72,7 +73,7 @@ export namespace SuggestionService {
     options: SuggestionQueueFilter,
     locale?: string
   ): Promise<SuggestionQueueResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_LIST);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("insufficientPermissions"));
@@ -90,12 +91,30 @@ export namespace SuggestionService {
 
       return {
         id: "admin-suggestion-result",
-        suggestions: result.rows as unknown as SuggestionReturnType[],
+        suggestions: result.rows.map(row => ({
+          id: row.id,
+          parentId: row.parentId,
+          submitterName: row.submitterName,
+          body: row.body,
+          status: row.status as SuggestionStatus,
+          duplicateOfId: row.duplicateOfId,
+          adminResponse: row.adminResponse,
+          reviewedByUserId: row.reviewedByUserId,
+          reviewedAt: row.reviewedAt,
+          emailSentAt: null,
+          createdAt: row.createdAt,
+          parentName: row.parentName ?? null,
+          reviewedByUserName: row.reviewerName ?? null,
+          duplicateOfBody: row.duplicateOfBody ?? null,
+          duplicateOfSubmitterName: row.duplicateOfSubmitterName ?? null,
+          responseCount: 0,
+        })),
         metrics: {
           id: "suggestion-metrics",
           pending: metrics.pending,
           reviewed: metrics.reviewed,
           duplicate: metrics.duplicate,
+          avgResponseTime: null,
           totalCount: result.totalCount,
         },
       };
@@ -110,7 +129,7 @@ export namespace SuggestionService {
     suggestionId: string,
     locale?: string
   ): Promise<SuggestionSelectType> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("insufficientPermissions"));
@@ -167,6 +186,34 @@ export namespace SuggestionService {
       return suggestions;
     } catch (error) {
       logger.error("Failed to get parent suggestions", { actorUserId, parentId: parent.id, error });
+      throw error;
+    }
+  }
+
+  export async function searchSuggestions(
+    actorUserId: string,
+    query: string,
+    excludeId: string,
+    locale?: string
+  ): Promise<ReadonlyArray<SuggestionSearchResultType>> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    try {
+      return (await SuggestionRepository.searchSuggestions(query, excludeId)).map(result => ({
+        id: result.id,
+        parentId: "",
+        submitterName: result.submitterName,
+        body: result.body,
+        status: result.status as SuggestionStatus,
+        createdAt: result.createdAt,
+        parentName: "",
+      }));
+    } catch (error) {
+      logger.error("Failed to search suggestions", { actorUserId, query, excludeId, error });
       throw error;
     }
   }

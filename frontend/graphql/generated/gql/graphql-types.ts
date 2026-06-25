@@ -27,6 +27,7 @@ export type AdminSuggestionResult = {
   id: Maybe<Scalars['String']['output']>;
   metrics: Maybe<SuggestionMetrics>;
   rows: Maybe<Array<Suggestion>>;
+  suggestions: Maybe<Array<Suggestion>>;
   totalCount: Maybe<Scalars['Int']['output']>;
 };
 
@@ -294,6 +295,7 @@ export type Complaint = {
   body: Maybe<Scalars['String']['output']>;
   category: Maybe<ComplaintCategory>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
+  files: Maybe<Array<ComplaintFile>>;
   id: Maybe<Scalars['String']['output']>;
   parentId: Maybe<Scalars['String']['output']>;
   parentName: Maybe<Scalars['String']['output']>;
@@ -312,12 +314,31 @@ export enum ComplaintCategory {
   RegardingTeacher = 'REGARDING_TEACHER'
 }
 
+/** A file attached to a complaint. */
+export type ComplaintFile = {
+  __typename?: 'ComplaintFile';
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  fileId: Maybe<Scalars['String']['output']>;
+  filePath: Maybe<Scalars['String']['output']>;
+  isProtected: Maybe<Scalars['Boolean']['output']>;
+  usageType: Maybe<Scalars['String']['output']>;
+};
+
+/** Input metadata for a pre-uploaded complaint attachment. */
+export type ComplaintFileMetadataInput = {
+  mimeType: Scalars['String']['input'];
+  path: Scalars['String']['input'];
+  sizeBytes: Scalars['Int']['input'];
+};
+
 /** Aggregate metrics for the complaint queue. */
 export type ComplaintMetrics = {
   __typename?: 'ComplaintMetrics';
   answered: Maybe<Scalars['Int']['output']>;
+  avgResolutionHours: Maybe<Scalars['Int']['output']>;
   avgResolutionTime: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
+  totalCount: Maybe<Scalars['Int']['output']>;
   unanswered: Maybe<Scalars['Int']['output']>;
 };
 
@@ -332,6 +353,7 @@ export type ComplaintQueueFilter = {
 /** Paginated admin complaint queue with metrics. */
 export type ComplaintQueueResult = {
   __typename?: 'ComplaintQueueResult';
+  complaints: Maybe<Array<Complaint>>;
   id: Maybe<Scalars['String']['output']>;
   metrics: Maybe<ComplaintMetrics>;
   rows: Maybe<Array<Complaint>>;
@@ -359,6 +381,7 @@ export enum ComplaintStatus {
 export type ComplaintSubmitInput = {
   body: Scalars['String']['input'];
   category: ComplaintCategory;
+  files: InputMaybe<Array<ComplaintFileMetadataInput>>;
   studentId: InputMaybe<Scalars['String']['input']>;
   submitterEmail: Scalars['String']['input'];
 };
@@ -996,6 +1019,12 @@ export type MarkInvoicePaidResult = {
   version: Maybe<Scalars['Int']['output']>;
 };
 
+/** Input for marking a suggestion as a duplicate of another suggestion. */
+export type MarkSuggestionDuplicateInput = {
+  duplicateOfId: Scalars['String']['input'];
+  suggestionId: Scalars['String']['input'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   activateClass: Maybe<ClassInstanceDetail>;
@@ -1031,6 +1060,8 @@ export type Mutation = {
   deleteRecurringClass: Maybe<Scalars['Boolean']['output']>;
   deleteStorageItems: Maybe<BulkOperationResult>;
   deleteStudent: Maybe<Student>;
+  /** Soft-deletes a suggestion (super admin only). Returns true on success. */
+  deleteSuggestion: Maybe<Scalars['Boolean']['output']>;
   /** Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables. */
   demoLogin: Maybe<LoginResponse>;
   executeDstBulkUpdate: Maybe<DstMigrationReport>;
@@ -1039,6 +1070,8 @@ export type Mutation = {
   login: Maybe<LoginResponse>;
   logout: Maybe<Scalars['Boolean']['output']>;
   markInvoicePaid: Maybe<MarkInvoicePaidResult>;
+  /** Marks a suggestion as a duplicate of another suggestion (admin only). */
+  markSuggestionDuplicate: Maybe<Suggestion>;
   /** Marks a suggestion as reviewed (admin only). */
   markSuggestionReviewed: Maybe<Suggestion>;
   moveStorageItems: Maybe<BulkOperationResult>;
@@ -1051,6 +1084,8 @@ export type Mutation = {
   resetClass: Maybe<Scalars['Boolean']['output']>;
   /** Creates a response to an existing complaint (admin only). */
   respondToComplaint: Maybe<ComplaintResponse>;
+  /** Responds to a suggestion with an admin text response (admin only). */
+  respondToSuggestion: Maybe<Suggestion>;
   revokePermissionGroupFromUser: Maybe<Scalars['Boolean']['output']>;
   setStorageItemProtection: Maybe<FileOperationResult>;
   stopClass: Maybe<ClassInstanceDetail>;
@@ -1231,6 +1266,11 @@ export type MutationDeleteStudentArgs = {
 };
 
 
+export type MutationDeleteSuggestionArgs = {
+  suggestionId: Scalars['String']['input'];
+};
+
+
 export type MutationDemoLoginArgs = {
   input: DemoLoginInput;
 };
@@ -1262,6 +1302,11 @@ export type MutationLoginArgs = {
 export type MutationMarkInvoicePaidArgs = {
   expectedVersion: InputMaybe<Scalars['Int']['input']>;
   invoiceId: Scalars['String']['input'];
+};
+
+
+export type MutationMarkSuggestionDuplicateArgs = {
+  input: MarkSuggestionDuplicateInput;
 };
 
 
@@ -1310,6 +1355,11 @@ export type MutationResetClassArgs = {
 
 export type MutationRespondToComplaintArgs = {
   input: RespondToComplaintInput;
+};
+
+
+export type MutationRespondToSuggestionArgs = {
+  input: RespondToSuggestionInput;
 };
 
 
@@ -1542,6 +1592,12 @@ export type ParentProfile = {
   whatsapp: Maybe<Scalars['String']['output']>;
 };
 
+/** Pagination options for the parent suggestions history query. */
+export type ParentSuggestionOptions = {
+  limit: Scalars['Int']['input'];
+  offset: Scalars['Int']['input'];
+};
+
 export type PartialStudentUpdateInput = {
   classesRemaining: InputMaybe<Scalars['Int']['input']>;
   classesTotal: InputMaybe<Scalars['Int']['input']>;
@@ -1592,6 +1648,8 @@ export type Query = {
   adminSuggestions: Maybe<AdminSuggestionResult>;
   classInstance: Maybe<ClassInstanceDetail>;
   classStatusEvents: Maybe<Array<ClassStatusEvent>>;
+  /** Returns file attachments for a specific complaint. Accessible by the owning parent or admins. */
+  complaintFiles: Maybe<Array<ComplaintFile>>;
   dailyScheduleList: Maybe<Array<DailyScheduleList>>;
   dailyScheduleMetrics: Maybe<DailyScheduleMetrics>;
   directoryChildren: Maybe<Array<DirectoryInfo>>;
@@ -1616,6 +1674,8 @@ export type Query = {
   parentDocuments: Maybe<Array<ParentDocument>>;
   parentInvoiceHistory: Maybe<Array<ParentInvoiceRow>>;
   parentProfile: Maybe<ParentProfile>;
+  /** Returns the authenticated parent's suggestion history with review status. */
+  parentSuggestions: Maybe<Array<Suggestion>>;
   /** Fetch a single permission group by ID. */
   permissionGroup: Maybe<PermissionGroup>;
   /** List all permission groups with their permission IDs. */
@@ -1625,6 +1685,8 @@ export type Query = {
   rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
   rescheduleTrackingRows: Maybe<Array<RescheduleTrackingRow>>;
   searchFiles: Maybe<StorageObjectList>;
+  /** Search suggestions for duplicate marking autocomplete. Requires suggestions.review permission. */
+  searchSuggestions: Maybe<Array<SuggestionSearchResult>>;
   searchTeacherAvailability: Maybe<AvailabilitySearchResult>;
   statusTrackingSchedule: Maybe<Array<StatusTrackingScheduleRow>>;
   storageStats: Maybe<StorageStats>;
@@ -1673,6 +1735,11 @@ export type QueryClassInstanceArgs = {
 
 export type QueryClassStatusEventsArgs = {
   classInstanceId: Scalars['ID']['input'];
+};
+
+
+export type QueryComplaintFilesArgs = {
+  complaintId: Scalars['String']['input'];
 };
 
 
@@ -1756,6 +1823,11 @@ export type QueryParentProfileArgs = {
 };
 
 
+export type QueryParentSuggestionsArgs = {
+  options: ParentSuggestionOptions;
+};
+
+
 export type QueryPermissionGroupArgs = {
   id: Scalars['String']['input'];
 };
@@ -1771,6 +1843,12 @@ export type QuerySearchFilesArgs = {
   folder: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   searchTerm: Scalars['String']['input'];
+};
+
+
+export type QuerySearchSuggestionsArgs = {
+  excludeId: Scalars['String']['input'];
+  query: Scalars['String']['input'];
 };
 
 
@@ -1962,6 +2040,12 @@ export type RespondToComplaintInput = {
   body: Scalars['String']['input'];
   complaintId: Scalars['String']['input'];
   emailSent: Scalars['Boolean']['input'];
+};
+
+/** Input for responding to a suggestion with an admin response. */
+export type RespondToSuggestionInput = {
+  adminResponse: Scalars['String']['input'];
+  suggestionId: Scalars['String']['input'];
 };
 
 export type RevokePermissionGroupFromUserInput = {
@@ -2191,15 +2275,24 @@ export type SubmitSuggestionInput = {
   submitterName: Scalars['String']['input'];
 };
 
-/** A parent suggestion with full details. */
+/** A parent suggestion with full details including review and duplicate status. */
 export type Suggestion = {
   __typename?: 'Suggestion';
+  adminResponse: Maybe<Scalars['String']['output']>;
   body: Maybe<Scalars['String']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
+  duplicateOfBody: Maybe<Scalars['String']['output']>;
+  duplicateOfId: Maybe<Scalars['String']['output']>;
+  duplicateOfSubmitterName: Maybe<Scalars['String']['output']>;
   emailSentAt: Maybe<Scalars['DateTime']['output']>;
   id: Maybe<Scalars['String']['output']>;
   parentId: Maybe<Scalars['String']['output']>;
   parentName: Maybe<Scalars['String']['output']>;
+  responseCount: Maybe<Scalars['Int']['output']>;
+  reviewedAt: Maybe<Scalars['DateTime']['output']>;
+  reviewedByName: Maybe<Scalars['String']['output']>;
+  reviewedByUserId: Maybe<Scalars['String']['output']>;
+  status: Maybe<SuggestionStatus>;
   submitterName: Maybe<Scalars['String']['output']>;
 };
 
@@ -2208,17 +2301,38 @@ export type SuggestionFilter = {
   limit: Scalars['Int']['input'];
   offset: Scalars['Int']['input'];
   search: InputMaybe<Scalars['String']['input']>;
-  status: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<SuggestionStatus>;
 };
 
 /** Aggregate metrics for the suggestion queue. */
 export type SuggestionMetrics = {
   __typename?: 'SuggestionMetrics';
   avgResponseTime: Maybe<Scalars['String']['output']>;
+  duplicate: Maybe<Scalars['Int']['output']>;
   id: Maybe<Scalars['String']['output']>;
   pending: Maybe<Scalars['Int']['output']>;
   reviewed: Maybe<Scalars['Int']['output']>;
+  totalCount: Maybe<Scalars['Int']['output']>;
 };
+
+/** A lightweight suggestion result for duplicate search autocomplete. */
+export type SuggestionSearchResult = {
+  __typename?: 'SuggestionSearchResult';
+  body: Maybe<Scalars['String']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  parentId: Maybe<Scalars['String']['output']>;
+  parentName: Maybe<Scalars['String']['output']>;
+  status: Maybe<SuggestionStatus>;
+  submitterName: Maybe<Scalars['String']['output']>;
+};
+
+/** Status of a suggestion in the review pipeline. */
+export enum SuggestionStatus {
+  Duplicate = 'DUPLICATE',
+  Pending = 'PENDING',
+  Reviewed = 'REVIEWED'
+}
 
 export type SupportRequestResult = {
   __typename?: 'SupportRequestResult';

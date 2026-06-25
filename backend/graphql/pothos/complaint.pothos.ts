@@ -1,12 +1,13 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintService } from "@/backend/services";
 import type {
+  ComplaintFileReturnType,
   ComplaintMetrics,
   ComplaintQueueFilter,
   ComplaintQueueResult,
   ComplaintReturnType,
   ComplaintSelectType,
-  ComplaintSubmitInput,
+  ComplaintSubmitWithFilesInput,
 } from "@/backend/types";
 import { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import { ComplaintResponsePothosObject } from "./complaintResponses.pothos";
@@ -21,6 +22,19 @@ export const ComplaintStatusPothosEnum = gqlSchemaBuilder.enumType(ComplaintStat
   description: "Status of a complaint in the support queue.",
 });
 
+const ComplaintFileRef = gqlSchemaBuilder.objectRef<ComplaintFileReturnType>("ComplaintFile");
+
+export const ComplaintFilePothosObject = ComplaintFileRef.implement({
+  description: "A file attached to a complaint.",
+  fields: t => ({
+    fileId: t.exposeString("fileId"),
+    filePath: t.exposeString("filePath"),
+    isProtected: t.exposeBoolean("isProtected"),
+    usageType: t.exposeString("usageType"),
+    createdAt: t.expose("createdAt", { type: "DateTime" }),
+  }),
+});
+
 const ComplaintRef = gqlSchemaBuilder.objectRef<ComplaintReturnType>("Complaint");
 
 export const ComplaintPothosObject = ComplaintRef.implement({
@@ -29,7 +43,7 @@ export const ComplaintPothosObject = ComplaintRef.implement({
     id: t.exposeString("id"),
     body: t.exposeString("body"),
     parentId: t.exposeString("parentId"),
-    parentName: t.exposeString("parentName"),
+    parentName: t.exposeString("parentName", { nullable: true }),
     submitterEmail: t.exposeString("submitterEmail"),
     studentId: t.exposeString("studentId", { nullable: true }),
     studentName: t.exposeString("studentName", { nullable: true }),
@@ -38,6 +52,7 @@ export const ComplaintPothosObject = ComplaintRef.implement({
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
     responses: t.expose("responses", { type: [ComplaintResponsePothosObject], nullable: true }),
+    files: t.expose("files", { type: [ComplaintFilePothosObject], nullable: true }),
   }),
 });
 
@@ -49,7 +64,9 @@ export const ComplaintMetricsPothosObject = ComplaintMetricsRef.implement({
     id: t.exposeString("id"),
     unanswered: t.exposeInt("unanswered"),
     answered: t.exposeInt("answered"),
+    avgResolutionHours: t.exposeInt("avgResolutionHours"),
     avgResolutionTime: t.exposeString("avgResolutionTime", { nullable: true }),
+    totalCount: t.exposeInt("totalCount"),
   }),
 });
 
@@ -59,13 +76,27 @@ export const ComplaintQueueResultPothosObject = AdminComplaintQueueResultRef.imp
   description: "Paginated admin complaint queue with metrics.",
   fields: t => ({
     id: t.exposeString("id"),
+    complaints: t.expose("complaints", { type: [ComplaintPothosObject] }),
     rows: t.expose("complaints", { type: [ComplaintPothosObject] }),
     metrics: t.expose("metrics", { type: ComplaintMetricsPothosObject }),
   }),
 });
 
+const ComplaintFileMetadataInputRef = gqlSchemaBuilder.inputRef<{ path: string; mimeType: string; sizeBytes: number }>(
+  "ComplaintFileMetadataInput"
+);
+
+export const ComplaintFileMetadataInputPothosObject = ComplaintFileMetadataInputRef.implement({
+  description: "Input metadata for a pre-uploaded complaint attachment.",
+  fields: t => ({
+    path: t.string({ required: true }),
+    mimeType: t.string({ required: true }),
+    sizeBytes: t.int({ required: true }),
+  }),
+});
+
 export const SubmitComplaintInputPothosObject = gqlSchemaBuilder
-  .inputRef<ComplaintSubmitInput>("ComplaintSubmitInput")
+  .inputRef<ComplaintSubmitWithFilesInput>("ComplaintSubmitInput")
   .implement({
     description: "Input for submitting a new complaint.",
     fields: t => ({
@@ -73,6 +104,7 @@ export const SubmitComplaintInputPothosObject = gqlSchemaBuilder
       category: t.field({ type: ComplaintCategoryPothosEnum, required: true }),
       submitterEmail: t.string({ required: true }),
       body: t.string({ required: true }),
+      files: t.field({ type: [ComplaintFileMetadataInputPothosObject], required: false }),
     }),
   });
 
@@ -88,6 +120,17 @@ export const ComplaintQueueFilterPothosObject = gqlSchemaBuilder
     }),
   });
 
+function normalizeComplaint(complaint: ComplaintReturnType): ComplaintReturnType {
+  return {
+    ...complaint,
+    parentName: complaint.parentName ?? null,
+    studentName: complaint.studentName ?? null,
+    responseCount: complaint.responseCount ?? 0,
+    responses: complaint.responses ?? [],
+    files: complaint.files ?? [],
+  };
+}
+
 gqlSchemaBuilder.queryField("parentComplaints", t =>
   t.field({
     type: [ComplaintPothosObject],
@@ -97,7 +140,8 @@ gqlSchemaBuilder.queryField("parentComplaints", t =>
         throw new Error("unauthenticated");
       }
 
-      return await ComplaintService.getParentComplaints(ctx.user.id, ctx.locale);
+      const complaints = await ComplaintService.getParentComplaints(ctx.user.id, ctx.locale);
+      return complaints.map(normalizeComplaint);
     },
   })
 );
@@ -125,20 +169,35 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
         ctx.locale
       );
 
-      const rows = result.complaints;
-
       return {
-        id: "admin-complaint-queue",
-        complaints: rows,
+        id: result.id,
+        complaints: result.complaints.map(normalizeComplaint),
         metrics: {
-          id: "complaint-metrics",
+          id: result.metrics.id,
           unanswered: result.metrics.unanswered,
           answered: result.metrics.answered,
           avgResolutionHours: result.metrics.avgResolutionHours,
-          avgResolutionTime: result.metrics.avgResolutionHours > 0 ? `${result.metrics.avgResolutionHours}h` : null,
+          avgResolutionTime: null,
           totalCount: result.metrics.totalCount,
         },
       };
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("complaintFiles", t =>
+  t.field({
+    type: [ComplaintFilePothosObject],
+    description: "Returns file attachments for a specific complaint. Accessible by the owning parent or admins.",
+    args: {
+      complaintId: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      if (!ctx.user?.id) {
+        throw new Error("unauthenticated");
+      }
+
+      return await ComplaintService.getComplaintFiles(ctx.user.id, args.complaintId, ctx.locale);
     },
   })
 );
@@ -162,11 +221,12 @@ gqlSchemaBuilder.mutationField("submitComplaint", t =>
           category: args.input.category,
           submitterEmail: args.input.submitterEmail,
           body: args.input.body,
+          files: args.input.files ?? [],
         },
         ctx.locale
       );
 
-      return {
+      return normalizeComplaint({
         id: created.id,
         parentId: created.parentId,
         studentId: created.studentId ?? null,
@@ -176,9 +236,12 @@ gqlSchemaBuilder.mutationField("submitComplaint", t =>
         status: created.status as ComplaintStatus,
         createdAt: created.createdAt,
         updatedAt: created.updatedAt,
-        parentName: "",
+        parentName: null,
         studentName: null,
-      };
+        responseCount: 0,
+        responses: [],
+        files: [],
+      });
     },
   })
 );

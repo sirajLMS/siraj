@@ -1,4 +1,4 @@
-import type { SuggestionStatus } from "@/shared/lib/enum";
+import type { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export type {
   AdminSuggestionResult,

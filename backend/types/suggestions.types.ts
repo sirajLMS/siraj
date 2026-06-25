@@ -30,6 +30,7 @@ export type SuggestionMetrics = {
   pending: number;
   reviewed: number;
   duplicate: number;
+  avgResponseTime: string | null;
   totalCount: number;
 };
 
@@ -54,11 +55,17 @@ export type ParentSuggestionOptions = {
   readonly offset: number;
 };
 
-export type SubmitSuggestionInputType = {
-  readonly submitterName: string;
-  readonly body: string;
+export type SuggestionSearchResultType = {
+  id: string;
+  parentId: string;
+  submitterName: string;
+  body: string;
+  status: SuggestionStatus;
+  createdAt: Date;
+  parentName: string;
 };
 
-export type SuggestionPothosType = SuggestionReturnType & {
-  parentName: string;
+export type SuggestionSubmitInputType = {
+  readonly submitterName: string;
+  readonly body: string;
 };

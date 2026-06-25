@@ -5,7 +5,6 @@ import type { ComplaintResponse } from "./complaintResponses.types";
 export type ComplaintSelectType = typeof complaints.$inferSelect;
 export type ComplaintInsertType = typeof complaints.$inferInsert;
 
-// input
 export type ComplaintSubmitInput = Omit<
   ComplaintInsertType,
   // enums
@@ -14,14 +13,13 @@ export type ComplaintSubmitInput = Omit<
   | "status"
   | "createdAt"
   | "updatedAt"
+  | "deletedAt"
   // resolved from mutation context
   | "parentId"
 > & {
   // enums
   category: ComplaintCategory;
 };
-
-// return
 
 export type ComplaintReturnType = Omit<
   ComplaintSelectType,
@@ -39,9 +37,8 @@ export type ComplaintReturnType = Omit<
   studentName?: string | null;
   responseCount?: number | null;
   responses?: ReadonlyArray<ComplaintResponse> | null;
+  files?: ReadonlyArray<ComplaintFileReturnType> | null;
 };
-
-// custom pothos types
 
 export type ComplaintQueueFilter = {
   search?: string | null;
@@ -77,4 +74,8 @@ export type FileMetadata = {
   readonly path: string;
   readonly mimeType: string;
   readonly sizeBytes: number;
+};
+
+export type ComplaintSubmitWithFilesInput = ComplaintSubmitInput & {
+  files?: ReadonlyArray<FileMetadata>;
 };

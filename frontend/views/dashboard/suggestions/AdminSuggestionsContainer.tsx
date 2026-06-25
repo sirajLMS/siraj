@@ -6,13 +6,12 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   adminSuggestionsQueryDocument,
   markSuggestionReviewedMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/suggestion.documents";
 import { useAdminSuggestionsStore } from "@/frontend/stores/adminSuggestionsStore";
-import { SuggestionStatus } from "@/shared/lib/enum";
 import { AdminSuggestionsView } from "./AdminSuggestionsView";
 import type { AdminSuggestionRow, AdminSuggestionsSummary } from "./types/suggestions.types";
 import { buildSuggestionsLabels } from "./utils/buildSuggestionsLabels";
@@ -63,7 +62,7 @@ export function AdminSuggestionsContainer() {
       id: row.id ?? "",
       parentName: row.parentName ?? "",
       suggestionPreview: row.body ?? "",
-      status: row.emailSentAt ? SuggestionStatus.REVIEWED : SuggestionStatus.PENDING,
+      status: row.status ?? SuggestionStatus.Pending,
       submittedAt: row.createdAt ?? "",
     }));
   }, [data?.adminSuggestions?.rows]);
@@ -92,7 +91,7 @@ export function AdminSuggestionsContainer() {
   }
 
   return (
-    <RequirePermission permissions={[AppPermission.ComplaintsList]}>
+    <RequirePermission permissions={[AppPermission.SuggestionsList]}>
       <AdminSuggestionsView
         labels={labels.admin}
         summary={summary}

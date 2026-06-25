@@ -101,6 +101,7 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
           submitterEmail: formData.contactEmail,
           body: formData.complaintDetails,
           category: ComplaintCategory.Other,
+          files: null,
         },
       },
     });

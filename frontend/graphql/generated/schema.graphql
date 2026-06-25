@@ -3,6 +3,7 @@ type AdminSuggestionResult {
   id: String
   metrics: SuggestionMetrics
   rows: [Suggestion!]
+  suggestions: [Suggestion!]
   totalCount: Int
 }
 
@@ -259,6 +260,7 @@ type Complaint {
   body: String
   category: ComplaintCategory
   createdAt: DateTime
+  files: [ComplaintFile!]
   id: String
   parentId: String
   parentName: String
@@ -277,11 +279,29 @@ enum ComplaintCategory {
   REGARDING_TEACHER
 }
 
+"""A file attached to a complaint."""
+type ComplaintFile {
+  createdAt: DateTime
+  fileId: String
+  filePath: String
+  isProtected: Boolean
+  usageType: String
+}
+
+"""Input metadata for a pre-uploaded complaint attachment."""
+input ComplaintFileMetadataInput {
+  mimeType: String!
+  path: String!
+  sizeBytes: Int!
+}
+
 """Aggregate metrics for the complaint queue."""
 type ComplaintMetrics {
   answered: Int
+  avgResolutionHours: Int
   avgResolutionTime: String
   id: String
+  totalCount: Int
   unanswered: Int
 }
 
@@ -295,6 +315,7 @@ input ComplaintQueueFilter {
 
 """Paginated admin complaint queue with metrics."""
 type ComplaintQueueResult {
+  complaints: [Complaint!]
   id: String
   metrics: ComplaintMetrics
   rows: [Complaint!]
@@ -321,6 +342,7 @@ enum ComplaintStatus {
 input ComplaintSubmitInput {
   body: String!
   category: ComplaintCategory!
+  files: [ComplaintFileMetadataInput!]
   studentId: String
   submitterEmail: String!
 }
@@ -950,6 +972,12 @@ type MarkInvoicePaidResult {
   version: Int
 }
 
+"""Input for marking a suggestion as a duplicate of another suggestion."""
+input MarkSuggestionDuplicateInput {
+  duplicateOfId: String!
+  suggestionId: String!
+}
+
 type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
@@ -995,6 +1023,9 @@ type Mutation {
   deleteStorageItems(input: StorageItemsDeleteInput!): BulkOperationResult
   deleteStudent(id: String!): Student
 
+  """Soft-deletes a suggestion (super admin only). Returns true on success."""
+  deleteSuggestion(suggestionId: String!): Boolean
+
   """
   Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
   """
@@ -1005,6 +1036,9 @@ type Mutation {
   login(input: LoginInput!): LoginResponse
   logout: Boolean
   markInvoicePaid(expectedVersion: Int, invoiceId: String!): MarkInvoicePaidResult
+
+  """Marks a suggestion as a duplicate of another suggestion (admin only)."""
+  markSuggestionDuplicate(input: MarkSuggestionDuplicateInput!): Suggestion
 
   """Marks a suggestion as reviewed (admin only)."""
   markSuggestionReviewed(suggestionId: String!): Suggestion
@@ -1019,6 +1053,9 @@ type Mutation {
 
   """Creates a response to an existing complaint (admin only)."""
   respondToComplaint(input: RespondToComplaintInput!): ComplaintResponse
+
+  """Responds to a suggestion with an admin text response (admin only)."""
+  respondToSuggestion(input: RespondToSuggestionInput!): Suggestion
   revokePermissionGroupFromUser(input: RevokePermissionGroupFromUserInput!): Boolean
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
   stopClass(classInstanceId: ID!): ClassInstanceDetail
@@ -1184,6 +1221,12 @@ type ParentProfile {
   whatsapp: String
 }
 
+"""Pagination options for the parent suggestions history query."""
+input ParentSuggestionOptions {
+  limit: Int!
+  offset: Int!
+}
+
 input PartialStudentUpdateInput {
   classesRemaining: Int
   classesTotal: Int
@@ -1235,6 +1278,11 @@ type Query {
   adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult
   classInstance(id: ID!): ClassInstanceDetail
   classStatusEvents(classInstanceId: ID!): [ClassStatusEvent!]
+
+  """
+  Returns file attachments for a specific complaint. Accessible by the owning parent or admins.
+  """
+  complaintFiles(complaintId: String!): [ComplaintFile!]
   dailyScheduleList(date: String!, search: String, teacherId: String): [DailyScheduleList!]
   dailyScheduleMetrics(date: String!, teacherId: String): DailyScheduleMetrics
   directoryChildren(
@@ -1270,6 +1318,11 @@ type Query {
   parentInvoiceHistory(parentId: String!): [ParentInvoiceRow!]
   parentProfile(parentId: String!): ParentProfile
 
+  """
+  Returns the authenticated parent's suggestion history with review status.
+  """
+  parentSuggestions(options: ParentSuggestionOptions!): [Suggestion!]
+
   """Fetch a single permission group by ID."""
   permissionGroup(id: String!): PermissionGroup
 
@@ -1293,6 +1346,11 @@ type Query {
     limit: Int = 50
     searchTerm: String!
   ): StorageObjectList
+
+  """
+  Search suggestions for duplicate marking autocomplete. Requires suggestions.review permission.
+  """
+  searchSuggestions(excludeId: String!, query: String!): [SuggestionSearchResult!]
   searchTeacherAvailability(input: AvailabilitySearchInput!): AvailabilitySearchResult
   statusTrackingSchedule(date: String!, search: String, viewerTimezone: String): [StatusTrackingScheduleRow!]
   storageStats(
@@ -1402,6 +1460,12 @@ input RespondToComplaintInput {
   body: String!
   complaintId: String!
   emailSent: Boolean! = false
+}
+
+"""Input for responding to a suggestion with an admin response."""
+input RespondToSuggestionInput {
+  adminResponse: String!
+  suggestionId: String!
 }
 
 input RevokePermissionGroupFromUserInput {
@@ -1624,14 +1688,25 @@ input SubmitSuggestionInput {
   submitterName: String!
 }
 
-"""A parent suggestion with full details."""
+"""
+A parent suggestion with full details including review and duplicate status.
+"""
 type Suggestion {
+  adminResponse: String
   body: String
   createdAt: DateTime
+  duplicateOfBody: String
+  duplicateOfId: String
+  duplicateOfSubmitterName: String
   emailSentAt: DateTime
   id: String
   parentId: String
   parentName: String
+  responseCount: Int
+  reviewedAt: DateTime
+  reviewedByName: String
+  reviewedByUserId: String
+  status: SuggestionStatus
   submitterName: String
 }
 
@@ -1640,15 +1715,35 @@ input SuggestionFilter {
   limit: Int!
   offset: Int!
   search: String
-  status: String
+  status: SuggestionStatus
 }
 
 """Aggregate metrics for the suggestion queue."""
 type SuggestionMetrics {
   avgResponseTime: String
+  duplicate: Int
   id: String
   pending: Int
   reviewed: Int
+  totalCount: Int
+}
+
+"""A lightweight suggestion result for duplicate search autocomplete."""
+type SuggestionSearchResult {
+  body: String
+  createdAt: DateTime
+  id: String
+  parentId: String
+  parentName: String
+  status: SuggestionStatus
+  submitterName: String
+}
+
+"""Status of a suggestion in the review pipeline."""
+enum SuggestionStatus {
+  DUPLICATE
+  PENDING
+  REVIEWED
 }
 
 type SupportRequestResult {

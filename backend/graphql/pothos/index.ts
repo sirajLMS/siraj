@@ -20,7 +20,6 @@ export * from "./permission-management.pothos";
 export * from "./recurring-class.pothos";
 export * from "./report.pothos";
 export * from "./schedule.pothos";
-export * from "./schedule-deletion.pothos";
 export * from "./staff-directory.pothos";
 export * from "./staff-profile.pothos";
 export * from "./storage.pothos";

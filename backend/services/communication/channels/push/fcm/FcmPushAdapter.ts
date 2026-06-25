@@ -31,7 +31,7 @@ export class FcmPushAdapter implements IPushChannel {
     }
 
     const normalizedPrivateKey = privateKey.replaceAll(String.raw`\n`, "\n");
-    
+
     if (getApps().length === 0) {
       initializeApp({
         credential: cert({

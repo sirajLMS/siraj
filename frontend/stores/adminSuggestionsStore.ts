@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { SuggestionStatus } from "@/shared/lib/enum";
+import { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface AdminSuggestionsState {
   readonly searchQuery: string;
@@ -15,7 +15,7 @@ interface AdminSuggestionsState {
 
 export const useAdminSuggestionsStore = create<AdminSuggestionsState>(set => ({
   searchQuery: "",
-  activeTab: SuggestionStatus.PENDING,
+  activeTab: SuggestionStatus.Pending,
   markingReviewedId: "",
   isMarkingReviewed: false,
   setSearchQuery: query => {
