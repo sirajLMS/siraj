@@ -1,17 +1,22 @@
 "use client";
 
-import { Box, Tooltip } from "@mui/material";
+import { HistoryOutlined } from "@mui/icons-material";
+import { Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
-import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/dashboard/utils/formatScheduleTime";
+import {
+  formatDurationMinutes,
+  formatScheduleTimeOnly,
+  formatScheduleYourTime,
+} from "@/frontend/views/dashboard/dashboard/utils/formatScheduleTime";
 import { ScheduleInstanceStatusBadge } from "./ScheduleInstanceStatusBadge";
 import {
   StyledActionsCellBox,
-  StyledGridDetailsIconButton,
+  StyledGridDetailsLink,
+  StyledHistoryIconLink,
   StyledMonospaceLabel,
   StyledScheduleNameLink,
   StyledScheduleTeacherLink,
@@ -21,15 +26,16 @@ import {
 
 interface UseScheduleColumnsParams {
   readonly headers: {
-    readonly classId: string;
     readonly student: string;
     readonly teacher: string;
     readonly time: string;
     readonly yourTime: string;
     readonly teacherTime: string;
     readonly studentTime: string;
+    readonly duration: string;
     readonly status: string;
     readonly actions: string;
+    readonly history: string;
   };
   readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
@@ -41,43 +47,44 @@ function buildTimeColumns(
   headers: UseScheduleColumnsParams["headers"],
   locale: string
 ): GridColDef<DailyScheduleRow>[] {
-  if (showTimezones) {
-    return [
-      {
-        field: "yourTime",
-        headerName: headers.yourTime,
-        width: 150,
-        flex: 1,
-        renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.yourTime ?? ""}</StyledMonospaceLabel>,
-      },
-      {
-        field: "teacherTime",
-        headerName: headers.teacherTime,
-        width: 150,
-        flex: 1,
-        renderCell: ({ row }) => (
-          <StyledMonospaceLabel variant="labelMd">{formatScheduleTimeOnly(row.teacherTime, locale)}</StyledMonospaceLabel>
-        ),
-      },
-      {
-        field: "studentTime",
-        headerName: headers.studentTime,
-        width: 150,
-        flex: 1,
-        renderCell: ({ row }) => (
-          <StyledMonospaceLabel variant="labelMd">{formatScheduleTimeOnly(row.studentTime, locale)}</StyledMonospaceLabel>
-        ),
-      },
-    ];
+  const yourTimeColumn: GridColDef<DailyScheduleRow> = {
+    field: "yourTime",
+    headerName: headers.yourTime,
+    width: 190,
+    flex: 1,
+    minWidth: 160,
+    renderCell: ({ row }) => (
+      <StyledMonospaceLabel variant="labelMd">
+        {formatScheduleYourTime(row.yourTime, row.studentTime ?? row.teacherTime, locale)}
+      </StyledMonospaceLabel>
+    ),
+  };
+
+  if (!showTimezones) {
+    return [yourTimeColumn];
   }
 
   return [
+    yourTimeColumn,
     {
-      field: "yourTime",
-      headerName: headers.time,
+      field: "teacherTime",
+      headerName: headers.teacherTime,
       width: 130,
       flex: 1,
-      renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.yourTime ?? ""}</StyledMonospaceLabel>,
+      minWidth: 110,
+      renderCell: ({ row }) => (
+        <StyledMonospaceLabel variant="labelMd">{formatScheduleTimeOnly(row.teacherTime, locale)}</StyledMonospaceLabel>
+      ),
+    },
+    {
+      field: "studentTime",
+      headerName: headers.studentTime,
+      width: 130,
+      flex: 1,
+      minWidth: 110,
+      renderCell: ({ row }) => (
+        <StyledMonospaceLabel variant="labelMd">{formatScheduleTimeOnly(row.studentTime, locale)}</StyledMonospaceLabel>
+      ),
     },
   ];
 }
@@ -111,64 +118,63 @@ function renderTeacherCell(row: DailyScheduleRow, locale: string) {
 function buildActionsColumn(
   headers: UseScheduleColumnsParams["headers"],
   detailsLabel: string,
-  router: ReturnType<typeof useRouter>,
+  historyLabel: string,
   locale: string
 ): GridColDef<DailyScheduleRow> {
   return {
     field: "actions",
     headerName: headers.actions,
-    width: 90,
+    width: 140,
     sortable: false,
     align: "center",
     headerAlign: "center",
-    flex: .5,
-    renderCell: ({ row }) => (
-      <StyledActionsCellBox>
-        <Box>
-          <Tooltip title={detailsLabel}>
-            <StyledGridDetailsIconButton variant="text" size="small" onClick={() => router.push(`/${locale}/classes/${row.id ?? ""}`)}>
-              {/* <DetailsIcon fontSize="small" /> */}
-              {detailsLabel}
-            </StyledGridDetailsIconButton>
-          </Tooltip>
-        </Box>
-      </StyledActionsCellBox>
-    ),
+    flex: 0.6,
+    minWidth: 120,
+    renderCell: ({ row }) => {
+      const studentId = row.student?.id;
+      const classId = row.id ?? "";
+
+      return (
+        <StyledActionsCellBox>
+          {studentId ? (
+            <Tooltip title={historyLabel}>
+              <StyledHistoryIconLink href={`/${locale}/students/${studentId}/history`} aria-label={historyLabel}>
+                <HistoryOutlined fontSize="small" />
+              </StyledHistoryIconLink>
+            </Tooltip>
+          ) : null}
+          {classId ? (
+            <Tooltip title={detailsLabel}>
+              <StyledGridDetailsLink href={`/${locale}/classes/${classId}`}>{detailsLabel}</StyledGridDetailsLink>
+            </Tooltip>
+          ) : null}
+        </StyledActionsCellBox>
+      );
+    },
   };
 }
 
-export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTimezones }: UseScheduleColumnsParams) {
-  const router = useRouter();
+export function useScheduleColumns({
+  headers,
+  statusLabels,
+  detailsLabel,
+  showTimezones,
+}: UseScheduleColumnsParams) {
   const locale = useLocale();
 
   return useMemo<GridColDef<DailyScheduleRow>[]>(() => {
-    const baseCols: GridColDef<DailyScheduleRow>[] = [
+    return [
+      ...buildTimeColumns(showTimezones, headers, locale),
       {
-        field: "classId",
-        headerName: headers.classId,
-        width: 120,
+        field: "duration",
+        headerName: headers.duration,
+        width: 90,
+        flex: 0.5,
+        minWidth: 80,
         renderCell: ({ row }) => (
-          <StyledMonospaceLabel variant="labelMd">{row.id ? `#CLS-${row.id}` : ""}</StyledMonospaceLabel>
+          <StyledMonospaceLabel variant="labelMd">{formatDurationMinutes(row.duration)}</StyledMonospaceLabel>
         ),
       },
-      {
-        field: "student",
-        headerName: headers.student,
-        flex: 1,
-        minWidth: 140,
-        renderCell: ({ row }) => renderStudentCell(row, locale),
-      },
-      {
-        field: "teacher",
-        headerName: headers.teacher,
-        flex: 1,
-        minWidth: 140,
-        renderCell: ({ row }) => renderTeacherCell(row, locale),
-      },
-    ];
-
-    baseCols.push(
-      ...buildTimeColumns(showTimezones, headers, locale),
       {
         field: "status",
         headerName: headers.status,
@@ -181,9 +187,21 @@ export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTi
           />
         ),
       },
-      buildActionsColumn(headers, detailsLabel, router, locale)
-    );
-
-    return baseCols;
-  }, [detailsLabel, headers, statusLabels, showTimezones, router, locale]);
+      {
+        field: "teacher",
+        headerName: headers.teacher,
+        flex: 1,
+        minWidth: 140,
+        renderCell: ({ row }) => renderTeacherCell(row, locale),
+      },
+      {
+        field: "student",
+        headerName: headers.student,
+        flex: 1,
+        minWidth: 140,
+        renderCell: ({ row }) => renderStudentCell(row, locale),
+      },
+      buildActionsColumn(headers, detailsLabel, headers.history, locale),
+    ];
+  }, [detailsLabel, headers, statusLabels, showTimezones, locale]);
 }

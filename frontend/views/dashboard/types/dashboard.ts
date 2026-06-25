@@ -83,20 +83,24 @@ export interface ScheduleOverviewData {
   readonly teachers: readonly TeacherFilterItem[];
   readonly rows: readonly DailyScheduleRow[];
   readonly headers: {
-    readonly classId: string;
     readonly student: string;
     readonly teacher: string;
     readonly time: string;
     readonly yourTime: string;
     readonly teacherTime: string;
     readonly studentTime: string;
+    readonly duration: string;
     readonly status: string;
     readonly actions: string;
+    readonly history: string;
   };
   readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
   readonly emptyMessage: string;
-  readonly showingText: string;
+  readonly selectedMetricLabel?: string | null;
+  readonly todayLabel: string;
+  readonly previousDayLabel: string;
+  readonly nextDayLabel: string;
   readonly page: number;
   readonly pageSize: number;
   readonly totalCount: number;

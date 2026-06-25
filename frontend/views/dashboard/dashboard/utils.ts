@@ -5,15 +5,16 @@ export const useAdminDashboardLabels = () => {
   const t = useTranslations("dashboard");
 
   const headers = {
-    classId: t("admin.classId"),
     student: t("admin.student"),
     teacher: t("admin.teacher"),
     time: t("admin.time"),
     yourTime: t("admin.yourTime"),
     teacherTime: t("admin.teacherTime"),
     studentTime: t("admin.studentTime"),
+    duration: t("admin.duration"),
     status: t("admin.status"),
     actions: t("admin.actions"),
+    history: t("admin.history"),
   };
 
   const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {

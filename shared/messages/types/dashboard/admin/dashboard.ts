@@ -14,11 +14,21 @@ export interface AdminDashboardLabels {
   readonly yourTime: string;
   readonly teacherTime: string;
   readonly studentTime: string;
+  readonly duration: string;
   readonly status: string;
   readonly actions: string;
+  readonly history: string;
   readonly details: string;
   readonly showingOf: string;
   readonly noClasses: string;
+  readonly today: string;
+  readonly previousDay: string;
+  readonly nextDay: string;
+  readonly previousPage: string;
+  readonly nextPage: string;
+  readonly pageOf: string;
+  readonly goToPage: string;
+  readonly paginationRange: string;
   readonly dashboardOverview: string;
   readonly viewAll: string;
   readonly metrics: {

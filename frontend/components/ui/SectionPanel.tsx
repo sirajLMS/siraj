@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { mergeSx } from "./mergeSx";
 
 interface SectionPanelProps {
-  readonly title?: string;
+  readonly title?: ReactNode;
   readonly subTitle?: string;
   readonly actions?: ReactNode;
   readonly children: ReactNode;
@@ -43,17 +43,24 @@ export function SectionPanel({ title, subTitle, actions, children, sx }: Section
             borderBottom: theme => `1px solid ${theme.palette.outlineVariant}`,
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            {title && (
-              <Typography variant="titleLg" sx={{ color: theme => theme.palette.onSurface }}>
-                {title}
-              </Typography>
-            )}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                flexWrap: "wrap",
+              }}
+            >
+              {title &&
+                (typeof title === "string" ? (
+                  <Typography variant="titleLg" sx={{ color: theme => theme.palette.onSurface }}>
+                    {title}
+                  </Typography>
+                ) : (
+                  title
+                ))}
+            </Box>
             {subTitle && (
               <Typography
                 variant="bodyMd"

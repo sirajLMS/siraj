@@ -6,6 +6,7 @@ import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/gener
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import { ScheduleOverviewGridPagination } from "./ScheduleOverviewPagination";
 import { useScheduleColumns } from "./useScheduleColumns";
 
 interface ScheduleOverviewDataGridProps {
@@ -15,15 +16,16 @@ interface ScheduleOverviewDataGridProps {
   readonly totalCount: number;
   readonly onPageChange: (page: number) => void;
   readonly headers: {
-    readonly classId: string;
     readonly student: string;
     readonly teacher: string;
     readonly time: string;
     readonly yourTime: string;
     readonly teacherTime: string;
     readonly studentTime: string;
+    readonly duration: string;
     readonly status: string;
     readonly actions: string;
+    readonly history: string;
   };
   readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
@@ -67,6 +69,9 @@ export function ScheduleOverviewDataGrid({
       rowHeight={60}
       ariaLabel="schedule-overview-table"
       emptyMessage={emptyMessage}
+      slots={{
+        pagination: ScheduleOverviewGridPagination,
+      }}
       columnVisibilityModel={{
         teacher: true,
         yourTime: true,
@@ -74,6 +79,10 @@ export function ScheduleOverviewDataGrid({
         studentTime: showTimezones,
       }}
       sx={{
+        "& .MuiDataGrid-footerContainer": {
+          backgroundColor: "transparent",
+          minHeight: "auto",
+        },
         "& .MuiDataGrid-columnHeader[data-field='teacher'], & .MuiDataGrid-cell[data-field='teacher']": {
           display: { xs: "none", md: "flex" },
         },

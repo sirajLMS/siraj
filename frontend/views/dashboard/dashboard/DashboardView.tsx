@@ -27,6 +27,10 @@ export function DashboardView({
   onMetricClick,
   selectedMetricKey,
   scheduleTitle,
+  selectedMetricLabel,
+  todayLabel,
+  previousDayLabel,
+  nextDayLabel,
   searchPlaceholder,
   searchValue,
   dateLabel,
@@ -40,7 +44,6 @@ export function DashboardView({
   statusLabels,
   detailsLabel,
   emptyMessage,
-  showingText,
   page,
   pageSize,
   totalCount,
@@ -67,6 +70,10 @@ export function DashboardView({
       <RequirePermission permissions={[AppPermission.ScheduleViewList]}>
         <ScheduleOverviewSection
           title={scheduleTitle}
+          selectedMetricLabel={selectedMetricLabel}
+          todayLabel={todayLabel}
+          previousDayLabel={previousDayLabel}
+          nextDayLabel={nextDayLabel}
           searchPlaceholder={searchPlaceholder}
           searchValue={searchValue}
           dateLabel={dateLabel}
@@ -80,7 +87,6 @@ export function DashboardView({
           statusLabels={statusLabels}
           detailsLabel={detailsLabel}
           emptyMessage={emptyMessage}
-          showingText={showingText}
           page={page}
           pageSize={pageSize}
           totalCount={totalCount}

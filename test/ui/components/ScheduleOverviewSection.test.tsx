@@ -38,20 +38,23 @@ const createMockProps = (overrides: Partial<ScheduleOverviewSectionProps> = {}):
   searchValue: "",
   rows: [],
   headers: {
-    classId: "Class ID",
     student: "Student",
     teacher: "Teacher",
     time: "Time",
     yourTime: "Your Time",
     teacherTime: "Teacher Time",
     studentTime: "Student Time",
+    duration: "Duration",
     status: "Status",
     actions: "Actions",
+    history: "History",
   },
   statusLabels,
   detailsLabel: "View Details",
   emptyMessage: "No classes scheduled",
-  showingText: "Showing 0 of 0",
+  todayLabel: "Today",
+  previousDayLabel: "Previous day",
+  nextDayLabel: "Next day",
   dateLabel: "Date",
   dateValue: "2026-06-20",
   teacherPlaceholder: "Filter by teacher",
@@ -82,10 +85,10 @@ describe("ScheduleOverviewSection", () => {
   });
 
   test("search input hidden without DashboardSearch permission", () => {
-    const props = createMockProps();
+    const props = createMockProps({ searchPlaceholder: "Search by student name" });
     renderWithWrapper(<ScheduleOverviewSection {...props} />, { permissions: [] });
 
-    expect(screen.queryAllByRole("textbox")).toHaveLength(0);
+    expect(screen.queryByPlaceholderText("Search by student name")).toBeNull();
   });
 
   test("search input has correct placeholder", () => {

@@ -1,13 +1,19 @@
 "use client";
 
-import { Autocomplete, Box, TextField } from "@mui/material";
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { Autocomplete, Box, Button, IconButton, TextField, Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { format, isValid, parse } from "date-fns";
+import { format, isValid } from "date-fns";
 import { AppDatePicker } from "@/frontend/components/ui/form/AppDatePicker";
 
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
+import {
+  getTodayScheduleFilterDate,
+  isScheduleFilterDateToday,
+  parseScheduleFilterDate,
+  shiftScheduleFilterDate,
+} from "@/frontend/views/dashboard/dashboard/utils/scheduleFilterDate";
 
-// Styled container for the filter row - responsive layout with column on mobile, row on desktop
 const StyledFiltersContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -19,9 +25,31 @@ const StyledFiltersContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
+const StyledDateControls = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "flex-end",
+  gap: theme.spacing(1),
+}));
+
+const StyledDateNavButton = styled(IconButton)(({ theme }) => ({
+  border: `1px solid ${theme.palette.border.light}`,
+  borderRadius: Number(theme.shape.borderRadius),
+  backgroundColor: theme.palette.surfaceContainerLowest,
+  width: 40,
+  height: 40,
+  "&.Mui-disabled": {
+    opacity: 0.5,
+  },
+}));
+
+const DATE_FILTER_FORMAT = "yyyy-MM-dd";
+
 interface ScheduleFiltersProps {
   readonly dateLabel: string;
   readonly dateValue: string;
+  readonly todayLabel: string;
+  readonly previousDayLabel: string;
+  readonly nextDayLabel: string;
   readonly teacherPlaceholder: string;
   readonly teacherValue: string;
   readonly submitLabel: string;
@@ -34,54 +62,74 @@ interface ScheduleFiltersProps {
   readonly onSubmit: () => void;
 }
 
-const DATE_FILTER_FORMAT = "yyyy-MM-dd";
-
-function parseFilterDate(date: string): Date | null {
-  if (date.length === 0) {
-    return null;
-  }
-
-  const parsedDate = parse(date, DATE_FILTER_FORMAT, new Date());
-
-  return isValid(parsedDate) ? parsedDate : null;
-}
-
 export function ScheduleFilters({
   dateLabel,
   dateValue,
+  todayLabel,
+  previousDayLabel,
+  nextDayLabel,
   teacherPlaceholder,
   teacherValue,
-  // submitLabel,
   teachers,
   loadingTeachers = false,
   teacherSearchValue,
   onTeacherSearchChange,
   onDateChange,
   onTeacherChange,
-  // onSubmit,
 }: Readonly<ScheduleFiltersProps>) {
-  const selectedDate = parseFilterDate(dateValue);
+  const selectedDate = parseScheduleFilterDate(dateValue);
+  const isTodaySelected = isScheduleFilterDateToday(dateValue);
 
-  // Ensure the selected teacher is always in the options list if they are selected
-  // but not in the current search results
-  const selectedTeacher = teachers.find(t => t.id === teacherValue) || null;
+  const selectedTeacher = teachers.find(teacher => teacher.id === teacherValue) || null;
 
   return (
     <StyledFiltersContainer>
-      <AppDatePicker
-        label={dateLabel}
-        value={selectedDate}
-        onChange={(date: Date | null) => {
-          onDateChange(date && isValid(date) ? format(date, DATE_FILTER_FORMAT) : "");
-        }}
-        slotProps={{
-          textField: {
-            size: "small",
-            sx: { minWidth: 180 },
-            slotProps: { htmlInput: { autoComplete: "off" } },
-          },
-        }}
-      />
+      <StyledDateControls>
+        <Tooltip title={previousDayLabel}>
+          <StyledDateNavButton
+            size="small"
+            aria-label={previousDayLabel}
+            onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, -1))}
+          >
+            <ChevronLeft fontSize="small" />
+          </StyledDateNavButton>
+        </Tooltip>
+
+        <AppDatePicker
+          label={dateLabel}
+          value={selectedDate}
+          onChange={(date: Date | null) => {
+            onDateChange(date && isValid(date) ? format(date, DATE_FILTER_FORMAT) : "");
+          }}
+          slotProps={{
+            textField: {
+              size: "small",
+              sx: { minWidth: 180 },
+              slotProps: { htmlInput: { autoComplete: "off" } },
+            },
+          }}
+        />
+
+        <Tooltip title={nextDayLabel}>
+          <StyledDateNavButton
+            size="small"
+            aria-label={nextDayLabel}
+            onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, 1))}
+          >
+            <ChevronRight fontSize="small" />
+          </StyledDateNavButton>
+        </Tooltip>
+
+        <Button
+          variant="text"
+          size="small"
+          disabled={isTodaySelected}
+          onClick={() => onDateChange(getTodayScheduleFilterDate())}
+          sx={{ minWidth: 64, height: 40 }}
+        >
+          {todayLabel}
+        </Button>
+      </StyledDateControls>
 
       <Autocomplete
         size="small"
@@ -109,23 +157,6 @@ export function ScheduleFilters({
         loading={loadingTeachers}
         renderInput={params => <TextField {...params} label={teacherPlaceholder} placeholder={teacherPlaceholder} />}
       />
-
-      {/* <Button
-        variant="contained"
-        onClick={onSubmit}
-        sx={{
-          borderRadius: 6,
-          px: 4,
-          textTransform: "uppercase",
-          fontWeight: 600,
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "12px",
-          letterSpacing: "0.1em",
-          height: 40,
-        }}
-      >
-        {submitLabel}
-      </Button> */}
     </StyledFiltersContainer>
   );
 }

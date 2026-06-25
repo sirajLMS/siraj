@@ -95,10 +95,9 @@ export function AdminDashboardContainer() {
   const totalCount = scheduleResult?.totalCount ?? rows.length;
   const paginatedRows = rows.slice(page * pageSize, (page + 1) * pageSize);
 
-  const showingText = t("admin.showingOf", {
-    shown: paginatedRows.length,
-    total: totalCount,
-  });
+  const selectedMetricLabel = filters.selectedStatus
+    ? t(`admin.metrics.${filters.selectedStatus}` as "admin.metrics.total")
+    : null;
 
   return (
     <DashboardView
@@ -108,6 +107,10 @@ export function AdminDashboardContainer() {
       onMetricClick={handleMetricClick}
       selectedMetricKey={filters.selectedStatus ?? undefined}
       scheduleTitle={t("admin.scheduleOverview")}
+      selectedMetricLabel={selectedMetricLabel}
+      todayLabel={t("admin.today")}
+      previousDayLabel={t("admin.previousDay")}
+      nextDayLabel={t("admin.nextDay")}
       searchPlaceholder={t("admin.searchPlaceholder")}
       searchValue={filters.searchQuery}
       dateLabel={t("admin.listOfClassesOn")}
@@ -121,7 +124,6 @@ export function AdminDashboardContainer() {
       statusLabels={statusLabels}
       detailsLabel={t("admin.details")}
       emptyMessage={loading ? "Loading..." : t("admin.noClasses")}
-      showingText={showingText}
       page={page}
       pageSize={pageSize}
       totalCount={totalCount}

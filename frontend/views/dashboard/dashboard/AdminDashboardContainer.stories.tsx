@@ -79,10 +79,9 @@ export function MockAdminDashboardContainer() {
 
   const paginatedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
 
-  const showingText = t("admin.showingOf", {
-    shown: paginatedRows.length,
-    total: filteredRows.length,
-  });
+  const selectedMetricLabel = filters.selectedStatus
+    ? t(`admin.metrics.${filters.selectedStatus}` as "admin.metrics.total")
+    : null;
 
   const handleMetricClick = (key: string) => {
     setPage(0);
@@ -101,6 +100,10 @@ export function MockAdminDashboardContainer() {
       onMetricClick={handleMetricClick}
       selectedMetricKey={filters.selectedStatus ?? undefined}
       scheduleTitle={t("admin.scheduleOverview")}
+      selectedMetricLabel={selectedMetricLabel}
+      todayLabel={t("admin.today")}
+      previousDayLabel={t("admin.previousDay")}
+      nextDayLabel={t("admin.nextDay")}
       searchPlaceholder={t("admin.searchPlaceholder")}
       searchValue={filters.searchQuery}
       dateLabel={t("admin.listOfClassesOn")}
@@ -114,7 +117,6 @@ export function MockAdminDashboardContainer() {
       statusLabels={statusLabels}
       detailsLabel={t("admin.details")}
       emptyMessage={t("admin.noClasses")}
-      showingText={showingText}
       page={page}
       pageSize={pageSize}
       totalCount={filteredRows.length}

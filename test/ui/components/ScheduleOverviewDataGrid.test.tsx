@@ -48,15 +48,16 @@ const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
 };
 
 const headers = {
-  classId: "Class ID",
   student: "Student",
   teacher: "Teacher",
   time: "Time",
   yourTime: "Your Time",
   teacherTime: "Teacher Time",
   studentTime: "Student Time",
+  duration: "Duration",
   status: "Status",
   actions: "Actions",
+  history: "History",
 };
 
 const mockRows: readonly DailyScheduleRow[] = [
@@ -123,10 +124,8 @@ describe("ScheduleOverviewDataGrid", () => {
       { permissions: [] }
     );
 
-    const timeHeaders = screen.getAllByText("Time");
-    expect(timeHeaders.length).toBeGreaterThan(0);
-    expect(timeHeaders[0]).toBeVisible();
-    expect(screen.queryByText("Your Time")).toBeNull();
+    expect(screen.getByText("Your Time")).toBeVisible();
+    expect(screen.queryByText("Time")).toBeNull();
   });
 
   test("renders student and teacher names as profile links", () => {
@@ -147,6 +146,26 @@ describe("ScheduleOverviewDataGrid", () => {
       "href",
       "/ar/teachers/teacher-1/profile"
     );
+  });
+
+  test("renders history and details action links", () => {
+    renderWithWrapper(
+      <ScheduleOverviewDataGrid
+        rows={mockRows}
+        {...defaultPaginationProps}
+        headers={headers}
+        statusLabels={statusLabels}
+        detailsLabel="View Details"
+        emptyMessage="No classes scheduled"
+      />,
+      { permissions: [] }
+    );
+
+    expect(screen.getAllByRole("link", { name: "History" })[0]).toHaveAttribute(
+      "href",
+      "/ar/students/student-1/history"
+    );
+    expect(screen.getAllByRole("link", { name: "View Details" })[0]).toHaveAttribute("href", "/ar/classes/row-1");
   });
 
   test("renders empty message when no rows", () => {
