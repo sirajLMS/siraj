@@ -6,7 +6,7 @@ import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentDirectoryCardList } from "./components/StudentDirectoryCardList";
 import { StudentMobileMetricsScroll } from "./components/StudentMobileMetricsScroll";
-import type { StudentAccountStatus, StudentDirectoryRow, StudentEnrollmentStatus } from "./types";
+import type { StudentAccountStatus, StudentDirectoryRowExtended, StudentEnrollmentStatus } from "./types";
 
 interface StudentsMobileViewProps {
   readonly pageTitle: string;
@@ -15,7 +15,7 @@ interface StudentsMobileViewProps {
   readonly addStudentLabel: string;
   readonly searchQuery: string;
   readonly mobileMetrics: readonly MetricItem[];
-  readonly rows: readonly StudentDirectoryRow[];
+  readonly rows: readonly StudentDirectoryRowExtended[];
   readonly cardListLabels: {
     readonly weeklyHours: string;
     readonly enrollmentStatus: string;

@@ -5,7 +5,7 @@ import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentDirectoryDataGrid } from "./components/StudentDirectoryDataGrid";
-import type { StudentAccountStatus, StudentDirectoryRow } from "./types";
+import type { StudentAccountStatus, StudentDirectoryRowExtended } from "./types";
 
 interface StudentsDesktopViewProps {
   readonly pageTitle: string;
@@ -14,7 +14,7 @@ interface StudentsDesktopViewProps {
   readonly addStudentLabel: string;
   readonly filtersLabel: string;
   readonly metrics: readonly MetricItem[];
-  readonly rows: readonly StudentDirectoryRow[];
+  readonly rows: readonly StudentDirectoryRowExtended[];
   readonly totalStudents: number; //NOSONAR
   readonly tableLabels: {
     readonly index: string;

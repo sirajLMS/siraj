@@ -1579,7 +1579,7 @@ type StudentDirectoryRow {
   classesTotal: Int
   createdAt: DateTime
   email: String
-  hoursPerWeek: String
+  hoursPerWeek: Int
   id: String
   name: String
   parentName: String

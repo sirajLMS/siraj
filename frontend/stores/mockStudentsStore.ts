@@ -11,19 +11,13 @@ import {
   WarningAmberOutlined,
 } from "@mui/icons-material";
 import { create } from "zustand";
-import type { StudentDirectoryRow } from "@/frontend/views/dashboard/students/home/types";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-
-export type {
-  StudentAccountStatus,
-  StudentDirectoryRow,
-  StudentEnrollmentStatus,
-} from "@/frontend/views/dashboard/students/home/types";
-export { MOBILE_METRIC_KEYS } from "@/frontend/views/dashboard/students/home/types";
+import { StudentStatus } from "../graphql/generated/gql/graphql-types";
+import type { StudentDirectoryRowExtended } from "../views/dashboard/students/home/types";
 
 interface StudentsState {
   readonly metrics: readonly MetricItem[];
-  readonly rows: readonly StudentDirectoryRow[];
+  readonly rows: readonly StudentDirectoryRowExtended[];
   readonly totalStudents: number;
   readonly searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -68,18 +62,25 @@ const STUDENT_METRICS: MetricItem[] = [
   },
 ];
 
-const MOCK_ROWS: StudentDirectoryRow[] = [
+const now = new Date().toISOString();
+
+const MOCK_ROWS: StudentDirectoryRowExtended[] = [
   {
     id: "stu-001",
     index: 1,
     name: "Ahmed Mansour",
     email: "a.mansour@university.edu",
     avatarUrl: "/demo/avatars/01.png",
-    accountStatus: "activated",
+    status: StudentStatus.Regular,
+    accountStatus: "regular",
     enrollmentStatus: "regular",
     hoursPerWeek: 12.5,
     classesRemaining: 15,
     classesTotal: 20,
+    parentName: "Mansour Ahmed",
+    teacherName: "Dr. Ali Ahmed",
+    createdAt: now,
+    updatedAt: now,
   },
   {
     id: "stu-002",
@@ -87,11 +88,16 @@ const MOCK_ROWS: StudentDirectoryRow[] = [
     name: "Sarah Al-Farsi",
     email: "sarah.farsi@gmail.com",
     avatarUrl: "/demo/avatars/02.png",
+    parentName: "Sarah Farsi",
+    teacherName: "Dr. Ali Farsi",
+    status: StudentStatus.Regular,
     accountStatus: "regular",
     enrollmentStatus: "regular",
     hoursPerWeek: 8,
     classesRemaining: 4,
     classesTotal: 10,
+    createdAt: now,
+    updatedAt: now,
   },
   {
     id: "stu-003",
@@ -104,6 +110,11 @@ const MOCK_ROWS: StudentDirectoryRow[] = [
     hoursPerWeek: 0,
     classesRemaining: 1,
     classesTotal: 10,
+    status: StudentStatus.Suspended,
+    parentName: null,
+    teacherName: null,
+    createdAt: now,
+    updatedAt: now,
   },
   {
     id: "stu-004",
@@ -116,6 +127,11 @@ const MOCK_ROWS: StudentDirectoryRow[] = [
     hoursPerWeek: 0,
     classesRemaining: 12,
     classesTotal: 12,
+    status: StudentStatus.OnLeave,
+    parentName: null,
+    teacherName: null,
+    createdAt: now,
+    updatedAt: now,
   },
   {
     id: "stu-005",
@@ -128,6 +144,11 @@ const MOCK_ROWS: StudentDirectoryRow[] = [
     hoursPerWeek: 15,
     classesRemaining: 27,
     classesTotal: 30,
+    status: StudentStatus.Regular,
+    parentName: null,
+    teacherName: null,
+    createdAt: now,
+    updatedAt: now,
   },
   {
     id: "stu-006",
@@ -140,6 +161,11 @@ const MOCK_ROWS: StudentDirectoryRow[] = [
     hoursPerWeek: 12.5,
     classesRemaining: 15,
     classesTotal: 20,
+    status: StudentStatus.Regular,
+    parentName: null,
+    teacherName: null,
+    createdAt: now,
+    updatedAt: now,
   },
   {
     id: "stu-007",
@@ -152,6 +178,11 @@ const MOCK_ROWS: StudentDirectoryRow[] = [
     hoursPerWeek: 6,
     classesRemaining: 2,
     classesTotal: 3,
+    status: StudentStatus.OnTrial,
+    parentName: null,
+    teacherName: null,
+    createdAt: now,
+    updatedAt: now,
   },
   {
     id: "stu-008",
@@ -165,6 +196,11 @@ const MOCK_ROWS: StudentDirectoryRow[] = [
     classesRemaining: 0,
     classesTotal: 20,
     isDeactivated: true,
+    status: StudentStatus.Deactivated,
+    parentName: null,
+    teacherName: null,
+    createdAt: now,
+    updatedAt: now,
   },
 ];
 

@@ -4,7 +4,7 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentsDesktopView } from "./StudentsDesktopView";
 import { StudentsMobileView } from "./StudentsMobileView";
-import type { StudentAccountStatus, StudentDirectoryRow, StudentEnrollmentStatus } from "./types";
+import type { StudentAccountStatus, StudentDirectoryRowExtended, StudentEnrollmentStatus } from "./types";
 
 export interface StudentsViewLabels {
   readonly pageTitle: string;
@@ -36,7 +36,7 @@ export interface StudentsViewLabels {
 interface StudentsViewProps {
   readonly metrics: readonly MetricItem[];
   readonly mobileMetrics: readonly MetricItem[];
-  readonly rows: readonly StudentDirectoryRow[];
+  readonly rows: readonly StudentDirectoryRowExtended[];
   readonly totalStudents: number;
   readonly searchQuery: string;
   readonly labels: StudentsViewLabels;

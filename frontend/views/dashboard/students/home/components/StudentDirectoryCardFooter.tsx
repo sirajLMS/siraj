@@ -3,11 +3,11 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import type { StudentDirectoryRow } from "../types";
+import type { StudentDirectoryRowExtended } from "../types";
 import { ClassesLeftProgress } from "./ClassesLeftProgress";
 
 interface StudentDirectoryCardFooterProps {
-  readonly row: StudentDirectoryRow;
+  readonly row: StudentDirectoryRowExtended;
   readonly classesLeftLabel: string;
   readonly viewProfileLabel: string;
   readonly onViewProfile: (id: string) => void;

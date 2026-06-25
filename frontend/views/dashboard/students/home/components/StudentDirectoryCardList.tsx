@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
-import type { StudentAccountStatus, StudentDirectoryRow, StudentEnrollmentStatus } from "../types";
+import type { StudentAccountStatus, StudentDirectoryRowExtended, StudentEnrollmentStatus } from "../types";
 import { StudentDirectoryCard } from "./StudentDirectoryCard";
 
 interface StudentDirectoryCardListLabels {
@@ -14,7 +14,7 @@ interface StudentDirectoryCardListLabels {
 }
 
 interface StudentDirectoryCardListProps {
-  readonly rows: readonly StudentDirectoryRow[];
+  readonly rows: readonly StudentDirectoryRowExtended[];
   readonly labels: StudentDirectoryCardListLabels;
   readonly onViewProfile: (id: string) => void;
 }

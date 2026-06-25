@@ -7,7 +7,7 @@ import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { StudentAccountStatus, StudentDirectoryRow } from "../types";
+import type { StudentAccountStatus, StudentDirectoryRowExtended } from "../types";
 import { ClassesLeftProgress } from "./ClassesLeftProgress";
 
 export interface StudentDirectoryDataGridLabels {
@@ -25,7 +25,7 @@ export interface StudentDirectoryDataGridLabels {
 }
 
 interface StudentDirectoryDataGridProps {
-  readonly rows: readonly StudentDirectoryRow[];
+  readonly rows: readonly StudentDirectoryRowExtended[];
   readonly labels: StudentDirectoryDataGridLabels;
   readonly onViewProfile: (id: string) => void;
   readonly onViewHistory: (id: string) => void;
@@ -41,7 +41,7 @@ export function StudentDirectoryDataGrid({
   onViewProfile,
   onViewHistory,
 }: StudentDirectoryDataGridProps) {
-  const columns = useMemo<GridColDef<StudentDirectoryRow>[]>(
+  const columns = useMemo<GridColDef<StudentDirectoryRowExtended>[]>(
     () => [
       {
         field: "index",
@@ -61,7 +61,7 @@ export function StudentDirectoryDataGrid({
         minWidth: 200,
         renderCell: ({ row }) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "100%" }}>
-            <Avatar src={row.avatarUrl} alt={row.name} sx={{ width: 40, height: 40 }} />
+            <Avatar src={row.avatarUrl || undefined} alt={row.name} sx={{ width: 40, height: 40 }} />
             <Typography variant="bodyLg" sx={theme => ({ fontWeight: 600, color: theme.palette.primary.main })}>
               {row.name}
             </Typography>
@@ -172,14 +172,14 @@ export function StudentDirectoryDataGrid({
   );
 
   return (
-    <AppDataGrid<StudentDirectoryRow>
+    <AppDataGrid<StudentDirectoryRowExtended>
       rows={rows}
       columns={columns}
       getRowId={row => row.id}
       autoHeight
       ariaLabel="student-directory-table"
       emptyMessage={labels.noEntries}
-      onRowClick={(params: GridRowParams<StudentDirectoryRow>) => {
+      onRowClick={(params: GridRowParams<StudentDirectoryRowExtended>) => {
         onViewProfile(params.row.id);
       }}
       getRowClassName={({ row }) => (row.isDeactivated ? "student-row-deactivated" : "")}

@@ -2162,7 +2162,7 @@ export type StudentDirectoryRow = {
   classesTotal: Maybe<Scalars['Int']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   email: Maybe<Scalars['String']['output']>;
-  hoursPerWeek: Maybe<Scalars['String']['output']>;
+  hoursPerWeek: Maybe<Scalars['Int']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   parentName: Maybe<Scalars['String']['output']>;

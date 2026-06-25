@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@mui/material";
-import type { StudentAccountStatus, StudentDirectoryRow, StudentEnrollmentStatus } from "../types";
+import type { StudentAccountStatus, StudentDirectoryRowExtended, StudentEnrollmentStatus } from "../types";
 import { StudentDirectoryCardFooter } from "./StudentDirectoryCardFooter";
 import { StudentDirectoryCardHeader } from "./StudentDirectoryCardHeader";
 import { StudentDirectoryCardStats } from "./StudentDirectoryCardStats";
@@ -16,7 +16,7 @@ interface StudentDirectoryCardLabels {
 }
 
 interface StudentDirectoryCardProps {
-  readonly row: StudentDirectoryRow;
+  readonly row: StudentDirectoryRowExtended;
   readonly labels: StudentDirectoryCardLabels;
   readonly onViewProfile: (id: string) => void;
 }

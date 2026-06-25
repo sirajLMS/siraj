@@ -2,10 +2,10 @@
 
 import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import type { StudentDirectoryRow, StudentEnrollmentStatus } from "../types";
+import type { StudentDirectoryRowExtended, StudentEnrollmentStatus } from "../types";
 
 interface StudentDirectoryCardStatsProps {
-  readonly row: StudentDirectoryRow;
+  readonly row: StudentDirectoryRowExtended;
   readonly weeklyHoursLabel: string;
   readonly enrollmentStatusLabel: string;
   readonly enrollmentLabels: Record<StudentEnrollmentStatus, string>;

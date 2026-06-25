@@ -5,6 +5,8 @@
  * This file contains UI-specific types that don't have a direct GraphQL equivalent.
  */
 
+import type { StudentDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
+
 /**
  * UI-specific status union type.
  * Maps from GraphQL StudentStatus enum values to display-friendly lowercase strings.
@@ -42,3 +44,10 @@ export const MOBILE_METRIC_ICON_KEYS = {
   on_leave: "EventBusyOutlined",
   suspended: "BlockOutlined",
 } as const;
+
+export type StudentDirectoryRowExtended = Readonly<StudentDirectoryRow> & {
+  readonly index: number;
+  readonly accountStatus: StudentAccountStatus;
+  readonly enrollmentStatus: StudentEnrollmentStatus;
+  readonly isDeactivated?: boolean;
+};

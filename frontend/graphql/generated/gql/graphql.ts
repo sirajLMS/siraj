@@ -1258,7 +1258,7 @@ export type UpdateTeacherProfileMutationVariables = Exact<{
 
 export type UpdateTeacherProfileMutation = { updateTeacherProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: string | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: string | null } | null };
 
-export type StudentDirectoryRowFragmentFragment = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: string | null, parentName: string | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
+export type StudentDirectoryRowFragmentFragment = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, parentName: string | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type StudentDirectoryQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
@@ -1267,7 +1267,7 @@ export type StudentDirectoryQueryVariables = Exact<{
 }>;
 
 
-export type StudentDirectoryQuery = { studentDirectory: Array<{ id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: string | null, parentName: string | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null }> | null };
+export type StudentDirectoryQuery = { studentDirectory: Array<{ id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, parentName: string | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null }> | null };
 
 export type StudentClassHistoryQueryVariables = Exact<{
   studentId: string | number;
