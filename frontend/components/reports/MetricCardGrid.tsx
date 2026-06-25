@@ -9,11 +9,12 @@ type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T |
 interface MetricCardGridProps {
   readonly metrics: readonly MetricItem[];
   readonly onMetricClick?: (key: string) => void;
+  readonly selectedKey?: string;
   readonly size?: ResponsiveStyleValue<GridSize>;
 }
 const defaultSize = { xs: 6, sm: 4, md: 3, lg: 2 };
 
-export function MetricCardGrid({ metrics, onMetricClick, size }: MetricCardGridProps) {
+export function MetricCardGrid({ metrics, onMetricClick, selectedKey, size }: MetricCardGridProps) {
   const t = useTranslations();
 
   return (
@@ -25,7 +26,7 @@ export function MetricCardGrid({ metrics, onMetricClick, size }: MetricCardGridP
             label={metric.label ?? t(metric.labelKey)}
             value={metric.count}
             subLabel={metric.subLabel}
-            variant={metric.variant}
+            variant={selectedKey === metric.key ? "highlight" : metric.variant}
             animated
             animationIndex={index}
             onClick={

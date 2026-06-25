@@ -1282,7 +1282,7 @@ type Query {
   Returns file attachments for a specific complaint. Accessible by the owning parent or admins.
   """
   complaintFiles(complaintId: String!): [ComplaintFile!]
-  dailyScheduleList(date: String!, search: String, teacherId: String): [DailyScheduleList!]
+  dailyScheduleList(date: String!, metricFilter: String, search: String, teacherId: String): [DailyScheduleList!]
   dailyScheduleMetrics(date: String!, teacherId: String): DailyScheduleMetrics
   directoryChildren(
     """Parent directory path (empty or null for root level)"""

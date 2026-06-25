@@ -36,6 +36,7 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
       date: t.arg.string({ required: true }),
       teacherId: t.arg.string({ required: false }),
       search: t.arg.string({ required: false }),
+      metricFilter: t.arg.string({ required: false }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
@@ -48,6 +49,7 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
         new Date(args.date),
         args.teacherId || undefined,
         args.search || undefined,
+        args.metricFilter || undefined,
         ctx.locale
       );
 

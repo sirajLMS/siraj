@@ -99,6 +99,9 @@ export function ScheduleFilters({
         }}
         onChange={(_event, newValue) => {
           onTeacherChange(newValue?.id ?? "");
+          if (onTeacherSearchChange) {
+            onTeacherSearchChange(newValue?.name ?? "");
+          }
         }}
         loading={loadingTeachers}
         renderInput={params => <TextField {...params} label={teacherPlaceholder} placeholder={teacherPlaceholder} />}

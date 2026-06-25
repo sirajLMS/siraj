@@ -1,19 +1,6 @@
-import {
-  AssignmentTurnedInOutlined,
-  CalendarToday,
-  CancelOutlined,
-  CheckCircleOutlineOutlined,
-  EventRepeatOutlined,
-  GroupAddOutlined,
-  HistoryOutlined,
-  MenuBookOutlined,
-  PendingActionsOutlined,
-  PersonOffOutlined,
-  QuizOutlined,
-  ScienceOutlined,
-} from "@mui/icons-material";
 import { create } from "zustand";
-import type { MetricItem, ScheduleRow, TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { ScheduleRow, TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
+import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/dashboard/utils/adminDashboardMetrics";
 import type { DashboardState } from "./dashboardStore";
 
 const MOCK_TEACHERS: TeacherFilterItem[] = [
@@ -21,20 +8,21 @@ const MOCK_TEACHERS: TeacherFilterItem[] = [
   { id: "teacher-sarah", name: "Sarah Johnson" },
 ];
 
-const MOCK_METRICS: MetricItem[] = [
-  { key: "total", count: 42, labelKey: "dashboard.admin.metrics.total", icon: CalendarToday },
-  { key: "regular", count: 28, labelKey: "dashboard.admin.metrics.regular", icon: MenuBookOutlined },
-  { key: "trial", count: 8, labelKey: "dashboard.admin.metrics.trial", icon: ScienceOutlined },
-  { key: "evaluation", count: 4, labelKey: "dashboard.admin.metrics.evaluation", icon: AssignmentTurnedInOutlined },
-  { key: "makeup", count: 2, labelKey: "dashboard.admin.metrics.makeup", icon: HistoryOutlined },
-  { key: "testing", count: 5, labelKey: "dashboard.admin.metrics.testing", icon: QuizOutlined },
-  { key: "pending", count: 12, labelKey: "dashboard.admin.metrics.pending", icon: PendingActionsOutlined },
-  { key: "done", count: 22, labelKey: "dashboard.admin.metrics.done", icon: CheckCircleOutlineOutlined },
-  { key: "rescheduled", count: 3, labelKey: "dashboard.admin.metrics.rescheduled", icon: EventRepeatOutlined },
-  { key: "cancelled", count: 1, labelKey: "dashboard.admin.metrics.cancelled", icon: CancelOutlined },
-  { key: "noShow", count: 4, labelKey: "dashboard.admin.metrics.noShow", icon: PersonOffOutlined },
-  { key: "needCover", count: 1, labelKey: "dashboard.admin.metrics.needCover", icon: GroupAddOutlined },
-];
+const MOCK_METRICS = buildAdminDashboardMetrics({
+  id: "metrics-mock",
+  total: 42,
+  regular: 28,
+  trial: 8,
+  advance: 4,
+  rescheduled: 3,
+  suspended: 1,
+  taken: 22,
+  pending: 12,
+  activated: 5,
+  running: 2,
+  absent: 4,
+  leave: 1,
+});
 
 const MOCK_SCHEDULE: ScheduleRow[] = [
   {

@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNotNull, isNull, lt, ne, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -14,6 +14,57 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+export type DailyScheduleMetricFilter =
+  | "total"
+  | "regular"
+  | "trial"
+  | "advance"
+  | "rescheduled"
+  | "suspended"
+  | "taken"
+  | "pending"
+  | "activated"
+  | "running"
+  | "absent"
+  | "leave";
+
+function buildDailyMetricFilterCondition(metricFilter?: string) {
+  if (!metricFilter || metricFilter === "total") {
+    return undefined;
+  }
+
+  switch (metricFilter as DailyScheduleMetricFilter) {
+    case "regular":
+      return eq(classInstances.classType, "REGULAR");
+    case "trial":
+      return eq(classInstances.classType, "TRIAL");
+    case "advance":
+      return eq(classInstances.classType, "ADVANCE");
+    case "rescheduled":
+      return eq(classInstances.isRescheduled, true);
+    case "suspended":
+      return eq(classInstances.isFrozen, true);
+    case "taken":
+      return eq(classInstances.outcome, "TAKEN");
+    case "pending":
+      return eq(classInstances.outcome, "PENDING");
+    case "activated":
+      return eq(classInstances.executionState, "ACTIVATED");
+    case "running":
+      return and(
+        eq(classInstances.executionState, "ACTIVATED"),
+        isNotNull(classInstances.actualStartAt),
+        isNull(classInstances.actualEndAt)
+      );
+    case "absent":
+      return eq(classInstances.outcome, "ABSENT");
+    case "leave":
+      return eq(classInstances.outcome, "LEAVE");
+    default:
+      return undefined;
+  }
+}
 
 export const getDailyMetrics = async (date: Date, teacherId?: string, tx?: DBTransaction) => {
   const runner = async (t: DBTransaction) => {
@@ -77,13 +128,14 @@ export type DailyScheduleResult = Types.ClassInstanceEntity & {
 
 export const getDailySchedule = async (
   date: Date,
-  options?: string | { teacherId?: string; search?: string; viewerTimezone?: string },
+  options?: string | { teacherId?: string; search?: string; viewerTimezone?: string; metricFilter?: string },
   tx?: DBTransaction
 ): Promise<DailyScheduleResult[]> => {
   const runner = async (t: DBTransaction): Promise<DailyScheduleResult[]> => {
     const teacherId = typeof options === "string" ? options : options?.teacherId;
     const search = typeof options === "object" ? options?.search : undefined;
     const viewerTimezone = typeof options === "object" ? options?.viewerTimezone : undefined;
+    const metricFilter = typeof options === "object" ? options?.metricFilter : undefined;
 
     const { getDayBoundaries } = await import("@/backend/lib/timezone");
     const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(date, viewerTimezone || "UTC");
@@ -92,7 +144,8 @@ export const getDailySchedule = async (
       isNull(classInstances.deletedAt),
       gte(classInstances.scheduledStartAt, startOfDayUtc),
       lt(classInstances.scheduledStartAt, endOfDayUtc),
-      teacherId ? eq(classInstances.teacherId, teacherId) : undefined
+      teacherId ? eq(classInstances.teacherId, teacherId) : undefined,
+      buildDailyMetricFilterCondition(metricFilter)
     );
 
     const rows = await t

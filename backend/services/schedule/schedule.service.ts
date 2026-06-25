@@ -45,6 +45,7 @@ export namespace ScheduleService {
     targetDate: Date,
     teacherId?: string,
     search?: string,
+    metricFilter?: string,
     locale?: string
   ) {
     try {
@@ -64,12 +65,22 @@ export namespace ScheduleService {
         }
       }
 
+      if (metricFilter && metricFilter !== "total") {
+        const canFilter = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_FILTER_METRICS);
+        if (!canFilter) {
+          logger.warn("Unauthorized metric filter access to daily schedule", { userId, metricFilter });
+          const t = await getBackendTranslations({ locale, namespace: "errors" });
+          throw new Error(t("unauthorizedAction"));
+        }
+      }
+
       const viewerTimezone = await resolveViewerTimezone(userId);
 
       const list = await SchedulingRepository.getDailySchedule(targetDate, {
         teacherId,
         search,
         viewerTimezone,
+        metricFilter,
       });
 
       return list.map(item => ({ ...item }));

@@ -1,21 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-// Import MUI icons for the metrics
-import {
-  AssignmentTurnedInOutlined,
-  CalendarToday,
-  CancelOutlined,
-  CheckCircleOutlineOutlined,
-  EventRepeatOutlined,
-  GroupAddOutlined,
-  HistoryOutlined,
-  MenuBookOutlined,
-  PendingActionsOutlined,
-  PersonOffOutlined,
-  QuizOutlined,
-  ScienceOutlined,
-} from "@mui/icons-material";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -26,8 +11,9 @@ import {
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { ClassStatus, MetricItem, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
+import type { ClassStatus, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
 import { DashboardView } from "./DashboardView";
+import { buildAdminDashboardMetrics } from "./utils/adminDashboardMetrics";
 import { useAdminDashboardLabels } from "./utils";
 
 // Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
@@ -43,6 +29,9 @@ export function AdminDashboardContainer() {
 
   const { headers, statusLabels } = useAdminDashboardLabels();
 
+  const selectedMetricFilter =
+    filters.selectedStatus && filters.selectedStatus !== "total" ? filters.selectedStatus : null;
+
   // Fetch metrics using active filters (date and teacherId)
   const {
     data: metricsData,
@@ -55,7 +44,7 @@ export function AdminDashboardContainer() {
     },
   });
 
-  // Fetch daily schedule list using active filters (date, teacherId, search)
+  // Fetch daily schedule list using active filters (date, teacherId, search, metric filter)
   const {
     data: listData,
     loading: loadingList,
@@ -65,6 +54,7 @@ export function AdminDashboardContainer() {
       date: filters.date,
       teacherId: filters.teacherId || null,
       search: filters.searchQuery || null,
+      metricFilter: selectedMetricFilter,
     },
   });
 
@@ -72,7 +62,7 @@ export function AdminDashboardContainer() {
   const [page, setPage] = useState(0);
   const pageSize = 10;
 
-  // Reset page to 0 when filters change
+  // Reset page when filters change
   useEffect(() => {
     setPage(0);
   }, []);
@@ -109,74 +99,9 @@ export function AdminDashboardContainer() {
     }
   };
 
-  // Map API metrics back to the required frontend MetricItem[] structure for TodayClassesSection
-  const rawMetrics = metricsData?.dailyScheduleMetrics;
-  const metricsList: MetricItem[] = [
-    { key: "total", count: rawMetrics?.total ?? 0, labelKey: "dashboard.admin.metrics.total", icon: CalendarToday },
-    {
-      key: "regular",
-      count: rawMetrics?.regular ?? 0,
-      labelKey: "dashboard.admin.metrics.regular",
-      icon: MenuBookOutlined,
-    },
-    { key: "trial", count: rawMetrics?.trial ?? 0, labelKey: "dashboard.admin.metrics.trial", icon: ScienceOutlined },
-    {
-      key: "evaluation",
-      count: rawMetrics?.advance ?? 0,
-      labelKey: "dashboard.admin.metrics.evaluation",
-      icon: AssignmentTurnedInOutlined,
-    },
-    {
-      key: "makeup",
-      count: rawMetrics?.running ?? 0,
-      labelKey: "dashboard.admin.metrics.makeup",
-      icon: HistoryOutlined,
-    },
-    {
-      key: "testing",
-      count: rawMetrics?.activated ?? 0,
-      labelKey: "dashboard.admin.metrics.testing",
-      icon: QuizOutlined,
-    },
-    {
-      key: "pending",
-      count: rawMetrics?.pending ?? 0,
-      labelKey: "dashboard.admin.metrics.pending",
-      icon: PendingActionsOutlined,
-    },
-    {
-      key: "done",
-      count: rawMetrics?.taken ?? 0,
-      labelKey: "dashboard.admin.metrics.done",
-      icon: CheckCircleOutlineOutlined,
-    },
-    {
-      key: "rescheduled",
-      count: rawMetrics?.rescheduled ?? 0,
-      labelKey: "dashboard.admin.metrics.rescheduled",
-      icon: EventRepeatOutlined,
-    },
-    {
-      key: "cancelled",
-      count: rawMetrics?.suspended ?? 0,
-      labelKey: "dashboard.admin.metrics.cancelled",
-      icon: CancelOutlined,
-    },
-    {
-      key: "noShow",
-      count: rawMetrics?.absent ?? 0,
-      labelKey: "dashboard.admin.metrics.noShow",
-      icon: PersonOffOutlined,
-    },
-    {
-      key: "needCover",
-      count: rawMetrics?.leave ?? 0,
-      labelKey: "dashboard.admin.metrics.needCover",
-      icon: GroupAddOutlined,
-    },
-  ];
+  const metricsList = buildAdminDashboardMetrics(metricsData?.dailyScheduleMetrics);
 
-  // Map and filter raw schedule list to rows with safe status mapping
+  // Map raw schedule list to rows with safe status mapping
   const rawList = listData?.dailyScheduleList ?? [];
   const mappedRows: ScheduleRow[] = rawList.map(item => {
     // Determine the status mapping safely from API response
@@ -201,33 +126,12 @@ export function AdminDashboardContainer() {
     };
   });
 
-  // Client-side filtering by selected status card
-  const filteredRows = mappedRows.filter(row => {
-    // Selected Status card filtering - maps metric keys to class statuses
-    if (filters.selectedStatus && filters.selectedStatus !== "total") {
-      const statusMapping: Record<string, string> = {
-        pending: "pending",
-        done: "completed",
-        cancelled: "cancelled",
-        noShow: "absent",
-        scheduled: "scheduled",
-        running: "in_progress",
-      };
-
-      const targetStatus = statusMapping[filters.selectedStatus];
-      if (targetStatus && row.status !== targetStatus) {
-        return false;
-      }
-    }
-    return true;
-  });
-
-  // Client-side pagination on filtered rows
-  const paginatedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
+  // Client-side pagination on server-filtered rows
+  const paginatedRows = mappedRows.slice(page * pageSize, (page + 1) * pageSize);
 
   const showingText = t("admin.showingOf", {
     shown: paginatedRows.length,
-    total: filteredRows.length,
+    total: mappedRows.length,
   });
 
   const isLoading = loadingMetrics || loadingList;
@@ -256,7 +160,7 @@ export function AdminDashboardContainer() {
       showingText={showingText}
       page={page}
       pageSize={pageSize}
-      totalCount={filteredRows.length}
+      totalCount={mappedRows.length}
       onPageChange={setPage}
       onSearchChange={setSearchQuery}
       onDateChange={setDateFilter}

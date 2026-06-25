@@ -8,7 +8,11 @@ const COMPLAINT_CATEGORIES = [
   ComplaintCategory.REGARDING_SYSTEM,
   ComplaintCategory.OTHER,
 ] as const;
-const SUGGESTION_STATUSES = [SuggestionStatus.PENDING, SuggestionStatus.REVIEWED] as const;
+const SUGGESTION_STATUSES = [
+  SuggestionStatus.PENDING,
+  SuggestionStatus.REVIEWED,
+  SuggestionStatus.DUPLICATE,
+] as const;
 
 export function buildComplaintBody(config: SeedConfig, index: number): string {
   const faker = getFakerForIndex(config.fakerSeed, 5000 + index);

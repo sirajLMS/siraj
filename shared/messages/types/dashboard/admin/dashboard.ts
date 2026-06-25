@@ -25,15 +25,15 @@ export interface AdminDashboardLabels {
     readonly total: string;
     readonly regular: string;
     readonly trial: string;
-    readonly evaluation: string;
-    readonly makeup: string;
-    readonly testing: string;
-    readonly pending: string;
-    readonly done: string;
+    readonly advance: string;
     readonly rescheduled: string;
-    readonly cancelled: string;
-    readonly noShow: string;
-    readonly needCover: string;
+    readonly suspended: string;
+    readonly taken: string;
+    readonly pending: string;
+    readonly activated: string;
+    readonly running: string;
+    readonly absent: string;
+    readonly leave: string;
   };
   readonly statusLabels: {
     readonly scheduled: string;

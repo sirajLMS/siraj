@@ -1744,6 +1744,7 @@ export type QueryComplaintFilesArgs = {
 
 export type QueryDailyScheduleListArgs = {
   date: Scalars['String']['input'];
+  metricFilter: InputMaybe<Scalars['String']['input']>;
   search: InputMaybe<Scalars['String']['input']>;
   teacherId: InputMaybe<Scalars['String']['input']>;
 };

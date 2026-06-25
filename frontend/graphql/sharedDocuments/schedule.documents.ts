@@ -29,8 +29,8 @@ export const dailyScheduleListQueryDocument: TypedDocumentNode<
   Operations.DailyScheduleListQuery,
   Types.QueryDailyScheduleListArgs
 > = gql`
-  query dailyScheduleList($date: String!, $teacherId: String, $search: String) {
-    dailyScheduleList(date: $date, teacherId: $teacherId, search: $search) {
+  query dailyScheduleList($date: String!, $teacherId: String, $search: String, $metricFilter: String) {
+    dailyScheduleList(date: $date, teacherId: $teacherId, search: $search, metricFilter: $metricFilter) {
       id
       yourTime
       teacherTime

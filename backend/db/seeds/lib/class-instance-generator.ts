@@ -9,6 +9,7 @@ import {
   iterateDatesInWindow,
   startOfDay,
 } from "./date-window";
+import { ALL_CLASS_TYPES, cycleAtIndex } from "./enum-coverage";
 import { getFakerForIndex } from "./faker-client";
 import { parseTimeToHoursMinutes, type ScheduleDaySpec } from "./schedule-factory";
 import type { SeedConfig } from "./seed-config";
@@ -35,6 +36,7 @@ export interface ResolvedInstanceState {
 function resolvePastState(config: SeedConfig, scheduleIndex: number, dateKey: string): ResolvedInstanceState {
   const faker = getFakerForIndex(config.fakerSeed, scheduleIndex + dateKey.length);
   const roll = faker.number.int({ min: 1, max: 100 });
+  const classType = cycleAtIndex(ALL_CLASS_TYPES, scheduleIndex + dateKey.charCodeAt(0));
 
   if (roll <= 85) {
     return {
@@ -42,7 +44,7 @@ function resolvePastState(config: SeedConfig, scheduleIndex: number, dateKey: st
       outcome: ClassOutcome.TAKEN,
       actualStartAt: null,
       actualEndAt: null,
-      classType: ClassType.REGULAR,
+      classType,
     };
   }
   if (roll <= 95) {
@@ -51,7 +53,7 @@ function resolvePastState(config: SeedConfig, scheduleIndex: number, dateKey: st
       outcome: ClassOutcome.ABSENT,
       actualStartAt: null,
       actualEndAt: null,
-      classType: ClassType.REGULAR,
+      classType,
     };
   }
   return {
@@ -59,7 +61,7 @@ function resolvePastState(config: SeedConfig, scheduleIndex: number, dateKey: st
     outcome: ClassOutcome.LEAVE,
     actualStartAt: null,
     actualEndAt: null,
-    classType: ClassType.REGULAR,
+    classType,
   };
 }
 
@@ -154,6 +156,18 @@ export function buildShowcaseInstancesForToday(
       ClassType.REGULAR
     ),
     createSlot(
+      11,
+      {
+        executionState: ClassExecutionState.RUNNING,
+        outcome: ClassOutcome.PENDING,
+        actualStartAt: null,
+        actualEndAt: null,
+        classType: ClassType.REGULAR,
+      },
+      "demo_instance_running_today",
+      ClassType.REGULAR
+    ),
+    createSlot(
       12,
       {
         executionState: ClassExecutionState.COMPLETED,
@@ -176,6 +190,18 @@ export function buildShowcaseInstancesForToday(
       },
       "demo_instance_cancelled_today",
       ClassType.REGULAR
+    ),
+    createSlot(
+      16,
+      {
+        executionState: ClassExecutionState.COMPLETED,
+        outcome: ClassOutcome.TAKEN,
+        actualStartAt: null,
+        actualEndAt: null,
+        classType: ClassType.ADVANCE,
+      },
+      "demo_instance_advance_today",
+      ClassType.ADVANCE
     ),
   ];
 }

@@ -1525,6 +1525,7 @@ export type DailyScheduleListQueryVariables = Exact<{
   date: string;
   teacherId: string | null | undefined;
   search: string | null | undefined;
+  metricFilter: string | null | undefined;
 }>;
 
 

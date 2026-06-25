@@ -82,7 +82,7 @@ export function TodayClassesMobileScroll({ metrics, onMetricClick, selectedKey }
     <StyledScrollGrid container columnSpacing={2}>
       {metrics.map(metric => {
         const MetricIcon = metric.icon;
-        const isError = metric.key === "cancelled" || metric.key === "noShow" || metric.key === "needCover";
+        const isError = metric.key === "suspended" || metric.key === "absent" || metric.key === "leave";
         const isSelected = selectedKey === metric.key;
 
         return (

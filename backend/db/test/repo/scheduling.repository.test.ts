@@ -305,6 +305,47 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       });
     });
 
+    test("filters daily schedule by metric filter", async () => {
+      await runInRollback(async tx => {
+        const { student, teacher } = await setupTestEntities(tx, "MetricFilter");
+        const testDate = new Date("2028-02-01T12:00:00Z");
+
+        await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: testDate,
+          scheduledEndAt: new Date(testDate.getTime() + 3600000),
+          classType: "REGULAR",
+          outcome: "PENDING",
+        });
+        await createMockClassInstance(tx, student.id, teacher.id, {
+          scheduledStartAt: testDate,
+          scheduledEndAt: new Date(testDate.getTime() + 3600000),
+          classType: "TRIAL",
+          outcome: "TAKEN",
+          executionState: "COMPLETED",
+          actualStartAt: testDate,
+          actualEndAt: new Date(testDate.getTime() + 3600000),
+        });
+
+        const allRows = await SchedulingRepository.getDailySchedule(testDate, { teacherId: teacher.id }, tx);
+        const regularRows = await SchedulingRepository.getDailySchedule(
+          testDate,
+          { teacherId: teacher.id, metricFilter: "regular" },
+          tx
+        );
+        const trialRows = await SchedulingRepository.getDailySchedule(
+          testDate,
+          { teacherId: teacher.id, metricFilter: "trial" },
+          tx
+        );
+
+        expect(regularRows.length).toBeGreaterThanOrEqual(1);
+        expect(trialRows.length).toBeGreaterThanOrEqual(1);
+        expect(regularRows.length + trialRows.length).toBeLessThanOrEqual(allRows.length);
+        expect(regularRows.every(row => row.classType === "REGULAR")).toBe(true);
+        expect(trialRows.every(row => row.classType === "TRIAL")).toBe(true);
+      });
+    });
+
     test("handles no transaction context natively", async () => {
       const date = new Date("2029-01-01T00:00:00Z");
       const metrics = await SchedulingRepository.getDailyMetrics(date);
