@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   dailyScheduleListQueryDocument,
@@ -14,6 +14,7 @@ import { useUserStore } from "@/frontend/stores/userStore";
 import { DashboardView } from "./DashboardView";
 import { useAdminDashboardLabels } from "./utils";
 import { buildAdminDashboardMetrics } from "./utils/adminDashboardMetrics";
+import { resolveDailyScheduleMetricFilter } from "./utils/dailyScheduleMetricFilter";
 
 // Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
 // This container component handles all GraphQL queries, filter state, and metric/row transformations
@@ -28,8 +29,7 @@ export function AdminDashboardContainer() {
 
   const { headers, statusLabels } = useAdminDashboardLabels();
 
-  const selectedMetricFilter =
-    filters.selectedStatus && filters.selectedStatus !== "total" ? filters.selectedStatus : null;
+  const selectedMetricFilter = resolveDailyScheduleMetricFilter(filters.selectedStatus);
 
   // Fetch metrics using active filters (date and teacherId)
   const {
@@ -55,16 +55,27 @@ export function AdminDashboardContainer() {
       search: filters.searchQuery || null,
       metricFilter: selectedMetricFilter,
     },
+    fetchPolicy: "cache-and-network",
   });
 
   const [teacherSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const pageSize = 10;
 
-  // Reset page when filters change
-  useEffect(() => {
+  const handleDateChange = (date: string) => {
+    setDateFilter(date);
     setPage(0);
-  }, []);
+  };
+
+  const handleTeacherChange = (teacherId: string) => {
+    setTeacherFilter(teacherId);
+    setPage(0);
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setPage(0);
+  };
 
   // Fetch teachers list using the new teachers query
   const { data: teachersData } = useQuery(teachersQueryDocument, {
@@ -86,11 +97,10 @@ export function AdminDashboardContainer() {
 
   // Handle metric card clicks - enforces DashboardFilterMetrics permission before toggling status selection
   const handleMetricClick = (key: string) => {
-    // Enforce dashboard.filter_metrics permission for card clicking
     if (!hasPermission(AppPermission.DashboardFilterMetrics)) {
       return;
     }
-    // Toggle the selected status
+    setPage(0);
     if (filters.selectedStatus === key) {
       setSelectedStatus(null);
     } else {
@@ -136,9 +146,9 @@ export function AdminDashboardContainer() {
       pageSize={pageSize}
       totalCount={rows.length}
       onPageChange={setPage}
-      onSearchChange={setSearchQuery}
-      onDateChange={setDateFilter}
-      onTeacherChange={setTeacherFilter}
+      onSearchChange={handleSearchChange}
+      onDateChange={handleDateChange}
+      onTeacherChange={handleTeacherChange}
       onSubmit={handleSubmit}
     />
   );

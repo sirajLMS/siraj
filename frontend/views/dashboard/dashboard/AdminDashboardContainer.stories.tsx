@@ -4,6 +4,10 @@ import { useState } from "react";
 import { useMockDashboardStore } from "@/frontend/stores/mockDashboardStore";
 import { DashboardView } from "./DashboardView";
 import { useAdminDashboardLabels } from "./utils";
+import {
+  matchesDailyScheduleMetricFilter,
+  resolveDailyScheduleMetricFilter,
+} from "./utils/dailyScheduleMetricFilter";
 
 // Reusable mock container that acts exactly like the old AdminDashboardContainer
 export function MockAdminDashboardContainer() {
@@ -19,6 +23,7 @@ export function MockAdminDashboardContainer() {
   const setDateFilter = useMockDashboardStore(state => state.setDateFilter);
   const setTeacherFilter = useMockDashboardStore(state => state.setTeacherFilter);
   const setSearchQuery = useMockDashboardStore(state => state.setSearchQuery);
+  const setSelectedStatus = useMockDashboardStore(state => state.setSelectedStatus);
   const [page, setPage] = useState(0);
   const pageSize = 10;
 
@@ -31,7 +36,13 @@ export function MockAdminDashboardContainer() {
     : lastUpdatedKey;
   const translatedLastUpdated = t(cleanedLastUpdatedKey);
 
+  const metricFilter = resolveDailyScheduleMetricFilter(filters.selectedStatus);
+
   const filteredRows = scheduleRows.filter(row => {
+    if (!matchesDailyScheduleMetricFilter(row, metricFilter)) {
+      return false;
+    }
+
     if (filters.searchQuery) {
       const query = filters.searchQuery.toLowerCase();
       const studentMatch = (row.student?.name ?? "").toLowerCase().includes(query);
@@ -61,12 +72,21 @@ export function MockAdminDashboardContainer() {
     total: filteredRows.length,
   });
 
+  const handleMetricClick = (key: string) => {
+    setPage(0);
+    if (filters.selectedStatus === key) {
+      setSelectedStatus(null);
+    } else {
+      setSelectedStatus(key);
+    }
+  };
+
   return (
     <DashboardView
       todayClassesTitle={t("admin.todayClasses")}
       lastUpdated={translatedLastUpdated}
       metrics={todayClasses}
-      onMetricClick={_key => {}}
+      onMetricClick={handleMetricClick}
       selectedMetricKey={filters.selectedStatus ?? undefined}
       scheduleTitle={t("admin.scheduleOverview")}
       searchPlaceholder={t("admin.searchPlaceholder")}

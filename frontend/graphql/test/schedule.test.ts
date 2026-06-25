@@ -111,6 +111,33 @@ describe("GraphQL Schedule Integration Tests", () => {
     }
   });
 
+  test("dailyScheduleList with metricFilter returns subset of rows", async () => {
+    if (!authToken) throw new Error("No auth token");
+
+    const allData = await authenticatedRequest(authToken, "query", dailyScheduleListQueryDocument, {
+      date: testDate,
+      teacherId: null,
+      search: null,
+      metricFilter: null,
+    });
+    const pendingData = await authenticatedRequest(authToken, "query", dailyScheduleListQueryDocument, {
+      date: testDate,
+      teacherId: null,
+      search: null,
+      metricFilter: "pending",
+    });
+
+    const allList = allData.dailyScheduleList;
+    const pendingList = pendingData.dailyScheduleList;
+    if (!allList || !pendingList) throw new Error("No dailyScheduleList data returned");
+
+    expect(pendingList.length).toBeLessThanOrEqual(allList.length);
+    for (const item of pendingList) {
+      if (!item) continue;
+      expect(item.outcome).toBe("PENDING");
+    }
+  });
+
   test("user without dashboard.search + search arg returns GraphQL error", async () => {
     const teacherToken = await loginDemoUser("teacher_default");
     const expectedTeacher = demoTeachers[0];
