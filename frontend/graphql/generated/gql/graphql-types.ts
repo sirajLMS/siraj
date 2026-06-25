@@ -1694,7 +1694,7 @@ export type Query = {
   studentClassHistory: Maybe<StudentClassHistory>;
   studentClassSessionDetail: Maybe<StudentSessionDetail>;
   /** Fetches the global student directory with cross-relational data. */
-  studentDirectory: Maybe<Array<StudentDirectoryRow>>;
+  studentDirectory: Maybe<Array<Student>>;
   students: StudentsWithFiltersResponse;
   teacherActiveDashboard: Maybe<TeacherDashboard>;
   teacherDashboard: Maybe<TeacherDashboard>;
@@ -2115,17 +2115,22 @@ export type StorageStats = {
 
 export type Student = {
   __typename?: 'Student';
+  avatarUrl: Maybe<Scalars['String']['output']>;
   classesRemaining: Scalars['Int']['output'];
   classesTotal: Scalars['Int']['output'];
   createdAt: Maybe<Scalars['DateTime']['output']>;
   dateOfBirth: Maybe<Scalars['DateTime']['output']>;
+  email: Maybe<Scalars['String']['output']>;
   gender: Maybe<Gender>;
+  hoursPerWeek: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   language: Maybe<AppLanguage>;
   name: Scalars['String']['output'];
   parentId: Scalars['String']['output'];
+  parentName: Maybe<Scalars['String']['output']>;
   primaryTeacherId: Maybe<Scalars['String']['output']>;
   status: StudentStatus;
+  teacherName: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -2148,20 +2153,6 @@ export type StudentCreateInput = {
   parentId: Scalars['String']['input'];
   primaryTeacherId: InputMaybe<Scalars['String']['input']>;
   status: StudentStatus;
-};
-
-export type StudentDirectoryRow = {
-  __typename?: 'StudentDirectoryRow';
-  classesRemaining: Maybe<Scalars['Int']['output']>;
-  classesTotal: Maybe<Scalars['Int']['output']>;
-  createdAt: Maybe<Scalars['DateTime']['output']>;
-  email: Maybe<Scalars['String']['output']>;
-  hoursPerWeek: Maybe<Scalars['String']['output']>;
-  id: Maybe<Scalars['String']['output']>;
-  name: Maybe<Scalars['String']['output']>;
-  parentName: Maybe<Scalars['String']['output']>;
-  status: Maybe<Scalars['String']['output']>;
-  teacherName: Maybe<Scalars['String']['output']>;
 };
 
 export type StudentFilterArgs = {

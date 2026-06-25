@@ -54,9 +54,9 @@ const _processStudentQuery = async (
   const results = await (processedQuery as unknown as Promise<{ student: Types.StudentEntity; total: number }[]>);
 
   const total = results[0]?.total ?? 0;
-  const items: Types.StudentDto[] = results
+  const items: Types.Student[] = results
     .map(r => StudentUtils.mapEntityToDto(r.student))
-    .filter((s): s is Types.StudentDto => s !== null);
+    .filter((s): s is Types.Student => s !== null);
 
   const pageInfo = PaginationUtils.buildPageInfoFromArgs(paginationArgs, items.length, total);
 
@@ -130,14 +130,14 @@ export namespace StudentRepository {
     }
   };
 
-  export const loadByIds = async (ids: string[], locale?: string): Promise<(Types.StudentDto | Error)[]> => {
+  export const loadByIds = async (ids: string[], locale?: string): Promise<(Types.Student | Error)[]> => {
     if (ids.length === 0) return [];
     const foundStudents = await db.select().from(students).where(inArray(students.id, ids));
     const t = await getBackendTranslations({ locale, namespace: "errors" });
 
     return ids.map(id => {
       const s = foundStudents.find(c => c.id === id);
-      return s ? (StudentUtils.mapEntityToDto(s) as Types.StudentDto) : new Error(t("studentNotFound", { id }));
+      return s ? (StudentUtils.mapEntityToDto(s) as Types.Student) : new Error(t("studentNotFound", { id }));
     });
   };
 
@@ -351,30 +351,12 @@ export namespace StudentRepository {
   ): Promise<Types.StudentEntity> =>
     runStudentUpdate(studentId, () => ({ status: newStatus }), expectedVersion, tx, locale);
 
-  export interface StudentDirectoryRow {
-    readonly id: string;
-    readonly name: string;
-    readonly email: string;
-    readonly status: string;
-    readonly classesRemaining: number;
-    readonly classesTotal: number;
-    readonly hoursPerWeek: string;
-    readonly parentName: string;
-    readonly teacherName: string | null;
-    readonly createdAt: Date;
-  }
-
-  export interface StudentDirectoryResult {
-    readonly rows: StudentDirectoryRow[];
-    readonly totalCount: number;
-  }
-
   export const getDirectoryRows = async (
     paginationArgs: Types.PaginationArgs | null,
     filters?: Types.StudentFilterArgs | null,
     orderBy?: Types.StudentsOrderByClause[] | null,
     tx?: DBTransaction
-  ): Promise<StudentDirectoryResult> => {
+  ): Promise<Types.StudentDirectoryResult> => {
     const queryDb = tx ?? db;
 
     const parentUsers = alias(users, "parent_users");
@@ -385,13 +367,16 @@ export namespace StudentRepository {
         id: students.id,
         name: students.name,
         email: sql<string>`COALESCE(${parentUsers.email}, '')`,
+        avatarUrl: students.avatarUrl,
         status: students.status,
         classesRemaining: students.classesRemaining,
         classesTotal: students.classesTotal,
         hoursPerWeek: students.hoursPerWeek,
         parentName: sql<string>`COALESCE(${parentUsers.name}, '')`,
+        primaryTeacherId: students.primaryTeacherId,
         teacherName: sql<string | null>`COALESCE(${teacherUsers.name}, NULL)`,
         createdAt: students.createdAt,
+        updatedAt: students.updatedAt,
       })
       .from(students)
       .innerJoin(parents, eq(students.parentId, parents.id))
@@ -422,6 +407,6 @@ export namespace StudentRepository {
 
     const totalCount = countResult[0]?.count ?? 0;
 
-    return { rows, totalCount };
+    return { rows: rows.map(r => r as Types.StudentDirectory), totalCount };
   };
 }

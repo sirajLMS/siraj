@@ -1,20 +1,8 @@
 import { and, eq, sql } from "drizzle-orm";
+import type { SessionSummary } from "@/backend/types";
 import type { DBTransaction } from "../db.types";
 import { db } from "../drizzleDb";
 import { classInstancePerformance, classInstances, teachers, users } from "../schema";
-
-export interface SessionSummary {
-  id: string;
-  title: string;
-  time: string;
-  duration: number;
-  status: string;
-  instructor: string;
-  timeSlot: string;
-  room: string | null;
-  notes: string;
-  dayOfMonth: number;
-}
 
 export namespace StudentHistoryRepository {
   export async function getMonthlyCalendar(

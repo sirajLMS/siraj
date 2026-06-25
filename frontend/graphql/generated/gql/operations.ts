@@ -1632,11 +1632,11 @@ export type UpdateTeacherProfileMutationVariables = Exact<{
 
 export type UpdateTeacherProfileMutation = UpdateTeacherProfileMutation_Mutation;
 
-export type StudentDirectoryRowFragmentFragment = { id: string | null, name: string | null, email: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: string | null, parentName: string | null, teacherName: string | null, createdAt: string | null };
+export type StudentDirectoryRowFragmentFragment = { id: string, name: string, email: string | null, avatarUrl: string | null, status: Types.StudentStatus, classesRemaining: number, classesTotal: number, hoursPerWeek: string | null, parentName: string | null, teacherName: string | null, createdAt: string | null };
 
-export type StudentDirectoryQuery_studentDirectory_StudentDirectoryRow = { id: string | null, name: string | null, email: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: string | null, parentName: string | null, teacherName: string | null, createdAt: string | null };
+export type StudentDirectoryQuery_studentDirectory_Student = { id: string, name: string, email: string | null, avatarUrl: string | null, status: Types.StudentStatus, classesRemaining: number, classesTotal: number, hoursPerWeek: string | null, parentName: string | null, teacherName: string | null, createdAt: string | null };
 
-export type StudentDirectoryQuery_Query = { studentDirectory: Array<StudentDirectoryQuery_studentDirectory_StudentDirectoryRow> | null };
+export type StudentDirectoryQuery_Query = { studentDirectory: Array<StudentDirectoryQuery_studentDirectory_Student> | null };
 
 
 export type StudentDirectoryQueryVariables = Exact<{

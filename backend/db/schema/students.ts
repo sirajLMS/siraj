@@ -53,6 +53,7 @@ export const students = pgTable(
       .references(() => parents.id, { onDelete: "cascade" }),
     primaryTeacherId: uuid("primary_teacher_id").references(() => teachers.id, { onDelete: "set null" }),
     name: varchar("name", { length: 255 }).notNull(),
+    avatarUrl: varchar("avatar_url", { length: 1024 }),
     dateOfBirth: timestamp("date_of_birth", { withTimezone: true, precision: 3 }),
     gender: genderEnum("gender"),
     language: appLanguageEnum("language"),

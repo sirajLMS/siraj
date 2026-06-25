@@ -14,6 +14,8 @@ export * from "./soft-delete.types";
 export * from "./staff-profile.types";
 export * from "./storage.types";
 export * from "./student.types";
+export * from "./student-lifecycle.types";
+export * from "./studentStatusHistory.types";
 export * from "./suggestions.types";
 export * from "./system-settings.types";
 export * from "./teacher.types";

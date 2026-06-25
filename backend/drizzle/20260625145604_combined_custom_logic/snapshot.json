@@ -1,6 +1,6 @@
 {
-  "id": "1859115e-7436-4375-9d1f-d602a71e8a3d",
-  "prevIds": ["ea788658-ee90-48ec-9efa-d822b48f0e0e"],
+  "id": "ad1d69ef-a42e-43d0-ac62-78108ee80c89",
+  "prevIds": ["d78ed969-e9ff-4893-9c40-446718d619b8"],
   "version": "8",
   "dialect": "postgres",
   "ddl": [
@@ -6281,6 +6281,19 @@
       "table": "students"
     },
     {
+      "type": "varchar(1024)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "avatar_url",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "students"
+    },
+    {
       "type": "timestamp(3) with time zone",
       "typeSchema": null,
       "notNull": false,
@@ -11596,19 +11609,6 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["duplicate_of_id"],
-      "schemaTo": "public",
-      "tableTo": "suggestions",
-      "columnsTo": ["id"],
-      "onUpdate": "NO ACTION",
-      "onDelete": "SET NULL",
-      "name": "suggestions_duplicate_of_id_suggestions_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "suggestions"
-    },
-    {
-      "nameExplicit": false,
       "columns": ["reviewed_by_user_id"],
       "schemaTo": "public",
       "tableTo": "users",
@@ -11616,6 +11616,19 @@
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "suggestions_reviewed_by_user_id_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "suggestions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": ["duplicate_of_id"],
+      "schemaTo": "public",
+      "tableTo": "suggestions",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "suggestions_duplicate_of_id_fkey",
       "entityType": "fks",
       "schema": "public",
       "table": "suggestions"

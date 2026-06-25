@@ -605,6 +605,7 @@ CREATE TABLE "students" (
 	"parent_id" uuid NOT NULL,
 	"primary_teacher_id" uuid,
 	"name" varchar(255) NOT NULL,
+	"avatar_url" varchar(1024),
 	"date_of_birth" timestamp(3) with time zone,
 	"gender" "gender",
 	"language" "app_language",
@@ -962,8 +963,8 @@ ALTER TABLE "learning_resources" ADD CONSTRAINT "learning_resources_uploaded_by_
 ALTER TABLE "notification_deliveries" ADD CONSTRAINT "notification_deliveries_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "notification_deliveries" ADD CONSTRAINT "notification_deliveries_wsuupd9kUEsX_fkey" FOREIGN KEY ("device_token_id") REFERENCES "user_device_tokens"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_duplicate_of_id_suggestions_id_fkey" FOREIGN KEY ("duplicate_of_id") REFERENCES "suggestions"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_reviewed_by_user_id_users_id_fkey" FOREIGN KEY ("reviewed_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_duplicate_of_id_fkey" FOREIGN KEY ("duplicate_of_id") REFERENCES "suggestions"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "user_device_tokens" ADD CONSTRAINT "user_device_tokens_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "user_notification_preferences" ADD CONSTRAINT "user_notification_preferences_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "parents" ADD CONSTRAINT "parents_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint

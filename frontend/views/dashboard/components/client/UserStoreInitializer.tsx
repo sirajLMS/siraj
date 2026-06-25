@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 import type { CurrentUserProfile } from "@/backend/types";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AppPermission as BackendAppPermission } from "@/shared/lib/enum";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { AppPermission as BackendAppPermission } from "@/shared/lib/enum";
 
 interface UserStoreInitializerProps {
   readonly userProfile: CurrentUserProfile;

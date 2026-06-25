@@ -2,28 +2,12 @@ import { StudentRepository, TeacherRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import {
+  ALLOWED_STATUS_TRANSITIONS,
+  type ChangeStudentStatusResult,
+  type ReassignStudentTeacherResult,
+} from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
-
-export interface ReassignTeacherResult {
-  readonly id: string;
-  readonly primaryTeacherId: string | null;
-  readonly version: number;
-}
-
-export interface ChangeStudentStatusResult {
-  readonly id: string;
-  readonly status: string;
-  readonly version: number;
-}
-
-const ALLOWED_STATUS_TRANSITIONS: Record<string, readonly string[]> = {
-  ON_TRIAL: ["REGULAR", "DEACTIVATED"],
-  REGULAR: ["SUSPENDED", "ON_LEAVE", "DEACTIVATED", "GRADUATED"],
-  SUSPENDED: ["REGULAR", "DEACTIVATED"],
-  ON_LEAVE: ["REGULAR", "DEACTIVATED"],
-  DEACTIVATED: ["REGULAR"],
-  GRADUATED: [],
-};
 
 export namespace StudentLifecycleService {
   export async function reassignTeacher(
@@ -32,7 +16,7 @@ export namespace StudentLifecycleService {
     newTeacherId: string,
     expectedVersion?: number,
     locale?: string
-  ): Promise<ReassignTeacherResult> {
+  ): Promise<ReassignStudentTeacherResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_REASSIGN_TEACHER);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });

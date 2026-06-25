@@ -1364,7 +1364,7 @@ type Query {
   studentClassSessionDetail(classInstanceId: ID!): StudentSessionDetail
 
   """Fetches the global student directory with cross-relational data."""
-  studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): [StudentDirectoryRow!]
+  studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): [Student!]
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
   teacherActiveDashboard(date: String!): TeacherDashboard
   teacherDashboard(date: String!): TeacherDashboard
@@ -1534,17 +1534,22 @@ type StorageStats {
 scalar StringMap
 
 type Student {
+  avatarUrl: String
   classesRemaining: Int!
   classesTotal: Int!
   createdAt: DateTime
   dateOfBirth: DateTime
+  email: String
   gender: Gender
+  hoursPerWeek: String
   id: String!
   language: AppLanguage
   name: String!
   parentId: String!
+  parentName: String
   primaryTeacherId: String
   status: StudentStatus!
+  teacherName: String
   updatedAt: DateTime
 }
 
@@ -1566,19 +1571,6 @@ input StudentCreateInput {
   parentId: String!
   primaryTeacherId: String
   status: StudentStatus!
-}
-
-type StudentDirectoryRow {
-  classesRemaining: Int
-  classesTotal: Int
-  createdAt: DateTime
-  email: String
-  hoursPerWeek: String
-  id: String
-  name: String
-  parentName: String
-  status: String
-  teacherName: String
 }
 
 input StudentFilterArgs {

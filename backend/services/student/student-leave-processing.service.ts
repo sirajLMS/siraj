@@ -1,11 +1,7 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { logger } from "@/backend/lib/logger";
+import type { LeaveProcessingResult } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
-
-export interface LeaveProcessingResult {
-  readonly processedCount: number;
-  readonly successorIds: string[];
-}
 
 export namespace StudentLeaveProcessingService {
   export const PERMISSION = AppPermission.SYSTEM_PROCESS_STUDENT_LEAVE;

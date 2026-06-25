@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import type { CurrentUserProfile } from "@/backend/types";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AppPermission as BackendAppPermission } from "@/shared/lib/enum";
 import { getAppLocale } from "@/frontend/views/dashboard/lib/getAppLocale";
 import { getDashboardLayoutData } from "@/frontend/views/dashboard/lib/getDashboardLayoutData";
 import { getDashboardPathname } from "@/frontend/views/dashboard/lib/getDashboardPathname";
+import { AppPermission as BackendAppPermission } from "@/shared/lib/enum";
 import { UserStoreInitializer } from "./client/UserStoreInitializer";
 import { DashboardLayout } from "./DashboardLayout";
 

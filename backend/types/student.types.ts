@@ -1,59 +1,65 @@
-import type { studentProgress, studentStatusHistory, students } from "@/backend/db/schema";
+import type { students } from "@/backend/db/schema";
 import type { AppLanguage, Gender, OrderSortDirection, StudentStatus } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
 export type StudentEntity = typeof students.$inferSelect;
 export type StudentEntityInput = typeof students.$inferInsert;
 
-export type StudentStatusHistorySelectType = typeof studentStatusHistory.$inferSelect;
-export type StudentStatusHistoryInput = typeof studentStatusHistory.$inferInsert;
-
-export type StudentProgressSelectType = typeof studentProgress.$inferSelect;
-export type StudentProgressInsertType = typeof studentProgress.$inferInsert;
-
-export type StudentDto = {
-  id: string;
-  parentId: string;
-  primaryTeacherId: string | null;
-  name: string;
-  dateOfBirth: Date | null;
+export type Student = Omit<
+  StudentEntity,
+  // enums
+  "status" | "gender" | "language"
+> & {
   gender: Gender | null;
   language: AppLanguage | null;
   status: StudentStatus;
-  classesTotal: number;
-  classesRemaining: number;
-  createdAt: Date;
-  updatedAt: Date;
+
+  // resolved
+  email?: string | null;
+  parentName?: string | null;
+  teacherName?: string | null;
+  avatarUrl?: string | null;
 };
 
-export type StudentCreateInput = {
-  parentId: string;
-  primaryTeacherId?: string | null;
-  name: string;
-  dateOfBirth?: Date | null;
+export type StudentDirectory = Omit<
+  Student,
+  | "dateOfBirth"
+  | "parentId"
+  | " primaryTeacherId"
+  | "idempotencyKey"
+  | "version"
+  | "language"
+  | "timezoneOverride"
+  | "gender"
+>;
+
+export interface StudentDirectoryResult {
+  readonly rows: StudentDirectory[];
+  readonly totalCount: number;
+}
+
+export type StudentCreateInput = Omit<
+  StudentEntityInput,
+  // enums
+  | "status"
+  | "gender"
+  | "language"
+  // forbidden
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+> & {
   gender?: Gender | null;
   language?: AppLanguage | null;
   status: StudentStatus;
-  classesTotal?: number;
-  classesRemaining?: number;
-  idempotencyKey: string;
 };
 
-export type PartialStudentUpdateInput = {
+export type PartialStudentUpdateInput = Partial<Omit<StudentCreateInput, "idempotencyKey">> & {
   id: string;
-  parentId?: string | null;
-  primaryTeacherId?: string | null;
-  name?: string | null;
-  dateOfBirth?: Date | null;
-  gender?: Gender | null;
-  language?: AppLanguage | null;
-  status?: StudentStatus | null;
-  classesTotal?: number | null;
-  classesRemaining?: number | null;
 };
 
 export type StudentsWithFiltersResponse = {
-  data: StudentDto[];
+  data: Student[];
   pageInfo: PageInfo;
 };
 
@@ -113,3 +119,10 @@ export enum StudentsOrderByColumn {
   CREATED_AT = "CREATED_AT",
   UPDATED_AT = "UPDATED_AT",
 }
+
+export type StudentHistoryMetricsDefinition = {
+  totalClasses: number;
+  attendanceRate: number;
+  hoursStudied: number;
+  performance: number;
+};
