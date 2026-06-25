@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useUserStore } from "@/frontend/stores/mockUserStore";
 import { BOTTOM_NAV_ITEMS, SIDEBAR_NAV_ITEMS } from "@/frontend/views/dashboard/config/mockNavigationConfig";
-import { DashboardLayout } from "./DashboardLayout";
+import { SidebarShell, type TranslatedNavItem } from "./client/SidebarShell";
+import { DashboardLayoutPreview } from "./DashboardLayoutPreview";
 import { useDashboardLayoutProps } from "./useDashboardLayoutProps";
 
 interface MockDashboardLayoutContainerProps {
@@ -12,46 +13,42 @@ interface MockDashboardLayoutContainerProps {
 
 function MockDashboardLayoutContainer({ children }: MockDashboardLayoutContainerProps) {
   const t = useTranslations("dashboard.admin");
-  const { name, role, avatarUrl, permissions, notificationCount, user } = useUserStore();
+  const tNav = useTranslations();
+  const locale = useLocale();
+  const { name, avatarUrl, permissions, notificationCount, user } = useUserStore();
 
-  const {
-    sidebarItems,
-    bottomNavItems,
-    activeNavKey,
-    sidebarOpen,
-    mobileDrawerOpen,
-    toggleSidebar,
-    toggleMobileDrawer,
-    closeMobileDrawer,
-    handleNavigate,
-  } = useDashboardLayoutProps({
+  const { sidebarItems, bottomNavItems, activeNavKey } = useDashboardLayoutProps({
     sidebarNavItems: SIDEBAR_NAV_ITEMS,
     bottomNavItems: BOTTOM_NAV_ITEMS,
     permissions,
   });
 
+  const translatedSidebarItems: TranslatedNavItem[] = sidebarItems.map(item => ({
+    ...item,
+    label: tNav(item.labelKey),
+  }));
+
+  const translatedBottomNavItems: TranslatedNavItem[] = bottomNavItems.map(item => ({
+    ...item,
+    label: tNav(item.labelKey),
+  }));
+
   return (
-    <DashboardLayout
-      sidebarItems={sidebarItems}
-      bottomNavItems={bottomNavItems}
+    <DashboardLayoutPreview
+      sidebar={
+        <SidebarShell navItems={translatedSidebarItems} activeKey={activeNavKey} locale={locale} sidebarWidth="260px" />
+      }
+      bottomNavItems={translatedBottomNavItems}
       activeNavKey={activeNavKey}
+      locale={locale}
       userName={name}
       userEmail={user?.email || "mock@example.com"}
-      userRole={role}
       roleLabel={t("roleLabel")}
       avatarUrl={avatarUrl}
       notificationCount={notificationCount}
-      sidebarWidth="260px"
-      navbarHeight="64px"
-      sidebarOpen={sidebarOpen}
-      mobileDrawerOpen={mobileDrawerOpen}
-      onToggleSidebar={toggleSidebar}
-      onToggleMobileDrawer={toggleMobileDrawer}
-      onCloseMobileDrawer={closeMobileDrawer}
-      onNavigate={handleNavigate}
     >
       {children}
-    </DashboardLayout>
+    </DashboardLayoutPreview>
   );
 }
 

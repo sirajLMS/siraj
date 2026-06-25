@@ -1,18 +1,18 @@
 "use client";
 
-import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
-import { useTranslations } from "next-intl";
+import { Box, Paper, Typography } from "@mui/material";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 
 interface BottomNavbarProps {
   readonly items: readonly NavItem[];
   readonly activeKey: string;
-  readonly onNavigate: (href: string) => void;
 }
 
-export function BottomNavbar({ items, activeKey, onNavigate }: BottomNavbarProps) {
+export function BottomNavbar({ items, activeKey }: BottomNavbarProps) {
   const t = useTranslations();
-  const activeIndex = items.findIndex(item => item.key === activeKey);
+  const locale = useLocale();
 
   return (
     <Paper
@@ -27,37 +27,50 @@ export function BottomNavbar({ items, activeKey, onNavigate }: BottomNavbarProps
       }}
       elevation={3}
     >
-      <BottomNavigation
-        value={Math.max(activeIndex, 0)}
-        onChange={(_, newValue: number) => {
-          onNavigate(items[newValue].href);
-        }}
-        showLabels
+      <Box
+        component="nav"
         sx={theme => ({
+          display: "flex",
           height: 64,
           bgcolor: theme.palette.background.paper,
-          "& .MuiBottomNavigationAction-root": {
-            minWidth: "auto",
-            py: 1,
-            color: theme.palette.text.secondary,
-            "&.Mui-selected": {
-              color: theme.palette.primary.main,
-            },
-          },
-          "& .MuiBottomNavigationAction-label": {
-            fontFamily: '"Inter", sans-serif',
-            fontSize: "12px",
-            fontWeight: 500,
-            letterSpacing: "0.05em",
-            mt: 0.5,
-          },
         })}
       >
         {items.map(item => {
           const IconComponent = item.icon;
-          return <BottomNavigationAction key={item.key} label={t(item.labelKey)} icon={<IconComponent />} />;
+          const isActive = item.key === activeKey;
+
+          return (
+            <Box
+              key={item.key}
+              component={Link}
+              href={`/${locale}${item.href}`}
+              sx={theme => ({
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 0.5,
+                py: 1,
+                textDecoration: "none",
+                color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
+              })}
+            >
+              <IconComponent fontSize="small" />
+              <Typography
+                sx={{
+                  fontFamily: '"Inter", sans-serif',
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {t(item.labelKey)}
+              </Typography>
+            </Box>
+          );
         })}
-      </BottomNavigation>
+      </Box>
     </Paper>
   );
 }

@@ -10,8 +10,9 @@ import { routing } from "@/shared/i18n/routing";
 const intlMiddleware = createMiddleware(routing);
 
 export default function proxy(request: NextRequest) {
-  // Apply next-intl's routing logic
-  return intlMiddleware(request);
+  const response = intlMiddleware(request);
+  response.headers.set("x-pathname", request.nextUrl.pathname);
+  return response;
 }
 
 export const config = {
