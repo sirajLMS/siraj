@@ -51,7 +51,7 @@ export function StudentDirectoryCardStats({
     <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, mb: 2 }}>
       <Box>
         <Typography sx={labelSx}>{weeklyHoursLabel}</Typography>
-        <Typography sx={valueSx}>{formatHours(row.hoursPerWeek)}</Typography>
+        <Typography sx={valueSx}>{formatHours(row.hoursPerWeek ?? 0)}</Typography>
       </Box>
       <Box>
         <Typography sx={labelSx}>{enrollmentStatusLabel}</Typography>

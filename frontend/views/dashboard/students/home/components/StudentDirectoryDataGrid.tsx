@@ -61,7 +61,7 @@ export function StudentDirectoryDataGrid({
         minWidth: 200,
         renderCell: ({ row }) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "100%" }}>
-            <Avatar src={row.avatarUrl || undefined} alt={row.name} sx={{ width: 40, height: 40 }} />
+            <Avatar src={row.avatarUrl || undefined} alt={row.name ?? ""} sx={{ width: 40, height: 40 }} />
             <Typography variant="bodyLg" sx={theme => ({ fontWeight: 600, color: theme.palette.primary.main })}>
               {row.name}
             </Typography>
@@ -97,7 +97,7 @@ export function StudentDirectoryDataGrid({
         width: 120,
         renderCell: ({ row }) => (
           <Typography variant="bodyMd" sx={theme => ({ fontWeight: 500, color: theme.palette.primary.main })}>
-            {formatHours(row.hoursPerWeek)}
+            {formatHours(row.hoursPerWeek ?? 0)}
           </Typography>
         ),
       },
@@ -108,8 +108,8 @@ export function StudentDirectoryDataGrid({
         sortable: false,
         renderCell: ({ row }) => (
           <ClassesLeftProgress
-            remaining={row.classesRemaining}
-            total={row.classesTotal}
+            remaining={row.classesRemaining ?? 0}
+            total={row.classesTotal ?? 0}
             accountStatus={row.accountStatus}
           />
         ),
@@ -134,7 +134,7 @@ export function StudentDirectoryDataGrid({
                   id={`student-info-${row.id}`}
                   size="small"
                   onClick={() => {
-                    onViewProfile(row.id);
+                    onViewProfile(row.id ?? "");
                   }}
                   sx={theme => ({
                     color: theme.palette.primary.main,
@@ -151,7 +151,7 @@ export function StudentDirectoryDataGrid({
                   id={`student-history-${row.id}`}
                   size="small"
                   onClick={() => {
-                    onViewHistory(row.id);
+                    onViewHistory(row.id ?? "");
                   }}
                   sx={theme => ({
                     color: theme.palette.primary.main,
@@ -175,12 +175,12 @@ export function StudentDirectoryDataGrid({
     <AppDataGrid<StudentDirectoryRowExtended>
       rows={rows}
       columns={columns}
-      getRowId={row => row.id}
+      getRowId={row => row.id ?? ""}
       autoHeight
       ariaLabel="student-directory-table"
       emptyMessage={labels.noEntries}
       onRowClick={(params: GridRowParams<StudentDirectoryRowExtended>) => {
-        onViewProfile(params.row.id);
+        onViewProfile(params.row.id ?? "");
       }}
       getRowClassName={({ row }) => (row.isDeactivated ? "student-row-deactivated" : "")}
       sx={{

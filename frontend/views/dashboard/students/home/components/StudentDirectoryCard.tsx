@@ -26,7 +26,7 @@ export function StudentDirectoryCard({ row, labels, onViewProfile }: StudentDire
     <Card
       elevation={0}
       onClick={() => {
-        onViewProfile(row.id);
+        onViewProfile(row.id ?? "");
       }}
       sx={theme => ({
         p: 2,

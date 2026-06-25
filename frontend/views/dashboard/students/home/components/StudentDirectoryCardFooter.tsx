@@ -44,8 +44,8 @@ export function StudentDirectoryCardFooter({
           {classesLeftLabel}
         </Typography>
         <ClassesLeftProgress
-          remaining={row.classesRemaining}
-          total={row.classesTotal}
+          remaining={row.classesRemaining ?? 0}
+          total={row.classesTotal ?? 0}
           accountStatus={row.accountStatus}
           compact
         />
@@ -56,7 +56,7 @@ export function StudentDirectoryCardFooter({
         aria-label={viewProfileLabel}
         onClick={e => {
           e.stopPropagation();
-          onViewProfile(row.id);
+          onViewProfile(row.id ?? "");
         }}
         sx={theme => ({
           width: 32,

@@ -22,3 +22,4 @@ export * from "./teacher.types";
 export * from "./teacher-availability.types";
 export * from "./userDeviceTokens.types";
 export * from "./userNotificationPreferences.types";
+export * from "./studentProgress.types";

@@ -29,6 +29,39 @@ function resolveRequesterUserId(
   return teacherUserMap.get(instance.teacherId);
 }
 
+async function upsertLeaveRequest(
+  instance: ClassInstanceEntity,
+  values: {
+    requestedByUserId: string;
+    requesterType: LeaveRequesterType;
+    reason: string;
+    status: LeaveRequestStatus;
+    createdAt: Date;
+    processedAt: Date | null;
+    processedByUserId: string | null;
+  }
+) {
+  const [existing] = await db
+    .select()
+    .from(leaveRequests)
+    .where(eq(leaveRequests.classInstanceId, instance.id))
+    .limit(1);
+
+  if (existing) {
+    return existing;
+  }
+
+  const [inserted] = await db
+    .insert(leaveRequests)
+    .values({
+      classInstanceId: instance.id,
+      ...values,
+    })
+    .returning();
+
+  return inserted;
+}
+
 export async function seedOrGet(
   classInstancesList: ClassInstanceEntity[],
   teachersList: TeacherEntity[],
@@ -73,31 +106,16 @@ export async function seedOrGet(
     );
     if (!actorUserId) continue;
 
-    const [existing] = await db
-      .select()
-      .from(leaveRequests)
-      .where(eq(leaveRequests.classInstanceId, instance.id))
-      .limit(1);
-
-    if (existing) {
-      results.push(existing);
-      continue;
-    }
-
     const faker = getFakerForIndex(seedConfig.fakerSeed, instance.id.length);
-    const [inserted] = await db
-      .insert(leaveRequests)
-      .values({
-        classInstanceId: instance.id,
-        requestedByUserId: actorUserId,
-        requesterType,
-        reason: faker.lorem.sentence(),
-        status: LeaveRequestStatus.APPROVED,
-        createdAt: instance.scheduledStartAt,
-        processedAt: instance.scheduledEndAt,
-        processedByUserId: adminUser?.id ?? null,
-      })
-      .returning();
+    const inserted = await upsertLeaveRequest(instance, {
+      requestedByUserId: actorUserId,
+      requesterType,
+      reason: faker.lorem.sentence(),
+      status: LeaveRequestStatus.APPROVED,
+      createdAt: instance.scheduledStartAt,
+      processedAt: instance.scheduledEndAt,
+      processedByUserId: adminUser?.id ?? null,
+    });
     results.push(inserted);
   }
 
@@ -124,33 +142,17 @@ export async function seedOrGet(
     );
     if (!actorUserId) continue;
 
-    const [existing] = await db
-      .select()
-      .from(leaveRequests)
-      .where(eq(leaveRequests.classInstanceId, instance.id))
-      .limit(1);
-
-    if (existing) {
-      results.push(existing);
-      continue;
-    }
-
     const faker = getFakerForIndex(seedConfig.fakerSeed, 8000 + i);
     const isProcessed = status !== LeaveRequestStatus.PENDING;
-
-    const [inserted] = await db
-      .insert(leaveRequests)
-      .values({
-        classInstanceId: instance.id,
-        requestedByUserId: actorUserId,
-        requesterType,
-        reason: faker.lorem.sentence(),
-        status,
-        createdAt: instance.scheduledStartAt,
-        processedAt: isProcessed ? instance.scheduledStartAt : null,
-        processedByUserId: isProcessed ? (adminUser?.id ?? null) : null,
-      })
-      .returning();
+    const inserted = await upsertLeaveRequest(instance, {
+      requestedByUserId: actorUserId,
+      requesterType,
+      reason: faker.lorem.sentence(),
+      status,
+      createdAt: instance.scheduledStartAt,
+      processedAt: isProcessed ? instance.scheduledStartAt : null,
+      processedByUserId: isProcessed ? (adminUser?.id ?? null) : null,
+    });
     results.push(inserted);
   }
 

@@ -13,7 +13,7 @@ export function StudentDirectoryCardHeader({ row, statusLabels }: StudentDirecto
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Avatar src={row.avatarUrl || undefined} alt={row.name} sx={{ width: 48, height: 48 }} />
+        <Avatar src={row.avatarUrl || undefined} alt={row.name ?? ""} sx={{ width: 48, height: 48 }} />
         <Box>
           <Typography
             variant="bodyLg"

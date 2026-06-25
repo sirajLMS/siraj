@@ -5,7 +5,7 @@ import { Gender } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../../types";
 import type { ClassInstanceEntity } from "../../../types/scheduling.types";
-import type { StudentProgressSelectType } from "../../../types/student.types";
+import type { StudentProgressSelectType } from "../../../types";
 import type { DBTransaction } from "../../db.types";
 import { classInstances, parents, studentProgress, students, teacherAssignments, teachers, users } from "../../schema";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";

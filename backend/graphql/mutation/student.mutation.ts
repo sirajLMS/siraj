@@ -1,4 +1,5 @@
 import { StudentRepository } from "@/backend/db/repo/student.repository";
+import type * as Types from "@/backend/types";
 import { StudentUtils } from "@/backend/utils";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
@@ -32,8 +33,12 @@ gqlSchemaBuilder.mutationFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_query, args) =>
-      await StudentRepository.partiallyUpdate(args.input).then(s => StudentUtils.mapEntityToDto(s)),
+    resolve: async (_query, args) => {
+      const input = Object.fromEntries(
+        Object.entries(args.input).filter(([, value]) => value !== null)
+      ) as Types.PartialStudentUpdateInput;
+      return await StudentRepository.partiallyUpdate(input).then(s => StudentUtils.mapEntityToDto(s));
+    },
   }),
 
   deleteStudent: t.field({

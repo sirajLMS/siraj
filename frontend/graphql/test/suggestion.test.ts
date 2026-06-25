@@ -39,7 +39,7 @@ describe("GraphQL: adminSuggestions query", () => {
     });
 
     expect(data.adminSuggestions).toBeDefined();
-    expect(data.adminSuggestions?.totalCount).toBeGreaterThanOrEqual(0);
+    expect(data.adminSuggestions?.metrics?.totalCount).toBeGreaterThanOrEqual(0);
     expect(Array.isArray(data.adminSuggestions?.rows)).toBeTrue();
 
     const metrics = data.adminSuggestions?.metrics;
