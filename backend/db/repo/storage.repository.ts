@@ -105,6 +105,13 @@ export namespace StorageDbRepository {
   export const createDirectory = async (
     input: StorageTypes.FolderCreateInput
   ): Promise<StorageTypes.DirectoryEntity> => {
+    const record = await ensureDirectoryRecord(input);
+    return record;
+  };
+
+  export const ensureDirectoryRecord = async (
+    input: StorageTypes.FolderCreateInput
+  ): Promise<StorageTypes.DirectoryEntity> => {
     const permissions = input.permissions || {
       allowUploads: true,
       allowDelete: true,
@@ -114,7 +121,7 @@ export namespace StorageDbRepository {
       allowMoveFiles: true,
     };
 
-    const [created] = await db
+    const [record] = await db
       .insert(storageDirectories)
       .values({
         path: input.path,
@@ -127,8 +134,15 @@ export namespace StorageDbRepository {
         isProtected: input.protected || false,
         protectChildren: input.protectChildren || false,
       })
+      .onConflictDoUpdate({
+        target: storageDirectories.path,
+        set: {
+          isProtected: input.protected || false,
+          protectChildren: input.protectChildren || false,
+        },
+      })
       .returning();
-    return created;
+    return record;
   };
 
   export const updateDirectory = async (

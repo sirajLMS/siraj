@@ -129,6 +129,18 @@ export type AvailabilitySearchInput = {
   toTime: string;
 };
 
+export type ClassExecutionState =
+  | 'ACTIVATED'
+  | 'COMPLETED'
+  | 'NOT_ACTIVATED'
+  | 'RUNNING';
+
+export type ClassOutcome =
+  | 'ABSENT'
+  | 'LEAVE'
+  | 'PENDING'
+  | 'TAKEN';
+
 /** Categories for parent complaints. */
 export type ComplaintCategory =
   | 'OTHER'
@@ -1516,7 +1528,7 @@ export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_D
 
 export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem = { id: string | null, name: string | null };
 
-export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, status: string | null, student: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
+export type DailyScheduleListQuery_dailyScheduleList_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, student: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: DailyScheduleListQuery_dailyScheduleList_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
 
 export type DailyScheduleListQuery_Query = { dailyScheduleList: Array<DailyScheduleListQuery_dailyScheduleList_DailyScheduleList> | null };
 

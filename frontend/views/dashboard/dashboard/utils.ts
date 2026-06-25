@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import type { ClassStatus } from "../types/dashboard";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 
 export const useAdminDashboardLabels = () => {
   const t = useTranslations("dashboard");
@@ -16,13 +16,15 @@ export const useAdminDashboardLabels = () => {
     actions: t("admin.actions"),
   };
 
-  const statusLabels: Record<ClassStatus, string> = {
-    scheduled: t("admin.statusLabels.scheduled"),
-    in_progress: t("admin.statusLabels.inProgress"),
-    pending: t("admin.statusLabels.pending"),
-    completed: t("admin.statusLabels.completed"),
-    cancelled: t("admin.statusLabels.cancelled"),
-    absent: t("admin.statusLabels.absent"),
+  const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
+    [ClassOutcome.Pending]: t("admin.statusLabels.PENDING"),
+    [ClassOutcome.Taken]: t("admin.statusLabels.TAKEN"),
+    [ClassOutcome.Absent]: t("admin.statusLabels.ABSENT"),
+    [ClassOutcome.Leave]: t("admin.statusLabels.LEAVE"),
+    [ClassExecutionState.NotActivated]: t("admin.statusLabels.NOT_ACTIVATED"),
+    [ClassExecutionState.Activated]: t("admin.statusLabels.ACTIVATED"),
+    [ClassExecutionState.Running]: t("admin.statusLabels.RUNNING"),
+    [ClassExecutionState.Completed]: t("admin.statusLabels.COMPLETED"),
   };
 
   return { headers, statusLabels };

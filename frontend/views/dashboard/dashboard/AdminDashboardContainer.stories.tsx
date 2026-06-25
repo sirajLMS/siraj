@@ -34,8 +34,8 @@ export function MockAdminDashboardContainer() {
   const filteredRows = scheduleRows.filter(row => {
     if (filters.searchQuery) {
       const query = filters.searchQuery.toLowerCase();
-      const studentMatch = row.student.toLowerCase().includes(query);
-      const classIdMatch = row.classId.toLowerCase().includes(query);
+      const studentMatch = (row.student?.name ?? "").toLowerCase().includes(query);
+      const classIdMatch = (row.id ?? "").toLowerCase().includes(query);
       if (!studentMatch && !classIdMatch) {
         return false;
       }
@@ -43,8 +43,9 @@ export function MockAdminDashboardContainer() {
 
     if (filters.teacherId) {
       const teacherId = filters.teacherId.toLowerCase();
+      const teacherName = (row.teacher?.name ?? "").toLowerCase();
       const nameParts = teacherId.split("-");
-      const matchesTeacher = nameParts.some(part => row.teacher.toLowerCase().includes(part));
+      const matchesTeacher = nameParts.some(part => teacherName.includes(part));
       if (!matchesTeacher) {
         return false;
       }

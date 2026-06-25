@@ -1,6 +1,7 @@
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
+import { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   DailyScheduleListPothosObject,
@@ -60,6 +61,8 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
         yourTime: item.yourTimeFormatted || item.scheduledStartAt.toISOString(),
         duration: item.durationMinutes,
         status: item.outcome || item.executionState,
+        outcome: item.outcome as ClassOutcome,
+        executionState: item.executionState as ClassExecutionState,
         student: { id: item.studentId, name: item.student?.name || "Unknown" },
         teacher: { id: item.teacherId, name: item.teacher?.user?.name || "Unknown" },
       }));

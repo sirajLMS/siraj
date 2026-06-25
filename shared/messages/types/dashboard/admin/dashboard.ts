@@ -36,12 +36,14 @@ export interface AdminDashboardLabels {
     readonly leave: string;
   };
   readonly statusLabels: {
-    readonly scheduled: string;
-    readonly inProgress: string;
-    readonly pending: string;
-    readonly completed: string;
-    readonly cancelled: string;
-    readonly absent: string;
+    readonly PENDING: string;
+    readonly TAKEN: string;
+    readonly ABSENT: string;
+    readonly LEAVE: string;
+    readonly NOT_ACTIVATED: string;
+    readonly ACTIVATED: string;
+    readonly RUNNING: string;
+    readonly COMPLETED: string;
   };
   readonly loadingTimeoutTitle: string;
   readonly loadingTimeoutDesc: string;

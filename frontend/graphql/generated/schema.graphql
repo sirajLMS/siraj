@@ -197,6 +197,13 @@ type ChangeStudentStatusResult {
   version: Int
 }
 
+enum ClassExecutionState {
+  ACTIVATED
+  COMPLETED
+  NOT_ACTIVATED
+  RUNNING
+}
+
 type ClassInstanceDetail {
   courseName: String
   durationMinutes: Int
@@ -245,6 +252,13 @@ type ClassInstanceTeacherInfo {
   id: String
   name: String
   title: String
+}
+
+enum ClassOutcome {
+  ABSENT
+  LEAVE
+  PENDING
+  TAKEN
 }
 
 type ClassStatusEvent {
@@ -633,7 +647,9 @@ type CreateRecurringClassResult {
 
 type DailyScheduleList {
   duration: Int
+  executionState: ClassExecutionState
   id: String
+  outcome: ClassOutcome
   status: String
   student: DailyScheduleListUserItem
   studentTime: String

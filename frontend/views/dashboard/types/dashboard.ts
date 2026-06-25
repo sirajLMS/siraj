@@ -1,5 +1,10 @@
 import type { SvgIconComponent } from "@mui/icons-material";
-import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type {
+  AppPermission,
+  ClassExecutionState,
+  ClassOutcome,
+} from "@/frontend/graphql/generated/gql/graphql-types";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
 import type { DashboardNavigationLabels } from "@/shared/messages/types/message";
 
 export interface NavItem {
@@ -20,8 +25,6 @@ export interface MetricItem {
   readonly subLabel?: string;
   readonly variant?: "default" | "error" | "highlight" | "danger" | "compact";
 }
-
-export type ClassStatus = "scheduled" | "in_progress" | "pending" | "completed" | "cancelled" | "absent";
 
 export type ClassInstanceStatus = "active" | "scheduled" | "pending" | "completed" | "cancelled";
 
@@ -68,18 +71,6 @@ export interface ClassInstance {
   readonly lastClassDaysAgo: number;
 }
 
-export interface ScheduleRow {
-  readonly id: string; // real UUID for routing
-  readonly classId: string; // display "#CLS-{id}"
-  readonly student: string;
-  readonly teacher: string;
-  readonly yourTime: string;
-  readonly teacherTime?: string;
-  readonly studentTime?: string;
-  readonly time: string; // legacy single column fallback
-  readonly status: ClassStatus;
-}
-
 export interface TeacherFilterItem {
   readonly id: string;
   readonly name: string;
@@ -94,7 +85,7 @@ export interface ScheduleOverviewData {
   readonly teacherValue: string;
   readonly submitLabel: string;
   readonly teachers: readonly TeacherFilterItem[];
-  readonly rows: readonly ScheduleRow[];
+  readonly rows: readonly DailyScheduleRow[];
   readonly headers: {
     readonly classId: string;
     readonly student: string;
@@ -106,7 +97,7 @@ export interface ScheduleOverviewData {
     readonly status: string;
     readonly actions: string;
   };
-  readonly statusLabels: Record<ClassStatus, string>;
+  readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
   readonly emptyMessage: string;
   readonly showingText: string;

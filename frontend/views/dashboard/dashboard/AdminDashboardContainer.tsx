@@ -11,7 +11,6 @@ import {
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { ClassStatus, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
 import { DashboardView } from "./DashboardView";
 import { useAdminDashboardLabels } from "./utils";
 import { buildAdminDashboardMetrics } from "./utils/adminDashboardMetrics";
@@ -101,37 +100,12 @@ export function AdminDashboardContainer() {
 
   const metricsList = buildAdminDashboardMetrics(metricsData?.dailyScheduleMetrics);
 
-  // Map raw schedule list to rows with safe status mapping
-  const rawList = listData?.dailyScheduleList ?? [];
-  const mappedRows: ScheduleRow[] = rawList.map(item => {
-    // Determine the status mapping safely from API response
-    let status: ClassStatus = "pending";
-    if (
-      item.status &&
-      ["scheduled", "in_progress", "pending", "completed", "cancelled", "absent"].includes(item.status)
-    ) {
-      status = item.status as ClassStatus;
-    }
-
-    return {
-      id: item.id ?? "",
-      classId: `#CLS-${item.id}`,
-      student: item.student?.name ?? "Unknown Student",
-      teacher: item.teacher?.name ?? "Unknown Teacher",
-      yourTime: item.yourTime ?? "",
-      teacherTime: item.teacherTime ?? undefined,
-      studentTime: item.studentTime ?? undefined,
-      time: item.yourTime ?? "",
-      status,
-    };
-  });
-
-  // Client-side pagination on server-filtered rows
-  const paginatedRows = mappedRows.slice(page * pageSize, (page + 1) * pageSize);
+  const rows = listData?.dailyScheduleList ?? [];
+  const paginatedRows = rows.slice(page * pageSize, (page + 1) * pageSize);
 
   const showingText = t("admin.showingOf", {
     shown: paginatedRows.length,
-    total: mappedRows.length,
+    total: rows.length,
   });
 
   const isLoading = loadingMetrics || loadingList;
@@ -160,7 +134,7 @@ export function AdminDashboardContainer() {
       showingText={showingText}
       page={page}
       pageSize={pageSize}
-      totalCount={mappedRows.length}
+      totalCount={rows.length}
       onPageChange={setPage}
       onSearchChange={setSearchQuery}
       onDateChange={setDateFilter}

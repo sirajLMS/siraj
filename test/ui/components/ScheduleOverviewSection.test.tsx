@@ -10,11 +10,14 @@ import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  ClassExecutionState,
+  ClassOutcome,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { ScheduleOverviewSectionProps } from "@/frontend/views/dashboard/dashboard/components/ScheduleOverviewSection";
 import { ScheduleOverviewSection } from "@/frontend/views/dashboard/dashboard/components/ScheduleOverviewSection";
-import type { ClassStatus } from "@/frontend/views/dashboard/types/dashboard";
 import { renderWithWrapper } from "./TestWrapper";
 
 afterEach(() => {
@@ -22,13 +25,15 @@ afterEach(() => {
   useUserStore.setState({ permissions: [] }, false);
 });
 
-const statusLabels: Record<ClassStatus, string> = {
-  scheduled: "Scheduled",
-  in_progress: "In Progress",
-  pending: "Pending",
-  completed: "Completed",
-  cancelled: "Cancelled",
-  absent: "Absent",
+const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
+  [ClassOutcome.Pending]: "Pending",
+  [ClassOutcome.Taken]: "Taken",
+  [ClassOutcome.Absent]: "Absent",
+  [ClassOutcome.Leave]: "Leave",
+  [ClassExecutionState.NotActivated]: "Not Activated",
+  [ClassExecutionState.Activated]: "Activated",
+  [ClassExecutionState.Running]: "Running",
+  [ClassExecutionState.Completed]: "Completed",
 };
 
 const createMockProps = (overrides: Partial<ScheduleOverviewSectionProps> = {}): ScheduleOverviewSectionProps => ({

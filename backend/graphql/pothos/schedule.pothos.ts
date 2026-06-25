@@ -1,5 +1,7 @@
+import type { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { ClassExecutionStatePothosObject, ClassOutcomePothosObject } from "./enum.pothos";
 
 export type DailyScheduleMetricsDefinition = {
   id: string;
@@ -58,6 +60,8 @@ export type DailyScheduleListDefinition = {
   yourTime: string;
   duration: number;
   status: string;
+  outcome: ClassOutcome;
+  executionState: ClassExecutionState;
   student: DailyScheduleListUserItem;
   teacher: DailyScheduleListUserItem;
 };
@@ -72,6 +76,8 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
     yourTime: t.exposeString("yourTime"),
     duration: t.exposeInt("duration"),
     status: t.exposeString("status"),
+    outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
+    executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     student: t.expose("student", { type: DailyScheduleListUserItemObject }),
     teacher: t.expose("teacher", { type: DailyScheduleListUserItemObject }),
   }),

@@ -10,10 +10,14 @@ import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  ClassExecutionState,
+  ClassOutcome,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { ScheduleOverviewDataGrid } from "@/frontend/views/dashboard/dashboard/components/ScheduleOverviewDataGrid";
-import type { ClassStatus, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
 import { renderWithWrapper } from "./TestWrapper";
 
 afterEach(() => {
@@ -21,13 +25,15 @@ afterEach(() => {
   useUserStore.setState({ permissions: [] }, false);
 });
 
-const statusLabels: Record<ClassStatus, string> = {
-  scheduled: "Scheduled",
-  in_progress: "In Progress",
-  pending: "Pending",
-  completed: "Completed",
-  cancelled: "Cancelled",
-  absent: "Absent",
+const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
+  [ClassOutcome.Pending]: "Pending",
+  [ClassOutcome.Taken]: "Taken",
+  [ClassOutcome.Absent]: "Absent",
+  [ClassOutcome.Leave]: "Leave",
+  [ClassExecutionState.NotActivated]: "Not Activated",
+  [ClassExecutionState.Activated]: "Activated",
+  [ClassExecutionState.Running]: "Running",
+  [ClassExecutionState.Completed]: "Completed",
 };
 
 const headers = {
@@ -42,28 +48,28 @@ const headers = {
   actions: "Actions",
 };
 
-const mockRows: readonly ScheduleRow[] = [
+const mockRows: readonly DailyScheduleRow[] = [
   {
     id: "row-1",
-    classId: "#CLS-101",
-    student: "Ahmed Hassan",
-    teacher: "Dr. Sarah",
     yourTime: "10:00 AM",
     teacherTime: "11:00 AM",
     studentTime: "10:00 AM",
-    time: "10:00 AM",
-    status: "scheduled",
+    duration: 60,
+    outcome: ClassOutcome.Pending,
+    executionState: ClassExecutionState.NotActivated,
+    student: { id: "student-1", name: "Ahmed Hassan" },
+    teacher: { id: "teacher-1", name: "Dr. Sarah" },
   },
   {
     id: "row-2",
-    classId: "#CLS-102",
-    student: "Fatima Ali",
-    teacher: "Mr. Omar",
     yourTime: "2:00 PM",
     teacherTime: "3:00 PM",
     studentTime: "2:00 PM",
-    time: "2:00 PM",
-    status: "completed",
+    duration: 60,
+    outcome: ClassOutcome.Taken,
+    executionState: ClassExecutionState.Completed,
+    student: { id: "student-2", name: "Fatima Ali" },
+    teacher: { id: "teacher-2", name: "Mr. Omar" },
   },
 ];
 

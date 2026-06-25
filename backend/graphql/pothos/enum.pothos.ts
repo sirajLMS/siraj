@@ -1,5 +1,7 @@
 import {
   AppLanguage,
+  ClassExecutionState,
+  ClassOutcome,
   CountryCode,
   Gender,
   InvoiceType,
@@ -35,4 +37,12 @@ export const InvoiceTypePothosObject = gqlSchemaBuilder.enumType(InvoiceType, {
 
 export const PaymentMethodPothosObject = gqlSchemaBuilder.enumType(PaymentMethod, {
   name: "PaymentMethod",
+});
+
+export const ClassOutcomePothosObject = gqlSchemaBuilder.enumType(ClassOutcome, {
+  name: "ClassOutcome",
+});
+
+export const ClassExecutionStatePothosObject = gqlSchemaBuilder.enumType(ClassExecutionState, {
+  name: "ClassExecutionState",
 });

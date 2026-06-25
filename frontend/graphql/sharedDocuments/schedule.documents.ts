@@ -36,7 +36,8 @@ export const dailyScheduleListQueryDocument: TypedDocumentNode<
       teacherTime
       studentTime
       duration
-      status
+      outcome
+      executionState
       student {
         id
         name

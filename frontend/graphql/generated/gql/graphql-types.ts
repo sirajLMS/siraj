@@ -226,6 +226,13 @@ export type ChangeStudentStatusResult = {
   version: Maybe<Scalars['Int']['output']>;
 };
 
+export enum ClassExecutionState {
+  Activated = 'ACTIVATED',
+  Completed = 'COMPLETED',
+  NotActivated = 'NOT_ACTIVATED',
+  Running = 'RUNNING'
+}
+
 export type ClassInstanceDetail = {
   __typename?: 'ClassInstanceDetail';
   courseName: Maybe<Scalars['String']['output']>;
@@ -279,6 +286,13 @@ export type ClassInstanceTeacherInfo = {
   name: Maybe<Scalars['String']['output']>;
   title: Maybe<Scalars['String']['output']>;
 };
+
+export enum ClassOutcome {
+  Absent = 'ABSENT',
+  Leave = 'LEAVE',
+  Pending = 'PENDING',
+  Taken = 'TAKEN'
+}
 
 export type ClassStatusEvent = {
   __typename?: 'ClassStatusEvent';
@@ -674,7 +688,9 @@ export type CreateRecurringClassResult = {
 export type DailyScheduleList = {
   __typename?: 'DailyScheduleList';
   duration: Maybe<Scalars['Int']['output']>;
+  executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
+  outcome: Maybe<ClassOutcome>;
   status: Maybe<Scalars['String']['output']>;
   student: Maybe<DailyScheduleListUserItem>;
   studentTime: Maybe<Scalars['String']['output']>;

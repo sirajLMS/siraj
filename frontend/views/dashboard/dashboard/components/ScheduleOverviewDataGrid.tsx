@@ -4,11 +4,12 @@ import type { GridPaginationModel } from "@mui/x-data-grid";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { ClassStatus, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
 import { useScheduleColumns } from "./useScheduleColumns";
 
 interface ScheduleOverviewDataGridProps {
-  readonly rows: readonly ScheduleRow[];
+  readonly rows: readonly DailyScheduleRow[];
   readonly page: number;
   readonly pageSize: number;
   readonly totalCount: number;
@@ -24,7 +25,7 @@ interface ScheduleOverviewDataGridProps {
     readonly status: string;
     readonly actions: string;
   };
-  readonly statusLabels: Record<ClassStatus, string>;
+  readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
   readonly emptyMessage: string;
 }
@@ -51,10 +52,10 @@ export function ScheduleOverviewDataGrid({
   };
 
   return (
-    <AppDataGrid<ScheduleRow>
+    <AppDataGrid<DailyScheduleRow>
       rows={rows}
       columns={columns}
-      getRowId={row => row.classId}
+      getRowId={row => row.id ?? ""}
       rowCount={totalCount}
       paginationMode="server"
       paginationModel={paginationModel}
@@ -68,17 +69,13 @@ export function ScheduleOverviewDataGrid({
       emptyMessage={emptyMessage}
       columnVisibilityModel={{
         teacher: true,
-        time: !showTimezones,
-        yourTime: showTimezones,
+        yourTime: true,
         teacherTime: showTimezones,
         studentTime: showTimezones,
       }}
       sx={{
         "& .MuiDataGrid-columnHeader[data-field='teacher'], & .MuiDataGrid-cell[data-field='teacher']": {
           display: { xs: "none", md: "flex" },
-        },
-        "& .MuiDataGrid-columnHeader[data-field='time'], & .MuiDataGrid-cell[data-field='time']": {
-          display: { xs: "none", sm: "flex" },
         },
         "& .MuiDataGrid-columnHeader[data-field='yourTime'], & .MuiDataGrid-cell[data-field='yourTime']": {
           display: { xs: "none", sm: "flex" },

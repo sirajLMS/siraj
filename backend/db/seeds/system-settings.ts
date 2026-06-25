@@ -66,15 +66,29 @@ const SYSTEM_SETTINGS_DATA = [
   createSetting("sms_rate_limit_per_hour", "3", "Maximum SMS messages per parent per hour", "communication"),
 ] as const;
 
+const SEED_STORAGE_DIRECTORIES = [
+  "public",
+  "public/docs",
+  "public/avatars",
+  "public/avatars/students",
+  "public/avatars/teachers",
+  "public/avatars/parents",
+  "public/invoices",
+  "public/complaints",
+  "public/resources",
+] as const;
+
 export async function seedOrGet() {
   logger.info("Initializing storage directories...");
   try {
     const fileSeeder = await createFileSeedingService();
-    await fileSeeder.ensureDirectory("public", true);
-    await fileSeeder.ensureDirectory("public/docs", true);
+    for (const dir of SEED_STORAGE_DIRECTORIES) {
+      await fileSeeder.ensureDirectory(dir, true);
+    }
     logger.info("Storage directories initialized successfully.");
   } catch (error) {
     logger.error("Failed to initialize storage directories:", error);
+    throw error;
   }
 
   // Seed the teacher handbook using SystemSettingsService

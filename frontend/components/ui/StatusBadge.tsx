@@ -13,6 +13,7 @@ export type StatusBadgeCategory =
   | "enrollment"
   | "classSession"
   | "classStatus"
+  | "classInstance"
   | "sessionTracking"
   | "trackingStatus"
   | "invoice";
@@ -49,6 +50,19 @@ function resolveStatusPaletteKey(
         completed: "completed",
         cancelled: "cancelled",
         absent: "blocked",
+      };
+      return map[status] ?? "pending";
+    }
+    case "classInstance": {
+      const map: Record<string, "active" | "pending" | "completed" | "cancelled" | "blocked"> = {
+        PENDING: "pending",
+        NOT_ACTIVATED: "pending",
+        ACTIVATED: "active",
+        RUNNING: "active",
+        TAKEN: "completed",
+        COMPLETED: "completed",
+        ABSENT: "blocked",
+        LEAVE: "cancelled",
       };
       return map[status] ?? "pending";
     }

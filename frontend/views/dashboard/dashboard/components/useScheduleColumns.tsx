@@ -6,8 +6,9 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
-import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { ClassStatus, ScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import { ScheduleInstanceStatusBadge } from "./ScheduleInstanceStatusBadge";
 import {
   StyledActionsCellBox,
   StyledGridDetailsIconButton,
@@ -15,15 +16,6 @@ import {
   StyledStudentNameText,
   StyledTeacherNameText,
 } from "./ScheduleOverviewDataGrid.styles";
-
-const CLASS_STATUS_MAP: Record<ClassStatus, string> = {
-  scheduled: "scheduled",
-  in_progress: "in_progress",
-  pending: "pending",
-  completed: "completed",
-  cancelled: "cancelled",
-  absent: "absent",
-};
 
 interface UseScheduleColumnsParams {
   readonly headers: {
@@ -37,7 +29,7 @@ interface UseScheduleColumnsParams {
     readonly status: string;
     readonly actions: string;
   };
-  readonly statusLabels: Record<ClassStatus, string>;
+  readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
   readonly showTimezones: boolean;
 }
@@ -45,7 +37,7 @@ interface UseScheduleColumnsParams {
 function buildTimeColumns(
   showTimezones: boolean,
   headers: UseScheduleColumnsParams["headers"]
-): GridColDef<ScheduleRow>[] {
+): GridColDef<DailyScheduleRow>[] {
   if (showTimezones) {
     return [
       {
@@ -53,7 +45,7 @@ function buildTimeColumns(
         headerName: headers.yourTime,
         width: 150,
         flex: 1,
-        renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.yourTime}</StyledMonospaceLabel>,
+        renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.yourTime ?? ""}</StyledMonospaceLabel>,
       },
       {
         field: "teacherTime",
@@ -74,11 +66,11 @@ function buildTimeColumns(
 
   return [
     {
-      field: "time",
+      field: "yourTime",
       headerName: headers.time,
       width: 130,
       flex: 1,
-      renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.time}</StyledMonospaceLabel>,
+      renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.yourTime ?? ""}</StyledMonospaceLabel>,
     },
   ];
 }
@@ -88,7 +80,7 @@ function buildActionsColumn(
   detailsLabel: string,
   router: ReturnType<typeof useRouter>,
   locale: string
-): GridColDef<ScheduleRow> {
+): GridColDef<DailyScheduleRow> {
   return {
     field: "actions",
     headerName: headers.actions,
@@ -100,7 +92,10 @@ function buildActionsColumn(
       <StyledActionsCellBox>
         <Box>
           <Tooltip title={detailsLabel}>
-            <StyledGridDetailsIconButton size="small" onClick={() => router.push(`/${locale}/classes/${row.id}`)}>
+            <StyledGridDetailsIconButton
+              size="small"
+              onClick={() => router.push(`/${locale}/classes/${row.id ?? ""}`)}
+            >
               <DetailsIcon fontSize="small" />
             </StyledGridDetailsIconButton>
           </Tooltip>
@@ -114,27 +109,33 @@ export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTi
   const router = useRouter();
   const locale = useLocale();
 
-  return useMemo<GridColDef<ScheduleRow>[]>(() => {
-    const baseCols: GridColDef<ScheduleRow>[] = [
+  return useMemo<GridColDef<DailyScheduleRow>[]>(() => {
+    const baseCols: GridColDef<DailyScheduleRow>[] = [
       {
         field: "classId",
         headerName: headers.classId,
         width: 120,
-        renderCell: ({ row }) => <StyledMonospaceLabel variant="labelMd">{row.classId}</StyledMonospaceLabel>,
+        renderCell: ({ row }) => (
+          <StyledMonospaceLabel variant="labelMd">{row.id ? `#CLS-${row.id}` : ""}</StyledMonospaceLabel>
+        ),
       },
       {
         field: "student",
         headerName: headers.student,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => <StyledStudentNameText variant="bodyMd">{row.student}</StyledStudentNameText>,
+        renderCell: ({ row }) => (
+          <StyledStudentNameText variant="bodyMd">{row.student?.name ?? "Unknown Student"}</StyledStudentNameText>
+        ),
       },
       {
         field: "teacher",
         headerName: headers.teacher,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => <StyledTeacherNameText variant="bodyMd">{row.teacher}</StyledTeacherNameText>,
+        renderCell: ({ row }) => (
+          <StyledTeacherNameText variant="bodyMd">{row.teacher?.name ?? "Unknown Teacher"}</StyledTeacherNameText>
+        ),
       },
     ];
 
@@ -145,7 +146,11 @@ export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTi
         headerName: headers.status,
         width: 130,
         renderCell: ({ row }) => (
-          <StatusBadge category="classStatus" status={CLASS_STATUS_MAP[row.status]} label={statusLabels[row.status]} />
+          <ScheduleInstanceStatusBadge
+            outcome={row.outcome}
+            executionState={row.executionState}
+            statusLabels={statusLabels}
+          />
         ),
       },
       buildActionsColumn(headers, detailsLabel, router, locale)

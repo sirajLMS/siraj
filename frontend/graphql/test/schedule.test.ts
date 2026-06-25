@@ -79,6 +79,8 @@ describe("GraphQL Schedule Integration Tests", () => {
       expect(firstRow.yourTime).toBeDefined();
       expect(firstRow.teacherTime).toBeDefined();
       expect(firstRow.studentTime).toBeDefined();
+      expect(firstRow.outcome).toBeDefined();
+      expect(firstRow.executionState).toBeDefined();
     }
   });
 

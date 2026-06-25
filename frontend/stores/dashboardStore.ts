@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import type { MetricItem, ScheduleRow, TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import type { MetricItem, TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 
 export interface DashboardFilters {
   readonly date: string;
@@ -27,7 +28,7 @@ export interface DashboardState {
   // Mock properties (fully defined in both stores for clean type checking)
   readonly todayClasses: readonly MetricItem[];
   readonly lastUpdated: string;
-  readonly scheduleRows: readonly ScheduleRow[];
+  readonly scheduleRows: readonly DailyScheduleRow[];
   readonly teachers: readonly TeacherFilterItem[];
   readonly pagination: Pagination;
   readonly setPage: (page: number) => void;

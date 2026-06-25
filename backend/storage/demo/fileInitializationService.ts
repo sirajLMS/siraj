@@ -1,5 +1,6 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
+import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
 import type { FileOperationResult, FileUploadResult, FolderCreateInput } from "@/backend/types";
 import { extToMime } from "@/shared/utils/storage.utils";
@@ -50,8 +51,16 @@ export class FileSeedingService implements IFileSeedingService {
   async ensureDirectory(path: string, isProtected = true): Promise<FileOperationResult> {
     try {
       const directoryInfo = await this.storageService.directoryInfoByPath(path);
-      if (directoryInfo) {
+      const dbRecord = await StorageDbRepository.directoryByPath(path);
+
+      if (directoryInfo && dbRecord) {
         return { success: true, message: `Directory already exists: ${path}` };
+      }
+
+      if (directoryInfo && !dbRecord) {
+        await StorageDbRepository.ensureDirectoryRecord({ path, protected: isProtected });
+        logger.info(`   📁 Synced directory DB record: ${path}`);
+        return { success: true, message: `Directory DB record synced: ${path}` };
       }
 
       const input: FolderCreateInput = {

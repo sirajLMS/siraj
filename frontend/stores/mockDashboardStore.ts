@@ -1,6 +1,8 @@
 import { create } from "zustand";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { buildAdminDashboardMetrics } from "@/frontend/views/dashboard/dashboard/utils/adminDashboardMetrics";
-import type { ScheduleRow, TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 import type { DashboardState } from "./dashboardStore";
 
 const MOCK_TEACHERS: TeacherFilterItem[] = [
@@ -24,39 +26,39 @@ const MOCK_METRICS = buildAdminDashboardMetrics({
   leave: 1,
 });
 
-const MOCK_SCHEDULE: ScheduleRow[] = [
+const MOCK_SCHEDULE: DailyScheduleRow[] = [
   {
     id: "9082",
-    classId: "#CLS-9082",
-    student: "Omar Khalid",
-    teacher: "Ahmed Mohammed",
     yourTime: "10:00 AM - 11:00 AM",
     teacherTime: "11:00 AM - 12:00 PM",
     studentTime: "10:00 AM - 11:00 AM",
-    time: "10:00 AM - 11:00 AM",
-    status: "scheduled",
+    duration: 60,
+    outcome: ClassOutcome.Pending,
+    executionState: ClassExecutionState.NotActivated,
+    student: { id: "student-1", name: "Omar Khalid" },
+    teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed" },
   },
   {
     id: "9083",
-    classId: "#CLS-9083",
-    student: "Layla Ismail",
-    teacher: "Sarah Johnson",
     yourTime: "11:30 AM - 12:30 PM",
     teacherTime: "12:30 PM - 01:30 PM",
     studentTime: "11:30 AM - 12:30 PM",
-    time: "11:30 AM - 12:30 PM",
-    status: "in_progress",
+    duration: 60,
+    outcome: ClassOutcome.Pending,
+    executionState: ClassExecutionState.Running,
+    student: { id: "student-2", name: "Layla Ismail" },
+    teacher: { id: "teacher-sarah", name: "Sarah Johnson" },
   },
   {
     id: "9084",
-    classId: "#CLS-9084",
-    student: "Omar Ahmed",
-    teacher: "Ahmed Mohammed",
     yourTime: "02:00 PM - 03:00 PM",
     teacherTime: "03:00 PM - 04:00 PM",
     studentTime: "02:00 PM - 03:00 PM",
-    time: "02:00 PM - 03:00 PM",
-    status: "pending",
+    duration: 60,
+    outcome: ClassOutcome.Taken,
+    executionState: ClassExecutionState.Completed,
+    student: { id: "student-3", name: "Omar Ahmed" },
+    teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed" },
   },
 ];
 
