@@ -8,7 +8,7 @@ export type StudentEntityInput = typeof students.$inferInsert;
 export type Student = Omit<
   StudentEntity,
   // enums
-  "status" | "gender" | "language"
+  "status" | "gender" | "language" | "hoursPerWeek"
 > & {
   gender: Gender | null;
   language: AppLanguage | null;
@@ -19,6 +19,7 @@ export type Student = Omit<
   parentName?: string | null;
   teacherName?: string | null;
   avatarUrl?: string | null;
+  hoursPerWeek?: number | null;
 };
 
 export type StudentDirectory = Omit<

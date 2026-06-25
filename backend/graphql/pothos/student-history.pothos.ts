@@ -1,13 +1,7 @@
+import type { StudentHistoryMetricsDefinition } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 // ─── Metrics ──────────────────────────────────────────────────────────────────
-
-export type StudentHistoryMetricsDefinition = {
-  totalClasses: number;
-  attendanceRate: number;
-  hoursStudied: number;
-  performance: number;
-};
 
 const StudentHistoryMetricsRef = gqlSchemaBuilder.objectRef<StudentHistoryMetricsDefinition>("StudentHistoryMetrics");
 

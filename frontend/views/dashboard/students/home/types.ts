@@ -1,5 +1,3 @@
-export type { StudentDirectoryRow as GqlStudentDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
-
 /**
  * Student Directory — Shared Types
  *
@@ -44,21 +42,3 @@ export const MOBILE_METRIC_ICON_KEYS = {
   on_leave: "EventBusyOutlined",
   suspended: "BlockOutlined",
 } as const;
-
-/**
- * View-specific student directory row.
- * Maps the GraphQL StudentDirectoryRow fields to what the UI views expect.
- */
-export interface StudentDirectoryRow {
-  readonly id: string;
-  readonly index: number;
-  readonly name: string;
-  readonly email: string;
-  readonly avatarUrl?: string;
-  readonly accountStatus: StudentAccountStatus;
-  readonly enrollmentStatus: StudentEnrollmentStatus;
-  readonly hoursPerWeek: number;
-  readonly classesRemaining: number;
-  readonly classesTotal: number;
-  readonly isDeactivated?: boolean;
-}

@@ -1,16 +1,11 @@
-import { StudentLifecycleService } from "@/backend/services/student/student-lifecycle.service";
+import { StudentLifecycleService } from "@/backend/services";
+import type { ChangeStudentStatusResult, ReassignStudentTeacherResult } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 // ─── ReassignStudentTeacherResult Object ─────────────────────────────────────
 
-export type ReassignStudentTeacherResultDefinition = {
-  id: string;
-  primaryTeacherId: string | null;
-  version: number;
-};
-
 const ReassignStudentTeacherResultRef =
-  gqlSchemaBuilder.objectRef<ReassignStudentTeacherResultDefinition>("ReassignStudentTeacherResult");
+  gqlSchemaBuilder.objectRef<ReassignStudentTeacherResult>("ReassignStudentTeacherResult");
 
 export const ReassignStudentTeacherResultPothosObject = ReassignStudentTeacherResultRef.implement({
   fields: t => ({
@@ -22,14 +17,7 @@ export const ReassignStudentTeacherResultPothosObject = ReassignStudentTeacherRe
 
 // ─── ChangeStudentStatusResult Object ────────────────────────────────────────
 
-export type ChangeStudentStatusResultDefinition = {
-  id: string;
-  status: string;
-  version: number;
-};
-
-const ChangeStudentStatusResultRef =
-  gqlSchemaBuilder.objectRef<ChangeStudentStatusResultDefinition>("ChangeStudentStatusResult");
+const ChangeStudentStatusResultRef = gqlSchemaBuilder.objectRef<ChangeStudentStatusResult>("ChangeStudentStatusResult");
 
 export const ChangeStudentStatusResultPothosObject = ChangeStudentStatusResultRef.implement({
   fields: t => ({

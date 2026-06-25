@@ -3,7 +3,7 @@ import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 
 export const studentDirectoryRowFragment = gql`
-  fragment StudentDirectoryRowFragment on Student {
+  fragment StudentDirectoryRowFragment on StudentDirectoryRow {
     id
     name
     email
@@ -15,6 +15,7 @@ export const studentDirectoryRowFragment = gql`
     parentName
     teacherName
     createdAt
+    updatedAt
   }
 `;
 

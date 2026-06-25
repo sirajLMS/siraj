@@ -1694,7 +1694,7 @@ export type Query = {
   studentClassHistory: Maybe<StudentClassHistory>;
   studentClassSessionDetail: Maybe<StudentSessionDetail>;
   /** Fetches the global student directory with cross-relational data. */
-  studentDirectory: Maybe<Array<Student>>;
+  studentDirectory: Maybe<Array<StudentDirectoryRow>>;
   students: StudentsWithFiltersResponse;
   teacherActiveDashboard: Maybe<TeacherDashboard>;
   teacherDashboard: Maybe<TeacherDashboard>;
@@ -2122,7 +2122,7 @@ export type Student = {
   dateOfBirth: Maybe<Scalars['DateTime']['output']>;
   email: Maybe<Scalars['String']['output']>;
   gender: Maybe<Gender>;
-  hoursPerWeek: Maybe<Scalars['String']['output']>;
+  hoursPerWeek: Maybe<Scalars['Int']['output']>;
   id: Scalars['String']['output'];
   language: Maybe<AppLanguage>;
   name: Scalars['String']['output'];
@@ -2153,6 +2153,22 @@ export type StudentCreateInput = {
   parentId: Scalars['String']['input'];
   primaryTeacherId: InputMaybe<Scalars['String']['input']>;
   status: StudentStatus;
+};
+
+export type StudentDirectoryRow = {
+  __typename?: 'StudentDirectoryRow';
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  classesRemaining: Maybe<Scalars['Int']['output']>;
+  classesTotal: Maybe<Scalars['Int']['output']>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
+  email: Maybe<Scalars['String']['output']>;
+  hoursPerWeek: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  parentName: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
+  updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type StudentFilterArgs = {

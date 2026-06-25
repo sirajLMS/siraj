@@ -11,16 +11,24 @@ import {
 } from "../pothos";
 
 export const StudentPothosObject = gqlSchemaBuilder
-  .loadableObjectRef<Types.StudentDto, string>("Student", {
+  .loadableObjectRef<Types.Student, string>("Student", {
     load: async (ids: string[]) => StudentRepository.loadByIds(ids),
     sort: s => s.id,
   })
   .implement({
     fields: t => ({
       id: t.exposeString("id", { nullable: false }),
-      parentId: t.exposeString("parentId", { nullable: false }),
-      primaryTeacherId: t.exposeString("primaryTeacherId", { nullable: true }),
       name: t.exposeString("name", { nullable: false }),
+      email: t.exposeString("email"),
+      dateOfBirth: t.expose("dateOfBirth", {
+        type: "DateTime",
+        nullable: true,
+      }),
+      avatarUrl: t.exposeString("avatarUrl"),
+      parentId: t.exposeString("parentId", { nullable: false }),
+      parentName: t.exposeString("parentName"),
+      primaryTeacherId: t.exposeString("primaryTeacherId", { nullable: true }),
+      teacherName: t.exposeString("teacherName", { nullable: true }),
       gender: t.field({
         type: GenderPothosObject,
         nullable: true,
@@ -38,9 +46,8 @@ export const StudentPothosObject = gqlSchemaBuilder
       }),
       classesTotal: t.exposeInt("classesTotal", { nullable: false }),
       classesRemaining: t.exposeInt("classesRemaining", { nullable: false }),
-      dateOfBirth: t.expose("dateOfBirth", {
-        type: "DateTime",
-        nullable: true,
+      hoursPerWeek: t.int({
+        resolve: s => s.hoursPerWeek ?? 0,
       }),
       createdAt: t.expose("createdAt", {
         type: "DateTime",

@@ -1,40 +1,36 @@
-import { StudentDirectoryService } from "@/backend/services/student/student-directory.service";
-import { PaginationArgs } from "@/backend/types/pagination.types";
+import { StudentDirectoryService } from "@/backend/services";
+import {
+  PaginationArgs,
+  type StudentDirectory,
+  type StudentFilterArgs,
+  type StudentsOrderByClause,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PaginationArgsObject } from "./pagination.objects";
 import { StudentFilterArgsPothosObject, StudentsOrderByClausePothosObject } from "./student.pothos";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
-export interface StudentDirectoryRowDefinition {
-  readonly id: string;
-  readonly name: string;
-  readonly email: string;
-  readonly status: string;
-  readonly classesRemaining: number;
-  readonly classesTotal: number;
-  readonly hoursPerWeek: string;
-  readonly parentName: string;
-  readonly teacherName: string | null;
-  readonly createdAt: Date;
-}
-
-const StudentDirectoryRowRef = gqlSchemaBuilder.objectRef<StudentDirectoryRowDefinition>("StudentDirectoryRow");
-
-export const StudentDirectoryRowPothosObject = StudentDirectoryRowRef.implement({
-  fields: t => ({
-    id: t.exposeString("id"),
-    name: t.exposeString("name"),
-    email: t.exposeString("email"),
-    status: t.exposeString("status"),
-    classesRemaining: t.exposeInt("classesRemaining"),
-    classesTotal: t.exposeInt("classesTotal"),
-    hoursPerWeek: t.exposeString("hoursPerWeek"),
-    parentName: t.exposeString("parentName"),
-    teacherName: t.exposeString("teacherName", { nullable: true }),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
-  }),
-});
+export const StudentDirectoryRowPothosObject = gqlSchemaBuilder
+  .objectRef<StudentDirectory>("StudentDirectoryRow")
+  .implement({
+    fields: t => ({
+      id: t.exposeString("id"),
+      name: t.exposeString("name"),
+      email: t.exposeString("email", { nullable: true }),
+      avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
+      status: t.exposeString("status"),
+      classesRemaining: t.exposeInt("classesRemaining"),
+      classesTotal: t.exposeInt("classesTotal"),
+      hoursPerWeek: t.string({
+        resolve: parent => parent.hoursPerWeek?.toString() ?? "0",
+      }),
+      parentName: t.exposeString("parentName", { nullable: true }),
+      teacherName: t.exposeString("teacherName", { nullable: true }),
+      createdAt: t.expose("createdAt", { type: "DateTime" }),
+      updatedAt: t.expose("updatedAt", { type: "DateTime" }),
+    }),
+  });
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
@@ -65,7 +61,7 @@ gqlSchemaBuilder.queryField("studentDirectory", t =>
       }
 
       // Convert GraphQL filter args to typed Service args
-      let filters: import("@/backend/types/student.types").StudentFilterArgs | null = null;
+      let filters: StudentFilterArgs | null = null;
       if (args.filterArgs) {
         filters = {
           name: args.filterArgs.name ?? undefined,
@@ -105,7 +101,7 @@ gqlSchemaBuilder.queryField("studentDirectory", t =>
       }
 
       // Convert orderBy clauses to typed Service args
-      let orderBy: import("@/backend/types/student.types").StudentsOrderByClause[] | null = null;
+      let orderBy: StudentsOrderByClause[] | null = null;
       if (args.orderBy) {
         orderBy = args.orderBy.map(clause => ({
           column: clause.column,

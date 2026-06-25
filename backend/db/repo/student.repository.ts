@@ -407,6 +407,15 @@ export namespace StudentRepository {
 
     const totalCount = countResult[0]?.count ?? 0;
 
-    return { rows: rows.map(r => r as Types.StudentDirectory), totalCount };
+    return {
+      rows: rows.map(
+        r =>
+          ({
+            ...r,
+            hoursPerWeek: r.hoursPerWeek ? Number.parseFloat(r.hoursPerWeek) : 0,
+          }) as Types.StudentDirectory
+      ),
+      totalCount,
+    };
   };
 }
