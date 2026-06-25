@@ -1,7 +1,10 @@
+import * as path from "node:path";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
+import { StorageDbRepository } from "@/backend/db/repo";
 import { students, teacherAssignments } from "@/backend/db/schema/students";
 import logger from "@/backend/lib/logger";
+import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import type { ParentEntity, TeacherEntity } from "@/backend/types";
 
 async function upsertStudent(
@@ -91,6 +94,41 @@ export async function seedOrGet(parentsList: ParentEntity[], teachersList: Teach
   );
 
   await ensureTeacherAssignments([student1.id, student2.id], defaultTeacher.id);
+
+  logger.info("Initializing student avatar storage...");
+  try {
+    const fileSeeder = await createFileSeedingService();
+    await fileSeeder.ensureDirectory("public", true);
+    await fileSeeder.ensureDirectory("public/avatars", true);
+    await fileSeeder.ensureDirectory("public/avatars/students", true);
+
+    const avatars = ["01.png", "02.png"];
+    const studentsList = [student1, student2];
+
+    for (let i = 0; i < studentsList.length; i++) {
+      const student = studentsList[i];
+      const avatarFileName = avatars[i];
+      const bucketPath = `public/avatars/students/${avatarFileName}`;
+      const localFilePath = path.join(__dirname, "assets", "avatars", "students", avatarFileName);
+
+      logger.info(`Seeding avatar ${avatarFileName} for student ${student.name}...`);
+      await fileSeeder.seedFile({
+        bucketPath,
+        localFilePath,
+      });
+
+      // Register file usage
+      await StorageDbRepository.registerFileUsage({
+        referenceTable: "students",
+        referenceId: student.id,
+        usageType: "avatar",
+        filePath: bucketPath,
+      });
+    }
+    logger.info("Student avatars seeded and registered successfully.");
+  } catch (error) {
+    logger.error("Failed to seed student avatars:", error);
+  }
 
   logger.info("System students seeded.");
   return [student1, student2];
