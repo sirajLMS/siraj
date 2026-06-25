@@ -565,14 +565,14 @@ export const getStatusTrackingRows = async (
         .slice(0, 2)
         .map((w: string) => w[0]?.toUpperCase() ?? "")
         .join(""),
-      studentStatus: r.studentStatus as string,
+      studentStatus: r.studentStatus,
       teacherId: r.teacherId,
       teacherName: r.teacherUserName,
       scheduledStartAt: r.scheduledStartAt,
       scheduledEndAt: r.scheduledEndAt,
       durationMinutes: r.durationMinutes,
-      executionState: r.executionState as string,
-      outcome: r.outcome as string,
+      executionState: r.executionState,
+      outcome: r.outcome,
       isFrozen: r.isFrozen,
     }));
 
@@ -653,7 +653,7 @@ export const getStudentFutureClasses = async (
     .orderBy(classInstances.scheduledStartAt);
   return rows.map(r => ({
     id: r.id,
-    executionState: r.executionState as string,
+    executionState: r.executionState,
     scheduledStartAt: r.scheduledStartAt,
   }));
 };

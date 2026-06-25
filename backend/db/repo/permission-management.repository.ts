@@ -142,7 +142,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        return await run(tx as DBTransaction);
+        return await run(tx);
       }
       return await db.transaction(run);
     } catch (error) {
@@ -215,7 +215,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        return await run(tx as DBTransaction);
+        return await run(tx);
       }
       return await db.transaction(run);
     } catch (error) {
@@ -247,7 +247,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        return await run(tx as DBTransaction);
+        return await run(tx);
       }
       return await db.transaction(run);
     } catch (error) {
@@ -305,7 +305,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        await run(tx as DBTransaction);
+        await run(tx);
       } else {
         await db.transaction(run);
       }
@@ -333,7 +333,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        await run(tx as DBTransaction);
+        await run(tx);
       } else {
         await db.transaction(run);
       }
@@ -382,7 +382,7 @@ export namespace PermissionManagementRepository {
 
     try {
       if (tx) {
-        await run(tx as DBTransaction);
+        await run(tx);
       } else {
         await db.transaction(run);
       }

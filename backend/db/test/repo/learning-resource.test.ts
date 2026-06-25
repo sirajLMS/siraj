@@ -207,18 +207,18 @@ describe("LearningResourceRepository — findById", () => {
   });
 });
 
-describe("LearningResourceRepository — deleteResource", () => {
-  async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
-    let errorCaught: unknown = null;
-    try {
-      await fn();
-    } catch (error) {
-      errorCaught = error;
-    }
-    expect(errorCaught).not.toBeNull();
-    return errorCaught as Error;
+async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
+  let errorCaught: unknown = null;
+  try {
+    await fn();
+  } catch (error) {
+    errorCaught = error;
   }
+  expect(errorCaught).not.toBeNull();
+  return errorCaught as Error;
+}
 
+describe("LearningResourceRepository — deleteResource", () => {
   resTest("successfully hard deletes an existing learning resource", async tx => {
     const user = await createTestUser(tx, {
       name: "DeleteUser",

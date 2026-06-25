@@ -10,12 +10,11 @@ import {
   checkOverlaps,
   type DBTransaction,
   getClassInstanceByIdOrThrow,
-  resolveStudentTimezone,
   validateTeacherAssignment,
 } from "./shared";
 import { adjustQuotaOnUpdate, updateInstanceState } from "./state-changes";
 
-export { resolveStudentTimezone };
+export { resolveStudentTimezone } from "./shared";
 
 export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
   const queryDb = tx ?? db;

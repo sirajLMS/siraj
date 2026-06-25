@@ -102,7 +102,7 @@ export namespace ReportRepository {
         .groupBy(groupKeyExpr);
 
       logger.debug(`[ReportRepository.generateAttendanceReport] Generated ${results.length} rows.`);
-      return results as AttendanceReportRow[];
+      return results;
     } catch (error) {
       logger.error("[ReportRepository.generateAttendanceReport] Fatal query execution error:", error);
       throw error;

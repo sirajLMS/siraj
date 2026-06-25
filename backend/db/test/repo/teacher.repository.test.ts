@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";

@@ -3,7 +3,6 @@ import { db } from "@/backend/db/drizzleDb";
 import { complaintResponses, complaints, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ComplaintResponse, ComplaintResponseInput } from "@/backend/types";
-import type {} from "@/backend/types/communications.types";
 import { ComplaintStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 

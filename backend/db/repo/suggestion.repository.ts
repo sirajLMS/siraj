@@ -59,7 +59,7 @@ export namespace SuggestionRepository {
       .limit(options.limit)
       .offset(options.offset);
 
-    return rows as SuggestionReturnType[];
+    return rows;
   };
 
   export type AdminSuggestionQueueRow = {
@@ -138,7 +138,7 @@ export namespace SuggestionRepository {
       .where(whereClause);
 
     return {
-      rows: rows as AdminSuggestionQueueRow[],
+      rows,
       totalCount: totalCount?.count ?? 0,
     };
   };
@@ -196,7 +196,7 @@ export namespace SuggestionRepository {
       .where(and(eq(suggestions.id, suggestionId), isNull(suggestions.deletedAt)))
       .limit(1);
 
-    return (results[0] as SuggestionDetailRow) ?? null;
+    return results[0] ?? null;
   };
 
   const updateSuggestionStatus = async (
@@ -302,7 +302,7 @@ export namespace SuggestionRepository {
       .orderBy(desc(suggestions.createdAt))
       .limit(10);
 
-    return rows as SuggestionSearchResult[];
+    return rows;
   };
 
   export type SuggestionMetrics = {

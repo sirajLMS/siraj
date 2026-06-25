@@ -332,20 +332,14 @@ describe("StaffProfileRepository — create", () => {
   });
 
   staffTest("rejects when create insertion fails", async () => {
-    const mockTx = {
-      select: () => ({
-        from: () => ({
-          where: () => ({
-            limit: () => [],
-          }),
-        }),
-      }),
-      insert: () => ({
-        values: () => ({
-          returning: () => [],
-        }),
-      }),
-    } as unknown as DBTransaction;
+    const selectLimit = () => [];
+    const selectWhere = () => ({ limit: selectLimit });
+    const selectFrom = () => ({ where: selectWhere });
+    const selectFn = () => ({ from: selectFrom });
+    const insertReturning = () => [];
+    const insertValues = () => ({ returning: insertReturning });
+    const insertFn = () => ({ values: insertValues });
+    const mockTx = { select: selectFn, insert: insertFn } as unknown as DBTransaction;
 
     let error: unknown = null;
     try {
@@ -363,41 +357,22 @@ describe("StaffProfileRepository — create", () => {
 
   staffTest("throws error when manager profile update select fails", async () => {
     let callCount = 0;
-    const mockTx = {
-      select: () => ({
-        from: () => ({
-          innerJoin: () => ({
-            leftJoin: () => ({
-              leftJoin: () => ({
-                where: () => ({
-                  limit: () => {
-                    callCount++;
-                    if (callCount === 1) {
-                      return [{ id: "some-id" }];
-                    }
-                    return [];
-                  },
-                }),
-              }),
-            }),
-          }),
-          where: () => ({
-            limit: () => {
-              callCount++;
-              if (callCount === 1) {
-                return [{ id: "some-id" }];
-              }
-              return [];
-            },
-          }),
-        }),
-      }),
-      update: () => ({
-        set: () => ({
-          where: () => Promise.resolve(),
-        }),
-      }),
-    } as unknown as DBTransaction;
+    const limitHandler = () => {
+      callCount++;
+      if (callCount === 1) return [{ id: "some-id" }];
+      return [];
+    };
+    const deepWhere = () => ({ limit: limitHandler });
+    const secondLeftJoin = () => ({ where: deepWhere });
+    const firstLeftJoin = () => ({ leftJoin: secondLeftJoin });
+    const innerJoin = () => ({ leftJoin: firstLeftJoin });
+    const outerWhere = () => ({ limit: limitHandler });
+    const fromFn = () => ({ innerJoin, where: outerWhere });
+    const selectFn = () => ({ from: fromFn });
+    const updateSetWhere = () => Promise.resolve();
+    const updateSet = () => ({ where: updateSetWhere });
+    const updateFn = () => ({ set: updateSet });
+    const mockTx = { select: selectFn, update: updateFn } as unknown as DBTransaction;
 
     let error: unknown = null;
     try {

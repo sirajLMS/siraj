@@ -106,7 +106,7 @@ function mergeBlockedRanges(blockedRanges: { start: number; end: number }[]): { 
   const sorted = [...blockedRanges].sort((a, b) => a.start - b.start);
   const mergedBlocked: { start: number; end: number }[] = [];
   for (const range of sorted) {
-    const last = mergedBlocked[mergedBlocked.length - 1];
+    const last = mergedBlocked.at(-1);
     if (last && range.start <= last.end) {
       last.end = Math.max(last.end, range.end);
     } else {

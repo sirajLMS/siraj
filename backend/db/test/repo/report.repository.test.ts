@@ -94,7 +94,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
     // date1: TAKEN, 1.0 hour, 100 EGP
     expect(sorted[0].takenClasses).toBe(1);
     expect(sorted[0].absentClasses).toBe(0);
-    expect(sorted[0].totalHours).toBe(1.0);
+    expect(sorted[0].totalHours).toBe(1);
     expect(sorted[0].paidEGP).toBe(100);
     expect(sorted[0].paidUSD).toBe(0);
 
@@ -108,14 +108,14 @@ describe("ReportRepository — generateAttendanceReport", () => {
     // date3: LEAVE, 2.0 hours, 50 USD
     expect(sorted[2].takenClasses).toBe(0);
     expect(sorted[2].leaveClasses).toBe(1);
-    expect(sorted[2].totalHours).toBe(2.0);
+    expect(sorted[2].totalHours).toBe(2);
     expect(sorted[2].paidEGP).toBe(0);
     expect(sorted[2].paidUSD).toBe(50);
 
     // date4: PENDING, 1.0 hour, 0 EGP
     expect(sorted[3].takenClasses).toBe(0);
     expect(sorted[3].pendingClasses).toBe(1);
-    expect(sorted[3].totalHours).toBe(1.0);
+    expect(sorted[3].totalHours).toBe(1);
     expect(sorted[3].paidEGP).toBe(0);
     expect(sorted[3].paidUSD).toBe(0);
   });

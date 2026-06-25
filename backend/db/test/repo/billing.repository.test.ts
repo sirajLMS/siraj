@@ -203,17 +203,17 @@ describe("BillingRepository — getInvoicesForParent", () => {
   });
 });
 
-describe("BillingRepository — deleteInvoice", () => {
-  async function setupInvoiceTest(tx: DBTransaction, status: "UNPAID" | "PAID" = "UNPAID") {
-    const parentUser = await createTestUser(tx, {
-      name: "Delete Test Parent",
-      email: `del-${randomUUID()}@test.com`,
-    });
-    const parent = await createTestParent(tx, parentUser.id);
-    const invoice = await createOverdueInvoice(tx, parent.id, "100.00", -5, status);
-    return { parent, invoice };
-  }
+async function setupInvoiceTest(tx: DBTransaction, status: "UNPAID" | "PAID" = "UNPAID") {
+  const parentUser = await createTestUser(tx, {
+    name: "Delete Test Parent",
+    email: `del-${randomUUID()}@test.com`,
+  });
+  const parent = await createTestParent(tx, parentUser.id);
+  const invoice = await createOverdueInvoice(tx, parent.id, "100.00", -5, status);
+  return { parent, invoice };
+}
 
+describe("BillingRepository — deleteInvoice", () => {
   test("soft-deletes an UNPAID invoice by setting deletedAt", async () => {
     await runInRollback(async tx => {
       const { invoice } = await setupInvoiceTest(tx);
@@ -262,17 +262,17 @@ describe("BillingRepository — deleteInvoice", () => {
   });
 });
 
-describe("BillingRepository — markInvoiceAsPaid", () => {
-  async function setupUnpaidInvoice(tx: DBTransaction) {
-    const parentUser = await createTestUser(tx, {
-      name: "MarkPaid Parent",
-      email: `markpaid-${randomUUID()}@test.com`,
-    });
-    const parent = await createTestParent(tx, parentUser.id);
-    const invoice = await createOverdueInvoice(tx, parent.id, "150.00", -5, "UNPAID");
-    return { parent, invoice };
-  }
+async function setupUnpaidInvoice(tx: DBTransaction) {
+  const parentUser = await createTestUser(tx, {
+    name: "MarkPaid Parent",
+    email: `markpaid-${randomUUID()}@test.com`,
+  });
+  const parent = await createTestParent(tx, parentUser.id);
+  const invoice = await createOverdueInvoice(tx, parent.id, "150.00", -5, "UNPAID");
+  return { parent, invoice };
+}
 
+describe("BillingRepository — markInvoiceAsPaid", () => {
   test("marks an UNPAID invoice as PAID and sets paidDate", async () => {
     await runInRollback(async tx => {
       const { invoice } = await setupUnpaidInvoice(tx);
