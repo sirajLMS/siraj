@@ -13,9 +13,17 @@ export interface SeedConfig {
   monthsBefore: number;
   monthsAfter: number;
   fakerSeed: number;
+  enableBilling: boolean;
+  enableCommunications: boolean;
+  enableAuditLogs: boolean;
+  enableExtendedScheduling: boolean;
+  enableExtendedFiles: boolean;
 }
 
-const PROFILE_DEFAULTS: Record<SeedProfile, Omit<SeedConfig, "profile" | "anchorDate">> = {
+const PROFILE_DEFAULTS: Record<
+  SeedProfile,
+  Omit<SeedConfig, "profile" | "anchorDate">
+> = {
   minimal: {
     extraTeachers: 0,
     extraParents: 0,
@@ -24,6 +32,11 @@ const PROFILE_DEFAULTS: Record<SeedProfile, Omit<SeedConfig, "profile" | "anchor
     monthsBefore: 1,
     monthsAfter: 1,
     fakerSeed: 42,
+    enableBilling: false,
+    enableCommunications: false,
+    enableAuditLogs: false,
+    enableExtendedScheduling: true,
+    enableExtendedFiles: false,
   },
   standard: {
     extraTeachers: 5,
@@ -33,6 +46,11 @@ const PROFILE_DEFAULTS: Record<SeedProfile, Omit<SeedConfig, "profile" | "anchor
     monthsBefore: 6,
     monthsAfter: 6,
     fakerSeed: 42,
+    enableBilling: true,
+    enableCommunications: true,
+    enableAuditLogs: true,
+    enableExtendedScheduling: true,
+    enableExtendedFiles: true,
   },
 };
 

@@ -2,7 +2,14 @@ import { db } from "@/backend/db/drizzleDb";
 import { parents } from "@/backend/db/schema/parents";
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
-import { pickTimezoneForIndex, type SeedConfig } from "./lib";
+import {
+  getAvatarFileName,
+  loadSeedConfig,
+  pickTimezoneForIndex,
+  seedEntityFile,
+  shouldSeedExtendedFiles,
+  type SeedConfig,
+} from "./lib";
 
 async function upsertParent(userId: string, timezone: string, now: Date) {
   const [insertedParent] = await db
@@ -27,9 +34,10 @@ async function upsertParent(userId: string, timezone: string, now: Date) {
   return insertedParent;
 }
 
-export async function seedOrGet(users: UserEntity[], _config?: SeedConfig) {
+export async function seedOrGet(users: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding system parents...");
   const now = new Date();
+  const seedConfig = config ?? loadSeedConfig();
 
   const parentUsers = users.filter(
     u => u.email === "parent@siraj.local" || /^parent-\d+@seed\.siraj\.local$/.test(u.email)
@@ -44,6 +52,23 @@ export async function seedOrGet(users: UserEntity[], _config?: SeedConfig) {
     const user = parentUsers[i];
     const timezone = i === 0 ? "Africa/Cairo" : pickTimezoneForIndex(i);
     const parent = await upsertParent(user.id, timezone, now);
+
+    if (shouldSeedExtendedFiles(seedConfig)) {
+      try {
+        const avatarFile = getAvatarFileName(i, 4);
+        await seedEntityFile({
+          assetRelativePath: `avatars/parents/${avatarFile}`,
+          bucketPath: `public/avatars/parents/${avatarFile}`,
+          referenceTable: "parents",
+          referenceId: parent.id,
+          usageType: "avatar",
+          ensureParentDirs: ["public/avatars/parents"],
+        });
+      } catch (error) {
+        logger.error(`Failed to seed parent avatar for ${parent.id}:`, error);
+      }
+    }
+
     results.push(parent);
   }
 

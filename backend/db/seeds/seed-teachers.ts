@@ -2,7 +2,14 @@ import { db } from "@/backend/db/drizzleDb";
 import { teachers } from "@/backend/db/schema/teachers";
 import logger from "@/backend/lib/logger";
 import type { TimezoneEntity, UserEntity } from "@/backend/types";
-import { pickTimezoneForIndex, type SeedConfig } from "./lib";
+import {
+  getAvatarFileName,
+  loadSeedConfig,
+  pickTimezoneForIndex,
+  seedEntityFile,
+  shouldSeedExtendedFiles,
+  type SeedConfig,
+} from "./lib";
 
 async function upsertTeacher(userId: string, timezone: TimezoneEntity, now: Date) {
   const [insertedTeacher] = await db
@@ -37,9 +44,10 @@ function resolveTimezone(timezones: TimezoneEntity[], ianaId: string): TimezoneE
   return match;
 }
 
-export async function seedOrGet(users: UserEntity[], timezones: TimezoneEntity[], _config?: SeedConfig) {
+export async function seedOrGet(users: UserEntity[], timezones: TimezoneEntity[], config?: SeedConfig) {
   logger.info("Seeding system teachers...");
   const now = new Date();
+  const seedConfig = config ?? loadSeedConfig();
 
   const defaultTimezone = timezones.find(t => t.ianaId === "UTC") || timezones[0];
   if (!defaultTimezone) {
@@ -60,6 +68,23 @@ export async function seedOrGet(users: UserEntity[], timezones: TimezoneEntity[]
     const tzIana = i === 0 ? "UTC" : pickTimezoneForIndex(i);
     const timezone = resolveTimezone(timezones, tzIana);
     const teacher = await upsertTeacher(user.id, timezone, now);
+
+    if (shouldSeedExtendedFiles(seedConfig)) {
+      try {
+        const avatarFile = getAvatarFileName(i, 4);
+        await seedEntityFile({
+          assetRelativePath: `avatars/teachers/${avatarFile}`,
+          bucketPath: `public/avatars/teachers/${avatarFile}`,
+          referenceTable: "teachers",
+          referenceId: teacher.id,
+          usageType: "avatar",
+          ensureParentDirs: ["public/avatars/teachers"],
+        });
+      } catch (error) {
+        logger.error(`Failed to seed teacher avatar for ${teacher.id}:`, error);
+      }
+    }
+
     results.push(teacher);
   }
 
