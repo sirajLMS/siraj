@@ -39,11 +39,14 @@ interface StudentsViewProps {
   readonly rows: readonly StudentDirectoryRowExtended[];
   readonly totalStudents: number;
   readonly searchQuery: string;
+  readonly page: number;
+  readonly pageSize: number;
   readonly labels: StudentsViewLabels;
   readonly onSearchChange: (query: string) => void;
   readonly onAddStudent: () => void;
   readonly onViewProfile: (id: string) => void;
   readonly onViewHistory: (id: string) => void;
+  readonly onPageChange: (page: number) => void;
 }
 
 export function StudentsView({
@@ -52,11 +55,14 @@ export function StudentsView({
   rows,
   totalStudents,
   searchQuery,
+  page,
+  pageSize,
   labels,
   onSearchChange,
   onAddStudent,
   onViewProfile,
   onViewHistory,
+  onPageChange,
 }: StudentsViewProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -71,6 +77,10 @@ export function StudentsView({
         searchQuery={searchQuery}
         mobileMetrics={mobileMetrics}
         rows={rows}
+        page={page}
+        pageSize={pageSize}
+        totalCount={totalStudents}
+        onPageChange={onPageChange}
         cardListLabels={{
           weeklyHours: labels.weeklyHours,
           enrollmentStatus: labels.enrollmentStatus,
@@ -96,6 +106,9 @@ export function StudentsView({
       metrics={metrics}
       rows={rows}
       totalStudents={totalStudents}
+      page={page}
+      pageSize={pageSize}
+      onPageChange={onPageChange}
       tableLabels={{
         index: labels.index,
         student: labels.student,

@@ -1,6 +1,8 @@
 import { StaffDirectoryService } from "@/backend/services/teacher/staff-directory.service";
 import { TeacherService } from "@/backend/services/teacher/teacher.service";
+import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { PaginationArgsObject } from "../pothos/pagination.objects";
 import { TeacherDirectoryPothosObject } from "../pothos/staff-directory.pothos";
 import { TeacherSimplePothosObject } from "../pothos/teacher.pothos";
 
@@ -23,18 +25,27 @@ gqlSchemaBuilder.queryField("teacherDirectory", t =>
     type: TeacherDirectoryPothosObject,
     args: {
       search: t.arg.string({ required: false }),
-      limit: t.arg.int({ required: false }),
-      offset: t.arg.int({ required: false }),
+      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
+      let pagination: PaginationArgs | null = null;
+      if (args.paginationArgs) {
+        pagination = new PaginationArgs({
+          first: args.paginationArgs.first ?? null,
+          skip: args.paginationArgs.skip ?? null,
+          after: args.paginationArgs.after ?? null,
+          before: args.paginationArgs.before ?? null,
+          last: args.paginationArgs.last ?? null,
+          page: args.paginationArgs.page ?? null,
+          maxCount: args.paginationArgs.maxCount ?? null,
+        });
+      }
+
       return await StaffDirectoryService.getDirectory(
         ctx.user?.id || "",
-        {
-          search: args.search ?? undefined,
-          limit: args.limit ?? undefined,
-          offset: args.offset ?? undefined,
-        },
+        pagination,
+        args.search ?? undefined,
         ctx.locale
       );
     },

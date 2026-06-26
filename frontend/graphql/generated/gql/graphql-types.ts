@@ -24,6 +24,7 @@ export type Scalars = {
 export type AdminDashboardScheduleInput = {
   date: Scalars['String']['input'];
   metricFilter: InputMaybe<Scalars['String']['input']>;
+  paginationArgs: InputMaybe<PaginationArgs>;
   search: InputMaybe<Scalars['String']['input']>;
   teacherId: InputMaybe<Scalars['String']['input']>;
 };
@@ -32,6 +33,7 @@ export type AdminDashboardScheduleResult = {
   __typename?: 'AdminDashboardScheduleResult';
   id: Maybe<Scalars['String']['output']>;
   metrics: Maybe<DailyScheduleMetrics>;
+  pageInfo: Maybe<PageInfo>;
   rows: Maybe<Array<DailyScheduleList>>;
   totalCount: Maybe<Scalars['Int']['output']>;
 };

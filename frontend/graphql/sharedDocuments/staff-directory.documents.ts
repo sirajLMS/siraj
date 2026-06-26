@@ -6,8 +6,8 @@ export const teacherDirectoryQueryDocument: TypedDocumentNode<
   Operations.TeacherDirectoryQuery,
   Types.QueryTeacherDirectoryArgs
 > = gql`
-  query teacherDirectory($search: String, $limit: Int, $offset: Int) {
-    teacherDirectory(search: $search, limit: $limit, offset: $offset) {
+  query teacherDirectory($search: String, $paginationArgs: PaginationArgs) {
+    teacherDirectory(search: $search, paginationArgs: $paginationArgs) {
       id
       metrics {
         id
@@ -24,22 +24,49 @@ export const teacherDirectoryQueryDocument: TypedDocumentNode<
         zoomLink
       }
       totalTeachers
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
     }
   }
 `;
 
-export const managerDirectoryQueryDocument: TypedDocumentNode<Operations.ManagerDirectoryQuery> = gql`
-  query managerDirectory {
-    managerDirectory {
+export const managerDirectoryQueryDocument: TypedDocumentNode<
+  Operations.ManagerDirectoryQuery,
+  Types.QueryManagerDirectoryArgs
+> = gql`
+  query managerDirectory($paginationArgs: PaginationArgs) {
+    managerDirectory(paginationArgs: $paginationArgs) {
       id
-      staffProfileId
-      name
-      email
-      phone
-      skypeId
-      status
-      roleSlug
-      roleName
+      rows {
+        id
+        staffProfileId
+        name
+        email
+        phone
+        skypeId
+        status
+        roleSlug
+        roleName
+      }
+      totalCount
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
     }
   }
 `;

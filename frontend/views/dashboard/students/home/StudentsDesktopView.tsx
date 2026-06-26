@@ -15,7 +15,10 @@ interface StudentsDesktopViewProps {
   readonly filtersLabel: string;
   readonly metrics: readonly MetricItem[];
   readonly rows: readonly StudentDirectoryRowExtended[];
-  readonly totalStudents: number; //NOSONAR
+  readonly totalStudents: number;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly onPageChange?: (page: number) => void;
   readonly tableLabels: {
     readonly index: string;
     readonly student: string;
@@ -45,6 +48,10 @@ export function StudentsDesktopView({
   filtersLabel,
   metrics,
   rows,
+  totalStudents,
+  page,
+  pageSize,
+  onPageChange,
   tableLabels,
   onAddStudent,
   onViewProfile,
@@ -72,6 +79,10 @@ export function StudentsDesktopView({
         <StudentDirectoryDataGrid
           rows={rows}
           labels={tableLabels}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalStudents}
+          onPageChange={onPageChange}
           onViewProfile={onViewProfile}
           onViewHistory={onViewHistory}
         />

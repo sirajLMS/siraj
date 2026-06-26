@@ -13,7 +13,10 @@ export function StoryBookPageContainer({ children, backgroundColor, color }: Sto
         minHeight: "100vh",
         width: "100%",
         boxSizing: "border-box",
-        backgroundColor: typeof backgroundColor === "function" ? backgroundColor(theme) : (backgroundColor ?? theme.palette.background.default),
+        backgroundColor:
+          typeof backgroundColor === "function"
+            ? backgroundColor(theme)
+            : (backgroundColor ?? theme.palette.background.default),
         color: typeof color === "function" ? color(theme) : color,
         p: 3,
       })}

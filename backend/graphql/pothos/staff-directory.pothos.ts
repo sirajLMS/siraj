@@ -1,5 +1,7 @@
 import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
+import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
@@ -64,17 +66,17 @@ export const TeacherDirectoryPothosObject = TeacherDirectoryRef.implement({
 
 // ─── Manager Directory Types & Queries ──────────────────────────────────────────
 
-export interface ManagerDirectoryRowDefinition {
-  readonly id: string;
-  readonly staffProfileId: string;
-  readonly name: string;
-  readonly email: string;
-  readonly phone: string | null;
-  readonly skypeId: string | null;
-  readonly status: string;
-  readonly roleSlug: string | null;
-  readonly roleName: string | null;
-}
+export type ManagerDirectoryRowDefinition = {
+  id: string;
+  staffProfileId: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  skypeId: string | null;
+  status: string;
+  roleSlug: string | null;
+  roleName: string | null;
+};
 
 const ManagerDirectoryRowRef = gqlSchemaBuilder.objectRef<ManagerDirectoryRowDefinition>("ManagerDirectoryRow");
 
@@ -92,18 +94,58 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
   }),
 });
 
+export type ManagerDirectoryResultDefinition = {
+  id: string;
+  rows: ManagerDirectoryRowDefinition[];
+  totalCount: number;
+  pageInfo: import("@/backend/types").PageInfo | null;
+};
+
+const ManagerDirectoryResultRef =
+  gqlSchemaBuilder.objectRef<ManagerDirectoryResultDefinition>("ManagerDirectoryResult");
+
+export const ManagerDirectoryResultPothosObject = ManagerDirectoryResultRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    rows: t.expose("rows", { type: [ManagerDirectoryRowPothosObject] }),
+    totalCount: t.exposeInt("totalCount"),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
+  }),
+});
+
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 gqlSchemaBuilder.queryField("managerDirectory", t =>
   t.field({
-    type: [ManagerDirectoryRowPothosObject],
-    resolve: async (_root, _args, ctx) => {
+    type: ManagerDirectoryResultPothosObject,
+    args: {
+      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
       const locale = ctx.locale || "en";
       const userId = ctx.user?.id || "";
 
-      const result = await ManagerDirectoryService.getManagerDirectory(userId, locale);
+      let pagination: PaginationArgs | null = null;
+      if (args.paginationArgs) {
+        pagination = new PaginationArgs({
+          first: args.paginationArgs.first ?? null,
+          skip: args.paginationArgs.skip ?? null,
+          after: args.paginationArgs.after ?? null,
+          before: args.paginationArgs.before ?? null,
+          last: args.paginationArgs.last ?? null,
+          page: args.paginationArgs.page ?? null,
+          maxCount: args.paginationArgs.maxCount ?? null,
+        });
+      }
 
-      return result.rows;
+      const result = await ManagerDirectoryService.getManagerDirectory(userId, pagination, locale);
+
+      return {
+        id: "manager-directory",
+        rows: result.rows,
+        totalCount: result.totalCount,
+        pageInfo: result.pageInfo,
+      };
     },
     description: "Lists all staff members with administrative access.",
   })

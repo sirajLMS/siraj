@@ -1,22 +1,10 @@
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
-import type { StaffProfileCreateResult, StaffProfileEntityInput } from "@/backend/types";
+import type { ManagerDirectoryResult, ManagerDirectoryRow, StaffProfileCreateResult, StaffProfileEntityInput, PaginationArgs } from "@/backend/types";
 import type { DBTransaction } from "../db.types";
-
-export interface ManagerDirectoryRow {
-  readonly id: string;
-  readonly staffProfileId: string;
-  readonly name: string;
-  readonly email: string;
-  readonly phone: string | null;
-  readonly skypeId: string | null;
-  readonly status: string;
-  readonly roleSlug: string | null;
-  readonly roleName: string | null;
-}
 
 export interface ManagerProfileUpdateInput {
   readonly phone?: string | null;
@@ -33,7 +21,6 @@ export namespace StaffProfileRepository {
   ): Promise<StaffProfileCreateResult> {
     const queryDb = tx ?? db;
 
-    // Verify the user exists and doesn't already have a staff profile
     const existingProfile = await queryDb
       .select({ id: staffProfiles.id })
       .from(staffProfiles)
@@ -84,16 +71,56 @@ export namespace StaffProfileRepository {
     roleName: permissionGroups.name,
   } as const;
 
-  export async function getManagerDirectory(tx?: DBTransaction): Promise<ManagerDirectoryRow[]> {
+  export async function getManagerDirectory(
+    pagination: PaginationArgs | null = null,
+    tx?: DBTransaction
+  ): Promise<ManagerDirectoryResult> {
     const queryDb = tx ?? db;
 
-    return await queryDb
+    const baseQuery = queryDb
       .select(MANAGER_DIRECTORY_SELECT)
       .from(staffProfiles)
       .innerJoin(users, eq(staffProfiles.userId, users.id))
       .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
       .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
       .orderBy(users.name);
+
+    if (!pagination) {
+      const rows = await baseQuery;
+      return { rows, totalCount: rows.length, pageInfo: null };
+    }
+
+    const perPage = pagination.perPage;
+    const currentPage = pagination.currentPage;
+    const offset = pagination.offset;
+
+    const [rows, countResult] = await Promise.all([
+      baseQuery.limit(perPage).offset(offset),
+      queryDb
+        .select({ count: count() })
+        .from(staffProfiles)
+        .innerJoin(users, eq(staffProfiles.userId, users.id))
+        .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
+        .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id)),
+    ]);
+
+    const totalCount = countResult[0]?.count ?? 0;
+    const lastPage = Math.max(1, Math.ceil(totalCount / perPage));
+
+    return {
+      rows,
+      totalCount,
+      pageInfo: {
+        count: rows.length,
+        currentPage,
+        firstItem: rows.length > 0 ? offset + 1 : null,
+        lastItem: rows.length > 0 ? offset + rows.length : null,
+        hasMorePages: currentPage < lastPage,
+        lastPage,
+        perPage,
+        total: totalCount,
+      },
+    };
   }
 
   export async function findByUserId(userId: string, tx?: DBTransaction): Promise<ManagerDirectoryRow | null> {

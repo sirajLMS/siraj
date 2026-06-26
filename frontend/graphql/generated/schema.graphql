@@ -1,6 +1,7 @@
 input AdminDashboardScheduleInput {
   date: String!
   metricFilter: String
+  paginationArgs: PaginationArgs
   search: String
   teacherId: String
 }
@@ -8,6 +9,7 @@ input AdminDashboardScheduleInput {
 type AdminDashboardScheduleResult {
   id: String
   metrics: DailyScheduleMetrics
+  pageInfo: PageInfo
   rows: [DailyScheduleList!]
   totalCount: Int
 }
@@ -947,6 +949,13 @@ enum ManagerAccountType {
   manager
 }
 
+type ManagerDirectoryResult {
+  id: String
+  pageInfo: PageInfo
+  rows: [ManagerDirectoryRow!]
+  totalCount: Int
+}
+
 type ManagerDirectoryRow {
   email: String
   id: String
@@ -1338,7 +1347,7 @@ type Query {
   listFiles(input: FilesListInput!): StorageObjectList
 
   """Lists all staff members with administrative access."""
-  managerDirectory: [ManagerDirectoryRow!]
+  managerDirectory(paginationArgs: PaginationArgs): ManagerDirectoryResult
   me: User
   notificationAlerts: NotificationAlertsResult
   parentAssociatedStudents(parentId: String!): [AssociatedStudent!]
@@ -1401,7 +1410,7 @@ type Query {
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
   teacherActiveDashboard(date: String!): TeacherDashboard
   teacherDashboard(date: String!): TeacherDashboard
-  teacherDirectory(limit: Int, offset: Int, search: String): TeacherDirectory
+  teacherDirectory(paginationArgs: PaginationArgs, search: String): TeacherDirectory
   teacherFutureSchedule: TeacherFutureSchedule
   teacherHandbookUrl: TeacherHandbookUrl
   teacherProfileForEdit(teacherId: ID!): TeacherProfileResult

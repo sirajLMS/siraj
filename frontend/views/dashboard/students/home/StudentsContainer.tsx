@@ -24,9 +24,24 @@ export function StudentsContainer() {
 
   const searchQuery = useStudentDirectoryStore(state => state.searchQuery);
   const setSearchQuery = useStudentDirectoryStore(state => state.setSearchQuery);
+  const page = useStudentDirectoryStore(state => state.page);
+  const pageSize = useStudentDirectoryStore(state => state.pageSize);
+  const setPage = useStudentDirectoryStore(state => state.setPage);
 
   const { data } = useQuery(studentDirectoryQueryDocument, {
-    variables: { filterArgs: null, orderBy: null, paginationArgs: null },
+    variables: {
+      filterArgs: null,
+      orderBy: null,
+      paginationArgs: {
+        first: pageSize,
+        page: page + 1,
+        skip: null,
+        after: null,
+        before: null,
+        last: null,
+        maxCount: null,
+      },
+    },
   });
 
   const rows = useMemo(() => buildStudentRows(data), [data]);
@@ -54,11 +69,14 @@ export function StudentsContainer() {
         rows={filteredRows}
         totalStudents={rows.length}
         searchQuery={searchQuery}
+        page={page}
+        pageSize={pageSize}
         labels={labels}
         onSearchChange={setSearchQuery}
         onAddStudent={handleAddStudent}
         onViewProfile={handleViewProfile}
         onViewHistory={handleViewHistory}
+        onPageChange={setPage}
       />
     </RequirePermission>
   );

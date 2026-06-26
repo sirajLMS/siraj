@@ -6,6 +6,7 @@ import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { PaginationArgs } from "@/backend/types";
 import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/shared/lib/enum";
 
 export namespace ScheduleService {
@@ -75,6 +76,7 @@ export namespace ScheduleService {
       teacherId?: string | null;
       search?: string | null;
       metricFilter?: string | null;
+      paginationArgs?: PaginationArgs | null;
     },
     locale?: string
   ) {
@@ -101,12 +103,13 @@ export namespace ScheduleService {
       const search = input.search || undefined;
       const metricFilter = input.metricFilter || undefined;
 
-      const { metrics, rows } = await SchedulingRepository.getAdminDashboardSchedule({
+      const { metrics, rows, totalCount, pageInfo } = await SchedulingRepository.getAdminDashboardSchedule({
         date: targetDate,
         teacherId,
         search,
         viewerTimezone,
         metricFilter,
+        pagination: input.paginationArgs ?? null,
       });
 
       const mappedRows = rows.map(mapDailyScheduleListItem);
@@ -118,7 +121,8 @@ export namespace ScheduleService {
           ...metrics,
         },
         rows: mappedRows,
-        totalCount: mappedRows.length,
+        totalCount,
+        pageInfo,
       };
     } catch (error) {
       logger.error("Error fetching admin dashboard schedule", { userId, error });

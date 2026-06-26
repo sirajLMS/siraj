@@ -2,6 +2,8 @@ import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { PageInfo, PaginationArgs } from "@/backend/types";
+import { PaginationUtils } from "@/backend/utils/pagination.utils";
 import { AppPermission } from "@/shared/lib/enum";
 
 export namespace StaffDirectoryService {
@@ -15,32 +17,50 @@ export namespace StaffDirectoryService {
 
   export async function getDirectory(
     userId: string,
-    options?: { search?: string; limit?: number; offset?: number },
+    paginationArgs: PaginationArgs | null,
+    search?: string,
     locale?: string
-  ) {
+  ): Promise<{
+    id: string;
+    metrics: { id: string; activated: number; deactivated: number };
+    rows: {
+      id: string;
+      index: string;
+      name: string;
+      email: string;
+      avatarUrl: string;
+      status: string;
+      zoomLink: string | null;
+    }[];
+    totalTeachers: number;
+    pageInfo: PageInfo | null;
+  }> {
     try {
       await assertDirectoryAccess(userId, locale);
 
-      const rows = await TeacherRepository.getTeacherDirectory(options);
+      const { rows: rawRows, totalCount } = await TeacherRepository.getTeacherDirectory(paginationArgs, search);
       const metrics = await TeacherRepository.getTeacherDirectoryMetrics();
 
+      const pageInfo = PaginationUtils.buildPageInfoFromArgs(paginationArgs, rawRows.length, totalCount);
+
       return {
-        id: `teacher-directory-${options?.search ?? "all"}`,
+        id: `teacher-directory-${search ?? "all"}`,
         metrics: {
           id: "teacher-directory-metrics",
           activated: metrics.activated,
           deactivated: metrics.deactivated,
         },
-        rows: rows.map((row, index) => ({
+        rows: rawRows.map((row, index) => ({
           id: row.id,
-          index: String(index + 1).padStart(2, "0"),
+          index: String((paginationArgs?.offset ?? 0) + index + 1).padStart(2, "0"),
           name: row.name,
           email: row.email,
           avatarUrl: row.avatarUrl ?? "",
           status: row.status === "ACTIVATED" ? "active" : "offline",
           zoomLink: row.zoomLink,
         })),
-        totalTeachers: metrics.activated + metrics.deactivated,
+        totalTeachers: totalCount,
+        pageInfo,
       };
     } catch (error) {
       logger.error("Error fetching teacher directory", { userId, error });

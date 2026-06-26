@@ -1,3 +1,4 @@
+import type { PaginationArgs } from "@/backend/types";
 import { ParentRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -29,7 +30,8 @@ export interface ParentDirectoryResult {
   readonly id: string;
   readonly metrics: ParentDirectoryMetrics;
   readonly rows: ParentDirectoryRow[];
-  readonly totalParents: number;
+  readonly totalCount: number;
+  readonly pageInfo: import("@/backend/types").PageInfo | null;
 }
 
 export namespace ParentDirectoryService {
@@ -40,8 +42,7 @@ export namespace ParentDirectoryService {
   export async function getParentDirectory(
     actorUserId: string,
     search: string | null,
-    limit: number,
-    offset: number,
+    pagination: PaginationArgs | null,
     locale?: string
   ): Promise<ParentDirectoryResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_VIEW_DIRECTORY);
@@ -53,8 +54,9 @@ export namespace ParentDirectoryService {
     const {
       metrics,
       rows: rawRows,
-      totalParents,
-    } = await ParentRepository.getParentDirectory({ search, limit, offset });
+      totalCount,
+      pageInfo,
+    } = await ParentRepository.getParentDirectory({ search, pagination });
 
     const rows: ParentDirectoryRow[] = [];
     for (let i = 0; i < rawRows.length; i++) {
@@ -64,7 +66,7 @@ export namespace ParentDirectoryService {
 
       rows.push({
         id: row.id,
-        index: offset + i + 1,
+        index: (pagination?.offset ?? 0) + i + 1,
         name: row.name,
         email: row.email,
         avatarUrl: row.avatarUrl,
@@ -82,7 +84,8 @@ export namespace ParentDirectoryService {
         ...metrics,
       },
       rows,
-      totalParents,
+      totalCount,
+      pageInfo,
     };
   }
 }

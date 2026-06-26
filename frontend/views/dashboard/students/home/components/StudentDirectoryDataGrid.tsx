@@ -5,7 +5,7 @@ import { Avatar, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
+import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { StudentAccountStatus, StudentDirectoryRowExtended } from "../types";
 import { ClassesLeftProgress } from "./ClassesLeftProgress";
@@ -27,6 +27,10 @@ export interface StudentDirectoryDataGridLabels {
 interface StudentDirectoryDataGridProps {
   readonly rows: readonly StudentDirectoryRowExtended[];
   readonly labels: StudentDirectoryDataGridLabels;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
   readonly onViewProfile: (id: string) => void;
   readonly onViewHistory: (id: string) => void;
 }
@@ -38,6 +42,10 @@ function formatHours(hours: number): string {
 export function StudentDirectoryDataGrid({
   rows,
   labels,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
   onViewProfile,
   onViewHistory,
 }: StudentDirectoryDataGridProps) {
@@ -171,6 +179,8 @@ export function StudentDirectoryDataGrid({
     [labels, onViewHistory, onViewProfile]
   );
 
+  const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
+
   return (
     <AppDataGrid<StudentDirectoryRowExtended>
       rows={rows}
@@ -179,6 +189,18 @@ export function StudentDirectoryDataGrid({
       autoHeight
       ariaLabel="student-directory-table"
       emptyMessage={labels.noEntries}
+      {...(isServerPagination
+        ? {
+            paginationMode: "server" as const,
+            rowCount: totalCount,
+            paginationModel: { page, pageSize },
+            onPaginationModelChange: model => {
+              onPageChange(model.page);
+            },
+            pageSizeOptions: [pageSize],
+            slots: { pagination: GridPagination },
+          }
+        : {})}
       onRowClick={(params: GridRowParams<StudentDirectoryRowExtended>) => {
         onViewProfile(params.row.id ?? "");
       }}

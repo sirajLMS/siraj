@@ -150,6 +150,7 @@ describe("GraphQL Schedule Integration Tests", () => {
         teacherId: null,
         search: null,
         metricFilter: "pending",
+        paginationArgs: null,
       },
     });
 

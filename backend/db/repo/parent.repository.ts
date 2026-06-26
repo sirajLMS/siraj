@@ -1,8 +1,10 @@
 import { and, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
+import { queryWithPagination } from "@/backend/db/query.extensions";
 import { invoices, parents, students, teachers, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { ParentCreateResult, ParentEntityInput } from "@/backend/types";
+import type { ParentCreateResult, ParentDirectoryResult, ParentEntityInput, PaginationArgs } from "@/backend/types";
+import { PaginationUtils } from "@/backend/utils";
 import type { DBTransaction } from "../db.types";
 
 export namespace ParentRepository {
@@ -97,11 +99,12 @@ export namespace ParentRepository {
   export type ParentDirectoryResult = {
     metrics: ParentDirectoryMetrics;
     rows: ParentDirectoryRow[];
-    totalParents: number;
+    totalCount: number;
+    pageInfo: import("@/backend/types").PageInfo | null;
   };
 
   export const getParentDirectory = async (
-    options: { search?: string | null; limit: number; offset: number },
+    options: { search?: string | null; pagination?: PaginationArgs | null },
     tx?: DBTransaction
   ): Promise<ParentDirectoryResult> => {
     const queryDb = tx ?? db;
@@ -129,7 +132,7 @@ export namespace ParentRepository {
       conditions.push(or(ilike(users.name, `%${options.search}%`), ilike(users.email, `%${options.search}%`)));
     }
 
-    const rowsQuery = queryDb
+    let rowsQuery = queryDb
       .select({
         id: parents.id,
         name: users.name,
@@ -146,8 +149,11 @@ export namespace ParentRepository {
       .innerJoin(users, eq(parents.userId, users.id))
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(parents.updatedAt))
-      .limit(options.limit)
-      .offset(options.offset);
+      .$dynamic();
+
+    if (options.pagination) {
+      rowsQuery = queryWithPagination(rowsQuery, options.pagination);
+    }
 
     const rows = await rowsQuery;
 
@@ -157,10 +163,14 @@ export namespace ParentRepository {
       .innerJoin(users, eq(parents.userId, users.id))
       .where(conditions.length > 0 ? and(...conditions) : undefined);
 
+    const total = totalCount?.count ?? 0;
+    const pageInfo = PaginationUtils.buildPageInfoFromArgs(options.pagination ?? null, rows.length, total);
+
     return {
       metrics,
       rows,
-      totalParents: totalCount?.count ?? 0,
+      totalCount: total,
+      pageInfo,
     };
   };
 

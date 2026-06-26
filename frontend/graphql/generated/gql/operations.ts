@@ -7,6 +7,7 @@ import type * as Types from './graphql-types.ts';
 export type AdminDashboardScheduleInput = {
   date: string;
   metricFilter: string | null | undefined;
+  paginationArgs: PaginationArgs | null | undefined;
   search: string | null | undefined;
   teacherId: string | null | undefined;
 };
@@ -1526,7 +1527,9 @@ export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardSch
 
 export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, student: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
 
-export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult = { id: string | null, totalCount: number | null, metrics: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics | null, rows: Array<AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList> | null };
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult = { id: string | null, totalCount: number | null, metrics: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics | null, rows: Array<AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList> | null, pageInfo: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_pageInfo_PageInfo | null };
 
 export type AdminDashboardScheduleQuery_Query = { adminDashboardSchedule: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult | null };
 

@@ -46,11 +46,14 @@ export type AdminDashboardScheduleInput = {
   search?: string;
   viewerTimezone: string;
   metricFilter?: string;
+  pagination?: Types.PaginationArgs | null;
 };
 
 export type AdminDashboardScheduleResult = {
   metrics: DailyScheduleMetricsCounts;
   rows: DailyScheduleResult[];
+  totalCount: number;
+  pageInfo: Types.PageInfo | null;
 };
 
 function buildDailyScheduleDayConditions(
@@ -173,9 +176,30 @@ export const getAdminDashboardSchedule = async (
       ? baseRows.filter(row => matchesDashboardMetricFilter(row, input.metricFilter))
       : baseRows;
 
+    const totalCount = filteredRows.length;
+
+    const paginatedRows = input.pagination
+      ? filteredRows.slice(input.pagination.offset, input.pagination.offset + input.pagination.perPage)
+      : filteredRows;
+
+    const pageInfo = input.pagination
+      ? {
+          count: paginatedRows.length,
+          currentPage: input.pagination.currentPage,
+          firstItem: paginatedRows.length > 0 ? input.pagination.offset + 1 : null,
+          hasMorePages: input.pagination.offset + input.pagination.perPage < totalCount,
+          lastItem: paginatedRows.length > 0 ? input.pagination.offset + paginatedRows.length : null,
+          lastPage: Math.max(1, Math.ceil(totalCount / input.pagination.perPage)),
+          perPage: input.pagination.perPage,
+          total: totalCount,
+        }
+      : null;
+
     return {
       metrics,
-      rows: await applyViewerTimezoneFormatting(filteredRows, input.viewerTimezone),
+      rows: await applyViewerTimezoneFormatting(paginatedRows, input.viewerTimezone),
+      totalCount,
+      pageInfo,
     };
   };
 

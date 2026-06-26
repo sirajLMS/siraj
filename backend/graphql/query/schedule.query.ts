@@ -1,6 +1,7 @@
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
+import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   AdminDashboardScheduleInputPothosObject,
@@ -25,7 +26,28 @@ gqlSchemaBuilder.queryField("adminDashboardSchedule", t =>
         const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
         throw new Error(tFunc("unauthorized"));
       }
-      return ScheduleService.getAdminDashboardSchedule(ctx.user.id, args.input, ctx.locale);
+
+      let pagination: PaginationArgs | null = null;
+      if (args.input.paginationArgs) {
+        pagination = new PaginationArgs({
+          first: args.input.paginationArgs.first ?? null,
+          skip: args.input.paginationArgs.skip ?? null,
+          after: args.input.paginationArgs.after ?? null,
+          before: args.input.paginationArgs.before ?? null,
+          last: args.input.paginationArgs.last ?? null,
+          page: args.input.paginationArgs.page ?? null,
+          maxCount: args.input.paginationArgs.maxCount ?? null,
+        });
+      }
+
+      return ScheduleService.getAdminDashboardSchedule(
+        ctx.user.id,
+        {
+          ...args.input,
+          paginationArgs: pagination,
+        },
+        ctx.locale
+      );
     },
   })
 );

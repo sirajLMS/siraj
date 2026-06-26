@@ -42,6 +42,16 @@ export const adminDashboardScheduleQueryDocument: TypedDocumentNode<
           name
         }
       }
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
     }
   }
 `;

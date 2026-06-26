@@ -1,8 +1,9 @@
 import { and, eq, ilike, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
+import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { TeacherCreateResult, TeacherEntityInput } from "@/backend/types";
+import type { PaginationArgs, TeacherCreateResult, TeacherEntityInput } from "@/backend/types";
 import type { DBTransaction } from "../db.types";
 
 export namespace TeacherRepository {
@@ -13,7 +14,6 @@ export namespace TeacherRepository {
   ): Promise<TeacherCreateResult> {
     const queryDb = tx ?? db;
 
-    // Verify the user exists and doesn't already have a teacher profile
     const existingTeacher = await queryDb
       .select({ id: teachers.id })
       .from(teachers)
@@ -25,7 +25,6 @@ export namespace TeacherRepository {
       throw new Error(t("teacher.alreadyExists"));
     }
 
-    // Validate timezone format
     try {
       Intl.DateTimeFormat(undefined, { timeZone: input.timezone });
     } catch {
@@ -120,42 +119,50 @@ export namespace TeacherRepository {
   };
 
   export const getTeacherDirectory = async (
-    options?: { search?: string; limit?: number; offset?: number },
+    paginationArgs: PaginationArgs | null,
+    search?: string,
     tx?: DBTransaction
-  ): Promise<TeacherDirectoryRow[]> => {
+  ): Promise<{ rows: TeacherDirectoryRow[]; totalCount: number }> => {
     const queryDb = tx ?? db;
 
     const conditions = and(
       isNull(users.deletedAt),
-      options?.search
-        ? or(ilike(users.name, `%${options.search}%`), ilike(users.email, `%${options.search}%`))
-        : undefined
+      search ? or(ilike(users.name, `%${search}%`), ilike(users.email, `%${search}%`)) : undefined
     );
 
-    const query = queryDb
-      .select({
-        id: teachers.id,
-        userId: teachers.userId,
-        name: users.name,
-        email: users.email,
-        avatarUrl: users.avatarUrl,
-        status: teachers.status,
-        zoomLink: teachers.zoomLink,
-      })
+    const baseSelect = {
+      id: teachers.id,
+      userId: teachers.userId,
+      name: users.name,
+      email: users.email,
+      avatarUrl: users.avatarUrl,
+      status: teachers.status,
+      zoomLink: teachers.zoomLink,
+    };
+
+    let rowsQuery = queryDb
+      .select(baseSelect)
       .from(teachers)
       .innerJoin(users, eq(teachers.userId, users.id))
       .where(conditions)
-      .orderBy(users.name);
+      .orderBy(users.name)
+      .$dynamic();
 
-    let finalQuery = query;
-    if (options?.limit !== undefined) {
-      finalQuery = finalQuery.limit(options.limit) as typeof finalQuery;
-    }
-    if (options?.offset !== undefined) {
-      finalQuery = finalQuery.offset(options.offset) as typeof finalQuery;
+    if (paginationArgs) {
+      rowsQuery = queryWithPagination(rowsQuery, paginationArgs);
     }
 
-    return finalQuery;
+    const countQuery = queryDb
+      .select({ count: sql<number>`count(*)::int` })
+      .from(teachers)
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .where(conditions);
+
+    const [rows, countResult] = await Promise.all([rowsQuery, countQuery]);
+
+    const totalCount = countResult[0]?.count ?? 0;
+
+    return { rows, totalCount };
   };
 
   export const getTeacherDirectoryMetrics = async (tx?: DBTransaction): Promise<TeacherDirectoryMetrics> => {

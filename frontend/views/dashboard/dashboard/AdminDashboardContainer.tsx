@@ -8,6 +8,7 @@ import { adminDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDo
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
 import { DashboardView } from "./DashboardView";
 import { useAdminDashboardLabels } from "./utils";
 import { buildAdminDashboardMetrics } from "./utils/adminDashboardMetrics";
@@ -26,6 +27,10 @@ export function AdminDashboardContainer() {
 
   const selectedMetricFilter = resolveDailyScheduleMetricFilter(filters.selectedStatus);
 
+  const [teacherSearchQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
+
   const {
     data: dashboardData,
     loading,
@@ -37,14 +42,19 @@ export function AdminDashboardContainer() {
         teacherId: filters.teacherId || null,
         search: filters.searchQuery || null,
         metricFilter: selectedMetricFilter,
+        paginationArgs: {
+          first: pageSize,
+          page: page + 1,
+          skip: null,
+          after: null,
+          before: null,
+          last: null,
+          maxCount: null,
+        },
       },
     },
     fetchPolicy: "cache-and-network",
   });
-
-  const [teacherSearchQuery] = useState("");
-  const [page, setPage] = useState(0);
-  const pageSize = 10;
 
   const handleDateChange = (date: string) => {
     setDateFilter(date);
@@ -90,10 +100,9 @@ export function AdminDashboardContainer() {
   };
 
   const scheduleResult = dashboardData?.adminDashboardSchedule;
-  const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics);
-  const rows = scheduleResult?.rows ?? [];
-  const totalCount = scheduleResult?.totalCount ?? rows.length;
-  const paginatedRows = rows.slice(page * pageSize, (page + 1) * pageSize);
+  const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null);
+  const rows = (scheduleResult?.rows ?? []) as readonly DailyScheduleRow[];
+  const totalCount = scheduleResult?.pageInfo?.total ?? scheduleResult?.totalCount ?? 0;
 
   const selectedMetricLabel = filters.selectedStatus
     ? t(`admin.metrics.${filters.selectedStatus}` as "admin.metrics.total")
@@ -119,7 +128,7 @@ export function AdminDashboardContainer() {
       teacherValue={filters.teacherId}
       submitLabel={t("admin.submit")}
       teachers={teachers}
-      rows={paginatedRows}
+      rows={rows}
       headers={headers}
       statusLabels={statusLabels}
       detailsLabel={t("admin.details")}

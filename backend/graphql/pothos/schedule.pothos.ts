@@ -1,7 +1,9 @@
 import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
+import type { PageInfo } from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { ClassExecutionStatePothosObject, ClassOutcomePothosObject } from "./enum.pothos";
+import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 export type DailyScheduleMetricsDefinition = {
   id: string;
@@ -88,6 +90,15 @@ export type AdminDashboardScheduleInputDefinition = {
   teacherId?: string | null;
   search?: string | null;
   metricFilter?: string | null;
+  paginationArgs?: {
+    first: number | null;
+    skip: number | null;
+    after: string | null;
+    before: string | null;
+    last: number | null;
+    page: number | null;
+    maxCount: number | null;
+  } | null;
 };
 
 export const AdminDashboardScheduleInputPothosObject = gqlSchemaBuilder
@@ -98,6 +109,7 @@ export const AdminDashboardScheduleInputPothosObject = gqlSchemaBuilder
       teacherId: t.string(),
       search: t.string(),
       metricFilter: t.string(),
+      paginationArgs: t.field({ type: PaginationArgsObject, required: false }),
     }),
   });
 
@@ -106,6 +118,7 @@ export type AdminDashboardScheduleResultDefinition = {
   totalCount: number;
   metrics: DailyScheduleMetricsDefinition;
   rows: DailyScheduleListDefinition[];
+  pageInfo: PageInfo | null;
 };
 
 const AdminDashboardScheduleResultRef =
@@ -117,6 +130,7 @@ export const AdminDashboardScheduleResultPothosObject = AdminDashboardScheduleRe
     totalCount: t.exposeInt("totalCount"),
     metrics: t.expose("metrics", { type: DailyScheduleMetricsPothosObject }),
     rows: t.expose("rows", { type: [DailyScheduleListPothosObject] }),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
   }),
 });
 

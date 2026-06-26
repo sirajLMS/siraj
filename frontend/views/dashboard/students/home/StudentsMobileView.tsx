@@ -16,6 +16,10 @@ interface StudentsMobileViewProps {
   readonly searchQuery: string;
   readonly mobileMetrics: readonly MetricItem[];
   readonly rows: readonly StudentDirectoryRowExtended[];
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
   readonly cardListLabels: {
     readonly weeklyHours: string;
     readonly enrollmentStatus: string;
@@ -37,6 +41,10 @@ export function StudentsMobileView({
   searchQuery,
   mobileMetrics,
   rows,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
   cardListLabels,
   onSearchChange,
   onAddStudent,
@@ -89,7 +97,15 @@ export function StudentsMobileView({
           </IconButton>
         </Box>
 
-        <StudentDirectoryCardList rows={rows} labels={cardListLabels} onViewProfile={onViewProfile} />
+        <StudentDirectoryCardList
+          rows={rows}
+          labels={cardListLabels}
+          onViewProfile={onViewProfile}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
+        />
 
         <Fab
           id="students-mobile-fab"
