@@ -5,7 +5,11 @@ import { Box, Checkbox, FormControlLabel, IconButton, Typography } from "@mui/ma
 import { styled } from "@mui/material/styles";
 import { format, isValid, parse } from "date-fns";
 import { AppTimePicker } from "@/frontend/components/ui/form";
+<<<<<<< HEAD
 import type { DayScheduleConfig } from "./types";
+=======
+import type { DayScheduleConfig } from "@/frontend/stores/createRecurringClassStore";
+>>>>>>> 5e74833e718bbaa4f5bf13d999b9dc8f0139a678
 import { MobileDayOverrideRow } from "./MobileDayOverrideRow";
 import { WeekendDayRow } from "./WeekendDayRow";
 
