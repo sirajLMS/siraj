@@ -146,6 +146,49 @@ After making changes:
 4. Re-run `bun quality-gate` to resume from last failed stage
 5. Use `bun quality-gate:fresh` only for clean-slate verification
 
+## Lint Queue Server (REQUIRED for parallel sub-agents)
+
+`bun run lint` is heavyweight and **MUST NOT be run concurrently** by multiple sub-agents — it causes resource contention and intermittent failures. Instead, use the **lint queue server** which serializes all lint requests through a single process.
+
+### Starting the server
+
+Before dispatching any sub-agents that will run lint, start the queue server as a background process:
+
+```bash
+~/.bun/bin/bun run scripts/lint-queue-server.ts
+```
+
+This listens on `http://localhost:4777`.
+
+### Submitting lint requests (from sub-agents)
+
+Each sub-agent should **NOT** run `bun run lint` directly. Instead, submit a request to the queue:
+
+**PowerShell (recommended for sub-agents):**
+```powershell
+$files = @("backend/types/foo.types.ts","frontend/stores/barStore.ts")  # ALL files the sub-agent modified
+$body = @{ id = "phase8"; files = $files } | ConvertTo-Json
+Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body
+```
+
+**Response:** `{ success: boolean, output: string, exitCode: number }`
+
+The request **blocks** until the lint run completes (the server processes requests one at a time).
+
+### Health check
+
+```powershell
+Invoke-RestMethod -Uri http://localhost:4777/status
+# Returns: { running: true, queueLength: 2 }
+```
+
+### Other quality commands are safe to run in parallel
+
+- `bun tsgo` — Safe to run concurrently (read-only type checker)
+- `bun biome:check` — Safe to run concurrently (lightweight formatter/linter)
+- `bun run test:*` — Safe to run concurrently (isolated test runners)
+- **`bun run lint`** — **ALWAYS use the queue server instead**
+
 ## AI Agent Communication Rules
 
 - **NEVER create summary markdown files** (SUMMARY.md, CHANGES.md, REPORT.md, etc.)
