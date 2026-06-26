@@ -21,7 +21,11 @@ async function testUpdateManagerProfile(actorRole: string, phonePrefix: string, 
   const actorToken = await loginDemoUser(actorRole);
   const managerResult = await getManagers(actorToken);
 
-  const staffDefault = managerResult.rows?.find(m => m.roleSlug === "staff_default");
+  if (!managerResult.rows) {
+    throw new Error("No rows returned from directory");
+  }
+
+  const staffDefault = managerResult.rows.find(m => m.roleSlug === "staff_default");
   if (!staffDefault) {
     throw new Error("No staff_default manager found in directory");
   }
@@ -59,9 +63,10 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     const managerResult = await getManagers(token);
 
     expect(Array.isArray(managerResult.rows)).toBeTrue();
-    expect(managerResult.rows?.length).toBeGreaterThan(0);
+    if (!managerResult.rows) throw new Error("No rows returned");
+    expect(managerResult.rows.length).toBeGreaterThan(0);
 
-    if (!managerResult.rows) throw new Error("No rows returned");`n    for (const manager of managerResult.rows) {
+    for (const manager of managerResult.rows) {
       expect(manager.id).toBeDefined();
       expect(manager.staffProfileId).toBeDefined();
       expect(manager.name).toBeDefined();
@@ -77,7 +82,8 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     const managerResult = await getManagers(token);
 
     expect(Array.isArray(managerResult.rows)).toBeTrue();
-    expect(managerResult.rows?.length).toBeGreaterThan(0);
+    if (!managerResult.rows) throw new Error("No rows returned");
+    expect(managerResult.rows.length).toBeGreaterThan(0);
   });
 
   test("Teacher denied from manager directory", async () => {
@@ -105,7 +111,9 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     const superAdminToken = await loginDemoUser("super_admin");
     const managerResult = await getManagers(superAdminToken);
 
-    const superAdmin = managerResult.rows?.find(m => m.roleSlug === "super_admin");
+    if (!managerResult.rows) throw new Error("No rows returned");
+
+    const superAdmin = managerResult.rows.find(m => m.roleSlug === "super_admin");
     if (!superAdmin) {
       throw new Error("No super_admin manager found in directory");
     }
@@ -164,4 +172,3 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     expect(result.error).toBeDefined();
   });
 });
-
