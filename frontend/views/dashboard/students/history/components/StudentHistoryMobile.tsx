@@ -194,7 +194,7 @@ function HistoryMobileActions({
           display: "flex",
           alignItems: "center",
           gap: 1,
-          bgcolor: theme.palette.primary.main,
+          backgroundColor: theme.palette.primary.main,
           px: 2,
           py: 1,
           borderRadius: 2,
@@ -216,7 +216,7 @@ function HistoryMobileActions({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          bgcolor: theme.palette.surfaceContainerHigh,
+          backgroundColor: theme.palette.surfaceContainerHigh,
           borderRadius: 2,
           color: theme.palette.primary.main,
           boxShadow: theme.palette.shadow.button,
@@ -244,7 +244,7 @@ function MobileMetric({
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.surfaceContainerLowest,
+        backgroundColor: theme.palette.surfaceContainerLowest,
         p: 2,
         borderRadius: "xl",
         border: `1px solid ${theme.palette.border.light}`,
@@ -269,7 +269,7 @@ function MobileMetric({
             width: 32,
             height: 32,
             borderRadius: "full",
-            bgcolor: typeof bg === "function" ? bg(theme) : bg,
+            backgroundColor: typeof bg === "function" ? bg(theme) : bg,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

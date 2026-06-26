@@ -22,26 +22,26 @@ function renderIcon(fileType: ResourceFileType) {
   }
 }
 
-function getIconStyles(theme: Theme, fileType: ResourceFileType): { readonly bgcolor: string; readonly color: string } {
+function getIconStyles(theme: Theme, fileType: ResourceFileType): { readonly backgroundColor: string; readonly color: string } {
   switch (fileType) {
     case "pptx":
       return {
-        bgcolor: theme.palette.secondaryContainer,
+        backgroundColor: theme.palette.secondaryContainer,
         color: theme.palette.primary.main,
       };
     case "xlsx":
       return {
-        bgcolor: theme.palette.tertiaryContainer,
+        backgroundColor: theme.palette.tertiaryContainer,
         color: theme.palette.onTertiaryContainer,
       };
     case "docx":
       return {
-        bgcolor: theme.palette.surfaceContainerHigh,
+        backgroundColor: theme.palette.surfaceContainerHigh,
         color: theme.palette.secondary.main,
       };
     default:
       return {
-        bgcolor: theme.palette.errorContainer,
+        backgroundColor: theme.palette.errorContainer,
         color: theme.palette.error.main,
       };
   }
@@ -56,7 +56,7 @@ export function ResourceFileTypeIcon({ fileType }: Readonly<ResourceFileTypeIcon
         return {
           p: 1.5,
           borderRadius: theme.layout.radius.card,
-          bgcolor: styles.bgcolor,
+          backgroundColor: styles.bgcolor,
           color: styles.color,
           display: "flex",
           alignItems: "center",

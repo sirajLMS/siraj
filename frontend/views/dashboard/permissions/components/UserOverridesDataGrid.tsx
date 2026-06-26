@@ -254,7 +254,7 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
                 sx={theme => ({
                   width: 32,
                   height: 32,
-                  bgcolor: theme.palette.primaryContainer,
+                  backgroundColor: theme.palette.primaryContainer,
                   color: theme.palette.onPrimaryContainer,
                   fontSize: "0.875rem",
                   fontWeight: 600,
@@ -368,7 +368,7 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
                 letterSpacing: "0.05em",
                 color: theme.palette.primary.main,
                 "&:hover": {
-                  bgcolor: "transparent",
+                  backgroundColor: "transparent",
                   color: theme.palette.primary.dark,
                   transform: "scale(1.02)",
                 },

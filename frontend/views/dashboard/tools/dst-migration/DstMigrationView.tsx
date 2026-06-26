@@ -42,7 +42,7 @@ function MobileInactiveNote() {
         sx={theme => ({
           p: 2,
           borderRadius: 3,
-          bgcolor: theme.palette.surfaceContainerLow,
+          backgroundColor: theme.palette.surfaceContainerLow,
           border: `1px solid ${theme.palette.outlineVariant}`,
           display: "flex",
           gap: 1.5,

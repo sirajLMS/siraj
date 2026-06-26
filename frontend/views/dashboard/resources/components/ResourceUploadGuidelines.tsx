@@ -15,7 +15,7 @@ export function ResourceUploadGuidelines({ labels }: Readonly<ResourceUploadGuid
         mt: 3,
         p: 3,
         borderRadius: theme.layout.radius.card,
-        bgcolor: theme.palette.surfaceContainerLow,
+        backgroundColor: theme.palette.surfaceContainerLow,
         border: `1px solid ${theme.palette.outlineVariant}`,
       })}
     >

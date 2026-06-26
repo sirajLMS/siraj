@@ -45,11 +45,11 @@ function MobileProfileHeader({ studentData }: Readonly<{ studentData: StudentPro
             position: "absolute",
             bottom: 0,
             right: 0,
-            bgcolor: theme.palette.primary.main,
+            backgroundColor: theme.palette.primary.main,
             color: theme.palette.onPrimary,
             p: 0.75,
             border: `2px solid ${theme.palette.background.paper}`,
-            "&:hover": { bgcolor: theme.palette.primary.dark },
+            "&:hover": { backgroundColor: theme.palette.primary.dark },
           })}
         >
           <EditOutlined sx={{ fontSize: 18 }} />
@@ -129,13 +129,13 @@ function FormActions({
           sx={theme => ({
             height: { xs: 56, md: 48 },
             px: { xs: 0, md: 5 },
-            bgcolor: isSaved ? theme.palette.primary.main : theme.palette.success.main,
+            backgroundColor: isSaved ? theme.palette.primary.main : theme.palette.success.main,
             color: isSaved ? theme.palette.onPrimary : theme.palette.onSuccess,
             borderRadius: 1,
             fontWeight: 700,
             letterSpacing: "0.1em",
-            "&:hover": { bgcolor: isSaved ? theme.palette.primary.dark : theme.palette.success.dark },
-            "&.Mui-disabled": { bgcolor: theme.palette.primary.main, color: theme.palette.onPrimary, opacity: 0.8 },
+            "&:hover": { backgroundColor: isSaved ? theme.palette.primary.dark : theme.palette.success.dark },
+            "&.Mui-disabled": { backgroundColor: theme.palette.primary.main, color: theme.palette.onPrimary, opacity: 0.8 },
             width: { xs: "100%", md: "auto" },
           })}
         >
@@ -151,7 +151,7 @@ function FormActions({
             letterSpacing: "0.1em",
             "&:hover": {
               color: theme.palette.error.main,
-              bgcolor: { xs: theme.palette.surfaceContainerLow, md: "transparent" },
+              backgroundColor: { xs: theme.palette.surfaceContainerLow, md: "transparent" },
             },
             width: { xs: "100%", md: "auto" },
           })}
@@ -246,7 +246,7 @@ export function StudentQuotaView({
 
       <Box
         sx={theme => ({
-          bgcolor: { xs: "transparent", md: theme.palette.background.paper },
+          backgroundColor: { xs: "transparent", md: theme.palette.background.paper },
           borderRadius: { xs: 0, md: "xl" },
           boxShadow: { xs: "none", md: theme.palette.shadow.card },
           border: { xs: "none", md: `1px solid ${theme.palette.border.light}` },

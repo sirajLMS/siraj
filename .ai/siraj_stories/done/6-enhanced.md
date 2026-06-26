@@ -2264,7 +2264,7 @@ function SlotItem({ classItem, onRemove, deleteConfirmMessage }: Readonly<SlotIt
     <>
       <Box
         sx={theme => ({
-          bgcolor: theme.palette.primary.main,
+          backgroundColor: theme.palette.primary.main,
           color: theme.palette.onPrimary,
           borderRadius: 1,
           p: 1,

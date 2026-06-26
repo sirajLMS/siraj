@@ -32,7 +32,7 @@ export function StudentDirectoryCard({ row, labels, onViewProfile }: StudentDire
         p: 2,
         borderRadius: 3,
         border: `1px solid ${theme.palette.border.light}`,
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
         opacity: row.isDeactivated ? 0.8 : 1,
         cursor: "pointer",
         transition: "box-shadow 0.15s ease",

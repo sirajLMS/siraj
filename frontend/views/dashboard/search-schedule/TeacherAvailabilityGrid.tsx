@@ -29,7 +29,7 @@ export function TeacherAvailabilityGrid({ teacher }: Readonly<TeacherAvailabilit
         p: 2,
         borderRadius: 2,
         border: `1px solid ${theme.palette.outlineVariant}`,
-        bgcolor: theme.palette.surface,
+        backgroundColor: theme.palette.surface,
       })}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2, flexWrap: "wrap" }}>
@@ -59,7 +59,7 @@ export function TeacherAvailabilityGrid({ teacher }: Readonly<TeacherAvailabilit
               sx={theme => ({
                 p: 1.5,
                 borderRadius: 1.5,
-                bgcolor: dayGaps.length > 0 ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow,
+                backgroundColor: dayGaps.length > 0 ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow,
                 border: `1px solid ${dayGaps.length > 0 ? theme.palette.primaryContainer : theme.palette.outlineVariant}`,
                 minHeight: 100,
                 display: "flex",
@@ -84,7 +84,7 @@ export function TeacherAvailabilityGrid({ teacher }: Readonly<TeacherAvailabilit
                     <Box
                       key={gap.id ?? ""}
                       sx={theme => ({
-                        bgcolor: theme.palette.primary.main,
+                        backgroundColor: theme.palette.primary.main,
                         color: theme.palette.onPrimary,
                         borderRadius: 1,
                         px: 1,

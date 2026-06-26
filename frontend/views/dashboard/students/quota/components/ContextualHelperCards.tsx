@@ -16,7 +16,7 @@ export function ContextualHelperCards() {
     >
       <Box
         sx={theme => ({
-          bgcolor: theme.palette.surfaceVariant,
+          backgroundColor: theme.palette.surfaceVariant,
           p: 3,
           borderRadius: "xl",
           border: `1px solid ${theme.palette.outlineVariant}`,
@@ -32,7 +32,7 @@ export function ContextualHelperCards() {
             alignItems: "center",
             justifyContent: "center",
             borderRadius: "full",
-            bgcolor: theme.palette.secondaryContainer,
+            backgroundColor: theme.palette.secondaryContainer,
             flexShrink: 0,
           })}
         >
@@ -64,7 +64,7 @@ export function ContextualHelperCards() {
 
       <Box
         sx={theme => ({
-          bgcolor: theme.palette.surfaceContainerLow,
+          backgroundColor: theme.palette.surfaceContainerLow,
           p: 3,
           borderRadius: "xl",
           border: `1px solid ${theme.palette.outlineVariant}`,
@@ -80,7 +80,7 @@ export function ContextualHelperCards() {
             alignItems: "center",
             justifyContent: "center",
             borderRadius: "full",
-            bgcolor: theme.palette.secondaryContainer,
+            backgroundColor: theme.palette.secondaryContainer,
             flexShrink: 0,
           })}
         >

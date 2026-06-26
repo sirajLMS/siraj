@@ -29,9 +29,9 @@ export function TeacherActiveSessionControls({
             sx={theme => ({
               width: 40,
               height: 40,
-              bgcolor: theme.palette.secondaryContainer,
+              backgroundColor: theme.palette.secondaryContainer,
               color: theme.palette.onSecondaryContainer,
-              "&:hover": { bgcolor: theme.palette.secondaryContainer },
+              "&:hover": { backgroundColor: theme.palette.secondaryContainer },
             })}
           >
             <PlayArrowOutlined />
@@ -47,7 +47,7 @@ export function TeacherActiveSessionControls({
             sx={theme => ({
               width: 40,
               height: 40,
-              bgcolor: theme.palette.surfaceContainerLowest,
+              backgroundColor: theme.palette.surfaceContainerLowest,
               border: `2px solid ${theme.palette.error.main}`,
               color: theme.palette.error.main,
             })}
@@ -65,7 +65,7 @@ export function TeacherActiveSessionControls({
             sx={theme => ({
               width: 40,
               height: 40,
-              bgcolor: theme.palette.surfaceContainerLowest,
+              backgroundColor: theme.palette.surfaceContainerLowest,
               border: `2px solid ${theme.palette.onSurfaceVariant}`,
               color: theme.palette.onSurfaceVariant,
             })}

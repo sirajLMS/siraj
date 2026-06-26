@@ -33,7 +33,7 @@ function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isReschedu
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        bgcolor: isRescheduled ? theme.palette.status.blockedContainer : theme.palette.surfaceContainerLow,
+        backgroundColor: isRescheduled ? theme.palette.status.blockedContainer : theme.palette.surfaceContainerLow,
         border: `1px solid ${isRescheduled ? theme.palette.status.blocked : theme.palette.outlineVariant}`,
         flexShrink: 0,
       })}
@@ -124,7 +124,7 @@ function ActionButtons({
             fontSize: 11,
             fontWeight: 700,
             letterSpacing: "0.05em",
-            bgcolor: theme.palette.surfaceContainerLow,
+            backgroundColor: theme.palette.surfaceContainerLow,
             color: theme.palette.onSurface,
             borderColor: theme.palette.outlineVariant,
             opacity: 0.38,
@@ -147,7 +147,7 @@ function ActionButtons({
             borderColor: theme.palette.primary.main,
             flex: isMobile ? 1 : "initial",
             "&:hover": {
-              bgcolor: theme.palette.primary.main,
+              backgroundColor: theme.palette.primary.main,
               color: theme.palette.onPrimary,
             },
           })}
@@ -162,12 +162,12 @@ function ActionButtons({
           fontSize: 11,
           fontWeight: 700,
           letterSpacing: "0.05em",
-          bgcolor: theme.palette.primary.main,
+          backgroundColor: theme.palette.primary.main,
           color: theme.palette.onPrimary,
           px: isMobile ? 2 : 3,
           flex: isMobile ? 1 : "initial",
           "&:hover": {
-            bgcolor: theme.palette.primary.dark,
+            backgroundColor: theme.palette.primary.dark,
           },
         })}
       >

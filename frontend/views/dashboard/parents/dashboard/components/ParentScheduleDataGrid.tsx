@@ -78,7 +78,7 @@ export function ParentScheduleDataGrid({
                 height: 32,
                 fontSize: 12,
                 fontWeight: 700,
-                bgcolor: theme.palette.secondaryContainer,
+                backgroundColor: theme.palette.secondaryContainer,
                 color: theme.palette.onSecondaryContainer,
               })}
             >
@@ -164,7 +164,7 @@ export function ParentScheduleDataGrid({
                   color: theme.palette.info.main,
                   opacity: row.videoEnabled ? 1 : 0.5,
                   "&:hover": {
-                    bgcolor: alpha(theme.palette.info.main, 0.08),
+                    backgroundColor: alpha(theme.palette.info.main, 0.08),
                   },
                 })}
               >

@@ -68,7 +68,7 @@ export function SuggestionSupportCards({ labels, variant }: Readonly<SuggestionS
                 width: 48,
                 height: 48,
                 borderRadius: "50%",
-                bgcolor: theme.palette.action.selected,
+                backgroundColor: theme.palette.action.selected,
                 color: theme.palette.primary.main,
                 display: "flex",
                 alignItems: "center",

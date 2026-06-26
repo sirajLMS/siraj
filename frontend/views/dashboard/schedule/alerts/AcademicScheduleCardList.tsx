@@ -68,7 +68,7 @@ const AcademicClassCard = ({
       elevation={0}
       sx={theme => ({
         borderRadius: 3,
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
         boxShadow: theme.palette.shadow.card,
         opacity: isMissed ? 0.8 : 1,
         border: "1px solid transparent",
@@ -169,7 +169,7 @@ const EndOfSchedule = ({ label }: { label: string }) => {
           width: "100%",
           height: 192,
           borderRadius: 4,
-          bgcolor: theme.palette.action.hover,
+          backgroundColor: theme.palette.action.hover,
           border: `1px solid ${theme.palette.border.light}`,
           mb: 2,
           overflow: "hidden",

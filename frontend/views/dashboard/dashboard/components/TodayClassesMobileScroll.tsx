@@ -30,7 +30,7 @@ const StyledMetricCard = styled(Grid, {
   maxHeight: 64,
   // borderRadius: 16,
   // border: isSelected ? `1px solid ${theme.palette.primary.main}` : `1px solid ${theme.palette.border.light}`,
-  bgcolor: isSelected ? theme.palette.primaryContainer : theme.palette.background.paper,
+  backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.background.paper,
   display: "flex",
   alignItems: "center",
   boxShadow: theme.palette.shadow.card,

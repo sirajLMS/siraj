@@ -57,7 +57,7 @@ export function DashboardLayout({
             minWidth: 0,
             pb: 10,
             minHeight: `calc(100vh - ${navbarHeight})`,
-            bgcolor: theme.palette.background.default,
+            backgroundColor: theme.palette.background.default,
             height: "100%",
             overflowY: "auto",
           })}

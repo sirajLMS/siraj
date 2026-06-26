@@ -58,7 +58,7 @@ interface ActionsPanelProps {
 
 // Header-colored strip at the top of the actions card
 const StyledActionsHeader = styled(Box)(({ theme }) => ({
-  bgcolor: theme.palette.header,
+  backgroundColor: theme.palette.header,
   paddingBlock: theme.spacing(2),
   paddingInline: theme.spacing(3),
 }));
@@ -75,7 +75,7 @@ const StyledActionsTitle = styled(Typography)(({ theme }) => ({
 const StyledHelpContainer = styled(Stack)(({ theme }) => ({
   gap: theme.spacing(1.5),
   padding: theme.spacing(2),
-  bgcolor: theme.palette.background.default,
+  backgroundColor: theme.palette.background.default,
   borderRadius: 1.5,
   alignItems: "flex-start",
 }));
@@ -145,7 +145,7 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
                     alignItems: "center",
                     justifyContent: "center",
                     gap: 1.5,
-                    bgcolor: bgColor,
+                    backgroundColor: bgColor,
                     border: `1px solid ${borderColor}`,
                     borderRadius: 2,
                     cursor: "pointer",
@@ -153,7 +153,7 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
                     boxShadow: theme.palette.shadow.button,
                     transition: "all 0.15s ease",
                     "&:hover": {
-                      bgcolor: alpha(mainColor, 0.08),
+                      backgroundColor: alpha(mainColor, 0.08),
                       boxShadow: theme.palette.shadow.buttonHover,
                       "& .action-icon": { transform: "scale(1.1)" },
                     },

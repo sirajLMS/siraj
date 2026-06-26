@@ -35,12 +35,12 @@ export function ResourceUploadDropzone({
           border: `2px dashed ${hasError ? theme.palette.error.main : theme.palette.outlineVariant}`,
           borderRadius: theme.layout.radius.card,
           p: isMobile ? 4 : 5,
-          bgcolor: theme.palette.surfaceContainerLow,
+          backgroundColor: theme.palette.surfaceContainerLow,
           cursor: "pointer",
           transition: "border-color 0.15s ease, background-color 0.15s ease",
           "&:hover": {
             borderColor: theme.palette.primary.main,
-            bgcolor: theme.palette.surfaceContainer,
+            backgroundColor: theme.palette.surfaceContainer,
           },
         })}
       >

@@ -32,14 +32,14 @@ const StyledSuccessSnackbarContent = styled(Box)(({ theme }) => ({
   paddingInline: theme.spacing(3),
   paddingBlock: theme.spacing(1.5),
   borderRadius: 10,
-  bgcolor: theme.palette.sidebarContainer,
+  backgroundColor: theme.palette.sidebarContainer,
   color: theme.palette.onSidebarContainer,
   boxShadow: theme.palette.shadow.card,
 }));
 
 // Primary-container-tinted circular check icon leading the success snackbar
 const StyledSuccessCheckIcon = styled(CheckCircleOutlined)(({ theme }) => ({
-  bgcolor: theme.palette.primaryContainer,
+  backgroundColor: theme.palette.primaryContainer,
   color: theme.palette.onPrimaryContainer,
   borderRadius: "50%",
   padding: theme.spacing(0.5),
@@ -171,7 +171,7 @@ export function CreateRecurringClassView({
       <Box sx={{ pb: isMobile ? 12 : 0 }}>
         <SectionPanel
           sx={{
-            bgcolor: theme => alpha(theme.palette.surfaceContainer, 0.2),
+            backgroundColor: theme => alpha(theme.palette.surfaceContainer, 0.2),
           }}
         >
           <RecurringClassForm

@@ -61,10 +61,10 @@ export function StudentDirectoryCardFooter({
         sx={theme => ({
           width: 32,
           height: 32,
-          bgcolor: theme.palette.action.hover,
+          backgroundColor: theme.palette.action.hover,
           color: theme.palette.primary.main,
           "&:hover": {
-            bgcolor: alpha(theme.palette.primary.main, 0.12),
+            backgroundColor: alpha(theme.palette.primary.main, 0.12),
           },
         })}
       >

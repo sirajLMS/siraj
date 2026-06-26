@@ -25,7 +25,7 @@ interface StatBoxProps {
 // Rounded default-background container for a single performance stat
 const StyledStatBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
-  bgcolor: theme.palette.background.default,
+  backgroundColor: theme.palette.background.default,
   borderRadius: 2,
   textAlign: "center",
 }));

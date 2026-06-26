@@ -39,12 +39,12 @@ export function ClassSessionActionButton({
           ...theme.typography.labelUppercase,
           px: 2,
           py: 0.75,
-          bgcolor: theme.palette.primary.main,
+          backgroundColor: theme.palette.primary.main,
           color: theme.palette.onPrimary,
           boxShadow: theme.palette.shadow.button,
           borderRadius: theme.layout.radius.button,
           "&:hover": {
-            bgcolor: theme.palette.primary.dark,
+            backgroundColor: theme.palette.primary.dark,
             boxShadow: theme.palette.shadow.buttonHover,
           },
         })}
@@ -71,7 +71,7 @@ export function ClassSessionActionButton({
           "&:hover": {
             borderColor: theme.palette.primary.main,
             color: theme.palette.primary.main,
-            bgcolor: alpha(theme.palette.primary.main, 0.04),
+            backgroundColor: alpha(theme.palette.primary.main, 0.04),
           },
         })}
       >
@@ -98,7 +98,7 @@ export function ClassSessionActionButton({
         py: 0.75,
         color: theme.palette.error.main,
         borderColor: theme.palette.error.main,
-        bgcolor: alpha(theme.palette.error.main, 0.06),
+        backgroundColor: alpha(theme.palette.error.main, 0.06),
         opacity: isDisabled ? 0.5 : 1,
         cursor: isDisabled ? "not-allowed" : "pointer",
         borderRadius: theme.layout.radius.button,
@@ -108,7 +108,7 @@ export function ClassSessionActionButton({
           opacity: 0.5,
         },
         "&:hover": {
-          bgcolor: alpha(theme.palette.error.main, 0.1),
+          backgroundColor: alpha(theme.palette.error.main, 0.1),
           borderColor: theme.palette.error.dark,
         },
       })}

@@ -17,7 +17,7 @@ export function AdminQueueEfficiencyBanner({
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.primary.main,
+        backgroundColor: theme.palette.primary.main,
         color: theme.palette.onPrimary,
         borderRadius: theme.layout.radius.card,
         p: theme.layout.cardPadding,

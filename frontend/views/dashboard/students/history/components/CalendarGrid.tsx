@@ -137,7 +137,7 @@ export function CalendarGrid({ currentMonth, classes }: Readonly<CalendarGridPro
           display: "grid",
           gridTemplateColumns: "repeat(7, 1fr)",
           borderBottom: theme => `1px solid ${theme.palette.border.light}`,
-          bgcolor: theme => theme.palette.surfaceContainerLow,
+          backgroundColor: theme => theme.palette.surfaceContainerLow,
         }}
       >
         {daysOfWeek.map(day => (

@@ -15,7 +15,7 @@ export function CheckedEmptyPanel({ items }: Readonly<Props>) {
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.surfaceContainerLowest,
+        backgroundColor: theme.palette.surfaceContainerLowest,
         borderRadius: 3,
         border: `1px solid ${theme.palette.outlineVariant}`,
         overflow: "hidden",
@@ -29,7 +29,7 @@ export function CheckedEmptyPanel({ items }: Readonly<Props>) {
           display: "flex",
           alignItems: "center",
           gap: 1.5,
-          bgcolor: alpha(theme.palette.warning.main, 0.1),
+          backgroundColor: alpha(theme.palette.warning.main, 0.1),
           borderBottom: `1px solid ${theme.palette.outlineVariant}`,
         })}
       >
@@ -38,7 +38,7 @@ export function CheckedEmptyPanel({ items }: Readonly<Props>) {
             width: 32,
             height: 32,
             borderRadius: "50%",
-            bgcolor: theme.palette.warning.main,
+            backgroundColor: theme.palette.warning.main,
             color: theme.palette.onWarning,
             display: "flex",
             alignItems: "center",

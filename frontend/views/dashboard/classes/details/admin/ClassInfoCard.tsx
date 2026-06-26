@@ -24,7 +24,7 @@ interface ClassInfoCardProps {
 
 // Primary-background LIVE INSTANCE chip shown in the card header
 const StyledLiveInstanceChip = styled(Chip)(({ theme }) => ({
-  bgcolor: theme.palette.primary.main,
+  backgroundColor: theme.palette.primary.main,
   color: theme.palette.onPrimary,
   typography: "labelUppercase",
   opacity: 0.8,
@@ -60,7 +60,7 @@ const StyledActiveConnectionCaption = styled(Typography)(({ theme }) => ({
 const StyledStudentAvatar = styled(Avatar)(({ theme }) => ({
   width: 64,
   height: 64,
-  bgcolor: theme.palette.background.default,
+  backgroundColor: theme.palette.background.default,
   color: theme.palette.primary.main,
 }));
 
@@ -68,7 +68,7 @@ const StyledStudentAvatar = styled(Avatar)(({ theme }) => ({
 const StyledTeacherAvatar = styled(Avatar)(({ theme }) => ({
   width: 64,
   height: 64,
-  bgcolor: theme.palette.primaryContainer,
+  backgroundColor: theme.palette.primaryContainer,
   color: theme.palette.onPrimaryContainer,
 }));
 

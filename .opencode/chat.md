@@ -9410,7 +9410,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 42:               p: 2,
 43:               borderRadius: theme.layout.radius.card,
 44:               border: `1px solid ${theme.palette.outlineVariant}`,
-45:               bgcolor: theme.palette.surfaceContainerLowest,
+45:               backgroundColor: theme.palette.surfaceContainerLowest,
 46:             })}
 47:           >
 48:             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5, gap: 1 }}>
@@ -9541,7 +9541,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 68:                 width: 48,
 69:                 height: 48,
 70:                 borderRadius: "50%",
-71:                 bgcolor: theme.palette.action.selected,
+71:                 backgroundColor: theme.palette.action.selected,
 72:                 color: theme.palette.primary.main,
 73:                 display: "flex",
 74:                 alignItems: "center",
@@ -9600,7 +9600,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 15:     return (
 16:       <Box
 17:         sx={theme => ({
-18:           bgcolor: theme.palette.primaryContainer,
+18:           backgroundColor: theme.palette.primaryContainer,
 19:           color: theme.palette.onPrimaryContainer,
 20:           p: 3,
 21:           mb: 2,
@@ -9622,7 +9622,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 37:         position: "relative",
 38:         overflow: "hidden",
 39:         borderRadius: theme.layout.radius.card,
-40:         bgcolor: theme.palette.primaryContainer,
+40:         backgroundColor: theme.palette.primaryContainer,
 41:         color: theme.palette.onPrimaryContainer,
 42:         p: 6,
 43:         mb: 4,
@@ -10321,7 +10321,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 20:               width: 32,
 21:               height: 32,
 22:               fontSize: 12,
-23:               bgcolor: theme.palette.secondaryContainer,
+23:               backgroundColor: theme.palette.secondaryContainer,
 24:               color: theme.palette.onSecondaryContainer,
 25:               border: `2px solid ${theme.palette.background.paper}`,
 26:               ml: -1,
@@ -10335,7 +10335,7 @@ Let me do a much deeper analysis of all the frontend files involved.
 34:             width: 32,
 35:             height: 32,
 36:             fontSize: 10,
-37:             bgcolor: theme.palette.surfaceContainer,
+37:             backgroundColor: theme.palette.surfaceContainer,
 38:             color: theme.palette.onSurfaceVariant,
 39:             border: `2px solid ${theme.palette.background.paper}`,
 40:             ml: -1,

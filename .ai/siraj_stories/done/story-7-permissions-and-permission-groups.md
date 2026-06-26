@@ -2075,7 +2075,7 @@ function SlotItem({ classItem, onRemove, deleteConfirmMessage }: Readonly<SlotIt
     <>
       <Box
         sx={theme => ({
-          bgcolor: theme.palette.primary.main,
+          backgroundColor: theme.palette.primary.main,
           color: theme.palette.onPrimary,
           borderRadius: 1,
           p: 1,
@@ -2184,10 +2184,10 @@ export default function TeacherWeeklyScheduleView({
                 <IconButton
                   onClick={handleClearSchedule}
                   sx={theme => ({
-                    bgcolor: theme.palette.error.main,
+                    backgroundColor: theme.palette.error.main,
                     color: theme.palette.onError,
                     borderRadius: 2,
-                    "&:hover": { bgcolor: theme.palette.error.dark },
+                    "&:hover": { backgroundColor: theme.palette.error.dark },
                   })}
                 >
                   <DeleteOutlined />
@@ -2212,11 +2212,11 @@ export default function TeacherWeeklyScheduleView({
             <IconButton
               onClick={handleClearSchedule}
               sx={theme => ({
-                bgcolor: theme.palette.error.main,
+                backgroundColor: theme.palette.error.main,
                 color: theme.palette.onError,
                 borderRadius: 2,
                 px: 4,
-                "&:hover": { bgcolor: theme.palette.error.dark },
+                "&:hover": { backgroundColor: theme.palette.error.dark },
               })}
             >
               <DeleteOutlined />

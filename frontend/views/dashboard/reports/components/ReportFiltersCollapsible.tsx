@@ -43,7 +43,7 @@ export function ReportFiltersCollapsible({
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
         borderRadius: theme.layout.radius.card,
         border: `1px solid ${theme.palette.border.light}`,
         boxShadow: theme.palette.shadow.card,
@@ -63,7 +63,7 @@ export function ReportFiltersCollapsible({
           justifyContent: "space-between",
           p: 2,
           border: "none",
-          bgcolor: "transparent",
+          backgroundColor: "transparent",
           cursor: "pointer",
         }}
       >

@@ -61,7 +61,7 @@ export function StudentDirectoryCardStats({
               width: 8,
               height: 8,
               borderRadius: "50%",
-              bgcolor: labelBgColor(row.enrollmentStatus, theme),
+              backgroundColor: labelBgColor(row.enrollmentStatus, theme),
             })}
           />
           <Typography

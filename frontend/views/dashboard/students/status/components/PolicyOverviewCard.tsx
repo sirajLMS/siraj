@@ -36,7 +36,7 @@ export function PolicyOverviewCard() {
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
         borderRadius: "xl",
         boxShadow: theme.palette.shadow.card,
         p: { xs: 3, md: 4 },
@@ -104,7 +104,7 @@ export function SuspensionWarningBanner() {
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.errorContainer,
+        backgroundColor: theme.palette.errorContainer,
         borderRadius: "xl",
         p: 3,
         borderLeft: `4px solid ${theme.palette.error.main}`,
@@ -120,7 +120,7 @@ export function SuspensionWarningBanner() {
     >
       <Box
         sx={theme => ({
-          bgcolor: theme.palette.background.paper,
+          backgroundColor: theme.palette.background.paper,
           borderRadius: "full",
           p: 1.5,
           display: "flex",

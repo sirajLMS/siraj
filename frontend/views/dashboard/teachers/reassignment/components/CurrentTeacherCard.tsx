@@ -15,7 +15,7 @@ export function CurrentTeacherCard({ currentTeacherName }: Readonly<CurrentTeach
   return (
     <BaseCard
       sx={theme => ({
-        bgcolor: theme.palette.primary.main,
+        backgroundColor: theme.palette.primary.main,
         color: theme.palette.onPrimary,
         position: "relative",
         overflow: "hidden",

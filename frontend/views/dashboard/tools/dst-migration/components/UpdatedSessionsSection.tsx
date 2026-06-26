@@ -20,7 +20,7 @@ export function UpdatedSessionsSection({ sessions, successfulCount }: Readonly<P
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.surfaceContainerLowest,
+        backgroundColor: theme.palette.surfaceContainerLowest,
         borderRadius: 3,
         border: `1px solid ${theme.palette.outlineVariant}`,
         overflow: "hidden",
@@ -34,7 +34,7 @@ export function UpdatedSessionsSection({ sessions, successfulCount }: Readonly<P
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          bgcolor: alpha(theme.palette.success.main, 0.08),
+          backgroundColor: alpha(theme.palette.success.main, 0.08),
           borderBottom: `1px solid ${theme.palette.outlineVariant}`,
         })}
       >
@@ -44,7 +44,7 @@ export function UpdatedSessionsSection({ sessions, successfulCount }: Readonly<P
               width: 32,
               height: 32,
               borderRadius: "50%",
-              bgcolor: theme.palette.success.main,
+              backgroundColor: theme.palette.success.main,
               color: theme.palette.onSuccess,
               display: "flex",
               alignItems: "center",
@@ -62,7 +62,7 @@ export function UpdatedSessionsSection({ sessions, successfulCount }: Readonly<P
           size="small"
           sx={theme => ({
             fontWeight: 700,
-            bgcolor: theme.palette.successContainer,
+            backgroundColor: theme.palette.successContainer,
             color: theme.palette.onSuccessContainer,
           })}
         />

@@ -3,7 +3,7 @@ import type { Theme } from "@mui/material";
 export const quotaInputSx = (theme: Theme) => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: 3,
-    bgColor: { xs: "transparent", md: theme.palette.background.paper },
+    backgroundColor: { xs: "transparent", md: theme.palette.background.paper },
     "& fieldset": {
       borderWidth: { xs: "0 0 2px 0", md: "1px" },
       borderColor: theme.palette.border.light,

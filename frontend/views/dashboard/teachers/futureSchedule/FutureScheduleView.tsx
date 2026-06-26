@@ -66,7 +66,7 @@ export function FutureScheduleView({
               <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Box
-                    sx={theme => ({ width: 8, height: 8, borderRadius: "50%", bgcolor: theme.palette.status.active })}
+                    sx={theme => ({ width: 8, height: 8, borderRadius: "50%", backgroundColor: theme.palette.status.active })}
                   />
                   <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                     {t("available")}
@@ -74,7 +74,7 @@ export function FutureScheduleView({
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Box
-                    sx={theme => ({ width: 8, height: 8, borderRadius: "50%", bgcolor: theme.palette.status.blocked })}
+                    sx={theme => ({ width: 8, height: 8, borderRadius: "50%", backgroundColor: theme.palette.status.blocked })}
                   />
                   <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                     {t("reScheduled")}

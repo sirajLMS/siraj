@@ -87,7 +87,7 @@ const StyledMobileClassTitle = styled(Typography)(({ theme }) => ({
 
 // Uppercase status chip with primaryContainer background shown in the mobile header
 const StyledMobileStatusChip = styled(Chip)(({ theme }) => ({
-  bgcolor: theme.palette.primaryContainer,
+  backgroundColor: theme.palette.primaryContainer,
   color: theme.palette.onPrimaryContainer,
   fontFamily: '"Inter", sans-serif',
   fontSize: "11px",
@@ -98,9 +98,9 @@ const StyledMobileStatusChip = styled(Chip)(({ theme }) => ({
 
 // Generate-report FilterButton with paper bg that darkens on hover
 const StyledGenerateReportButton = styled(FilterButton)(({ theme }) => ({
-  bgcolor: theme.palette.background.paper,
+  backgroundColor: theme.palette.background.paper,
   "&:hover": {
-    bgcolor: theme.palette.action.selected,
+    backgroundColor: theme.palette.action.selected,
     borderColor: theme.palette.primary.dark,
   },
 }));

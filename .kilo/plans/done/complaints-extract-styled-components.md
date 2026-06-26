@@ -45,7 +45,7 @@ All files under `frontend/views/dashboard/complaints/` (23 files). Do NOT modify
 |---------|-----------|
 | Header `<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3, gap: 2 }}>` | `StyledCardListHeader = styled(Box)(({ theme }) => ({ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: theme.spacing(3), gap: theme.spacing(2) }))` |
 | Icon+Title `<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>` | `StyledCardListTitleGroup = styled(Box)(({ theme }) => ({ display: "flex", alignItems: "center", gap: theme.spacing(1) }))` |
-| `<Chip sx={theme => ({ bgcolor: theme.palette.surfaceContainerHigh })}>` | `StyledTotalCountChip = styled(Chip)(({ theme }) => ({ backgroundColor: theme.palette.surfaceContainerHigh }))` |
+| `<Chip sx={theme => ({ backgroundColor: theme.palette.surfaceContainerHigh })}>` | `StyledTotalCountChip = styled(Chip)(({ theme }) => ({ backgroundColor: theme.palette.surfaceContainerHigh }))` |
 | Card list `<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>` | `StyledCardListContainer = styled(Box)(({ theme }) => ({ display: "flex", flexDirection: "column", gap: theme.spacing(2) }))` |
 | Load-more `<Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>` | `StyledLoadMoreContainer = styled(Box)(({ theme }) => ({ display: "flex", justifyContent: "center", marginTop: theme.spacing(4) }))` |
 | Load-more `<Button sx={theme => ({ color: ..., fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" })}>` | `StyledLoadMoreButton = styled(Button)(({ theme }) => ({ color: theme.palette.primary.main, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }))` |

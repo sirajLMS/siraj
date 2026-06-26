@@ -22,7 +22,7 @@ export function SectionPanel({ title, subTitle, actions, children, sx }: Section
       elevation={0}
       sx={mergeSx(
         {
-          bgcolor: theme => alpha(theme.palette.surfaceContainer, 0.95),
+          backgroundColor: theme => alpha(theme.palette.surfaceContainer, 0.95),
           borderRadius: theme => theme.layout.radius.section,
           border: theme => `1px solid ${theme.palette.outlineVariant}`,
           overflow: "hidden",

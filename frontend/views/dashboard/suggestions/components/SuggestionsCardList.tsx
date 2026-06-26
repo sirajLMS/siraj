@@ -43,7 +43,7 @@ export function SuggestionsCardList({ rows, labels, canManage, onMarkReviewed }:
               p: 2,
               borderRadius: theme.layout.radius.card,
               border: `1px solid ${theme.palette.outlineVariant}`,
-              bgcolor: theme.palette.surfaceContainerLowest,
+              backgroundColor: theme.palette.surfaceContainerLowest,
             })}
           >
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5, gap: 1 }}>

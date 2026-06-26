@@ -13,7 +13,7 @@ export function StoryBookPageContainer({ children, bgcolor, color }: StoryBookPa
         minHeight: "100vh",
         width: "100%",
         boxSizing: "border-box",
-        bgcolor: typeof bgcolor === "function" ? bgcolor(theme) : (bgcolor ?? theme.palette.background.default),
+        backgroundColor: typeof bgcolor === "function" ? bgcolor(theme) : (bgcolor ?? theme.palette.background.default),
         color: typeof color === "function" ? color(theme) : color,
         p: 3,
       })}

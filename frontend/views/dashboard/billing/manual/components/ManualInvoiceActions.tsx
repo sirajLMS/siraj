@@ -47,10 +47,10 @@ export function ManualInvoiceActions({
         isMobile
           ? {
               height: 56,
-              bgcolor: "transparent",
+              backgroundColor: "transparent",
               color: theme => theme.palette.primary.main,
               border: theme => `2px solid ${theme.palette.primary.main}`,
-              "&:hover": { bgcolor: theme => theme.palette.action.hover },
+              "&:hover": { backgroundColor: theme => theme.palette.action.hover },
             }
           : { flex: 1, py: 2 }
       }

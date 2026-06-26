@@ -17,7 +17,7 @@ const MobileReportCard = ({ title, description, downloadLabel, onDownload }: Ins
       sx={theme => ({
         p: theme.layout.cardPadding,
         borderRadius: theme.layout.radius.card,
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
         boxShadow: theme.palette.shadow.card,
         borderLeft: `4px solid ${theme.palette.header}`,
         overflow: "hidden",
@@ -82,7 +82,7 @@ const DesktopReportCard = ({ title, description, downloadLabel, onDownload }: In
       sx={theme => ({
         p: theme.layout.cardPadding,
         borderRadius: theme.layout.radius.card,
-        bgcolor: theme.palette.sidebar,
+        backgroundColor: theme.palette.sidebar,
         height: "100%",
         display: "flex",
         flexDirection: "column",
@@ -123,7 +123,7 @@ const DesktopReportCard = ({ title, description, downloadLabel, onDownload }: In
           sx={theme => ({
             px: 3,
             py: 1,
-            bgcolor: theme.palette.primary.main,
+            backgroundColor: theme.palette.primary.main,
             color: theme.palette.onPrimary,
             fontFamily: '"Inter", sans-serif',
             fontSize: "12px",
@@ -131,7 +131,7 @@ const DesktopReportCard = ({ title, description, downloadLabel, onDownload }: In
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             "&:hover": {
-              bgcolor: theme.palette.primary.light,
+              backgroundColor: theme.palette.primary.light,
             },
           })}
         >

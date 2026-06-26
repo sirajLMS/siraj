@@ -21,7 +21,7 @@ export function MobileWeeklyScroller({ selectedWeek, onSelectWeek }: Readonly<Mo
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.surfaceContainerLowest,
+        backgroundColor: theme.palette.surfaceContainerLowest,
         borderRadius: "xl",
         boxShadow: theme.palette.shadow.card,
         border: `1px solid ${theme.palette.border.light}`,
@@ -63,11 +63,11 @@ export function MobileWeeklyScroller({ selectedWeek, onSelectWeek }: Readonly<Mo
                 minWidth: 48,
                 py: 1.5,
                 borderRadius: "xl",
-                bgcolor: isSelected ? theme.palette.primaryContainer : "transparent",
+                backgroundColor: isSelected ? theme.palette.primaryContainer : "transparent",
                 color: isSelected ? theme.palette.onPrimaryContainer : "inherit",
                 boxShadow: isSelected ? theme.palette.shadow.cardHover : "none",
                 ...(isSelected && { outline: `1px solid ${theme.palette.primary.main}33` }),
-                "&:hover": { bgcolor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow },
+                "&:hover": { backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow },
                 opacity: d.hasClass ? 1 : 0.4,
                 cursor: "pointer",
               })}
@@ -93,7 +93,7 @@ export function MobileWeeklyScroller({ selectedWeek, onSelectWeek }: Readonly<Mo
                       width: 6,
                       height: 6,
                       borderRadius: "full",
-                      bgcolor: dotColor,
+                      backgroundColor: dotColor,
                       mt: 0.5,
                     };
                   }}

@@ -67,7 +67,7 @@ const DeactivateParentDialog: React.FC<DeactivateParentDialogProps> = ({
         <Button
           onClick={onConfirm}
           disabled={deactivating}
-          sx={{ bgcolor: theme => theme.palette.error.main, color: theme => theme.palette.onError }}
+          sx={{ backgroundColor: theme => theme.palette.error.main, color: theme => theme.palette.onError }}
           variant="contained"
           startIcon={deactivating ? <CircularProgress size={16} sx={{ color: "inherit" }} /> : undefined}
         >

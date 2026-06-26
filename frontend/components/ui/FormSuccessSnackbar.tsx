@@ -20,7 +20,7 @@ export function FormSuccessSnackbar({ open, message, onClose }: Readonly<FormSuc
           px: 3,
           py: 1.5,
           borderRadius: 10,
-          bgcolor: theme.palette.primary.main,
+          backgroundColor: theme.palette.primary.main,
           color: theme.palette.onPrimary,
           boxShadow: theme.palette.shadow.card,
         })}

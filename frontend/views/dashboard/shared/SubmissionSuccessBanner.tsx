@@ -15,7 +15,7 @@ export function SubmissionSuccessBanner({ message, onDismiss }: Readonly<Submiss
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        bgcolor: theme.palette.tertiaryContainer,
+        backgroundColor: theme.palette.tertiaryContainer,
         color: theme.palette.onTertiaryContainer,
         opacity: 0.95,
         border: `1px solid ${theme.palette.outlineVariant}`,

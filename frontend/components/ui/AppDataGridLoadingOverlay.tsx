@@ -12,7 +12,7 @@ export function AppDataGridLoadingOverlay(_props: GridOverlayProps) {
         justifyContent: "center",
         height: "100%",
         py: theme.spacing(6),
-        bgcolor: alpha(theme.palette.surface, 0.4),
+        backgroundColor: alpha(theme.palette.surface, 0.4),
       })}
     >
       <CircularProgress

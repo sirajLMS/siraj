@@ -47,7 +47,7 @@ export function QuickAdjustSection({ setValue, getValues }: Readonly<Props>) {
         p: 2,
         borderRadius: 3,
         border: `1px dashed ${theme.palette.outlineVariant}`,
-        bgcolor: theme.palette.surface,
+        backgroundColor: theme.palette.surface,
       })}
     >
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mb: 1.5, display: "block" })}>
@@ -70,7 +70,7 @@ export function QuickAdjustSection({ setValue, getValues }: Readonly<Props>) {
               borderColor: theme.palette.outlineVariant,
               color: theme.palette.onSurface,
               "&:hover": {
-                bgcolor: theme.palette.primary.main,
+                backgroundColor: theme.palette.primary.main,
                 color: theme.palette.onPrimary,
                 borderColor: theme.palette.primary.main,
               },

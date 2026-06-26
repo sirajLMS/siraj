@@ -40,10 +40,10 @@ export function ClassesLeftProgress({ remaining, total, accountStatus, compact =
           sx={theme => ({
             height: 8,
             borderRadius: 4,
-            bgcolor: theme.palette.surfaceContainer,
+            backgroundColor: theme.palette.surfaceContainer,
             "& .MuiLinearProgress-bar": {
               borderRadius: 4,
-              bgcolor: resolveProgressColor(theme, accountStatus, ratio),
+              backgroundColor: resolveProgressColor(theme, accountStatus, ratio),
             },
           })}
         />

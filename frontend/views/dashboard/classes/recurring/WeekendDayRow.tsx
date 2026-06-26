@@ -15,7 +15,7 @@ const StyledWeekendRowContainer = styled(Box)(({ theme }) => ({
   justifyContent: "space-between",
   p: 2,
   borderRadius: 3,
-  bgcolor: theme.palette.surfaceContainer,
+  backgroundColor: theme.palette.surfaceContainer,
   opacity: 0.6,
   border: 1,
   borderColor: theme.palette.outlineVariant,

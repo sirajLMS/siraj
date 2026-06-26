@@ -139,7 +139,7 @@ export function StudentDirectoryDataGrid({
                   sx={theme => ({
                     color: theme.palette.primary.main,
                     "&:hover": {
-                      bgcolor: alpha(theme.palette.primary.main, 0.08),
+                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
                     },
                   })}
                 >
@@ -156,7 +156,7 @@ export function StudentDirectoryDataGrid({
                   sx={theme => ({
                     color: theme.palette.primary.main,
                     "&:hover": {
-                      bgcolor: alpha(theme.palette.primary.main, 0.08),
+                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
                     },
                   })}
                 >

@@ -278,12 +278,12 @@ export function PermissionGroupForm({
           disabled={isLoading}
           variant="contained"
           sx={theme => ({
-            bgcolor: theme.palette.primary.main,
+            backgroundColor: theme.palette.primary.main,
             color: theme.palette.onPrimary,
             fontWeight: 700,
             borderRadius: 1.5,
             "&:hover": {
-              bgcolor: theme.palette.primary.dark,
+              backgroundColor: theme.palette.primary.dark,
             },
           })}
         >

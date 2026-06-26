@@ -38,7 +38,7 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
           <Avatar
             src={row.avatarUrl}
             alt={row.name}
-            sx={theme => ({ width: 48, height: 48, bgcolor: theme.palette.surfaceContainer })}
+            sx={theme => ({ width: 48, height: 48, backgroundColor: theme.palette.surfaceContainer })}
           />
           <Stack>
             <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>

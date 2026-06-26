@@ -19,7 +19,7 @@ function TimeChip({ value, highlighted }: Readonly<{ value: string; highlighted?
       size="small"
       sx={theme => ({
         fontWeight: highlighted ? 700 : 500,
-        bgcolor: highlighted ? theme.palette.successContainer : theme.palette.surfaceContainerHigh,
+        backgroundColor: highlighted ? theme.palette.successContainer : theme.palette.surfaceContainerHigh,
         color: highlighted ? theme.palette.onSuccessContainer : theme.palette.onSurface,
       })}
     />
@@ -96,7 +96,7 @@ export function UpdatedSessionsDataGrid({ sessions }: Readonly<Props>) {
           py: 2,
           display: "flex",
           justifyContent: "center",
-          bgcolor: theme.palette.surfaceContainerLow,
+          backgroundColor: theme.palette.surfaceContainerLow,
           borderTop: `1px solid ${theme.palette.outlineVariant}`,
         })}
       >

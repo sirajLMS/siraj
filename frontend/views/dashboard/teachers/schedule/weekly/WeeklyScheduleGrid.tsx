@@ -70,7 +70,7 @@ function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
     <>
       <Box
         sx={theme => ({
-          bgcolor: theme.palette.primary.main,
+          backgroundColor: theme.palette.primary.main,
           color: theme.palette.onPrimary,
           borderRadius: 1,
           p: 1,
@@ -127,7 +127,7 @@ function GridHeader() {
         gridColumn: "span 8",
         display: "grid",
         gridTemplateColumns: "100px repeat(7, 1fr)",
-        bgcolor: theme.palette.sidebar,
+        backgroundColor: theme.palette.sidebar,
         color: theme.palette.onSidebar,
       })}
     >
@@ -187,7 +187,7 @@ function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
       <Box
         sx={theme => ({
           p: 2,
-          bgcolor: theme.palette.background.default,
+          backgroundColor: theme.palette.background.default,
           borderRight: `1px solid ${theme.palette.border.light}`,
           display: "flex",
           alignItems: "center",
@@ -212,7 +212,7 @@ function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
               minHeight: 80,
               borderRight: `1px solid ${theme.palette.border.light}`,
               position: "relative",
-              bgcolor: isLunch ? theme.palette.action.hover : "transparent",
+              backgroundColor: isLunch ? theme.palette.action.hover : "transparent",
             })}
           >
             {isLunch ? (
@@ -249,7 +249,7 @@ export default function WeeklyScheduleGrid({ classes, onRemoveClass }: Readonly<
         border: `1px solid ${theme.palette.border.light}`,
         borderRadius: theme.layout.radius.card,
         overflow: "hidden",
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
       })}
     >
       <GridHeader />

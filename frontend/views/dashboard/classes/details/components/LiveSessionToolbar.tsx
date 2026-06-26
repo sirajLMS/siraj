@@ -43,18 +43,18 @@ import type { SxProps, Theme } from "@mui/material";
 
 // Success-tinted contained button used for the start action
 const StyledStartActionButton = styled(Button)(({ theme }) => ({
-  bgcolor: theme.palette.success.main,
+  backgroundColor: theme.palette.success.main,
   color: theme.palette.onSuccess,
   borderRadius: theme.layout.radius.button,
-  "&:hover": { bgcolor: theme.palette.success.dark },
+  "&:hover": { backgroundColor: theme.palette.success.dark },
 }));
 
 // Warning-tinted contained button used for the mark-absent action
 const StyledAbsentActionButton = styled(Button)(({ theme }) => ({
-  bgcolor: theme.palette.warning.main,
+  backgroundColor: theme.palette.warning.main,
   color: theme.palette.onWarning,
   borderRadius: theme.layout.radius.button,
-  "&:hover": { bgcolor: theme.palette.warning.dark },
+  "&:hover": { backgroundColor: theme.palette.warning.dark },
 }));
 
 // Secondary-colored outlined button used for the leave action
@@ -64,16 +64,16 @@ const StyledLeaveActionButton = styled(Button)(({ theme }) => ({
   borderRadius: theme.layout.radius.button,
   "&:hover": {
     borderColor: theme.palette.secondary.dark,
-    bgcolor: theme.palette.action.hover,
+    backgroundColor: theme.palette.action.hover,
   },
 }));
 
 // Error-tinted contained button used for the reset action
 const StyledResetActionButton = styled(Button)(({ theme }) => ({
-  bgcolor: theme.palette.error.main,
+  backgroundColor: theme.palette.error.main,
   color: theme.palette.onError,
   borderRadius: theme.layout.radius.button,
-  "&:hover": { bgcolor: theme.palette.error.dark },
+  "&:hover": { backgroundColor: theme.palette.error.dark },
 }));
 
 interface ActionButtonProps {

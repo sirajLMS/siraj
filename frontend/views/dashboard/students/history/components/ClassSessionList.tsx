@@ -42,7 +42,7 @@ export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionLis
             component={Link}
             href={`/classes/${session.id}`}
             sx={theme => ({
-              bgcolor: theme.palette.surfaceContainerLowest,
+              backgroundColor: theme.palette.surfaceContainerLowest,
               borderRadius: "xl",
               boxShadow: theme.palette.shadow.card,
               border: `1px solid ${theme.palette.border.light}`,
@@ -63,7 +63,7 @@ export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionLis
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 p: 1,
                 borderRadius: "lg",
                 width: 64,
@@ -92,18 +92,18 @@ export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionLis
               <Box
                 sx={theme => {
                   let colors = {
-                    bgcolor: theme.palette.secondaryContainer,
+                    backgroundColor: theme.palette.secondaryContainer,
                     color: theme.palette.onSecondaryContainer,
                   };
 
                   if (session.status === "present") {
                     colors = {
-                      bgcolor: theme.palette.status.activeContainer,
+                      backgroundColor: theme.palette.status.activeContainer,
                       color: theme.palette.status.onActiveContainer,
                     };
                   } else if (session.status === "absent") {
                     colors = {
-                      bgcolor: theme.palette.errorContainer,
+                      backgroundColor: theme.palette.errorContainer,
                       color: theme.palette.onErrorContainer,
                     };
                   }

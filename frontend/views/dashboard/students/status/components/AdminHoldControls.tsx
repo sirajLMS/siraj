@@ -122,9 +122,9 @@ function ReasonEntryField() {
             sx={theme => ({
               fontSize: "10px",
               fontWeight: 600,
-              bgcolor: theme.palette.surfaceContainerLow,
+              backgroundColor: theme.palette.surfaceContainerLow,
               color: theme.palette.onSurfaceVariant,
-              "&:hover": { bgcolor: theme.palette.surfaceContainerHigh },
+              "&:hover": { backgroundColor: theme.palette.surfaceContainerHigh },
             })}
           />
         ))}
@@ -146,10 +146,10 @@ function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
       sx={theme => ({
         py: 1.5,
         borderRadius: "button",
-        bgcolor: currentStatus === "suspended" ? theme.palette.error.main : theme.palette.primary.main,
+        backgroundColor: currentStatus === "suspended" ? theme.palette.error.main : theme.palette.primary.main,
         color: currentStatus === "suspended" ? theme.palette.onError : theme.palette.onPrimary,
         "&:hover": {
-          bgcolor: currentStatus === "suspended" ? theme.palette.error.dark : theme.palette.primary.dark,
+          backgroundColor: currentStatus === "suspended" ? theme.palette.error.dark : theme.palette.primary.dark,
         },
         typography: "buttonText",
         textTransform: "uppercase",
@@ -171,7 +171,7 @@ export function AdminHoldControls({ isUpdating }: Readonly<AdminHoldControlsProp
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
         borderRadius: "xl",
         boxShadow: theme.palette.shadow.card,
         p: { xs: 3, md: 4 },

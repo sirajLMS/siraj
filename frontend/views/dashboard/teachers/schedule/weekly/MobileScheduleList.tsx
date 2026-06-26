@@ -48,7 +48,7 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
     <>
       <Box
         sx={theme => ({
-          bgcolor: theme.palette.primary.dark,
+          backgroundColor: theme.palette.primary.dark,
           color: theme.palette.onPrimary,
           borderRadius: 2,
           px: 2,
@@ -141,11 +141,11 @@ function DaySelector({ selectedDay, onSelect }: Readonly<DaySelectorProps>) {
             borderRadius: 10,
             px: 3,
             whiteSpace: "nowrap",
-            bgcolor: selectedDay === day ? theme.palette.primary.main : theme.palette.background.paper,
+            backgroundColor: selectedDay === day ? theme.palette.primary.main : theme.palette.background.paper,
             color: selectedDay === day ? theme.palette.onPrimary : theme.palette.text.secondary,
             borderColor: selectedDay === day ? theme.palette.primary.main : theme.palette.border.light,
             "&:hover": {
-              bgcolor: selectedDay === day ? theme.palette.primary.dark : theme.palette.action.hover,
+              backgroundColor: selectedDay === day ? theme.palette.primary.dark : theme.palette.action.hover,
             },
           })}
         >
@@ -206,7 +206,7 @@ function TimeSlotRow({ time, slotClasses, onRemoveClass }: Readonly<TimeSlotRowP
       sx={theme => ({
         display: "flex",
         minHeight: isLunch ? 48 : 80,
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
       })}
     >
       <Box
@@ -215,7 +215,7 @@ function TimeSlotRow({ time, slotClasses, onRemoveClass }: Readonly<TimeSlotRowP
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          bgcolor: theme.palette.background.default,
+          backgroundColor: theme.palette.background.default,
           borderRight: `1px solid ${theme.palette.border.light}`,
         })}
       >
@@ -248,7 +248,7 @@ export default function MobileScheduleList({ classes, onRemoveClass }: Readonly<
           display: "flex",
           flexDirection: "column",
           gap: 0.5,
-          bgcolor: theme.palette.border.light,
+          backgroundColor: theme.palette.border.light,
           borderRadius: theme.layout.radius.card,
           overflow: "hidden",
           border: `1px solid ${theme.palette.border.light}`,

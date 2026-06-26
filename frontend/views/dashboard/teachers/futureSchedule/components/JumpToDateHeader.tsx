@@ -54,7 +54,7 @@ export function JumpToDateHeader({ leaveQuotaUsed, leaveQuotaTotal, totalClasses
                 gap: 1.5,
                 px: 2,
                 py: 1,
-                bgcolor: theme.palette.surfaceContainerLow,
+                backgroundColor: theme.palette.surfaceContainerLow,
                 border: `1px solid ${theme.palette.outlineVariant}`,
                 borderRadius: 2,
                 cursor: "pointer",
@@ -84,7 +84,7 @@ export function JumpToDateHeader({ leaveQuotaUsed, leaveQuotaTotal, totalClasses
           <Box
             sx={theme => ({
               p: 2,
-              bgcolor: alpha(theme.palette.primary.main, 0.08),
+              backgroundColor: alpha(theme.palette.primary.main, 0.08),
               borderLeft: `4px solid ${theme.palette.primary.main}`,
               borderRadius: 2,
               flex: 1,
@@ -106,7 +106,7 @@ export function JumpToDateHeader({ leaveQuotaUsed, leaveQuotaTotal, totalClasses
           <Box
             sx={theme => ({
               p: 2,
-              bgcolor: alpha(theme.palette.header, 0.08),
+              backgroundColor: alpha(theme.palette.header, 0.08),
               borderLeft: `4px solid ${theme.palette.header}`,
               borderRadius: 2,
               flex: 1,

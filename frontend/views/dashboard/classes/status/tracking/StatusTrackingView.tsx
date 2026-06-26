@@ -16,16 +16,16 @@ const StyledMobileFab = styled(Fab)(({ theme }) => ({
   position: "fixed",
   bottom: 88,
   right: 24,
-  bgcolor: theme.palette.primary.main,
+  backgroundColor: theme.palette.primary.main,
   color: theme.palette.onPrimary,
-  "&:hover": { bgcolor: theme.palette.primary.dark },
+  "&:hover": { backgroundColor: theme.palette.primary.dark },
 }));
 
 // Selected-action pill badge showing the total-sessions count in the section header
 const StyledTotalSessionsBadge = styled(Box)(({ theme }) => ({
   paddingInline: theme.spacing(2),
   paddingBlock: theme.spacing(0.5),
-  bgcolor: theme.palette.action.selected,
+  backgroundColor: theme.palette.action.selected,
   borderRadius: 10,
   fontSize: "12px",
   color: theme.palette.text.secondary,
@@ -38,10 +38,10 @@ const StyledDesktopFab = styled(Fab)(({ theme }) => ({
   position: "fixed",
   bottom: 32,
   right: 32,
-  bgcolor: theme.palette.primary.main,
+  backgroundColor: theme.palette.primary.main,
   color: theme.palette.onPrimary,
   "&:hover": {
-    bgcolor: theme.palette.primary.dark,
+    backgroundColor: theme.palette.primary.dark,
     transform: "scale(1.1)",
   },
   transition: "transform 0.15s ease, background-color 0.15s ease",

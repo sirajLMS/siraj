@@ -52,7 +52,7 @@ const ParentProfileView: React.FC<ParentProfileViewProps> = ({ parent, parentId,
             gap: 1.5,
             px: 3,
             py: 1.5,
-            bgcolor: theme.palette.primary.main,
+            backgroundColor: theme.palette.primary.main,
             color: theme.palette.onPrimary,
           }}
         >

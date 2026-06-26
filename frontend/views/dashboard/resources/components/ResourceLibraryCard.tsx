@@ -32,7 +32,7 @@ export function ResourceLibraryCard({
         p: isList ? 2 : 3,
         borderRadius: theme.layout.radius.card,
         border: `1px solid ${theme.palette.outlineVariant}`,
-        bgcolor: theme.palette.surfaceContainerLowest,
+        backgroundColor: theme.palette.surfaceContainerLowest,
         display: "flex",
         flexDirection: isList ? "row" : "column",
         alignItems: isList ? "flex-start" : "stretch",

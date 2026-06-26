@@ -82,7 +82,7 @@ export function BillingMonthSelector({ control, errors, labels, variant }: Reado
                           borderRadius: theme.layout.radius.button,
                           py: 1,
                           cursor: "pointer",
-                          bgcolor: isChecked ? theme.palette.primaryContainer : theme.palette.background.paper,
+                          backgroundColor: isChecked ? theme.palette.primaryContainer : theme.palette.background.paper,
                           color: isChecked ? theme.palette.onPrimaryContainer : theme.palette.onSurfaceVariant,
                           fontSize: "12px",
                           fontWeight: 500,
@@ -115,8 +115,8 @@ export function BillingMonthSelector({ control, errors, labels, variant }: Reado
                         py: 1,
                         borderRadius: theme.layout.radius.button,
                         border: `1px solid ${theme.palette.border.light}`,
-                        bgcolor: isChecked ? theme.palette.action.selected : theme.palette.background.paper,
-                        "&:hover": { bgcolor: theme.palette.surfaceContainerLow },
+                        backgroundColor: isChecked ? theme.palette.action.selected : theme.palette.background.paper,
+                        "&:hover": { backgroundColor: theme.palette.surfaceContainerLow },
                       })}
                     />
                   );

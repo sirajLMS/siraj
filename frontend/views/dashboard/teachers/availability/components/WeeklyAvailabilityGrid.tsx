@@ -33,7 +33,7 @@ function GridHeader({ labels }: Readonly<{ labels: WeeklyAvailabilityGridProps["
       sx={theme => ({
         display: "grid",
         gridTemplateColumns: "100px repeat(7, 1fr)",
-        bgcolor: theme.palette.primary.main,
+        backgroundColor: theme.palette.primary.main,
         color: theme.palette.onPrimary,
       })}
     >
@@ -72,7 +72,7 @@ function AvailabilityBlock({ entry }: Readonly<{ entry: AvailabilityEntry }>) {
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.primary.main,
+        backgroundColor: theme.palette.primary.main,
         height: "100%",
         width: "100%",
         borderRadius: 1,
@@ -84,7 +84,7 @@ function AvailabilityBlock({ entry }: Readonly<{ entry: AvailabilityEntry }>) {
         cursor: "pointer",
         transition: "all 0.2s",
         "&:hover": {
-          bgcolor: theme.palette.primary.dark,
+          backgroundColor: theme.palette.primary.dark,
           transform: "scale(1.02)",
           zIndex: 10,
         },
@@ -130,7 +130,7 @@ function GridRow({ time, dayEntries }: Readonly<{ time: string; dayEntries: Week
     >
       <Box
         sx={theme => ({
-          bgcolor: theme.palette.surfaceContainerLow,
+          backgroundColor: theme.palette.surfaceContainerLow,
           color: theme.palette.onSurface,
           display: "flex",
           alignItems: "center",

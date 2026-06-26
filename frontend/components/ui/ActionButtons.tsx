@@ -30,7 +30,7 @@ export function FilterButton({ sx, ...props }: Readonly<ButtonProps>) {
           borderColor: theme.palette.border.light,
           color: theme.palette.primary.main,
           "&:hover": {
-            bgcolor: theme.palette.action.selected,
+            backgroundColor: theme.palette.action.selected,
             borderColor: theme.palette.primary.dark,
           },
         }),
@@ -49,8 +49,8 @@ export function ExportButton({ sx, ...props }: Readonly<ButtonProps>) {
         theme => ({
           borderColor: theme.palette.border.main,
           color: theme.palette.onPrimary,
-          bgcolor: theme.palette.primary.main,
-          "&:hover": { bgcolor: theme.palette.primary.dark },
+          backgroundColor: theme.palette.primary.main,
+          "&:hover": { backgroundColor: theme.palette.primary.dark },
         }),
         sx
       )}

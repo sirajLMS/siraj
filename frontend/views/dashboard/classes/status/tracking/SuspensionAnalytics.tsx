@@ -25,7 +25,7 @@ export interface SuspensionAnalyticsProps {
 const StyledCtaContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   borderRadius: 3,
-  bgcolor: theme.palette.primary.dark,
+  backgroundColor: theme.palette.primary.dark,
   position: "relative",
   overflow: "hidden",
   display: "flex",
@@ -42,7 +42,7 @@ const StyledTopRightBlob = styled(Box)(({ theme }) => ({
   width: 200,
   height: 200,
   borderRadius: "50%",
-  bgcolor: alpha(theme.palette.primary.dark, 0.04),
+  backgroundColor: alpha(theme.palette.primary.dark, 0.04),
   filter: "blur(40px)",
   pointerEvents: "none",
 }));
@@ -55,7 +55,7 @@ const StyledBottomLeftBlob = styled(Box)(({ theme }) => ({
   width: 160,
   height: 160,
   borderRadius: "50%",
-  bgcolor: alpha(theme.palette.primary.main, 0.3),
+  backgroundColor: alpha(theme.palette.primary.main, 0.3),
   filter: "blur(32px)",
   pointerEvents: "none",
 }));
@@ -67,7 +67,7 @@ const StyledUrgentTaskBadge = styled(Box)(({ theme }) => ({
   gap: theme.spacing(0.75),
   paddingInline: theme.spacing(1.5),
   paddingBlock: theme.spacing(0.5),
-  bgcolor: alpha(theme.palette.primaryContainer, 0.3),
+  backgroundColor: alpha(theme.palette.primaryContainer, 0.3),
   borderRadius: 10,
 }));
 
@@ -104,7 +104,7 @@ const StyledCtaDescription = styled(Typography)(({ theme }) => ({
 const StyledOpenAuditLogsButton = styled(Button)(({ theme }) => ({
   position: "relative",
   zIndex: 1,
-  bgcolor: theme.palette.primary.main,
+  backgroundColor: theme.palette.primary.main,
   color: theme.palette.onPrimary,
   fontFamily: '"Inter", sans-serif',
   fontWeight: 700,
@@ -115,7 +115,7 @@ const StyledOpenAuditLogsButton = styled(Button)(({ theme }) => ({
   paddingBlock: theme.spacing(1.25),
   borderRadius: 2,
   "&:hover": {
-    bgcolor: theme.palette.primary.light,
+    backgroundColor: theme.palette.primary.light,
   },
 }));
 

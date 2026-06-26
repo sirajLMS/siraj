@@ -112,7 +112,7 @@ src/views/auth/[page]/
 - **NO Quotes for Colors**: Never use MUI's string-based palette access (e.g., `color="primary.main"` or `sx={{ color: 'primary.main' }}`).
 - **Theme Callback Pattern**: Use the theme callback pattern ONLY when theme-specific values are needed:
     - `sx={(theme) => ({ color: theme.palette.primary.main })}`
-    - `sx={(theme) => ({ bgcolor: theme.palette.onPrimaryContainer })}`
+    - `sx={(theme) => ({ backgroundColor: theme.palette.onPrimaryContainer })}`
     - If no theme values are used, use a plain object: `sx={{ display: 'flex' }}`
 - **Universal Contrast**: Use Material 3 `on<Color>` siblings instead of legacy `contrastText` (e.g., `theme.palette.onPrimary`).
 - **Flattened Accessors**: Use the flattened M3 sibling accessors directly on the palette (e.g., `onPrimaryContainer`, `onBackground`, `onHeader`).

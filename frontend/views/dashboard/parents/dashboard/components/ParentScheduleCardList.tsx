@@ -34,7 +34,7 @@ function ScheduleCard({
       elevation={0}
       sx={theme => ({
         borderRadius: 3,
-        bgcolor: theme.palette.surfaceContainerLowest,
+        backgroundColor: theme.palette.surfaceContainerLowest,
         border: `1px solid ${theme.palette.outlineVariant}`,
         boxShadow: theme.palette.shadow.card,
       })}
@@ -46,7 +46,7 @@ function ScheduleCard({
               sx={theme => ({
                 p: 1,
                 borderRadius: 2,
-                bgcolor: theme.palette.secondaryContainer,
+                backgroundColor: theme.palette.secondaryContainer,
                 display: "flex",
               })}
             >
@@ -99,11 +99,11 @@ function ScheduleCard({
             sx={theme => ({
               width: 40,
               height: 40,
-              bgcolor: theme.palette.header,
+              backgroundColor: theme.palette.header,
               color: theme.palette.onPrimary,
-              "&:hover": { bgcolor: theme.palette.primary.dark },
+              "&:hover": { backgroundColor: theme.palette.primary.dark },
               "&.Mui-disabled": {
-                bgcolor: theme.palette.surfaceContainer,
+                backgroundColor: theme.palette.surfaceContainer,
                 color: theme.palette.onSurfaceVariant,
               },
             })}

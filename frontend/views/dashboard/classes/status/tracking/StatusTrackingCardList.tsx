@@ -93,7 +93,7 @@ const StyledStatusAvatar = styled(Box, {
   width: 48,
   height: 48,
   borderRadius: "50%",
-  bgcolor: bgcolorToken,
+  backgroundColor: bgcolorToken,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -179,24 +179,24 @@ function getCardActionButton(
 function getAvatarStyles(theme: Theme, sessionStatus: SessionStatus) {
   if (sessionStatus === "suspended_pending") {
     return {
-      bgcolor: theme.palette.status.blockedContainer,
+      backgroundColor: theme.palette.status.blockedContainer,
       color: theme.palette.status.onBlockedContainer,
     };
   }
   if (sessionStatus === "on_leave") {
     return {
-      bgcolor: theme.palette.secondaryContainer,
+      backgroundColor: theme.palette.secondaryContainer,
       color: theme.palette.onSecondaryContainer,
     };
   }
   if (sessionStatus === "pending_verification") {
     return {
-      bgcolor: theme.palette.status.pendingContainer,
+      backgroundColor: theme.palette.status.pendingContainer,
       color: theme.palette.status.onPendingContainer,
     };
   }
   return {
-    bgcolor: theme.palette.status.activeContainer,
+    backgroundColor: theme.palette.status.activeContainer,
     color: theme.palette.status.onActiveContainer,
   };
 }

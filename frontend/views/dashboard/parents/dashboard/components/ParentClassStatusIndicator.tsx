@@ -33,7 +33,7 @@ export function ParentClassStatusIndicator({ status, label }: Readonly<ParentCla
           width: 8,
           height: 8,
           borderRadius: "50%",
-          bgcolor: resolveDotColor(status, theme),
+          backgroundColor: resolveDotColor(status, theme),
           ...(shouldPulse && {
             animation: "pulse 1.5s ease-in-out infinite",
             "@keyframes pulse": {

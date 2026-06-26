@@ -28,10 +28,10 @@ const StyledDayScheduleRowContainer = styled(Box, {
   borderRadius: 3,
   border: isActiveOverride ? 2 : 1,
   borderColor: isActiveOverride ? theme.palette.sidebar : theme.palette.outlineVariant,
-  bgcolor: isActiveOverride ? theme.palette.surfaceContainerHigh : theme.palette.surface,
+  backgroundColor: isActiveOverride ? theme.palette.surfaceContainerHigh : theme.palette.surface,
   transition: "background-color 0.2s",
   "&:hover": {
-    bgcolor: isActiveOverride ? theme.palette.surfaceContainerHighest : theme.palette.surfaceContainerLow,
+    backgroundColor: isActiveOverride ? theme.palette.surfaceContainerHighest : theme.palette.surfaceContainerLow,
   },
 }));
 
@@ -40,10 +40,10 @@ const StyledOverrideToggleIconButton = styled(IconButton, {
   shouldForwardProp: prop => prop !== "isActiveOverride",
 })<{ isActiveOverride: boolean }>(({ theme, isActiveOverride }) => ({
   color: isActiveOverride ? theme.palette.sidebar : theme.palette.onSurfaceVariant,
-  bgcolor: isActiveOverride ? theme.palette.surfaceContainerHighest : undefined,
+  backgroundColor: isActiveOverride ? theme.palette.surfaceContainerHighest : undefined,
   "&:hover": {
     color: theme.palette.sidebar,
-    bgcolor: theme.palette.surfaceContainerHighest,
+    backgroundColor: theme.palette.surfaceContainerHighest,
   },
 }));
 

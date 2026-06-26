@@ -54,12 +54,12 @@ export function DeleteGroupDialog({
           disabled={isLoading}
           variant="contained"
           sx={theme => ({
-            bgcolor: theme.palette.error.main,
+            backgroundColor: theme.palette.error.main,
             color: theme.palette.onError,
             fontWeight: 700,
             borderRadius: 1.5,
             "&:hover": {
-              bgcolor: theme.palette.error.dark,
+              backgroundColor: theme.palette.error.dark,
             },
           })}
         >

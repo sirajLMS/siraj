@@ -44,14 +44,14 @@ const StyledMobileEditButton = styled(Button)(({ theme }) => ({
   borderColor: theme.palette.outlineVariant,
   typography: "labelUppercase",
   "&:hover": {
-    bgcolor: alpha(theme.palette.onSidebar, 0.1),
+    backgroundColor: alpha(theme.palette.onSidebar, 0.1),
     borderColor: theme.palette.onSidebar,
   },
 }));
 
 // Contained mobile update button using header background and onPrimary text
 const StyledMobileUpdateButton = styled(Button)(({ theme }) => ({
-  bgcolor: theme.palette.header,
+  backgroundColor: theme.palette.header,
   color: theme.palette.onPrimary,
   typography: "labelUppercase",
   boxShadow: theme.palette.shadow.button,
@@ -122,7 +122,7 @@ export function AdminNoteCard({ note, labels, onUpdate, onEdit }: AdminNoteCardP
   return (
     <BaseCard
       sx={theme => ({
-        bgcolor: theme.palette.sidebar,
+        backgroundColor: theme.palette.sidebar,
         color: theme.palette.onSidebar,
         boxShadow: theme.palette.shadow.card,
       })}

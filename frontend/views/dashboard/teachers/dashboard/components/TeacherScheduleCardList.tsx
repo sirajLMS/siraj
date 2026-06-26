@@ -54,7 +54,7 @@ export function TeacherScheduleCardList({
               p: 2,
               opacity: isCompleted ? 0.7 : 1,
               borderColor: theme.palette.border.light,
-              bgcolor: theme.palette.surfaceContainerLowest,
+              backgroundColor: theme.palette.surfaceContainerLowest,
             })}
           >
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>

@@ -30,7 +30,7 @@ export function ReportsTotalsRow({ summary, totalsLabel }: Readonly<ReportsTotal
         alignItems: "center",
         px: 3,
         py: 2.5,
-        bgcolor: theme.palette.surfaceContainer,
+        backgroundColor: theme.palette.surfaceContainer,
         borderTop: `2px solid ${theme.palette.primary.main}`,
         gap: 1,
       })}

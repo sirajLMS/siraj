@@ -88,7 +88,7 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
               methods.handleSubmit(onSubmit)(e);
             }}
             sx={theme => ({
-              bgcolor: theme.palette.background.paper,
+              backgroundColor: theme.palette.background.paper,
               p: { xs: 2, md: 6 },
               borderRadius: "xl",
               border: `1px solid ${theme.palette.border.light}`,

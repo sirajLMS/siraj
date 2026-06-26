@@ -19,7 +19,7 @@ const StyledTimezoneWarningAlert = styled(Alert)(({ theme }) => ({
   borderRadius: 2,
   borderLeft: 4,
   borderColor: theme.palette.status.cancelled,
-  bgcolor: theme.palette.errorContainer,
+  backgroundColor: theme.palette.errorContainer,
   color: theme.palette.onErrorContainer,
   animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
   "@keyframes pulse": {

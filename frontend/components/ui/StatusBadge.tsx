@@ -103,7 +103,7 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
   // sessionTracking: on_leave uses secondary family
   if (category === "sessionTracking" && status === "on_leave") {
     return {
-      bgcolor: theme.palette.secondaryContainer,
+      backgroundColor: theme.palette.secondaryContainer,
       color: theme.palette.onSecondaryContainer,
     };
   }
@@ -116,7 +116,7 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
       `on${paletteKey.charAt(0).toUpperCase()}${paletteKey.slice(1)}Container` as keyof typeof theme.palette.status;
 
     return {
-      bgcolor: theme.palette.status[containerKey],
+      backgroundColor: theme.palette.status[containerKey],
       color: theme.palette.status[onContainerKey],
     };
   }
@@ -124,18 +124,18 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
   switch (category) {
     case "studentAccount": {
       // Map studentAccount statuses to appropriate M3 status families
-      const map: Record<string, { bgcolor: string; color: string }> = {
-        activated: { bgcolor: theme.palette.status.activeContainer, color: theme.palette.status.onActiveContainer },
-        regular: { bgcolor: theme.palette.status.activeContainer, color: theme.palette.status.onActiveContainer },
+      const map: Record<string, { backgroundColor: string; color: string }> = {
+        activated: { backgroundColor: theme.palette.status.activeContainer, color: theme.palette.status.onActiveContainer },
+        regular: { backgroundColor: theme.palette.status.activeContainer, color: theme.palette.status.onActiveContainer },
         deactivated: {
-          bgcolor: theme.palette.status.cancelledContainer,
+          backgroundColor: theme.palette.status.cancelledContainer,
           color: theme.palette.status.onCancelledContainer,
         },
-        suspended: { bgcolor: theme.palette.status.blockedContainer, color: theme.palette.status.onBlockedContainer },
-        on_leave: { bgcolor: theme.palette.secondaryContainer, color: theme.palette.onSecondaryContainer },
-        on_trial: { bgcolor: theme.palette.status.pendingContainer, color: theme.palette.status.onPendingContainer },
+        suspended: { backgroundColor: theme.palette.status.blockedContainer, color: theme.palette.status.onBlockedContainer },
+        on_leave: { backgroundColor: theme.palette.secondaryContainer, color: theme.palette.onSecondaryContainer },
+        on_trial: { backgroundColor: theme.palette.status.pendingContainer, color: theme.palette.status.onPendingContainer },
       };
-      return map[status] ?? { bgcolor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
+      return map[status] ?? { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
     }
     case "session": {
       // Direct access to status family based on the status string as the key
@@ -146,26 +146,26 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
 
       if (theme.palette.status[containerKey]) {
         return {
-          bgcolor: theme.palette.status[containerKey],
+          backgroundColor: theme.palette.status[containerKey],
           color: theme.palette.status[onContainerKey],
         };
       }
-      return { bgcolor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
+      return { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
     }
     case "enrollment": {
       // Map enrollment statuses to M3 families
-      const map: Record<string, { bgcolor: string; color: string }> = {
-        regular: { bgcolor: theme.palette.status.activeContainer, color: theme.palette.status.onActiveContainer },
-        prospect: { bgcolor: theme.palette.status.pendingContainer, color: theme.palette.status.onPendingContainer },
+      const map: Record<string, { backgroundColor: string; color: string }> = {
+        regular: { backgroundColor: theme.palette.status.activeContainer, color: theme.palette.status.onActiveContainer },
+        prospect: { backgroundColor: theme.palette.status.pendingContainer, color: theme.palette.status.onPendingContainer },
         withdrawn: {
-          bgcolor: theme.palette.status.cancelledContainer,
+          backgroundColor: theme.palette.status.cancelledContainer,
           color: theme.palette.status.onCancelledContainer,
         },
       };
-      return map[status] ?? { bgcolor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
+      return map[status] ?? { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
     }
     default:
-      return { bgcolor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
+      return { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
   }
 }
 

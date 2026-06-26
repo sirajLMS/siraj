@@ -21,7 +21,7 @@ const StyledDayCard = styled(Box)(({ theme }) => ({
   borderColor: theme.palette.sidebar,
   borderRadius: theme.layout.radius.card,
   p: 2,
-  bgcolor: theme.palette.surface,
+  backgroundColor: theme.palette.surface,
   boxShadow: theme.palette.shadow.card,
 }));
 
@@ -40,9 +40,9 @@ const StyledDayLabel = styled(Typography)(({ theme }) => ({
 
 // Circular icon button for toggling override with sidebar background
 const StyledOverrideIconButton = styled(IconButton)(({ theme }) => ({
-  bgcolor: theme.palette.sidebar,
+  backgroundColor: theme.palette.sidebar,
   color: theme.palette.onSidebar,
-  "&:hover": { bgcolor: theme.palette.surfaceContainer },
+  "&:hover": { backgroundColor: theme.palette.surfaceContainer },
 }));
 
 // Inner row container for time override controls with outline border
@@ -54,7 +54,7 @@ const StyledTimeOverrideRow = styled(Box)(({ theme }) => ({
   border: 1,
   borderColor: theme.palette.outlineVariant,
   borderRadius: theme.layout.radius.button,
-  bgcolor: theme.palette.surfaceContainerLowest,
+  backgroundColor: theme.palette.surfaceContainerLowest,
 }));
 
 // Event repeat icon styled with sidebar color

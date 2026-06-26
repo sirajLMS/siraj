@@ -35,7 +35,7 @@ function UpcomingClassesMobile({ classes }: Readonly<{ classes: readonly Upcomin
           <Box
             key={cls.id}
             sx={theme => ({
-              bgcolor: theme.palette.background.paper,
+              backgroundColor: theme.palette.background.paper,
               borderRadius: "xl",
               p: 2.5,
               boxShadow: theme.palette.shadow.card,
@@ -76,7 +76,7 @@ function UpcomingClassesMobile({ classes }: Readonly<{ classes: readonly Upcomin
             </Box>
             <Box
               sx={theme => ({
-                bgcolor: theme.palette.secondaryContainer,
+                backgroundColor: theme.palette.secondaryContainer,
                 color: theme.palette.onSecondaryContainer,
                 px: 1,
                 py: 0.5,
@@ -122,7 +122,7 @@ function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        bgcolor: theme.palette.background.default,
+        backgroundColor: theme.palette.background.default,
       })}
     >
       <Box>
@@ -135,7 +135,7 @@ function DesktopHeader({ studentId, pendingCount }: Readonly<{ studentId: string
       </Box>
       <Box
         sx={theme => ({
-          bgcolor: theme.palette.primaryContainer,
+          backgroundColor: theme.palette.primaryContainer,
           color: theme.palette.onPrimaryContainer,
           px: 1.5,
           py: 0.5,
@@ -157,7 +157,7 @@ function DesktopFooter({ studentId }: Readonly<{ studentId: string }>) {
       sx={theme => ({
         px: 3,
         py: 2,
-        bgcolor: theme.palette.background.default,
+        backgroundColor: theme.palette.background.default,
         borderTop: `1px solid ${theme.palette.border.main}`,
         textAlign: "right",
       })}
@@ -195,7 +195,7 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
         <Box sx={{ py: 1.5 }}>
           <Box
             sx={theme => ({
-              bgcolor: theme.palette.background.default,
+              backgroundColor: theme.palette.background.default,
               px: 1,
               py: 0.5,
               borderRadius: 1,
@@ -231,7 +231,7 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
     <Paper
       elevation={0}
       sx={theme => ({
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
         borderRadius: "xl",
         boxShadow: theme.palette.shadow.card,
         border: `1px solid ${theme.palette.border.main}`,
@@ -248,7 +248,7 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
         sx={theme => ({
           border: "none",
           "& .MuiDataGrid-columnHeader": {
-            bgcolor: theme.palette.background.default,
+            backgroundColor: theme.palette.background.default,
             color: theme.palette.onSurfaceVariant,
             fontSize: "10px",
             fontWeight: 700,

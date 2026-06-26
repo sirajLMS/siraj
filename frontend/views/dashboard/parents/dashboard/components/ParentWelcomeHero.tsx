@@ -20,7 +20,7 @@ export function ParentWelcomeHero({
         mb: 3,
         p: 3,
         borderRadius: 3,
-        bgcolor: theme.palette.primaryContainer,
+        backgroundColor: theme.palette.primaryContainer,
         color: theme.palette.onPrimary,
         position: "relative",
         overflow: "hidden",
@@ -50,7 +50,7 @@ export function ParentWelcomeHero({
             py: 0.5,
             px: 1.5,
             borderRadius: 999,
-            bgcolor: alpha(theme.palette.header, 0.4),
+            backgroundColor: alpha(theme.palette.header, 0.4),
           })}
         >
           <InfoOutlined sx={{ fontSize: 16 }} />

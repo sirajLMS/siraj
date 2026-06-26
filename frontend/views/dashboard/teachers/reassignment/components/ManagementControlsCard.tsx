@@ -131,7 +131,7 @@ function ActionButtons({ loading, saved, onCancel }: Readonly<ActionButtonsProps
             borderColor: theme.palette.border.main,
             "&:hover": {
               borderColor: theme.palette.border.main,
-              bgcolor: theme.palette.surfaceContainerLow,
+              backgroundColor: theme.palette.surfaceContainerLow,
             },
           })}
         >
@@ -146,13 +146,13 @@ function ActionButtons({ loading, saved, onCancel }: Readonly<ActionButtonsProps
             minWidth: 160,
             py: 1.5,
             fontWeight: 700,
-            bgcolor: saved ? theme.palette.success.main : theme.palette.primary.main,
+            backgroundColor: saved ? theme.palette.success.main : theme.palette.primary.main,
             color: saved ? theme.palette.onSuccess : theme.palette.onPrimary,
             "&:hover": {
-              bgcolor: saved ? theme.palette.success.dark : theme.palette.primary.dark,
+              backgroundColor: saved ? theme.palette.success.dark : theme.palette.primary.dark,
             },
             "&.Mui-disabled": {
-              bgcolor: theme.palette.surfaceContainerHighest,
+              backgroundColor: theme.palette.surfaceContainerHighest,
               color: theme.palette.onSurfaceVariant,
             },
           })}

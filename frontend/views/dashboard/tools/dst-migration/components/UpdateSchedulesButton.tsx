@@ -43,15 +43,15 @@ export function UpdateSchedulesButton({ status, onUpdate, fullWidth = false }: R
         borderWidth: 2,
         ...(isComplete
           ? {
-              bgcolor: theme.palette.success.main,
+              backgroundColor: theme.palette.success.main,
               color: theme.palette.onSuccess,
               borderColor: theme.palette.success.main,
-              "&:hover": { bgcolor: theme.palette.success.dark },
+              "&:hover": { backgroundColor: theme.palette.success.dark },
             }
           : {
               color: theme.palette.primary.main,
               borderColor: theme.palette.primary.main,
-              "&:hover": { bgcolor: theme.palette.primary.main, color: theme.palette.onPrimary },
+              "&:hover": { backgroundColor: theme.palette.primary.main, color: theme.palette.onPrimary },
             }),
         "& .MuiButton-startIcon .MuiSvgIcon-root": isRunning
           ? { animation: "spin 1s linear infinite", "@keyframes spin": { to: { transform: "rotate(360deg)" } } }
@@ -82,9 +82,9 @@ export function UpdateSchedulesButtonMobile({ status, onUpdate }: Readonly<Omit<
         borderRadius: 99,
         fontWeight: 700,
         letterSpacing: "0.1em",
-        bgcolor: isComplete ? theme.palette.success.main : theme.palette.primary.main,
+        backgroundColor: isComplete ? theme.palette.success.main : theme.palette.primary.main,
         color: theme.palette.onPrimary,
-        "&:hover": { bgcolor: isComplete ? theme.palette.success.dark : theme.palette.primary.dark },
+        "&:hover": { backgroundColor: isComplete ? theme.palette.success.dark : theme.palette.primary.dark },
         "& .MuiButton-startIcon .MuiSvgIcon-root": isRunning
           ? { animation: "spin 1s linear infinite", "@keyframes spin": { to: { transform: "rotate(360deg)" } } }
           : undefined,

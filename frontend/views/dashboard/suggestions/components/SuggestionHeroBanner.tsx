@@ -15,7 +15,7 @@ export function SuggestionHeroBanner({ labels, variant }: Readonly<SuggestionHer
     return (
       <Box
         sx={theme => ({
-          bgcolor: theme.palette.primaryContainer,
+          backgroundColor: theme.palette.primaryContainer,
           color: theme.palette.onPrimaryContainer,
           p: 3,
           mb: 2,
@@ -37,7 +37,7 @@ export function SuggestionHeroBanner({ labels, variant }: Readonly<SuggestionHer
         position: "relative",
         overflow: "hidden",
         borderRadius: theme.layout.radius.card,
-        bgcolor: theme.palette.primaryContainer,
+        backgroundColor: theme.palette.primaryContainer,
         color: theme.palette.onPrimaryContainer,
         p: 6,
         mb: 4,

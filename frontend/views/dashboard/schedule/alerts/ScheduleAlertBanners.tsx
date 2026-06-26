@@ -37,7 +37,7 @@ export function ScheduleAlertBanners({ alerts, labels }: ScheduleAlertBannersPro
                 gap: 1.5,
                 p: 2,
                 borderRadius: theme.layout.radius.card,
-                bgcolor: theme.palette.status.cancelledContainer,
+                backgroundColor: theme.palette.status.cancelledContainer,
                 border: `1px solid ${theme.palette.status.cancelled}`,
                 boxShadow: theme.palette.shadow.card,
               })}
@@ -64,7 +64,7 @@ export function ScheduleAlertBanners({ alerts, labels }: ScheduleAlertBannersPro
               alignItems: "center",
               gap: 2,
               p: 2,
-              bgcolor: theme.palette.status.cancelledContainer,
+              backgroundColor: theme.palette.status.cancelledContainer,
               borderLeft: `4px solid ${theme.palette.status.cancelled}`,
               borderRadius: "0 12px 12px 0",
               animation: alert.pulse ? "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite" : "none",

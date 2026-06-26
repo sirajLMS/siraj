@@ -22,7 +22,7 @@ const StyledRemarksTitle = styled(Typography)(({ theme }) => ({
 
 // Default-background italic quote block with a header-colored left accent border
 const StyledRemarksQuoteBlock = styled(Box)(({ theme }) => ({
-  bgcolor: theme.palette.background.default,
+  backgroundColor: theme.palette.background.default,
   padding: theme.spacing(2),
   borderRadius: 1.5,
   borderLeft: 4,

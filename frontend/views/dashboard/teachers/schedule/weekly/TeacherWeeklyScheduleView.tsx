@@ -66,7 +66,7 @@ export function ScheduleFooterLegend({
             sx={theme => ({
               width: 12,
               height: 12,
-              bgcolor: theme.palette.primary.main,
+              backgroundColor: theme.palette.primary.main,
               borderRadius: 0.5,
             })}
           />
@@ -140,10 +140,10 @@ export default function TeacherWeeklyScheduleView({
                 <IconButton
                   onClick={handleClearClick}
                   sx={theme => ({
-                    bgcolor: theme.palette.error.main,
+                    backgroundColor: theme.palette.error.main,
                     color: theme.palette.onError,
                     borderRadius: 2,
-                    "&:hover": { bgcolor: theme.palette.error.dark },
+                    "&:hover": { backgroundColor: theme.palette.error.dark },
                   })}
                 >
                   <DeleteOutlined />
@@ -180,11 +180,11 @@ export default function TeacherWeeklyScheduleView({
             <IconButton
               onClick={handleClearClick}
               sx={theme => ({
-                bgcolor: theme.palette.error.main,
+                backgroundColor: theme.palette.error.main,
                 color: theme.palette.onError,
                 borderRadius: 2,
                 px: 4,
-                "&:hover": { bgcolor: theme.palette.error.dark },
+                "&:hover": { backgroundColor: theme.palette.error.dark },
               })}
             >
               <DeleteOutlined />

@@ -35,7 +35,7 @@ export function StudentMobileMetricsScroll({ metrics }: StudentMobileMetricsScro
                 py: 1.5,
                 borderRadius: 10,
                 border: `1px solid ${theme.palette.border.light}`,
-                bgcolor: theme.palette.background.paper,
+                backgroundColor: theme.palette.background.paper,
                 display: "flex",
                 alignItems: "center",
                 gap: 1.5,

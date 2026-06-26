@@ -34,7 +34,7 @@ export function ParentOnboardingView({ register, errors, handleSubmit, isSubmitt
             sx={theme => ({
               display: { xs: "none", sm: "flex" },
               alignItems: "center",
-              bgcolor: theme.palette.primaryContainer,
+              backgroundColor: theme.palette.primaryContainer,
               color: theme.palette.onPrimaryContainer,
               px: 2,
               py: 1,
@@ -61,7 +61,7 @@ export function ParentOnboardingView({ register, errors, handleSubmit, isSubmitt
         <Box
           sx={theme => ({
             p: 3,
-            bgcolor: theme.palette.surfaceContainerLow,
+            backgroundColor: theme.palette.surfaceContainerLow,
             borderRadius: 3,
             display: "flex",
             alignItems: "center",

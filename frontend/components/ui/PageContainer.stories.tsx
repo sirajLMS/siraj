@@ -12,7 +12,7 @@ const meta: Meta<typeof PageContainer> = {
         <Box
           sx={theme => ({
             p: 2,
-            bgcolor: theme.palette.primaryContainer,
+            backgroundColor: theme.palette.primaryContainer,
             color: theme.palette.onPrimaryContainer,
             borderRadius: 2,
           })}
@@ -22,7 +22,7 @@ const meta: Meta<typeof PageContainer> = {
         <Box
           sx={theme => ({
             p: 2,
-            bgcolor: theme.palette.secondaryContainer,
+            backgroundColor: theme.palette.secondaryContainer,
             color: theme.palette.onSecondaryContainer,
             borderRadius: 2,
           })}

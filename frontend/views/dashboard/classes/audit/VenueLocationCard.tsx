@@ -24,7 +24,7 @@ const StyledSectionTitle = styled(Typography)(({ theme }) => ({
 
 // Hover-tinted preview container used for both mobile header and desktop venue image area
 const StyledVenuePreviewContainer = styled(Box)(({ theme }) => ({
-  bgcolor: theme.palette.action.hover,
+  backgroundColor: theme.palette.action.hover,
   position: "relative",
   display: "flex",
   alignItems: "center",
@@ -50,7 +50,7 @@ const StyledCapacityBadge = styled(Box)(({ theme }) => ({
   position: "absolute",
   top: 8,
   right: 8,
-  bgcolor: theme.palette.header,
+  backgroundColor: theme.palette.header,
   color: theme.palette.onHeader,
   paddingInline: theme.spacing(1),
   paddingBlock: theme.spacing(0.5),
@@ -96,7 +96,7 @@ const StyledCapacityInfoRow = styled(Box)(({ theme }) => ({
   alignItems: "center",
   gap: theme.spacing(1.5),
   padding: theme.spacing(1.5),
-  bgcolor: theme.palette.primaryContainer,
+  backgroundColor: theme.palette.primaryContainer,
   borderRadius: 2,
 }));
 

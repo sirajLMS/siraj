@@ -150,10 +150,10 @@ function TeacherActionButton({ icon, variant, onClick }: TeacherActionButtonProp
     <IconButton
       onClick={onClick}
       sx={theme => ({
-        bgcolor: variant === "primary" ? theme.palette.primaryContainer : theme.palette.errorContainer,
+        backgroundColor: variant === "primary" ? theme.palette.primaryContainer : theme.palette.errorContainer,
         color: variant === "primary" ? theme.palette.onPrimaryContainer : theme.palette.onErrorContainer,
         "&:hover": {
-          bgcolor: variant === "primary" ? theme.palette.primaryContainer : theme.palette.errorContainer,
+          backgroundColor: variant === "primary" ? theme.palette.primaryContainer : theme.palette.errorContainer,
           opacity: 0.8,
         },
       })}

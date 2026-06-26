@@ -67,7 +67,7 @@ export function StudentsMobileView({
                 ),
                 sx: theme => ({
                   borderRadius: 3,
-                  bgcolor: theme.palette.background.paper,
+                  backgroundColor: theme.palette.background.paper,
                   py: 0.5,
                 }),
               },
@@ -78,11 +78,11 @@ export function StudentsMobileView({
             aria-label={addStudentLabel}
             onClick={onAddStudent}
             sx={theme => ({
-              bgcolor: theme.palette.header,
+              backgroundColor: theme.palette.header,
               color: theme.palette.onPrimary,
               borderRadius: 3,
               px: 2,
-              "&:hover": { bgcolor: theme.palette.primary.dark },
+              "&:hover": { backgroundColor: theme.palette.primary.dark },
             })}
           >
             <PersonAddAltOutlined />
@@ -99,9 +99,9 @@ export function StudentsMobileView({
             position: "fixed",
             bottom: 88,
             right: 24,
-            bgcolor: theme.palette.header,
+            backgroundColor: theme.palette.header,
             color: theme.palette.onPrimary,
-            "&:hover": { bgcolor: theme.palette.primary.dark },
+            "&:hover": { backgroundColor: theme.palette.primary.dark },
           })}
         >
           <AddOutlined />

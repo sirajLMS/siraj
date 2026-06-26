@@ -78,7 +78,7 @@ export function PerformanceLedgerCard({ row, labels }: Readonly<PerformanceLedge
           alignItems: "flex-start",
           gap: 2,
           borderBottom: `1px solid ${theme.palette.border.light}`,
-          bgcolor: alpha(theme.palette.surfaceContainerLow, 0.8),
+          backgroundColor: alpha(theme.palette.surfaceContainerLow, 0.8),
         })}
       >
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
@@ -87,7 +87,7 @@ export function PerformanceLedgerCard({ row, labels }: Readonly<PerformanceLedge
               width: 40,
               height: 40,
               borderRadius: "50%",
-              bgcolor: theme.palette.primary.main,
+              backgroundColor: theme.palette.primary.main,
               color: theme.palette.onPrimary,
               display: "flex",
               alignItems: "center",
@@ -131,7 +131,7 @@ export function PerformanceLedgerCard({ row, labels }: Readonly<PerformanceLedge
           <Box
             sx={theme => ({
               textAlign: "center",
-              bgcolor: theme.palette.surfaceContainerHigh,
+              backgroundColor: theme.palette.surfaceContainerHigh,
               borderRadius: theme.layout.radius.badge,
               p: 1,
             })}

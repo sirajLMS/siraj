@@ -125,10 +125,10 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
         }
         tooltipTitle={labels.joinSession}
         sx={theme => ({
-          bgcolor: theme.palette.primaryContainer,
+          backgroundColor: theme.palette.primaryContainer,
           color: theme.palette.onPrimaryContainer,
           "&:hover": {
-            bgcolor: theme.palette.primary.main,
+            backgroundColor: theme.palette.primary.main,
             color: theme.palette.onPrimary,
           },
         })}
@@ -183,10 +183,10 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
         icon={<EventRepeatOutlined />}
         tooltipTitle={labels.reschedule}
         sx={theme => ({
-          bgcolor: theme.palette.secondaryContainer,
+          backgroundColor: theme.palette.secondaryContainer,
           color: theme.palette.onSecondaryContainer,
           "&:hover": {
-            bgcolor: theme.palette.secondary.main,
+            backgroundColor: theme.palette.secondary.main,
             color: theme.palette.onSecondary,
           },
         })}
@@ -204,10 +204,10 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
       icon={<AssignmentTurnedInOutlined />}
       tooltipTitle={labels.verifyDocuments}
       sx={theme => ({
-        bgcolor: theme.palette.status.pendingContainer,
+        backgroundColor: theme.palette.status.pendingContainer,
         color: theme.palette.status.onPendingContainer,
         "&:hover": {
-          bgcolor: theme.palette.status.pending,
+          backgroundColor: theme.palette.status.pending,
           color: theme.palette.status.onPending,
         },
       })}

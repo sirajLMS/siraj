@@ -45,19 +45,19 @@ function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter =
     py: 1.25,
     px: 2,
     justifyContent: isCollapsed ? "center" : "flex-start",
-    bgcolor: isActive ? theme.palette.onSidebarContainer : theme.palette.sidebarContainer,
+    backgroundColor: isActive ? theme.palette.onSidebarContainer : theme.palette.sidebarContainer,
     color: isActive ? theme.palette.sidebarContainer : theme.palette.onSidebarContainer,
     "&:hover": {
-      bgcolor: theme.palette.onSidebarContainer,
+      backgroundColor: theme.palette.onSidebarContainer,
       color: theme.palette.sidebarContainer,
     },
     transition: "all 0.2s ease",
     ...(!isFooter && {
       fontWeight: isActive ? 700 : 400,
       "&.Mui-selected": {
-        bgcolor: theme.palette.onSidebarContainer,
+        backgroundColor: theme.palette.onSidebarContainer,
         "&:hover": {
-          bgcolor: theme.palette.onSidebarContainer,
+          backgroundColor: theme.palette.onSidebarContainer,
         },
       },
     }),
@@ -143,7 +143,7 @@ function SidebarContent({
           px: 1.5,
           "&::-webkit-scrollbar": { width: 4 },
           "&::-webkit-scrollbar-thumb": {
-            bgcolor: theme.palette.onSidebarContainer,
+            backgroundColor: theme.palette.onSidebarContainer,
             borderRadius: 10,
           },
         })}
@@ -203,7 +203,7 @@ function SidebarMobileDrawer({
         "& .MuiDrawer-paper": {
           width: sidebarWidth,
           boxSizing: "border-box",
-          bgcolor: theme.palette.sidebarContainer,
+          backgroundColor: theme.palette.sidebarContainer,
           color: theme.palette.onSidebarContainer,
           borderRight: "none",
         },
@@ -236,7 +236,7 @@ function SidebarDesktop({
         display: { xs: "none", md: "block" },
         width: isCollapsed ? collapsedWidth : sidebarWidth,
         flexShrink: 0,
-        bgcolor: theme.palette.sidebarContainer,
+        backgroundColor: theme.palette.sidebarContainer,
         color: theme.palette.onSidebarContainer,
         minHeight: "100%",
         position: "relative",
@@ -257,7 +257,7 @@ function SidebarDesktop({
           transition: "all 0.2s ease",
           "&:hover": {
             width: "12px",
-            bgcolor: theme.palette.sidebarContainer,
+            backgroundColor: theme.palette.sidebarContainer,
             "& .toggle-button": {
               opacity: 1,
               transform: "scale(1)",
@@ -274,13 +274,13 @@ function SidebarDesktop({
             transform: "translateY(-50%) scale(0.8)",
             opacity: 0,
             transition: "all 0.2s ease",
-            bgcolor: theme.palette.sidebarContainer,
+            backgroundColor: theme.palette.sidebarContainer,
             border: `1px solid ${theme.palette.outlineVariant}`,
             width: "32px",
             height: "32px",
             color: theme.palette.onSidebarContainer,
             "&:hover": {
-              bgcolor: theme.palette.sidebarContainer,
+              backgroundColor: theme.palette.sidebarContainer,
               borderColor: theme.palette.outlineVariant,
             },
           })}

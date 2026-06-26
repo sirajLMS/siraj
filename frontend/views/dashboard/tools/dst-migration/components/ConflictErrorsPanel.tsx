@@ -23,7 +23,7 @@ function ConflictCard({
         borderRadius: 2,
         borderLeft: 4,
         borderColor: theme.palette.error.main,
-        bgcolor: alpha(theme.palette.error.main, 0.06),
+        backgroundColor: alpha(theme.palette.error.main, 0.06),
       })}
     >
       <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main, mb: 0.5 })}>
@@ -45,7 +45,7 @@ export function ConflictErrorsPanel({ conflictGroups }: Readonly<Props>) {
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.surfaceContainerLowest,
+        backgroundColor: theme.palette.surfaceContainerLowest,
         borderRadius: 3,
         border: `1px solid ${theme.palette.outlineVariant}`,
         overflow: "hidden",
@@ -59,7 +59,7 @@ export function ConflictErrorsPanel({ conflictGroups }: Readonly<Props>) {
           display: "flex",
           alignItems: "center",
           gap: 1.5,
-          bgcolor: alpha(theme.palette.error.main, 0.08),
+          backgroundColor: alpha(theme.palette.error.main, 0.08),
           borderBottom: `1px solid ${theme.palette.outlineVariant}`,
         })}
       >
@@ -68,7 +68,7 @@ export function ConflictErrorsPanel({ conflictGroups }: Readonly<Props>) {
             width: 32,
             height: 32,
             borderRadius: "50%",
-            bgcolor: theme.palette.error.main,
+            backgroundColor: theme.palette.error.main,
             color: theme.palette.onError,
             display: "flex",
             alignItems: "center",
@@ -92,7 +92,7 @@ export function ConflictErrorsPanel({ conflictGroups }: Readonly<Props>) {
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "0.05em",
-                bgcolor: theme.palette.secondaryContainer,
+                backgroundColor: theme.palette.secondaryContainer,
                 color: theme.palette.onSecondaryContainer,
               })}
             />

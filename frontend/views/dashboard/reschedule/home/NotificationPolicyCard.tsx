@@ -12,7 +12,7 @@ export function NotificationPolicyCard() {
       sx={theme => ({
         p: 2,
         borderRadius: 3,
-        bgcolor: theme.palette.surfaceContainerLow,
+        backgroundColor: theme.palette.surfaceContainerLow,
         display: "flex",
         alignItems: "flex-start",
         gap: 1.5,

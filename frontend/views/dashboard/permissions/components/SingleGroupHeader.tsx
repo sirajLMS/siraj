@@ -18,7 +18,7 @@ const StyledBackButton = styled(Button)(({ theme }) => ({
   textTransform: "none",
   fontSize: "0.875rem",
   "&:hover": {
-    bgcolor: "transparent",
+    backgroundColor: "transparent",
     color: theme.palette.primary.main,
   },
 }));

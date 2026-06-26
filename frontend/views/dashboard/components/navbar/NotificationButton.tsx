@@ -55,7 +55,7 @@ export function NotificationButton({ notificationCount, ...props }: Readonly<Not
               mt: 1,
               borderRadius: 2,
               border: `1px solid ${theme.palette.outlineVariant}`,
-              bgcolor: theme.palette.surface,
+              backgroundColor: theme.palette.surface,
             }),
           },
         }}

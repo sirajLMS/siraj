@@ -147,7 +147,7 @@ const MobileAlertsLayout = ({
             sx={theme => ({
               width: 40,
               height: 40,
-              bgcolor: theme.palette.background.paper,
+              backgroundColor: theme.palette.background.paper,
               border: `1px solid ${theme.palette.border.light}`,
               color: theme.palette.primary.main,
             })}
@@ -161,7 +161,7 @@ const MobileAlertsLayout = ({
             sx={theme => ({
               width: 40,
               height: 40,
-              bgcolor: theme.palette.background.paper,
+              backgroundColor: theme.palette.background.paper,
               border: `1px solid ${theme.palette.border.light}`,
               color: theme.palette.primary.main,
             })}

@@ -129,7 +129,7 @@ export function StatusTrackingDataGrid({
                   borderRadius: 1.5,
                   fontSize: "13px",
                   fontWeight: 700,
-                  bgcolor: styles.backgroundColor,
+                  backgroundColor: styles.backgroundColor,
                   color: styles.color,
                 }}
               >
@@ -212,9 +212,9 @@ export function StatusTrackingDataGrid({
       }
       sx={{
         "& .status-row-suspended": {
-          bgcolor: theme => alpha(theme.palette.status.blocked, 0.08),
+          backgroundColor: theme => alpha(theme.palette.status.blocked, 0.08),
           "&:hover": {
-            bgcolor: theme => alpha(theme.palette.status.blocked, 0.12),
+            backgroundColor: theme => alpha(theme.palette.status.blocked, 0.12),
           },
         },
       }}

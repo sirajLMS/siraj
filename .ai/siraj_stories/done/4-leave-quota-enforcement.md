@@ -1574,7 +1574,7 @@ function ActionButtons({ item, isMobile, onRequestLeave }: Readonly<{ item: Futu
             fontSize: 11,
             fontWeight: 700,
             letterSpacing: "0.05em",
-            bgcolor: theme.palette.surfaceContainerLow,
+            backgroundColor: theme.palette.surfaceContainerLow,
             color: theme.palette.onSurface,
             borderColor: theme.palette.outlineVariant,
             opacity: 0.38,
@@ -1597,7 +1597,7 @@ function ActionButtons({ item, isMobile, onRequestLeave }: Readonly<{ item: Futu
             borderColor: theme.palette.primary.main,
             flex: isMobile ? 1 : "initial",
             "&:hover": {
-              bgcolor: theme.palette.primary.main,
+              backgroundColor: theme.palette.primary.main,
               color: theme.palette.onPrimary,
             },
           })}

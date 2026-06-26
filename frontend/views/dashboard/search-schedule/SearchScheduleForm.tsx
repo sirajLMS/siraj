@@ -32,7 +32,7 @@ export function SearchScheduleForm({ onSearch }: Readonly<SearchScheduleFormProp
         flexWrap: "wrap",
         p: 2,
         borderRadius: 2,
-        bgcolor: theme.palette.surfaceContainerLow,
+        backgroundColor: theme.palette.surfaceContainerLow,
         mb: 3,
       })}
     >

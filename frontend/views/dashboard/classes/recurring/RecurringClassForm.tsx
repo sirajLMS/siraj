@@ -58,7 +58,7 @@ const StyledScrollableFormBody = styled(Box, {
   p: isMobile ? 2 : 3,
   "&::-webkit-scrollbar": { width: 4 },
   "&::-webkit-scrollbar-thumb": {
-    bgcolor: theme.palette.divider,
+    backgroundColor: theme.palette.divider,
     borderRadius: 2,
   },
 }));
@@ -73,7 +73,7 @@ const StyledFormFooter = styled(Box, {
   justifyContent: isMobile ? "center" : "space-between",
   borderTop: 1,
   borderColor: theme.palette.divider,
-  bgcolor: alpha(theme.palette.background.default, 0.5),
+  backgroundColor: alpha(theme.palette.background.default, 0.5),
   ...(isMobile && {
     position: "fixed",
     bottom: 0,
@@ -88,7 +88,7 @@ const StyledFormFooter = styled(Box, {
 const StyledSubmitButton = styled(Button, {
   shouldForwardProp: prop => prop !== "isMobile",
 })<{ isMobile: boolean }>(({ theme, isMobile }) => ({
-  bgcolor: theme.palette.sidebar,
+  backgroundColor: theme.palette.sidebar,
   color: theme.palette.onSidebar,
   borderRadius: 10,
   px: isMobile ? 4 : 5,
@@ -96,7 +96,7 @@ const StyledSubmitButton = styled(Button, {
   typography: "labelUppercase",
   boxShadow: theme.palette.shadow.button,
   "&:hover": {
-    bgcolor: theme.palette.sidebar,
+    backgroundColor: theme.palette.sidebar,
     filter: "brightness(1.1)",
   },
   maxWidth: isMobile ? 480 : undefined,
@@ -110,7 +110,7 @@ const StyledSuccessBadge = styled(Box)(({ theme }) => ({
   px: 2,
   py: 1,
   borderRadius: 2,
-  bgcolor: theme.palette.status.activeContainer,
+  backgroundColor: theme.palette.status.activeContainer,
   color: theme.palette.sidebar,
   border: 1,
   borderColor: theme.palette.status.active,

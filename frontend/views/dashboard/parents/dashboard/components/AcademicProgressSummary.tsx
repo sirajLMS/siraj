@@ -42,10 +42,10 @@ function ProgressRow({
         sx={theme => ({
           height: 8,
           borderRadius: 999,
-          bgcolor: theme.palette.surfaceContainer,
+          backgroundColor: theme.palette.surfaceContainer,
           "& .MuiLinearProgress-bar": {
             borderRadius: 999,
-            bgcolor: theme.palette.header,
+            backgroundColor: theme.palette.header,
           },
         })}
       />
@@ -64,7 +64,7 @@ export function AcademicProgressSummary({
       sx={theme => ({
         p: 3,
         borderRadius: 3,
-        bgcolor: theme.palette.surfaceContainerLowest,
+        backgroundColor: theme.palette.surfaceContainerLowest,
         border: `1px solid ${theme.palette.outlineVariant}`,
         height: "100%",
         display: "flex",
@@ -106,7 +106,7 @@ export function AcademicProgressSummary({
           fontWeight: 700,
           letterSpacing: "0.1em",
           "&:hover": {
-            bgcolor: theme.palette.header,
+            backgroundColor: theme.palette.header,
             color: theme.palette.onPrimary,
             borderColor: theme.palette.header,
           },

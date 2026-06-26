@@ -116,7 +116,7 @@ export function StudentStatusView({
           sx={theme => ({
             borderRadius: "xl",
             boxShadow: theme.palette.shadow.card,
-            bgcolor: theme.palette.successContainer,
+            backgroundColor: theme.palette.successContainer,
             color: theme.palette.onSuccessContainer,
             "& .MuiAlert-icon": {
               color: theme.palette.onSuccessContainer,

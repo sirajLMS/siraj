@@ -147,7 +147,7 @@ function ClassesLeftField() {
             sx={theme => ({
               "& .MuiOutlinedInput-root": {
                 borderRadius: "lg",
-                bgcolor: { xs: "transparent", md: theme.palette.background.paper },
+                backgroundColor: { xs: "transparent", md: theme.palette.background.paper },
                 color: { xs: theme.palette.tertiary, md: theme.palette.primary.main },
                 fontWeight: 700,
                 "& fieldset": {

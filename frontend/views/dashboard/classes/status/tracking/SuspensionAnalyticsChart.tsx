@@ -32,7 +32,7 @@ const StyledChartBar = styled(Box, {
   shouldForwardProp: prop => prop !== "isHighlighted",
 })<{ isHighlighted: boolean }>(({ theme, isHighlighted }) => ({
   flex: 1,
-  bgcolor: isHighlighted ? theme.palette.error.main : theme.palette.primaryContainer,
+  backgroundColor: isHighlighted ? theme.palette.error.main : theme.palette.primaryContainer,
   borderRadius: "3px 3px 0 0",
   transition: "height 0.3s ease",
   "&:hover": { opacity: 0.85 },

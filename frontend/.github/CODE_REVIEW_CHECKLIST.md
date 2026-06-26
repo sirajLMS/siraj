@@ -86,7 +86,7 @@ Use this checklist when reviewing new dashboard pages or refactoring existing on
 <Table>...</Table>
 
 // Hardcoded status chip
-<Chip label="Active" sx={{ bgcolor: "#4caf50", color: "#fff" }} />
+<Chip label="Active" sx={{ backgroundColor: "#4caf50", color: "#fff" }} />
 
 // Per-feature metric card
 const MyFeatureMetricCard = ({ label, value }) => ...

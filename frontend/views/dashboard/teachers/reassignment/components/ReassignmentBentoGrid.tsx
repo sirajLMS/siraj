@@ -26,7 +26,7 @@ function BentoCard({ icon: Icon, title, subtitle }: Readonly<BentoCardProps>) {
     >
       <Avatar
         sx={theme => ({
-          bgcolor: "transparent",
+          backgroundColor: "transparent",
           border: `2px solid ${theme.palette.primary.main}`,
           color: theme.palette.primary.main,
           width: 48,

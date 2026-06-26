@@ -42,11 +42,11 @@ export function TeacherProfileFormActions({
           startIcon={<SaveOutlined />}
           fullWidth={isMobile}
           sx={theme => ({
-            bgcolor: theme.palette.success.main,
+            backgroundColor: theme.palette.success.main,
             color: theme.palette.onSuccess,
             boxShadow: theme.palette.shadow.button,
             "&:hover": {
-              bgcolor: theme.palette.success.dark,
+              backgroundColor: theme.palette.success.dark,
               boxShadow: theme.palette.shadow.buttonHover,
             },
             px: 4,
@@ -66,7 +66,7 @@ export function TeacherProfileFormActions({
             borderColor: theme.palette.outline,
             "&:hover": {
               borderColor: theme.palette.outlineVariant,
-              bgcolor: theme.palette.surfaceVariant,
+              backgroundColor: theme.palette.surfaceVariant,
             },
           })}
         >

@@ -32,7 +32,7 @@ export function BottomNavbar({ items, activeKey }: BottomNavbarProps) {
         sx={theme => ({
           display: "flex",
           height: 64,
-          bgcolor: theme.palette.background.paper,
+          backgroundColor: theme.palette.background.paper,
         })}
       >
         {items.map(item => {

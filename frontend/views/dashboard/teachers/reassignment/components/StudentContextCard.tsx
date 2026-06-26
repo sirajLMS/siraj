@@ -43,7 +43,7 @@ export function StudentContextCard({ student }: Readonly<StudentContextCardProps
             <Box
               sx={theme => ({
                 p: 1.5,
-                bgcolor: theme.palette.surfaceContainerLow,
+                backgroundColor: theme.palette.surfaceContainerLow,
                 borderRadius: 2,
                 textAlign: "left",
               })}
@@ -68,7 +68,7 @@ export function StudentContextCard({ student }: Readonly<StudentContextCardProps
             <Box
               sx={theme => ({
                 p: 1.5,
-                bgcolor: theme.palette.surfaceContainerLow,
+                backgroundColor: theme.palette.surfaceContainerLow,
                 borderRadius: 2,
                 textAlign: "left",
               })}

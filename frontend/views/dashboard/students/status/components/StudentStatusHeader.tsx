@@ -36,7 +36,7 @@ function StudentAvatar({ student, isMobile }: Readonly<{ student: StudentStatusI
               height: 24,
               borderRadius: "full",
               border: `4px solid ${theme.palette.background.paper}`,
-              bgcolor: statusColor,
+              backgroundColor: statusColor,
             };
           }}
         />
@@ -98,7 +98,7 @@ function HeaderActions({ isMobile }: Readonly<{ isMobile: boolean }>) {
           borderColor: theme.palette.border.main,
           "&:hover": {
             borderColor: theme.palette.secondary.main,
-            bgcolor: theme.palette.surfaceContainerHigh,
+            backgroundColor: theme.palette.surfaceContainerHigh,
           },
         })}
       >
@@ -114,7 +114,7 @@ function HeaderActions({ isMobile }: Readonly<{ isMobile: boolean }>) {
           borderColor: theme.palette.border.main,
           "&:hover": {
             borderColor: theme.palette.secondary.main,
-            bgcolor: theme.palette.surfaceContainerHigh,
+            backgroundColor: theme.palette.surfaceContainerHigh,
           },
         })}
       >
@@ -131,7 +131,7 @@ export function StudentStatusHeader({ student }: Readonly<StudentStatusHeaderPro
   return (
     <Box
       sx={theme => ({
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
         borderRadius: "xl",
         boxShadow: theme.palette.shadow.card,
         p: { xs: 3, md: "cardPadding" },

@@ -18,9 +18,9 @@ export function ParentSupportFab({ label, onClick }: Readonly<ParentSupportFabPr
           position: "fixed",
           bottom: 32,
           right: 32,
-          bgcolor: theme.palette.header,
+          backgroundColor: theme.palette.header,
           color: theme.palette.onPrimary,
-          "&:hover": { bgcolor: theme.palette.primary.dark },
+          "&:hover": { backgroundColor: theme.palette.primary.dark },
         })}
       >
         <SupportAgentOutlined sx={{ fontSize: 28 }} />

@@ -154,11 +154,11 @@ export function ParentsDataGrid({ rows, labels, onOpenSettings }: Readonly<Paren
                 onOpenSettings(row.id);
               }}
               sx={theme => ({
-                bgcolor: alpha(theme.palette.info.main, 0.08),
+                backgroundColor: alpha(theme.palette.info.main, 0.08),
                 color: theme.palette.info.main,
                 borderRadius: 1.5,
                 "&:hover": {
-                  bgcolor: theme.palette.info.main,
+                  backgroundColor: theme.palette.info.main,
                   color: theme.palette.onInfo,
                 },
               })}

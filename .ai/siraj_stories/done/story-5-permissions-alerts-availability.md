@@ -1486,7 +1486,7 @@ export function NotificationPanel({ onClose }: Readonly<NotificationPanelProps>)
           <Typography
             variant="caption"
             sx={theme => ({
-              bgcolor: theme.palette.error.main,
+              backgroundColor: theme.palette.error.main,
               color: theme.palette.onError,
               px: 1,
               py: 0.25,
@@ -1610,7 +1610,7 @@ export function UnpaidInvoicesSection() {
         <Typography
           variant="caption"
           sx={theme => ({
-            bgcolor: theme.palette.error.main,
+            backgroundColor: theme.palette.error.main,
             color: theme.palette.onError,
             px: 0.75,
             py: 0.25,
@@ -1708,7 +1708,7 @@ export function NotificationButton({ notificationCount }: Readonly<NotificationB
               mt: 1,
               borderRadius: 2,
               border: `1px solid ${theme.palette.outlineVariant}`,
-              bgcolor: theme.palette.surface,
+              backgroundColor: theme.palette.surface,
             }),
           },
         }}
@@ -1880,7 +1880,7 @@ export function SearchScheduleForm({ onSearch }: Readonly<SearchScheduleFormProp
         flexWrap: "wrap",
         p: 2,
         borderRadius: 2,
-        bgcolor: theme.palette.surfaceContainerLow,
+        backgroundColor: theme.palette.surfaceContainerLow,
         mb: 3,
       })}
     >
@@ -2028,7 +2028,7 @@ export function TeacherAvailabilityGrid({ teacher }: Readonly<TeacherAvailabilit
               sx={theme => ({
                 p: 1,
                 borderRadius: 1,
-                bgcolor: dayGaps.length > 0 ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow,
+                backgroundColor: dayGaps.length > 0 ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow,
                 minHeight: 60,
               })}
             >
@@ -2042,7 +2042,7 @@ export function TeacherAvailabilityGrid({ teacher }: Readonly<TeacherAvailabilit
                 <Box
                   key={gap.id}
                   sx={theme => ({
-                    bgcolor: theme.palette.primary,
+                    backgroundColor: theme.palette.primary,
                     color: theme.palette.onPrimary,
                     borderRadius: 0.5,
                     px: 0.5,

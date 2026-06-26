@@ -17,7 +17,7 @@ interface StudentProfileCardProps {
 // Thin header-colored accent bar spanning the top of the card
 const StyledTopAccentBar = styled(Box)(({ theme }) => ({
   height: 4,
-  bgcolor: theme.palette.header,
+  backgroundColor: theme.palette.header,
   position: "absolute",
   top: 0,
   left: 0,
@@ -42,7 +42,7 @@ const StyledViewProfileButton = styled(Button)(({ theme }) => ({
   fontWeight: 700,
   letterSpacing: "0.08em",
   "&:hover": {
-    bgcolor: theme.palette.header,
+    backgroundColor: theme.palette.header,
     color: theme.palette.onHeader,
     borderColor: theme.palette.header,
   },

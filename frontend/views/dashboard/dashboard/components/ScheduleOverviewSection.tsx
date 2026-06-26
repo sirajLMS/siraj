@@ -288,7 +288,7 @@ const MobileLayout = ({
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: 2,
-                bgcolor: theme => theme.palette.surfaceContainerLowest,
+                backgroundColor: theme => theme.palette.surfaceContainerLowest,
               },
             }}
           />

@@ -27,16 +27,16 @@ interface AdminActionsBarProps {
 const StyledActionsDivider = styled(Box)(({ theme }) => ({
   width: 1,
   height: 16,
-  bgcolor: theme.palette.outlineVariant,
+  backgroundColor: theme.palette.outlineVariant,
 }));
 
 // Active-tinted icon button used for the force-activate action
 const StyledForceActivateButton = styled(IconButton)(({ theme }) => ({
-  bgcolor: theme.palette.status.activeContainer,
+  backgroundColor: theme.palette.status.activeContainer,
   color: theme.palette.status.onActiveContainer,
   borderRadius: 1.5,
   "&:hover": {
-    bgcolor: theme.palette.status.active,
+    backgroundColor: theme.palette.status.active,
     filter: "brightness(1.1)",
   },
   "&:active": {
@@ -61,11 +61,11 @@ const StyledStopPauseButton = styled(IconButton)(({ theme }) => ({
 
 // Blocked-tinted icon button used for the delete action
 const StyledDeleteIconButton = styled(IconButton)(({ theme }) => ({
-  bgcolor: theme.palette.status.blockedContainer,
+  backgroundColor: theme.palette.status.blockedContainer,
   color: theme.palette.status.onBlockedContainer,
   borderRadius: 1.5,
   "&:hover": {
-    bgcolor: theme.palette.status.blocked,
+    backgroundColor: theme.palette.status.blocked,
     filter: "brightness(1.1)",
   },
   "&:active": {
@@ -76,8 +76,8 @@ const StyledDeleteIconButton = styled(IconButton)(({ theme }) => ({
 
 // Header/onHeader horizontal bar that wraps the left and right admin actions
 const StyledAdminActionsBar = styled(Box)(({ theme }) => ({
-  bgcolor: theme.palette.header,
-  color: theme.palette.onHeader,
+  backgroundColor: theme.palette.headerContainer,
+  color: theme.palette.onHeaderContainer,
   paddingInline: theme.spacing(2),
   paddingBlock: theme.spacing(1.5),
   borderRadius: 2,
@@ -139,7 +139,7 @@ function RightAdminActions({
           sx={theme => ({
             px: 2,
             height: 40,
-            bgcolor: theme.palette.primaryContainer,
+            backgroundColor: theme.palette.primaryContainer,
             color: theme.palette.onPrimaryContainer,
             border: "none",
             borderRadius: 1.5,
@@ -149,7 +149,7 @@ function RightAdminActions({
             alignItems: "center",
             gap: 1,
             transition: "background 0.15s ease",
-            "&:hover": { bgcolor: theme.palette.primaryContainer, filter: "brightness(0.9)" },
+            "&:hover": { backgroundColor: theme.palette.primaryContainer, filter: "brightness(0.9)" },
           })}
         >
           <CalendarMonthOutlinedIcon sx={{ fontSize: 16 }} />
@@ -162,7 +162,7 @@ function RightAdminActions({
         sx={theme => ({
           px: 2,
           height: 40,
-          bgcolor: theme.palette.primaryContainer,
+          backgroundColor: theme.palette.primaryContainer,
           color: theme.palette.onPrimaryContainer,
           border: "none",
           borderRadius: 1.5,
@@ -172,7 +172,7 @@ function RightAdminActions({
           alignItems: "center",
           gap: 1,
           transition: "background 0.15s ease",
-          "&:hover": { bgcolor: theme.palette.primaryContainer, filter: "brightness(0.9)" },
+          "&:hover": { backgroundColor: theme.palette.primaryContainer, filter: "brightness(0.9)" },
         })}
       >
         <ArticleIcon sx={{ fontSize: 16 }} />

@@ -17,7 +17,7 @@ export function ImportantNotes() {
     <BaseCard
       sx={theme => ({
         p: 3,
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.primary,
         border: 1,
         borderColor: theme.palette.border.main,
@@ -48,7 +48,7 @@ export function ImportantNotes() {
               key={note.title}
               sx={theme => ({
                 p: 2,
-                bgcolor: theme.palette.surfaceContainerLow,
+                backgroundColor: theme.palette.surfaceContainerLow,
                 borderRadius: 2,
                 border: 1,
                 borderStyle: "solid",
@@ -74,7 +74,7 @@ export function ImportantNotes() {
           bottom: -40,
           width: 160,
           height: 160,
-          bgcolor: theme.palette.primary.main,
+          backgroundColor: theme.palette.primary.main,
           opacity: 0.05,
           borderRadius: "50%",
         })}

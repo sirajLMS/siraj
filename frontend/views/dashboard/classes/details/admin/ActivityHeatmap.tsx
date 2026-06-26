@@ -27,7 +27,7 @@ const StyledHeatmapHeader = styled(Stack)(({ theme }) => ({
   paddingBlock: theme.spacing(2.5),
   borderBottom: 1,
   borderColor: theme.palette.border.light,
-  bgcolor: theme.palette.background.paper,
+  backgroundColor: theme.palette.background.paper,
 }));
 
 // Primary-colored section title used in the heatmap header
@@ -39,7 +39,7 @@ const StyledSectionTitle = styled(Typography)(({ theme }) => ({
 const StyledStudentInputSwatch = styled(Box)(({ theme }) => ({
   width: 12,
   height: 12,
-  bgcolor: theme.palette.primary.main,
+  backgroundColor: theme.palette.primary.main,
   borderRadius: 0.5,
 }));
 
@@ -47,7 +47,7 @@ const StyledStudentInputSwatch = styled(Box)(({ theme }) => ({
 const StyledTeacherResponseSwatch = styled(Box)(({ theme }) => ({
   width: 12,
   height: 12,
-  bgcolor: theme.palette.secondary.main,
+  backgroundColor: theme.palette.secondary.main,
   borderRadius: 0.5,
 }));
 
@@ -133,7 +133,7 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
                 flex: 1,
                 height: `${bar.height}%`,
                 borderRadius: "4px 4px 0 0",
-                bgcolor: i % 2 === 0 ? theme.palette.primary.main : theme.palette.secondary.main,
+                backgroundColor: i % 2 === 0 ? theme.palette.primary.main : theme.palette.secondary.main,
                 opacity: i % 2 === 0 ? 0.85 : 0.5,
                 transition: "height 0.6s ease",
                 "&:hover": { opacity: 1, filter: "brightness(1.15)" },

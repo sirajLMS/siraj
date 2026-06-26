@@ -23,7 +23,7 @@ export function ResourceGovernancePanel({ labels }: Readonly<ResourceGovernanceP
         sx={theme => ({
           p: 1,
           borderRadius: "50%",
-          bgcolor: theme.palette.surfaceContainer,
+          backgroundColor: theme.palette.surfaceContainer,
           height: "fit-content",
         })}
       >

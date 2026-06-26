@@ -54,7 +54,7 @@ export function WorkshopPromoCard({ promo, labels, onLearnMore }: Readonly<Works
           sx={theme => ({
             width: "fit-content",
             mb: 1.5,
-            bgcolor: theme.palette.header,
+            backgroundColor: theme.palette.header,
             color: theme.palette.onPrimary,
             fontWeight: 700,
             textTransform: "uppercase",
@@ -84,7 +84,7 @@ export function WorkshopPromoCard({ promo, labels, onLearnMore }: Readonly<Works
             px: 0,
             pb: 0.5,
             "&:hover": {
-              bgcolor: "transparent",
+              backgroundColor: "transparent",
               opacity: 0.9,
             },
           })}

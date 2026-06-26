@@ -11,7 +11,7 @@ export function SupportContact() {
     <BaseCard
       sx={theme => ({
         p: 3,
-        bgcolor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
         border: `1px solid ${theme.palette.border.main}`,
         boxShadow: theme.palette.shadow.card,
       })}
@@ -51,7 +51,7 @@ export function SupportContact() {
           borderColor: theme.palette.border.main,
           py: 1,
           "&:hover": {
-            bgcolor: theme.palette.action.hover,
+            backgroundColor: theme.palette.action.hover,
             borderColor: theme.palette.primary.main,
           },
         })}

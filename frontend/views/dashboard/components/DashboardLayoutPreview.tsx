@@ -48,7 +48,7 @@ export function DashboardLayoutPreview({
         elevation={0}
         sx={{
           width: "100%",
-          bgcolor: theme => theme.palette.headerContainer,
+          backgroundColor: theme => theme.palette.headerContainer,
           color: theme => theme.palette.onHeaderContainer,
           zIndex: theme => theme.zIndex.drawer + 1,
           boxShadow: theme => theme.palette.shadow.card,
@@ -67,7 +67,7 @@ export function DashboardLayoutPreview({
               sx={theme => ({
                 width: 40,
                 height: 40,
-                bgcolor: alpha(theme.palette.onHeaderContainer, 0.15),
+                backgroundColor: alpha(theme.palette.onHeaderContainer, 0.15),
                 borderRadius: 2,
                 display: "flex",
                 alignItems: "center",
@@ -121,7 +121,7 @@ export function DashboardLayoutPreview({
             minWidth: 0,
             pb: 10,
             minHeight: `calc(100vh - ${navbarHeight})`,
-            bgcolor: theme.palette.background.default,
+            backgroundColor: theme.palette.background.default,
             height: "100%",
             overflowY: "auto",
           })}
@@ -140,7 +140,7 @@ export function DashboardLayoutPreview({
           zIndex: theme.zIndex.appBar,
           display: { xs: "flex", md: "none" },
           height: 64,
-          bgcolor: theme.palette.background.paper,
+          backgroundColor: theme.palette.background.paper,
           borderTop: `1px solid ${theme.palette.border.light}`,
         })}
       >

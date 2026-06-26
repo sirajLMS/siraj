@@ -68,7 +68,7 @@ export function RescheduleTrackingDataGrid({
                 height: 36,
                 fontSize: "12px",
                 fontWeight: 700,
-                bgcolor: theme.palette.secondaryContainer,
+                backgroundColor: theme.palette.secondaryContainer,
                 color: theme.palette.onSecondaryContainer,
               })}
             >
@@ -130,7 +130,7 @@ export function RescheduleTrackingDataGrid({
                   px: 1,
                   py: 0.25,
                   borderRadius: 0.75,
-                  bgcolor: isLeaveRequest ? theme.palette.error.main : theme.palette.primary.main,
+                  backgroundColor: isLeaveRequest ? theme.palette.error.main : theme.palette.primary.main,
                   width: "fit-content",
                 })}
               >
@@ -202,10 +202,10 @@ export function RescheduleTrackingDataGrid({
                         fontSize: "11px",
                         borderRadius: 1.5,
                         boxShadow: "none",
-                        bgcolor: theme.palette.primary.main,
+                        backgroundColor: theme.palette.primary.main,
                         color: theme.palette.onPrimary,
                         "&:hover": {
-                          bgcolor: alpha(theme.palette.primary.dark, 0.9),
+                          backgroundColor: alpha(theme.palette.primary.dark, 0.9),
                         },
                       })}
                     >
@@ -223,10 +223,10 @@ export function RescheduleTrackingDataGrid({
                         fontSize: "11px",
                         borderRadius: 1.5,
                         boxShadow: "none",
-                        bgcolor: theme.palette.error.main,
+                        backgroundColor: theme.palette.error.main,
                         color: theme.palette.onError,
                         "&:hover": {
-                          bgcolor: alpha(theme.palette.error.dark, 0.9),
+                          backgroundColor: alpha(theme.palette.error.dark, 0.9),
                         },
                       })}
                     >

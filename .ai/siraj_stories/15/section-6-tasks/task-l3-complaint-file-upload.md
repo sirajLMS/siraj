@@ -202,7 +202,7 @@ export function ComplaintFileUploadDropzone({
         <Chip
           label={maxFilesLabel}
           size="small"
-          sx={theme => ({ mt: 1, bgcolor: theme.palette.surfaceContainerHigh })}
+          sx={theme => ({ mt: 1, backgroundColor: theme.palette.surfaceContainerHigh })}
         />
       </StyledDropzoneContainer>
 

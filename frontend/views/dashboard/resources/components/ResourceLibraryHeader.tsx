@@ -58,7 +58,7 @@ export function ResourceLibraryHeader({
         icon={<SortOutlined />}
         label={sortLabel}
         onClick={handleSortToggle}
-        sx={theme => ({ bgcolor: theme.palette.surfaceContainerHigh })}
+        sx={theme => ({ backgroundColor: theme.palette.surfaceContainerHigh })}
       />
     </Box>
   );

@@ -67,9 +67,9 @@ function FormActions({
         variant="contained"
         disabled={isSubmitting}
         sx={theme => ({
-          bgcolor: theme.palette.status.active,
+          backgroundColor: theme.palette.status.active,
           color: theme.palette.status.onActive,
-          "&:hover": { bgcolor: theme.palette.status.active },
+          "&:hover": { backgroundColor: theme.palette.status.active },
           px: 5,
           py: 1.5,
           borderRadius: 2,
@@ -172,7 +172,7 @@ export function TeacherOnboardingView({
             px: 3,
             py: 1.5,
             borderRadius: 10,
-            bgcolor: theme.palette.primary.main,
+            backgroundColor: theme.palette.primary.main,
             color: theme.palette.onPrimary,
             boxShadow: theme.palette.shadow.card,
           })}

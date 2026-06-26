@@ -41,7 +41,7 @@ const StyledTimeRangeChip = styled(Box)(({ theme }) => ({
   border: 1,
   borderColor: theme.palette.border.light,
   borderRadius: 2,
-  bgcolor: theme.palette.background.paper,
+  backgroundColor: theme.palette.background.paper,
 }));
 
 // Muted secondary-colored caption used inside the time-range chip

@@ -680,7 +680,7 @@ Add status badge for duplicate, admin response preview, duplicate link indicator
       mt: 1,
       p: 1.5,
       borderRadius: theme.layout.radius.card,
-      bgcolor: theme.palette.surfaceContainerLow,
+      backgroundColor: theme.palette.surfaceContainerLow,
     })}
   >
     <Typography variant="labelMd" sx={{ fontWeight: 700 }}>

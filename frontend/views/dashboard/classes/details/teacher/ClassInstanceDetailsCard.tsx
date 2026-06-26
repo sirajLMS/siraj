@@ -59,7 +59,7 @@ const StyledHeadingInfoIcon = styled(InfoOutlined)(({ theme }) => ({
 
 // Instance ID chip with secondaryContainer background
 const StyledInstanceIdChip = styled(Chip)(({ theme }) => ({
-  bgcolor: theme.palette.secondaryContainer,
+  backgroundColor: theme.palette.secondaryContainer,
   color: theme.palette.onSecondaryContainer,
   typography: "labelUppercase",
 }));
@@ -138,7 +138,7 @@ export function ClassInstanceDetailsCard({
             label={labels.status}
             value={
               <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-                <StyledStatusDot sx={theme => ({ bgcolor: theme.palette.status[statusKey] })} />
+                <StyledStatusDot sx={theme => ({ backgroundColor: theme.palette.status[statusKey] })} />
                 <Typography variant="bodyLg" sx={{ fontWeight: 600 }}>
                   {statusLabel}
                 </Typography>

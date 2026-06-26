@@ -122,14 +122,14 @@ export function MetricCard({
     height: "100%",
     ...(isHighlight && {
       borderColor: theme.palette.primary.main,
-      bgcolor: theme.palette.action.hover,
+      backgroundColor: theme.palette.action.hover,
     }),
     ...(isError && {
       borderColor: theme.palette.error.light,
     }),
     "&:hover .metric-icon-wrap": onClick
       ? {
-          bgcolor: isError ? theme.palette.error.main : theme.palette.primary.main,
+          backgroundColor: isError ? theme.palette.error.main : theme.palette.primary.main,
           borderColor: isError ? theme.palette.error.main : theme.palette.primary.main,
           "& .MuiSvgIcon-root": { color: isError ? theme.palette.onError : theme.palette.onPrimary },
         }

@@ -18,7 +18,7 @@ export function PerformanceStreak() {
     <Box
       sx={theme => ({
         mt: 4,
-        bgcolor: theme.palette.primary.main,
+        backgroundColor: theme.palette.primary.main,
         p: 3,
         borderRadius: 4,
         position: "relative",
@@ -40,7 +40,7 @@ export function PerformanceStreak() {
               key={item.id}
               sx={theme => ({
                 flex: 1,
-                bgcolor: theme.palette.onPrimary,
+                backgroundColor: theme.palette.onPrimary,
                 opacity: item.height === 48 ? 1 : 0.2,
                 borderTopLeftRadius: 4,
                 borderTopRightRadius: 4,
@@ -64,7 +64,7 @@ export function PerformanceStreak() {
           bottom: -40,
           width: 160,
           height: 160,
-          bgcolor: theme.palette.onPrimary,
+          backgroundColor: theme.palette.onPrimary,
           opacity: 0.05,
           borderRadius: "50%",
           filter: "blur(24px)",

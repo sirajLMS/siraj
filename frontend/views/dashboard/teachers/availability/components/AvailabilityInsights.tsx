@@ -84,7 +84,7 @@ function TimezoneInsight({
             fontSize: "10px",
             fontWeight: 700,
             border: `2px solid ${theme.palette.background.paper}`,
-            bgcolor: theme.palette.secondaryContainer,
+            backgroundColor: theme.palette.secondaryContainer,
             color: theme.palette.onSecondaryContainer,
           },
         })}
@@ -93,7 +93,7 @@ function TimezoneInsight({
           <Avatar
             key={tz}
             sx={theme => ({
-              bgcolor: tz === "AST" ? theme.palette.primaryContainer : theme.palette.secondaryContainer,
+              backgroundColor: tz === "AST" ? theme.palette.primaryContainer : theme.palette.secondaryContainer,
               color: tz === "AST" ? theme.palette.onPrimaryContainer : theme.palette.onSecondaryContainer,
             })}
           >

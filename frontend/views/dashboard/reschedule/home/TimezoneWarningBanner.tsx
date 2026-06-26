@@ -18,7 +18,7 @@ export function TimezoneWarningBanner({ timezone }: Readonly<Props>) {
         alignItems: "flex-start",
         gap: 2,
         p: 2,
-        bgcolor: theme.palette.warningContainer,
+        backgroundColor: theme.palette.warningContainer,
         borderLeft: 4,
         borderColor: theme.palette.onWarningContainer,
         borderRadius: 1,

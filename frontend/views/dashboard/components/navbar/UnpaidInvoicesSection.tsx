@@ -54,7 +54,7 @@ export function UnpaidInvoicesSection() {
         <Typography
           variant="caption"
           sx={theme => ({
-            bgcolor: theme.palette.error.main,
+            backgroundColor: theme.palette.error.main,
             color: theme.palette.onError,
             px: 0.75,
             py: 0.25,

@@ -34,7 +34,7 @@ export function ResourceDeleteDialog({
             width: 64,
             height: 64,
             borderRadius: "50%",
-            bgcolor: theme.palette.errorContainer,
+            backgroundColor: theme.palette.errorContainer,
             color: theme.palette.error.main,
             display: "flex",
             alignItems: "center",
@@ -61,8 +61,8 @@ export function ResourceDeleteDialog({
           disabled={loading}
           sx={theme => ({
             py: 1.5,
-            bgcolor: theme.palette.error.main,
-            "&:hover": { bgcolor: theme.palette.error.dark },
+            backgroundColor: theme.palette.error.main,
+            "&:hover": { backgroundColor: theme.palette.error.dark },
           })}
         >
           {loading ? "..." : labels.deleteDialog.confirm}

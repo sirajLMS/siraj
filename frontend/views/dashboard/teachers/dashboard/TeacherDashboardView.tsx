@@ -139,7 +139,7 @@ export function TeacherDashboardView({
                 label={labels.todayChip}
                 size="small"
                 sx={theme => ({
-                  bgcolor: theme.palette.secondary.main,
+                  backgroundColor: theme.palette.secondary.main,
                   color: theme.palette.onSecondary,
                 })}
               />

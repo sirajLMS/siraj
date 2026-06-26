@@ -27,7 +27,7 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
       elevation={0}
       sx={{
         width: "100%",
-        bgcolor: theme => theme.palette.headerContainer,
+        backgroundColor: theme => theme.palette.headerContainer,
         color: theme => theme.palette.onHeaderContainer,
         zIndex: theme => theme.zIndex.drawer + 1,
         boxShadow: theme => theme.palette.shadow.card,
@@ -47,7 +47,7 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
             sx={theme => ({
               width: 40,
               height: 40,
-              bgcolor: alpha(theme.palette.onHeaderContainer, 0.15),
+              backgroundColor: alpha(theme.palette.onHeaderContainer, 0.15),
               borderRadius: 2,
               display: "flex",
               alignItems: "center",

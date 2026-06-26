@@ -52,7 +52,7 @@ export function TeacherReassignmentView({
               severity="error"
               icon={<WarningOutlined />}
               sx={theme => ({
-                bgcolor: theme.palette.errorContainer,
+                backgroundColor: theme.palette.errorContainer,
                 color: theme.palette.onErrorContainer,
                 borderRadius: 2,
                 "& .MuiAlert-icon": {

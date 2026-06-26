@@ -37,7 +37,7 @@ const StyledDetailLabel = styled(Typography)(({ theme }) => ({
 const StyledHeaderBar = styled(Box)(({ theme }) => ({
   paddingInline: theme.spacing(3),
   paddingBlock: theme.spacing(2),
-  bgcolor: theme.palette.primary.main,
+  backgroundColor: theme.palette.primary.main,
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
@@ -58,7 +58,7 @@ const StyledHeaderTitle = styled(Typography)(({ theme }) => ({
 
 // Status chip displayed in the header (paper background with primary accent border)
 const StyledStatusChip = styled(Chip)(({ theme }) => ({
-  bgcolor: theme.palette.background.paper,
+  backgroundColor: theme.palette.background.paper,
   color: theme.palette.primary.main,
   typography: "labelUppercase",
   border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
@@ -92,7 +92,7 @@ const StyledOriginalDateText = styled(Typography)(({ theme }) => ({
 const StyledAuditTrailSection = styled(Box)(({ theme }) => ({
   paddingInline: theme.spacing(3),
   paddingBlock: theme.spacing(3),
-  bgcolor: theme.palette.surfaceContainerLow,
+  backgroundColor: theme.palette.surfaceContainerLow,
   borderTop: `1px solid ${theme.palette.border.light}`,
 }));
 
@@ -108,7 +108,7 @@ const StyledSectionTitle = styled(Typography)(({ theme }) => ({
 
 // Paper-background quote block with left accent border used for the audit remark
 const StyledRemarkQuoteBlock = styled(Box)(({ theme }) => ({
-  bgcolor: theme.palette.background.paper,
+  backgroundColor: theme.palette.background.paper,
   padding: theme.spacing(2),
   borderRadius: 2,
   borderLeft: `4px solid ${theme.palette.header}`,

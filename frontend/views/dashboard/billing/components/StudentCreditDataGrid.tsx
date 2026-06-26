@@ -90,7 +90,7 @@ export function StudentCreditDataGrid({
                 size="small"
                 sx={theme => ({
                   fontWeight: 700,
-                  bgcolor: isNegative ? theme.palette.errorContainer : theme.palette.secondaryContainer,
+                  backgroundColor: isNegative ? theme.palette.errorContainer : theme.palette.secondaryContainer,
                   color: isNegative ? theme.palette.error.main : theme.palette.onSecondaryContainer,
                 })}
               />

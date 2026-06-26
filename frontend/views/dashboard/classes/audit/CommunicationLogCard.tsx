@@ -53,7 +53,7 @@ const StyledMobileResendButton = styled(Button)(({ theme }) => ({
   borderRadius: 1.5,
   "&:hover": {
     borderColor: theme.palette.primary.dark,
-    bgcolor: alpha(theme.palette.primary.main, 0.04),
+    backgroundColor: alpha(theme.palette.primary.main, 0.04),
   },
 }));
 
@@ -66,7 +66,7 @@ const StyledDesktopResendButton = styled(Button)(({ theme }) => ({
   "&:hover": {
     borderColor: theme.palette.primary.main,
     color: theme.palette.primary.main,
-    bgcolor: alpha(theme.palette.primary.main, 0.04),
+    backgroundColor: alpha(theme.palette.primary.main, 0.04),
   },
 }));
 
@@ -82,7 +82,7 @@ const LogEntryItem = ({ entry, isMobile }: { entry: CommunicationLogEntry; isMob
         justifyContent: "space-between",
         gap: 1.5,
         p: isMobile ? 2 : 0,
-        bgcolor: isMobile ? theme.palette.action.hover : undefined,
+        backgroundColor: isMobile ? theme.palette.action.hover : undefined,
         borderRadius: isMobile ? 3 : 0,
         opacity: entry.isActive ? 1 : 0.6,
       })}
@@ -97,7 +97,7 @@ const LogEntryItem = ({ entry, isMobile }: { entry: CommunicationLogEntry; isMob
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
-            bgcolor: entry.isActive ? theme.palette.secondaryContainer : theme.palette.action.selected,
+            backgroundColor: entry.isActive ? theme.palette.secondaryContainer : theme.palette.action.selected,
             color: entry.isActive ? theme.palette.onSecondaryContainer : theme.palette.text.secondary,
           })}
         >

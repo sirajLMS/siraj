@@ -75,7 +75,7 @@ function DefaultLogoutButton({ onClick }: Readonly<LogoutButtonSlotProps>) {
         mb: 1,
         py: 1,
         "&:hover": {
-          bgcolor: theme.palette.errorContainer,
+          backgroundColor: theme.palette.errorContainer,
           color: theme.palette.onErrorContainer,
         },
       })}
@@ -170,7 +170,7 @@ export function UserMenuButton({
               boxShadow: theme.palette.shadow.card,
               border: `1px solid ${theme.palette.outlineVariant}`,
               borderRadius: 2,
-              bgcolor: theme.palette.background.paper,
+              backgroundColor: theme.palette.background.paper,
             }),
           },
         }}

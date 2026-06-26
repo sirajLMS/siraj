@@ -38,7 +38,7 @@ export function TeacherCardList({ rows, searchQuery, onSearchChange }: Readonly<
             ),
             sx: theme => ({
               borderRadius: "xl",
-              bgcolor: theme.palette.background.paper,
+              backgroundColor: theme.palette.background.paper,
             }),
           },
         }}
@@ -49,7 +49,7 @@ export function TeacherCardList({ rows, searchQuery, onSearchChange }: Readonly<
           <Box
             key={row.id}
             sx={theme => ({
-              bgcolor: theme.palette.background.paper,
+              backgroundColor: theme.palette.background.paper,
               borderRadius: "xl",
               p: 2,
               boxShadow: theme.palette.shadow.card,

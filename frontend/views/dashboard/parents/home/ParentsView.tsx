@@ -63,7 +63,7 @@ export function ParentsView({
                   width: 300,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 10,
-                    bgcolor: theme => theme.palette.background.paper,
+                    backgroundColor: theme => theme.palette.background.paper,
                   },
                 }}
                 slotProps={{
@@ -96,7 +96,7 @@ export function ParentsView({
             mb: 3,
             "& .MuiOutlinedInput-root": {
               borderRadius: 3,
-              bgcolor: theme => theme.palette.background.paper,
+              backgroundColor: theme => theme.palette.background.paper,
             },
           }}
           slotProps={{

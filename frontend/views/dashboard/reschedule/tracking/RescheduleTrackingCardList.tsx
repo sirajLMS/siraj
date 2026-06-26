@@ -62,10 +62,10 @@ const CardHeader = ({ row, onView }: { row: TrackingRow; onView: (id: string) =>
           width: 40,
           height: 40,
           borderRadius: "50%",
-          bgcolor: theme.palette.action.hover,
+          backgroundColor: theme.palette.action.hover,
           color: theme.palette.primary.main,
           "&:hover": {
-            bgcolor: alpha(theme.palette.primary.main, 0.07),
+            backgroundColor: alpha(theme.palette.primary.main, 0.07),
           },
         })}
       >
@@ -134,7 +134,7 @@ const CardFooter = ({
           px: 1.5,
           py: 0.5,
           borderRadius: 6,
-          bgcolor: isLeave ? theme.palette.error.main : theme.palette.primary.main,
+          backgroundColor: isLeave ? theme.palette.error.main : theme.palette.primary.main,
         })}
       >
         {isLeave ? (
