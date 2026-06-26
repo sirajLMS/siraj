@@ -27,8 +27,7 @@ describe("GraphQL Parent Integration Tests", () => {
 
     const data = await authenticatedRequest(authToken, "query", parentDirectoryQueryDocument, {
       search: null,
-      limit: 50,
-      offset: 0,
+      paginationArgs: null,
     });
 
     expect(data.parentDirectory).toBeDefined();
@@ -43,7 +42,7 @@ describe("GraphQL Parent Integration Tests", () => {
     expect(metrics.onTrial).toBeGreaterThanOrEqual(0);
 
     expect(Array.isArray(data.parentDirectory?.rows)).toBeTrue();
-    expect(data.parentDirectory?.totalParents).toBeGreaterThanOrEqual(0);
+    expect(data.parentDirectory?.totalCount).toBeGreaterThanOrEqual(0);
 
     if (data.parentDirectory?.rows && data.parentDirectory.rows.length > 0) {
       const firstRow = data.parentDirectory.rows[0];
@@ -61,8 +60,7 @@ describe("GraphQL Parent Integration Tests", () => {
 
     const data = await authenticatedRequest(authToken, "query", parentDirectoryQueryDocument, {
       search: "Default Parent",
-      limit: 50,
-      offset: 0,
+      paginationArgs: null,
     });
 
     expect(data.parentDirectory?.rows).toBeDefined();
@@ -75,8 +73,7 @@ describe("GraphQL Parent Integration Tests", () => {
   test("parentDirectory — teacher role is denied access", async () => {
     await assertOperationDenied("teacher_default", "query", parentDirectoryQueryDocument, {
       search: null,
-      limit: 50,
-      offset: 0,
+      paginationArgs: null,
     });
   });
 
@@ -87,8 +84,7 @@ describe("GraphQL Parent Integration Tests", () => {
       query: parentDirectoryQueryDocument,
       variables: {
         search: null,
-        limit: 50,
-        offset: 0,
+        paginationArgs: null,
       },
       context: {
         headers: {
@@ -118,8 +114,7 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
     // First, get a valid parentId from the directory (which admin already has access to)
     const dataDir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
       search: null,
-      limit: 1,
-      offset: 0,
+      paginationArgs: null,
     });
 
     const parentId = dataDir.parentDirectory?.rows?.[0]?.id;
@@ -190,8 +185,7 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
 
     const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
       search: null,
-      limit: 1,
-      offset: 0,
+      paginationArgs: null,
     });
     const parentId = dir.parentDirectory?.rows?.[0]?.id;
     if (!parentId) return;
@@ -258,8 +252,7 @@ describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
 
     const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
       search: null,
-      limit: 10,
-      offset: 0,
+      paginationArgs: null,
     });
 
     // Find a parent that is REGULAR (not already DEACTIVATED)
@@ -334,17 +327,19 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
 
     const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
       search: null,
-      limit: 1,
-      offset: 0,
+      paginationArgs: null,
     });
     const parentId = dir.parentDirectory?.rows?.[0]?.id;
     if (!parentId) return;
 
-    const data = await authenticatedRequest(adminToken, "query", parentInvoiceHistoryQueryDocument, { parentId });
+    const data = await authenticatedRequest(adminToken, "query", parentInvoiceHistoryQueryDocument, {
+      parentId,
+      paginationArgs: null,
+    });
 
-    expect(Array.isArray(data.parentInvoiceHistory)).toBeTrue();
-    if (data.parentInvoiceHistory && data.parentInvoiceHistory.length > 0) {
-      const first = data.parentInvoiceHistory[0];
+    expect(data.parentInvoiceHistory?.rows).toBeDefined();
+    if (data.parentInvoiceHistory?.rows && data.parentInvoiceHistory.rows.length > 0) {
+      const first = data.parentInvoiceHistory.rows[0];
       expect(typeof first?.id).toBe("string");
       expect(typeof first?.amount).toBe("string");
       expect(typeof first?.status).toBe("string");
@@ -356,7 +351,7 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
 
     const result = await testClient.query({
       query: parentInvoiceHistoryQueryDocument,
-      variables: { parentId: "00000000-0000-0000-0000-000000000000" },
+      variables: { parentId: "00000000-0000-0000-0000-000000000000", paginationArgs: null },
       context: { headers: { Authorization: `Bearer ${teacherToken}` } },
     });
 
@@ -379,8 +374,7 @@ describe("GraphQL Document Tests — parentDocuments query", () => {
 
     const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
       search: null,
-      limit: 1,
-      offset: 0,
+      paginationArgs: null,
     });
     const parentId = dir.parentDirectory?.rows?.[0]?.id;
     if (!parentId) return;

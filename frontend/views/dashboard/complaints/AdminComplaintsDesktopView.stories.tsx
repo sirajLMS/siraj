@@ -57,6 +57,9 @@ const mockActions = {
   onAnswer: (id: string, options: { readonly sendEmail: boolean }) => {
     logger.info("onAnswer:", id, options);
   },
+  onPageChange: (page: number) => {
+    logger.info("onPageChange:", page);
+  },
 };
 
 interface AdminComplaintsDesktopStoryProps {
@@ -66,6 +69,9 @@ interface AdminComplaintsDesktopStoryProps {
   readonly activeTab: ComplaintTab;
   readonly draftResponses: Readonly<Record<string, string>>;
   readonly canManage: boolean;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
 }
 
 function AdminComplaintsDesktopStoryRenderer({
@@ -75,6 +81,9 @@ function AdminComplaintsDesktopStoryRenderer({
   activeTab,
   draftResponses,
   canManage,
+  page,
+  pageSize,
+  totalCount,
 }: Readonly<AdminComplaintsDesktopStoryProps>) {
   const t = useTranslations("dashboard.complaints");
   const labels = buildComplaintsLabels(t).admin;
@@ -88,6 +97,9 @@ function AdminComplaintsDesktopStoryRenderer({
       activeTab={activeTab}
       draftResponses={draftResponses}
       canManage={canManage}
+      page={page}
+      pageSize={pageSize}
+      totalCount={totalCount}
       {...mockActions}
     />
   );
@@ -114,6 +126,9 @@ export const Default: Story = {
     activeTab: ComplaintStatus.Unanswered,
     draftResponses: {},
     canManage: true,
+    page: 0,
+    pageSize: 10,
+    totalCount: 2,
   },
 };
 

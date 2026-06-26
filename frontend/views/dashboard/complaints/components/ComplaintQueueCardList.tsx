@@ -2,6 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { PaginationControls } from "@/frontend/components/ui/PaginationControls";
 import type { ComplaintsAdminLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import type { AdminComplaintRow } from "../types/complaints.types";
 import { ComplaintQueueCard } from "./ComplaintQueueCard";
@@ -26,8 +27,12 @@ interface ComplaintQueueCardListProps {
   readonly labels: ComplaintsAdminLabels;
   readonly draftResponses: Readonly<Record<string, string>>;
   readonly canManage: boolean;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
   readonly onDraftChange: (id: string, text: string) => void;
   readonly onAnswer: (id: string, options: { readonly sendEmail: boolean }) => void;
+  readonly onPageChange: (page: number) => void;
 }
 
 export function ComplaintQueueCardList({
@@ -35,30 +40,48 @@ export function ComplaintQueueCardList({
   labels,
   draftResponses,
   canManage,
+  page,
+  pageSize,
+  totalCount,
   onDraftChange,
   onAnswer,
+  onPageChange,
 }: Readonly<ComplaintQueueCardListProps>) {
   if (rows.length === 0) {
     return <StyledEmptyStateMessage variant="bodyMd">{labels.queue.noEntries}</StyledEmptyStateMessage>;
   }
 
+  const pageCount = Math.ceil(totalCount / pageSize);
+
   return (
-    <StyledQueueCardContainer>
-      {rows.map(row => (
-        <ComplaintQueueCard
-          key={row.id}
-          row={row}
-          labels={labels}
-          draftResponse={draftResponses[row.id] ?? ""}
-          canManage={canManage}
-          onDraftChange={text => {
-            onDraftChange(row.id, text);
-          }}
-          onAnswer={options => {
-            onAnswer(row.id, options);
-          }}
+    <Box>
+      <StyledQueueCardContainer>
+        {rows.map(row => (
+          <ComplaintQueueCard
+            key={row.id}
+            row={row}
+            labels={labels}
+            draftResponse={draftResponses[row.id] ?? ""}
+            canManage={canManage}
+            onDraftChange={text => {
+              onDraftChange(row.id, text);
+            }}
+            onAnswer={options => {
+              onAnswer(row.id, options);
+            }}
+          />
+        ))}
+      </StyledQueueCardContainer>
+      {pageCount > 1 && (
+        <PaginationControls
+          page={page}
+          pageCount={pageCount}
+          rowCount={totalCount}
+          pageSize={pageSize}
+          embedded
+          onPageChange={onPageChange}
         />
-      ))}
-    </StyledQueueCardContainer>
+      )}
+    </Box>
   );
 }

@@ -36,6 +36,10 @@ export function AdminBillingMobileView({
   onMarkAsPaid,
   onSendReminder,
   onManualInvoice,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
 }: Readonly<AdminBillingViewProps>) {
   return (
     <>
@@ -58,6 +62,10 @@ export function AdminBillingMobileView({
             quickPay: labels.adminTable.quickPay,
             statusLabels: labels.invoiceStatus,
           }}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
         />
         {canManage && (
           <>

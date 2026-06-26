@@ -15,7 +15,9 @@ import type {
   ComplaintSelectType,
   ComplaintSubmitInput,
   FileMetadata,
+  ParentComplaintPaginatedResult,
 } from "@/backend/types";
+import { PaginationArgs } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ComplaintService {
@@ -107,7 +109,11 @@ export namespace ComplaintService {
     }
   }
 
-  export async function getParentComplaints(actorUserId: string, locale?: string): Promise<ComplaintReturnType[]> {
+  export async function getParentComplaints(
+    actorUserId: string,
+    pagination: PaginationArgs | null = null,
+    locale?: string
+  ): Promise<ParentComplaintPaginatedResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
@@ -121,12 +127,12 @@ export namespace ComplaintService {
     }
 
     try {
-      const complaints = await ComplaintRepository.getComplaintsByParent(parent.id);
-      const results: ComplaintReturnType[] = [];
+      const result = await ComplaintRepository.getComplaintsByParent(parent.id, pagination);
+      const complaints: ComplaintReturnType[] = [];
 
-      for (const complaint of complaints) {
+      for (const complaint of result.complaints) {
         const responses = await ComplaintResponseRepository.getResponsesByComplaint(complaint.id);
-        results.push({
+        complaints.push({
           id: complaint.id,
           parentId: complaint.parentId,
           studentId: complaint.studentId,
@@ -141,7 +147,12 @@ export namespace ComplaintService {
         });
       }
 
-      return results;
+      return {
+        id: result.id,
+        complaints,
+        totalCount: result.totalCount,
+        pageInfo: result.pageInfo,
+      };
     } catch (error) {
       logger.error("Failed to get parent complaints", { actorUserId, parentId: parent.id, error });
       throw error;
@@ -161,8 +172,8 @@ export namespace ComplaintService {
 
     try {
       const result = await ComplaintRepository.getComplaintQueue({
-        limit: options.limit,
-        offset: options.offset,
+        limit: 100,
+        offset: 0,
         status: options.status ?? null,
         search: options.search ?? null,
       });
@@ -194,8 +205,8 @@ export namespace ComplaintService {
     try {
       const [queueResult, metrics] = await Promise.all([
         ComplaintRepository.getComplaintQueue({
-          limit: options.limit,
-          offset: options.offset,
+          limit: 100,
+          offset: 0,
           status: options.status ?? null,
           search: options.search ?? null,
         }),
@@ -211,6 +222,55 @@ export namespace ComplaintService {
           answered: metrics.answered,
           avgResolutionHours: metrics.avgResolutionHours,
           totalCount: queueResult.metrics.totalCount,
+        },
+      };
+    } catch (error) {
+      logger.error("Failed to get admin complaint queue with metrics", { actorUserId, options, error });
+      throw error;
+    }
+  }
+
+  export async function getQueueWithMetricsPaginated(
+    actorUserId: string,
+    options: ComplaintQueueFilter,
+    paginationArgs: PaginationArgs | null,
+    locale?: string
+  ): Promise<{
+    id: string;
+    rows: ComplaintQueuePaginatedResult["rows"];
+    totalCount: number;
+    pageInfo: ComplaintQueuePaginatedResult["pageInfo"];
+    metrics: { id: string; unanswered: number; answered: number; avgResolutionHours: number; totalCount: number };
+  }> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    try {
+      const [paginatedResult, metrics] = await Promise.all([
+        ComplaintRepository.getComplaintQueuePaginated(
+          {
+            status: options.status ?? null,
+            search: options.search ?? null,
+          },
+          paginationArgs
+        ),
+        ComplaintRepository.getComplaintMetrics(),
+      ]);
+
+      return {
+        id: "complaint-queue-result",
+        rows: paginatedResult.rows,
+        totalCount: paginatedResult.totalCount,
+        pageInfo: paginatedResult.pageInfo,
+        metrics: {
+          id: "complaint-metrics",
+          unanswered: metrics.unanswered,
+          answered: metrics.answered,
+          avgResolutionHours: metrics.avgResolutionHours,
+          totalCount: paginatedResult.totalCount,
         },
       };
     } catch (error) {

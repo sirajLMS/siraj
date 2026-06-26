@@ -2,12 +2,16 @@ import { create } from "zustand";
 import type { ComplaintTab } from "@/frontend/views/dashboard/complaints/types/complaints.types";
 import { ComplaintStatus } from "@/frontend/views/dashboard/complaints/types/complaints.types";
 
+const DEFAULT_PAGE_SIZE = 10;
+
 interface AdminComplaintsState {
   readonly searchQuery: string;
   readonly activeTab: ComplaintTab;
   readonly draftResponses: Readonly<Record<string, string>>;
   readonly respondingToId: string;
   readonly isResponding: boolean;
+  readonly page: number;
+  readonly pageSize: number;
   setSearchQuery: (query: string) => void;
   setActiveTab: (tab: ComplaintTab) => void;
   setDraftResponse: (id: string, text: string) => void;
@@ -15,6 +19,7 @@ interface AdminComplaintsState {
   setRespondingToId: (id: string) => void;
   setIsResponding: (value: boolean) => void;
   resetResponding: () => void;
+  setPage: (page: number) => void;
 }
 
 export const useAdminComplaintsStore = create<AdminComplaintsState>(set => ({
@@ -23,11 +28,13 @@ export const useAdminComplaintsStore = create<AdminComplaintsState>(set => ({
   draftResponses: {},
   respondingToId: "",
   isResponding: false,
+  page: 0,
+  pageSize: DEFAULT_PAGE_SIZE,
   setSearchQuery: query => {
-    set({ searchQuery: query });
+    set({ searchQuery: query, page: 0 });
   },
   setActiveTab: tab => {
-    set({ activeTab: tab });
+    set({ activeTab: tab, page: 0 });
   },
   setDraftResponse: (id, text) => {
     set(state => ({
@@ -47,5 +54,8 @@ export const useAdminComplaintsStore = create<AdminComplaintsState>(set => ({
   },
   resetResponding: () => {
     set({ respondingToId: "", isResponding: false });
+  },
+  setPage: page => {
+    set({ page });
   },
 }));

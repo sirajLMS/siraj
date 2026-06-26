@@ -18,8 +18,7 @@ async function loginAndGetParentId(): Promise<{ token: string; parentId: string 
 
   const dir = await authenticatedRequest(token, "query", parentDirectoryQueryDocument, {
     search: null,
-    limit: 1,
-    offset: 0,
+    paginationArgs: null,
   });
 
   const parentId = dir.parentDirectory?.rows?.[0]?.id;

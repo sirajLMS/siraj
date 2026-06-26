@@ -1,16 +1,21 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
+import { PageInfoObject } from "@/backend/graphql/pothos/pagination.objects";
 import { ComplaintService } from "@/backend/services";
 import type {
   ComplaintFileReturnType,
   ComplaintMetrics,
   ComplaintQueueFilter,
+  ComplaintQueuePaginatedResult,
   ComplaintQueueResult,
   ComplaintReturnType,
   ComplaintSelectType,
   ComplaintSubmitWithFilesInput,
+  PaginationArgs,
 } from "@/backend/types";
 import { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import { ComplaintResponsePothosObject } from "./complaintResponses.pothos";
+import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 export const ComplaintCategoryPothosEnum = gqlSchemaBuilder.enumType(ComplaintCategory, {
   name: "ComplaintCategory",
@@ -79,6 +84,33 @@ export const ComplaintQueueResultPothosObject = AdminComplaintQueueResultRef.imp
     complaints: t.expose("complaints", { type: [ComplaintPothosObject] }),
     rows: t.expose("complaints", { type: [ComplaintPothosObject] }),
     metrics: t.expose("metrics", { type: ComplaintMetricsPothosObject }),
+    totalCount: t.exposeInt("totalCount", { nullable: true }),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
+  }),
+});
+
+const ParentComplaintsResultRef = gqlSchemaBuilder.objectRef<ParentComplaintPaginatedResult>("ParentComplaintsResult");
+
+export const ParentComplaintsResultPothosObject = ParentComplaintsResultRef.implement({
+  description: "Paginated parent complaints with page info.",
+  fields: t => ({
+    id: t.exposeString("id"),
+    complaints: t.expose("complaints", { type: [ComplaintPothosObject] }),
+    totalCount: t.exposeInt("totalCount"),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
+  }),
+});
+
+const ComplaintQueuePaginatedResultRef = gqlSchemaBuilder.objectRef<ComplaintQueuePaginatedResult>(
+  "ComplaintQueuePaginatedResult"
+);
+
+export const ComplaintQueuePaginatedResultPothosObject = ComplaintQueuePaginatedResultRef.implement({
+  description: "Paginated result for the admin complaint queue.",
+  fields: t => ({
+    rows: t.expose("rows", { type: [ComplaintPothosObject] }),
+    totalCount: t.exposeInt("totalCount"),
+    pageInfo: t.field({ type: PageInfoObject, nullable: true }),
   }),
 });
 
@@ -111,12 +143,10 @@ export const SubmitComplaintInputPothosObject = gqlSchemaBuilder
 export const ComplaintQueueFilterPothosObject = gqlSchemaBuilder
   .inputRef<ComplaintQueueFilter>("ComplaintQueueFilter")
   .implement({
-    description: "Filter and pagination options for the admin complaint queue.",
+    description: "Filter options for the admin complaint queue.",
     fields: t => ({
       search: t.string({ required: false }),
       status: t.field({ type: ComplaintStatusPothosEnum, required: false }),
-      limit: t.int({ required: true }),
-      offset: t.int({ required: true }),
     }),
   });
 
@@ -133,15 +163,37 @@ function normalizeComplaint(complaint: ComplaintReturnType): ComplaintReturnType
 
 gqlSchemaBuilder.queryField("parentComplaints", t =>
   t.field({
-    type: [ComplaintPothosObject],
-    description: "Returns the authenticated parent's complaint history with responses.",
-    resolve: async (_root, _args, ctx) => {
+    type: ParentComplaintsResultPothosObject,
+    description: "Returns the authenticated parent's complaint history with pagination.",
+    args: {
+      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
+    },
+    resolve: async (_root, args, ctx): Promise<ParentComplaintPaginatedResult> => {
       if (!ctx.user?.id) {
         throw new Error("unauthenticated");
       }
 
-      const complaints = await ComplaintService.getParentComplaints(ctx.user.id, ctx.locale);
-      return complaints.map(normalizeComplaint);
+      let pagination: PaginationArgs | null = null;
+      if (args.paginationArgs) {
+        pagination = new PaginationArgs({
+          first: args.paginationArgs.first ?? null,
+          skip: args.paginationArgs.skip ?? null,
+          after: args.paginationArgs.after ?? null,
+          before: args.paginationArgs.before ?? null,
+          last: args.paginationArgs.last ?? null,
+          page: args.paginationArgs.page ?? null,
+          maxCount: args.paginationArgs.maxCount ?? null,
+        });
+      }
+
+      const result = await ComplaintService.getParentComplaints(ctx.user.id, pagination, ctx.locale);
+
+      return {
+        id: result.id,
+        complaints: result.complaints.map(normalizeComplaint),
+        totalCount: result.totalCount,
+        pageInfo: result.pageInfo,
+      };
     },
   })
 );
@@ -152,26 +204,38 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
     description: "Returns the paginated admin complaint queue with metrics.",
     args: {
       filter: t.arg({ type: ComplaintQueueFilterPothosObject, required: true }),
+      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     resolve: async (_root, args, ctx): Promise<ComplaintQueueResult> => {
       if (!ctx.user?.id) {
         throw new Error("unauthenticated");
       }
 
-      const result = await ComplaintService.getQueueWithMetrics(
+      const paginationArgs = args.paginationArgs
+        ? new PaginationArgs({
+            first: args.paginationArgs.first ?? null,
+            skip: args.paginationArgs.skip ?? null,
+            after: args.paginationArgs.after ?? null,
+            before: args.paginationArgs.before ?? null,
+            last: args.paginationArgs.last ?? null,
+            page: args.paginationArgs.page ?? null,
+            maxCount: args.paginationArgs.maxCount ?? null,
+          })
+        : null;
+
+      const result = await ComplaintService.getQueueWithMetricsPaginated(
         ctx.user.id,
         {
-          limit: args.filter.limit,
-          offset: args.filter.offset,
           status: args.filter.status ?? null,
           search: args.filter.search ?? null,
         },
+        paginationArgs,
         ctx.locale
       );
 
       return {
         id: result.id,
-        complaints: result.complaints.map(normalizeComplaint),
+        complaints: result.rows.map(normalizeComplaint),
         metrics: {
           id: result.metrics.id,
           unanswered: result.metrics.unanswered,
@@ -180,6 +244,8 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
           avgResolutionTime: null,
           totalCount: result.metrics.totalCount,
         },
+        totalCount: result.totalCount,
+        pageInfo: result.pageInfo,
       };
     },
   })

@@ -21,6 +21,10 @@ export interface ParentComplaintsViewProps {
   readonly onSubmit: (data: ComplaintFormData) => void;
   readonly onDismissSuccess: () => void;
   readonly onLoadOlderRecords: () => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 export interface AdminComplaintsViewProps {
@@ -31,8 +35,12 @@ export interface AdminComplaintsViewProps {
   readonly activeTab: ComplaintTab;
   readonly draftResponses: Readonly<Record<string, string>>;
   readonly canManage: boolean;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
   readonly onSearchChange: (query: string) => void;
   readonly onTabChange: (tab: ComplaintTab) => void;
   readonly onDraftChange: (id: string, text: string) => void;
   readonly onAnswer: (id: string, options: { readonly sendEmail: boolean }) => void;
+  readonly onPageChange: (page: number) => void;
 }

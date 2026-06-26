@@ -4,21 +4,38 @@ import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 
 // ─── Query: parentComplaints ────────────────────────────────────────────────
 
-export const parentComplaintsQueryDocument: TypedDocumentNode<Operations.ParentComplaintsQuery> = gql`
-  query ParentComplaints {
-    parentComplaints {
+export const parentComplaintsQueryDocument: TypedDocumentNode<
+  Operations.ParentComplaintsQuery,
+  Types.QueryParentComplaintsArgs
+> = gql`
+  query ParentComplaints($paginationArgs: PaginationArgs) {
+    parentComplaints(paginationArgs: $paginationArgs) {
       id
-      category
-      body
-      status
-      createdAt
-      studentName
-      responses {
+      complaints {
         id
+        category
         body
-        emailSent
+        status
         createdAt
-        responderName
+        studentName
+        responses {
+          id
+          body
+          emailSent
+          createdAt
+          responderName
+        }
+      }
+      totalCount
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
       }
     }
   }
@@ -30,8 +47,8 @@ export const adminComplaintQueueQueryDocument: TypedDocumentNode<
   Operations.AdminComplaintQueueQuery,
   Types.QueryAdminComplaintQueueArgs
 > = gql`
-  query AdminComplaintQueue($filter: ComplaintQueueFilter!) {
-    adminComplaintQueue(filter: $filter) {
+  query AdminComplaintQueue($filter: ComplaintQueueFilter!, $paginationArgs: PaginationArgs) {
+    adminComplaintQueue(filter: $filter, paginationArgs: $paginationArgs) {
       id
       rows {
         id
@@ -50,6 +67,17 @@ export const adminComplaintQueueQueryDocument: TypedDocumentNode<
         unanswered
         answered
         avgResolutionTime
+      }
+      totalCount
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
       }
     }
   }

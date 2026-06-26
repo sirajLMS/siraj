@@ -27,10 +27,14 @@ export function AdminComplaintsMobileView({
   activeTab,
   draftResponses,
   canManage,
+  page,
+  pageSize,
+  totalCount,
   onSearchChange,
   onTabChange,
   onDraftChange,
   onAnswer,
+  onPageChange,
 }: Readonly<AdminComplaintsViewProps>) {
   return (
     <PageContainer>
@@ -60,8 +64,12 @@ export function AdminComplaintsMobileView({
           labels={labels}
           draftResponses={draftResponses}
           canManage={canManage}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
           onDraftChange={onDraftChange}
           onAnswer={onAnswer}
+          onPageChange={onPageChange}
         />
       </StyledMobileQueueContainer>
     </PageContainer>

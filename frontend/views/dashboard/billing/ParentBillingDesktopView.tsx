@@ -18,6 +18,10 @@ export function ParentBillingDesktopView({
   onSearchChange,
   onPayNow,
   onDownloadPdf,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
 }: Readonly<ParentBillingViewProps>) {
   return (
     <PageContainer>
@@ -47,6 +51,10 @@ export function ParentBillingDesktopView({
           onPayNow={onPayNow}
           onDownloadPdf={onDownloadPdf}
           labels={getParentInvoiceGridLabels(labels)}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
         />
       </SectionPanel>
     </PageContainer>

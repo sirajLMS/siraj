@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
+import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
@@ -25,13 +25,13 @@ export interface AcademicScheduleDataGridLabels {
 
 interface AcademicScheduleDataGridProps {
   readonly rows: readonly AcademicClassRow[];
-  readonly totalClasses: number;
-  readonly currentPage: number;
-  readonly pageSize: number;
   readonly labels: AcademicScheduleDataGridLabels;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalClasses?: number;
   readonly onJoin: (id: string) => void;
   readonly onLeave: (id: string) => void;
-  readonly onPageChange: (page: number) => void;
+  readonly onPageChange?: (page: number) => void;
 }
 
 const SESSION_STATUS_LABELS: Record<ClassSessionStatus, keyof AcademicScheduleDataGridLabels> = {
@@ -42,9 +42,9 @@ const SESSION_STATUS_LABELS: Record<ClassSessionStatus, keyof AcademicScheduleDa
 
 export function AcademicScheduleDataGrid({
   rows,
+  page = 0,
+  pageSize = 10,
   totalClasses,
-  currentPage,
-  pageSize,
   labels,
   onJoin,
   onLeave,
@@ -135,28 +135,29 @@ export function AcademicScheduleDataGrid({
     ];
   }, [labels, onJoin, onLeave]);
 
-  const paginationModel: GridPaginationModel = {
-    page: currentPage,
-    pageSize,
-  };
+  const isServerPagination = totalClasses !== undefined && onPageChange !== undefined;
 
   return (
     <AppDataGrid<AcademicClassRow>
       rows={rows}
       columns={columns}
       getRowId={row => row.id}
-      rowCount={totalClasses}
-      paginationMode="server"
-      paginationModel={paginationModel}
-      onPaginationModelChange={model => {
-        onPageChange(model.page);
-      }}
-      pageSizeOptions={[pageSize]}
-      slots={{ pagination: GridPagination }}
       autoHeight
       rowHeight={100}
       ariaLabel="academic-schedule-table"
       emptyMessage={labels.noEntries}
+      {...(isServerPagination
+        ? {
+            paginationMode: "server" as const,
+            rowCount: totalClasses,
+            paginationModel: { page, pageSize },
+            onPaginationModelChange: model => {
+              onPageChange(model.page);
+            },
+            pageSizeOptions: [pageSize],
+            slots: { pagination: GridPagination },
+          }
+        : {})}
     />
   );
 }

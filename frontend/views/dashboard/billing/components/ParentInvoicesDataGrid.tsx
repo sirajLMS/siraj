@@ -5,7 +5,7 @@ import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import type { ParentInvoiceRow, ParentInvoiceStatus } from "../types/parentBillingTypes";
 
 export interface ParentInvoicesDataGridLabels {
@@ -30,6 +30,10 @@ interface ParentInvoicesDataGridProps {
   readonly canView: boolean;
   readonly onPayNow: (id: string) => void;
   readonly onDownloadPdf: (id: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 // Fee amount text styled with primary color and bold weight for emphasis
@@ -44,6 +48,10 @@ export function ParentInvoicesDataGrid({
   canView,
   onPayNow,
   onDownloadPdf,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
 }: Readonly<ParentInvoicesDataGridProps>) {
   const columns = useMemo<GridColDef<ParentInvoiceRow>[]>(
     () => [
@@ -156,5 +164,26 @@ export function ParentInvoicesDataGrid({
     [canView, labels, onDownloadPdf, onPayNow]
   );
 
-  return <AppDataGrid rows={rows} columns={columns} getRowId={row => row.id} emptyMessage={labels.noEntries} />;
+  const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
+
+  return (
+    <AppDataGrid
+      rows={rows}
+      columns={columns}
+      getRowId={row => row.id}
+      emptyMessage={labels.noEntries}
+      {...(isServerPagination
+        ? {
+            paginationMode: "server" as const,
+            rowCount: totalCount,
+            paginationModel: { page, pageSize },
+            onPaginationModelChange: model => {
+              onPageChange(model.page);
+            },
+            pageSizeOptions: [pageSize],
+            slots: { pagination: GridPagination },
+          }
+        : {})}
+    />
+  );
 }

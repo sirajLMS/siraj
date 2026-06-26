@@ -1,16 +1,21 @@
 import { create } from "zustand";
 import type { ParentStudentOption } from "@/frontend/views/dashboard/complaints/types/complaints.types";
 
+const DEFAULT_PAGE_SIZE = 10;
+
 interface ParentComplaintsState {
   readonly studentOptions: readonly ParentStudentOption[];
   readonly selectedStudentId: string;
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
+  readonly page: number;
+  readonly pageSize: number;
   setStudentOptions: (options: readonly ParentStudentOption[]) => void;
   setSelectedStudentId: (id: string) => void;
   setSubmitting: (value: boolean) => void;
   setShowSuccess: (value: boolean) => void;
   resetSuccess: () => void;
+  setPage: (page: number) => void;
 }
 
 export const useParentComplaintsStore = create<ParentComplaintsState>(set => ({
@@ -18,6 +23,8 @@ export const useParentComplaintsStore = create<ParentComplaintsState>(set => ({
   selectedStudentId: "",
   isSubmitting: false,
   showSuccess: false,
+  page: 0,
+  pageSize: DEFAULT_PAGE_SIZE,
   setStudentOptions: options => {
     set({ studentOptions: options });
   },
@@ -32,5 +39,8 @@ export const useParentComplaintsStore = create<ParentComplaintsState>(set => ({
   },
   resetSuccess: () => {
     set({ showSuccess: false });
+  },
+  setPage: page => {
+    set({ page });
   },
 }));

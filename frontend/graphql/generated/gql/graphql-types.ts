@@ -374,12 +374,18 @@ export type ComplaintMetrics = {
   unanswered: Maybe<Scalars['Int']['output']>;
 };
 
-/** Filter and pagination options for the admin complaint queue. */
+/** Filter options for the admin complaint queue. */
 export type ComplaintQueueFilter = {
-  limit: Scalars['Int']['input'];
-  offset: Scalars['Int']['input'];
   search: InputMaybe<Scalars['String']['input']>;
   status: InputMaybe<ComplaintStatus>;
+};
+
+/** Paginated result for the admin complaint queue. */
+export type ComplaintQueuePaginatedResult = {
+  __typename?: 'ComplaintQueuePaginatedResult';
+  pageInfo: Maybe<PageInfo>;
+  rows: Maybe<Array<Complaint>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
 };
 
 /** Paginated admin complaint queue with metrics. */
@@ -388,7 +394,9 @@ export type ComplaintQueueResult = {
   complaints: Maybe<Array<Complaint>>;
   id: Maybe<Scalars['String']['output']>;
   metrics: Maybe<ComplaintMetrics>;
+  pageInfo: Maybe<PageInfo>;
   rows: Maybe<Array<Complaint>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
 };
 
 /** A single response to a complaint. */
@@ -1522,6 +1530,15 @@ export type PaginationArgs = {
   skip: InputMaybe<Scalars['Int']['input']>;
 };
 
+/** Paginated parent complaints with page info. */
+export type ParentComplaintsResult = {
+  __typename?: 'ParentComplaintsResult';
+  complaints: Maybe<Array<Complaint>>;
+  id: Maybe<Scalars['String']['output']>;
+  pageInfo: Maybe<PageInfo>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
 export type ParentDirectory = {
   __typename?: 'ParentDirectory';
   id: Maybe<Scalars['String']['output']>;
@@ -1563,6 +1580,14 @@ export type ParentDocument = {
   id: Maybe<Scalars['String']['output']>;
   isProtected: Maybe<Scalars['Boolean']['output']>;
   usageType: Maybe<Scalars['String']['output']>;
+};
+
+export type ParentInvoiceHistoryResult = {
+  __typename?: 'ParentInvoiceHistoryResult';
+  id: Maybe<Scalars['String']['output']>;
+  pageInfo: Maybe<PageInfo>;
+  rows: Maybe<Array<ParentInvoiceRow>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
 };
 
 export type ParentInvoiceRow = {
@@ -1712,11 +1737,11 @@ export type Query = {
   me: Maybe<User>;
   notificationAlerts: Maybe<NotificationAlertsResult>;
   parentAssociatedStudents: Maybe<Array<AssociatedStudent>>;
-  /** Returns the authenticated parent's complaint history with responses. */
-  parentComplaints: Maybe<Array<Complaint>>;
+  /** Returns the authenticated parent's complaint history with pagination. */
+  parentComplaints: Maybe<ParentComplaintsResult>;
   parentDirectory: Maybe<ParentDirectory>;
   parentDocuments: Maybe<Array<ParentDocument>>;
-  parentInvoiceHistory: Maybe<Array<ParentInvoiceRow>>;
+  parentInvoiceHistory: Maybe<ParentInvoiceHistoryResult>;
   parentProfile: Maybe<ParentProfile>;
   /** Returns the authenticated parent's suggestion history with review status. */
   parentSuggestions: Maybe<Array<Suggestion>>;
@@ -1764,6 +1789,7 @@ export type Query = {
 
 export type QueryAdminComplaintQueueArgs = {
   filter: ComplaintQueueFilter;
+  paginationArgs: InputMaybe<PaginationArgs>;
 };
 
 
@@ -1856,6 +1882,11 @@ export type QueryParentAssociatedStudentsArgs = {
 };
 
 
+export type QueryParentComplaintsArgs = {
+  paginationArgs: InputMaybe<PaginationArgs>;
+};
+
+
 export type QueryParentDirectoryArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
   search: InputMaybe<Scalars['String']['input']>;
@@ -1868,6 +1899,7 @@ export type QueryParentDocumentsArgs = {
 
 
 export type QueryParentInvoiceHistoryArgs = {
+  paginationArgs: InputMaybe<PaginationArgs>;
   parentId: Scalars['String']['input'];
 };
 

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-const DEFAULT_PAGE_SIZE = 4;
+const DEFAULT_PAGE_SIZE = 10;
 
 interface ScheduleAlertsState {
   readonly page: number;

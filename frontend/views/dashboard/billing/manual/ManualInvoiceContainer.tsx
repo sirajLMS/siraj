@@ -26,7 +26,7 @@ export function ManualInvoiceContainer() {
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   const { data: parentData, loading: parentsLoading } = useQuery(parentDirectoryQueryDocument, {
-    variables: { search: null, limit: 200, offset: 0 },
+    variables: { search: null, paginationArgs: null },
     fetchPolicy: "cache-first",
   });
 

@@ -1,6 +1,7 @@
 import type { complaints } from "@/backend/db/schema";
 import type { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import type { ComplaintResponse } from "./complaintResponses.types";
+import type { PageInfo } from "./pagination.types";
 
 export type ComplaintSelectType = typeof complaints.$inferSelect;
 export type ComplaintInsertType = typeof complaints.$inferInsert;
@@ -43,8 +44,6 @@ export type ComplaintReturnType = Omit<
 export type ComplaintQueueFilter = {
   search?: string | null;
   status?: ComplaintStatus | null;
-  limit: number;
-  offset: number;
 };
 
 export type ComplaintMetrics = {
@@ -60,6 +59,14 @@ export type ComplaintQueueResult = {
   id: string;
   complaints: ReadonlyArray<ComplaintReturnType>;
   metrics: ComplaintMetrics;
+  totalCount?: number | null;
+  pageInfo?: PageInfo | null;
+};
+
+export type ComplaintQueuePaginatedResult = {
+  rows: ReadonlyArray<ComplaintReturnType>;
+  totalCount: number;
+  pageInfo: PageInfo | null;
 };
 
 export type ComplaintFileReturnType = {
@@ -74,6 +81,13 @@ export type FileMetadata = {
   readonly path: string;
   readonly mimeType: string;
   readonly sizeBytes: number;
+};
+
+export type ParentComplaintPaginatedResult = {
+  readonly id: string;
+  readonly complaints: ReadonlyArray<ComplaintReturnType>;
+  readonly totalCount: number;
+  readonly pageInfo: PageInfo | null;
 };
 
 export type ComplaintSubmitWithFilesInput = ComplaintSubmitInput & {

@@ -9,8 +9,7 @@ import {
 } from "@mui/icons-material";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { StatusBadge } from "@/frontend/components/ui";
-import { PaginationControls } from "@/frontend/components/ui";
+import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
 import { ClassSessionActionButton } from "./ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "./types";
 
@@ -192,7 +191,16 @@ const EndOfSchedule = ({ label }: { label: string }) => {
   );
 };
 
-export function AcademicScheduleCardList({ rows, totalCount, currentPage, pageSize, labels, onJoin, onLeave, onPageChange }: AcademicScheduleCardListProps) {
+export function AcademicScheduleCardList({
+  rows,
+  totalCount,
+  currentPage,
+  pageSize,
+  labels,
+  onJoin,
+  onLeave,
+  onPageChange,
+}: AcademicScheduleCardListProps) {
   const pageCount = Math.ceil(totalCount / pageSize);
 
   return (

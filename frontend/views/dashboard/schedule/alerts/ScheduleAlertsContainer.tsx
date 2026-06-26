@@ -4,10 +4,8 @@ import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { adminDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
 import { useScheduleAlertsStore } from "@/frontend/stores/scheduleAlertsStore";
-import type { AlertsMetric, ScheduleAlert } from "./types";
 import { ScheduleAlertsView } from "./ScheduleAlertsView";
-import type { ClassSessionStatus } from "./types";
-import type { AcademicClassRow, ClassSessionAction } from "./types";
+import type { AcademicClassRow, AlertsMetric, ClassSessionAction, ClassSessionStatus, ScheduleAlert } from "./types";
 
 function getTodayString() {
   const today = new Date();

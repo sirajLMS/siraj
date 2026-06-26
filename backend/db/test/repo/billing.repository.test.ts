@@ -139,12 +139,13 @@ describe("BillingRepository — getInvoicesForParent", () => {
       const inv1 = await createOverdueInvoice(tx, parent.id, "120.00", -5, "UNPAID");
       const inv2 = await createOverdueInvoice(tx, parent.id, "80.00", -10, "PAID");
 
-      const history = await BillingRepository.getInvoicesForParent(parent.id, tx);
+      const result = await BillingRepository.getInvoicesForParent(parent.id, null, tx);
 
-      expect(Array.isArray(history)).toBeTrue();
-      expect(history.length).toBe(2);
+      expect(result.rows.length).toBe(2);
+      expect(result.totalCount).toBe(2);
+      expect(result.pageInfo).toBeNull();
 
-      const itemsMap = new Map(history.map(item => [item.id, item]));
+      const itemsMap = new Map(result.rows.map(item => [item.id, item]));
 
       const item1 = itemsMap.get(inv1.id);
       expect(item1).toBeDefined();
@@ -163,10 +164,11 @@ describe("BillingRepository — getInvoicesForParent", () => {
     });
   });
 
-  test("returns empty array for parent with no invoices", async () => {
+  test("returns empty rows for parent with no invoices", async () => {
     await runInRollback(async tx => {
-      const result = await BillingRepository.getInvoicesForParent("00000000-0000-0000-0000-000000000000", tx);
-      expect(result).toEqual([]);
+      const result = await BillingRepository.getInvoicesForParent("00000000-0000-0000-0000-000000000000", null, tx);
+      expect(result.rows).toEqual([]);
+      expect(result.totalCount).toBe(0);
     });
   });
 
@@ -179,7 +181,6 @@ describe("BillingRepository — getInvoicesForParent", () => {
       const parent = await createTestParent(tx, parentUser.id);
 
       const now = new Date();
-      // create a soft-deleted invoice directly
       const [softDeletedInv] = await tx
         .insert(invoices)
         .values({
@@ -197,8 +198,8 @@ describe("BillingRepository — getInvoicesForParent", () => {
         })
         .returning();
 
-      const result = await BillingRepository.getInvoicesForParent(parent.id, tx);
-      expect(result.some(item => item.id === softDeletedInv.id)).toBeFalse();
+      const result = await BillingRepository.getInvoicesForParent(parent.id, null, tx);
+      expect(result.rows.some(item => item.id === softDeletedInv.id)).toBeFalse();
     });
   });
 });
@@ -256,8 +257,8 @@ describe("BillingRepository — deleteInvoice", () => {
     await runInRollback(async tx => {
       const { parent, invoice } = await setupInvoiceTest(tx);
       await BillingRepository.deleteInvoice(invoice.id, tx);
-      const history = await BillingRepository.getInvoicesForParent(parent.id, tx);
-      expect(history.find(inv => inv.id === invoice.id)).toBeUndefined();
+      const result = await BillingRepository.getInvoicesForParent(parent.id, null, tx);
+      expect(result.rows.find(inv => inv.id === invoice.id)).toBeUndefined();
     });
   });
 });

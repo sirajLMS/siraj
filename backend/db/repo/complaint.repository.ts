@@ -1,7 +1,9 @@
 import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
+import { queryWithPagination } from "@/backend/db/query.extensions";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { PaginationUtils } from "@/backend/utils";
 import type {
   ComplaintFileReturnType,
   ComplaintMetrics,
@@ -10,7 +12,9 @@ import type {
   ComplaintReturnType,
   ComplaintSelectType,
   ComplaintSubmitInput,
+  ParentComplaintPaginatedResult,
 } from "@/backend/types";
+import { PaginationArgs } from "@/backend/types";
 import { type ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
@@ -57,10 +61,16 @@ export namespace ComplaintRepository {
     };
   };
 
-  export const getComplaintsByParent = async (parentId: string, tx?: DBTransaction): Promise<ComplaintReturnType[]> => {
+  export const getComplaintsByParent = async (
+    parentId: string,
+    pagination: PaginationArgs | null = null,
+    tx?: DBTransaction
+  ): Promise<ParentComplaintPaginatedResult> => {
     const queryDb = tx ?? db;
 
-    const results = await queryDb
+    const whereCondition = and(eq(complaints.parentId, parentId), isNull(complaints.deletedAt));
+
+    const baseQuery = queryDb
       .select({
         id: complaints.id,
         parentId: complaints.parentId,
@@ -75,10 +85,17 @@ export namespace ComplaintRepository {
       })
       .from(complaints)
       .leftJoin(students, eq(complaints.studentId, students.id))
-      .where(and(eq(complaints.parentId, parentId), isNull(complaints.deletedAt)))
+      .where(whereCondition)
       .orderBy(desc(complaints.createdAt));
 
-    return results.map(r => ({
+    const [rows, countResult] = await Promise.all([
+      queryWithPagination(baseQuery, pagination),
+      queryDb.select({ total: count() }).from(complaints).where(whereCondition),
+    ]);
+
+    const total = countResult[0]?.total ?? 0;
+
+    const complaintsList: ComplaintReturnType[] = rows.map(r => ({
       id: r.id,
       parentId: r.parentId,
       studentId: r.studentId ?? null,
@@ -91,6 +108,15 @@ export namespace ComplaintRepository {
       studentName: r.studentName ?? null,
       responses: [] as ReadonlyArray<ComplaintResponse>,
     }));
+
+    const pageInfo = PaginationUtils.buildPageInfoFromArgs(pagination, complaintsList.length, total);
+
+    return {
+      id: `parent-complaints-${parentId}`,
+      complaints: complaintsList,
+      totalCount: total,
+      pageInfo,
+    };
   };
 
   export const getComplaintQueue = async (
@@ -159,6 +185,86 @@ export namespace ComplaintRepository {
       id: `complaint-queue-${Date.now()}`,
       complaints: typedRows,
       metrics,
+    };
+  };
+
+  export const getComplaintQueuePaginated = async (
+    options: { search?: string | null; status?: string | null },
+    paginationArgs: PaginationArgs | null,
+    tx?: DBTransaction
+  ): Promise<ComplaintQueuePaginatedResult> => {
+    const queryDb = tx ?? db;
+
+    const conditions = [isNull(complaints.deletedAt)];
+
+    if (options.status) {
+      conditions.push(eq(complaints.status, options.status as ComplaintStatus));
+    }
+
+    if (options.search) {
+      conditions.push(ilike(users.name, `%${options.search}%`));
+    }
+
+    const whereClause = and(...conditions);
+
+    const baseQuery = queryDb
+      .select({
+        id: complaints.id,
+        parentId: complaints.parentId,
+        parentName: users.name,
+        studentId: complaints.studentId,
+        studentName: students.name,
+        category: complaints.category,
+        submitterEmail: complaints.submitterEmail,
+        body: complaints.body,
+        status: complaints.status,
+        responseCount: sql<number>`(
+          SELECT COUNT(*) FROM complaint_responses
+          WHERE complaint_responses.complaint_id = ${complaints.id}
+        )`.mapWith(Number),
+        createdAt: complaints.createdAt,
+        updatedAt: complaints.updatedAt,
+      })
+      .from(complaints)
+      .leftJoin(parents, eq(complaints.parentId, parents.id))
+      .leftJoin(users, eq(parents.userId, users.id))
+      .leftJoin(students, eq(complaints.studentId, students.id))
+      .where(whereClause)
+      .orderBy(desc(complaints.createdAt));
+
+    const [rows, countResult] = await Promise.all([
+      queryWithPagination(baseQuery, paginationArgs),
+      queryDb
+        .select({ total: count() })
+        .from(complaints)
+        .leftJoin(parents, eq(complaints.parentId, parents.id))
+        .leftJoin(users, eq(parents.userId, users.id))
+        .where(whereClause),
+    ]);
+
+    const total = countResult[0]?.total ?? 0;
+
+    const typedRows: ComplaintReturnType[] = rows.map(r => ({
+      id: r.id,
+      parentId: r.parentId,
+      studentId: r.studentId ?? null,
+      category: r.category as ComplaintCategory,
+      submitterEmail: r.submitterEmail,
+      body: r.body,
+      status: r.status as ComplaintStatus,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+      parentName: r.parentName ?? null,
+      studentName: r.studentName ?? null,
+      responseCount: r.responseCount,
+    }));
+
+    const pageInfo = PaginationUtils.buildPageInfoFromArgs(paginationArgs, typedRows.length, total);
+
+    return {
+      rows: typedRows,
+      totalCount: total,
+      pageInfo,
     };
   };
 

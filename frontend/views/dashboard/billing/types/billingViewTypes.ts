@@ -65,4 +65,8 @@ export interface ParentBillingViewProps extends BillingCapabilityProps {
   readonly onPayNow: (id: string) => void;
   readonly onDownloadPdf: (id: string) => void;
   readonly onQuickPay: () => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }

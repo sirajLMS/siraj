@@ -3,7 +3,7 @@
 import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
+import { PaginationControls, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
 import type { ParentInvoiceRow, ParentInvoiceStatus } from "../types/parentBillingTypes";
 
 interface ParentInvoicesCardListLabels {
@@ -19,6 +19,10 @@ interface ParentInvoicesCardListProps {
   readonly canView: boolean;
   readonly onPayNow: (id: string) => void;
   readonly onDownloadPdf: (id: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 // Invoice card with outline border and surface background for mobile card list
@@ -51,7 +55,14 @@ export function ParentInvoicesCardList({
   canView,
   onPayNow,
   onDownloadPdf,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
 }: Readonly<ParentInvoicesCardListProps>) {
+  const showPagination = totalCount !== undefined && onPageChange !== undefined && totalCount > 0;
+  const pageCount = pageSize > 0 ? Math.ceil((totalCount ?? 0) / pageSize) : 0;
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       {rows.map(row => (
@@ -99,6 +110,15 @@ export function ParentInvoicesCardList({
           )}
         </StyledInvoiceCard>
       ))}
+      {showPagination && (
+        <PaginationControls
+          page={page}
+          pageCount={pageCount}
+          rowCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+        />
+      )}
     </Box>
   );
 }

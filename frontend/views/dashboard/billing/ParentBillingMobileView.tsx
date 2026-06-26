@@ -41,6 +41,10 @@ export function ParentBillingMobileView({
   onPayNow,
   onDownloadPdf,
   onQuickPay,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
 }: Readonly<ParentBillingViewProps>) {
   const showQuickPayFab = canView && !canManage;
 
@@ -75,6 +79,10 @@ export function ParentBillingMobileView({
               payNow: labels.parentTable.payNow,
               statusLabels: labels.invoiceStatus,
             }}
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            onPageChange={onPageChange}
           />
         )}
       </PageContainer>

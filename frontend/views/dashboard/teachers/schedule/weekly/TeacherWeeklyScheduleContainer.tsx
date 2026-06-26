@@ -43,7 +43,7 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
   const isAdmin = hasPermission(AppPermission.StaffViewDirectory);
 
   const { data: directoryData } = useQuery(teacherDirectoryQueryDocument, {
-    variables: { search: null, limit: 100, offset: 0 },
+    variables: { search: null, paginationArgs: null },
     skip: !isAdmin,
   });
 

@@ -1,8 +1,7 @@
 import { BillingHistoryService } from "@/backend/services/billing/billing-history.service";
-import type { PaginationArgs } from "@/backend/types";
+import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { PaginationArgsObject } from "./pagination.objects";
-import { PageInfoObject } from "./pagination.objects";
+import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 export type ParentInvoiceRowDefinition = {
   id: string;
@@ -72,12 +71,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
         });
       }
 
-      return BillingHistoryService.getParentInvoiceHistory(
-        ctx.user?.id || "",
-        args.parentId,
-        pagination,
-        ctx.locale
-      );
+      return BillingHistoryService.getParentInvoiceHistory(ctx.user?.id || "", args.parentId, pagination, ctx.locale);
     },
   })
 );

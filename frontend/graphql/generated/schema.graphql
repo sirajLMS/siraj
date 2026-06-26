@@ -336,12 +336,17 @@ type ComplaintMetrics {
   unanswered: Int
 }
 
-"""Filter and pagination options for the admin complaint queue."""
+"""Filter options for the admin complaint queue."""
 input ComplaintQueueFilter {
-  limit: Int!
-  offset: Int!
   search: String
   status: ComplaintStatus
+}
+
+"""Paginated result for the admin complaint queue."""
+type ComplaintQueuePaginatedResult {
+  pageInfo: PageInfo
+  rows: [Complaint!]
+  totalCount: Int
 }
 
 """Paginated admin complaint queue with metrics."""
@@ -349,7 +354,9 @@ type ComplaintQueueResult {
   complaints: [Complaint!]
   id: String
   metrics: ComplaintMetrics
+  pageInfo: PageInfo
   rows: [Complaint!]
+  totalCount: Int
 }
 
 """A single response to a complaint."""
@@ -1156,6 +1163,14 @@ input PaginationArgs {
   skip: Int
 }
 
+"""Paginated parent complaints with page info."""
+type ParentComplaintsResult {
+  complaints: [Complaint!]
+  id: String
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
 type ParentDirectory {
   id: String
   metrics: ParentDirectoryMetrics
@@ -1193,6 +1208,13 @@ type ParentDocument {
   id: String
   isProtected: Boolean
   usageType: String
+}
+
+type ParentInvoiceHistoryResult {
+  id: String
+  pageInfo: PageInfo
+  rows: [ParentInvoiceRow!]
+  totalCount: Int
 }
 
 type ParentInvoiceRow {
@@ -1313,7 +1335,7 @@ scalar PhoneNumber
 
 type Query {
   """Returns the paginated admin complaint queue with metrics."""
-  adminComplaintQueue(filter: ComplaintQueueFilter!): ComplaintQueueResult
+  adminComplaintQueue(filter: ComplaintQueueFilter!, paginationArgs: PaginationArgs): ComplaintQueueResult
   adminDashboardSchedule(input: AdminDashboardScheduleInput!): AdminDashboardScheduleResult
 
   """Returns the paginated admin suggestion list with metrics."""
@@ -1353,11 +1375,11 @@ type Query {
   notificationAlerts: NotificationAlertsResult
   parentAssociatedStudents(parentId: String!): [AssociatedStudent!]
 
-  """Returns the authenticated parent's complaint history with responses."""
-  parentComplaints: [Complaint!]
+  """Returns the authenticated parent's complaint history with pagination."""
+  parentComplaints(paginationArgs: PaginationArgs): ParentComplaintsResult
   parentDirectory(paginationArgs: PaginationArgs, search: String): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
-  parentInvoiceHistory(parentId: String!): [ParentInvoiceRow!]
+  parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String!): ParentInvoiceHistoryResult
   parentProfile(parentId: String!): ParentProfile
 
   """

@@ -33,14 +33,19 @@ export function AdminComplaintsContainer() {
   const setSearchQuery = useAdminComplaintsStore(state => state.setSearchQuery);
   const setActiveTab = useAdminComplaintsStore(state => state.setActiveTab);
   const setDraftResponse = useAdminComplaintsStore(state => state.setDraftResponse);
+  const page = useAdminComplaintsStore(state => state.page);
+  const pageSize = useAdminComplaintsStore(state => state.pageSize);
+  const setPage = useAdminComplaintsStore(state => state.setPage);
 
   const { data, loading, error, refetch } = useQuery(adminComplaintQueueQueryDocument, {
     variables: {
       filter: {
         search: searchQuery || null,
         status: activeTab,
-        limit: 100,
-        offset: 0,
+      },
+      paginationArgs: {
+        first: pageSize,
+        page: page + 1,
       },
     },
   });
@@ -50,6 +55,8 @@ export function AdminComplaintsContainer() {
       void refetch();
     },
   });
+
+  const totalCount = data?.adminComplaintQueue?.totalCount ?? 0;
 
   const summary: AdminComplaintsSummary = useMemo(() => {
     const metrics = data?.adminComplaintQueue?.metrics;
@@ -118,10 +125,14 @@ export function AdminComplaintsContainer() {
         activeTab={activeTab}
         draftResponses={draftResponses}
         canManage={canManage}
+        page={page}
+        pageSize={pageSize}
+        totalCount={totalCount}
         onSearchChange={setSearchQuery}
         onTabChange={setActiveTab}
         onDraftChange={setDraftResponse}
         onAnswer={handleAnswer}
+        onPageChange={setPage}
       />
     </RequirePermission>
   );

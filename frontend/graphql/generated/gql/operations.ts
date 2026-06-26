@@ -162,10 +162,8 @@ export type ComplaintFileMetadataInput = {
   sizeBytes: number;
 };
 
-/** Filter and pagination options for the admin complaint queue. */
+/** Filter options for the admin complaint queue. */
 export type ComplaintQueueFilter = {
-  limit: number;
-  offset: number;
   search: string | null | undefined;
   status: ComplaintStatus | null | undefined;
 };
@@ -1044,14 +1042,20 @@ export type DeleteClassInstanceMutationVariables = Exact<{
 
 export type DeleteClassInstanceMutation = DeleteClassInstanceMutation_Mutation;
 
-export type ParentComplaintsQuery_parentComplaints_Complaint_responses_ComplaintResponse = { id: string | null, body: string | null, emailSent: boolean | null, createdAt: string | null, responderName: string | null };
+export type ParentComplaintsQuery_parentComplaints_ParentComplaintsResult_complaints_Complaint_responses_ComplaintResponse = { id: string | null, body: string | null, emailSent: boolean | null, createdAt: string | null, responderName: string | null };
 
-export type ParentComplaintsQuery_parentComplaints_Complaint = { id: string | null, category: Types.ComplaintCategory | null, body: string | null, status: Types.ComplaintStatus | null, createdAt: string | null, studentName: string | null, responses: Array<ParentComplaintsQuery_parentComplaints_Complaint_responses_ComplaintResponse> | null };
+export type ParentComplaintsQuery_parentComplaints_ParentComplaintsResult_complaints_Complaint = { id: string | null, category: Types.ComplaintCategory | null, body: string | null, status: Types.ComplaintStatus | null, createdAt: string | null, studentName: string | null, responses: Array<ParentComplaintsQuery_parentComplaints_ParentComplaintsResult_complaints_Complaint_responses_ComplaintResponse> | null };
 
-export type ParentComplaintsQuery_Query = { parentComplaints: Array<ParentComplaintsQuery_parentComplaints_Complaint> | null };
+export type ParentComplaintsQuery_parentComplaints_ParentComplaintsResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type ParentComplaintsQuery_parentComplaints_ParentComplaintsResult = { id: string | null, totalCount: number | null, complaints: Array<ParentComplaintsQuery_parentComplaints_ParentComplaintsResult_complaints_Complaint> | null, pageInfo: ParentComplaintsQuery_parentComplaints_ParentComplaintsResult_pageInfo_PageInfo | null };
+
+export type ParentComplaintsQuery_Query = { parentComplaints: ParentComplaintsQuery_parentComplaints_ParentComplaintsResult | null };
 
 
-export type ParentComplaintsQueryVariables = Exact<{ [key: string]: never; }>;
+export type ParentComplaintsQueryVariables = Exact<{
+  paginationArgs: Types.PaginationArgs | null | undefined;
+}>;
 
 
 export type ParentComplaintsQuery = ParentComplaintsQuery_Query;
@@ -1060,13 +1064,16 @@ export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_ro
 
 export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_metrics_ComplaintMetrics = { id: string | null, unanswered: number | null, answered: number | null, avgResolutionTime: string | null };
 
-export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult = { id: string | null, rows: Array<AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_rows_Complaint> | null, metrics: AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_metrics_ComplaintMetrics | null };
+export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult = { id: string | null, totalCount: number | null, rows: Array<AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_rows_Complaint> | null, metrics: AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_metrics_ComplaintMetrics | null, pageInfo: AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_pageInfo_PageInfo | null };
 
 export type AdminComplaintQueueQuery_Query = { adminComplaintQueue: AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult | null };
 
 
 export type AdminComplaintQueueQueryVariables = Exact<{
   filter: Types.ComplaintQueueFilter;
+  paginationArgs: Types.PaginationArgs | null | undefined;
 }>;
 
 
@@ -1191,13 +1198,18 @@ export type NotificationAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type NotificationAlertsQuery = NotificationAlertsQuery_Query;
 
-export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: string | null, status: string | null, invoiceType: string | null, studentId: string | null };
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: string | null, status: string | null, invoiceType: string | null, studentId: string | null };
 
-export type ParentInvoiceHistoryQuery_Query = { parentInvoiceHistory: Array<ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceRow> | null };
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult = { id: string | null, totalCount: number | null, rows: Array<ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow> | null, pageInfo: ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo | null };
+
+export type ParentInvoiceHistoryQuery_Query = { parentInvoiceHistory: ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult | null };
 
 
 export type ParentInvoiceHistoryQueryVariables = Exact<{
   parentId: string;
+  paginationArgs: Types.PaginationArgs | null | undefined;
 }>;
 
 

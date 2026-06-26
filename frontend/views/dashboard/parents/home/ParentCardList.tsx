@@ -111,7 +111,7 @@ export function ParentCardList({
 }: Readonly<ParentCardListProps>) {
   const hasPagination =
     totalCount !== undefined && page !== undefined && pageSize !== undefined && onPageChange !== undefined;
-  const pageCount = pageSize > 0 ? Math.ceil((totalCount ?? 0) / pageSize) : 0;
+  const pageCount = (pageSize ?? 0) > 0 ? Math.ceil((totalCount ?? 0) / (pageSize ?? 1)) : 0;
 
   return (
     <Stack spacing={2}>

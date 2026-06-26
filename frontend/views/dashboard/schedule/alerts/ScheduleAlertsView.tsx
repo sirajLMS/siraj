@@ -231,9 +231,9 @@ const DesktopAlertsLayout = ({
     >
       <AcademicScheduleDataGrid
         rows={classes}
-        totalClasses={totalClasses}
-        currentPage={currentPage}
+        page={currentPage}
         pageSize={pageSize}
+        totalClasses={totalClasses}
         labels={gridLabels}
         onJoin={onJoin}
         onLeave={onLeave}

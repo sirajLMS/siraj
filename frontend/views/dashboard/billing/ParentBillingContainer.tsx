@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentInvoiceHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
 import { ParentBillingView } from "./ParentBillingView";
 import type { ParentBillingViewProps } from "./types/billingViewTypes";
 import { filterParentInvoices } from "./utils/billingFilters";
@@ -27,12 +28,29 @@ export function ParentBillingContainer() {
 
   const [searchQuery, setSearchQuery] = useState("");
 
+  const page = useParentBillingStore(state => state.page);
+  const pageSize = useParentBillingStore(state => state.pageSize);
+  const setPage = useParentBillingStore(state => state.setPage);
+
   const { data, loading, error } = useQuery(parentInvoiceHistoryQueryDocument, {
-    variables: { parentId },
+    variables: {
+      parentId,
+      paginationArgs: {
+        first: pageSize,
+        page: page + 1,
+        skip: null,
+        after: null,
+        before: null,
+        last: null,
+        maxCount: null,
+      },
+    },
     skip: !parentId,
   });
 
-  const invoices = useMemo(() => data?.parentInvoiceHistory ?? [], [data?.parentInvoiceHistory]);
+  const totalCount = data?.parentInvoiceHistory?.totalCount ?? 0;
+
+  const invoices = useMemo(() => data?.parentInvoiceHistory?.rows ?? [], [data?.parentInvoiceHistory]);
 
   const filteredInvoices = useMemo(
     () =>
@@ -85,6 +103,10 @@ export function ParentBillingContainer() {
     onPayNow: () => undefined,
     onDownloadPdf: () => undefined,
     onQuickPay: () => undefined,
+    page,
+    pageSize,
+    totalCount,
+    onPageChange: setPage,
   };
 
   return (
