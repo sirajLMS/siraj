@@ -38,14 +38,14 @@ const EmptyCell = styled(Box)(({ theme }) => ({
 }));
 
 const StatusBadge = styled(Box)<{ status: "present" | "absent" | "late" }>(({ theme, status }) => {
-  let bgColor = theme.palette.secondary.main;
+  let backgroundColor = theme.palette.secondary.main;
   let color = theme.palette.onSecondary;
 
   if (status === "present") {
-    bgColor = theme.palette.status.active;
+    backgroundColor = theme.palette.status.active;
     color = theme.palette.status.onActive;
   } else if (status === "absent") {
-    bgColor = theme.palette.error.main;
+    backgroundColor = theme.palette.error.main;
     color = theme.palette.onError;
   }
 
@@ -56,7 +56,7 @@ const StatusBadge = styled(Box)<{ status: "present" | "absent" | "late" }>(({ th
     lineHeight: 1.2,
     fontWeight: 700,
     color,
-    backgroundColor: bgColor,
+    backgroundColor: backgroundColor,
   };
 });
 

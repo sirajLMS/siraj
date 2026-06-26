@@ -1,12 +1,11 @@
 "use client";
 
 import type { GridPaginationModel } from "@mui/x-data-grid";
-import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
+import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
-import { ScheduleOverviewGridPagination } from "./ScheduleOverviewPagination";
 import { useScheduleColumns } from "./useScheduleColumns";
 
 interface ScheduleOverviewDataGridProps {
@@ -70,7 +69,7 @@ export function ScheduleOverviewDataGrid({
       ariaLabel="schedule-overview-table"
       emptyMessage={emptyMessage}
       slots={{
-        pagination: ScheduleOverviewGridPagination,
+        pagination: GridPagination,
       }}
       columnVisibilityModel={{
         teacher: true,

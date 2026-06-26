@@ -132,7 +132,7 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
                   const mainColor = status[statusKey];
                   const borderColor = status[`${statusKey}Container` as keyof typeof status];
                   const capitalized = statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
-                  const bgColor = status[`on${capitalized}Container` as keyof typeof status];
+                  const backgroundColor = status[`on${capitalized}Container` as keyof typeof status];
 
                   return {
                     width: "100%",
@@ -142,7 +142,7 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
                     alignItems: "center",
                     justifyContent: "center",
                     gap: 1.5,
-                    backgroundColor: bgColor,
+                    backgroundColor: backgroundColor,
                     border: `1px solid ${borderColor}`,
                     borderRadius: 2,
                     cursor: "pointer",

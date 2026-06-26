@@ -59,7 +59,7 @@ export function ResourceFileTypeIcon({ fileType }: Readonly<ResourceFileTypeIcon
         return {
           p: 1.5,
           borderRadius: theme.layout.radius.card,
-          backgroundColor: styles.bgcolor,
+          backgroundColor: styles.backgroundColor,
           color: styles.color,
           display: "flex",
           alignItems: "center",

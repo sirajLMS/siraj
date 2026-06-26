@@ -199,9 +199,9 @@ export function StatusBadge({ category, status, label, size = "small", icon }: R
         label={label}
         size={size}
         sx={theme => {
-          const { bgcolor, color } = getStatusColors(theme, category, status);
+          const { backgroundColor, color } = getStatusColors(theme, category, status);
           return {
-            bgcolor,
+            backgroundColor,
             color,
             whiteSpace: "normal",
             overflowWrap: "break-word",
@@ -222,14 +222,14 @@ export function StatusBadge({ category, status, label, size = "small", icon }: R
     <Box
       component="span"
       sx={theme => {
-        const { bgcolor, color } = getStatusColors(theme, category, status);
+        const { backgroundColor, color } = getStatusColors(theme, category, status);
         return {
           display: "inline-flex",
           alignItems: "center",
           px: 1.5,
           py: 0.5,
           borderRadius: theme.layout.radius.badge,
-          bgcolor,
+          backgroundColor,
           color,
         };
       }}

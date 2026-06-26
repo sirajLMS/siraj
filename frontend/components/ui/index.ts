@@ -7,6 +7,7 @@ export { FormSuccessSnackbar } from "./FormSuccessSnackbar";
 export { MetricCard, type MetricCardVariant } from "./MetricCard";
 export { PageContainer } from "./PageContainer";
 export { PageHeader, type PageHeaderBreadcrumb } from "./PageHeader";
+export { GridPagination, PaginationControls, type PaginationControlsProps } from "./PaginationControls";
 export { SectionPanel } from "./SectionPanel";
 export { StatusBadge, type StatusBadgeCategory } from "./StatusBadge";
 export * from "./StoryBookPageContainer";

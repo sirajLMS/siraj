@@ -88,12 +88,12 @@ const StyledSeeAllButton = styled(Button)(({ theme }) => ({
 }));
 
 const StyledStatusAvatar = styled(Box, {
-  shouldForwardProp: prop => prop !== "bgcolorToken" && prop !== "colorToken",
-})<{ bgcolorToken: string; colorToken: string }>(({ theme, bgcolorToken, colorToken }) => ({
+  shouldForwardProp: prop => prop !== "backgroundColorToken" && prop !== "colorToken",
+})<{ backgroundColorToken: string; colorToken: string }>(({ theme, backgroundColorToken, colorToken }) => ({
   width: 48,
   height: 48,
   borderRadius: "50%",
-  backgroundColor: bgcolorToken,
+  backgroundColor: backgroundColorToken,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -227,7 +227,7 @@ function StatusTrackingCard({
     >
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
         <Box sx={{ display: "flex", gap: 2 }}>
-          <StyledStatusAvatar bgcolorToken={avatarStyles.bgcolor} colorToken={avatarStyles.color}>
+          <StyledStatusAvatar backgroundColorToken={avatarStyles.backgroundColor} colorToken={avatarStyles.color}>
             {row.studentInitials ?? ""}
           </StyledStatusAvatar>
 

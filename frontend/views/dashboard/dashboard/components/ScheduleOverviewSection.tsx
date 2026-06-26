@@ -4,13 +4,12 @@ import { SearchOutlined } from "@mui/icons-material";
 import { Box, Chip, InputAdornment, Paper, Stack, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { SectionPanel } from "@/frontend/components/ui";
+import { PaginationControls, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ScheduleOverviewData } from "@/frontend/views/dashboard/types/dashboard";
 import { ScheduleFilters } from "./ScheduleFilters";
 import { ScheduleOverviewCardList } from "./ScheduleOverviewCardList";
 import { ScheduleOverviewDataGrid } from "./ScheduleOverviewDataGrid";
-import { ScheduleOverviewPaginationControls } from "./ScheduleOverviewPagination";
 
 const StyledDesktopPanel = styled(Paper)(({ theme }) => ({
   borderRadius: Number(theme.shape.borderRadius) * 2,
@@ -302,7 +301,7 @@ const MobileLayout = ({
         emptyMessage={emptyMessage}
       />
 
-      <ScheduleOverviewPaginationControls
+      <PaginationControls
         page={page}
         pageCount={pageCount}
         rowCount={totalCount}
