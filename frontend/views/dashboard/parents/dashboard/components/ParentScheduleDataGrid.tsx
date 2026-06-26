@@ -5,8 +5,8 @@ import { Avatar, alpha, Box, IconButton, Tooltip, Typography } from "@mui/materi
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
-import type { ParentBookingStatus, ParentScheduleRow } from "../types/parentDashboardTypes";
 import type { ParentDashboardLabels } from "../types/parentDashboardLabels";
+import type { ParentBookingStatus, ParentScheduleRow } from "../types/parentDashboardTypes";
 import { ParentClassStatusIndicator } from "./ParentClassStatusIndicator";
 
 interface ParentScheduleDataGridProps {

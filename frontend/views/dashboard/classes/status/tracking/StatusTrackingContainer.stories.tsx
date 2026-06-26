@@ -8,7 +8,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { create } from "zustand";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useRescheduleStore } from "@/frontend/stores/mockRescheduleStore";
+import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
 import { StatusTrackingView } from "./StatusTrackingView";

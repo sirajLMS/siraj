@@ -22,7 +22,10 @@ function renderIcon(fileType: ResourceFileType) {
   }
 }
 
-function getIconStyles(theme: Theme, fileType: ResourceFileType): { readonly backgroundColor: string; readonly color: string } {
+function getIconStyles(
+  theme: Theme,
+  fileType: ResourceFileType
+): { readonly backgroundColor: string; readonly color: string } {
   switch (fileType) {
     case "pptx":
       return {

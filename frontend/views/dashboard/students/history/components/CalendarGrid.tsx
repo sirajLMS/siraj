@@ -1,7 +1,7 @@
-import { Link } from "@/shared/i18n/routing";
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, Paper, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { Link } from "@/shared/i18n/routing";
 import type { ClassSession } from "../types";
 
 const calendarCellBase = ({ theme }: { theme: import("@mui/material/styles").Theme }) => ({

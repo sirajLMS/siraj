@@ -1,11 +1,5 @@
 import { create } from "zustand";
-
-export interface RescheduleSession {
-  readonly sessionId: string;
-  readonly teacherName: string;
-  readonly studentName: string;
-  readonly teacherTimezone: string;
-}
+import type { RescheduleSession } from "@/frontend/views/dashboard/reschedule/home/types";
 
 interface RescheduleState {
   readonly session: RescheduleSession;
@@ -15,10 +9,10 @@ interface RescheduleState {
 }
 
 const defaultSession: RescheduleSession = {
-  sessionId: "s1",
-  teacherName: "Ahmed Al-Farsi",
-  studentName: "Omar Ahmed",
-  teacherTimezone: "Africa/Cairo",
+  sessionId: "",
+  teacherName: "",
+  studentName: "",
+  teacherTimezone: "",
 };
 
 export const useRescheduleStore = create<RescheduleState>(set => ({

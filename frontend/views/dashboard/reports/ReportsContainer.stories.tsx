@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore as useMockUserStore } from "@/frontend/stores/mockUserStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { ReportsView } from "./ReportsView";
@@ -174,22 +173,7 @@ export const AdminFullAccess: Story = {
           __typename: "User",
         },
       });
-      useMockUserStore.setState({
-        permissions: perms,
-        user: {
-          id: "mock-id",
-          name: "Mock User",
-          role: "Mock Role",
-          avatarUrl: "",
-          permissions: perms,
-          notificationCount: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          emailVerifiedAt: new Date().toISOString(),
-          email: "mock@example.com",
-          __typename: "User",
-        },
-      });
+
       return <Story />;
     },
   ],
@@ -216,22 +200,7 @@ export const RestrictedAccess: Story = {
           __typename: "User",
         },
       });
-      useMockUserStore.setState({
-        permissions: perms,
-        user: {
-          id: "mock-id",
-          name: "Mock User",
-          role: "Mock Role",
-          avatarUrl: "",
-          permissions: perms,
-          notificationCount: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          emailVerifiedAt: new Date().toISOString(),
-          email: "mock@example.com",
-          __typename: "User",
-        },
-      });
+
       return <Story />;
     },
   ],
@@ -270,22 +239,7 @@ export const EmptyData: Story = {
           __typename: "User",
         },
       });
-      useMockUserStore.setState({
-        permissions: perms,
-        user: {
-          id: "mock-id",
-          name: "Mock User",
-          role: "Mock Role",
-          avatarUrl: "",
-          permissions: perms,
-          notificationCount: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          emailVerifiedAt: new Date().toISOString(),
-          email: "mock@example.com",
-          __typename: "User",
-        },
-      });
+
       return <Story />;
     },
   ],
@@ -324,22 +278,7 @@ export const ApiError: Story = {
           __typename: "User",
         },
       });
-      useMockUserStore.setState({
-        permissions: perms,
-        user: {
-          id: "mock-id",
-          name: "Mock User",
-          role: "Mock Role",
-          avatarUrl: "",
-          permissions: perms,
-          notificationCount: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          emailVerifiedAt: new Date().toISOString(),
-          email: "mock@example.com",
-          __typename: "User",
-        },
-      });
+
       return <Story />;
     },
   ],

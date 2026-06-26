@@ -2,7 +2,6 @@ import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { managerDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
-import { useUserStore as useMockUserStore } from "@/frontend/stores/mockUserStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { ManagersContainer } from "./ManagersContainer";
 
@@ -63,7 +62,6 @@ const meta: Meta<typeof ManagersContainer> = {
         AppPermission.StaffEditProfile,
       ];
       useUserStore.setState({ permissions: perms });
-      useMockUserStore.setState({ permissions: perms });
       return (
         <MockedProvider mocks={managerDirectoryMocks}>
           <Story />

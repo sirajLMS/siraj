@@ -67,7 +67,9 @@ export function MobileWeeklyScroller({ selectedWeek, onSelectWeek }: Readonly<Mo
                 color: isSelected ? theme.palette.onPrimaryContainer : "inherit",
                 boxShadow: isSelected ? theme.palette.shadow.cardHover : "none",
                 ...(isSelected && { outline: `1px solid ${theme.palette.primary.main}33` }),
-                "&:hover": { backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow },
+                "&:hover": {
+                  backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow,
+                },
                 opacity: d.hasClass ? 1 : 0.4,
                 cursor: "pointer",
               })}

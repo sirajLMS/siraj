@@ -9,8 +9,8 @@ import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/context/ThemeContext";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission as AppPermissionEnum } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createAppTheme } from "@/frontend/providers/theme/theme";
-import { MOCK_ADMIN_USER, userInfoToUser } from "@/frontend/stores/mockUserStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import ar from "@/shared/messages/ar";
 import en from "@/shared/messages/en";
@@ -57,14 +57,82 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
 
   // Seed the user store with admin permissions by default for Storybook
   useEffect(() => {
-    const user = userInfoToUser(MOCK_ADMIN_USER);
+    const adminPermissions: AppPermission[] = [
+      AppPermissionEnum.AuthLogin,
+      AppPermissionEnum.AuthViewOwnProfile,
+      AppPermissionEnum.DashboardView,
+      AppPermissionEnum.DashboardViewMetrics,
+      AppPermissionEnum.DashboardFilterMetrics,
+      AppPermissionEnum.DashboardMetricsViewAll,
+      AppPermissionEnum.ScheduleViewList,
+      AppPermissionEnum.ScheduleFilterAdvanced,
+      AppPermissionEnum.ScheduleViewAll,
+      AppPermissionEnum.ScheduleViewAssigned,
+      AppPermissionEnum.TeacherViewDashboard,
+      AppPermissionEnum.ScheduleViewFamily,
+      AppPermissionEnum.ScheduleSearchAvailability,
+      AppPermissionEnum.ScheduleManageRecurring,
+      AppPermissionEnum.ScheduleDstMigrate,
+      AppPermissionEnum.SessionViewDetails,
+      AppPermissionEnum.SessionActivateClass,
+      AppPermissionEnum.SessionActivateOverride,
+      AppPermissionEnum.SessionUpdateStatusStart,
+      AppPermissionEnum.SessionUpdateStatusAbsent,
+      AppPermissionEnum.SessionUpdateStatusLeave,
+      AppPermissionEnum.SessionReschedule,
+      AppPermissionEnum.SessionReset,
+      AppPermissionEnum.TeachersList,
+      AppPermissionEnum.TeachersCreate,
+      AppPermissionEnum.TeachersEdit,
+      AppPermissionEnum.TeachersManageSchedule,
+      AppPermissionEnum.ParentsList,
+      AppPermissionEnum.ParentsCreate,
+      AppPermissionEnum.ParentsEdit,
+      AppPermissionEnum.StudentsList,
+      AppPermissionEnum.StudentsEdit,
+      AppPermissionEnum.StudentsChangeTeacher,
+      AppPermissionEnum.StudentsChangeStatus,
+      AppPermissionEnum.StudentsOverrideQuota,
+      AppPermissionEnum.InvoicesList,
+      AppPermissionEnum.InvoicesDelete,
+      AppPermissionEnum.InvoicesCreate,
+      AppPermissionEnum.InvoicesMarkPaid,
+      AppPermissionEnum.InvoicesEdit,
+      AppPermissionEnum.ResourcesList,
+      AppPermissionEnum.ResourcesDelete,
+      AppPermissionEnum.ResourcesUpload,
+      AppPermissionEnum.ReportsGenerate,
+      AppPermissionEnum.ComplaintsList,
+      AppPermissionEnum.ComplaintsDelete,
+      AppPermissionEnum.ComplaintsRespond,
+      AppPermissionEnum.StaffList,
+      AppPermissionEnum.StaffCreate,
+      AppPermissionEnum.StaffEdit,
+      AppPermissionEnum.PermissionGroupsManage,
+      AppPermissionEnum.PermissionGroupsAssign,
+    ];
+
+    const adminUser = {
+      id: "mock-admin-id",
+      name: "Academy Admin",
+      role: "Academy Admin",
+      avatarUrl: "",
+      permissions: adminPermissions,
+      notificationCount: 3,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      emailVerifiedAt: new Date().toISOString(),
+      email: "admin@example.com",
+      __typename: "User" as const,
+    };
+
     useUserStore.setState({
-      user,
-      name: user.name || "",
-      role: user.role || "",
-      avatarUrl: user.avatarUrl || "",
-      permissions: (user.permissions as AppPermission[]) || [],
-      notificationCount: user.notificationCount || 0,
+      user: adminUser,
+      name: adminUser.name,
+      role: adminUser.role,
+      avatarUrl: adminUser.avatarUrl,
+      permissions: adminPermissions,
+      notificationCount: adminUser.notificationCount,
     });
   }, []);
 

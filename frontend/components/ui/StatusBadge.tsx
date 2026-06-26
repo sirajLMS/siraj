@@ -125,17 +125,31 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
     case "studentAccount": {
       // Map studentAccount statuses to appropriate M3 status families
       const map: Record<string, { backgroundColor: string; color: string }> = {
-        activated: { backgroundColor: theme.palette.status.activeContainer, color: theme.palette.status.onActiveContainer },
-        regular: { backgroundColor: theme.palette.status.activeContainer, color: theme.palette.status.onActiveContainer },
+        activated: {
+          backgroundColor: theme.palette.status.activeContainer,
+          color: theme.palette.status.onActiveContainer,
+        },
+        regular: {
+          backgroundColor: theme.palette.status.activeContainer,
+          color: theme.palette.status.onActiveContainer,
+        },
         deactivated: {
           backgroundColor: theme.palette.status.cancelledContainer,
           color: theme.palette.status.onCancelledContainer,
         },
-        suspended: { backgroundColor: theme.palette.status.blockedContainer, color: theme.palette.status.onBlockedContainer },
+        suspended: {
+          backgroundColor: theme.palette.status.blockedContainer,
+          color: theme.palette.status.onBlockedContainer,
+        },
         on_leave: { backgroundColor: theme.palette.secondaryContainer, color: theme.palette.onSecondaryContainer },
-        on_trial: { backgroundColor: theme.palette.status.pendingContainer, color: theme.palette.status.onPendingContainer },
+        on_trial: {
+          backgroundColor: theme.palette.status.pendingContainer,
+          color: theme.palette.status.onPendingContainer,
+        },
       };
-      return map[status] ?? { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
+      return (
+        map[status] ?? { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant }
+      );
     }
     case "session": {
       // Direct access to status family based on the status string as the key
@@ -155,14 +169,22 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
     case "enrollment": {
       // Map enrollment statuses to M3 families
       const map: Record<string, { backgroundColor: string; color: string }> = {
-        regular: { backgroundColor: theme.palette.status.activeContainer, color: theme.palette.status.onActiveContainer },
-        prospect: { backgroundColor: theme.palette.status.pendingContainer, color: theme.palette.status.onPendingContainer },
+        regular: {
+          backgroundColor: theme.palette.status.activeContainer,
+          color: theme.palette.status.onActiveContainer,
+        },
+        prospect: {
+          backgroundColor: theme.palette.status.pendingContainer,
+          color: theme.palette.status.onPendingContainer,
+        },
         withdrawn: {
           backgroundColor: theme.palette.status.cancelledContainer,
           color: theme.palette.status.onCancelledContainer,
         },
       };
-      return map[status] ?? { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
+      return (
+        map[status] ?? { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant }
+      );
     }
     default:
       return { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };

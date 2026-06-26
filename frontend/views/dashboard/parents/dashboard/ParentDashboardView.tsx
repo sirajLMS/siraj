@@ -3,7 +3,6 @@
 import { FilterListOutlined } from "@mui/icons-material";
 import { Box, Grid, useMediaQuery, useTheme } from "@mui/material";
 import { FilterButton, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import type { ParentDashboardMetrics, ParentScheduleRow, StudentProgressItem, WorkshopPromo } from "./types/parentDashboardTypes";
 import { AcademicProgressSummary } from "./components/AcademicProgressSummary";
 import { ParentDashboardMetricsRow } from "./components/ParentDashboardMetrics";
 import { ParentScheduleCardList } from "./components/ParentScheduleCardList";
@@ -12,6 +11,12 @@ import { ParentSupportFab } from "./components/ParentSupportFab";
 import { ParentWelcomeHero } from "./components/ParentWelcomeHero";
 import { WorkshopPromoCard } from "./components/WorkshopPromoCard";
 import type { ParentDashboardLabels } from "./types/parentDashboardLabels";
+import type {
+  ParentDashboardMetrics,
+  ParentScheduleRow,
+  StudentProgressItem,
+  WorkshopPromo,
+} from "./types/parentDashboardTypes";
 
 interface ParentDashboardViewProps {
   readonly userName: string;

@@ -8,12 +8,12 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
-import type { StudentStatusInfo } from "./types";
 import { AdminHoldControls } from "./components/AdminHoldControls";
 import { PolicyOverviewCard, SuspensionWarningBanner } from "./components/PolicyOverviewCard";
 import { StudentStatusHeader } from "./components/StudentStatusHeader";
 import { UpcomingClassesTable } from "./components/UpcomingClassesTable";
 import { type StatusUpdateFormData, statusUpdateSchema } from "./schemas/statusUpdateSchema";
+import type { StudentStatusInfo } from "./types";
 
 interface StudentStatusViewProps {
   readonly studentInfo: StudentStatusInfo | null;

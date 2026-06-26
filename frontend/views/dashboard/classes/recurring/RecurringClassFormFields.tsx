@@ -2,13 +2,13 @@
 
 import { Box, Grid } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
-import type { StudentGroup } from "./types";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 import { DaysScheduleSection } from "./DaysScheduleSection";
 import { DurationInput } from "./DurationInput";
 import type { RecurringClassFormData } from "./recurringClassSchema";
 import { StudentGroupSelect } from "./StudentGroupSelect";
 import { TimeInput } from "./TimeInput";
+import type { StudentGroup } from "./types";
 
 interface RecurringClassFormFieldsProps {
   readonly register: UseFormRegister<RecurringClassFormData>;

@@ -1,7 +1,7 @@
-import { Link } from "@/shared/i18n/routing";
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
+import { Link } from "@/shared/i18n/routing";
 import type { ClassSession } from "../types";
 
 interface ClassSessionListProps {

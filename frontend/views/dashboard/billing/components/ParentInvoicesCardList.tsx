@@ -4,7 +4,7 @@ import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
-import type { ParentInvoiceRow, ParentInvoiceStatus } from "@/frontend/stores/moackParentBillingStore";
+import type { ParentInvoiceRow, ParentInvoiceStatus } from "../types/parentBillingTypes";
 
 interface ParentInvoicesCardListLabels {
   readonly viewDetails: string;

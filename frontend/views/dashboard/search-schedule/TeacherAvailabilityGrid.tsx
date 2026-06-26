@@ -59,7 +59,8 @@ export function TeacherAvailabilityGrid({ teacher }: Readonly<TeacherAvailabilit
               sx={theme => ({
                 p: 1.5,
                 borderRadius: 1.5,
-                backgroundColor: dayGaps.length > 0 ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow,
+                backgroundColor:
+                  dayGaps.length > 0 ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow,
                 border: `1px solid ${dayGaps.length > 0 ? theme.palette.primaryContainer : theme.palette.outlineVariant}`,
                 minHeight: 100,
                 display: "flex",

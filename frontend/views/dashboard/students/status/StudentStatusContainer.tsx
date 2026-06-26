@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
-import { useStudentStatusStore } from "@/frontend/stores/mockStudentStatusStore";
+import { useStudentStatusStore } from "@/frontend/stores/studentStatusStore";
 import { StudentStatusView } from "./StudentStatusView";
 
 export function StudentStatusContainer() {

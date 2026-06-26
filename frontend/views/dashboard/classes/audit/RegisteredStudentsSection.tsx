@@ -77,7 +77,8 @@ export function RegisteredStudentsSection({
                   height: 32,
                   typography: "labelUppercase",
                   fontSize: "12px",
-                  backgroundColor: rowIndex % 2 === 0 ? theme.palette.secondaryContainer : theme.palette.primaryContainer,
+                  backgroundColor:
+                    rowIndex % 2 === 0 ? theme.palette.secondaryContainer : theme.palette.primaryContainer,
                   color: rowIndex % 2 === 0 ? theme.palette.onSecondaryContainer : theme.palette.onPrimaryContainer,
                 })}
                 src={row.avatarUrl}

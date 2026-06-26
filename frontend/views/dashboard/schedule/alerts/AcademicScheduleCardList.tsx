@@ -10,8 +10,8 @@ import {
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { AcademicClassRow, ClassSessionStatus } from "./types";
 import { ClassSessionActionButton } from "./ClassSessionActionButton";
+import type { AcademicClassRow, ClassSessionStatus } from "./types";
 
 interface AcademicScheduleCardListProps {
   readonly rows: readonly AcademicClassRow[];

@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore as useMockUserStore } from "@/frontend/stores/mockUserStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentComplaintsDesktopView } from "./ParentComplaintsDesktopView";
@@ -130,7 +129,6 @@ const meta: Meta<typeof ParentComplaintsDesktopStoryRenderer> = {
         __typename: "User" as const,
       };
       useUserStore.setState({ permissions: PARENT_PERMISSIONS, user: mockUser });
-      useMockUserStore.setState({ permissions: PARENT_PERMISSIONS, user: mockUser });
       return <Story />;
     },
   ],

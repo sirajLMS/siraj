@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useClassAuditStore } from "@/frontend/stores/mockClassAuditStore";
+import { useClassAuditStore } from "@/frontend/stores/classAuditStore";
 import { logger } from "@/frontend/utils/logger";
 import { ClassAuditView } from "./ClassAuditView";
 
@@ -11,6 +11,10 @@ export function ClassAuditContainer() {
   const audit = useClassAuditStore(state => state.audit);
   const resendNotifications = useClassAuditStore(state => state.resendNotifications);
   const updateAdminNote = useClassAuditStore(state => state.updateAdminNote);
+
+  if (!audit) {
+    return null;
+  }
 
   const labels = {
     breadcrumbs: {

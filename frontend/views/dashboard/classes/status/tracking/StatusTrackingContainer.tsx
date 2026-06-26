@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
-import { useRescheduleStore } from "@/frontend/stores/mockRescheduleStore";
+import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { useRouter } from "@/shared/i18n/routing";
 import { StatusTrackingView } from "./StatusTrackingView";
 import type { StatusTrackingRow } from "./types";

@@ -1,6 +1,5 @@
 import type { Decorator } from "@storybook/react";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore as useMockUserStore } from "@/frontend/stores/mockUserStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 
 export function createMockAdminDecorator(permissions: readonly AppPermission[]): Decorator[] {
@@ -20,7 +19,6 @@ export function createMockAdminDecorator(permissions: readonly AppPermission[]):
         __typename: "User" as const,
       };
       useUserStore.setState({ permissions, user: mockUser });
-      useMockUserStore.setState({ permissions, user: mockUser });
       return <Story />;
     },
   ];

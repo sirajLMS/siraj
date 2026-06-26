@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
-import type { ParentInvoiceRow, ParentInvoiceStatus } from "@/frontend/stores/moackParentBillingStore";
+import type { ParentInvoiceRow, ParentInvoiceStatus } from "../types/parentBillingTypes";
 
 export interface ParentInvoicesDataGridLabels {
   readonly invoiceNumber: string;

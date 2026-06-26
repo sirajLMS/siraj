@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore as useMockUserStore } from "@/frontend/stores/mockUserStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { ParentSuggestionsDesktopView } from "./ParentSuggestionsDesktopView";
@@ -82,7 +81,6 @@ const meta: Meta<typeof ParentSuggestionsDesktopStoryRenderer> = {
         __typename: "User" as const,
       };
       useUserStore.setState({ permissions: PARENT_PERMISSIONS, user: mockUser });
-      useMockUserStore.setState({ permissions: PARENT_PERMISSIONS, user: mockUser });
       return <Story />;
     },
   ],

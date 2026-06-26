@@ -23,13 +23,22 @@ function DistributionLegend({
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Box sx={theme => ({ width: 8, height: 8, borderRadius: "50%", backgroundColor: theme.palette.primary.main })} />
+        <Box
+          sx={theme => ({ width: 8, height: 8, borderRadius: "50%", backgroundColor: theme.palette.primary.main })}
+        />
         <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.primary }}>
           {egpPercent}% {egpLabel}
         </Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Box sx={theme => ({ width: 8, height: 8, borderRadius: "50%", backgroundColor: theme.palette.secondaryContainer })} />
+        <Box
+          sx={theme => ({
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            backgroundColor: theme.palette.secondaryContainer,
+          })}
+        />
         <Typography variant="labelMd" sx={{ color: theme => theme.palette.text.primary }}>
           {usdPercent}% {usdLabel}
         </Typography>
@@ -74,7 +83,9 @@ export function FinancialDistributionCard({
         })}
       >
         <Box sx={theme => ({ width: `${egpPercent}%`, backgroundColor: theme.palette.primary.main, height: "100%" })} />
-        <Box sx={theme => ({ width: `${usdPercent}%`, backgroundColor: theme.palette.secondaryContainer, height: "100%" })} />
+        <Box
+          sx={theme => ({ width: `${usdPercent}%`, backgroundColor: theme.palette.secondaryContainer, height: "100%" })}
+        />
       </Box>
 
       <Box sx={{ mt: compact ? 1.5 : 2 }}>

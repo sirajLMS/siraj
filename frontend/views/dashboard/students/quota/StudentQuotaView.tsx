@@ -14,7 +14,6 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import type { StudentProfileData } from "./types";
 import type { MessageSchema } from "@/shared/messages/types/message";
 import { ContextualHelperCards } from "./components/ContextualHelperCards";
 import { CourseDetailsSection } from "./components/CourseDetailsSection";
@@ -24,6 +23,7 @@ import {
   type StudentQuotaFormData,
   type StudentQuotaFormInput,
 } from "./schemas/studentQuotaSchema";
+import type { StudentProfileData } from "./types";
 
 function MobileProfileHeader({ studentData }: Readonly<{ studentData: StudentProfileData }>) {
   const t = useTranslations("dashboard.studentQuota");
@@ -135,7 +135,11 @@ function FormActions({
             fontWeight: 700,
             letterSpacing: "0.1em",
             "&:hover": { backgroundColor: isSaved ? theme.palette.primary.dark : theme.palette.success.dark },
-            "&.Mui-disabled": { backgroundColor: theme.palette.primary.main, color: theme.palette.onPrimary, opacity: 0.8 },
+            "&.Mui-disabled": {
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.onPrimary,
+              opacity: 0.8,
+            },
             width: { xs: "100%", md: "auto" },
           })}
         >

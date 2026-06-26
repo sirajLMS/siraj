@@ -47,7 +47,9 @@ export function UpdatedSessionsCardList({ sessions, successfulCount }: Readonly<
 
   return (
     <Box>
-      <Box sx={theme => ({ backgroundColor: theme.palette.surfaceContainerLowest, borderRadius: 3, overflow: "hidden" })}>
+      <Box
+        sx={theme => ({ backgroundColor: theme.palette.surfaceContainerLowest, borderRadius: 3, overflow: "hidden" })}
+      >
         {sessions.map(session => (
           <UpdatedSessionRow key={session.id} session={session} />
         ))}

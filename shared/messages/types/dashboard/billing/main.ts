@@ -1,8 +1,8 @@
-import type { ParentInvoiceStatus } from "@/frontend/stores/moackParentBillingStore";
 import type {
   AdminInvoiceStatus,
   StudentCreditStatus,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
+import type { ParentInvoiceStatus } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
 import type { BillingManualLabels } from "./manual";
 
 export interface BillingLabels {

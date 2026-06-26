@@ -4,10 +4,10 @@ import { FileDownloadOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { ExportButton, FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import type { TrackingRow } from "./types";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { RescheduleTrackingCardList } from "./RescheduleTrackingCardList";
 import { RescheduleTrackingDataGrid } from "./RescheduleTrackingDataGrid";
+import type { TrackingRow } from "./types";
 
 interface RescheduleTrackingViewLabels {
   readonly pageTitle: string;

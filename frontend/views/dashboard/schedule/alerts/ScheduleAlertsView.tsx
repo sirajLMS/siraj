@@ -10,16 +10,11 @@ import {
   PageHeader,
   SectionPanel,
 } from "@/frontend/components/ui";
-import type {
-  AcademicClassRow,
-  AlertsMetric,
-  ScheduleAlert,
-  ScheduleAlertType,
-} from "./types";
 import { AcademicScheduleCardList } from "./AcademicScheduleCardList";
 import { AcademicScheduleDataGrid, type AcademicScheduleDataGridLabels } from "./AcademicScheduleDataGrid";
 import { InstitutionalReportCard } from "./InstitutionalReportCard";
 import { ScheduleAlertBanners } from "./ScheduleAlertBanners";
+import type { AcademicClassRow, AlertsMetric, ScheduleAlert, ScheduleAlertType } from "./types";
 
 export interface ScheduleAlertsLabels {
   readonly pageTitle: string;

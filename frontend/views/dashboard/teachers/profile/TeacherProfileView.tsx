@@ -8,7 +8,6 @@ import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
-import type { TeacherProfileData } from "./types";
 import type { MessageSchema } from "@/shared/messages/types/message";
 import { SalaryDetailsSection } from "./components/SalaryDetailsSection";
 import { SystemConfigSection } from "./components/SystemConfigSection";
@@ -20,6 +19,7 @@ import {
   type TeacherProfileFormData,
   type TeacherProfileFormInput,
 } from "./schemas/teacherProfileSchema";
+import type { TeacherProfileData } from "./types";
 
 interface TeacherProfileViewProps {
   readonly profile: TeacherProfileData | null;

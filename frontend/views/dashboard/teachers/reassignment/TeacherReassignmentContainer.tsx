@@ -1,7 +1,7 @@
 "use client";
 
-import { useStudentsStore } from "@/frontend/stores/mockStudentsStore";
-import { useTeachersStore } from "@/frontend/stores/mockTeachersStore";
+import { useStudentsStore } from "@/frontend/stores/studentsStore";
+import { useTeachersStore } from "@/frontend/stores/teachersStore";
 import { TeacherReassignmentView } from "./TeacherReassignmentView";
 
 export function TeacherReassignmentContainer() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useScheduleAlertsStore } from "@/frontend/stores/mockScheduleAlertsStore";
+import { useScheduleAlertsStore } from "@/frontend/stores/scheduleAlertsStore";
 import { ScheduleAlertsView } from "./ScheduleAlertsView";
 
 export function ScheduleAlertsContainer() {

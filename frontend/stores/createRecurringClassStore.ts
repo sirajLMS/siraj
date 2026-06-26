@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { DayScheduleConfig as BaseDayScheduleConfig } from "@/frontend/stores/recurring-schedule-types";
+import type { StudentGroup } from "@/frontend/views/dashboard/classes/recurring/types";
 
 export type DayOfWeek = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
 
@@ -19,6 +20,7 @@ interface CreateRecurringClassState {
   readonly isDialogOpen: boolean;
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
+  readonly studentGroups: readonly StudentGroup[];
   readonly days: readonly DayScheduleConfig[];
   openDialog: () => void;
   closeDialog: () => void;
@@ -35,6 +37,7 @@ export const useCreateRecurringClassStore = create<CreateRecurringClassState>(se
   isDialogOpen: false,
   isSubmitting: false,
   showSuccess: false,
+  studentGroups: [],
   days: DEFAULT_DAY_SCHEDULE,
   openDialog: () => set({ isDialogOpen: true }),
   closeDialog: () => set({ isDialogOpen: false }),

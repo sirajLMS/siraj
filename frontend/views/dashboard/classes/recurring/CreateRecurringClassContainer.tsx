@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useCreateRecurringClassStore } from "@/frontend/stores/mockCreateRecurringClassStore";
-import { useUserStore } from "@/frontend/stores/mockUserStore";
+import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
+import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { createRecurringClass } from "./actions/createRecurringClass";
 import { CreateRecurringClassView } from "./CreateRecurringClassView";

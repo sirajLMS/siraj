@@ -7,12 +7,12 @@ import { styled } from "@mui/material/styles";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import type { StudentGroup } from "./types";
-import { DEFAULT_DAY_SCHEDULE } from "./types";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 import { RecurringClassForm } from "./RecurringClassForm";
 import type { RecurringClassFormData } from "./recurringClassSchema";
 import { createRecurringClassSchema } from "./recurringClassSchema";
+import type { StudentGroup } from "./types";
+import { DEFAULT_DAY_SCHEDULE } from "./types";
 
 interface CreateRecurringClassViewProps {
   readonly studentGroups: readonly StudentGroup[];

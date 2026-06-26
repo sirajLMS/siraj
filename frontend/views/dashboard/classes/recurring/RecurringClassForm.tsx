@@ -11,10 +11,10 @@ import type {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
-import type { StudentGroup } from "./types";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 import { RecurringClassFormFields } from "./RecurringClassFormFields";
 import type { RecurringClassFormData } from "./recurringClassSchema";
+import type { StudentGroup } from "./types";
 
 interface RecurringClassFormProps {
   readonly register: UseFormRegister<RecurringClassFormData>;

@@ -1,33 +1,74 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { useMockDashboardStore } from "@/frontend/stores/mockDashboardStore";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useDashboardStore } from "@/frontend/stores/dashboardStore";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule-instance-dashboard-status";
 import { DashboardView } from "./DashboardView";
 import { useAdminDashboardLabels } from "./utils";
 import { buildAdminDashboardMetrics } from "./utils/adminDashboardMetrics";
 import { matchesDailyScheduleMetricFilter, resolveDailyScheduleMetricFilter } from "./utils/dailyScheduleMetricFilter";
 
-// Reusable mock container that acts exactly like the old AdminDashboardContainer
+const MOCK_TEACHERS: TeacherFilterItem[] = [
+  { id: "teacher-ahmed", name: "Ahmed Mohammed" },
+  { id: "teacher-sarah", name: "Sarah Johnson" },
+];
+
+const MOCK_SCHEDULE: DailyScheduleRow[] = [
+  {
+    id: "9082",
+    yourTime: "10:00 AM - 11:00 AM",
+    teacherTime: "11:00 AM - 12:00 PM",
+    studentTime: "10:00 AM - 11:00 AM",
+    duration: 60,
+    outcome: ClassOutcome.Pending,
+    executionState: ClassExecutionState.NotActivated,
+    student: { id: "student-1", name: "Omar Khalid" },
+    teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed" },
+  },
+  {
+    id: "9083",
+    yourTime: "11:30 AM - 12:30 PM",
+    teacherTime: "12:30 PM - 01:30 PM",
+    studentTime: "11:30 AM - 12:30 PM",
+    duration: 60,
+    outcome: ClassOutcome.Pending,
+    executionState: ClassExecutionState.Running,
+    student: { id: "student-2", name: "Layla Ismail" },
+    teacher: { id: "teacher-sarah", name: "Sarah Johnson" },
+  },
+  {
+    id: "9084",
+    yourTime: "02:00 PM - 03:00 PM",
+    teacherTime: "03:00 PM - 04:00 PM",
+    studentTime: "02:00 PM - 03:00 PM",
+    duration: 60,
+    outcome: ClassOutcome.Taken,
+    executionState: ClassExecutionState.Completed,
+    student: { id: "student-3", name: "Omar Ahmed" },
+    teacher: { id: "teacher-ahmed", name: "Ahmed Mohammed" },
+  },
+];
+
 export function MockAdminDashboardContainer() {
   const t = useTranslations("dashboard");
 
   const { headers, statusLabels } = useAdminDashboardLabels();
 
-  const lastUpdatedKey = useMockDashboardStore(state => state.lastUpdated);
-  const filters = useMockDashboardStore(state => state.filters);
-  const scheduleRows = useMockDashboardStore(state => state.scheduleRows);
-  const teachers = useMockDashboardStore(state => state.teachers);
-  const setDateFilter = useMockDashboardStore(state => state.setDateFilter);
-  const setTeacherFilter = useMockDashboardStore(state => state.setTeacherFilter);
-  const setSearchQuery = useMockDashboardStore(state => state.setSearchQuery);
-  const setSelectedStatus = useMockDashboardStore(state => state.setSelectedStatus);
+  const lastUpdatedKey = useDashboardStore(state => state.lastUpdated);
+  const filters = useDashboardStore(state => state.filters);
+  const scheduleRows = useDashboardStore(state => state.scheduleRows);
+  const teachers = useDashboardStore(state => state.teachers);
+  const setDateFilter = useDashboardStore(state => state.setDateFilter);
+  const setTeacherFilter = useDashboardStore(state => state.setTeacherFilter);
+  const setSearchQuery = useDashboardStore(state => state.setSearchQuery);
+  const setSelectedStatus = useDashboardStore(state => state.setSelectedStatus);
   const [page, setPage] = useState(0);
   const pageSize = 10;
 
-  const handleSubmit = () => {
-    // Placeholder for story submit
-  };
+  const handleSubmit = () => {};
 
   const cleanedLastUpdatedKey = lastUpdatedKey.startsWith("dashboard.")
     ? lastUpdatedKey.replace("dashboard.", "")
@@ -133,6 +174,21 @@ const meta: Meta<typeof MockAdminDashboardContainer> = {
   parameters: {
     layout: "fullscreen",
   },
+  decorators: [
+    Story => {
+      const MOCK_METRICS = buildAdminDashboardMetrics({
+        id: "metrics-mock",
+        ...computeDailyScheduleMetricsFromRows(MOCK_SCHEDULE),
+      });
+      useDashboardStore.setState({
+        todayClasses: MOCK_METRICS,
+        lastUpdated: "dashboard.admin.updatedMinutesAgo",
+        scheduleRows: MOCK_SCHEDULE,
+        teachers: MOCK_TEACHERS,
+      });
+      return <Story />;
+    },
+  ],
 };
 
 export default meta;

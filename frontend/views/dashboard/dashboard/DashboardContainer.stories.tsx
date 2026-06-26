@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useSearchParams } from "next/navigation";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useUserStore as useMockUserStore } from "@/frontend/stores/mockUserStore";
+import { useUserStore } from "@/frontend/stores/userStore";
 import { ParentDashboardContainer } from "@/frontend/views/dashboard/parents/dashboard/ParentDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
 import { shouldRenderTeacherDashboard } from "@/frontend/views/dashboard/teachers/dashboard/utils/teacherDashboardMode";
@@ -24,7 +24,7 @@ function shouldShowTeacherDashboard(permissions: readonly AppPermission[], modeP
 }
 
 export function MockDashboardContainer() {
-  const permissions = useMockUserStore(state => state.permissions);
+  const permissions = useUserStore(state => state.permissions);
   const searchParams = useSearchParams();
   const modeParam = searchParams?.get("mode") ?? null;
 

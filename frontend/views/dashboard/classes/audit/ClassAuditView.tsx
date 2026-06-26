@@ -3,11 +3,11 @@
 import { Box, Chip, Grid, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import type { ClassAuditData } from "./types";
 import { AdminNoteCard } from "./AdminNoteCard";
 import { ClassAuditDetailsCard } from "./ClassAuditDetailsCard";
 import { CommunicationLogCard } from "./CommunicationLogCard";
 import { RegisteredStudentsSection } from "./RegisteredStudentsSection";
+import type { ClassAuditData } from "./types";
 import { VenueLocationCard } from "./VenueLocationCard";
 
 export interface ClassAuditLabels {

@@ -1,5 +1,5 @@
-import type { ParentBillingSummary, ParentInvoiceRow } from "@/frontend/stores/moackParentBillingStore";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
+import type { ParentBillingSummary, ParentInvoiceRow } from "./parentBillingTypes";
 
 export type AdminInvoiceStatus = "overdue" | "pending" | "paid";
 
