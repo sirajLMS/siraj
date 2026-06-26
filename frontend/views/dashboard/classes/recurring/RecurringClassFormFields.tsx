@@ -2,7 +2,7 @@
 
 import { Box, Grid } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
-import type { StudentGroup } from "@/frontend/stores/mockCreateRecurringClassStore";
+import type { StudentGroup } from "./types";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 import { DaysScheduleSection } from "./DaysScheduleSection";
 import { DurationInput } from "./DurationInput";

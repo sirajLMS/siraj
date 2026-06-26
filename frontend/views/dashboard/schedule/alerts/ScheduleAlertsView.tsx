@@ -15,7 +15,7 @@ import type {
   AlertsMetric,
   ScheduleAlert,
   ScheduleAlertType,
-} from "@/frontend/stores/mockScheduleAlertsStore";
+} from "./types";
 import { AcademicScheduleCardList } from "./AcademicScheduleCardList";
 import { AcademicScheduleDataGrid, type AcademicScheduleDataGridLabels } from "./AcademicScheduleDataGrid";
 import { InstitutionalReportCard } from "./InstitutionalReportCard";

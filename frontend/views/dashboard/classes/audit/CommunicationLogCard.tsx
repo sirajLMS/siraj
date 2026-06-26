@@ -4,7 +4,7 @@ import { CheckCircleOutlined, EmailOutlined, RadioButtonUncheckedOutlined, SmsOu
 import { alpha, Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
-import type { CommunicationLogEntry, CommunicationType } from "@/frontend/stores/mockClassAuditStore";
+import type { CommunicationLogEntry, CommunicationType } from "./types";
 
 interface CommunicationLogCardProps {
   readonly entries: readonly CommunicationLogEntry[];

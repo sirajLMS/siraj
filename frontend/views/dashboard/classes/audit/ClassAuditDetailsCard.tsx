@@ -5,7 +5,7 @@ import { alpha, Box, Chip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { BaseCard } from "@/frontend/components/ui";
-import type { ClassAuditData } from "@/frontend/stores/mockClassAuditStore";
+import type { ClassAuditData } from "./types";
 
 interface ClassAuditDetailsCardProps {
   readonly audit: ClassAuditData;

@@ -2,7 +2,7 @@
 
 import { LoginOutlined, LogoutOutlined, OndemandVideoOutlined } from "@mui/icons-material";
 import { alpha, Button } from "@mui/material";
-import type { ClassSessionAction } from "@/frontend/stores/mockScheduleAlertsStore";
+import type { ClassSessionAction } from "./types";
 
 interface ClassSessionActionButtonProps {
   readonly action: ClassSessionAction;

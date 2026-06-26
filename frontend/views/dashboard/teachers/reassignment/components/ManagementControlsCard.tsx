@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BaseCard, StatusBadge } from "@/frontend/components/ui";
 import { labelSx, outlinedInputSx } from "@/frontend/components/ui/form";
-import type { TeacherDirectoryRow } from "@/frontend/stores/mockTeachersStore";
+import type { TeacherDirectoryRow } from "@/frontend/views/dashboard/teachers/home/types";
 
 interface ManagementControlsCardProps {
   readonly teachers: readonly TeacherDirectoryRow[];
