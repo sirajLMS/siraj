@@ -23,6 +23,7 @@ export function TeachersContainer() {
         maxCount: null,
       },
     },
+    fetchPolicy: "cache-and-network",
   });
 
   const directory = data?.teacherDirectory;

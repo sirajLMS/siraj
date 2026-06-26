@@ -46,6 +46,7 @@ export function ParentBillingContainer() {
       },
     },
     skip: !parentId,
+    fetchPolicy: "cache-and-network",
   });
 
   const totalCount = data?.parentInvoiceHistory?.totalCount ?? 0;

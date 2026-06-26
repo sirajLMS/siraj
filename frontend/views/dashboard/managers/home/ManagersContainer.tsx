@@ -40,6 +40,7 @@ export function ManagersContainer() {
         maxCount: null,
       },
     },
+    fetchPolicy: "cache-and-network",
   });
 
   const rawRows = data?.managerDirectory?.rows;

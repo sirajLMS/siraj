@@ -80,6 +80,7 @@ export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) 
       },
     },
     skip: !parentId,
+    fetchPolicy: "cache-and-network",
   });
 
   const [markAsPaidMutation, { loading: markingPaid }] = useMutation(markInvoicePaidMutationDocument, {

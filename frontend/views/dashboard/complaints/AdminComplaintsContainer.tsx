@@ -53,6 +53,7 @@ export function AdminComplaintsContainer() {
         maxCount: null,
       },
     },
+    fetchPolicy: "cache-and-network",
   });
 
   const [respondToComplaint] = useMutation(respondToComplaintMutationDocument, {

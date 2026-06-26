@@ -164,6 +164,7 @@ export function RescheduleTrackingContainer() {
         maxCount: null,
       },
     },
+    fetchPolicy: "cache-and-network",
   });
 
   const {

@@ -42,6 +42,7 @@ export function StudentsContainer() {
         maxCount: null,
       },
     },
+    fetchPolicy: "cache-and-network",
   });
 
   const rows = useMemo(() => buildStudentRows(data), [data]);

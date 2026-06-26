@@ -36,6 +36,7 @@ export function ParentsContainer() {
         maxCount: null,
       },
     },
+    fetchPolicy: "cache-and-network",
   });
 
   const directory = data?.parentDirectory;

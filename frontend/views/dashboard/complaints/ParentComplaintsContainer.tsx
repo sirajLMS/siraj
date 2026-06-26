@@ -51,6 +51,7 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
       },
     },
     skip: !parentId,
+    fetchPolicy: "cache-and-network",
   });
 
   const { data: studentsData } = useQuery(parentAssociatedStudentsQueryDocument, {

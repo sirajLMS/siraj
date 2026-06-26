@@ -351,11 +351,13 @@ export function TeacherDashboardContainer() {
   const { data: standardData, refetch: refetchStandard } = useQuery(teacherDashboardQueryDocument, {
     variables: { date: filterDate, pagination: paginationArgs },
     skip: mode !== "standard",
+    fetchPolicy: "cache-and-network",
   });
 
   const { data: activeData, refetch: refetchActive } = useQuery(teacherActiveDashboardQueryDocument, {
     variables: { date: filterDate, pagination: paginationArgs },
     skip: mode !== "active",
+    fetchPolicy: "cache-and-network",
   });
 
   const [handbookRequested, setHandbookRequested] = useState(false);

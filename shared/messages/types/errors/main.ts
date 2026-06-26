@@ -1,3 +1,14 @@
+import type { AuthErrorLabels } from "./auth";
+import type { ComplaintErrorLabels } from "./complaint";
+import type { ComplaintResponseErrorLabels } from "./complaintResponse";
+import type { ManagerErrorLabels } from "./manager";
+import type { ParentErrorLabels } from "./parent";
+import type { PermissionErrorLabels } from "./permission";
+import type { StaffErrorLabels } from "./staff";
+import type { SuggestionErrorLabels } from "./suggestion";
+import type { TeacherErrorLabels } from "./teacher";
+import type { UserErrorLabels } from "./user";
+
 export interface ErrorsLabels {
   readonly unauthorizedViewMetrics: string;
   readonly unauthorizedViewList: string;
@@ -90,49 +101,17 @@ export interface ErrorsLabels {
   readonly suggestionSubmitFailed: string;
   readonly suggestionNotFound: string;
   readonly suggestionAlreadyReviewed: string;
-  readonly teacher: {
-    readonly alreadyExists: string;
-    readonly invalidTimezone: string;
-    readonly createFailed: string;
-  };
-  readonly parent: {
-    readonly alreadyExists: string;
-    readonly invalidTimezone: string;
-    readonly createFailed: string;
-  };
-  readonly staff: {
-    readonly alreadyExists: string;
-    readonly createFailed: string;
-  };
-  readonly manager: {
-    readonly onlySuperAdminCanCreate: string;
-  };
-  readonly auth: {
-    readonly invalidRoleTab: string;
-  };
-  readonly user: {
-    readonly emailAlreadyExists: string;
-  };
-  readonly permission: {
-    readonly groupNotFound: string;
-  };
-  readonly complaint: {
-    readonly createFailed: string;
-    readonly tooManyFiles: string;
-    readonly fileTooLarge: string;
-    readonly invalidFileType: string;
-  };
-  readonly complaintResponse: {
-    readonly createFailed: string;
-  };
+  readonly teacher: TeacherErrorLabels;
+  readonly parent: ParentErrorLabels;
+  readonly staff: StaffErrorLabels;
+  readonly manager: ManagerErrorLabels;
+  readonly auth: AuthErrorLabels;
+  readonly user: UserErrorLabels;
+  readonly permission: PermissionErrorLabels;
+  readonly complaint: ComplaintErrorLabels;
+  readonly complaintResponse: ComplaintResponseErrorLabels;
   readonly complaintNotFound: string;
-  readonly suggestion: {
-    readonly createFailed: string;
-    readonly notFound: string;
-    readonly cannotMarkSelfAsDuplicate: string;
-    readonly targetIsAlreadyDuplicate: string;
-    readonly cannotCreateCircularDuplicate: string;
-  };
+  readonly suggestion: SuggestionErrorLabels;
   readonly outOfQuota: string;
   readonly unauthorizedSearch: string;
 }
