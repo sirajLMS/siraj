@@ -269,7 +269,6 @@ function StandardDashboardWrapper({
 }: Readonly<StandardDashboardWrapperProps>) {
   const standardMetrics = standardData?.teacherDashboard?.metrics;
   const scheduleRows = mapRows(standardData?.teacherDashboard?.scheduleRows, filterDate, "standard");
-  const totalScheduledToday = scheduleRows.length;
   const totalCount = standardData?.teacherDashboard?.totalCount ?? 0;
   const missedRow = scheduleRows.find(r => r.status === "missed");
   const missedAlert = missedRow
@@ -292,7 +291,6 @@ function StandardDashboardWrapper({
       scheduleRows={scheduleRows}
       missedAlert={missedAlert}
       scheduleDateLabel={filterDate}
-      totalScheduledToday={totalScheduledToday}
       labels={labels}
       canActivate={permissions.includes(AppPermission.SessionActivateClass)}
       canManualEntry={permissions.includes(AppPermission.SessionActivateClass)}
@@ -340,7 +338,15 @@ export function TeacherDashboardContainer() {
   const { filterDate, setFilterDate, page, pageSize, setPage } = useTeacherDashboardStore();
   const mode = resolveTeacherDashboardMode(permissions, modeParam);
 
-  const paginationArgs = { first: pageSize, page: page + 1 };
+  const paginationArgs: Types.PaginationArgs = {
+    first: pageSize,
+    page: page + 1,
+    after: null,
+    before: null,
+    last: null,
+    maxCount: null,
+    skip: null,
+  };
 
   const { data: standardData, refetch: refetchStandard } = useQuery(teacherDashboardQueryDocument, {
     variables: { date: filterDate, pagination: paginationArgs },
@@ -458,7 +464,7 @@ export function TeacherDashboardContainer() {
       {mode === "active" && canControl ? (
         <ActiveDashboardWrapper
           userName={userName}
-          activeData={activeData}
+          activeData={activeData as Operations.TeacherActiveDashboardQuery | undefined}
           filterDate={filterDate}
           labels={labels}
           activationError={activationError}
@@ -476,7 +482,7 @@ export function TeacherDashboardContainer() {
         />
       ) : (
         <StandardDashboardWrapper
-          standardData={standardData}
+          standardData={standardData as Operations.TeacherDashboardQuery | undefined}
           filterDate={filterDate}
           permissions={permissions}
           labels={labels}

@@ -76,6 +76,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
       query: teacherDashboardQueryDocument,
       variables: {
         date: testDate,
+        pagination: null,
       },
       context: {
         headers: {
@@ -109,6 +110,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
       query: teacherDashboardQueryDocument,
       variables: {
         date: testDate,
+        pagination: null,
       },
       errorPolicy: "all",
       context: {

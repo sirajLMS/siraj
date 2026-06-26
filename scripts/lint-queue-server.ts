@@ -26,7 +26,11 @@ async function runLint(files: string[]): Promise<LintResult> {
 async function processQueue() {
   if (running || queue.length === 0) return;
   running = true;
-  const item = queue.shift()!;
+  const item = queue.shift();
+  if (!item) {
+    running = false;
+    return;
+  }
   console.log(`[lint-queue] Running lint for request ${item.id} on ${item.files.length} file(s)`);
   try {
     const result = await runLint(item.files);

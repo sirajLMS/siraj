@@ -22,7 +22,6 @@ interface TeacherDashboardViewProps {
   readonly scheduleRows: readonly TeacherScheduleRow[];
   readonly missedAlert: MissedClassAlert | null;
   readonly scheduleDateLabel: string;
-  readonly totalScheduledToday: number;
   readonly labels: TeacherDashboardLabels;
   readonly canActivate: boolean;
   readonly canManualEntry: boolean;
@@ -84,16 +83,11 @@ function buildHeaderActions({
   );
 }
 
-function formatShowingText(template: string, shown: number, total: number): string {
-  return template.replace("{shown}", String(shown)).replace("{total}", String(total));
-}
-
 export function TeacherDashboardView({
   metrics,
   scheduleRows,
   missedAlert,
   scheduleDateLabel,
-  totalScheduledToday,
   labels,
   canActivate,
   canManualEntry,

@@ -3,7 +3,14 @@
 import { AddOutlined, CalendarMonthOutlined } from "@mui/icons-material";
 import { Alert, Box, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { DateNavigator, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import {
+  DateNavigator,
+  PageContainer,
+  PageHeader,
+  PaginationControls,
+  PrimaryPageAction,
+  SectionPanel,
+} from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   StudentProgressFeedItem,
@@ -228,6 +235,16 @@ export function TeacherDashboardActiveView({
               />
             ))}
           </Stack>
+          {totalCount !== undefined && onPageChange && pageSize > 0 && Math.ceil(totalCount / pageSize) > 1 && (
+            <PaginationControls
+              page={page}
+              pageCount={Math.ceil(totalCount / pageSize)}
+              rowCount={totalCount}
+              pageSize={pageSize}
+              embedded
+              onPageChange={onPageChange}
+            />
+          )}
         </Box>
 
         <StudentProgressFeed items={progressFeed} title={labels.progressFeed.title} />

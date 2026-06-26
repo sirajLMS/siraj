@@ -7,8 +7,8 @@ import { parentDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedD
 import { useParentDashboardStore } from "@/frontend/stores/parentDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import type { ParentScheduleRow } from "./types/parentDashboardTypes";
 import { ParentDashboardView } from "./ParentDashboardView";
+import type { ParentScheduleRow } from "./types/parentDashboardTypes";
 
 function mapExecutionStateToLiveClassStatus(
   executionState: string,
@@ -34,11 +34,11 @@ export function ParentDashboardContainer() {
     () => ({
       page: page + 1,
       first: pageSize,
-      after: undefined,
-      before: undefined,
-      last: undefined,
-      maxCount: undefined,
-      skip: undefined,
+      skip: null,
+      after: null,
+      before: null,
+      last: null,
+      maxCount: null,
     }),
     [page, pageSize]
   );
@@ -49,7 +49,7 @@ export function ParentDashboardContainer() {
   }, []);
 
   const { data } = useQuery(parentDashboardScheduleQueryDocument, {
-    variables: { date: today, paginationArgs },
+    variables: { date: today, search: null, paginationArgs },
     fetchPolicy: "cache-and-network",
   });
 
@@ -65,13 +65,8 @@ export function ParentDashboardContainer() {
       studentInitials: r.studentInitials ?? "",
       studentAvatarUrl: r.studentAvatarUrl ?? undefined,
       teacherName: r.teacherName ?? "",
-      bookingStatus: (r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed") as
-        | "confirmed"
-        | "rescheduled",
-      liveClassStatus: mapExecutionStateToLiveClassStatus(
-        r.executionState ?? "",
-        r.outcome ?? ""
-      ),
+      bookingStatus: (r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed") as "confirmed" | "rescheduled",
+      liveClassStatus: mapExecutionStateToLiveClassStatus(r.executionState ?? "", r.outcome ?? ""),
       videoEnabled: !!r.zoomMeetingUrl,
     }));
   }, [data]);

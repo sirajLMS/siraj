@@ -50,8 +50,9 @@ export type ParentDashboardScheduleResultDefinition = {
   pageInfo: PageInfo | null;
 };
 
-const ParentDashboardScheduleResultRef =
-  gqlSchemaBuilder.objectRef<ParentDashboardScheduleResultDefinition>("ParentDashboardScheduleResult");
+const ParentDashboardScheduleResultRef = gqlSchemaBuilder.objectRef<ParentDashboardScheduleResultDefinition>(
+  "ParentDashboardScheduleResult"
+);
 
 export const ParentDashboardScheduleResultPothosObject = ParentDashboardScheduleResultRef.implement({
   fields: t => ({

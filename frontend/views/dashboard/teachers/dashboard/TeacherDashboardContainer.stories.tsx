@@ -255,7 +255,6 @@ export function MockTeacherDashboardContainer({ mode = "standard" }: MockTeacher
       scheduleRows={standardStore.scheduleRows}
       missedAlert={standardStore.missedAlert}
       scheduleDateLabel={standardStore.scheduleDateLabel}
-      totalScheduledToday={standardStore.totalScheduledToday}
       labels={labels}
       canActivate={true}
       canManualEntry={true}

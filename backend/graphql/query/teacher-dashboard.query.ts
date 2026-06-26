@@ -1,6 +1,6 @@
-import { PaginationArgs } from "@/backend/types";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
+import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PaginationArgsObject } from "../pothos/pagination.objects";
 import { TeacherDashboardPothosObject, TeacherHandbookUrlPothosObject } from "../pothos/teacher-dashboard.pothos";
@@ -19,7 +19,13 @@ gqlSchemaBuilder.queryField("teacherDashboard", t =>
         throw new Error(tFunc("unauthorized"));
       }
       const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
-      const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, "teacher", ctx.locale, pagination);
+      const result = await TeacherDashboardService.getDashboard(
+        ctx.user.id,
+        args.date,
+        "teacher",
+        ctx.locale,
+        pagination
+      );
       return {
         ...result,
         scheduleRows: result.scheduleRows.map(r => ({
@@ -52,7 +58,13 @@ gqlSchemaBuilder.queryField("teacherActiveDashboard", t =>
         throw new Error(tFunc("unauthorized"));
       }
       const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
-      const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, "teacher-active", ctx.locale, pagination);
+      const result = await TeacherDashboardService.getDashboard(
+        ctx.user.id,
+        args.date,
+        "teacher-active",
+        ctx.locale,
+        pagination
+      );
       return {
         ...result,
         scheduleRows: result.scheduleRows.map(r => ({

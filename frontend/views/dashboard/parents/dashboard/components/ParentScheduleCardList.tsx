@@ -3,9 +3,9 @@
 import { ScheduleOutlined, VideocamOutlined } from "@mui/icons-material";
 import { Avatar, Box, Card, CardContent, IconButton, Stack, Typography } from "@mui/material";
 import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
+import type { SchedulePagination } from "../ParentDashboardView";
 import type { ParentDashboardLabels } from "../types/parentDashboardLabels";
 import type { ParentScheduleRow } from "../types/parentDashboardTypes";
-import type { SchedulePagination } from "../ParentDashboardView";
 
 interface ParentScheduleCardListProps {
   readonly rows: readonly ParentScheduleRow[];
@@ -118,10 +118,13 @@ function ScheduleCard({
   );
 }
 
-export function ParentScheduleCardList({ rows, labels, onJoinVideo, pagination }: Readonly<ParentScheduleCardListProps>) {
-  const pageCount = pagination
-    ? Math.max(1, Math.ceil(pagination.totalCount / pagination.pageSize))
-    : 0;
+export function ParentScheduleCardList({
+  rows,
+  labels,
+  onJoinVideo,
+  pagination,
+}: Readonly<ParentScheduleCardListProps>) {
+  const pageCount = pagination ? Math.max(1, Math.ceil(pagination.totalCount / pagination.pageSize)) : 0;
 
   return (
     <Stack spacing={1.5}>

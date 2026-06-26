@@ -123,6 +123,16 @@ export function TeacherScheduleCardList({
           </Paper>
         );
       })}
+      {isServerPagination && pageCount > 1 && totalCount !== undefined && onPageChange && (
+        <PaginationControls
+          page={page}
+          pageCount={pageCount}
+          rowCount={totalCount}
+          pageSize={pageSize}
+          embedded
+          onPageChange={onPageChange}
+        />
+      )}
     </Stack>
   );
 }

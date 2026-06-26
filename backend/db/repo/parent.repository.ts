@@ -1,18 +1,14 @@
-import { and, count, desc, eq, ilike, or, sql } from "drizzle-orm";
-import { isNull, gte, lt, inArray } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
-import {
-  classInstances,
-  invoices,
-  parents,
-  students,
-  teachers,
-  users,
-} from "@/backend/db/schema";
+import { classInstances, invoices, parents, students, teachers, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { PaginationArgs, ParentCreateResult, ParentEntityInput } from "@/backend/types";
-import type { ParentDashboardScheduleRow } from "@/backend/types";
+import type {
+  PaginationArgs,
+  ParentCreateResult,
+  ParentDashboardScheduleRow,
+  ParentEntityInput,
+} from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
 import type { DBTransaction } from "../db.types";
 
@@ -399,10 +395,7 @@ export namespace ParentRepository {
     tx?: DBTransaction
   ): Promise<ParentDashboardScheduleResult> => {
     const runner = async (t: DBTransaction): Promise<ParentDashboardScheduleResult> => {
-      const parentStudents = await t
-        .select({ id: students.id })
-        .from(students)
-        .where(eq(students.parentId, parentId));
+      const parentStudents = await t.select({ id: students.id }).from(students).where(eq(students.parentId, parentId));
 
       const studentIds = parentStudents.map(s => s.id);
 
@@ -508,7 +501,7 @@ export namespace ParentRepository {
           scheduledStartAt: r.scheduledStartAt,
           scheduledEndAt: r.scheduledEndAt,
           durationMinutes: r.durationMinutes,
-          bookingStatus: r.isRescheduled ? "rescheduled" as const : "confirmed" as const,
+          bookingStatus: r.isRescheduled ? ("rescheduled" as const) : ("confirmed" as const),
           executionState: r.executionState,
           outcome: r.outcome,
           zoomMeetingUrl: r.zoomMeetingUrl ?? null,

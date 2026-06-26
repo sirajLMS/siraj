@@ -147,6 +147,7 @@ describe("GraphQL Class Session Integration Tests", () => {
       query: teacherDashboardQueryDocument,
       variables: {
         date: testDate,
+        pagination: null,
       },
       context: {
         headers: {
@@ -241,6 +242,7 @@ describe("GraphQL Class Session Integration Tests", () => {
       query: teacherDashboardQueryDocument,
       variables: {
         date: outsideDate || testDate,
+        pagination: null,
       },
       context: {
         headers: {
