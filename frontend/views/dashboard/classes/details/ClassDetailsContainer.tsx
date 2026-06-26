@@ -1,9 +1,21 @@
 "use client";
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
-import { Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -21,14 +33,19 @@ import {
 } from "@/frontend/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
+import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/dashboard/utils/formatScheduleTime";
 import { getErrorMessage } from "@/shared/utils/error";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
 import { ClassDetailsHeader } from "./ClassDetailsHeader";
 import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
+import { type ClassDetailsViewMode, formatClassDetailDate } from "./types";
 import { useAdminViewLabels, useTeacherViewLabels } from "./useClassDetailsLabels";
 
 interface CommonViewProps {
   readonly instance: ClassInstanceDetail;
+  readonly formattedScheduledDate: string;
+  readonly formattedStartTime: string;
+  readonly formattedEndTime: string;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;
   readonly onStop: () => void;
@@ -56,9 +73,9 @@ const AdminView = (props: AdminViewProps) => {
 };
 
 interface TeacherViewProps extends CommonViewProps {
+  readonly viewMode: ClassDetailsViewMode;
   readonly onActivate: () => void;
   readonly onInfoEdit: () => void;
-  readonly onViewProfile: () => void;
 }
 
 const TeacherView = (props: TeacherViewProps) => {
@@ -71,6 +88,7 @@ export function ClassDetailsContainer() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations("dashboard.classDetails");
   const client = useApolloClient();
 
   const params = useParams();
@@ -81,6 +99,7 @@ export function ClassDetailsContainer() {
   const [isWarningDismissed, setIsWarningDismissed] = useState(false);
   const [errorState, setErrorState] = useState<string | null>(null);
   const [shouldLoadEvents, setShouldLoadEvents] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const { data, loading, error } = useQuery(classInstanceQueryDocument, {
     variables: { id },
@@ -150,6 +169,7 @@ export function ClassDetailsContainer() {
   const [deleteClass] = useMutation(deleteClassInstanceMutationDocument, {
     onCompleted: () => {
       setErrorState(null);
+      setDeleteDialogOpen(false);
     },
     onError: err => setErrorState(err.message),
   });
@@ -188,6 +208,8 @@ export function ClassDetailsContainer() {
 
   const canOverride = hasPermission(AppPermission.SessionOverrideActions);
   const canView = hasPermission(AppPermission.SessionViewDetails);
+  const canActivate = hasPermission(AppPermission.SessionActivateClass);
+  const isParentView = hasPermission(AppPermission.ScheduleViewFamily) && !canActivate && !canOverride;
 
   if (loading) {
     return (
@@ -203,10 +225,17 @@ export function ClassDetailsContainer() {
 
   if (error || !data?.classInstance) {
     logger.error("Error fetching class details:", error);
-    return null;
+    return (
+      <PageContainer>
+        <Alert severity="error">{error?.message ?? t("loadError")}</Alert>
+      </PageContainer>
+    );
   }
 
   const instance = data.classInstance;
+  const formattedScheduledDate = formatClassDetailDate(instance.scheduledDate, locale);
+  const formattedStartTime = formatScheduleTimeOnly(instance.startTime, locale);
+  const formattedEndTime = formatScheduleTimeOnly(instance.endTime, locale);
 
   const handleForceActivate = async () => {
     try {
@@ -235,7 +264,7 @@ export function ClassDetailsContainer() {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDeleteConfirm = async () => {
     try {
       await deleteClass({ variables: { classInstanceId: id } });
       logger.warn("Deleted class instance:", id);
@@ -243,6 +272,10 @@ export function ClassDetailsContainer() {
     } catch (err) {
       logger.error("Error in deleteClass:", err);
     }
+  };
+
+  const handleDeleteRequest = () => {
+    setDeleteDialogOpen(true);
   };
 
   const handleGenerateLog = () => {
@@ -253,12 +286,6 @@ export function ClassDetailsContainer() {
     router.push(`/${locale}/reschedule?classInstanceId=${id}`);
   };
 
-  const handleViewProfile = () => {
-    if (instance.student?.id) {
-      router.push(`/${locale}/students/${instance.student.id}/status`);
-    }
-  };
-
   const handleInfoEdit = () => {
     router.push(`/${locale}/classes/${id}/audit`);
   };
@@ -266,6 +293,9 @@ export function ClassDetailsContainer() {
   const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;
 
   const sessionActionProps = {
+    formattedScheduledDate,
+    formattedStartTime,
+    formattedEndTime,
     onStart: () => startSession({ variables: { classInstanceId: id } }),
     onAbsent: () => markAbsent({ variables: { classInstanceId: id } }),
     onLeave: (reason: string) => processLeave({ variables: { classInstanceId: id, leaveReason: reason } }),
@@ -276,6 +306,21 @@ export function ClassDetailsContainer() {
     isResetting,
     error: errorState,
   };
+
+  const deleteDialog = (
+    <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
+      <DialogTitle>{t("deleteConfirm.title")}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{t("deleteConfirm.message")}</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setDeleteDialogOpen(false)}>{t("deleteConfirm.cancel")}</Button>
+        <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+          {t("deleteConfirm.confirm")}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 
   if (canOverride) {
     return (
@@ -289,9 +334,10 @@ export function ClassDetailsContainer() {
           onStop={handleStop}
           onGenerateLog={handleGenerateLog}
           onReschedule={handleReschedule}
-          onDelete={handleDelete}
+          onDelete={handleDeleteRequest}
           {...sessionActionProps}
         />
+        {deleteDialog}
       </PageContainer>
     );
   }
@@ -302,15 +348,16 @@ export function ClassDetailsContainer() {
         {pageHeader}
         <TeacherView
           instance={instance}
+          viewMode={isParentView ? "parent" : "teacher"}
           isWarningDismissed={isWarningDismissed}
           onDismissWarning={() => setIsWarningDismissed(true)}
           onActivate={handleActivate}
           onStop={handleStop}
           onInfoEdit={handleInfoEdit}
-          onDelete={handleDelete}
-          onViewProfile={handleViewProfile}
+          onDelete={handleDeleteRequest}
           {...sessionActionProps}
         />
+        {deleteDialog}
       </PageContainer>
     );
   }

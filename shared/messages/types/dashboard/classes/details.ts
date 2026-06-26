@@ -17,6 +17,7 @@ export interface ClassDetailsLabels {
     readonly avgGrade: string;
     readonly lastClass: string;
     readonly days: string;
+    readonly noData: string;
   };
   readonly heatmap: AdminViewLabels["heatmap"];
   readonly instanceDetails: {
@@ -56,7 +57,15 @@ export interface ClassDetailsLabels {
     readonly cancel: string;
     readonly resetDialogTitle: string;
     readonly resetConfirm: string;
+    readonly joinZoom: string;
   };
+  readonly deleteConfirm: {
+    readonly title: string;
+    readonly message: string;
+    readonly confirm: string;
+    readonly cancel: string;
+  };
+  readonly loadError: string;
   readonly status: {
     readonly active: string;
     readonly scheduled: string;

@@ -5,6 +5,7 @@ export interface ClassDetailsPerformanceLabels {
   readonly assessmentProgress: string;
   readonly focusLevel: string;
   readonly sessionHealth: string;
+  readonly noData: string;
 }
 
 export interface AdminViewLabels {
@@ -31,11 +32,13 @@ export interface AdminViewLabels {
     readonly authorization: string;
     readonly minutes: string;
     readonly optimal: string;
+    readonly unavailable: string;
   };
   readonly performance: ClassDetailsPerformanceLabels;
   readonly heatmap: {
     readonly activityHeatmap: string;
     readonly studentInput: string;
     readonly teacherResponse: string;
+    readonly noData: string;
   };
 }

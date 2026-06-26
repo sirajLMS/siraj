@@ -16,6 +16,7 @@ interface ActionConfig {
   readonly key: string;
   readonly icon: React.ElementType;
   readonly statusKey: "active" | "cancelled" | "completed";
+  readonly permission?: AppPermission;
 }
 
 const ACTION_CONFIGS: ActionConfig[] = [
@@ -23,11 +24,13 @@ const ACTION_CONFIGS: ActionConfig[] = [
     key: "activate",
     icon: PowerSettingsNewIcon,
     statusKey: "active",
+    permission: AppPermission.SessionActivateClass,
   },
   {
     key: "stop",
     icon: PauseCircleIcon,
     statusKey: "cancelled",
+    permission: AppPermission.SessionOverrideActions,
   },
   {
     key: "infoEdit",
@@ -38,6 +41,7 @@ const ACTION_CONFIGS: ActionConfig[] = [
     key: "delete",
     icon: DeleteIcon,
     statusKey: "cancelled",
+    permission: AppPermission.SessionOverrideActions,
   },
 ];
 
@@ -56,14 +60,12 @@ interface ActionsPanelProps {
   };
 }
 
-// Header-colored strip at the top of the actions card
 const StyledActionsHeader = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.header,
   paddingBlock: theme.spacing(2),
   paddingInline: theme.spacing(3),
 }));
 
-// OnHeader flex-row title that leads with a bolt icon
 const StyledActionsTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.onHeader,
   display: "flex",
@@ -71,7 +73,6 @@ const StyledActionsTitle = styled(Typography)(({ theme }) => ({
   gap: theme.spacing(1),
 }));
 
-// Default-background rounded help block beneath the action grid
 const StyledHelpContainer = styled(Stack)(({ theme }) => ({
   gap: theme.spacing(1.5),
   padding: theme.spacing(2),
@@ -80,13 +81,11 @@ const StyledHelpContainer = styled(Stack)(({ theme }) => ({
   alignItems: "flex-start",
 }));
 
-// Muted onSurfaceVariant text/icon color used for the contextual help area
 const StyledHelpText = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
   lineHeight: 1.6,
 }));
 
-// Muted onSurfaceVariant icon used as the contextual help indicator
 const StyledHelpIcon = styled(HelpOutlinedIcon)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
   fontSize: 20,
@@ -111,7 +110,6 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
 
   return (
     <BaseCard sx={{ p: 0, overflow: "hidden" }}>
-      {/* Action header */}
       <StyledActionsHeader>
         <StyledActionsTitle variant="titleLg">
           <BoltIcon />
@@ -120,7 +118,6 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
       </StyledActionsHeader>
 
       <Box sx={{ p: 3 }}>
-        {/* 2×2 action button grid */}
         <Grid container spacing={2}>
           {ACTION_CONFIGS.map(config => {
             const Icon = config.icon;
@@ -170,10 +167,8 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
 
             return (
               <Grid key={config.key} size={{ xs: 6 }}>
-                {config.key === "activate" ? (
-                  <RequirePermission permissions={[AppPermission.SessionActivateClass]}>
-                    {buttonElement}
-                  </RequirePermission>
+                {config.permission ? (
+                  <RequirePermission permissions={[config.permission]}>{buttonElement}</RequirePermission>
                 ) : (
                   buttonElement
                 )}
@@ -182,7 +177,6 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
           })}
         </Grid>
 
-        {/* Contextual help */}
         <StyledHelpContainer direction="row" sx={{ mt: 2.5 }}>
           <StyledHelpIcon />
           <StyledHelpText variant="caption">{labels.contextualHelp}</StyledHelpText>

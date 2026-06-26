@@ -15,6 +15,7 @@ import { StudentProgressFeed } from "./components/StudentProgressFeed";
 import { TeacherActiveMetricsRow } from "./components/TeacherActiveMetricsRow";
 import { TeacherActiveScheduleDataGrid } from "./components/TeacherActiveScheduleDataGrid";
 import { TeacherActiveSessionControls } from "./components/TeacherActiveSessionControls";
+import { TeacherDateControls } from "./components/TeacherDateControls";
 import type { TeacherDashboardLabels } from "./types/teacherDashboardLabels";
 
 interface TeacherDashboardActiveViewProps {
@@ -31,6 +32,8 @@ interface TeacherDashboardActiveViewProps {
   readonly onMarkAbsent?: (id: string) => void;
   readonly onRequestLeave?: (id: string) => void;
   readonly activationError?: string | null;
+  readonly dateValue: string;
+  readonly onDateChange: (date: string) => void;
 }
 
 function formatWelcomeSubtitle(template: string, date: string, count: number): string {
@@ -141,6 +144,8 @@ export function TeacherDashboardActiveView({
   onMarkAbsent,
   onRequestLeave,
   activationError,
+  dateValue,
+  onDateChange,
 }: Readonly<TeacherDashboardActiveViewProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -177,6 +182,17 @@ export function TeacherDashboardActiveView({
               )}
             </Typography>
           </Box>
+        </Box>
+
+        <Box sx={{ mb: 3 }}>
+          <TeacherDateControls
+            dateValue={dateValue}
+            todayLabel={labels.dateFilter.today}
+            previousDayLabel={labels.dateFilter.previousDay}
+            nextDayLabel={labels.dateFilter.nextDay}
+            dateLabel={labels.dateFilter.dateLabel}
+            onDateChange={onDateChange}
+          />
         </Box>
 
         <Box sx={{ mb: 4 }}>
@@ -228,6 +244,17 @@ export function TeacherDashboardActiveView({
           </PrimaryPageAction>
         }
       />
+
+      <Box sx={{ mb: 3 }}>
+        <TeacherDateControls
+          dateValue={dateValue}
+          todayLabel={labels.dateFilter.today}
+          previousDayLabel={labels.dateFilter.previousDay}
+          nextDayLabel={labels.dateFilter.nextDay}
+          dateLabel={labels.dateFilter.dateLabel}
+          onDateChange={onDateChange}
+        />
+      </Box>
 
       <Box sx={{ mb: 4 }}>
         <TeacherActiveMetricsRow metrics={metrics} labels={labels.activeMetrics} isMobile={false} />

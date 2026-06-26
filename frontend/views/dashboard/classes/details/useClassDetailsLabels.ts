@@ -28,6 +28,7 @@ export interface TeacherViewLabels {
     readonly avgGrade: string;
     readonly lastClass: string;
     readonly days: string;
+    readonly noData: string;
   };
   readonly actions: {
     readonly actions: string;
@@ -38,7 +39,6 @@ export interface TeacherViewLabels {
     readonly contextualHelp: string;
   };
   readonly studentProfile: {
-    readonly studentLevel: string;
     readonly viewFullProfile: string;
   };
 }
@@ -71,6 +71,7 @@ export const useAdminViewLabels = (timezone: string): AdminViewLabels => {
         authorization: t("metadata.authorization"),
         minutes: t("metadata.minutes"),
         optimal: t("metadata.optimal"),
+        unavailable: t("metadata.unavailable"),
       },
       performance: {
         livePerformanceOverview: t("performance.livePerformanceOverview"),
@@ -79,11 +80,13 @@ export const useAdminViewLabels = (timezone: string): AdminViewLabels => {
         assessmentProgress: t("performance.assessmentProgress"),
         focusLevel: t("performance.focusLevel"),
         sessionHealth: t("performance.sessionHealth"),
+        noData: t("performance.noData"),
       },
       heatmap: {
         activityHeatmap: t("heatmap.activityHeatmap"),
         studentInput: t("heatmap.studentInput"),
         teacherResponse: t("heatmap.teacherResponse"),
+        noData: t("heatmap.noData"),
       },
     }),
     [t, timezone]
@@ -127,6 +130,7 @@ export const useTeacherViewLabels = (timezone: string): TeacherViewLabels => {
         avgGrade: t("performance.avgGrade"),
         lastClass: t("performance.lastClass"),
         days: t("performance.days"),
+        noData: t("performance.noData"),
       },
       actions: {
         actions: t("actions.actions"),
@@ -137,7 +141,6 @@ export const useTeacherViewLabels = (timezone: string): TeacherViewLabels => {
         contextualHelp: t("actions.contextualHelp"),
       },
       studentProfile: {
-        studentLevel: t("studentProfile.studentLevel"),
         viewFullProfile: t("studentProfile.viewFullProfile"),
       },
     };

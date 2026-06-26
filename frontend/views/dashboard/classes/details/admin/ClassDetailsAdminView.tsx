@@ -13,6 +13,7 @@ import { MetadataCard } from "./MetadataCard";
 
 interface ClassDetailsAdminViewProps {
   readonly instance: ClassInstanceDetail;
+  readonly formattedScheduledDate: string;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;
   readonly onForceActivate: () => void;
@@ -39,8 +40,11 @@ function toNumberArray(value: unknown): number[] {
   return [];
 }
 
+const LIVE_EXECUTION_STATES = new Set(["ACTIVATED", "RUNNING"]);
+
 export function ClassDetailsAdminView({
   instance,
+  formattedScheduledDate,
   isWarningDismissed,
   onDismissWarning,
   onForceActivate,
@@ -59,18 +63,24 @@ export function ClassDetailsAdminView({
   isResetting,
   error,
 }: ClassDetailsAdminViewProps) {
-  const performanceMetrics = [
-    { key: "engagement", labelKey: "engagementScore", value: `${instance.performance?.engagementScore ?? 0}%` },
-    {
-      key: "assessment",
-      labelKey: "assessmentProgress",
-      value: `${instance.performance?.assessmentProgress ?? 0}/${instance.performance?.assessmentTotal ?? 0}`,
-    },
-    { key: "focus", labelKey: "focusLevel", value: instance.performance?.focusLevel ?? "" },
-    { key: "health", labelKey: "sessionHealth", value: instance.performance?.sessionHealth ?? "" },
-  ];
+  const performance = instance.performance;
+  const hasPerformance = performance != null;
+  const showLiveMetadata = LIVE_EXECUTION_STATES.has(instance.executionState ?? "");
 
-  const heatmapData = toNumberArray(instance.performance?.heatmapData);
+  const performanceMetrics = hasPerformance
+    ? [
+        { key: "engagement", labelKey: "engagementScore", value: `${performance.engagementScore ?? 0}%` },
+        {
+          key: "assessment",
+          labelKey: "assessmentProgress",
+          value: `${performance.assessmentProgress ?? 0}/${performance.assessmentTotal ?? 0}`,
+        },
+        { key: "focus", labelKey: "focusLevel", value: performance.focusLevel ?? "" },
+        { key: "health", labelKey: "sessionHealth", value: performance.sessionHealth ?? "" },
+      ]
+    : [];
+
+  const heatmapData = toNumberArray(performance?.heatmapData);
 
   return (
     <Box>
@@ -90,7 +100,6 @@ export function ClassDetailsAdminView({
         error={error}
       />
 
-      {/* Admin Actions Bar */}
       <RequirePermission permissions={[AppPermission.SessionOverrideActions]}>
         <AdminActionsBar
           onForceActivate={onForceActivate}
@@ -102,7 +111,6 @@ export function ClassDetailsAdminView({
         />
       </RequirePermission>
 
-      {/* Class Info + Metadata */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, md: 8 }}>
           <ClassInfoCard
@@ -111,11 +119,12 @@ export function ClassDetailsAdminView({
             student={{
               id: instance.student?.id ?? "",
               name: instance.student?.name ?? "",
-              grade: instance.student?.grade ?? "",
-              level: Number(instance.student?.level ?? 0),
+              grade: "",
+              level: 0,
               avatarUrl: instance.student?.avatarUrl ?? "",
             }}
             teacher={{
+              id: instance.teacher?.id ?? "",
               name: instance.teacher?.name ?? "",
               title: instance.teacher?.title ?? "",
               avatarUrl: instance.teacher?.avatarUrl ?? "",
@@ -126,19 +135,18 @@ export function ClassDetailsAdminView({
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
           <MetadataCard
-            scheduledDate={instance.scheduledDate ?? ""}
+            scheduledDate={formattedScheduledDate}
             durationMinutes={instance.durationMinutes ?? 0}
-            latencyMs={instance.performance?.latencyMs ?? 0}
-            authorization="OAuth 2.0 SSL"
+            latencyMs={performance?.latencyMs ?? null}
+            authorizationLabel={performance?.authorizationLabel ?? null}
+            showLiveMetadata={showLiveMetadata}
             labels={labels.metadata}
           />
         </Grid>
       </Grid>
 
-      {/* Live Performance Overview */}
-      <LivePerformanceGrid metrics={performanceMetrics} labels={labels.performance} />
+      <LivePerformanceGrid metrics={performanceMetrics} labels={labels.performance} hasData={hasPerformance} />
 
-      {/* Activity Heatmap */}
       <ActivityHeatmap data={heatmapData} labels={labels.heatmap} />
     </Box>
   );

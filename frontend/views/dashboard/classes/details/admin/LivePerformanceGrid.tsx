@@ -19,6 +19,7 @@ const METRIC_ICONS: Record<string, SvgIconComponent> = {
 
 interface LivePerformanceGridProps {
   readonly metrics: readonly PerformanceMetric[];
+  readonly hasData: boolean;
   readonly labels: {
     readonly livePerformanceOverview: string;
     readonly last30Mins: string;
@@ -26,6 +27,7 @@ interface LivePerformanceGridProps {
     readonly assessmentProgress: string;
     readonly focusLevel: string;
     readonly sessionHealth: string;
+    readonly noData: string;
   };
 }
 
@@ -49,7 +51,7 @@ const StyledTimeRangeCaption = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export function LivePerformanceGrid({ metrics, labels }: LivePerformanceGridProps) {
+export function LivePerformanceGrid({ metrics, hasData, labels }: LivePerformanceGridProps) {
   const labelMap: Record<string, string> = {
     engagementScore: labels.engagementScore,
     assessmentProgress: labels.assessmentProgress,
@@ -70,12 +72,23 @@ export function LivePerformanceGrid({ metrics, labels }: LivePerformanceGridProp
     <Box>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <StyledSectionTitle variant="headlineMd">{labels.livePerformanceOverview}</StyledSectionTitle>
-        <StyledTimeRangeChip>
-          <StyledTimeRangeCaption variant="caption">{labels.last30Mins}</StyledTimeRangeCaption>
-        </StyledTimeRangeChip>
+        {hasData ? (
+          <StyledTimeRangeChip>
+            <StyledTimeRangeCaption variant="caption">{labels.last30Mins}</StyledTimeRangeCaption>
+          </StyledTimeRangeChip>
+        ) : null}
       </Stack>
 
-      <MetricCardGrid metrics={metricItems} size={{ md: 3, lg: "grow" }} />
+      {hasData ? (
+        <MetricCardGrid metrics={metricItems} size={{ md: 3, lg: "grow" }} />
+      ) : (
+        <Typography
+          variant="body2"
+          sx={theme => ({ color: theme.palette.onSurfaceVariant, py: 4, textAlign: "center" })}
+        >
+          {labels.noData}
+        </Typography>
+      )}
     </Box>
   );
 }

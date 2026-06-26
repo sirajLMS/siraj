@@ -219,6 +219,7 @@ enum ClassExecutionState {
 }
 
 type ClassInstanceDetail {
+  classType: String
   courseName: String
   durationMinutes: Int
   endTime: String
@@ -244,6 +245,7 @@ type ClassInstancePerformance {
   assessmentProgress: Int
   assessmentTotal: Int
   attendanceRate: Int
+  authorizationLabel: String
   avgGrade: String
   engagementScore: Int
   focusLevel: String

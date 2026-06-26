@@ -4,6 +4,7 @@ import { Box, Grid } from "@mui/material";
 import type { ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
 import { ClassDetailsToolbarArea } from "../components/ClassDetailsToolbarArea";
+import type { ClassDetailsViewMode } from "../types";
 import type { TeacherViewLabels } from "../useClassDetailsLabels";
 import { ActionsPanel } from "./ActionsPanel";
 import { ClassInstanceDetailsCard } from "./ClassInstanceDetailsCard";
@@ -13,13 +14,15 @@ import { StudentProfileCard } from "./StudentProfileCard";
 
 interface ClassDetailsTeacherViewProps {
   readonly instance: ClassInstanceDetail;
+  readonly viewMode: ClassDetailsViewMode;
+  readonly formattedStartTime: string;
+  readonly formattedEndTime: string;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;
   readonly onActivate: () => void;
   readonly onStop: () => void;
   readonly onInfoEdit: () => void;
   readonly onDelete: () => void;
-  readonly onViewProfile: () => void;
   readonly labels: TeacherViewLabels;
   readonly onStart: () => void;
   readonly onAbsent: () => void;
@@ -34,13 +37,15 @@ interface ClassDetailsTeacherViewProps {
 
 export function ClassDetailsTeacherView({
   instance,
+  viewMode,
+  formattedStartTime,
+  formattedEndTime,
   isWarningDismissed,
   onDismissWarning,
   onActivate,
   onStop,
   onInfoEdit,
   onDelete,
-  onViewProfile,
   labels,
   onStart,
   onAbsent,
@@ -53,6 +58,9 @@ export function ClassDetailsTeacherView({
   error,
 }: ClassDetailsTeacherViewProps) {
   const status = (instance.status as ClassInstanceStatus) || "pending";
+  const performance = instance.performance;
+  const hasPerformance = performance != null;
+  const showActionsPanel = viewMode === "teacher";
 
   return (
     <Box>
@@ -73,48 +81,49 @@ export function ClassDetailsTeacherView({
       />
 
       <Grid container spacing={3}>
-        {/* Left Column: Details + Performance */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <ClassInstanceDetailsCard
               instanceId={instance.id ?? ""}
+              studentId={instance.student?.id ?? ""}
               studentName={instance.student?.name ?? ""}
               courseModule={instance.courseName ?? ""}
-              startTime={instance.startTime ?? ""}
-              endTime={instance.endTime ?? ""}
+              startTime={formattedStartTime}
+              endTime={formattedEndTime}
               durationMinutes={instance.durationMinutes ?? 0}
               status={status}
               labels={labels.instanceDetails}
             />
             <RemarksCard remarks={instance.remarks ?? ""} labels={labels.remarks} />
             <PerformanceOverviewCard
-              attendanceRate={instance.performance?.attendanceRate ?? 0}
-              avgGrade={instance.performance?.avgGrade ?? ""}
-              lastClassDaysAgo={instance.performance?.lastClassDaysAgo ?? 0}
+              attendanceRate={performance?.attendanceRate ?? 0}
+              avgGrade={performance?.avgGrade ?? ""}
+              lastClassDaysAgo={performance?.lastClassDaysAgo ?? 0}
+              hasData={hasPerformance}
               labels={labels.performance}
             />
           </Box>
         </Grid>
 
-        {/* Right Column: Actions + Student Profile */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <ActionsPanel
-              onActivate={onActivate}
-              onStop={onStop}
-              onInfoEdit={onInfoEdit}
-              onDelete={onDelete}
-              labels={labels.actions}
-            />
+            {showActionsPanel ? (
+              <ActionsPanel
+                onActivate={onActivate}
+                onStop={onStop}
+                onInfoEdit={onInfoEdit}
+                onDelete={onDelete}
+                labels={labels.actions}
+              />
+            ) : null}
             <StudentProfileCard
               student={{
                 id: instance.student?.id ?? "",
                 name: instance.student?.name ?? "",
-                grade: instance.student?.grade ?? "",
-                level: Number(instance.student?.level ?? 0),
+                grade: "",
+                level: 0,
                 avatarUrl: instance.student?.avatarUrl ?? "",
               }}
-              onViewProfile={onViewProfile}
               labels={labels.studentProfile}
             />
           </Box>

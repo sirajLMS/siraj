@@ -13,6 +13,7 @@ import { ParentSupportFab } from "@/frontend/views/dashboard/parents/dashboard/c
 import { ActivationPolicyPanel } from "./components/ActivationPolicyPanel";
 import { MissedClassAlertBanner } from "./components/MissedClassAlertBanner";
 import { TeacherDashboardMetricsRow } from "./components/TeacherDashboardMetricsRow";
+import { TeacherDateControls } from "./components/TeacherDateControls";
 import { TeacherScheduleCardList } from "./components/TeacherScheduleCardList";
 import { TeacherScheduleDataGrid } from "./components/TeacherScheduleDataGrid";
 import type { TeacherDashboardLabels } from "./types/teacherDashboardLabels";
@@ -34,6 +35,8 @@ interface TeacherDashboardViewProps {
   readonly onDownloadHandbook: () => void;
   readonly onContactCoordinator: () => void;
   readonly onSupport: () => void;
+  readonly dateValue: string;
+  readonly onDateChange: (date: string) => void;
 }
 
 function buildHeaderActions({
@@ -99,6 +102,8 @@ export function TeacherDashboardView({
   onDownloadHandbook,
   onContactCoordinator,
   onSupport,
+  dateValue,
+  onDateChange,
 }: Readonly<TeacherDashboardViewProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -124,6 +129,17 @@ export function TeacherDashboardView({
         ) : (
           <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} actions={headerActions} />
         )}
+
+        <Box sx={{ mb: 3 }}>
+          <TeacherDateControls
+            dateValue={dateValue}
+            todayLabel={labels.dateFilter.today}
+            previousDayLabel={labels.dateFilter.previousDay}
+            nextDayLabel={labels.dateFilter.nextDay}
+            dateLabel={labels.dateFilter.dateLabel}
+            onDateChange={onDateChange}
+          />
+        </Box>
 
         <Box sx={{ mb: 4 }}>
           <TeacherDashboardMetricsRow metrics={metrics} labels={labels.metrics} isMobile={isMobile} />

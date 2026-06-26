@@ -78,6 +78,12 @@ export interface TeacherDashboardLabels {
     readonly description: string;
     readonly descriptionMobile: string;
   };
+  readonly dateFilter: {
+    readonly today: string;
+    readonly previousDay: string;
+    readonly nextDay: string;
+    readonly dateLabel: string;
+  };
   readonly support: {
     readonly liveSupport: string;
   };

@@ -1,6 +1,10 @@
 "use client";
 
+import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
+import { Stack } from "@mui/material";
+import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { PrimaryPageAction } from "@/frontend/components/ui";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
 import { TimezoneWarningBanner } from "../teacher/TimezoneWarningBanner";
 import { LiveSessionToolbar } from "./LiveSessionToolbar";
@@ -41,9 +45,17 @@ export function ClassDetailsToolbarArea({
   isResetting,
   error,
 }: ClassDetailsToolbarAreaProps) {
+  const t = useTranslations("dashboard.classDetails.liveSession");
+  const zoomMeetingUrl = instance.zoomMeetingUrl?.trim();
+
+  const handleJoinZoom = () => {
+    if (zoomMeetingUrl) {
+      window.open(zoomMeetingUrl, "_blank", "noopener,noreferrer");
+    }
+  };
+
   return (
     <>
-      {/* Timezone Warning */}
       {!isWarningDismissed && instance.hasTimezoneMismatch && (
         <RequirePermission permissions={[AppPermission.ScheduleViewTimezones]}>
           <TimezoneWarningBanner
@@ -54,7 +66,14 @@ export function ClassDetailsToolbarArea({
         </RequirePermission>
       )}
 
-      {/* Live Session Toolbar */}
+      {zoomMeetingUrl ? (
+        <Stack direction="row" sx={{ mb: 2 }}>
+          <PrimaryPageAction startIcon={<VideocamOutlined />} onClick={handleJoinZoom} id={`join-zoom-${instance.id}`}>
+            {t("joinZoom")}
+          </PrimaryPageAction>
+        </Stack>
+      ) : null}
+
       <LiveSessionToolbar
         classInstanceId={instance.id ?? ""}
         executionState={instance.executionState ?? "NOT_ACTIVATED"}

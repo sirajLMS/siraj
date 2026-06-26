@@ -815,6 +815,7 @@ const en: MessageSchema = {
         authorization: "Authorization",
         minutes: "Minutes",
         optimal: "Optimal",
+        unavailable: "—",
       },
       performance: {
         livePerformanceOverview: "Live Performance Overview",
@@ -828,11 +829,13 @@ const en: MessageSchema = {
         avgGrade: "Avg Grade",
         lastClass: "Last Class",
         days: "Days",
+        noData: "No performance data available for this session.",
       },
       heatmap: {
         activityHeatmap: "Activity Heatmap",
         studentInput: "Student Input",
         teacherResponse: "Teacher Response",
+        noData: "No activity data available for this session.",
       },
       instanceDetails: {
         classInstanceDetails: "Class Instance Details",
@@ -872,7 +875,15 @@ const en: MessageSchema = {
         cancel: "Cancel",
         resetDialogTitle: "Reset Session?",
         resetConfirm: "Reset",
+        joinZoom: "Join Zoom Meeting",
       },
+      deleteConfirm: {
+        title: "Delete Class Instance",
+        message: "This action is permanent and cannot be undone. Are you sure you want to delete this class instance?",
+        confirm: "Delete",
+        cancel: "Cancel",
+      },
+      loadError: "Unable to load class details. Please try again.",
       status: {
         active: "Active",
         scheduled: "Scheduled",
@@ -1777,6 +1788,12 @@ const en: MessageSchema = {
         descriptionMobile:
           'Classes can only be activated 5 minutes before the scheduled start time. If you miss the activation window by more than 15 minutes, the slot will be marked as "Missed".',
       },
+      dateFilter: {
+        today: "Today",
+        previousDay: "Previous day",
+        nextDay: "Next day",
+        dateLabel: "Date",
+      },
       support: {
         liveSupport: "Live Support",
       },
@@ -2223,6 +2240,11 @@ const en: MessageSchema = {
     stopDescription: "Stopped manually",
     softDeleteDescription: "Soft deleted",
     teacherQuotaExhaustedNote: "[Admin Reschedule] Teacher has exhausted monthly leave allowance ({used}/{max}).",
+    classTypes: {
+      REGULAR: "Regular Class",
+      TRIAL: "Trial Class",
+      ADVANCE: "Advance Class",
+    },
   },
 };
 

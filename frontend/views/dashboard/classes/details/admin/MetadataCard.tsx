@@ -11,8 +11,9 @@ import { BaseCard } from "@/frontend/components/ui";
 interface MetadataCardProps {
   readonly scheduledDate: string;
   readonly durationMinutes: number;
-  readonly latencyMs: number;
-  readonly authorization: string;
+  readonly latencyMs: number | null;
+  readonly authorizationLabel: string | null;
+  readonly showLiveMetadata: boolean;
   readonly labels: {
     readonly metadata: string;
     readonly scheduledDate: string;
@@ -20,7 +21,7 @@ interface MetadataCardProps {
     readonly latency: string;
     readonly authorization: string;
     readonly minutes: string;
-    readonly optimal: string;
+    readonly unavailable: string;
   };
 }
 
@@ -30,33 +31,33 @@ interface MetadataRowProps {
   readonly value: React.ReactNode;
 }
 
-// Muted onSurfaceVariant flex row that holds the label + icon pair on the left
 const StyledLabelRow = styled(Stack)(({ theme }) => ({
   alignItems: "center",
   gap: theme.spacing(1),
   color: theme.palette.onSurfaceVariant,
 }));
 
-// OutlineVariant divider placed between metadata rows
 const StyledRowDivider = styled(Divider)(({ theme }) => ({
   borderColor: theme.palette.outlineVariant,
 }));
 
-// Block-display uppercase muted caption used as the card header
 const StyledMetadataHeader = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
   display: "block",
 }));
 
-// Bold primary-colored value text used for most metadata fields
 const StyledPrimaryValueText = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
   fontWeight: 700,
 }));
 
-// Bold active-status-colored value text used for the latency field
 const StyledActiveValueText = styled(Typography)(({ theme }) => ({
   color: theme.palette.status.active,
+  fontWeight: 700,
+}));
+
+const StyledUnavailableText = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onSurfaceVariant,
   fontWeight: 700,
 }));
 
@@ -75,7 +76,21 @@ function MetadataRow({ icon, label, value }: MetadataRowProps) {
   );
 }
 
-export function MetadataCard({ scheduledDate, durationMinutes, latencyMs, authorization, labels }: MetadataCardProps) {
+function formatValue(value: string | number | null | undefined, fallback: string): React.ReactNode {
+  if (value === null || value === undefined || value === "") {
+    return <StyledUnavailableText variant="caption">{fallback}</StyledUnavailableText>;
+  }
+  return <StyledPrimaryValueText variant="caption">{value}</StyledPrimaryValueText>;
+}
+
+export function MetadataCard({
+  scheduledDate,
+  durationMinutes,
+  latencyMs,
+  authorizationLabel,
+  showLiveMetadata,
+  labels,
+}: MetadataCardProps) {
   return (
     <BaseCard sx={{ height: "100%" }}>
       <StyledMetadataHeader variant="labelUppercase" sx={{ mb: 2 }}>
@@ -86,7 +101,7 @@ export function MetadataCard({ scheduledDate, durationMinutes, latencyMs, author
         <MetadataRow
           icon={<CalendarTodayIcon sx={{ fontSize: 18 }} />}
           label={labels.scheduledDate}
-          value={<StyledPrimaryValueText variant="caption">{scheduledDate}</StyledPrimaryValueText>}
+          value={formatValue(scheduledDate, labels.unavailable)}
         />
         <MetadataRow
           icon={<ScheduleIcon sx={{ fontSize: 18 }} />}
@@ -97,20 +112,26 @@ export function MetadataCard({ scheduledDate, durationMinutes, latencyMs, author
             </StyledPrimaryValueText>
           }
         />
-        <MetadataRow
-          icon={<RouterIcon sx={{ fontSize: 18 }} />}
-          label={labels.latency}
-          value={
-            <StyledActiveValueText variant="caption">
-              {latencyMs}ms ({labels.optimal})
-            </StyledActiveValueText>
-          }
-        />
-        <MetadataRow
-          icon={<VerifiedUserIcon sx={{ fontSize: 18 }} />}
-          label={labels.authorization}
-          value={<StyledPrimaryValueText variant="caption">{authorization}</StyledPrimaryValueText>}
-        />
+        {showLiveMetadata ? (
+          <>
+            <MetadataRow
+              icon={<RouterIcon sx={{ fontSize: 18 }} />}
+              label={labels.latency}
+              value={
+                latencyMs != null ? (
+                  <StyledActiveValueText variant="caption">{latencyMs}ms</StyledActiveValueText>
+                ) : (
+                  formatValue(null, labels.unavailable)
+                )
+              }
+            />
+            <MetadataRow
+              icon={<VerifiedUserIcon sx={{ fontSize: 18 }} />}
+              label={labels.authorization}
+              value={formatValue(authorizationLabel, labels.unavailable)}
+            />
+          </>
+        ) : null}
       </Stack>
     </BaseCard>
   );

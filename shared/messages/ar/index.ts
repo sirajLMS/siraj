@@ -59,6 +59,11 @@ export const session: SessionLabels = {
   stopDescription: "إيقاف يدوي",
   softDeleteDescription: "حذف مؤقت",
   teacherQuotaExhaustedNote: "[إعادة جدولة من المدير] المعلم استنفد حد الإجازات الشهري ({used}/{max}).",
+  classTypes: {
+    REGULAR: "حصة عادية",
+    TRIAL: "حصة تجريبية",
+    ADVANCE: "حصة متقدمة",
+  },
 };
 
 export const arTranslations = {

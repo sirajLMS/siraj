@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { create } from "zustand";
 import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useClassDetailsStore } from "@/frontend/stores/classDetailsStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import type { ClassInstance } from "@/frontend/views/dashboard/types/dashboard";
@@ -30,6 +29,7 @@ const mockInstance: ClassInstance = {
     avatarUrl: "/demo/avatars/01.png",
   },
   teacher: {
+    id: "teacher-id",
     name: "Dr. Ali",
     title: "Senior Linguist • PH.D",
     avatarUrl: "/demo/avatars/04.png",
@@ -93,6 +93,7 @@ function MockAdminViewWrapper({ pageHeader, instance, isWarningDismissed, dismis
       {pageHeader}
       <ClassDetailsAdminView
         instance={instance}
+        formattedScheduledDate={instance.scheduledDate ?? ""}
         isWarningDismissed={isWarningDismissed}
         onDismissWarning={dismissWarning}
         onForceActivate={handleForceActivate}
@@ -130,22 +131,21 @@ function MockTeacherViewWrapper({ pageHeader, instance, isWarningDismissed, dism
   const handleInfoEdit = () => {
     logger.info("Teacher info/edit:", instance.id);
   };
-  const handleViewProfile = () => {
-    logger.info("View student profile:", instance.student?.id ?? "");
-  };
 
   return (
     <PageContainer>
       {pageHeader}
       <ClassDetailsTeacherView
         instance={instance}
+        viewMode="teacher"
+        formattedStartTime={instance.startTime ?? ""}
+        formattedEndTime={instance.endTime ?? ""}
         isWarningDismissed={isWarningDismissed}
         onDismissWarning={dismissWarning}
         onActivate={handleActivate}
         onStop={handleStop}
         onInfoEdit={handleInfoEdit}
         onDelete={handleDelete}
-        onViewProfile={handleViewProfile}
         labels={labels}
         onStart={() => logger.info("Start clicked")}
         onAbsent={() => logger.info("Absent clicked")}
@@ -167,6 +167,7 @@ function mapMockToReal(mock: ClassInstance): ClassInstanceDetail {
     id: mock.id,
     instanceId: mock.instanceId,
     courseName: mock.courseName,
+    classType: "REGULAR",
     scheduledDate: mock.scheduledDate,
     startTime: mock.startTime,
     endTime: mock.endTime,
@@ -203,6 +204,7 @@ function mapMockToReal(mock: ClassInstance): ClassInstanceDetail {
       focusLevel: "High",
       sessionHealth: "Stable",
       latencyMs: mock.latencyMs,
+      authorizationLabel: mock.authorization,
       attendanceRate: mock.attendanceRate,
       avgGrade: mock.avgGrade,
       lastClassDaysAgo: mock.lastClassDaysAgo,
@@ -216,8 +218,8 @@ export function MockClassDetailsContainer() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const permissions = useUserStore(state => state.permissions);
   const mockInstance = useMockClassDetailsStore(state => state.instance);
-  const isWarningDismissed = useClassDetailsStore(state => state.isWarningDismissed);
-  const dismissWarning = useClassDetailsStore(state => state.dismissWarning);
+  const isWarningDismissed = useMockClassDetailsStore(state => state.isWarningDismissed);
+  const dismissWarning = useMockClassDetailsStore(state => state.dismissWarning);
 
   const canOverride = permissions.includes(AppPermission.SessionOverrideActions);
   const canView = permissions.includes(AppPermission.SessionViewDetails);

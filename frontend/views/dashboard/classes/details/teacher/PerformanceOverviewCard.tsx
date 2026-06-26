@@ -8,12 +8,14 @@ interface PerformanceOverviewCardProps {
   readonly attendanceRate: number;
   readonly avgGrade: string;
   readonly lastClassDaysAgo: number;
+  readonly hasData: boolean;
   readonly labels: {
     readonly previousPerformanceOverview: string;
     readonly attendanceRate: string;
     readonly avgGrade: string;
     readonly lastClass: string;
     readonly days: string;
+    readonly noData: string;
   };
 }
 
@@ -61,6 +63,7 @@ export function PerformanceOverviewCard({
   attendanceRate,
   avgGrade,
   lastClassDaysAgo,
+  hasData,
   labels,
 }: PerformanceOverviewCardProps) {
   return (
@@ -68,17 +71,26 @@ export function PerformanceOverviewCard({
       <StyledSectionTitle variant="titleLg" sx={{ mb: 2.5 }}>
         {labels.previousPerformanceOverview}
       </StyledSectionTitle>
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 4 }}>
-          <StatBox label={labels.attendanceRate} value={`${attendanceRate}%`} />
+      {hasData ? (
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 4 }}>
+            <StatBox label={labels.attendanceRate} value={`${attendanceRate}%`} />
+          </Grid>
+          <Grid size={{ xs: 4 }}>
+            <StatBox label={labels.avgGrade} value={avgGrade} />
+          </Grid>
+          <Grid size={{ xs: 4 }}>
+            <StatBox label={labels.lastClass} value={`${lastClassDaysAgo} ${labels.days}`} />
+          </Grid>
         </Grid>
-        <Grid size={{ xs: 4 }}>
-          <StatBox label={labels.avgGrade} value={avgGrade} />
-        </Grid>
-        <Grid size={{ xs: 4 }}>
-          <StatBox label={labels.lastClass} value={`${lastClassDaysAgo} ${labels.days}`} />
-        </Grid>
-      </Grid>
+      ) : (
+        <Typography
+          variant="body2"
+          sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center", py: 2 })}
+        >
+          {labels.noData}
+        </Typography>
+      )}
     </BaseCard>
   );
 }

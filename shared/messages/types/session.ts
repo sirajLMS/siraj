@@ -12,4 +12,9 @@ export interface SessionLabels {
   readonly stopDescription: string;
   readonly softDeleteDescription: string;
   readonly teacherQuotaExhaustedNote: string;
+  readonly classTypes: {
+    readonly REGULAR: string;
+    readonly TRIAL: string;
+    readonly ADVANCE: string;
+  };
 }

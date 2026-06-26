@@ -1,4 +1,3 @@
-import { SchedulingRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { type ClassActionFn, ClassSessionService } from "@/backend/services/session/class-session.service";
 import type { BaseContext } from "../gqlContext";
@@ -8,7 +7,6 @@ import {
   LeaveProcessResultPothosObject,
   RescheduleClassInputPothosObject,
 } from "../pothos/class-session.pothos";
-import { resolveDetail } from "../utils/class-session.utils";
 
 // ─── Shared Helpers ───────────────────────────────────────────────────────────
 
@@ -23,7 +21,7 @@ async function requireAuth(ctx: BaseContext): Promise<string> {
 async function handleClassAction<R>(ctx: BaseContext, classInstanceId: string, action: ClassActionFn<R>) {
   const userId = await requireAuth(ctx);
   await action(userId, classInstanceId, ctx.locale);
-  return resolveDetail(classInstanceId, ctx.locale);
+  return ClassSessionService.getClassInstanceDetail(userId, classInstanceId, ctx.locale);
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
@@ -110,11 +108,6 @@ gqlSchemaBuilder.mutationField("rescheduleClass", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const existing = await SchedulingRepository.getClassInstanceById(args.classInstanceId);
-      if (!existing) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("notFound"));
-      }
       const newInstance = await ClassSessionService.reschedule(
         userId,
         args.classInstanceId,
@@ -125,7 +118,7 @@ gqlSchemaBuilder.mutationField("rescheduleClass", t =>
         },
         ctx.locale
       );
-      return resolveDetail(newInstance.id, ctx.locale);
+      return ClassSessionService.getClassInstanceDetail(userId, newInstance.id, ctx.locale);
     },
   })
 );

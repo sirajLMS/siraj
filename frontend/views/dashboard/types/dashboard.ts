@@ -33,6 +33,7 @@ export interface StudentInfo {
 }
 
 export interface TeacherInfo {
+  readonly id?: string;
   readonly name: string;
   readonly title: string;
   readonly avatarUrl: string;

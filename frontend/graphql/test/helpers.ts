@@ -83,6 +83,7 @@ export async function provisionTestEntities(adminToken: string, prefix: string, 
     teacherUserId: entities.teacherUserId,
     parentUserId: entities.parentUserId,
     parentId: entities.parentId,
+    parentUserEmail: entities.parentUserEmail,
     teacherToken,
   };
 }
@@ -111,6 +112,7 @@ export async function loginAndProvision(prefix: string) {
     teacherUserId: result.teacherUserId,
     parentUserId: result.parentUserId,
     parentId: result.parentId,
+    parentUserEmail: result.parentUserEmail,
   };
 }
 

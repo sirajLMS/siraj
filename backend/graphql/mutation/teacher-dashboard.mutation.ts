@@ -1,4 +1,5 @@
 import { getBackendTranslations } from "@/backend/lib/intl";
+import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { ClassInstanceDetailPothosObject, SupportRequestResultPothosObject } from "../pothos/class-session.pothos";
@@ -6,7 +7,6 @@ import {
   CreateManualClassEntryInputPothosObject,
   LogSupportRequestInputPothosObject,
 } from "../pothos/teacher-dashboard.pothos";
-import { resolveDetail } from "../utils/class-session.utils";
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ gqlSchemaBuilder.mutationField("createTeacherManualClassEntry", t =>
         },
         ctx.locale
       );
-      return resolveDetail(created.id);
+      return ClassSessionService.getClassInstanceDetail(ctx.user.id, created.id, ctx.locale);
     },
   })
 );

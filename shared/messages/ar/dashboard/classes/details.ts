@@ -30,6 +30,7 @@ export const classDetails: ClassDetailsLabels = {
     authorization: "التفويض",
     minutes: "دقيقة",
     optimal: "مثالي",
+    unavailable: "—",
   },
   performance: {
     livePerformanceOverview: "نظرة عامة على الأداء المباشر",
@@ -43,11 +44,13 @@ export const classDetails: ClassDetailsLabels = {
     avgGrade: "متوسط الدرجة",
     lastClass: "آخر حصة",
     days: "أيام",
+    noData: "لا تتوفر بيانات أداء لهذه الجلسة.",
   },
   heatmap: {
     activityHeatmap: "خريطة النشاط الحراري",
     studentInput: "مدخلات الطالب",
     teacherResponse: "استجابة المعلم",
+    noData: "لا تتوفر بيانات نشاط لهذه الجلسة.",
   },
   instanceDetails: {
     classInstanceDetails: "تفاصيل الحصة",
@@ -86,7 +89,15 @@ export const classDetails: ClassDetailsLabels = {
     cancel: "إلغاء",
     resetDialogTitle: "إعادة تعيين الجلسة؟",
     resetConfirm: "إعادة تعيين",
+    joinZoom: "انضم إلى اجتماع زووم",
   },
+  deleteConfirm: {
+    title: "حذف الحصة",
+    message: "هذا الإجراء دائم ولا يمكن التراجع عنه. هل أنت متأكد من حذف هذه الحصة؟",
+    confirm: "حذف",
+    cancel: "إلغاء",
+  },
+  loadError: "تعذر تحميل تفاصيل الحصة. يرجى المحاولة مرة أخرى.",
   status: {
     active: "نشط",
     scheduled: "مجدول",

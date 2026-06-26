@@ -21,6 +21,7 @@ import {
   teacherDashboardQueryDocument,
   teacherHandbookUrlQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/teacher-dashboard.documents";
+import { useTeacherDashboardStore } from "@/frontend/stores/teacherDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import type { TeacherScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
@@ -30,14 +31,6 @@ import { TeacherDashboardView } from "./TeacherDashboardView";
 import type { TeacherDashboardLabels } from "./types/teacherDashboardLabels";
 import { buildTeacherDashboardLabels } from "./utils/buildTeacherDashboardLabels";
 import { resolveTeacherDashboardMode, shouldRenderTeacherDashboard } from "./utils/teacherDashboardMode";
-
-const getTodayString = () => {
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-};
 
 interface RawRow {
   readonly id?: string | null;
@@ -118,7 +111,7 @@ function mapRows(
 interface ActiveDashboardWrapperProps {
   readonly userName: string;
   readonly activeData: Operations.TeacherActiveDashboardQuery | undefined;
-  readonly todayDateStr: string;
+  readonly filterDate: string;
   readonly labels: TeacherDashboardLabels;
   readonly activationError: string | null;
   readonly handleActivate: (id: string) => Promise<void>;
@@ -137,12 +130,13 @@ interface ActiveDashboardWrapperProps {
     readonly data?: Operations.TeacherActiveDashboardQuery | null;
     readonly error?: unknown;
   }>;
+  readonly onDateChange: (date: string) => void;
 }
 
 function ActiveDashboardWrapper({
   userName,
   activeData,
-  todayDateStr,
+  filterDate,
   labels,
   activationError,
   handleActivate,
@@ -152,9 +146,10 @@ function ActiveDashboardWrapper({
   markAbsent,
   requestLeave,
   refetchActive,
+  onDateChange,
 }: Readonly<ActiveDashboardWrapperProps>) {
   const activeMetrics = activeData?.teacherActiveDashboard?.metrics;
-  const scheduleRows = mapRows(activeData?.teacherActiveDashboard?.scheduleRows, todayDateStr, "active");
+  const scheduleRows = mapRows(activeData?.teacherActiveDashboard?.scheduleRows, filterDate, "active");
 
   const feed = (activeData?.teacherActiveDashboard?.progressFeed || []).map((f: RawFeedItem) => {
     let icon: "grade" | "login" | "description" = "description";
@@ -189,10 +184,12 @@ function ActiveDashboardWrapper({
       metrics={activeViewMetrics}
       scheduleRows={scheduleRows}
       progressFeed={feed}
-      welcomeDateSummary={todayDateStr}
+      welcomeDateSummary={filterDate}
       sessionsScheduledToday={scheduleRows.length}
       labels={labels}
       onActivate={handleActivate}
+      dateValue={filterDate}
+      onDateChange={onDateChange}
       onNewSession={() => {
         setManualEntryDefaultActive(true);
         setManualEntryOpen(true);
@@ -230,7 +227,7 @@ function ActiveDashboardWrapper({
 
 interface StandardDashboardWrapperProps {
   readonly standardData: Operations.TeacherDashboardQuery | undefined;
-  readonly todayDateStr: string;
+  readonly filterDate: string;
   readonly permissions: readonly AppPermission[];
   readonly labels: TeacherDashboardLabels;
   readonly handleActivate: (id: string) => Promise<void>;
@@ -238,11 +235,12 @@ interface StandardDashboardWrapperProps {
   readonly handleSupportRequest: (type: "COORDINATOR" | "SUPPORT") => Promise<void>;
   readonly setManualEntryDefaultActive: (val: boolean) => void;
   readonly setManualEntryOpen: (val: boolean) => void;
+  readonly onDateChange: (date: string) => void;
 }
 
 function StandardDashboardWrapper({
   standardData,
-  todayDateStr,
+  filterDate,
   permissions,
   labels,
   handleActivate,
@@ -250,9 +248,10 @@ function StandardDashboardWrapper({
   handleSupportRequest,
   setManualEntryDefaultActive,
   setManualEntryOpen,
+  onDateChange,
 }: Readonly<StandardDashboardWrapperProps>) {
   const standardMetrics = standardData?.teacherDashboard?.metrics;
-  const scheduleRows = mapRows(standardData?.teacherDashboard?.scheduleRows, todayDateStr, "standard");
+  const scheduleRows = mapRows(standardData?.teacherDashboard?.scheduleRows, filterDate, "standard");
   const totalScheduledToday = scheduleRows.length;
   const missedRow = scheduleRows.find(r => r.status === "missed");
   const missedAlert = missedRow
@@ -274,7 +273,7 @@ function StandardDashboardWrapper({
       metrics={viewMetrics}
       scheduleRows={scheduleRows}
       missedAlert={missedAlert}
-      scheduleDateLabel={todayDateStr}
+      scheduleDateLabel={filterDate}
       totalScheduledToday={totalScheduledToday}
       labels={labels}
       canActivate={permissions.includes(AppPermission.SessionActivateClass)}
@@ -299,6 +298,8 @@ function StandardDashboardWrapper({
       onDownloadHandbook={handleDownloadHandbook}
       onContactCoordinator={() => handleSupportRequest("COORDINATOR")}
       onSupport={() => handleSupportRequest("SUPPORT")}
+      dateValue={filterDate}
+      onDateChange={onDateChange}
     />
   );
 }
@@ -314,16 +315,16 @@ export function TeacherDashboardContainer() {
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
   const [manualEntryDefaultActive, setManualEntryDefaultActive] = useState(false);
 
-  const todayDateStr = getTodayString();
+  const { filterDate, setFilterDate } = useTeacherDashboardStore();
   const mode = resolveTeacherDashboardMode(permissions, modeParam);
 
   const { data: standardData, refetch: refetchStandard } = useQuery(teacherDashboardQueryDocument, {
-    variables: { date: todayDateStr },
+    variables: { date: filterDate },
     skip: mode !== "standard",
   });
 
   const { data: activeData, refetch: refetchActive } = useQuery(teacherActiveDashboardQueryDocument, {
-    variables: { date: todayDateStr },
+    variables: { date: filterDate },
     skip: mode !== "active",
   });
 
@@ -434,7 +435,7 @@ export function TeacherDashboardContainer() {
         <ActiveDashboardWrapper
           userName={userName}
           activeData={activeData}
-          todayDateStr={todayDateStr}
+          filterDate={filterDate}
           labels={labels}
           activationError={activationError}
           handleActivate={handleActivate}
@@ -444,11 +445,12 @@ export function TeacherDashboardContainer() {
           markAbsent={markAbsent}
           requestLeave={requestLeave}
           refetchActive={refetchActive}
+          onDateChange={setFilterDate}
         />
       ) : (
         <StandardDashboardWrapper
           standardData={standardData}
-          todayDateStr={todayDateStr}
+          filterDate={filterDate}
           permissions={permissions}
           labels={labels}
           handleActivate={handleActivate}
@@ -456,6 +458,7 @@ export function TeacherDashboardContainer() {
           handleSupportRequest={handleSupportRequest}
           setManualEntryDefaultActive={setManualEntryDefaultActive}
           setManualEntryOpen={setManualEntryOpen}
+          onDateChange={setFilterDate}
         />
       )}
       <ManualClassEntryDialog

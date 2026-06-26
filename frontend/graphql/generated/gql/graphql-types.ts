@@ -250,6 +250,7 @@ export enum ClassExecutionState {
 
 export type ClassInstanceDetail = {
   __typename?: 'ClassInstanceDetail';
+  classType: Maybe<Scalars['String']['output']>;
   courseName: Maybe<Scalars['String']['output']>;
   durationMinutes: Maybe<Scalars['Int']['output']>;
   endTime: Maybe<Scalars['String']['output']>;
@@ -276,6 +277,7 @@ export type ClassInstancePerformance = {
   assessmentProgress: Maybe<Scalars['Int']['output']>;
   assessmentTotal: Maybe<Scalars['Int']['output']>;
   attendanceRate: Maybe<Scalars['Int']['output']>;
+  authorizationLabel: Maybe<Scalars['String']['output']>;
   avgGrade: Maybe<Scalars['String']['output']>;
   engagementScore: Maybe<Scalars['Int']['output']>;
   focusLevel: Maybe<Scalars['String']['output']>;

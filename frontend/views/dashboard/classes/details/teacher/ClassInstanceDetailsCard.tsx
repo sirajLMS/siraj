@@ -4,6 +4,7 @@ import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
+import { StudentEntityLink } from "../components/EntityLinks";
 
 const STATUS_COLOR_MAP: Record<ClassInstanceStatus, "active" | "confirmed" | "pending" | "completed" | "cancelled"> = {
   active: "active",
@@ -15,6 +16,7 @@ const STATUS_COLOR_MAP: Record<ClassInstanceStatus, "active" | "confirmed" | "pe
 
 interface ClassInstanceDetailsCardProps {
   readonly instanceId: string;
+  readonly studentId: string;
   readonly studentName: string;
   readonly courseModule: string;
   readonly startTime: string;
@@ -82,6 +84,7 @@ function DetailField({ label, value }: DetailFieldProps) {
 
 export function ClassInstanceDetailsCard({
   instanceId,
+  studentId,
   studentName,
   courseModule,
   startTime,
@@ -108,9 +111,13 @@ export function ClassInstanceDetailsCard({
           <DetailField
             label={labels.studentName}
             value={
-              <Typography variant="bodyLg" sx={{ fontWeight: 600 }}>
-                {studentName}
-              </Typography>
+              studentId ? (
+                <StudentEntityLink studentId={studentId} name={studentName} variant="bodyLg" />
+              ) : (
+                <Typography variant="bodyLg" sx={{ fontWeight: 600 }}>
+                  {studentName}
+                </Typography>
+              )
             }
           />
         </Grid>

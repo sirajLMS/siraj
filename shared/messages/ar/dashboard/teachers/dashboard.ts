@@ -82,6 +82,12 @@ export const dashboard: TeacherDashboardLabels = {
     descriptionMobile:
       'لا يمكن تفعيل الحصص إلا قبل 5 دقائق من وقت البدء المجدول. إذا فاتتك نافذة التفعيل بأكثر من 15 دقيقة، ستُسجل الحصة كـ "فائتة".',
   },
+  dateFilter: {
+    today: "اليوم",
+    previousDay: "اليوم السابق",
+    nextDay: "اليوم التالي",
+    dateLabel: "التاريخ",
+  },
   support: {
     liveSupport: "الدعم المباشر",
   },

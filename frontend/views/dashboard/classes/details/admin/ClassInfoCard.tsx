@@ -4,9 +4,12 @@ import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LanguageIcon from "@mui/icons-material/Language";
 import { Avatar, Box, Chip, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import Link from "next/link";
+import { useLocale } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui";
 import { avatarInitials } from "@/frontend/utils/avatar";
 import type { StudentInfo, TeacherInfo } from "@/frontend/views/dashboard/types/dashboard";
+import { StudentEntityLink, TeacherEntityLink } from "../components/EntityLinks";
 
 interface ClassInfoCardProps {
   readonly courseName: string;
@@ -22,7 +25,6 @@ interface ClassInfoCardProps {
   };
 }
 
-// Primary-background LIVE INSTANCE chip shown in the card header
 const StyledLiveInstanceChip = styled(Chip)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
   color: theme.palette.onPrimary,
@@ -33,30 +35,25 @@ const StyledLiveInstanceChip = styled(Chip)(({ theme }) => ({
   },
 }));
 
-// Primary-colored h3 course name heading
 const StyledCourseNameHeading = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-// Secondary-colored body text for the instance ID label
 const StyledInstanceIdLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-// Small active-status dot colored with the status.active palette token
 const StyledActiveStatusDot = styled(FiberManualRecordIcon)(({ theme }) => ({
   fontSize: 12,
   color: theme.palette.status.active,
 }));
 
-// Uppercase secondary-colored caption next to the active status dot
 const StyledActiveConnectionCaption = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   textTransform: "uppercase",
   letterSpacing: "0.05em",
 }));
 
-// Default-background avatar used for the student slot
 const StyledStudentAvatar = styled(Avatar)(({ theme }) => ({
   width: 64,
   height: 64,
@@ -64,7 +61,6 @@ const StyledStudentAvatar = styled(Avatar)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-// PrimaryContainer-tinted avatar used for the teacher slot
 const StyledTeacherAvatar = styled(Avatar)(({ theme }) => ({
   width: 64,
   height: 64,
@@ -72,24 +68,15 @@ const StyledTeacherAvatar = styled(Avatar)(({ theme }) => ({
   color: theme.palette.onPrimaryContainer,
 }));
 
-// Block-display secondary caption used above a person's role (Student / Module Instructor)
 const StyledPersonRoleCaption = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   display: "block",
 }));
 
-// Block-display primary name used for student / teacher name
-const StyledPersonNameText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  display: "block",
-}));
-
-// Secondary caption used for student grade+ID or teacher title beneath the name
 const StyledPersonDetailCaption = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-// Absolute-positioned decorative Language icon rendered at near-invisible opacity
 const StyledDecorativeIconWrapper = styled(Box)(({ theme }) => ({
   position: "absolute",
   right: -16,
@@ -99,7 +86,44 @@ const StyledDecorativeIconWrapper = styled(Box)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
+function LinkedAvatar({
+  href,
+  name,
+  avatarUrl,
+  variant,
+}: {
+  readonly href?: string;
+  readonly name: string;
+  readonly avatarUrl?: string;
+  readonly variant: "student" | "teacher";
+}) {
+  const avatar =
+    variant === "student" ? (
+      <StyledStudentAvatar src={avatarUrl} alt={name}>
+        {avatarInitials(name)}
+      </StyledStudentAvatar>
+    ) : (
+      <StyledTeacherAvatar alt={name} src={avatarUrl}>
+        {avatarInitials(name)}
+      </StyledTeacherAvatar>
+    );
+
+  if (!href) {
+    return avatar;
+  }
+
+  return (
+    <Box component={Link} href={href} sx={{ display: "inline-flex", textDecoration: "none" }}>
+      {avatar}
+    </Box>
+  );
+}
+
 export function ClassInfoCard({ courseName, instanceId, student, teacher, isActive, labels }: ClassInfoCardProps) {
+  const locale = useLocale();
+  const studentHref = student.id ? `/${locale}/students/${student.id}` : undefined;
+  const teacherHref = teacher.id ? `/${locale}/teachers/${teacher.id}/profile` : undefined;
+
   return (
     <BaseCard sx={{ position: "relative", overflow: "hidden", height: "100%" }}>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
@@ -131,36 +155,37 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
       </Stack>
 
       <Stack direction="row" sx={{ gap: 4, mt: 2 }}>
-        {/* Student */}
         <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
-          <StyledStudentAvatar src={student.avatarUrl} alt={student.name}>
-            {avatarInitials(student.name)}
-          </StyledStudentAvatar>
+          <LinkedAvatar href={studentHref} name={student.name} avatarUrl={student.avatarUrl} variant="student" />
           <Box>
             <StyledPersonRoleCaption variant="caption">{labels.student}</StyledPersonRoleCaption>
-            <StyledPersonNameText variant="titleLg">{student.name}</StyledPersonNameText>
-            <StyledPersonDetailCaption variant="caption">
-              {student.grade} • ID: {student.id}
-            </StyledPersonDetailCaption>
+            {student.id ? (
+              <StudentEntityLink studentId={student.id} name={student.name} />
+            ) : (
+              <Typography variant="titleLg">{student.name}</Typography>
+            )}
+            <StyledPersonDetailCaption variant="caption">ID: {student.id}</StyledPersonDetailCaption>
           </Box>
         </Stack>
 
         <Divider orientation="vertical" flexItem />
 
-        {/* Teacher */}
         <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
-          <StyledTeacherAvatar alt={teacher.name} src={teacher.avatarUrl}>
-            {avatarInitials(teacher.name)}
-          </StyledTeacherAvatar>
+          <LinkedAvatar href={teacherHref} name={teacher.name} avatarUrl={teacher.avatarUrl} variant="teacher" />
           <Box>
             <StyledPersonRoleCaption variant="caption">{labels.moduleInstructor}</StyledPersonRoleCaption>
-            <StyledPersonNameText variant="titleLg">{teacher.name}</StyledPersonNameText>
-            <StyledPersonDetailCaption variant="caption">{teacher.title}</StyledPersonDetailCaption>
+            {teacher.id ? (
+              <TeacherEntityLink teacherId={teacher.id} name={teacher.name} />
+            ) : (
+              <Typography variant="titleLg">{teacher.name}</Typography>
+            )}
+            {teacher.title ? (
+              <StyledPersonDetailCaption variant="caption">{teacher.title}</StyledPersonDetailCaption>
+            ) : null}
           </Box>
         </Stack>
       </Stack>
 
-      {/* Decorative background icon */}
       <StyledDecorativeIconWrapper>
         <LanguageIcon sx={{ fontSize: 200 }} />
       </StyledDecorativeIconWrapper>

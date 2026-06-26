@@ -15,6 +15,11 @@ export const session: SessionLabels = {
   stopDescription: "Manual stop",
   softDeleteDescription: "Soft delete",
   teacherQuotaExhaustedNote: "[Manager reschedule] Teacher exhausted monthly leave quota ({used}/{max}).",
+  classTypes: {
+    REGULAR: "Regular Class",
+    TRIAL: "Trial Class",
+    ADVANCE: "Advance Class",
+  },
 };
 
 export const enTranslations = {

@@ -1,9 +1,12 @@
+import { ParentRepository } from "@/backend/db/repo/parent.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
+import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
-import type { ClassInstanceEntity } from "@/backend/types";
+import type { ClassInstanceDetailReturnType, ClassInstanceEntity, ClassStatusEventReturnType } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
 /**
@@ -21,13 +24,42 @@ export namespace ClassSessionService {
     }
   }
 
-  async function getOrThrow(classInstanceId: string, locale?: string): Promise<ClassInstanceEntity> {
+  async function getOrThrow(classInstanceId: string, locale?: string) {
     const instance = await SchedulingRepository.getClassInstanceById(classInstanceId);
     if (!instance) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("notFound"));
     }
     return instance;
+  }
+
+  async function assertClassInstanceViewAccess(
+    userId: string,
+    instance: NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>,
+    locale?: string
+  ): Promise<void> {
+    const isPrivileged = await PermissionsService.hasAnyPermission(userId, [
+      AppPermission.SESSION_OVERRIDE_ACTIONS,
+      AppPermission.SESSION_ACTIVATE_OVERRIDE,
+      AppPermission.SESSION_RESET,
+    ]);
+
+    if (isPrivileged) {
+      return;
+    }
+
+    const teacher = await SchedulingRepository.getTeacherByUserId(userId);
+    if (teacher && instance.teacherId === teacher.id) {
+      return;
+    }
+
+    const parent = await ParentRepository.findByUserId(userId);
+    if (parent && instance.student?.parentId === parent.id) {
+      return;
+    }
+
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(t("unauthorizedAction"));
   }
 
   async function handleUpdate<T>(promise: Promise<T | null>, locale?: string): Promise<T> {
@@ -39,7 +71,10 @@ export namespace ClassSessionService {
     return result;
   }
 
-  async function assertSessionActivated(instance: ClassInstanceEntity, locale?: string): Promise<void> {
+  async function assertSessionActivated(
+    instance: Awaited<ReturnType<typeof getOrThrow>>,
+    locale?: string
+  ): Promise<void> {
     const validStates = ["ACTIVATED", "RUNNING"];
     if (!validStates.includes(instance.executionState)) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
@@ -52,12 +87,35 @@ export namespace ClassSessionService {
     classInstanceId: string,
     permission: AppPermission,
     locale: string | undefined,
-    action: (instance: ClassInstanceEntity) => Promise<T | null>
+    action: (instance: Awaited<ReturnType<typeof getOrThrow>>) => Promise<T | null>
   ): Promise<T> {
     await assertPermission(userId, permission, locale);
     const instance = await getOrThrow(classInstanceId, locale);
     await assertSessionActivated(instance, locale);
     return handleUpdate(action(instance), locale);
+  }
+
+  export async function getClassInstanceDetail(
+    userId: string,
+    classInstanceId: string,
+    locale?: string
+  ): Promise<ClassInstanceDetailReturnType> {
+    await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, locale);
+    const instance = await getOrThrow(classInstanceId, locale);
+    await assertClassInstanceViewAccess(userId, instance, locale);
+    const perf = await ClassPerformanceService.getPerformanceForClass(classInstanceId);
+    return buildClassInstanceDetail(instance, perf, locale);
+  }
+
+  export async function getClassStatusEvents(
+    userId: string,
+    classInstanceId: string,
+    locale?: string
+  ): Promise<ClassStatusEventReturnType[]> {
+    await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, locale);
+    const instance = await getOrThrow(classInstanceId, locale);
+    await assertClassInstanceViewAccess(userId, instance, locale);
+    return SchedulingRepository.getClassStatusEvents(classInstanceId);
   }
 
   export async function activate(userId: string, classInstanceId: string, locale?: string) {

@@ -104,6 +104,12 @@ export function buildTeacherDashboardLabels(t: TeacherDashboardTranslator): Teac
       description: t("policy.description"),
       descriptionMobile: t("policy.descriptionMobile"),
     },
+    dateFilter: {
+      today: t("dateFilter.today"),
+      previousDay: t("dateFilter.previousDay"),
+      nextDay: t("dateFilter.nextDay"),
+      dateLabel: t("dateFilter.dateLabel"),
+    },
     support: {
       liveSupport: t("support.liveSupport"),
     },

@@ -2,7 +2,7 @@
 
 import { Box, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BaseCard } from "@/frontend/components/ui";
 
 interface ActivityHeatmapProps {
@@ -11,6 +11,7 @@ interface ActivityHeatmapProps {
     readonly activityHeatmap: string;
     readonly studentInput: string;
     readonly teacherResponse: string;
+    readonly noData: string;
   };
 }
 
@@ -19,7 +20,6 @@ interface Bar {
   height: number;
 }
 
-// Paper-background header strip with a light bottom border above the bars
 const StyledHeatmapHeader = styled(Stack)(({ theme }) => ({
   justifyContent: "space-between",
   alignItems: "center",
@@ -30,12 +30,10 @@ const StyledHeatmapHeader = styled(Stack)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
 }));
 
-// Primary-colored section title used in the heatmap header
 const StyledSectionTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-// Primary-colored square swatch used as the "student input" legend indicator
 const StyledStudentInputSwatch = styled(Box)(({ theme }) => ({
   width: 12,
   height: 12,
@@ -43,7 +41,6 @@ const StyledStudentInputSwatch = styled(Box)(({ theme }) => ({
   borderRadius: 0.5,
 }));
 
-// Secondary-colored square swatch used as the "teacher response" legend indicator
 const StyledTeacherResponseSwatch = styled(Box)(({ theme }) => ({
   width: 12,
   height: 12,
@@ -51,38 +48,28 @@ const StyledTeacherResponseSwatch = styled(Box)(({ theme }) => ({
   borderRadius: 0.5,
 }));
 
-// Muted onSurfaceVariant caption used for legend labels
 const StyledLegendCaption = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
 }));
 
-// Faint outlineVariant grid line drawn across the bars area
 const StyledGridDivider = styled(Divider)(({ theme }) => ({
   borderColor: theme.palette.outlineVariant,
   opacity: 0.4,
 }));
 
+const StyledEmptyState = styled(Typography)(({ theme }) => ({
+  color: theme.palette.onSurfaceVariant,
+  textAlign: "center",
+}));
+
 export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
   const [bars, setBars] = useState<Bar[]>(() => data.map((h, i) => ({ id: `bar-${i}`, height: h })));
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setBars(prev => {
-        const next = [...prev];
-        const [r1, r2] = crypto.getRandomValues(new Uint8Array(2));
-        const idx = r1 % next.length;
-        next[idx] = { ...next[idx], height: (r2 % 80) + 10 };
-        return next;
-      });
-    }, 1500);
+    setBars(data.map((h, i) => ({ id: `bar-${i}`, height: h })));
+  }, [data]);
 
-    return () => {
-      if (intervalRef.current !== null) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []);
+  const hasData = bars.length > 0;
 
   return (
     <BaseCard sx={{ p: 0, overflow: "hidden", mt: 3 }}>
@@ -101,47 +88,53 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
       </StyledHeatmapHeader>
 
       <Box sx={{ px: 4, pb: 4, pt: 2, height: 300, position: "relative" }}>
-        {/* Grid lines */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: "16px 32px 32px 32px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            pointerEvents: "none",
-          }}
-        >
-          {[0, 1, 2].map(i => (
-            <StyledGridDivider key={i} />
-          ))}
-        </Box>
-
-        {/* Bars */}
-        <Stack
-          direction="row"
-          sx={{
-            alignItems: "flex-end",
-            height: "100%",
-            gap: 0.5,
-          }}
-        >
-          {bars.map((bar, i) => (
+        {!hasData ? (
+          <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
+            <StyledEmptyState variant="body2">{labels.noData}</StyledEmptyState>
+          </Stack>
+        ) : (
+          <>
             <Box
-              key={bar.id}
-              sx={theme => ({
-                flex: 1,
-                height: `${bar.height}%`,
-                borderRadius: "4px 4px 0 0",
-                backgroundColor: i % 2 === 0 ? theme.palette.primary.main : theme.palette.secondary.main,
-                opacity: i % 2 === 0 ? 0.85 : 0.5,
-                transition: "height 0.6s ease",
-                "&:hover": { opacity: 1, filter: "brightness(1.15)" },
-                cursor: "pointer",
-              })}
-            />
-          ))}
-        </Stack>
+              sx={{
+                position: "absolute",
+                inset: "16px 32px 32px 32px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                pointerEvents: "none",
+              }}
+            >
+              {[0, 1, 2].map(i => (
+                <StyledGridDivider key={i} />
+              ))}
+            </Box>
+
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: "flex-end",
+                height: "100%",
+                gap: 0.5,
+              }}
+            >
+              {bars.map((bar, i) => (
+                <Box
+                  key={bar.id}
+                  sx={theme => ({
+                    flex: 1,
+                    height: `${bar.height}%`,
+                    borderRadius: "4px 4px 0 0",
+                    backgroundColor: i % 2 === 0 ? theme.palette.primary.main : theme.palette.secondary.main,
+                    opacity: i % 2 === 0 ? 0.85 : 0.5,
+                    transition: "height 0.6s ease",
+                    "&:hover": { opacity: 1, filter: "brightness(1.15)" },
+                    cursor: "pointer",
+                  })}
+                />
+              ))}
+            </Stack>
+          </>
+        )}
       </Box>
     </BaseCard>
   );

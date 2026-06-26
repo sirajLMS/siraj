@@ -1,23 +1,17 @@
+import { ClassSessionService } from "@/backend/services/session/class-session.service";
+import type {
+  ClassInstanceDetailReturnType,
+  ClassInstancePerformanceReturnType,
+  ClassInstanceStudentReturnType,
+  ClassInstanceTeacherReturnType,
+  ClassStatusEventReturnType,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { resolveDetail } from "../utils/class-session.utils";
 
 // ─── Performance ─────────────────────────────────────────────────────────────
 
-export type ClassInstancePerformanceDefinition = {
-  engagementScore: number | null;
-  assessmentProgress: number | null;
-  assessmentTotal: number | null;
-  focusLevel: string | null;
-  sessionHealth: string | null;
-  heatmapData: number[] | null;
-  latencyMs: number | null;
-  attendanceRate: number | null;
-  avgGrade: string | null;
-  lastClassDaysAgo: number | null;
-};
-
 const ClassInstancePerformanceRef =
-  gqlSchemaBuilder.objectRef<ClassInstancePerformanceDefinition>("ClassInstancePerformance");
+  gqlSchemaBuilder.objectRef<ClassInstancePerformanceReturnType>("ClassInstancePerformance");
 
 export const ClassInstancePerformancePothosObject = ClassInstancePerformanceRef.implement({
   fields: t => ({
@@ -32,6 +26,7 @@ export const ClassInstancePerformancePothosObject = ClassInstancePerformanceRef.
       resolve: p => p.heatmapData,
     }),
     latencyMs: t.exposeInt("latencyMs", { nullable: true }),
+    authorizationLabel: t.exposeString("authorizationLabel", { nullable: true }),
     attendanceRate: t.exposeInt("attendanceRate", { nullable: true }),
     avgGrade: t.exposeString("avgGrade", { nullable: true }),
     lastClassDaysAgo: t.exposeInt("lastClassDaysAgo", { nullable: true }),
@@ -40,15 +35,7 @@ export const ClassInstancePerformancePothosObject = ClassInstancePerformanceRef.
 
 // ─── Student Info ─────────────────────────────────────────────────────────────
 
-export type ClassInstanceStudentDefinition = {
-  id: string;
-  name: string;
-  grade: string | null;
-  level: string | null;
-  avatarUrl: string | null;
-};
-
-const ClassInstanceStudentRef = gqlSchemaBuilder.objectRef<ClassInstanceStudentDefinition>("ClassInstanceStudentInfo");
+const ClassInstanceStudentRef = gqlSchemaBuilder.objectRef<ClassInstanceStudentReturnType>("ClassInstanceStudentInfo");
 
 export const ClassInstanceStudentPothosObject = ClassInstanceStudentRef.implement({
   fields: t => ({
@@ -62,14 +49,7 @@ export const ClassInstanceStudentPothosObject = ClassInstanceStudentRef.implemen
 
 // ─── Teacher Info ─────────────────────────────────────────────────────────────
 
-export type ClassInstanceTeacherDefinition = {
-  id: string;
-  name: string;
-  title: string | null;
-  avatarUrl: string | null;
-};
-
-const ClassInstanceTeacherRef = gqlSchemaBuilder.objectRef<ClassInstanceTeacherDefinition>("ClassInstanceTeacherInfo");
+const ClassInstanceTeacherRef = gqlSchemaBuilder.objectRef<ClassInstanceTeacherReturnType>("ClassInstanceTeacherInfo");
 
 export const ClassInstanceTeacherPothosObject = ClassInstanceTeacherRef.implement({
   fields: t => ({
@@ -82,34 +62,13 @@ export const ClassInstanceTeacherPothosObject = ClassInstanceTeacherRef.implemen
 
 // ─── Class Instance Detail ────────────────────────────────────────────────────
 
-export type ClassInstanceDetailDefinition = {
-  id: string;
-  courseName: string;
-  instanceId: string;
-  scheduledDate: string;
-  startTime: string;
-  endTime: string;
-  durationMinutes: number;
-  status: string;
-  remarks: string | null;
-  hasTimezoneMismatch: boolean;
-  studentTimezone: string | null;
-  zoomMeetingUrl: string | null;
-  payrollCredited: boolean;
-  isRescheduled: boolean;
-  executionState: string;
-  outcome: string;
-  student: ClassInstanceStudentDefinition;
-  teacher: ClassInstanceTeacherDefinition;
-  performance: ClassInstancePerformanceDefinition | null;
-};
-
-const ClassInstanceDetailRef = gqlSchemaBuilder.objectRef<ClassInstanceDetailDefinition>("ClassInstanceDetail");
+const ClassInstanceDetailRef = gqlSchemaBuilder.objectRef<ClassInstanceDetailReturnType>("ClassInstanceDetail");
 
 export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
     courseName: t.exposeString("courseName"),
+    classType: t.exposeString("classType"),
     instanceId: t.exposeString("instanceId"),
     scheduledDate: t.exposeString("scheduledDate"),
     startTime: t.exposeString("startTime"),
@@ -135,14 +94,7 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
 
 // ─── Class Status Event ───────────────────────────────────────────────────────
 
-export type ClassStatusEventDefinition = {
-  id: string;
-  eventType: string;
-  description: string | null;
-  createdAt: Date | string;
-};
-
-const ClassStatusEventRef = gqlSchemaBuilder.objectRef<ClassStatusEventDefinition>("ClassStatusEvent");
+const ClassStatusEventRef = gqlSchemaBuilder.objectRef<ClassStatusEventReturnType>("ClassStatusEvent");
 
 export const ClassStatusEventPothosObject = ClassStatusEventRef.implement({
   fields: t => ({
@@ -263,11 +215,21 @@ export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
     rescheduledInstanceId: t.exposeString("rescheduledInstanceId"),
     completedInstance: t.field({
       type: ClassInstanceDetailPothosObject,
-      resolve: (parent, _args, ctx) => resolveDetail(parent.completedInstanceId, ctx.locale),
+      resolve: (parent, _args, ctx) => {
+        if (!ctx.user) {
+          throw new Error("Unauthorized");
+        }
+        return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.completedInstanceId, ctx.locale);
+      },
     }),
     rescheduledInstance: t.field({
       type: ClassInstanceDetailPothosObject,
-      resolve: (parent, _args, ctx) => resolveDetail(parent.rescheduledInstanceId, ctx.locale),
+      resolve: (parent, _args, ctx) => {
+        if (!ctx.user) {
+          throw new Error("Unauthorized");
+        }
+        return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.rescheduledInstanceId, ctx.locale);
+      },
     }),
   }),
 });

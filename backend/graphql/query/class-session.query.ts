@@ -1,14 +1,12 @@
-import { ClassPerformanceRepository } from "@/backend/db/repo/class-performance.repository";
-import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
+import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   ClassInstanceDetailPothosObject,
   ClassStatusEventPothosObject,
   TeacherFutureSchedulePothosObject,
 } from "../pothos/class-session.pothos";
-import { buildClassInstanceDetail } from "../utils/class-session.utils";
 
 gqlSchemaBuilder.queryField("classInstance", t =>
   t.field({
@@ -20,13 +18,7 @@ gqlSchemaBuilder.queryField("classInstance", t =>
         const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
         throw new Error(tFunc("unauthorized"));
       }
-      const instance = await SchedulingRepository.getClassInstanceById(args.id);
-      if (!instance) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("notFound"));
-      }
-      const perf = await ClassPerformanceRepository.getByClassInstanceId(args.id);
-      return buildClassInstanceDetail(instance, perf);
+      return ClassSessionService.getClassInstanceDetail(ctx.user.id, args.id, ctx.locale);
     },
   })
 );
@@ -41,7 +33,7 @@ gqlSchemaBuilder.queryField("classStatusEvents", t =>
         const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
         throw new Error(tFunc("unauthorized"));
       }
-      return SchedulingRepository.getClassStatusEvents(args.classInstanceId);
+      return ClassSessionService.getClassStatusEvents(ctx.user.id, args.classInstanceId, ctx.locale);
     },
   })
 );

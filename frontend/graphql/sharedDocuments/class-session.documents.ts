@@ -10,6 +10,7 @@ export const classInstanceQueryDocument: TypedDocumentNode<
     classInstance(id: $id) {
       id
       courseName
+      classType
       instanceId
       scheduledDate
       startTime
@@ -45,6 +46,7 @@ export const classInstanceQueryDocument: TypedDocumentNode<
         sessionHealth
         heatmapData
         latencyMs
+        authorizationLabel
         attendanceRate
         avgGrade
         lastClassDaysAgo
