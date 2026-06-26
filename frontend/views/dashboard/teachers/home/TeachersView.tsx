@@ -18,6 +18,10 @@ interface TeachersViewProps {
   readonly totalTeachers: number;
   readonly searchQuery: string;
   readonly onSearchChange: (query: string) => void;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+  readonly onPageChange: (page: number) => void;
 }
 
 export function TeachersView({
@@ -26,16 +30,14 @@ export function TeachersView({
   totalTeachers,
   searchQuery,
   onSearchChange,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
 }: Readonly<TeachersViewProps>) {
   const t = useTranslations("dashboard.teachersDirectory");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-  const filteredRows = rows.filter(
-    row =>
-      (row.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (row.email || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <PageContainer>
@@ -52,10 +54,24 @@ export function TeachersView({
       </Box>
 
       {isMobile ? (
-        <TeacherCardList rows={filteredRows} searchQuery={searchQuery} onSearchChange={onSearchChange} />
+        <TeacherCardList
+          rows={rows}
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
+        />
       ) : (
-        <SectionPanel title={t("table.showingOf", { count: filteredRows.length, total: totalTeachers })}>
-          <TeacherDataGrid rows={filteredRows} />
+        <SectionPanel title={t("table.showingOf", { count: rows.length, total: totalTeachers })}>
+          <TeacherDataGrid
+            rows={rows}
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            onPageChange={onPageChange}
+          />
         </SectionPanel>
       )}
     </PageContainer>

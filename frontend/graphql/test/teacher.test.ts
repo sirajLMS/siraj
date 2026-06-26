@@ -42,13 +42,19 @@ async function queryTeachers(token: string, search: string, limit: number) {
 async function queryTeacherDirectory(
   token: string,
   search: string | null = null,
-  limit: number | null = null,
-  offset: number | null = null
+  paginationArgs: {
+    first: number;
+    page: number;
+    skip: null;
+    after: null;
+    before: null;
+    last: null;
+    maxCount: null;
+  } | null = null
 ) {
   const data = await authenticatedRequest(token, "query", teacherDirectoryQueryDocument, {
     search,
-    limit,
-    offset,
+    paginationArgs,
   });
   if (!data?.teacherDirectory) throw new Error("No teacher directory returned");
   return data.teacherDirectory;
@@ -61,7 +67,15 @@ describe("GraphQL Teacher Integration Tests", () => {
 
   async function getSeededTeacherId(): Promise<string> {
     if (!authToken) throw new Error("No auth token");
-    const directory = await queryTeacherDirectory(authToken, null, 1, 0);
+    const directory = await queryTeacherDirectory(authToken, null, {
+      first: 1,
+      page: 1,
+      skip: null,
+      after: null,
+      before: null,
+      last: null,
+      maxCount: null,
+    });
     const teacherId = directory.rows?.[0]?.id;
     if (!teacherId) throw new Error("No seeded teacher found in directory");
     return teacherId;
@@ -144,8 +158,7 @@ describe("GraphQL Teacher Integration Tests", () => {
       query: teacherDirectoryQueryDocument,
       variables: {
         search: null,
-        limit: null,
-        offset: null,
+        paginationArgs: null,
       },
       context: {
         headers: {
@@ -160,7 +173,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   test("teacherDirectory returns directory data for authorized admin", async () => {
     if (!authToken) throw new Error("No auth token");
 
-    const directory = await queryTeacherDirectory(authToken, null, null, null);
+    const directory = await queryTeacherDirectory(authToken, null, null);
 
     expect(directory.id).toBeDefined();
     expect(directory.metrics).toBeDefined();
@@ -175,7 +188,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     const expectedTeacher = demoTeachers[0];
     if (!expectedTeacher) throw new Error("No demo teachers");
 
-    const directory = await queryTeacherDirectory(authToken, expectedTeacher.name, null, null);
+    const directory = await queryTeacherDirectory(authToken, expectedTeacher.name, null);
 
     const matched = directory.rows?.some(r => r?.name === expectedTeacher.name);
     expect(matched).toBeTrue();

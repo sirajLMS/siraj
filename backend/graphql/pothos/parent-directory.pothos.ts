@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { PageInfoObject } from "./pagination.objects";
 
 export type ParentDirectoryMetricsDefinition = {
   id: string;
@@ -57,7 +58,8 @@ export type ParentDirectoryDefinition = {
   id: string;
   metrics: ParentDirectoryMetricsDefinition;
   rows: ParentDirectoryRowDefinition[];
-  totalParents: number;
+  totalCount: number;
+  pageInfo: import("@/backend/types").PageInfo | null;
 };
 
 const ParentDirectoryRef = gqlSchemaBuilder.objectRef<ParentDirectoryDefinition>("ParentDirectory");
@@ -67,6 +69,7 @@ export const ParentDirectoryPothosObject = ParentDirectoryRef.implement({
     id: t.exposeString("id"),
     metrics: t.expose("metrics", { type: ParentDirectoryMetricsPothosObject }),
     rows: t.expose("rows", { type: [ParentDirectoryRowPothosObject] }),
-    totalParents: t.exposeInt("totalParents"),
+    totalCount: t.exposeInt("totalCount"),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
   }),
 });

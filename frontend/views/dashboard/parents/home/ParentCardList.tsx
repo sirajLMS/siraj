@@ -2,6 +2,7 @@
 
 import { PriorityHighOutlined as AlertIcon, SettingsOutlined as SettingsIcon } from "@mui/icons-material";
 import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
+import { PaginationControls } from "@/frontend/components/ui";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { ParentAccountStatus, ParentDirectoryRow } from "@/frontend/views/dashboard/parents/types/directory";
@@ -93,14 +94,43 @@ interface ParentCardListProps {
   readonly rows: readonly ParentDirectoryRow[];
   readonly labels: ParentCardListLabels;
   readonly onOpenSettings: (id: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
-export function ParentCardList({ rows, labels, onOpenSettings }: Readonly<ParentCardListProps>) {
+export function ParentCardList({
+  rows,
+  labels,
+  onOpenSettings,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
+}: Readonly<ParentCardListProps>) {
+  const hasPagination =
+    totalCount !== undefined && page !== undefined && pageSize !== undefined && onPageChange !== undefined;
+  const pageCount = pageSize > 0 ? Math.ceil((totalCount ?? 0) / pageSize) : 0;
+
   return (
     <Stack spacing={2}>
       {rows.map(row => (
         <ParentCard key={row.id} row={row} labels={labels} onOpenSettings={onOpenSettings} />
       ))}
+      {hasPagination &&
+        page !== undefined &&
+        pageSize !== undefined &&
+        totalCount !== undefined &&
+        onPageChange !== undefined && (
+          <PaginationControls
+            page={page}
+            pageCount={pageCount}
+            rowCount={totalCount}
+            pageSize={pageSize}
+            onPageChange={onPageChange}
+          />
+        )}
     </Stack>
   );
 }

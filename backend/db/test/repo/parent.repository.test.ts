@@ -295,16 +295,13 @@ describe("ParentRepository — getParentDirectory", () => {
       const user2 = await createTestUser(tx, { name: "Dir Parent B", email: `dpb-${randomUUID()}@test.com` });
       const parent2 = await createTestParent(tx, user2.id, { status: "ON_LEAVE" });
 
-      const result = await ParentRepository.getParentDirectory({ search: "Dir Parent", limit: 10, offset: 0 }, tx);
-      expect(result.totalParents).toBeGreaterThanOrEqual(2);
+      const result = await ParentRepository.getParentDirectory({ search: "Dir Parent" }, tx);
+      expect(result.totalCount).toBeGreaterThanOrEqual(2);
       expect(result.rows.length).toBeGreaterThanOrEqual(2);
       expect(result.metrics.regular).toBeGreaterThanOrEqual(1);
       expect(result.metrics.onLeave).toBeGreaterThanOrEqual(1);
 
-      const searchResult = await ParentRepository.getParentDirectory(
-        { search: "Dir Parent A", limit: 10, offset: 0 },
-        tx
-      );
+      const searchResult = await ParentRepository.getParentDirectory({ search: "Dir Parent A" }, tx);
       expect(searchResult.rows.some(r => r.id === parent1.id)).toBeTrue();
       expect(searchResult.rows.some(r => r.id === parent2.id)).toBeFalse();
     });
@@ -382,7 +379,7 @@ describe("ParentRepository — non-transactional coverage fallback", () => {
     const studentsList = await ParentRepository.getAssociatedStudents(fakeId);
     expect(studentsList.length).toBe(0);
 
-    const directory = await ParentRepository.getParentDirectory({ limit: 1, offset: 0 });
+    const directory = await ParentRepository.getParentDirectory({});
     expect(directory.rows.length).toBeGreaterThanOrEqual(0);
   });
 });

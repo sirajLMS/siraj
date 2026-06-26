@@ -30,18 +30,26 @@ interface ParentsViewProps {
   readonly metrics: readonly MetricItem[];
   readonly rows: readonly ParentDirectoryRow[];
   readonly labels: ParentsViewLabels;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
   readonly onAddParent: () => void;
   readonly onOpenSettings: (id: string) => void;
   readonly onSearch: (query: string) => void;
+  readonly onPageChange?: (page: number) => void;
 }
 
 export function ParentsView({
   metrics,
   rows,
   labels,
+  page,
+  pageSize,
+  totalCount,
   onAddParent,
   onOpenSettings,
   onSearch,
+  onPageChange,
 }: Readonly<ParentsViewProps>) {
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("md"));
 
@@ -121,9 +129,25 @@ export function ParentsView({
         }
       >
         {isMobile ? (
-          <ParentCardList rows={rows} labels={labels.card} onOpenSettings={onOpenSettings} />
+          <ParentCardList
+            rows={rows}
+            labels={labels.card}
+            onOpenSettings={onOpenSettings}
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            onPageChange={onPageChange}
+          />
         ) : (
-          <ParentsDataGrid rows={rows} labels={labels.table} onOpenSettings={onOpenSettings} />
+          <ParentsDataGrid
+            rows={rows}
+            labels={labels.table}
+            onOpenSettings={onOpenSettings}
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            onPageChange={onPageChange}
+          />
         )}
       </SectionPanel>
     </PageContainer>

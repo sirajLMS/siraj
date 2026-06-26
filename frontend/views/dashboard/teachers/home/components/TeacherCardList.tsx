@@ -2,6 +2,7 @@ import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutli
 import { Avatar, Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { PaginationControls } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 
@@ -9,16 +10,29 @@ interface TeacherCardListProps {
   readonly rows: readonly TeacherDirectoryRow[];
   readonly searchQuery: string;
   readonly onSearchChange: (query: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
-export function TeacherCardList({ rows, searchQuery, onSearchChange }: Readonly<TeacherCardListProps>) {
+export function TeacherCardList({
+  rows,
+  searchQuery,
+  onSearchChange,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
+}: Readonly<TeacherCardListProps>) {
   const t = useTranslations("dashboard.teachersDirectory");
   const router = useRouter();
   const locale = useLocale();
 
+  const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      {/* Search Bar */}
       <TextField
         fullWidth
         placeholder={t("table.linkPending").replace("Link Pending", "Search teachers...")}
@@ -129,6 +143,16 @@ export function TeacherCardList({ rows, searchQuery, onSearchChange }: Readonly<
           </Box>
         ))}
       </Box>
+
+      {onPageChange && totalCount !== undefined ? (
+        <PaginationControls
+          page={page}
+          pageCount={pageCount}
+          rowCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+        />
+      ) : null}
     </Box>
   );
 }

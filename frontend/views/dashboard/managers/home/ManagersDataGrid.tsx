@@ -4,33 +4,20 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
+import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { Manager } from "./types";
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Styled Components — Extracted inline sx styles for reusability & consistency
- * ──────────────────────────────────────────────────────────────────────────── */
-
-/**
- * Avatar for manager profile in data grid rows.
- * Fixed dimensions for consistent row height.
- */
 const StyledManagerAvatar = styled(Avatar)({
   width: 40,
   height: 40,
 });
 
-/**
- * Manager name typography with bold weight and primary color.
- */
 const StyledManagerNameTypography = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
   color: theme.palette.primary.main,
 }));
 
-/**
- * Role chip with conditional styling based on staff/admin role.
- */
 const StyledRoleChip = styled(Chip, {
   shouldForwardProp: prop => prop !== "isStaff",
 })<{ isStaff: boolean }>(({ theme, isStaff }) => ({
@@ -40,44 +27,25 @@ const StyledRoleChip = styled(Chip, {
   color: isStaff ? theme.palette.onSecondaryContainer : theme.palette.onPrimaryContainer,
 }));
 
-/**
- * Container wrapper for the data grid.
- */
 const StyledDataGridWrapper = styled(Box)({
   width: "100%",
 });
 
-/**
- * Footer section displaying pagination info with border-top separator.
- */
-const StyledDataGridFooter = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderTop: `1px solid ${theme.palette.border.light}`,
-  backgroundColor: theme.palette.background.default,
-}));
-
-/* ────────────────────────────────────────────────────────────────────────────
- * Component Interface
- * ──────────────────────────────────────────────────────────────────────────── */
-
 interface ManagersDataGridProps {
   managers: Manager[];
-  total: number;
+  page?: number;
+  pageSize?: number;
+  totalCount?: number;
+  onPageChange?: (page: number) => void;
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * ManagersDataGrid Component
- * ──────────────────────────────────────────────────────────────────────────── */
-
-/**
- * Desktop data grid for displaying managers in tabular format.
- *
- * Columns: Hash, Manager (with avatar/status), Contact, Skype, Phone, Role, Options
- *
- * @param managers - Array of manager records to display
- * @param total - Total count for pagination display
- */
-export function ManagersDataGrid({ managers, total }: Readonly<ManagersDataGridProps>) {
+export function ManagersDataGrid({
+  managers,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
+}: Readonly<ManagersDataGridProps>) {
   const t = useTranslations("dashboard.managersDirectory");
 
   const columns = useMemo<GridColDef<Manager>[]>(
@@ -168,14 +136,29 @@ export function ManagersDataGrid({ managers, total }: Readonly<ManagersDataGridP
     [t]
   );
 
+  const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
+
   return (
     <StyledDataGridWrapper>
-      <AppDataGrid rows={managers} columns={columns} emptyMessage={t("noEntries")} autoHeight rowHeight={80} />
-      <StyledDataGridFooter>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t("showingOf", { count: managers.length, total: total })}
-        </Typography>
-      </StyledDataGridFooter>
+      <AppDataGrid<Manager>
+        rows={managers}
+        columns={columns}
+        emptyMessage={t("noEntries")}
+        autoHeight
+        rowHeight={80}
+        {...(isServerPagination
+          ? {
+              paginationMode: "server" as const,
+              rowCount: totalCount,
+              paginationModel: { page, pageSize },
+              onPaginationModelChange: model => {
+                onPageChange(model.page);
+              },
+              pageSizeOptions: [pageSize],
+              slots: { pagination: GridPagination },
+            }
+          : {})}
+      />
     </StyledDataGridWrapper>
   );
 }

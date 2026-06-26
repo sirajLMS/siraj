@@ -5,6 +5,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { TeacherRepository } from "@/backend/db/repo";
 import { teachers, users } from "@/backend/db/schema";
+import { PaginationArgs } from "@/backend/types";
 import { createTestUser, setupTeacher } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
@@ -14,7 +15,7 @@ describe("TeacherRepository", () => {
       await setupTeacher(tx, { name: "Zack Teacher", email: "zack@example.com" }, { status: "ACTIVATED" });
       const t2 = await setupTeacher(tx, { name: "Alice Teacher", email: "alice@example.com" }, { status: "ACTIVATED" });
 
-      const directory = await TeacherRepository.getTeacherDirectory(undefined, tx);
+      const { rows: directory } = await TeacherRepository.getTeacherDirectory(null, undefined, tx);
       expect(directory.length).toBeGreaterThanOrEqual(2);
 
       // Verify sorting is alphabetical by user name
@@ -45,28 +46,30 @@ describe("TeacherRepository", () => {
         { status: "ACTIVATED" }
       );
 
-      const nameSearchResult = await TeacherRepository.getTeacherDirectory({ search: "SearchName" }, tx);
-      expect(nameSearchResult.length).toBe(1);
-      expect(nameSearchResult[0].id).toBe(t1.teacher.id);
+      const nameSearchResult = await TeacherRepository.getTeacherDirectory(null, "SearchName", tx);
+      expect(nameSearchResult.rows.length).toBe(1);
+      expect(nameSearchResult.rows[0].id).toBe(t1.teacher.id);
 
-      const emailSearchResult = await TeacherRepository.getTeacherDirectory({ search: "searchemail@example.com" }, tx);
-      expect(emailSearchResult.length).toBe(1);
-      expect(emailSearchResult[0].id).toBe(t2.teacher.id);
+      const emailSearchResult = await TeacherRepository.getTeacherDirectory(null, "searchemail@example.com", tx);
+      expect(emailSearchResult.rows.length).toBe(1);
+      expect(emailSearchResult.rows[0].id).toBe(t2.teacher.id);
     });
   });
 
-  it("getTeacherDirectory supports limit and offset", async () => {
+  it("getTeacherDirectory supports pagination via PaginationArgs", async () => {
     await runInRollback(async tx => {
       await setupTeacher(tx, { name: "Teacher A" }, { status: "ACTIVATED" });
       await setupTeacher(tx, { name: "Teacher B" }, { status: "ACTIVATED" });
       await setupTeacher(tx, { name: "Teacher C" }, { status: "ACTIVATED" });
 
-      const limited = await TeacherRepository.getTeacherDirectory({ limit: 1 }, tx);
-      expect(limited.length).toBe(1);
+      const firstPageArgs = new PaginationArgs({ first: 1, page: 1 });
+      const limited = await TeacherRepository.getTeacherDirectory(firstPageArgs, undefined, tx);
+      expect(limited.rows.length).toBe(1);
 
-      const offsetResult = await TeacherRepository.getTeacherDirectory({ limit: 1, offset: 1 }, tx);
-      expect(offsetResult.length).toBe(1);
-      expect(offsetResult[0].id).not.toBe(limited[0].id);
+      const secondPageArgs = new PaginationArgs({ first: 1, page: 2 });
+      const offsetResult = await TeacherRepository.getTeacherDirectory(secondPageArgs, undefined, tx);
+      expect(offsetResult.rows.length).toBe(1);
+      expect(offsetResult.rows[0].id).not.toBe(limited.rows[0].id);
     });
   });
 
@@ -88,14 +91,14 @@ describe("TeacherRepository", () => {
     await runInRollback(async tx => {
       const t1 = await setupTeacher(tx, { name: "SoftDeleted Teacher" }, { status: "ACTIVATED" });
 
-      const beforeDelete = await TeacherRepository.getTeacherDirectory({ search: "SoftDeleted" }, tx);
-      expect(beforeDelete.length).toBe(1);
+      const beforeDelete = await TeacherRepository.getTeacherDirectory(null, "SoftDeleted", tx);
+      expect(beforeDelete.rows.length).toBe(1);
 
       // Soft delete user
       await tx.update(users).set({ deletedAt: new Date() }).where(eq(users.id, t1.user.id));
 
-      const afterDelete = await TeacherRepository.getTeacherDirectory({ search: "SoftDeleted" }, tx);
-      expect(afterDelete.length).toBe(0);
+      const afterDelete = await TeacherRepository.getTeacherDirectory(null, "SoftDeleted", tx);
+      expect(afterDelete.rows.length).toBe(0);
     });
   });
 
@@ -357,8 +360,8 @@ describe("TeacherRepository", () => {
       const search = await TeacherRepository.searchTeachers("NonExistentName", 10);
       expect(search.length).toBe(0);
 
-      const directory = await TeacherRepository.getTeacherDirectory({ limit: 1 });
-      expect(directory.length).toBeGreaterThanOrEqual(0);
+      const directory = await TeacherRepository.getTeacherDirectory(new PaginationArgs({ first: 1, page: 1 }));
+      expect(directory.rows.length).toBeGreaterThanOrEqual(0);
 
       const metrics = await TeacherRepository.getTeacherDirectoryMetrics();
       expect(metrics.activated).toBeGreaterThanOrEqual(0);

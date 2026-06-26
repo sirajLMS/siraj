@@ -9,6 +9,7 @@ import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { GridPagination } from "@/frontend/components/ui";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { ParentAccountStatus, ParentDirectoryRow } from "@/frontend/views/dashboard/parents/types/directory";
@@ -31,9 +32,21 @@ interface ParentsDataGridProps {
   readonly rows: readonly ParentDirectoryRow[];
   readonly labels: ParentsDataGridLabels;
   readonly onOpenSettings: (id: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
-export function ParentsDataGrid({ rows, labels, onOpenSettings }: Readonly<ParentsDataGridProps>) {
+export function ParentsDataGrid({
+  rows,
+  labels,
+  onOpenSettings,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
+}: Readonly<ParentsDataGridProps>) {
   const columns = useMemo<GridColDef<ParentDirectoryRow>[]>(
     () => [
       {
@@ -183,6 +196,18 @@ export function ParentsDataGrid({ rows, labels, onOpenSettings }: Readonly<Paren
       onRowClick={(params: GridRowParams<ParentDirectoryRow>) => {
         onOpenSettings(params.row.id);
       }}
+      {...(totalCount !== undefined && page !== undefined && pageSize !== undefined && onPageChange
+        ? {
+            paginationMode: "server",
+            rowCount: totalCount,
+            paginationModel: { page, pageSize },
+            onPaginationModelChange: model => {
+              onPageChange(model.page);
+            },
+            pageSizeOptions: [10, 25, 50],
+            slots: { pagination: GridPagination },
+          }
+        : {})}
       sx={{
         "& .MuiDataGrid-row": { cursor: "pointer" },
       }}

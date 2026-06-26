@@ -1,0 +1,10 @@
+type TeacherDirectory {
+  id: String
+  metrics: TeacherDirectoryMetrics
+  rows: [TeacherDirectoryRow!]
+  totalTeachers: Int
+}
+
+type TeacherDirectoryMetrics {
+  activated: Int
+  deactivated: Int

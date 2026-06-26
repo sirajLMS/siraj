@@ -86,7 +86,8 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
     const group = await createTestPermissionGroup(tx, "Test Dir Group", `test-dir-${randomUUID()}`);
     await assignUserToGroup(tx, user.id, group.id);
 
-    const result = await StaffProfileRepository.getManagerDirectory(null, tx);`n    const found = result.rows.find(r => r.id === user.id);
+    const result = await StaffProfileRepository.getManagerDirectory(null, tx);
+    const found = result.rows.find(r => r.id === user.id);
     expect(found).toBeDefined();
     expect(found?.roleSlug).toBe(group.slug);
     expect(found?.email).toBe(user.email);
@@ -98,20 +99,23 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
       skypeId: "live:test.skype",
     });
 
-    const result = await StaffProfileRepository.getManagerDirectory(null, tx);`n    const found = result.rows.find(r => r.name === "SkypePhone");
+    const result = await StaffProfileRepository.getManagerDirectory(null, tx);
+    const found = result.rows.find(r => r.name === "SkypePhone");
     expect(found).toBeDefined();
     expect(found?.phone).toBe("+1234567890");
     expect(found?.skypeId).toBe("live:test.skype");
   });
 
   staffTest("returns empty array when no staff profiles exist", async tx => {
-    const result = await StaffProfileRepository.getManagerDirectory(null, tx);`n    expect(Array.isArray(result.rows)).toBe(true);
+    const result = await StaffProfileRepository.getManagerDirectory(null, tx);
+    expect(Array.isArray(result.rows)).toBe(true);
   });
 
   staffTest("returns staff without permission group (roleSlug is null)", async tx => {
     const { user } = await createStaffUser(tx, "NoGroupMgr");
 
-    const result = await StaffProfileRepository.getManagerDirectory(null, tx);`n    const found = result.rows.find(r => r.id === user.id);
+    const result = await StaffProfileRepository.getManagerDirectory(null, tx);
+    const found = result.rows.find(r => r.id === user.id);
     expect(found).toBeDefined();
     expect(found?.roleSlug).toBeNull();
     expect(found?.roleName).toBeNull();
@@ -391,7 +395,8 @@ describe("StaffProfileRepository — create", () => {
     const result = await StaffProfileRepository.findByUserId(fakeId);
     expect(result).toBeNull();
 
-    const directory = await StaffProfileRepository.getManagerDirectory();`n    expect(directory.rows.length).toBeGreaterThanOrEqual(0);
+    const directory = await StaffProfileRepository.getManagerDirectory();
+    expect(directory.rows.length).toBeGreaterThanOrEqual(0);
   });
 
   staffTest("rolls back staff profile creation on subsequent failure", async () => {
@@ -412,6 +417,3 @@ describe("StaffProfileRepository — create", () => {
     }
   });
 });
-
-
-

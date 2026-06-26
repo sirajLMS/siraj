@@ -1,16 +1,26 @@
 import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
 import { Avatar, Box, IconButton, Link, Typography } from "@mui/material";
-import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
+import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface TeacherDataGridProps {
   readonly rows: readonly TeacherDirectoryRow[];
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
-export function TeacherDataGrid({ rows }: Readonly<TeacherDataGridProps>) {
+export function TeacherDataGrid({
+  rows,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
+}: Readonly<TeacherDataGridProps>) {
   const t = useTranslations("dashboard.teachersDirectory");
   const router = useRouter();
   const locale = useLocale();
@@ -136,7 +146,34 @@ export function TeacherDataGrid({ rows }: Readonly<TeacherDataGridProps>) {
     },
   ];
 
-  return <AppDataGrid rows={rows} columns={columns} rowHeight={72} disableRowSelectionOnClick />;
+  const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
+
+  const paginationModel: GridPaginationModel = {
+    page,
+    pageSize,
+  };
+
+  return (
+    <AppDataGrid<TeacherDirectoryRow>
+      rows={rows}
+      columns={columns}
+      rowHeight={72}
+      disableRowSelectionOnClick
+      getRowId={row => row.id ?? ""}
+      {...(isServerPagination
+        ? {
+            paginationMode: "server" as const,
+            rowCount: totalCount,
+            paginationModel,
+            onPaginationModelChange: model => {
+              onPageChange(model.page);
+            },
+            pageSizeOptions: [pageSize],
+            slots: { pagination: GridPagination },
+          }
+        : {})}
+    />
+  );
 }
 
 interface TeacherActionButtonProps {

@@ -8,10 +8,21 @@ import { useTeacherDirectoryStore } from "@/frontend/stores/teacherDirectoryStor
 import { TeachersView } from "./TeachersView";
 
 export function TeachersContainer() {
-  const { searchQuery, setSearchQuery } = useTeacherDirectoryStore();
+  const { searchQuery, setSearchQuery, page, pageSize, setPage } = useTeacherDirectoryStore();
 
   const { data, loading } = useQuery(teacherDirectoryQueryDocument, {
-    variables: { search: searchQuery || null, limit: 100, offset: 0 },
+    variables: {
+      search: searchQuery || null,
+      paginationArgs: {
+        first: pageSize,
+        page: page + 1,
+        skip: null,
+        after: null,
+        before: null,
+        last: null,
+        maxCount: null,
+      },
+    },
   });
 
   const directory = data?.teacherDirectory;
@@ -24,6 +35,10 @@ export function TeachersContainer() {
         totalTeachers={0}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        page={page}
+        pageSize={pageSize}
+        totalCount={0}
+        onPageChange={setPage}
       />
     );
   }
@@ -36,6 +51,10 @@ export function TeachersContainer() {
         totalTeachers={directory.totalTeachers || 0}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        page={page}
+        pageSize={pageSize}
+        totalCount={directory.pageInfo?.total ?? 0}
+        onPageChange={setPage}
       />
     </RequirePermission>
   );

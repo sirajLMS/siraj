@@ -1,7 +1,7 @@
-import type { PaginationArgs } from "@/backend/types";
 import { ParentRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { PaginationArgs } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
 export interface ParentDirectoryMetrics {

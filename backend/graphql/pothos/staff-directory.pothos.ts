@@ -1,4 +1,5 @@
 import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
+import type { PageInfo } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
@@ -51,6 +52,7 @@ export type TeacherDirectoryDefinition = {
   metrics: TeacherDirectoryMetricsDefinition;
   rows: TeacherDirectoryRowDefinition[];
   totalTeachers: number;
+  pageInfo: PageInfo | null;
 };
 
 const TeacherDirectoryRef = gqlSchemaBuilder.objectRef<TeacherDirectoryDefinition>("TeacherDirectory");
@@ -61,6 +63,7 @@ export const TeacherDirectoryPothosObject = TeacherDirectoryRef.implement({
     metrics: t.expose("metrics", { type: TeacherDirectoryMetricsPothosObject }),
     rows: t.expose("rows", { type: [TeacherDirectoryRowPothosObject] }),
     totalTeachers: t.exposeInt("totalTeachers"),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
   }),
 });
 
@@ -98,7 +101,7 @@ export type ManagerDirectoryResultDefinition = {
   id: string;
   rows: ManagerDirectoryRowDefinition[];
   totalCount: number;
-  pageInfo: import("@/backend/types").PageInfo | null;
+  pageInfo: PageInfo | null;
 };
 
 const ManagerDirectoryResultRef =

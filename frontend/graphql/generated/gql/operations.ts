@@ -1214,15 +1214,16 @@ export type ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentD
 
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow = { id: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, accountStatus: string | null, unpaidInvoices: number | null };
 
-export type ParentDirectoryQuery_parentDirectory_ParentDirectory = { id: string | null, totalParents: number | null, metrics: ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics | null, rows: Array<ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow> | null };
+export type ParentDirectoryQuery_parentDirectory_ParentDirectory_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type ParentDirectoryQuery_parentDirectory_ParentDirectory = { id: string | null, totalCount: number | null, metrics: ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics | null, rows: Array<ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow> | null, pageInfo: ParentDirectoryQuery_parentDirectory_ParentDirectory_pageInfo_PageInfo | null };
 
 export type ParentDirectoryQuery_Query = { parentDirectory: ParentDirectoryQuery_parentDirectory_ParentDirectory | null };
 
 
 export type ParentDirectoryQueryVariables = Exact<{
+  paginationArgs: Types.PaginationArgs | null | undefined;
   search: string | null | undefined;
-  limit: number | null | undefined;
-  offset: number | null | undefined;
 }>;
 
 
@@ -1613,26 +1614,33 @@ export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_metrics_Teac
 
 export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_rows_TeacherDirectoryRow = { id: string | null, index: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, zoomLink: string | null };
 
-export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory = { id: string | null, totalTeachers: number | null, metrics: TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_metrics_TeacherDirectoryMetrics | null, rows: Array<TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_rows_TeacherDirectoryRow> | null };
+export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type TeacherDirectoryQuery_teacherDirectory_TeacherDirectory = { id: string | null, totalTeachers: number | null, metrics: TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_metrics_TeacherDirectoryMetrics | null, rows: Array<TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_rows_TeacherDirectoryRow> | null, pageInfo: TeacherDirectoryQuery_teacherDirectory_TeacherDirectory_pageInfo_PageInfo | null };
 
 export type TeacherDirectoryQuery_Query = { teacherDirectory: TeacherDirectoryQuery_teacherDirectory_TeacherDirectory | null };
 
 
 export type TeacherDirectoryQueryVariables = Exact<{
   search: string | null | undefined;
-  limit: number | null | undefined;
-  offset: number | null | undefined;
+  paginationArgs: Types.PaginationArgs | null | undefined;
 }>;
 
 
 export type TeacherDirectoryQuery = TeacherDirectoryQuery_Query;
 
-export type ManagerDirectoryQuery_managerDirectory_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, skypeId: string | null, status: string | null, roleSlug: string | null, roleName: string | null };
+export type ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_rows_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, skypeId: string | null, status: string | null, roleSlug: string | null, roleName: string | null };
 
-export type ManagerDirectoryQuery_Query = { managerDirectory: Array<ManagerDirectoryQuery_managerDirectory_ManagerDirectoryRow> | null };
+export type ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult = { id: string | null, totalCount: number | null, rows: Array<ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_rows_ManagerDirectoryRow> | null, pageInfo: ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_pageInfo_PageInfo | null };
+
+export type ManagerDirectoryQuery_Query = { managerDirectory: ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult | null };
 
 
-export type ManagerDirectoryQueryVariables = Exact<{ [key: string]: never; }>;
+export type ManagerDirectoryQueryVariables = Exact<{
+  paginationArgs: Types.PaginationArgs | null | undefined;
+}>;
 
 
 export type ManagerDirectoryQuery = ManagerDirectoryQuery_Query;

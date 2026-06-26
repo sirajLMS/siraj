@@ -2,39 +2,23 @@ import { ChatBubbleOutlineOutlined, MailOutlined, PhoneOutlined, SettingsOutline
 import { Avatar, Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import { BaseCard, StatusBadge } from "@/frontend/components/ui";
+import { BaseCard, PaginationControls, StatusBadge } from "@/frontend/components/ui";
 import type { Manager } from "./types";
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Styled Components — Extracted inline sx styles for reusability & consistency
- * ──────────────────────────────────────────────────────────────────────────── */
-
-/**
- * Empty state container shown when no managers match the filters.
- */
 const StyledEmptyStateBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
   textAlign: "center",
   color: theme.palette.text.secondary,
 }));
 
-/**
- * Wrapper for the card list with consistent padding.
- */
 const StyledCardListWrapper = styled(Stack)(({ theme }) => ({
   padding: theme.spacing(2),
 }));
 
-/**
- * Individual manager card with relative positioning for absolute children.
- */
 const StyledManagerCard = styled(BaseCard)({
   position: "relative",
 });
 
-/**
- * Settings icon button positioned absolutely in card corner.
- */
 const StyledCardIconButton = styled(IconButton)(({ theme }) => ({
   position: "absolute",
   top: 12,
@@ -42,18 +26,12 @@ const StyledCardIconButton = styled(IconButton)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-/**
- * Avatar with border matching surface container color.
- */
 const StyledProfileAvatar = styled(Avatar)(({ theme }) => ({
   width: 64,
   height: 64,
   border: `2px solid ${theme.palette.surfaceContainerHighest}`,
 }));
 
-/**
- * Small status indicator dot positioned on avatar corner.
- */
 const StyledStatusIndicator = styled(Box, {
   shouldForwardProp: prop => prop !== "status",
 })<{ status: "active" | "blocked" }>(({ theme, status }) => ({
@@ -67,9 +45,6 @@ const StyledStatusIndicator = styled(Box, {
   border: `2px solid ${theme.palette.background.paper}`,
 }));
 
-/**
- * Role chip with compact sizing for mobile card layout.
- */
 const StyledRoleChip = styled(Chip, {
   shouldForwardProp: prop => prop !== "isStaff",
 })<{ isStaff: boolean }>(({ theme, isStaff }) => ({
@@ -81,51 +56,29 @@ const StyledRoleChip = styled(Chip, {
   color: isStaff ? theme.palette.onSecondaryContainer : theme.palette.onPrimaryContainer,
 }));
 
-/**
- * Contact item row with icon and text.
- */
 const StyledContactItemBox = styled(Stack)(({ theme }) => ({
   alignItems: "center",
   color: theme.palette.text.secondary,
 }));
 
-/**
- * Footer showing pagination info.
- */
-const StyledCardListFooter = styled(Box)(({ theme }) => ({
-  paddingTop: theme.spacing(2),
-  paddingBottom: theme.spacing(2),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
-
-/* ────────────────────────────────────────────────────────────────────────────
- * Component Interface
- * ──────────────────────────────────────────────────────────────────────────── */
-
 interface ManagersCardListProps {
   managers: Manager[];
-  total: number;
+  page?: number;
+  pageSize?: number;
+  totalCount?: number;
+  onPageChange?: (page: number) => void;
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * ManagersCardList Component
- * ──────────────────────────────────────────────────────────────────────────── */
-
-/**
- * Mobile card list for displaying managers on small screens (< md).
- *
- * Each card shows:
- * - Profile avatar with status indicator
- * - Name, role chip, and status badge
- * - Contact info (email, skype, phone)
- * - Settings action button
- *
- * @param managers - Array of manager records to display
- * @param total - Total count for pagination display
- */
-export function ManagersCardList({ managers, total }: Readonly<ManagersCardListProps>) {
+export function ManagersCardList({
+  managers,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
+}: Readonly<ManagersCardListProps>) {
   const t = useTranslations("dashboard.managersDirectory");
+
+  const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
 
   if (managers.length === 0) {
     return (
@@ -141,12 +94,10 @@ export function ManagersCardList({ managers, total }: Readonly<ManagersCardListP
         const isStaff = manager.role === "staff";
         return (
           <StyledManagerCard key={manager.id}>
-            {/* Card actions (top-right) */}
             <StyledCardIconButton size="small" aria-label={t("actions.options")}>
               <SettingsOutlined fontSize="small" />
             </StyledCardIconButton>
 
-            {/* Profile section: Avatar + Name + Badges */}
             <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", mb: 3 }}>
               <Box sx={{ position: "relative" }}>
                 <StyledProfileAvatar src={manager.avatarUrl} alt={manager.name} />
@@ -171,7 +122,6 @@ export function ManagersCardList({ managers, total }: Readonly<ManagersCardListP
               </Box>
             </Stack>
 
-            {/* Contact information rows */}
             <Stack spacing={1.5}>
               <StyledContactItemBox direction="row" spacing={1.5}>
                 <MailOutlined fontSize="small" sx={theme => ({ color: theme.palette.primaryContainer })} />
@@ -190,10 +140,15 @@ export function ManagersCardList({ managers, total }: Readonly<ManagersCardListP
         );
       })}
 
-      {/* Footer with pagination info */}
-      <StyledCardListFooter>
-        <Typography variant="bodyMd">{t("showingOf", { count: managers.length, total: total })}</Typography>
-      </StyledCardListFooter>
+      {onPageChange && totalCount !== undefined ? (
+        <PaginationControls
+          page={page}
+          pageCount={pageCount}
+          rowCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+        />
+      ) : null}
     </StyledCardListWrapper>
   );
 }

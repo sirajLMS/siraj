@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { invoices, parents, students, teachers, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { ParentCreateResult, ParentDirectoryResult, ParentEntityInput, PaginationArgs } from "@/backend/types";
+import type { PaginationArgs, ParentCreateResult, ParentEntityInput } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
 import type { DBTransaction } from "../db.types";
 

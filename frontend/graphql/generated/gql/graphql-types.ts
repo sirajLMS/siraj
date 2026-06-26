@@ -993,6 +993,14 @@ export enum ManagerAccountType {
   Manager = 'manager'
 }
 
+export type ManagerDirectoryResult = {
+  __typename?: 'ManagerDirectoryResult';
+  id: Maybe<Scalars['String']['output']>;
+  pageInfo: Maybe<PageInfo>;
+  rows: Maybe<Array<ManagerDirectoryRow>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
 export type ManagerDirectoryRow = {
   __typename?: 'ManagerDirectoryRow';
   email: Maybe<Scalars['String']['output']>;
@@ -1518,8 +1526,9 @@ export type ParentDirectory = {
   __typename?: 'ParentDirectory';
   id: Maybe<Scalars['String']['output']>;
   metrics: Maybe<ParentDirectoryMetrics>;
+  pageInfo: Maybe<PageInfo>;
   rows: Maybe<Array<ParentDirectoryRow>>;
-  totalParents: Maybe<Scalars['Int']['output']>;
+  totalCount: Maybe<Scalars['Int']['output']>;
 };
 
 export type ParentDirectoryMetrics = {
@@ -1699,7 +1708,7 @@ export type Query = {
   learningResources: Maybe<Array<LearningResourceRow>>;
   listFiles: Maybe<StorageObjectList>;
   /** Lists all staff members with administrative access. */
-  managerDirectory: Maybe<Array<ManagerDirectoryRow>>;
+  managerDirectory: Maybe<ManagerDirectoryResult>;
   me: Maybe<User>;
   notificationAlerts: Maybe<NotificationAlertsResult>;
   parentAssociatedStudents: Maybe<Array<AssociatedStudent>>;
@@ -1837,14 +1846,18 @@ export type QueryListFilesArgs = {
 };
 
 
+export type QueryManagerDirectoryArgs = {
+  paginationArgs: InputMaybe<PaginationArgs>;
+};
+
+
 export type QueryParentAssociatedStudentsArgs = {
   parentId: Scalars['String']['input'];
 };
 
 
 export type QueryParentDirectoryArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
+  paginationArgs: InputMaybe<PaginationArgs>;
   search: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -1957,8 +1970,7 @@ export type QueryTeacherDashboardArgs = {
 
 
 export type QueryTeacherDirectoryArgs = {
-  limit: InputMaybe<Scalars['Int']['input']>;
-  offset: InputMaybe<Scalars['Int']['input']>;
+  paginationArgs: InputMaybe<PaginationArgs>;
   search: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -2451,6 +2463,7 @@ export type TeacherDirectory = {
   __typename?: 'TeacherDirectory';
   id: Maybe<Scalars['String']['output']>;
   metrics: Maybe<TeacherDirectoryMetrics>;
+  pageInfo: Maybe<PageInfo>;
   rows: Maybe<Array<TeacherDirectoryRow>>;
   totalTeachers: Maybe<Scalars['Int']['output']>;
 };

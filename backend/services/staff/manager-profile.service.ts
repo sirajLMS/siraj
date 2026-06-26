@@ -1,9 +1,9 @@
-import type { ManagerDirectoryRow } from "@/backend/types";
-import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
 import type { ManagerProfileUpdateInput } from "@/backend/db/repo/staff-profile.repository";
+import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { ManagerDirectoryRow } from "@/backend/types";
 import { AppPermission, SystemPermissionGroupSlug } from "@/shared/lib/enum";
 
 export interface UpdateManagerProfileInput {

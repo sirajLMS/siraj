@@ -1159,8 +1159,9 @@ input PaginationArgs {
 type ParentDirectory {
   id: String
   metrics: ParentDirectoryMetrics
+  pageInfo: PageInfo
   rows: [ParentDirectoryRow!]
-  totalParents: Int
+  totalCount: Int
 }
 
 type ParentDirectoryMetrics {
@@ -1354,7 +1355,7 @@ type Query {
 
   """Returns the authenticated parent's complaint history with responses."""
   parentComplaints: [Complaint!]
-  parentDirectory(limit: Int = 50, offset: Int = 0, search: String): ParentDirectory
+  parentDirectory(paginationArgs: PaginationArgs, search: String): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
   parentInvoiceHistory(parentId: String!): [ParentInvoiceRow!]
   parentProfile(parentId: String!): ParentProfile
@@ -1856,6 +1857,7 @@ type TeacherDashboardScheduleRow {
 type TeacherDirectory {
   id: String
   metrics: TeacherDirectoryMetrics
+  pageInfo: PageInfo
   rows: [TeacherDirectoryRow!]
   totalTeachers: Int
 }

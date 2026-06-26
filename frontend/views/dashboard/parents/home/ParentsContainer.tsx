@@ -10,23 +10,31 @@ import {
   VerifiedUserOutlined,
 } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useCallback } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
+import { useParentsStore } from "@/frontend/stores/parentsStore";
 import { logger } from "@/frontend/utils/logger";
 import type { ParentAccountStatus } from "@/frontend/views/dashboard/parents/types/directory";
 import { ParentsView } from "./ParentsView";
 
 export function ParentsContainer() {
   const t = useTranslations("dashboard.parentsDirectory");
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchQuery, page, pageSize, setSearchQuery, setPage } = useParentsStore();
 
   const { data } = useQuery(parentDirectoryQueryDocument, {
     variables: {
       search: searchQuery || null,
-      limit: 50,
-      offset: 0,
+      paginationArgs: {
+        first: pageSize,
+        page: page + 1,
+        skip: null,
+        after: null,
+        before: null,
+        last: null,
+        maxCount: null,
+      },
     },
   });
 
@@ -138,15 +146,26 @@ export function ParentsContainer() {
     setSearchQuery(query);
   };
 
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      setPage(newPage);
+    },
+    [setPage]
+  );
+
   return (
     <RequirePermission permissions={[AppPermission.ParentViewDirectory]}>
       <ParentsView
         metrics={metrics}
         rows={rows}
         labels={labels}
+        page={page}
+        pageSize={pageSize}
+        totalCount={directory?.totalCount ?? 0}
         onAddParent={handleAddParent}
         onOpenSettings={handleOpenSettings}
         onSearch={handleSearch}
+        onPageChange={handlePageChange}
       />
     </RequirePermission>
   );

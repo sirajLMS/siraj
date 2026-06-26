@@ -24,24 +24,41 @@ export function ManagersContainer() {
   const statusFilter = useManagersDirectoryStore(state => state.statusFilter);
   const setRoleFilter = useManagersDirectoryStore(state => state.setRoleFilter);
   const setStatusFilter = useManagersDirectoryStore(state => state.setStatusFilter);
+  const page = useManagersDirectoryStore(state => state.page);
+  const pageSize = useManagersDirectoryStore(state => state.pageSize);
+  const setPage = useManagersDirectoryStore(state => state.setPage);
 
-  const { data } = useQuery(managerDirectoryQueryDocument, {});
+  const { data } = useQuery(managerDirectoryQueryDocument, {
+    variables: {
+      paginationArgs: {
+        first: pageSize,
+        page: page + 1,
+        skip: null,
+        after: null,
+        before: null,
+        last: null,
+        maxCount: null,
+      },
+    },
+  });
+
+  const rawRows = data?.managerDirectory?.rows;
 
   const rows = useMemo(() => {
-    if (!data?.managerDirectory) return [];
-    return data.managerDirectory.map(
-      (row: NonNullable<NonNullable<typeof data>["managerDirectory"]>[number], index: number) => ({
-        id: row.id ?? "",
-        name: row.name ?? "",
-        role: mapManagerRole(row.roleSlug),
-        status: mapManagerStatus(row.status),
-        email: row.email ?? "",
-        skypeId: row.skypeId ?? "",
-        phone: row.phone ?? "",
-        avatarUrl: `/demo/avatars/${String((index % 8) + 1).padStart(2, "0")}.png`,
-      })
-    );
-  }, [data]);
+    if (!rawRows) return [];
+    return rawRows.map((row, index) => ({
+      id: row.id ?? "",
+      name: row.name ?? "",
+      role: mapManagerRole(row.roleSlug),
+      status: mapManagerStatus(row.status),
+      email: row.email ?? "",
+      skypeId: row.skypeId ?? "",
+      phone: row.phone ?? "",
+      avatarUrl: `/demo/avatars/${String((index % 8) + 1).padStart(2, "0")}.png`,
+    }));
+  }, [rawRows]);
+
+  const totalCount = data?.managerDirectory?.totalCount ?? 0;
 
   const metrics = useMemo(() => {
     let totalAdmin = 0;
@@ -73,7 +90,10 @@ export function ManagersContainer() {
       <ManagersView
         managers={filteredManagers}
         metrics={metrics}
-        totalManagers={rows.length}
+        totalManagers={totalCount}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
         roleFilter={roleFilter}
         statusFilter={statusFilter}
         onRoleFilterChange={setRoleFilter}

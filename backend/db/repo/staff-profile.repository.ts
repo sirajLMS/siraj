@@ -3,7 +3,13 @@ import { db } from "@/backend/db/drizzleDb";
 import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
-import type { ManagerDirectoryResult, ManagerDirectoryRow, StaffProfileCreateResult, StaffProfileEntityInput, PaginationArgs } from "@/backend/types";
+import type {
+  ManagerDirectoryResult,
+  ManagerDirectoryRow,
+  PaginationArgs,
+  StaffProfileCreateResult,
+  StaffProfileEntityInput,
+} from "@/backend/types";
 import type { DBTransaction } from "../db.types";
 
 export interface ManagerProfileUpdateInput {

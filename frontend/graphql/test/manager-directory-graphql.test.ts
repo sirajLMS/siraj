@@ -10,19 +10,18 @@ import { testClient } from "./testClient";
 
 async function getManagers(token: string) {
   const data = await authenticatedRequest(token, "query", managerDirectoryQueryDocument);
-  const managers = data?.managerDirectory;
-  if (!managers) {
+  const result = data?.managerDirectory;
+  if (!result) {
     throw new Error("managerDirectory was not returned");
   }
-  return managers;
+  return result;
 }
 
 async function testUpdateManagerProfile(actorRole: string, phonePrefix: string, skypePrefix: string) {
   const actorToken = await loginDemoUser(actorRole);
-  const managers = await getManagers(actorToken);
+  const managerResult = await getManagers(actorToken);
 
-  // Find a Staff Default user
-  const staffDefault = managers.find(m => m.roleSlug === "staff_default");
+  const staffDefault = managerResult.rows?.find(m => m.roleSlug === "staff_default");
   if (!staffDefault) {
     throw new Error("No staff_default manager found in directory");
   }
@@ -57,12 +56,12 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
 
   test("Super Admin can query manager directory", async () => {
     const token = await loginDemoUser("super_admin");
-    const managers = await getManagers(token);
+    const managerResult = await getManagers(token);
 
-    expect(Array.isArray(managers)).toBeTrue();
-    expect(managers.length).toBeGreaterThan(0);
+    expect(Array.isArray(managerResult.rows)).toBeTrue();
+    expect(managerResult.rows?.length).toBeGreaterThan(0);
 
-    for (const manager of managers) {
+    if (!managerResult.rows) throw new Error("No rows returned");`n    for (const manager of managerResult.rows) {
       expect(manager.id).toBeDefined();
       expect(manager.staffProfileId).toBeDefined();
       expect(manager.name).toBeDefined();
@@ -75,10 +74,10 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
 
   test("Academy Admin can query manager directory", async () => {
     const token = await loginDemoUser("academy_admin");
-    const managers = await getManagers(token);
+    const managerResult = await getManagers(token);
 
-    expect(Array.isArray(managers)).toBeTrue();
-    expect(managers.length).toBeGreaterThan(0);
+    expect(Array.isArray(managerResult.rows)).toBeTrue();
+    expect(managerResult.rows?.length).toBeGreaterThan(0);
   });
 
   test("Teacher denied from manager directory", async () => {
@@ -86,6 +85,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
 
     const result = await testClient.query({
       query: managerDirectoryQueryDocument,
+      variables: { paginationArgs: null },
       errorPolicy: "all",
       context: {
         headers: {
@@ -103,10 +103,9 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
 
   test("Academy Admin denied from updating Super Admin profile", async () => {
     const superAdminToken = await loginDemoUser("super_admin");
-    const managers = await getManagers(superAdminToken);
+    const managerResult = await getManagers(superAdminToken);
 
-    // Find the Super Admin user profile
-    const superAdmin = managers.find(m => m.roleSlug === "super_admin");
+    const superAdmin = managerResult.rows?.find(m => m.roleSlug === "super_admin");
     if (!superAdmin) {
       throw new Error("No super_admin manager found in directory");
     }
@@ -165,3 +164,4 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     expect(result.error).toBeDefined();
   });
 });
+

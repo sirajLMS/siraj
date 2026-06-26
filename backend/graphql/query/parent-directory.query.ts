@@ -1,7 +1,9 @@
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ParentDirectoryService } from "@/backend/services/parent/parent-directory.service";
+import { PaginationArgs } from "@/backend/types";
 import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { PaginationArgsObject } from "../pothos/pagination.objects";
 import { ParentDirectoryPothosObject } from "../pothos/parent-directory.pothos";
 
 async function requireAuth(ctx: BaseContext): Promise<string> {
@@ -17,19 +19,26 @@ gqlSchemaBuilder.queryField("parentDirectory", t =>
     type: ParentDirectoryPothosObject,
     args: {
       search: t.arg.string(),
-      limit: t.arg.int({ defaultValue: 50 }),
-      offset: t.arg.int({ defaultValue: 0 }),
+      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return ParentDirectoryService.getParentDirectory(
-        userId,
-        args.search ?? null,
-        args.limit ?? 50,
-        args.offset ?? 0,
-        ctx.locale
-      );
+
+      let pagination: PaginationArgs | null = null;
+      if (args.paginationArgs) {
+        pagination = new PaginationArgs({
+          first: args.paginationArgs.first ?? null,
+          skip: args.paginationArgs.skip ?? null,
+          after: args.paginationArgs.after ?? null,
+          before: args.paginationArgs.before ?? null,
+          last: args.paginationArgs.last ?? null,
+          page: args.paginationArgs.page ?? null,
+          maxCount: args.paginationArgs.maxCount ?? null,
+        });
+      }
+
+      return ParentDirectoryService.getParentDirectory(userId, args.search ?? null, pagination, ctx.locale);
     },
   })
 );

@@ -47,14 +47,14 @@ describe("ParentDirectoryService Permission Gating", () => {
     const actorUserId = testUser.id;
 
     // Case 1: Lacks permission
-    const error = await ParentDirectoryService.getParentDirectory(actorUserId, null, 10, 0).catch(e => e);
+    const error = await ParentDirectoryService.getParentDirectory(actorUserId, null, null).catch(e => e);
     expect(error).toBeInstanceOf(Error);
     expect(getErrorMessage(error)).toContain("Insufficient permissions");
 
     // Case 2: Has permission
     mockPermissions.set(`${actorUserId}:${AppPermission.PARENT_VIEW_DIRECTORY}`, true);
-    const result = await ParentDirectoryService.getParentDirectory(actorUserId, null, 10, 0);
+    const result = await ParentDirectoryService.getParentDirectory(actorUserId, null, null);
     expect(result.id).toBe("parent-directory");
-    expect(result.totalParents).toBeGreaterThanOrEqual(0);
+    expect(result.totalCount).toBeGreaterThanOrEqual(0);
   });
 });

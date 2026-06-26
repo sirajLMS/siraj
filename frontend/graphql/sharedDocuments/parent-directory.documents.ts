@@ -6,8 +6,8 @@ export const parentDirectoryQueryDocument: TypedDocumentNode<
   Operations.ParentDirectoryQuery,
   Types.QueryParentDirectoryArgs
 > = gql`
-  query parentDirectory($search: String, $limit: Int, $offset: Int) {
-    parentDirectory(search: $search, limit: $limit, offset: $offset) {
+  query parentDirectory($paginationArgs: PaginationArgs, $search: String) {
+    parentDirectory(paginationArgs: $paginationArgs, search: $search) {
       id
       metrics {
         id
@@ -29,7 +29,17 @@ export const parentDirectoryQueryDocument: TypedDocumentNode<
         accountStatus
         unpaidInvoices
       }
-      totalParents
+      totalCount
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
     }
   }
 `;
