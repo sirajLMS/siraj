@@ -194,8 +194,6 @@ export const RescheduleTrackingMetricsPothosObject = RescheduleTrackingMetricsRe
 export type RescheduleTrackingInputDefinition = {
   search?: string | null;
   status?: string | null;
-  limit?: number | null;
-  offset?: number | null;
 };
 
 export const RescheduleTrackingInputPothosObject = gqlSchemaBuilder
@@ -204,10 +202,26 @@ export const RescheduleTrackingInputPothosObject = gqlSchemaBuilder
     fields: t => ({
       search: t.string(),
       status: t.string(),
-      limit: t.int(),
-      offset: t.int(),
     }),
   });
+
+export type RescheduleTrackingResultDefinition = {
+  id: string;
+  rows: RescheduleTrackingRowDefinition[];
+  totalCount: number;
+  pageInfo: PageInfo | null;
+};
+
+const RescheduleTrackingResultRef =
+  gqlSchemaBuilder.objectRef<RescheduleTrackingResultDefinition>("RescheduleTrackingResult");
+export const RescheduleTrackingResultPothosObject = RescheduleTrackingResultRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    rows: t.expose("rows", { type: [RescheduleTrackingRowRef] }),
+    totalCount: t.exposeInt("totalCount"),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
+  }),
+});
 
 // ─── Status Tracking Schedule Row ─────────────────────────────────────────────
 

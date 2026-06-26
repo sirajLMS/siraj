@@ -3,6 +3,7 @@ export { AppDataGrid, type AppDataGridProps } from "./AppDataGrid";
 export { AppDataGridLoadingOverlay } from "./AppDataGridLoadingOverlay";
 export { AppDataGridNoRowsOverlay } from "./AppDataGridNoRowsOverlay";
 export { BaseCard } from "./BaseCard";
+export { DateNavigator, type DateNavigatorProps } from "./DateNavigator";
 export { FormSuccessSnackbar } from "./FormSuccessSnackbar";
 export { MetricCard, type MetricCardVariant } from "./MetricCard";
 export { PageContainer } from "./PageContainer";

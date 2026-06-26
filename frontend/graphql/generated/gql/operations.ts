@@ -554,13 +554,6 @@ export type RescheduleClassInput = {
   scheduledStartAt: string;
 };
 
-export type RescheduleTrackingInput = {
-  limit: number | null | undefined;
-  offset: number | null | undefined;
-  search: string | null | undefined;
-  status: string | null | undefined;
-};
-
 export type ResourceUploadInput = {
   displayName: string;
   fileId: string | number;
@@ -1574,13 +1567,19 @@ export type DailyScheduleListQueryVariables = Exact<{
 
 export type DailyScheduleListQuery = DailyScheduleListQuery_Query;
 
-export type RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingRow = { id: string | null, originalClassId: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, status: string | null, dateLabel: string | null, remarks: string | null };
+export type RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingResult_rows_RescheduleTrackingRow = { id: string | null, originalClassId: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, status: string | null, dateLabel: string | null, remarks: string | null };
 
-export type RescheduleTrackingRowsQuery_Query = { rescheduleTrackingRows: Array<RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingRow> | null };
+export type RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingResult = { id: string | null, totalCount: number | null, rows: Array<RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingResult_rows_RescheduleTrackingRow> | null, pageInfo: RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingResult_pageInfo_PageInfo | null };
+
+export type RescheduleTrackingRowsQuery_Query = { rescheduleTrackingRows: RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingResult | null };
 
 
 export type RescheduleTrackingRowsQueryVariables = Exact<{
-  input: Types.RescheduleTrackingInput;
+  search: string | null | undefined;
+  status: string | null | undefined;
+  paginationArgs: Types.PaginationArgs | null | undefined;
 }>;
 
 

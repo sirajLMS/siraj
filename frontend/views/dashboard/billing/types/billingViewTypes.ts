@@ -50,6 +50,10 @@ export interface AdminBillingViewProps extends BillingCapabilityProps {
   readonly onDeleteInvoice?: (id: string) => void;
   readonly markingPaid?: boolean;
   readonly deletingInvoice?: boolean;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 export interface ParentBillingViewProps extends BillingCapabilityProps {

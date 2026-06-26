@@ -1,17 +1,8 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "@mui/icons-material";
-import { Autocomplete, Box, Button, IconButton, TextField, Tooltip } from "@mui/material";
+import { Autocomplete, Box, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { format, isValid } from "date-fns";
-import { AppDatePicker } from "@/frontend/components/ui/form/AppDatePicker";
-import { rtlFlipIconSx } from "@/frontend/utils/rtlFlipIconSx";
-import {
-  getTodayScheduleFilterDate,
-  isScheduleFilterDateToday,
-  parseScheduleFilterDate,
-  shiftScheduleFilterDate,
-} from "@/frontend/views/dashboard/dashboard/utils/scheduleFilterDate";
+import { DateNavigator } from "@/frontend/components/ui";
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 
 const StyledFiltersContainer = styled(Box)(({ theme }) => ({
@@ -24,25 +15,6 @@ const StyledFiltersContainer = styled(Box)(({ theme }) => ({
     alignItems: "flex-end",
   },
 }));
-
-const StyledDateControls = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "flex-end",
-  gap: theme.spacing(1),
-}));
-
-const StyledDateNavButton = styled(IconButton)(({ theme }) => ({
-  border: `1px solid ${theme.palette.border.light}`,
-  borderRadius: Number(theme.shape.borderRadius),
-  backgroundColor: theme.palette.surfaceContainerLowest,
-  width: 40,
-  height: 40,
-  "&.Mui-disabled": {
-    opacity: 0.5,
-  },
-}));
-
-const DATE_FILTER_FORMAT = "yyyy-MM-dd";
 
 interface ScheduleFiltersProps {
   readonly dateLabel: string;
@@ -77,59 +49,18 @@ export function ScheduleFilters({
   onDateChange,
   onTeacherChange,
 }: Readonly<ScheduleFiltersProps>) {
-  const selectedDate = parseScheduleFilterDate(dateValue);
-  const isTodaySelected = isScheduleFilterDateToday(dateValue);
-
   const selectedTeacher = teachers.find(teacher => teacher.id === teacherValue) || null;
 
   return (
     <StyledFiltersContainer>
-      <StyledDateControls>
-        <Tooltip title={previousDayLabel}>
-          <StyledDateNavButton
-            size="small"
-            aria-label={previousDayLabel}
-            onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, -1))}
-          >
-            <ChevronLeft fontSize="small" sx={rtlFlipIconSx} />
-          </StyledDateNavButton>
-        </Tooltip>
-
-        <AppDatePicker
-          label={dateLabel}
-          value={selectedDate}
-          onChange={(date: Date | null) => {
-            onDateChange(date && isValid(date) ? format(date, DATE_FILTER_FORMAT) : "");
-          }}
-          slotProps={{
-            textField: {
-              size: "small",
-              sx: { minWidth: 180 },
-              slotProps: { htmlInput: { autoComplete: "off" } },
-            },
-          }}
-        />
-
-        <Tooltip title={nextDayLabel}>
-          <StyledDateNavButton
-            size="small"
-            aria-label={nextDayLabel}
-            onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, 1))}
-          >
-            <ChevronRight fontSize="small" sx={rtlFlipIconSx} />
-          </StyledDateNavButton>
-        </Tooltip>
-
-        <Button
-          variant="text"
-          size="small"
-          disabled={isTodaySelected}
-          onClick={() => onDateChange(getTodayScheduleFilterDate())}
-          sx={{ minWidth: 64, height: 40 }}
-        >
-          {todayLabel}
-        </Button>
-      </StyledDateControls>
+      <DateNavigator
+        dateValue={dateValue}
+        todayLabel={todayLabel}
+        previousDayLabel={previousDayLabel}
+        nextDayLabel={nextDayLabel}
+        dateLabel={dateLabel}
+        onDateChange={onDateChange}
+      />
 
       <Autocomplete
         size="small"

@@ -1374,7 +1374,7 @@ type Query {
   """List all permission catalog entries."""
   permissions: [Permission!]
   rescheduleTrackingMetrics: RescheduleTrackingMetrics
-  rescheduleTrackingRows(input: RescheduleTrackingInput!): [RescheduleTrackingRow!]
+  rescheduleTrackingRows(paginationArgs: PaginationArgs, search: String, status: String): RescheduleTrackingResult
   searchFiles(
     """File type filter (optional)"""
     fileType: String
@@ -1461,8 +1461,6 @@ input RescheduleClassInput {
 }
 
 input RescheduleTrackingInput {
-  limit: Int
-  offset: Int
   search: String
   status: String
 }
@@ -1474,6 +1472,13 @@ type RescheduleTrackingMetrics {
   leave: Int
   pending: Int
   rescheduled: Int
+}
+
+type RescheduleTrackingResult {
+  id: String
+  pageInfo: PageInfo
+  rows: [RescheduleTrackingRow!]
+  totalCount: Int
 }
 
 type RescheduleTrackingRow {

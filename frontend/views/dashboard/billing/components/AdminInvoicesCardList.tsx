@@ -2,7 +2,7 @@
 
 import { Avatar, Box, Button, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { StatusBadge } from "@/frontend/components/ui";
+import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
 import type { AdminInvoiceRow, AdminInvoiceStatus } from "../types/billingViewTypes";
 
 interface AdminInvoicesCardListLabels {
@@ -16,6 +16,10 @@ interface AdminInvoicesCardListProps {
   readonly labels: AdminInvoicesCardListLabels;
   readonly canManage: boolean;
   readonly onMarkAsPaid: (id: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 // Invoice card with outline border and surface background for mobile card list
@@ -44,7 +48,18 @@ const StyledDateTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export function AdminInvoicesCardList({ rows, labels, canManage, onMarkAsPaid }: Readonly<AdminInvoicesCardListProps>) {
+export function AdminInvoicesCardList({
+  rows,
+  labels,
+  canManage,
+  onMarkAsPaid,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
+}: Readonly<AdminInvoicesCardListProps>) {
+  const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       {rows.map(row => {
@@ -88,6 +103,15 @@ export function AdminInvoicesCardList({ rows, labels, canManage, onMarkAsPaid }:
           </StyledInvoiceCard>
         );
       })}
+      {onPageChange && totalCount !== undefined ? (
+        <PaginationControls
+          page={page}
+          pageCount={pageCount}
+          rowCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+        />
+      ) : null}
     </Box>
   );
 }

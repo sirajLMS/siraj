@@ -16,6 +16,7 @@ import {
   rescheduleTrackingMetricsQueryDocument,
   rescheduleTrackingRowsQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { useRescheduleTrackingStore } from "@/frontend/stores/rescheduleTrackingStore";
 import { logger } from "@/frontend/utils/logger";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
@@ -143,19 +144,24 @@ export function RescheduleTrackingContainer() {
   const t = useTranslations("dashboard.rescheduleTracking");
   const locale = useLocale();
   const router = useRouter();
+  const { page, pageSize, setPage } = useRescheduleTrackingStore();
 
-  // 1. Fetch real queries from the backend
   const {
     data: rowsData,
     loading: rowsLoading,
     error: rowsError,
   } = useQuery(rescheduleTrackingRowsQueryDocument, {
     variables: {
-      input: {
-        limit: 100,
-        offset: 0,
-        status: "",
-        search: "",
+      search: null,
+      status: null,
+      paginationArgs: {
+        first: pageSize,
+        page: page + 1,
+        skip: null,
+        after: null,
+        before: null,
+        last: null,
+        maxCount: null,
       },
     },
   });
@@ -222,19 +228,25 @@ export function RescheduleTrackingContainer() {
   const metrics = buildTrackingMetrics(metricsData?.rescheduleTrackingMetrics);
 
   // Map database rows to TrackingRow format
-  const rows = buildTrackingRows(rowsData?.rescheduleTrackingRows ?? [], locale);
+  const rows = buildTrackingRows(rowsData?.rescheduleTrackingRows?.rows ?? [], locale);
+
+  const totalCount = rowsData?.rescheduleTrackingRows?.totalCount ?? 0;
 
   return (
     <RequirePermission permissions={[AppPermission.SessionReschedule]}>
       <RescheduleTrackingView
         metrics={metrics}
         rows={rows}
-        totalItems={rows.length}
+        totalItems={totalCount}
         labels={labels}
         onApprove={handleApprove}
         onReject={handleReject}
         onView={handleView}
         onExport={handleExport}
+        page={page}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        onPageChange={setPage}
       />
     </RequirePermission>
   );

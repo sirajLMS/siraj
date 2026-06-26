@@ -7,6 +7,7 @@ import type {
   TeacherScheduleRow,
 } from "@/frontend/stores/teacherDashboardTypes";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { getTodayScheduleFilterDate } from "@/frontend/utils/scheduleFilterDate";
 import { TeacherDashboardActiveView } from "./TeacherDashboardActiveView";
 import { TeacherDashboardView } from "./TeacherDashboardView";
 import { buildTeacherDashboardLabels } from "./utils/buildTeacherDashboardLabels";
@@ -242,6 +243,8 @@ export function MockTeacherDashboardContainer({ mode = "standard" }: MockTeacher
         onStartSession={id => alert(`Start session ${id}`)}
         onMarkAbsent={id => alert(`Mark absent ${id}`)}
         onRequestLeave={id => alert(`Request leave ${id}`)}
+        dateValue={getTodayScheduleFilterDate()}
+        onDateChange={() => {}}
       />
     );
   }
@@ -264,6 +267,8 @@ export function MockTeacherDashboardContainer({ mode = "standard" }: MockTeacher
       onDownloadHandbook={() => alert("Download handbook clicked")}
       onContactCoordinator={() => alert("Contact coordinator clicked")}
       onSupport={() => alert("Live support clicked")}
+      dateValue={getTodayScheduleFilterDate()}
+      onDateChange={() => {}}
     />
   );
 }

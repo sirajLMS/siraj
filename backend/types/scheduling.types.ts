@@ -5,6 +5,7 @@ import type {
   recurringSchedules,
   timezones,
 } from "@/backend/db/schema";
+import type { PageInfo } from "./pagination.types";
 
 export type RecurringScheduleEntity = typeof recurringSchedules.$inferSelect;
 export type RecurringScheduleInsertInput = typeof recurringSchedules.$inferInsert;
@@ -39,6 +40,10 @@ export type RescheduleTrackingRow = {
 export type RescheduleTrackingInput = {
   search?: string | null;
   status?: string | null;
-  limit?: number | null;
-  offset?: number | null;
+};
+
+export type RescheduleTrackingPaginatedResult = {
+  rows: RescheduleTrackingRow[];
+  totalCount: number;
+  pageInfo: PageInfo | null;
 };

@@ -3,7 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
+import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import { ClassSessionActionButton } from "./ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "./types";
@@ -136,7 +136,7 @@ export function AcademicScheduleDataGrid({
   }, [labels, onJoin, onLeave]);
 
   const paginationModel: GridPaginationModel = {
-    page: currentPage - 1,
+    page: currentPage,
     pageSize,
   };
 
@@ -149,9 +149,10 @@ export function AcademicScheduleDataGrid({
       paginationMode="server"
       paginationModel={paginationModel}
       onPaginationModelChange={model => {
-        onPageChange(model.page + 1);
+        onPageChange(model.page);
       }}
       pageSizeOptions={[pageSize]}
+      slots={{ pagination: GridPagination }}
       autoHeight
       rowHeight={100}
       ariaLabel="academic-schedule-table"

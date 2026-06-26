@@ -56,6 +56,7 @@ interface ScheduleAlertsViewProps {
   readonly onJoin: (id: string) => void;
   readonly onLeave: (id: string) => void;
   readonly onPageChange: (page: number) => void;
+  readonly loading?: boolean;
   readonly onDownloadReport: () => void;
   readonly onFilter: () => void;
   readonly onExport: () => void;
@@ -115,18 +116,26 @@ const MetricsSection = ({
 const MobileAlertsLayout = ({
   labels,
   classes,
+  totalCount,
+  currentPage,
+  pageSize,
   onFilter,
   onExport,
   onJoin,
   onLeave,
+  onPageChange,
   cardListLabels,
 }: {
   labels: ScheduleAlertsLabels;
   classes: readonly AcademicClassRow[];
+  totalCount: number;
+  currentPage: number;
+  pageSize: number;
   onFilter: () => void;
   onExport: () => void;
   onJoin: (id: string) => void;
   onLeave: (id: string) => void;
+  onPageChange: (page: number) => void;
   cardListLabels: CardListLabels;
 }) => {
   return (
@@ -166,7 +175,16 @@ const MobileAlertsLayout = ({
           </IconButton>
         </Box>
       </Box>
-      <AcademicScheduleCardList rows={classes} labels={cardListLabels} onJoin={onJoin} onLeave={onLeave} />
+      <AcademicScheduleCardList
+        rows={classes}
+        totalCount={totalCount}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        labels={cardListLabels}
+        onJoin={onJoin}
+        onLeave={onLeave}
+        onPageChange={onPageChange}
+      />
     </Box>
   );
 };
@@ -237,6 +255,7 @@ export function ScheduleAlertsView({
   onJoin,
   onLeave,
   onPageChange,
+  loading = false,
   onDownloadReport,
   onFilter,
   onExport,
@@ -282,14 +301,30 @@ export function ScheduleAlertsView({
         onDownloadReport={onDownloadReport}
       />
 
-      {isMobile ? (
+      {loading ? (
+        <Box
+          sx={theme => ({
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            py: 8,
+            color: theme.palette.text.secondary,
+          })}
+        >
+          <Typography variant="bodyLg">Loading...</Typography>
+        </Box>
+      ) : isMobile ? (
         <MobileAlertsLayout
           labels={labels}
           classes={classes}
+          totalCount={totalClasses}
+          currentPage={currentPage}
+          pageSize={pageSize}
           onFilter={onFilter}
           onExport={onExport}
           onJoin={onJoin}
           onLeave={onLeave}
+          onPageChange={onPageChange}
           cardListLabels={cardListLabels}
         />
       ) : (

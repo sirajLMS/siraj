@@ -209,6 +209,10 @@ export function MockRescheduleTrackingContainer() {
       onReject={() => {}}
       onView={() => {}}
       onExport={() => {}}
+      page={pagination.page}
+      pageSize={pagination.pageSize}
+      totalCount={pagination.totalItems}
+      onPageChange={() => {}}
     />
   );
 }

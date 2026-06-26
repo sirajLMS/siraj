@@ -3,7 +3,7 @@
 import { AddOutlined, CalendarMonthOutlined } from "@mui/icons-material";
 import { Alert, Box, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { DateNavigator, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   StudentProgressFeedItem,
@@ -15,7 +15,6 @@ import { StudentProgressFeed } from "./components/StudentProgressFeed";
 import { TeacherActiveMetricsRow } from "./components/TeacherActiveMetricsRow";
 import { TeacherActiveScheduleDataGrid } from "./components/TeacherActiveScheduleDataGrid";
 import { TeacherActiveSessionControls } from "./components/TeacherActiveSessionControls";
-import { TeacherDateControls } from "./components/TeacherDateControls";
 import type { TeacherDashboardLabels } from "./types/teacherDashboardLabels";
 
 interface TeacherDashboardActiveViewProps {
@@ -185,7 +184,7 @@ export function TeacherDashboardActiveView({
         </Box>
 
         <Box sx={{ mb: 3 }}>
-          <TeacherDateControls
+          <DateNavigator
             dateValue={dateValue}
             todayLabel={labels.dateFilter.today}
             previousDayLabel={labels.dateFilter.previousDay}
@@ -246,7 +245,7 @@ export function TeacherDashboardActiveView({
       />
 
       <Box sx={{ mb: 3 }}>
-        <TeacherDateControls
+        <DateNavigator
           dateValue={dateValue}
           todayLabel={labels.dateFilter.today}
           previousDayLabel={labels.dateFilter.previousDay}

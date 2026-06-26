@@ -1,4 +1,5 @@
 import type { currencyExchangeRates, invoices, payments } from "@/backend/db/schema";
+import type { PageInfo } from "./pagination.types";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
 export type InvoiceInsertInput = typeof invoices.$inferInsert;
@@ -25,4 +26,23 @@ export interface UnpaidInvoicesSummaryResult {
   totalOverdueInvoices: number;
   totalOverdueAmount: string;
   items: UnpaidInvoiceSummaryItem[];
+}
+
+export interface InvoiceHistoryPaginatedResult {
+  readonly id: string;
+  readonly rows: InvoiceHistoryRow[];
+  readonly totalCount: number;
+  readonly pageInfo: PageInfo | null;
+}
+
+export interface InvoiceHistoryRow {
+  readonly id: string;
+  readonly issueDate: string;
+  readonly dueDate: string;
+  readonly paidDate: string | null;
+  readonly amount: string;
+  readonly currency: string;
+  readonly status: string;
+  readonly invoiceType: string;
+  readonly studentId: string | null;
 }

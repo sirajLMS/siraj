@@ -37,6 +37,10 @@ export function AdminBillingDesktopView({
   onMarkAsPaid,
   onSendReminder,
   onManualInvoice,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
 }: Readonly<AdminBillingViewProps>) {
   return (
     <PageContainer>
@@ -70,6 +74,10 @@ export function AdminBillingDesktopView({
           canManage={canManage}
           onMarkAsPaid={onMarkAsPaid}
           labels={getAdminInvoiceGridLabels(labels)}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
         />
       </SectionPanel>
 

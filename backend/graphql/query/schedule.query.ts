@@ -3,14 +3,14 @@ import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
 import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { PaginationArgsObject } from "../pothos/pagination.objects";
 import {
   AdminDashboardScheduleInputPothosObject,
   AdminDashboardScheduleResultPothosObject,
   DailyScheduleListPothosObject,
   DailyScheduleMetricsPothosObject,
-  RescheduleTrackingInputPothosObject,
   RescheduleTrackingMetricsPothosObject,
-  RescheduleTrackingRowPothosObject,
+  RescheduleTrackingResultPothosObject,
 } from "../pothos/schedule.pothos";
 import { WeeklyScheduleGridPothosObject, WeeklyWorkloadMetricsPothosObject } from "../pothos/weekly-schedule.pothos";
 
@@ -107,9 +107,11 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
 
 gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
   t.field({
-    type: [RescheduleTrackingRowPothosObject],
+    type: RescheduleTrackingResultPothosObject,
     args: {
-      input: t.arg({ type: RescheduleTrackingInputPothosObject, required: true }),
+      search: t.arg.string({ required: false }),
+      status: t.arg.string({ required: false }),
+      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
@@ -117,7 +119,31 @@ gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
         const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
         throw new Error(tFunc("unauthorized"));
       }
-      return ScheduleService.getRescheduleTracking(ctx.user.id, args.input, ctx.locale);
+
+      let pagination: PaginationArgs | null = null;
+      if (args.paginationArgs) {
+        pagination = new PaginationArgs({
+          first: args.paginationArgs.first ?? null,
+          skip: args.paginationArgs.skip ?? null,
+          after: args.paginationArgs.after ?? null,
+          before: args.paginationArgs.before ?? null,
+          last: args.paginationArgs.last ?? null,
+          page: args.paginationArgs.page ?? null,
+          maxCount: args.paginationArgs.maxCount ?? null,
+        });
+      }
+
+      const result = await ScheduleService.getRescheduleTracking(
+        ctx.user.id,
+        { search: args.search ?? null, status: args.status ?? null },
+        pagination,
+        ctx.locale
+      );
+
+      return {
+        id: `reschedule-tracking-${args.search || ""}-${args.status || ""}`,
+        ...result,
+      };
     },
   })
 );

@@ -159,6 +159,49 @@ Table cell actions (approve/reject, join session) may use compact `Button` with 
 
 ---
 
+## Date navigation
+
+Use shared [`DateNavigator`](src/components/ui/DateNavigator.tsx) from `@/frontend/components/ui`:
+
+```tsx
+<DateNavigator
+  dateValue={filterDate}
+  todayLabel={labels.dateFilter.today}
+  previousDayLabel={labels.dateFilter.previousDay}
+  nextDayLabel={labels.dateFilter.nextDay}
+  dateLabel={labels.dateFilter.dateLabel}
+  onDateChange={setFilterDate}
+/>
+```
+
+### Props
+
+| Prop                | Type       | Use case                                        |
+| ------------------- | ---------- | ----------------------------------------------- |
+| `dateValue`         | `string`   | Current date in `yyyy-MM-dd` format             |
+| `todayLabel`        | `string`   | Label for the "Today" quick-jump button         |
+| `previousDayLabel`  | `string`   | Tooltip for the previous-day chevron button      |
+| `nextDayLabel`      | `string`   | Tooltip for the next-day chevron button         |
+| `dateLabel`         | `string?`  | Label displayed on the `AppDatePicker` field    |
+| `onDateChange`      | `function` | Callback with new `yyyy-MM-dd` string            |
+
+### Date utilities
+
+Date shift/parse helpers live in `@/frontend/utils/scheduleFilterDate`:
+
+- `shiftScheduleFilterDate(date, offset)` — add/subtract days
+- `getTodayScheduleFilterDate()` — today as `yyyy-MM-dd`
+- `isScheduleFilterDateToday(date)` — check if a date is today
+- `parseScheduleFilterDate(date)` — parse `yyyy-MM-dd` to `Date | null`
+
+### Usage pattern
+
+Wire the `DateNavigator` to a Zustand store `filterDate` field so a single value drives both the navigator UI and the GraphQL query variables (same pattern as `AdminDashboardContainer`).
+
+**Do not** hand-build date picker + prev/next button rows. Always use `DateNavigator`.
+
+---
+
 ## Forms
 
 Use shared form field styles from `@/frontend/components/ui/form`:

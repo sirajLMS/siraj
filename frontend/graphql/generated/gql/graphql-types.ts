@@ -1727,7 +1727,7 @@ export type Query = {
   /** List all permission catalog entries. */
   permissions: Maybe<Array<Permission>>;
   rescheduleTrackingMetrics: Maybe<RescheduleTrackingMetrics>;
-  rescheduleTrackingRows: Maybe<Array<RescheduleTrackingRow>>;
+  rescheduleTrackingRows: Maybe<RescheduleTrackingResult>;
   searchFiles: Maybe<StorageObjectList>;
   /** Search suggestions for duplicate marking autocomplete. Requires suggestions.review permission. */
   searchSuggestions: Maybe<Array<SuggestionSearchResult>>;
@@ -1888,7 +1888,9 @@ export type QueryPermissionGroupArgs = {
 
 
 export type QueryRescheduleTrackingRowsArgs = {
-  input: RescheduleTrackingInput;
+  paginationArgs: InputMaybe<PaginationArgs>;
+  search: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -2050,8 +2052,6 @@ export type RescheduleClassInput = {
 };
 
 export type RescheduleTrackingInput = {
-  limit: InputMaybe<Scalars['Int']['input']>;
-  offset: InputMaybe<Scalars['Int']['input']>;
   search: InputMaybe<Scalars['String']['input']>;
   status: InputMaybe<Scalars['String']['input']>;
 };
@@ -2064,6 +2064,14 @@ export type RescheduleTrackingMetrics = {
   leave: Maybe<Scalars['Int']['output']>;
   pending: Maybe<Scalars['Int']['output']>;
   rescheduled: Maybe<Scalars['Int']['output']>;
+};
+
+export type RescheduleTrackingResult = {
+  __typename?: 'RescheduleTrackingResult';
+  id: Maybe<Scalars['String']['output']>;
+  pageInfo: Maybe<PageInfo>;
+  rows: Maybe<Array<RescheduleTrackingRow>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
 };
 
 export type RescheduleTrackingRow = {

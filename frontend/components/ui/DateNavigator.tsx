@@ -11,7 +11,7 @@ import {
   isScheduleFilterDateToday,
   parseScheduleFilterDate,
   shiftScheduleFilterDate,
-} from "@/frontend/views/dashboard/dashboard/utils/scheduleFilterDate";
+} from "@/frontend/utils/scheduleFilterDate";
 
 const StyledDateControls = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -32,7 +32,7 @@ const StyledDateNavButton = styled(IconButton)(({ theme }) => ({
 
 const DATE_FILTER_FORMAT = "yyyy-MM-dd";
 
-interface TeacherDateControlsProps {
+export interface DateNavigatorProps {
   readonly dateValue: string;
   readonly todayLabel: string;
   readonly previousDayLabel: string;
@@ -41,14 +41,14 @@ interface TeacherDateControlsProps {
   readonly onDateChange: (date: string) => void;
 }
 
-export function TeacherDateControls({
+export function DateNavigator({
   dateValue,
   todayLabel,
   previousDayLabel,
   nextDayLabel,
   dateLabel,
   onDateChange,
-}: Readonly<TeacherDateControlsProps>) {
+}: Readonly<DateNavigatorProps>) {
   const selectedDate = parseScheduleFilterDate(dateValue);
   const isTodaySelected = isScheduleFilterDateToday(dateValue);
 

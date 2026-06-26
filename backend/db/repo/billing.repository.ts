@@ -1,6 +1,7 @@
-import { and, desc, eq, isNull, type SQL, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNull, type SQL, sql } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
+import { queryWithPagination } from "@/backend/db/query.extensions";
 import {
   currencyExchangeAuditLogs,
   currencyExchangeRates,
@@ -11,7 +12,9 @@ import {
   users,
 } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
+import type { PageInfo, PaginationArgs } from "@/backend/types";
 import type * as Types from "@/backend/types";
+import { PaginationUtils } from "@/backend/utils";
 import type { DBTransaction } from "../db.types";
 
 type CurrencyExchangeRateUpdateInput = Omit<Types.CurrencyExchangeRateInsertInput, "id" | "createdAt" | "updatedAt">;
@@ -365,13 +368,22 @@ export namespace BillingRepository {
     studentId: string | null;
   };
 
+  export type ParentInvoiceHistoryResult = {
+    rows: ParentInvoiceHistoryRow[];
+    totalCount: number;
+    pageInfo: PageInfo | null;
+  };
+
   export const getInvoicesForParent = async (
     parentId: string,
+    pagination: PaginationArgs | null = null,
     tx?: DBTransaction
-  ): Promise<ParentInvoiceHistoryRow[]> => {
+  ): Promise<ParentInvoiceHistoryResult> => {
     const queryDb = tx ?? db;
 
-    const results = await queryDb
+    const whereCondition = and(eq(invoices.parentId, parentId), isNull(invoices.deletedAt));
+
+    let rowsQuery = queryDb
       .select({
         id: invoices.id,
         issueDate: invoices.issueDate,
@@ -384,10 +396,17 @@ export namespace BillingRepository {
         studentId: invoices.studentId,
       })
       .from(invoices)
-      .where(and(eq(invoices.parentId, parentId), isNull(invoices.deletedAt)))
-      .orderBy(desc(invoices.issueDate));
+      .where(whereCondition)
+      .orderBy(desc(invoices.issueDate))
+      .$dynamic();
 
-    return results.map(r => ({
+    if (pagination) {
+      rowsQuery = queryWithPagination(rowsQuery, pagination);
+    }
+
+    const results = await rowsQuery;
+
+    const rows: ParentInvoiceHistoryRow[] = results.map(r => ({
       id: r.id,
       issueDate: r.issueDate,
       dueDate: r.dueDate,
@@ -398,6 +417,16 @@ export namespace BillingRepository {
       invoiceType: r.invoiceType,
       studentId: r.studentId ?? null,
     }));
+
+    const [totalCountRow] = await queryDb
+      .select({ count: count() })
+      .from(invoices)
+      .where(whereCondition);
+
+    const total = totalCountRow?.count ?? 0;
+    const pageInfo = PaginationUtils.buildPageInfoFromArgs(pagination, rows.length, total);
+
+    return { rows, totalCount: total, pageInfo };
   };
 
   export const deleteInvoice = async (

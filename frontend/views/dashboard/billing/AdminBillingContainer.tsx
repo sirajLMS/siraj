@@ -9,6 +9,7 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { deleteInvoiceMutationDocument, markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { parentInvoiceHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
+import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { AdminBillingView } from "./AdminBillingView";
 import type { AdminBillingSummary, AdminInvoiceRow, AdminInvoiceStatus } from "./types/billingViewTypes";
 import { filterAdminInvoices } from "./utils/billingFilters";
@@ -50,6 +51,10 @@ export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) 
   const locale = useLocale();
   const labels = buildBillingLabels(t);
 
+  const page = useAdminBillingStore(state => state.page);
+  const pageSize = useAdminBillingStore(state => state.pageSize);
+  const setPage = useAdminBillingStore(state => state.setPage);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -62,7 +67,18 @@ export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) 
   };
 
   const { data: invoicesData, refetch: refetchInvoices } = useQuery(parentInvoiceHistoryQueryDocument, {
-    variables: { parentId: parentId ?? "" },
+    variables: {
+      parentId: parentId ?? "",
+      paginationArgs: {
+        first: pageSize,
+        page: page + 1,
+        skip: null,
+        after: null,
+        before: null,
+        last: null,
+        maxCount: null,
+      },
+    },
     skip: !parentId,
   });
 
@@ -88,7 +104,7 @@ export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) 
 
   const invoices: AdminInvoiceRow[] = useMemo(
     () =>
-      (invoicesData?.parentInvoiceHistory ?? []).map(inv => ({
+      (invoicesData?.parentInvoiceHistory?.rows ?? []).map(inv => ({
         id: inv.id ?? "",
         studentName: inv.studentId ?? "Student",
         studentInitials: deriveInitials(inv.studentId),
@@ -100,6 +116,8 @@ export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) 
   );
 
   const filteredInvoices = useMemo(() => filterAdminInvoices(invoices, searchQuery), [invoices, searchQuery]);
+
+  const totalCount = invoicesData?.parentInvoiceHistory?.totalCount ?? 0;
 
   const summary: AdminBillingSummary = useMemo(
     () => ({
@@ -153,6 +171,10 @@ export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) 
         onDeleteInvoice={handleDeleteInvoice}
         markingPaid={markingPaid}
         deletingInvoice={deletingInvoice}
+        page={page}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        onPageChange={setPage}
       />
       <Snackbar
         open={snackbarOpen}

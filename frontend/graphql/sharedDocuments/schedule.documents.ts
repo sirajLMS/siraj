@@ -107,20 +107,34 @@ export const rescheduleTrackingRowsQueryDocument: TypedDocumentNode<
   Operations.RescheduleTrackingRowsQuery,
   Types.QueryRescheduleTrackingRowsArgs
 > = gql`
-  query rescheduleTrackingRows($input: RescheduleTrackingInput!) {
-    rescheduleTrackingRows(input: $input) {
+  query rescheduleTrackingRows($search: String, $status: String, $paginationArgs: PaginationArgs) {
+    rescheduleTrackingRows(search: $search, status: $status, paginationArgs: $paginationArgs) {
       id
-      originalClassId
-      teacherId
-      teacherName
-      teacherAvatarUrl
-      studentId
-      studentName
-      scheduledStartAt
-      scheduledEndAt
-      status
-      dateLabel
-      remarks
+      totalCount
+      rows {
+        id
+        originalClassId
+        teacherId
+        teacherName
+        teacherAvatarUrl
+        studentId
+        studentName
+        scheduledStartAt
+        scheduledEndAt
+        status
+        dateLabel
+        remarks
+      }
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
     }
   }
 `;

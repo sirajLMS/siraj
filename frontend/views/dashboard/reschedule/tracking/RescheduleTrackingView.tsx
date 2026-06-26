@@ -34,12 +34,16 @@ interface RescheduleTrackingViewLabels {
 interface RescheduleTrackingViewProps {
   readonly metrics: readonly MetricItem[];
   readonly rows: readonly TrackingRow[];
-  readonly totalItems: number; //NoSonar
+  readonly totalItems: number;
   readonly labels: RescheduleTrackingViewLabels;
   readonly onApprove: (id: string) => void;
   readonly onReject: (id: string) => void;
   readonly onView: (id: string) => void;
   readonly onExport: () => void;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+  readonly onPageChange: (page: number) => void;
 }
 
 export function RescheduleTrackingView({
@@ -50,6 +54,10 @@ export function RescheduleTrackingView({
   onReject,
   onView,
   onExport,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
 }: RescheduleTrackingViewProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -96,7 +104,15 @@ export function RescheduleTrackingView({
       >
         {isMobile ? (
           <Box sx={{ p: 2 }}>
-            <RescheduleTrackingCardList rows={rows} labels={tableLabels} onView={onView} />
+            <RescheduleTrackingCardList
+              rows={rows}
+              labels={tableLabels}
+              onView={onView}
+              page={page}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              onPageChange={onPageChange}
+            />
           </Box>
         ) : (
           <RescheduleTrackingDataGrid
@@ -106,6 +122,10 @@ export function RescheduleTrackingView({
             onApprove={onApprove}
             onReject={onReject}
             onView={onView}
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            onPageChange={onPageChange}
           />
         )}
       </SectionPanel>

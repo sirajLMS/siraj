@@ -11,7 +11,7 @@ import {
 } from "@mui/icons-material";
 import { Box, Card, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { StatusBadge } from "@/frontend/components/ui";
+import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
 import type { TrackingRow } from "./types";
 
 interface RescheduleTrackingCardListProps {
@@ -25,6 +25,10 @@ interface RescheduleTrackingCardListProps {
     readonly noEntries: string;
   };
   readonly onView: (id: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 const CardHeader = ({ row, onView }: { row: TrackingRow; onView: (id: string) => void }) => {
@@ -206,7 +210,15 @@ function TrackingCard({
   );
 }
 
-export function RescheduleTrackingCardList({ rows, labels, onView }: RescheduleTrackingCardListProps) {
+export function RescheduleTrackingCardList({
+  rows,
+  labels,
+  onView,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
+}: RescheduleTrackingCardListProps) {
   if (rows.length === 0) {
     return (
       <Box sx={{ textAlign: "center", py: 6 }}>
@@ -222,6 +234,15 @@ export function RescheduleTrackingCardList({ rows, labels, onView }: RescheduleT
       {rows.map(row => (
         <TrackingCard key={row.id} row={row} labels={labels} onView={onView} />
       ))}
+      {totalCount !== undefined && onPageChange !== undefined && totalCount > 0 && (
+        <PaginationControls
+          page={page ?? 0}
+          pageCount={Math.ceil(totalCount / (pageSize ?? 10))}
+          rowCount={totalCount}
+          pageSize={pageSize ?? 10}
+          onPageChange={onPageChange}
+        />
+      )}
     </Box>
   );
 }

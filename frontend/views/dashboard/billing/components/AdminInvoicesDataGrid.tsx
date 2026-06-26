@@ -5,7 +5,7 @@ import { Avatar, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, StatusBadge } from "@/frontend/components/ui";
 import type { AdminInvoiceRow, AdminInvoiceStatus } from "../types/billingViewTypes";
 
 export interface AdminInvoicesDataGridLabels {
@@ -26,6 +26,10 @@ interface AdminInvoicesDataGridProps {
   readonly labels: AdminInvoicesDataGridLabels;
   readonly canManage: boolean;
   readonly onMarkAsPaid: (id: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 // Invoice ID text styled with primary color and bold weight for emphasis
@@ -92,7 +96,16 @@ function renderInvoiceAction(
   );
 }
 
-export function AdminInvoicesDataGrid({ rows, labels, canManage, onMarkAsPaid }: Readonly<AdminInvoicesDataGridProps>) {
+export function AdminInvoicesDataGrid({
+  rows,
+  labels,
+  canManage,
+  onMarkAsPaid,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
+}: Readonly<AdminInvoicesDataGridProps>) {
   const columns = useMemo<GridColDef<AdminInvoiceRow>[]>(
     () => [
       {
@@ -159,5 +172,26 @@ export function AdminInvoicesDataGrid({ rows, labels, canManage, onMarkAsPaid }:
     [canManage, labels, onMarkAsPaid]
   );
 
-  return <AppDataGrid rows={rows} columns={columns} getRowId={row => row.id} emptyMessage={labels.noEntries} />;
+  const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
+
+  return (
+    <AppDataGrid
+      rows={rows}
+      columns={columns}
+      getRowId={row => row.id}
+      emptyMessage={labels.noEntries}
+      {...(isServerPagination
+        ? {
+            paginationMode: "server" as const,
+            rowCount: totalCount,
+            paginationModel: { page, pageSize },
+            onPaginationModelChange: model => {
+              onPageChange(model.page);
+            },
+            pageSizeOptions: [pageSize],
+            slots: { pagination: GridPagination },
+          }
+        : {})}
+    />
+  );
 }

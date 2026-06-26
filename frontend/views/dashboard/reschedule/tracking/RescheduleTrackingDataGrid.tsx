@@ -11,7 +11,7 @@ import { Avatar, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
+import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { TrackingRow } from "./types";
 
@@ -42,6 +42,10 @@ interface RescheduleTrackingDataGridProps {
   readonly onApprove: (id: string) => void;
   readonly onReject: (id: string) => void;
   readonly onView: (id: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 export function RescheduleTrackingDataGrid({
@@ -51,6 +55,10 @@ export function RescheduleTrackingDataGrid({
   onApprove,
   onReject,
   onView,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
 }: RescheduleTrackingDataGridProps) {
   const columns = useMemo<GridColDef<TrackingRow>[]>(
     () => [
@@ -259,6 +267,8 @@ export function RescheduleTrackingDataGrid({
     [headers, labels, onApprove, onReject, onView]
   );
 
+  const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
+
   return (
     <AppDataGrid<TrackingRow>
       rows={rows}
@@ -268,6 +278,18 @@ export function RescheduleTrackingDataGrid({
       ariaLabel="reschedule-tracking-table"
       emptyMessage={labels.noEntries}
       rowHeight={80}
+      {...(isServerPagination
+        ? {
+            paginationMode: "server" as const,
+            rowCount: totalCount,
+            paginationModel: { page, pageSize },
+            onPaginationModelChange: model => {
+              onPageChange(model.page);
+            },
+            pageSizeOptions: [pageSize],
+            slots: { pagination: GridPagination },
+          }
+        : {})}
     />
   );
 }

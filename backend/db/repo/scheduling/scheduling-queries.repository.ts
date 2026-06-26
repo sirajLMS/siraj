@@ -1,6 +1,7 @@
 import { and, eq, gte, ilike, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
+import { queryWithPagination } from "@/backend/db/query.extensions";
 import {
   classInstances,
   classStatusEvents,
@@ -278,9 +279,10 @@ export const getTeacherProgressFeed = async (teacherId: string, date: Date, tx?:
 
 export const getRescheduleTrackingRows = async (
   input: Types.RescheduleTrackingInput,
+  pagination: Types.PaginationArgs | null = null,
   tx?: DBTransaction
-): Promise<Types.RescheduleTrackingRow[]> => {
-  const runner = async (t: DBTransaction): Promise<Types.RescheduleTrackingRow[]> => {
+): Promise<Types.RescheduleTrackingPaginatedResult> => {
+  const runner = async (t: DBTransaction): Promise<Types.RescheduleTrackingPaginatedResult> => {
     const originalClass = alias(classInstances, "original_class");
     const baseConditions = and(isNull(classInstances.deletedAt), sql`${classInstances.originalClassId} IS NOT NULL`);
 
@@ -319,19 +321,26 @@ export const getRescheduleTrackingRows = async (
       .leftJoin(teachers, eq(classInstances.teacherId, teachers.id))
       .leftJoin(users, eq(teachers.userId, users.id))
       .leftJoin(students, eq(classInstances.studentId, students.id))
+      .where(conditions)
+      .orderBy(sql`${classInstances.scheduledStartAt} DESC`)
+      .$dynamic();
+
+    const dataQuery = queryWithPagination(query, pagination);
+
+    const countQuery = t
+      .select({ count: sql<number>`count(*)`.mapWith(Number) })
+      .from(classInstances)
+      .leftJoin(originalClass, eq(classInstances.originalClassId, originalClass.id))
+      .leftJoin(teachers, eq(classInstances.teacherId, teachers.id))
+      .leftJoin(users, eq(teachers.userId, users.id))
+      .leftJoin(students, eq(classInstances.studentId, students.id))
       .where(conditions);
 
-    let finalQuery = query.orderBy(sql`${classInstances.scheduledStartAt} DESC`);
-    if (input.limit !== undefined && input.limit !== null) {
-      finalQuery = finalQuery.limit(input.limit) as typeof finalQuery;
-    }
-    if (input.offset !== undefined && input.offset !== null) {
-      finalQuery = finalQuery.offset(input.offset) as typeof finalQuery;
-    }
+    const [queryRows, [countRow]] = await Promise.all([dataQuery, countQuery]);
 
-    const queryRows = await finalQuery;
+    const totalCount = countRow?.count ?? 0;
 
-    return queryRows.map(row => {
+    const mappedRows = queryRows.map(row => {
       const isLeave = row.originalOutcome === "LEAVE";
       return {
         id: row.id,
@@ -348,6 +357,21 @@ export const getRescheduleTrackingRows = async (
         remarks: row.remarks,
       };
     });
+
+    const pageInfo = pagination
+      ? {
+          count: mappedRows.length,
+          currentPage: pagination.currentPage,
+          firstItem: mappedRows.length > 0 ? pagination.offset + 1 : null,
+          hasMorePages: pagination.offset + pagination.perPage < totalCount,
+          lastItem: mappedRows.length > 0 ? pagination.offset + mappedRows.length : null,
+          lastPage: Math.max(1, Math.ceil(totalCount / pagination.perPage)),
+          perPage: pagination.perPage,
+          total: totalCount,
+        }
+      : null;
+
+    return { rows: mappedRows, totalCount, pageInfo };
   };
 
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));

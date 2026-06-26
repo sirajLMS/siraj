@@ -3,7 +3,7 @@
 import { AddOutlined, PrintOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import type { ReactNode } from "react";
-import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { DateNavigator, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import type {
   MissedClassAlert,
   TeacherDashboardMetrics,
@@ -13,7 +13,6 @@ import { ParentSupportFab } from "@/frontend/views/dashboard/parents/dashboard/c
 import { ActivationPolicyPanel } from "./components/ActivationPolicyPanel";
 import { MissedClassAlertBanner } from "./components/MissedClassAlertBanner";
 import { TeacherDashboardMetricsRow } from "./components/TeacherDashboardMetricsRow";
-import { TeacherDateControls } from "./components/TeacherDateControls";
 import { TeacherScheduleCardList } from "./components/TeacherScheduleCardList";
 import { TeacherScheduleDataGrid } from "./components/TeacherScheduleDataGrid";
 import type { TeacherDashboardLabels } from "./types/teacherDashboardLabels";
@@ -131,7 +130,7 @@ export function TeacherDashboardView({
         )}
 
         <Box sx={{ mb: 3 }}>
-          <TeacherDateControls
+          <DateNavigator
             dateValue={dateValue}
             todayLabel={labels.dateFilter.today}
             previousDayLabel={labels.dateFilter.previousDay}

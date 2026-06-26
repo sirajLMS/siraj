@@ -181,7 +181,8 @@ export namespace ScheduleService {
 
   export async function getRescheduleTracking(
     userId: string,
-    input: { search?: string | null; status?: string | null; limit?: number | null; offset?: number | null },
+    input: { search?: string | null; status?: string | null },
+    pagination: PaginationArgs | null = null,
     locale?: string
   ) {
     const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SESSION_RESCHEDULE);
@@ -190,7 +191,7 @@ export namespace ScheduleService {
       throw new Error(t("unauthorizedAction"));
     }
 
-    return SchedulingRepository.getRescheduleTrackingRows(input);
+    return SchedulingRepository.getRescheduleTrackingRows(input, pagination);
   }
 
   export async function getRescheduleTrackingMetrics(userId: string, locale?: string) {

@@ -1,5 +1,8 @@
 import { BillingHistoryService } from "@/backend/services/billing/billing-history.service";
+import type { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { PaginationArgsObject } from "./pagination.objects";
+import { PageInfoObject } from "./pagination.objects";
 
 export type ParentInvoiceRowDefinition = {
   id: string;
@@ -29,14 +32,52 @@ export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
   }),
 });
 
+export type ParentInvoiceHistoryResultDefinition = {
+  id: string;
+  rows: ParentInvoiceRowDefinition[];
+  totalCount: number;
+  pageInfo: import("@/backend/types").PageInfo | null;
+};
+
+const ParentInvoiceHistoryResultRef =
+  gqlSchemaBuilder.objectRef<ParentInvoiceHistoryResultDefinition>("ParentInvoiceHistoryResult");
+
+export const ParentInvoiceHistoryResultPothosObject = ParentInvoiceHistoryResultRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    rows: t.expose("rows", { type: [ParentInvoiceRowPothosObject] }),
+    totalCount: t.exposeInt("totalCount"),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
+  }),
+});
+
 gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
   t.field({
-    type: [ParentInvoiceRowRef],
+    type: ParentInvoiceHistoryResultPothosObject,
     args: {
       parentId: t.arg.string({ required: true }),
+      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     resolve: async (_root, args, ctx) => {
-      return BillingHistoryService.getParentInvoiceHistory(ctx.user?.id || "", args.parentId, ctx.locale);
+      let pagination: PaginationArgs | null = null;
+      if (args.paginationArgs) {
+        pagination = new PaginationArgs({
+          first: args.paginationArgs.first ?? null,
+          skip: args.paginationArgs.skip ?? null,
+          after: args.paginationArgs.after ?? null,
+          before: args.paginationArgs.before ?? null,
+          last: args.paginationArgs.last ?? null,
+          page: args.paginationArgs.page ?? null,
+          maxCount: args.paginationArgs.maxCount ?? null,
+        });
+      }
+
+      return BillingHistoryService.getParentInvoiceHistory(
+        ctx.user?.id || "",
+        args.parentId,
+        pagination,
+        ctx.locale
+      );
     },
   })
 );

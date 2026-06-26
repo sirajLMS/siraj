@@ -10,11 +10,15 @@ import {
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/components/ui";
+import { PaginationControls } from "@/frontend/components/ui";
 import { ClassSessionActionButton } from "./ClassSessionActionButton";
 import type { AcademicClassRow, ClassSessionStatus } from "./types";
 
 interface AcademicScheduleCardListProps {
   readonly rows: readonly AcademicClassRow[];
+  readonly totalCount: number;
+  readonly currentPage: number;
+  readonly pageSize: number;
   readonly labels: {
     readonly joinSession: string;
     readonly leaveClass: string;
@@ -26,6 +30,7 @@ interface AcademicScheduleCardListProps {
   };
   readonly onJoin: (id: string) => void;
   readonly onLeave: (id: string) => void;
+  readonly onPageChange: (page: number) => void;
 }
 
 function getRoomIcon(room: string) {
@@ -187,13 +192,24 @@ const EndOfSchedule = ({ label }: { label: string }) => {
   );
 };
 
-export function AcademicScheduleCardList({ rows, labels, onJoin, onLeave }: AcademicScheduleCardListProps) {
+export function AcademicScheduleCardList({ rows, totalCount, currentPage, pageSize, labels, onJoin, onLeave, onPageChange }: AcademicScheduleCardListProps) {
+  const pageCount = Math.ceil(totalCount / pageSize);
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       {rows.map(row => (
         <AcademicClassCard key={row.id} row={row} labels={labels} onJoin={onJoin} onLeave={onLeave} />
       ))}
       <EndOfSchedule label={labels.endOfSchedule} />
+      {totalCount > 0 && (
+        <PaginationControls
+          page={currentPage}
+          pageCount={pageCount}
+          rowCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+        />
+      )}
     </Box>
   );
 }
