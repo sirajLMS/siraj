@@ -1,4 +1,5 @@
 import type { teacherBankingDetailsHistory, teacherPayments, teachers } from "@/backend/db/schema";
+import type { PageInfo } from "./pagination.types";
 
 export type TeacherEntity = typeof teachers.$inferSelect;
 export type TeacherEntityInput = typeof teachers.$inferInsert;
@@ -28,3 +29,12 @@ export type CreateTeacherPaymentInput = {
 };
 
 export type TeacherCreateResult = Pick<TeacherEntity, "id" | "userId" | "status" | "timezone" | "createdAt">;
+
+export type TeacherDashboardPaginatedResult = {
+  id: string;
+  metrics: Record<string, number>;
+  scheduleRows: Record<string, unknown>[];
+  progressFeed: Record<string, unknown>[];
+  totalCount: number;
+  pageInfo: PageInfo | null;
+};

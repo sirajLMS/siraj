@@ -34,3 +34,32 @@ export type ParentDirectoryResult = {
   totalCount: number;
   pageInfo: PageInfo | null;
 };
+
+export type ParentDashboardScheduleRow = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentInitials: string;
+  studentAvatarUrl: string | null;
+  teacherId: string;
+  teacherName: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  bookingStatus: "confirmed" | "rescheduled";
+  executionState: string;
+  outcome: string;
+  zoomMeetingUrl: string | null;
+  classTimeFormatted: string;
+};
+
+export type ParentDashboardScheduleInput = {
+  date?: string | null;
+  search?: string | null;
+};
+
+export type ParentDashboardSchedulePaginatedResult = {
+  rows: ParentDashboardScheduleRow[];
+  totalCount: number;
+  pageInfo: PageInfo | null;
+};

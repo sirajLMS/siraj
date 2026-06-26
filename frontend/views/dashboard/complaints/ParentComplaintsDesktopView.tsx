@@ -24,6 +24,10 @@ interface ParentComplaintsDesktopViewProps {
   readonly onDismissSuccess: () => void;
   readonly onFormSubmit: () => void;
   readonly onLoadOlderRecords: () => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 export function ParentComplaintsDesktopView({
@@ -39,6 +43,10 @@ export function ParentComplaintsDesktopView({
   onDismissSuccess,
   onFormSubmit,
   onLoadOlderRecords,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
 }: Readonly<ParentComplaintsDesktopViewProps>) {
   return (
     <PageContainer>
@@ -79,6 +87,10 @@ export function ParentComplaintsDesktopView({
             labels={labels}
             hasOlderRecords={hasOlderRecords}
             onLoadOlderRecords={onLoadOlderRecords}
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            onPageChange={onPageChange}
           />
         </Grid>
       </Grid>

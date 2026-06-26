@@ -2,14 +2,16 @@
 
 import { ScheduleOutlined, VideocamOutlined } from "@mui/icons-material";
 import { Avatar, Box, Card, CardContent, IconButton, Stack, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/components/ui";
+import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
 import type { ParentDashboardLabels } from "../types/parentDashboardLabels";
 import type { ParentScheduleRow } from "../types/parentDashboardTypes";
+import type { SchedulePagination } from "../ParentDashboardView";
 
 interface ParentScheduleCardListProps {
   readonly rows: readonly ParentScheduleRow[];
   readonly labels: ParentDashboardLabels;
   readonly onJoinVideo: (id: string) => void;
+  readonly pagination?: SchedulePagination;
 }
 
 function formatDuration(template: string, minutes: number): string {
@@ -116,12 +118,26 @@ function ScheduleCard({
   );
 }
 
-export function ParentScheduleCardList({ rows, labels, onJoinVideo }: Readonly<ParentScheduleCardListProps>) {
+export function ParentScheduleCardList({ rows, labels, onJoinVideo, pagination }: Readonly<ParentScheduleCardListProps>) {
+  const pageCount = pagination
+    ? Math.max(1, Math.ceil(pagination.totalCount / pagination.pageSize))
+    : 0;
+
   return (
     <Stack spacing={1.5}>
       {rows.map(row => (
         <ScheduleCard key={row.id} row={row} labels={labels} onJoinVideo={onJoinVideo} />
       ))}
+      {pagination && pagination.totalCount > 0 && (
+        <PaginationControls
+          page={pagination.page}
+          pageCount={pageCount}
+          rowCount={pagination.totalCount}
+          pageSize={pagination.pageSize}
+          embedded
+          onPageChange={pagination.onPageChange}
+        />
+      )}
     </Stack>
   );
 }

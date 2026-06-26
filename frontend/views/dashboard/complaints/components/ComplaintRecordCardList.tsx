@@ -3,6 +3,7 @@
 import { ExpandMoreOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { PaginationControls } from "@/frontend/components/ui";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import type { ParentComplaintRecord } from "../types/complaints.types";
 import { ComplaintRecordCard } from "./ComplaintRecordCard";
@@ -60,6 +61,10 @@ interface ComplaintRecordCardListProps {
   readonly labels: ComplaintsParentLabels;
   readonly hasOlderRecords: boolean;
   readonly onLoadOlderRecords: () => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 export function ComplaintRecordCardList({
@@ -67,8 +72,14 @@ export function ComplaintRecordCardList({
   labels,
   hasOlderRecords,
   onLoadOlderRecords,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
 }: Readonly<ComplaintRecordCardListProps>) {
-  const totalLabel = labels.totalRecords.replace("{count}", String(records.length));
+  const totalLabel = labels.totalRecords.replace("{count}", String(totalCount ?? records.length));
+  const showPagination = totalCount !== undefined && onPageChange !== undefined && totalCount > 0;
+  const pageCount = pageSize > 0 ? Math.ceil((totalCount ?? 0) / pageSize) : 0;
 
   return (
     <Box>
@@ -88,14 +99,23 @@ export function ComplaintRecordCardList({
         ))}
       </StyledCardListContainer>
 
-      {/* Load older records button (shown when more records exist) */}
-      {hasOlderRecords ? (
-        <StyledLoadMoreContainer>
-          <StyledLoadMoreButton onClick={onLoadOlderRecords} endIcon={<ExpandMoreOutlined />}>
-            {labels.loadOlder}
-          </StyledLoadMoreButton>
-        </StyledLoadMoreContainer>
-      ) : null}
+      {showPagination ? (
+        <PaginationControls
+          page={page}
+          pageCount={pageCount}
+          rowCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+        />
+      ) : (
+        hasOlderRecords && (
+          <StyledLoadMoreContainer>
+            <StyledLoadMoreButton onClick={onLoadOlderRecords} endIcon={<ExpandMoreOutlined />}>
+              {labels.loadOlder}
+            </StyledLoadMoreButton>
+          </StyledLoadMoreContainer>
+        )
+      )}
     </Box>
   );
 }

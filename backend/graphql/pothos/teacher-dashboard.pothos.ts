@@ -1,6 +1,6 @@
+import type { PageInfo } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-
-// ─── Schedule Row ─────────────────────────────────────────────────────────────
+import { PageInfoObject } from "../pothos/pagination.objects";
 
 export type TeacherDashboardScheduleRowDefinition = {
   id: string;
@@ -31,8 +31,6 @@ export const TeacherDashboardScheduleRowPothosObject = TeacherDashboardScheduleR
   }),
 });
 
-// ─── Progress Feed Item ───────────────────────────────────────────────────────
-
 export type TeacherProgressFeedItemDefinition = {
   id: string;
   title: string;
@@ -49,8 +47,6 @@ export const TeacherProgressFeedItemPothosObject = TeacherProgressFeedItemRef.im
     type: t.exposeString("type"),
   }),
 });
-
-// ─── Metrics ──────────────────────────────────────────────────────────────────
 
 export type TeacherDashboardMetricsDefinition = {
   total: number;
@@ -87,13 +83,13 @@ export const TeacherDashboardMetricsPothosObject = TeacherDashboardMetricsRef.im
   }),
 });
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
-
 export type TeacherDashboardDefinition = {
   id: string;
   metrics: TeacherDashboardMetricsDefinition;
   scheduleRows: TeacherDashboardScheduleRowDefinition[];
   progressFeed: TeacherProgressFeedItemDefinition[];
+  totalCount: number;
+  pageInfo: PageInfo | null;
 };
 
 const TeacherDashboardRef = gqlSchemaBuilder.objectRef<TeacherDashboardDefinition>("TeacherDashboard");
@@ -104,10 +100,10 @@ export const TeacherDashboardPothosObject = TeacherDashboardRef.implement({
     metrics: t.expose("metrics", { type: TeacherDashboardMetricsPothosObject }),
     scheduleRows: t.expose("scheduleRows", { type: [TeacherDashboardScheduleRowPothosObject] }),
     progressFeed: t.expose("progressFeed", { type: [TeacherProgressFeedItemPothosObject] }),
+    totalCount: t.exposeInt("totalCount"),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
   }),
 });
-
-// ─── Input: Create Manual Class Entry ────────────────────────────────────────
 
 export type CreateManualClassEntryInputDefinition = {
   studentId: string;
@@ -131,8 +127,6 @@ export const CreateManualClassEntryInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-// ─── Input: Log Support Request ───────────────────────────────────────────────
-
 export type LogSupportRequestInputDefinition = {
   reason: string;
 };
@@ -144,8 +138,6 @@ export const LogSupportRequestInputPothosObject = gqlSchemaBuilder
       reason: t.string({ required: true }),
     }),
   });
-
-// ─── Teacher Handbook URL ─────────────────────────────────────────────────────
 
 export type TeacherHandbookUrlDefinition = {
   id: string;

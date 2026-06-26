@@ -1,19 +1,25 @@
+import { PaginationArgs } from "@/backend/types";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { PaginationArgsObject } from "../pothos/pagination.objects";
 import { TeacherDashboardPothosObject, TeacherHandbookUrlPothosObject } from "../pothos/teacher-dashboard.pothos";
 
 gqlSchemaBuilder.queryField("teacherDashboard", t =>
   t.field({
     type: TeacherDashboardPothosObject,
-    args: { date: t.arg.string({ required: true }) },
+    args: {
+      date: t.arg.string({ required: true }),
+      pagination: t.arg({ type: PaginationArgsObject, required: false }),
+    },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
         const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
         throw new Error(tFunc("unauthorized"));
       }
-      const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, "teacher", ctx.locale);
+      const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
+      const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, "teacher", ctx.locale, pagination);
       return {
         ...result,
         scheduleRows: result.scheduleRows.map(r => ({
@@ -35,14 +41,18 @@ gqlSchemaBuilder.queryField("teacherDashboard", t =>
 gqlSchemaBuilder.queryField("teacherActiveDashboard", t =>
   t.field({
     type: TeacherDashboardPothosObject,
-    args: { date: t.arg.string({ required: true }) },
+    args: {
+      date: t.arg.string({ required: true }),
+      pagination: t.arg({ type: PaginationArgsObject, required: false }),
+    },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user) {
         const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
         throw new Error(tFunc("unauthorized"));
       }
-      const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, "teacher-active", ctx.locale);
+      const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
+      const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, "teacher-active", ctx.locale, pagination);
       return {
         ...result,
         scheduleRows: result.scheduleRows.map(r => ({

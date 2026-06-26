@@ -46,6 +46,11 @@ export function AdminComplaintsContainer() {
       paginationArgs: {
         first: pageSize,
         page: page + 1,
+        skip: null,
+        after: null,
+        before: null,
+        last: null,
+        maxCount: null,
       },
     },
   });

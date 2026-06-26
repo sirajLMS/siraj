@@ -40,6 +40,10 @@ interface ParentComplaintsMobileViewProps {
   readonly onDismissSuccess: () => void;
   readonly onFormSubmit: () => void;
   readonly onLoadOlderRecords: () => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 export function ParentComplaintsMobileView({
@@ -55,6 +59,10 @@ export function ParentComplaintsMobileView({
   onDismissSuccess,
   onFormSubmit,
   onLoadOlderRecords,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
 }: Readonly<ParentComplaintsMobileViewProps>) {
   return (
     <>
@@ -95,6 +103,10 @@ export function ParentComplaintsMobileView({
             labels={labels}
             hasOlderRecords={hasOlderRecords}
             onLoadOlderRecords={onLoadOlderRecords}
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            onPageChange={onPageChange}
           />
 
           {/* Policy information panel shown below the form */}

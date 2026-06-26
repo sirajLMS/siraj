@@ -1,6 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
-import { PageInfoObject } from "@/backend/graphql/pothos/pagination.objects";
+import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/pagination.objects";
 import { ComplaintService } from "@/backend/services";
 import type {
   ComplaintFileReturnType,
@@ -11,11 +10,11 @@ import type {
   ComplaintReturnType,
   ComplaintSelectType,
   ComplaintSubmitWithFilesInput,
-  PaginationArgs,
+  ParentComplaintPaginatedResult,
 } from "@/backend/types";
+import { PaginationArgs } from "@/backend/types";
 import { ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import { ComplaintResponsePothosObject } from "./complaintResponses.pothos";
-import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 export const ComplaintCategoryPothosEnum = gqlSchemaBuilder.enumType(ComplaintCategory, {
   name: "ComplaintCategory",
@@ -110,7 +109,7 @@ export const ComplaintQueuePaginatedResultPothosObject = ComplaintQueuePaginated
   fields: t => ({
     rows: t.expose("rows", { type: [ComplaintPothosObject] }),
     totalCount: t.exposeInt("totalCount"),
-    pageInfo: t.field({ type: PageInfoObject, nullable: true }),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
   }),
 });
 

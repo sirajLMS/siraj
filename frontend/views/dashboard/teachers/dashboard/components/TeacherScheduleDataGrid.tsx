@@ -4,7 +4,7 @@ import { MoreVertOutlined, VideocamOffOutlined, VideocamOutlined } from "@mui/ic
 import { IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 import { TeacherScheduleStatusContent } from "./TeacherScheduleStatusContent";
@@ -17,6 +17,10 @@ interface TeacherScheduleDataGridProps {
   readonly emptyMessage: string;
   readonly onJoinVideo: (id: string) => void;
   readonly onActivate?: (id: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 function formatRowNumber(value: number): string {
@@ -39,6 +43,10 @@ export function TeacherScheduleDataGrid({
   emptyMessage,
   onJoinVideo,
   onActivate,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
 }: Readonly<TeacherScheduleDataGridProps>) {
   const columns = useMemo<GridColDef<TeacherScheduleRow>[]>(() => {
     return [
@@ -120,14 +128,28 @@ export function TeacherScheduleDataGrid({
     ];
   }, [canActivate, labels, onActivate, onJoinVideo]);
 
+  const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
+
   return (
-    <AppDataGrid
+    <AppDataGrid<TeacherScheduleRow>
       rows={rows}
       columns={columns}
       getRowId={row => row.id}
       emptyMessage={emptyMessage}
       disableRowSelectionOnClick
       autoHeight
+      {...(isServerPagination
+        ? {
+            paginationMode: "server" as const,
+            rowCount: totalCount,
+            paginationModel: { page, pageSize },
+            onPaginationModelChange: model => {
+              onPageChange(model.page);
+            },
+            pageSizeOptions: [pageSize],
+            slots: { pagination: GridPagination },
+          }
+        : {})}
     />
   );
 }

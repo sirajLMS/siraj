@@ -9,6 +9,7 @@ export * from "./learning-resource.documents";
 export { createManagerMutationDocument } from "./manager-onboarding.documents";
 export * from "./notification-alerts.documents";
 export * from "./parent-billing-history.documents";
+export * from "./parent-dashboard.documents";
 export * from "./parent-directory.documents";
 export * from "./parent-documents.documents";
 export { createParentMutationDocument } from "./parent-onboarding.documents";

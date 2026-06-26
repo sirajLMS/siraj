@@ -1,9 +1,18 @@
 import { and, count, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { isNull, gte, lt, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
-import { invoices, parents, students, teachers, users } from "@/backend/db/schema";
+import {
+  classInstances,
+  invoices,
+  parents,
+  students,
+  teachers,
+  users,
+} from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { PaginationArgs, ParentCreateResult, ParentEntityInput } from "@/backend/types";
+import type { ParentDashboardScheduleRow } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
 import type { DBTransaction } from "../db.types";
 
@@ -376,5 +385,142 @@ export namespace ParentRepository {
     }
 
     return mapAssociatedStudentRow(results[0]);
+  };
+
+  export type ParentDashboardScheduleResult = {
+    rows: ParentDashboardScheduleRow[];
+    totalCount: number;
+    pageInfo: import("@/backend/types").PageInfo | null;
+  };
+
+  export const getParentDashboardSchedule = async (
+    parentId: string,
+    input: { date?: Date | null; search?: string | null; pagination?: PaginationArgs | null },
+    tx?: DBTransaction
+  ): Promise<ParentDashboardScheduleResult> => {
+    const runner = async (t: DBTransaction): Promise<ParentDashboardScheduleResult> => {
+      const parentStudents = await t
+        .select({ id: students.id })
+        .from(students)
+        .where(eq(students.parentId, parentId));
+
+      const studentIds = parentStudents.map(s => s.id);
+
+      if (studentIds.length === 0) {
+        const pageInfo = PaginationUtils.buildPageInfoFromArgs(input.pagination, 0, 0);
+        return { rows: [], totalCount: 0, pageInfo };
+      }
+
+      const conditions = [isNull(classInstances.deletedAt), inArray(classInstances.studentId, studentIds)];
+
+      if (input.date) {
+        const parentRow = await t
+          .select({ timezone: parents.timezone })
+          .from(parents)
+          .where(eq(parents.id, parentId))
+          .limit(1);
+
+        const viewerTimezone = parentRow[0]?.timezone ?? "UTC";
+        const { getDayBoundaries } = await import("@/backend/lib/timezone");
+        const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(input.date, viewerTimezone);
+
+        conditions.push(gte(classInstances.scheduledStartAt, startOfDayUtc));
+        conditions.push(lt(classInstances.scheduledStartAt, endOfDayUtc));
+      }
+
+      if (input.search) {
+        const searchPattern = `%${input.search}%`;
+        const searchCondition = or(ilike(students.name, searchPattern), ilike(users.name, searchPattern));
+        if (searchCondition) {
+          conditions.push(searchCondition);
+        }
+      }
+
+      const whereClause = and(...conditions);
+
+      let dataQuery = t
+        .select({
+          id: classInstances.id,
+          studentId: classInstances.studentId,
+          studentName: students.name,
+          studentAvatarUrl: students.avatarUrl,
+          teacherId: classInstances.teacherId,
+          teacherName: sql<string>`COALESCE(${users.name}, '')`,
+          scheduledStartAt: classInstances.scheduledStartAt,
+          scheduledEndAt: classInstances.scheduledEndAt,
+          durationMinutes: classInstances.durationMinutes,
+          isRescheduled: classInstances.isRescheduled,
+          executionState: classInstances.executionState,
+          outcome: classInstances.outcome,
+          zoomMeetingUrl: classInstances.zoomMeetingUrl,
+        })
+        .from(classInstances)
+        .innerJoin(students, eq(classInstances.studentId, students.id))
+        .leftJoin(teachers, eq(classInstances.teacherId, teachers.id))
+        .leftJoin(users, eq(teachers.userId, users.id))
+        .where(whereClause)
+        .orderBy(classInstances.scheduledStartAt)
+        .$dynamic();
+
+      if (input.pagination) {
+        dataQuery = queryWithPagination(dataQuery, input.pagination);
+      }
+
+      const [queryRows, [countRow]] = await Promise.all([
+        dataQuery,
+        t
+          .select({ count: count() })
+          .from(classInstances)
+          .innerJoin(students, eq(classInstances.studentId, students.id))
+          .leftJoin(teachers, eq(classInstances.teacherId, teachers.id))
+          .leftJoin(users, eq(teachers.userId, users.id))
+          .where(whereClause),
+      ]);
+
+      const totalCount = countRow?.count ?? 0;
+
+      const parentRow = await t
+        .select({ timezone: parents.timezone })
+        .from(parents)
+        .where(eq(parents.id, parentId))
+        .limit(1);
+
+      const viewerTimezone = parentRow[0]?.timezone ?? "UTC";
+      const { formatInstantInTimezone } = await import("@/backend/lib/timezone");
+
+      const mappedRows: ParentDashboardScheduleRow[] = queryRows.map(r => {
+        const studentName = r.studentName ?? "";
+        const initials = studentName
+          .split(" ")
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((w: string) => w[0]?.toUpperCase() ?? "")
+          .join("");
+
+        return {
+          id: r.id,
+          studentId: r.studentId,
+          studentName,
+          studentInitials: initials,
+          studentAvatarUrl: r.studentAvatarUrl ?? null,
+          teacherId: r.teacherId,
+          teacherName: r.teacherName ?? "",
+          scheduledStartAt: r.scheduledStartAt,
+          scheduledEndAt: r.scheduledEndAt,
+          durationMinutes: r.durationMinutes,
+          bookingStatus: r.isRescheduled ? "rescheduled" as const : "confirmed" as const,
+          executionState: r.executionState,
+          outcome: r.outcome,
+          zoomMeetingUrl: r.zoomMeetingUrl ?? null,
+          classTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone),
+        };
+      });
+
+      const pageInfo = PaginationUtils.buildPageInfoFromArgs(input.pagination, mappedRows.length, totalCount);
+
+      return { rows: mappedRows, totalCount, pageInfo };
+    };
+
+    return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 }

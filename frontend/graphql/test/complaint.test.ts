@@ -12,7 +12,7 @@ import { setupTestServerLifecycle } from "./lifecycle";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
-const DEFAULT_FILTER = { limit: 100, offset: 0, search: null, status: null };
+const DEFAULT_FILTER = { search: null, status: null };
 
 async function submitTestComplaint(token: string, body: string): Promise<string> {
   const data = await authenticatedRequest(token, "mutate", submitComplaintMutationDocument, {
@@ -40,12 +40,16 @@ describe("GraphQL: parentComplaints query", () => {
   });
 
   test("authorized parent gets own complaints with correct data shape", async () => {
-    const data = await authenticatedRequest(parentToken, "query", parentComplaintsQueryDocument);
+    const data = await authenticatedRequest(parentToken, "query", parentComplaintsQueryDocument, {
+      paginationArgs: null,
+    });
 
-    expect(Array.isArray(data.parentComplaints)).toBeTrue();
+    expect(data.parentComplaints).toBeDefined();
+    expect(typeof data.parentComplaints?.totalCount).toBe("number");
+    expect(Array.isArray(data.parentComplaints?.complaints)).toBeTrue();
 
-    if (data.parentComplaints?.length) {
-      const first = data.parentComplaints[0];
+    if (data.parentComplaints?.complaints?.length) {
+      const first = data.parentComplaints.complaints[0];
       if (!first) throw new Error("First complaint is null");
       expect(first.id).toBeDefined();
       expect(typeof first.id).toBe("string");
@@ -67,14 +71,18 @@ describe("GraphQL: parentComplaints query", () => {
   });
 
   test("teacher role is denied access to parentComplaints", async () => {
-    await assertOperationDenied("teacher_default", "query", parentComplaintsQueryDocument, {});
+    await assertOperationDenied("teacher_default", "query", parentComplaintsQueryDocument, {
+      paginationArgs: null,
+    });
   });
 
   test("parent only sees own complaints — IDOR protection (Threat 1)", async () => {
-    const data = await authenticatedRequest(parentToken, "query", parentComplaintsQueryDocument);
+    const data = await authenticatedRequest(parentToken, "query", parentComplaintsQueryDocument, {
+      paginationArgs: null,
+    });
 
-    if (data.parentComplaints?.length) {
-      for (const complaint of data.parentComplaints) {
+    if (data.parentComplaints?.complaints?.length) {
+      for (const complaint of data.parentComplaints.complaints) {
         expect(complaint).toBeDefined();
         expect(complaint?.id).toBeDefined();
       }
@@ -95,6 +103,7 @@ describe("GraphQL: adminComplaintQueue query", () => {
   test("authorized admin gets all complaints with metrics", async () => {
     const data = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
+      paginationArgs: null,
     });
 
     expect(data.adminComplaintQueue).toBeDefined();
@@ -123,18 +132,21 @@ describe("GraphQL: adminComplaintQueue query", () => {
   test("parent role is denied access to adminComplaintQueue", async () => {
     await assertOperationDenied("parent_default", "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
+      paginationArgs: null,
     });
   });
 
   test("teacher role is denied access to adminComplaintQueue", async () => {
     await assertOperationDenied("teacher_default", "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
+      paginationArgs: null,
     });
   });
 
   test("status filter returns only matching complaints", async () => {
     const data = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
       filter: { ...DEFAULT_FILTER, status: ComplaintStatus.Unanswered },
+      paginationArgs: null,
     });
 
     expect(data.adminComplaintQueue).toBeDefined();
@@ -147,6 +159,7 @@ describe("GraphQL: adminComplaintQueue query", () => {
   test("search filter narrows results", async () => {
     const allData = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
+      paginationArgs: null,
     });
 
     const allRows = allData.adminComplaintQueue?.rows;
@@ -160,6 +173,7 @@ describe("GraphQL: adminComplaintQueue query", () => {
 
     const filteredData = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
       filter: { ...DEFAULT_FILTER, search: searchTerm },
+      paginationArgs: null,
     });
 
     expect(filteredData.adminComplaintQueue).toBeDefined();
@@ -241,8 +255,10 @@ describe("GraphQL: submitComplaint mutation", () => {
     expect(data.submitComplaint).toBeDefined();
     expect(data.submitComplaint?.id).toBeDefined();
 
-    const listData = await authenticatedRequest(parentToken, "query", parentComplaintsQueryDocument);
-    const found = listData.parentComplaints?.find(c => c?.id === data.submitComplaint?.id);
+    const listData = await authenticatedRequest(parentToken, "query", parentComplaintsQueryDocument, {
+      paginationArgs: null,
+    });
+    const found = listData.parentComplaints?.complaints?.find(c => c?.id === data.submitComplaint?.id);
     expect(found).toBeDefined();
     expect(found?.body).toBe("IDOR test — should link to own parent");
   });
@@ -281,6 +297,7 @@ describe("GraphQL: respondToComplaint mutation", () => {
   test("complaint status updated to ANSWERED after response", async () => {
     const queueData = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
+      paginationArgs: null,
     });
 
     const row = queueData.adminComplaintQueue?.rows?.find(r => r?.id === complaintId);
@@ -346,6 +363,7 @@ describe("GraphQL: deleteComplaint mutation", () => {
   test("deleted complaint no longer appears in admin queue", async () => {
     const queueData = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
+      paginationArgs: null,
     });
 
     const found = queueData.adminComplaintQueue?.rows?.find(r => r?.id === complaintToDeleteId);
@@ -387,12 +405,15 @@ describe("GraphQL: Complaint security tests (Section 4)", () => {
   test("Threat 1 — parentComplaints is scoped to authenticated parent (IDOR protection)", async () => {
     const parentToken = await loginDemoUser("parent_default");
 
-    const data = await authenticatedRequest(parentToken, "query", parentComplaintsQueryDocument);
+    const data = await authenticatedRequest(parentToken, "query", parentComplaintsQueryDocument, {
+      paginationArgs: null,
+    });
 
-    expect(Array.isArray(data.parentComplaints)).toBeTrue();
+    expect(data.parentComplaints).toBeDefined();
+    expect(Array.isArray(data.parentComplaints?.complaints)).toBeTrue();
 
-    if (data.parentComplaints?.length) {
-      for (const complaint of data.parentComplaints) {
+    if (data.parentComplaints?.complaints?.length) {
+      for (const complaint of data.parentComplaints.complaints) {
         expect(complaint?.id).toBeDefined();
         expect(complaint?.body).toBeDefined();
       }

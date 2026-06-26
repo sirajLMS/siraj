@@ -34,8 +34,22 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
   const showSuccess = useParentComplaintsStore(state => state.showSuccess);
   const setSubmitting = useParentComplaintsStore(state => state.setSubmitting);
   const resetSuccess = useParentComplaintsStore(state => state.resetSuccess);
+  const page = useParentComplaintsStore(state => state.page);
+  const pageSize = useParentComplaintsStore(state => state.pageSize);
+  const setPage = useParentComplaintsStore(state => state.setPage);
 
   const { data, loading, error, refetch } = useQuery(parentComplaintsQueryDocument, {
+    variables: {
+      paginationArgs: {
+        first: pageSize,
+        page: page + 1,
+        skip: null,
+        after: null,
+        before: null,
+        last: null,
+        maxCount: null,
+      },
+    },
     skip: !parentId,
   });
 
@@ -63,9 +77,11 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
     }));
   }, [studentsData?.parentAssociatedStudents]);
 
+  const totalCount = data?.parentComplaints?.totalCount ?? 0;
+
   const records: readonly ParentComplaintRecord[] = useMemo(() => {
-    if (!data?.parentComplaints) return [];
-    return data.parentComplaints.map(record => ({
+    if (!data?.parentComplaints?.complaints) return [];
+    return data.parentComplaints.complaints.map(record => ({
       id: record.id ?? "",
       regarding: record.studentName ? `Regarding: ${record.studentName}` : "General",
       summary: record.body ?? "",
@@ -80,7 +96,6 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
     }));
   }, [data?.parentComplaints]);
 
-  // Client-side guard for empty parentId
   if (!parentId) {
     return (
       <Box sx={{ p: 4 }}>
@@ -132,6 +147,10 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
         onSubmit={handleSubmit}
         onDismissSuccess={resetSuccess}
         onLoadOlderRecords={() => void refetch()}
+        page={page}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        onPageChange={setPage}
       />
     </RequirePermission>
   );

@@ -11,13 +11,14 @@ import { PermissionsService } from "@/backend/services";
 import type {
   ComplaintFileReturnType,
   ComplaintQueueFilter,
+  ComplaintQueuePaginatedResult,
   ComplaintReturnType,
   ComplaintSelectType,
   ComplaintSubmitInput,
   FileMetadata,
+  PaginationArgs,
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ComplaintService {
@@ -171,15 +172,16 @@ export namespace ComplaintService {
     }
 
     try {
-      const result = await ComplaintRepository.getComplaintQueue({
-        limit: 100,
-        offset: 0,
-        status: options.status ?? null,
-        search: options.search ?? null,
-      });
+      const result = await ComplaintRepository.getComplaintQueuePaginated(
+        {
+          status: options.status ?? null,
+          search: options.search ?? null,
+        },
+        null
+      );
 
       return {
-        complaints: result.complaints,
+        complaints: result.rows,
       };
     } catch (error) {
       logger.error("Failed to get admin complaint queue", { actorUserId, options, error });
@@ -204,24 +206,25 @@ export namespace ComplaintService {
 
     try {
       const [queueResult, metrics] = await Promise.all([
-        ComplaintRepository.getComplaintQueue({
-          limit: 100,
-          offset: 0,
-          status: options.status ?? null,
-          search: options.search ?? null,
-        }),
+        ComplaintRepository.getComplaintQueuePaginated(
+          {
+            status: options.status ?? null,
+            search: options.search ?? null,
+          },
+          null
+        ),
         ComplaintRepository.getComplaintMetrics(),
       ]);
 
       return {
         id: "complaint-queue-result",
-        complaints: queueResult.complaints,
+        complaints: queueResult.rows,
         metrics: {
           id: "complaint-metrics",
           unanswered: metrics.unanswered,
           answered: metrics.answered,
           avgResolutionHours: metrics.avgResolutionHours,
-          totalCount: queueResult.metrics.totalCount,
+          totalCount: queueResult.totalCount,
         },
       };
     } catch (error) {

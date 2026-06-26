@@ -1171,6 +1171,31 @@ type ParentComplaintsResult {
   totalCount: Int
 }
 
+type ParentDashboardScheduleResult {
+  id: String
+  pageInfo: PageInfo
+  rows: [ParentDashboardScheduleRow!]
+  totalCount: Int
+}
+
+type ParentDashboardScheduleRow {
+  bookingStatus: String
+  classTimeFormatted: String
+  durationMinutes: Int
+  executionState: String
+  id: String
+  outcome: String
+  scheduledEndAt: DateTime
+  scheduledStartAt: DateTime
+  studentAvatarUrl: String
+  studentId: String
+  studentInitials: String
+  studentName: String
+  teacherId: String
+  teacherName: String
+  zoomMeetingUrl: String
+}
+
 type ParentDirectory {
   id: String
   metrics: ParentDirectoryMetrics
@@ -1377,6 +1402,7 @@ type Query {
 
   """Returns the authenticated parent's complaint history with pagination."""
   parentComplaints(paginationArgs: PaginationArgs): ParentComplaintsResult
+  parentDashboardSchedule(date: String, paginationArgs: PaginationArgs, search: String): ParentDashboardScheduleResult
   parentDirectory(paginationArgs: PaginationArgs, search: String): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
   parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String!): ParentInvoiceHistoryResult
@@ -1431,8 +1457,8 @@ type Query {
   """Fetches the global student directory with cross-relational data."""
   studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): [StudentDirectoryRow!]
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
-  teacherActiveDashboard(date: String!): TeacherDashboard
-  teacherDashboard(date: String!): TeacherDashboard
+  teacherActiveDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
+  teacherDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
   teacherDirectory(paginationArgs: PaginationArgs, search: String): TeacherDirectory
   teacherFutureSchedule: TeacherFutureSchedule
   teacherHandbookUrl: TeacherHandbookUrl
@@ -1850,8 +1876,10 @@ type TeacherAvailabilityGap {
 type TeacherDashboard {
   id: String
   metrics: TeacherDashboardMetrics
+  pageInfo: PageInfo
   progressFeed: [TeacherProgressFeedItem!]
   scheduleRows: [TeacherDashboardScheduleRow!]
+  totalCount: Int
 }
 
 type TeacherDashboardMetrics {

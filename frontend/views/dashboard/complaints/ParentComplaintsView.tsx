@@ -20,6 +20,10 @@ export function ParentComplaintsView({
   onSubmit,
   onDismissSuccess,
   onLoadOlderRecords,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
 }: Readonly<ParentComplaintsViewProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -73,6 +77,10 @@ export function ParentComplaintsView({
     onDismissSuccess,
     onFormSubmit: handleFormSubmit,
     onLoadOlderRecords,
+    page,
+    pageSize,
+    totalCount,
+    onPageChange,
   };
 
   if (isMobile) {

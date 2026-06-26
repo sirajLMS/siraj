@@ -1,18 +1,86 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
+import { parentDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useParentDashboardStore } from "@/frontend/stores/parentDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
+import type { ParentScheduleRow } from "./types/parentDashboardTypes";
 import { ParentDashboardView } from "./ParentDashboardView";
+
+function mapExecutionStateToLiveClassStatus(
+  executionState: string,
+  outcome: string
+): "starting_soon" | "pending" | "scheduled" {
+  if (executionState === "ACTIVATED") return "starting_soon";
+  if (outcome === "PENDING") return "pending";
+  return "scheduled";
+}
 
 export function ParentDashboardContainer() {
   const t = useTranslations("dashboard.parentDashboard");
   const userName = useUserStore(state => state.name);
   const metrics = useParentDashboardStore(state => state.metrics);
-  const scheduleRows = useParentDashboardStore(state => state.scheduleRows);
   const studentProgress = useParentDashboardStore(state => state.studentProgress);
   const workshopPromo = useParentDashboardStore(state => state.workshopPromo);
+  const page = useParentDashboardStore(state => state.page);
+  const pageSize = useParentDashboardStore(state => state.pageSize);
+  const setPage = useParentDashboardStore(state => state.setPage);
+  const setScheduleTotalCount = useParentDashboardStore(state => state.setScheduleTotalCount);
+
+  const paginationArgs = useMemo(
+    () => ({
+      page: page + 1,
+      first: pageSize,
+      after: undefined,
+      before: undefined,
+      last: undefined,
+      maxCount: undefined,
+      skip: undefined,
+    }),
+    [page, pageSize]
+  );
+
+  const today = useMemo(() => {
+    const d = new Date();
+    return d.toISOString().split("T")[0];
+  }, []);
+
+  const { data } = useQuery(parentDashboardScheduleQueryDocument, {
+    variables: { date: today, paginationArgs },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const scheduleRows: readonly ParentScheduleRow[] = useMemo(() => {
+    const rows = data?.parentDashboardSchedule?.rows;
+    if (!rows) return [];
+    return rows.map(r => ({
+      id: r.id ?? "",
+      rowNumber: 0,
+      classTime: r.classTimeFormatted ?? "",
+      durationMinutes: r.durationMinutes ?? 0,
+      studentName: r.studentName ?? "",
+      studentInitials: r.studentInitials ?? "",
+      studentAvatarUrl: r.studentAvatarUrl ?? undefined,
+      teacherName: r.teacherName ?? "",
+      bookingStatus: (r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed") as
+        | "confirmed"
+        | "rescheduled",
+      liveClassStatus: mapExecutionStateToLiveClassStatus(
+        r.executionState ?? "",
+        r.outcome ?? ""
+      ),
+      videoEnabled: !!r.zoomMeetingUrl,
+    }));
+  }, [data]);
+
+  const totalCount = data?.parentDashboardSchedule?.totalCount ?? 0;
+
+  if (totalCount !== useParentDashboardStore.getState().scheduleTotalCount) {
+    setScheduleTotalCount(totalCount);
+  }
 
   const handleFilter = () => {
     logger.info("Parent dashboard filter clicked");
@@ -46,6 +114,10 @@ export function ParentDashboardContainer() {
     logger.info("Parent dashboard live support clicked");
   };
 
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
   return (
     <ParentDashboardView
       userName={userName}
@@ -53,6 +125,12 @@ export function ParentDashboardContainer() {
       scheduleRows={scheduleRows}
       studentProgress={studentProgress}
       workshopPromo={workshopPromo}
+      schedulePagination={{
+        page,
+        pageSize,
+        totalCount,
+        onPageChange: handlePageChange,
+      }}
       labels={{
         welcome: t("welcome", { name: userName }),
         welcomeBack: t("welcomeBack"),

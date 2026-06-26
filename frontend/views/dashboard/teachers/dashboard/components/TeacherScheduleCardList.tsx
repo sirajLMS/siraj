@@ -2,7 +2,7 @@
 
 import { VideocamOffOutlined, VideocamOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, IconButton, Paper, Stack, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/components/ui";
+import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
@@ -14,6 +14,10 @@ interface TeacherScheduleCardListProps {
   readonly canActivate: boolean;
   readonly onJoinVideo: (id: string) => void;
   readonly onActivate?: (id: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 function renderCardAction(
@@ -39,7 +43,14 @@ export function TeacherScheduleCardList({
   canActivate,
   onJoinVideo,
   onActivate,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
 }: Readonly<TeacherScheduleCardListProps>) {
+  const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
+  const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
+
   return (
     <Stack spacing={2}>
       {rows.map(row => {

@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, StatusBadge } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
@@ -20,6 +20,10 @@ interface TeacherActiveScheduleDataGridProps {
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
   readonly onRequestLeave?: (id: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 function formatDuration(minutes: number | undefined, template: string): string {
@@ -62,6 +66,10 @@ export function TeacherActiveScheduleDataGrid({
   onStartSession,
   onMarkAbsent,
   onRequestLeave,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
 }: Readonly<TeacherActiveScheduleDataGridProps>) {
   const columns = useMemo<GridColDef<TeacherScheduleRow>[]>(() => {
     return [
@@ -136,14 +144,28 @@ export function TeacherActiveScheduleDataGrid({
     ];
   }, [labels, onActivate, onStartSession, onMarkAbsent, onRequestLeave]);
 
+  const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
+
   return (
-    <AppDataGrid
+    <AppDataGrid<TeacherScheduleRow>
       rows={rows}
       columns={columns}
       getRowId={row => row.id}
       emptyMessage={labels.schedule.noEntries}
       disableRowSelectionOnClick
       autoHeight
+      {...(isServerPagination
+        ? {
+            paginationMode: "server" as const,
+            rowCount: totalCount,
+            paginationModel: { page, pageSize },
+            onPaginationModelChange: model => {
+              onPageChange(model.page);
+            },
+            pageSizeOptions: [pageSize],
+            slots: { pagination: GridPagination },
+          }
+        : {})}
     />
   );
 }

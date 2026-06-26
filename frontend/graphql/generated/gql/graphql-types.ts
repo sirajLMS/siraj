@@ -1539,6 +1539,33 @@ export type ParentComplaintsResult = {
   totalCount: Maybe<Scalars['Int']['output']>;
 };
 
+export type ParentDashboardScheduleResult = {
+  __typename?: 'ParentDashboardScheduleResult';
+  id: Maybe<Scalars['String']['output']>;
+  pageInfo: Maybe<PageInfo>;
+  rows: Maybe<Array<ParentDashboardScheduleRow>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export type ParentDashboardScheduleRow = {
+  __typename?: 'ParentDashboardScheduleRow';
+  bookingStatus: Maybe<Scalars['String']['output']>;
+  classTimeFormatted: Maybe<Scalars['String']['output']>;
+  durationMinutes: Maybe<Scalars['Int']['output']>;
+  executionState: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  outcome: Maybe<Scalars['String']['output']>;
+  scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
+  scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
+  studentAvatarUrl: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  studentInitials: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
+  zoomMeetingUrl: Maybe<Scalars['String']['output']>;
+};
+
 export type ParentDirectory = {
   __typename?: 'ParentDirectory';
   id: Maybe<Scalars['String']['output']>;
@@ -1739,6 +1766,7 @@ export type Query = {
   parentAssociatedStudents: Maybe<Array<AssociatedStudent>>;
   /** Returns the authenticated parent's complaint history with pagination. */
   parentComplaints: Maybe<ParentComplaintsResult>;
+  parentDashboardSchedule: Maybe<ParentDashboardScheduleResult>;
   parentDirectory: Maybe<ParentDirectory>;
   parentDocuments: Maybe<Array<ParentDocument>>;
   parentInvoiceHistory: Maybe<ParentInvoiceHistoryResult>;
@@ -1887,6 +1915,13 @@ export type QueryParentComplaintsArgs = {
 };
 
 
+export type QueryParentDashboardScheduleArgs = {
+  date: InputMaybe<Scalars['String']['input']>;
+  paginationArgs: InputMaybe<PaginationArgs>;
+  search: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryParentDirectoryArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
   search: InputMaybe<Scalars['String']['input']>;
@@ -1995,11 +2030,13 @@ export type QueryStudentsArgs = {
 
 export type QueryTeacherActiveDashboardArgs = {
   date: Scalars['String']['input'];
+  pagination: InputMaybe<PaginationArgs>;
 };
 
 
 export type QueryTeacherDashboardArgs = {
   date: Scalars['String']['input'];
+  pagination: InputMaybe<PaginationArgs>;
 };
 
 
@@ -2466,8 +2503,10 @@ export type TeacherDashboard = {
   __typename?: 'TeacherDashboard';
   id: Maybe<Scalars['String']['output']>;
   metrics: Maybe<TeacherDashboardMetrics>;
+  pageInfo: Maybe<PageInfo>;
   progressFeed: Maybe<Array<TeacherProgressFeedItem>>;
   scheduleRows: Maybe<Array<TeacherDashboardScheduleRow>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
 };
 
 export type TeacherDashboardMetrics = {

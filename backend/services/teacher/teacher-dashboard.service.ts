@@ -4,7 +4,7 @@ import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
-import type { ClassInstanceInsertInput, CreateAuditLogInput } from "@/backend/types";
+import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
 export namespace TeacherDashboardService {
@@ -16,32 +16,41 @@ export namespace TeacherDashboardService {
     }
   }
 
-  export async function getDashboard(userId: string, date: string, _mode: string, locale?: string) {
+  export async function getDashboard(
+    userId: string,
+    date: string,
+    _mode: string,
+    locale?: string,
+    pagination?: PaginationArgs | null
+  ) {
     await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, locale);
     await assertPermission(userId, AppPermission.SCHEDULE_VIEW_ASSIGNED, locale);
 
     const teacher = await TeacherRepository.findByUserId(userId);
     if (!teacher) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("notFound")); // Needs specific teacher not found error
+      throw new Error(t("notFound"));
     }
 
     const targetDate = new Date(date);
-    const scheduleRows = await SchedulingRepository.getDailySchedule(targetDate, {
+    const result = await SchedulingRepository.getAdminDashboardSchedule({
+      date: targetDate,
       teacherId: teacher.id,
       viewerTimezone: teacher.timezone,
+      pagination: pagination ?? null,
     });
 
     const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacher.id);
 
-    // Fetch real progress feed from class status events
     const progressFeed = await SchedulingRepository.getTeacherProgressFeed(teacher.id, targetDate);
 
     return {
       id: `teacher-dashboard-${teacher.id}-${date}`,
       metrics,
-      scheduleRows,
+      scheduleRows: result.rows,
       progressFeed,
+      totalCount: result.totalCount,
+      pageInfo: result.pageInfo,
     };
   }
 

@@ -12,6 +12,7 @@ export * from "./learning-resource.pothos";
 export * from "./manager-onboarding.pothos";
 export * from "./notification-alerts.pothos";
 export * from "./pagination.objects";
+export * from "./parent-dashboard.pothos";
 export * from "./parent-directory.pothos";
 export * from "./parent-document.pothos";
 export * from "./parent-onboarding.pothos";

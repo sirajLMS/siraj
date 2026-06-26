@@ -6,8 +6,8 @@ export const teacherDashboardQueryDocument: TypedDocumentNode<
   Operations.TeacherDashboardQuery,
   Types.QueryTeacherDashboardArgs
 > = gql`
-  query teacherDashboard($date: String!) {
-    teacherDashboard(date: $date) {
+  query teacherDashboard($date: String!, $pagination: PaginationArgs) {
+    teacherDashboard(date: $date, pagination: $pagination) {
       id
       metrics {
         total
@@ -38,6 +38,17 @@ export const teacherDashboardQueryDocument: TypedDocumentNode<
         id
         title
         type
+      }
+      totalCount
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        lastItem
+        hasMorePages
+        lastPage
+        perPage
+        total
       }
     }
   }
@@ -47,8 +58,8 @@ export const teacherActiveDashboardQueryDocument: TypedDocumentNode<
   Operations.TeacherActiveDashboardQuery,
   Types.QueryTeacherActiveDashboardArgs
 > = gql`
-  query teacherActiveDashboard($date: String!) {
-    teacherActiveDashboard(date: $date) {
+  query teacherActiveDashboard($date: String!, $pagination: PaginationArgs) {
+    teacherActiveDashboard(date: $date, pagination: $pagination) {
       id
       metrics {
         total
@@ -79,6 +90,17 @@ export const teacherActiveDashboardQueryDocument: TypedDocumentNode<
         id
         title
         type
+      }
+      totalCount
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        lastItem
+        hasMorePages
+        lastPage
+        perPage
+        total
       }
     }
   }

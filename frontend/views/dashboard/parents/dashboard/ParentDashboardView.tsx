@@ -18,12 +18,20 @@ import type {
   WorkshopPromo,
 } from "./types/parentDashboardTypes";
 
+export interface SchedulePagination {
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalCount: number;
+  readonly onPageChange: (page: number) => void;
+}
+
 interface ParentDashboardViewProps {
   readonly userName: string;
   readonly metrics: ParentDashboardMetrics;
   readonly scheduleRows: readonly ParentScheduleRow[];
   readonly studentProgress: readonly StudentProgressItem[];
   readonly workshopPromo: WorkshopPromo;
+  readonly schedulePagination?: SchedulePagination;
   readonly labels: ParentDashboardLabels;
   readonly onFilter: () => void;
   readonly onViewFullWeek: () => void;
@@ -79,6 +87,7 @@ export function ParentDashboardView({
   scheduleRows,
   studentProgress,
   workshopPromo,
+  schedulePagination,
   labels,
   onFilter,
   onViewFullWeek,
@@ -108,7 +117,12 @@ export function ParentDashboardView({
       {isMobile ? (
         <Box sx={{ mb: 4 }}>
           <MobileScheduleHeader labels={labels} onViewAll={onViewAll} />
-          <ParentScheduleCardList rows={scheduleRows} labels={labels} onJoinVideo={onJoinVideo} />
+          <ParentScheduleCardList
+            rows={scheduleRows}
+            labels={labels}
+            onJoinVideo={onJoinVideo}
+            pagination={schedulePagination}
+          />
         </Box>
       ) : (
         <SectionPanel
@@ -116,7 +130,13 @@ export function ParentDashboardView({
           actions={<DesktopScheduleActions labels={labels} onFilter={onFilter} onViewFullWeek={onViewFullWeek} />}
           sx={{ mb: 4 }}
         >
-          <ParentScheduleDataGrid rows={scheduleRows} labels={labels} onHistory={onHistory} onJoinVideo={onJoinVideo} />
+          <ParentScheduleDataGrid
+            rows={scheduleRows}
+            labels={labels}
+            onHistory={onHistory}
+            onJoinVideo={onJoinVideo}
+            pagination={schedulePagination}
+          />
         </SectionPanel>
       )}
 

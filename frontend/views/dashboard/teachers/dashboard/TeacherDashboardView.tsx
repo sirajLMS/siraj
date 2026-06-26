@@ -36,6 +36,10 @@ interface TeacherDashboardViewProps {
   readonly onSupport: () => void;
   readonly dateValue: string;
   readonly onDateChange: (date: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 function buildHeaderActions({
@@ -103,6 +107,10 @@ export function TeacherDashboardView({
   onSupport,
   dateValue,
   onDateChange,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
 }: Readonly<TeacherDashboardViewProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -165,6 +173,10 @@ export function TeacherDashboardView({
               canActivate={canActivate}
               onJoinVideo={onJoinVideo}
               onActivate={onActivate}
+              page={page}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              onPageChange={onPageChange}
             />
           </Box>
         ) : (
@@ -176,10 +188,11 @@ export function TeacherDashboardView({
               emptyMessage={labels.schedule.noEntries}
               onJoinVideo={onJoinVideo}
               onActivate={onActivate}
+              page={page}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              onPageChange={onPageChange}
             />
-            <Typography sx={{ typography: "labelMd", color: theme.palette.text.secondary, mt: 2 }}>
-              {formatShowingText(labels.schedule.showing, scheduleRows.length, totalScheduledToday)}
-            </Typography>
           </SectionPanel>
         )}
 

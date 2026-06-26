@@ -4,9 +4,10 @@ import { HistoryOutlined, PersonOutlined, VideocamOffOutlined, VideocamOutlined 
 import { Avatar, alpha, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
+import { AppDataGrid, GridPagination, StatusBadge } from "@/frontend/components/ui";
 import type { ParentDashboardLabels } from "../types/parentDashboardLabels";
 import type { ParentBookingStatus, ParentScheduleRow } from "../types/parentDashboardTypes";
+import type { SchedulePagination } from "../ParentDashboardView";
 import { ParentClassStatusIndicator } from "./ParentClassStatusIndicator";
 
 interface ParentScheduleDataGridProps {
@@ -14,6 +15,7 @@ interface ParentScheduleDataGridProps {
   readonly labels: ParentDashboardLabels;
   readonly onHistory: (id: string) => void;
   readonly onJoinVideo: (id: string) => void;
+  readonly pagination?: SchedulePagination;
 }
 
 function resolveBookingBadge(status: ParentBookingStatus): { category: "session" | "trackingStatus"; status: string } {
@@ -36,6 +38,7 @@ export function ParentScheduleDataGrid({
   labels,
   onHistory,
   onJoinVideo,
+  pagination,
 }: Readonly<ParentScheduleDataGridProps>) {
   const columns = useMemo<GridColDef<ParentScheduleRow>[]>(() => {
     return [
@@ -189,6 +192,8 @@ export function ParentScheduleDataGrid({
     ];
   }, [labels, onHistory, onJoinVideo]);
 
+  const isServerPagination = pagination !== undefined;
+
   return (
     <AppDataGrid<ParentScheduleRow>
       rows={rows}
@@ -196,9 +201,20 @@ export function ParentScheduleDataGrid({
       getRowId={row => row.id}
       autoHeight
       rowHeight={72}
-      hideFooter={rows.length <= 10}
       ariaLabel="parent-schedule-table"
       emptyMessage={labels.schedule.noEntries}
+      {...(isServerPagination
+        ? {
+            paginationMode: "server" as const,
+            rowCount: pagination.totalCount,
+            paginationModel: { page: pagination.page, pageSize: pagination.pageSize },
+            onPaginationModelChange: model => {
+              pagination.onPageChange(model.page);
+            },
+            pageSizeOptions: [pagination.pageSize],
+            slots: { pagination: GridPagination },
+          }
+        : { hideFooter: rows.length <= 10 })}
     />
   );
 }

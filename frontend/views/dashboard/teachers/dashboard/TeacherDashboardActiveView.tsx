@@ -33,6 +33,10 @@ interface TeacherDashboardActiveViewProps {
   readonly activationError?: string | null;
   readonly dateValue: string;
   readonly onDateChange: (date: string) => void;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onPageChange?: (page: number) => void;
 }
 
 function formatWelcomeSubtitle(template: string, date: string, count: number): string {
@@ -145,6 +149,10 @@ export function TeacherDashboardActiveView({
   activationError,
   dateValue,
   onDateChange,
+  page = 0,
+  pageSize = 10,
+  totalCount,
+  onPageChange,
 }: Readonly<TeacherDashboardActiveViewProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -267,6 +275,10 @@ export function TeacherDashboardActiveView({
           onStartSession={onStartSession}
           onMarkAbsent={onMarkAbsent}
           onRequestLeave={onRequestLeave}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
         />
       </SectionPanel>
     </PageContainer>

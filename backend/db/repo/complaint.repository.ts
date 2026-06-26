@@ -3,18 +3,19 @@ import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import { PaginationUtils } from "@/backend/utils";
 import type {
   ComplaintFileReturnType,
   ComplaintMetrics,
+  ComplaintQueuePaginatedResult,
   ComplaintQueueResult,
   ComplaintResponse,
   ComplaintReturnType,
   ComplaintSelectType,
   ComplaintSubmitInput,
+  PaginationArgs,
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
+import { PaginationUtils } from "@/backend/utils";
 import { type ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
@@ -86,7 +87,8 @@ export namespace ComplaintRepository {
       .from(complaints)
       .leftJoin(students, eq(complaints.studentId, students.id))
       .where(whereCondition)
-      .orderBy(desc(complaints.createdAt));
+      .orderBy(desc(complaints.createdAt))
+      .$dynamic();
 
     const [rows, countResult] = await Promise.all([
       queryWithPagination(baseQuery, pagination),
@@ -207,7 +209,7 @@ export namespace ComplaintRepository {
 
     const whereClause = and(...conditions);
 
-    const baseQuery = queryDb
+    let rowsQuery = queryDb
       .select({
         id: complaints.id,
         parentId: complaints.parentId,
@@ -230,10 +232,15 @@ export namespace ComplaintRepository {
       .leftJoin(users, eq(parents.userId, users.id))
       .leftJoin(students, eq(complaints.studentId, students.id))
       .where(whereClause)
-      .orderBy(desc(complaints.createdAt));
+      .orderBy(desc(complaints.createdAt))
+      .$dynamic();
+
+    if (paginationArgs) {
+      rowsQuery = queryWithPagination(rowsQuery, paginationArgs);
+    }
 
     const [rows, countResult] = await Promise.all([
-      queryWithPagination(baseQuery, paginationArgs),
+      rowsQuery,
       queryDb
         .select({ total: count() })
         .from(complaints)
@@ -244,7 +251,7 @@ export namespace ComplaintRepository {
 
     const total = countResult[0]?.total ?? 0;
 
-    const typedRows: ComplaintReturnType[] = rows.map(r => ({
+    const typedRows: ComplaintReturnType[] = (rows as Awaited<typeof rows>).map(r => ({
       id: r.id,
       parentId: r.parentId,
       studentId: r.studentId ?? null,

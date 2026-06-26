@@ -1215,6 +1215,24 @@ export type ParentInvoiceHistoryQueryVariables = Exact<{
 
 export type ParentInvoiceHistoryQuery = ParentInvoiceHistoryQuery_Query;
 
+export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, teacherId: string | null, teacherName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, bookingStatus: string | null, executionState: string | null, outcome: string | null, zoomMeetingUrl: string | null, classTimeFormatted: string | null };
+
+export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult = { id: string | null, totalCount: number | null, rows: Array<ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow> | null, pageInfo: ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_pageInfo_PageInfo | null };
+
+export type ParentDashboardScheduleQuery_Query = { parentDashboardSchedule: ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult | null };
+
+
+export type ParentDashboardScheduleQueryVariables = Exact<{
+  date: string | null | undefined;
+  search: string | null | undefined;
+  paginationArgs: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type ParentDashboardScheduleQuery = ParentDashboardScheduleQuery_Query;
+
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null, regular: number | null, onLeave: number | null, suspended: number | null, onTrial: number | null };
 
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow = { id: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, accountStatus: string | null, unpaidInvoices: number | null };
@@ -1844,13 +1862,16 @@ export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem = { id: string | null, title: string | null, type: string | null };
 
-export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard = { id: string | null, metrics: TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics | null, scheduleRows: Array<TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow> | null, progressFeed: Array<TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem> | null };
+export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, lastItem: number | null, hasMorePages: boolean, lastPage: number, perPage: number, total: number };
+
+export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard = { id: string | null, totalCount: number | null, metrics: TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics | null, scheduleRows: Array<TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow> | null, progressFeed: Array<TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem> | null, pageInfo: TeacherDashboardQuery_teacherDashboard_TeacherDashboard_pageInfo_PageInfo | null };
 
 export type TeacherDashboardQuery_Query = { teacherDashboard: TeacherDashboardQuery_teacherDashboard_TeacherDashboard | null };
 
 
 export type TeacherDashboardQueryVariables = Exact<{
   date: string;
+  pagination: Types.PaginationArgs | null | undefined;
 }>;
 
 
@@ -1862,13 +1883,16 @@ export type TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_
 
 export type TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem = { id: string | null, title: string | null, type: string | null };
 
-export type TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard = { id: string | null, metrics: TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics | null, scheduleRows: Array<TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow> | null, progressFeed: Array<TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem> | null };
+export type TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, lastItem: number | null, hasMorePages: boolean, lastPage: number, perPage: number, total: number };
+
+export type TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard = { id: string | null, totalCount: number | null, metrics: TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics | null, scheduleRows: Array<TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow> | null, progressFeed: Array<TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem> | null, pageInfo: TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard_pageInfo_PageInfo | null };
 
 export type TeacherActiveDashboardQuery_Query = { teacherActiveDashboard: TeacherActiveDashboardQuery_teacherActiveDashboard_TeacherDashboard | null };
 
 
 export type TeacherActiveDashboardQueryVariables = Exact<{
   date: string;
+  pagination: Types.PaginationArgs | null | undefined;
 }>;
 
 

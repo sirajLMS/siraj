@@ -131,6 +131,9 @@ interface ActiveDashboardWrapperProps {
     readonly error?: unknown;
   }>;
   readonly onDateChange: (date: string) => void;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly onPageChange: (page: number) => void;
 }
 
 function ActiveDashboardWrapper({
@@ -147,9 +150,13 @@ function ActiveDashboardWrapper({
   requestLeave,
   refetchActive,
   onDateChange,
+  page,
+  pageSize,
+  onPageChange,
 }: Readonly<ActiveDashboardWrapperProps>) {
   const activeMetrics = activeData?.teacherActiveDashboard?.metrics;
   const scheduleRows = mapRows(activeData?.teacherActiveDashboard?.scheduleRows, filterDate, "active");
+  const totalCount = activeData?.teacherActiveDashboard?.totalCount ?? 0;
 
   const feed = (activeData?.teacherActiveDashboard?.progressFeed || []).map((f: RawFeedItem) => {
     let icon: "grade" | "login" | "description" = "description";
@@ -221,6 +228,10 @@ function ActiveDashboardWrapper({
         }
       }}
       activationError={activationError}
+      page={page}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      onPageChange={onPageChange}
     />
   );
 }
@@ -236,6 +247,9 @@ interface StandardDashboardWrapperProps {
   readonly setManualEntryDefaultActive: (val: boolean) => void;
   readonly setManualEntryOpen: (val: boolean) => void;
   readonly onDateChange: (date: string) => void;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly onPageChange: (page: number) => void;
 }
 
 function StandardDashboardWrapper({
@@ -249,10 +263,14 @@ function StandardDashboardWrapper({
   setManualEntryDefaultActive,
   setManualEntryOpen,
   onDateChange,
+  page,
+  pageSize,
+  onPageChange,
 }: Readonly<StandardDashboardWrapperProps>) {
   const standardMetrics = standardData?.teacherDashboard?.metrics;
   const scheduleRows = mapRows(standardData?.teacherDashboard?.scheduleRows, filterDate, "standard");
   const totalScheduledToday = scheduleRows.length;
+  const totalCount = standardData?.teacherDashboard?.totalCount ?? 0;
   const missedRow = scheduleRows.find(r => r.status === "missed");
   const missedAlert = missedRow
     ? {
@@ -300,6 +318,10 @@ function StandardDashboardWrapper({
       onSupport={() => handleSupportRequest("SUPPORT")}
       dateValue={filterDate}
       onDateChange={onDateChange}
+      page={page}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      onPageChange={onPageChange}
     />
   );
 }
@@ -315,16 +337,18 @@ export function TeacherDashboardContainer() {
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
   const [manualEntryDefaultActive, setManualEntryDefaultActive] = useState(false);
 
-  const { filterDate, setFilterDate } = useTeacherDashboardStore();
+  const { filterDate, setFilterDate, page, pageSize, setPage } = useTeacherDashboardStore();
   const mode = resolveTeacherDashboardMode(permissions, modeParam);
 
+  const paginationArgs = { first: pageSize, page: page + 1 };
+
   const { data: standardData, refetch: refetchStandard } = useQuery(teacherDashboardQueryDocument, {
-    variables: { date: filterDate },
+    variables: { date: filterDate, pagination: paginationArgs },
     skip: mode !== "standard",
   });
 
   const { data: activeData, refetch: refetchActive } = useQuery(teacherActiveDashboardQueryDocument, {
-    variables: { date: filterDate },
+    variables: { date: filterDate, pagination: paginationArgs },
     skip: mode !== "active",
   });
 
@@ -446,6 +470,9 @@ export function TeacherDashboardContainer() {
           requestLeave={requestLeave}
           refetchActive={refetchActive}
           onDateChange={setFilterDate}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
         />
       ) : (
         <StandardDashboardWrapper
@@ -459,6 +486,9 @@ export function TeacherDashboardContainer() {
           setManualEntryDefaultActive={setManualEntryDefaultActive}
           setManualEntryOpen={setManualEntryOpen}
           onDateChange={setFilterDate}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
         />
       )}
       <ManualClassEntryDialog

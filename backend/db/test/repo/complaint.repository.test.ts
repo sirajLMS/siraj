@@ -184,16 +184,16 @@ describe("ComplaintRepository — getComplaintsByParent", () => {
     await insertComplaint(tx, parentA.parent.id, { body: "Parent A complaint" });
     await insertComplaint(tx, parentB.parent.id, { body: "Parent B complaint" });
 
-    const resultA = await ComplaintRepository.getComplaintsByParent(parentA.parent.id, tx);
-    const resultB = await ComplaintRepository.getComplaintsByParent(parentB.parent.id, tx);
+    const resultA = await ComplaintRepository.getComplaintsByParent(parentA.parent.id, null, tx);
+    const resultB = await ComplaintRepository.getComplaintsByParent(parentB.parent.id, null, tx);
 
-    expect(resultA.length).toBeGreaterThanOrEqual(1);
-    expect(resultA.every(c => c.parentId === parentA.parent.id)).toBeTrue();
-    expect(resultA.some(c => c.body === "Parent A complaint")).toBeTrue();
-    expect(resultA.some(c => c.body === "Parent B complaint")).toBeFalse();
+    expect(resultA.complaints.length).toBeGreaterThanOrEqual(1);
+    expect(resultA.complaints.every(c => c.parentId === parentA.parent.id)).toBeTrue();
+    expect(resultA.complaints.some(c => c.body === "Parent A complaint")).toBeTrue();
+    expect(resultA.complaints.some(c => c.body === "Parent B complaint")).toBeFalse();
 
-    expect(resultB.length).toBeGreaterThanOrEqual(1);
-    expect(resultB.every(c => c.parentId === parentB.parent.id)).toBeTrue();
+    expect(resultB.complaints.length).toBeGreaterThanOrEqual(1);
+    expect(resultB.complaints.every(c => c.parentId === parentB.parent.id)).toBeTrue();
   });
 
   complaintTest("excludes soft-deleted complaints", async tx => {
@@ -202,23 +202,24 @@ describe("ComplaintRepository — getComplaintsByParent", () => {
     await insertComplaint(tx, parent.id, { body: "Active complaint" });
     await insertComplaint(tx, parent.id, { body: "Deleted complaint", deletedAt: new Date() });
 
-    const result = await ComplaintRepository.getComplaintsByParent(parent.id, tx);
+    const result = await ComplaintRepository.getComplaintsByParent(parent.id, null, tx);
 
-    expect(result.some(c => c.body === "Active complaint")).toBeTrue();
-    expect(result.some(c => c.body === "Deleted complaint")).toBeFalse();
+    expect(result.complaints.some(c => c.body === "Active complaint")).toBeTrue();
+    expect(result.complaints.some(c => c.body === "Deleted complaint")).toBeFalse();
   });
 
   complaintTest("returns results ordered by createdAt DESC", async tx => {
     const { parent } = await setupParentWithStudent(tx, "OrderDesc");
     await insertTimedComplaintPair(tx, parent.id, "Earlier complaint", "Later complaint");
-    const result = await ComplaintRepository.getComplaintsByParent(parent.id, tx);
-    expect(result.length).toBeGreaterThanOrEqual(2);
-    expect(result[0].createdAt.getTime()).toBeGreaterThanOrEqual(result[1].createdAt.getTime());
+    const result = await ComplaintRepository.getComplaintsByParent(parent.id, null, tx);
+    expect(result.complaints.length).toBeGreaterThanOrEqual(2);
+    expect(result.complaints[0].createdAt.getTime()).toBeGreaterThanOrEqual(result.complaints[1].createdAt.getTime());
   });
 
   complaintTest("returns empty array for unknown parentId", async tx => {
-    const result = await ComplaintRepository.getComplaintsByParent("00000000-0000-0000-0000-000000000000", tx);
-    expect(result).toEqual([]);
+    const result = await ComplaintRepository.getComplaintsByParent("00000000-0000-0000-0000-000000000000", null, tx);
+    expect(result.complaints).toEqual([]);
+    expect(result.totalCount).toBe(0);
   });
 
   complaintTest("includes studentName from join when studentId is set", async tx => {
@@ -226,9 +227,9 @@ describe("ComplaintRepository — getComplaintsByParent", () => {
 
     await insertComplaint(tx, parent.id, { studentId: student.id, body: "With student" });
 
-    const result = await ComplaintRepository.getComplaintsByParent(parent.id, tx);
+    const result = await ComplaintRepository.getComplaintsByParent(parent.id, null, tx);
 
-    const matched = result.find(c => c.body === "With student");
+    const matched = result.complaints.find(c => c.body === "With student");
     expect(matched).toBeDefined();
     expect(matched?.studentName).toBe("StudJoin Student");
   });
@@ -496,7 +497,8 @@ describe("ComplaintRepository — getComplaintFiles", () => {
 describe("ComplaintRepository — non-transactional coverage fallback", () => {
   test("supports calls without tx for getComplaintsByParent", async () => {
     const result = await ComplaintRepository.getComplaintsByParent("00000000-0000-0000-0000-000000000000");
-    expect(result).toEqual([]);
+    expect(result.complaints).toEqual([]);
+    expect(result.totalCount).toBe(0);
   });
 
   test("supports calls without tx for getComplaintById", async () => {
