@@ -3,12 +3,7 @@
 import { FilterListOutlined } from "@mui/icons-material";
 import { Box, Grid, useMediaQuery, useTheme } from "@mui/material";
 import { FilterButton, PageContainer, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import type {
-  ParentDashboardMetrics,
-  ParentScheduleRow,
-  StudentProgressItem,
-  WorkshopPromo,
-} from "@/frontend/stores/mockParentDashboardStore";
+import type { ParentDashboardMetrics, ParentScheduleRow, StudentProgressItem, WorkshopPromo } from "./types/parentDashboardTypes";
 import { AcademicProgressSummary } from "./components/AcademicProgressSummary";
 import { ParentDashboardMetricsRow } from "./components/ParentDashboardMetrics";
 import { ParentScheduleCardList } from "./components/ParentScheduleCardList";

@@ -4,7 +4,7 @@ import { Box, type BoxProps, Button, type ButtonProps, Divider, styled, useMedia
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormGetValues, UseFormHandleSubmit, UseFormSetValue } from "react-hook-form";
 import { FormSuccessSnackbar, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import type { RescheduleSession } from "@/frontend/stores/mockRescheduleStore";
+import type { RescheduleSession } from "./types";
 import { ClassParticipantsSection } from "./ClassParticipantsSection";
 import { NotificationPolicyCard } from "./NotificationPolicyCard";
 import { QuickAdjustSection } from "./QuickAdjustSection";

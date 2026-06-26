@@ -4,7 +4,7 @@ import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Grid, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import type { TeacherDirectoryRow } from "@/frontend/stores/mockTeachersStore";
+import type { TeacherDirectoryRow } from "@/frontend/views/dashboard/teachers/home/types";
 import type { StudentDirectoryRowExtended } from "@/frontend/views/dashboard/students/home/types";
 import { CurrentTeacherCard } from "./components/CurrentTeacherCard";
 import { ManagementControlsCard } from "./components/ManagementControlsCard";

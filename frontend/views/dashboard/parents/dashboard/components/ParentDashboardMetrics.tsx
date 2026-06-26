@@ -3,7 +3,7 @@
 import { ChildCareOutlined, EventOutlined, PaymentsOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import { MetricCard } from "@/frontend/components/ui";
-import type { ParentDashboardMetrics } from "@/frontend/stores/mockParentDashboardStore";
+import type { ParentDashboardMetrics } from "../types/parentDashboardTypes";
 
 interface ParentDashboardMetricsRowProps {
   readonly metrics: ParentDashboardMetrics;

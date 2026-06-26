@@ -2,7 +2,7 @@ import { Fingerprint, HistoryOutlined, MailOutlineOutlined } from "@mui/icons-ma
 import { Avatar, Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { StudentStatusInfo } from "@/frontend/stores/mockStudentStatusStore";
+import type { StudentStatusInfo } from "../types";
 
 interface StudentStatusHeaderProps {
   readonly student: StudentStatusInfo;
