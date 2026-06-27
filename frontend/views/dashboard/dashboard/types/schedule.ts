@@ -1,4 +1,1 @@
-import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList } from "@/frontend/graphql/generated/gql/operations";
-
-export type DailyScheduleRow =
-  AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList;
+export type { DailyScheduleList as DailyScheduleRow } from "@/frontend/graphql/generated/gql/graphql-types";

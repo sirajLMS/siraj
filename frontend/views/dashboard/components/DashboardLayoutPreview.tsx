@@ -2,11 +2,11 @@
 
 import { SchoolOutlined } from "@mui/icons-material";
 import { AppBar, alpha, Box, Toolbar, Typography } from "@mui/material";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { LanguageSwitcher } from "@/frontend/views/dashboard/components/navbar/LanguageSwitcher";
 import { ThemeSwitcher } from "@/frontend/views/dashboard/components/navbar/ThemeSwitcher";
+import { Link } from "@/shared/i18n/routing";
 import { MobileMenuButton } from "./client/MobileMenuButton";
 import type { TranslatedNavItem } from "./client/SidebarShell";
 import { NotificationButton } from "./navbar/NotificationButton";
@@ -17,7 +17,6 @@ interface DashboardLayoutPreviewProps {
   readonly sidebar: ReactNode;
   readonly bottomNavItems: readonly TranslatedNavItem[];
   readonly activeNavKey: string;
-  readonly locale: string;
   readonly userName: string;
   readonly userEmail: string;
   readonly roleLabel: string;
@@ -142,22 +141,14 @@ function MainContent({
   );
 }
 
-function BottomNavItem({
-  item,
-  isActive,
-  locale,
-}: {
-  readonly item: TranslatedNavItem;
-  readonly isActive: boolean;
-  readonly locale: string;
-}) {
+function BottomNavItem({ item, isActive }: { readonly item: TranslatedNavItem; readonly isActive: boolean }) {
   const IconComponent = item.icon;
 
   return (
     <Box
       key={item.key}
       component={Link}
-      href={`/${locale}${item.href}`}
+      href={item.href}
       sx={theme => ({
         flex: 1,
         display: "flex",
@@ -188,11 +179,9 @@ function BottomNavItem({
 function BottomNav({
   bottomNavItems,
   activeNavKey,
-  locale,
 }: {
   readonly bottomNavItems: readonly TranslatedNavItem[];
   readonly activeNavKey: string;
-  readonly locale: string;
 }) {
   return (
     <Box
@@ -210,7 +199,7 @@ function BottomNav({
       })}
     >
       {bottomNavItems.map(item => (
-        <BottomNavItem key={item.key} item={item} isActive={item.key === activeNavKey} locale={locale} />
+        <BottomNavItem key={item.key} item={item} isActive={item.key === activeNavKey} />
       ))}
     </Box>
   );
@@ -221,7 +210,6 @@ export function DashboardLayoutPreview({
   sidebar,
   bottomNavItems,
   activeNavKey,
-  locale,
   userName,
   userEmail,
   roleLabel,
@@ -241,7 +229,7 @@ export function DashboardLayoutPreview({
       <MainContent sidebar={sidebar} navbarHeight={navbarHeight}>
         {children}
       </MainContent>
-      <BottomNav bottomNavItems={bottomNavItems} activeNavKey={activeNavKey} locale={locale} />
+      <BottomNav bottomNavItems={bottomNavItems} activeNavKey={activeNavKey} />
     </Box>
   );
 }

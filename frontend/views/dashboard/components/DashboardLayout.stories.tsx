@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { BOTTOM_NAV_ITEMS, SIDEBAR_NAV_ITEMS } from "@/frontend/views/dashboard/config/mockNavigationConfig";
@@ -14,7 +14,6 @@ interface MockDashboardLayoutContainerProps {
 function MockDashboardLayoutContainer({ children }: MockDashboardLayoutContainerProps) {
   const t = useTranslations("dashboard.admin");
   const tNav = useTranslations();
-  const locale = useLocale();
   const { name, avatarUrl, permissions, notificationCount, user } = useUserStore();
 
   const { sidebarItems, bottomNavItems, activeNavKey } = useDashboardLayoutProps({
@@ -35,12 +34,9 @@ function MockDashboardLayoutContainer({ children }: MockDashboardLayoutContainer
 
   return (
     <DashboardLayoutPreview
-      sidebar={
-        <SidebarShell navItems={translatedSidebarItems} activeKey={activeNavKey} locale={locale} sidebarWidth="260px" />
-      }
+      sidebar={<SidebarShell navItems={translatedSidebarItems} activeKey={activeNavKey} sidebarWidth="260px" />}
       bottomNavItems={translatedBottomNavItems}
       activeNavKey={activeNavKey}
-      locale={locale}
       userName={name}
       userEmail={user?.email || "mock@example.com"}
       roleLabel={t("roleLabel")}

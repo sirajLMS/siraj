@@ -1,11 +1,10 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useLayoutStore } from "@/frontend/stores/layoutStore";
 import { getNavItemsForPermissions } from "@/frontend/views/dashboard/config/navigationConfig";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
+import { usePathname, useRouter } from "@/shared/i18n/routing";
 
 interface UseDashboardLayoutPropsInput {
   readonly sidebarNavItems: readonly NavItem[];
@@ -20,18 +19,16 @@ export function useDashboardLayoutProps({
 }: UseDashboardLayoutPropsInput) {
   const router = useRouter();
   const pathname = usePathname();
-  const locale = useLocale();
 
   const { sidebarOpen, mobileDrawerOpen, toggleSidebar, toggleMobileDrawer, closeMobileDrawer } = useLayoutStore();
 
   const sidebarItems = getNavItemsForPermissions(sidebarNavItems, permissions);
   const filteredBottomNavItems = getNavItemsForPermissions(bottomNavItems, permissions);
 
-  const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/dashboard";
-  const activeNavKey = sidebarItems.find(item => pathWithoutLocale.startsWith(item.href))?.key ?? "home";
+  const activeNavKey = sidebarItems.find(item => pathname.startsWith(item.href))?.key ?? "home";
 
   const handleNavigate = (href: string) => {
-    router.push(`/${locale}${href}`);
+    router.push(href);
   };
 
   return {

@@ -12,8 +12,8 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { useParams, useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   groupClassAuditQueryDocument,
@@ -21,6 +21,7 @@ import {
   updateClassAdminNoteMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
+import { useRouter } from "@/shared/i18n/routing";
 import { ClassAuditView } from "./ClassAuditView";
 
 function exportToCsv(
@@ -162,7 +163,6 @@ function AdminNoteDialog({
 
 export function ClassAuditContainer() {
   const router = useRouter();
-  const locale = useLocale();
   const t = useTranslations("dashboard.classAudit");
   const client = useApolloClient();
 
@@ -217,7 +217,7 @@ export function ClassAuditContainer() {
   };
 
   const handleEditClass = () => {
-    router.push(`/${locale}/reschedule?classInstanceId=${id}`);
+    router.push(`/reschedule?classInstanceId=${id}`);
   };
 
   const handleExportStudents = () => {
@@ -225,7 +225,7 @@ export function ClassAuditContainer() {
   };
 
   const handleViewStudent = (studentId: string) => {
-    router.push(`/${locale}/students/${studentId}/status`);
+    router.push(`/students/${studentId}/status`);
   };
 
   const handleJoinMeeting = () => {

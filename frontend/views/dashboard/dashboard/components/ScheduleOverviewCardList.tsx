@@ -3,11 +3,10 @@
 import { MoreVert as MoreVertIcon } from "@mui/icons-material";
 import { Box, IconButton, Paper, Stack, type Theme, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
 import { resolveScheduleInstanceDisplayStatus } from "@/frontend/views/dashboard/dashboard/utils/scheduleInstanceStatus";
+import { useRouter } from "@/shared/i18n/routing";
 import { ScheduleInstanceStatusBadge } from "./ScheduleInstanceStatusBadge";
 
 interface ScheduleOverviewCardListProps {
@@ -112,7 +111,6 @@ export function ScheduleOverviewCardList({
   emptyMessage,
 }: ScheduleOverviewCardListProps) {
   const router = useRouter();
-  const locale = useLocale();
 
   if (rows.length === 0) {
     return (
@@ -157,7 +155,7 @@ export function ScheduleOverviewCardList({
                 />
                 <StyledDetailsIconButton
                   size="small"
-                  onClick={() => router.push(`/${locale}/classes/${row.id ?? ""}`)}
+                  onClick={() => router.push(`/classes/${row.id ?? ""}`)}
                   aria-label={detailsLabel}
                 >
                   <MoreVertIcon fontSize="small" />

@@ -1,9 +1,9 @@
 "use client";
 
 import { Box, Paper, Typography } from "@mui/material";
-import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
+import { Link } from "@/shared/i18n/routing";
 
 interface BottomNavbarProps {
   readonly items: readonly NavItem[];
@@ -12,7 +12,6 @@ interface BottomNavbarProps {
 
 export function BottomNavbar({ items, activeKey }: BottomNavbarProps) {
   const t = useTranslations();
-  const locale = useLocale();
 
   return (
     <Paper
@@ -43,7 +42,7 @@ export function BottomNavbar({ items, activeKey }: BottomNavbarProps) {
             <Box
               key={item.key}
               component={Link}
-              href={`/${locale}${item.href}`}
+              href={item.href}
               sx={theme => ({
                 flex: 1,
                 display: "flex",

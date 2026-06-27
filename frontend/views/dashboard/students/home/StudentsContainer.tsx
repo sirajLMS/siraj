@@ -1,13 +1,13 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
 import { useStudentDirectoryStore } from "@/frontend/stores/studentDirectoryStore";
+import { useRouter } from "@/shared/i18n/routing";
 import { StudentsView } from "./StudentsView";
 import {
   buildFilteredRows,

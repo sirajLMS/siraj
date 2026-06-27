@@ -3,15 +3,14 @@
 import { useQuery } from "@apollo/client/react";
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/graphql/sharedDocuments/billing-alerts.documents";
+import { useRouter } from "@/shared/i18n/routing";
 
 export function UnpaidInvoicesSection() {
   const t = useTranslations("dashboard.notifications");
-  const locale = useLocale();
   const router = useRouter();
 
   const { data, loading } = useQuery(unpaidInvoicesAlertQueryDocument);
@@ -39,7 +38,7 @@ export function UnpaidInvoicesSection() {
   }
 
   const handleUserClick = (userId: string) => {
-    router.push(`/${locale}/users/${userId}/billing-profile`);
+    router.push(`/users/${userId}/billing-profile`);
   };
 
   const items = summary.items ?? [];

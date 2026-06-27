@@ -2,14 +2,14 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createManualInvoiceMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
 import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
+import { useRouter } from "@/shared/i18n/routing";
 import { ManualInvoiceView } from "./ManualInvoiceView";
 import type { ManualInvoiceFormData } from "./schemas/manualInvoiceSchema";
 import type { ParentInvoiceOption, StudentOption } from "./types/manualInvoiceViewTypes";
@@ -43,7 +43,6 @@ function billingMonthsToInput(months: string[], year?: number): { year: number; 
 export function ManualInvoiceContainer() {
   const t = useTranslations("dashboard.billing.manual");
   const router = useRouter();
-  const locale = useLocale();
   const labels = buildManualInvoiceLabels(t);
 
   const [showSuccess, setShowSuccess] = useState(false);
@@ -83,7 +82,7 @@ export function ManualInvoiceContainer() {
   });
 
   const handleBack = () => {
-    router.push(`/${locale}/billing`);
+    router.push("/billing");
   };
 
   const handleSubmit = (data: ManualInvoiceFormData, sendEmail: boolean) => {

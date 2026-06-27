@@ -2,9 +2,8 @@
 
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import Link from "next/link";
-import { useLocale } from "next-intl";
 import { avatarInitials } from "@/frontend/utils/avatar";
+import { Link } from "@/shared/i18n/routing";
 
 const StyledEntityLink = styled(Link)(({ theme }) => ({
   color: theme.palette.primary.main,
@@ -36,8 +35,7 @@ export function StudentEntityLink({
   showAvatar = false,
   variant = "titleLg",
 }: StudentEntityLinkProps) {
-  const locale = useLocale();
-  const href = `/${locale}/students/${studentId}`;
+  const href = `/students/${studentId}`;
 
   if (showAvatar) {
     return (
@@ -90,8 +88,7 @@ export function TeacherEntityLink({
   showAvatar = false,
   variant = "titleLg",
 }: TeacherEntityLinkProps) {
-  const locale = useLocale();
-  const href = `/${locale}/teachers/${teacherId}/profile`;
+  const href = `/teachers/${teacherId}/profile`;
 
   if (showAvatar) {
     return (

@@ -2,8 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -18,6 +17,7 @@ import {
   studentCreditStatusQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
+import { useRouter } from "@/shared/i18n/routing";
 import { AdminBillingView } from "./AdminBillingView";
 import type {
   AdminBillingSummary,
@@ -63,7 +63,6 @@ function deriveInitials(name: string | null): string {
 export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const t = useTranslations("dashboard.billing");
   const router = useRouter();
-  const locale = useLocale();
   const labels = buildBillingLabels(t);
 
   const page = useAdminBillingStore(state => state.page);
@@ -217,7 +216,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
         onMarkAsPaid={handleMarkAsPaid}
         onSendReminder={handleSendReminder}
         onManualInvoice={() => {
-          router.push(`/${locale}/billing/manual`);
+          router.push("/billing/manual");
         }}
         onDeleteInvoice={handleDeleteInvoice}
         markingPaid={markingPaid}

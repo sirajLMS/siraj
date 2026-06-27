@@ -1,10 +1,10 @@
 import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
 import { Avatar, Box, IconButton, Link, Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
-import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useRouter } from "@/shared/i18n/routing";
 
 interface TeacherDataGridProps {
   readonly rows: readonly TeacherDirectoryRow[];

@@ -4,11 +4,10 @@ import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LanguageIcon from "@mui/icons-material/Language";
 import { Avatar, Box, Chip, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import Link from "next/link";
-import { useLocale } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui";
 import { avatarInitials } from "@/frontend/utils/avatar";
 import type { StudentInfo, TeacherInfo } from "@/frontend/views/dashboard/types/dashboard";
+import { Link } from "@/shared/i18n/routing";
 import { StudentEntityLink, TeacherEntityLink } from "../components/EntityLinks";
 
 interface ClassInfoCardProps {
@@ -120,9 +119,8 @@ function LinkedAvatar({
 }
 
 export function ClassInfoCard({ courseName, instanceId, student, teacher, isActive, labels }: ClassInfoCardProps) {
-  const locale = useLocale();
-  const studentHref = student.id ? `/${locale}/students/${student.id}` : undefined;
-  const teacherHref = teacher.id ? `/${locale}/teachers/${teacher.id}/profile` : undefined;
+  const studentHref = student.id ? `/students/${student.id}` : undefined;
+  const teacherHref = teacher.id ? `/teachers/${teacher.id}/profile` : undefined;
 
   return (
     <BaseCard sx={{ position: "relative", overflow: "hidden", height: "100%" }}>

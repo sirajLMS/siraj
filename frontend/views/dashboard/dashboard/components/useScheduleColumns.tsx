@@ -89,7 +89,7 @@ function buildTimeColumns(
   ];
 }
 
-function renderStudentCell(row: DailyScheduleRow, locale: string) {
+function renderStudentCell(row: DailyScheduleRow) {
   const studentName = row.student?.name ?? "Unknown Student";
   const studentId = row.student?.id;
 
@@ -97,10 +97,10 @@ function renderStudentCell(row: DailyScheduleRow, locale: string) {
     return <StyledStudentNameText variant="bodyMd">{studentName}</StyledStudentNameText>;
   }
 
-  return <StyledScheduleNameLink href={`/${locale}/students/${studentId}`}>{studentName}</StyledScheduleNameLink>;
+  return <StyledScheduleNameLink href={`/students/${studentId}`}>{studentName}</StyledScheduleNameLink>;
 }
 
-function renderTeacherCell(row: DailyScheduleRow, locale: string) {
+function renderTeacherCell(row: DailyScheduleRow) {
   const teacherName = row.teacher?.name ?? "Unknown Teacher";
   const teacherId = row.teacher?.id;
 
@@ -108,18 +108,13 @@ function renderTeacherCell(row: DailyScheduleRow, locale: string) {
     return <StyledTeacherNameText variant="bodyMd">{teacherName}</StyledTeacherNameText>;
   }
 
-  return (
-    <StyledScheduleTeacherLink href={`/${locale}/teachers/${teacherId}/profile`}>
-      {teacherName}
-    </StyledScheduleTeacherLink>
-  );
+  return <StyledScheduleTeacherLink href={`/teachers/${teacherId}/profile`}>{teacherName}</StyledScheduleTeacherLink>;
 }
 
 function buildActionsColumn(
   headers: UseScheduleColumnsParams["headers"],
   detailsLabel: string,
-  historyLabel: string,
-  locale: string
+  historyLabel: string
 ): GridColDef<DailyScheduleRow> {
   return {
     field: "actions",
@@ -138,14 +133,14 @@ function buildActionsColumn(
         <StyledActionsCellBox>
           {studentId ? (
             <Tooltip title={historyLabel}>
-              <StyledHistoryIconLink href={`/${locale}/students/${studentId}/history`} aria-label={historyLabel}>
+              <StyledHistoryIconLink href={`/students/${studentId}/history`} aria-label={historyLabel}>
                 <HistoryOutlined fontSize="small" />
               </StyledHistoryIconLink>
             </Tooltip>
           ) : null}
           {classId ? (
             <Tooltip title={detailsLabel}>
-              <StyledGridDetailsLink href={`/${locale}/classes/${classId}`}>{detailsLabel}</StyledGridDetailsLink>
+              <StyledGridDetailsLink href={`/classes/${classId}`}>{detailsLabel}</StyledGridDetailsLink>
             </Tooltip>
           ) : null}
         </StyledActionsCellBox>
@@ -187,16 +182,16 @@ export function useScheduleColumns({ headers, statusLabels, detailsLabel, showTi
         headerName: headers.teacher,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => renderTeacherCell(row, locale),
+        renderCell: ({ row }) => renderTeacherCell(row),
       },
       {
         field: "student",
         headerName: headers.student,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => renderStudentCell(row, locale),
+        renderCell: ({ row }) => renderStudentCell(row),
       },
-      buildActionsColumn(headers, detailsLabel, headers.history, locale),
+      buildActionsColumn(headers, detailsLabel, headers.history),
     ];
   }, [detailsLabel, headers, statusLabels, showTimezones, locale]);
 }

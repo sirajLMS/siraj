@@ -2,10 +2,9 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import Link from "next/link";
-import { useLocale } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui";
 import type { StudentInfo } from "@/frontend/views/dashboard/types/dashboard";
+import { Link } from "@/shared/i18n/routing";
 import { StudentEntityLink } from "../components/EntityLinks";
 
 interface StudentProfileCardProps {
@@ -44,8 +43,6 @@ const StyledViewProfileButton = styled(Link)(({ theme }) => ({
 }));
 
 export function StudentProfileCard({ student, labels }: StudentProfileCardProps) {
-  const locale = useLocale();
-
   if (!student.id) {
     return (
       <BaseCard sx={{ position: "relative", overflow: "hidden", pt: 4 }}>
@@ -55,7 +52,7 @@ export function StudentProfileCard({ student, labels }: StudentProfileCardProps)
     );
   }
 
-  const profileHref = `/${locale}/students/${student.id}`;
+  const profileHref = `/students/${student.id}`;
 
   return (
     <BaseCard sx={{ position: "relative", overflow: "hidden", pt: 4 }}>

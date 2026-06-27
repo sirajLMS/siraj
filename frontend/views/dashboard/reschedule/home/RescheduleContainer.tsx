@@ -4,7 +4,6 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, CircularProgress } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
@@ -18,7 +17,6 @@ import { combineDateTime } from "./utils/rescheduleDateTime";
 
 export function RescheduleContainer() {
   const router = useRouter();
-  const locale = useLocale();
   const searchParams = useSearchParams();
   const classInstanceId = searchParams.get("classInstanceId") ?? "";
 
@@ -101,7 +99,7 @@ export function RescheduleContainer() {
       if (mutationResult?.rescheduleClass?.id) {
         setShowSuccess(true);
         setTimeout(() => {
-          router.push(`/${locale}/classes/${mutationResult.rescheduleClass?.id}`);
+          router.push(`/classes/${mutationResult.rescheduleClass?.id}`);
         }, 1500);
       }
     } catch (err) {
@@ -110,7 +108,7 @@ export function RescheduleContainer() {
   };
 
   const onCancel = () => {
-    router.push(`/${locale}/classes/${classInstanceId}`);
+    router.push(`/classes/${classInstanceId}`);
   };
 
   return (

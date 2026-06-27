@@ -205,7 +205,7 @@ export function RescheduleTrackingContainer() {
   };
 
   const handleView = (id: string) => {
-    router.push(`/${locale}/classes/${id}`);
+    router.push(`/classes/${id}`);
   };
 
   const handleExport = () => {

@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-import { type AppLocale, locales } from "@/shared/i18n/routing";
+import { type AppLocale, locales, redirect } from "@/shared/i18n/routing";
 
 export default async function DashboardLayout({ params }: { readonly params: Promise<{ locale: string }> }) {
   let { locale } = await params;
@@ -8,7 +7,7 @@ export default async function DashboardLayout({ params }: { readonly params: Pro
     locale = locales[0];
   }
 
-  redirect(`/${locale}/login`);
+  redirect({ href: "/login", locale });
 
   return <> </>;
 }

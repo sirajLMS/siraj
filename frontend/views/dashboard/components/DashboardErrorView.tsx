@@ -2,8 +2,8 @@
 
 import { ErrorOutlined as ErrorIcon } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/shared/i18n/routing";
 
 interface DashboardErrorViewProps {
   readonly errorMessage: string | null;
@@ -11,7 +11,6 @@ interface DashboardErrorViewProps {
 
 export function DashboardErrorView({ errorMessage }: DashboardErrorViewProps) {
   const router = useRouter();
-  const locale = useLocale();
   const t = useTranslations("dashboard.admin");
 
   const errorTitle = errorMessage ? t("loadingFailedTitle") : t("unauthenticatedTitle");
@@ -23,7 +22,7 @@ export function DashboardErrorView({ errorMessage }: DashboardErrorViewProps) {
   };
 
   const handleLoginRedirect = () => {
-    router.push(`/${locale}/login`);
+    router.push("/login");
   };
 
   return (

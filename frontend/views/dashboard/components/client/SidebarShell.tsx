@@ -15,10 +15,10 @@ import {
   type Theme,
   Tooltip,
 } from "@mui/material";
-import Link from "next/link";
 import { useEffect } from "react";
 import { useLayoutStore } from "@/frontend/stores/layoutStore";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
+import { Link } from "@/shared/i18n/routing";
 
 export interface TranslatedNavItem extends NavItem {
   readonly label: string;
@@ -27,13 +27,11 @@ export interface TranslatedNavItem extends NavItem {
 interface SidebarShellProps {
   readonly navItems: readonly TranslatedNavItem[];
   readonly activeKey: string;
-  readonly locale: string;
   readonly sidebarWidth: string;
 }
 
 interface SidebarNavItemProps {
   readonly item: TranslatedNavItem;
-  readonly locale: string;
   readonly isActive?: boolean;
   readonly isCollapsed: boolean;
   readonly isFooter?: boolean;
@@ -64,13 +62,13 @@ function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter =
   });
 }
 
-function SidebarNavItem({ item, locale, isActive = false, isCollapsed, isFooter = false }: SidebarNavItemProps) {
+function SidebarNavItem({ item, isActive = false, isCollapsed, isFooter = false }: SidebarNavItemProps) {
   const IconComponent = item.icon;
 
   const button = (
     <ListItemButton
       component={Link}
-      href={`/${locale}${item.href}`}
+      href={item.href}
       selected={!isFooter && isActive}
       sx={getSidebarItemStyles(isCollapsed, isActive, isFooter)}
     >
@@ -116,12 +114,10 @@ function SidebarNavItem({ item, locale, isActive = false, isCollapsed, isFooter 
 function SidebarContent({
   navItems,
   activeKey,
-  locale,
   isCollapsed,
 }: {
   readonly navItems: readonly TranslatedNavItem[];
   readonly activeKey: string;
-  readonly locale: string;
   readonly isCollapsed: boolean;
 }) {
   const mainItems = navItems.filter(item => item.section === "main");
@@ -150,13 +146,7 @@ function SidebarContent({
         component="nav"
       >
         {mainItems.map(item => (
-          <SidebarNavItem
-            key={item.key}
-            item={item}
-            locale={locale}
-            isActive={item.key === activeKey}
-            isCollapsed={isCollapsed}
-          />
+          <SidebarNavItem key={item.key} item={item} isActive={item.key === activeKey} isCollapsed={isCollapsed} />
         ))}
       </List>
 
@@ -165,7 +155,7 @@ function SidebarContent({
           <Divider sx={theme => ({ borderColor: theme.palette.outlineVariant, mx: 1.5 })} />
           <List sx={{ px: 1.5, pt: 1 }} component="nav">
             {footerItems.map(item => (
-              <SidebarNavItem key={item.key} item={item} locale={locale} isCollapsed={isCollapsed} isFooter />
+              <SidebarNavItem key={item.key} item={item} isCollapsed={isCollapsed} isFooter />
             ))}
           </List>
         </>
@@ -178,12 +168,10 @@ function SidebarMobileDrawer({
   sidebarWidth,
   navItems,
   activeKey,
-  locale,
 }: {
   readonly sidebarWidth: string;
   readonly navItems: readonly TranslatedNavItem[];
   readonly activeKey: string;
-  readonly locale: string;
 }) {
   const mobileDrawerOpen = useLayoutStore(state => state.mobileDrawerOpen);
   const closeMobileDrawer = useLayoutStore(state => state.closeMobileDrawer);
@@ -209,7 +197,7 @@ function SidebarMobileDrawer({
         },
       })}
     >
-      <SidebarContent navItems={navItems} activeKey={activeKey} locale={locale} isCollapsed={false} />
+      <SidebarContent navItems={navItems} activeKey={activeKey} isCollapsed={false} />
     </Drawer>
   );
 }
@@ -218,12 +206,10 @@ function SidebarDesktop({
   sidebarWidth,
   navItems,
   activeKey,
-  locale,
 }: {
   readonly sidebarWidth: string;
   readonly navItems: readonly TranslatedNavItem[];
   readonly activeKey: string;
-  readonly locale: string;
 }) {
   const collapsedWidth = "80px";
   const sidebarOpen = useLayoutStore(state => state.sidebarOpen);
@@ -243,7 +229,7 @@ function SidebarDesktop({
         transition: "width 0.3s ease",
       })}
     >
-      <SidebarContent navItems={navItems} activeKey={activeKey} locale={locale} isCollapsed={isCollapsed} />
+      <SidebarContent navItems={navItems} activeKey={activeKey} isCollapsed={isCollapsed} />
 
       <Box
         onClick={toggleSidebar}
@@ -306,11 +292,11 @@ function SidebarDesktop({
   );
 }
 
-export function SidebarShell({ navItems, activeKey, locale, sidebarWidth }: SidebarShellProps) {
+export function SidebarShell({ navItems, activeKey, sidebarWidth }: SidebarShellProps) {
   return (
     <>
-      <SidebarMobileDrawer sidebarWidth={sidebarWidth} navItems={navItems} activeKey={activeKey} locale={locale} />
-      <SidebarDesktop sidebarWidth={sidebarWidth} navItems={navItems} activeKey={activeKey} locale={locale} />
+      <SidebarMobileDrawer sidebarWidth={sidebarWidth} navItems={navItems} activeKey={activeKey} />
+      <SidebarDesktop sidebarWidth={sidebarWidth} navItems={navItems} activeKey={activeKey} />
     </>
   );
 }

@@ -14,7 +14,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { PageContainer } from "@/frontend/components/ui";
@@ -34,6 +34,7 @@ import {
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/dashboard/utils/formatScheduleTime";
+import { useRouter } from "@/shared/i18n/routing";
 import { getErrorMessage } from "@/shared/utils/error";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
 import { ClassDetailsHeader } from "./ClassDetailsHeader";
@@ -268,7 +269,7 @@ export function ClassDetailsContainer() {
     try {
       await deleteClass({ variables: { classInstanceId: id } });
       logger.warn("Deleted class instance:", id);
-      router.push(`/${locale}/dashboard`);
+      router.push("/dashboard");
     } catch (err) {
       logger.error("Error in deleteClass:", err);
     }
@@ -283,11 +284,11 @@ export function ClassDetailsContainer() {
   };
 
   const handleReschedule = () => {
-    router.push(`/${locale}/reschedule?classInstanceId=${id}`);
+    router.push(`/reschedule?classInstanceId=${id}`);
   };
 
   const handleInfoEdit = () => {
-    router.push(`/${locale}/classes/${id}/audit`);
+    router.push(`/classes/${id}/audit`);
   };
 
   const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;

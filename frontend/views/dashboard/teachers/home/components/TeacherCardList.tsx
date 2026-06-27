@@ -1,10 +1,10 @@
 import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, IconButton, TextField, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { PaginationControls } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useRouter } from "@/shared/i18n/routing";
 
 interface TeacherCardListProps {
   readonly rows: readonly TeacherDirectoryRow[];
@@ -57,12 +57,10 @@ function TeacherCard({
   row,
   t,
   router,
-  locale,
 }: {
   readonly row: TeacherDirectoryRow;
   readonly t: ReturnType<typeof useTranslations<"dashboard.teachersDirectory">>;
   readonly router: ReturnType<typeof useRouter>;
-  readonly locale: string;
 }) {
   return (
     <Box
@@ -121,7 +119,7 @@ function TeacherCard({
         >
           {t("actions.joinRoom")}
         </Button>
-        <TeacherCardActions row={row} t={t} router={router} locale={locale} />
+        <TeacherCardActions row={row} t={t} router={router} />
       </Box>
     </Box>
   );
@@ -131,12 +129,10 @@ function TeacherCardActions({
   row,
   t: _t,
   router,
-  locale,
 }: {
   readonly row: TeacherDirectoryRow;
   readonly t: ReturnType<typeof useTranslations<"dashboard.teachersDirectory">>;
   readonly router: ReturnType<typeof useRouter>;
-  readonly locale: string;
 }) {
   return (
     <Box sx={{ display: "flex", gap: 1 }}>
@@ -144,7 +140,7 @@ function TeacherCardActions({
         sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
         onClick={() => {
           if (row.id) {
-            router.push(`/${locale}/teachers/${row.id}/schedule/weekly`);
+            router.push(`/teachers/${row.id}/schedule/weekly`);
           }
         }}
       >
@@ -154,7 +150,7 @@ function TeacherCardActions({
         sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
         onClick={() => {
           if (row.id) {
-            router.push(`/${locale}/teachers/${row.id}/profile`);
+            router.push(`/teachers/${row.id}/profile`);
           }
         }}
       >
@@ -175,7 +171,6 @@ export function TeacherCardList({
 }: Readonly<TeacherCardListProps>) {
   const t = useTranslations("dashboard.teachersDirectory");
   const router = useRouter();
-  const locale = useLocale();
 
   const pageCount = totalCount !== undefined && pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
 
@@ -189,7 +184,7 @@ export function TeacherCardList({
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {rows.map(row => (
-          <TeacherCard key={row.id} row={row} t={t} router={router} locale={locale} />
+          <TeacherCard key={row.id} row={row} t={t} router={router} />
         ))}
       </Box>
 

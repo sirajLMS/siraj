@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useTransition } from "react";
 import type { Locale } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/routing";
 
 export function useLanguageSwitch() {
   const router = useRouter();

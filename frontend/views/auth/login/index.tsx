@@ -1,12 +1,13 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { demoLoginMutationDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useAuth } from "@/frontend/hooks/useAuth";
 import { useAuthToken } from "@/frontend/hooks/useAuthToken";
+import { useRouter } from "@/shared/i18n/routing";
 import { LoginView } from "./LoginView";
 import type { LoginFormData } from "./schemas/loginSchema";
 

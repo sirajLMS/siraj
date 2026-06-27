@@ -1,8 +1,7 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
 import type { CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -10,6 +9,7 @@ import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedD
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
+import { useRouter } from "@/shared/i18n/routing";
 import { mapFormDataToInput } from "./actions/createRecurringClass";
 import { CreateRecurringClassView } from "./CreateRecurringClassView";
 import type { RecurringClassFormData } from "./recurringClassSchema";
@@ -17,7 +17,6 @@ import type { RecurringClassFormData } from "./recurringClassSchema";
 export function CreateRecurringClassContainer() {
   const t = useTranslations("dashboard.createRecurringClass");
   const router = useRouter();
-  const locale = useLocale();
   const permissions = useUserStore(state => state.permissions);
 
   const isSubmitting = useCreateRecurringClassStore(state => state.isSubmitting);
@@ -34,8 +33,8 @@ export function CreateRecurringClassContainer() {
   const [createClassMutation] = useMutation(createRecurringClassMutationDocument);
 
   const handleClose = useCallback(() => {
-    router.push(`/${locale}/dashboard`);
-  }, [router, locale]);
+    router.push("/dashboard");
+  }, [router]);
 
   const handleSubmit = useCallback(
     async (data: RecurringClassFormData) => {
@@ -57,7 +56,7 @@ export function CreateRecurringClassContainer() {
           const classId = result.createRecurringClass.recurringScheduleId ?? result.createRecurringClass.id;
           if (classId) {
             setTimeout(() => {
-              router.push(`/${locale}/classes/${classId}`);
+              router.push(`/classes/${classId}`);
             }, 1500);
           }
         } else {
@@ -71,7 +70,7 @@ export function CreateRecurringClassContainer() {
         setSubmitting(false);
       }
     },
-    [createClassMutation, setSubmitting, resetSuccess, clearError, setShowSuccess, setErrorMessage, router, locale, t]
+    [createClassMutation, setSubmitting, resetSuccess, clearError, setShowSuccess, setErrorMessage, router, t]
   );
 
   const labels = useMemo(

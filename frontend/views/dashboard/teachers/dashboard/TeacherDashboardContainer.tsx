@@ -2,13 +2,14 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+import { useRouter } from "@/shared/i18n/routing";
 
 type SupportRequestType = "COORDINATOR" | "SUPPORT";
 type SnackbarSeverity = "success" | "error" | "info";
@@ -338,7 +339,6 @@ function StandardDashboardWrapper({
 
 export function TeacherDashboardContainer() {
   const t = useTranslations("dashboard.teacherDashboard");
-  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const modeParam = searchParams.get("mode");
@@ -483,7 +483,7 @@ export function TeacherDashboardContainer() {
   };
 
   const handleViewAll = () => {
-    router.push(`/${locale}/schedule`);
+    router.push("/schedule");
   };
 
   const showSnackbar = (message: string, severity: SnackbarSeverity) => {

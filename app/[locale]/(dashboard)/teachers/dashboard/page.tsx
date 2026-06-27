@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/shared/i18n/routing";
 
 interface TeacherDashboardRedirectPageProps {
   readonly params: Promise<{ locale: string }>;
@@ -6,5 +6,5 @@ interface TeacherDashboardRedirectPageProps {
 
 export default async function TeacherDashboardRedirectPage({ params }: TeacherDashboardRedirectPageProps) {
   const { locale } = await params;
-  redirect(`/${locale}/dashboard?mode=teacher`);
+  redirect({ href: "/dashboard?mode=teacher", locale });
 }
