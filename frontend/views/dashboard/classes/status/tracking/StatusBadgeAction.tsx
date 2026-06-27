@@ -7,6 +7,7 @@ import {
   PowerSettingsNewOutlined,
 } from "@mui/icons-material";
 import { Box, Button, type SxProps, styled, type Theme, Tooltip, Typography, useTheme } from "@mui/material";
+import { useRouter } from "@/shared/i18n/routing";
 import type { StatusTrackingRow } from "./types";
 import { computeSessionStatus } from "./types";
 
@@ -108,6 +109,7 @@ const ActionButtonWrapper = ({
 
 export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }: StatusActionProps) {
   const theme = useTheme();
+  const router = useRouter();
   const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
   const rowId = row.id ?? "";
 
@@ -133,7 +135,7 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
           },
         })}
         onClick={() => {
-          /* join session */
+          router.push(`/classes/${rowId}`);
         }}
       />
     );

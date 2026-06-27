@@ -118,7 +118,7 @@ type CardListLabels = {
   readonly pendingVerification: string;
 };
 
-interface MobileLayoutProps extends Omit<StatusTrackingViewProps, "suspendedCount" | "onNewReport"> {
+interface MobileLayoutProps extends Omit<StatusTrackingViewProps, "suspendedCount"> {
   readonly cardListLabels: CardListLabels;
 }
 
@@ -135,6 +135,7 @@ function MobileLayout({
   onActivate,
   onReschedule,
   onVerify,
+  onNewReport,
 }: MobileLayoutProps) {
   return (
     <PageContainer>
@@ -154,7 +155,7 @@ function MobileLayout({
         />
 
         {/* Mobile FAB */}
-        <StyledMobileFab id="status-fab-btn" aria-label={labels.newReport}>
+        <StyledMobileFab id="status-fab-btn" aria-label={labels.newReport} onClick={onNewReport}>
           <AddOutlined />
         </StyledMobileFab>
       </Box>

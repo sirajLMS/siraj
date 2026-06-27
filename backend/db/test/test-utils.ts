@@ -108,7 +108,7 @@ async function executeGrantWithRetry(quotedRole: string): Promise<void> {
   ];
 
   for (const stmt of grantStatements) {
-    await retryOnConcurrentConflict(() => db.execute(sql.raw(stmt)));
+    await retryOnConcurrentConflict(() => db.execute(sql.raw(stmt)), 5);
   }
 }
 
@@ -118,16 +118,28 @@ async function retryOnConcurrentConflict(fn: () => Promise<unknown>, maxRetries 
       await fn();
       return;
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      const isConcurrent =
-        msg.includes("tuple concurrently updated") || msg.includes("deadlock detected") || msg.includes("40P01");
-      if (isConcurrent && attempt < maxRetries - 1) {
+      if (isConcurrentConflictError(e) && attempt < maxRetries - 1) {
         await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
         continue;
       }
       throw e;
     }
   }
+}
+
+function isConcurrentConflictError(e: unknown): boolean {
+  let msg = e instanceof Error ? e.message : String(e);
+  if (msg.includes("tuple concurrently updated") || msg.includes("deadlock detected") || msg.includes("40P01")) {
+    return true;
+  }
+  const cause = e instanceof Error ? (e as { cause?: unknown }).cause : undefined;
+  if (cause instanceof Error) {
+    msg = cause.message;
+    if (msg.includes("tuple concurrently updated") || msg.includes("deadlock detected") || msg.includes("40P01")) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

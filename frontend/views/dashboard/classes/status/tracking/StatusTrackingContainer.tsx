@@ -42,6 +42,22 @@ export function StatusTrackingContainer() {
     router.push("/reschedule");
   };
 
+  const handleActivate = (id: string) => {
+    router.push(`/classes/${id}`);
+  };
+
+  const handleVerify = (id: string) => {
+    const row = rows.find(session => session.id === id);
+    const studentId = row?.studentId;
+    if (studentId) {
+      router.push(`/students/${studentId}/status`);
+    }
+  };
+
+  const handleNewReport = () => {
+    router.push("/classes/new");
+  };
+
   return (
     <StatusTrackingView
       metrics={metrics}
@@ -49,10 +65,10 @@ export function StatusTrackingContainer() {
       totalSessions={rows.length}
       suspendedCount={suspendedCount}
       labels={labels}
-      onActivate={(_id: string) => {}}
+      onActivate={handleActivate}
       onReschedule={handleReschedule}
-      onVerify={(_id: string) => {}}
-      onNewReport={() => {}}
+      onVerify={handleVerify}
+      onNewReport={handleNewReport}
     />
   );
 }
