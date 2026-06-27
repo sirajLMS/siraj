@@ -32,6 +32,28 @@ const StyledEditField = styled(Stack)(({ theme }) => ({
   padding: theme.spacing(1, 0),
 }));
 
+async function executeManagerUpdate(
+  updateProfile: (options: { readonly variables: { readonly staffProfileId: string; readonly input: UpdateManagerProfileInput } }) => Promise<unknown>,
+  staffProfileId: string,
+  input: UpdateManagerProfileInput,
+  onSuccess: () => void,
+  successMessage: string,
+  logContext: Record<string, unknown>
+) {
+  try {
+    await updateProfile({
+      variables: {
+        staffProfileId,
+        input,
+      },
+    });
+    onSuccess();
+    logger.info(successMessage, logContext);
+  } catch (error) {
+    logger.error("Failed to update manager profile", { error });
+  }
+}
+
 export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>) {
   const t = useTranslations("dashboard.managersDirectory");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -63,42 +85,26 @@ export function ManagerRowActions({ manager }: Readonly<ManagerRowActionsProps>)
     setDeactivateDialogOpen(true);
   };
 
-  const handleEditSubmit = async () => {
-    try {
-      const input = {
-        phone: editPhone || null,
-        skypeId: editSkypeId || null,
-      } as UpdateManagerProfileInput;
-      await updateProfile({
-        variables: {
-          staffProfileId: manager.id,
-          input,
-        },
-      });
-      setEditDialogOpen(false);
-      logger.info("Manager profile updated", { staffProfileId: manager.id });
-    } catch (error) {
-      logger.error("Failed to update manager profile", { error });
-    }
-  };
+  const handleEditSubmit = () =>
+    executeManagerUpdate(
+      updateProfile,
+      manager.id,
+      { phone: editPhone || null, skypeId: editSkypeId || null } as UpdateManagerProfileInput,
+      () => setEditDialogOpen(false),
+      "Manager profile updated",
+      { staffProfileId: manager.id }
+    );
 
-  const handleDeactivateSubmit = async () => {
-    try {
-      const newStatus = manager.status === "active" ? "DEACTIVATED" : "ACTIVATED";
-      const input = {
-        status: newStatus,
-      } as UpdateManagerProfileInput;
-      await updateProfile({
-        variables: {
-          staffProfileId: manager.id,
-          input,
-        },
-      });
-      setDeactivateDialogOpen(false);
-      logger.info("Manager status updated", { staffProfileId: manager.id, newStatus });
-    } catch (error) {
-      logger.error("Failed to update manager status", { error });
-    }
+  const handleDeactivateSubmit = () => {
+    const newStatus = manager.status === "active" ? "DEACTIVATED" : "ACTIVATED";
+    return executeManagerUpdate(
+      updateProfile,
+      manager.id,
+      { status: newStatus } as UpdateManagerProfileInput,
+      () => setDeactivateDialogOpen(false),
+      "Manager status updated",
+      { staffProfileId: manager.id, newStatus }
+    );
   };
 
   const isDeactivate = manager.status === "active";

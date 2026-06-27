@@ -31,6 +31,81 @@ function formatDuration(hours: number): string {
   }
 }
 
+function buildComplaintQueueConditions(
+  options: { search?: string | null; status?: string | null },
+  _queryDb: typeof db | DBTransaction
+): SQL | undefined {
+  const conditions = [isNull(complaints.deletedAt)];
+
+  if (options.status) {
+    conditions.push(eq(complaints.status, options.status as ComplaintStatus));
+  }
+
+  if (options.search) {
+    conditions.push(ilike(users.name, `%${options.search}%`));
+  }
+
+  return and(...conditions);
+}
+
+function buildComplaintQueueSelect(queryDb: typeof db | DBTransaction) {
+  return queryDb
+    .select({
+      id: complaints.id,
+      parentId: complaints.parentId,
+      parentName: users.name,
+      parentAvatarUrl: users.avatarUrl,
+      studentId: complaints.studentId,
+      studentName: students.name,
+      category: complaints.category,
+      submitterEmail: complaints.submitterEmail,
+      body: complaints.body,
+      status: complaints.status,
+      responseCount: sql<number>`(
+        SELECT COUNT(*) FROM complaint_responses
+        WHERE complaint_responses.complaint_id = ${complaints.id}
+      )`.mapWith(Number),
+      createdAt: complaints.createdAt,
+      updatedAt: complaints.updatedAt,
+    })
+    .from(complaints)
+    .leftJoin(parents, eq(complaints.parentId, parents.id))
+    .leftJoin(users, eq(parents.userId, users.id))
+    .leftJoin(students, eq(complaints.studentId, students.id));
+}
+
+function mapComplaintQueueRow(r: {
+  id: string;
+  parentId: string;
+  studentId: string | null;
+  category: string;
+  submitterEmail: string;
+  body: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  parentName: string | null;
+  parentAvatarUrl: string | null;
+  studentName: string | null;
+  responseCount?: number;
+}): ComplaintReturnType {
+  return {
+    id: r.id,
+    parentId: r.parentId,
+    studentId: r.studentId ?? null,
+    category: r.category as ComplaintCategory,
+    submitterEmail: r.submitterEmail,
+    body: r.body,
+    status: r.status as ComplaintStatus,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+    parentName: r.parentName ?? null,
+    parentAvatarUrl: r.parentAvatarUrl ?? null,
+    studentName: r.studentName ?? null,
+    responseCount: r.responseCount,
+  };
+}
+
 export namespace ComplaintRepository {
   export const submitComplaint = async (
     input: ComplaintSubmitInput,
@@ -126,63 +201,15 @@ export namespace ComplaintRepository {
     tx?: DBTransaction
   ): Promise<ComplaintQueueResult> => {
     const queryDb = tx ?? db;
+    const whereClause = buildComplaintQueueConditions(options, queryDb);
 
-    const conditions = [isNull(complaints.deletedAt)];
-
-    if (options.status) {
-      conditions.push(eq(complaints.status, options.status as ComplaintStatus));
-    }
-
-    if (options.search) {
-      conditions.push(ilike(users.name, `%${options.search}%`));
-    }
-
-    const whereClause = and(...conditions);
-
-    const rows = await queryDb
-      .select({
-        id: complaints.id,
-        parentId: complaints.parentId,
-        parentName: users.name,
-        parentAvatarUrl: users.avatarUrl,
-        studentId: complaints.studentId,
-        studentName: students.name,
-        category: complaints.category,
-        submitterEmail: complaints.submitterEmail,
-        body: complaints.body,
-        status: complaints.status,
-        responseCount: sql<number>`(
-          SELECT COUNT(*) FROM complaint_responses
-          WHERE complaint_responses.complaint_id = ${complaints.id}
-        )`.mapWith(Number),
-        createdAt: complaints.createdAt,
-        updatedAt: complaints.updatedAt,
-      })
-      .from(complaints)
-      .leftJoin(parents, eq(complaints.parentId, parents.id))
-      .leftJoin(users, eq(parents.userId, users.id))
-      .leftJoin(students, eq(complaints.studentId, students.id))
+    const rows = await buildComplaintQueueSelect(queryDb)
       .where(whereClause)
       .orderBy(desc(complaints.createdAt))
       .limit(options.limit)
       .offset(options.offset);
 
-    const typedRows: ComplaintReturnType[] = rows.map(r => ({
-      id: r.id,
-      parentId: r.parentId,
-      studentId: r.studentId ?? null,
-      category: r.category as ComplaintCategory,
-      submitterEmail: r.submitterEmail,
-      body: r.body,
-      status: r.status as ComplaintStatus,
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
-      parentName: r.parentName ?? null,
-      parentAvatarUrl: r.parentAvatarUrl ?? null,
-      studentName: r.studentName ?? null,
-      responseCount: r.responseCount,
-    }));
-
+    const typedRows: ComplaintReturnType[] = rows.map(mapComplaintQueueRow);
     const metrics = await getComplaintMetrics(whereClause, queryDb);
 
     return {
@@ -198,42 +225,9 @@ export namespace ComplaintRepository {
     tx?: DBTransaction
   ): Promise<ComplaintQueuePaginatedResult> => {
     const queryDb = tx ?? db;
+    const whereClause = buildComplaintQueueConditions(options, queryDb);
 
-    const conditions = [isNull(complaints.deletedAt)];
-
-    if (options.status) {
-      conditions.push(eq(complaints.status, options.status as ComplaintStatus));
-    }
-
-    if (options.search) {
-      conditions.push(ilike(users.name, `%${options.search}%`));
-    }
-
-    const whereClause = and(...conditions);
-
-    let rowsQuery = queryDb
-      .select({
-        id: complaints.id,
-        parentId: complaints.parentId,
-        parentName: users.name,
-        parentAvatarUrl: users.avatarUrl,
-        studentId: complaints.studentId,
-        studentName: students.name,
-        category: complaints.category,
-        submitterEmail: complaints.submitterEmail,
-        body: complaints.body,
-        status: complaints.status,
-        responseCount: sql<number>`(
-          SELECT COUNT(*) FROM complaint_responses
-          WHERE complaint_responses.complaint_id = ${complaints.id}
-        )`.mapWith(Number),
-        createdAt: complaints.createdAt,
-        updatedAt: complaints.updatedAt,
-      })
-      .from(complaints)
-      .leftJoin(parents, eq(complaints.parentId, parents.id))
-      .leftJoin(users, eq(parents.userId, users.id))
-      .leftJoin(students, eq(complaints.studentId, students.id))
+    let rowsQuery = buildComplaintQueueSelect(queryDb)
       .where(whereClause)
       .orderBy(desc(complaints.createdAt))
       .$dynamic();
@@ -254,22 +248,7 @@ export namespace ComplaintRepository {
 
     const total = countResult[0]?.total ?? 0;
 
-    const typedRows: ComplaintReturnType[] = (rows as Awaited<typeof rows>).map(r => ({
-      id: r.id,
-      parentId: r.parentId,
-      studentId: r.studentId ?? null,
-      category: r.category as ComplaintCategory,
-      submitterEmail: r.submitterEmail,
-      body: r.body,
-      status: r.status as ComplaintStatus,
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
-      parentName: r.parentName ?? null,
-      parentAvatarUrl: r.parentAvatarUrl ?? null,
-      studentName: r.studentName ?? null,
-      responseCount: r.responseCount,
-    }));
-
+    const typedRows: ComplaintReturnType[] = (rows as Awaited<typeof rows>).map(mapComplaintQueueRow);
     const pageInfo = PaginationUtils.buildPageInfoFromArgs(paginationArgs, typedRows.length, total);
 
     return {

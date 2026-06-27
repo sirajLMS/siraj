@@ -4,8 +4,9 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { StaffProfileRepository } from "@/backend/db/repo";
-import { PaginationArgs } from "@/backend/types";
+import type { ManagerProfileUpdateInput } from "@/backend/db/repo/staff-profile.repository";
 import { permissionGroups, staffProfiles, userPermissionGroups } from "@/backend/db/schema";
+import { PaginationArgs } from "@/backend/types";
 import { createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
@@ -81,6 +82,27 @@ async function assignUserToGroup(tx: DBTransaction, userId: string, groupId: str
   });
 }
 
+async function updateProfile(tx: DBTransaction, profileId: string, input: ManagerProfileUpdateInput) {
+  return StaffProfileRepository.updateManagerProfile(profileId, input, undefined, tx);
+}
+
+async function createStaffAndGroup(tx: DBTransaction, staffName: string, groupName: string, groupSlug: string) {
+  const { user } = await createStaffUser(tx, staffName);
+  const group = await createTestPermissionGroup(tx, groupName, groupSlug);
+  await assignUserToGroup(tx, user.id, group.id);
+  return { user, group };
+}
+
+async function insertStaffProfile(tx: DBTransaction, userId: string, status: string) {
+  const now = new Date();
+  await tx.insert(staffProfiles).values({
+    userId,
+    status,
+    createdAt: now,
+    updatedAt: now,
+  });
+}
+
 describe("StaffProfileRepository — getManagerDirectory", () => {
   staffTest("returns all staff members with their role", async tx => {
     const { user } = await createStaffUser(tx, "DirMgr");
@@ -123,75 +145,53 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
   });
 
   staffTest("filters by admin role", async tx => {
-    const { user: adminUser } = await createStaffUser(tx, "AdminFilter");
-    const adminGroup = await createTestPermissionGroup(tx, "Admin Group", `admin-${randomUUID()}`);
-    await assignUserToGroup(tx, adminUser.id, adminGroup.id);
-
-    const { user: staffUser } = await createStaffUser(tx, "StaffFilterNoAdmin");
-    const staffGroup = await createTestPermissionGroup(tx, "Staff Group", `staff-${randomUUID()}`);
-    await assignUserToGroup(tx, staffUser.id, staffGroup.id);
+    const { user: adminUser } = await createStaffAndGroup(tx, "AdminFilter", "Admin Group", `admin-${randomUUID()}`);
+    const { user: staffUser } = await createStaffAndGroup(
+      tx,
+      "StaffFilterNoAdmin",
+      "Staff Group",
+      `staff-${randomUUID()}`
+    );
 
     const result = await StaffProfileRepository.getManagerDirectory(null, { roleFilter: "admin" }, tx);
-    const adminFound = result.rows.find(r => r.id === adminUser.id);
-    const staffFound = result.rows.find(r => r.id === staffUser.id);
-    expect(adminFound).toBeDefined();
-    expect(staffFound).toBeUndefined();
+    expect(result.rows.find(r => r.id === adminUser.id)).toBeDefined();
+    expect(result.rows.find(r => r.id === staffUser.id)).toBeUndefined();
   });
 
   staffTest("filters by staff role (non-admin slugs)", async tx => {
-    const { user: adminUser } = await createStaffUser(tx, "AdminNoMatch");
-    const adminGroup = await createTestPermissionGroup(tx, "Admin X", `admin-x-${randomUUID()}`);
-    await assignUserToGroup(tx, adminUser.id, adminGroup.id);
-
-    const { user: staffUser } = await createStaffUser(tx, "StaffMatch");
-    const staffGroup = await createTestPermissionGroup(tx, "Staff Y", `staff-y-${randomUUID()}`);
-    await assignUserToGroup(tx, staffUser.id, staffGroup.id);
-
+    const { user: adminUser } = await createStaffAndGroup(tx, "AdminNoMatch", "Admin X", `admin-x-${randomUUID()}`);
+    const { user: staffUser } = await createStaffAndGroup(tx, "StaffMatch", "Staff Y", `staff-y-${randomUUID()}`);
     const { user: noGroupUser } = await createStaffUser(tx, "NoGroupMatch");
 
     const result = await StaffProfileRepository.getManagerDirectory(null, { roleFilter: "staff" }, tx);
-    const adminFound = result.rows.find(r => r.id === adminUser.id);
-    const staffFound = result.rows.find(r => r.id === staffUser.id);
-    const noGroupFound = result.rows.find(r => r.id === noGroupUser.id);
-    expect(adminFound).toBeUndefined();
-    expect(staffFound).toBeDefined();
-    expect(noGroupFound).toBeDefined();
+    expect(result.rows.find(r => r.id === adminUser.id)).toBeUndefined();
+    expect(result.rows.find(r => r.id === staffUser.id)).toBeDefined();
+    expect(result.rows.find(r => r.id === noGroupUser.id)).toBeDefined();
   });
 
   staffTest("filters by active status", async tx => {
-    const now = new Date();
     const activeUser = await createTestUser(tx, { name: "ActiveS", email: `active-s-${randomUUID()}@t.com` });
-    await tx.insert(staffProfiles).values({
-      userId: activeUser.id, status: "ACTIVATED", createdAt: now, updatedAt: now,
-    });
+    await insertStaffProfile(tx, activeUser.id, "ACTIVATED");
     const deactivatedUser = await createTestUser(tx, { name: "DeactivatedS", email: `deact-s-${randomUUID()}@t.com` });
-    await tx.insert(staffProfiles).values({
-      userId: deactivatedUser.id, status: "DEACTIVATED", createdAt: now, updatedAt: now,
-    });
+    await insertStaffProfile(tx, deactivatedUser.id, "DEACTIVATED");
 
     const result = await StaffProfileRepository.getManagerDirectory(null, { statusFilter: "active" }, tx);
-    const activeFound = result.rows.find(r => r.id === activeUser.id);
-    const deactivatedFound = result.rows.find(r => r.id === deactivatedUser.id);
-    expect(activeFound).toBeDefined();
-    expect(deactivatedFound).toBeUndefined();
+    expect(result.rows.find(r => r.id === activeUser.id)).toBeDefined();
+    expect(result.rows.find(r => r.id === deactivatedUser.id)).toBeUndefined();
   });
 
   staffTest("filters by offline status", async tx => {
-    const now = new Date();
     const activeUser = await createTestUser(tx, { name: "ActiveOff", email: `active-off-${randomUUID()}@t.com` });
-    await tx.insert(staffProfiles).values({
-      userId: activeUser.id, status: "ACTIVATED", createdAt: now, updatedAt: now,
+    await insertStaffProfile(tx, activeUser.id, "ACTIVATED");
+    const deactivatedUser = await createTestUser(tx, {
+      name: "DeactivatedOff",
+      email: `deact-off-${randomUUID()}@t.com`,
     });
-    const deactivatedUser = await createTestUser(tx, { name: "DeactivatedOff", email: `deact-off-${randomUUID()}@t.com` });
-    await tx.insert(staffProfiles).values({
-      userId: deactivatedUser.id, status: "DEACTIVATED", createdAt: now, updatedAt: now,
-    });
+    await insertStaffProfile(tx, deactivatedUser.id, "DEACTIVATED");
 
     const result = await StaffProfileRepository.getManagerDirectory(null, { statusFilter: "offline" }, tx);
-    const activeFound = result.rows.find(r => r.id === activeUser.id);
-    const deactivatedFound = result.rows.find(r => r.id === deactivatedUser.id);
-    expect(activeFound).toBeUndefined();
-    expect(deactivatedFound).toBeDefined();
+    expect(result.rows.find(r => r.id === activeUser.id)).toBeUndefined();
+    expect(result.rows.find(r => r.id === deactivatedUser.id)).toBeDefined();
   });
 
   staffTest("returns paginated results with pageInfo", async tx => {
@@ -255,12 +255,12 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
   staffTest("updates phone and skypeId", async tx => {
     const { profile } = await createStaffUser(tx, "UpdateBoth");
 
-    const result = await StaffProfileRepository.updateManagerProfile(
-      profile.id,
-      { phone: "+1234567890", phoneIsSet: true, skypeId: "test.skype", skypeIdIsSet: true },
-      undefined,
-      tx
-    );
+    const result = await updateProfile(tx, profile.id, {
+      phone: "+1234567890",
+      phoneIsSet: true,
+      skypeId: "test.skype",
+      skypeIdIsSet: true,
+    });
     expect(result.phone).toBe("+1234567890");
     expect(result.skypeId).toBe("test.skype");
   });
@@ -270,12 +270,7 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
       skypeId: "original.skype",
     });
 
-    const result = await StaffProfileRepository.updateManagerProfile(
-      profile.id,
-      { phone: "+9876543210", phoneIsSet: true },
-      undefined,
-      tx
-    );
+    const result = await updateProfile(tx, profile.id, { phone: "+9876543210", phoneIsSet: true });
     expect(result.phone).toBe("+9876543210");
     expect(result.skypeId).toBe("original.skype");
   });
@@ -285,12 +280,7 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
       phone: "+1111111111",
     });
 
-    const result = await StaffProfileRepository.updateManagerProfile(
-      profile.id,
-      { phone: null, phoneIsSet: true },
-      undefined,
-      tx
-    );
+    const result = await updateProfile(tx, profile.id, { phone: null, phoneIsSet: true });
     expect(result.phone).toBeNull();
   });
 
@@ -299,12 +289,7 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
       phone: "+5555555555",
     });
 
-    const result = await StaffProfileRepository.updateManagerProfile(
-      profile.id,
-      { skypeId: "new.skype.id", skypeIdIsSet: true },
-      undefined,
-      tx
-    );
+    const result = await updateProfile(tx, profile.id, { skypeId: "new.skype.id", skypeIdIsSet: true });
     expect(result.skypeId).toBe("new.skype.id");
     expect(result.phone).toBe("+5555555555");
   });
@@ -314,35 +299,20 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
       phone: "+4444444444",
     });
 
-    const result = await StaffProfileRepository.updateManagerProfile(
-      profile.id,
-      { status: "DEACTIVATED", statusIsSet: true },
-      undefined,
-      tx
-    );
+    const result = await updateProfile(tx, profile.id, { status: "DEACTIVATED", statusIsSet: true });
     expect(result.status).toBe("DEACTIVATED");
   });
 
   staffTest("defaults status to ACTIVATED when statusIsSet is true and status is null", async tx => {
     const { profile } = await createStaffUser(tx, "StatusDefault");
 
-    const result = await StaffProfileRepository.updateManagerProfile(
-      profile.id,
-      { status: null, statusIsSet: true },
-      undefined,
-      tx
-    );
+    const result = await updateProfile(tx, profile.id, { status: null, statusIsSet: true });
     expect(result.status).toBe("ACTIVATED");
   });
 
   staffTest("throws error for non-existent staff profile ID", async tx => {
     const error = await expectRepoError(() =>
-      StaffProfileRepository.updateManagerProfile(
-        "00000000-0000-0000-0000-000000000000",
-        { phone: "+1111111111", phoneIsSet: true },
-        undefined,
-        tx
-      )
+      updateProfile(tx, "00000000-0000-0000-0000-000000000000", { phone: "+1111111111", phoneIsSet: true })
     );
     expect(error.message).toContain("not found");
   });
@@ -353,7 +323,7 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
       skypeId: "keep.skype",
     });
 
-    const result = await StaffProfileRepository.updateManagerProfile(profile.id, {}, undefined, tx);
+    const result = await updateProfile(tx, profile.id, {});
     expect(result.phone).toBe("+9999999999");
     expect(result.skypeId).toBe("keep.skype");
   });
@@ -361,12 +331,7 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
   staffTest("persists update to database", async tx => {
     const { profile } = await createStaffUser(tx, "Persist");
 
-    await StaffProfileRepository.updateManagerProfile(
-      profile.id,
-      { phone: "+1234500000", phoneIsSet: true },
-      undefined,
-      tx
-    );
+    await updateProfile(tx, profile.id, { phone: "+1234500000", phoneIsSet: true });
 
     const [updated] = await tx
       .select({ phone: staffProfiles.phone })
@@ -423,15 +388,13 @@ describe("StaffProfileRepository — getOnboardingMetrics", () => {
   });
 
   staffTest("counts active and deactivated staff correctly", async tx => {
-    const now = new Date();
     const activeUser = await createTestUser(tx, { name: "ActiveOM", email: `active-om-${randomUUID()}@t.com` });
-    await tx.insert(staffProfiles).values({
-      userId: activeUser.id, status: "ACTIVATED", createdAt: now, updatedAt: now,
+    await insertStaffProfile(tx, activeUser.id, "ACTIVATED");
+    const deactivatedUser = await createTestUser(tx, {
+      name: "DeactivatedOM",
+      email: `deact-om-${randomUUID()}@t.com`,
     });
-    const deactivatedUser = await createTestUser(tx, { name: "DeactivatedOM", email: `deact-om-${randomUUID()}@t.com` });
-    await tx.insert(staffProfiles).values({
-      userId: deactivatedUser.id, status: "DEACTIVATED", createdAt: now, updatedAt: now,
-    });
+    await insertStaffProfile(tx, deactivatedUser.id, "DEACTIVATED");
 
     const result = await StaffProfileRepository.getOnboardingMetrics(tx);
     expect(result.activeStaff).toBeGreaterThanOrEqual(1);

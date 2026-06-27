@@ -6,25 +6,47 @@ import type { TeacherEntity, TimezoneEntity, UserEntity } from "@/backend/types"
 import { VacationRequestStatus } from "@/shared/lib/enum";
 import { addMonths, loadSeedConfig, type SeedConfig, startOfDay } from "./lib";
 
-export async function seedOrGet(
-  teachersList: TeacherEntity[],
-  usersList: UserEntity[],
-  timezones: TimezoneEntity[],
-  config?: SeedConfig
+async function upsertVacationRequest(
+  teacher: TeacherEntity,
+  requestedByUserId: string,
+  startAt: Date,
+  endAt: Date,
+  tz: TimezoneEntity | undefined,
+  status: VacationRequestStatus,
+  adminUserId: string | undefined,
+  now: Date
 ) {
-  logger.info("Seeding teacher vacation requests...");
-  const now = new Date();
-  const seedConfig = config ?? loadSeedConfig();
+  const [existing] = await db
+    .select()
+    .from(teacherVacationRequests)
+    .where(eq(teacherVacationRequests.teacherId, teacher.id))
+    .limit(1);
 
-  if (!seedConfig.enableExtendedScheduling || !teachersList?.length) {
-    return [];
+  if (existing) {
+    return existing;
   }
 
-  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
-  const teacherUserMap = new Map(teachersList.map(t => [t.id, usersList.find(u => u.id === t.userId)?.id]));
-  const results = [];
-  const anchor = startOfDay(seedConfig.anchorDate);
+  const [inserted] = await db
+    .insert(teacherVacationRequests)
+    .values({
+      teacherId: teacher.id,
+      requestedByUserId,
+      startAt,
+      endAt,
+      timezone: teacher.timezone,
+      timezoneId: tz?.id ?? null,
+      reason: "Seed vacation request",
+      status,
+      processedAt: status !== VacationRequestStatus.PENDING ? now : null,
+      processedByUserId: status !== VacationRequestStatus.PENDING ? (adminUserId ?? null) : null,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+  return inserted;
+}
 
+function buildVacationSpecs(teachersList: TeacherEntity[], profile: string) {
   const specs: Array<{
     teacherIndex: number;
     status: VacationRequestStatus;
@@ -45,7 +67,7 @@ export async function seedOrGet(
     },
   ];
 
-  if (seedConfig.profile === "standard" && teachersList.length > 2) {
+  if (profile === "standard" && teachersList.length > 2) {
     specs.push({
       teacherIndex: 2,
       status: VacationRequestStatus.REJECTED,
@@ -53,6 +75,29 @@ export async function seedOrGet(
       durationDays: 4,
     });
   }
+
+  return specs;
+}
+
+export async function seedOrGet(
+  teachersList: TeacherEntity[],
+  usersList: UserEntity[],
+  timezones: TimezoneEntity[],
+  config?: SeedConfig
+) {
+  logger.info("Seeding teacher vacation requests...");
+  const now = new Date();
+  const seedConfig = config ?? loadSeedConfig();
+
+  if (!seedConfig.enableExtendedScheduling || !teachersList?.length) {
+    return [];
+  }
+
+  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
+  const teacherUserMap = new Map(teachersList.map(t => [t.id, usersList.find(u => u.id === t.userId)?.id]));
+  const anchor = startOfDay(seedConfig.anchorDate);
+  const specs = buildVacationSpecs(teachersList, seedConfig.profile);
+  const results = [];
 
   for (const spec of specs) {
     const teacher = teachersList[spec.teacherIndex];
@@ -66,34 +111,16 @@ export async function seedOrGet(
     endAt.setDate(endAt.getDate() + spec.durationDays);
     const tz = timezones.find(t => t.ianaId === teacher.timezone) ?? timezones[0];
 
-    const [existing] = await db
-      .select()
-      .from(teacherVacationRequests)
-      .where(eq(teacherVacationRequests.teacherId, teacher.id))
-      .limit(1);
-
-    if (existing) {
-      results.push(existing);
-      continue;
-    }
-
-    const [inserted] = await db
-      .insert(teacherVacationRequests)
-      .values({
-        teacherId: teacher.id,
-        requestedByUserId,
-        startAt,
-        endAt,
-        timezone: teacher.timezone,
-        timezoneId: tz?.id ?? null,
-        reason: "Seed vacation request",
-        status: spec.status,
-        processedAt: spec.status !== VacationRequestStatus.PENDING ? now : null,
-        processedByUserId: spec.status !== VacationRequestStatus.PENDING ? adminUser?.id : null,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+    const inserted = await upsertVacationRequest(
+      teacher,
+      requestedByUserId,
+      startAt,
+      endAt,
+      tz,
+      spec.status,
+      adminUser?.id,
+      now
+    );
     results.push(inserted);
   }
 

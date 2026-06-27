@@ -47,6 +47,225 @@ interface RecurringClassFormFieldsProps {
   };
 }
 
+function FormRow({ isMobile, children }: { readonly isMobile: boolean; readonly children: React.ReactNode }) {
+  return (
+    <Box sx={{ display: "flex", gap: isMobile ? 2 : 3, flexDirection: isMobile ? "column" : "row" }}>{children}</Box>
+  );
+}
+
+function OptionSelect({
+  labelId,
+  value,
+  label,
+  placeholder,
+  isSubmitting,
+  isMobile,
+  error,
+  onChange,
+  options,
+}: {
+  readonly labelId: string;
+  readonly value: string;
+  readonly label: string;
+  readonly placeholder: string;
+  readonly isSubmitting: boolean;
+  readonly isMobile: boolean;
+  readonly error?: string;
+  readonly onChange: (value: string) => void;
+  readonly options: readonly { readonly value: string; readonly label: string }[];
+}) {
+  return (
+    <>
+      <Typography component="label" sx={labelSx}>
+        {label}
+      </Typography>
+      <FormControl fullWidth error={!!error} variant={isMobile ? "outlined" : "standard"}>
+        {isMobile && <InputLabel id={labelId}>{placeholder}</InputLabel>}
+        <Select
+          labelId={labelId}
+          value={value}
+          label={isMobile ? placeholder : undefined}
+          displayEmpty
+          disabled={isSubmitting}
+          onChange={e => {
+            onChange(e.target.value);
+          }}
+          variant={isMobile ? "outlined" : "standard"}
+          sx={isMobile ? { borderRadius: 3 } : standardInputSx}
+        >
+          <MenuItem value="">
+            <em>{placeholder}</em>
+          </MenuItem>
+          {options.map(opt => (
+            <MenuItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </MenuItem>
+          ))}
+        </Select>
+        {error && <FormHelperText>{error}</FormHelperText>}
+      </FormControl>
+    </>
+  );
+}
+
+function StudentTeacherRow({
+  studentId,
+  teacherId,
+  students,
+  teachers,
+  isSubmitting,
+  studentsLoading,
+  teachersLoading,
+  isMobile,
+  labels,
+  setValue,
+  errors,
+}: {
+  readonly studentId: string;
+  readonly teacherId: string;
+  readonly students: readonly SimpleEntity[];
+  readonly teachers: readonly SimpleEntity[];
+  readonly isSubmitting: boolean;
+  readonly studentsLoading: boolean;
+  readonly teachersLoading: boolean;
+  readonly isMobile: boolean;
+  readonly labels: RecurringClassFormFieldsProps["labels"];
+  readonly setValue: UseFormSetValue<RecurringClassFormData>;
+  readonly errors: FieldErrors<RecurringClassFormData>;
+}) {
+  return (
+    <FormRow isMobile={isMobile}>
+      <Box sx={{ flex: 1 }}>
+        <EntitySelect
+          value={studentId}
+          entities={students}
+          isSubmitting={isSubmitting || studentsLoading}
+          isMobile={isMobile}
+          label={labels.students}
+          placeholder={labels.studentsPlaceholder}
+          error={errors.studentId?.message}
+          onChange={val => {
+            setValue("studentId", val, { shouldValidate: true });
+          }}
+        />
+      </Box>
+      <Box sx={{ flex: 1 }}>
+        <EntitySelect
+          value={teacherId}
+          entities={teachers}
+          isSubmitting={isSubmitting || teachersLoading}
+          isMobile={isMobile}
+          label={labels.teacher}
+          placeholder={labels.teacherPlaceholder}
+          error={errors.teacherId?.message}
+          onChange={val => {
+            setValue("teacherId", val, { shouldValidate: true });
+          }}
+        />
+      </Box>
+    </FormRow>
+  );
+}
+
+function TimeTimezoneRow({
+  timezone,
+  control,
+  isSubmitting,
+  isMobile,
+  labels,
+  setValue,
+  errors,
+}: {
+  readonly timezone: string;
+  readonly control: Control<RecurringClassFormData>;
+  readonly isSubmitting: boolean;
+  readonly isMobile: boolean;
+  readonly labels: RecurringClassFormFieldsProps["labels"];
+  readonly setValue: UseFormSetValue<RecurringClassFormData>;
+  readonly errors: FieldErrors<RecurringClassFormData>;
+}) {
+  return (
+    <FormRow isMobile={isMobile}>
+      <Box sx={{ flex: 1 }}>
+        <TimeInput
+          label={labels.defaultStartTime}
+          control={control}
+          isSubmitting={isSubmitting}
+          isMobile={isMobile}
+          error={errors.defaultStartTime?.message}
+        />
+      </Box>
+      <Box sx={{ flex: 1 }}>
+        <OptionSelect
+          labelId="timezone-select-label"
+          value={timezone}
+          label={labels.timezone}
+          placeholder={labels.timezonePlaceholder}
+          isSubmitting={isSubmitting}
+          isMobile={isMobile}
+          error={errors.timezone?.message}
+          onChange={val => {
+            setValue("timezone", val, { shouldValidate: true });
+          }}
+          options={TIMEZONE_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+        />
+      </Box>
+    </FormRow>
+  );
+}
+
+function DurationClassTypeRow({
+  classType,
+  register,
+  errors,
+  isSubmitting,
+  isMobile,
+  labels,
+  setValue,
+}: {
+  readonly classType: string;
+  readonly register: UseFormRegister<RecurringClassFormData>;
+  readonly errors: FieldErrors<RecurringClassFormData>;
+  readonly isSubmitting: boolean;
+  readonly isMobile: boolean;
+  readonly labels: RecurringClassFormFieldsProps["labels"];
+  readonly setValue: UseFormSetValue<RecurringClassFormData>;
+}) {
+  return (
+    <FormRow isMobile={isMobile}>
+      <Box sx={{ flex: 1 }}>
+        <DurationInput
+          register={register}
+          errors={errors}
+          isSubmitting={isSubmitting}
+          isMobile={isMobile}
+          labels={{
+            duration: labels.duration,
+            durationHours: labels.durationHours,
+            durationMinutes: labels.durationMinutes,
+            hours: labels.hours,
+            minutes: labels.minutes,
+          }}
+        />
+      </Box>
+      <Box sx={{ flex: 1 }}>
+        <OptionSelect
+          labelId="class-type-select-label"
+          value={classType}
+          label={labels.classType}
+          placeholder={labels.classTypePlaceholder}
+          isSubmitting={isSubmitting}
+          isMobile={isMobile}
+          onChange={val => {
+            setValue("classType", val as RecurringClassFormData["classType"], { shouldValidate: true });
+          }}
+          options={CLASS_TYPE_OPTIONS.map(opt => ({ value: opt, label: opt }))}
+        />
+      </Box>
+    </FormRow>
+  );
+}
+
 export function RecurringClassFormFields({
   register,
   errors,
@@ -86,91 +305,39 @@ export function RecurringClassFormFields({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: isMobile ? 3 : 4 }}>
-      <Box sx={{ display: "flex", gap: isMobile ? 2 : 3, flexDirection: isMobile ? "column" : "row" }}>
-        <Box sx={{ flex: 1 }}>
-          <EntitySelect
-            value={studentId}
-            entities={students}
-            isSubmitting={isSubmitting || studentsLoading}
-            isMobile={isMobile}
-            label={labels.students}
-            placeholder={labels.studentsPlaceholder}
-            error={errors.studentId?.message}
-            onChange={val => {
-              setValue("studentId", val, { shouldValidate: true });
-            }}
-          />
-        </Box>
-        <Box sx={{ flex: 1 }}>
-          <EntitySelect
-            value={teacherId}
-            entities={teachers}
-            isSubmitting={isSubmitting || teachersLoading}
-            isMobile={isMobile}
-            label={labels.teacher}
-            placeholder={labels.teacherPlaceholder}
-            error={errors.teacherId?.message}
-            onChange={val => {
-              setValue("teacherId", val, { shouldValidate: true });
-            }}
-          />
-        </Box>
-      </Box>
+      <StudentTeacherRow
+        studentId={studentId}
+        teacherId={teacherId}
+        students={students}
+        teachers={teachers}
+        isSubmitting={isSubmitting}
+        studentsLoading={studentsLoading}
+        teachersLoading={teachersLoading}
+        isMobile={isMobile}
+        labels={labels}
+        setValue={setValue}
+        errors={errors}
+      />
 
-      <Box sx={{ display: "flex", gap: isMobile ? 2 : 3, flexDirection: isMobile ? "column" : "row" }}>
-        <Box sx={{ flex: 1 }}>
-          <TimeInput
-            label={labels.defaultStartTime}
-            control={control}
-            isSubmitting={isSubmitting}
-            isMobile={isMobile}
-            error={errors.defaultStartTime?.message}
-          />
-        </Box>
-        <Box sx={{ flex: 1 }}>
-          <TimezoneSelect
-            value={timezone}
-            label={labels.timezone}
-            placeholder={labels.timezonePlaceholder}
-            isSubmitting={isSubmitting}
-            isMobile={isMobile}
-            error={errors.timezone?.message}
-            onChange={val => {
-              setValue("timezone", val, { shouldValidate: true });
-            }}
-          />
-        </Box>
-      </Box>
+      <TimeTimezoneRow
+        timezone={timezone}
+        control={control}
+        isSubmitting={isSubmitting}
+        isMobile={isMobile}
+        labels={labels}
+        setValue={setValue}
+        errors={errors}
+      />
 
-      <Box sx={{ display: "flex", gap: isMobile ? 2 : 3, flexDirection: isMobile ? "column" : "row" }}>
-        <Box sx={{ flex: 1 }}>
-          <DurationInput
-            register={register}
-            errors={errors}
-            isSubmitting={isSubmitting}
-            isMobile={isMobile}
-            labels={{
-              duration: labels.duration,
-              durationHours: labels.durationHours,
-              durationMinutes: labels.durationMinutes,
-              hours: labels.hours,
-              minutes: labels.minutes,
-            }}
-          />
-        </Box>
-        <Box sx={{ flex: 1 }}>
-          <ClassTypeSelect
-            value={classType}
-            label={labels.classType}
-            placeholder={labels.classTypePlaceholder}
-            isSubmitting={isSubmitting}
-            isMobile={isMobile}
-            onChange={val => {
-              setValue("classType", val as RecurringClassFormData["classType"], { shouldValidate: true });
-            }}
-          />
-        </Box>
-      </Box>
+      <DurationClassTypeRow
+        classType={classType}
+        register={register}
+        errors={errors}
+        isSubmitting={isSubmitting}
+        isMobile={isMobile}
+        labels={labels}
+        setValue={setValue}
+      />
 
       <DaysScheduleSection
         watch={watch}
@@ -186,104 +353,5 @@ export function RecurringClassFormFields({
         }}
       />
     </Box>
-  );
-}
-
-function TimezoneSelect({
-  value,
-  label,
-  placeholder,
-  isSubmitting,
-  isMobile,
-  error,
-  onChange,
-}: {
-  readonly value: string;
-  readonly label: string;
-  readonly placeholder: string;
-  readonly isSubmitting: boolean;
-  readonly isMobile: boolean;
-  readonly error?: string;
-  readonly onChange: (value: string) => void;
-}) {
-  return (
-    <>
-      <Typography component="label" sx={labelSx}>
-        {label}
-      </Typography>
-      <FormControl fullWidth error={!!error} variant={isMobile ? "outlined" : "standard"}>
-        {isMobile && <InputLabel id="timezone-select-label">{placeholder}</InputLabel>}
-        <Select
-          labelId="timezone-select-label"
-          value={value}
-          label={isMobile ? placeholder : undefined}
-          displayEmpty
-          disabled={isSubmitting}
-          onChange={e => {
-            onChange(e.target.value);
-          }}
-          variant={isMobile ? "outlined" : "standard"}
-          sx={isMobile ? { borderRadius: 3 } : standardInputSx}
-        >
-          <MenuItem value="">
-            <em>{placeholder}</em>
-          </MenuItem>
-          {TIMEZONE_OPTIONS.map(opt => (
-            <MenuItem key={opt.value} value={opt.value}>
-              {opt.label}
-            </MenuItem>
-          ))}
-        </Select>
-        {error && <FormHelperText>{error}</FormHelperText>}
-      </FormControl>
-    </>
-  );
-}
-
-function ClassTypeSelect({
-  value,
-  label,
-  placeholder,
-  isSubmitting,
-  isMobile,
-  onChange,
-}: {
-  readonly value: string;
-  readonly label: string;
-  readonly placeholder: string;
-  readonly isSubmitting: boolean;
-  readonly isMobile: boolean;
-  readonly onChange: (value: string) => void;
-}) {
-  return (
-    <>
-      <Typography component="label" sx={labelSx}>
-        {label}
-      </Typography>
-      <FormControl fullWidth variant={isMobile ? "outlined" : "standard"}>
-        {isMobile && <InputLabel id="class-type-select-label">{placeholder}</InputLabel>}
-        <Select
-          labelId="class-type-select-label"
-          value={value}
-          label={isMobile ? placeholder : undefined}
-          displayEmpty
-          disabled={isSubmitting}
-          onChange={e => {
-            onChange(e.target.value);
-          }}
-          variant={isMobile ? "outlined" : "standard"}
-          sx={isMobile ? { borderRadius: 3 } : standardInputSx}
-        >
-          <MenuItem value="">
-            <em>{placeholder}</em>
-          </MenuItem>
-          {CLASS_TYPE_OPTIONS.map(opt => (
-            <MenuItem key={opt} value={opt}>
-              {opt}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </>
   );
 }

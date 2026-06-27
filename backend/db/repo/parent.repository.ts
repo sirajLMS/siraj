@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gte, ilike, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, inArray, isNull, lt, or, type SQL, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { classInstances, invoices, parents, students, teachers, users } from "@/backend/db/schema";
@@ -389,6 +389,112 @@ export namespace ParentRepository {
     pageInfo: import("@/backend/types").PageInfo | null;
   };
 
+  async function fetchParentTimezone(t: DBTransaction, parentId: string): Promise<string> {
+    const parentRow = await t
+      .select({ timezone: parents.timezone })
+      .from(parents)
+      .where(eq(parents.id, parentId))
+      .limit(1);
+    return parentRow[0]?.timezone ?? "UTC";
+  }
+
+  async function buildScheduleConditions(
+    input: { date?: Date | null; search?: string | null },
+    studentIds: string[],
+    timezone: string
+  ): Promise<SQL | undefined> {
+    const conditions: (SQL | undefined)[] = [
+      isNull(classInstances.deletedAt),
+      inArray(classInstances.studentId, studentIds),
+    ];
+
+    if (input.date) {
+      const { getDayBoundaries } = await import("@/backend/lib/timezone");
+      const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(input.date as Date, timezone);
+      conditions.push(gte(classInstances.scheduledStartAt, startOfDayUtc));
+      conditions.push(lt(classInstances.scheduledStartAt, endOfDayUtc));
+    }
+
+    if (input.search) {
+      const searchPattern = `%${input.search}%`;
+      const searchCondition = or(ilike(students.name, searchPattern), ilike(users.name, searchPattern));
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
+    }
+
+    return and(...conditions);
+  }
+
+  function buildScheduleDataQuery(t: DBTransaction) {
+    return t
+      .select({
+        id: classInstances.id,
+        studentId: classInstances.studentId,
+        studentName: students.name,
+        studentAvatarUrl: students.avatarUrl,
+        teacherId: classInstances.teacherId,
+        teacherName: sql<string>`COALESCE(${users.name}, '')`,
+        scheduledStartAt: classInstances.scheduledStartAt,
+        scheduledEndAt: classInstances.scheduledEndAt,
+        durationMinutes: classInstances.durationMinutes,
+        isRescheduled: classInstances.isRescheduled,
+        executionState: classInstances.executionState,
+        outcome: classInstances.outcome,
+        zoomMeetingUrl: classInstances.zoomMeetingUrl,
+      })
+      .from(classInstances)
+      .innerJoin(students, eq(classInstances.studentId, students.id))
+      .leftJoin(teachers, eq(classInstances.teacherId, teachers.id))
+      .leftJoin(users, eq(teachers.userId, users.id));
+  }
+
+  async function fetchScheduleCount(t: DBTransaction, whereClause: SQL | undefined): Promise<number> {
+    const [countRow] = await t
+      .select({ count: count() })
+      .from(classInstances)
+      .innerJoin(students, eq(classInstances.studentId, students.id))
+      .leftJoin(teachers, eq(classInstances.teacherId, teachers.id))
+      .leftJoin(users, eq(teachers.userId, users.id))
+      .where(whereClause);
+    return countRow?.count ?? 0;
+  }
+
+  async function mapScheduleRows(
+    queryRows: Awaited<ReturnType<ReturnType<typeof buildScheduleDataQuery>["execute"]>>,
+    viewerTimezone: string
+  ): Promise<ParentDashboardScheduleRow[]> {
+    const { formatInstantInTimezone } = await import("@/backend/lib/timezone");
+
+    return queryRows.map(r => {
+      const studentName = r.studentName ?? "";
+      const initials = studentName
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((w: string) => w[0]?.toUpperCase() ?? "")
+        .join("");
+
+      return {
+        id: r.id,
+        studentId: r.studentId,
+        studentName,
+        studentInitials: initials,
+        studentAvatarUrl: r.studentAvatarUrl ?? null,
+        teacherId: r.teacherId,
+        teacherName: r.teacherName ?? "",
+        scheduledStartAt: r.scheduledStartAt,
+        scheduledEndAt: r.scheduledEndAt,
+        durationMinutes: r.durationMinutes,
+        bookingStatus: r.isRescheduled ? ("rescheduled" as const) : ("confirmed" as const),
+        executionState: r.executionState,
+        outcome: r.outcome,
+        zoomMeetingUrl: r.zoomMeetingUrl ?? null,
+        classTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone),
+      };
+    });
+  }
+
   export const getParentDashboardSchedule = async (
     parentId: string,
     input: { date?: Date | null; search?: string | null; pagination?: PaginationArgs | null },
@@ -396,7 +502,6 @@ export namespace ParentRepository {
   ): Promise<ParentDashboardScheduleResult> => {
     const runner = async (t: DBTransaction): Promise<ParentDashboardScheduleResult> => {
       const parentStudents = await t.select({ id: students.id }).from(students).where(eq(students.parentId, parentId));
-
       const studentIds = parentStudents.map(s => s.id);
 
       if (studentIds.length === 0) {
@@ -404,111 +509,19 @@ export namespace ParentRepository {
         return { rows: [], totalCount: 0, pageInfo };
       }
 
-      const conditions = [isNull(classInstances.deletedAt), inArray(classInstances.studentId, studentIds)];
+      const viewerTimezone = input.date ? await fetchParentTimezone(t, parentId) : "UTC";
+      const whereClause = await buildScheduleConditions(input, studentIds, viewerTimezone);
 
-      if (input.date) {
-        const parentRow = await t
-          .select({ timezone: parents.timezone })
-          .from(parents)
-          .where(eq(parents.id, parentId))
-          .limit(1);
-
-        const viewerTimezone = parentRow[0]?.timezone ?? "UTC";
-        const { getDayBoundaries } = await import("@/backend/lib/timezone");
-        const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(input.date, viewerTimezone);
-
-        conditions.push(gte(classInstances.scheduledStartAt, startOfDayUtc));
-        conditions.push(lt(classInstances.scheduledStartAt, endOfDayUtc));
-      }
-
-      if (input.search) {
-        const searchPattern = `%${input.search}%`;
-        const searchCondition = or(ilike(students.name, searchPattern), ilike(users.name, searchPattern));
-        if (searchCondition) {
-          conditions.push(searchCondition);
-        }
-      }
-
-      const whereClause = and(...conditions);
-
-      let dataQuery = t
-        .select({
-          id: classInstances.id,
-          studentId: classInstances.studentId,
-          studentName: students.name,
-          studentAvatarUrl: students.avatarUrl,
-          teacherId: classInstances.teacherId,
-          teacherName: sql<string>`COALESCE(${users.name}, '')`,
-          scheduledStartAt: classInstances.scheduledStartAt,
-          scheduledEndAt: classInstances.scheduledEndAt,
-          durationMinutes: classInstances.durationMinutes,
-          isRescheduled: classInstances.isRescheduled,
-          executionState: classInstances.executionState,
-          outcome: classInstances.outcome,
-          zoomMeetingUrl: classInstances.zoomMeetingUrl,
-        })
-        .from(classInstances)
-        .innerJoin(students, eq(classInstances.studentId, students.id))
-        .leftJoin(teachers, eq(classInstances.teacherId, teachers.id))
-        .leftJoin(users, eq(teachers.userId, users.id))
-        .where(whereClause)
-        .orderBy(classInstances.scheduledStartAt)
-        .$dynamic();
+      let dataQuery = buildScheduleDataQuery(t).where(whereClause).orderBy(classInstances.scheduledStartAt).$dynamic();
 
       if (input.pagination) {
         dataQuery = queryWithPagination(dataQuery, input.pagination);
       }
 
-      const [queryRows, [countRow]] = await Promise.all([
-        dataQuery,
-        t
-          .select({ count: count() })
-          .from(classInstances)
-          .innerJoin(students, eq(classInstances.studentId, students.id))
-          .leftJoin(teachers, eq(classInstances.teacherId, teachers.id))
-          .leftJoin(users, eq(teachers.userId, users.id))
-          .where(whereClause),
-      ]);
+      const [queryRows, totalCount] = await Promise.all([dataQuery, fetchScheduleCount(t, whereClause)]);
 
-      const totalCount = countRow?.count ?? 0;
-
-      const parentRow = await t
-        .select({ timezone: parents.timezone })
-        .from(parents)
-        .where(eq(parents.id, parentId))
-        .limit(1);
-
-      const viewerTimezone = parentRow[0]?.timezone ?? "UTC";
-      const { formatInstantInTimezone } = await import("@/backend/lib/timezone");
-
-      const mappedRows: ParentDashboardScheduleRow[] = queryRows.map(r => {
-        const studentName = r.studentName ?? "";
-        const initials = studentName
-          .split(" ")
-          .filter(Boolean)
-          .slice(0, 2)
-          .map((w: string) => w[0]?.toUpperCase() ?? "")
-          .join("");
-
-        return {
-          id: r.id,
-          studentId: r.studentId,
-          studentName,
-          studentInitials: initials,
-          studentAvatarUrl: r.studentAvatarUrl ?? null,
-          teacherId: r.teacherId,
-          teacherName: r.teacherName ?? "",
-          scheduledStartAt: r.scheduledStartAt,
-          scheduledEndAt: r.scheduledEndAt,
-          durationMinutes: r.durationMinutes,
-          bookingStatus: r.isRescheduled ? ("rescheduled" as const) : ("confirmed" as const),
-          executionState: r.executionState,
-          outcome: r.outcome,
-          zoomMeetingUrl: r.zoomMeetingUrl ?? null,
-          classTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone),
-        };
-      });
-
+      const timezoneForFormatting = await fetchParentTimezone(t, parentId);
+      const mappedRows = await mapScheduleRows(queryRows, timezoneForFormatting);
       const pageInfo = PaginationUtils.buildPageInfoFromArgs(input.pagination, mappedRows.length, totalCount);
 
       return { rows: mappedRows, totalCount, pageInfo };

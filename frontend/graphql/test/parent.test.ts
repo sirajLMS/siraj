@@ -78,22 +78,10 @@ describe("GraphQL Parent Integration Tests", () => {
   });
 
   test("parentDirectory — parent role is denied access", async () => {
-    const parentToken = await loginDemoUser("parent_default");
-
-    const result = await testClient.query({
-      query: parentDirectoryQueryDocument,
-      variables: {
-        search: null,
-        paginationArgs: null,
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${parentToken}`,
-        },
-      },
+    await assertOperationDenied("parent_default", "query", parentDirectoryQueryDocument, {
+      search: null,
+      paginationArgs: null,
     });
-
-    expect(result.error).toBeDefined();
   });
 });
 
@@ -134,27 +122,15 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
   });
 
   test("parentProfile — teacher role is denied (IDOR protection)", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
-
-    const result = await testClient.query({
-      query: parentProfileQueryDocument,
-      variables: { parentId: validParentId ?? "00000000-0000-0000-0000-000000000000" },
-      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+    await assertOperationDenied("teacher_default", "query", parentProfileQueryDocument, {
+      parentId: validParentId ?? "00000000-0000-0000-0000-000000000000",
     });
-
-    expect(result.error).toBeDefined();
   });
 
   test("parentProfile — parent role is denied (IDOR protection)", async () => {
-    const parentToken = await loginDemoUser("parent_default");
-
-    const result = await testClient.query({
-      query: parentProfileQueryDocument,
-      variables: { parentId: validParentId ?? "00000000-0000-0000-0000-000000000000" },
-      context: { headers: { Authorization: `Bearer ${parentToken}` } },
+    await assertOperationDenied("parent_default", "query", parentProfileQueryDocument, {
+      parentId: validParentId ?? "00000000-0000-0000-0000-000000000000",
     });
-
-    expect(result.error).toBeDefined();
   });
 
   test("parentProfile — returns null for unknown parentId (not a data leak)", async () => {
@@ -206,15 +182,9 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
   });
 
   test("parentAssociatedStudents — teacher role denied", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
-
-    const result = await testClient.query({
-      query: parentAssociatedStudentsQueryDocument,
-      variables: { parentId: "00000000-0000-0000-0000-000000000000" },
-      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+    await assertOperationDenied("teacher_default", "query", parentAssociatedStudentsQueryDocument, {
+      parentId: "00000000-0000-0000-0000-000000000000",
     });
-
-    expect(result.error).toBeDefined();
   });
 });
 
@@ -280,19 +250,11 @@ describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
   });
 
   test("updateStudentQuota — teacher role is denied", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
-
-    const result = await testClient.mutate({
-      mutation: updateStudentQuotaMutationDocument,
-      variables: {
-        studentId: "00000000-0000-0000-0000-000000000000",
-        newClassesRemaining: 5,
-        expectedVersion: null,
-      },
-      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+    await assertOperationDenied("teacher_default", "mutate", updateStudentQuotaMutationDocument, {
+      studentId: "00000000-0000-0000-0000-000000000000",
+      newClassesRemaining: 5,
+      expectedVersion: null,
     });
-
-    expect(result.error).toBeDefined();
   });
 
   test("updateStudentQuota — unknown studentId throws error", async () => {
@@ -347,15 +309,10 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
   });
 
   test("parentInvoiceHistory — teacher role denied", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
-
-    const result = await testClient.query({
-      query: parentInvoiceHistoryQueryDocument,
-      variables: { parentId: "00000000-0000-0000-0000-000000000000", paginationArgs: null },
-      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+    await assertOperationDenied("teacher_default", "query", parentInvoiceHistoryQueryDocument, {
+      parentId: "00000000-0000-0000-0000-000000000000",
+      paginationArgs: null,
     });
-
-    expect(result.error).toBeDefined();
   });
 });
 
@@ -386,14 +343,8 @@ describe("GraphQL Document Tests — parentDocuments query", () => {
   });
 
   test("parentDocuments — teacher role denied", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
-
-    const result = await testClient.query({
-      query: parentDocumentsQueryDocument,
-      variables: { parentId: "00000000-0000-0000-0000-000000000000" },
-      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+    await assertOperationDenied("teacher_default", "query", parentDocumentsQueryDocument, {
+      parentId: "00000000-0000-0000-0000-000000000000",
     });
-
-    expect(result.error).toBeDefined();
   });
 });

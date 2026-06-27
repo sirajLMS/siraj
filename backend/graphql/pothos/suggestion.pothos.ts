@@ -9,9 +9,17 @@ import type {
   SuggestionQueueResult,
   SuggestionReturnType,
   SuggestionSearchResultType,
+  SuggestionSelectType,
   SuggestionSubmitInputType,
 } from "@/backend/types";
 import { SuggestionStatus } from "@/shared/lib/enum";
+
+function requireAuth(ctx: { user?: { id: string } | undefined }): string {
+  if (!ctx.user?.id) {
+    throw new Error("unauthenticated");
+  }
+  return ctx.user.id;
+}
 
 const SuggestionStatusPothosEnum = gqlSchemaBuilder.enumType(SuggestionStatus, {
   name: "SuggestionStatus",
@@ -165,12 +173,10 @@ gqlSchemaBuilder.queryField("adminSuggestions", t =>
       filter: t.arg({ type: SuggestionFilterPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
+      const userId = requireAuth(ctx);
 
       const result: SuggestionQueueResult = await SuggestionService.getAdminSuggestions(
-        ctx.user.id,
+        userId,
         {
           limit: args.filter.limit,
           offset: args.filter.offset,
@@ -197,12 +203,10 @@ gqlSchemaBuilder.queryField("parentSuggestions", t =>
       options: t.arg({ type: ParentSuggestionOptionsPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
+      const userId = requireAuth(ctx);
 
       const suggestions = await SuggestionService.getParentSuggestions(
-        ctx.user.id,
+        userId,
         { limit: args.options.limit, offset: args.options.offset },
         ctx.locale
       );
@@ -221,15 +225,43 @@ gqlSchemaBuilder.queryField("searchSuggestions", t =>
       excludeId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
+      const userId = requireAuth(ctx);
 
-      const results = await SuggestionService.searchSuggestions(ctx.user.id, args.query, args.excludeId, ctx.locale);
+      const results = await SuggestionService.searchSuggestions(userId, args.query, args.excludeId, ctx.locale);
       return results.map(normalizeSuggestionSearchResult);
     },
   })
 );
+
+function toSuggestionReturnType(result: SuggestionSelectType): SuggestionReturnType {
+  return normalizeSuggestion({
+    id: result.id,
+    parentId: result.parentId,
+    submitterName: result.submitterName,
+    body: result.body,
+    status: result.status as SuggestionStatus,
+    duplicateOfId: result.duplicateOfId ?? null,
+    adminResponse: result.adminResponse ?? null,
+    reviewedByUserId: result.reviewedByUserId ?? null,
+    reviewedAt: result.reviewedAt ?? null,
+    emailSentAt: result.emailSentAt ?? null,
+    createdAt: result.createdAt,
+    parentName: "",
+    reviewedByUserName: null,
+    duplicateOfBody: null,
+    duplicateOfSubmitterName: null,
+    responseCount: 0,
+  });
+}
+
+async function authenticatedSuggestionMutation(
+  ctx: { user?: { id: string } | undefined; locale: string },
+  serviceCall: (userId: string) => Promise<SuggestionSelectType>
+): Promise<SuggestionReturnType> {
+  const userId = requireAuth(ctx);
+  const result = await serviceCall(userId);
+  return toSuggestionReturnType(result);
+}
 
 gqlSchemaBuilder.mutationField("submitSuggestion", t =>
   t.field({
@@ -238,39 +270,10 @@ gqlSchemaBuilder.mutationField("submitSuggestion", t =>
     args: {
       input: t.arg({ type: SubmitSuggestionInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
-
-      const created = await SuggestionService.submitSuggestion(
-        ctx.user.id,
-        {
-          submitterName: args.input.submitterName,
-          body: args.input.body,
-        },
-        ctx.locale
-      );
-
-      return normalizeSuggestion({
-        id: created.id,
-        parentId: created.parentId,
-        submitterName: created.submitterName,
-        body: created.body,
-        status: created.status as SuggestionStatus,
-        duplicateOfId: created.duplicateOfId ?? null,
-        adminResponse: created.adminResponse ?? null,
-        reviewedByUserId: created.reviewedByUserId ?? null,
-        reviewedAt: created.reviewedAt ?? null,
-        emailSentAt: created.emailSentAt ?? null,
-        createdAt: created.createdAt,
-        parentName: "",
-        reviewedByUserName: null,
-        duplicateOfBody: null,
-        duplicateOfSubmitterName: null,
-        responseCount: 0,
-      });
-    },
+    resolve: async (_root, args, ctx) =>
+      authenticatedSuggestionMutation(ctx, userId =>
+        SuggestionService.submitSuggestion(userId, { submitterName: args.input.submitterName, body: args.input.body }, ctx.locale)
+      ),
   })
 );
 
@@ -281,32 +284,10 @@ gqlSchemaBuilder.mutationField("markSuggestionReviewed", t =>
     args: {
       suggestionId: t.arg.string({ required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
-
-      const updated = await SuggestionService.markSuggestionReviewed(ctx.user.id, args.suggestionId, ctx.locale);
-
-      return normalizeSuggestion({
-        id: updated.id,
-        parentId: updated.parentId,
-        submitterName: updated.submitterName,
-        body: updated.body,
-        status: updated.status as SuggestionStatus,
-        duplicateOfId: updated.duplicateOfId ?? null,
-        adminResponse: updated.adminResponse ?? null,
-        reviewedByUserId: updated.reviewedByUserId ?? null,
-        reviewedAt: updated.reviewedAt ?? null,
-        emailSentAt: updated.emailSentAt ?? null,
-        createdAt: updated.createdAt,
-        parentName: "",
-        reviewedByUserName: null,
-        duplicateOfBody: null,
-        duplicateOfSubmitterName: null,
-        responseCount: 0,
-      });
-    },
+    resolve: async (_root, args, ctx) =>
+      authenticatedSuggestionMutation(ctx, userId =>
+        SuggestionService.markSuggestionReviewed(userId, args.suggestionId, ctx.locale)
+      ),
   })
 );
 
@@ -317,37 +298,10 @@ gqlSchemaBuilder.mutationField("respondToSuggestion", t =>
     args: {
       input: t.arg({ type: RespondToSuggestionInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
-
-      const result = await SuggestionService.respondToSuggestion(
-        ctx.user.id,
-        args.input.suggestionId,
-        args.input.adminResponse,
-        ctx.locale
-      );
-
-      return normalizeSuggestion({
-        id: result.id,
-        parentId: result.parentId,
-        submitterName: result.submitterName,
-        body: result.body,
-        status: result.status as SuggestionStatus,
-        duplicateOfId: result.duplicateOfId ?? null,
-        adminResponse: result.adminResponse ?? null,
-        reviewedByUserId: result.reviewedByUserId ?? null,
-        reviewedAt: result.reviewedAt ?? null,
-        emailSentAt: result.emailSentAt ?? null,
-        createdAt: result.createdAt,
-        parentName: "",
-        reviewedByUserName: null,
-        duplicateOfBody: null,
-        duplicateOfSubmitterName: null,
-        responseCount: 0,
-      });
-    },
+    resolve: async (_root, args, ctx) =>
+      authenticatedSuggestionMutation(ctx, userId =>
+        SuggestionService.respondToSuggestion(userId, args.input.suggestionId, args.input.adminResponse, ctx.locale)
+      ),
   })
 );
 
@@ -358,37 +312,10 @@ gqlSchemaBuilder.mutationField("markSuggestionDuplicate", t =>
     args: {
       input: t.arg({ type: MarkSuggestionDuplicateInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
-
-      const result = await SuggestionService.markAsDuplicate(
-        ctx.user.id,
-        args.input.suggestionId,
-        args.input.duplicateOfId,
-        ctx.locale
-      );
-
-      return normalizeSuggestion({
-        id: result.id,
-        parentId: result.parentId,
-        submitterName: result.submitterName,
-        body: result.body,
-        status: result.status as SuggestionStatus,
-        duplicateOfId: result.duplicateOfId ?? null,
-        adminResponse: result.adminResponse ?? null,
-        reviewedByUserId: result.reviewedByUserId ?? null,
-        reviewedAt: result.reviewedAt ?? null,
-        emailSentAt: result.emailSentAt ?? null,
-        createdAt: result.createdAt,
-        parentName: "",
-        reviewedByUserName: null,
-        duplicateOfBody: null,
-        duplicateOfSubmitterName: null,
-        responseCount: 0,
-      });
-    },
+    resolve: async (_root, args, ctx) =>
+      authenticatedSuggestionMutation(ctx, userId =>
+        SuggestionService.markAsDuplicate(userId, args.input.suggestionId, args.input.duplicateOfId, ctx.locale)
+      ),
   })
 );
 
@@ -400,11 +327,9 @@ gqlSchemaBuilder.mutationField("deleteSuggestion", t =>
       suggestionId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
+      const userId = requireAuth(ctx);
 
-      await SuggestionService.deleteSuggestion(ctx.user.id, args.suggestionId, ctx.locale);
+      await SuggestionService.deleteSuggestion(userId, args.suggestionId, ctx.locale);
       return true;
     },
   })

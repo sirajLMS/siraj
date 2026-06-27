@@ -62,6 +62,83 @@ async function upsertLeaveRequest(
   return inserted;
 }
 
+type LeaveRequestContext = {
+  teacherUserMap: Map<string, string>;
+  studentParentUserMap: Map<string, string>;
+  adminUserId: string | undefined;
+  fakerSeed: number;
+};
+
+async function seedApprovedLeaves(leaveInstances: ClassInstanceEntity[], maxLeaves: number, ctx: LeaveRequestContext) {
+  const results = [];
+  for (let i = 0; i < maxLeaves; i++) {
+    const instance = leaveInstances[i];
+    const requesterType = cycleAtIndex(ALL_LEAVE_REQUESTER_TYPES, i);
+    const actorUserId = resolveRequesterUserId(
+      requesterType,
+      instance,
+      ctx.teacherUserMap,
+      ctx.studentParentUserMap,
+      ctx.adminUserId
+    );
+    if (!actorUserId) continue;
+
+    const faker = getFakerForIndex(ctx.fakerSeed, instance.id.length);
+    const inserted = await upsertLeaveRequest(instance, {
+      requestedByUserId: actorUserId,
+      requesterType,
+      reason: faker.lorem.sentence(),
+      status: LeaveRequestStatus.APPROVED,
+      createdAt: instance.scheduledStartAt,
+      processedAt: instance.scheduledEndAt,
+      processedByUserId: ctx.adminUserId ?? null,
+    });
+    results.push(inserted);
+  }
+  return results;
+}
+
+async function seedSupplementalLeaves(
+  pendingFutureInstances: ClassInstanceEntity[],
+  supplementalCount: number,
+  offsetIndex: number,
+  ctx: LeaveRequestContext
+) {
+  const supplementalStatuses = [
+    LeaveRequestStatus.PENDING,
+    LeaveRequestStatus.RESCHEDULED,
+    LeaveRequestStatus.CANCELLED,
+  ] as const;
+  const results = [];
+  for (let i = 0; i < supplementalCount; i++) {
+    const instance = pendingFutureInstances[i];
+    const status = supplementalStatuses[i];
+    const requesterType = cycleAtIndex(ALL_LEAVE_REQUESTER_TYPES, offsetIndex + i);
+    const actorUserId = resolveRequesterUserId(
+      requesterType,
+      instance,
+      ctx.teacherUserMap,
+      ctx.studentParentUserMap,
+      ctx.adminUserId
+    );
+    if (!actorUserId) continue;
+
+    const faker = getFakerForIndex(ctx.fakerSeed, 8000 + i);
+    const isProcessed = status !== LeaveRequestStatus.PENDING;
+    const inserted = await upsertLeaveRequest(instance, {
+      requestedByUserId: actorUserId,
+      requesterType,
+      reason: faker.lorem.sentence(),
+      status,
+      createdAt: instance.scheduledStartAt,
+      processedAt: isProcessed ? instance.scheduledStartAt : null,
+      processedByUserId: isProcessed ? (ctx.adminUserId ?? null) : null,
+    });
+    results.push(inserted);
+  }
+  return results;
+}
+
 export async function seedOrGet(
   classInstancesList: ClassInstanceEntity[],
   teachersList: TeacherEntity[],
@@ -91,70 +168,21 @@ export async function seedOrGet(
       .filter((entry): entry is [string, string] => !!entry[1])
   );
   const adminUser = usersList.find(u => u.email === "admin@siraj.local");
-  const results = [];
+  const ctx: LeaveRequestContext = {
+    teacherUserMap,
+    studentParentUserMap,
+    adminUserId: adminUser?.id,
+    fakerSeed: seedConfig.fakerSeed,
+  };
   const maxLeaves = seedConfig.profile === "standard" ? leaveInstances.length : Math.min(2, leaveInstances.length);
-
-  for (let i = 0; i < maxLeaves; i++) {
-    const instance = leaveInstances[i];
-    const requesterType = cycleAtIndex(ALL_LEAVE_REQUESTER_TYPES, i);
-    const actorUserId = resolveRequesterUserId(
-      requesterType,
-      instance,
-      teacherUserMap,
-      studentParentUserMap,
-      adminUser?.id
-    );
-    if (!actorUserId) continue;
-
-    const faker = getFakerForIndex(seedConfig.fakerSeed, instance.id.length);
-    const inserted = await upsertLeaveRequest(instance, {
-      requestedByUserId: actorUserId,
-      requesterType,
-      reason: faker.lorem.sentence(),
-      status: LeaveRequestStatus.APPROVED,
-      createdAt: instance.scheduledStartAt,
-      processedAt: instance.scheduledEndAt,
-      processedByUserId: adminUser?.id ?? null,
-    });
-    results.push(inserted);
-  }
-
-  const supplementalStatuses = [
-    LeaveRequestStatus.PENDING,
-    LeaveRequestStatus.RESCHEDULED,
-    LeaveRequestStatus.CANCELLED,
-  ] as const;
   const supplementalCount =
     seedConfig.profile === "standard"
-      ? Math.min(supplementalStatuses.length, pendingFutureInstances.length)
+      ? Math.min(3, pendingFutureInstances.length)
       : Math.min(1, pendingFutureInstances.length);
 
-  for (let i = 0; i < supplementalCount; i++) {
-    const instance = pendingFutureInstances[i];
-    const status = supplementalStatuses[i];
-    const requesterType = cycleAtIndex(ALL_LEAVE_REQUESTER_TYPES, maxLeaves + i);
-    const actorUserId = resolveRequesterUserId(
-      requesterType,
-      instance,
-      teacherUserMap,
-      studentParentUserMap,
-      adminUser?.id
-    );
-    if (!actorUserId) continue;
-
-    const faker = getFakerForIndex(seedConfig.fakerSeed, 8000 + i);
-    const isProcessed = status !== LeaveRequestStatus.PENDING;
-    const inserted = await upsertLeaveRequest(instance, {
-      requestedByUserId: actorUserId,
-      requesterType,
-      reason: faker.lorem.sentence(),
-      status,
-      createdAt: instance.scheduledStartAt,
-      processedAt: isProcessed ? instance.scheduledStartAt : null,
-      processedByUserId: isProcessed ? (adminUser?.id ?? null) : null,
-    });
-    results.push(inserted);
-  }
+  const approved = await seedApprovedLeaves(leaveInstances, maxLeaves, ctx);
+  const supplemental = await seedSupplementalLeaves(pendingFutureInstances, supplementalCount, maxLeaves, ctx);
+  const results = [...approved, ...supplemental];
 
   logger.info(`Leave requests seeded (${results.length} rows).`);
   return results;

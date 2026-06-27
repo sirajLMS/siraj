@@ -10,14 +10,12 @@ import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/c
 import type { ComplaintFormData } from "../schemas/complaintFormSchema";
 import type { ParentStudentOption } from "../types/complaints.types";
 
-/** Styled field label with uppercase text and surface-variant color */
 const StyledFieldLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
   textTransform: "uppercase",
   fontWeight: 500,
 }));
 
-/** Main form layout container with responsive gap based on viewport */
 const StyledFormContainer = styled(Box, {
   shouldForwardProp: prop => prop !== "isMobile",
 })<{ isMobile: boolean }>(({ theme, isMobile }) => ({
@@ -26,7 +24,6 @@ const StyledFormContainer = styled(Box, {
   gap: theme.spacing(isMobile ? 3 : 4),
 }));
 
-/** Form header row containing the icon and form title */
 const StyledFormHeaderBox = styled(Box, {
   shouldForwardProp: prop => prop !== "isMobile",
 })<{ isMobile: boolean }>(({ theme, isMobile }) => ({
@@ -36,28 +33,23 @@ const StyledFormHeaderBox = styled(Box, {
   marginBottom: theme.spacing(isMobile ? 0 : 1),
 }));
 
-/** Error message displayed below a form field when validation fails */
 const StyledFieldErrorMessage = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
   marginTop: theme.spacing(0.5),
 }));
 
-/** Rate review icon in primary color for the form header */
 const StyledFormHeaderIcon = styled(RateReviewOutlined)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-/** Email icon in primary color for the contact email field */
 const StyledEmailIcon = styled(EmailOutlined)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-/** Description icon in primary color for the details field */
 const StyledDescriptionIcon = styled(DescriptionOutlined)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-/** Wrapper for each form field group (label + input + error) */
 const StyledFormFieldGroup = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -76,6 +68,131 @@ function FieldLabel({ children }: Readonly<{ children: string }>) {
   return <StyledFieldLabel variant="labelMd">{children}</StyledFieldLabel>;
 }
 
+function FormHeader({ isMobile, title }: { readonly isMobile: boolean; readonly title: string }) {
+  return (
+    <StyledFormHeaderBox isMobile={isMobile}>
+      <StyledFormHeaderIcon />
+      <Typography variant="titleLg">{title}</Typography>
+    </StyledFormHeaderBox>
+  );
+}
+
+function SelectFieldGroup({
+  label,
+  control,
+  name,
+  error,
+  children,
+}: {
+  readonly label: string;
+  readonly control: Control<ComplaintFormData>;
+  readonly name: "category" | "studentId";
+  readonly error: FieldErrors<ComplaintFormData>["category"] | FieldErrors<ComplaintFormData>["studentId"];
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <StyledFormFieldGroup>
+      <FieldLabel>{label}</FieldLabel>
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <FormControl fullWidth error={Boolean(error)}>
+            <Select {...field} displayEmpty value={field.value}>
+              {children}
+            </Select>
+            {error?.message ? (
+              <StyledFieldErrorMessage variant="bodyMd">{error.message}</StyledFieldErrorMessage>
+            ) : null}
+          </FormControl>
+        )}
+      />
+    </StyledFormFieldGroup>
+  );
+}
+
+function ContactEmailField({
+  control,
+  error,
+  labels,
+}: {
+  readonly control: Control<ComplaintFormData>;
+  readonly error: FieldErrors<ComplaintFormData>["contactEmail"];
+  readonly labels: ComplaintsParentLabels;
+}) {
+  return (
+    <StyledFormFieldGroup>
+      <FieldLabel>{labels.contactEmail}</FieldLabel>
+      <Controller
+        name="contactEmail"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            placeholder={labels.contactEmailPlaceholder}
+            fullWidth
+            error={Boolean(error)}
+            helperText={error?.message}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <StyledEmailIcon />
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: { autoComplete: "email" },
+            }}
+          />
+        )}
+      />
+    </StyledFormFieldGroup>
+  );
+}
+
+function ComplaintDetailsField({
+  control,
+  error,
+  labels,
+  isMobile,
+}: {
+  readonly control: Control<ComplaintFormData>;
+  readonly error: FieldErrors<ComplaintFormData>["complaintDetails"];
+  readonly labels: ComplaintsParentLabels;
+  readonly isMobile: boolean;
+}) {
+  return (
+    <StyledFormFieldGroup>
+      <FieldLabel>{labels.complaintDetails}</FieldLabel>
+      <Controller
+        name="complaintDetails"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            placeholder={labels.complaintDetailsPlaceholder}
+            fullWidth
+            multiline
+            minRows={isMobile ? 4 : 5}
+            error={Boolean(error)}
+            helperText={error?.message}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start" sx={{ alignSelf: "flex-start", mt: 1 }}>
+                    <StyledDescriptionIcon />
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: { autoComplete: "off" },
+            }}
+          />
+        )}
+      />
+    </StyledFormFieldGroup>
+  );
+}
+
 export function ComplaintFormFields({
   control,
   errors,
@@ -87,130 +204,30 @@ export function ComplaintFormFields({
 
   return (
     <StyledFormContainer isMobile={isMobile}>
-      {/* Form header with icon and title */}
-      <StyledFormHeaderBox isMobile={isMobile}>
-        <StyledFormHeaderIcon />
-        <Typography variant="titleLg">{labels.formTitle}</Typography>
-      </StyledFormHeaderBox>
+      <FormHeader isMobile={isMobile} title={labels.formTitle} />
 
-      <StyledFormFieldGroup>
-        <FieldLabel>{labels.category}</FieldLabel>
-        <Controller
-          name="category"
-          control={control}
-          render={({ field }) => (
-            <FormControl fullWidth error={Boolean(errors.category)}>
-              <Select
-                {...field}
-                displayEmpty
-                value={field.value}
-                onChange={event => {
-                  field.onChange(event.target.value as ComplaintCategory);
-                }}
-              >
-                {Object.values(ComplaintCategory).map(cat => (
-                  <MenuItem key={cat} value={cat}>
-                    {labels.categoryLabels[cat]}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.category?.message ? (
-                <StyledFieldErrorMessage variant="bodyMd">{errors.category.message}</StyledFieldErrorMessage>
-              ) : null}
-            </FormControl>
-          )}
-        />
-      </StyledFormFieldGroup>
+      <SelectFieldGroup label={labels.category} control={control} name="category" error={errors.category}>
+        {Object.values(ComplaintCategory).map(cat => (
+          <MenuItem key={cat} value={cat}>
+            {labels.categoryLabels[cat]}
+          </MenuItem>
+        ))}
+      </SelectFieldGroup>
 
-      <StyledFormFieldGroup>
-        <FieldLabel>{labels.student}</FieldLabel>
-        <Controller
-          name="studentId"
-          control={control}
-          render={({ field }) => (
-            <FormControl fullWidth error={Boolean(errors.studentId)}>
-              <Select
-                {...field}
-                displayEmpty
-                value={field.value}
-                onChange={event => {
-                  field.onChange(event.target.value);
-                }}
-              >
-                <MenuItem value="" disabled>
-                  {labels.student}
-                </MenuItem>
-                {studentOptions.map(option => (
-                  <MenuItem key={option.id} value={option.id}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.studentId?.message ? (
-                <StyledFieldErrorMessage variant="bodyMd">{errors.studentId.message}</StyledFieldErrorMessage>
-              ) : null}
-            </FormControl>
-          )}
-        />
-      </StyledFormFieldGroup>
+      <SelectFieldGroup label={labels.student} control={control} name="studentId" error={errors.studentId}>
+        <MenuItem value="" disabled>
+          {labels.student}
+        </MenuItem>
+        {studentOptions.map(option => (
+          <MenuItem key={option.id} value={option.id}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </SelectFieldGroup>
 
-      {/* Contact email text field */}
-      <StyledFormFieldGroup>
-        <FieldLabel>{labels.contactEmail}</FieldLabel>
-        <Controller
-          name="contactEmail"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              placeholder={labels.contactEmailPlaceholder}
-              fullWidth
-              error={Boolean(errors.contactEmail)}
-              helperText={errors.contactEmail?.message}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <StyledEmailIcon />
-                    </InputAdornment>
-                  ),
-                },
-                htmlInput: { autoComplete: "email" },
-              }}
-            />
-          )}
-        />
-      </StyledFormFieldGroup>
+      <ContactEmailField control={control} error={errors.contactEmail} labels={labels} />
 
-      {/* Complaint details multi-line text field */}
-      <StyledFormFieldGroup>
-        <FieldLabel>{labels.complaintDetails}</FieldLabel>
-        <Controller
-          name="complaintDetails"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              placeholder={labels.complaintDetailsPlaceholder}
-              fullWidth
-              multiline
-              minRows={isMobile ? 4 : 5}
-              error={Boolean(errors.complaintDetails)}
-              helperText={errors.complaintDetails?.message}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start" sx={{ alignSelf: "flex-start", mt: 1 }}>
-                      <StyledDescriptionIcon />
-                    </InputAdornment>
-                  ),
-                },
-                htmlInput: { autoComplete: "off" },
-              }}
-            />
-          )}
-        />
-      </StyledFormFieldGroup>
+      <ComplaintDetailsField control={control} error={errors.complaintDetails} labels={labels} isMobile={isMobile} />
     </StyledFormContainer>
   );
 }

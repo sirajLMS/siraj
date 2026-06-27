@@ -1,10 +1,17 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { GroupClassRepository } from "@/backend/db/repo";
 import { classCommunications, classInstances, groupClassEnrollments, groupClasses } from "@/backend/db/schema";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { createMockClassInstance, createTestParent, createTestStudent, createTestUser, setupStudent, setupTeacher } from "../entity-setup";
+import {
+  createMockClassInstance,
+  createTestParent,
+  createTestStudent,
+  createTestUser,
+  setupStudent,
+  setupTeacher,
+} from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
@@ -27,7 +34,11 @@ function gcTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
 async function setupGroupClassFixture(tx: DBTransaction, prefix: string) {
-  const { user: parentUser, parent, student } = await setupStudent(
+  const {
+    user: parentUser,
+    parent,
+    student,
+  } = await setupStudent(
     tx,
     { name: `${prefix} ParentUser`, email: `${prefix.toLowerCase()}-parent-${randomUUID()}@example.com` },
     {},

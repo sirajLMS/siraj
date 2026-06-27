@@ -1,3 +1,4 @@
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
@@ -14,6 +15,37 @@ import {
 } from "../pothos/schedule.pothos";
 import { WeeklyScheduleGridPothosObject, WeeklyWorkloadMetricsPothosObject } from "../pothos/weekly-schedule.pothos";
 
+async function requireAuth(ctx: BaseContext): Promise<string> {
+  if (!ctx.user) {
+    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+    throw new Error(tFunc("unauthorized"));
+  }
+  return ctx.user.id;
+}
+
+type PaginationArgsInput = {
+  first?: number | null;
+  skip?: number | null;
+  after?: string | null;
+  before?: string | null;
+  last?: number | null;
+  page?: number | null;
+  maxCount?: number | null;
+};
+
+function toPaginationArgs(input?: PaginationArgsInput | null): PaginationArgs | null {
+  if (!input) return null;
+  return new PaginationArgs({
+    first: input.first ?? null,
+    skip: input.skip ?? null,
+    after: input.after ?? null,
+    before: input.before ?? null,
+    last: input.last ?? null,
+    page: input.page ?? null,
+    maxCount: input.maxCount ?? null,
+  });
+}
+
 gqlSchemaBuilder.queryField("adminDashboardSchedule", t =>
   t.field({
     type: AdminDashboardScheduleResultPothosObject,
@@ -22,26 +54,12 @@ gqlSchemaBuilder.queryField("adminDashboardSchedule", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
+      const userId = await requireAuth(ctx);
 
-      let pagination: PaginationArgs | null = null;
-      if (args.input.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.input.paginationArgs.first ?? null,
-          skip: args.input.paginationArgs.skip ?? null,
-          after: args.input.paginationArgs.after ?? null,
-          before: args.input.paginationArgs.before ?? null,
-          last: args.input.paginationArgs.last ?? null,
-          page: args.input.paginationArgs.page ?? null,
-          maxCount: args.input.paginationArgs.maxCount ?? null,
-        });
-      }
+      const pagination = toPaginationArgs(args.input.paginationArgs);
 
       return ScheduleService.getAdminDashboardSchedule(
-        ctx.user.id,
+        userId,
         {
           ...args.input,
           paginationArgs: pagination,
@@ -61,12 +79,9 @@ gqlSchemaBuilder.queryField("dailyScheduleMetrics", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
+      const userId = await requireAuth(ctx);
       const result = await ScheduleService.getAdminDashboardSchedule(
-        ctx.user.id,
+        userId,
         { date: args.date, teacherId: args.teacherId },
         ctx.locale
       );
@@ -86,12 +101,9 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
+      const userId = await requireAuth(ctx);
       const result = await ScheduleService.getAdminDashboardSchedule(
-        ctx.user.id,
+        userId,
         {
           date: args.date,
           teacherId: args.teacherId,
@@ -115,26 +127,12 @@ gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
+      const userId = await requireAuth(ctx);
 
-      let pagination: PaginationArgs | null = null;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      }
+      const pagination = toPaginationArgs(args.paginationArgs);
 
       const result = await ScheduleService.getRescheduleTracking(
-        ctx.user.id,
+        userId,
         { search: args.search ?? null, status: args.status ?? null },
         pagination,
         ctx.locale
@@ -153,11 +151,8 @@ gqlSchemaBuilder.queryField("rescheduleTrackingMetrics", t =>
     type: RescheduleTrackingMetricsPothosObject,
     authScopes: { loggedIn: true },
     resolve: async (_parent, _args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      return ScheduleService.getRescheduleTrackingMetrics(ctx.user.id, ctx.locale);
+      const userId = await requireAuth(ctx);
+      return ScheduleService.getRescheduleTrackingMetrics(userId, ctx.locale);
     },
   })
 );

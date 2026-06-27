@@ -85,19 +85,23 @@ const defaultPaginationProps = {
   onPageChange: mock(() => {}),
 };
 
+function renderScheduleDataGrid(permissions: AppPermission[] = []) {
+  return renderWithWrapper(
+    <ScheduleOverviewDataGrid
+      rows={mockRows}
+      {...defaultPaginationProps}
+      headers={headers}
+      statusLabels={statusLabels}
+      detailsLabel="View Details"
+      emptyMessage="No classes scheduled"
+    />,
+    { permissions }
+  );
+}
+
 describe("ScheduleOverviewDataGrid", () => {
   test("shows timezone columns with ScheduleViewTimezones permission", () => {
-    renderWithWrapper(
-      <ScheduleOverviewDataGrid
-        rows={mockRows}
-        {...defaultPaginationProps}
-        headers={headers}
-        statusLabels={statusLabels}
-        detailsLabel="View Details"
-        emptyMessage="No classes scheduled"
-      />,
-      { permissions: [AppPermission.ScheduleViewTimezones] }
-    );
+    renderScheduleDataGrid([AppPermission.ScheduleViewTimezones]);
 
     expect(screen.getByText("Your Time")).toBeVisible();
     expect(screen.getByText("Teacher Time")).toBeVisible();
@@ -105,51 +109,21 @@ describe("ScheduleOverviewDataGrid", () => {
   });
 
   test("shows single time column without ScheduleViewTimezones permission", () => {
-    renderWithWrapper(
-      <ScheduleOverviewDataGrid
-        rows={mockRows}
-        {...defaultPaginationProps}
-        headers={headers}
-        statusLabels={statusLabels}
-        detailsLabel="View Details"
-        emptyMessage="No classes scheduled"
-      />,
-      { permissions: [] }
-    );
+    renderScheduleDataGrid([]);
 
     expect(screen.getByText("Your Time")).toBeVisible();
     expect(screen.queryByText("Time")).toBeNull();
   });
 
   test("renders student and teacher names as profile links", () => {
-    renderWithWrapper(
-      <ScheduleOverviewDataGrid
-        rows={mockRows}
-        {...defaultPaginationProps}
-        headers={headers}
-        statusLabels={statusLabels}
-        detailsLabel="View Details"
-        emptyMessage="No classes scheduled"
-      />,
-      { permissions: [] }
-    );
+    renderScheduleDataGrid([]);
 
     expect(screen.getByRole("link", { name: "Ahmed Hassan" })).toHaveAttribute("href", "/ar/students/student-1");
     expect(screen.getByRole("link", { name: "Dr. Sarah" })).toHaveAttribute("href", "/ar/teachers/teacher-1/profile");
   });
 
   test("renders history and details action links", () => {
-    renderWithWrapper(
-      <ScheduleOverviewDataGrid
-        rows={mockRows}
-        {...defaultPaginationProps}
-        headers={headers}
-        statusLabels={statusLabels}
-        detailsLabel="View Details"
-        emptyMessage="No classes scheduled"
-      />,
-      { permissions: [] }
-    );
+    renderScheduleDataGrid([]);
 
     expect(screen.getAllByRole("link", { name: "History" })[0]).toHaveAttribute(
       "href",

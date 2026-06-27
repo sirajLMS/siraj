@@ -19,6 +19,18 @@ import type {
 } from "@/backend/types";
 import type { DBTransaction } from "../db.types";
 
+async function insertReturning<T>(
+  table: Parameters<typeof db.insert>[0],
+  values: Record<string, unknown>,
+  tx?: DBTransaction
+): Promise<T> {
+  const runner = async (t: DBTransaction) => {
+    const [created] = await t.insert(table).values(values).returning();
+    return created as T;
+  };
+  return tx ? runner(tx) : db.transaction(runner);
+}
+
 export namespace GroupClassRepository {
   export async function getByClassInstanceId(
     classInstanceId: string,
@@ -45,18 +57,7 @@ export namespace GroupClassRepository {
     input: Omit<GroupClassInsertType, "id" | "createdAt" | "updatedAt">,
     tx?: DBTransaction
   ): Promise<GroupClassSelectType> {
-    const runner = async (t: DBTransaction) => {
-      const [created] = await t
-        .insert(groupClasses)
-        .values({
-          ...input,
-        })
-        .returning();
-
-      return created;
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
+    return insertReturning<GroupClassSelectType>(groupClasses, { ...input }, tx);
   }
 
   export async function getEnrollments(
@@ -110,18 +111,7 @@ export namespace GroupClassRepository {
     input: Omit<ClassCommunicationInsertType, "id" | "createdAt">,
     tx?: DBTransaction
   ): Promise<ClassCommunicationSelectType> {
-    const runner = async (t: DBTransaction) => {
-      const [created] = await t
-        .insert(classCommunications)
-        .values({
-          ...input,
-        })
-        .returning();
-
-      return created;
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
+    return insertReturning<ClassCommunicationSelectType>(classCommunications, { ...input }, tx);
   }
 
   export async function updateAdminNote(

@@ -14,6 +14,52 @@ interface TeacherDataGridProps {
   readonly onPageChange?: (page: number) => void;
 }
 
+interface TeacherActionButtonProps {
+  readonly icon: React.ReactNode;
+  readonly variant: "primary" | "error";
+  readonly onClick: () => void;
+}
+
+function TeacherActionButton({ icon, variant, onClick }: TeacherActionButtonProps) {
+  return (
+    <IconButton
+      onClick={onClick}
+      sx={theme => ({
+        backgroundColor: variant === "primary" ? theme.palette.primaryContainer : theme.palette.errorContainer,
+        color: variant === "primary" ? theme.palette.onPrimaryContainer : theme.palette.onErrorContainer,
+        "&:hover": {
+          backgroundColor: variant === "primary" ? theme.palette.primaryContainer : theme.palette.errorContainer,
+          opacity: 0.8,
+        },
+      })}
+    >
+      {icon}
+    </IconButton>
+  );
+}
+
+function getActionCellRenderer(
+  icon: React.ReactNode,
+  variant: "primary" | "error",
+  router: ReturnType<typeof useRouter>,
+  _locale: string,
+  getPath: (id: string) => string
+) {
+  return function ActionCell({ row }: GridRenderCellParams<TeacherDirectoryRow>) {
+    return (
+      <TeacherActionButton
+        icon={icon}
+        variant={variant}
+        onClick={() => {
+          if (row.id) {
+            router.push(getPath(row.id));
+          }
+        }}
+      />
+    );
+  };
+}
+
 export function TeacherDataGrid({
   rows,
   page = 0,
@@ -114,16 +160,12 @@ export function TeacherDataGrid({
       width: 120,
       align: "center",
       headerAlign: "center",
-      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
-        <TeacherActionButton
-          icon={<CalendarMonthOutlined />}
-          variant="error"
-          onClick={() => {
-            if (params.row.id) {
-              router.push(`/${locale}/teachers/${params.row.id}/schedule/weekly`);
-            }
-          }}
-        />
+      renderCell: getActionCellRenderer(
+        <CalendarMonthOutlined />,
+        "error",
+        router,
+        locale,
+        id => `/${locale}/teachers/${id}/schedule/weekly`
       ),
     },
     {
@@ -132,16 +174,12 @@ export function TeacherDataGrid({
       width: 100,
       align: "center",
       headerAlign: "center",
-      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
-        <TeacherActionButton
-          icon={<SettingsOutlined />}
-          variant="primary"
-          onClick={() => {
-            if (params.row.id) {
-              router.push(`/${locale}/teachers/${params.row.id}/profile`);
-            }
-          }}
-        />
+      renderCell: getActionCellRenderer(
+        <SettingsOutlined />,
+        "primary",
+        router,
+        locale,
+        id => `/${locale}/teachers/${id}/profile`
       ),
     },
   ];
@@ -173,29 +211,5 @@ export function TeacherDataGrid({
           }
         : {})}
     />
-  );
-}
-
-interface TeacherActionButtonProps {
-  readonly icon: React.ReactNode;
-  readonly variant: "primary" | "error";
-  readonly onClick: () => void;
-}
-
-function TeacherActionButton({ icon, variant, onClick }: TeacherActionButtonProps) {
-  return (
-    <IconButton
-      onClick={onClick}
-      sx={theme => ({
-        backgroundColor: variant === "primary" ? theme.palette.primaryContainer : theme.palette.errorContainer,
-        color: variant === "primary" ? theme.palette.onPrimaryContainer : theme.palette.onErrorContainer,
-        "&:hover": {
-          backgroundColor: variant === "primary" ? theme.palette.primaryContainer : theme.palette.errorContainer,
-          opacity: 0.8,
-        },
-      })}
-    >
-      {icon}
-    </IconButton>
   );
 }
