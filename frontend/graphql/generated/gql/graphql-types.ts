@@ -1120,6 +1120,7 @@ export type ManagerOnboardingResult = {
   __typename?: 'ManagerOnboardingResult';
   assignedGroupSlug: Maybe<Scalars['String']['output']>;
   email: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   staffProfileId: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
@@ -1167,6 +1168,7 @@ export type Mutation = {
   bulkRevokeUsersFromGroup: Maybe<Scalars['Boolean']['output']>;
   changeStudentStatus: Maybe<ChangeStudentStatusResult>;
   cleanupTestEntities: Maybe<Scalars['Boolean']['output']>;
+  cleanupTestGroupClass: Maybe<Scalars['Boolean']['output']>;
   clearWeeklySchedule: Maybe<Scalars['Boolean']['output']>;
   copyStorageItems: Maybe<BulkOperationResult>;
   createFolder: Maybe<FileOperationResult>;
@@ -1181,6 +1183,7 @@ export type Mutation = {
   createTeacher: Maybe<TeacherOnboardingResult>;
   createTeacherManualClassEntry: Maybe<ClassInstanceDetail>;
   createTestEntities: Maybe<TestEntities>;
+  createTestGroupClass: Maybe<TestGroupClass>;
   deactivateParent: Maybe<DeactivateParentResult>;
   deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
   /** Soft-deletes a complaint (admin only). Returns true on success. */
@@ -1288,6 +1291,11 @@ export type MutationCleanupTestEntitiesArgs = {
 };
 
 
+export type MutationCleanupTestGroupClassArgs = {
+  groupClassId: Scalars['String']['input'];
+};
+
+
 export type MutationClearWeeklyScheduleArgs = {
   teacherId: Scalars['ID']['input'];
 };
@@ -1351,6 +1359,12 @@ export type MutationCreateTeacherManualClassEntryArgs = {
 export type MutationCreateTestEntitiesArgs = {
   classesRemaining: InputMaybe<Scalars['Int']['input']>;
   prefix: Scalars['String']['input'];
+};
+
+
+export type MutationCreateTestGroupClassArgs = {
+  classInstanceId: Scalars['String']['input'];
+  teacherName: Scalars['String']['input'];
 };
 
 
@@ -2909,6 +2923,11 @@ export type TestEntities = {
   teacherId: Maybe<Scalars['String']['output']>;
   teacherUserEmail: Maybe<Scalars['String']['output']>;
   teacherUserId: Maybe<Scalars['String']['output']>;
+};
+
+export type TestGroupClass = {
+  __typename?: 'TestGroupClass';
+  groupClassId: Maybe<Scalars['String']['output']>;
 };
 
 export type UnpaidInvoiceItem = {

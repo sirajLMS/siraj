@@ -1,15 +1,12 @@
 import { Box, MenuItem, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
+import type { ManagerRoleFilter, ManagerStatusFilter } from "./types";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Styled Components — Extracted inline sx styles for reusability & consistency
  * ──────────────────────────────────────────────────────────────────────────── */
 
-/**
- * Main container for the filter bar.
- * Provides flex layout with wrapping, spacing, and bottom border separator.
- */
 const StyledFilterContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   flexWrap: "wrap",
@@ -20,9 +17,6 @@ const StyledFilterContainer = styled(Box)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.border.light}`,
 }));
 
-/**
- * Groups filter controls (Select dropdowns) together horizontally.
- */
 const StyledInputGroup = styled(Box)(({ theme }) => ({
   display: "flex",
   gap: theme.spacing(2),
@@ -33,26 +27,16 @@ const StyledInputGroup = styled(Box)(({ theme }) => ({
  * ──────────────────────────────────────────────────────────────────────────── */
 
 interface ManagersFilterBarProps {
-  roleFilter: "all" | "admin" | "staff";
-  statusFilter: "all" | "active" | "offline";
-  onRoleFilterChange: (role: "all" | "admin" | "staff") => void;
-  onStatusFilterChange: (status: "all" | "active" | "offline") => void;
+  roleFilter: ManagerRoleFilter;
+  statusFilter: ManagerStatusFilter;
+  onRoleFilterChange: (role: ManagerRoleFilter) => void;
+  onStatusFilterChange: (status: ManagerStatusFilter) => void;
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
  * ManagersFilterBar Component
  * ──────────────────────────────────────────────────────────────────────────── */
 
-/**
- * Filter bar for the Managers directory page.
- *
- * Renders role and status filter dropdowns within a SectionPanel.
- *
- * @param roleFilter - Current role filter value ("all" | "admin" | "staff")
- * @param statusFilter - Current status filter value ("all" | "active" | "offline")
- * @param onRoleFilterChange - Callback when role filter changes
- * @param onStatusFilterChange - Callback when status filter changes
- */
 export function ManagersFilterBar({
   roleFilter,
   statusFilter,

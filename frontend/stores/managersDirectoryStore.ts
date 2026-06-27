@@ -1,15 +1,13 @@
 import { create } from "zustand";
-
-type RoleFilter = "all" | "admin" | "staff";
-type StatusFilter = "all" | "active" | "offline";
+import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/views/dashboard/managers/home/types";
 
 interface ManagersDirectoryState {
-  readonly roleFilter: RoleFilter;
-  readonly statusFilter: StatusFilter;
+  readonly roleFilter: ManagerRoleFilter;
+  readonly statusFilter: ManagerStatusFilter;
   readonly page: number;
   readonly pageSize: number;
-  setRoleFilter: (filter: RoleFilter) => void;
-  setStatusFilter: (filter: StatusFilter) => void;
+  setRoleFilter: (filter: ManagerRoleFilter) => void;
+  setStatusFilter: (filter: ManagerStatusFilter) => void;
   setPage: (page: number) => void;
 }
 

@@ -43,3 +43,23 @@ export const cleanupTestEntitiesMutationDocument: TypedDocumentNode<
     )
   }
 `;
+
+export const createTestGroupClassMutationDocument: TypedDocumentNode<
+  Operations.CreateTestGroupClassMutation,
+  Types.MutationCreateTestGroupClassArgs
+> = gql`
+  mutation createTestGroupClass($classInstanceId: String!, $teacherName: String!) {
+    createTestGroupClass(classInstanceId: $classInstanceId, teacherName: $teacherName) {
+      groupClassId
+    }
+  }
+`;
+
+export const cleanupTestGroupClassMutationDocument: TypedDocumentNode<
+  Operations.CleanupTestGroupClassMutation,
+  Types.MutationCleanupTestGroupClassArgs
+> = gql`
+  mutation cleanupTestGroupClass($groupClassId: String!) {
+    cleanupTestGroupClass(groupClassId: $groupClassId)
+  }
+`;

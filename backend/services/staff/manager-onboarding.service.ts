@@ -15,6 +15,7 @@ export interface ManagerOnboardingInput {
 }
 
 export interface ManagerOnboardingResult {
+  readonly id: string;
   readonly userId: string;
   readonly staffProfileId: string;
   readonly name: string;
@@ -97,6 +98,7 @@ export namespace ManagerOnboardingService {
       });
 
       return {
+        id: staffProfile.id,
         userId: user.id,
         staffProfileId: staffProfile.id,
         name: user.name,

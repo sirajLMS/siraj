@@ -1250,7 +1250,7 @@ export type DeleteLearningResourceMutationVariables = Exact<{
 
 export type DeleteLearningResourceMutation = DeleteLearningResourceMutation_Mutation;
 
-export type CreateManagerMutation_createManager_ManagerOnboardingResult = { userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, status: string | null, assignedGroupSlug: string | null };
+export type CreateManagerMutation_createManager_ManagerOnboardingResult = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, status: string | null, assignedGroupSlug: string | null };
 
 export type CreateManagerMutation_Mutation = { createManager: CreateManagerMutation_createManager_ManagerOnboardingResult | null };
 
@@ -2150,6 +2150,29 @@ export type CleanupTestEntitiesMutationVariables = Exact<{
 
 
 export type CleanupTestEntitiesMutation = CleanupTestEntitiesMutation_Mutation;
+
+export type CreateTestGroupClassMutation_createTestGroupClass_TestGroupClass = { groupClassId: string | null };
+
+export type CreateTestGroupClassMutation_Mutation = { createTestGroupClass: CreateTestGroupClassMutation_createTestGroupClass_TestGroupClass | null };
+
+
+export type CreateTestGroupClassMutationVariables = Exact<{
+  classInstanceId: string;
+  teacherName: string;
+}>;
+
+
+export type CreateTestGroupClassMutation = CreateTestGroupClassMutation_Mutation;
+
+export type CleanupTestGroupClassMutation_Mutation = { cleanupTestGroupClass: boolean | null };
+
+
+export type CleanupTestGroupClassMutationVariables = Exact<{
+  groupClassId: string;
+}>;
+
+
+export type CleanupTestGroupClassMutation = CleanupTestGroupClassMutation_Mutation;
 
 export type WelcomeMessageQuery_Query = { welcomeMessage: string | null };
 

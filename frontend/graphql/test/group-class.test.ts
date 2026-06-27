@@ -1,42 +1,83 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import {
   groupClassAuditQueryDocument,
   resendClassNotificationsMutationDocument,
   updateClassAdminNoteMutationDocument,
 } from "../sharedDocuments";
-import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
-import { authenticatedRequest, loginDemoUser } from "./helpers";
+import { deleteClassInstanceMutationDocument } from "../sharedDocuments/class-session.documents";
+import { createTeacherManualClassEntryMutationDocument } from "../sharedDocuments/teacher-dashboard.documents";
+import {
+  cleanupTestEntitiesMutationDocument,
+  cleanupTestGroupClassMutationDocument,
+  createTestGroupClassMutationDocument,
+} from "../sharedDocuments/test-helper.documents";
+import { authenticatedRequest, loginAndProvision } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
-const TODAY = new Date().toISOString().split("T")[0];
 
-describe("GraphQL: groupClassAudit query", () => {
+describe("GraphQL: Group Class integration tests", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
-  let classInstanceId = "";
+  let adminToken: string | null = null;
+  let teacherToken: string | null = null;
+  let studentId: string | null = null;
+  let teacherId: string | null = null;
+  let studentUserId: string | null = null;
+  let teacherUserId: string | null = null;
+  let parentUserId: string | null = null;
+  let parentId: string | null = null;
+  let classInstanceId: string | null = null;
+  let groupClassId: string | null = null;
 
-  test("login as academy_admin and fetch a valid classInstanceId from schedule", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
+  test("provision test entities, class instance, and group class", async () => {
+    const r = await loginAndProvision("GroupClassIntTest");
+    adminToken = r.adminToken;
+    teacherToken = r.teacherToken;
+    studentId = r.studentId;
+    teacherId = r.teacherId;
+    studentUserId = r.studentUserId;
+    teacherUserId = r.teacherUserId;
+    parentUserId = r.parentUserId;
+    parentId = r.parentId;
 
-    const result = await testClient.query({
-      query: dailyScheduleListQueryDocument,
-      variables: { date: TODAY, teacherId: null, search: null, metricFilter: null },
-      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+    if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
+
+    const now = new Date();
+    const end = new Date(now.getTime() + 60 * 60 * 1000);
+    const createRes = await testClient.mutate({
+      mutation: createTeacherManualClassEntryMutationDocument,
+      variables: {
+        input: {
+          studentId,
+          teacherId,
+          scheduledStartAt: now.toISOString(),
+          scheduledEndAt: end.toISOString(),
+          durationMinutes: 60,
+          classType: "REGULAR",
+        },
+      },
+      errorPolicy: "all",
+      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
     });
+    expect(createRes.error).toBeUndefined();
+    classInstanceId = createRes.data?.createTeacherManualClassEntry?.id ?? null;
+    expect(classInstanceId).toBeTruthy();
 
-    expect(result.error).toBeUndefined();
-    const rows = result.data?.dailyScheduleList;
-    expect(Array.isArray(rows)).toBeTrue();
-    const firstRow = rows?.find((r: { id?: string | null }) => r?.id);
-    expect(firstRow?.id).toBeTruthy();
-    classInstanceId = firstRow?.id ?? "";
+    if (!adminToken || !classInstanceId) throw new Error("Missing admin token or classInstanceId");
+
+    const gcRes = await authenticatedRequest(adminToken, "mutate", createTestGroupClassMutationDocument, {
+      classInstanceId,
+      teacherName: "Test Teacher",
+    });
+    groupClassId = gcRes.createTestGroupClass?.groupClassId ?? null;
+    expect(groupClassId).toBeTruthy();
   });
 
   test("admin can query groupClassAudit with valid classInstanceId", async () => {
+    if (!adminToken || !classInstanceId) throw new Error("Missing test context");
+
     const result = await testClient.query({
       query: groupClassAuditQueryDocument,
       variables: { classInstanceId },
@@ -64,7 +105,9 @@ describe("GraphQL: groupClassAudit query", () => {
     expect(typeof audit.adminNote?.lastUpdated).toBe("string");
   });
 
-  test("non-existent classInstanceId returns GraphQL error", async () => {
+  test("groupClassAudit: non-existent classInstanceId returns GraphQL error", async () => {
+    if (!adminToken) throw new Error("Missing test context");
+
     const result = await testClient.query({
       query: groupClassAuditQueryDocument,
       variables: { classInstanceId: NIL_UUID },
@@ -73,33 +116,10 @@ describe("GraphQL: groupClassAudit query", () => {
 
     expect(result.error).toBeDefined();
   });
-});
 
-describe("GraphQL: updateClassAdminNote mutation", () => {
-  setupTestServerLifecycle();
+  test("admin can update admin note via updateClassAdminNote", async () => {
+    if (!adminToken || !classInstanceId) throw new Error("Missing test context");
 
-  let adminToken = "";
-  let classInstanceId = "";
-
-  test("login as academy_admin and fetch a valid classInstanceId from schedule", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
-
-    const result = await testClient.query({
-      query: dailyScheduleListQueryDocument,
-      variables: { date: TODAY, teacherId: null, search: null, metricFilter: null },
-      context: { headers: { Authorization: `Bearer ${adminToken}` } },
-    });
-
-    expect(result.error).toBeUndefined();
-    const rows = result.data?.dailyScheduleList;
-    expect(Array.isArray(rows)).toBeTrue();
-    const firstRow = rows?.find((r: { id?: string | null }) => r?.id);
-    expect(firstRow?.id).toBeTruthy();
-    classInstanceId = firstRow?.id ?? "";
-  });
-
-  test("admin can update admin note", async () => {
     const data = await authenticatedRequest(adminToken, "mutate", updateClassAdminNoteMutationDocument, {
       classInstanceId,
       content: "Updated by integration test",
@@ -111,7 +131,9 @@ describe("GraphQL: updateClassAdminNote mutation", () => {
     expect(data.updateClassAdminNote.adminNote?.content).toBe("Updated by integration test");
   });
 
-  test("non-existent classInstanceId returns GraphQL error", async () => {
+  test("updateClassAdminNote: non-existent classInstanceId returns GraphQL error", async () => {
+    if (!adminToken) throw new Error("Missing test context");
+
     const result = await testClient.mutate({
       mutation: updateClassAdminNoteMutationDocument,
       variables: { classInstanceId: NIL_UUID, content: "Should fail" },
@@ -120,33 +142,10 @@ describe("GraphQL: updateClassAdminNote mutation", () => {
 
     expect(result.error).toBeDefined();
   });
-});
-
-describe("GraphQL: resendClassNotifications mutation", () => {
-  setupTestServerLifecycle();
-
-  let adminToken = "";
-  let classInstanceId = "";
-
-  test("login as academy_admin and fetch a valid classInstanceId from schedule", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
-
-    const result = await testClient.query({
-      query: dailyScheduleListQueryDocument,
-      variables: { date: TODAY, teacherId: null, search: null, metricFilter: null },
-      context: { headers: { Authorization: `Bearer ${adminToken}` } },
-    });
-
-    expect(result.error).toBeUndefined();
-    const rows = result.data?.dailyScheduleList;
-    expect(Array.isArray(rows)).toBeTrue();
-    const firstRow = rows?.find((r: { id?: string | null }) => r?.id);
-    expect(firstRow?.id).toBeTruthy();
-    classInstanceId = firstRow?.id ?? "";
-  });
 
   test("resendClassNotifications returns result or permission error for valid classInstanceId", async () => {
+    if (!adminToken || !classInstanceId) throw new Error("Missing test context");
+
     const result = await testClient.mutate({
       mutation: resendClassNotificationsMutationDocument,
       variables: { classInstanceId },
@@ -161,7 +160,9 @@ describe("GraphQL: resendClassNotifications mutation", () => {
     }
   });
 
-  test("non-existent classInstanceId returns GraphQL error", async () => {
+  test("resendClassNotifications: non-existent classInstanceId returns GraphQL error", async () => {
+    if (!adminToken) throw new Error("Missing test context");
+
     const result = await testClient.mutate({
       mutation: resendClassNotificationsMutationDocument,
       variables: { classInstanceId: NIL_UUID },
@@ -169,5 +170,35 @@ describe("GraphQL: resendClassNotifications mutation", () => {
     });
 
     expect(result.error).toBeDefined();
+  });
+
+  afterAll(async () => {
+    if (!adminToken) return;
+
+    if (groupClassId) {
+      await authenticatedRequest(adminToken, "mutate", cleanupTestGroupClassMutationDocument, { groupClassId }).catch(
+        () => {}
+      );
+    }
+    if (classInstanceId) {
+      await testClient
+        .mutate({
+          mutation: deleteClassInstanceMutationDocument,
+          variables: { classInstanceId },
+          errorPolicy: "all",
+          context: { headers: { Authorization: `Bearer ${adminToken}` } },
+        })
+        .catch(() => {});
+    }
+    if (studentUserId && teacherUserId && parentUserId && studentId && teacherId && parentId) {
+      await authenticatedRequest(adminToken, "mutate", cleanupTestEntitiesMutationDocument, {
+        studentUserId,
+        teacherUserId,
+        parentUserId,
+        studentId,
+        teacherId,
+        parentId,
+      }).catch(() => {});
+    }
   });
 });

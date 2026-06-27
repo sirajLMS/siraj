@@ -6,25 +6,19 @@ import { ManagersCardList } from "./ManagersCardList";
 import { ManagersDataGrid } from "./ManagersDataGrid";
 import { ManagersFilterBar } from "./ManagersFilterBar";
 import { ManagersMetrics } from "./ManagersMetrics";
-import type { Manager } from "./types";
+import type { Manager, ManagerRoleFilter, ManagerStatusFilter, NonNullableManagerDirectoryMetrics } from "./types";
 
 interface ManagersViewProps {
   managers: Manager[];
-  metrics: {
-    id: string;
-    totalAdmin: number;
-    systemStaff: number;
-    activeNow: number;
-    alerts: number;
-  };
+  metrics: NonNullableManagerDirectoryMetrics;
   totalManagers: number;
   page?: number;
   pageSize?: number;
   onPageChange?: (page: number) => void;
-  roleFilter: "all" | "admin" | "staff";
-  statusFilter: "all" | "active" | "offline";
-  onRoleFilterChange: (role: "all" | "admin" | "staff") => void;
-  onStatusFilterChange: (status: "all" | "active" | "offline") => void;
+  roleFilter: ManagerRoleFilter;
+  statusFilter: ManagerStatusFilter;
+  onRoleFilterChange: (role: ManagerRoleFilter) => void;
+  onStatusFilterChange: (status: ManagerStatusFilter) => void;
 }
 
 export function ManagersView({

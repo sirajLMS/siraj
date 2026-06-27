@@ -2,14 +2,10 @@ import { AdminPanelSettingsOutlined, BoltOutlined, GroupOutlined, WarningAmberOu
 import { Grid } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { MetricCard } from "@/frontend/components/ui/MetricCard";
+import type { NonNullableManagerDirectoryMetrics } from "./types";
 
 interface ManagersMetricsProps {
-  metrics: {
-    totalAdmin: number;
-    systemStaff: number;
-    activeNow: number;
-    alerts: number;
-  };
+  metrics: NonNullableManagerDirectoryMetrics;
 }
 
 export function ManagersMetrics({ metrics }: Readonly<ManagersMetricsProps>) {

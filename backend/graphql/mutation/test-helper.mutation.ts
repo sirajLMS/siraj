@@ -1,7 +1,6 @@
 import { TestHelperService } from "@/backend/services/system/test-helper.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
-// Define the Pothos types for the mutation responses only in non-production environments
 if (process.env.NODE_ENV !== "production") {
   const TestEntitiesType = gqlSchemaBuilder.objectRef<{
     studentUserEmail: string;
@@ -29,6 +28,16 @@ if (process.env.NODE_ENV !== "production") {
     }),
   });
 
+  const TestGroupClassType = gqlSchemaBuilder.objectRef<{
+    groupClassId: string;
+  }>("TestGroupClass");
+
+  TestGroupClassType.implement({
+    fields: t => ({
+      groupClassId: t.exposeString("groupClassId"),
+    }),
+  });
+
   gqlSchemaBuilder.mutationFields(t => ({
     createTestEntities: t.field({
       type: TestEntitiesType,
@@ -53,6 +62,27 @@ if (process.env.NODE_ENV !== "production") {
       },
       resolve: async (_query, args) => {
         return await TestHelperService.cleanupTestEntities(args);
+      },
+    }),
+
+    createTestGroupClass: t.field({
+      type: TestGroupClassType,
+      args: {
+        classInstanceId: t.arg.string({ required: true }),
+        teacherName: t.arg.string({ required: true }),
+      },
+      resolve: async (_query, args) => {
+        return await TestHelperService.createTestGroupClass(args.classInstanceId, args.teacherName);
+      },
+    }),
+
+    cleanupTestGroupClass: t.field({
+      type: "Boolean",
+      args: {
+        groupClassId: t.arg.string({ required: true }),
+      },
+      resolve: async (_query, args) => {
+        return await TestHelperService.cleanupTestGroupClass(args.groupClassId);
       },
     }),
   }));

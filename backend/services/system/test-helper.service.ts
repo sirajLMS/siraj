@@ -3,6 +3,8 @@ import { eq, inArray, or } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
   classInstances,
+  groupClassEnrollments,
+  groupClasses,
   parents,
   permissionGroups,
   students,
@@ -253,6 +255,65 @@ export namespace TestHelperService {
       return true;
     } catch (error) {
       logger.error("Failed to clean up test entities via helper service", { error });
+      return false;
+    }
+  }
+
+  export async function createTestGroupClass(
+    classInstanceId: string,
+    teacherName: string
+  ): Promise<{ groupClassId: string }> {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Test helper service is not allowed in production environment.");
+    }
+
+    const now = new Date();
+    const [classInstance] = await db
+      .select({
+        scheduledStartAt: classInstances.scheduledStartAt,
+        scheduledEndAt: classInstances.scheduledEndAt,
+        classType: classInstances.classType,
+      })
+      .from(classInstances)
+      .where(eq(classInstances.id, classInstanceId))
+      .limit(1);
+
+    if (!classInstance) throw new Error("Class instance not found");
+
+    const [inserted] = await db
+      .insert(groupClasses)
+      .values({
+        classInstanceId,
+        courseName: `TestCourse-${classInstanceId.slice(0, 8)}`,
+        teacherName,
+        classType: classInstance.classType,
+        originalDate: null,
+        rescheduledDate: null,
+        timeSlot: `${classInstance.scheduledStartAt.toISOString().slice(11, 16)} - ${classInstance.scheduledEndAt.toISOString().slice(11, 16)}`,
+        status: "regular_scheduled",
+        auditRemark: null,
+        auditLoggedAt: now,
+      })
+      .returning();
+
+    if (!inserted) throw new Error("Failed to insert group class");
+
+    logger.info("Test group class created successfully", { classInstanceId, groupClassId: inserted.id });
+    return { groupClassId: inserted.id };
+  }
+
+  export async function cleanupTestGroupClass(groupClassId: string): Promise<boolean> {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Test helper service is not allowed in production environment.");
+    }
+
+    try {
+      await db.delete(groupClassEnrollments).where(eq(groupClassEnrollments.groupClassId, groupClassId));
+      await db.delete(groupClasses).where(eq(groupClasses.id, groupClassId));
+      logger.info("Test group class cleaned up successfully", { groupClassId });
+      return true;
+    } catch (error) {
+      logger.error("Failed to clean up test group class", { error });
       return false;
     }
   }

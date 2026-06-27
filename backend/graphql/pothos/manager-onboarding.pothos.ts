@@ -34,6 +34,7 @@ export const ManagerOnboardingResultPothosObject = gqlSchemaBuilder
   .implement({
     description: "Result of manager onboarding operation",
     fields: t => ({
+      id: t.exposeString("id"),
       userId: t.exposeString("userId"),
       staffProfileId: t.exposeString("staffProfileId"),
       name: t.exposeString("name"),

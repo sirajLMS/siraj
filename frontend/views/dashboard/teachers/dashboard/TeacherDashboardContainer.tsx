@@ -9,6 +9,10 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
+
+type SupportRequestType = "COORDINATOR" | "SUPPORT";
+type SnackbarSeverity = "success" | "error" | "info";
+
 import {
   activateClassMutationDocument,
   updateSessionStatusAbsentMutationDocument,
@@ -247,8 +251,8 @@ interface StandardDashboardWrapperProps {
   readonly labels: TeacherDashboardLabels;
   readonly handleActivate: (id: string) => Promise<void>;
   readonly handleDownloadHandbook: () => Promise<void>;
-  readonly handleSupportRequest: (type: "COORDINATOR" | "SUPPORT") => Promise<void>;
-  readonly showSnackbar: (message: string, severity: "success" | "error" | "info") => void;
+  readonly handleSupportRequest: (type: SupportRequestType) => Promise<void>;
+  readonly showSnackbar: (message: string, severity: SnackbarSeverity) => void;
   readonly t: ReturnType<typeof useTranslations<"dashboard.teacherDashboard">>;
   readonly setManualEntryDefaultActive: (val: boolean) => void;
   readonly setManualEntryOpen: (val: boolean) => void;
@@ -346,7 +350,7 @@ export function TeacherDashboardContainer() {
   const [manualEntryDefaultActive, setManualEntryDefaultActive] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "info">("info");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<SnackbarSeverity>("info");
 
   const { filterDate, setFilterDate, page, pageSize, setPage } = useTeacherDashboardStore();
   const mode = resolveTeacherDashboardMode(permissions, modeParam);
@@ -457,7 +461,7 @@ export function TeacherDashboardContainer() {
     }
   };
 
-  const handleSupportRequest = async (type: "COORDINATOR" | "SUPPORT") => {
+  const handleSupportRequest = async (type: SupportRequestType) => {
     try {
       await logSupportRequest({
         variables: {
@@ -482,7 +486,7 @@ export function TeacherDashboardContainer() {
     router.push(`/${locale}/schedule`);
   };
 
-  const showSnackbar = (message: string, severity: "success" | "error" | "info") => {
+  const showSnackbar = (message: string, severity: SnackbarSeverity) => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);

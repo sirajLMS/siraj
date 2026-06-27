@@ -8,6 +8,7 @@ export const createManagerMutationDocument: TypedDocumentNode<
 > = gql`
   mutation createManager($input: ManagerOnboardingInput!) {
     createManager(input: $input) {
+      id
       userId
       staffProfileId
       name

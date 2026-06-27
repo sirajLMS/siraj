@@ -1065,6 +1065,7 @@ input ManagerOnboardingInput {
 type ManagerOnboardingResult {
   assignedGroupSlug: String
   email: String
+  id: String
   name: String
   staffProfileId: String
   status: String
@@ -1109,6 +1110,7 @@ type Mutation {
   bulkRevokeUsersFromGroup(groupId: String!, userIds: [String!]!): Boolean
   changeStudentStatus(expectedVersion: Int, newStatus: String!, studentId: String!): ChangeStudentStatusResult
   cleanupTestEntities(parentId: String!, parentUserId: String!, studentId: String!, studentUserId: String!, teacherId: String!, teacherUserId: String!): Boolean
+  cleanupTestGroupClass(groupClassId: String!): Boolean
   clearWeeklySchedule(teacherId: ID!): Boolean
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createFolder(input: FolderCreateInput!): FileOperationResult
@@ -1126,6 +1128,7 @@ type Mutation {
   createTeacher(input: TeacherOnboardingInput!): TeacherOnboardingResult
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
+  createTestGroupClass(classInstanceId: String!, teacherName: String!): TestGroupClass
   deactivateParent(parentId: String!): DeactivateParentResult
   deleteClassInstance(classInstanceId: ID!): Boolean
 
@@ -2250,6 +2253,10 @@ type TestEntities {
   teacherId: String
   teacherUserEmail: String
   teacherUserId: String
+}
+
+type TestGroupClass {
+  groupClassId: String
 }
 
 type UnpaidInvoiceItem {
