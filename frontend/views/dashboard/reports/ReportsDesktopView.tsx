@@ -46,6 +46,7 @@ export function ReportsDesktopView({
   onSubmit,
   onExportCsv,
   onPrintReport,
+  onRowClick,
 }: Readonly<ReportsDesktopViewProps>) {
   return (
     <PageContainer>
@@ -82,8 +83,13 @@ export function ReportsDesktopView({
       </BaseCard>
 
       <SectionPanel>
-        <ReportsDataGrid rows={rows} labels={tableLabels} />
-        <ReportsTotalsRow summary={summary} totalsLabel={totalsLabel} />
+        <ReportsDataGrid rows={rows} labels={tableLabels} onRowClick={onRowClick} />
+        <ReportsTotalsRow
+          summary={summary}
+          totalsLabel={totalsLabel}
+          egpLabel={summaryLabels.egpLabel}
+          usdLabel={summaryLabels.usdLabel}
+        />
       </SectionPanel>
 
       <Grid container spacing={2}>

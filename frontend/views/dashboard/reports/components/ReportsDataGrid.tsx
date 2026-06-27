@@ -23,6 +23,7 @@ export interface ReportsDataGridLabels {
 interface ReportsDataGridProps {
   readonly rows: readonly ReportLedgerRow[];
   readonly labels: ReportsDataGridLabels;
+  readonly onRowClick?: (row: ReportLedgerRow) => void;
 }
 
 function formatCurrency(value: number): string {
@@ -48,7 +49,7 @@ function renderCountCell(value: number, tone: "default" | "error" | "primary" = 
   );
 }
 
-export function ReportsDataGrid({ rows, labels }: Readonly<ReportsDataGridProps>) {
+export function ReportsDataGrid({ rows, labels, onRowClick }: Readonly<ReportsDataGridProps>) {
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
@@ -145,7 +146,21 @@ export function ReportsDataGrid({ rows, labels }: Readonly<ReportsDataGridProps>
 
   return (
     <Box sx={{ px: { xs: 0, md: 1 }, pb: 1 }}>
-      <AppDataGrid rows={rows} columns={columns} emptyMessage={labels.noEntries} autoHeight disableColumnMenu />
+      <AppDataGrid
+        rows={rows}
+        columns={columns}
+        emptyMessage={labels.noEntries}
+        autoHeight
+        disableColumnMenu
+        onRowClick={
+          onRowClick
+            ? params => {
+                onRowClick(params.row);
+              }
+            : undefined
+        }
+        sx={{ "& .MuiDataGrid-row": onRowClick ? { cursor: "pointer" } : {} }}
+      />
     </Box>
   );
 }

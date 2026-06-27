@@ -22,6 +22,7 @@ interface PerformanceLedgerCardLabels {
 interface PerformanceLedgerCardProps {
   readonly row: ReportLedgerRow;
   readonly labels: PerformanceLedgerCardLabels;
+  readonly onClick?: (row: ReportLedgerRow) => void;
 }
 
 function formatCurrency(value: number): string {
@@ -63,13 +64,22 @@ function StatCell({
   );
 }
 
-export function PerformanceLedgerCard({ row, labels }: Readonly<PerformanceLedgerCardProps>) {
+export function PerformanceLedgerCard({ row, labels, onClick }: Readonly<PerformanceLedgerCardProps>) {
   const studentText = labels.studentLabel.replace("{name}", row.studentName);
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
   return (
-    <BaseCard sx={{ p: 0, overflow: "hidden" }}>
+    <BaseCard
+      onClick={
+        onClick
+          ? () => {
+              onClick(row);
+            }
+          : undefined
+      }
+      sx={{ p: 0, overflow: "hidden", ...(onClick ? { cursor: "pointer" } : {}) }}
+    >
       <Box
         sx={theme => ({
           p: 2,

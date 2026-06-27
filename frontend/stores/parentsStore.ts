@@ -1,18 +1,15 @@
 import { create } from "zustand";
-import type { ParentAccountStatus } from "@/frontend/views/dashboard/parents/types/directory";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface ParentsState {
-  readonly metrics: readonly MetricItem[];
-  readonly totalParents: number;
   readonly searchQuery: string;
   readonly page: number;
   readonly pageSize: number;
-  readonly statusFilter: ParentAccountStatus | null;
+  readonly statusFilter: ParentStatus | null;
   readonly filterPanelOpen: boolean;
   setSearchQuery: (query: string) => void;
   setPage: (page: number) => void;
-  setStatusFilter: (status: ParentAccountStatus | null) => void;
+  setStatusFilter: (status: ParentStatus | null) => void;
   setFilterPanelOpen: (open: boolean) => void;
   resetFilters: () => void;
 }
@@ -20,8 +17,6 @@ interface ParentsState {
 export const DEFAULT_PAGE_SIZE = 10;
 
 export const useParentsStore = create<ParentsState>(set => ({
-  metrics: [],
-  totalParents: 0,
   searchQuery: "",
   page: 0,
   pageSize: DEFAULT_PAGE_SIZE,
@@ -33,7 +28,7 @@ export const useParentsStore = create<ParentsState>(set => ({
   setPage: (page: number) => {
     set({ page });
   },
-  setStatusFilter: (status: ParentAccountStatus | null) => {
+  setStatusFilter: (status: ParentStatus | null) => {
     set({ statusFilter: status, page: 0 });
   },
   setFilterPanelOpen: (open: boolean) => {

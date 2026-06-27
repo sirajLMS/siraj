@@ -18,13 +18,14 @@ interface PerformanceLedgerCardListLabels {
 interface PerformanceLedgerCardListProps {
   readonly rows: readonly ReportLedgerRow[];
   readonly labels: PerformanceLedgerCardListLabels;
+  readonly onRowClick?: (row: ReportLedgerRow) => void;
 }
 
-export function PerformanceLedgerCardList({ rows, labels }: Readonly<PerformanceLedgerCardListProps>) {
+export function PerformanceLedgerCardList({ rows, labels, onRowClick }: Readonly<PerformanceLedgerCardListProps>) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       {rows.map(row => (
-        <PerformanceLedgerCard key={row.id} row={row} labels={labels} />
+        <PerformanceLedgerCard key={row.id} row={row} labels={labels} onClick={onRowClick} />
       ))}
     </Box>
   );

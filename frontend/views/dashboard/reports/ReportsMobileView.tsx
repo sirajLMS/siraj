@@ -51,6 +51,7 @@ interface ReportsMobileViewProps {
   readonly onTeacherChange: (teacherId: string) => void;
   readonly onReportTypeChange: (reportType: ReportType) => void;
   readonly onSubmit: () => void;
+  readonly onRowClick?: (row: ReportLedgerRow) => void;
 }
 
 export function ReportsMobileView({
@@ -74,6 +75,7 @@ export function ReportsMobileView({
   onTeacherChange,
   onReportTypeChange,
   onSubmit,
+  onRowClick,
 }: Readonly<ReportsMobileViewProps>) {
   return (
     <PageContainer>
@@ -118,7 +120,7 @@ export function ReportsMobileView({
         <Typography variant="titleLg" sx={{ color: theme => theme.palette.primary.main, mb: 2, px: 0.5 }}>
           {ledgerTitle}
         </Typography>
-        <PerformanceLedgerCardList rows={rows} labels={ledgerLabels} />
+        <PerformanceLedgerCardList rows={rows} labels={ledgerLabels} onRowClick={onRowClick} />
       </Box>
     </PageContainer>
   );

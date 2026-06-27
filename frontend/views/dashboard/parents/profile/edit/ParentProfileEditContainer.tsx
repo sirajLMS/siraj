@@ -3,8 +3,8 @@
 import { useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
@@ -21,8 +21,7 @@ interface ParentProfileEditContainerProps {
 export default function ParentProfileEditContainer({ id }: ParentProfileEditContainerProps) {
   const t = useTranslations("dashboard.parentProfile");
   const router = useRouter();
-  const params = useParams();
-  const parentId = typeof params?.id === "string" ? params.id : id || "";
+  const parentId = id;
 
   const { data, loading, error } = useQuery(parentProfileQueryDocument, {
     variables: { parentId },
@@ -39,7 +38,7 @@ export default function ParentProfileEditContainer({ id }: ParentProfileEditCont
     address: profile?.address ?? "",
     whatsapp: profile?.whatsapp ?? "",
     facebook: profile?.facebook ?? "",
-    twitter: "",
+    twitter: profile?.twitter ?? "",
     skype: profile?.skype ?? "",
     defaultZoomLink: profile?.defaultZoomLink ?? "",
     invoiceType: (profile?.invoiceType as InvoiceType) ?? InvoiceType.Monthly,
@@ -51,12 +50,33 @@ export default function ParentProfileEditContainer({ id }: ParentProfileEditCont
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ParentProfileEditFormData>({
     resolver: zodResolver(parentProfileEditSchema),
     defaultValues,
-    values: defaultValues,
   });
+
+  useEffect(() => {
+    if (profile) {
+      reset({
+        name: profile.name ?? "",
+        email: profile.email ?? "",
+        phone: profile.phone ?? "",
+        nationality: profile.nationality ?? "",
+        address: profile.address ?? "",
+        whatsapp: profile.whatsapp ?? "",
+        facebook: profile.facebook ?? "",
+        twitter: profile.twitter ?? "",
+        skype: profile.skype ?? "",
+        defaultZoomLink: profile.defaultZoomLink ?? "",
+        invoiceType: (profile.invoiceType as InvoiceType) ?? InvoiceType.Monthly,
+        feeAmount: profile.feeAmount ?? "",
+        paymentMethod: (profile.paymentMethod as PaymentMethod) ?? PaymentMethod.Paypal,
+        currency: profile.currency ?? "USD",
+      });
+    }
+  }, [profile, reset]);
 
   const onSubmit = (formData: ParentProfileEditFormData) => {
     logger.info("Profile edit submitted", { parentId, formData });

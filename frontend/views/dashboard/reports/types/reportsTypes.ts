@@ -10,6 +10,7 @@ export interface ReportTeacherOption {
 
 export interface ReportLedgerRow {
   readonly id: string;
+  readonly entityId: string | null;
   readonly name: string;
   readonly studentName: string;
   readonly avatarInitials: string;

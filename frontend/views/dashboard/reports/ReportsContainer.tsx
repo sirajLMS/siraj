@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type { AttendanceReportRow } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -11,6 +12,7 @@ import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teache
 import { useUserStore } from "@/frontend/stores/userStore";
 import { exportAttendanceReport } from "@/frontend/utils/excel-export/report-export";
 import { logger } from "@/frontend/utils/logger";
+import { studentStatusPath, teacherProfilePath } from "@/frontend/utils/routes";
 import { ReportsView } from "./ReportsView";
 import type { ReportLedgerRow, ReportsSummary, ReportType } from "./types/reportsTypes";
 
@@ -27,6 +29,7 @@ function mapReportRows(reportRows: readonly AttendanceReportRow[] | null | undef
 
   return reportRows.map((row: AttendanceReportRow, index: number) => ({
     id: row.id ?? row.groupKey ?? `rep-${index}`,
+    entityId: row.groupKey ?? null,
     name: row.groupLabel ?? "",
     studentName: "",
     avatarInitials: row.groupLabel
@@ -71,6 +74,7 @@ interface ReportsMainContentProps {
   readonly onSubmit: () => void;
   readonly onExportCsv: () => void;
   readonly onPrintReport: () => void;
+  readonly onRowClick?: (row: ReportLedgerRow) => void;
 }
 
 function ReportsMainContent({
@@ -89,6 +93,7 @@ function ReportsMainContent({
   onSubmit,
   onExportCsv,
   onPrintReport,
+  onRowClick,
 }: ReportsMainContentProps) {
   const t = useTranslations("dashboard.reports");
 
@@ -168,6 +173,7 @@ function ReportsMainContent({
       onSubmit={onSubmit}
       onExportCsv={onExportCsv}
       onPrintReport={onPrintReport}
+      onRowClick={onRowClick}
     />
   );
 }
@@ -182,6 +188,8 @@ export function ReportsContainer() {
   const { hasPermission } = useUserStore();
   const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
+  const router = useRouter();
+  const locale = useLocale();
 
   const [fromDate, setFromDate] = useState("2023-08-01");
   const [toDate, setToDate] = useState("2023-08-31");
@@ -315,6 +323,18 @@ export function ReportsContainer() {
     window.print();
   }, []);
 
+  const handleRowClick = useCallback(
+    (row: ReportLedgerRow) => {
+      if (!row.entityId) return;
+      if (reportType === "by_teacher") {
+        router.push(teacherProfilePath(locale, row.entityId));
+      } else if (reportType === "by_student") {
+        router.push(studentStatusPath(locale, row.entityId));
+      }
+    },
+    [reportType, router, locale]
+  );
+
   return (
     <RequirePermission permissions={[AppPermission.ReportGenerateCustom]}>
       <ReportsMainContent
@@ -333,6 +353,7 @@ export function ReportsContainer() {
         onSubmit={handleSubmit}
         onExportCsv={handleExportCsv}
         onPrintReport={handlePrintReport}
+        onRowClick={reportType !== "by_date" ? handleRowClick : undefined}
       />
     </RequirePermission>
   );

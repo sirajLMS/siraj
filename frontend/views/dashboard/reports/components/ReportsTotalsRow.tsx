@@ -8,17 +8,19 @@ import type { ReportsSummary } from "@/frontend/views/dashboard/reports/types/re
 interface ReportsTotalsRowProps {
   readonly summary: ReportsSummary;
   readonly totalsLabel: string;
+  readonly egpLabel: string;
+  readonly usdLabel: string;
 }
 
 function formatCurrency(value: number): string {
   return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export function ReportsTotalsRow({ summary, totalsLabel }: Readonly<ReportsTotalsRowProps>) {
+export function ReportsTotalsRow({ summary, totalsLabel, egpLabel, usdLabel }: Readonly<ReportsTotalsRowProps>) {
   const { hasPermission } = useUserStore();
   const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
-  const totalsText = `${formatCurrency(summary.totalEgp)} EGP, ${formatCurrency(summary.totalUsd)} $`;
+  const totalsText = `${formatCurrency(summary.totalEgp)} ${egpLabel}, ${formatCurrency(summary.totalUsd)} ${usdLabel}`;
 
   return (
     <Box

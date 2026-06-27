@@ -2,7 +2,6 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -109,8 +108,7 @@ function mapProfileData(
 
 export function ParentProfileContainer({ id }: ParentProfileContainerProps) {
   const t = useTranslations("dashboard.parentProfile");
-  const params = useParams();
-  const parentId = typeof params?.id === "string" ? params.id : id || "";
+  const parentId = id;
 
   const {
     data: profileData,

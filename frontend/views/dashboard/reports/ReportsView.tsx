@@ -52,6 +52,7 @@ export function ReportsView({
   onSubmit,
   onExportCsv,
   onPrintReport,
+  onRowClick,
 }: Readonly<ReportsViewProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -79,6 +80,7 @@ export function ReportsView({
         onTeacherChange={onTeacherChange}
         onReportTypeChange={onReportTypeChange}
         onSubmit={onSubmit}
+        onRowClick={onRowClick}
       />
     );
   }
@@ -108,6 +110,7 @@ export function ReportsView({
       onSubmit={onSubmit}
       onExportCsv={onExportCsv}
       onPrintReport={onPrintReport}
+      onRowClick={onRowClick}
     />
   );
 }

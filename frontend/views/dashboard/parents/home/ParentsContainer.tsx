@@ -12,11 +12,12 @@ import {
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
 import { useParentsStore } from "@/frontend/stores/parentsStore";
-import { logger } from "@/frontend/utils/logger";
-import type { ParentAccountStatus } from "@/frontend/views/dashboard/parents/types/directory";
+import { exportParentDirectory } from "@/frontend/utils/excel-export/parent-directory-export";
+import { type ParentAccountStatus, toParentAccountStatus } from "@/frontend/views/dashboard/parents/types/directory";
+import { useRouter } from "@/shared/i18n/routing";
 import { ParentsView } from "./ParentsView";
 
 function useDirectoryMetrics(
@@ -84,7 +85,7 @@ function useDirectoryRows(
           readonly avatarUrl?: string | null;
           readonly guardianOf?: string | null;
           readonly time?: string | null;
-          readonly accountStatus?: string | null;
+          readonly accountStatus?: ParentStatus | null;
           readonly unpaidInvoices?: number | null;
         }[]
       | null;
@@ -98,18 +99,30 @@ function useDirectoryRows(
     avatarUrl: row.avatarUrl ?? undefined,
     guardianOf: row.guardianOf ?? "",
     time: row.time ?? "",
-    accountStatus: (row.accountStatus as ParentAccountStatus) || "regular",
+    accountStatus: row.accountStatus ? toParentAccountStatus(row.accountStatus) : "regular",
     unpaidInvoices: row.unpaidInvoices ?? 0,
   }));
 }
 
 function useDirectoryLabels(t: ReturnType<typeof useTranslations<"dashboard.parentsDirectory">>) {
+  const statusLabels = {
+    activated: t("metrics.activated"),
+    deactivated: t("metrics.deactivated"),
+    regular: t("metrics.regular"),
+    on_leave: t("metrics.onLeave"),
+    suspended: t("metrics.suspended"),
+    on_trial: t("metrics.onTrial"),
+  } as Record<ParentAccountStatus, string>;
+
   return {
     pageTitle: t("pageTitle"),
     pageSubtitle: t("pageSubtitle"),
     addParent: t("actions.addParent"),
     records: t("records"),
     searchPlaceholder: t("searchPlaceholder"),
+    filterLabel: t("actions.filter"),
+    clearFilters: t("actions.clearFilters"),
+    statusLabels,
     table: {
       index: t("table.index"),
       image: t("table.image"),
@@ -121,38 +134,37 @@ function useDirectoryLabels(t: ReturnType<typeof useTranslations<"dashboard.pare
       options: t("table.options"),
       noEntries: t("noEntries"),
       guardianOf: (name: string) => t("card.guardianOf", { name }),
-      statusLabels: {
-        activated: t("metrics.activated"),
-        deactivated: t("metrics.deactivated"),
-        regular: t("metrics.regular"),
-        on_leave: t("metrics.onLeave"),
-        suspended: t("metrics.suspended"),
-        on_trial: t("metrics.onTrial"),
-      } as Record<ParentAccountStatus, string>,
+      statusLabels,
     },
     card: {
       guardianOf: (name: string) => t("card.guardianOf", { name }),
       unpaidCount: (count: number) => t("card.unpaidCount", { count }),
       invoicesCleared: t("card.invoicesCleared"),
-      statusLabels: {
-        activated: t("metrics.activated"),
-        deactivated: t("metrics.deactivated"),
-        regular: t("metrics.regular"),
-        on_leave: t("metrics.onLeave"),
-        suspended: t("metrics.suspended"),
-        on_trial: t("metrics.onTrial"),
-      } as Record<ParentAccountStatus, string>,
+      statusLabels,
     },
   };
 }
 
 export function ParentsContainer() {
   const t = useTranslations("dashboard.parentsDirectory");
-  const { searchQuery, page, pageSize, setSearchQuery, setPage } = useParentsStore();
+  const router = useRouter();
+  const {
+    searchQuery,
+    page,
+    pageSize,
+    statusFilter,
+    filterPanelOpen,
+    setSearchQuery,
+    setPage,
+    setStatusFilter,
+    setFilterPanelOpen,
+    resetFilters,
+  } = useParentsStore();
 
   const { data } = useQuery(parentDirectoryQueryDocument, {
     variables: {
       search: searchQuery || null,
+      statusFilter: statusFilter || null,
       paginationArgs: {
         first: pageSize,
         page: page + 1,
@@ -172,11 +184,11 @@ export function ParentsContainer() {
   const labels = useDirectoryLabels(t);
 
   const handleAddParent = () => {
-    logger.info("Add parent clicked");
+    router.push("/parents/onboarding");
   };
 
   const handleOpenSettings = (id: string) => {
-    logger.info("Open settings for parent:", id);
+    router.push(`/parents/${id}/profile`);
   };
 
   const handleSearch = (query: string) => {
@@ -190,6 +202,14 @@ export function ParentsContainer() {
     [setPage]
   );
 
+  const handleFilter = useCallback(() => {
+    setFilterPanelOpen(!filterPanelOpen);
+  }, [filterPanelOpen, setFilterPanelOpen]);
+
+  const handleExport = useCallback(() => {
+    void exportParentDirectory({ rows, labels });
+  }, [rows, labels]);
+
   return (
     <RequirePermission permissions={[AppPermission.ParentViewDirectory]}>
       <ParentsView
@@ -199,10 +219,16 @@ export function ParentsContainer() {
         page={page}
         pageSize={pageSize}
         totalCount={directory?.totalCount ?? 0}
+        statusFilter={statusFilter}
+        filterPanelOpen={filterPanelOpen}
         onAddParent={handleAddParent}
         onOpenSettings={handleOpenSettings}
         onSearch={handleSearch}
         onPageChange={handlePageChange}
+        onFilter={handleFilter}
+        onExport={handleExport}
+        onStatusFilterChange={setStatusFilter}
+        onResetFilters={resetFilters}
       />
     </RequirePermission>
   );

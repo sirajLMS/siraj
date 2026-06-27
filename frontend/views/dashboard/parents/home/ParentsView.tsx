@@ -20,7 +20,12 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
-import type { ParentAccountStatus, ParentDirectoryRow } from "@/frontend/views/dashboard/parents/types/directory";
+import { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  type ParentAccountStatus,
+  type ParentDirectoryRow,
+  toParentAccountStatus,
+} from "@/frontend/views/dashboard/parents/types/directory";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { ParentCardList, type ParentCardListLabels } from "./ParentCardList";
 import { ParentsDataGrid, type ParentsDataGridLabels } from "./ParentsDataGrid";
@@ -46,7 +51,7 @@ interface ParentsViewProps {
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
-  readonly statusFilter: ParentAccountStatus | null;
+  readonly statusFilter: ParentStatus | null;
   readonly filterPanelOpen: boolean;
   readonly onAddParent: () => void;
   readonly onOpenSettings: (id: string) => void;
@@ -54,17 +59,17 @@ interface ParentsViewProps {
   readonly onPageChange?: (page: number) => void;
   readonly onFilter: () => void;
   readonly onExport: () => void;
-  readonly onStatusFilterChange: (status: ParentAccountStatus | null) => void;
+  readonly onStatusFilterChange: (status: ParentStatus | null) => void;
   readonly onResetFilters: () => void;
 }
 
-const STATUS_FILTER_OPTIONS: readonly ParentAccountStatus[] = [
-  "activated",
-  "deactivated",
-  "regular",
-  "on_leave",
-  "suspended",
-  "on_trial",
+const STATUS_FILTER_OPTIONS: readonly ParentStatus[] = [
+  ParentStatus.Activated,
+  ParentStatus.Deactivated,
+  ParentStatus.Regular,
+  ParentStatus.OnLeave,
+  ParentStatus.Suspended,
+  ParentStatus.OnTrial,
 ];
 
 export function ParentsView({
@@ -173,23 +178,26 @@ export function ParentsView({
             <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mr: 1 })}>
               {labels.filterLabel}:
             </Typography>
-            {STATUS_FILTER_OPTIONS.map(status => (
-              <Chip
-                key={status}
-                label={labels.statusLabels[status]}
-                size="small"
-                variant={statusFilter === status ? "filled" : "outlined"}
-                onClick={() => {
-                  onStatusFilterChange(statusFilter === status ? null : status);
-                }}
-                sx={theme => ({
-                  ...(statusFilter === status && {
-                    backgroundColor: theme.palette.primary.main,
-                    color: theme.palette.onPrimary,
-                  }),
-                })}
-              />
-            ))}
+            {STATUS_FILTER_OPTIONS.map(status => {
+              const displayStatus = toParentAccountStatus(status);
+              return (
+                <Chip
+                  key={status}
+                  label={labels.statusLabels[displayStatus]}
+                  size="small"
+                  variant={statusFilter === status ? "filled" : "outlined"}
+                  onClick={() => {
+                    onStatusFilterChange(statusFilter === status ? null : status);
+                  }}
+                  sx={theme => ({
+                    ...(statusFilter === status && {
+                      backgroundColor: theme.palette.primary.main,
+                      color: theme.palette.onPrimary,
+                    }),
+                  })}
+                />
+              );
+            })}
             {statusFilter && (
               <Chip
                 label={labels.clearFilters}

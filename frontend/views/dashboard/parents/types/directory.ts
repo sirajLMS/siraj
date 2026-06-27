@@ -1,14 +1,11 @@
-/**
- * Parent directory domain types.
- *
- * Derived from the GraphQL `ParentDirectory` schema — these types live
- * alongside the view layer so components never depend on mock stores.
- */
+import type { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
-/** All possible account-status values shown in the parents directory. */
-export type ParentAccountStatus = "activated" | "deactivated" | "regular" | "on_leave" | "suspended" | "on_trial";
+export type ParentAccountStatus = Lowercase<ParentStatus>;
 
-/** A single row in the parents directory data-grid / card-list. */
+export function toParentAccountStatus(status: ParentStatus): ParentAccountStatus {
+  return status.toLowerCase() as ParentAccountStatus;
+}
+
 export interface ParentDirectoryRow {
   readonly id: string;
   readonly index: number;

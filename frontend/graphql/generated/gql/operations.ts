@@ -1382,7 +1382,7 @@ export type ParentDashboardMetricsQueryVariables = Exact<{ [key: string]: never;
 
 export type ParentDashboardMetricsQuery = ParentDashboardMetricsQuery_Query;
 
-export type ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null, regular: number | null, onLeave: number | null, suspended: number | null, onTrial: number | null };
+export type ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null, regular: number | null, onLeave: number | null, onTrial: number | null, suspended: number | null };
 
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow = { id: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, accountStatus: Types.ParentStatus | null, unpaidInvoices: number | null };
 
@@ -1396,6 +1396,7 @@ export type ParentDirectoryQuery_Query = { parentDirectory: ParentDirectoryQuery
 export type ParentDirectoryQueryVariables = Exact<{
   paginationArgs: Types.PaginationArgs | null | undefined;
   search: string | null | undefined;
+  statusFilter: Types.ParentStatus | null | undefined;
 }>;
 
 

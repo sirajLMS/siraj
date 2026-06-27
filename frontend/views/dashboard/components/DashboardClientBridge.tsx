@@ -1,3 +1,4 @@
+import { NotificationsProvider } from "@toolpad/core/useNotifications";
 import type { ReactNode } from "react";
 import type { CurrentUserProfile } from "@/backend/types";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -29,7 +30,7 @@ export async function DashboardClientBridge({ children, userProfile, roleLabel }
   const { sidebarItems, bottomNavItems, activeNavKey } = getDashboardLayoutData(pathname, permissions, locale);
 
   return (
-    <>
+    <NotificationsProvider>
       <UserStoreInitializer userProfile={userProfile} />
       <DashboardLayout
         sidebarItems={sidebarItems}
@@ -44,6 +45,6 @@ export async function DashboardClientBridge({ children, userProfile, roleLabel }
       >
         {children}
       </DashboardLayout>
-    </>
+    </NotificationsProvider>
   );
 }

@@ -1,5 +1,8 @@
+"use client";
+
 import { ArrowForwardOutlined, GroupOutlined } from "@mui/icons-material";
-import { Alert, Box, Button, Snackbar, Typography, useTheme } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useState } from "react";
@@ -24,17 +27,13 @@ const ParentProfileView: React.FC<ParentProfileViewProps> = ({ parent, parentId,
   const tActions = useTranslations("dashboard.parentProfile.actions");
   const theme = useTheme();
   const router = useRouter();
+  const notifications = useNotifications();
 
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   const handleAvatarUpload = (file: File) => {
     logger.info("Avatar upload requested for parent:", { parentId, fileName: file.name });
-    setSnackbarMessage(tActions("avatarUploadSuccess"));
-    setSnackbarSeverity("success");
-    setSnackbarOpen(true);
+    notifications.show(tActions("avatarUploadSuccess"), { severity: "success", autoHideDuration: 4000 });
   };
 
   return (
@@ -118,17 +117,6 @@ const ParentProfileView: React.FC<ParentProfileViewProps> = ({ parent, parentId,
         parentName={parent.name}
         onUpload={handleAvatarUpload}
       />
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)} sx={{ width: "100%" }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </PageContainer>
   );
 };

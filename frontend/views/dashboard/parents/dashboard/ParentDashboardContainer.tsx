@@ -1,8 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import {
   parentDashboardMetricsQueryDocument,
@@ -10,6 +9,7 @@ import {
 } from "@/frontend/graphql/sharedDocuments";
 import { useParentDashboardStore } from "@/frontend/stores/parentDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { useRouter } from "@/shared/i18n/routing";
 import { ParentDashboardView } from "./ParentDashboardView";
 import type {
   ParentDashboardMetrics,
@@ -134,7 +134,6 @@ function useDashboardLabels(
 
 export function ParentDashboardContainer() {
   const t = useTranslations("dashboard.parentDashboard");
-  const locale = useLocale();
   const router = useRouter();
   const userName = useUserStore(state => state.name);
   const page = useParentDashboardStore(state => state.page);
@@ -208,16 +207,16 @@ export function ParentDashboardContainer() {
   const handlers = useMemo(
     () => ({
       handleFilter: () => {
-        router.push(`/${locale}/schedule`);
+        router.push("/schedule");
       },
       handleViewFullWeek: () => {
-        router.push(`/${locale}/schedule`);
+        router.push("/schedule");
       },
       handleViewAll: () => {
-        router.push(`/${locale}/schedule`);
+        router.push("/schedule");
       },
       handleHistory: (id: string) => {
-        router.push(`/${locale}/students/${id}/history`);
+        router.push(`/students/${id}/history`);
       },
       handleJoinVideo: (id: string) => {
         const row = rawScheduleRows?.find(r => r?.id === id);
@@ -227,21 +226,21 @@ export function ParentDashboardContainer() {
         }
       },
       handleDownloadReport: () => {
-        router.push(`/${locale}/reports`);
+        router.push("/reports");
       },
       handleLearnMore: () => {
         if (workshopPromo?.title) {
-          router.push(`/${locale}/workshops`);
+          router.push("/workshops");
         }
       },
       handleSupport: () => {
-        router.push(`/${locale}/support`);
+        router.push("/support");
       },
       handlePageChange: (newPage: number) => {
         setPage(newPage);
       },
     }),
-    [router, locale, rawScheduleRows, workshopPromo, setPage]
+    [router, rawScheduleRows, workshopPromo, setPage]
   );
 
   if (totalCount !== useParentDashboardStore.getState().scheduleTotalCount) {

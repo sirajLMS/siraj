@@ -28,6 +28,7 @@ describe("GraphQL Parent Integration Tests", () => {
     const data = await authenticatedRequest(authToken, "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
+      statusFilter: null,
     });
 
     expect(data.parentDirectory).toBeDefined();
@@ -61,6 +62,7 @@ describe("GraphQL Parent Integration Tests", () => {
     const data = await authenticatedRequest(authToken, "query", parentDirectoryQueryDocument, {
       search: "Default Parent",
       paginationArgs: null,
+      statusFilter: null,
     });
 
     expect(data.parentDirectory?.rows).toBeDefined();
@@ -74,6 +76,7 @@ describe("GraphQL Parent Integration Tests", () => {
     await assertOperationDenied("teacher_default", "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
+      statusFilter: null,
     });
   });
 
@@ -81,6 +84,7 @@ describe("GraphQL Parent Integration Tests", () => {
     await assertOperationDenied("parent_default", "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
+      statusFilter: null,
     });
   });
 });
@@ -103,6 +107,7 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
     const dataDir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
+      statusFilter: null,
     });
 
     const parentId = dataDir.parentDirectory?.rows?.[0]?.id;
@@ -162,6 +167,7 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
     const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
+      statusFilter: null,
     });
     const parentId = dir.parentDirectory?.rows?.[0]?.id;
     if (!parentId) return;
@@ -223,10 +229,11 @@ describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
     const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
+      statusFilter: null,
     });
 
     // Find a parent that is REGULAR (not already DEACTIVATED)
-    const targetRow = dir.parentDirectory?.rows?.find(r => r?.accountStatus !== "deactivated");
+    const targetRow = dir.parentDirectory?.rows?.find(r => r?.accountStatus !== "DEACTIVATED");
     if (!targetRow?.id) return; // skip if no suitable parent
 
     const data = await authenticatedRequest(adminToken, "mutate", deactivateParentMutationDocument, {
@@ -290,6 +297,7 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
     const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
+      statusFilter: null,
     });
     const parentId = dir.parentDirectory?.rows?.[0]?.id;
     if (!parentId) return;
@@ -332,6 +340,7 @@ describe("GraphQL Document Tests — parentDocuments query", () => {
     const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
+      statusFilter: null,
     });
     const parentId = dir.parentDirectory?.rows?.[0]?.id;
     if (!parentId) return;

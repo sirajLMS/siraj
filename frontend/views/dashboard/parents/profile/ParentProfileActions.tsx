@@ -17,15 +17,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Snackbar,
   Stack,
   useTheme,
 } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useState } from "react";
 import { deactivateParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
-import { Link } from "@/shared/i18n/routing";
+import { Link, useRouter } from "@/shared/i18n/routing";
 
 interface DeactivateParentDialogProps {
   readonly open: boolean;
@@ -86,25 +86,21 @@ interface ParentProfileActionsProps {
 const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, onEditAvatar }) => {
   const theme = useTheme();
   const t = useTranslations("dashboard.parentProfile.actions");
+  const router = useRouter();
+  const notifications = useNotifications();
 
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   const [deactivateParent, { loading: deactivating, error: deactivateError }] = useMutation(
     deactivateParentMutationDocument,
     {
       onCompleted: () => {
         setDeactivateDialogOpen(false);
-        setSnackbarMessage(t("deactivateSuccess"));
-        setSnackbarSeverity("success");
-        setSnackbarOpen(true);
+        notifications.show(t("deactivateSuccess"), { severity: "success", autoHideDuration: 4000 });
+        router.push("/parents");
       },
       onError: error => {
-        setSnackbarMessage(error.message);
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
+        notifications.show(error.message, { severity: "error", autoHideDuration: 4000 });
       },
     }
   );
@@ -188,17 +184,6 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, o
         deactivating={deactivating}
         error={deactivateError}
       />
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)} sx={{ width: "100%" }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </>
   );
 };

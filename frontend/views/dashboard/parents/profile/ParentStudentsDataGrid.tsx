@@ -17,13 +17,13 @@ import {
   LinearProgress,
   MenuItem,
   Select,
-  Snackbar,
   Stack,
   Typography,
   useTheme,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useState } from "react";
@@ -251,6 +251,7 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
   const tStudents = useTranslations("dashboard.parentProfile.students");
   const theme = useTheme();
   const router = useRouter();
+  const notifications = useNotifications();
 
   const [reassignDialogState, setReassignDialogState] = useState<{
     open: boolean;
@@ -263,16 +264,6 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
     studentId: string;
     currentStatus: string;
   }>({ open: false, studentId: "", currentStatus: "" });
-
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
-
-  const showFeedback = (message: string, severity: "success" | "error") => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
-  };
 
   const columns: GridColDef<ParentStudent>[] = [
     {
@@ -456,7 +447,7 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
         currentTeacherName={reassignDialogState.currentTeacherName}
         onClose={() => setReassignDialogState({ open: false, studentId: "", currentTeacherName: "" })}
         onSuccess={() => {
-          showFeedback(tStudents("reassignSuccess"), "success");
+          notifications.show(tStudents("reassignSuccess"), { severity: "success", autoHideDuration: 4000 });
           onRefetch?.();
         }}
       />
@@ -467,21 +458,10 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
         currentStatus={statusDialogState.currentStatus}
         onClose={() => setStatusDialogState({ open: false, studentId: "", currentStatus: "" })}
         onSuccess={() => {
-          showFeedback(tStudents("statusChangeSuccess"), "success");
+          notifications.show(tStudents("statusChangeSuccess"), { severity: "success", autoHideDuration: 4000 });
           onRefetch?.();
         }}
       />
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </>
   );
 };

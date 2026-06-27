@@ -6,8 +6,8 @@ export const parentDirectoryQueryDocument: TypedDocumentNode<
   Operations.ParentDirectoryQuery,
   Types.QueryParentDirectoryArgs
 > = gql`
-  query parentDirectory($paginationArgs: PaginationArgs, $search: String) {
-    parentDirectory(paginationArgs: $paginationArgs, search: $search) {
+  query parentDirectory($paginationArgs: PaginationArgs, $search: String, $statusFilter: ParentStatus) {
+    parentDirectory(paginationArgs: $paginationArgs, search: $search, statusFilter: $statusFilter) {
       id
       metrics {
         id
@@ -15,8 +15,8 @@ export const parentDirectoryQueryDocument: TypedDocumentNode<
         deactivated
         regular
         onLeave
-        suspended
         onTrial
+        suspended
       }
       rows {
         id

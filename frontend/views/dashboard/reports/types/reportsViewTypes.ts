@@ -34,6 +34,7 @@ export interface ReportsSharedHandlers {
   readonly onSubmit: () => void;
   readonly onExportCsv: () => void;
   readonly onPrintReport: () => void;
+  readonly onRowClick?: (row: ReportLedgerRow) => void;
 }
 
 export type ReportsSharedViewProps = ReportsSharedState & ReportsSharedHandlers;
