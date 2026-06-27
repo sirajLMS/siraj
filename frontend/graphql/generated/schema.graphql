@@ -14,6 +14,11 @@ type AdminDashboardScheduleResult {
   totalCount: Int
 }
 
+type AdminNoteInfo {
+  content: String
+  lastUpdated: String
+}
+
 """Paginated admin suggestion list with metrics."""
 type AdminSuggestionResult {
   id: String
@@ -286,6 +291,16 @@ type ClassStatusEvent {
   id: String
 }
 
+type CommunicationLogEntry {
+  description: String
+  id: String
+  isActive: Boolean
+  isDelivered: Boolean
+  timestamp: String
+  title: String
+  type: String
+}
+
 """A parent complaint with full details and responses."""
 type Complaint {
   body: String
@@ -293,6 +308,7 @@ type Complaint {
   createdAt: DateTime
   files: [ComplaintFile!]
   id: String
+  parentAvatarUrl: String
   parentId: String
   parentName: String
   responses: [ComplaintResponse!]
@@ -903,6 +919,35 @@ enum Gender {
   MALE
 }
 
+type GroupClassAudit {
+  adminNote: AdminNoteInfo
+  auditLoggedAt: String
+  auditRemark: String
+  className: String
+  communications: [CommunicationLogEntry!]
+  courseCode: String
+  id: String
+  meetingInfo: OnlineMeetingInfo
+  originalDate: String
+  registeredStudentCount: Int
+  rescheduledDate: String
+  status: String
+  students: [GroupClassStudent!]
+  teacherName: String
+  timeSlot: String
+  totalStudentCount: Int
+  venue: String
+}
+
+type GroupClassStudent {
+  attendanceStatus: String
+  avatarUrl: String
+  id: String
+  initials: String
+  name: String
+  studentId: String
+}
+
 type GroupUser {
   email: String
   id: String
@@ -956,14 +1001,24 @@ enum ManagerAccountType {
   manager
 }
 
+type ManagerDirectoryMetrics {
+  activeNow: Int
+  alerts: Int
+  id: String
+  systemStaff: Int
+  totalAdmin: Int
+}
+
 type ManagerDirectoryResult {
   id: String
+  metrics: ManagerDirectoryMetrics
   pageInfo: PageInfo
   rows: [ManagerDirectoryRow!]
   totalCount: Int
 }
 
 type ManagerDirectoryRow {
+  avatarUrl: String
   email: String
   id: String
   name: String
@@ -1096,6 +1151,7 @@ type Mutation {
   refreshToken: RefreshTokenResponse
   renameFile(input: FileRenameInput!): FileOperationResult
   rescheduleClass(classInstanceId: ID!, input: RescheduleClassInput!): ClassInstanceDetail
+  resendClassNotifications(classInstanceId: String!): SupportRequestResult
   resetClass(classInstanceId: ID!): Boolean
 
   """Creates a response to an existing complaint (admin only)."""
@@ -1112,6 +1168,7 @@ type Mutation {
 
   """Submits a new suggestion from the authenticated parent."""
   submitSuggestion(input: SubmitSuggestionInput!): Suggestion
+  updateClassAdminNote(classInstanceId: String!, content: String!): GroupClassAudit
   updateDirectoryPermissions(input: DirectoryPermissionsUpdateInput!): FileOperationResult
 
   """Updates a manager's profile fields."""
@@ -1133,6 +1190,21 @@ type NotificationAlertsResult {
   id: String
   totalCount: Int
   unreadCount: Int
+}
+
+"""Summary metrics for the staff onboarding process"""
+type OnboardingMetrics {
+  activeStaff: Int
+  avgOnboardingDays: Float
+  id: String
+  pendingApproval: Int
+}
+
+type OnlineMeetingInfo {
+  joinUrl: String
+  meetingId: String
+  platform: String
+  zoomMeetingUrl: String
 }
 
 enum OrderSortDirection {
@@ -1389,15 +1461,19 @@ type Query {
 
   """Generates dynamic attendance and financial reports."""
   generateAttendanceReport(filters: AttendanceReportFiltersInput!): [AttendanceReportRow!]
+  groupClassAudit(classInstanceId: String!): GroupClassAudit
 
   """Lists all learning resources available to the academy."""
   learningResources(searchQuery: String): [LearningResourceRow!]
   listFiles(input: FilesListInput!): StorageObjectList
 
   """Lists all staff members with administrative access."""
-  managerDirectory(paginationArgs: PaginationArgs): ManagerDirectoryResult
+  managerDirectory(paginationArgs: PaginationArgs, roleFilter: String, statusFilter: String): ManagerDirectoryResult
   me: User
   notificationAlerts: NotificationAlertsResult
+
+  """Returns onboarding metrics for staff accounts."""
+  onboardingMetrics: OnboardingMetrics
   parentAssociatedStudents(parentId: String!): [AssociatedStudent!]
 
   """Returns the authenticated parent's complaint history with pagination."""
@@ -2121,6 +2197,7 @@ type UnpaidInvoicesSummary {
 input UpdateManagerProfileInput {
   phone: String
   skypeId: String
+  status: String
 }
 
 input UpdatePermissionGroupInput {

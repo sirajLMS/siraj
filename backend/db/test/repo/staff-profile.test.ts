@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { StaffProfileRepository } from "@/backend/db/repo";
+import { PaginationArgs } from "@/backend/types";
 import { permissionGroups, staffProfiles, userPermissionGroups } from "@/backend/db/schema";
 import { createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
@@ -86,7 +87,7 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
     const group = await createTestPermissionGroup(tx, "Test Dir Group", `test-dir-${randomUUID()}`);
     await assignUserToGroup(tx, user.id, group.id);
 
-    const result = await StaffProfileRepository.getManagerDirectory(null, tx);
+    const result = await StaffProfileRepository.getManagerDirectory(null, undefined, tx);
     const found = result.rows.find(r => r.id === user.id);
     expect(found).toBeDefined();
     expect(found?.roleSlug).toBe(group.slug);
@@ -99,7 +100,7 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
       skypeId: "live:test.skype",
     });
 
-    const result = await StaffProfileRepository.getManagerDirectory(null, tx);
+    const result = await StaffProfileRepository.getManagerDirectory(null, undefined, tx);
     const found = result.rows.find(r => r.name === "SkypePhone");
     expect(found).toBeDefined();
     expect(found?.phone).toBe("+1234567890");
@@ -107,18 +108,116 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
   });
 
   staffTest("returns empty array when no staff profiles exist", async tx => {
-    const result = await StaffProfileRepository.getManagerDirectory(null, tx);
+    const result = await StaffProfileRepository.getManagerDirectory(null, undefined, tx);
     expect(Array.isArray(result.rows)).toBe(true);
   });
 
   staffTest("returns staff without permission group (roleSlug is null)", async tx => {
     const { user } = await createStaffUser(tx, "NoGroupMgr");
 
-    const result = await StaffProfileRepository.getManagerDirectory(null, tx);
+    const result = await StaffProfileRepository.getManagerDirectory(null, undefined, tx);
     const found = result.rows.find(r => r.id === user.id);
     expect(found).toBeDefined();
     expect(found?.roleSlug).toBeNull();
     expect(found?.roleName).toBeNull();
+  });
+
+  staffTest("filters by admin role", async tx => {
+    const { user: adminUser } = await createStaffUser(tx, "AdminFilter");
+    const adminGroup = await createTestPermissionGroup(tx, "Admin Group", `admin-${randomUUID()}`);
+    await assignUserToGroup(tx, adminUser.id, adminGroup.id);
+
+    const { user: staffUser } = await createStaffUser(tx, "StaffFilterNoAdmin");
+    const staffGroup = await createTestPermissionGroup(tx, "Staff Group", `staff-${randomUUID()}`);
+    await assignUserToGroup(tx, staffUser.id, staffGroup.id);
+
+    const result = await StaffProfileRepository.getManagerDirectory(null, { roleFilter: "admin" }, tx);
+    const adminFound = result.rows.find(r => r.id === adminUser.id);
+    const staffFound = result.rows.find(r => r.id === staffUser.id);
+    expect(adminFound).toBeDefined();
+    expect(staffFound).toBeUndefined();
+  });
+
+  staffTest("filters by staff role (non-admin slugs)", async tx => {
+    const { user: adminUser } = await createStaffUser(tx, "AdminNoMatch");
+    const adminGroup = await createTestPermissionGroup(tx, "Admin X", `admin-x-${randomUUID()}`);
+    await assignUserToGroup(tx, adminUser.id, adminGroup.id);
+
+    const { user: staffUser } = await createStaffUser(tx, "StaffMatch");
+    const staffGroup = await createTestPermissionGroup(tx, "Staff Y", `staff-y-${randomUUID()}`);
+    await assignUserToGroup(tx, staffUser.id, staffGroup.id);
+
+    const { user: noGroupUser } = await createStaffUser(tx, "NoGroupMatch");
+
+    const result = await StaffProfileRepository.getManagerDirectory(null, { roleFilter: "staff" }, tx);
+    const adminFound = result.rows.find(r => r.id === adminUser.id);
+    const staffFound = result.rows.find(r => r.id === staffUser.id);
+    const noGroupFound = result.rows.find(r => r.id === noGroupUser.id);
+    expect(adminFound).toBeUndefined();
+    expect(staffFound).toBeDefined();
+    expect(noGroupFound).toBeDefined();
+  });
+
+  staffTest("filters by active status", async tx => {
+    const now = new Date();
+    const activeUser = await createTestUser(tx, { name: "ActiveS", email: `active-s-${randomUUID()}@t.com` });
+    await tx.insert(staffProfiles).values({
+      userId: activeUser.id, status: "ACTIVATED", createdAt: now, updatedAt: now,
+    });
+    const deactivatedUser = await createTestUser(tx, { name: "DeactivatedS", email: `deact-s-${randomUUID()}@t.com` });
+    await tx.insert(staffProfiles).values({
+      userId: deactivatedUser.id, status: "DEACTIVATED", createdAt: now, updatedAt: now,
+    });
+
+    const result = await StaffProfileRepository.getManagerDirectory(null, { statusFilter: "active" }, tx);
+    const activeFound = result.rows.find(r => r.id === activeUser.id);
+    const deactivatedFound = result.rows.find(r => r.id === deactivatedUser.id);
+    expect(activeFound).toBeDefined();
+    expect(deactivatedFound).toBeUndefined();
+  });
+
+  staffTest("filters by offline status", async tx => {
+    const now = new Date();
+    const activeUser = await createTestUser(tx, { name: "ActiveOff", email: `active-off-${randomUUID()}@t.com` });
+    await tx.insert(staffProfiles).values({
+      userId: activeUser.id, status: "ACTIVATED", createdAt: now, updatedAt: now,
+    });
+    const deactivatedUser = await createTestUser(tx, { name: "DeactivatedOff", email: `deact-off-${randomUUID()}@t.com` });
+    await tx.insert(staffProfiles).values({
+      userId: deactivatedUser.id, status: "DEACTIVATED", createdAt: now, updatedAt: now,
+    });
+
+    const result = await StaffProfileRepository.getManagerDirectory(null, { statusFilter: "offline" }, tx);
+    const activeFound = result.rows.find(r => r.id === activeUser.id);
+    const deactivatedFound = result.rows.find(r => r.id === deactivatedUser.id);
+    expect(activeFound).toBeUndefined();
+    expect(deactivatedFound).toBeDefined();
+  });
+
+  staffTest("returns paginated results with pageInfo", async tx => {
+    await createStaffUser(tx, "Page1");
+    await createStaffUser(tx, "Page2");
+
+    const pagination = new PaginationArgs({ first: 1, page: 1 });
+    const result = await StaffProfileRepository.getManagerDirectory(pagination, undefined, tx);
+
+    expect(result.rows.length).toBeLessThanOrEqual(1);
+    expect(result.pageInfo).not.toBeNull();
+    expect(result.pageInfo?.perPage).toBe(1);
+    expect(result.pageInfo?.currentPage).toBe(1);
+    expect(result.totalCount).toBeGreaterThanOrEqual(0);
+  });
+
+  staffTest("returns metrics in directory result", async tx => {
+    await createStaffUser(tx, "MetricsDir");
+
+    const result = await StaffProfileRepository.getManagerDirectory(null, undefined, tx);
+    expect(result.metrics).toBeDefined();
+    expect(result.metrics.id).toBe("manager-directory-metrics");
+    expect(typeof result.metrics.totalAdmin).toBe("number");
+    expect(typeof result.metrics.systemStaff).toBe("number");
+    expect(typeof result.metrics.activeNow).toBe("number");
+    expect(typeof result.metrics.alerts).toBe("number");
   });
 });
 
@@ -210,6 +309,32 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
     expect(result.phone).toBe("+5555555555");
   });
 
+  staffTest("updates status when statusIsSet is true", async tx => {
+    const { profile } = await createStaffUser(tx, "StatusUpdate", {
+      phone: "+4444444444",
+    });
+
+    const result = await StaffProfileRepository.updateManagerProfile(
+      profile.id,
+      { status: "DEACTIVATED", statusIsSet: true },
+      undefined,
+      tx
+    );
+    expect(result.status).toBe("DEACTIVATED");
+  });
+
+  staffTest("defaults status to ACTIVATED when statusIsSet is true and status is null", async tx => {
+    const { profile } = await createStaffUser(tx, "StatusDefault");
+
+    const result = await StaffProfileRepository.updateManagerProfile(
+      profile.id,
+      { status: null, statusIsSet: true },
+      undefined,
+      tx
+    );
+    expect(result.status).toBe("ACTIVATED");
+  });
+
   staffTest("throws error for non-existent staff profile ID", async tx => {
     const error = await expectRepoError(() =>
       StaffProfileRepository.updateManagerProfile(
@@ -283,6 +408,39 @@ describe("StaffProfileRepository — getUserPermissionGroupSlugs", () => {
 
     const slugs = await StaffProfileRepository.getUserPermissionGroupSlugs(user.id, tx);
     expect(slugs).toEqual([group.slug]);
+  });
+});
+
+describe("StaffProfileRepository — getOnboardingMetrics", () => {
+  staffTest("returns metrics with correct structure", async tx => {
+    await createStaffUser(tx, "Onboard1");
+
+    const result = await StaffProfileRepository.getOnboardingMetrics(tx);
+    expect(result.id).toBe("onboarding-metrics");
+    expect(typeof result.activeStaff).toBe("number");
+    expect(typeof result.pendingApproval).toBe("number");
+    expect(typeof result.avgOnboardingDays).toBe("number");
+  });
+
+  staffTest("counts active and deactivated staff correctly", async tx => {
+    const now = new Date();
+    const activeUser = await createTestUser(tx, { name: "ActiveOM", email: `active-om-${randomUUID()}@t.com` });
+    await tx.insert(staffProfiles).values({
+      userId: activeUser.id, status: "ACTIVATED", createdAt: now, updatedAt: now,
+    });
+    const deactivatedUser = await createTestUser(tx, { name: "DeactivatedOM", email: `deact-om-${randomUUID()}@t.com` });
+    await tx.insert(staffProfiles).values({
+      userId: deactivatedUser.id, status: "DEACTIVATED", createdAt: now, updatedAt: now,
+    });
+
+    const result = await StaffProfileRepository.getOnboardingMetrics(tx);
+    expect(result.activeStaff).toBeGreaterThanOrEqual(1);
+    expect(result.pendingApproval).toBeGreaterThanOrEqual(1);
+  });
+
+  staffTest("returns 0 avgOnboardingDays when no recent profiles", async tx => {
+    const result = await StaffProfileRepository.getOnboardingMetrics(tx);
+    expect(result.avgOnboardingDays).toBeGreaterThanOrEqual(0);
   });
 });
 

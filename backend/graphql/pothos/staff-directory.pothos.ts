@@ -1,5 +1,5 @@
 import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
-import type { PageInfo } from "@/backend/types";
+import type { OnboardingMetricsResult, PageInfo } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
@@ -74,6 +74,7 @@ export type ManagerDirectoryRowDefinition = {
   staffProfileId: string;
   name: string;
   email: string;
+  avatarUrl: string | null;
   phone: string | null;
   skypeId: string | null;
   status: string;
@@ -89,6 +90,7 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
     staffProfileId: t.exposeString("staffProfileId"),
     name: t.exposeString("name"),
     email: t.exposeString("email"),
+    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     phone: t.exposeString("phone", { nullable: true }),
     skypeId: t.exposeString("skypeId", { nullable: true }),
     status: t.exposeString("status"),
@@ -97,8 +99,30 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
   }),
 });
 
+export type ManagerDirectoryMetricsDefinition = {
+  id: string;
+  totalAdmin: number;
+  systemStaff: number;
+  activeNow: number;
+  alerts: number;
+};
+
+const ManagerDirectoryMetricsRef =
+  gqlSchemaBuilder.objectRef<ManagerDirectoryMetricsDefinition>("ManagerDirectoryMetrics");
+
+export const ManagerDirectoryMetricsPothosObject = ManagerDirectoryMetricsRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    totalAdmin: t.exposeInt("totalAdmin"),
+    systemStaff: t.exposeInt("systemStaff"),
+    activeNow: t.exposeInt("activeNow"),
+    alerts: t.exposeInt("alerts"),
+  }),
+});
+
 export type ManagerDirectoryResultDefinition = {
   id: string;
+  metrics: ManagerDirectoryMetricsDefinition;
   rows: ManagerDirectoryRowDefinition[];
   totalCount: number;
   pageInfo: PageInfo | null;
@@ -110,9 +134,24 @@ const ManagerDirectoryResultRef =
 export const ManagerDirectoryResultPothosObject = ManagerDirectoryResultRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
+    metrics: t.expose("metrics", { type: ManagerDirectoryMetricsPothosObject }),
     rows: t.expose("rows", { type: [ManagerDirectoryRowPothosObject] }),
     totalCount: t.exposeInt("totalCount"),
     pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
+  }),
+});
+
+// ─── Onboarding Metrics ──────────────────────────────────────────────────────────
+
+const OnboardingMetricsRef = gqlSchemaBuilder.objectRef<OnboardingMetricsResult>("OnboardingMetrics");
+
+export const OnboardingMetricsPothosObject = OnboardingMetricsRef.implement({
+  description: "Summary metrics for the staff onboarding process",
+  fields: t => ({
+    id: t.exposeString("id"),
+    activeStaff: t.exposeInt("activeStaff"),
+    pendingApproval: t.exposeInt("pendingApproval"),
+    avgOnboardingDays: t.exposeFloat("avgOnboardingDays"),
   }),
 });
 
@@ -123,6 +162,8 @@ gqlSchemaBuilder.queryField("managerDirectory", t =>
     type: ManagerDirectoryResultPothosObject,
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
+      roleFilter: t.arg.string({ required: false }),
+      statusFilter: t.arg.string({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
       const locale = ctx.locale || "en";
@@ -141,10 +182,16 @@ gqlSchemaBuilder.queryField("managerDirectory", t =>
         });
       }
 
-      const result = await ManagerDirectoryService.getManagerDirectory(userId, pagination, locale);
+      const filters = {
+        roleFilter: args.roleFilter ?? null,
+        statusFilter: args.statusFilter ?? null,
+      };
+
+      const result = await ManagerDirectoryService.getManagerDirectory(userId, pagination, locale, filters);
 
       return {
         id: "manager-directory",
+        metrics: result.metrics,
         rows: result.rows,
         totalCount: result.totalCount,
         pageInfo: result.pageInfo,
@@ -154,11 +201,25 @@ gqlSchemaBuilder.queryField("managerDirectory", t =>
   })
 );
 
+gqlSchemaBuilder.queryField("onboardingMetrics", t =>
+  t.field({
+    type: OnboardingMetricsPothosObject,
+    resolve: async (_root, _args, ctx) => {
+      const locale = ctx.locale || "en";
+      const userId = ctx.user?.id || "";
+
+      return await ManagerDirectoryService.getOnboardingMetrics(userId, locale);
+    },
+    description: "Returns onboarding metrics for staff accounts.",
+  })
+);
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 export interface UpdateManagerProfileInputDefinition {
   phone?: string | null;
   skypeId?: string | null;
+  status?: string | null;
 }
 
 export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
@@ -167,6 +228,7 @@ export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
     fields: t => ({
       phone: t.string({ required: false }),
       skypeId: t.string({ required: false }),
+      status: t.string({ required: false }),
     }),
   });
 

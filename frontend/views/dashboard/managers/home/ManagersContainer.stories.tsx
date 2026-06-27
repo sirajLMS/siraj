@@ -12,9 +12,10 @@ const MOCK_MANAGER_ROWS = [
     staffProfileId: "staff-1",
     name: "Admin User",
     email: "admin@academy.com",
+    avatarUrl: null,
     phone: "+1-555-0100",
     skypeId: "admin.skype",
-    status: "ACTIVE",
+    status: "ACTIVATED",
     roleSlug: "super_admin",
     roleName: "Super Admin",
   },
@@ -24,24 +25,72 @@ const MOCK_MANAGER_ROWS = [
     staffProfileId: "staff-2",
     name: "Staff Member",
     email: "staff@academy.com",
+    avatarUrl: null,
     phone: "+1-555-0200",
     skypeId: "staff.skype",
-    status: "ACTIVE",
+    status: "ACTIVATED",
     roleSlug: "staff_default",
     roleName: "Staff Default",
   },
 ];
 
+const MOCK_METRICS = {
+  __typename: "ManagerDirectoryMetrics" as const,
+  id: "manager-directory-metrics",
+  totalAdmin: 1,
+  systemStaff: 1,
+  activeNow: 2,
+  alerts: 0,
+};
+
+const MOCK_PAGE_INFO = {
+  __typename: "PageInfo" as const,
+  count: 2,
+  currentPage: 1,
+  firstItem: 1,
+  hasMorePages: false,
+  lastItem: 2,
+  lastPage: 1,
+  perPage: 10,
+  total: 2,
+};
+
+function makeMockResult(rows: typeof MOCK_MANAGER_ROWS, metrics: typeof MOCK_METRICS) {
+  return {
+    data: {
+      managerDirectory: {
+        __typename: "ManagerDirectoryResult" as const,
+        id: "manager-directory",
+        rows,
+        metrics,
+        totalCount: rows.length,
+        pageInfo: MOCK_PAGE_INFO,
+      },
+    },
+  };
+}
+
+const defaultVariables = {
+  paginationArgs: {
+    first: 10,
+    page: 1,
+    skip: null,
+    after: null,
+    before: null,
+    last: null,
+    maxCount: null,
+  },
+  roleFilter: null,
+  statusFilter: null,
+};
+
 const managerDirectoryMocks = [
   {
     request: {
       query: managerDirectoryQueryDocument,
+      variables: defaultVariables,
     },
-    result: {
-      data: {
-        managerDirectory: MOCK_MANAGER_ROWS,
-      },
-    },
+    result: makeMockResult(MOCK_MANAGER_ROWS, MOCK_METRICS),
   },
 ];
 
@@ -85,8 +134,19 @@ export const Empty: Story = {
       <MockedProvider
         mocks={[
           {
-            request: { query: managerDirectoryQueryDocument },
-            result: { data: { managerDirectory: [] } },
+            request: { query: managerDirectoryQueryDocument, variables: defaultVariables },
+            result: {
+              data: {
+                managerDirectory: {
+                  __typename: "ManagerDirectoryResult",
+                  id: "manager-directory",
+                  rows: [],
+                  metrics: MOCK_METRICS,
+                  totalCount: 0,
+                  pageInfo: { ...MOCK_PAGE_INFO, count: 0, total: 0, firstItem: null, lastItem: null },
+                },
+              },
+            },
           },
         ]}
       >

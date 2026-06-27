@@ -5,6 +5,7 @@ import { Box, FormControl, InputAdornment, MenuItem, Select, TextField, Typograp
 import { styled } from "@mui/material/styles";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import { ComplaintCategory } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ComplaintsParentLabels } from "@/shared/messages/types/dashboard/complaints/main";
 import type { ComplaintFormData } from "../schemas/complaintFormSchema";
 import type { ParentStudentOption } from "../types/complaints.types";
@@ -92,7 +93,35 @@ export function ComplaintFormFields({
         <Typography variant="titleLg">{labels.formTitle}</Typography>
       </StyledFormHeaderBox>
 
-      {/* Student select field */}
+      <StyledFormFieldGroup>
+        <FieldLabel>{labels.category}</FieldLabel>
+        <Controller
+          name="category"
+          control={control}
+          render={({ field }) => (
+            <FormControl fullWidth error={Boolean(errors.category)}>
+              <Select
+                {...field}
+                displayEmpty
+                value={field.value}
+                onChange={event => {
+                  field.onChange(event.target.value as ComplaintCategory);
+                }}
+              >
+                {Object.values(ComplaintCategory).map(cat => (
+                  <MenuItem key={cat} value={cat}>
+                    {labels.categoryLabels[cat]}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.category?.message ? (
+                <StyledFieldErrorMessage variant="bodyMd">{errors.category.message}</StyledFieldErrorMessage>
+              ) : null}
+            </FormControl>
+          )}
+        />
+      </StyledFormFieldGroup>
+
       <StyledFormFieldGroup>
         <FieldLabel>{labels.student}</FieldLabel>
         <Controller

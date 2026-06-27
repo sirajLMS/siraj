@@ -42,6 +42,7 @@ async function testUpdateManagerProfile(actorRole: string, phonePrefix: string, 
     input: {
       phone: uniquePhone,
       skypeId: uniqueSkype,
+      status: null,
     },
   });
 
@@ -91,7 +92,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
 
     const result = await testClient.query({
       query: managerDirectoryQueryDocument,
-      variables: { paginationArgs: null },
+      variables: { paginationArgs: null, roleFilter: null, statusFilter: null },
       errorPolicy: "all",
       context: {
         headers: {
@@ -131,6 +132,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
         input: {
           phone: "+15555555555",
           skypeId: "hacker_skype",
+          status: null,
         },
       },
       errorPolicy: "all",
@@ -159,6 +161,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
         input: {
           phone: "+10000000000",
           skypeId: "nonexistent",
+          status: null,
         },
       },
       errorPolicy: "all",

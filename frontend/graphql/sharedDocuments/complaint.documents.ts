@@ -60,7 +60,15 @@ export const adminComplaintQueueQueryDocument: TypedDocumentNode<
         status
         createdAt
         parentName
+        parentAvatarUrl
         studentName
+        responses {
+          id
+          body
+          createdAt
+          responderName
+          emailSent
+        }
       }
       metrics {
         id

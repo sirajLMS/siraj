@@ -5,6 +5,7 @@ export const complaints: ComplaintsLabels = {
     pageTitle: "الشكاوى والسجلات",
     formTitle: "تقديم شكوى جديدة",
     student: "اختر الطالب",
+    category: "فئة الشكوى",
     contactEmail: "البريد الإلكتروني للتواصل",
     contactEmailPlaceholder: "parent.contact@example.com",
     complaintDetails: "تفاصيل الشكوى",
@@ -25,6 +26,7 @@ export const complaints: ComplaintsLabels = {
       emailRequired: "يرجى إدخال بريدك الإلكتروني.",
       emailInvalid: "يرجى إدخال بريد إلكتروني صالح.",
       detailsRequired: "يرجى وصف شكواك في 10 أحرف على الأقل.",
+      categoryRequired: "يرجى اختيار فئة الشكوى.",
     },
     statusLabels: {
       pending: "معلقة",
@@ -58,6 +60,10 @@ export const complaints: ComplaintsLabels = {
       answerAndEmail: "رد وإرسال بالبريد",
       adminResponse: "رد الإدارة",
       noEntries: "لا توجد شكاوى مطابقة للبحث",
+      deleteConfirmTitle: "حذف الشكوى",
+      deleteConfirmBody: "سيتم إزالة هذه الشكوى نهائيًا من القائمة. لا يمكن التراجع عن هذا الإجراء.",
+      deleteConfirmCancel: "إلغاء",
+      deleteConfirmConfirm: "حذف",
     },
     priorityLabels: {
       urgent: "أولوية عاجلة",

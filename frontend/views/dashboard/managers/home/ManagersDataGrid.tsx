@@ -1,11 +1,14 @@
-import { MailOutlined, SettingsOutlined } from "@mui/icons-material";
-import { Avatar, Box, Chip, IconButton, Stack, Typography } from "@mui/material";
+"use client";
+
+import { MailOutlined } from "@mui/icons-material";
+import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import { ManagerRowActions } from "./ManagerRowActions";
 import type { Manager } from "./types";
 
 const StyledManagerAvatar = styled(Avatar)({
@@ -63,7 +66,9 @@ export function ManagersDataGrid({
         minWidth: 250,
         renderCell: params => (
           <Stack direction="row" spacing={2} sx={{ alignItems: "center", height: "100%" }}>
-            <StyledManagerAvatar src={params.row.avatarUrl} alt={params.row.name} />
+            <StyledManagerAvatar src={params.row.avatarUrl || undefined} alt={params.row.name}>
+              {!params.row.avatarUrl ? params.row.name.charAt(0).toUpperCase() : undefined}
+            </StyledManagerAvatar>
             <Box
               sx={{
                 display: "flex",
@@ -126,11 +131,7 @@ export function ManagersDataGrid({
         width: 100,
         align: "center",
         headerAlign: "center",
-        renderCell: () => (
-          <IconButton size="small" aria-label={t("actions.options")}>
-            <SettingsOutlined fontSize="small" />
-          </IconButton>
-        ),
+        renderCell: params => <ManagerRowActions manager={params.row} />,
       },
     ],
     [t]

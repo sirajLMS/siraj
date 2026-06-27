@@ -724,6 +724,7 @@ export type TeacherProfileUpdateInput = {
 export type UpdateManagerProfileInput = {
   phone: string | null | undefined;
   skypeId: string | null | undefined;
+  status: string | null | undefined;
 };
 
 export type UpdatePermissionGroupInput = {
@@ -1060,7 +1061,9 @@ export type ParentComplaintsQueryVariables = Exact<{
 
 export type ParentComplaintsQuery = ParentComplaintsQuery_Query;
 
-export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_rows_Complaint = { id: string | null, parentId: string | null, studentId: string | null, category: Types.ComplaintCategory | null, submitterEmail: string | null, body: string | null, status: Types.ComplaintStatus | null, createdAt: string | null, parentName: string | null, studentName: string | null };
+export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_rows_Complaint_responses_ComplaintResponse = { id: string | null, body: string | null, createdAt: string | null, responderName: string | null, emailSent: boolean | null };
+
+export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_rows_Complaint = { id: string | null, parentId: string | null, studentId: string | null, category: Types.ComplaintCategory | null, submitterEmail: string | null, body: string | null, status: Types.ComplaintStatus | null, createdAt: string | null, parentName: string | null, parentAvatarUrl: string | null, studentName: string | null, responses: Array<AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_rows_Complaint_responses_ComplaintResponse> | null };
 
 export type AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_metrics_ComplaintMetrics = { id: string | null, unanswered: number | null, answered: number | null, avgResolutionTime: string | null };
 
@@ -1125,6 +1128,59 @@ export type ExecuteDstBulkUpdateMutationVariables = Exact<{
 
 
 export type ExecuteDstBulkUpdateMutation = ExecuteDstBulkUpdateMutation_Mutation;
+
+export type GroupClassAuditQuery_groupClassAudit_GroupClassAudit_students_GroupClassStudent = { id: string | null, name: string | null, studentId: string | null, initials: string | null, attendanceStatus: string | null, avatarUrl: string | null };
+
+export type GroupClassAuditQuery_groupClassAudit_GroupClassAudit_meetingInfo_OnlineMeetingInfo = { platform: string | null, zoomMeetingUrl: string | null, meetingId: string | null, joinUrl: string | null };
+
+export type GroupClassAuditQuery_groupClassAudit_GroupClassAudit_communications_CommunicationLogEntry = { id: string | null, type: string | null, title: string | null, description: string | null, isActive: boolean | null, isDelivered: boolean | null, timestamp: string | null };
+
+export type GroupClassAuditQuery_groupClassAudit_GroupClassAudit_adminNote_AdminNoteInfo = { content: string | null, lastUpdated: string | null };
+
+export type GroupClassAuditQuery_groupClassAudit_GroupClassAudit = { id: string | null, className: string | null, courseCode: string | null, teacherName: string | null, originalDate: string | null, rescheduledDate: string | null, timeSlot: string | null, venue: string | null, status: string | null, auditRemark: string | null, auditLoggedAt: string | null, registeredStudentCount: number | null, totalStudentCount: number | null, students: Array<GroupClassAuditQuery_groupClassAudit_GroupClassAudit_students_GroupClassStudent> | null, meetingInfo: GroupClassAuditQuery_groupClassAudit_GroupClassAudit_meetingInfo_OnlineMeetingInfo | null, communications: Array<GroupClassAuditQuery_groupClassAudit_GroupClassAudit_communications_CommunicationLogEntry> | null, adminNote: GroupClassAuditQuery_groupClassAudit_GroupClassAudit_adminNote_AdminNoteInfo | null };
+
+export type GroupClassAuditQuery_Query = { groupClassAudit: GroupClassAuditQuery_groupClassAudit_GroupClassAudit | null };
+
+
+export type GroupClassAuditQueryVariables = Exact<{
+  classInstanceId: string;
+}>;
+
+
+export type GroupClassAuditQuery = GroupClassAuditQuery_Query;
+
+export type UpdateClassAdminNoteMutation_updateClassAdminNote_GroupClassAudit_students_GroupClassStudent = { id: string | null, name: string | null, studentId: string | null, initials: string | null, attendanceStatus: string | null, avatarUrl: string | null };
+
+export type UpdateClassAdminNoteMutation_updateClassAdminNote_GroupClassAudit_meetingInfo_OnlineMeetingInfo = { platform: string | null, zoomMeetingUrl: string | null, meetingId: string | null, joinUrl: string | null };
+
+export type UpdateClassAdminNoteMutation_updateClassAdminNote_GroupClassAudit_communications_CommunicationLogEntry = { id: string | null, type: string | null, title: string | null, description: string | null, isActive: boolean | null, isDelivered: boolean | null, timestamp: string | null };
+
+export type UpdateClassAdminNoteMutation_updateClassAdminNote_GroupClassAudit_adminNote_AdminNoteInfo = { content: string | null, lastUpdated: string | null };
+
+export type UpdateClassAdminNoteMutation_updateClassAdminNote_GroupClassAudit = { id: string | null, className: string | null, courseCode: string | null, teacherName: string | null, originalDate: string | null, rescheduledDate: string | null, timeSlot: string | null, venue: string | null, status: string | null, auditRemark: string | null, auditLoggedAt: string | null, registeredStudentCount: number | null, totalStudentCount: number | null, students: Array<UpdateClassAdminNoteMutation_updateClassAdminNote_GroupClassAudit_students_GroupClassStudent> | null, meetingInfo: UpdateClassAdminNoteMutation_updateClassAdminNote_GroupClassAudit_meetingInfo_OnlineMeetingInfo | null, communications: Array<UpdateClassAdminNoteMutation_updateClassAdminNote_GroupClassAudit_communications_CommunicationLogEntry> | null, adminNote: UpdateClassAdminNoteMutation_updateClassAdminNote_GroupClassAudit_adminNote_AdminNoteInfo | null };
+
+export type UpdateClassAdminNoteMutation_Mutation = { updateClassAdminNote: UpdateClassAdminNoteMutation_updateClassAdminNote_GroupClassAudit | null };
+
+
+export type UpdateClassAdminNoteMutationVariables = Exact<{
+  classInstanceId: string;
+  content: string;
+}>;
+
+
+export type UpdateClassAdminNoteMutation = UpdateClassAdminNoteMutation_Mutation;
+
+export type ResendClassNotificationsMutation_resendClassNotifications_SupportRequestResult = { id: string | null, success: boolean | null };
+
+export type ResendClassNotificationsMutation_Mutation = { resendClassNotifications: ResendClassNotificationsMutation_resendClassNotifications_SupportRequestResult | null };
+
+
+export type ResendClassNotificationsMutationVariables = Exact<{
+  classInstanceId: string;
+}>;
+
+
+export type ResendClassNotificationsMutation = ResendClassNotificationsMutation_Mutation;
 
 export type LearningResourceRowFragmentFragment = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
 
@@ -1658,23 +1714,27 @@ export type TeacherDirectoryQueryVariables = Exact<{
 
 export type TeacherDirectoryQuery = TeacherDirectoryQuery_Query;
 
-export type ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_rows_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, skypeId: string | null, status: string | null, roleSlug: string | null, roleName: string | null };
+export type ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_metrics_ManagerDirectoryMetrics = { id: string | null, totalAdmin: number | null, systemStaff: number | null, activeNow: number | null, alerts: number | null };
+
+export type ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_rows_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, skypeId: string | null, status: string | null, roleSlug: string | null, roleName: string | null };
 
 export type ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
-export type ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult = { id: string | null, totalCount: number | null, rows: Array<ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_rows_ManagerDirectoryRow> | null, pageInfo: ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_pageInfo_PageInfo | null };
+export type ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult = { id: string | null, totalCount: number | null, metrics: ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_metrics_ManagerDirectoryMetrics | null, rows: Array<ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_rows_ManagerDirectoryRow> | null, pageInfo: ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult_pageInfo_PageInfo | null };
 
 export type ManagerDirectoryQuery_Query = { managerDirectory: ManagerDirectoryQuery_managerDirectory_ManagerDirectoryResult | null };
 
 
 export type ManagerDirectoryQueryVariables = Exact<{
   paginationArgs: Types.PaginationArgs | null | undefined;
+  roleFilter: string | null | undefined;
+  statusFilter: string | null | undefined;
 }>;
 
 
 export type ManagerDirectoryQuery = ManagerDirectoryQuery_Query;
 
-export type UpdateManagerProfileMutation_updateManagerProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, skypeId: string | null, status: string | null, roleSlug: string | null, roleName: string | null };
+export type UpdateManagerProfileMutation_updateManagerProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, skypeId: string | null, status: string | null, roleSlug: string | null, roleName: string | null };
 
 export type UpdateManagerProfileMutation_Mutation = { updateManagerProfile: UpdateManagerProfileMutation_updateManagerProfile_ManagerDirectoryRow | null };
 
@@ -1686,6 +1746,16 @@ export type UpdateManagerProfileMutationVariables = Exact<{
 
 
 export type UpdateManagerProfileMutation = UpdateManagerProfileMutation_Mutation;
+
+export type OnboardingMetricsQuery_onboardingMetrics_OnboardingMetrics = { id: string | null, activeStaff: number | null, pendingApproval: number | null, avgOnboardingDays: number | null };
+
+export type OnboardingMetricsQuery_Query = { onboardingMetrics: OnboardingMetricsQuery_onboardingMetrics_OnboardingMetrics | null };
+
+
+export type OnboardingMetricsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type OnboardingMetricsQuery = OnboardingMetricsQuery_Query;
 
 export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: string | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: string | null };
 

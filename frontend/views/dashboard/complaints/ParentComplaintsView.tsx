@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { ComplaintCategory } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ParentComplaintsDesktopView } from "./ParentComplaintsDesktopView";
 import { ParentComplaintsMobileView } from "./ParentComplaintsMobileView";
 import { complaintFormSchema } from "./schemas/complaintFormSchema";
@@ -37,6 +38,7 @@ export function ParentComplaintsView({
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
+      category: ComplaintCategory.Other,
       studentId: "",
       contactEmail: "",
       complaintDetails: "",

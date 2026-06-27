@@ -33,7 +33,7 @@ export function useCreateManagerMutation() {
         phone: formData.phone || null,
         skypeId: formData.skypeId || null,
         accountType: formData.accountType,
-        password: "",
+        password: formData.password,
       };
 
       const result = await mutate({ variables: { input } });

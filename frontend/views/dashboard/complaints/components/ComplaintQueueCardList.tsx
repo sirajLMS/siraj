@@ -27,11 +27,13 @@ interface ComplaintQueueCardListProps {
   readonly labels: ComplaintsAdminLabels;
   readonly draftResponses: Readonly<Record<string, string>>;
   readonly canManage: boolean;
+  readonly canDelete: boolean;
   readonly page: number;
   readonly pageSize: number;
   readonly totalCount: number;
   readonly onDraftChange: (id: string, text: string) => void;
   readonly onAnswer: (id: string, options: { readonly sendEmail: boolean }) => void;
+  readonly onDelete: (id: string) => void;
   readonly onPageChange: (page: number) => void;
 }
 
@@ -40,11 +42,13 @@ export function ComplaintQueueCardList({
   labels,
   draftResponses,
   canManage,
+  canDelete,
   page,
   pageSize,
   totalCount,
   onDraftChange,
   onAnswer,
+  onDelete,
   onPageChange,
 }: Readonly<ComplaintQueueCardListProps>) {
   if (rows.length === 0) {
@@ -63,11 +67,15 @@ export function ComplaintQueueCardList({
             labels={labels}
             draftResponse={draftResponses[row.id] ?? ""}
             canManage={canManage}
+            canDelete={canDelete}
             onDraftChange={text => {
               onDraftChange(row.id, text);
             }}
             onAnswer={options => {
               onAnswer(row.id, options);
+            }}
+            onDelete={() => {
+              onDelete(row.id);
             }}
           />
         ))}

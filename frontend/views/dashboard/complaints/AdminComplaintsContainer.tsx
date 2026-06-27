@@ -1,14 +1,25 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Typography,
+} from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   adminComplaintQueueQueryDocument,
+  deleteComplaintMutationDocument,
   respondToComplaintMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/complaint.documents";
 import { useAdminComplaintsStore } from "@/frontend/stores/adminComplaintsStore";
@@ -16,7 +27,6 @@ import { useUserStore } from "@/frontend/stores/userStore";
 import { AdminComplaintsView } from "./AdminComplaintsView";
 import type { AdminComplaintRow, AdminComplaintsSummary } from "./types/complaints.types";
 import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
-import { filterComplaintsByTab } from "./utils/complaintFilters";
 
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
@@ -33,6 +43,8 @@ export function AdminComplaintsContainer() {
   const setSearchQuery = useAdminComplaintsStore(state => state.setSearchQuery);
   const setActiveTab = useAdminComplaintsStore(state => state.setActiveTab);
   const setDraftResponse = useAdminComplaintsStore(state => state.setDraftResponse);
+  const clearDraftResponse = useAdminComplaintsStore(state => state.clearDraftResponse);
+  const resetResponding = useAdminComplaintsStore(state => state.resetResponding);
   const page = useAdminComplaintsStore(state => state.page);
   const pageSize = useAdminComplaintsStore(state => state.pageSize);
   const setPage = useAdminComplaintsStore(state => state.setPage);
@@ -57,7 +69,12 @@ export function AdminComplaintsContainer() {
   });
 
   const [respondToComplaint] = useMutation(respondToComplaintMutationDocument, {
-    onCompleted: () => {
+    onCompleted: (_data, options) => {
+      const complaintId = options?.variables?.input?.complaintId;
+      if (complaintId) {
+        clearDraftResponse(complaintId);
+      }
+      resetResponding();
       void refetch();
     },
   });
@@ -79,22 +96,33 @@ export function AdminComplaintsContainer() {
       id: row.id ?? "",
       submitterName: row.parentName ?? row.submitterEmail ?? "",
       submitterRole: row.studentName ? `Guardian • ${row.studentName}` : "Guardian",
-      avatarUrl: "",
+      avatarUrl: row.parentAvatarUrl ?? "",
       priority: row.category?.toLowerCase().includes("urgent") ? "urgent" : "general",
       receivedAt: row.createdAt ?? "",
       complaintText: row.body ?? "",
       status: row.status ?? ComplaintStatus.Unanswered,
-      adminResponse: undefined,
-      answeredAt: undefined,
+      adminResponse: row.responses && row.responses.length > 0 ? (row.responses[0].body ?? "") : undefined,
+      answeredAt: row.responses && row.responses.length > 0 ? (row.responses[0].createdAt ?? "") : undefined,
     }));
   }, [data?.adminComplaintQueue?.rows]);
 
   const canManage = hasPermission(AppPermission.ComplaintsRespond);
+  const canDelete = hasPermission(AppPermission.ComplaintsDelete);
 
-  const filteredRows = useMemo(
-    () => filterComplaintsByTab(rows, activeTab, searchQuery),
-    [activeTab, rows, searchQuery]
-  );
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteComplaintId, setDeleteComplaintId] = useState<string | null>(null);
+
+  const [deleteComplaint, { loading: isDeletingComplaint }] = useMutation(deleteComplaintMutationDocument, {
+    onCompleted: () => {
+      setDeleteDialogOpen(false);
+      setDeleteComplaintId(null);
+      void refetch();
+    },
+    onError: () => {
+      setDeleteDialogOpen(false);
+      setDeleteComplaintId(null);
+    },
+  });
 
   const handleAnswer = (id: string, options: { readonly sendEmail: boolean }) => {
     const draft = draftResponses[id] ?? "";
@@ -107,6 +135,21 @@ export function AdminComplaintsContainer() {
         },
       },
     });
+  };
+
+  const handleDeleteRequest = (id: string) => {
+    setDeleteComplaintId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteComplaintId) {
+      void deleteComplaint({
+        variables: {
+          complaintId: deleteComplaintId,
+        },
+      });
+    }
   };
 
   if (loading) {
@@ -126,11 +169,12 @@ export function AdminComplaintsContainer() {
       <AdminComplaintsView
         labels={labels.admin}
         summary={summary}
-        rows={filteredRows}
+        rows={rows}
         searchQuery={searchQuery}
         activeTab={activeTab}
         draftResponses={draftResponses}
         canManage={canManage}
+        canDelete={canDelete}
         page={page}
         pageSize={pageSize}
         totalCount={totalCount}
@@ -138,8 +182,23 @@ export function AdminComplaintsContainer() {
         onTabChange={setActiveTab}
         onDraftChange={setDraftResponse}
         onAnswer={handleAnswer}
+        onDelete={handleDeleteRequest}
         onPageChange={setPage}
       />
+      {canDelete ? (
+        <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth>
+          <DialogTitle>{labels.admin.queue.deleteConfirmTitle}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{labels.admin.queue.deleteConfirmBody}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialogOpen(false)}>{labels.admin.queue.deleteConfirmCancel}</Button>
+            <Button onClick={handleDeleteConfirm} color="error" variant="contained" disabled={isDeletingComplaint}>
+              {labels.admin.queue.deleteConfirmConfirm}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      ) : null}
     </RequirePermission>
   );
 }

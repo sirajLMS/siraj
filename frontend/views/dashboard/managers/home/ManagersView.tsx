@@ -11,6 +11,7 @@ import type { Manager } from "./types";
 interface ManagersViewProps {
   managers: Manager[];
   metrics: {
+    id: string;
     totalAdmin: number;
     systemStaff: number;
     activeNow: number;

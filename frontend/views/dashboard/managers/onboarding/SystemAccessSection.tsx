@@ -1,9 +1,9 @@
 "use client";
 
-import { Box, Button, Grid, MenuItem, Select, Typography } from "@mui/material";
+import { Box, Button, Grid, Input, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
-import type { Control, FieldErrors } from "react-hook-form";
+import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import { SectionPanel } from "@/frontend/components/ui/SectionPanel";
@@ -12,21 +12,6 @@ import { ManagerAccountType } from "./types";
 
 const ACCOUNT_TYPES: readonly ManagerAccountType[] = [ManagerAccountType.Manager, ManagerAccountType.Admin];
 
-const DEPARTMENTS = [
-  { value: "academic", labelKey: "academic" },
-  { value: "operations", labelKey: "operations" },
-  { value: "human_resources", labelKey: "humanResources" },
-  { value: "it_support", labelKey: "itSupport" },
-] as const;
-
-/* ────────────────────────────────────────────────────────────────────────────
- * Styled Components — Extracted inline sx styles for reusability & consistency
- * ──────────────────────────────────────────────────────────────────────────── */
-
-/**
- * Container for account type toggle buttons.
- * Provides rounded background matching surface container.
- */
 const StyledAccountTypeContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   padding: theme.spacing(0.5),
@@ -35,10 +20,6 @@ const StyledAccountTypeContainer = styled(Box)(({ theme }) => ({
   width: "100%",
 }));
 
-/**
- * Individual toggle button within the account type selector.
- * Changes appearance based on selected state.
- */
 const StyledAccountTypeButton = styled(Button, {
   shouldForwardProp: prop => prop !== "isSelected",
 })<{ isSelected: boolean }>(({ theme, isSelected }) => ({
@@ -54,14 +35,6 @@ const StyledAccountTypeButton = styled(Button, {
   },
 }));
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Account Type Toggle Sub-component
- * ──────────────────────────────────────────────────────────────────────────── */
-
-/**
- * Toggle control for selecting manager or admin account type.
- * Renders two styled buttons within a container.
- */
 function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboardingFormData> }) {
   const t = useTranslations("dashboard.managerOnboarding");
 
@@ -93,71 +66,13 @@ function AccountTypeToggle({ control }: { readonly control: Control<ManagerOnboa
   );
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * Department Select Sub-component
- * ──────────────────────────────────────────────────────────────────────────── */
-
-/**
- * Department selection dropdown with error handling.
- */
-function DepartmentSelect({
-  control,
-  errors,
-}: {
-  readonly control: Control<ManagerOnboardingFormData>;
-  readonly errors: FieldErrors<ManagerOnboardingFormData>;
-}) {
-  const t = useTranslations("dashboard.managerOnboarding");
-
-  return (
-    <Controller
-      name="department"
-      control={control}
-      render={({ field }) => (
-        <FieldWrapper
-          label={t("fields.department")}
-          required
-          error={errors.department ? t(`validation.${errors.department.message}`) : undefined}
-        >
-          <Select {...field} error={!!errors.department} fullWidth variant="standard" displayEmpty sx={standardInputSx}>
-            <MenuItem value="" disabled>
-              {t("placeholders.department")}
-            </MenuItem>
-            {DEPARTMENTS.map(dept => (
-              <MenuItem key={dept.value} value={dept.value}>
-                {t(`options.department.${dept.labelKey}`)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FieldWrapper>
-      )}
-    />
-  );
-}
-
-/* ────────────────────────────────────────────────────────────────────────────
- * Component Interface
- * ──────────────────────────────────────────────────────────────────────────── */
-
 interface Props {
+  readonly register: UseFormRegister<ManagerOnboardingFormData>;
   readonly control: Control<ManagerOnboardingFormData>;
   readonly errors: FieldErrors<ManagerOnboardingFormData>;
 }
 
-/* ────────────────────────────────────────────────────────────────────────────
- * SystemAccessSection Component
- * ──────────────────────────────────────────────────────────────────────────── */
-
-/**
- * System access configuration section for manager onboarding.
- *
- * Contains:
- * - Account Type Toggle: Choose between "manager" or "admin"
- * - Department Select: Assign department to the new staff member
- *
- * Displays a dynamic description based on the selected account type.
- */
-export function SystemAccessSection({ control, errors }: Props) {
+export function SystemAccessSection({ register, control, errors }: Props) {
   const t = useTranslations("dashboard.managerOnboarding");
   const accountType = useWatch({ control, name: "accountType" });
   const descriptionKey =
@@ -177,7 +92,20 @@ export function SystemAccessSection({ control, errors }: Props) {
           </FieldWrapper>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <DepartmentSelect control={control} errors={errors} />
+          <FieldWrapper
+            label={t("fields.password")}
+            required
+            error={errors.password ? t(`validation.${errors.password.message}`) : undefined}
+          >
+            <Input
+              {...register("password")}
+              type="password"
+              placeholder={t("placeholders.password")}
+              error={!!errors.password}
+              fullWidth
+              sx={standardInputSx}
+            />
+          </FieldWrapper>
         </Grid>
       </Grid>
     </SectionPanel>

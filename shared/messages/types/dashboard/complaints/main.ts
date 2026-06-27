@@ -3,12 +3,14 @@ export interface ComplaintValidationLabels {
   readonly emailRequired: string;
   readonly emailInvalid: string;
   readonly detailsRequired: string;
+  readonly categoryRequired: string;
 }
 
 export interface ComplaintsParentLabels {
   readonly pageTitle: string;
   readonly formTitle: string;
   readonly student: string;
+  readonly category: string;
   readonly contactEmail: string;
   readonly contactEmailPlaceholder: string;
   readonly complaintDetails: string;
@@ -50,6 +52,10 @@ export interface ComplaintsAdminLabels {
     readonly answerAndEmail: string;
     readonly adminResponse: string;
     readonly noEntries: string;
+    readonly deleteConfirmTitle: string;
+    readonly deleteConfirmBody: string;
+    readonly deleteConfirmCancel: string;
+    readonly deleteConfirmConfirm: string;
   };
   readonly priorityLabels: Record<"urgent" | "general", string>;
   readonly categoryLabels: Record<"REGARDING_TEACHER" | "REGARDING_SYSTEM" | "OTHER", string>;

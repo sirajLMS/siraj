@@ -1,8 +1,11 @@
-import { ChatBubbleOutlineOutlined, MailOutlined, PhoneOutlined, SettingsOutlined } from "@mui/icons-material";
-import { Avatar, Box, Chip, IconButton, Stack, Typography } from "@mui/material";
+"use client";
+
+import { ChatBubbleOutlineOutlined, MailOutlined, PhoneOutlined } from "@mui/icons-material";
+import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { BaseCard, PaginationControls, StatusBadge } from "@/frontend/components/ui";
+import { ManagerRowActions } from "./ManagerRowActions";
 import type { Manager } from "./types";
 
 const StyledEmptyStateBox = styled(Box)(({ theme }) => ({
@@ -19,7 +22,7 @@ const StyledManagerCard = styled(BaseCard)({
   position: "relative",
 });
 
-const StyledCardIconButton = styled(IconButton)(({ theme }) => ({
+const StyledCardActionsBox = styled(Box)(({ theme }) => ({
   position: "absolute",
   top: 12,
   right: 12,
@@ -94,13 +97,15 @@ export function ManagersCardList({
         const isStaff = manager.role === "staff";
         return (
           <StyledManagerCard key={manager.id}>
-            <StyledCardIconButton size="small" aria-label={t("actions.options")}>
-              <SettingsOutlined fontSize="small" />
-            </StyledCardIconButton>
+            <StyledCardActionsBox>
+              <ManagerRowActions manager={manager} />
+            </StyledCardActionsBox>
 
             <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", mb: 3 }}>
               <Box sx={{ position: "relative" }}>
-                <StyledProfileAvatar src={manager.avatarUrl} alt={manager.name} />
+                <StyledProfileAvatar src={manager.avatarUrl || undefined} alt={manager.name}>
+                  {!manager.avatarUrl ? manager.name.charAt(0).toUpperCase() : undefined}
+                </StyledProfileAvatar>
                 <StyledStatusIndicator status={manager.status === "active" ? "active" : "blocked"} />
               </Box>
 

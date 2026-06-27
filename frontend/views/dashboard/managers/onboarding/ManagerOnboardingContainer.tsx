@@ -19,7 +19,7 @@ const defaultValues: ManagerOnboardingFormData = {
   phone: "",
   skypeId: "",
   accountType: ManagerAccountType.Manager,
-  department: "",
+  password: "",
 };
 
 export function ManagerOnboardingContainer() {
@@ -55,6 +55,7 @@ export function ManagerOnboardingContainer() {
       logger.info("Manager onboarding form submitted successfully");
       setShowSuccess(true);
       resetForm();
+      router.push("/managers");
     } catch (error) {
       logger.error("Failed to submit manager onboarding form", { error });
     }

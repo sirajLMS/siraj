@@ -3,8 +3,6 @@ import { ManagerAccountType } from "../types";
 
 export type { ManagerOnboardingFormData } from "../types";
 
-const departmentValues = ["academic", "operations", "human_resources", "it_support"] as const;
-
 export const managerOnboardingSchema = z.object({
   name: z.string().min(1, "fullNameRequired"),
   email: z.email({ message: "emailInvalid" }),
@@ -13,12 +11,5 @@ export const managerOnboardingSchema = z.object({
   accountType: z.custom<ManagerAccountType>(
     val => typeof val === "string" && Object.values(ManagerAccountType).includes(val as ManagerAccountType)
   ),
-  department: z
-    .string()
-    .min(1, "departmentRequired")
-    .refine(val => (departmentValues as readonly string[]).includes(val), {
-      message: "departmentRequired",
-    }),
+  password: z.string().min(8, "passwordMinLength"),
 });
-
-export type ManagerDepartment = (typeof departmentValues)[number];

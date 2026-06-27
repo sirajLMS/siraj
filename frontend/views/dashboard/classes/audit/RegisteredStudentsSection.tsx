@@ -7,10 +7,10 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ExportButton, SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
-import type { AttendanceStatus, RegisteredStudent } from "./types";
+import type { GroupClassStudent } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface RegisteredStudentsSectionProps {
-  readonly students: readonly RegisteredStudent[];
+  readonly students: readonly (GroupClassStudent | null)[] | null | undefined;
   readonly registeredCount: number;
   readonly labels: {
     readonly title: string;
@@ -28,18 +28,18 @@ interface RegisteredStudentsSectionProps {
   readonly onViewStudent: (id: string) => void;
 }
 
-// Muted onSurfaceVariant text used for the student ID number cell
 const StyledStudentIdText = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
 }));
 
-// Primary-colored icon button used as the row view action
 const StyledViewActionButton = styled(IconButton)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
+type AttendanceStatus = "pending" | "present" | "absent";
+
 function getAttendanceChipProps(
-  status: AttendanceStatus,
+  status: string | null | undefined,
   labels: RegisteredStudentsSectionProps["labels"]
 ): { label: string } {
   if (status === "present") {
@@ -60,7 +60,9 @@ export function RegisteredStudentsSection({
 }: RegisteredStudentsSectionProps) {
   const title = labels.title.replace("{count}", String(registeredCount));
 
-  const columns = useMemo<GridColDef<RegisteredStudent>[]>(
+  const validStudents = useMemo(() => (students ?? []).filter((s): s is GroupClassStudent => s != null), [students]);
+
+  const columns = useMemo<GridColDef<GroupClassStudent>[]>(
     () => [
       {
         field: "name",
@@ -68,7 +70,7 @@ export function RegisteredStudentsSection({
         flex: 1.2,
         minWidth: 200,
         renderCell: ({ row, api }) => {
-          const rowIndex = api.getAllRowIds().indexOf(row.id);
+          const rowIndex = api.getAllRowIds().indexOf(row.id ?? "");
           return (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "100%" }}>
               <Avatar
@@ -81,12 +83,12 @@ export function RegisteredStudentsSection({
                     rowIndex % 2 === 0 ? theme.palette.secondaryContainer : theme.palette.primaryContainer,
                   color: rowIndex % 2 === 0 ? theme.palette.onSecondaryContainer : theme.palette.onPrimaryContainer,
                 })}
-                src={row.avatarUrl}
+                src={row.avatarUrl ?? undefined}
               >
-                {row.initials}
+                {row.initials ?? ""}
               </Avatar>
               <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
-                {row.name}
+                {row.name ?? ""}
               </Typography>
             </Box>
           );
@@ -97,7 +99,7 @@ export function RegisteredStudentsSection({
         headerName: labels.idNumber,
         flex: 1,
         minWidth: 140,
-        renderCell: ({ row }) => <StyledStudentIdText variant="bodyMd">{row.studentId}</StyledStudentIdText>,
+        renderCell: ({ row }) => <StyledStudentIdText variant="bodyMd">{row.studentId ?? ""}</StyledStudentIdText>,
       },
       {
         field: "attendanceStatus",
@@ -106,7 +108,13 @@ export function RegisteredStudentsSection({
         minWidth: 160,
         renderCell: ({ row }) => {
           const chip = getAttendanceChipProps(row.attendanceStatus, labels);
-          return <StatusBadge category="sessionTracking" status={row.attendanceStatus} label={chip.label} />;
+          return (
+            <StatusBadge
+              category="sessionTracking"
+              status={(row.attendanceStatus as AttendanceStatus) ?? "pending"}
+              label={chip.label}
+            />
+          );
         },
       },
       {
@@ -120,9 +128,11 @@ export function RegisteredStudentsSection({
           <StyledViewActionButton
             size="small"
             onClick={() => {
-              onViewStudent(row.id);
+              if (row.id) {
+                onViewStudent(row.id);
+              }
             }}
-            aria-label={`View ${row.name}`}
+            aria-label={`View ${row.name ?? ""}`}
           >
             <VisibilityOutlined fontSize="small" />
           </StyledViewActionButton>
@@ -141,10 +151,10 @@ export function RegisteredStudentsSection({
         </ExportButton>
       }
     >
-      <AppDataGrid<RegisteredStudent>
-        rows={students}
+      <AppDataGrid<GroupClassStudent>
+        rows={validStudents}
         columns={columns}
-        getRowId={row => row.id}
+        getRowId={row => row.id ?? ""}
         autoHeight
         ariaLabel="registered-students-table"
         emptyMessage={labels.noEntries}

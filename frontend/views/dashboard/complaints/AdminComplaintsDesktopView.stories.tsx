@@ -57,6 +57,9 @@ const mockActions = {
   onAnswer: (id: string, options: { readonly sendEmail: boolean }) => {
     logger.info("onAnswer:", id, options);
   },
+  onDelete: (id: string) => {
+    logger.info("onDelete:", id);
+  },
   onPageChange: (page: number) => {
     logger.info("onPageChange:", page);
   },
@@ -69,6 +72,7 @@ interface AdminComplaintsDesktopStoryProps {
   readonly activeTab: ComplaintTab;
   readonly draftResponses: Readonly<Record<string, string>>;
   readonly canManage: boolean;
+  readonly canDelete: boolean;
   readonly page: number;
   readonly pageSize: number;
   readonly totalCount: number;
@@ -81,6 +85,7 @@ function AdminComplaintsDesktopStoryRenderer({
   activeTab,
   draftResponses,
   canManage,
+  canDelete,
   page,
   pageSize,
   totalCount,
@@ -97,6 +102,7 @@ function AdminComplaintsDesktopStoryRenderer({
       activeTab={activeTab}
       draftResponses={draftResponses}
       canManage={canManage}
+      canDelete={canDelete}
       page={page}
       pageSize={pageSize}
       totalCount={totalCount}
@@ -126,6 +132,7 @@ export const Default: Story = {
     activeTab: ComplaintStatus.Unanswered,
     draftResponses: {},
     canManage: true,
+    canDelete: true,
     page: 0,
     pageSize: 10,
     totalCount: 2,

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlternateEmailOutlined, CheckCircleOutlined, SendOutlined } from "@mui/icons-material";
+import { AlternateEmailOutlined, CheckCircleOutlined, DeleteOutlineOutlined, SendOutlined } from "@mui/icons-material";
 import { Avatar, Box, Paper, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { FilterButton, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
@@ -143,13 +143,22 @@ const StyledComplaintTextBox = styled(Box, {
   borderLeft: `4px solid ${theme.palette.primary.main}`,
 }));
 
+/** Delete button with error color */
+const StyledDeleteButton = styled(FilterButton)(({ theme }) => ({
+  color: theme.palette.error.main,
+  borderColor: theme.palette.error.main,
+  "&:hover": { backgroundColor: theme.palette.errorContainer },
+}));
+
 interface ComplaintQueueCardProps {
   readonly row: AdminComplaintRow;
   readonly labels: ComplaintsAdminLabels;
   readonly draftResponse: string;
   readonly canManage: boolean;
+  readonly canDelete: boolean;
   readonly onDraftChange: (text: string) => void;
   readonly onAnswer: (options: { readonly sendEmail: boolean }) => void;
+  readonly onDelete: () => void;
 }
 
 function getInitials(name: string): string {
@@ -174,15 +183,19 @@ function ComplaintResponseSection({
   labels,
   draftResponse,
   canManage,
+  canDelete,
   onDraftChange,
   onAnswer,
+  onDelete,
 }: Readonly<{
   row: AdminComplaintRow;
   labels: ComplaintsAdminLabels;
   draftResponse: string;
   canManage: boolean;
+  canDelete: boolean;
   onDraftChange: (text: string) => void;
   onAnswer: (options: { readonly sendEmail: boolean }) => void;
+  onDelete: () => void;
 }>) {
   if (row.status === ComplaintStatus.Answered) {
     // Already-answered response display
@@ -240,6 +253,16 @@ function ComplaintResponseSection({
         >
           {labels.queue.answerAndEmail}
         </StyledEmailActionButton>
+        {canDelete ? (
+          <StyledDeleteButton
+            startIcon={<DeleteOutlineOutlined />}
+            onClick={() => {
+              onDelete();
+            }}
+          >
+            {labels.queue.deleteConfirmConfirm}
+          </StyledDeleteButton>
+        ) : null}
       </StyledResponseActionsBox>
     </Box>
   );
@@ -250,8 +273,10 @@ export function ComplaintQueueCard({
   labels,
   draftResponse,
   canManage,
+  canDelete,
   onDraftChange,
   onAnswer,
+  onDelete,
 }: Readonly<ComplaintQueueCardProps>) {
   const isUnanswered = row.status === ComplaintStatus.Unanswered;
 
@@ -291,8 +316,10 @@ export function ComplaintQueueCard({
         labels={labels}
         draftResponse={draftResponse}
         canManage={canManage}
+        canDelete={canDelete}
         onDraftChange={onDraftChange}
         onAnswer={onAnswer}
+        onDelete={onDelete}
       />
     </StyledQueueCardPaper>
   );

@@ -10,9 +10,18 @@ export type StaffProfileCreateResult = Pick<
 >;
 
 export interface ManagerDirectoryResult {
+  readonly metrics: ManagerDirectoryMetrics;
   readonly rows: ManagerDirectoryRow[];
   readonly totalCount: number;
   readonly pageInfo: PageInfo | null;
+}
+
+export interface ManagerDirectoryMetrics {
+  readonly id: string;
+  readonly totalAdmin: number;
+  readonly systemStaff: number;
+  readonly activeNow: number;
+  readonly alerts: number;
 }
 
 export interface ManagerDirectoryRow {
@@ -20,9 +29,22 @@ export interface ManagerDirectoryRow {
   readonly staffProfileId: string;
   readonly name: string;
   readonly email: string;
+  readonly avatarUrl: string | null;
   readonly phone: string | null;
   readonly skypeId: string | null;
   readonly status: string;
   readonly roleSlug: string | null;
   readonly roleName: string | null;
+}
+
+export interface ManagerDirectoryFilters {
+  readonly roleFilter?: string | null;
+  readonly statusFilter?: string | null;
+}
+
+export interface OnboardingMetricsResult {
+  readonly id: string;
+  readonly activeStaff: number;
+  readonly pendingApproval: number;
+  readonly avgOnboardingDays: number;
 }

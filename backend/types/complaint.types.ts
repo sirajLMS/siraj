@@ -35,6 +35,7 @@ export type ComplaintReturnType = Omit<
   status: ComplaintStatus;
   // resolved
   parentName?: string | null;
+  parentAvatarUrl?: string | null;
   studentName?: string | null;
   responseCount?: number | null;
   responses?: ReadonlyArray<ComplaintResponse> | null;

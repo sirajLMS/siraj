@@ -9,6 +9,7 @@ import { AppPermission, SystemPermissionGroupSlug } from "@/shared/lib/enum";
 export interface UpdateManagerProfileInput {
   readonly phone?: string | null;
   readonly skypeId?: string | null;
+  readonly status?: string | null;
 }
 
 export namespace ManagerProfileService {
@@ -53,6 +54,8 @@ export namespace ManagerProfileService {
       phoneIsSet: input.phone !== undefined,
       skypeId: input.skypeId,
       skypeIdIsSet: input.skypeId !== undefined,
+      status: input.status,
+      statusIsSet: input.status !== undefined,
     };
 
     const updatedProfile = await StaffProfileRepository.updateManagerProfile(targetStaffProfileId, repoInput, locale);

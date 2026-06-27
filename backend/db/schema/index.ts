@@ -3,6 +3,7 @@ export * from "./billing";
 export * from "./cache";
 export * from "./communications";
 export * from "./enums";
+export * from "./group-class";
 export * from "./parents";
 export * from "./permissions";
 export * from "./scheduling";

@@ -4,10 +4,10 @@ import { AdminPanelSettingsOutlined, StickyNote2Outlined } from "@mui/icons-mate
 import { alpha, Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/components/ui";
-import type { AdminNote } from "./types";
+import type { AdminNoteInfo } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface AdminNoteCardProps {
-  readonly note: AdminNote;
+  readonly note: AdminNoteInfo | null | undefined;
   readonly labels: {
     readonly title: string;
     readonly titleMobile: string;
@@ -38,7 +38,6 @@ interface NoteFooterDesktopProps {
   readonly onUpdate: () => void;
 }
 
-// Outlined mobile edit button with onSidebar tint and outlineVariant border
 const StyledMobileEditButton = styled(Button)(({ theme }) => ({
   color: theme.palette.onSidebar,
   borderColor: theme.palette.outlineVariant,
@@ -49,7 +48,6 @@ const StyledMobileEditButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-// Contained mobile update button using header background and onPrimary text
 const StyledMobileUpdateButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.header,
   color: theme.palette.onPrimary,
@@ -57,7 +55,6 @@ const StyledMobileUpdateButton = styled(Button)(({ theme }) => ({
   boxShadow: theme.palette.shadow.button,
 }));
 
-// Desktop footer strip with outlineVariant top border separating the note body from actions
 const StyledDesktopFooter = styled(Box)(({ theme }) => ({
   pt: 2,
   borderTop: `1px solid ${theme.palette.outlineVariant}`,
@@ -117,7 +114,8 @@ export function AdminNoteCard({ note, labels, onUpdate, onEdit }: AdminNoteCardP
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const lastUpdatedText = labels.lastUpdated.replace("{time}", note.lastUpdated);
+  const lastUpdatedText = labels.lastUpdated.replace("{time}", note?.lastUpdated ?? "");
+  const content = note?.content ?? "";
 
   return (
     <BaseCard
@@ -130,7 +128,7 @@ export function AdminNoteCard({ note, labels, onUpdate, onEdit }: AdminNoteCardP
       <NoteHeader isMobile={isMobile} title={labels.title} titleMobile={labels.titleMobile} />
 
       <Typography variant="bodyMd" sx={{ opacity: 0.85, lineHeight: 1.6, mb: 2 }}>
-        {note.content}
+        {content}
       </Typography>
 
       {isMobile ? (

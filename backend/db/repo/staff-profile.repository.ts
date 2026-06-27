@@ -1,11 +1,14 @@
-import { count, eq } from "drizzle-orm";
+import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import type {
+  ManagerDirectoryFilters,
+  ManagerDirectoryMetrics,
   ManagerDirectoryResult,
   ManagerDirectoryRow,
+  OnboardingMetricsResult,
   PaginationArgs,
   StaffProfileCreateResult,
   StaffProfileEntityInput,
@@ -17,6 +20,8 @@ export interface ManagerProfileUpdateInput {
   readonly phoneIsSet?: boolean;
   readonly skypeId?: string | null;
   readonly skypeIdIsSet?: boolean;
+  readonly status?: string | null;
+  readonly statusIsSet?: boolean;
 }
 
 export namespace StaffProfileRepository {
@@ -70,6 +75,7 @@ export namespace StaffProfileRepository {
     staffProfileId: staffProfiles.id,
     name: users.name,
     email: users.email,
+    avatarUrl: users.avatarUrl,
     phone: staffProfiles.phone,
     skypeId: staffProfiles.skypeId,
     status: staffProfiles.status,
@@ -77,11 +83,32 @@ export namespace StaffProfileRepository {
     roleName: permissionGroups.name,
   } as const;
 
+  function buildManagerDirectoryWhere(filters?: ManagerDirectoryFilters) {
+    const conditions: ReturnType<typeof and> = and(
+      filters?.roleFilter === "admin"
+        ? ilike(permissionGroups.slug, "%admin%")
+        : filters?.roleFilter === "staff"
+          ? or(
+              isNull(permissionGroups.slug),
+              and(notIlike(permissionGroups.slug, "%admin%"), ilike(permissionGroups.slug, "%staff%"))
+            )
+          : undefined,
+      filters?.statusFilter === "active"
+        ? eq(staffProfiles.status, "ACTIVATED")
+        : filters?.statusFilter === "offline"
+          ? eq(staffProfiles.status, "DEACTIVATED")
+          : undefined
+    );
+    return conditions ?? undefined;
+  }
+
   export async function getManagerDirectory(
     pagination: PaginationArgs | null = null,
+    filters?: ManagerDirectoryFilters,
     tx?: DBTransaction
   ): Promise<ManagerDirectoryResult> {
     const queryDb = tx ?? db;
+    const whereClause = buildManagerDirectoryWhere(filters);
 
     const baseQuery = queryDb
       .select(MANAGER_DIRECTORY_SELECT)
@@ -89,31 +116,40 @@ export namespace StaffProfileRepository {
       .innerJoin(users, eq(staffProfiles.userId, users.id))
       .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
       .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
+      .where(whereClause)
       .orderBy(users.name);
 
     if (!pagination) {
-      const rows = await baseQuery;
-      return { rows, totalCount: rows.length, pageInfo: null };
+      const [rows, metrics] = await Promise.all([baseQuery, getManagerDirectoryMetrics(queryDb)]);
+      return {
+        metrics,
+        rows,
+        totalCount: rows.length,
+        pageInfo: null,
+      };
     }
 
     const perPage = pagination.perPage;
     const currentPage = pagination.currentPage;
     const offset = pagination.offset;
 
-    const [rows, countResult] = await Promise.all([
+    const [rows, countResult, metrics] = await Promise.all([
       baseQuery.limit(perPage).offset(offset),
       queryDb
         .select({ count: count() })
         .from(staffProfiles)
         .innerJoin(users, eq(staffProfiles.userId, users.id))
         .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
-        .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id)),
+        .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
+        .where(whereClause),
+      getManagerDirectoryMetrics(queryDb),
     ]);
 
     const totalCount = countResult[0]?.count ?? 0;
     const lastPage = Math.max(1, Math.ceil(totalCount / perPage));
 
     return {
+      metrics,
       rows,
       totalCount,
       pageInfo: {
@@ -126,6 +162,63 @@ export namespace StaffProfileRepository {
         perPage,
         total: totalCount,
       },
+    };
+  }
+
+  async function getManagerDirectoryMetrics(queryDb: typeof db | DBTransaction): Promise<ManagerDirectoryMetrics> {
+    const metricsResult = await queryDb
+      .select({
+        totalAdmin:
+          sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${permissionGroups.slug} ILIKE '%admin%')`.mapWith(
+            Number
+          ),
+        systemStaff:
+          sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${permissionGroups.slug} NOT ILIKE '%admin%')`.mapWith(
+            Number
+          ),
+        activeNow:
+          sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${staffProfiles.status} = 'ACTIVATED')`.mapWith(Number),
+        alerts: sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${staffProfiles.status} != 'ACTIVATED')`.mapWith(
+          Number
+        ),
+      })
+      .from(staffProfiles)
+      .innerJoin(users, eq(staffProfiles.userId, users.id))
+      .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
+      .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id));
+
+    const m = metricsResult[0];
+    return {
+      id: "manager-directory-metrics",
+      totalAdmin: m?.totalAdmin ?? 0,
+      systemStaff: m?.systemStaff ?? 0,
+      activeNow: m?.activeNow ?? 0,
+      alerts: m?.alerts ?? 0,
+    };
+  }
+
+  export async function getOnboardingMetrics(tx?: DBTransaction): Promise<OnboardingMetricsResult> {
+    const queryDb = tx ?? db;
+
+    const ninetyDaysAgo = sql`NOW() - INTERVAL '90 days'`;
+
+    const result = await queryDb
+      .select({
+        activeStaff: sql<number>`COUNT(*) FILTER (WHERE ${staffProfiles.status} = 'ACTIVATED')`.mapWith(Number),
+        pendingApproval: sql<number>`COUNT(*) FILTER (WHERE ${staffProfiles.status} = 'DEACTIVATED')`.mapWith(Number),
+        avgOnboardingDays:
+          sql<number>`COALESCE(AVG(EXTRACT(EPOCH FROM (${staffProfiles.updatedAt} - ${staffProfiles.createdAt})) / 86400) FILTER (WHERE ${staffProfiles.createdAt} >= ${ninetyDaysAgo}), 0)`.mapWith(
+            Number
+          ),
+      })
+      .from(staffProfiles);
+
+    const r = result[0];
+    return {
+      id: "onboarding-metrics",
+      activeStaff: r?.activeStaff ?? 0,
+      pendingApproval: r?.pendingApproval ?? 0,
+      avgOnboardingDays: Math.round((r?.avgOnboardingDays ?? 0) * 10) / 10,
     };
   }
 
@@ -168,6 +261,9 @@ export namespace StaffProfileRepository {
       }
       if (input.skypeIdIsSet) {
         updateSet.skypeId = input.skypeId ?? null;
+      }
+      if (input.statusIsSet) {
+        updateSet.status = input.status ?? "ACTIVATED";
       }
 
       await t.update(staffProfiles).set(updateSet).where(eq(staffProfiles.id, staffProfileId));

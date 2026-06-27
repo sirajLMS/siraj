@@ -3,12 +3,12 @@
 import { Box, Chip, Grid, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
+import type { GroupClassAudit } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AdminNoteCard } from "./AdminNoteCard";
 import { ClassAuditDetailsCard } from "./ClassAuditDetailsCard";
 import { CommunicationLogCard } from "./CommunicationLogCard";
+import { OnlineMeetingCard } from "./OnlineMeetingCard";
 import { RegisteredStudentsSection } from "./RegisteredStudentsSection";
-import type { ClassAuditData } from "./types";
-import { VenueLocationCard } from "./VenueLocationCard";
 
 export interface ClassAuditLabels {
   readonly breadcrumbs: {
@@ -44,11 +44,11 @@ export interface ClassAuditLabels {
     readonly absent: string;
     readonly noEntries: string;
   };
-  readonly venueLocation: {
+  readonly meetingInfo: {
     readonly title: string;
-    readonly capacity: string;
-    readonly viewMap: string;
+    readonly joinMeeting: string;
     readonly capacityBadge: string;
+    readonly capacity: string;
   };
   readonly communicationLog: {
     readonly title: string;
@@ -64,19 +64,19 @@ export interface ClassAuditLabels {
 }
 
 interface ClassAuditViewProps {
-  readonly audit: ClassAuditData;
+  readonly audit: NonNullable<GroupClassAudit>;
   readonly labels: ClassAuditLabels;
   readonly onGenerateReport: () => void;
   readonly onEditClass: () => void;
   readonly onExportStudents: () => void;
   readonly onViewStudent: (id: string) => void;
-  readonly onViewMap: () => void;
+  readonly onJoinMeeting: () => void;
   readonly onResendNotifications: () => void;
   readonly onUpdateAdminNote: () => void;
   readonly onEditAdminNote: () => void;
+  readonly isResending: boolean;
 }
 
-// Primary-colored mobile class title using the Hanken Grotesk display font
 const StyledMobileClassTitle = styled(Typography)(({ theme }) => ({
   fontFamily: '"Hanken Grotesk", sans-serif',
   fontSize: "24px",
@@ -85,7 +85,6 @@ const StyledMobileClassTitle = styled(Typography)(({ theme }) => ({
   lineHeight: 1.2,
 }));
 
-// Uppercase status chip with primaryContainer background shown in the mobile header
 const StyledMobileStatusChip = styled(Chip)(({ theme }) => ({
   backgroundColor: theme.palette.primaryContainer,
   color: theme.palette.onPrimaryContainer,
@@ -96,7 +95,6 @@ const StyledMobileStatusChip = styled(Chip)(({ theme }) => ({
   textTransform: "uppercase",
 }));
 
-// Generate-report FilterButton with paper bg that darkens on hover
 const StyledGenerateReportButton = styled(FilterButton)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   "&:hover": {
@@ -112,10 +110,11 @@ export function ClassAuditView({
   onEditClass,
   onExportStudents,
   onViewStudent,
-  onViewMap,
+  onJoinMeeting,
   onResendNotifications,
   onUpdateAdminNote,
   onEditAdminNote,
+  isResending,
 }: ClassAuditViewProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -166,7 +165,11 @@ export function ClassAuditView({
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 2, lg: 2 } }}>
-          <VenueLocationCard venue={audit.venueInfo} labels={labels.venueLocation} onViewMap={onViewMap} />
+          <OnlineMeetingCard
+            meetingInfo={audit.meetingInfo}
+            labels={labels.meetingInfo}
+            onJoinMeeting={onJoinMeeting}
+          />
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 3, lg: 4 } }}>
@@ -175,6 +178,7 @@ export function ClassAuditView({
               entries={audit.communications}
               labels={labels.communicationLog}
               onResend={onResendNotifications}
+              isResending={isResending}
             />
           </Box>
         </Grid>
@@ -182,7 +186,7 @@ export function ClassAuditView({
         <Grid size={{ xs: 12, lg: 8 }} sx={{ order: { xs: 4, lg: 3 } }}>
           <RegisteredStudentsSection
             students={audit.students}
-            registeredCount={audit.registeredStudentCount}
+            registeredCount={audit.registeredStudentCount ?? 0}
             labels={labels.registeredStudents}
             onExport={onExportStudents}
             onViewStudent={onViewStudent}

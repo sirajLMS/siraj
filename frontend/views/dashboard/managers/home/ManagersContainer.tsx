@@ -1,13 +1,12 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { managerDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/staff-directory.documents";
 import { useManagersDirectoryStore } from "@/frontend/stores/managersDirectoryStore";
 import { ManagersView } from "./ManagersView";
-import type { ManagerRole, ManagerStatus } from "./types";
+import type { Manager, ManagerRole, ManagerStatus } from "./types";
 
 function mapManagerRole(roleSlug: string | null | undefined): ManagerRole {
   if (!roleSlug) return "staff";
@@ -16,7 +15,7 @@ function mapManagerRole(roleSlug: string | null | undefined): ManagerRole {
 
 function mapManagerStatus(status: string | null | undefined): ManagerStatus {
   if (!status) return "offline";
-  return status.toLowerCase() === "active" ? "active" : "offline";
+  return status.toLowerCase() === "activated" ? "active" : "offline";
 }
 
 export function ManagersContainer() {
@@ -39,57 +38,48 @@ export function ManagersContainer() {
         last: null,
         maxCount: null,
       },
+      roleFilter: roleFilter !== "all" ? roleFilter : null,
+      statusFilter: statusFilter !== "all" ? statusFilter : null,
     },
     fetchPolicy: "cache-and-network",
   });
 
   const rawRows = data?.managerDirectory?.rows;
+  const apiMetrics = data?.managerDirectory?.metrics;
 
-  const rows = useMemo(() => {
-    if (!rawRows) return [];
-    return rawRows.map((row, index) => ({
-      id: row.id ?? "",
-      name: row.name ?? "",
-      role: mapManagerRole(row.roleSlug),
-      status: mapManagerStatus(row.status),
-      email: row.email ?? "",
-      skypeId: row.skypeId ?? "",
-      phone: row.phone ?? "",
-      avatarUrl: `/demo/avatars/${String((index % 8) + 1).padStart(2, "0")}.png`,
-    }));
-  }, [rawRows]);
+  const rows = rawRows?.map(row => ({
+    id: row.id ?? "",
+    name: row.name ?? "",
+    role: mapManagerRole(row.roleSlug),
+    status: mapManagerStatus(row.status),
+    email: row.email ?? "",
+    skypeId: row.skypeId ?? "",
+    phone: row.phone ?? "",
+    avatarUrl: row.avatarUrl ?? "",
+  })) as Manager[];
+
+  const metrics = apiMetrics
+    ? {
+        id: apiMetrics.id ?? "",
+        totalAdmin: apiMetrics.totalAdmin ?? 0,
+        systemStaff: apiMetrics.systemStaff ?? 0,
+        activeNow: apiMetrics.activeNow ?? 0,
+        alerts: apiMetrics.alerts ?? 0,
+      }
+    : {
+        id: "manager-directory-metrics",
+        totalAdmin: 0,
+        systemStaff: 0,
+        activeNow: 0,
+        alerts: 0,
+      };
 
   const totalCount = data?.managerDirectory?.totalCount ?? 0;
-
-  const metrics = useMemo(() => {
-    let totalAdmin = 0;
-    let systemStaff = 0;
-    let activeNow = 0;
-    for (const r of rows) {
-      if (r.role === "admin") totalAdmin++;
-      if (r.role === "staff") systemStaff++;
-      if (r.status === "active") activeNow++;
-    }
-    return {
-      totalAdmin,
-      systemStaff,
-      activeNow,
-      alerts: 0,
-    };
-  }, [rows]);
-
-  const filteredManagers = useMemo(() => {
-    return rows.filter(manager => {
-      const matchesRole = roleFilter === "all" || manager.role === roleFilter;
-      const matchesStatus = statusFilter === "all" || manager.status === statusFilter;
-      return matchesRole && matchesStatus;
-    });
-  }, [rows, roleFilter, statusFilter]);
 
   return (
     <RequirePermission permissions={[AppPermission.StaffViewDirectory]}>
       <ManagersView
-        managers={filteredManagers}
+        managers={rows ?? []}
         metrics={metrics}
         totalManagers={totalCount}
         page={page}

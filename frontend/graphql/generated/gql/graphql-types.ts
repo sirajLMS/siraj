@@ -38,6 +38,12 @@ export type AdminDashboardScheduleResult = {
   totalCount: Maybe<Scalars['Int']['output']>;
 };
 
+export type AdminNoteInfo = {
+  __typename?: 'AdminNoteInfo';
+  content: Maybe<Scalars['String']['output']>;
+  lastUpdated: Maybe<Scalars['String']['output']>;
+};
+
 /** Paginated admin suggestion list with metrics. */
 export type AdminSuggestionResult = {
   __typename?: 'AdminSuggestionResult';
@@ -321,6 +327,17 @@ export type ClassStatusEvent = {
   id: Maybe<Scalars['String']['output']>;
 };
 
+export type CommunicationLogEntry = {
+  __typename?: 'CommunicationLogEntry';
+  description: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  isActive: Maybe<Scalars['Boolean']['output']>;
+  isDelivered: Maybe<Scalars['Boolean']['output']>;
+  timestamp: Maybe<Scalars['String']['output']>;
+  title: Maybe<Scalars['String']['output']>;
+  type: Maybe<Scalars['String']['output']>;
+};
+
 /** A parent complaint with full details and responses. */
 export type Complaint = {
   __typename?: 'Complaint';
@@ -329,6 +346,7 @@ export type Complaint = {
   createdAt: Maybe<Scalars['DateTime']['output']>;
   files: Maybe<Array<ComplaintFile>>;
   id: Maybe<Scalars['String']['output']>;
+  parentAvatarUrl: Maybe<Scalars['String']['output']>;
   parentId: Maybe<Scalars['String']['output']>;
   parentName: Maybe<Scalars['String']['output']>;
   responses: Maybe<Array<ComplaintResponse>>;
@@ -947,6 +965,37 @@ export enum Gender {
   Male = 'MALE'
 }
 
+export type GroupClassAudit = {
+  __typename?: 'GroupClassAudit';
+  adminNote: Maybe<AdminNoteInfo>;
+  auditLoggedAt: Maybe<Scalars['String']['output']>;
+  auditRemark: Maybe<Scalars['String']['output']>;
+  className: Maybe<Scalars['String']['output']>;
+  communications: Maybe<Array<CommunicationLogEntry>>;
+  courseCode: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  meetingInfo: Maybe<OnlineMeetingInfo>;
+  originalDate: Maybe<Scalars['String']['output']>;
+  registeredStudentCount: Maybe<Scalars['Int']['output']>;
+  rescheduledDate: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  students: Maybe<Array<GroupClassStudent>>;
+  teacherName: Maybe<Scalars['String']['output']>;
+  timeSlot: Maybe<Scalars['String']['output']>;
+  totalStudentCount: Maybe<Scalars['Int']['output']>;
+  venue: Maybe<Scalars['String']['output']>;
+};
+
+export type GroupClassStudent = {
+  __typename?: 'GroupClassStudent';
+  attendanceStatus: Maybe<Scalars['String']['output']>;
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  initials: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+};
+
 export type GroupUser = {
   __typename?: 'GroupUser';
   email: Maybe<Scalars['String']['output']>;
@@ -1001,9 +1050,19 @@ export enum ManagerAccountType {
   Manager = 'manager'
 }
 
+export type ManagerDirectoryMetrics = {
+  __typename?: 'ManagerDirectoryMetrics';
+  activeNow: Maybe<Scalars['Int']['output']>;
+  alerts: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  systemStaff: Maybe<Scalars['Int']['output']>;
+  totalAdmin: Maybe<Scalars['Int']['output']>;
+};
+
 export type ManagerDirectoryResult = {
   __typename?: 'ManagerDirectoryResult';
   id: Maybe<Scalars['String']['output']>;
+  metrics: Maybe<ManagerDirectoryMetrics>;
   pageInfo: Maybe<PageInfo>;
   rows: Maybe<Array<ManagerDirectoryRow>>;
   totalCount: Maybe<Scalars['Int']['output']>;
@@ -1011,6 +1070,7 @@ export type ManagerDirectoryResult = {
 
 export type ManagerDirectoryRow = {
   __typename?: 'ManagerDirectoryRow';
+  avatarUrl: Maybe<Scalars['String']['output']>;
   email: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
@@ -1131,6 +1191,7 @@ export type Mutation = {
   refreshToken: Maybe<RefreshTokenResponse>;
   renameFile: Maybe<FileOperationResult>;
   rescheduleClass: Maybe<ClassInstanceDetail>;
+  resendClassNotifications: Maybe<SupportRequestResult>;
   resetClass: Maybe<Scalars['Boolean']['output']>;
   /** Creates a response to an existing complaint (admin only). */
   respondToComplaint: Maybe<ComplaintResponse>;
@@ -1143,6 +1204,7 @@ export type Mutation = {
   submitComplaint: Maybe<Complaint>;
   /** Submits a new suggestion from the authenticated parent. */
   submitSuggestion: Maybe<Suggestion>;
+  updateClassAdminNote: Maybe<GroupClassAudit>;
   updateDirectoryPermissions: Maybe<FileOperationResult>;
   /** Updates a manager's profile fields. */
   updateManagerProfile: Maybe<ManagerDirectoryRow>;
@@ -1398,6 +1460,11 @@ export type MutationRescheduleClassArgs = {
 };
 
 
+export type MutationResendClassNotificationsArgs = {
+  classInstanceId: Scalars['String']['input'];
+};
+
+
 export type MutationResetClassArgs = {
   classInstanceId: Scalars['ID']['input'];
 };
@@ -1435,6 +1502,12 @@ export type MutationSubmitComplaintArgs = {
 
 export type MutationSubmitSuggestionArgs = {
   input: SubmitSuggestionInput;
+};
+
+
+export type MutationUpdateClassAdminNoteArgs = {
+  classInstanceId: Scalars['String']['input'];
+  content: Scalars['String']['input'];
 };
 
 
@@ -1499,6 +1572,23 @@ export type NotificationAlertsResult = {
   id: Maybe<Scalars['String']['output']>;
   totalCount: Maybe<Scalars['Int']['output']>;
   unreadCount: Maybe<Scalars['Int']['output']>;
+};
+
+/** Summary metrics for the staff onboarding process */
+export type OnboardingMetrics = {
+  __typename?: 'OnboardingMetrics';
+  activeStaff: Maybe<Scalars['Int']['output']>;
+  avgOnboardingDays: Maybe<Scalars['Float']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  pendingApproval: Maybe<Scalars['Int']['output']>;
+};
+
+export type OnlineMeetingInfo = {
+  __typename?: 'OnlineMeetingInfo';
+  joinUrl: Maybe<Scalars['String']['output']>;
+  meetingId: Maybe<Scalars['String']['output']>;
+  platform: Maybe<Scalars['String']['output']>;
+  zoomMeetingUrl: Maybe<Scalars['String']['output']>;
 };
 
 export enum OrderSortDirection {
@@ -1756,6 +1846,7 @@ export type Query = {
   folderInfo: Maybe<DirectoryInfo>;
   /** Generates dynamic attendance and financial reports. */
   generateAttendanceReport: Maybe<Array<AttendanceReportRow>>;
+  groupClassAudit: Maybe<GroupClassAudit>;
   /** Lists all learning resources available to the academy. */
   learningResources: Maybe<Array<LearningResourceRow>>;
   listFiles: Maybe<StorageObjectList>;
@@ -1763,6 +1854,8 @@ export type Query = {
   managerDirectory: Maybe<ManagerDirectoryResult>;
   me: Maybe<User>;
   notificationAlerts: Maybe<NotificationAlertsResult>;
+  /** Returns onboarding metrics for staff accounts. */
+  onboardingMetrics: Maybe<OnboardingMetrics>;
   parentAssociatedStudents: Maybe<Array<AssociatedStudent>>;
   /** Returns the authenticated parent's complaint history with pagination. */
   parentComplaints: Maybe<ParentComplaintsResult>;
@@ -1890,6 +1983,11 @@ export type QueryGenerateAttendanceReportArgs = {
 };
 
 
+export type QueryGroupClassAuditArgs = {
+  classInstanceId: Scalars['String']['input'];
+};
+
+
 export type QueryLearningResourcesArgs = {
   searchQuery: InputMaybe<Scalars['String']['input']>;
 };
@@ -1902,6 +2000,8 @@ export type QueryListFilesArgs = {
 
 export type QueryManagerDirectoryArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
+  roleFilter: InputMaybe<Scalars['String']['input']>;
+  statusFilter: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -2734,6 +2834,7 @@ export type UnpaidInvoicesSummary = {
 export type UpdateManagerProfileInput = {
   phone: InputMaybe<Scalars['String']['input']>;
   skypeId: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdatePermissionGroupInput = {

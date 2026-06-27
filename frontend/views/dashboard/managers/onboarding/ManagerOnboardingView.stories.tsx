@@ -10,7 +10,7 @@ const defaultValues: ManagerOnboardingFormData = {
   phone: "",
   skypeId: "",
   accountType: ManagerAccountType.Manager,
-  department: "academic",
+  password: "",
 };
 
 function ManagerOnboardingStoryWrapper({

@@ -1,0 +1,205 @@
+import { desc, eq, inArray } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
+import {
+  classCommunications,
+  classInstances,
+  groupClassEnrollments,
+  groupClasses,
+  parents,
+  students,
+  users,
+} from "@/backend/db/schema";
+import type {
+  ClassCommunicationInsertType,
+  ClassCommunicationSelectType,
+  GroupClassEnrollmentInsertType,
+  GroupClassEnrollmentSelectType,
+  GroupClassInsertType,
+  GroupClassSelectType,
+} from "@/backend/types";
+import type { DBTransaction } from "../db.types";
+
+export namespace GroupClassRepository {
+  export async function getByClassInstanceId(
+    classInstanceId: string,
+    tx?: DBTransaction
+  ): Promise<GroupClassSelectType | null> {
+    const queryDb = tx ?? db;
+    const [row] = await queryDb
+      .select()
+      .from(groupClasses)
+      .where(eq(groupClasses.classInstanceId, classInstanceId))
+      .limit(1);
+
+    return row ?? null;
+  }
+
+  export async function getById(id: string, tx?: DBTransaction): Promise<GroupClassSelectType | null> {
+    const queryDb = tx ?? db;
+    const [row] = await queryDb.select().from(groupClasses).where(eq(groupClasses.id, id)).limit(1);
+
+    return row ?? null;
+  }
+
+  export async function create(
+    input: Omit<GroupClassInsertType, "id" | "createdAt" | "updatedAt">,
+    tx?: DBTransaction
+  ): Promise<GroupClassSelectType> {
+    const runner = async (t: DBTransaction) => {
+      const [created] = await t
+        .insert(groupClasses)
+        .values({
+          ...input,
+        })
+        .returning();
+
+      return created;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  }
+
+  export async function getEnrollments(
+    groupClassId: string,
+    tx?: DBTransaction
+  ): Promise<(GroupClassEnrollmentSelectType & { studentName: string; studentAvatarUrl: string | null })[]> {
+    const queryDb = tx ?? db;
+    const rows = await queryDb
+      .select({
+        enrollment: groupClassEnrollments,
+        studentName: students.name,
+        studentAvatarUrl: students.avatarUrl,
+      })
+      .from(groupClassEnrollments)
+      .innerJoin(students, eq(groupClassEnrollments.studentId, students.id))
+      .where(eq(groupClassEnrollments.groupClassId, groupClassId));
+
+    return rows.map(r => ({
+      ...r.enrollment,
+      studentName: r.studentName,
+      studentAvatarUrl: r.studentAvatarUrl,
+    }));
+  }
+
+  export async function createEnrollments(
+    inputs: Omit<GroupClassEnrollmentInsertType, "id" | "createdAt" | "updatedAt">[],
+    tx?: DBTransaction
+  ): Promise<GroupClassEnrollmentSelectType[]> {
+    if (inputs.length === 0) return [];
+
+    const runner = async (t: DBTransaction) => {
+      return t.insert(groupClassEnrollments).values(inputs).returning();
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  }
+
+  export async function getCommunications(
+    groupClassId: string,
+    tx?: DBTransaction
+  ): Promise<ClassCommunicationSelectType[]> {
+    const queryDb = tx ?? db;
+    return queryDb
+      .select()
+      .from(classCommunications)
+      .where(eq(classCommunications.groupClassId, groupClassId))
+      .orderBy(desc(classCommunications.createdAt));
+  }
+
+  export async function createCommunication(
+    input: Omit<ClassCommunicationInsertType, "id" | "createdAt">,
+    tx?: DBTransaction
+  ): Promise<ClassCommunicationSelectType> {
+    const runner = async (t: DBTransaction) => {
+      const [created] = await t
+        .insert(classCommunications)
+        .values({
+          ...input,
+        })
+        .returning();
+
+      return created;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  }
+
+  export async function updateAdminNote(
+    classInstanceId: string,
+    content: string,
+    tx?: DBTransaction
+  ): Promise<GroupClassSelectType | null> {
+    const runner = async (t: DBTransaction) => {
+      const [updated] = await t
+        .update(classInstances)
+        .set({ adminNotes: content, updatedAt: new Date() })
+        .where(eq(classInstances.id, classInstanceId))
+        .returning();
+
+      if (!updated) return null;
+
+      const [groupClass] = await t
+        .select()
+        .from(groupClasses)
+        .where(eq(groupClasses.classInstanceId, classInstanceId))
+        .limit(1);
+
+      return groupClass ?? null;
+    };
+
+    return tx ? runner(tx) : db.transaction(runner);
+  }
+
+  export async function getEnrollmentsWithStudentDetails(
+    groupClassId: string,
+    tx?: DBTransaction
+  ): Promise<
+    {
+      id: string;
+      groupClassId: string;
+      studentId: string;
+      studentIdNumber: string | null;
+      attendanceStatus: string;
+      studentName: string;
+      studentAvatarUrl: string | null;
+    }[]
+  > {
+    const queryDb = tx ?? db;
+    const rows = await queryDb
+      .select({
+        id: groupClassEnrollments.id,
+        groupClassId: groupClassEnrollments.groupClassId,
+        studentId: groupClassEnrollments.studentId,
+        studentIdNumber: groupClassEnrollments.studentIdNumber,
+        attendanceStatus: groupClassEnrollments.attendanceStatus,
+        studentName: students.name,
+        studentAvatarUrl: students.avatarUrl,
+      })
+      .from(groupClassEnrollments)
+      .innerJoin(students, eq(groupClassEnrollments.studentId, students.id))
+      .where(eq(groupClassEnrollments.groupClassId, groupClassId));
+
+    return rows;
+  }
+
+  export async function getParentUserIdsForGroupClass(groupClassId: string, tx?: DBTransaction): Promise<string[]> {
+    const queryDb = tx ?? db;
+    const studentRows = await queryDb
+      .select({ parentId: students.parentId })
+      .from(groupClassEnrollments)
+      .innerJoin(students, eq(groupClassEnrollments.studentId, students.id))
+      .where(eq(groupClassEnrollments.groupClassId, groupClassId));
+
+    const parentIds = [...new Set(studentRows.map(r => r.parentId).filter((id): id is string => id != null))];
+
+    if (parentIds.length === 0) return [];
+
+    const parentRows = await queryDb
+      .select({ userId: parents.userId })
+      .from(parents)
+      .innerJoin(users, eq(parents.userId, users.id))
+      .where(inArray(parents.id, parentIds));
+
+    return parentRows.map(r => r.userId).filter((id): id is string => id != null);
+  }
+}

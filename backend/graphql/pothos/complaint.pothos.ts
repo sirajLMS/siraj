@@ -48,6 +48,7 @@ export const ComplaintPothosObject = ComplaintRef.implement({
     body: t.exposeString("body"),
     parentId: t.exposeString("parentId"),
     parentName: t.exposeString("parentName", { nullable: true }),
+    parentAvatarUrl: t.exposeString("parentAvatarUrl", { nullable: true }),
     submitterEmail: t.exposeString("submitterEmail"),
     studentId: t.exposeString("studentId", { nullable: true }),
     studentName: t.exposeString("studentName", { nullable: true }),

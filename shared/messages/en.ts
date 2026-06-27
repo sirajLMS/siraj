@@ -2069,6 +2069,7 @@ const en: MessageSchema = {
         pageTitle: "Complaints & Records",
         formTitle: "Submit a New Complaint",
         student: "Select Student",
+        category: "Complaint Category",
         contactEmail: "Contact Email",
         contactEmailPlaceholder: "parent.contact@example.com",
         complaintDetails: "Complaint Details",
@@ -2089,6 +2090,7 @@ const en: MessageSchema = {
           emailRequired: "Please enter your contact email.",
           emailInvalid: "Please enter a valid email address.",
           detailsRequired: "Please describe your complaint in at least 10 characters.",
+          categoryRequired: "Please select a complaint category.",
         },
         statusLabels: {
           pending: "Pending",
@@ -2122,6 +2124,10 @@ const en: MessageSchema = {
           answerAndEmail: "Answer & Send to Email",
           adminResponse: "Admin Response",
           noEntries: "No complaints match your search",
+          deleteConfirmTitle: "Delete Complaint",
+          deleteConfirmBody: "This complaint will be permanently removed from the queue. This action cannot be undone.",
+          deleteConfirmCancel: "Cancel",
+          deleteConfirmConfirm: "Delete",
         },
         priorityLabels: {
           urgent: "Urgent Priority",

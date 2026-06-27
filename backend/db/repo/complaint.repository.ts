@@ -144,6 +144,7 @@ export namespace ComplaintRepository {
         id: complaints.id,
         parentId: complaints.parentId,
         parentName: users.name,
+        parentAvatarUrl: users.avatarUrl,
         studentId: complaints.studentId,
         studentName: students.name,
         category: complaints.category,
@@ -177,6 +178,7 @@ export namespace ComplaintRepository {
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
       parentName: r.parentName ?? null,
+      parentAvatarUrl: r.parentAvatarUrl ?? null,
       studentName: r.studentName ?? null,
       responseCount: r.responseCount,
     }));
@@ -214,6 +216,7 @@ export namespace ComplaintRepository {
         id: complaints.id,
         parentId: complaints.parentId,
         parentName: users.name,
+        parentAvatarUrl: users.avatarUrl,
         studentId: complaints.studentId,
         studentName: students.name,
         category: complaints.category,
@@ -262,6 +265,7 @@ export namespace ComplaintRepository {
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
       parentName: r.parentName ?? null,
+      parentAvatarUrl: r.parentAvatarUrl ?? null,
       studentName: r.studentName ?? null,
       responseCount: r.responseCount,
     }));

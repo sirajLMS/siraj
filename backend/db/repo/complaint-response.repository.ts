@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { complaintResponses, complaints, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -58,5 +58,40 @@ export namespace ComplaintResponseRepository {
       .leftJoin(users, eq(complaintResponses.responderUserId, users.id))
       .where(eq(complaintResponses.complaintId, complaintId))
       .orderBy(desc(complaintResponses.createdAt));
+  };
+
+  export const getResponsesByComplaints = async (
+    complaintIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Map<string, ComplaintResponse[]>> => {
+    const queryDb = tx ?? db;
+
+    if (complaintIds.length === 0) {
+      return new Map();
+    }
+
+    const responses = await queryDb
+      .select({
+        id: complaintResponses.id,
+        complaintId: complaintResponses.complaintId,
+        responderUserId: complaintResponses.responderUserId,
+        responderName: users.name,
+        body: complaintResponses.body,
+        emailSent: complaintResponses.emailSent,
+        createdAt: complaintResponses.createdAt,
+      })
+      .from(complaintResponses)
+      .leftJoin(users, eq(complaintResponses.responderUserId, users.id))
+      .where(inArray(complaintResponses.complaintId, [...complaintIds]))
+      .orderBy(desc(complaintResponses.createdAt));
+
+    const result = new Map<string, ComplaintResponse[]>();
+    for (const id of complaintIds) {
+      result.set(
+        id,
+        responses.filter(r => r.complaintId === id)
+      );
+    }
+    return result;
   };
 }

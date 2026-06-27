@@ -35,6 +35,7 @@ export interface AdminComplaintsViewProps {
   readonly activeTab: ComplaintTab;
   readonly draftResponses: Readonly<Record<string, string>>;
   readonly canManage: boolean;
+  readonly canDelete: boolean;
   readonly page: number;
   readonly pageSize: number;
   readonly totalCount: number;
@@ -42,5 +43,6 @@ export interface AdminComplaintsViewProps {
   readonly onTabChange: (tab: ComplaintTab) => void;
   readonly onDraftChange: (id: string, text: string) => void;
   readonly onAnswer: (id: string, options: { readonly sendEmail: boolean }) => void;
+  readonly onDelete: (id: string) => void;
   readonly onPageChange: (page: number) => void;
 }

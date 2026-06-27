@@ -1,8 +1,12 @@
 import { z } from "zod";
+import { ComplaintCategory } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ComplaintValidationLabels } from "@/shared/messages/types/dashboard/complaints/main";
 
 export const complaintFormSchema = (labels: ComplaintValidationLabels) =>
   z.object({
+    category: z.nativeEnum(ComplaintCategory, {
+      message: labels.categoryRequired,
+    }),
     studentId: z.string().min(1, labels.studentRequired),
     contactEmail: z
       .string()

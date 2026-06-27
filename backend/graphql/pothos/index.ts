@@ -8,6 +8,7 @@ export * from "./complaint.pothos";
 export * from "./complaintResponses.pothos";
 export * from "./dst-migration.pothos";
 export * from "./enum.pothos";
+export * from "./group-class.pothos";
 export * from "./learning-resource.pothos";
 export * from "./manager-onboarding.pothos";
 export * from "./notification-alerts.pothos";

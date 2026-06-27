@@ -1,14 +1,11 @@
 import { create } from "zustand";
-import type { ClassAuditData } from "@/frontend/views/dashboard/classes/audit/types";
 
-interface ClassAuditState {
-  readonly audit: ClassAuditData | null;
-  resendNotifications: () => void;
-  updateAdminNote: () => void;
+interface ClassAuditUiState {
+  readonly noteDialogOpen: boolean;
+  setNoteDialogOpen: (open: boolean) => void;
 }
 
-export const useClassAuditStore = create<ClassAuditState>(() => ({
-  audit: null,
-  resendNotifications: () => {},
-  updateAdminNote: () => {},
+export const useClassAuditStore = create<ClassAuditUiState>(set => ({
+  noteDialogOpen: false,
+  setNoteDialogOpen: (open: boolean) => set({ noteDialogOpen: open }),
 }));

@@ -153,7 +153,7 @@ export function ManagerOnboardingView({
           <StaffInfoSection register={register} errors={errors} />
 
           {/* System access configuration (account type + department) */}
-          <SystemAccessSection control={control} errors={errors} />
+          <SystemAccessSection register={register} control={control} errors={errors} />
 
           {/* Form action buttons */}
           <StyledFormActions>

@@ -12,6 +12,7 @@ function buildParentLabels(t: ComplaintsTranslator): ComplaintsParentLabels {
     pageTitle: t("parent.pageTitle"),
     formTitle: t("parent.formTitle"),
     student: t("parent.student"),
+    category: t("parent.category"),
     contactEmail: t("parent.contactEmail"),
     contactEmailPlaceholder: t("parent.contactEmailPlaceholder"),
     complaintDetails: t("parent.complaintDetails"),
@@ -31,6 +32,7 @@ function buildParentLabels(t: ComplaintsTranslator): ComplaintsParentLabels {
       emailRequired: t("parent.validation.emailRequired"),
       emailInvalid: t("parent.validation.emailInvalid"),
       detailsRequired: t("parent.validation.detailsRequired"),
+      categoryRequired: t("parent.validation.categoryRequired"),
     },
     statusLabels: {
       pending: t("parent.statusLabels.pending"),
@@ -67,6 +69,10 @@ function buildAdminLabels(t: ComplaintsTranslator): ComplaintsAdminLabels {
       answerAndEmail: t("admin.queue.answerAndEmail"),
       adminResponse: t("admin.queue.adminResponse"),
       noEntries: t("admin.queue.noEntries"),
+      deleteConfirmTitle: t("admin.queue.deleteConfirmTitle"),
+      deleteConfirmBody: t("admin.queue.deleteConfirmBody"),
+      deleteConfirmCancel: t("admin.queue.deleteConfirmCancel"),
+      deleteConfirmConfirm: t("admin.queue.deleteConfirmConfirm"),
     },
     priorityLabels: {
       urgent: t("admin.priorityLabels.urgent"),

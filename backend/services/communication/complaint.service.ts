@@ -263,9 +263,17 @@ export namespace ComplaintService {
         ComplaintRepository.getComplaintMetrics(),
       ]);
 
+      const complaintIds = paginatedResult.rows.map(r => r.id);
+      const responsesMap = await ComplaintResponseRepository.getResponsesByComplaints(complaintIds);
+
+      const rowsWithResponses = paginatedResult.rows.map(row => ({
+        ...row,
+        responses: responsesMap.get(row.id) ?? [],
+      }));
+
       return {
         id: "complaint-queue-result",
-        rows: paginatedResult.rows,
+        rows: rowsWithResponses,
         totalCount: paginatedResult.totalCount,
         pageInfo: paginatedResult.pageInfo,
         metrics: {

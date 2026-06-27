@@ -9,12 +9,10 @@ import { ComplaintsSearchBar } from "./components/ComplaintsSearchBar";
 import { ComplaintsTabBar } from "./components/ComplaintsTabBar";
 import type { AdminComplaintsViewProps } from "./types/complaintsViewTypes";
 
-/** Mobile search bar wrapper with bottom margin */
 const StyledMobileSearchBox = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(2),
 }));
 
-/** Mobile queue cards container with top padding */
 const StyledMobileQueueContainer = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(2),
 }));
@@ -27,6 +25,7 @@ export function AdminComplaintsMobileView({
   activeTab,
   draftResponses,
   canManage,
+  canDelete,
   page,
   pageSize,
   totalCount,
@@ -34,21 +33,19 @@ export function AdminComplaintsMobileView({
   onTabChange,
   onDraftChange,
   onAnswer,
+  onDelete,
   onPageChange,
 }: Readonly<AdminComplaintsViewProps>) {
   return (
     <PageContainer>
       <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} titleVariant="headlineMd" />
 
-      {/* Summary metrics row with unanswered/answered counts and efficiency banner */}
       <ComplaintsMetricsRow summary={summary} labels={labels} compact />
 
-      {/* Search input for filtering complaints */}
       <StyledMobileSearchBox>
         <ComplaintsSearchBar value={searchQuery} placeholder={labels.searchPlaceholder} onChange={onSearchChange} />
       </StyledMobileSearchBox>
 
-      {/* Tab bar switching between unanswered and answered queues */}
       <ComplaintsTabBar
         activeTab={activeTab}
         unansweredCount={summary.unanswered}
@@ -57,18 +54,19 @@ export function AdminComplaintsMobileView({
         onTabChange={onTabChange}
       />
 
-      {/* Filtered list of complaint queue cards */}
       <StyledMobileQueueContainer>
         <ComplaintQueueCardList
           rows={rows}
           labels={labels}
           draftResponses={draftResponses}
           canManage={canManage}
+          canDelete={canDelete}
           page={page}
           pageSize={pageSize}
           totalCount={totalCount}
           onDraftChange={onDraftChange}
           onAnswer={onAnswer}
+          onDelete={onDelete}
           onPageChange={onPageChange}
         />
       </StyledMobileQueueContainer>

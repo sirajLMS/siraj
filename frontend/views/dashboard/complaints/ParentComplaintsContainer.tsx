@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   parentComplaintsQueryDocument,
   submitComplaintMutationDocument,
@@ -116,7 +116,7 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
           studentId: formData.studentId,
           submitterEmail: formData.contactEmail,
           body: formData.complaintDetails,
-          category: ComplaintCategory.Other,
+          category: formData.category,
           files: null,
         },
       },
@@ -141,7 +141,7 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
         labels={labels.parent}
         studentOptions={studentOptions}
         records={records}
-        hasOlderRecords={false}
+        hasOlderRecords={data?.parentComplaints?.pageInfo?.hasMorePages ?? false}
         isSubmitting={isSubmitting}
         showSuccess={showSuccess}
         canSubmit={true}

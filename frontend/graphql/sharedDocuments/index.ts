@@ -5,6 +5,7 @@ export * from "./billing-management.documents";
 export * from "./class-session.documents";
 export * from "./complaint.documents";
 export * from "./dst-migration.documents";
+export * from "./group-class.documents";
 export * from "./learning-resource.documents";
 export { createManagerMutationDocument } from "./manager-onboarding.documents";
 export * from "./notification-alerts.documents";

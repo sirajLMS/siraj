@@ -6,6 +6,7 @@ export * from "./class-instance-performance.types";
 export * from "./communications.types";
 export * from "./complaint.types";
 export * from "./complaintResponses.types";
+export * from "./group-class.types";
 export * from "./notificationDeliveries.types";
 export * from "./pagination.types";
 export * from "./parent.types";

@@ -18,6 +18,7 @@ import type {
 import { loadSeedConfig, type SeedConfig } from "./lib";
 import { seedOrGet as seedOrGetAdminAuditLogs } from "./seed-admin-audit-logs";
 import { seedOrGet as seedOrGetAuditLogs } from "./seed-audit-logs";
+import { seedOrGet as seedOrGetClassCommunications } from "./seed-class-communications";
 import { seedOrGet as seedOrGetClassInstances } from "./seed-class-instances";
 import { seedOrGet as seedOrGetClassPerformance } from "./seed-class-performance";
 import { seedOrGet as seedOrGetClassStatusEvents } from "./seed-class-status-events";
@@ -29,6 +30,8 @@ import { seedOrGet as seedOrGetCurrencyExchangeRates } from "./seed-currency-exc
 import { seedOrGet as seedOrGetCurrencyHedges } from "./seed-currency-hedges";
 import { seedOrGet as seedOrGetDstMigrationEntries } from "./seed-dst-migration-entries";
 import { seedOrGet as seedOrGetDstMigrationRuns } from "./seed-dst-migration-runs";
+import { seedOrGet as seedOrGetGroupClassEnrollments } from "./seed-group-class-enrollments";
+import { seedOrGet as seedOrGetGroupClasses } from "./seed-group-classes";
 import { seedOrGet as seedOrGetInvoiceCoverageMonths } from "./seed-invoice-coverage-months";
 import { seedOrGet as seedOrGetInvoices } from "./seed-invoices";
 import { seedOrGet as seedOrGetLearningResources } from "./seed-learning-resources";
@@ -72,6 +75,9 @@ export type SeedContext = {
   exchangeRates?: Awaited<ReturnType<typeof seedOrGetCurrencyExchangeRates>>;
   invoices?: InvoiceSelectType[];
   bankingDetails?: TeacherBankingDetailsHistorySelectType[];
+  groupClasses?: { id: string; classInstanceId: string; courseName: string }[];
+  groupClassEnrollments?: { id: string }[];
+  classCommunications?: { id: string }[];
 };
 
 export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContext> {
@@ -137,6 +143,15 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   logger.log("Seeding class performance and status events...");
   await seedOrGetClassPerformance(context.classInstances, config);
   await seedOrGetClassStatusEvents(context.classInstances, context.teachers, config);
+
+  logger.log("Seeding group classes domain...");
+  context.groupClasses = await seedOrGetGroupClasses(context.classInstances, context.students ?? [], config);
+  context.groupClassEnrollments = await seedOrGetGroupClassEnrollments(
+    context.groupClasses,
+    context.students ?? [],
+    config
+  );
+  context.classCommunications = await seedOrGetClassCommunications(context.groupClasses, config);
 
   logger.log("Seeding scheduling extensions...");
   await seedOrGetTeacherAvailabilityWindows(context.teachers, context.timezones, config);

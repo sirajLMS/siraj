@@ -42,14 +42,22 @@ export const managerDirectoryQueryDocument: TypedDocumentNode<
   Operations.ManagerDirectoryQuery,
   Types.QueryManagerDirectoryArgs
 > = gql`
-  query managerDirectory($paginationArgs: PaginationArgs) {
-    managerDirectory(paginationArgs: $paginationArgs) {
+  query managerDirectory($paginationArgs: PaginationArgs, $roleFilter: String, $statusFilter: String) {
+    managerDirectory(paginationArgs: $paginationArgs, roleFilter: $roleFilter, statusFilter: $statusFilter) {
       id
+      metrics {
+        id
+        totalAdmin
+        systemStaff
+        activeNow
+        alerts
+      }
       rows {
         id
         staffProfileId
         name
         email
+        avatarUrl
         phone
         skypeId
         status
@@ -81,11 +89,23 @@ export const updateManagerProfileMutationDocument: TypedDocumentNode<
       staffProfileId
       name
       email
+      avatarUrl
       phone
       skypeId
       status
       roleSlug
       roleName
+    }
+  }
+`;
+
+export const onboardingMetricsQueryDocument: TypedDocumentNode<Operations.OnboardingMetricsQuery> = gql`
+  query onboardingMetrics {
+    onboardingMetrics {
+      id
+      activeStaff
+      pendingApproval
+      avgOnboardingDays
     }
   }
 `;
