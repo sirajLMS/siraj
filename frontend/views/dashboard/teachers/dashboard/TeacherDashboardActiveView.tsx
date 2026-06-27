@@ -34,6 +34,7 @@ interface TeacherDashboardActiveViewProps {
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
   readonly onRequestLeave?: (id: string) => void;
+  readonly onViewAll?: () => void;
   readonly activationError?: string | null;
   readonly dateValue: string;
   readonly onDateChange: (date: string) => void;
@@ -58,6 +59,7 @@ function MobileScheduleSection({
   onStartSession,
   onMarkAbsent,
   onRequestLeave,
+  onViewAll,
   page,
   pageSize,
   totalCount,
@@ -69,6 +71,7 @@ function MobileScheduleSection({
   readonly onStartSession?: (id: string) => void;
   readonly onMarkAbsent?: (id: string) => void;
   readonly onRequestLeave?: (id: string) => void;
+  readonly onViewAll?: () => void;
   readonly page: number;
   readonly pageSize: number;
   readonly totalCount?: number;
@@ -80,9 +83,9 @@ function MobileScheduleSection({
         <Typography sx={{ typography: "titleLg", color: theme => theme.palette.primary.main }}>
           {labels.schedule.titleToday}
         </Typography>
-        <Typography sx={{ typography: "labelUppercase", color: theme => theme.palette.primary.main, fontWeight: 700 }}>
+        <PrimaryPageAction variant="text" onClick={onViewAll} sx={{ minWidth: "auto", px: 0 }}>
           {labels.schedule.viewAll}
-        </Typography>
+        </PrimaryPageAction>
       </Box>
       <Stack spacing={2}>
         {scheduleRows.map(row => (
@@ -125,6 +128,7 @@ function DashboardMobileView({
   onStartSession,
   onMarkAbsent,
   onRequestLeave,
+  onViewAll,
   progressFeed,
   page,
   pageSize,
@@ -183,6 +187,7 @@ function DashboardMobileView({
         onStartSession={onStartSession}
         onMarkAbsent={onMarkAbsent}
         onRequestLeave={onRequestLeave}
+        onViewAll={onViewAll}
         page={page ?? 0}
         pageSize={pageSize ?? 10}
         totalCount={totalCount}

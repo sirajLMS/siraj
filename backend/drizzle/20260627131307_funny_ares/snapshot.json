@@ -1,8 +1,8 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "44b59e2b-8f35-4e49-9752-ae7c18856fc9",
-  "prevIds": ["467a537e-b1cc-4467-b472-ed71a294ebda"],
+  "id": "348a06c7-3d07-4a4f-9e83-a88ffd2db696",
+  "prevIds": ["e69f6f3b-00b9-4de5-9a5c-060a41d0425f"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
@@ -434,7 +434,7 @@
       "schema": "public"
     },
     {
-      "values": ["PER_CLASSES", "MONTHLY"],
+      "values": ["PER_CLASSES", "MONTHLY", "MANUAL"],
       "name": "invoice_type",
       "entityType": "enums",
       "schema": "public"

@@ -1,8 +1,9 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { Alert, Snackbar } from "@mui/material";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
@@ -131,6 +132,7 @@ interface ActiveDashboardWrapperProps {
     readonly error?: unknown;
   }>;
   readonly onDateChange: (date: string) => void;
+  readonly onViewAll: () => void;
   readonly page: number;
   readonly pageSize: number;
   readonly onPageChange: (page: number) => void;
@@ -150,6 +152,7 @@ function ActiveDashboardWrapper({
   requestLeave,
   refetchActive,
   onDateChange,
+  onViewAll,
   page,
   pageSize,
   onPageChange,
@@ -228,6 +231,7 @@ function ActiveDashboardWrapper({
         }
       }}
       activationError={activationError}
+      onViewAll={onViewAll}
       page={page}
       pageSize={pageSize}
       totalCount={totalCount}
@@ -244,6 +248,8 @@ interface StandardDashboardWrapperProps {
   readonly handleActivate: (id: string) => Promise<void>;
   readonly handleDownloadHandbook: () => Promise<void>;
   readonly handleSupportRequest: (type: "COORDINATOR" | "SUPPORT") => Promise<void>;
+  readonly showSnackbar: (message: string, severity: "success" | "error" | "info") => void;
+  readonly t: ReturnType<typeof useTranslations<"dashboard.teacherDashboard">>;
   readonly setManualEntryDefaultActive: (val: boolean) => void;
   readonly setManualEntryOpen: (val: boolean) => void;
   readonly onDateChange: (date: string) => void;
@@ -260,6 +266,8 @@ function StandardDashboardWrapper({
   handleActivate,
   handleDownloadHandbook,
   handleSupportRequest,
+  showSnackbar,
+  t: tFunc,
   setManualEntryDefaultActive,
   setManualEntryOpen,
   onDateChange,
@@ -307,7 +315,7 @@ function StandardDashboardWrapper({
         if (row?.zoomMeetingUrl) {
           globalThis.open(row.zoomMeetingUrl, "_blank");
         } else {
-          alert("Meeting URL not available.");
+          showSnackbar(tFunc("errors.meetingUrlNotAvailable"), "error");
         }
       }}
       onActivate={handleActivate}
@@ -326,6 +334,8 @@ function StandardDashboardWrapper({
 
 export function TeacherDashboardContainer() {
   const t = useTranslations("dashboard.teacherDashboard");
+  const locale = useLocale();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const modeParam = searchParams.get("mode");
   const permissions = useUserStore(state => state.permissions);
@@ -334,6 +344,9 @@ export function TeacherDashboardContainer() {
   const [activationError, setActivationError] = useState<string | null>(null);
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
   const [manualEntryDefaultActive, setManualEntryDefaultActive] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "info">("info");
 
   const { filterDate, setFilterDate, page, pageSize, setPage } = useTeacherDashboardStore();
   const mode = resolveTeacherDashboardMode(permissions, modeParam);
@@ -370,11 +383,13 @@ export function TeacherDashboardContainer() {
       if (handbookData?.teacherHandbookUrl?.url) {
         globalThis.open(handbookData.teacherHandbookUrl.url, "_blank");
       } else {
-        alert("Handbook URL not found.");
+        setSnackbarMessage(t("errors.handbookUrlNotFound"));
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       }
       setHandbookRequested(false);
     }
-  }, [handbookRequested, handbookLoading, handbookData]);
+  }, [handbookRequested, handbookLoading, handbookData, t]);
 
   const [activateClass] = useMutation(activateClassMutationDocument);
   const [startClass] = useMutation(updateSessionStatusStartMutationDocument);
@@ -451,7 +466,9 @@ export function TeacherDashboardContainer() {
           },
         },
       });
-      alert(`Support request submitted to ${type.toLowerCase()}.`);
+      setSnackbarMessage(t("supportRequestSubmitted", { type: type.toLowerCase() }));
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
     } catch (err) {
       logger.error("Error logging support request:", err);
     }
@@ -459,6 +476,16 @@ export function TeacherDashboardContainer() {
 
   const handleDownloadHandbook = async () => {
     setHandbookRequested(true);
+  };
+
+  const handleViewAll = () => {
+    router.push(`/${locale}/schedule`);
+  };
+
+  const showSnackbar = (message: string, severity: "success" | "error" | "info") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
   };
 
   return (
@@ -478,6 +505,7 @@ export function TeacherDashboardContainer() {
           requestLeave={requestLeave}
           refetchActive={refetchActive}
           onDateChange={setFilterDate}
+          onViewAll={handleViewAll}
           page={page}
           pageSize={pageSize}
           onPageChange={setPage}
@@ -491,6 +519,8 @@ export function TeacherDashboardContainer() {
           handleActivate={handleActivate}
           handleDownloadHandbook={handleDownloadHandbook}
           handleSupportRequest={handleSupportRequest}
+          showSnackbar={showSnackbar}
+          t={t}
           setManualEntryDefaultActive={setManualEntryDefaultActive}
           setManualEntryOpen={setManualEntryOpen}
           onDateChange={setFilterDate}
@@ -506,6 +536,16 @@ export function TeacherDashboardContainer() {
         onSubmit={handleFormSubmit => handleManualEntrySubmit(handleFormSubmit)}
         defaultActive={manualEntryDefaultActive}
       />
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)} sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </RequirePermission>
   );
 }

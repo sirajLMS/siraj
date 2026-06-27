@@ -1,13 +1,26 @@
 import { and, count, desc, eq, gte, ilike, inArray, isNull, lt, or, type SQL, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
-import { classInstances, invoices, parents, students, teachers, users } from "@/backend/db/schema";
+import {
+  classInstancePerformance,
+  classInstances,
+  invoices,
+  notificationDeliveries,
+  parents,
+  siteContent,
+  students,
+  teachers,
+  users,
+} from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type {
   PaginationArgs,
   ParentCreateResult,
+  ParentDashboardMetricsType,
   ParentDashboardScheduleRow,
   ParentEntityInput,
+  StudentProgressReturnType,
+  WorkshopPromoReturnType,
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
 import type { DBTransaction } from "../db.types";
@@ -528,5 +541,148 @@ export namespace ParentRepository {
     };
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+  };
+
+  export const getParentDashboardMetrics = async (
+    parentId: string,
+    tx?: DBTransaction
+  ): Promise<ParentDashboardMetricsType> => {
+    const queryDb = tx ?? db;
+
+    const parentStudents = await queryDb
+      .select({ id: students.id })
+      .from(students)
+      .where(eq(students.parentId, parentId));
+    const totalStudents = parentStudents.length;
+
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+
+    const studentIds = parentStudents.map(s => s.id);
+
+    let todaysClasses = 0;
+    if (studentIds.length > 0) {
+      const [classCountRow] = await queryDb
+        .select({ count: count() })
+        .from(classInstances)
+        .where(
+          and(
+            inArray(classInstances.studentId, studentIds),
+            isNull(classInstances.deletedAt),
+            gte(classInstances.scheduledStartAt, todayStart),
+            lt(classInstances.scheduledStartAt, todayEnd)
+          )
+        );
+      todaysClasses = classCountRow?.count ?? 0;
+    }
+
+    const [invoiceRow] = await queryDb
+      .select({
+        count: count(),
+        totalAmount: sql<string>`COALESCE(SUM(${invoices.amount}), '0')`,
+      })
+      .from(invoices)
+      .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
+
+    const pendingInvoicesCount = invoiceRow?.count ?? 0;
+    const pendingInvoicesAmount = invoiceRow?.totalAmount ?? "0";
+
+    const [unreadRow] = await queryDb
+      .select({ count: count() })
+      .from(notificationDeliveries)
+      .innerJoin(users, eq(notificationDeliveries.userId, users.id))
+      .innerJoin(parents, eq(parents.userId, users.id))
+      .where(
+        and(
+          eq(parents.id, parentId),
+          eq(notificationDeliveries.status, "DELIVERED"),
+          sql`${notificationDeliveries.openedAt} IS NULL`
+        )
+      );
+
+    const pendingMessages = unreadRow?.count ?? 0;
+
+    const avgResult =
+      studentIds.length > 0
+        ? await queryDb
+            .select({
+              avgScore: sql<number>`COALESCE(AVG(${classInstancePerformance.engagementScore}), 0)`,
+            })
+            .from(classInstancePerformance)
+            .innerJoin(classInstances, eq(classInstancePerformance.classInstanceId, classInstances.id))
+            .where(
+              and(
+                inArray(classInstances.studentId, studentIds),
+                isNull(classInstances.deletedAt),
+                sql`${classInstancePerformance.engagementScore} IS NOT NULL`
+              )
+            )
+        : [{ avgScore: 0 }];
+
+    const performanceAvg = Math.round(avgResult[0]?.avgScore ?? 0);
+    const performanceAvgMobile = Math.round((avgResult[0]?.avgScore ?? 0) / 10);
+
+    return {
+      id: `parent-metrics-${parentId}`,
+      totalStudents,
+      todaysClasses,
+      pendingInvoicesCount,
+      pendingInvoicesAmount,
+      performanceAvg,
+      performanceAvgMobile,
+      pendingMessages,
+    };
+  };
+
+  export const getParentStudentProgress = async (
+    parentId: string,
+    tx?: DBTransaction
+  ): Promise<StudentProgressReturnType[]> => {
+    const queryDb = tx ?? db;
+
+    const parentStudents = await queryDb
+      .select({
+        id: students.id,
+        name: students.name,
+        classesTotal: students.classesTotal,
+        classesRemaining: students.classesRemaining,
+      })
+      .from(students)
+      .where(eq(students.parentId, parentId));
+
+    return parentStudents.map(s => ({
+      id: s.id,
+      name: s.name,
+      completionPercent:
+        s.classesTotal > 0 ? Math.round(((s.classesTotal - s.classesRemaining) / s.classesTotal) * 100) : 0,
+    }));
+  };
+
+  export const getParentWorkshopPromo = async (
+    _parentId: string,
+    tx?: DBTransaction
+  ): Promise<WorkshopPromoReturnType | null> => {
+    const queryDb = tx ?? db;
+
+    const rows = await queryDb
+      .select({
+        id: siteContent.id,
+        title: siteContent.title,
+        body: siteContent.body,
+      })
+      .from(siteContent)
+      .where(and(eq(siteContent.contentType, "workshop_promo"), eq(siteContent.isPublished, true)))
+      .limit(1);
+
+    if (rows.length === 0) return null;
+
+    const row = rows[0];
+    return {
+      id: row.id,
+      title: row.title,
+      description: row.body,
+      imageUrl: "",
+    };
   };
 }

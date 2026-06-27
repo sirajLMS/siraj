@@ -91,4 +91,9 @@ export const dashboard: TeacherDashboardLabels = {
   support: {
     liveSupport: "الدعم المباشر",
   },
+  errors: {
+    meetingUrlNotAvailable: "رابط الاجتماع غير متاح.",
+    handbookUrlNotFound: "رابط دليل المعلم غير موجود.",
+  },
+  supportRequestSubmitted: "تم إرسال طلب الدعم إلى {type}.",
 };

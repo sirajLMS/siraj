@@ -40,3 +40,32 @@ export const parentDashboardScheduleQueryDocument: TypedDocumentNode<
     }
   }
 `;
+
+export const parentDashboardMetricsQueryDocument: TypedDocumentNode<Operations.ParentDashboardMetricsQuery> = gql`
+  query parentDashboardMetrics {
+    parentDashboardMetrics {
+      id
+      metrics {
+        id
+        totalStudents
+        todaysClasses
+        pendingInvoicesCount
+        pendingInvoicesAmount
+        performanceAvg
+        performanceAvgMobile
+        pendingMessages
+      }
+      studentProgress {
+        id
+        name
+        completionPercent
+      }
+      workshopPromo {
+        id
+        title
+        description
+        imageUrl
+      }
+    }
+  }
+`;

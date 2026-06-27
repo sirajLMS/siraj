@@ -2,6 +2,7 @@ export interface AdminDashboardLabels {
   readonly roleLabel: string;
   readonly todayClasses: string;
   readonly updatedMinutesAgo: string;
+  readonly updatedJustNow: string;
   readonly scheduleOverview: string;
   readonly searchPlaceholder: string;
   readonly listOfClassesOn: string;

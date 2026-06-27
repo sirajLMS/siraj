@@ -63,3 +63,34 @@ export type ParentDashboardSchedulePaginatedResult = {
   totalCount: number;
   pageInfo: PageInfo | null;
 };
+
+export type ParentDashboardMetricsType = {
+  id: string;
+  totalStudents: number;
+  todaysClasses: number;
+  pendingInvoicesCount: number;
+  pendingInvoicesAmount: string;
+  performanceAvg: number;
+  performanceAvgMobile: number;
+  pendingMessages: number;
+};
+
+export type StudentProgressReturnType = {
+  id: string;
+  name: string;
+  completionPercent: number;
+};
+
+export type WorkshopPromoReturnType = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+};
+
+export type ParentDashboardMetricsReturnType = {
+  id: string;
+  metrics: ParentDashboardMetricsType;
+  studentProgress: StudentProgressReturnType[];
+  workshopPromo: WorkshopPromoReturnType | null;
+};

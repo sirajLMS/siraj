@@ -975,6 +975,7 @@ type GroupUser {
 }
 
 enum InvoiceType {
+  MANUAL
   MONTHLY
   PER_CLASSES
 }
@@ -1272,6 +1273,24 @@ type ParentComplaintsResult {
   totalCount: Int
 }
 
+type ParentDashboardMetrics {
+  id: String
+  pendingInvoicesAmount: String
+  pendingInvoicesCount: Int
+  pendingMessages: Int
+  performanceAvg: Int
+  performanceAvgMobile: Int
+  todaysClasses: Int
+  totalStudents: Int
+}
+
+type ParentDashboardMetricsResult {
+  id: String
+  metrics: ParentDashboardMetrics
+  studentProgress: [StudentProgress!]
+  workshopPromo: WorkshopPromo
+}
+
 type ParentDashboardScheduleResult {
   id: String
   pageInfo: PageInfo
@@ -1512,6 +1531,7 @@ type Query {
 
   """Returns the authenticated parent's complaint history with pagination."""
   parentComplaints(paginationArgs: PaginationArgs): ParentComplaintsResult
+  parentDashboardMetrics: ParentDashboardMetricsResult
   parentDashboardSchedule(date: String, paginationArgs: PaginationArgs, search: String): ParentDashboardScheduleResult
   parentDirectory(paginationArgs: PaginationArgs, search: String): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
@@ -1753,7 +1773,7 @@ type Student {
   dateOfBirth: DateTime
   email: String
   gender: Gender
-  hoursPerWeek: Int
+  hoursPerWeek: Float
   id: String!
   language: AppLanguage
   name: String!
@@ -1801,7 +1821,7 @@ type StudentDirectoryRow {
   classesTotal: Int
   createdAt: DateTime
   email: String
-  hoursPerWeek: Int
+  hoursPerWeek: Float
   id: String
   name: String
   parentName: String
@@ -1864,6 +1884,12 @@ type StudentHistorySession {
   time: String
   timeSlot: String
   title: String
+}
+
+type StudentProgress {
+  completionPercent: Int
+  id: String
+  name: String
 }
 
 type StudentSessionDetail {
@@ -2323,4 +2349,11 @@ type WeeklyWorkloadMetrics {
   id: String
   totalMinutes: Int
   weeklyHoursWorked: String
+}
+
+type WorkshopPromo {
+  description: String
+  id: String
+  imageUrl: String
+  title: String
 }

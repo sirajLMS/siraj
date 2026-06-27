@@ -30,7 +30,7 @@ interface ParentDashboardViewProps {
   readonly metrics: ParentDashboardMetrics;
   readonly scheduleRows: readonly ParentScheduleRow[];
   readonly studentProgress: readonly StudentProgressItem[];
-  readonly workshopPromo: WorkshopPromo;
+  readonly workshopPromo: WorkshopPromo | null;
   readonly schedulePagination?: SchedulePagination;
   readonly labels: ParentDashboardLabels;
   readonly onFilter: () => void;
@@ -148,10 +148,12 @@ export function ParentDashboardView({
         />
       ) : (
         <Grid container spacing={3}>
-          <Grid size={{ xs: 12, lg: 6 }}>
-            <WorkshopPromoCard promo={workshopPromo} labels={labels.workshop} onLearnMore={onLearnMore} />
-          </Grid>
-          <Grid size={{ xs: 12, lg: 6 }}>
+          {workshopPromo && (
+            <Grid size={{ xs: 12, lg: 6 }}>
+              <WorkshopPromoCard promo={workshopPromo} labels={labels.workshop} onLearnMore={onLearnMore} />
+            </Grid>
+          )}
+          <Grid size={{ xs: 12, lg: workshopPromo ? 6 : 12 }}>
             <AcademicProgressSummary
               studentProgress={studentProgress}
               labels={labels.progress}

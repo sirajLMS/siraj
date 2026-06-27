@@ -3,7 +3,8 @@ import type { AdminDashboardLabels } from "../../../types/dashboard/admin";
 export const admin: AdminDashboardLabels = {
   roleLabel: "لوحة تحكم المدير",
   todayClasses: "حصص اليوم",
-  updatedMinutesAgo: "تم التحديث منذ دقيقتين",
+  updatedMinutesAgo: "تم التحديث منذ {minutes, plural, =1 {دقيقة} other {# دقائق}}",
+  updatedJustNow: "تم التحديث الآن",
   scheduleOverview: "نظرة عامة على الجدول",
   searchPlaceholder: "البحث بالطالب أو رقم الحصة...",
   listOfClassesOn: "قائمة الحصص في",

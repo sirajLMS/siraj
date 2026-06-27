@@ -1026,6 +1026,7 @@ export type GroupUser = {
 };
 
 export enum InvoiceType {
+  Manual = 'MANUAL',
   Monthly = 'MONTHLY',
   PerClasses = 'PER_CLASSES'
 }
@@ -1668,6 +1669,26 @@ export type ParentComplaintsResult = {
   totalCount: Maybe<Scalars['Int']['output']>;
 };
 
+export type ParentDashboardMetrics = {
+  __typename?: 'ParentDashboardMetrics';
+  id: Maybe<Scalars['String']['output']>;
+  pendingInvoicesAmount: Maybe<Scalars['String']['output']>;
+  pendingInvoicesCount: Maybe<Scalars['Int']['output']>;
+  pendingMessages: Maybe<Scalars['Int']['output']>;
+  performanceAvg: Maybe<Scalars['Int']['output']>;
+  performanceAvgMobile: Maybe<Scalars['Int']['output']>;
+  todaysClasses: Maybe<Scalars['Int']['output']>;
+  totalStudents: Maybe<Scalars['Int']['output']>;
+};
+
+export type ParentDashboardMetricsResult = {
+  __typename?: 'ParentDashboardMetricsResult';
+  id: Maybe<Scalars['String']['output']>;
+  metrics: Maybe<ParentDashboardMetrics>;
+  studentProgress: Maybe<Array<StudentProgress>>;
+  workshopPromo: Maybe<WorkshopPromo>;
+};
+
 export type ParentDashboardScheduleResult = {
   __typename?: 'ParentDashboardScheduleResult';
   id: Maybe<Scalars['String']['output']>;
@@ -1902,6 +1923,7 @@ export type Query = {
   parentBillingSummary: Maybe<ParentBillingSummary>;
   /** Returns the authenticated parent's complaint history with pagination. */
   parentComplaints: Maybe<ParentComplaintsResult>;
+  parentDashboardMetrics: Maybe<ParentDashboardMetricsResult>;
   parentDashboardSchedule: Maybe<ParentDashboardScheduleResult>;
   parentDirectory: Maybe<ParentDirectory>;
   parentDocuments: Maybe<Array<ParentDocument>>;
@@ -2413,7 +2435,7 @@ export type Student = {
   dateOfBirth: Maybe<Scalars['DateTime']['output']>;
   email: Maybe<Scalars['String']['output']>;
   gender: Maybe<Gender>;
-  hoursPerWeek: Maybe<Scalars['Int']['output']>;
+  hoursPerWeek: Maybe<Scalars['Float']['output']>;
   id: Scalars['String']['output'];
   language: Maybe<AppLanguage>;
   name: Scalars['String']['output'];
@@ -2464,7 +2486,7 @@ export type StudentDirectoryRow = {
   classesTotal: Maybe<Scalars['Int']['output']>;
   createdAt: Maybe<Scalars['DateTime']['output']>;
   email: Maybe<Scalars['String']['output']>;
-  hoursPerWeek: Maybe<Scalars['Int']['output']>;
+  hoursPerWeek: Maybe<Scalars['Float']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   parentName: Maybe<Scalars['String']['output']>;
@@ -2529,6 +2551,13 @@ export type StudentHistorySession = {
   time: Maybe<Scalars['String']['output']>;
   timeSlot: Maybe<Scalars['String']['output']>;
   title: Maybe<Scalars['String']['output']>;
+};
+
+export type StudentProgress = {
+  __typename?: 'StudentProgress';
+  completionPercent: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
 };
 
 export type StudentSessionDetail = {
@@ -2987,4 +3016,12 @@ export type WeeklyWorkloadMetrics = {
   id: Maybe<Scalars['String']['output']>;
   totalMinutes: Maybe<Scalars['Int']['output']>;
   weeklyHoursWorked: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkshopPromo = {
+  __typename?: 'WorkshopPromo';
+  description: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  imageUrl: Maybe<Scalars['String']['output']>;
+  title: Maybe<Scalars['String']['output']>;
 };

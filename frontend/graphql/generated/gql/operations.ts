@@ -475,6 +475,7 @@ export type Gender =
   | 'MALE';
 
 export type InvoiceType =
+  | 'MANUAL'
   | 'MONTHLY'
   | 'PER_CLASSES';
 
@@ -1355,6 +1356,22 @@ export type ParentDashboardScheduleQueryVariables = Exact<{
 
 
 export type ParentDashboardScheduleQuery = ParentDashboardScheduleQuery_Query;
+
+export type ParentDashboardMetricsQuery_parentDashboardMetrics_ParentDashboardMetricsResult_metrics_ParentDashboardMetrics = { id: string | null, totalStudents: number | null, todaysClasses: number | null, pendingInvoicesCount: number | null, pendingInvoicesAmount: string | null, performanceAvg: number | null, performanceAvgMobile: number | null, pendingMessages: number | null };
+
+export type ParentDashboardMetricsQuery_parentDashboardMetrics_ParentDashboardMetricsResult_studentProgress_StudentProgress = { id: string | null, name: string | null, completionPercent: number | null };
+
+export type ParentDashboardMetricsQuery_parentDashboardMetrics_ParentDashboardMetricsResult_workshopPromo_WorkshopPromo = { id: string | null, title: string | null, description: string | null, imageUrl: string | null };
+
+export type ParentDashboardMetricsQuery_parentDashboardMetrics_ParentDashboardMetricsResult = { id: string | null, metrics: ParentDashboardMetricsQuery_parentDashboardMetrics_ParentDashboardMetricsResult_metrics_ParentDashboardMetrics | null, studentProgress: Array<ParentDashboardMetricsQuery_parentDashboardMetrics_ParentDashboardMetricsResult_studentProgress_StudentProgress> | null, workshopPromo: ParentDashboardMetricsQuery_parentDashboardMetrics_ParentDashboardMetricsResult_workshopPromo_WorkshopPromo | null };
+
+export type ParentDashboardMetricsQuery_Query = { parentDashboardMetrics: ParentDashboardMetricsQuery_parentDashboardMetrics_ParentDashboardMetricsResult | null };
+
+
+export type ParentDashboardMetricsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ParentDashboardMetricsQuery = ParentDashboardMetricsQuery_Query;
 
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null, regular: number | null, onLeave: number | null, suspended: number | null, onTrial: number | null };
 

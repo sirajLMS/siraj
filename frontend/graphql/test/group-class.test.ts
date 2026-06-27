@@ -4,27 +4,42 @@ import {
   resendClassNotificationsMutationDocument,
   updateClassAdminNoteMutationDocument,
 } from "../sharedDocuments";
+import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
 import { authenticatedRequest, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
-const SEEDED_CLASS_INSTANCE_ID = "cdbf985e-871d-492a-a86e-1c2cf1572893";
+const TODAY = new Date().toISOString().split("T")[0];
 
 describe("GraphQL: groupClassAudit query", () => {
   setupTestServerLifecycle();
 
   let adminToken = "";
+  let classInstanceId = "";
 
-  test("login as academy_admin", async () => {
+  test("login as academy_admin and fetch a valid classInstanceId from schedule", async () => {
     adminToken = await loginDemoUser("academy_admin");
     expect(adminToken).not.toBeNull();
+
+    const result = await testClient.query({
+      query: dailyScheduleListQueryDocument,
+      variables: { date: TODAY, teacherId: null, search: null, metricFilter: null },
+      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+    });
+
+    expect(result.error).toBeUndefined();
+    const rows = result.data?.dailyScheduleList;
+    expect(Array.isArray(rows)).toBeTrue();
+    const firstRow = rows?.find((r: { id?: string | null }) => r?.id);
+    expect(firstRow?.id).toBeTruthy();
+    classInstanceId = firstRow?.id ?? "";
   });
 
   test("admin can query groupClassAudit with valid classInstanceId", async () => {
     const result = await testClient.query({
       query: groupClassAuditQueryDocument,
-      variables: { classInstanceId: SEEDED_CLASS_INSTANCE_ID },
+      variables: { classInstanceId },
       context: { headers: { Authorization: `Bearer ${adminToken}` } },
     });
 
@@ -64,15 +79,29 @@ describe("GraphQL: updateClassAdminNote mutation", () => {
   setupTestServerLifecycle();
 
   let adminToken = "";
+  let classInstanceId = "";
 
-  test("login as academy_admin", async () => {
+  test("login as academy_admin and fetch a valid classInstanceId from schedule", async () => {
     adminToken = await loginDemoUser("academy_admin");
     expect(adminToken).not.toBeNull();
+
+    const result = await testClient.query({
+      query: dailyScheduleListQueryDocument,
+      variables: { date: TODAY, teacherId: null, search: null, metricFilter: null },
+      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+    });
+
+    expect(result.error).toBeUndefined();
+    const rows = result.data?.dailyScheduleList;
+    expect(Array.isArray(rows)).toBeTrue();
+    const firstRow = rows?.find((r: { id?: string | null }) => r?.id);
+    expect(firstRow?.id).toBeTruthy();
+    classInstanceId = firstRow?.id ?? "";
   });
 
   test("admin can update admin note", async () => {
     const data = await authenticatedRequest(adminToken, "mutate", updateClassAdminNoteMutationDocument, {
-      classInstanceId: SEEDED_CLASS_INSTANCE_ID,
+      classInstanceId,
       content: "Updated by integration test",
     });
 
@@ -97,16 +126,30 @@ describe("GraphQL: resendClassNotifications mutation", () => {
   setupTestServerLifecycle();
 
   let adminToken = "";
+  let classInstanceId = "";
 
-  test("login as academy_admin", async () => {
+  test("login as academy_admin and fetch a valid classInstanceId from schedule", async () => {
     adminToken = await loginDemoUser("academy_admin");
     expect(adminToken).not.toBeNull();
+
+    const result = await testClient.query({
+      query: dailyScheduleListQueryDocument,
+      variables: { date: TODAY, teacherId: null, search: null, metricFilter: null },
+      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+    });
+
+    expect(result.error).toBeUndefined();
+    const rows = result.data?.dailyScheduleList;
+    expect(Array.isArray(rows)).toBeTrue();
+    const firstRow = rows?.find((r: { id?: string | null }) => r?.id);
+    expect(firstRow?.id).toBeTruthy();
+    classInstanceId = firstRow?.id ?? "";
   });
 
   test("resendClassNotifications returns result or permission error for valid classInstanceId", async () => {
     const result = await testClient.mutate({
       mutation: resendClassNotificationsMutationDocument,
-      variables: { classInstanceId: SEEDED_CLASS_INSTANCE_ID },
+      variables: { classInstanceId },
       context: { headers: { Authorization: `Bearer ${adminToken}` } },
     });
 

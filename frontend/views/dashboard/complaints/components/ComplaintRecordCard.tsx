@@ -104,7 +104,7 @@ interface ComplaintRecordCardProps {
 
 function mapStatusForBadge(status: ComplaintStatus): string {
   if (status === ComplaintStatus.Answered) {
-    return "paid";
+    return "completed";
   }
 
   return "pending";
@@ -124,7 +124,7 @@ export function ComplaintRecordCard({ record, labels }: Readonly<ComplaintRecord
             <StyledRecordSummaryText variant="bodyLg">{record.summary}</StyledRecordSummaryText>
           </Box>
           <StatusBadge
-            category="invoice"
+            category="classStatus"
             status={mapStatusForBadge(record.status)}
             label={labels.statusLabels[labelKey]}
           />

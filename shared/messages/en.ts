@@ -721,7 +721,8 @@ const en: MessageSchema = {
     admin: {
       roleLabel: "Admin Dashboard",
       todayClasses: "Today Classes",
-      updatedMinutesAgo: "Updated 2 minutes ago",
+      updatedMinutesAgo: "Updated {minutes, plural, =1 {1 minute} other {# minutes}} ago",
+      updatedJustNow: "Updated just now",
       scheduleOverview: "Schedule Overview",
       searchPlaceholder: "Search by Student or Class ID...",
       listOfClassesOn: "List of Classes on",
@@ -1806,6 +1807,11 @@ const en: MessageSchema = {
       support: {
         liveSupport: "Live Support",
       },
+      errors: {
+        meetingUrlNotAvailable: "Meeting URL not available.",
+        handbookUrlNotFound: "Handbook URL not found.",
+      },
+      supportRequestSubmitted: "Support request submitted to {type}.",
     },
     reports: {
       pageTitle: "Master Reporting Engine",

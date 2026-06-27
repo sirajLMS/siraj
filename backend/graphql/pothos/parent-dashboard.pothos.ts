@@ -1,4 +1,9 @@
-import type { PageInfo } from "@/backend/types";
+import type {
+  PageInfo,
+  ParentDashboardMetricsType,
+  StudentProgressReturnType,
+  WorkshopPromoReturnType,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PageInfoObject } from "./pagination.objects";
 
@@ -60,5 +65,60 @@ export const ParentDashboardScheduleResultPothosObject = ParentDashboardSchedule
     rows: t.expose("rows", { type: [ParentDashboardScheduleRowRef] }),
     totalCount: t.exposeInt("totalCount"),
     pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
+  }),
+});
+
+const ParentDashboardMetricsRef = gqlSchemaBuilder.objectRef<ParentDashboardMetricsType>("ParentDashboardMetrics");
+
+export const ParentDashboardMetricsPothosObject = ParentDashboardMetricsRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    totalStudents: t.exposeInt("totalStudents"),
+    todaysClasses: t.exposeInt("todaysClasses"),
+    pendingInvoicesCount: t.exposeInt("pendingInvoicesCount"),
+    pendingInvoicesAmount: t.exposeString("pendingInvoicesAmount"),
+    performanceAvg: t.exposeInt("performanceAvg"),
+    performanceAvgMobile: t.exposeInt("performanceAvgMobile"),
+    pendingMessages: t.exposeInt("pendingMessages"),
+  }),
+});
+
+const StudentProgressRef = gqlSchemaBuilder.objectRef<StudentProgressReturnType>("StudentProgress");
+
+export const StudentProgressPothosObject = StudentProgressRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    name: t.exposeString("name"),
+    completionPercent: t.exposeInt("completionPercent"),
+  }),
+});
+
+const WorkshopPromoRef = gqlSchemaBuilder.objectRef<WorkshopPromoReturnType>("WorkshopPromo");
+
+export const WorkshopPromoPothosObject = WorkshopPromoRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    title: t.exposeString("title"),
+    description: t.exposeString("description"),
+    imageUrl: t.exposeString("imageUrl"),
+  }),
+});
+
+export type ParentDashboardMetricsResultDefinition = {
+  id: string;
+  metrics: ParentDashboardMetricsType;
+  studentProgress: StudentProgressReturnType[];
+  workshopPromo: WorkshopPromoReturnType | null;
+};
+
+const ParentDashboardMetricsResultRef =
+  gqlSchemaBuilder.objectRef<ParentDashboardMetricsResultDefinition>("ParentDashboardMetricsResult");
+
+export const ParentDashboardMetricsResultPothosObject = ParentDashboardMetricsResultRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    metrics: t.expose("metrics", { type: ParentDashboardMetricsRef }),
+    studentProgress: t.expose("studentProgress", { type: [StudentProgressRef] }),
+    workshopPromo: t.expose("workshopPromo", { type: WorkshopPromoRef, nullable: true }),
   }),
 });

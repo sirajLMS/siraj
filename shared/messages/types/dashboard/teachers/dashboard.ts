@@ -87,4 +87,9 @@ export interface TeacherDashboardLabels {
   readonly support: {
     readonly liveSupport: string;
   };
+  readonly errors: {
+    readonly meetingUrlNotAvailable: string;
+    readonly handbookUrlNotFound: string;
+  };
+  readonly supportRequestSubmitted: string;
 }

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { adminDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
@@ -55,6 +55,30 @@ export function AdminDashboardContainer() {
     },
     fetchPolicy: "cache-and-network",
   });
+
+  const dataArrivedAtRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (dashboardData) {
+      dataArrivedAtRef.current = Date.now();
+    }
+  }, [dashboardData]);
+
+  const [_relativeTimeTick, setRelativeTimeTick] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRelativeTimeTick(prev => prev + 1);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const lastUpdated = useMemo(() => {
+    if (!dataArrivedAtRef.current) return t("admin.updatedMinutesAgo");
+    const elapsedMs = Date.now() - dataArrivedAtRef.current;
+    const elapsedMin = Math.floor(elapsedMs / 60000);
+    if (elapsedMin < 1) return t("admin.updatedJustNow");
+    return t("admin.updatedMinutesAgo", { minutes: elapsedMin });
+  }, [t]);
 
   const handleDateChange = (date: string) => {
     setDateFilter(date);
@@ -111,7 +135,7 @@ export function AdminDashboardContainer() {
   return (
     <DashboardView
       todayClassesTitle={t("admin.todayClasses")}
-      lastUpdated={t("admin.updatedMinutesAgo")}
+      lastUpdated={lastUpdated}
       metrics={metricsList}
       onMetricClick={handleMetricClick}
       selectedMetricKey={filters.selectedStatus ?? undefined}

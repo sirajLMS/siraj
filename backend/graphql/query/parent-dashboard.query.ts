@@ -4,7 +4,10 @@ import { PaginationArgs } from "@/backend/types";
 import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PaginationArgsObject } from "../pothos/pagination.objects";
-import { ParentDashboardScheduleResultPothosObject } from "../pothos/parent-dashboard.pothos";
+import {
+  ParentDashboardMetricsResultPothosObject,
+  ParentDashboardScheduleResultPothosObject,
+} from "../pothos/parent-dashboard.pothos";
 
 async function requireAuth(ctx: BaseContext): Promise<string> {
   if (!ctx.user?.id) {
@@ -53,6 +56,17 @@ gqlSchemaBuilder.queryField("parentDashboardSchedule", t =>
         totalCount: result.totalCount,
         pageInfo: result.pageInfo,
       };
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("parentDashboardMetrics", t =>
+  t.field({
+    type: ParentDashboardMetricsResultPothosObject,
+    authScopes: { loggedIn: true },
+    resolve: async (_parent, _args, ctx) => {
+      const userId = await requireAuth(ctx);
+      return await ParentDashboardService.getDashboardMetrics(userId, ctx.locale);
     },
   })
 );

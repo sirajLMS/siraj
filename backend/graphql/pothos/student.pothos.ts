@@ -46,7 +46,7 @@ export const StudentPothosObject = gqlSchemaBuilder
       }),
       classesTotal: t.exposeInt("classesTotal", { nullable: false }),
       classesRemaining: t.exposeInt("classesRemaining", { nullable: false }),
-      hoursPerWeek: t.int({
+      hoursPerWeek: t.float({
         resolve: s => s.hoursPerWeek ?? 0,
       }),
       createdAt: t.expose("createdAt", {

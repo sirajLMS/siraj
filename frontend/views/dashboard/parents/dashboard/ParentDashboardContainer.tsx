@@ -1,14 +1,22 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { parentDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import {
+  parentDashboardMetricsQueryDocument,
+  parentDashboardScheduleQueryDocument,
+} from "@/frontend/graphql/sharedDocuments";
 import { useParentDashboardStore } from "@/frontend/stores/parentDashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { logger } from "@/frontend/utils/logger";
 import { ParentDashboardView } from "./ParentDashboardView";
-import type { ParentScheduleRow } from "./types/parentDashboardTypes";
+import type {
+  ParentDashboardMetrics,
+  ParentScheduleRow,
+  StudentProgressItem,
+  WorkshopPromo,
+} from "./types/parentDashboardTypes";
 
 function mapExecutionStateToLiveClassStatus(
   executionState: string,
@@ -124,47 +132,11 @@ function useDashboardLabels(
   );
 }
 
-function useDashboardHandlers(setPage: (page: number) => void) {
-  return useMemo(
-    () => ({
-      handleFilter: () => {
-        logger.info("Parent dashboard filter clicked");
-      },
-      handleViewFullWeek: () => {
-        logger.info("Parent dashboard view full week clicked");
-      },
-      handleViewAll: () => {
-        logger.info("Parent dashboard view all schedule clicked");
-      },
-      handleHistory: (id: string) => {
-        logger.info("Parent dashboard history clicked", { id });
-      },
-      handleJoinVideo: (id: string) => {
-        logger.info("Parent dashboard join video clicked", { id });
-      },
-      handleDownloadReport: () => {
-        logger.info("Parent dashboard download report clicked");
-      },
-      handleLearnMore: () => {
-        logger.info("Parent dashboard workshop learn more clicked");
-      },
-      handleSupport: () => {
-        logger.info("Parent dashboard live support clicked");
-      },
-      handlePageChange: (newPage: number) => {
-        setPage(newPage);
-      },
-    }),
-    [setPage]
-  );
-}
-
 export function ParentDashboardContainer() {
   const t = useTranslations("dashboard.parentDashboard");
+  const locale = useLocale();
+  const router = useRouter();
   const userName = useUserStore(state => state.name);
-  const metrics = useParentDashboardStore(state => state.metrics);
-  const studentProgress = useParentDashboardStore(state => state.studentProgress);
-  const workshopPromo = useParentDashboardStore(state => state.workshopPromo);
   const page = useParentDashboardStore(state => state.page);
   const pageSize = useParentDashboardStore(state => state.pageSize);
   const setPage = useParentDashboardStore(state => state.setPage);
@@ -188,15 +160,89 @@ export function ParentDashboardContainer() {
     return d.toISOString().split("T")[0];
   }, []);
 
-  const { data } = useQuery(parentDashboardScheduleQueryDocument, {
+  const { data: scheduleData } = useQuery(parentDashboardScheduleQueryDocument, {
     variables: { date: today, search: null, paginationArgs },
     fetchPolicy: "cache-and-network",
   });
 
-  const scheduleRows = useScheduleRows(data);
-  const totalCount = data?.parentDashboardSchedule?.totalCount ?? 0;
+  const { data: metricsData } = useQuery(parentDashboardMetricsQueryDocument, {
+    fetchPolicy: "cache-and-network",
+  });
+
+  const metricsResult = metricsData?.parentDashboardMetrics;
+  const metrics: ParentDashboardMetrics = useMemo(
+    () => ({
+      totalStudents: metricsResult?.metrics?.totalStudents ?? 0,
+      todaysClasses: metricsResult?.metrics?.todaysClasses ?? 0,
+      pendingInvoicesCount: metricsResult?.metrics?.pendingInvoicesCount ?? 0,
+      pendingInvoicesAmount: metricsResult?.metrics?.pendingInvoicesAmount ?? "0",
+      performanceAvg: metricsResult?.metrics?.performanceAvg ?? 0,
+      performanceAvgMobile: metricsResult?.metrics?.performanceAvgMobile ?? 0,
+      pendingMessages: metricsResult?.metrics?.pendingMessages ?? 0,
+    }),
+    [metricsResult]
+  );
+
+  const studentProgress: readonly StudentProgressItem[] = useMemo(
+    () =>
+      (metricsResult?.studentProgress ?? []).map(s => ({
+        id: s?.id ?? "",
+        name: s?.name ?? "",
+        completionPercent: s?.completionPercent ?? 0,
+      })),
+    [metricsResult]
+  );
+
+  const workshopPromo: WorkshopPromo | null = useMemo(() => {
+    const wp = metricsResult?.workshopPromo;
+    if (!wp) return null;
+    return { title: wp.title ?? "", description: wp.description ?? "", imageUrl: wp.imageUrl ?? "" };
+  }, [metricsResult]);
+
+  const scheduleRows = useScheduleRows(scheduleData);
+  const totalCount = scheduleData?.parentDashboardSchedule?.totalCount ?? 0;
   const labels = useDashboardLabels(t, userName, metrics.pendingMessages);
-  const handlers = useDashboardHandlers(setPage);
+
+  const rawScheduleRows = scheduleData?.parentDashboardSchedule?.rows;
+
+  const handlers = useMemo(
+    () => ({
+      handleFilter: () => {
+        router.push(`/${locale}/schedule`);
+      },
+      handleViewFullWeek: () => {
+        router.push(`/${locale}/schedule`);
+      },
+      handleViewAll: () => {
+        router.push(`/${locale}/schedule`);
+      },
+      handleHistory: (id: string) => {
+        router.push(`/${locale}/students/${id}/history`);
+      },
+      handleJoinVideo: (id: string) => {
+        const row = rawScheduleRows?.find(r => r?.id === id);
+        const url = row?.zoomMeetingUrl;
+        if (url) {
+          globalThis.open(url, "_blank");
+        }
+      },
+      handleDownloadReport: () => {
+        router.push(`/${locale}/reports`);
+      },
+      handleLearnMore: () => {
+        if (workshopPromo?.title) {
+          router.push(`/${locale}/workshops`);
+        }
+      },
+      handleSupport: () => {
+        router.push(`/${locale}/support`);
+      },
+      handlePageChange: (newPage: number) => {
+        setPage(newPage);
+      },
+    }),
+    [router, locale, rawScheduleRows, workshopPromo, setPage]
+  );
 
   if (totalCount !== useParentDashboardStore.getState().scheduleTotalCount) {
     setScheduleTotalCount(totalCount);

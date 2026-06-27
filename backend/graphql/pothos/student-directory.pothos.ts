@@ -22,7 +22,7 @@ export const StudentDirectoryRowPothosObject = gqlSchemaBuilder
       status: t.exposeString("status"),
       classesRemaining: t.exposeInt("classesRemaining"),
       classesTotal: t.exposeInt("classesTotal"),
-      hoursPerWeek: t.int({
+      hoursPerWeek: t.float({
         resolve: parent => parent.hoursPerWeek ?? 0,
       }),
       parentName: t.exposeString("parentName", { nullable: true }),

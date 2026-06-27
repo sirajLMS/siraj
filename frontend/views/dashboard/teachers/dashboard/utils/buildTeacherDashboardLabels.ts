@@ -113,5 +113,10 @@ export function buildTeacherDashboardLabels(t: TeacherDashboardTranslator): Teac
     support: {
       liveSupport: t("support.liveSupport"),
     },
+    errors: {
+      meetingUrlNotAvailable: t("errors.meetingUrlNotAvailable"),
+      handbookUrlNotFound: t("errors.handbookUrlNotFound"),
+    },
+    supportRequestSubmitted: t.raw("supportRequestSubmitted") as string,
   };
 }

@@ -1,7 +1,11 @@
 import { ParentRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { PaginationArgs, ParentDashboardSchedulePaginatedResult } from "@/backend/types";
+import type {
+  PaginationArgs,
+  ParentDashboardMetricsReturnType,
+  ParentDashboardSchedulePaginatedResult,
+} from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ParentDashboardService {
@@ -31,5 +35,35 @@ export namespace ParentDashboardService {
     });
 
     return result;
+  }
+
+  export async function getDashboardMetrics(
+    actorUserId: string,
+    locale?: string
+  ): Promise<ParentDashboardMetricsReturnType> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SCHEDULE_VIEW_FAMILY);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    const parent = await ParentRepository.findByUserId(actorUserId);
+    if (!parent) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("parentNotFound", { id: actorUserId }));
+    }
+
+    const [metrics, studentProgress, workshopPromo] = await Promise.all([
+      ParentRepository.getParentDashboardMetrics(parent.id),
+      ParentRepository.getParentStudentProgress(parent.id),
+      ParentRepository.getParentWorkshopPromo(parent.id),
+    ]);
+
+    return {
+      id: `parent-dashboard-metrics-${parent.id}`,
+      metrics,
+      studentProgress,
+      workshopPromo,
+    };
   }
 }
