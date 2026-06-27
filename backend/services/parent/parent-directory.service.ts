@@ -2,7 +2,7 @@ import { ParentRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { PaginationArgs } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
+import { AppPermission, type ParentStatus } from "@/shared/lib/enum";
 
 export interface ParentDirectoryMetrics {
   readonly id: string;
@@ -22,7 +22,7 @@ export interface ParentDirectoryRow {
   readonly avatarUrl: string | null;
   readonly guardianOf: string;
   readonly time: string;
-  readonly accountStatus: string;
+  readonly accountStatus: ParentStatus;
   readonly unpaidInvoices: number;
 }
 
@@ -43,6 +43,7 @@ export namespace ParentDirectoryService {
     actorUserId: string,
     search: string | null,
     pagination: PaginationArgs | null,
+    accountStatus: ParentStatus | null,
     locale?: string
   ): Promise<ParentDirectoryResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.PARENT_VIEW_DIRECTORY);
@@ -56,7 +57,7 @@ export namespace ParentDirectoryService {
       rows: rawRows,
       totalCount,
       pageInfo,
-    } = await ParentRepository.getParentDirectory({ search, pagination });
+    } = await ParentRepository.getParentDirectory({ search, pagination, accountStatus });
 
     const rows: ParentDirectoryRow[] = [];
     for (let i = 0; i < rawRows.length; i++) {
@@ -72,7 +73,7 @@ export namespace ParentDirectoryService {
         avatarUrl: row.avatarUrl,
         guardianOf,
         time: row.updatedAt.toLocaleTimeString(),
-        accountStatus: row.status.toLowerCase(),
+        accountStatus: row.status as ParentStatus,
         unpaidInvoices: row.unpaidInvoices,
       });
     }

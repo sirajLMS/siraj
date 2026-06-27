@@ -1,4 +1,6 @@
+import type { ParentStatus } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { ParentStatusPothosEnum } from "./enum.pothos";
 import { PageInfoObject } from "./pagination.objects";
 
 export type ParentDirectoryMetricsDefinition = {
@@ -34,7 +36,7 @@ export type ParentDirectoryRowDefinition = {
   avatarUrl: string | null;
   guardianOf: string;
   time: string;
-  accountStatus: string;
+  accountStatus: ParentStatus;
   unpaidInvoices: number;
 };
 
@@ -49,7 +51,7 @@ export const ParentDirectoryRowPothosObject = ParentDirectoryRowRef.implement({
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     guardianOf: t.exposeString("guardianOf"),
     time: t.exposeString("time"),
-    accountStatus: t.exposeString("accountStatus"),
+    accountStatus: t.expose("accountStatus", { type: ParentStatusPothosEnum }),
     unpaidInvoices: t.exposeInt("unpaidInvoices"),
   }),
 });

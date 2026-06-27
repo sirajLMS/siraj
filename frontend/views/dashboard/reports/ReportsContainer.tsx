@@ -2,16 +2,14 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import {
-  AppPermission,
-  type AttendanceReportRow,
-  ReportGroupingMode,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+import type { AttendanceReportRow } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, ReportGroupingMode } from "@/frontend/graphql/generated/gql/graphql-types";
 import { generateAttendanceReportQueryDocument } from "@/frontend/graphql/sharedDocuments/report.documents";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { exportAttendanceReport } from "@/frontend/utils/excel-export/report-export";
 import { logger } from "@/frontend/utils/logger";
 import { ReportsView } from "./ReportsView";
 import type { ReportLedgerRow, ReportsSummary, ReportType } from "./types/reportsTypes";
@@ -50,66 +48,14 @@ function mapReportRows(reportRows: readonly AttendanceReportRow[] | null | undef
   }));
 }
 
-interface ReportsSummarySectionProps {
-  readonly rows: readonly ReportLedgerRow[];
-  readonly reportData:
-    | { readonly generateAttendanceReport: readonly AttendanceReportRow[] | null | undefined }
-    | undefined;
-  readonly children: (summary: ReportsSummary) => React.ReactNode;
-}
-
-function ReportsSummarySection({ rows, reportData, children }: ReportsSummarySectionProps) {
-  const summary = useMemo<ReportsSummary>(() => {
-    if (rows.length === 0) {
-      return {
-        engagementRate: 0,
-        engagementGrowth: 0,
-        egpPercent: 100,
-        usdPercent: 0,
-        totalHours: "0:00",
-        totalEgp: 0,
-        totalUsd: 0,
-      };
-    }
-
-    const totalTaken = rows.reduce((sum, r) => sum + r.taken, 0);
-    const totalAbsent = rows.reduce((sum, r) => sum + r.absent, 0);
-    const totalLeave = rows.reduce((sum, r) => sum + r.leave, 0);
-    const totalAttempted = totalTaken + totalAbsent + totalLeave;
-
-    const engagementRate = totalAttempted > 0 ? Math.round((totalTaken / totalAttempted) * 1000) / 10 : 0;
-    const engagementGrowth = 12.4;
-
-    const totalHoursFloat =
-      reportData?.generateAttendanceReport?.reduce(
-        (sum: number, r: AttendanceReportRow) => sum + (r.totalHours ?? 0),
-        0
-      ) ?? 0;
-
-    const totalEgp = rows.reduce((sum, r) => sum + r.paidEgp, 0);
-    const totalUsd = rows.reduce((sum, r) => sum + r.paidUsd, 0);
-    const totalPaid = totalEgp + totalUsd;
-
-    const egpPercent = totalPaid > 0 ? Math.round((totalEgp / totalPaid) * 100) : 100;
-    const usdPercent = totalPaid > 0 ? 100 - egpPercent : 0;
-
-    return {
-      engagementRate,
-      engagementGrowth,
-      egpPercent,
-      usdPercent,
-      totalHours: formatHours(totalHoursFloat),
-      totalEgp,
-      totalUsd,
-    };
-  }, [rows, reportData]);
-
-  return children(summary);
-}
-
 interface ReportsMainContentProps {
   readonly reportData:
-    | { readonly generateAttendanceReport: readonly AttendanceReportRow[] | null | undefined }
+    | {
+        readonly generateAttendanceReport?: {
+          readonly rows?: readonly AttendanceReportRow[] | null;
+          readonly engagementGrowth?: number | null;
+        } | null;
+      }
     | undefined;
   readonly summary: ReportsSummary;
   readonly fromDate: string;
@@ -146,7 +92,7 @@ function ReportsMainContent({
 }: ReportsMainContentProps) {
   const t = useTranslations("dashboard.reports");
 
-  const rows = useMemo(() => mapReportRows(reportData?.generateAttendanceReport), [reportData]);
+  const rows = useMemo(() => mapReportRows(reportData?.generateAttendanceReport?.rows), [reportData]);
 
   const labels = {
     pageTitle: t("pageTitle"),
@@ -226,9 +172,16 @@ function ReportsMainContent({
   );
 }
 
+function mapReportTypeToGroupingMode(reportType: ReportType): ReportGroupingMode {
+  if (reportType === "by_date") return ReportGroupingMode.Date;
+  if (reportType === "by_student") return ReportGroupingMode.Student;
+  return ReportGroupingMode.Teacher;
+}
+
 export function ReportsContainer() {
   const { hasPermission } = useUserStore();
   const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
+  const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
 
   const [fromDate, setFromDate] = useState("2023-08-01");
   const [toDate, setToDate] = useState("2023-08-31");
@@ -265,55 +218,122 @@ export function ReportsContainer() {
     fetchPolicy: "network-only",
   });
 
-  const rows = useMemo(() => mapReportRows(reportData?.generateAttendanceReport), [reportData]);
+  const rows = useMemo(() => mapReportRows(reportData?.generateAttendanceReport?.rows), [reportData]);
 
-  const handleSubmit = () => {
+  const summary = useMemo<ReportsSummary>(() => {
+    if (rows.length === 0) {
+      return {
+        engagementRate: 0,
+        engagementGrowth: null,
+        egpPercent: 100,
+        usdPercent: 0,
+        totalHours: "0:00",
+        totalEgp: 0,
+        totalUsd: 0,
+      };
+    }
+
+    const totalTaken = rows.reduce((sum, r) => sum + r.taken, 0);
+    const totalAbsent = rows.reduce((sum, r) => sum + r.absent, 0);
+    const totalLeave = rows.reduce((sum, r) => sum + r.leave, 0);
+    const totalAttempted = totalTaken + totalAbsent + totalLeave;
+
+    const engagementRate = totalAttempted > 0 ? Math.round((totalTaken / totalAttempted) * 1000) / 10 : 0;
+    const engagementGrowth = reportData?.generateAttendanceReport?.engagementGrowth ?? null;
+
+    const totalHoursFloat =
+      reportData?.generateAttendanceReport?.rows?.reduce(
+        (sum: number, r: AttendanceReportRow) => sum + (r.totalHours ?? 0),
+        0
+      ) ?? 0;
+
+    const totalEgp = rows.reduce((sum, r) => sum + r.paidEgp, 0);
+    const totalUsd = rows.reduce((sum, r) => sum + r.paidUsd, 0);
+    const totalPaid = totalEgp + totalUsd;
+
+    const egpPercent = totalPaid > 0 ? Math.round((totalEgp / totalPaid) * 100) : 100;
+    const usdPercent = totalPaid > 0 ? 100 - egpPercent : 0;
+
+    return {
+      engagementRate,
+      engagementGrowth,
+      egpPercent,
+      usdPercent,
+      totalHours: formatHours(totalHoursFloat),
+      totalEgp,
+      totalUsd,
+    };
+  }, [rows, reportData]);
+
+  const handleSubmit = useCallback(() => {
     if (fromDate > toDate) {
       logger.warn("From date must be before or equal to To date");
       return;
     }
 
-    const mappedGroupBy = reportType === "by_date" ? ReportGroupingMode.Date : ReportGroupingMode.Teacher;
-
     setActiveFilters({
       fromDate,
       toDate,
       teacherId: teacherId || null,
-      groupBy: mappedGroupBy,
+      groupBy: mapReportTypeToGroupingMode(reportType),
     });
-  };
+  }, [fromDate, toDate, teacherId, reportType]);
 
-  const handleExportCsv = () => {
-    logger.info("Export CSV requested");
-  };
+  const handleExportCsv = useCallback(() => {
+    exportAttendanceReport({
+      rows,
+      summary,
+      labels: {
+        pageTitle: "Attendance Report",
+        tableLabels: {
+          name: "Name",
+          taken: "Taken",
+          absent: "Absent",
+          leave: "Leave",
+          pending: "Pending",
+          hours: "Hours",
+          paidEgp: "Paid (EGP)",
+          paidUsd: "Paid (USD)",
+        },
+        totalsLabel: "Totals",
+        summaryLabels: {
+          engagementRate: "Engagement Rate",
+          financialDistribution: "Currency Split",
+          egpLabel: "EGP",
+          usdLabel: "USD",
+        },
+      },
+      fromDate,
+      toDate,
+      showFinancials,
+    }).catch((error: unknown) => {
+      logger.error("Excel export failed", error);
+    });
+  }, [rows, summary, fromDate, toDate, showFinancials]);
 
-  const handlePrintReport = () => {
-    logger.info("Print report requested");
-  };
+  const handlePrintReport = useCallback(() => {
+    window.print();
+  }, []);
 
   return (
     <RequirePermission permissions={[AppPermission.ReportGenerateCustom]}>
-      <ReportsSummarySection rows={rows} reportData={reportData}>
-        {summary => (
-          <ReportsMainContent
-            reportData={reportData}
-            summary={summary}
-            fromDate={fromDate}
-            toDate={toDate}
-            teacherId={teacherId}
-            reportType={reportType}
-            teachers={teachers}
-            canGenerate={canGenerate}
-            onFromDateChange={setFromDate}
-            onToDateChange={setToDate}
-            onTeacherChange={setTeacherId}
-            onReportTypeChange={setReportType}
-            onSubmit={handleSubmit}
-            onExportCsv={handleExportCsv}
-            onPrintReport={handlePrintReport}
-          />
-        )}
-      </ReportsSummarySection>
+      <ReportsMainContent
+        reportData={reportData}
+        summary={summary}
+        fromDate={fromDate}
+        toDate={toDate}
+        teacherId={teacherId}
+        reportType={reportType}
+        teachers={teachers}
+        canGenerate={canGenerate}
+        onFromDateChange={setFromDate}
+        onToDateChange={setToDate}
+        onTeacherChange={setTeacherId}
+        onReportTypeChange={setReportType}
+        onSubmit={handleSubmit}
+        onExportCsv={handleExportCsv}
+        onPrintReport={handlePrintReport}
+      />
     </RequirePermission>
   );
 }

@@ -30,6 +30,8 @@ export const directory: ParentsDirectoryLabels = {
   },
   actions: {
     addParent: "إضافة ولي أمر جديد",
+    filter: "تصفية",
+    clearFilters: "مسح التصفية",
   },
   noEntries: "لا يوجد أولياء أمور",
 };

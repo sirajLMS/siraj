@@ -206,10 +206,20 @@ export type AttendanceReportFiltersInput = {
   toDate: Scalars['String']['input'];
 };
 
+/** The full attendance report result including rows and growth metric. */
+export type AttendanceReportPayload = {
+  __typename?: 'AttendanceReportPayload';
+  /** Period-over-period engagement growth percentage, or null if unavailable. */
+  engagementGrowth: Maybe<Scalars['Float']['output']>;
+  /** The aggregated attendance report rows. */
+  rows: Maybe<Array<AttendanceReportRow>>;
+};
+
 /** A single row of the aggregated attendance report. */
 export type AttendanceReportRow = {
   __typename?: 'AttendanceReportRow';
   absentClasses: Maybe<Scalars['Int']['output']>;
+  engagementGrowth: Maybe<Scalars['Float']['output']>;
   groupKey: Maybe<Scalars['String']['output']>;
   groupLabel: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
@@ -1752,7 +1762,7 @@ export type ParentDirectoryMetrics = {
 
 export type ParentDirectoryRow = {
   __typename?: 'ParentDirectoryRow';
-  accountStatus: Maybe<Scalars['String']['output']>;
+  accountStatus: Maybe<ParentStatus>;
   avatarUrl: Maybe<Scalars['String']['output']>;
   email: Maybe<Scalars['String']['output']>;
   guardianOf: Maybe<Scalars['String']['output']>;
@@ -1852,6 +1862,15 @@ export type ParentProfile = {
   whatsapp: Maybe<Scalars['String']['output']>;
 };
 
+export enum ParentStatus {
+  Activated = 'ACTIVATED',
+  Deactivated = 'DEACTIVATED',
+  OnLeave = 'ON_LEAVE',
+  OnTrial = 'ON_TRIAL',
+  Regular = 'REGULAR',
+  Suspended = 'SUSPENDED'
+}
+
 /** Pagination options for the parent suggestions history query. */
 export type ParentSuggestionOptions = {
   limit: Scalars['Int']['input'];
@@ -1922,7 +1941,7 @@ export type Query = {
   fileUsage: Maybe<FileUsageResult>;
   folderInfo: Maybe<DirectoryInfo>;
   /** Generates dynamic attendance and financial reports. */
-  generateAttendanceReport: Maybe<Array<AttendanceReportRow>>;
+  generateAttendanceReport: Maybe<AttendanceReportPayload>;
   groupClassAudit: Maybe<GroupClassAudit>;
   /** Lists all learning resources available to the academy. */
   learningResources: Maybe<Array<LearningResourceRow>>;
@@ -2115,6 +2134,7 @@ export type QueryParentDashboardScheduleArgs = {
 export type QueryParentDirectoryArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
   search: InputMaybe<Scalars['String']['input']>;
+  statusFilter: InputMaybe<ParentStatus>;
 };
 
 
@@ -2301,6 +2321,7 @@ export type RefreshTokenResponse = {
 /** Determines how the attendance data is aggregated. */
 export enum ReportGroupingMode {
   Date = 'DATE',
+  Student = 'STUDENT',
   Teacher = 'TEACHER'
 }
 

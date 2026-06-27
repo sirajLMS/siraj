@@ -1,3 +1,5 @@
+"use client";
+
 import { useMutation } from "@apollo/client/react";
 import {
   EditNoteOutlined,
@@ -5,7 +7,6 @@ import {
   PersonOffOutlined,
   PhotoCameraOutlined,
   ReceiptLongOutlined,
-  UploadFileOutlined,
 } from "@mui/icons-material";
 import {
   Alert,
@@ -16,16 +17,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Link,
   Snackbar,
   Stack,
   useTheme,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useState } from "react";
 import { deactivateParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { Link } from "@/shared/i18n/routing";
 
 interface DeactivateParentDialogProps {
   readonly open: boolean;
@@ -80,12 +80,12 @@ const DeactivateParentDialog: React.FC<DeactivateParentDialogProps> = ({
 
 interface ParentProfileActionsProps {
   readonly parentId: string;
+  readonly onEditAvatar: () => void;
 }
 
-const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId }) => {
+const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, onEditAvatar }) => {
   const theme = useTheme();
   const t = useTranslations("dashboard.parentProfile.actions");
-  const router = useRouter();
 
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -100,8 +100,6 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId })
         setSnackbarMessage(t("deactivateSuccess"));
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
-        // Navigate back to parent directory after short delay
-        setTimeout(() => router.back(), 1500);
       },
       onError: error => {
         setSnackbarMessage(error.message);
@@ -115,13 +113,13 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId })
     void deactivateParent({ variables: { parentId } });
   };
 
-  const actionLinks = [
-    { label: t("editPicture"), icon: PhotoCameraOutlined, color: theme.palette.primary.main },
-    { label: t("editProfile"), icon: EditNoteOutlined, color: theme.palette.primary.main },
-    { label: t("uploadDocs"), icon: UploadFileOutlined, color: theme.palette.primary.main },
-    { label: t("addNewStudent"), icon: PersonAddOutlined, color: theme.palette.primary.main },
-    { label: t("viewInvoices"), icon: ReceiptLongOutlined, color: theme.palette.primary.main },
-  ];
+  const actionStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: 1,
+    typography: "labelLarge",
+    fontWeight: 700,
+  } as const;
 
   return (
     <>
@@ -135,45 +133,52 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId })
           mb: theme.layout.sectionGap,
         }}
       >
-        {actionLinks.map(({ label, icon: Icon, color }) => (
-          <Link
-            key={label}
-            href="#"
-            underline="hover"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              color: color,
-              typography: "labelLarge",
-              fontWeight: 700,
-            }}
+        <Button
+          onClick={onEditAvatar}
+          startIcon={<PhotoCameraOutlined sx={{ fontSize: 18 }} />}
+          sx={{ ...actionStyle, color: theme.palette.primary.main }}
+        >
+          {t("editPicture")}
+        </Button>
+
+        <Link href={`/parents/${parentId}/profile/edit`} style={{ textDecoration: "none" }}>
+          <Button
+            startIcon={<EditNoteOutlined sx={{ fontSize: 18 }} />}
+            sx={{ ...actionStyle, color: theme.palette.primary.main }}
           >
-            <Icon sx={{ fontSize: 18 }} />
-            {label}
-          </Link>
-        ))}
-        <Link
-          component="button"
+            {t("editProfile")}
+          </Button>
+        </Link>
+
+        <Link href={`/students/onboarding?parentId=${parentId}`} style={{ textDecoration: "none" }}>
+          <Button
+            startIcon={<PersonAddOutlined sx={{ fontSize: 18 }} />}
+            sx={{ ...actionStyle, color: theme.palette.primary.main }}
+          >
+            {t("addNewStudent")}
+          </Button>
+        </Link>
+
+        <Link href={`/billing/invoices?parentId=${parentId}`} style={{ textDecoration: "none" }}>
+          <Button
+            startIcon={<ReceiptLongOutlined sx={{ fontSize: 18 }} />}
+            sx={{ ...actionStyle, color: theme.palette.primary.main }}
+          >
+            {t("viewInvoices")}
+          </Button>
+        </Link>
+
+        <Button
           onClick={() => setDeactivateDialogOpen(true)}
-          underline="hover"
+          startIcon={<PersonOffOutlined sx={{ fontSize: 18 }} />}
           sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
+            ...actionStyle,
             color: theme.palette.error.main,
-            typography: "labelLarge",
-            fontWeight: 700,
             ml: "auto !important",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            p: 0,
           }}
         >
-          <PersonOffOutlined sx={{ fontSize: 18 }} />
           {t("deactivateAccount")}
-        </Link>
+        </Button>
       </Stack>
 
       <DeactivateParentDialog

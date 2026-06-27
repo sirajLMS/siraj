@@ -6,7 +6,7 @@ import { BaseCard } from "@/frontend/components/ui/BaseCard";
 
 interface EngagementRateCardProps {
   readonly rate: number;
-  readonly growth: number;
+  readonly growth: number | null;
   readonly title: string;
   readonly subtitle: string;
   readonly increaseLabel: string;
@@ -21,6 +21,8 @@ export function EngagementRateCard({
   increaseLabel,
   compact = false,
 }: Readonly<EngagementRateCardProps>) {
+  const growthDisplay = growth !== null ? `${growth > 0 ? "+" : ""}${growth}%` : "—";
+
   return (
     <BaseCard
       sx={{
@@ -41,10 +43,10 @@ export function EngagementRateCard({
         </Typography>
         <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mt: compact ? 1 : 2 }}>
           <Typography variant={compact ? "headlineMd" : "display"} sx={{ color: theme => theme.palette.primary.main }}>
-            {compact ? `${rate}%` : `+${growth}%`}
+            {compact ? `${rate}%` : growthDisplay}
           </Typography>
           <Typography variant="labelMd" sx={{ color: theme => theme.palette.primary.main, opacity: 0.7 }}>
-            {compact ? `+${growth}% vs prev` : increaseLabel}
+            {compact && growth !== null ? `+${growth}% vs prev` : increaseLabel}
           </Typography>
         </Box>
       </Box>

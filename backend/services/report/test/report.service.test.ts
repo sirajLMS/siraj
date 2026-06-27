@@ -23,6 +23,7 @@ describe("ReportService — generateAttendanceReport", () => {
       totalHours: 1,
       paidEGP: 100,
       paidUSD: 0,
+      engagementGrowth: null,
     },
   ];
 
@@ -54,44 +55,48 @@ describe("ReportService — generateAttendanceReport", () => {
       }
     );
     const repoSpy = spyOn(ReportRepository, "generateAttendanceReport").mockResolvedValue(mockRepoResults);
+    const growthSpy = spyOn(ReportRepository, "calculateEngagementGrowth").mockResolvedValue(null);
 
     const result = await ReportService.generateAttendanceReport(dummyFilters, dummyActorId);
 
-    expect(result).toBeArray();
-    expect(result.length).toBe(1);
-    expect(result[0].takenClasses).toBe(1);
-    expect(result[0].groupLabel).toBe("2026-05-10");
+    expect(result.rows).toBeArray();
+    expect(result.rows.length).toBe(1);
+    expect(result.rows[0].takenClasses).toBe(1);
+    expect(result.rows[0].groupLabel).toBe("2026-05-10");
 
-    // Financial data must be zeroed out
-    expect(result[0].totalHours).toBe(0);
-    expect(result[0].paidEGP).toBe(0);
-    expect(result[0].paidUSD).toBe(0);
+    expect(result.rows[0].totalHours).toBe(0);
+    expect(result.rows[0].paidEGP).toBe(0);
+    expect(result.rows[0].paidUSD).toBe(0);
+    expect(result.engagementGrowth).toBeNull();
 
     expect(hasPermissionSpy).toHaveBeenCalledWith(dummyActorId, AppPermission.REPORT_GENERATE_CUSTOM);
     expect(hasPermissionSpy).toHaveBeenCalledWith(dummyActorId, AppPermission.REPORT_VIEW_FINANCIALS);
 
     hasPermissionSpy.mockRestore();
     repoSpy.mockRestore();
+    growthSpy.mockRestore();
   });
 
   test("returns unmasked data if actor has both permissions", async () => {
     const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
     const repoSpy = spyOn(ReportRepository, "generateAttendanceReport").mockResolvedValue(mockRepoResults);
+    const growthSpy = spyOn(ReportRepository, "calculateEngagementGrowth").mockResolvedValue(5.2);
 
     const result = await ReportService.generateAttendanceReport(dummyFilters, dummyActorId);
 
-    expect(result).toBeArray();
-    expect(result.length).toBe(1);
-    expect(result[0].takenClasses).toBe(1);
-    expect(result[0].groupLabel).toBe("2026-05-10");
+    expect(result.rows).toBeArray();
+    expect(result.rows.length).toBe(1);
+    expect(result.rows[0].takenClasses).toBe(1);
+    expect(result.rows[0].groupLabel).toBe("2026-05-10");
 
-    // Financial data must not be zeroed out
-    expect(result[0].totalHours).toBe(1);
-    expect(result[0].paidEGP).toBe(100);
-    expect(result[0].paidUSD).toBe(0);
+    expect(result.rows[0].totalHours).toBe(1);
+    expect(result.rows[0].paidEGP).toBe(100);
+    expect(result.rows[0].paidUSD).toBe(0);
+    expect(result.engagementGrowth).toBe(5.2);
 
     hasPermissionSpy.mockRestore();
     repoSpy.mockRestore();
+    growthSpy.mockRestore();
   });
 
   test("wraps repository failure with permissionDenied error and preserves cause", async () => {

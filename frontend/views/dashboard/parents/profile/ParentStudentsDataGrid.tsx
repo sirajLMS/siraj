@@ -34,6 +34,7 @@ import {
   changeStudentStatusMutationDocument,
   reassignStudentTeacherMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { useRouter } from "@/shared/i18n/routing";
 import type { ParentStudent } from "../types/profile";
 
 interface ParentStudentsDataGridProps {
@@ -249,6 +250,7 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
   const t = useTranslations("dashboard.parentProfile.table");
   const tStudents = useTranslations("dashboard.parentProfile.students");
   const theme = useTheme();
+  const router = useRouter();
 
   const [reassignDialogState, setReassignDialogState] = useState<{
     open: boolean;
@@ -361,9 +363,10 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
       headerName: t("info"),
       width: 70,
       sortable: false,
-      renderCell: () => (
+      renderCell: params => (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
           <PersonOutlined
+            onClick={() => router.push(`/students/${params.row.id}`)}
             sx={{
               color: theme.palette.text.secondary,
               cursor: "pointer",

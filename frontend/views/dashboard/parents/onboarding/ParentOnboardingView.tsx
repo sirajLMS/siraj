@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import type { FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { FeesContractSection } from "./FeesContractSection";
-import { NetworkOverview } from "./NetworkOverview";
 import { ParentInfoSection } from "./ParentInfoSection";
 import { SocialCommsSection } from "./SocialCommsSection";
 import type { ParentOnboardingFormData } from "./schemas/parentOnboardingSchema";
@@ -90,8 +89,6 @@ export function ParentOnboardingView({ register, errors, handleSubmit, isSubmitt
           </Typography>
         </Box>
       </Box>
-
-      <NetworkOverview />
     </PageContainer>
   );
 }

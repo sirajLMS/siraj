@@ -1,4 +1,4 @@
-import { useMutation } from "@apollo/client/react";
+import { useApolloClient, useMutation } from "@apollo/client/react";
 import { create } from "zustand";
 import type { ManagerOnboardingInput, ManagerOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createManagerMutationDocument } from "@/frontend/graphql/sharedDocuments";
@@ -21,6 +21,7 @@ export const useManagerOnboardingStore = create<ManagerOnboardingState>(set => (
 export function useCreateManagerMutation() {
   const [mutate, { loading, error, data }] = useMutation(createManagerMutationDocument);
   const store = useManagerOnboardingStore();
+  const { cache } = useApolloClient();
 
   const execute = async (formData: ManagerOnboardingFormData) => {
     store.reset();
@@ -39,6 +40,8 @@ export function useCreateManagerMutation() {
       const result = await mutate({ variables: { input } });
 
       if (result.data?.createManager) {
+        cache.evict({ id: "ROOT_QUERY", fieldName: "managerDirectory" });
+        cache.gc();
         useManagerOnboardingStore.setState({ result: result.data.createManager, isSubmitting: false });
         return result.data.createManager;
       }

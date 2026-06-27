@@ -29,13 +29,13 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     // 2. Act
     const data = await authenticatedRequest(adminToken, "query", generateAttendanceReportQueryDocument, { filters });
 
-    const rows = data?.generateAttendanceReport;
-    expect(rows).toBeDefined();
-    if (!rows) throw new Error("generateAttendanceReport returned no data");
+    const payload = data?.generateAttendanceReport;
+    expect(payload).toBeDefined();
+    if (!payload) throw new Error("generateAttendanceReport returned no data");
+
+    const rows = payload.rows ?? [];
     expect(Array.isArray(rows)).toBeTrue();
 
-    // 3. Assert - If rows exist, financial columns should be exposed (not forced to 0 unless actually zero)
-    // We verify type safety and field presence
     for (const row of rows) {
       expect(row.id).toBeDefined();
       expect(row.groupKey).toBeDefined();
@@ -48,17 +48,14 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     const superAdminToken = await loginDemoUser("super_admin");
     const teacherToken = await loginDemoUser("teacher_default");
 
-    // 1. Get teacher's user ID
     const meData = await authenticatedRequest(teacherToken, "query", meQueryDocument);
     const teacherUserId = meData?.me?.id;
     if (typeof teacherUserId !== "string") throw new Error("Could not fetch teacher userId");
 
-    // 2. Find permission ID for 'report.generate_custom' (Querying as super_admin)
     const permissionsData = await authenticatedRequest(superAdminToken, "query", permissionsQueryDocument);
     const customPerm = permissionsData?.permissions?.find(p => p.key === "report.generate_custom");
     if (typeof customPerm?.id !== "string") throw new Error("Could not find report.generate_custom permission ID");
 
-    // 3. Create a temporary permission group with only report.generate_custom permission
     const groupRes = await authenticatedRequest(superAdminToken, "mutate", createPermissionGroupMutationDocument, {
       input: {
         name: `Temp Report Group ${Date.now()}`,
@@ -69,7 +66,6 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     const groupId = groupRes?.createPermissionGroup?.id;
     if (typeof groupId !== "string") throw new Error("Could not create temp permission group");
 
-    // 4. Assign the group to the teacher
     await authenticatedRequest(superAdminToken, "mutate", assignPermissionGroupToUserMutationDocument, {
       input: {
         groupId,
@@ -78,17 +74,17 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     });
 
     try {
-      // 5. Run reporting query as the teacher (who now has report.generate_custom but NOT report.view_financials)
       const data = await authenticatedRequest(teacherToken, "query", generateAttendanceReportQueryDocument, {
         filters,
       });
 
-      const rows = data?.generateAttendanceReport;
-      expect(rows).toBeDefined();
-      if (!rows) throw new Error("generateAttendanceReport returned no data");
+      const payload = data?.generateAttendanceReport;
+      expect(payload).toBeDefined();
+      if (!payload) throw new Error("generateAttendanceReport returned no data");
+
+      const rows = payload.rows ?? [];
       expect(Array.isArray(rows)).toBeTrue();
 
-      // 6. Assert - All financial columns are strictly 0 or null
       for (const row of rows) {
         expect(row.totalHours === 0 || row.totalHours === null).toBeTrue();
         expect(row.paidEGP === 0 || row.paidEGP === null).toBeTrue();

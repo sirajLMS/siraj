@@ -18,10 +18,17 @@ export const profile: ParentProfileLabels = {
     cancel: "إلغاء",
     deactivating: "جاري التعطيل...",
     deactivateSuccess: "تم تعطيل حساب ولي الأمر بنجاح.",
+    selectPicture: "اختر صورة",
+    changePicture: "تغيير الصورة",
+    upload: "رفع",
+    avatarFileTypeError: "نوع الملف غير مدعوم. يرجى اختيار صورة JPG أو PNG أو WebP.",
+    avatarFileSizeError: "حجم الملف كبير جدًا. الحد الأقصى {maxMb} ميجابايت.",
+    avatarUploadSuccess: "تم رفع الصورة الشخصية بنجاح.",
   },
   errors: {
     invalidId: "معرف ولي الأمر غير صالح.",
     notFound: "ولي الأمر غير موجود.",
+    invalidData: "بيانات ولي الأمر غير صالحة.",
   },
   sections: {
     parentInfo: "معلومات ولي الأمر",

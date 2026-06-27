@@ -1323,6 +1323,8 @@ const en: MessageSchema = {
       },
       actions: {
         addParent: "Add New Parent",
+        filter: "Filter",
+        clearFilters: "Clear Filters",
       },
       noEntries: "No parents found",
     },
@@ -1344,10 +1346,17 @@ const en: MessageSchema = {
         cancel: "Cancel",
         deactivating: "Deactivating...",
         deactivateSuccess: "Parent account has been deactivated successfully.",
+        selectPicture: "Select Picture",
+        changePicture: "Change Picture",
+        upload: "Upload",
+        avatarFileTypeError: "Unsupported file type. Please select a JPG, PNG, or WebP image.",
+        avatarFileSizeError: "File size too large. Maximum {maxMb} MB.",
+        avatarUploadSuccess: "Avatar uploaded successfully.",
       },
       errors: {
         invalidId: "Invalid parent ID.",
         notFound: "Parent not found.",
+        invalidData: "Invalid parent data.",
       },
       sections: {
         parentInfo: "Parent Information",

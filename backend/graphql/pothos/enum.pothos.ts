@@ -6,6 +6,7 @@ import {
   Gender,
   InvoiceType,
   OrderSortDirection,
+  ParentStatus,
   PaymentMethod,
   StudentStatus,
 } from "@/shared/lib/enum";
@@ -29,6 +30,10 @@ export const AppLanguagePothosObject = gqlSchemaBuilder.enumType(AppLanguage, {
 
 export const StudentStatusPothosObject = gqlSchemaBuilder.enumType(StudentStatus, {
   name: "StudentStatus",
+});
+
+export const ParentStatusPothosEnum = gqlSchemaBuilder.enumType(ParentStatus, {
+  name: "ParentStatus",
 });
 
 export const InvoiceTypePothosObject = gqlSchemaBuilder.enumType(InvoiceType, {

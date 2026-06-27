@@ -207,6 +207,48 @@ describe("ReportRepository — generateAttendanceReport", () => {
     expect(results.length).toBe(0);
   });
 
+  reportRepoTest("aggregates and groups correctly by STUDENT", async tx => {
+    const { student } = await setupTestData(tx);
+
+    const filters = {
+      fromDate: new Date("2026-05-01T00:00:00Z"),
+      toDate: new Date("2026-05-31T23:59:59Z"),
+      groupBy: ReportGroupingMode.STUDENT,
+    };
+
+    const results = await ReportRepository.generateAttendanceReport(filters, tx);
+
+    expect(results).toBeArray();
+    expect(results.length).toBe(1);
+
+    const row = results[0];
+    expect(row.groupKey).toBe(student.id);
+    expect(row.groupLabel).toBe(student.name);
+    expect(row.takenClasses).toBe(1);
+    expect(row.absentClasses).toBe(1);
+    expect(row.leaveClasses).toBe(1);
+    expect(row.pendingClasses).toBe(1);
+    expect(row.totalHours).toBe(5.5);
+    expect(row.paidEGP).toBe(250);
+    expect(row.paidUSD).toBe(50);
+    expect(row.engagementGrowth).toBeNull();
+  });
+
+  reportRepoTest("returns null engagementGrowth when no prior period data", async tx => {
+    const { teacher } = await setupTestData(tx);
+
+    const filters = {
+      fromDate: new Date("2026-05-01T00:00:00Z"),
+      toDate: new Date("2026-05-31T23:59:59Z"),
+      teacherId: teacher.id,
+      groupBy: ReportGroupingMode.DATE,
+    };
+
+    const growth = await ReportRepository.calculateEngagementGrowth(filters, tx);
+
+    expect(growth).toBeNull();
+  });
+
   reportRepoTest("fails and catches error properly when query crashes", async tx => {
     // Act & Assert
     // Passing an invalid UUID string for teacherId triggers a PostgreSQL type conversion error.

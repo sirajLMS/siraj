@@ -179,9 +179,21 @@ input AttendanceReportFiltersInput {
   toDate: String!
 }
 
+"""The full attendance report result including rows and growth metric."""
+type AttendanceReportPayload {
+  """
+  Period-over-period engagement growth percentage, or null if unavailable.
+  """
+  engagementGrowth: Float
+
+  """The aggregated attendance report rows."""
+  rows: [AttendanceReportRow!]
+}
+
 """A single row of the aggregated attendance report."""
 type AttendanceReportRow {
   absentClasses: Int
+  engagementGrowth: Float
   groupKey: String
   groupLabel: String
   id: String
@@ -1338,7 +1350,7 @@ type ParentDirectoryMetrics {
 }
 
 type ParentDirectoryRow {
-  accountStatus: String
+  accountStatus: ParentStatus
   avatarUrl: String
   email: String
   guardianOf: String
@@ -1433,6 +1445,15 @@ type ParentProfile {
   whatsapp: String
 }
 
+enum ParentStatus {
+  ACTIVATED
+  DEACTIVATED
+  ON_LEAVE
+  ON_TRIAL
+  REGULAR
+  SUSPENDED
+}
+
 """Pagination options for the parent suggestions history query."""
 input ParentSuggestionOptions {
   limit: Int!
@@ -1515,7 +1536,7 @@ type Query {
   folderInfo(path: String!): DirectoryInfo
 
   """Generates dynamic attendance and financial reports."""
-  generateAttendanceReport(filters: AttendanceReportFiltersInput!): [AttendanceReportRow!]
+  generateAttendanceReport(filters: AttendanceReportFiltersInput!): AttendanceReportPayload
   groupClassAudit(classInstanceId: String!): GroupClassAudit
 
   """Lists all learning resources available to the academy."""
@@ -1536,7 +1557,7 @@ type Query {
   parentComplaints(paginationArgs: PaginationArgs): ParentComplaintsResult
   parentDashboardMetrics: ParentDashboardMetricsResult
   parentDashboardSchedule(date: String, paginationArgs: PaginationArgs, search: String): ParentDashboardScheduleResult
-  parentDirectory(paginationArgs: PaginationArgs, search: String): ParentDirectory
+  parentDirectory(paginationArgs: PaginationArgs, search: String, statusFilter: ParentStatus): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
   parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String): ParentInvoiceHistoryResult
   parentProfile(parentId: String!): ParentProfile
@@ -1633,6 +1654,7 @@ type RefreshTokenResponse {
 """Determines how the attendance data is aggregated."""
 enum ReportGroupingMode {
   DATE
+  STUDENT
   TEACHER
 }
 

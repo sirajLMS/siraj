@@ -15,10 +15,17 @@ export interface ParentProfileLabels {
     readonly cancel: string;
     readonly deactivating: string;
     readonly deactivateSuccess: string;
+    readonly selectPicture: string;
+    readonly changePicture: string;
+    readonly upload: string;
+    readonly avatarFileTypeError: string;
+    readonly avatarFileSizeError: string;
+    readonly avatarUploadSuccess: string;
   };
   readonly errors: {
     readonly invalidId: string;
     readonly notFound: string;
+    readonly invalidData: string;
   };
   readonly sections: {
     readonly parentInfo: string;

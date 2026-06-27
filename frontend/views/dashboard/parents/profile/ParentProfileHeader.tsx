@@ -8,9 +8,10 @@ interface ParentProfileHeaderProps {
   readonly name: string;
   readonly avatarUrl?: string;
   readonly status: string;
+  readonly onEditAvatar: () => void;
 }
 
-const ParentProfileHeader: React.FC<ParentProfileHeaderProps> = ({ name, avatarUrl, status }) => {
+const ParentProfileHeader: React.FC<ParentProfileHeaderProps> = ({ name, avatarUrl, status, onEditAvatar }) => {
   const theme = useTheme();
   const t = useTranslations("dashboard.parentProfile");
 
@@ -34,11 +35,13 @@ const ParentProfileHeader: React.FC<ParentProfileHeaderProps> = ({ name, avatarU
           sx={{
             width: 128,
             height: 128,
-            border: `4px solid ${theme.palette.primary.main}1A`, // 10% opacity primary
+            border: `4px solid ${theme.palette.primary.main}1A`,
           }}
         />
         <Box
           component="button"
+          type="button"
+          onClick={onEditAvatar}
           sx={{
             position: "absolute",
             bottom: 0,

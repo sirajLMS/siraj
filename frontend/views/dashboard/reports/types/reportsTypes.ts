@@ -25,7 +25,7 @@ export interface ReportLedgerRow {
 
 export interface ReportsSummary {
   readonly engagementRate: number;
-  readonly engagementGrowth: number;
+  readonly engagementGrowth: number | null;
   readonly egpPercent: number;
   readonly usdPercent: number;
   readonly totalHours: string;

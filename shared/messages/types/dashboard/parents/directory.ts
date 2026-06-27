@@ -28,6 +28,8 @@ export interface ParentsDirectoryLabels {
   };
   readonly actions: {
     readonly addParent: string;
+    readonly filter: string;
+    readonly clearFilters: string;
   };
   readonly noEntries: string;
 }

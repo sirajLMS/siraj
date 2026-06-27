@@ -23,6 +23,7 @@ import type {
   WorkshopPromoReturnType,
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
+import type { ParentStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 export namespace ParentRepository {
@@ -122,7 +123,7 @@ export namespace ParentRepository {
   };
 
   export const getParentDirectory = async (
-    options: { search?: string | null; pagination?: PaginationArgs | null },
+    options: { search?: string | null; pagination?: PaginationArgs | null; accountStatus?: ParentStatus | null },
     tx?: DBTransaction
   ): Promise<ParentDirectoryResult> => {
     const queryDb = tx ?? db;
@@ -148,6 +149,9 @@ export namespace ParentRepository {
     const conditions = [];
     if (options.search) {
       conditions.push(or(ilike(users.name, `%${options.search}%`), ilike(users.email, `%${options.search}%`)));
+    }
+    if (options.accountStatus) {
+      conditions.push(eq(parents.status, options.accountStatus));
     }
 
     let rowsQuery = queryDb

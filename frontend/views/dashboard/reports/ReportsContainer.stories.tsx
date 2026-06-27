@@ -105,7 +105,7 @@ const mockSummary = {
   totalHours: "22:30",
   totalEgp: 2500,
   totalUsd: 0,
-};
+} as const;
 
 const baseArgs = {
   labels: mockLabels,

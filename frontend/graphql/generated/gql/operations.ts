@@ -537,6 +537,14 @@ export type ParentOnboardingInput = {
   whatsapp: string | null | undefined;
 };
 
+export type ParentStatus =
+  | 'ACTIVATED'
+  | 'DEACTIVATED'
+  | 'ON_LEAVE'
+  | 'ON_TRIAL'
+  | 'REGULAR'
+  | 'SUSPENDED';
+
 export type PaymentMethod =
   | 'BANK_ACCOUNT'
   | 'PAYPAL';
@@ -550,6 +558,7 @@ export type RecurringClassDayInput = {
 /** Determines how the attendance data is aggregated. */
 export type ReportGroupingMode =
   | 'DATE'
+  | 'STUDENT'
   | 'TEACHER';
 
 export type RescheduleClassInput = {
@@ -1375,7 +1384,7 @@ export type ParentDashboardMetricsQuery = ParentDashboardMetricsQuery_Query;
 
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics = { id: string | null, activated: number | null, deactivated: number | null, regular: number | null, onLeave: number | null, suspended: number | null, onTrial: number | null };
 
-export type ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow = { id: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, accountStatus: string | null, unpaidInvoices: number | null };
+export type ParentDirectoryQuery_parentDirectory_ParentDirectory_rows_ParentDirectoryRow = { id: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, accountStatus: Types.ParentStatus | null, unpaidInvoices: number | null };
 
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -1651,9 +1660,11 @@ export type CreateRecurringClassMutationVariables = Exact<{
 
 export type CreateRecurringClassMutation = CreateRecurringClassMutation_Mutation;
 
-export type GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportRow = { id: string | null, groupKey: string | null, groupLabel: string | null, takenClasses: number | null, absentClasses: number | null, leaveClasses: number | null, pendingClasses: number | null, totalHours: number | null, paidEGP: number | null, paidUSD: number | null };
+export type GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow = { id: string | null, groupKey: string | null, groupLabel: string | null, takenClasses: number | null, absentClasses: number | null, leaveClasses: number | null, pendingClasses: number | null, totalHours: number | null, paidEGP: number | null, paidUSD: number | null, engagementGrowth: number | null };
 
-export type GenerateAttendanceReportQuery_Query = { generateAttendanceReport: Array<GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportRow> | null };
+export type GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload = { engagementGrowth: number | null, rows: Array<GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload_rows_AttendanceReportRow> | null };
+
+export type GenerateAttendanceReportQuery_Query = { generateAttendanceReport: GenerateAttendanceReportQuery_generateAttendanceReport_AttendanceReportPayload | null };
 
 
 export type GenerateAttendanceReportQueryVariables = Exact<{
