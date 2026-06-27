@@ -9,9 +9,15 @@ export interface ParentInvoiceOption {
   readonly label: string;
 }
 
+export interface StudentOption {
+  readonly id: string;
+  readonly name: string;
+}
+
 export interface ManualInvoiceViewProps {
   readonly labels: ManualInvoiceLabels;
   readonly parentOptions: readonly ParentInvoiceOption[];
+  readonly studentOptions: readonly StudentOption[];
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
   readonly canCreate: boolean;
@@ -19,4 +25,5 @@ export interface ManualInvoiceViewProps {
   readonly onBack: () => void;
   readonly onSubmit: (data: ManualInvoiceFormData, sendEmail: boolean) => void;
   readonly onDismissSuccess: () => void;
+  readonly onParentChange: (parentId: string | null) => void;
 }

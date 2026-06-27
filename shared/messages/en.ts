@@ -1946,6 +1946,7 @@ const en: MessageSchema = {
         backToFinancials: "Back to Financials",
         parentSelection: "Parent Selection",
         parentPlaceholder: "Select a parent record...",
+        studentSelection: "Student Selection",
         feeAmount: "Fee Amount (AED)",
         feeAmountPlaceholder: "0.00",
         issueDate: "Issue Date",

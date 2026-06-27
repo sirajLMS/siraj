@@ -7,11 +7,24 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { deleteInvoiceMutationDocument, markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocuments";
-import { parentInvoiceHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
+import {
+  deleteInvoiceMutationDocument,
+  markInvoicePaidMutationDocument,
+  sendPaymentReminderMutationDocument,
+} from "@/frontend/graphql/sharedDocuments";
+import {
+  adminBillingSummaryQueryDocument,
+  adminInvoicesQueryDocument,
+  studentCreditStatusQueryDocument,
+} from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { AdminBillingView } from "./AdminBillingView";
-import type { AdminBillingSummary, AdminInvoiceRow, AdminInvoiceStatus } from "./types/billingViewTypes";
+import type {
+  AdminBillingSummary,
+  AdminInvoiceRow,
+  AdminInvoiceStatus,
+  StudentCreditRow,
+} from "./types/billingViewTypes";
 import { filterAdminInvoices } from "./utils/billingFilters";
 import { buildBillingLabels } from "./utils/buildBillingLabels";
 
@@ -40,12 +53,14 @@ function formatDate(dateStr: string | null): string {
   });
 }
 
-function deriveInitials(studentId: string | null): string {
-  if (!studentId) return "?";
-  return studentId.slice(0, 2).toUpperCase();
+function deriveInitials(name: string | null): string {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
 }
 
-export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) {
+export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const t = useTranslations("dashboard.billing");
   const router = useRouter();
   const locale = useLocale();
@@ -66,9 +81,8 @@ export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) 
     setSnackbarOpen(true);
   };
 
-  const { data: invoicesData, refetch: refetchInvoices } = useQuery(parentInvoiceHistoryQueryDocument, {
+  const { data: invoicesData, refetch: refetchInvoices } = useQuery(adminInvoicesQueryDocument, {
     variables: {
-      parentId: parentId ?? "",
       paginationArgs: {
         first: pageSize,
         page: page + 1,
@@ -79,7 +93,14 @@ export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) 
         maxCount: null,
       },
     },
-    skip: !parentId,
+    fetchPolicy: "cache-and-network",
+  });
+
+  const { data: summaryData } = useQuery(adminBillingSummaryQueryDocument, {
+    fetchPolicy: "cache-and-network",
+  });
+
+  const { data: creditData } = useQuery(studentCreditStatusQueryDocument, {
     fetchPolicy: "cache-and-network",
   });
 
@@ -103,45 +124,70 @@ export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) 
     },
   });
 
+  const [sendReminderMutation] = useMutation(sendPaymentReminderMutationDocument, {
+    onCompleted: data => {
+      if (data.sendPaymentReminder?.success) {
+        showFeedback(t("reminderSent", { defaultValue: "Payment reminder sent" }), "success");
+      }
+    },
+    onError: error => {
+      showFeedback(error.message, "error");
+    },
+  });
+
   const invoices: AdminInvoiceRow[] = useMemo(
     () =>
-      (invoicesData?.parentInvoiceHistory?.rows ?? []).map(inv => ({
+      (invoicesData?.adminInvoices?.rows ?? []).map(inv => ({
         id: inv.id ?? "",
-        studentName: inv.studentId ?? "Student",
-        studentInitials: deriveInitials(inv.studentId),
+        studentName: inv.studentName ?? inv.studentId ?? "Student",
+        studentInitials: deriveInitials(inv.studentName),
         dateIssued: formatDate(inv.issueDate),
         amount: formatCurrency(inv.amount, inv.currency),
         status: mapInvoiceStatus(inv.status, inv.dueDate),
       })),
-    [invoicesData?.parentInvoiceHistory]
+    [invoicesData?.adminInvoices]
   );
 
   const filteredInvoices = useMemo(() => filterAdminInvoices(invoices, searchQuery), [invoices, searchQuery]);
 
-  const totalCount = invoicesData?.parentInvoiceHistory?.totalCount ?? 0;
+  const totalCount = invoicesData?.adminInvoices?.totalCount ?? 0;
 
   const summary: AdminBillingSummary = useMemo(
     () => ({
-      totalOutstanding: formatCurrency(
-        String(
-          invoices
-            .filter(i => i.status !== "paid")
-            .reduce((sum, i) => sum + Number(i.amount.replace(/[^0-9.-]/g, "")), 0)
-        ),
-        "USD"
-      ),
-      pendingInvoices: invoices.filter(i => i.status !== "paid").length,
-      negativeBalanceCount: "0 Students",
-      mtdRevenue: formatCurrency(
-        String(
-          invoices
-            .filter(i => i.status === "paid")
-            .reduce((sum, i) => sum + Number(i.amount.replace(/[^0-9.-]/g, "")), 0)
-        ),
-        "USD"
-      ),
+      totalOutstanding: formatCurrency(summaryData?.adminBillingSummary?.totalOutstanding ?? "0.00", "USD"),
+      pendingInvoices: summaryData?.adminBillingSummary?.pendingCount ?? 0,
+      negativeBalanceCount: `${summaryData?.adminBillingSummary?.negativeBalanceCount ?? 0} Students`,
+      mtdRevenue: formatCurrency(summaryData?.adminBillingSummary?.mtdRevenue ?? "0.00", "USD"),
     }),
-    [invoices]
+    [summaryData?.adminBillingSummary]
+  );
+
+  const creditRows: StudentCreditRow[] = useMemo(
+    () =>
+      (creditData?.studentCreditStatus ?? [])
+        .filter(
+          (
+            row
+          ): row is {
+            id: string;
+            studentName: string;
+            parentEmail: string;
+            planType: string;
+            classesRemaining: number;
+            classesTotal: number;
+            status: string;
+          } => row.id != null
+        )
+        .map(row => ({
+          id: row.id,
+          studentName: row.studentName,
+          parentEmail: row.parentEmail,
+          planType: row.planType,
+          classesLeft: row.classesRemaining,
+          classesTotal: row.classesTotal,
+          status: row.classesRemaining === 0 ? ("negative_balance" as const) : ("active_credit" as const),
+        })),
+    [creditData?.studentCreditStatus]
   );
 
   const handleMarkAsPaid = (invoiceId: string) => {
@@ -152,20 +198,24 @@ export function AdminBillingContainer({ parentId }: AdminBillingContainerProps) 
     void deleteInvoiceMutation({ variables: { invoiceId } });
   };
 
+  const handleSendReminder = (studentId: string) => {
+    void sendReminderMutation({ variables: { studentId } });
+  };
+
   return (
     <RequirePermission permissions={[AppPermission.BillingViewHistory]} fallback={null}>
       <AdminBillingView
         labels={labels}
         summary={summary}
         invoices={filteredInvoices}
-        creditRows={[]}
+        creditRows={creditRows}
         searchQuery={searchQuery}
         canManage
         canView
         canCreate
         onSearchChange={setSearchQuery}
         onMarkAsPaid={handleMarkAsPaid}
-        onSendReminder={() => {}}
+        onSendReminder={handleSendReminder}
         onManualInvoice={() => {
           router.push(`/${locale}/billing/manual`);
         }}

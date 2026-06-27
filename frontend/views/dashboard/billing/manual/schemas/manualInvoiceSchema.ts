@@ -6,6 +6,7 @@ export const manualInvoiceSchema = (labels: BillingManualValidationLabels) =>
   z
     .object({
       parentId: z.string().min(1, labels.parentRequired),
+      studentId: z.string().optional(),
       feeAmount: z
         .string()
         .min(1, labels.feeAmountRequired)

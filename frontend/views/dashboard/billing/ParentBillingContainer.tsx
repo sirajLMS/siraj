@@ -1,32 +1,55 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { Alert, Box, CircularProgress, Snackbar, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { parentInvoiceHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import {
+  parentBillingSummaryQueryDocument,
+  parentInvoiceHistoryQueryDocument,
+} from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
 import { ParentBillingView } from "./ParentBillingView";
 import type { ParentBillingViewProps } from "./types/billingViewTypes";
 import { filterParentInvoices } from "./utils/billingFilters";
 import { buildBillingLabels } from "./utils/buildBillingLabels";
 
-// Typography styled with error color for displaying error messages
 const StyledErrorTypography = styled(Typography)(({ theme }) => ({
   color: theme.palette.error.main,
 }));
 
+function formatCurrency(amount: string, currency: string): string {
+  const numAmount = Number(amount);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(numAmount);
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export function ParentBillingContainer() {
   const t = useTranslations("dashboard.billing");
-  const params = useParams();
-  const parentId = typeof params?.id === "string" ? params.id : "";
   const labels = buildBillingLabels(t);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+
+  const showFeedback = (message: string, severity: "success" | "error") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
 
   const page = useParentBillingStore(state => state.page);
   const pageSize = useParentBillingStore(state => state.pageSize);
@@ -34,7 +57,7 @@ export function ParentBillingContainer() {
 
   const { data, loading, error } = useQuery(parentInvoiceHistoryQueryDocument, {
     variables: {
-      parentId,
+      parentId: null,
       paginationArgs: {
         first: pageSize,
         page: page + 1,
@@ -45,8 +68,21 @@ export function ParentBillingContainer() {
         maxCount: null,
       },
     },
-    skip: !parentId,
     fetchPolicy: "cache-and-network",
+  });
+
+  const { data: summaryData } = useQuery(parentBillingSummaryQueryDocument, {
+    variables: { parentId: null },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const [markAsPaidMutation] = useMutation(markInvoicePaidMutationDocument, {
+    onCompleted: () => {
+      showFeedback(t("markAsPaidSuccess", { defaultValue: "Invoice marked as paid" }), "success");
+    },
+    onError: err => {
+      showFeedback(err.message, "error");
+    },
   });
 
   const totalCount = data?.parentInvoiceHistory?.totalCount ?? 0;
@@ -71,9 +107,15 @@ export function ParentBillingContainer() {
     [invoices, searchQuery]
   );
 
-  if (!parentId) {
-    return <StyledErrorTypography>{t("errors.invalidId")}</StyledErrorTypography>;
-  }
+  const summary = useMemo(
+    () => ({
+      outstandingBalance: formatCurrency(summaryData?.parentBillingSummary?.outstandingBalance ?? "0.00", "USD"),
+      paidThisTerm: formatCurrency(summaryData?.parentBillingSummary?.paidThisTerm ?? "0.00", "USD"),
+      nextDueDate: formatDate(summaryData?.parentBillingSummary?.nextDueDate ?? null),
+      activeStudents: String(summaryData?.parentBillingSummary?.activeStudents ?? 0),
+    }),
+    [summaryData?.parentBillingSummary]
+  );
 
   if (loading) {
     return (
@@ -87,23 +129,22 @@ export function ParentBillingContainer() {
     return <StyledErrorTypography>{error.message}</StyledErrorTypography>;
   }
 
+  const handlePayNow = (invoiceId: string) => {
+    void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null } });
+  };
+
   const viewProps: ParentBillingViewProps = {
     labels,
-    summary: {
-      outstandingBalance: "",
-      paidThisTerm: "",
-      nextDueDate: "",
-      activeStudents: "",
-    },
+    summary,
     invoices: filteredInvoices,
     searchQuery,
     canManage: false,
     canView: true,
     canCreate: false,
     onSearchChange: setSearchQuery,
-    onPayNow: () => undefined,
-    onDownloadPdf: () => undefined,
-    onQuickPay: () => undefined,
+    onPayNow: handlePayNow,
+    onDownloadPdf: () => {},
+    onQuickPay: () => {},
     page,
     pageSize,
     totalCount,
@@ -113,6 +154,16 @@ export function ParentBillingContainer() {
   return (
     <RequirePermission permissions={[AppPermission.BillingViewHistory]}>
       <ParentBillingView {...viewProps} />
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </RequirePermission>
   );
 }

@@ -14,6 +14,7 @@ import { formatDraftTotal } from "./utils/manualInvoiceFormatters";
 export function ManualInvoiceView({
   labels,
   parentOptions,
+  studentOptions,
   isSubmitting,
   showSuccess,
   canCreate,
@@ -21,6 +22,7 @@ export function ManualInvoiceView({
   onBack,
   onSubmit,
   onDismissSuccess,
+  onParentChange,
 }: Readonly<ManualInvoiceViewProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -30,10 +32,12 @@ export function ManualInvoiceView({
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       parentId: "",
+      studentId: "",
       feeAmount: "",
       issueDate: "",
       dueDate: "",
@@ -43,8 +47,19 @@ export function ManualInvoiceView({
 
   const feeAmount = useWatch({ control, name: "feeAmount" });
   const billingMonths = useWatch({ control, name: "billingMonths" });
+  const currentParentId = useWatch({ control, name: "parentId" });
   const monthCount = billingMonths.length;
   const totalFormatted = formatDraftTotal(feeAmount, monthCount);
+
+  useEffect(() => {
+    onParentChange(currentParentId || null);
+  }, [currentParentId, onParentChange]);
+
+  useEffect(() => {
+    if (currentParentId) {
+      setValue("studentId", "");
+    }
+  }, [currentParentId, setValue]);
 
   useEffect(() => {
     if (!showSuccess) {
@@ -75,6 +90,7 @@ export function ManualInvoiceView({
   const sharedProps = {
     labels,
     parentOptions,
+    studentOptions,
     control,
     errors,
     totalFormatted,

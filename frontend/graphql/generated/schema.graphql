@@ -1,3 +1,11 @@
+type AdminBillingSummary {
+  id: String
+  mtdRevenue: String
+  negativeBalanceCount: Int
+  pendingCount: Int
+  totalOutstanding: String
+}
+
 input AdminDashboardScheduleInput {
   date: String!
   metricFilter: String
@@ -11,6 +19,13 @@ type AdminDashboardScheduleResult {
   metrics: DailyScheduleMetrics
   pageInfo: PageInfo
   rows: [DailyScheduleList!]
+  totalCount: Int
+}
+
+type AdminInvoiceHistoryResult {
+  id: String
+  pageInfo: PageInfo
+  rows: [ParentInvoiceRow!]
   totalCount: Int
 }
 
@@ -196,6 +211,11 @@ type AvailabilitySearchTeacher {
   id: String
   name: String
   timezone: String
+}
+
+input BillingMonthInput {
+  month: Int!
+  year: Int!
 }
 
 type BulkOperationFailure {
@@ -1094,7 +1114,7 @@ type Mutation {
 
   """Create a new manager/staff account (System Admin only)"""
   createManager(input: ManagerOnboardingInput!): ManagerOnboardingResult
-  createManualInvoice(amount: String!, currency: String!, dueDate: String!, exchangeRateSnapshot: String, exchangeRateSource: String, invoiceType: String!, issueDate: String!, parentId: String!, studentId: String): ManualInvoiceResult
+  createManualInvoice(amount: String!, billingMonths: [BillingMonthInput!], currency: String!, dueDate: String!, exchangeRateSnapshot: String, exchangeRateSource: String, invoiceType: String!, issueDate: String!, parentId: String!, sendEmail: Boolean, studentId: String): ManualInvoiceResult
 
   """Create a new parent account with billing configuration"""
   createParent(input: ParentOnboardingInput!): ParentOnboardingResult
@@ -1160,6 +1180,7 @@ type Mutation {
   """Responds to a suggestion with an admin text response (admin only)."""
   respondToSuggestion(input: RespondToSuggestionInput!): Suggestion
   revokePermissionGroupFromUser(input: RevokePermissionGroupFromUserInput!): Boolean
+  sendPaymentReminder(studentId: String!): SendPaymentReminderResult
   setStorageItemProtection(input: StorageItemProtectionUpdateInput!): FileOperationResult
   stopClass(classInstanceId: ID!): ClassInstanceDetail
 
@@ -1233,6 +1254,14 @@ input PaginationArgs {
   maxCount: Int = 100
   page: Int
   skip: Int
+}
+
+type ParentBillingSummary {
+  activeStudents: Int
+  id: String
+  nextDueDate: String
+  outstandingBalance: String
+  paidThisTerm: String
 }
 
 """Paginated parent complaints with page info."""
@@ -1324,6 +1353,7 @@ type ParentInvoiceRow {
   paidDate: String
   status: String
   studentId: String
+  studentName: String
 }
 
 """Input for creating a new parent account with billing configuration"""
@@ -1431,9 +1461,12 @@ type PermissionGroup {
 scalar PhoneNumber
 
 type Query {
+  adminBillingSummary: AdminBillingSummary
+
   """Returns the paginated admin complaint queue with metrics."""
   adminComplaintQueue(filter: ComplaintQueueFilter!, paginationArgs: PaginationArgs): ComplaintQueueResult
   adminDashboardSchedule(input: AdminDashboardScheduleInput!): AdminDashboardScheduleResult
+  adminInvoices(paginationArgs: PaginationArgs): AdminInvoiceHistoryResult
 
   """Returns the paginated admin suggestion list with metrics."""
   adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult
@@ -1475,13 +1508,14 @@ type Query {
   """Returns onboarding metrics for staff accounts."""
   onboardingMetrics: OnboardingMetrics
   parentAssociatedStudents(parentId: String!): [AssociatedStudent!]
+  parentBillingSummary(parentId: String): ParentBillingSummary
 
   """Returns the authenticated parent's complaint history with pagination."""
   parentComplaints(paginationArgs: PaginationArgs): ParentComplaintsResult
   parentDashboardSchedule(date: String, paginationArgs: PaginationArgs, search: String): ParentDashboardScheduleResult
   parentDirectory(paginationArgs: PaginationArgs, search: String): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
-  parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String!): ParentInvoiceHistoryResult
+  parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String): ParentInvoiceHistoryResult
   parentProfile(parentId: String!): ParentProfile
 
   """
@@ -1529,6 +1563,7 @@ type Query {
   studentById(studentId: String!): AssociatedStudent
   studentClassHistory(month: Int!, studentId: ID!, year: Int!): StudentClassHistory
   studentClassSessionDetail(classInstanceId: ID!): StudentSessionDetail
+  studentCreditStatus: [StudentCreditRow!]
 
   """Fetches the global student directory with cross-relational data."""
   studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): [StudentDirectoryRow!]
@@ -1644,6 +1679,11 @@ input RevokePermissionGroupFromUserInput {
   userId: String!
 }
 
+type SendPaymentReminderResult {
+  id: String
+  success: Boolean
+}
+
 type StatusTrackingScheduleRow {
   durationMinutes: Int
   executionState: String
@@ -1743,6 +1783,16 @@ input StudentCreateInput {
   parentId: String!
   primaryTeacherId: String
   status: StudentStatus!
+}
+
+type StudentCreditRow {
+  classesRemaining: Int
+  classesTotal: Int
+  id: String
+  parentEmail: String
+  planType: String
+  status: String
+  studentName: String
 }
 
 type StudentDirectoryRow {

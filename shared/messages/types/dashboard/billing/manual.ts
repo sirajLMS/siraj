@@ -21,6 +21,7 @@ export interface BillingManualLabels {
   readonly backToFinancials: string;
   readonly parentSelection: string;
   readonly parentPlaceholder: string;
+  readonly studentSelection: string;
   readonly feeAmount: string;
   readonly feeAmountPlaceholder: string;
   readonly issueDate: string;

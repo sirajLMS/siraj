@@ -2,8 +2,6 @@ import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 
-// ─── Mutation: createManualInvoice ──────────────────────────────────────────
-
 export const createManualInvoiceMutationDocument: TypedDocumentNode<
   Operations.CreateManualInvoiceMutation,
   Types.MutationCreateManualInvoiceArgs
@@ -18,6 +16,8 @@ export const createManualInvoiceMutationDocument: TypedDocumentNode<
     $dueDate: String!
     $exchangeRateSnapshot: String
     $exchangeRateSource: String
+    $billingMonths: [BillingMonthInput!]
+    $sendEmail: Boolean
   ) {
     createManualInvoice(
       parentId: $parentId
@@ -29,6 +29,8 @@ export const createManualInvoiceMutationDocument: TypedDocumentNode<
       dueDate: $dueDate
       exchangeRateSnapshot: $exchangeRateSnapshot
       exchangeRateSource: $exchangeRateSource
+      billingMonths: $billingMonths
+      sendEmail: $sendEmail
     ) {
       id
       parentId
@@ -46,8 +48,6 @@ export const createManualInvoiceMutationDocument: TypedDocumentNode<
   }
 `;
 
-// ─── Mutation: markInvoicePaid ──────────────────────────────────────────────
-
 export const markInvoicePaidMutationDocument: TypedDocumentNode<
   Operations.MarkInvoicePaidMutation,
   Types.MutationMarkInvoicePaidArgs
@@ -64,8 +64,6 @@ export const markInvoicePaidMutationDocument: TypedDocumentNode<
   }
 `;
 
-// ─── Mutation: deleteInvoice ────────────────────────────────────────────────
-
 export const deleteInvoiceMutationDocument: TypedDocumentNode<
   Operations.DeleteInvoiceMutation,
   Types.MutationDeleteInvoiceArgs
@@ -77,6 +75,18 @@ export const deleteInvoiceMutationDocument: TypedDocumentNode<
       deletedAt
       version
       notificationSummaryUpdated
+    }
+  }
+`;
+
+export const sendPaymentReminderMutationDocument: TypedDocumentNode<
+  Operations.SendPaymentReminderMutation,
+  Types.MutationSendPaymentReminderArgs
+> = gql`
+  mutation SendPaymentReminder($studentId: String!) {
+    sendPaymentReminder(studentId: $studentId) {
+      id
+      success
     }
   }
 `;

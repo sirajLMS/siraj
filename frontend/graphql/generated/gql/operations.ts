@@ -137,6 +137,11 @@ export type AvailabilitySearchInput = {
   toTime: string;
 };
 
+export type BillingMonthInput = {
+  month: number;
+  year: number;
+};
+
 export type ClassExecutionState =
   | 'ACTIVATED'
   | 'COMPLETED'
@@ -873,6 +878,8 @@ export type CreateManualInvoiceMutationVariables = Exact<{
   dueDate: string;
   exchangeRateSnapshot: string | null | undefined;
   exchangeRateSource: string | null | undefined;
+  billingMonths: Array<Types.BillingMonthInput> | Types.BillingMonthInput | null | undefined;
+  sendEmail: boolean | null | undefined;
 }>;
 
 
@@ -902,6 +909,18 @@ export type DeleteInvoiceMutationVariables = Exact<{
 
 
 export type DeleteInvoiceMutation = DeleteInvoiceMutation_Mutation;
+
+export type SendPaymentReminderMutation_sendPaymentReminder_SendPaymentReminderResult = { id: string | null, success: boolean | null };
+
+export type SendPaymentReminderMutation_Mutation = { sendPaymentReminder: SendPaymentReminderMutation_sendPaymentReminder_SendPaymentReminderResult | null };
+
+
+export type SendPaymentReminderMutationVariables = Exact<{
+  studentId: string;
+}>;
+
+
+export type SendPaymentReminderMutation = SendPaymentReminderMutation_Mutation;
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo = { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null };
 
@@ -1254,7 +1273,7 @@ export type NotificationAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type NotificationAlertsQuery = NotificationAlertsQuery_Query;
 
-export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: string | null, status: string | null, invoiceType: string | null, studentId: string | null };
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: string | null, status: string | null, invoiceType: string | null, studentId: string | null, studentName: string | null };
 
 export type ParentInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -1264,12 +1283,60 @@ export type ParentInvoiceHistoryQuery_Query = { parentInvoiceHistory: ParentInvo
 
 
 export type ParentInvoiceHistoryQueryVariables = Exact<{
-  parentId: string;
+  parentId: string | null | undefined;
   paginationArgs: Types.PaginationArgs | null | undefined;
 }>;
 
 
 export type ParentInvoiceHistoryQuery = ParentInvoiceHistoryQuery_Query;
+
+export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: string | null, status: string | null, invoiceType: string | null, studentId: string | null, studentName: string | null };
+
+export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult = { id: string | null, totalCount: number | null, rows: Array<AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_rows_ParentInvoiceRow> | null, pageInfo: AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult_pageInfo_PageInfo | null };
+
+export type AdminInvoicesQuery_Query = { adminInvoices: AdminInvoicesQuery_adminInvoices_AdminInvoiceHistoryResult | null };
+
+
+export type AdminInvoicesQueryVariables = Exact<{
+  paginationArgs: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type AdminInvoicesQuery = AdminInvoicesQuery_Query;
+
+export type AdminBillingSummaryQuery_adminBillingSummary_AdminBillingSummary = { id: string | null, totalOutstanding: string | null, pendingCount: number | null, mtdRevenue: string | null, negativeBalanceCount: number | null };
+
+export type AdminBillingSummaryQuery_Query = { adminBillingSummary: AdminBillingSummaryQuery_adminBillingSummary_AdminBillingSummary | null };
+
+
+export type AdminBillingSummaryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminBillingSummaryQuery = AdminBillingSummaryQuery_Query;
+
+export type StudentCreditStatusQuery_studentCreditStatus_StudentCreditRow = { id: string | null, studentName: string | null, parentEmail: string | null, planType: string | null, classesRemaining: number | null, classesTotal: number | null, status: string | null };
+
+export type StudentCreditStatusQuery_Query = { studentCreditStatus: Array<StudentCreditStatusQuery_studentCreditStatus_StudentCreditRow> | null };
+
+
+export type StudentCreditStatusQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type StudentCreditStatusQuery = StudentCreditStatusQuery_Query;
+
+export type ParentBillingSummaryQuery_parentBillingSummary_ParentBillingSummary = { id: string | null, outstandingBalance: string | null, paidThisTerm: string | null, nextDueDate: string | null, activeStudents: number | null };
+
+export type ParentBillingSummaryQuery_Query = { parentBillingSummary: ParentBillingSummaryQuery_parentBillingSummary_ParentBillingSummary | null };
+
+
+export type ParentBillingSummaryQueryVariables = Exact<{
+  parentId: string | null | undefined;
+}>;
+
+
+export type ParentBillingSummaryQuery = ParentBillingSummaryQuery_Query;
 
 export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, teacherId: string | null, teacherName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, bookingStatus: string | null, executionState: string | null, outcome: string | null, zoomMeetingUrl: string | null, classTimeFormatted: string | null };
 

@@ -4,8 +4,8 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import type {
   AdminBillingSummaryResult,
   InvoiceHistoryPaginatedResult,
-  ParentBillingSummaryResult,
   PaginationArgs,
+  ParentBillingSummaryResult,
   StudentCreditRow,
 } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
@@ -70,10 +70,7 @@ export namespace BillingHistoryService {
     return BillingRepository.getAdminBillingSummary();
   }
 
-  export async function getStudentCreditStatus(
-    actorUserId: string,
-    locale?: string
-  ): Promise<StudentCreditRow[]> {
+  export async function getStudentCreditStatus(actorUserId: string, locale?: string): Promise<StudentCreditRow[]> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_VIEW_HISTORY);
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });

@@ -4,15 +4,41 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createManualInvoiceMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
+import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
 import { ManualInvoiceView } from "./ManualInvoiceView";
 import type { ManualInvoiceFormData } from "./schemas/manualInvoiceSchema";
-import type { ParentInvoiceOption } from "./types/manualInvoiceViewTypes";
+import type { ParentInvoiceOption, StudentOption } from "./types/manualInvoiceViewTypes";
 import { buildManualInvoiceLabels } from "./utils/buildManualInvoiceLabels";
+
+const MONTH_MAP: Record<string, number> = {
+  jan: 1,
+  feb: 2,
+  mar: 3,
+  apr: 4,
+  may: 5,
+  jun: 6,
+  jul: 7,
+  aug: 8,
+  sep: 9,
+  oct: 10,
+  nov: 11,
+  dec: 12,
+};
+
+function billingMonthsToInput(months: string[], year?: number): { year: number; month: number }[] {
+  const targetYear = year ?? new Date().getFullYear();
+  return months
+    .map(m => {
+      const month = MONTH_MAP[m];
+      return month ? { year: targetYear, month } : null;
+    })
+    .filter((m): m is { year: number; month: number } => m !== null);
+}
 
 export function ManualInvoiceContainer() {
   const t = useTranslations("dashboard.billing.manual");
@@ -24,9 +50,20 @@ export function ManualInvoiceContainer() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
 
   const { data: parentData, loading: parentsLoading } = useQuery(parentDirectoryQueryDocument, {
     variables: { search: null, paginationArgs: null },
+    fetchPolicy: "cache-first",
+  });
+
+  const { data: studentData, loading: studentsLoading } = useQuery(studentDirectoryQueryDocument, {
+    variables: {
+      paginationArgs: null,
+      orderBy: null,
+      filterArgs: selectedParentId ? ({ parentId: selectedParentId } as never) : null,
+    },
+    skip: !selectedParentId,
     fetchPolicy: "cache-first",
   });
 
@@ -49,11 +86,11 @@ export function ManualInvoiceContainer() {
     router.push(`/${locale}/billing`);
   };
 
-  const handleSubmit = (data: ManualInvoiceFormData, _sendEmail: boolean) => {
+  const handleSubmit = (data: ManualInvoiceFormData, sendEmail: boolean) => {
     void createInvoice({
       variables: {
         parentId: data.parentId,
-        studentId: null,
+        studentId: (data as ManualInvoiceFormData & { studentId?: string }).studentId ?? null,
         amount: data.feeAmount,
         currency: "USD",
         invoiceType: "MANUAL",
@@ -61,6 +98,8 @@ export function ManualInvoiceContainer() {
         dueDate: data.dueDate,
         exchangeRateSnapshot: null,
         exchangeRateSource: null,
+        billingMonths: billingMonthsToInput(data.billingMonths),
+        sendEmail,
       },
     });
   };
@@ -73,18 +112,31 @@ export function ManualInvoiceContainer() {
       label: `${row.name} (ID: ${row.id})`,
     }));
 
+  const studentOptions: StudentOption[] = useMemo(
+    () =>
+      (studentData?.studentDirectory ?? [])
+        .filter((s): s is { id: string; name: string } & typeof s => s.id != null)
+        .map(s => ({
+          id: s.id,
+          name: s.name ?? "Unknown",
+        })),
+    [studentData?.studentDirectory]
+  );
+
   return (
     <RequirePermission permissions={[AppPermission.BillingCreateInvoice]} fallback={null}>
       <ManualInvoiceView
         labels={labels}
         parentOptions={parentOptions}
-        isSubmitting={isSubmitting || parentsLoading}
+        studentOptions={studentOptions}
+        isSubmitting={isSubmitting || parentsLoading || studentsLoading}
         showSuccess={showSuccess}
         canCreate
-        canSendEmail={false}
+        canSendEmail
         onBack={handleBack}
         onSubmit={handleSubmit}
         onDismissSuccess={() => setShowSuccess(false)}
+        onParentChange={setSelectedParentId}
       />
       <Snackbar
         open={snackbarOpen}

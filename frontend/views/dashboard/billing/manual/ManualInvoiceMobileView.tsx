@@ -9,11 +9,12 @@ import { InvoiceDraftSummaryCard } from "./components/InvoiceDraftSummaryCard";
 import { ManualInvoiceActions } from "./components/ManualInvoiceActions";
 import { ManualInvoiceFormFields } from "./components/ManualInvoiceFormFields";
 import type { ManualInvoiceFormData } from "./schemas/manualInvoiceSchema";
-import type { ParentInvoiceOption } from "./types/manualInvoiceViewTypes";
+import type { ParentInvoiceOption, StudentOption } from "./types/manualInvoiceViewTypes";
 
 interface ManualInvoiceMobileViewProps {
   readonly labels: BillingManualLabels;
   readonly parentOptions: readonly ParentInvoiceOption[];
+  readonly studentOptions: readonly StudentOption[];
   readonly control: Control<ManualInvoiceFormData>;
   readonly errors: FieldErrors<ManualInvoiceFormData>;
   readonly totalFormatted: string;
@@ -27,6 +28,7 @@ interface ManualInvoiceMobileViewProps {
 export function ManualInvoiceMobileView({
   labels,
   parentOptions,
+  studentOptions,
   control,
   errors,
   totalFormatted,
@@ -52,6 +54,7 @@ export function ManualInvoiceMobileView({
           errors={errors}
           labels={labels}
           parentOptions={parentOptions}
+          studentOptions={studentOptions}
           variant="mobile"
         />
 
@@ -59,7 +62,7 @@ export function ManualInvoiceMobileView({
           <BillingMonthSelector control={control} errors={errors} labels={labels} variant="mobile" />
         </BaseCard>
 
-        <InvoiceDraftSummaryCard labels={labels} totalFormatted={totalFormatted} variant="mobile" />
+        <InvoiceDraftSummaryCard labels={labels} totalFormatted={totalFormatted} currency="USD" variant="mobile" />
 
         <ManualInvoiceActions
           labels={labels}

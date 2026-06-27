@@ -545,11 +545,7 @@ export namespace BillingRepository {
       })
       .from(invoices)
       .where(
-        and(
-          eq(invoices.status, "PAID"),
-          isNull(invoices.deletedAt),
-          sql`${invoices.paidDate} >= ${firstOfMonth}`
-        )
+        and(eq(invoices.status, "PAID"), isNull(invoices.deletedAt), sql`${invoices.paidDate} >= ${firstOfMonth}`)
       );
 
     const negBalanceResult = await t
@@ -617,13 +613,7 @@ export namespace BillingRepository {
         paidThisTerm: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
       })
       .from(invoices)
-      .where(
-        and(
-          eq(invoices.parentId, parentId),
-          eq(invoices.status, "PAID"),
-          isNull(invoices.deletedAt)
-        )
-      );
+      .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "PAID"), isNull(invoices.deletedAt)));
 
     const activeStudentsResult = await t
       .select({

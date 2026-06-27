@@ -8,6 +8,7 @@ import type { BillingManualLabels } from "@/shared/messages/types/dashboard/bill
 interface InvoiceDraftSummaryCardProps {
   readonly labels: BillingManualLabels;
   readonly totalFormatted: string;
+  readonly currency: string;
   readonly variant: "desktop" | "mobile";
 }
 
@@ -81,7 +82,12 @@ const StyledTotalValue = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
 }));
 
-export function InvoiceDraftSummaryCard({ labels, totalFormatted, variant }: Readonly<InvoiceDraftSummaryCardProps>) {
+export function InvoiceDraftSummaryCard({
+  labels,
+  totalFormatted,
+  currency,
+  variant,
+}: Readonly<InvoiceDraftSummaryCardProps>) {
   const isMobile = variant === "mobile";
 
   if (isMobile) {
@@ -91,7 +97,9 @@ export function InvoiceDraftSummaryCard({ labels, totalFormatted, variant }: Rea
           <Typography variant="labelMd" sx={{ opacity: 0.8, textTransform: "uppercase" }}>
             {labels.totalDraftValue}
           </Typography>
-          <Typography variant="headlineMd">AED {totalFormatted}</Typography>
+          <Typography variant="headlineMd">
+            {currency} {totalFormatted}
+          </Typography>
         </Box>
         <StyledMobileIconCircle>
           <ReceiptLongOutlined />
@@ -113,7 +121,9 @@ export function InvoiceDraftSummaryCard({ labels, totalFormatted, variant }: Rea
       </Box>
       <Box sx={{ textAlign: "end" }}>
         <StyledTotalLabel variant="labelMd">{labels.totalDraftValue}</StyledTotalLabel>
-        <StyledTotalValue variant="headlineMd">AED {totalFormatted}</StyledTotalValue>
+        <StyledTotalValue variant="headlineMd">
+          {currency} {totalFormatted}
+        </StyledTotalValue>
       </Box>
     </StyledDesktopSummaryContainer>
   );

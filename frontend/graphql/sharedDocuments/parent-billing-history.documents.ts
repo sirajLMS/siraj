@@ -7,7 +7,7 @@ export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
   Operations.ParentInvoiceHistoryQuery,
   Types.QueryParentInvoiceHistoryArgs
 > = gql`
-  query ParentInvoiceHistory($parentId: String!, $paginationArgs: PaginationArgs) {
+  query ParentInvoiceHistory($parentId: String, $paginationArgs: PaginationArgs) {
     parentInvoiceHistory(parentId: $parentId, paginationArgs: $paginationArgs) {
       id
       rows {
@@ -20,6 +20,7 @@ export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
         status
         invoiceType
         studentId
+        studentName
       }
       totalCount
       pageInfo {
@@ -32,6 +33,81 @@ export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
         perPage
         total
       }
+    }
+  }
+`;
+
+export const adminInvoicesQueryDocument: TypedDocumentNode<
+  Operations.AdminInvoicesQuery,
+  Types.QueryAdminInvoicesArgs
+> = gql`
+  query AdminInvoices($paginationArgs: PaginationArgs) {
+    adminInvoices(paginationArgs: $paginationArgs) {
+      id
+      rows {
+        id
+        issueDate
+        dueDate
+        paidDate
+        amount
+        currency
+        status
+        invoiceType
+        studentId
+        studentName
+      }
+      totalCount
+      pageInfo {
+        count
+        currentPage
+        firstItem
+        hasMorePages
+        lastItem
+        lastPage
+        perPage
+        total
+      }
+    }
+  }
+`;
+
+export const adminBillingSummaryQueryDocument: TypedDocumentNode<Operations.AdminBillingSummaryQuery> = gql`
+  query AdminBillingSummary {
+    adminBillingSummary {
+      id
+      totalOutstanding
+      pendingCount
+      mtdRevenue
+      negativeBalanceCount
+    }
+  }
+`;
+
+export const studentCreditStatusQueryDocument: TypedDocumentNode<Operations.StudentCreditStatusQuery> = gql`
+  query StudentCreditStatus {
+    studentCreditStatus {
+      id
+      studentName
+      parentEmail
+      planType
+      classesRemaining
+      classesTotal
+      status
+    }
+  }
+`;
+
+export const parentBillingSummaryQueryDocument: TypedDocumentNode<
+  Operations.ParentBillingSummaryQuery,
+  Types.QueryParentBillingSummaryArgs
+> = gql`
+  query ParentBillingSummary($parentId: String) {
+    parentBillingSummary(parentId: $parentId) {
+      id
+      outstandingBalance
+      paidThisTerm
+      nextDueDate
+      activeStudents
     }
   }
 `;

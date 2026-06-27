@@ -10,6 +10,7 @@ export function buildManualInvoiceLabels(t: BillingManualTranslator): BillingMan
     backToFinancials: t("backToFinancials"),
     parentSelection: t("parentSelection"),
     parentPlaceholder: t("parentPlaceholder"),
+    studentSelection: t("studentSelection"),
     feeAmount: t("feeAmount"),
     feeAmountPlaceholder: t("feeAmountPlaceholder"),
     issueDate: t("issueDate"),

@@ -13,9 +13,8 @@ import { ManualInvoiceActions } from "./components/ManualInvoiceActions";
 import { ManualInvoiceFormFields } from "./components/ManualInvoiceFormFields";
 import { ManualInvoiceSupportCards } from "./components/ManualInvoiceSupportCards";
 import type { ManualInvoiceFormData } from "./schemas/manualInvoiceSchema";
-import type { ParentInvoiceOption } from "./types/manualInvoiceViewTypes";
+import type { ParentInvoiceOption, StudentOption } from "./types/manualInvoiceViewTypes";
 
-// Back navigation button styled with primary color and bold weight
 const StyledBackButton = styled(Button)(({ theme }) => ({
   color: theme.palette.primary.main,
   fontWeight: 700,
@@ -24,6 +23,7 @@ const StyledBackButton = styled(Button)(({ theme }) => ({
 interface ManualInvoiceDesktopViewProps {
   readonly labels: BillingManualLabels;
   readonly parentOptions: readonly ParentInvoiceOption[];
+  readonly studentOptions: readonly StudentOption[];
   readonly control: Control<ManualInvoiceFormData>;
   readonly errors: FieldErrors<ManualInvoiceFormData>;
   readonly totalFormatted: string;
@@ -38,6 +38,7 @@ interface ManualInvoiceDesktopViewProps {
 export function ManualInvoiceDesktopView({
   labels,
   parentOptions,
+  studentOptions,
   control,
   errors,
   totalFormatted,
@@ -74,10 +75,11 @@ export function ManualInvoiceDesktopView({
               errors={errors}
               labels={labels}
               parentOptions={parentOptions}
+              studentOptions={studentOptions}
               variant="desktop"
             />
             <BillingMonthSelector control={control} errors={errors} labels={labels} variant="desktop" />
-            <InvoiceDraftSummaryCard labels={labels} totalFormatted={totalFormatted} variant="desktop" />
+            <InvoiceDraftSummaryCard labels={labels} totalFormatted={totalFormatted} currency="USD" variant="desktop" />
             <ManualInvoiceActions
               labels={labels}
               canCreate={canCreate}

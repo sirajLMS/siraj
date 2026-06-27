@@ -39,6 +39,8 @@ function invoiceVars(parentId: string, amount: string) {
     dueDate: "2026-07-22",
     exchangeRateSnapshot: null,
     exchangeRateSource: null,
+    billingMonths: null,
+    sendEmail: null,
   };
 }
 

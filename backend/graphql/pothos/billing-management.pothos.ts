@@ -1,5 +1,9 @@
-import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
+import {
+  BillingManagementService,
+  type SendPaymentReminderResult,
+} from "@/backend/services/billing/billing-management.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { BillingMonthInputRef } from "./billing-history.pothos";
 
 // ─── ManualInvoiceResult Object ──────────────────────────────────────────────
 
@@ -98,6 +102,8 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
       dueDate: t.arg.string({ required: true }),
       exchangeRateSnapshot: t.arg.string({ required: false }),
       exchangeRateSource: t.arg.string({ required: false }),
+      billingMonths: t.arg({ type: [BillingMonthInputRef], required: false }),
+      sendEmail: t.arg.boolean({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
       return BillingManagementService.createManualInvoice(
@@ -112,6 +118,8 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
           dueDate: args.dueDate,
           exchangeRateSnapshot: args.exchangeRateSnapshot ?? null,
           exchangeRateSource: args.exchangeRateSource ?? null,
+          billingMonths: args.billingMonths?.map(m => ({ year: m.year, month: m.month })) ?? null,
+          sendEmail: args.sendEmail ?? null,
         },
         ctx.locale
       );
@@ -160,6 +168,27 @@ gqlSchemaBuilder.mutationField("deleteInvoice", t =>
         version: result.invoice.version,
         notificationSummaryUpdated: result.notificationSummaryUpdated,
       };
+    },
+  })
+);
+
+const SendPaymentReminderResultRef = gqlSchemaBuilder.objectRef<SendPaymentReminderResult>("SendPaymentReminderResult");
+
+export const SendPaymentReminderResultPothosObject = SendPaymentReminderResultRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    success: t.exposeBoolean("success"),
+  }),
+});
+
+gqlSchemaBuilder.mutationField("sendPaymentReminder", t =>
+  t.field({
+    type: SendPaymentReminderResultRef,
+    args: {
+      studentId: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      return BillingManagementService.sendPaymentReminder(ctx.user?.id || "", args.studentId, ctx.locale);
     },
   })
 );

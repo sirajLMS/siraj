@@ -21,6 +21,15 @@ export type Scalars = {
   StringMap: { input: Record<string, string>; output: Record<string, string>; }
 };
 
+export type AdminBillingSummary = {
+  __typename?: 'AdminBillingSummary';
+  id: Maybe<Scalars['String']['output']>;
+  mtdRevenue: Maybe<Scalars['String']['output']>;
+  negativeBalanceCount: Maybe<Scalars['Int']['output']>;
+  pendingCount: Maybe<Scalars['Int']['output']>;
+  totalOutstanding: Maybe<Scalars['String']['output']>;
+};
+
 export type AdminDashboardScheduleInput = {
   date: Scalars['String']['input'];
   metricFilter: InputMaybe<Scalars['String']['input']>;
@@ -35,6 +44,14 @@ export type AdminDashboardScheduleResult = {
   metrics: Maybe<DailyScheduleMetrics>;
   pageInfo: Maybe<PageInfo>;
   rows: Maybe<Array<DailyScheduleList>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export type AdminInvoiceHistoryResult = {
+  __typename?: 'AdminInvoiceHistoryResult';
+  id: Maybe<Scalars['String']['output']>;
+  pageInfo: Maybe<PageInfo>;
+  rows: Maybe<Array<ParentInvoiceRow>>;
   totalCount: Maybe<Scalars['Int']['output']>;
 };
 
@@ -224,6 +241,11 @@ export type AvailabilitySearchTeacher = {
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   timezone: Maybe<Scalars['String']['output']>;
+};
+
+export type BillingMonthInput = {
+  month: Scalars['Int']['input'];
+  year: Scalars['Int']['input'];
 };
 
 export type BulkOperationFailure = {
@@ -1198,6 +1220,7 @@ export type Mutation = {
   /** Responds to a suggestion with an admin text response (admin only). */
   respondToSuggestion: Maybe<Suggestion>;
   revokePermissionGroupFromUser: Maybe<Scalars['Boolean']['output']>;
+  sendPaymentReminder: Maybe<SendPaymentReminderResult>;
   setStorageItemProtection: Maybe<FileOperationResult>;
   stopClass: Maybe<ClassInstanceDetail>;
   /** Submits a new complaint from the authenticated parent. */
@@ -1286,6 +1309,7 @@ export type MutationCreateManagerArgs = {
 
 export type MutationCreateManualInvoiceArgs = {
   amount: Scalars['String']['input'];
+  billingMonths: InputMaybe<Array<BillingMonthInput>>;
   currency: Scalars['String']['input'];
   dueDate: Scalars['String']['input'];
   exchangeRateSnapshot: InputMaybe<Scalars['String']['input']>;
@@ -1293,6 +1317,7 @@ export type MutationCreateManualInvoiceArgs = {
   invoiceType: Scalars['String']['input'];
   issueDate: Scalars['String']['input'];
   parentId: Scalars['String']['input'];
+  sendEmail: InputMaybe<Scalars['Boolean']['input']>;
   studentId: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -1485,6 +1510,11 @@ export type MutationRevokePermissionGroupFromUserArgs = {
 };
 
 
+export type MutationSendPaymentReminderArgs = {
+  studentId: Scalars['String']['input'];
+};
+
+
 export type MutationSetStorageItemProtectionArgs = {
   input: StorageItemProtectionUpdateInput;
 };
@@ -1620,6 +1650,15 @@ export type PaginationArgs = {
   skip: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type ParentBillingSummary = {
+  __typename?: 'ParentBillingSummary';
+  activeStudents: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  nextDueDate: Maybe<Scalars['String']['output']>;
+  outstandingBalance: Maybe<Scalars['String']['output']>;
+  paidThisTerm: Maybe<Scalars['String']['output']>;
+};
+
 /** Paginated parent complaints with page info. */
 export type ParentComplaintsResult = {
   __typename?: 'ParentComplaintsResult';
@@ -1718,6 +1757,7 @@ export type ParentInvoiceRow = {
   paidDate: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
   studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
 };
 
 /** Input for creating a new parent account with billing configuration */
@@ -1827,9 +1867,11 @@ export type PermissionGroup = {
 
 export type Query = {
   __typename?: 'Query';
+  adminBillingSummary: Maybe<AdminBillingSummary>;
   /** Returns the paginated admin complaint queue with metrics. */
   adminComplaintQueue: Maybe<ComplaintQueueResult>;
   adminDashboardSchedule: Maybe<AdminDashboardScheduleResult>;
+  adminInvoices: Maybe<AdminInvoiceHistoryResult>;
   /** Returns the paginated admin suggestion list with metrics. */
   adminSuggestions: Maybe<AdminSuggestionResult>;
   classInstance: Maybe<ClassInstanceDetail>;
@@ -1857,6 +1899,7 @@ export type Query = {
   /** Returns onboarding metrics for staff accounts. */
   onboardingMetrics: Maybe<OnboardingMetrics>;
   parentAssociatedStudents: Maybe<Array<AssociatedStudent>>;
+  parentBillingSummary: Maybe<ParentBillingSummary>;
   /** Returns the authenticated parent's complaint history with pagination. */
   parentComplaints: Maybe<ParentComplaintsResult>;
   parentDashboardSchedule: Maybe<ParentDashboardScheduleResult>;
@@ -1884,6 +1927,7 @@ export type Query = {
   studentById: Maybe<AssociatedStudent>;
   studentClassHistory: Maybe<StudentClassHistory>;
   studentClassSessionDetail: Maybe<StudentSessionDetail>;
+  studentCreditStatus: Maybe<Array<StudentCreditRow>>;
   /** Fetches the global student directory with cross-relational data. */
   studentDirectory: Maybe<Array<StudentDirectoryRow>>;
   students: StudentsWithFiltersResponse;
@@ -1916,6 +1960,11 @@ export type QueryAdminComplaintQueueArgs = {
 
 export type QueryAdminDashboardScheduleArgs = {
   input: AdminDashboardScheduleInput;
+};
+
+
+export type QueryAdminInvoicesArgs = {
+  paginationArgs: InputMaybe<PaginationArgs>;
 };
 
 
@@ -2010,6 +2059,11 @@ export type QueryParentAssociatedStudentsArgs = {
 };
 
 
+export type QueryParentBillingSummaryArgs = {
+  parentId: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryParentComplaintsArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
 };
@@ -2035,7 +2089,7 @@ export type QueryParentDocumentsArgs = {
 
 export type QueryParentInvoiceHistoryArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
-  parentId: Scalars['String']['input'];
+  parentId: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -2283,6 +2337,12 @@ export type RevokePermissionGroupFromUserInput = {
   userId: Scalars['String']['input'];
 };
 
+export type SendPaymentReminderResult = {
+  __typename?: 'SendPaymentReminderResult';
+  id: Maybe<Scalars['String']['output']>;
+  success: Maybe<Scalars['Boolean']['output']>;
+};
+
 export type StatusTrackingScheduleRow = {
   __typename?: 'StatusTrackingScheduleRow';
   durationMinutes: Maybe<Scalars['Int']['output']>;
@@ -2384,6 +2444,17 @@ export type StudentCreateInput = {
   parentId: Scalars['String']['input'];
   primaryTeacherId: InputMaybe<Scalars['String']['input']>;
   status: StudentStatus;
+};
+
+export type StudentCreditRow = {
+  __typename?: 'StudentCreditRow';
+  classesRemaining: Maybe<Scalars['Int']['output']>;
+  classesTotal: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  parentEmail: Maybe<Scalars['String']['output']>;
+  planType: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
 };
 
 export type StudentDirectoryRow = {
