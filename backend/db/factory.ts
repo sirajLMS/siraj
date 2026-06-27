@@ -16,11 +16,17 @@ const createNeonDb = () => {
 
 export type NeonDbType = ReturnType<typeof createNeonDb>;
 
+function isTestEnv(): boolean {
+  return !!process.env.BUN_TEST || process.env.NODE_ENV === "test";
+}
+
+const defaultPoolMax = () => (isTestEnv() ? 3 : 10);
+
 const createPostgresDb = () => {
   logger.log("Initializing PostgreSQL connection pool");
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 10,
+    max: defaultPoolMax(),
   });
   const db = drizzlePostgres({ client: pool, relations });
   return db;
@@ -53,6 +59,6 @@ export function createPool() {
 
   return new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 10,
+    max: defaultPoolMax(),
   });
 }

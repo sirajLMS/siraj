@@ -22,14 +22,27 @@ export function clearDrizzleLogs() {
 // Create database connection using factory
 export const db = createDatabase();
 
-// Create pool for PostgreSQL (throws error for Neon)
-export const drizzleDbPool = (() => {
-  try {
-    return createPool();
-  } catch {
-    return null; // Neon doesn't support pools
+// Lazy pool for PostgreSQL — only created when accessed, avoids wasting
+// connections in parallel test processes that never need the raw pool.
+let _drizzleDbPool: ReturnType<typeof createPool> | null = null;
+
+export function getDrizzleDbPool(): ReturnType<typeof createPool> | null {
+  if (!_drizzleDbPool) {
+    try {
+      _drizzleDbPool = createPool();
+    } catch {
+      return null;
+    }
   }
-})();
+  return _drizzleDbPool;
+}
+
+export async function closeDrizzleDbPool(): Promise<void> {
+  if (_drizzleDbPool) {
+    await _drizzleDbPool.end();
+    _drizzleDbPool = null;
+  }
+}
 
 export { relations };
 

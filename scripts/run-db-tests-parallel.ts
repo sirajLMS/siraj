@@ -35,10 +35,10 @@ for await (const file of glob.scan({ cwd: "backend/db/test" })) {
 const totalFiles = testFiles.length;
 const parallelism = availableParallelism();
 
-globalThis.console.log(`${BOLD}Bun Parallel Test Runner${RESET}`);
-globalThis.console.log(
-  `${GRAY}Running ${totalFiles} database test files across ${parallelism} parallel processes...${RESET}\n`
-);
+// Each worker creates a pg pool (max: 3 in test env via factory.ts).
+// Cap workers so total connections stay well within PostgreSQL's max_connections.
+// With max 3 per pool: 8 workers x 3 = 24 connections (leaves headroom for other clients).
+const MAX_DB_WORKERS = 8;
 
 const startAll = performance.now();
 let totalPasses = 0;
@@ -50,6 +50,13 @@ let filesFailedCount = 0;
 const failureDetails: FailureDetail[] = [];
 const queue = [...testFiles];
 const workers: Promise<void>[] = [];
+
+const effectiveWorkers = Math.min(parallelism, queue.length, MAX_DB_WORKERS);
+
+globalThis.console.log(`${BOLD}Bun Parallel Test Runner${RESET}`);
+globalThis.console.log(
+  `${GRAY}Running ${totalFiles} database test files across ${effectiveWorkers} parallel processes (capped from ${parallelism} for DB connection safety)...${RESET}\n`
+);
 
 function stripAnsi(str: string): string {
   const ESC = String.fromCharCode(27);
@@ -186,7 +193,7 @@ async function worker() {
 }
 
 // Start workers up to the concurrency limit
-const limit = Math.min(parallelism, queue.length);
+const limit = Math.min(parallelism, queue.length, MAX_DB_WORKERS);
 for (let i = 0; i < limit; i++) {
   workers.push(worker());
 }

@@ -72,7 +72,16 @@ export async function createTestUser(
  * Sets up a temporary RLS role for testing.
  * @param roleName Name of the role to create
  */
+const rlsRoleRefCounts = new Map<string, number>();
+
 export async function setupRlsRole(roleName: string = "test_rls_user"): Promise<void> {
+  const currentCount = rlsRoleRefCounts.get(roleName) ?? 0;
+  rlsRoleRefCounts.set(roleName, currentCount + 1);
+
+  if (currentCount > 0) {
+    return;
+  }
+
   const quotedRole = quoteIdent(roleName);
 
   await db.execute(
@@ -87,6 +96,10 @@ export async function setupRlsRole(roleName: string = "test_rls_user"): Promise<
   `)
   );
 
+  await executeGrantWithRetry(quotedRole);
+}
+
+async function executeGrantWithRetry(quotedRole: string): Promise<void> {
   const grantStatements = [
     `GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${quotedRole}`,
     `GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${quotedRole}`,
@@ -95,13 +108,24 @@ export async function setupRlsRole(roleName: string = "test_rls_user"): Promise<
   ];
 
   for (const stmt of grantStatements) {
+    await retryOnConcurrentConflict(() => db.execute(sql.raw(stmt)));
+  }
+}
+
+async function retryOnConcurrentConflict(fn: () => Promise<unknown>, maxRetries = 3): Promise<void> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      await db.execute(sql.raw(stmt));
+      await fn();
+      return;
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      if (!msg.includes("tuple concurrently updated")) {
-        throw e;
+      const isConcurrent =
+        msg.includes("tuple concurrently updated") || msg.includes("deadlock detected") || msg.includes("40P01");
+      if (isConcurrent && attempt < maxRetries - 1) {
+        await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
+        continue;
       }
+      throw e;
     }
   }
 }
@@ -111,6 +135,13 @@ export async function setupRlsRole(roleName: string = "test_rls_user"): Promise<
  * @param roleName Name of the role to drop
  */
 export async function teardownRlsRole(roleName: string = "test_rls_user"): Promise<void> {
+  const currentCount = rlsRoleRefCounts.get(roleName) ?? 0;
+  if (currentCount > 1) {
+    rlsRoleRefCounts.set(roleName, currentCount - 1);
+    return;
+  }
+
+  rlsRoleRefCounts.delete(roleName);
   const quotedRole = quoteIdent(roleName);
   try {
     await db.execute(sql.raw(`REASSIGN OWNED BY ${quotedRole} TO postgres`));
@@ -139,7 +170,7 @@ export async function queryAsRlsRole<T>(
     const base = new URL(process.env.DATABASE_URL);
     base.username = roleName;
     base.password = "test_rls_pass";
-    pool = new Pool({ connectionString: base.toString(), max: 2 });
+    pool = new Pool({ connectionString: base.toString(), max: 1 });
     rlsClientCache.set(roleName, pool);
   }
 

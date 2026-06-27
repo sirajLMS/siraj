@@ -231,6 +231,46 @@ CREATE TABLE "user_notification_preferences" (
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "class_communications" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"group_class_id" uuid NOT NULL,
+	"type" varchar(20) NOT NULL,
+	"title" varchar(255) NOT NULL,
+	"description" text,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"is_delivered" boolean,
+	"notification_delivery_id" uuid,
+	"class_status_event_id" uuid,
+	"timestamp" timestamp(3) with time zone,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "group_class_enrollments" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"group_class_id" uuid NOT NULL,
+	"student_id" uuid NOT NULL,
+	"student_id_number" varchar(50),
+	"attendance_status" varchar(20) DEFAULT 'pending' NOT NULL,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "group_classes" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"class_instance_id" uuid NOT NULL,
+	"course_name" varchar(255) NOT NULL,
+	"teacher_name" varchar(255) NOT NULL,
+	"class_type" varchar(50) NOT NULL,
+	"original_date" timestamp(3) with time zone,
+	"rescheduled_date" timestamp(3) with time zone,
+	"time_slot" varchar(100) NOT NULL,
+	"status" varchar(50) NOT NULL,
+	"audit_remark" text,
+	"audit_logged_at" timestamp(3) with time zone NOT NULL,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "parents" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL UNIQUE,
@@ -849,6 +889,13 @@ CREATE INDEX "user_device_tokens_user_id_idx" ON "user_device_tokens" ("user_id"
 CREATE UNIQUE INDEX "user_device_tokens_token_unique_idx" ON "user_device_tokens" ("token");--> statement-breakpoint
 CREATE INDEX "user_notification_preferences_user_id_idx" ON "user_notification_preferences" ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "user_notification_preferences_unique_idx" ON "user_notification_preferences" ("user_id","channel","event_type");--> statement-breakpoint
+CREATE INDEX "class_communications_group_class_id_idx" ON "class_communications" ("group_class_id");--> statement-breakpoint
+CREATE INDEX "class_communications_type_idx" ON "class_communications" ("type");--> statement-breakpoint
+CREATE UNIQUE INDEX "group_class_enrollments_unique_idx" ON "group_class_enrollments" ("group_class_id","student_id");--> statement-breakpoint
+CREATE INDEX "group_class_enrollments_group_class_id_idx" ON "group_class_enrollments" ("group_class_id");--> statement-breakpoint
+CREATE INDEX "group_class_enrollments_student_id_idx" ON "group_class_enrollments" ("student_id");--> statement-breakpoint
+CREATE INDEX "group_classes_class_instance_id_idx" ON "group_classes" ("class_instance_id");--> statement-breakpoint
+CREATE INDEX "group_classes_status_idx" ON "group_classes" ("status");--> statement-breakpoint
 CREATE INDEX "parents_user_id_idx" ON "parents" ("user_id");--> statement-breakpoint
 CREATE INDEX "parents_status_idx" ON "parents" ("status");--> statement-breakpoint
 CREATE INDEX "group_permissions_group_id_idx" ON "group_permissions" ("group_id");--> statement-breakpoint
@@ -967,6 +1014,12 @@ ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_reviewed_by_user_id_users_
 ALTER TABLE "suggestions" ADD CONSTRAINT "suggestions_duplicate_of_id_fkey" FOREIGN KEY ("duplicate_of_id") REFERENCES "suggestions"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "user_device_tokens" ADD CONSTRAINT "user_device_tokens_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "user_notification_preferences" ADD CONSTRAINT "user_notification_preferences_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "class_communications" ADD CONSTRAINT "class_communications_group_class_id_group_classes_id_fkey" FOREIGN KEY ("group_class_id") REFERENCES "group_classes"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "class_communications" ADD CONSTRAINT "class_communications_PiBewH0pYIt0_fkey" FOREIGN KEY ("notification_delivery_id") REFERENCES "notification_deliveries"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "class_communications" ADD CONSTRAINT "class_communications_NjLYHZgCUCzr_fkey" FOREIGN KEY ("class_status_event_id") REFERENCES "class_status_events"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "group_class_enrollments" ADD CONSTRAINT "group_class_enrollments_group_class_id_group_classes_id_fkey" FOREIGN KEY ("group_class_id") REFERENCES "group_classes"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "group_class_enrollments" ADD CONSTRAINT "group_class_enrollments_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "group_classes" ADD CONSTRAINT "group_classes_class_instance_id_class_instances_id_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "parents" ADD CONSTRAINT "parents_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "group_permissions" ADD CONSTRAINT "group_permissions_group_id_permission_groups_id_fkey" FOREIGN KEY ("group_id") REFERENCES "permission_groups"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "group_permissions" ADD CONSTRAINT "group_permissions_permission_id_permissions_id_fkey" FOREIGN KEY ("permission_id") REFERENCES "permissions"("id") ON DELETE CASCADE;--> statement-breakpoint

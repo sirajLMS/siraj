@@ -1,6 +1,6 @@
 {
-  "id": "ad1d69ef-a42e-43d0-ac62-78108ee80c89",
-  "prevIds": ["d78ed969-e9ff-4893-9c40-446718d619b8"],
+  "id": "917f7b8e-b588-46cf-9a23-100d92842450",
+  "prevIds": ["44b59e2b-8f35-4e49-9752-ae7c18856fc9"],
   "version": "8",
   "dialect": "postgres",
   "ddl": [
@@ -607,6 +607,24 @@
     {
       "isRlsEnabled": false,
       "name": "user_notification_preferences",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "class_communications",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "group_class_enrollments",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "group_classes",
       "entityType": "tables",
       "schema": "public"
     },
@@ -2925,6 +2943,409 @@
       "entityType": "columns",
       "schema": "public",
       "table": "user_notification_preferences"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "group_class_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "title",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "description",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "true",
+      "generated": null,
+      "identity": null,
+      "name": "is_active",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "is_delivered",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "notification_delivery_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "class_status_event_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "timestamp",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "group_class_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "student_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "student_id_number",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "type": "varchar(20)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'pending'",
+      "generated": null,
+      "identity": null,
+      "name": "attendance_status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "class_instance_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "course_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "teacher_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "class_type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "original_date",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "rescheduled_date",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "time_slot",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "audit_remark",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "audit_logged_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "group_classes"
     },
     {
       "type": "uuid",
@@ -9224,6 +9645,160 @@
       "nameExplicit": true,
       "columns": [
         {
+          "value": "group_class_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "class_communications_group_class_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "type",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "class_communications_type_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "group_class_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "student_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "group_class_enrollments_unique_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "group_class_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "group_class_enrollments_group_class_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "student_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "group_class_enrollments_student_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "class_instance_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "group_classes_class_instance_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "status",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "group_classes_status_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
           "value": "user_id",
           "isExpression": false,
           "asc": true,
@@ -11661,6 +12236,84 @@
     },
     {
       "nameExplicit": false,
+      "columns": ["group_class_id"],
+      "schemaTo": "public",
+      "tableTo": "group_classes",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "class_communications_group_class_id_group_classes_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["notification_delivery_id"],
+      "schemaTo": "public",
+      "tableTo": "notification_deliveries",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "class_communications_PiBewH0pYIt0_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["class_status_event_id"],
+      "schemaTo": "public",
+      "tableTo": "class_status_events",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "class_communications_NjLYHZgCUCzr_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "class_communications"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["group_class_id"],
+      "schemaTo": "public",
+      "tableTo": "group_classes",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "group_class_enrollments_group_class_id_group_classes_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["student_id"],
+      "schemaTo": "public",
+      "tableTo": "students",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "group_class_enrollments_student_id_students_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "group_class_enrollments"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["class_instance_id"],
+      "schemaTo": "public",
+      "tableTo": "class_instances",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "group_classes_class_instance_id_class_instances_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "group_classes"
+    },
+    {
+      "nameExplicit": false,
       "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
@@ -12870,6 +13523,30 @@
       "name": "user_notification_preferences_pkey",
       "schema": "public",
       "table": "user_notification_preferences",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "class_communications_pkey",
+      "schema": "public",
+      "table": "class_communications",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "group_class_enrollments_pkey",
+      "schema": "public",
+      "table": "group_class_enrollments",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "group_classes_pkey",
+      "schema": "public",
+      "table": "group_classes",
       "entityType": "pks"
     },
     {

@@ -1,19 +1,12 @@
 // cspell:ignore: notif
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { UserEntity, UserNotificationPreferenceSelectType } from "../../../types";
 import { userNotificationPreferences, users } from "../../schema";
-import {
-  closeRlsClients,
-  createTestUser,
-  queryAsRlsRole,
-  runInRollback,
-  setupRlsRole,
-  teardownRlsRole,
-} from "../test-utils";
+import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("User Notification Preferences", () => {
   const RLS_ROLE = "test_rls_user_notif";
@@ -24,7 +17,6 @@ describe("User Notification Preferences", () => {
 
   afterAll(async () => {
     await teardownRlsRole(RLS_ROLE);
-    await closeRlsClients();
   });
 
   test("Can insert and retrieve preferences", async () => {
@@ -112,21 +104,25 @@ describe("User Notification Preferences", () => {
         enabled: true,
       });
 
-      const preferences = await queryAsRlsRole<{ user_id: string }>(
-        RLS_ROLE,
-        userA.id,
-        `SELECT user_id FROM "user_notification_preferences"`
-      );
-      expect(preferences.length).toBe(0);
+      const quotedRole = `"${RLS_ROLE}"`;
+      await tx.execute(sql`SET LOCAL ROLE ${sql.raw(quotedRole)}`);
+      await tx.execute(sql`SELECT set_config('app.current_user_id', ${userA.id}, true)`);
 
-      const bPreferences = await queryAsRlsRole<{ user_id: string }>(
-        RLS_ROLE,
-        userB.id,
-        `SELECT user_id FROM "user_notification_preferences" WHERE "user_id" = $1`,
-        [userB.id]
-      );
+      const aPreferences = await tx
+        .select({ userId: userNotificationPreferences.userId })
+        .from(userNotificationPreferences);
+      expect(aPreferences.length).toBe(0);
+
+      await tx.execute(sql`RESET ROLE`);
+      await tx.execute(sql`SET LOCAL ROLE ${sql.raw(quotedRole)}`);
+      await tx.execute(sql`SELECT set_config('app.current_user_id', ${userB.id}, true)`);
+
+      const bPreferences = await tx
+        .select({ userId: userNotificationPreferences.userId })
+        .from(userNotificationPreferences)
+        .where(eq(userNotificationPreferences.userId, userB.id));
       expect(bPreferences.length).toBe(1);
-      expect(bPreferences[0].user_id).toBe(userB.id);
+      expect(bPreferences[0].userId).toBe(userB.id);
     });
     testLogger.info("RLS test passed.");
   });

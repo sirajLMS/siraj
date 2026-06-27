@@ -1,8 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
 import { and, eq, isNull, sql } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
 import { setupTestEntities } from "@/backend/db/test/entity-setup";
@@ -15,8 +13,6 @@ import { getErrorMessage } from "@/shared/utils/error";
 describe("Scheduling Security & Trigger Compatibility", () => {
   beforeAll(async () => {
     await setupRlsRole();
-    const triggerSql = readFileSync("backend/db/migration/class_instances_state_transition_trigger.sql", "utf-8");
-    await db.execute(sql.raw(triggerSql));
   });
 
   afterAll(async () => {

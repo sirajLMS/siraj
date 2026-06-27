@@ -3,7 +3,7 @@ import { migrate as migrateNeon } from "drizzle-orm/neon-http/migrator";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { migrate as migratePostgres } from "drizzle-orm/node-postgres/migrator";
 import logger from "@/backend/lib/logger";
-import { db, drizzleDbPool } from "../drizzleDb";
+import { db, getDrizzleDbPool } from "../drizzleDb";
 
 /**
  * Run migrations programmatically
@@ -32,11 +32,14 @@ export async function runMigrations(closePool: boolean) {
     return;
   }
 
-  if (provider === "postgres" && drizzleDbPool) {
-    logger.warn("🔴 Closing database pool now...");
-    await drizzleDbPool.end();
-    logger.warn("🔴 Database pool has been closed!");
-    logger.warn("⚠️  Any subsequent database operations will fail with 'Cannot use a pool after calling end'");
+  if (provider === "postgres") {
+    const pool = getDrizzleDbPool();
+    if (pool) {
+      logger.warn("🔴 Closing database pool now...");
+      await pool.end();
+      logger.warn("🔴 Database pool has been closed!");
+      logger.warn("⚠️  Any subsequent database operations will fail with 'Cannot use a pool after calling end'");
+    }
   }
 }
 

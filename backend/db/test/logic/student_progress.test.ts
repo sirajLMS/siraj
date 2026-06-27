@@ -7,7 +7,7 @@ import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEnt
 import type { ClassInstanceEntity } from "../../../types/scheduling.types";
 import type { DBTransaction } from "../../db.types";
 import { classInstances, parents, studentProgress, students, teacherAssignments, teachers, users } from "../../schema";
-import { closeRlsClients, queryAsRlsRole, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 async function setupTestEnvironment(tx: DBTransaction, now: Date) {
   const [userP] = (await tx
@@ -80,7 +80,6 @@ describe("Student Progress Tracking", () => {
 
   afterAll(async () => {
     await teardownRlsRole(ROLE_NAME);
-    await closeRlsClients();
   });
 
   test("Teacher can log progress for their student", async () => {
@@ -158,15 +157,18 @@ describe("Student Progress Tracking", () => {
         parentVisible: true,
       });
 
-      const visibleResults = await queryAsRlsRole<{ id: string; topics_covered: string }>(
-        ROLE_NAME,
-        userP.id,
-        `SELECT id, topics_covered FROM "student_progress" WHERE student_id = $1`,
-        [student.id]
-      );
-      expect(visibleResults.length).toBe(1);
-      expect(visibleResults[0].topics_covered).toBe("Visible Part");
+      const quotedRole = `"${ROLE_NAME}"`;
+      await tx.execute(sql`SET LOCAL ROLE ${sql.raw(quotedRole)}`);
+      await tx.execute(sql`SELECT set_config('app.current_user_id', ${userP.id}, true)`);
 
+      const visibleResults = await tx
+        .select({ id: studentProgress.id, topicsCovered: studentProgress.topicsCovered })
+        .from(studentProgress)
+        .where(eq(studentProgress.studentId, student.id));
+      expect(visibleResults.length).toBe(1);
+      expect(visibleResults[0].topicsCovered).toBe("Visible Part");
+
+      await tx.execute(sql`RESET ROLE`);
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userT.id}, true)`);
       const [updated] = await tx
         .update(studentProgress)
@@ -175,12 +177,13 @@ describe("Student Progress Tracking", () => {
         .returning();
       expect(updated).toBeDefined();
 
-      const hiddenResults = await queryAsRlsRole<{ id: string }>(
-        ROLE_NAME,
-        userP.id,
-        `SELECT id FROM "student_progress" WHERE student_id = $1`,
-        [student.id]
-      );
+      await tx.execute(sql`SET LOCAL ROLE ${sql.raw(quotedRole)}`);
+      await tx.execute(sql`SELECT set_config('app.current_user_id', ${userP.id}, true)`);
+
+      const hiddenResults = await tx
+        .select({ id: studentProgress.id })
+        .from(studentProgress)
+        .where(eq(studentProgress.studentId, student.id));
       expect(hiddenResults.length).toBe(0);
     });
     testLogger.info("Parent visibility RLS test passed.");
