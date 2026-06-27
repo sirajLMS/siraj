@@ -19,70 +19,78 @@ import { logger } from "@/frontend/utils/logger";
 import type { ParentAccountStatus } from "@/frontend/views/dashboard/parents/types/directory";
 import { ParentsView } from "./ParentsView";
 
-export function ParentsContainer() {
-  const t = useTranslations("dashboard.parentsDirectory");
-  const { searchQuery, page, pageSize, setSearchQuery, setPage } = useParentsStore();
-
-  const { data } = useQuery(parentDirectoryQueryDocument, {
-    variables: {
-      search: searchQuery || null,
-      paginationArgs: {
-        first: pageSize,
-        page: page + 1,
-        skip: null,
-        after: null,
-        before: null,
-        last: null,
-        maxCount: null,
-      },
+function useDirectoryMetrics(
+  directory: {
+    readonly metrics?: {
+      readonly activated?: number | null;
+      readonly deactivated?: number | null;
+      readonly regular?: number | null;
+      readonly onLeave?: number | null;
+      readonly suspended?: number | null;
+      readonly onTrial?: number | null;
+    } | null;
+  } | null
+) {
+  const m = directory?.metrics;
+  if (!m) return [];
+  return [
+    {
+      key: "activated",
+      count: m.activated ?? 0,
+      labelKey: "dashboard.parentsDirectory.metrics.activated",
+      icon: HowToRegOutlined,
     },
-    fetchPolicy: "cache-and-network",
-  });
+    {
+      key: "deactivated",
+      count: m.deactivated ?? 0,
+      labelKey: "dashboard.parentsDirectory.metrics.deactivated",
+      icon: CancelOutlined,
+    },
+    {
+      key: "regular",
+      count: m.regular ?? 0,
+      labelKey: "dashboard.parentsDirectory.metrics.regular",
+      icon: VerifiedUserOutlined,
+    },
+    {
+      key: "on_leave",
+      count: m.onLeave ?? 0,
+      labelKey: "dashboard.parentsDirectory.metrics.onLeave",
+      icon: EventBusyOutlined,
+    },
+    {
+      key: "suspended",
+      count: m.suspended ?? 0,
+      labelKey: "dashboard.parentsDirectory.metrics.suspended",
+      icon: BlockOutlined,
+    },
+    {
+      key: "on_trial",
+      count: m.onTrial ?? 0,
+      labelKey: "dashboard.parentsDirectory.metrics.onTrial",
+      icon: TimerOutlined,
+    },
+  ];
+}
 
-  const directory = data?.parentDirectory;
-
-  const metrics = directory?.metrics
-    ? [
-        {
-          key: "activated",
-          count: directory.metrics.activated ?? 0,
-          labelKey: "dashboard.parentsDirectory.metrics.activated",
-          icon: HowToRegOutlined,
-        },
-        {
-          key: "deactivated",
-          count: directory.metrics.deactivated ?? 0,
-          labelKey: "dashboard.parentsDirectory.metrics.deactivated",
-          icon: CancelOutlined,
-        },
-        {
-          key: "regular",
-          count: directory.metrics.regular ?? 0,
-          labelKey: "dashboard.parentsDirectory.metrics.regular",
-          icon: VerifiedUserOutlined,
-        },
-        {
-          key: "on_leave",
-          count: directory.metrics.onLeave ?? 0,
-          labelKey: "dashboard.parentsDirectory.metrics.onLeave",
-          icon: EventBusyOutlined,
-        },
-        {
-          key: "suspended",
-          count: directory.metrics.suspended ?? 0,
-          labelKey: "dashboard.parentsDirectory.metrics.suspended",
-          icon: BlockOutlined,
-        },
-        {
-          key: "on_trial",
-          count: directory.metrics.onTrial ?? 0,
-          labelKey: "dashboard.parentsDirectory.metrics.onTrial",
-          icon: TimerOutlined,
-        },
-      ]
-    : [];
-
-  const rows = (directory?.rows ?? []).map(row => ({
+function useDirectoryRows(
+  directory: {
+    readonly rows?:
+      | readonly {
+          readonly id?: string | null;
+          readonly index?: number | null;
+          readonly name?: string | null;
+          readonly email?: string | null;
+          readonly avatarUrl?: string | null;
+          readonly guardianOf?: string | null;
+          readonly time?: string | null;
+          readonly accountStatus?: string | null;
+          readonly unpaidInvoices?: number | null;
+        }[]
+      | null;
+  } | null
+) {
+  return (directory?.rows ?? []).map(row => ({
     id: row.id ?? "",
     index: row.index ?? 0,
     name: row.name ?? "",
@@ -93,8 +101,10 @@ export function ParentsContainer() {
     accountStatus: (row.accountStatus as ParentAccountStatus) || "regular",
     unpaidInvoices: row.unpaidInvoices ?? 0,
   }));
+}
 
-  const labels = {
+function useDirectoryLabels(t: ReturnType<typeof useTranslations<"dashboard.parentsDirectory">>) {
+  return {
     pageTitle: t("pageTitle"),
     pageSubtitle: t("pageSubtitle"),
     addParent: t("actions.addParent"),
@@ -134,6 +144,32 @@ export function ParentsContainer() {
       } as Record<ParentAccountStatus, string>,
     },
   };
+}
+
+export function ParentsContainer() {
+  const t = useTranslations("dashboard.parentsDirectory");
+  const { searchQuery, page, pageSize, setSearchQuery, setPage } = useParentsStore();
+
+  const { data } = useQuery(parentDirectoryQueryDocument, {
+    variables: {
+      search: searchQuery || null,
+      paginationArgs: {
+        first: pageSize,
+        page: page + 1,
+        skip: null,
+        after: null,
+        before: null,
+        last: null,
+        maxCount: null,
+      },
+    },
+    fetchPolicy: "cache-and-network",
+  });
+
+  const directory = data?.parentDirectory;
+  const metrics = useDirectoryMetrics(directory);
+  const rows = useDirectoryRows(directory);
+  const labels = useDirectoryLabels(t);
 
   const handleAddParent = () => {
     logger.info("Add parent clicked");

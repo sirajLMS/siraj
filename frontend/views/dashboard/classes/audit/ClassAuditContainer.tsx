@@ -23,58 +23,44 @@ import {
 import { logger } from "@/frontend/utils/logger";
 import { ClassAuditView } from "./ClassAuditView";
 
-export function ClassAuditContainer() {
-  const router = useRouter();
-  const locale = useLocale();
-  const t = useTranslations("dashboard.classAudit");
-  const client = useApolloClient();
-
-  const params = useParams();
-  const rawId = params?.id;
-  const id = typeof rawId === "string" ? rawId : "";
-
-  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
-  const [noteContent, setNoteContent] = useState("");
-
-  const { data, loading, error } = useQuery(groupClassAuditQueryDocument, {
-    variables: { classInstanceId: id },
-    skip: !id,
-  });
-
-  const [updateAdminNote, { loading: isUpdatingNote }] = useMutation(updateClassAdminNoteMutationDocument, {
-    onCompleted: () => {
-      setNoteDialogOpen(false);
-      client.refetchQueries({ include: [groupClassAuditQueryDocument] });
-    },
-  });
-
-  const [resendNotifications, { loading: isResending }] = useMutation(resendClassNotificationsMutationDocument, {
-    onCompleted: () => {
-      client.refetchQueries({ include: [groupClassAuditQueryDocument] });
-    },
-  });
-
-  if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <CircularProgress />
-      </Box>
-    );
+function exportToCsv(
+  students: readonly {
+    readonly name?: string | null;
+    readonly studentId?: string | null;
+    readonly attendanceStatus?: string | null;
+  }[],
+  filename: string,
+  id: string
+) {
+  try {
+    const filtered = students.filter((s): s is NonNullable<typeof s> => s != null);
+    const csvRows = [
+      ["Name", "Student ID", "Attendance Status"].join(","),
+      ...filtered.map(s => [s.name ?? "", s.studentId ?? "", s.attendanceStatus ?? ""].join(",")),
+    ];
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${filename}-${id}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    logger.error("Error generating report:", err);
   }
+}
 
-  if (!id) {
-    return <Box sx={{ p: 3, textAlign: "center" }}>Invalid Class ID</Box>;
-  }
-
-  if (error || !data?.groupClassAudit) {
-    logger.error("Error fetching class audit:", error);
-    return <Alert severity="error">{error?.message ?? "Failed to load class audit data"}</Alert>;
-  }
-
-  const audit = data.groupClassAudit;
-  if (!audit) return null;
-
-  const labels = {
+function useAuditLabels(
+  t: ReturnType<typeof useTranslations<"dashboard.classAudit">>,
+  audit: {
+    readonly registeredStudentCount?: number | null;
+    readonly adminNote?: { readonly lastUpdated?: string | null; readonly content?: string | null } | null;
+  } | null
+) {
+  return {
     breadcrumbs: {
       dashboard: t("breadcrumbs.dashboard"),
       schedules: t("breadcrumbs.schedules"),
@@ -126,27 +112,108 @@ export function ClassAuditContainer() {
       edit: t("adminNote.edit"),
     },
   };
+}
+
+function AdminNoteDialog({
+  open,
+  onClose,
+  noteContent,
+  onNoteContentChange,
+  onSave,
+  isUpdatingNote,
+  title,
+  editLabel,
+  updateLabel,
+}: {
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly noteContent: string;
+  readonly onNoteContentChange: (value: string) => void;
+  readonly onSave: () => void;
+  readonly isUpdatingNote: boolean;
+  readonly title: string;
+  readonly editLabel: string;
+  readonly updateLabel: string;
+}) {
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          multiline
+          rows={4}
+          fullWidth
+          value={noteContent}
+          onChange={e => onNoteContentChange(e.target.value)}
+          disabled={isUpdatingNote}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>{editLabel}</Button>
+        <Button onClick={onSave} variant="contained" disabled={isUpdatingNote}>
+          {updateLabel}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+export function ClassAuditContainer() {
+  const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("dashboard.classAudit");
+  const client = useApolloClient();
+
+  const params = useParams();
+  const rawId = params?.id;
+  const id = typeof rawId === "string" ? rawId : "";
+
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const [noteContent, setNoteContent] = useState("");
+
+  const { data, loading, error } = useQuery(groupClassAuditQueryDocument, {
+    variables: { classInstanceId: id },
+    skip: !id,
+  });
+
+  const [updateAdminNote, { loading: isUpdatingNote }] = useMutation(updateClassAdminNoteMutationDocument, {
+    onCompleted: () => {
+      setNoteDialogOpen(false);
+      client.refetchQueries({ include: [groupClassAuditQueryDocument] });
+    },
+  });
+
+  const [resendNotifications, { loading: isResending }] = useMutation(resendClassNotificationsMutationDocument, {
+    onCompleted: () => {
+      client.refetchQueries({ include: [groupClassAuditQueryDocument] });
+    },
+  });
+
+  // Call the hook at the top level to avoid conditional hook violation
+  const audit = data?.groupClassAudit;
+  const labels = useAuditLabels(t, audit);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!id) {
+    return <Box sx={{ p: 3, textAlign: "center" }}>Invalid Class ID</Box>;
+  }
+
+  if (error || !audit) {
+    logger.error("Error fetching class audit:", error);
+    return <Alert severity="error">{error?.message ?? "Failed to load class audit data"}</Alert>;
+  }
 
   const handleGenerateReport = () => {
-    try {
-      const students = (audit?.students ?? []).filter((s): s is NonNullable<typeof s> => s != null);
-      const csvRows = [
-        ["Name", "Student ID", "Attendance Status"].join(","),
-        ...students.map(s => [s.name ?? "", s.studentId ?? "", s.attendanceStatus ?? ""].join(",")),
-      ];
-      const csvContent = csvRows.join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `class-audit-${id}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      logger.error("Error generating report:", err);
-    }
+    exportToCsv(audit?.students ?? [], "class-audit", id);
   };
 
   const handleEditClass = () => {
@@ -154,25 +221,7 @@ export function ClassAuditContainer() {
   };
 
   const handleExportStudents = () => {
-    try {
-      const students = (audit?.students ?? []).filter((s): s is NonNullable<typeof s> => s != null);
-      const csvRows = [
-        ["Name", "Student ID", "Attendance Status"].join(","),
-        ...students.map(s => [s.name ?? "", s.studentId ?? "", s.attendanceStatus ?? ""].join(",")),
-      ];
-      const csvContent = csvRows.join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `students-${id}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      logger.error("Error exporting students:", err);
-    }
+    exportToCsv(audit?.students ?? [], "students", id);
   };
 
   const handleViewStudent = (studentId: string) => {
@@ -199,30 +248,6 @@ export function ClassAuditContainer() {
     updateAdminNote({ variables: { classInstanceId: id, content: noteContent } });
   };
 
-  const noteDialog = (
-    <Dialog open={noteDialogOpen} onClose={() => setNoteDialogOpen(false)} maxWidth="sm" fullWidth>
-      <DialogTitle>{t("adminNote.title")}</DialogTitle>
-      <DialogContent>
-        <TextField
-          autoFocus
-          margin="dense"
-          multiline
-          rows={4}
-          fullWidth
-          value={noteContent}
-          onChange={e => setNoteContent(e.target.value)}
-          disabled={isUpdatingNote}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setNoteDialogOpen(false)}>{t("adminNote.edit")}</Button>
-        <Button onClick={handleSaveNote} variant="contained" disabled={isUpdatingNote}>
-          {t("adminNote.update")}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
   return (
     <>
       <ClassAuditView
@@ -238,7 +263,17 @@ export function ClassAuditContainer() {
         onEditAdminNote={handleOpenNoteDialog}
         isResending={isResending}
       />
-      {noteDialog}
+      <AdminNoteDialog
+        open={noteDialogOpen}
+        onClose={() => setNoteDialogOpen(false)}
+        noteContent={noteContent}
+        onNoteContentChange={setNoteContent}
+        onSave={handleSaveNote}
+        isUpdatingNote={isUpdatingNote}
+        title={t("adminNote.title")}
+        editLabel={t("adminNote.edit")}
+        updateLabel={t("adminNote.update")}
+      />
     </>
   );
 }

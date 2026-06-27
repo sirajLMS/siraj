@@ -354,67 +354,81 @@ export namespace BillingRepository {
     };
   };
 
+  const invoiceSelectFields = {
+    id: invoices.id,
+    issueDate: invoices.issueDate,
+    dueDate: invoices.dueDate,
+    paidDate: invoices.paidDate,
+    amount: invoices.amount,
+    currency: invoices.currency,
+    status: invoices.status,
+    invoiceType: invoices.invoiceType,
+    studentId: invoices.studentId,
+  };
+
+  function mapInvoiceRow(r: {
+    id: string;
+    issueDate: string;
+    dueDate: string;
+    paidDate: string | null;
+    amount: string;
+    currency: string;
+    status: string;
+    invoiceType: string | null;
+    studentId: string | null;
+  }): Types.InvoiceHistoryRow {
+    return {
+      id: r.id,
+      issueDate: r.issueDate,
+      dueDate: r.dueDate,
+      paidDate: r.paidDate ?? null,
+      amount: r.amount,
+      currency: r.currency,
+      status: r.status,
+      invoiceType: r.invoiceType,
+      studentId: r.studentId ?? null,
+    };
+  }
+
   export const getInvoicesForParent = async (
     parentId: string,
     pagination: PaginationArgs | null = null,
     tx?: DBTransaction
   ): Promise<Types.InvoiceHistoryPaginatedResult> => {
     const queryDb = tx ?? db;
-
     const whereCondition = and(eq(invoices.parentId, parentId), isNull(invoices.deletedAt));
 
     if (!pagination) {
       const rows = await queryDb
-        .select({
-          id: invoices.id,
-          issueDate: invoices.issueDate,
-          dueDate: invoices.dueDate,
-          paidDate: invoices.paidDate,
-          amount: invoices.amount,
-          currency: invoices.currency,
-          status: invoices.status,
-          invoiceType: invoices.invoiceType,
-          studentId: invoices.studentId,
-        })
+        .select(invoiceSelectFields)
         .from(invoices)
         .where(whereCondition)
         .orderBy(desc(invoices.issueDate));
 
       return {
         id: `parent-invoice-history-${parentId}`,
-        rows: rows.map(r => ({
-          id: r.id,
-          issueDate: r.issueDate,
-          dueDate: r.dueDate,
-          paidDate: r.paidDate ?? null,
-          amount: r.amount,
-          currency: r.currency,
-          status: r.status,
-          invoiceType: r.invoiceType,
-          studentId: r.studentId ?? null,
-        })),
+        rows: rows.map(mapInvoiceRow),
         totalCount: rows.length,
         pageInfo: null,
       };
     }
 
+    return fetchInvoicesPaginated(queryDb, parentId, whereCondition, pagination);
+  };
+
+  async function fetchInvoicesPaginated(
+    queryDb: DBTransaction | typeof db,
+    parentId: string,
+    whereCondition: SQL | undefined,
+    pagination: PaginationArgs
+  ): Promise<Types.InvoiceHistoryPaginatedResult> {
     const perPage = pagination.perPage;
     const currentPage = pagination.currentPage;
     const offset = pagination.offset;
 
     const [dataRows, countResult] = await Promise.all([
       queryDb
-        .select({
-          id: invoices.id,
-          issueDate: invoices.issueDate,
-          dueDate: invoices.dueDate,
-          paidDate: invoices.paidDate,
-          amount: invoices.amount,
-          currency: invoices.currency,
-          status: invoices.status,
-          invoiceType: invoices.invoiceType,
-          studentId: invoices.studentId,
-        })
+        .select(invoiceSelectFields)
         .from(invoices)
         .where(whereCondition)
         .orderBy(desc(invoices.issueDate))
@@ -425,18 +439,7 @@ export namespace BillingRepository {
 
     const totalCount = countResult[0]?.count ?? 0;
     const lastPage = Math.max(1, Math.ceil(totalCount / perPage));
-
-    const rows: Types.InvoiceHistoryRow[] = dataRows.map(r => ({
-      id: r.id,
-      issueDate: r.issueDate,
-      dueDate: r.dueDate,
-      paidDate: r.paidDate ?? null,
-      amount: r.amount,
-      currency: r.currency,
-      status: r.status,
-      invoiceType: r.invoiceType,
-      studentId: r.studentId ?? null,
-    }));
+    const rows: Types.InvoiceHistoryRow[] = dataRows.map(mapInvoiceRow);
 
     return {
       id: `parent-invoice-history-${parentId}`,
@@ -453,7 +456,7 @@ export namespace BillingRepository {
         total: totalCount,
       },
     };
-  };
+  }
 
   export const deleteInvoice = async (
     invoiceId: string,
