@@ -385,7 +385,7 @@ export namespace BillingRepository {
       amount: r.amount,
       currency: r.currency,
       status: r.status,
-      invoiceType: r.invoiceType,
+      invoiceType: r.invoiceType ?? "",
       studentId: r.studentId ?? null,
     };
   }

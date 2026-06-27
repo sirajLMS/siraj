@@ -33,7 +33,9 @@ const StyledEditField = styled(Stack)(({ theme }) => ({
 }));
 
 async function executeManagerUpdate(
-  updateProfile: (options: { readonly variables: { readonly staffProfileId: string; readonly input: UpdateManagerProfileInput } }) => Promise<unknown>,
+  updateProfile: (options: {
+    readonly variables: { readonly staffProfileId: string; readonly input: UpdateManagerProfileInput };
+  }) => Promise<unknown>,
   staffProfileId: string,
   input: UpdateManagerProfileInput,
   onSuccess: () => void,

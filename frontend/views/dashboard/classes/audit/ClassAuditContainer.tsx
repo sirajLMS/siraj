@@ -193,7 +193,7 @@ export function ClassAuditContainer() {
 
   // Call the hook at the top level to avoid conditional hook violation
   const audit = data?.groupClassAudit;
-  const labels = useAuditLabels(t, audit);
+  const labels = useAuditLabels(t, audit ?? null);
 
   if (loading) {
     return (

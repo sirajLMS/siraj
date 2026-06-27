@@ -272,7 +272,11 @@ gqlSchemaBuilder.mutationField("submitSuggestion", t =>
     },
     resolve: async (_root, args, ctx) =>
       authenticatedSuggestionMutation(ctx, userId =>
-        SuggestionService.submitSuggestion(userId, { submitterName: args.input.submitterName, body: args.input.body }, ctx.locale)
+        SuggestionService.submitSuggestion(
+          userId,
+          { submitterName: args.input.submitterName, body: args.input.body },
+          ctx.locale
+        )
       ),
   })
 );

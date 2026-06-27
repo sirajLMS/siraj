@@ -6,7 +6,14 @@ import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { UserEntity, UserNotificationPreferenceSelectType } from "../../../types";
 import { userNotificationPreferences, users } from "../../schema";
-import { closeRlsClients, createTestUser, queryAsRlsRole, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
+import {
+  closeRlsClients,
+  createTestUser,
+  queryAsRlsRole,
+  runInRollback,
+  setupRlsRole,
+  teardownRlsRole,
+} from "../test-utils";
 
 describe("User Notification Preferences", () => {
   const RLS_ROLE = "test_rls_user_notif";

@@ -1,8 +1,15 @@
 "use client";
 
 import { AddOutlined, CalendarMonthOutlined } from "@mui/icons-material";
-import { Alert, Box, PaginationControls, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { DateNavigator, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import { Alert, Box, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import {
+  DateNavigator,
+  PageContainer,
+  PageHeader,
+  PaginationControls,
+  PrimaryPageAction,
+  SectionPanel,
+} from "@/frontend/components/ui";
 import type {
   StudentProgressFeedItem,
   TeacherDashboardMetrics,

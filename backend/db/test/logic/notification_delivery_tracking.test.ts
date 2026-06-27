@@ -12,7 +12,14 @@ import { testLogger } from "@/shared/lib/testlogger";
 import type { UserEntity } from "../../../types";
 import { NotificationRepository } from "../../repo/notification.repository";
 import { users } from "../../schema";
-import { closeRlsClients, createTestUser, queryAsRlsRole, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
+import {
+  closeRlsClients,
+  createTestUser,
+  queryAsRlsRole,
+  runInRollback,
+  setupRlsRole,
+  teardownRlsRole,
+} from "../test-utils";
 
 describe("Notification Delivery Tracking", () => {
   const RLS_ROLE = "test_rls_user_notif_delivery";

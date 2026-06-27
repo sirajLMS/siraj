@@ -5,7 +5,13 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students } from "@/backend/db/schema";
 import { setupTestEntities } from "@/backend/db/test/entity-setup";
-import { closeRlsClients, queryAsRlsRole, runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
+import {
+  closeRlsClients,
+  queryAsRlsRole,
+  runInRollback,
+  setupRlsRole,
+  teardownRlsRole,
+} from "@/backend/db/test/test-utils";
 import { getErrorMessage } from "@/shared/utils/error";
 import type { DBTransaction } from "../../db.types";
 

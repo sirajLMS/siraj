@@ -167,8 +167,8 @@ export function ParentsContainer() {
   });
 
   const directory = data?.parentDirectory;
-  const metrics = useDirectoryMetrics(directory);
-  const rows = useDirectoryRows(directory);
+  const metrics = useDirectoryMetrics(directory ?? null);
+  const rows = useDirectoryRows(directory ?? null);
   const labels = useDirectoryLabels(t);
 
   const handleAddParent = () => {
