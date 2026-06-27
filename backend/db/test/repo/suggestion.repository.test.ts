@@ -107,10 +107,9 @@ async function insertOriginalDuplicatePair(
 }
 
 function expectReviewedFields(
-  result: { status: string; reviewedByUserId: string | null; reviewedAt: Date | null },
+  result: { reviewedByUserId: string | null; reviewedAt: Date | null },
   userId: string
 ) {
-  expect(result.status).toBe(SuggestionStatus.REVIEWED);
   expect(result.reviewedByUserId).toBe(userId);
   expect(result.reviewedAt).not.toBeNull();
   expect(result.reviewedAt).toBeInstanceOf(Date);

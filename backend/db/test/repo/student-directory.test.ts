@@ -48,12 +48,12 @@ describe("StudentRepository.getDirectoryRows", () => {
       expect(result.totalCount).toBeGreaterThanOrEqual(result.rows.length);
     });
 
-    dirTest("includes hoursPerWeek as string (numeric column)", async tx => {
+    dirTest("includes hoursPerWeek as number (parsed from numeric column)", async tx => {
       await createStudentWithTeacher(tx, "DirHours", "DirHoursT");
 
       const result = await StudentRepository.getDirectoryRows(null, null, null, tx);
       expect(result.rows.length).toBeGreaterThan(0);
-      expect(typeof result.rows[0]?.hoursPerWeek).toBe("string");
+      expect(typeof result.rows[0]?.hoursPerWeek).toBe("number");
     });
 
     dirTest("returns null teacherName for students without assigned teacher", async tx => {

@@ -73,11 +73,12 @@ async function setupTestData(tx: DBTransaction) {
 describe("ReportRepository — generateAttendanceReport", () => {
   reportRepoTest("aggregates and groups correctly by DATE", async tx => {
     // Arrange
-    await setupTestData(tx);
+    const { teacher } = await setupTestData(tx);
 
     const filters = {
       fromDate: new Date("2026-05-01T00:00:00Z"),
       toDate: new Date("2026-05-31T23:59:59Z"),
+      teacherId: teacher.id,
       groupBy: ReportGroupingMode.DATE,
     };
 
@@ -127,6 +128,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
     const filters = {
       fromDate: new Date("2026-05-01T00:00:00Z"),
       toDate: new Date("2026-05-31T23:59:59Z"),
+      teacherId: teacher.id,
       groupBy: ReportGroupingMode.TEACHER,
     };
 
@@ -188,11 +190,12 @@ describe("ReportRepository — generateAttendanceReport", () => {
 
   reportRepoTest("returns empty array if no class instances in date range", async tx => {
     // Arrange
-    await setupTestData(tx);
+    const { teacher } = await setupTestData(tx);
 
     const filters = {
       fromDate: new Date("2025-01-01T00:00:00Z"),
       toDate: new Date("2025-12-31T23:59:59Z"),
+      teacherId: teacher.id,
       groupBy: ReportGroupingMode.DATE,
     };
 

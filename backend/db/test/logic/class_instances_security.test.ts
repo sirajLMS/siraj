@@ -5,7 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students } from "@/backend/db/schema";
 import { setupTestEntities } from "@/backend/db/test/entity-setup";
-import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
+import { closeRlsClients, getRlsClient, runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { getErrorMessage } from "@/shared/utils/error";
 import type { DBTransaction } from "../../db.types";
 
@@ -49,6 +49,7 @@ describe("Class Instances Security Logic", () => {
 
   afterAll(async () => {
     await teardownRlsRole();
+    await closeRlsClients();
   });
 
   it("should rollback when a COMPLETED class instance is transitioned to RUNNING", () =>
@@ -74,22 +75,23 @@ describe("Class Instances Security Logic", () => {
       expect(getErrorMessage(error)).toMatch(/Invalid transition: Cannot reactivate a COMPLETED class instance/);
     }));
 
-  it("should enforce RLS policies for teachers blocking unauthorized SELECT", () =>
-    runInRollback(async tx => {
+  it("should enforce RLS policies for teachers blocking unauthorized SELECT", async () => {
+    const rlsDb = await getRlsClient("test_rls_user");
+    await runInRollback(async tx => {
       const scenario1 = await setupTestEntities(tx, "SecLogic", { skipInstance: true });
       await setupTestEntities(tx, "SecLogic", { skipInstance: true });
 
       await createTestInstance(tx, scenario1.teacher.id, scenario1.student.id);
 
-      await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
-      await tx.execute(sql`SELECT set_config('app.current_user_id', ${scenario1.teacherUser.id}, true)`);
+      await rlsDb.execute(sql`SELECT set_config('app.current_user_id', ${scenario1.teacherUser.id}, false)`);
 
-      const instances = await tx.select().from(classInstances);
+      const instances = await rlsDb.select().from(classInstances);
       expect(instances.length).toBeGreaterThanOrEqual(1);
       for (const inst of instances) {
         expect(inst.teacherId).toBe(scenario1.teacher.id);
       }
-    }));
+    });
+  });
 
   it("should rollback negative quota updates via check constraint", () =>
     runInRollback(async tx => {

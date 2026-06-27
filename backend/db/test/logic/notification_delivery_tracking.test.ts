@@ -12,7 +12,7 @@ import { testLogger } from "@/shared/lib/testlogger";
 import type { UserEntity } from "../../../types";
 import { NotificationRepository } from "../../repo/notification.repository";
 import { notificationDeliveries, userDeviceTokens, users } from "../../schema";
-import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { closeRlsClients, createTestUser, getRlsClient, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("Notification Delivery Tracking", () => {
   const RLS_ROLE = "test_rls_user_notif_delivery";
@@ -23,6 +23,7 @@ describe("Notification Delivery Tracking", () => {
 
   afterAll(async () => {
     await teardownRlsRole(RLS_ROLE);
+    await closeRlsClients();
   });
 
   test("Registers device tokens and tracks delivery lifecycle", async () => {
@@ -197,6 +198,7 @@ describe("Notification Delivery Tracking", () => {
 
   test("RLS prevents users from seeing others' deliveries and tokens", async () => {
     testLogger.info("Testing RLS on notification delivery tracking...");
+    const rlsDb = await getRlsClient(RLS_ROLE);
     await runInRollback(async tx => {
       const userA = await createTestUser(tx, { name: "UserA" });
       const userB = await createTestUser(tx, { name: "UserB" });
@@ -218,18 +220,17 @@ describe("Notification Delivery Tracking", () => {
         tx
       );
 
-      await tx.execute(sql`SET LOCAL ROLE test_rls_user_notif_delivery`);
-      await tx.execute(sql`SELECT set_config('app.current_user_id', ${userA.id}, true)`);
+      await rlsDb.execute(sql`SELECT set_config('app.current_user_id', ${userA.id}, false)`);
 
-      const visibleTokens = await tx.select().from(userDeviceTokens);
-      const visibleDeliveries = await tx.select().from(notificationDeliveries);
+      const visibleTokens = await rlsDb.select().from(userDeviceTokens);
+      const visibleDeliveries = await rlsDb.select().from(notificationDeliveries);
 
       expect(visibleTokens.length).toBe(0);
       expect(visibleDeliveries.length).toBe(0);
 
-      await tx.execute(sql`SELECT set_config('app.current_user_id', ${userB.id}, true)`);
-      const userBTokens = await tx.select().from(userDeviceTokens).where(eq(userDeviceTokens.userId, userB.id));
-      const userBDeliveries = await tx
+      await rlsDb.execute(sql`SELECT set_config('app.current_user_id', ${userB.id}, false)`);
+      const userBTokens = await rlsDb.select().from(userDeviceTokens).where(eq(userDeviceTokens.userId, userB.id));
+      const userBDeliveries = await rlsDb
         .select()
         .from(notificationDeliveries)
         .where(and(eq(notificationDeliveries.userId, userB.id)));
