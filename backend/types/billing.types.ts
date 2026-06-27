@@ -45,4 +45,31 @@ export interface InvoiceHistoryRow {
   readonly status: string;
   readonly invoiceType: string;
   readonly studentId: string | null;
+  readonly studentName: string | null;
+}
+
+export interface AdminBillingSummaryResult {
+  readonly id: string;
+  readonly totalOutstanding: string;
+  readonly pendingCount: number;
+  readonly mtdRevenue: string;
+  readonly negativeBalanceCount: number;
+}
+
+export interface StudentCreditRow {
+  readonly id: string;
+  readonly studentName: string;
+  readonly parentEmail: string;
+  readonly planType: string;
+  readonly classesRemaining: number;
+  readonly classesTotal: number;
+  readonly status: string;
+}
+
+export interface ParentBillingSummaryResult {
+  readonly id: string;
+  readonly outstandingBalance: string;
+  readonly paidThisTerm: string;
+  readonly nextDueDate: string | null;
+  readonly activeStudents: number;
 }

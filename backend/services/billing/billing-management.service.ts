@@ -16,6 +16,8 @@ export interface CreateManualInvoiceInput {
   readonly dueDate: string;
   readonly exchangeRateSnapshot?: string | null;
   readonly exchangeRateSource?: string | null;
+  readonly billingMonths?: readonly { readonly year: number; readonly month: number }[] | null;
+  readonly sendEmail?: boolean | null;
 }
 
 export interface ManualInvoiceResult {
@@ -52,6 +54,11 @@ export interface DeleteInvoiceResult {
     readonly version: number;
   };
   readonly notificationSummaryUpdated: boolean;
+}
+
+export interface SendPaymentReminderResult {
+  readonly id: string;
+  readonly success: boolean;
 }
 
 export namespace BillingManagementService {
@@ -96,6 +103,21 @@ export namespace BillingManagementService {
         undefined,
         locale
       );
+
+      if (input.billingMonths && input.billingMonths.length > 0) {
+        await BillingRepository.createInvoiceCoverageMonths(created.id, input.billingMonths);
+      }
+
+      if (input.sendEmail) {
+        try {
+          await NotificationSyncService.syncUnpaidNotifications(locale);
+        } catch (err) {
+          logger.error("Failed to send invoice email notification", {
+            invoiceId: created.id,
+            err,
+          });
+        }
+      }
 
       logger.info("Manual invoice created", {
         actorUserId,
@@ -208,6 +230,35 @@ export namespace BillingManagementService {
       };
     } catch (error) {
       logger.error("Failed to delete invoice", { actorUserId, invoiceId, error });
+      throw error;
+    }
+  }
+
+  export async function sendPaymentReminder(
+    actorUserId: string,
+    studentId: string,
+    locale?: string
+  ): Promise<SendPaymentReminderResult> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    try {
+      const syncResult = await NotificationSyncService.syncUnpaidNotifications(locale);
+
+      logger.info("Payment reminder sent", {
+        actorUserId,
+        studentId,
+      });
+
+      return {
+        id: `reminder-${studentId}`,
+        success: syncResult !== null,
+      };
+    } catch (error) {
+      logger.error("Failed to send payment reminder", { actorUserId, studentId, error });
       throw error;
     }
   }

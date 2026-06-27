@@ -4,9 +4,11 @@ import { db } from "@/backend/db/drizzleDb";
 import {
   currencyExchangeAuditLogs,
   currencyExchangeRates,
+  invoiceCoverageMonths,
   invoices,
   parents,
   payments,
+  students,
   systemSettings,
   users,
 } from "@/backend/db/schema";
@@ -354,7 +356,7 @@ export namespace BillingRepository {
     };
   };
 
-  const invoiceSelectFields = {
+  const invoiceBaseFields = {
     id: invoices.id,
     issueDate: invoices.issueDate,
     dueDate: invoices.dueDate,
@@ -364,6 +366,7 @@ export namespace BillingRepository {
     status: invoices.status,
     invoiceType: invoices.invoiceType,
     studentId: invoices.studentId,
+    studentName: students.name,
   };
 
   function mapInvoiceRow(r: {
@@ -376,6 +379,7 @@ export namespace BillingRepository {
     status: string;
     invoiceType: string | null;
     studentId: string | null;
+    studentName: string | null;
   }): Types.InvoiceHistoryRow {
     return {
       id: r.id,
@@ -387,6 +391,7 @@ export namespace BillingRepository {
       status: r.status,
       invoiceType: r.invoiceType ?? "",
       studentId: r.studentId ?? null,
+      studentName: r.studentName ?? null,
     };
   }
 
@@ -400,8 +405,9 @@ export namespace BillingRepository {
 
     if (!pagination) {
       const rows = await queryDb
-        .select(invoiceSelectFields)
+        .select(invoiceBaseFields)
         .from(invoices)
+        .leftJoin(students, eq(invoices.studentId, students.id))
         .where(whereCondition)
         .orderBy(desc(invoices.issueDate));
 
@@ -428,8 +434,9 @@ export namespace BillingRepository {
 
     const [dataRows, countResult] = await Promise.all([
       queryDb
-        .select(invoiceSelectFields)
+        .select(invoiceBaseFields)
         .from(invoices)
+        .leftJoin(students, eq(invoices.studentId, students.id))
         .where(whereCondition)
         .orderBy(desc(invoices.issueDate))
         .limit(perPage)
@@ -457,6 +464,198 @@ export namespace BillingRepository {
       },
     };
   }
+
+  export const getAllInvoices = async (
+    pagination: PaginationArgs | null = null,
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceHistoryPaginatedResult> => {
+    const queryDb = tx ?? db;
+    const whereCondition = isNull(invoices.deletedAt);
+
+    if (!pagination) {
+      const rows = await queryDb
+        .select(invoiceBaseFields)
+        .from(invoices)
+        .leftJoin(students, eq(invoices.studentId, students.id))
+        .where(whereCondition)
+        .orderBy(desc(invoices.issueDate));
+
+      return {
+        id: "admin-invoice-history",
+        rows: rows.map(mapInvoiceRow),
+        totalCount: rows.length,
+        pageInfo: null,
+      };
+    }
+
+    const perPage = pagination.perPage;
+    const currentPage = pagination.currentPage;
+    const offset = pagination.offset;
+
+    const [dataRows, countResult] = await Promise.all([
+      queryDb
+        .select(invoiceBaseFields)
+        .from(invoices)
+        .leftJoin(students, eq(invoices.studentId, students.id))
+        .where(whereCondition)
+        .orderBy(desc(invoices.issueDate))
+        .limit(perPage)
+        .offset(offset),
+      queryDb.select({ count: count() }).from(invoices).where(whereCondition),
+    ]);
+
+    const totalCount = countResult[0]?.count ?? 0;
+    const lastPage = Math.max(1, Math.ceil(totalCount / perPage));
+    const rows: Types.InvoiceHistoryRow[] = dataRows.map(mapInvoiceRow);
+
+    return {
+      id: "admin-invoice-history",
+      rows,
+      totalCount,
+      pageInfo: {
+        count: rows.length,
+        currentPage,
+        firstItem: rows.length > 0 ? offset + 1 : null,
+        lastItem: rows.length > 0 ? offset + rows.length : null,
+        hasMorePages: currentPage < lastPage,
+        lastPage,
+        perPage,
+        total: totalCount,
+      },
+    };
+  };
+
+  export const getAdminBillingSummary = async (tx?: DBTransaction): Promise<Types.AdminBillingSummaryResult> => {
+    const t = tx ?? db;
+
+    const unpaidResult = await t
+      .select({
+        totalOutstanding: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+        pendingCount: count(),
+      })
+      .from(invoices)
+      .where(and(eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
+
+    const now = new Date();
+    const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+
+    const mtdResult = await t
+      .select({
+        mtdRevenue: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+      })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.status, "PAID"),
+          isNull(invoices.deletedAt),
+          sql`${invoices.paidDate} >= ${firstOfMonth}`
+        )
+      );
+
+    const negBalanceResult = await t
+      .select({
+        negativeBalanceCount: count(),
+      })
+      .from(students)
+      .where(sql`${students.classesRemaining} = 0`);
+
+    return {
+      id: "admin-billing-summary",
+      totalOutstanding: unpaidResult[0]?.totalOutstanding ?? "0.00",
+      pendingCount: unpaidResult[0]?.pendingCount ?? 0,
+      mtdRevenue: mtdResult[0]?.mtdRevenue ?? "0.00",
+      negativeBalanceCount: negBalanceResult[0]?.negativeBalanceCount ?? 0,
+    };
+  };
+
+  export const getStudentsWithCreditStatus = async (tx?: DBTransaction): Promise<Types.StudentCreditRow[]> => {
+    const t = tx ?? db;
+
+    const rows = await t
+      .select({
+        id: students.id,
+        studentName: students.name,
+        parentEmail: users.email,
+        planType: sql<string>`COALESCE(${parents.invoiceType}, 'MONTHLY')`,
+        classesRemaining: students.classesRemaining,
+        classesTotal: students.classesTotal,
+        status: students.status,
+      })
+      .from(students)
+      .leftJoin(parents, eq(students.parentId, parents.id))
+      .leftJoin(users, eq(parents.userId, users.id))
+      .where(sql`${students.classesRemaining} <= 5`)
+      .orderBy(students.classesRemaining);
+
+    return rows.map(r => ({
+      id: r.id,
+      studentName: r.studentName ?? "Unknown",
+      parentEmail: r.parentEmail ?? "",
+      planType: r.planType ?? "MONTHLY",
+      classesRemaining: r.classesRemaining,
+      classesTotal: r.classesTotal,
+      status: r.status ?? "active",
+    }));
+  };
+
+  export const getParentBillingSummary = async (
+    parentId: string,
+    tx?: DBTransaction
+  ): Promise<Types.ParentBillingSummaryResult> => {
+    const t = tx ?? db;
+
+    const unpaidResult = await t
+      .select({
+        outstandingBalance: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+        nextDueDate: sql<string | null>`MIN(${invoices.dueDate})`,
+      })
+      .from(invoices)
+      .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
+
+    const paidResult = await t
+      .select({
+        paidThisTerm: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+      })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.parentId, parentId),
+          eq(invoices.status, "PAID"),
+          isNull(invoices.deletedAt)
+        )
+      );
+
+    const activeStudentsResult = await t
+      .select({
+        activeStudents: count(),
+      })
+      .from(students)
+      .where(and(eq(students.parentId, parentId), eq(students.status, "ACTIVE")));
+
+    return {
+      id: `parent-billing-summary-${parentId}`,
+      outstandingBalance: unpaidResult[0]?.outstandingBalance ?? "0.00",
+      paidThisTerm: paidResult[0]?.paidThisTerm ?? "0.00",
+      nextDueDate: unpaidResult[0]?.nextDueDate ?? null,
+      activeStudents: activeStudentsResult[0]?.activeStudents ?? 0,
+    };
+  };
+
+  export const createInvoiceCoverageMonths = async (
+    invoiceId: string,
+    months: readonly { readonly year: number; readonly month: number }[],
+    tx?: DBTransaction
+  ): Promise<void> => {
+    const t = tx ?? db;
+    if (months.length === 0) return;
+    await t.insert(invoiceCoverageMonths).values(
+      months.map(m => ({
+        invoiceId,
+        year: m.year,
+        month: m.month,
+      }))
+    );
+  };
 
   export const deleteInvoice = async (
     invoiceId: string,
