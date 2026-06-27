@@ -14,7 +14,6 @@ import type {
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
 import { RecurringClassFormFields } from "./RecurringClassFormFields";
 import type { RecurringClassFormData } from "./recurringClassSchema";
-import type { StudentGroup } from "./types";
 
 interface RecurringClassFormProps {
   readonly register: UseFormRegister<RecurringClassFormData>;
@@ -23,33 +22,36 @@ interface RecurringClassFormProps {
   readonly setValue: UseFormSetValue<RecurringClassFormData>;
   readonly control: Control<RecurringClassFormData>;
   readonly handleSubmit: UseFormHandleSubmit<RecurringClassFormData>;
-  readonly studentGroups: readonly StudentGroup[];
   readonly isSubmitting: boolean;
   readonly isMobile: boolean;
   readonly showSuccess: boolean;
-  readonly labels: Pick<
-    CreateRecurringClassLabels,
-    | "add"
-    | "addClass"
-    | "addedSuccessfully"
-    | "students"
-    | "studentsPlaceholder"
-    | "defaultStartTime"
-    | "duration"
-    | "durationHours"
-    | "durationMinutes"
-    | "hours"
-    | "minutes"
-    | "daysSelection"
-    | "classSchedule"
-    | "timeOverride"
-    | "weekendOff"
-    | "days"
-  >;
+  readonly labels: {
+    readonly add: string;
+    readonly addClass: string;
+    readonly addedSuccessfully: string;
+    readonly students: string;
+    readonly studentsPlaceholder: string;
+    readonly teacher: string;
+    readonly teacherPlaceholder: string;
+    readonly defaultStartTime: string;
+    readonly duration: string;
+    readonly durationHours: string;
+    readonly durationMinutes: string;
+    readonly hours: string;
+    readonly minutes: string;
+    readonly daysSelection: string;
+    readonly classSchedule: string;
+    readonly weekendOff: string;
+    readonly timeOverride: string;
+    readonly timezone: string;
+    readonly timezonePlaceholder: string;
+    readonly classType: string;
+    readonly classTypePlaceholder: string;
+    readonly days: CreateRecurringClassLabels["days"];
+  };
   readonly onSubmit: (data: RecurringClassFormData) => void;
 }
 
-// Scrollable form body area with custom scrollbar styling and responsive padding
 const StyledScrollableFormBody = styled(Box, {
   shouldForwardProp: prop => prop !== "isMobile",
 })<{ isMobile: boolean }>(({ theme, isMobile }) => ({
@@ -63,7 +65,6 @@ const StyledScrollableFormBody = styled(Box, {
   },
 }));
 
-// Footer bar with border-top and responsive fixed positioning on mobile
 const StyledFormFooter = styled(Box, {
   shouldForwardProp: prop => prop !== "isMobile",
 })<{ isMobile: boolean }>(({ theme, isMobile }) => ({
@@ -84,7 +85,6 @@ const StyledFormFooter = styled(Box, {
   }),
 }));
 
-// Sidebar-themed submit button with rounded corners and hover brightness effect
 const StyledSubmitButton = styled(Button, {
   shouldForwardProp: prop => prop !== "isMobile",
 })<{ isMobile: boolean }>(({ theme, isMobile }) => ({
@@ -102,7 +102,6 @@ const StyledSubmitButton = styled(Button, {
   maxWidth: isMobile ? 480 : undefined,
 }));
 
-// Success confirmation badge with active status colors and border
 const StyledSuccessBadge = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
@@ -123,7 +122,6 @@ export function RecurringClassForm({
   setValue,
   control,
   handleSubmit,
-  studentGroups,
   isSubmitting,
   isMobile,
   showSuccess,
@@ -146,7 +144,6 @@ export function RecurringClassForm({
           watch={watch}
           setValue={setValue}
           control={control}
-          studentGroups={studentGroups}
           isSubmitting={isSubmitting}
           isMobile={isMobile}
           labels={labels}

@@ -11,6 +11,8 @@ export interface CreateRecurringClassLabels {
   readonly close: string;
   readonly students: string;
   readonly studentsPlaceholder: string;
+  readonly teacher: string;
+  readonly teacherPlaceholder: string;
   readonly defaultStartTime: string;
   readonly duration: string;
   readonly durationHours: string;
@@ -21,6 +23,10 @@ export interface CreateRecurringClassLabels {
   readonly classSchedule: string;
   readonly timeOverride: string;
   readonly weekendOff: string;
+  readonly timezone: string;
+  readonly timezonePlaceholder: string;
+  readonly classType: string;
+  readonly classTypePlaceholder: string;
   readonly days: {
     readonly monday: string;
     readonly tuesday: string;
@@ -31,11 +37,14 @@ export interface CreateRecurringClassLabels {
     readonly sunday: string;
   };
   readonly validation: {
-    readonly studentGroupRequired: string;
+    readonly studentRequired: string;
+    readonly teacherRequired: string;
     readonly startTimeRequired: string;
     readonly durationRequired: string;
     readonly daysRequired: string;
     readonly durationHoursMax: string;
     readonly durationMinutesMax: string;
+    readonly timezoneRequired: string;
+    readonly creationFailed: string;
   };
 }

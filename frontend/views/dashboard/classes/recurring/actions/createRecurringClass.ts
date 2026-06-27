@@ -1,44 +1,87 @@
 "use server";
 
-import { webcrypto } from "node:crypto";
+import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
+import type { CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { RecurringClassFormData } from "../recurringClassSchema";
 
-export type CreateRecurringClassResponse =
-  | {
-      success: true;
-      message: string;
-      classId: string;
-    }
-  | {
-      success: false;
-      message: string;
-    };
-
-function secureRandom(): number {
-  const array = new Uint32Array(1);
-  webcrypto.getRandomValues(array);
-  return array[0] / (0xffffffff + 1);
+function buildActiveDays(data: RecurringClassFormData) {
+  return data.days
+    .filter(d => d.enabled)
+    .map(d => ({
+      dayOfWeek: d.day,
+      startTime: d.showOverride ? d.timeOverride : data.defaultStartTime,
+      isActive: true,
+    }));
 }
 
-export async function createRecurringClass(_data: RecurringClassFormData): Promise<CreateRecurringClassResponse> {
-  await new Promise(resolve => setTimeout(resolve, 800 + secureRandom() * 600));
+function calculateDurationMinutes(data: RecurringClassFormData): number {
+  return data.durationHours * 60 + data.durationMinutes;
+}
 
-  const isSuccess = secureRandom() > 0.1;
+export async function createRecurringClass(
+  data: RecurringClassFormData,
+  locale?: string
+): Promise<
+  | { success: true; classId: string; recurringScheduleId: string | null; classInstanceCount: number }
+  | { success: false; message: string }
+> {
+  const { userId } = await getServerUserContext();
+  if (!userId) {
+    return { success: false, message: "Unauthorized" };
+  }
 
-  if (isSuccess) {
-    const randomBytes = new Uint8Array(4);
-    webcrypto.getRandomValues(randomBytes);
-    const classId = `cls-${Array.from(randomBytes, byte => byte.toString(36)).join("")}`;
+  try {
+    const activeDays = buildActiveDays(data);
+
+    if (activeDays.length === 0) {
+      return { success: false, message: "At least one day must be selected" };
+    }
+
+    const result = await RecurringClassService.createRecurringClass(
+      userId,
+      {
+        studentId: data.studentId,
+        teacherId: data.teacherId,
+        durationMinutes: calculateDurationMinutes(data),
+        defaultStartTime: data.defaultStartTime,
+        timezone: data.timezone,
+        days: activeDays,
+        classType: data.classType,
+        effectiveFrom: data.effectiveFrom || undefined,
+        effectiveUntil: data.effectiveUntil || undefined,
+        generateInstancesForWeeks: data.generateInstancesForWeeks,
+        timezoneId: undefined,
+      },
+      locale
+    );
 
     return {
       success: true,
-      message: "Recurring class created successfully",
-      classId,
+      classId: result.recurringScheduleId ?? "",
+      recurringScheduleId: result.recurringScheduleId,
+      classInstanceCount: result.classInstanceIds.length,
     };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to create recurring class";
+    return { success: false, message };
   }
+}
+
+export function mapFormDataToInput(data: RecurringClassFormData): CreateRecurringClassInput {
+  const activeDays = buildActiveDays(data);
 
   return {
-    success: false,
-    message: "Failed to create recurring class. Please try again.",
+    studentId: data.studentId,
+    teacherId: data.teacherId,
+    durationMinutes: calculateDurationMinutes(data),
+    defaultStartTime: data.defaultStartTime,
+    timezone: data.timezone,
+    classType: data.classType ?? null,
+    days: activeDays,
+    generateInstancesForWeeks: data.generateInstancesForWeeks ?? 4,
+    effectiveFrom: data.effectiveFrom ?? null,
+    effectiveUntil: data.effectiveUntil ?? null,
+    timezoneId: null,
   };
 }

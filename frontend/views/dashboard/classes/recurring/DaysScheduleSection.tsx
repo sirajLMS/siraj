@@ -18,6 +18,16 @@ interface DaysScheduleSectionProps {
   >;
 }
 
+const DAY_LABEL_KEY_MAP: Record<string, keyof CreateRecurringClassLabels["days"]> = {
+  MONDAY: "monday",
+  TUESDAY: "tuesday",
+  WEDNESDAY: "wednesday",
+  THURSDAY: "thursday",
+  FRIDAY: "friday",
+  SATURDAY: "saturday",
+  SUNDAY: "sunday",
+};
+
 export function DaysScheduleSection({ watch, setValue, errors, isMobile, labels }: DaysScheduleSectionProps) {
   const days = watch("days");
 
@@ -44,20 +54,23 @@ export function DaysScheduleSection({ watch, setValue, errors, isMobile, labels 
         {isMobile ? labels.classSchedule : labels.daysSelection}
       </Typography>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {days.map((day, index) => (
-          <DayScheduleRow
-            key={day.day}
-            day={day}
-            index={index}
-            isMobile={isMobile}
-            dayLabel={labels.days[day.day]}
-            weekendOffLabel={labels.weekendOff}
-            timeOverrideLabel={labels.timeOverride}
-            onToggleDay={handleToggleDay}
-            onToggleOverride={handleToggleOverride}
-            onTimeOverrideChange={handleTimeOverrideChange}
-          />
-        ))}
+        {days.map((day, index) => {
+          const labelKey = DAY_LABEL_KEY_MAP[day.day];
+          return (
+            <DayScheduleRow
+              key={day.day}
+              day={day}
+              index={index}
+              isMobile={isMobile}
+              dayLabel={labelKey ? labels.days[labelKey] : day.day}
+              weekendOffLabel={labels.weekendOff}
+              timeOverrideLabel={labels.timeOverride}
+              onToggleDay={handleToggleDay}
+              onToggleOverride={handleToggleOverride}
+              onTimeOverrideChange={handleTimeOverrideChange}
+            />
+          );
+        })}
       </Box>
       {errors.days && (
         <FormHelperText error sx={{ mt: 1 }}>

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const dayScheduleSchema = z.object({
-  day: z.enum(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]),
+  day: z.enum(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]),
   enabled: z.boolean(),
   timeOverride: z.string(),
   showOverride: z.boolean(),
@@ -9,16 +9,19 @@ const dayScheduleSchema = z.object({
 });
 
 export const createRecurringClassSchema = (messages: {
-  studentGroupRequired: string;
+  studentRequired: string;
+  teacherRequired: string;
   startTimeRequired: string;
   durationRequired: string;
   daysRequired: string;
   durationHoursMax: string;
   durationMinutesMax: string;
+  timezoneRequired: string;
 }) => {
   return z
     .object({
-      studentGroupId: z.string().min(1, messages.studentGroupRequired),
+      studentId: z.string().min(1, messages.studentRequired),
+      teacherId: z.string().min(1, messages.teacherRequired),
       defaultStartTime: z.string().min(1, messages.startTimeRequired),
       durationHours: z
         .number({ error: messages.durationRequired })
@@ -28,9 +31,14 @@ export const createRecurringClassSchema = (messages: {
         .number({ error: messages.durationRequired })
         .min(0, messages.durationRequired)
         .max(59, messages.durationMinutesMax),
+      timezone: z.string().min(1, messages.timezoneRequired),
+      classType: z.enum(["REGULAR", "TRIAL", "ADVANCE"]).optional(),
+      effectiveFrom: z.string().optional(),
+      effectiveUntil: z.string().optional(),
+      generateInstancesForWeeks: z.number().min(1).max(12).optional(),
       days: z.array(dayScheduleSchema),
     })
-    .refine(data => data.days.some(day => day.enabled && !day.isWeekend), {
+    .refine(data => data.days.some(day => day.enabled), {
       message: messages.daysRequired,
       path: ["days"],
     })
