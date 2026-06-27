@@ -5,7 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students } from "@/backend/db/schema";
 import { setupTestEntities } from "@/backend/db/test/entity-setup";
-import { closeRlsClients, getRlsClient, runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
+import { closeRlsClients, queryAsRlsRole, runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { getErrorMessage } from "@/shared/utils/error";
 import type { DBTransaction } from "../../db.types";
 
@@ -76,19 +76,20 @@ describe("Class Instances Security Logic", () => {
     }));
 
   it("should enforce RLS policies for teachers blocking unauthorized SELECT", async () => {
-    const rlsDb = await getRlsClient("test_rls_user");
     await runInRollback(async tx => {
       const scenario1 = await setupTestEntities(tx, "SecLogic", { skipInstance: true });
       await setupTestEntities(tx, "SecLogic", { skipInstance: true });
 
       await createTestInstance(tx, scenario1.teacher.id, scenario1.student.id);
 
-      await rlsDb.execute(sql`SELECT set_config('app.current_user_id', ${scenario1.teacherUser.id}, false)`);
-
-      const instances = await rlsDb.select().from(classInstances);
+      const instances = await queryAsRlsRole<{ teacher_id: string }>(
+        "test_rls_user",
+        scenario1.teacherUser.id,
+        `SELECT teacher_id FROM "class_instances"`
+      );
       expect(instances.length).toBeGreaterThanOrEqual(1);
       for (const inst of instances) {
-        expect(inst.teacherId).toBe(scenario1.teacher.id);
+        expect(inst.teacher_id).toBe(scenario1.teacher.id);
       }
     });
   });

@@ -1,12 +1,12 @@
 // cspell:ignore: notif
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { UserEntity, UserNotificationPreferenceSelectType } from "../../../types";
 import { userNotificationPreferences, users } from "../../schema";
-import { closeRlsClients, createTestUser, getRlsClient, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { closeRlsClients, createTestUser, queryAsRlsRole, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("User Notification Preferences", () => {
   const RLS_ROLE = "test_rls_user_notif";
@@ -94,7 +94,6 @@ describe("User Notification Preferences", () => {
 
   test("RLS prevents users from seeing others' preferences", async () => {
     testLogger.info("Testing RLS on notification preferences...");
-    const rlsDb = await getRlsClient(RLS_ROLE);
     await runInRollback(async tx => {
       const userA = await createTestUser(tx, { name: "UserA" });
       const userB = await createTestUser(tx, { name: "UserB" });
@@ -106,15 +105,21 @@ describe("User Notification Preferences", () => {
         enabled: true,
       });
 
-      await rlsDb.execute(sql`SELECT set_config('app.current_user_id', ${userA.id}, false)`);
-
-      const preferences = await rlsDb.select().from(userNotificationPreferences);
+      const preferences = await queryAsRlsRole<{ user_id: string }>(
+        RLS_ROLE,
+        userA.id,
+        `SELECT user_id FROM "user_notification_preferences"`
+      );
       expect(preferences.length).toBe(0);
 
-      await rlsDb.execute(sql`SELECT set_config('app.current_user_id', ${userB.id}, false)`);
-      const bPreferences = await rlsDb.select().from(userNotificationPreferences);
+      const bPreferences = await queryAsRlsRole<{ user_id: string }>(
+        RLS_ROLE,
+        userB.id,
+        `SELECT user_id FROM "user_notification_preferences" WHERE "user_id" = $1`,
+        [userB.id]
+      );
       expect(bPreferences.length).toBe(1);
-      expect(bPreferences[0].userId).toBe(userB.id);
+      expect(bPreferences[0].user_id).toBe(userB.id);
     });
     testLogger.info("RLS test passed.");
   });

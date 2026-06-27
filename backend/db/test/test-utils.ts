@@ -87,10 +87,23 @@ export async function setupRlsRole(roleName: string = "test_rls_user"): Promise<
   `)
   );
 
-  await db.execute(sql.raw(`GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${quotedRole}`));
-  await db.execute(sql.raw(`GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${quotedRole}`));
-  await db.execute(sql.raw(`ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${quotedRole}`));
-  await db.execute(sql.raw(`ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${quotedRole}`));
+  const grantStatements = [
+    `GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${quotedRole}`,
+    `GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${quotedRole}`,
+    `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${quotedRole}`,
+    `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${quotedRole}`,
+  ];
+
+  for (const stmt of grantStatements) {
+    try {
+      await db.execute(sql.raw(stmt));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (!msg.includes("tuple concurrently updated")) {
+        throw e;
+      }
+    }
+  }
 }
 
 /**
@@ -110,4 +123,39 @@ export async function teardownRlsRole(roleName: string = "test_rls_user"): Promi
 
 function quoteIdent(ident: string): string {
   return `"${ident.replaceAll('"', '""')}"`;
+}
+
+const rlsClientCache = new Map<string, import("pg").Pool>();
+
+export async function queryAsRlsRole<T>(
+  roleName: string,
+  userId: string,
+  querySql: string,
+  params: unknown[] = []
+): Promise<T[]> {
+  let pool = rlsClientCache.get(roleName);
+  if (!pool) {
+    const { Pool } = await import("pg");
+    const base = new URL(process.env.DATABASE_URL);
+    base.username = roleName;
+    base.password = "test_rls_pass";
+    pool = new Pool({ connectionString: base.toString(), max: 2 });
+    rlsClientCache.set(roleName, pool);
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query(`SELECT set_config('app.current_user_id', $1, false)`, [userId]);
+    const result = await client.query(querySql, params);
+    return result.rows as T[];
+  } finally {
+    client.release();
+  }
+}
+
+export async function closeRlsClients(): Promise<void> {
+  for (const [, pool] of rlsClientCache) {
+    await pool.end();
+  }
+  rlsClientCache.clear();
 }

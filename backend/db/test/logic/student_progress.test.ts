@@ -7,7 +7,7 @@ import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEnt
 import type { ClassInstanceEntity } from "../../../types/scheduling.types";
 import type { DBTransaction } from "../../db.types";
 import { classInstances, parents, studentProgress, students, teacherAssignments, teachers, users } from "../../schema";
-import { runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { closeRlsClients, queryAsRlsRole, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 async function setupTestEnvironment(tx: DBTransaction, now: Date) {
   const [userP] = (await tx
@@ -80,6 +80,7 @@ describe("Student Progress Tracking", () => {
 
   afterAll(async () => {
     await teardownRlsRole(ROLE_NAME);
+    await closeRlsClients();
   });
 
   test("Teacher can log progress for their student", async () => {
@@ -149,7 +150,6 @@ describe("Student Progress Tracking", () => {
       const now = new Date();
       const { userP, userT, teacher, student, classInst } = await setupTestEnvironment(tx, now);
 
-      // Insert one visible record
       await tx.insert(studentProgress).values({
         studentId: student.id,
         classInstanceId: classInst.id,
@@ -158,34 +158,29 @@ describe("Student Progress Tracking", () => {
         parentVisible: true,
       });
 
-      // Switch to unprivileged role for RLS tests
-      await tx.execute(sql`SET LOCAL ROLE ${sql.raw(ROLE_NAME)}`);
-
-      // Set actor to Parent
-      await tx.execute(sql`SELECT set_config('app.current_user_id', ${userP.id}, true)`);
-
-      const visibleResults = (await tx
-        .select()
-        .from(studentProgress)
-        .where(eq(studentProgress.studentId, student.id))) as StudentProgressSelectType[];
+      const visibleResults = await queryAsRlsRole<{ id: string; topics_covered: string }>(
+        ROLE_NAME,
+        userP.id,
+        `SELECT id, topics_covered FROM "student_progress" WHERE student_id = $1`,
+        [student.id]
+      );
       expect(visibleResults.length).toBe(1);
-      expect(visibleResults[0].topicsCovered).toBe("Visible Part");
+      expect(visibleResults[0].topics_covered).toBe("Visible Part");
 
-      // Update to hidden (need to be teacher to update, since we are under RLS)
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userT.id}, true)`);
-      const updateResult = await tx
+      const [updated] = await tx
         .update(studentProgress)
         .set({ parentVisible: false })
         .where(eq(studentProgress.id, visibleResults[0].id))
         .returning();
-      expect(updateResult.length).toBe(1); // Ensure it actually updated
+      expect(updated).toBeDefined();
 
-      // Check again as parent
-      await tx.execute(sql`SELECT set_config('app.current_user_id', ${userP.id}, true)`);
-      const hiddenResults = (await tx
-        .select()
-        .from(studentProgress)
-        .where(eq(studentProgress.studentId, student.id))) as StudentProgressSelectType[];
+      const hiddenResults = await queryAsRlsRole<{ id: string }>(
+        ROLE_NAME,
+        userP.id,
+        `SELECT id FROM "student_progress" WHERE student_id = $1`,
+        [student.id]
+      );
       expect(hiddenResults.length).toBe(0);
     });
     testLogger.info("Parent visibility RLS test passed.");

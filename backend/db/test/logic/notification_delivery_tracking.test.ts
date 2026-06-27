@@ -1,7 +1,7 @@
 // cspell:ignore: notif
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { and, eq, sql } from "drizzle-orm";
+
 import {
   DevicePlatform,
   NotificationChannel,
@@ -11,8 +11,8 @@ import {
 import { testLogger } from "@/shared/lib/testlogger";
 import type { UserEntity } from "../../../types";
 import { NotificationRepository } from "../../repo/notification.repository";
-import { notificationDeliveries, userDeviceTokens, users } from "../../schema";
-import { closeRlsClients, createTestUser, getRlsClient, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { users } from "../../schema";
+import { closeRlsClients, createTestUser, queryAsRlsRole, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("Notification Delivery Tracking", () => {
   const RLS_ROLE = "test_rls_user_notif_delivery";
@@ -198,7 +198,6 @@ describe("Notification Delivery Tracking", () => {
 
   test("RLS prevents users from seeing others' deliveries and tokens", async () => {
     testLogger.info("Testing RLS on notification delivery tracking...");
-    const rlsDb = await getRlsClient(RLS_ROLE);
     await runInRollback(async tx => {
       const userA = await createTestUser(tx, { name: "UserA" });
       const userB = await createTestUser(tx, { name: "UserB" });
@@ -220,20 +219,32 @@ describe("Notification Delivery Tracking", () => {
         tx
       );
 
-      await rlsDb.execute(sql`SELECT set_config('app.current_user_id', ${userA.id}, false)`);
-
-      const visibleTokens = await rlsDb.select().from(userDeviceTokens);
-      const visibleDeliveries = await rlsDb.select().from(notificationDeliveries);
+      const visibleTokens = await queryAsRlsRole<{ user_id: string }>(
+        RLS_ROLE,
+        userA.id,
+        `SELECT user_id FROM "user_device_tokens"`
+      );
+      const visibleDeliveries = await queryAsRlsRole<{ user_id: string }>(
+        RLS_ROLE,
+        userA.id,
+        `SELECT user_id FROM "notification_deliveries"`
+      );
 
       expect(visibleTokens.length).toBe(0);
       expect(visibleDeliveries.length).toBe(0);
 
-      await rlsDb.execute(sql`SELECT set_config('app.current_user_id', ${userB.id}, false)`);
-      const userBTokens = await rlsDb.select().from(userDeviceTokens).where(eq(userDeviceTokens.userId, userB.id));
-      const userBDeliveries = await rlsDb
-        .select()
-        .from(notificationDeliveries)
-        .where(and(eq(notificationDeliveries.userId, userB.id)));
+      const userBTokens = await queryAsRlsRole<{ user_id: string }>(
+        RLS_ROLE,
+        userB.id,
+        `SELECT user_id FROM "user_device_tokens" WHERE "user_id" = $1`,
+        [userB.id]
+      );
+      const userBDeliveries = await queryAsRlsRole<{ user_id: string }>(
+        RLS_ROLE,
+        userB.id,
+        `SELECT user_id FROM "notification_deliveries" WHERE "user_id" = $1`,
+        [userB.id]
+      );
 
       expect(userBTokens.length).toBe(1);
       expect(userBDeliveries.length).toBe(1);
