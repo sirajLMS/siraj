@@ -110,6 +110,8 @@ const en: MessageSchema = {
     resourceCreateFailed: "Failed to create learning resource",
     resourceNotFound: "Learning resource not found",
     resourceDeleteFailed: "Failed to delete learning resource",
+    bookNotFound: "Book not found",
+    bookDeleteFailed: "Failed to delete book",
     permissionDenied: "You do not have permission to perform this action.",
     insufficientPrivilege: "You do not have sufficient privilege to edit administrative accounts.",
     complaintSubmitFailed: "Failed to submit complaint",
@@ -235,6 +237,7 @@ const en: MessageSchema = {
       teacherDashboard: "Teacher Dashboard",
       teacherDashboardActive: "Session Controls",
       permissions: "Permissions",
+      booksAndBags: "Books & Bags",
     },
     layout: {
       appTitle: "Siraj LMS",
@@ -2207,6 +2210,15 @@ const en: MessageSchema = {
         documentNameRequired: "Please enter a document name.",
         fileRequired: "Please select a file to upload.",
       },
+    },
+    booksAndBags: {
+      pageTitle: "Books & Bags",
+      pageSubtitle: "Browse and manage books and bags inventory.",
+      noEntries: "No books or bags found.",
+      statusAvailable: "Available",
+      statusOutOfStock: "Out of Stock",
+      deleteSuccess: "Book deleted successfully.",
+      deleteFailed: "Failed to delete book.",
     },
     permissions: {
       title: "Permission Management",

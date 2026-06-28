@@ -1,4 +1,14 @@
-import type { ResourcesLabels } from "../../../types/dashboard/resources";
+import type { BooksAndBagsLabels, ResourcesLabels } from "../../../types/dashboard/resources";
+
+export const booksAndBags: BooksAndBagsLabels = {
+  pageTitle: "الكتب والحقائب",
+  pageSubtitle: "تصفح وإدارة مخزون الكتب والحقائب.",
+  noEntries: "لم يتم العثور على كتب أو حقائب.",
+  statusAvailable: "متوفر",
+  statusOutOfStock: "غير متوفر",
+  deleteSuccess: "تم حذف الكتاب بنجاح.",
+  deleteFailed: "فشل حذف الكتاب.",
+};
 
 export const resources: ResourcesLabels = {
   pageTitle: "موارد التعلم",

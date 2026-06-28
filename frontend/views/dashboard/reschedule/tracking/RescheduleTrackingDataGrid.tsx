@@ -7,49 +7,9 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import {
-  LeaveRequestStatus as GqlLeaveRequestStatus,
-  RescheduleDateLabel as GqlRescheduleDateLabel,
-} from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TrackingRow } from "./types";
-import { getTrackingStatusIcon, getTrackingStatusLabel } from "./types";
-
-interface RescheduleTrackingDataGridHeaders {
-  readonly teacherName: string;
-  readonly studentName: string;
-  readonly scheduledDate: string;
-  readonly timeSlot: string;
-  readonly classStatus: string;
-  readonly action: string;
-}
-
-interface RescheduleTrackingDataGridLabels {
-  readonly newDate: string;
-  readonly leaveRequest: string;
-  readonly rescheduled: string;
-  readonly pendingLeave: string;
-  readonly viewDetails: string;
-  readonly approveLeave: string;
-  readonly rejectLeave: string;
-  readonly noEntries: string;
-  readonly statusPending: string;
-  readonly statusRescheduled: string;
-  readonly statusApproved: string;
-  readonly statusCancelled: string;
-}
-
-interface RescheduleTrackingDataGridProps {
-  readonly rows: readonly TrackingRow[];
-  readonly headers: RescheduleTrackingDataGridHeaders;
-  readonly labels: RescheduleTrackingDataGridLabels;
-  readonly onApprove: (id: string) => void;
-  readonly onReject: (id: string) => void;
-  readonly onView: (id: string) => void;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
-}
+import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
+import { getTrackingStatusIcon, getTrackingStatusLabel } from "./tracking.helpers";
+import type { RescheduleTrackingDataGridProps, TrackingRow } from "./tracking.types";
 
 export function RescheduleTrackingDataGrid({
   rows,
@@ -73,7 +33,7 @@ export function RescheduleTrackingDataGrid({
         renderCell: ({ row }) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, alignSelf: "center", height: "100%" }}>
             <Avatar
-              src={row.teacherAvatarUrl}
+              src={row.teacherAvatarUrl ?? undefined}
               sx={theme => ({
                 width: 36,
                 height: 36,
@@ -95,10 +55,10 @@ export function RescheduleTrackingDataGrid({
               }}
             >
               <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-                {row.teacherName}
+                {row.teacherName ?? ""}
               </Typography>
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                ID: {row.teacherId}
+                ID: {row.teacherId ?? ""}
               </Typography>
             </Box>
           </Box>
@@ -111,7 +71,7 @@ export function RescheduleTrackingDataGrid({
         minWidth: 160,
         renderCell: ({ row }) => (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {row.studentName}
+            {row.studentName ?? ""}
           </Typography>
         ),
       },
@@ -121,7 +81,7 @@ export function RescheduleTrackingDataGrid({
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => {
-          const isLeaveRequest = row.dateLabel === GqlRescheduleDateLabel.LeaveRequest;
+          const isLeaveRequest = row.dateLabel === RescheduleDateLabel.LeaveRequest;
           return (
             <Box
               sx={{
@@ -175,14 +135,17 @@ export function RescheduleTrackingDataGrid({
         headerName: headers.classStatus,
         width: 160,
         flex: 1,
-        renderCell: ({ row }) => (
-          <StatusBadge
-            category="trackingStatus"
-            status={row.status}
-            label={getTrackingStatusLabel(row.status, { ...labels, filterAll: "" })}
-            icon={getTrackingStatusIcon(row.status, { fontSize: 14, color: "inherit" })}
-          />
-        ),
+        renderCell: ({ row }) => {
+          const status = row.status ?? LeaveRequestStatus.Pending;
+          return (
+            <StatusBadge
+              category="trackingStatus"
+              status={status}
+              label={row.status != null ? getTrackingStatusLabel(status, { ...labels, filterAll: "" }) : ""}
+              icon={row.status != null ? getTrackingStatusIcon(status, { fontSize: 14, color: "inherit" }) : null}
+            />
+          );
+        },
       },
       {
         field: "actions",
@@ -192,16 +155,17 @@ export function RescheduleTrackingDataGrid({
         align: "right",
         headerAlign: "center",
         renderCell: ({ row }) => {
-          if (row.status === GqlLeaveRequestStatus.Pending) {
+          const rowId = row.id ?? "";
+          if (row.status != null && row.status === LeaveRequestStatus.Pending) {
             return (
               <Box sx={{ height: "100%", display: "flex", alignItems: "center" }}>
                 <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, width: "100%" }}>
                   <Tooltip title={labels.approveLeave}>
                     <IconButton
-                      id={`approve-leave-${row.id}`}
+                      id={`approve-leave-${rowId}`}
                       size="small"
                       onClick={() => {
-                        onApprove(row.id);
+                        onApprove(rowId);
                       }}
                       sx={theme => ({
                         fontSize: "11px",
@@ -219,10 +183,10 @@ export function RescheduleTrackingDataGrid({
                   </Tooltip>
                   <Tooltip title={labels.rejectLeave}>
                     <IconButton
-                      id={`reject-leave-${row.id}`}
+                      id={`reject-leave-${rowId}`}
                       size="small"
                       onClick={() => {
-                        onReject(row.id);
+                        onReject(rowId);
                       }}
                       sx={theme => ({
                         fontSize: "11px",
@@ -246,9 +210,9 @@ export function RescheduleTrackingDataGrid({
           return (
             <Tooltip title={labels.viewDetails}>
               <IconButton
-                id={`view-tracking-${row.id}`}
+                id={`view-tracking-${rowId}`}
                 onClick={() => {
-                  onView(row.id);
+                  onView(rowId);
                 }}
                 sx={theme => ({
                   color: theme.palette.primary.main,
@@ -270,7 +234,7 @@ export function RescheduleTrackingDataGrid({
     <AppDataGrid<TrackingRow>
       rows={rows}
       columns={columns}
-      getRowId={row => row.id}
+      getRowId={row => row.id ?? ""}
       autoHeight
       ariaLabel="reschedule-tracking-table"
       emptyMessage={labels.noEntries}

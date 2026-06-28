@@ -1,1 +1,1 @@
-export type { ResourcesLabels, ResourceValidationLabels } from "./main";
+export type { BooksAndBagsLabels, ResourcesLabels, ResourceValidationLabels } from "./main";

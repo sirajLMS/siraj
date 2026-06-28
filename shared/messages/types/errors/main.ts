@@ -92,6 +92,8 @@ export interface ErrorsLabels {
   readonly resourceCreateFailed: string;
   readonly resourceNotFound: string;
   readonly resourceDeleteFailed: string;
+  readonly bookNotFound: string;
+  readonly bookDeleteFailed: string;
   readonly permissionDenied: string;
   readonly insufficientPrivilege: string;
   readonly complaintSubmitFailed: string;

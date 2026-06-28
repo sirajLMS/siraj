@@ -4,117 +4,20 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type { RescheduleTrackingRow as GqlRescheduleTrackingRow } from "@/frontend/graphql/generated/gql/graphql-types";
-import {
-  AppPermission,
-  LeaveRequestStatus as GqlLeaveRequestStatus,
-  RescheduleDateLabel as GqlRescheduleDateLabel,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, LeaveRequestStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   rescheduleTrackingMetricsQueryDocument,
   rescheduleTrackingRowsQueryDocument,
   updateSessionStatusLeaveMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { useRescheduleTrackingStore } from "@/frontend/stores/rescheduleTrackingStore";
+import { exportRescheduleTracking } from "@/frontend/utils/excel-export/tracking-export";
 import { logger } from "@/frontend/utils/logger";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
 import { RescheduleTrackingView } from "./RescheduleTrackingView";
-import type { TrackingRow } from "./types";
-import { TRACKING_METRIC_DEFINITIONS } from "./types";
-
-type RawRow = GqlRescheduleTrackingRow;
-
-type RawMetrics = {
-  readonly pending?: number | null;
-  readonly approved?: number | null;
-  readonly leave?: number | null;
-  readonly rescheduled?: number | null;
-  readonly cancelled?: number | null;
-};
-
-function buildTrackingMetrics(rawMetrics: RawMetrics | null | undefined): MetricItem[] {
-  const counts: Record<string, number | null | undefined> = {
-    pending: rawMetrics?.pending,
-    approved: rawMetrics?.approved,
-    leave: rawMetrics?.leave,
-    rescheduled: rawMetrics?.rescheduled,
-    cancelled: rawMetrics?.cancelled,
-  };
-  return TRACKING_METRIC_DEFINITIONS.map(def => ({
-    key: def.key,
-    count: counts[def.key] ?? 0,
-    labelKey: def.labelKey,
-    icon: def.icon,
-    ...(def.variant ? { variant: def.variant } : {}),
-  }));
-}
-
-function buildTrackingRows(rawRows: readonly RawRow[], locale: string): TrackingRow[] {
-  return rawRows.map(r => {
-    const start =
-      r.scheduledStartAt && typeof r.scheduledStartAt === "string" ? new Date(r.scheduledStartAt) : new Date();
-    const end = r.scheduledEndAt && typeof r.scheduledEndAt === "string" ? new Date(r.scheduledEndAt) : new Date();
-
-    const initials = (r.teacherName ?? "")
-      .split(" ")
-      .map(part => part[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
-
-    const formattedDate = start.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-
-    const formatTime = (d: Date) =>
-      d.toLocaleTimeString(locale === "ar" ? "ar-EG" : "en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
-    const timeSlot = `${formatTime(start)} - ${formatTime(end)}`;
-
-    return {
-      id: r.id ?? "",
-      originalClassId: r.originalClassId ?? null,
-      teacherName: r.teacherName ?? "",
-      teacherId: r.teacherId ?? "",
-      teacherInitials: initials || "T",
-      teacherAvatarUrl: r.teacherAvatarUrl ?? undefined,
-      studentName: r.studentName ?? "",
-      scheduledDate: formattedDate,
-      dateLabel:
-        r.dateLabel === GqlRescheduleDateLabel.LeaveRequest
-          ? GqlRescheduleDateLabel.LeaveRequest
-          : GqlRescheduleDateLabel.NewDate,
-      timeSlot,
-      status: r.status ?? GqlLeaveRequestStatus.Pending,
-    };
-  });
-}
-
-function handleExportData(rows: readonly TrackingRow[]) {
-  try {
-    const headers = ["Teacher", "Student", "Scheduled Date", "Time Slot", "Status"];
-    const csvRows = rows.map(r => [r.teacherName, r.studentName, r.scheduledDate, r.timeSlot, r.status]);
-    const csvContent =
-      "data:text/csv;charset=utf-8," + [headers.join(","), ...csvRows.map(e => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "reschedule_tracking.csv");
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } catch (err) {
-    logger.error("Failed to export reschedule tracking data:", err);
-  }
-}
+import { buildTrackingMetrics, buildTrackingRows } from "./tracking.helpers";
 
 export function RescheduleTrackingContainer() {
   const t = useTranslations("dashboard.rescheduleTracking");
@@ -225,11 +128,31 @@ export function RescheduleTrackingContainer() {
     router.push(`/classes/${id}`);
   };
 
-  const handleExport = () => {
-    handleExportData(rows);
-  };
+  const handleExport = useCallback(() => {
+    exportRescheduleTracking({
+      rows,
+      labels: {
+        pageTitle: t("pageTitle"),
+        table: {
+          teacher: t("table.teacherName"),
+          student: t("table.studentClass"),
+          scheduledDate: t("table.scheduledDate"),
+          timeSlot: t("table.timeSlot"),
+          status: t("table.classStatus"),
+        },
+        statusLabels: {
+          [LeaveRequestStatus.Pending]: t("status.pendingLeave"),
+          [LeaveRequestStatus.Rescheduled]: t("status.rescheduled"),
+          [LeaveRequestStatus.Approved]: t("status.approved"),
+          [LeaveRequestStatus.Cancelled]: t("status.cancelled"),
+        },
+      },
+    }).catch((err: unknown) => {
+      logger.error("Excel export failed", err);
+    });
+  }, [rows, t]);
 
-  const handleFilterChange = (status: GqlLeaveRequestStatus | null) => {
+  const handleFilterChange = (status: LeaveRequestStatus | null) => {
     setStatusFilter(status);
   };
 

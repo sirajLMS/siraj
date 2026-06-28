@@ -27,6 +27,8 @@ type Documents = {
     "\n  mutation MarkInvoicePaid($invoiceId: String!, $expectedVersion: Int) {\n    markInvoicePaid(invoiceId: $invoiceId, expectedVersion: $expectedVersion) {\n      id\n      parentId\n      status\n      paidDate\n      version\n      notificationSummaryUpdated\n    }\n  }\n": typeof types.MarkInvoicePaidDocument,
     "\n  mutation DeleteInvoice($invoiceId: String!) {\n    deleteInvoice(invoiceId: $invoiceId) {\n      id\n      parentId\n      deletedAt\n      version\n      notificationSummaryUpdated\n    }\n  }\n": typeof types.DeleteInvoiceDocument,
     "\n  mutation SendPaymentReminder($studentId: String!) {\n    sendPaymentReminder(studentId: $studentId) {\n      id\n      success\n    }\n  }\n": typeof types.SendPaymentReminderDocument,
+    "\n  query BooksAndBagsQuery {\n    booksAndBags {\n      id\n      name\n      availabilityStatus\n    }\n  }\n": typeof types.BooksAndBagsQueryDocument,
+    "\n  mutation DeleteBookMutation($id: ID!) {\n    deleteBook(id: $id)\n  }\n": typeof types.DeleteBookMutationDocument,
     "\n  query classInstance($id: ID!) {\n    classInstance(id: $id) {\n      id\n      courseName\n      classType\n      instanceId\n      scheduledDate\n      startTime\n      endTime\n      durationMinutes\n      status\n      remarks\n      hasTimezoneMismatch\n      studentTimezone\n      teacherTimezone\n      zoomMeetingUrl\n      payrollCredited\n      isRescheduled\n      executionState\n      outcome\n      student {\n        id\n        name\n        grade\n        level\n        avatarUrl\n      }\n      teacher {\n        id\n        name\n        title\n        avatarUrl\n      }\n      performance {\n        engagementScore\n        assessmentProgress\n        assessmentTotal\n        focusLevel\n        sessionHealth\n        heatmapData\n        latencyMs\n        authorizationLabel\n        attendanceRate\n        avgGrade\n        lastClassDaysAgo\n      }\n    }\n  }\n": typeof types.ClassInstanceDocument,
     "\n  query classStatusEvents($classInstanceId: ID!) {\n    classStatusEvents(classInstanceId: $classInstanceId) {\n      id\n      eventType\n      description\n      createdAt\n    }\n  }\n": typeof types.ClassStatusEventsDocument,
     "\n  mutation activateClass($classInstanceId: ID!) {\n    activateClass(classInstanceId: $classInstanceId) {\n      id\n      status\n      durationMinutes\n      remarks\n      zoomMeetingUrl\n    }\n  }\n": typeof types.ActivateClassDocument,
@@ -144,6 +146,8 @@ const documents: Documents = {
     "\n  mutation MarkInvoicePaid($invoiceId: String!, $expectedVersion: Int) {\n    markInvoicePaid(invoiceId: $invoiceId, expectedVersion: $expectedVersion) {\n      id\n      parentId\n      status\n      paidDate\n      version\n      notificationSummaryUpdated\n    }\n  }\n": types.MarkInvoicePaidDocument,
     "\n  mutation DeleteInvoice($invoiceId: String!) {\n    deleteInvoice(invoiceId: $invoiceId) {\n      id\n      parentId\n      deletedAt\n      version\n      notificationSummaryUpdated\n    }\n  }\n": types.DeleteInvoiceDocument,
     "\n  mutation SendPaymentReminder($studentId: String!) {\n    sendPaymentReminder(studentId: $studentId) {\n      id\n      success\n    }\n  }\n": types.SendPaymentReminderDocument,
+    "\n  query BooksAndBagsQuery {\n    booksAndBags {\n      id\n      name\n      availabilityStatus\n    }\n  }\n": types.BooksAndBagsQueryDocument,
+    "\n  mutation DeleteBookMutation($id: ID!) {\n    deleteBook(id: $id)\n  }\n": types.DeleteBookMutationDocument,
     "\n  query classInstance($id: ID!) {\n    classInstance(id: $id) {\n      id\n      courseName\n      classType\n      instanceId\n      scheduledDate\n      startTime\n      endTime\n      durationMinutes\n      status\n      remarks\n      hasTimezoneMismatch\n      studentTimezone\n      teacherTimezone\n      zoomMeetingUrl\n      payrollCredited\n      isRescheduled\n      executionState\n      outcome\n      student {\n        id\n        name\n        grade\n        level\n        avatarUrl\n      }\n      teacher {\n        id\n        name\n        title\n        avatarUrl\n      }\n      performance {\n        engagementScore\n        assessmentProgress\n        assessmentTotal\n        focusLevel\n        sessionHealth\n        heatmapData\n        latencyMs\n        authorizationLabel\n        attendanceRate\n        avgGrade\n        lastClassDaysAgo\n      }\n    }\n  }\n": types.ClassInstanceDocument,
     "\n  query classStatusEvents($classInstanceId: ID!) {\n    classStatusEvents(classInstanceId: $classInstanceId) {\n      id\n      eventType\n      description\n      createdAt\n    }\n  }\n": types.ClassStatusEventsDocument,
     "\n  mutation activateClass($classInstanceId: ID!) {\n    activateClass(classInstanceId: $classInstanceId) {\n      id\n      status\n      durationMinutes\n      remarks\n      zoomMeetingUrl\n    }\n  }\n": types.ActivateClassDocument,
@@ -314,6 +318,14 @@ export function graphql(source: "\n  mutation DeleteInvoice($invoiceId: String!)
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation SendPaymentReminder($studentId: String!) {\n    sendPaymentReminder(studentId: $studentId) {\n      id\n      success\n    }\n  }\n"): (typeof documents)["\n  mutation SendPaymentReminder($studentId: String!) {\n    sendPaymentReminder(studentId: $studentId) {\n      id\n      success\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query BooksAndBagsQuery {\n    booksAndBags {\n      id\n      name\n      availabilityStatus\n    }\n  }\n"): (typeof documents)["\n  query BooksAndBagsQuery {\n    booksAndBags {\n      id\n      name\n      availabilityStatus\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteBookMutation($id: ID!) {\n    deleteBook(id: $id)\n  }\n"): (typeof documents)["\n  mutation DeleteBookMutation($id: ID!) {\n    deleteBook(id: $id)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

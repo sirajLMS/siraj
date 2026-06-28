@@ -525,6 +525,11 @@ export enum AppPermission {
   TEST_CUSTOM_ONLY = "test.custom_only",
 }
 
+export enum AvailabilityStatus {
+  AVAILABLE = "AVAILABLE",
+  OUT_OF_STOCK = "OUT_OF_STOCK",
+}
+
 export enum SystemPermissionGroupSlug {
   SUPER_ADMIN = "super_admin",
   ACADEMY_ADMIN = "academy_admin",

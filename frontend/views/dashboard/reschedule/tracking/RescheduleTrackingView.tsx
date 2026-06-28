@@ -4,62 +4,12 @@ import { FileDownloadOutlined } from "@mui/icons-material";
 import { Box, MenuItem, Select, type SelectChangeEvent, useMediaQuery, useTheme } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { ExportButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
-import { LeaveRequestStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { LeaveRequestStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { RescheduleTrackingCardList } from "./RescheduleTrackingCardList";
 import { RescheduleTrackingDataGrid } from "./RescheduleTrackingDataGrid";
-import type { TrackingRow } from "./types";
-import { getTrackingStatusLabel } from "./types";
-
-interface RescheduleTrackingViewLabels {
-  readonly pageTitle: string;
-  readonly sectionTitle: string;
-  readonly exportData: string;
-  readonly filterAll: string;
-  readonly teacherName: string;
-  readonly studentName: string;
-  readonly scheduledDate: string;
-  readonly timeSlot: string;
-  readonly classStatus: string;
-  readonly action: string;
-  readonly newDate: string;
-  readonly leaveRequest: string;
-  readonly rescheduled: string;
-  readonly pendingLeave: string;
-  readonly viewDetails: string;
-  readonly approveLeave: string;
-  readonly rejectLeave: string;
-  readonly showingOf: string;
-  readonly noEntries: string;
-  readonly statusPending: string;
-  readonly statusRescheduled: string;
-  readonly statusApproved: string;
-  readonly statusCancelled: string;
-}
-
-interface RescheduleTrackingViewProps {
-  readonly metrics: readonly MetricItem[];
-  readonly rows: readonly TrackingRow[];
-  readonly labels: RescheduleTrackingViewLabels;
-  readonly onApprove: (id: string) => void;
-  readonly onReject: (id: string) => void;
-  readonly onView: (id: string) => void;
-  readonly onExport: () => void;
-  readonly onFilterChange: (status: LeaveRequestStatus | null) => void;
-  readonly statusFilter: LeaveRequestStatus | null;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly totalCount: number;
-  readonly onPageChange: (page: number) => void;
-}
-
-const STATUS_FILTER_OPTIONS: readonly (LeaveRequestStatus | "")[] = [
-  "",
-  LeaveRequestStatus.Pending,
-  LeaveRequestStatus.Rescheduled,
-  LeaveRequestStatus.Approved,
-  LeaveRequestStatus.Cancelled,
-] as const;
+import { getTrackingStatusLabel } from "./tracking.helpers";
+import type { RescheduleTrackingViewProps } from "./tracking.types";
+import { STATUS_FILTER_OPTIONS } from "./tracking.types";
 
 export function RescheduleTrackingView({
   metrics,

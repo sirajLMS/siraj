@@ -10,32 +10,12 @@ import {
 import { Box, Card, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
-import { RescheduleDateLabel as GqlRescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { TrackingRow } from "./types";
-import { getTrackingStatusIcon, getTrackingStatusLabel } from "./types";
-
-interface RescheduleTrackingCardListProps {
-  readonly rows: readonly TrackingRow[];
-  readonly labels: {
-    readonly newDate: string;
-    readonly leaveRequest: string;
-    readonly rescheduled: string;
-    readonly pendingLeave: string;
-    readonly viewDetails: string;
-    readonly noEntries: string;
-    readonly statusPending: string;
-    readonly statusRescheduled: string;
-    readonly statusApproved: string;
-    readonly statusCancelled: string;
-  };
-  readonly onView: (id: string) => void;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
-}
+import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
+import { getTrackingStatusIcon, getTrackingStatusLabel } from "./tracking.helpers";
+import type { RescheduleTrackingCardListProps, TrackingRow } from "./tracking.types";
 
 const CardHeader = ({ row, onView }: { row: TrackingRow; onView: (id: string) => void }) => {
+  const rowId = row.id ?? "";
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
       <Box>
@@ -47,7 +27,7 @@ const CardHeader = ({ row, onView }: { row: TrackingRow; onView: (id: string) =>
             color: theme.palette.text.primary,
           })}
         >
-          {row.teacherName}
+          {row.teacherName ?? ""}
         </Typography>
         <Typography
           sx={theme => ({
@@ -57,14 +37,14 @@ const CardHeader = ({ row, onView }: { row: TrackingRow; onView: (id: string) =>
             fontWeight: 500,
           })}
         >
-          ID: {row.teacherId}
+          ID: {row.teacherId ?? ""}
         </Typography>
       </Box>
       <IconButton
-        id={`view-card-${row.id}`}
+        id={`view-card-${rowId}`}
         size="small"
         onClick={() => {
-          onView(row.id);
+          onView(rowId);
         }}
         sx={theme => ({
           width: 40,
@@ -95,7 +75,7 @@ const CardBody = ({ row }: { row: TrackingRow }) => {
             color: theme.palette.text.secondary,
           })}
         >
-          {row.studentName}
+          {row.studentName ?? ""}
         </Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -166,9 +146,15 @@ const CardFooter = ({
 
       <StatusBadge
         category="trackingStatus"
-        status={row.status}
-        label={getTrackingStatusLabel(row.status, { ...labels, filterAll: "" })}
-        icon={getTrackingStatusIcon(row.status, { fontSize: 14 })}
+        status={row.status ?? LeaveRequestStatus.Pending}
+        label={
+          row.status != null
+            ? getTrackingStatusLabel(row.status ?? LeaveRequestStatus.Pending, { ...labels, filterAll: "" })
+            : ""
+        }
+        icon={
+          row.status != null ? getTrackingStatusIcon(row.status ?? LeaveRequestStatus.Pending, { fontSize: 14 }) : null
+        }
       />
     </Box>
   );
@@ -183,7 +169,7 @@ function TrackingCard({
   readonly labels: RescheduleTrackingCardListProps["labels"];
   readonly onView: (id: string) => void;
 }) {
-  const isLeave = row.dateLabel === GqlRescheduleDateLabel.LeaveRequest;
+  const isLeave = row.dateLabel === RescheduleDateLabel.LeaveRequest;
 
   return (
     <Card
@@ -230,7 +216,7 @@ export function RescheduleTrackingCardList({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       {rows.map(row => (
-        <TrackingCard key={row.id} row={row} labels={labels} onView={onView} />
+        <TrackingCard key={row.id ?? ""} row={row} labels={labels} onView={onView} />
       ))}
       {totalCount !== undefined && onPageChange !== undefined && totalCount > 0 && (
         <PaginationControls

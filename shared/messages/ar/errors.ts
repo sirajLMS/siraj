@@ -85,6 +85,8 @@ export const errors: ErrorsLabels = {
   resourceCreateFailed: "فشل إنشاء المورد التعليمي",
   resourceNotFound: "لم يتم العثور على المورد التعليمي",
   resourceDeleteFailed: "فشل حذف المورد التعليمي",
+  bookNotFound: "لم يتم العثور على الكتاب",
+  bookDeleteFailed: "فشل حذف الكتاب",
   permissionDenied: "ليس لديك صلاحية لتنفيذ هذا الإجراء.",
   insufficientPrivilege: "ليس لديك صلاحية كافية لتعديل حسابات المسؤولين.",
   complaintSubmitFailed: "فشل في إرسال الشكوى",

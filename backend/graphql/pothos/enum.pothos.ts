@@ -1,5 +1,6 @@
 import {
   AppLanguage,
+  AvailabilityStatus,
   ClassExecutionState,
   ClassOutcome,
   CountryCode,
@@ -60,4 +61,8 @@ export const LeaveRequestStatusPothosObject = gqlSchemaBuilder.enumType(LeaveReq
 
 export const RescheduleDateLabelPothosObject = gqlSchemaBuilder.enumType(RescheduleDateLabel, {
   name: "RescheduleDateLabel",
+});
+
+export const AvailabilityStatusPothosObject = gqlSchemaBuilder.enumType(AvailabilityStatus, {
+  name: "AvailabilityStatus",
 });

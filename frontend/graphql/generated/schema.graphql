@@ -225,9 +225,20 @@ type AvailabilitySearchTeacher {
   timezone: String
 }
 
+enum AvailabilityStatus {
+  AVAILABLE
+  OUT_OF_STOCK
+}
+
 input BillingMonthInput {
   month: Int!
   year: Int!
+}
+
+type Book {
+  availabilityStatus: AvailabilityStatus
+  id: String
+  name: String
 }
 
 type BulkOperationFailure {
@@ -1150,6 +1161,12 @@ type Mutation {
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
   createTestGroupClass(classInstanceId: String!, teacherName: String!): TestGroupClass
   deactivateParent(parentId: String!): DeactivateParentResult
+
+  """Permanently deletes a book from the database."""
+  deleteBook(
+    """The UUID of the book to delete"""
+    id: ID!
+  ): Boolean
   deleteClassInstance(classInstanceId: ID!): Boolean
 
   """Soft-deletes a complaint (admin only). Returns true on success."""
@@ -1521,6 +1538,9 @@ type Query {
 
   """Returns the paginated admin suggestion list with metrics."""
   adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult
+
+  """Lists all books and bags available to the academy."""
+  booksAndBags: [Book!]
   classInstance(id: ID!): ClassInstanceDetail
   classStatusEvents(classInstanceId: ID!): [ClassStatusEvent!]
 

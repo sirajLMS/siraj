@@ -3,6 +3,7 @@ export * from "./availability-search.pothos";
 export * from "./billing-alerts.pothos";
 export * from "./billing-history.pothos";
 export * from "./billing-management.pothos";
+export * from "./book.pothos";
 export * from "./class-session.pothos";
 export * from "./complaint.pothos";
 export * from "./complaintResponses.pothos";

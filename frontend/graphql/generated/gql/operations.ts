@@ -137,6 +137,10 @@ export type AvailabilitySearchInput = {
   toTime: string;
 };
 
+export type AvailabilityStatus =
+  | 'AVAILABLE'
+  | 'OUT_OF_STOCK';
+
 export type BillingMonthInput = {
   month: number;
   year: number;
@@ -941,6 +945,26 @@ export type SendPaymentReminderMutationVariables = Exact<{
 
 
 export type SendPaymentReminderMutation = SendPaymentReminderMutation_Mutation;
+
+export type BooksAndBagsQueryQuery_booksAndBags_Book = { id: string | null, name: string | null, availabilityStatus: Types.AvailabilityStatus | null };
+
+export type BooksAndBagsQueryQuery_Query = { booksAndBags: Array<BooksAndBagsQueryQuery_booksAndBags_Book> | null };
+
+
+export type BooksAndBagsQueryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BooksAndBagsQueryQuery = BooksAndBagsQueryQuery_Query;
+
+export type DeleteBookMutationMutation_Mutation = { deleteBook: boolean | null };
+
+
+export type DeleteBookMutationMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeleteBookMutationMutation = DeleteBookMutationMutation_Mutation;
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo = { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null };
 

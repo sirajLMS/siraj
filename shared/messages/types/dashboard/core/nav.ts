@@ -39,4 +39,5 @@ export interface DashboardNavigationLabels {
   readonly teacherDashboard: string;
   readonly teacherDashboardActive: string;
   readonly permissions: string;
+  readonly booksAndBags: string;
 }

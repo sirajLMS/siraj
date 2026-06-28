@@ -24,7 +24,7 @@ import { managerOnboarding, managersDirectory } from "./dashboard/managers";
 import { directory, onboarding, profile } from "./dashboard/parents";
 import { permissions as permissionsLabels } from "./dashboard/permissions";
 import { reports as reportsLabels } from "./dashboard/reports";
-import { resources as resourcesLabels } from "./dashboard/resources";
+import { booksAndBags as booksAndBagsLabels, resources as resourcesLabels } from "./dashboard/resources";
 import {
   directory as studentDirectory,
   history as studentHistory,
@@ -108,6 +108,7 @@ export const arTranslations = {
     suggestions: suggestionsLabels,
     complaints: complaintsLabels,
     resources: resourcesLabels,
+    booksAndBags: booksAndBagsLabels,
     permissions: permissionsLabels,
     searchSchedule,
   },

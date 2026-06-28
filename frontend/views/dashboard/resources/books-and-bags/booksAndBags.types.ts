@@ -1,0 +1,35 @@
+import type { AvailabilityStatus } from "@/shared/lib/enum";
+
+export interface BookItem {
+  readonly id: string;
+  readonly name: string;
+  readonly availabilityStatus: AvailabilityStatus;
+}
+
+export interface BooksAndBagsLabels {
+  readonly pageTitle: string;
+  readonly pageSubtitle: string;
+  readonly noEntries: string;
+  readonly statusAvailable: string;
+  readonly statusOutOfStock: string;
+  readonly deleteSuccess: string;
+  readonly deleteFailed: string;
+}
+
+export interface BooksAndBagsClientProps {
+  readonly initialBooks: ReadonlyArray<{ id: string; name: string; availabilityStatus: AvailabilityStatus }>;
+}
+
+export interface BookItemCardProps {
+  readonly book: BookItem;
+  readonly labels: BooksAndBagsLabels;
+}
+
+export interface BooksAndBagsGridProps {
+  readonly books: BookItem[];
+  readonly labels: BooksAndBagsLabels;
+}
+
+export interface BooksAndBagsPageProps {
+  readonly params: Promise<{ locale: string }>;
+}

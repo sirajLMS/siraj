@@ -1,1 +1,1 @@
-export { resources } from "./main";
+export { booksAndBags, resources } from "./main";

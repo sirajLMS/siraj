@@ -2,6 +2,7 @@ export * from "./auth.documents";
 export * from "./availability-search.documents";
 export * from "./billing-alerts.documents";
 export * from "./billing-management.documents";
+export * from "./books-and-bags.documents";
 export * from "./class-session.documents";
 export * from "./complaint.documents";
 export * from "./dst-migration.documents";

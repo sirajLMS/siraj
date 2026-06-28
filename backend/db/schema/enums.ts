@@ -3,6 +3,7 @@ import {
   AccountStatus,
   AppLanguage,
   AppPermission,
+  AvailabilityStatus,
   ClassExecutionState,
   ClassOutcome,
   ClassType,
@@ -79,6 +80,7 @@ export const dayOfWeekEnum = createPgEnumFromEnum("day_of_week", DayOfWeek);
 
 export const dstMigrationResultEnum = createPgEnumFromEnum("dst_migration_result", DstMigrationResult);
 
+export const availabilityStatusEnum = createPgEnumFromEnum("availability_status", AvailabilityStatus);
 export const appPermissionEnum = pgEnum(
   "app_permission",
   Object.values(AppPermission) as [AppPermission, ...AppPermission[]]

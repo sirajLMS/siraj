@@ -29,7 +29,7 @@ import type { ManagerOnboardingLabels, ManagersDirectoryLabels } from "./dashboa
 import type { ParentOnboardingLabels, ParentProfileLabels, ParentsDirectoryLabels } from "./dashboard/parents";
 import type { PermissionsLabels } from "./dashboard/permissions";
 import type { ReportsLabels } from "./dashboard/reports";
-import type { ResourcesLabels } from "./dashboard/resources";
+import type { BooksAndBagsLabels, ResourcesLabels } from "./dashboard/resources";
 import type {
   StudentDirectoryLabels,
   StudentHistoryLabels,
@@ -55,6 +55,7 @@ export type {
   AdminDashboardLabels,
   AdminViewLabels,
   BillingLabels,
+  BooksAndBagsLabels,
   ClassAuditLabels,
   ClassDetailsLabels,
   ClassDetailsPerformanceLabels,
@@ -131,6 +132,7 @@ export type MessageSchema = {
     readonly suggestions: SuggestionsLabels;
     readonly complaints: ComplaintsLabels;
     readonly resources: ResourcesLabels;
+    readonly booksAndBags: BooksAndBagsLabels;
     readonly permissions: PermissionsLabels;
     readonly searchSchedule: SearchScheduleLabels;
   };

@@ -85,6 +85,8 @@ export const errors: ErrorsLabels = {
   resourceCreateFailed: "Failed to create learning resource",
   resourceNotFound: "Learning resource not found",
   resourceDeleteFailed: "Failed to delete learning resource",
+  bookNotFound: "Book not found",
+  bookDeleteFailed: "Failed to delete book",
   permissionDenied: "You do not have permission to perform this action.",
   insufficientPrivilege: "You do not have sufficient privilege to modify admin accounts.",
   complaintSubmitFailed: "Failed to submit complaint",

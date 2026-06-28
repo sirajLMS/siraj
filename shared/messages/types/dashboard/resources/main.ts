@@ -3,6 +3,16 @@ export interface ResourceValidationLabels {
   readonly fileRequired: string;
 }
 
+export interface BooksAndBagsLabels {
+  readonly pageTitle: string;
+  readonly pageSubtitle: string;
+  readonly noEntries: string;
+  readonly statusAvailable: string;
+  readonly statusOutOfStock: string;
+  readonly deleteSuccess: string;
+  readonly deleteFailed: string;
+}
+
 export interface ResourcesLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;

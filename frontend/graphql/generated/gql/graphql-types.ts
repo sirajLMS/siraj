@@ -253,9 +253,21 @@ export type AvailabilitySearchTeacher = {
   timezone: Maybe<Scalars['String']['output']>;
 };
 
+export enum AvailabilityStatus {
+  Available = 'AVAILABLE',
+  OutOfStock = 'OUT_OF_STOCK'
+}
+
 export type BillingMonthInput = {
   month: Scalars['Int']['input'];
   year: Scalars['Int']['input'];
+};
+
+export type Book = {
+  __typename?: 'Book';
+  availabilityStatus: Maybe<AvailabilityStatus>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
 };
 
 export type BulkOperationFailure = {
@@ -1203,6 +1215,8 @@ export type Mutation = {
   createTestEntities: Maybe<TestEntities>;
   createTestGroupClass: Maybe<TestGroupClass>;
   deactivateParent: Maybe<DeactivateParentResult>;
+  /** Permanently deletes a book from the database. */
+  deleteBook: Maybe<Scalars['Boolean']['output']>;
   deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
   /** Soft-deletes a complaint (admin only). Returns true on success. */
   deleteComplaint: Maybe<Scalars['Boolean']['output']>;
@@ -1388,6 +1402,11 @@ export type MutationCreateTestGroupClassArgs = {
 
 export type MutationDeactivateParentArgs = {
   parentId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteBookArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1936,6 +1955,8 @@ export type Query = {
   adminInvoices: Maybe<AdminInvoiceHistoryResult>;
   /** Returns the paginated admin suggestion list with metrics. */
   adminSuggestions: Maybe<AdminSuggestionResult>;
+  /** Lists all books and bags available to the academy. */
+  booksAndBags: Maybe<Array<Book>>;
   classInstance: Maybe<ClassInstanceDetail>;
   classStatusEvents: Maybe<Array<ClassStatusEvent>>;
   /** Returns file attachments for a specific complaint. Accessible by the owning parent or admins. */
