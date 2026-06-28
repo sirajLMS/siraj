@@ -4,6 +4,7 @@ export type {
   DailyScheduleResult,
   FutureClassRow,
   StatusTrackingRow,
+  UpcomingClassRow,
 } from "./scheduling-queries.repository";
 export {
   bulkFreezeStudentClasses,
@@ -20,5 +21,6 @@ export {
   getTeacherFutureClasses,
   getTeacherLeaveQuotaUsage,
   getTeacherProgressFeed,
+  getUpcomingClassesForStudent,
   incrementTeacherLeaveQuota,
 } from "./scheduling-queries.repository";

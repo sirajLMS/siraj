@@ -17,9 +17,12 @@ export interface StudentStatusLabels {
     readonly quickReasons: string;
   };
   readonly statusOptions: {
-    readonly regular: string;
-    readonly suspended: string;
-    readonly onLeave: string;
+    readonly REGULAR: string;
+    readonly SUSPENDED: string;
+    readonly ON_LEAVE: string;
+    readonly ON_TRIAL: string;
+    readonly DEACTIVATED: string;
+    readonly GRADUATED: string;
   };
   readonly reasons: {
     readonly unpaidInvoice: string;
@@ -39,6 +42,10 @@ export interface StudentStatusLabels {
     readonly status: string;
     readonly pendingHolds: string;
     readonly footerInfo: string;
+    readonly noUpcomingClasses: string;
+    readonly frozen: string;
+    readonly active: string;
+    readonly minutesShort: string;
   };
   readonly policies: {
     readonly suspensionTitle: string;

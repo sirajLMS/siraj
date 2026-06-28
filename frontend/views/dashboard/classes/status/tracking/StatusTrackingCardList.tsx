@@ -3,35 +3,22 @@
 import { BlockOutlined, PersonOutlined, ScheduleOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Button, Card, CardContent, Typography, useTheme } from "@mui/material";
 import { styled, type Theme } from "@mui/material/styles";
+import { useLocale } from "next-intl";
 import { StatusBadge } from "@/frontend/components/ui";
-import { computeSessionStatus, formatScheduleRange, type SessionStatus, type StatusTrackingRow } from "./types";
-
-interface StatusTrackingCardListProps {
-  readonly rows: readonly StatusTrackingRow[];
-  readonly totalSessions: number;
-  readonly labels: {
-    readonly joinSession: string;
-    readonly activate: string;
-    readonly reschedule: string;
-    readonly verifyDocuments: string;
-    readonly sessionLocked: string;
-    readonly seeAll: string;
-    readonly todaysSchedule: string;
-    readonly regular: string;
-    readonly suspendedPending: string;
-    readonly onLeave: string;
-    readonly pendingVerification: string;
-  };
-  readonly onActivate: (id: string) => void;
-  readonly onReschedule: (id: string) => void;
-  readonly onVerify: (id: string) => void;
-}
+import {
+  type CardListLabels,
+  computeSessionStatus,
+  formatScheduleRange,
+  SessionStatus,
+  type StatusTrackingCardListProps,
+  type StatusTrackingRow,
+} from "./types";
 
 const STATUS_LABEL_KEYS: Record<SessionStatus, "regular" | "suspendedPending" | "onLeave" | "pendingVerification"> = {
-  regular: "regular",
-  suspended_pending: "suspendedPending",
-  on_leave: "onLeave",
-  pending_verification: "pendingVerification",
+  [SessionStatus.REGULAR]: "regular",
+  [SessionStatus.SUSPENDED_PENDING]: "suspendedPending",
+  [SessionStatus.ON_LEAVE]: "onLeave",
+  [SessionStatus.PENDING_VERIFICATION]: "pendingVerification",
 };
 
 const StyledCardActionButtonBase = styled(Button)(({ theme }) => ({
@@ -106,10 +93,10 @@ const StyledStatusAvatar = styled(Box, {
 }));
 
 function getStatusIcon(sessionStatus: SessionStatus) {
-  if (sessionStatus === "suspended_pending") {
+  if (sessionStatus === SessionStatus.SUSPENDED_PENDING) {
     return <BlockOutlined sx={{ fontSize: 12 }} />;
   }
-  if (sessionStatus === "pending_verification") {
+  if (sessionStatus === SessionStatus.PENDING_VERIFICATION) {
     return <WarningAmberOutlined sx={{ fontSize: 12 }} />;
   }
   return undefined;
@@ -118,20 +105,21 @@ function getStatusIcon(sessionStatus: SessionStatus) {
 function getCardActionButton(
   row: StatusTrackingRow,
   sessionStatus: SessionStatus,
-  labels: StatusTrackingCardListProps["labels"],
+  labels: CardListLabels,
   onActivate: (id: string) => void,
-  onVerify: (id: string) => void
+  onVerify: (id: string) => void,
+  onJoin: (id: string) => void
 ) {
   const rowId = row.id ?? "";
 
-  if (sessionStatus === "regular") {
+  if (sessionStatus === SessionStatus.REGULAR) {
     return (
       <StyledCardActionButtonBase
         id={`mobile-join-${rowId}`}
         fullWidth
         variant="contained"
         onClick={() => {
-          /* join session */
+          onJoin(rowId);
         }}
       >
         {labels.joinSession}
@@ -139,7 +127,7 @@ function getCardActionButton(
     );
   }
 
-  if (sessionStatus === "suspended_pending") {
+  if (sessionStatus === SessionStatus.SUSPENDED_PENDING) {
     return (
       <StyledActivateActionButton
         id={`mobile-activate-${rowId}`}
@@ -154,7 +142,7 @@ function getCardActionButton(
     );
   }
 
-  if (sessionStatus === "on_leave") {
+  if (sessionStatus === SessionStatus.ON_LEAVE) {
     return (
       <StyledCardActionButtonBase id={`mobile-locked-${rowId}`} fullWidth disabled>
         {labels.sessionLocked}
@@ -177,19 +165,19 @@ function getCardActionButton(
 }
 
 function getAvatarStyles(theme: Theme, sessionStatus: SessionStatus) {
-  if (sessionStatus === "suspended_pending") {
+  if (sessionStatus === SessionStatus.SUSPENDED_PENDING) {
     return {
       backgroundColor: theme.palette.status.blockedContainer,
       color: theme.palette.status.onBlockedContainer,
     };
   }
-  if (sessionStatus === "on_leave") {
+  if (sessionStatus === SessionStatus.ON_LEAVE) {
     return {
       backgroundColor: theme.palette.secondaryContainer,
       color: theme.palette.onSecondaryContainer,
     };
   }
-  if (sessionStatus === "pending_verification") {
+  if (sessionStatus === SessionStatus.PENDING_VERIFICATION) {
     return {
       backgroundColor: theme.palette.status.pendingContainer,
       color: theme.palette.status.onPendingContainer,
@@ -206,13 +194,16 @@ function StatusTrackingCard({
   labels,
   onActivate,
   onVerify,
+  onJoin,
 }: {
   readonly row: StatusTrackingRow;
-  readonly labels: StatusTrackingCardListProps["labels"];
+  readonly labels: CardListLabels;
   readonly onActivate: (id: string) => void;
   readonly onVerify: (id: string) => void;
+  readonly onJoin: (id: string) => void;
 }) {
   const theme = useTheme();
+  const locale = useLocale();
   const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
   const avatarStyles = getAvatarStyles(theme, sessionStatus);
   return (
@@ -253,14 +244,14 @@ function StatusTrackingCard({
               <StyledMetaInfoRow>
                 <ScheduleOutlined sx={{ fontSize: 16 }} />
                 <Typography sx={{ fontSize: "13px" }}>
-                  {formatScheduleRange(row.scheduledStartAt, row.scheduledEndAt)}
+                  {formatScheduleRange(row.scheduledStartAt, row.scheduledEndAt, locale)}
                 </Typography>
               </StyledMetaInfoRow>
             </Box>
           </Box>
         </Box>
 
-        {getCardActionButton(row, sessionStatus, labels, onActivate, onVerify)}
+        {getCardActionButton(row, sessionStatus, labels, onActivate, onVerify, onJoin)}
       </CardContent>
     </Card>
   );
@@ -271,8 +262,9 @@ export function StatusTrackingCardList({
   totalSessions,
   labels,
   onActivate,
-  onReschedule: _onReschedule,
   onVerify,
+  onJoin,
+  onSeeAll,
 }: StatusTrackingCardListProps) {
   return (
     <Box>
@@ -290,7 +282,7 @@ export function StatusTrackingCardList({
             ({totalSessions})
           </Box>
         </StyledSectionTitle>
-        <StyledSeeAllButton id="status-see-all-btn" size="small">
+        <StyledSeeAllButton id="status-see-all-btn" size="small" onClick={onSeeAll}>
           {labels.seeAll}
         </StyledSeeAllButton>
       </Box>
@@ -303,6 +295,7 @@ export function StatusTrackingCardList({
             labels={labels}
             onActivate={onActivate}
             onVerify={onVerify}
+            onJoin={onJoin}
           />
         ))}
       </Box>

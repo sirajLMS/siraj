@@ -1,43 +1,73 @@
 import { Fingerprint, HistoryOutlined, MailOutlineOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, Typography, useMediaQuery, useTheme } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
+import { useCallback } from "react";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { StudentStatusInfo } from "../types";
+import { useRouter } from "@/shared/i18n/routing";
+import { StudentStatus } from "@/shared/lib/enum";
+import type { StudentStatusHeaderProps } from "../types";
 
-interface StudentStatusHeaderProps {
-  readonly student: StudentStatusInfo;
+const STATUS_DOT_COLOR_MAP: Record<string, string> = {
+  [StudentStatus.REGULAR]: "success",
+  [StudentStatus.SUSPENDED]: "error",
+  [StudentStatus.ON_LEAVE]: "warning",
+  [StudentStatus.ON_TRIAL]: "info",
+  [StudentStatus.DEACTIVATED]: "grey",
+  [StudentStatus.GRADUATED]: "success",
+};
+
+function getStatusDotColor(student: StudentStatusHeaderProps["student"], theme: Theme) {
+  const key = STATUS_DOT_COLOR_MAP[student.status] ?? "warning";
+  if (key === "success") return theme.palette.success.main;
+  if (key === "error") return theme.palette.error.main;
+  if (key === "warning") return theme.palette.warning.main;
+  if (key === "info") return theme.palette.info.main;
+  if (key === "grey") return theme.palette.outline;
+  return theme.palette.onSurfaceVariant;
 }
 
-function StudentAvatar({ student, isMobile }: Readonly<{ student: StudentStatusInfo; isMobile: boolean }>) {
+const STATUS_BADGE_MAP: Record<string, string> = {
+  [StudentStatus.REGULAR]: "regular",
+  [StudentStatus.SUSPENDED]: "suspended",
+  [StudentStatus.ON_LEAVE]: "on_leave",
+  [StudentStatus.ON_TRIAL]: "on_trial",
+  [StudentStatus.DEACTIVATED]: "deactivated",
+  [StudentStatus.GRADUATED]: "regular",
+};
+
+function getBadgeStatusKey(status: StudentStatus): string {
+  return STATUS_BADGE_MAP[status] ?? "regular";
+}
+
+function StudentAvatar({
+  student,
+  isMobile,
+}: Readonly<{ student: StudentStatusHeaderProps["student"]; isMobile: boolean }>) {
+  const theme = useTheme();
   return (
     <Box sx={{ position: "relative" }}>
       <Avatar
-        src={student.profileImage}
+        src={student.avatarUrl ?? undefined}
         alt={student.name}
-        sx={theme => ({
+        sx={{
           width: 96,
           height: 96,
           border: `4px solid ${theme.palette.background.paper}`,
           boxShadow: theme.palette.shadow.card,
-        })}
+        }}
       />
       {isMobile && (
         <Box
-          sx={theme => {
-            let statusColor = theme.palette.warning.main;
-            if (student.status === "regular") statusColor = theme.palette.success.main;
-            else if (student.status === "suspended") statusColor = theme.palette.error.main;
-
-            return {
-              position: "absolute",
-              bottom: 0,
-              right: 0,
-              width: 24,
-              height: 24,
-              borderRadius: "full",
-              border: `4px solid ${theme.palette.background.paper}`,
-              backgroundColor: statusColor,
-            };
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            right: 0,
+            width: 24,
+            height: 24,
+            borderRadius: "full",
+            border: `4px solid ${theme.palette.background.paper}`,
+            backgroundColor: getStatusDotColor(student, theme),
           }}
         />
       )}
@@ -45,7 +75,7 @@ function StudentAvatar({ student, isMobile }: Readonly<{ student: StudentStatusI
   );
 }
 
-function StudentInfo({ student }: Readonly<{ student: StudentStatusInfo }>) {
+function StudentInfo({ student }: Readonly<{ student: StudentStatusHeaderProps["student"] }>) {
   const t = useTranslations("dashboard.studentStatus");
 
   return (
@@ -56,8 +86,8 @@ function StudentInfo({ student }: Readonly<{ student: StudentStatusInfo }>) {
         </Typography>
         <StatusBadge
           category="studentAccount"
-          status={student.status}
-          label={t(`statusOptions.${student.status}`).split(" (")[0]}
+          status={getBadgeStatusKey(student.status)}
+          label={t(`statusOptions.${student.status}`)}
         />
       </Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, mt: 1 }}>
@@ -76,15 +106,27 @@ function StudentInfo({ student }: Readonly<{ student: StudentStatusInfo }>) {
           </Typography>
         </Box>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {student.grade}
+          {student.teacherName}
         </Typography>
       </Box>
     </Box>
   );
 }
 
-function HeaderActions({ isMobile }: Readonly<{ isMobile: boolean }>) {
+function HeaderActions({
+  student,
+  isMobile,
+}: Readonly<{ student: StudentStatusHeaderProps["student"]; isMobile: boolean }>) {
   const t = useTranslations("dashboard.studentStatus");
+  const router = useRouter();
+
+  const handleViewHistory = useCallback(() => {
+    router.push(`/students/${student.id}/history`);
+  }, [router, student.id]);
+
+  const handleContactParent = useCallback(() => {
+    router.push(`/students/${student.id}/quota`);
+  }, [router, student.id]);
 
   return (
     <Box sx={{ display: "flex", gap: 1.5, width: { xs: "100%", md: "auto" } }}>
@@ -92,6 +134,7 @@ function HeaderActions({ isMobile }: Readonly<{ isMobile: boolean }>) {
         fullWidth={isMobile}
         variant="outlined"
         startIcon={<HistoryOutlined />}
+        onClick={handleViewHistory}
         sx={theme => ({
           borderRadius: "button",
           color: theme.palette.secondary.main,
@@ -108,6 +151,7 @@ function HeaderActions({ isMobile }: Readonly<{ isMobile: boolean }>) {
         fullWidth={isMobile}
         variant="outlined"
         startIcon={<MailOutlineOutlined />}
+        onClick={handleContactParent}
         sx={theme => ({
           borderRadius: "button",
           color: theme.palette.secondary.main,
@@ -149,7 +193,7 @@ export function StudentStatusHeader({ student }: Readonly<StudentStatusHeaderPro
         <StudentAvatar student={student} isMobile={isMobile} />
         <StudentInfo student={student} />
       </Box>
-      <HeaderActions isMobile={isMobile} />
+      <HeaderActions student={student} isMobile={isMobile} />
     </Box>
   );
 }

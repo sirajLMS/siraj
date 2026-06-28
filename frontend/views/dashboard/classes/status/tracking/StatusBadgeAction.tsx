@@ -7,24 +7,7 @@ import {
   PowerSettingsNewOutlined,
 } from "@mui/icons-material";
 import { Box, Button, type SxProps, styled, type Theme, Tooltip, Typography, useTheme } from "@mui/material";
-import { useRouter } from "@/shared/i18n/routing";
-import type { StatusTrackingRow } from "./types";
-import { computeSessionStatus } from "./types";
-
-interface StatusActionProps {
-  readonly row: StatusTrackingRow;
-  readonly labels: {
-    readonly joinSession: string;
-    readonly activate: string;
-    readonly reschedule: string;
-    readonly verifyDocuments: string;
-    readonly administrativeHold: string;
-    readonly holdDescription: string;
-  };
-  readonly onActivate: (id: string) => void;
-  readonly onReschedule: (id: string) => void;
-  readonly onVerify: (id: string) => void;
-}
+import { computeSessionStatus, SessionStatus, type StatusActionProps } from "./types";
 
 const StyledActionButton = styled(Button, {
   shouldForwardProp: prop => prop !== "minWidthLg",
@@ -107,13 +90,12 @@ const ActionButtonWrapper = ({
   </StyledTooltip>
 );
 
-export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }: StatusActionProps) {
+export function StatusAction({ row, labels, onActivate, onReschedule, onVerify, onJoin }: StatusActionProps) {
   const theme = useTheme();
-  const router = useRouter();
   const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
   const rowId = row.id ?? "";
 
-  if (sessionStatus === "regular") {
+  if (sessionStatus === SessionStatus.REGULAR) {
     return (
       <ActionButtonWrapper
         id={`join-session-${rowId}`}
@@ -135,13 +117,13 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
           },
         })}
         onClick={() => {
-          router.push(`/classes/${rowId}`);
+          onJoin(rowId);
         }}
       />
     );
   }
 
-  if (sessionStatus === "suspended_pending") {
+  if (sessionStatus === SessionStatus.SUSPENDED_PENDING) {
     return (
       <ActionButtonWrapper
         id={`activate-session-${rowId}`}
@@ -177,7 +159,7 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
     );
   }
 
-  if (sessionStatus === "on_leave") {
+  if (sessionStatus === SessionStatus.ON_LEAVE) {
     return (
       <ActionButtonWrapper
         id={`reschedule-session-${rowId}`}

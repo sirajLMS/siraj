@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
 import { createMockAdminDecorator } from "../components/createMockAdminDecorator";
 import { AdminSuggestionsDesktopView } from "./AdminSuggestionsDesktopView";
-import type { AdminSuggestionRow, AdminSuggestionsSummary, SuggestionStatus } from "./types/suggestions.types";
+import type { AdminSuggestionRow, AdminSuggestionsSummary } from "./types/suggestions.types";
 import { buildSuggestionsLabels } from "./utils/buildSuggestionsLabels";
 
 const MOCK_ADMIN_SUGGESTION_ROWS: readonly AdminSuggestionRow[] = [
@@ -12,25 +12,45 @@ const MOCK_ADMIN_SUGGESTION_ROWS: readonly AdminSuggestionRow[] = [
     id: "sug-1001",
     parentName: "Sarah Jenkins",
     suggestionPreview: "It would be great to have a weekend coding club for Grade 5-8 students...",
-    status: "PENDING" as SuggestionStatus,
+    status: SuggestionStatus.Pending,
     submittedAt: "2 hours ago",
+    adminResponse: null,
+    duplicateOfBody: null,
+    duplicateOfSubmitterName: null,
+    responseCount: null,
   },
   {
     id: "sug-1002",
     parentName: "David Miller",
     suggestionPreview: "Consider adding organic options to the cafeteria lunch menu.",
-    status: "REVIEWED" as SuggestionStatus,
+    status: SuggestionStatus.Reviewed,
     submittedAt: "1 day ago",
+    adminResponse: "Thank you for the suggestion. We are reviewing it.",
+    duplicateOfBody: null,
+    duplicateOfSubmitterName: null,
+    responseCount: 1,
+  },
+  {
+    id: "sug-1003",
+    parentName: "Fatima Ali",
+    suggestionPreview: "Weekend coding club would be wonderful for the students.",
+    status: SuggestionStatus.Duplicate,
+    submittedAt: "3 hours ago",
+    adminResponse: null,
+    duplicateOfBody: "It would be great to have a weekend coding club for Grade 5-8 students...",
+    duplicateOfSubmitterName: "Sarah Jenkins",
+    responseCount: null,
   },
 ];
 
 const MOCK_ADMIN_SUMMARY: AdminSuggestionsSummary = {
   pending: 1,
   reviewed: 1,
+  duplicateCount: 1,
   avgResponseHours: "12.5 Hours",
 };
 
-const ADMIN_PERMISSIONS = [AppPermission.ComplaintsRespond];
+const ADMIN_PERMISSIONS = [AppPermission.SuggestionsReview, AppPermission.SuggestionsDelete];
 
 const mockActions = {
   onSearchChange: (query: string) => {
@@ -42,6 +62,15 @@ const mockActions = {
   onMarkReviewed: (id: string) => {
     logger.info("onMarkReviewed:", id);
   },
+  onRespond: (id: string) => {
+    logger.info("onRespond:", id);
+  },
+  onMarkDuplicate: (id: string) => {
+    logger.info("onMarkDuplicate:", id);
+  },
+  onDelete: (id: string) => {
+    logger.info("onDelete:", id);
+  },
 };
 
 interface AdminSuggestionsDesktopStoryProps {
@@ -50,6 +79,7 @@ interface AdminSuggestionsDesktopStoryProps {
   readonly searchQuery: string;
   readonly activeTab: SuggestionStatus;
   readonly canManage: boolean;
+  readonly canDelete: boolean;
 }
 
 function AdminSuggestionsDesktopStoryRenderer({
@@ -58,6 +88,7 @@ function AdminSuggestionsDesktopStoryRenderer({
   searchQuery,
   activeTab,
   canManage,
+  canDelete,
 }: Readonly<AdminSuggestionsDesktopStoryProps>) {
   const t = useTranslations("dashboard.suggestions");
   const labels = buildSuggestionsLabels(t).admin;
@@ -70,6 +101,7 @@ function AdminSuggestionsDesktopStoryRenderer({
       searchQuery={searchQuery}
       activeTab={activeTab}
       canManage={canManage}
+      canDelete={canDelete}
       {...mockActions}
     />
   );
@@ -93,8 +125,9 @@ export const Default: Story = {
     summary: MOCK_ADMIN_SUMMARY,
     rows: MOCK_ADMIN_SUGGESTION_ROWS,
     searchQuery: "",
-    activeTab: "PENDING" as SuggestionStatus,
+    activeTab: SuggestionStatus.Pending,
     canManage: true,
+    canDelete: true,
   },
 };
 
@@ -102,6 +135,13 @@ export const Empty: Story = {
   args: {
     ...Default.args,
     rows: [],
-    summary: { pending: 0, reviewed: 0, avgResponseHours: "0.0 Hours" },
+    summary: { pending: 0, reviewed: 0, duplicateCount: 0, avgResponseHours: "0.0 Hours" },
+  },
+};
+
+export const WithoutDeletePermission: Story = {
+  args: {
+    ...Default.args,
+    canDelete: false,
   },
 };

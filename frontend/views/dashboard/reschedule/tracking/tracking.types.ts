@@ -65,7 +65,7 @@ export interface RescheduleTrackingDataGridProps {
   readonly onPageChange?: (page: number) => void;
 }
 
-export interface RescheduleTrackingCardListLabels extends RescheduleTrackingCommonLabels {}
+export type RescheduleTrackingCardListLabels = RescheduleTrackingCommonLabels;
 
 export interface RescheduleTrackingCardListProps {
   readonly rows: readonly TrackingRow[];

@@ -1,6 +1,5 @@
 "use client";
 
-import type { SvgIconComponent } from "@mui/icons-material";
 import {
   BlockOutlined,
   CheckCircleOutlineOutlined,
@@ -9,23 +8,13 @@ import {
 } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-import { computeSessionStatus, type StatusTrackingRow } from "./types";
-
-interface MetricCounts {
-  regular: number;
-  pending: number;
-  suspended: number;
-  on_leave: number;
-}
-
-interface RawMetric {
-  key: string;
-  count: number;
-  labelKey: string;
-  icon: SvgIconComponent;
-  variant?: MetricItem["variant"];
-}
+import {
+  computeSessionStatus,
+  type MetricCounts,
+  type RawMetric,
+  SessionStatus,
+  type StatusTrackingRow,
+} from "./types";
 
 const METRIC_DEFINITIONS: readonly Omit<RawMetric, "count">[] = [
   { key: "regular", labelKey: "dashboard.statusTracking.metrics.regular", icon: CheckCircleOutlineOutlined },
@@ -40,18 +29,18 @@ const METRIC_DEFINITIONS: readonly Omit<RawMetric, "count">[] = [
 ];
 
 function computeMetricCounts(rows: readonly StatusTrackingRow[]): MetricCounts {
-  const counts: MetricCounts = { regular: 0, pending: 0, suspended: 0, on_leave: 0 };
+  const counts: Record<keyof MetricCounts, number> = { regular: 0, pending: 0, suspended: 0, on_leave: 0 };
   for (const row of rows) {
     const status = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
-    if (status === "regular") counts.regular += 1;
-    else if (status === "pending_verification") counts.pending += 1;
-    else if (status === "suspended_pending") counts.suspended += 1;
-    else if (status === "on_leave") counts.on_leave += 1;
+    if (status === SessionStatus.REGULAR) counts.regular += 1;
+    else if (status === SessionStatus.PENDING_VERIFICATION) counts.pending += 1;
+    else if (status === SessionStatus.SUSPENDED_PENDING) counts.suspended += 1;
+    else if (status === SessionStatus.ON_LEAVE) counts.on_leave += 1;
   }
-  return counts;
+  return counts as MetricCounts;
 }
 
-function buildMetrics(counts: MetricCounts, subLabelMap: Record<string, string>): readonly MetricItem[] {
+function buildMetrics(counts: MetricCounts, subLabelMap: Record<string, string>): readonly RawMetric[] {
   return METRIC_DEFINITIONS.map(def => ({
     ...def,
     count: counts[def.key as keyof MetricCounts],
@@ -64,8 +53,9 @@ export function useStatusTrackingMetrics(rows: readonly StatusTrackingRow[]) {
 
   const suspendedCount = useMemo(
     () =>
-      rows.filter(r => computeSessionStatus(r.studentStatus, r.isFrozen, r.executionState) === "suspended_pending")
-        .length,
+      rows.filter(
+        r => computeSessionStatus(r.studentStatus, r.isFrozen, r.executionState) === SessionStatus.SUSPENDED_PENDING
+      ).length,
     [rows]
   );
 

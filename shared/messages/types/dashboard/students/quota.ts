@@ -14,10 +14,13 @@ export interface StudentQuotaLabels {
     readonly studentNamePlaceholder: string;
     readonly dateOfBirth: string;
     readonly language: string;
+    readonly arabic: string;
+    readonly english: string;
     readonly gender: string;
     readonly male: string;
     readonly female: string;
     readonly teacher: string;
+    readonly loadingTeachers: string;
     readonly totalClasses: string;
     readonly classesLeft: string;
     readonly overrideActive: string;
@@ -28,6 +31,7 @@ export interface StudentQuotaLabels {
     readonly cancel: string;
     readonly saving: string;
     readonly saved: string;
+    readonly saveSuccess: string;
     readonly lastEdited: string;
   };
   readonly info: {

@@ -37,6 +37,7 @@ export const studentByIdQueryDocument: TypedDocumentNode<Operations.StudentByIdQ
       classesTotal
       language
       gender
+      version
       updatedAt
     }
   }

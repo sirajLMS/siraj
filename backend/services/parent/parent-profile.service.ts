@@ -39,6 +39,7 @@ export interface AssociatedStudentResult {
   readonly classesTotal: number;
   readonly language: string | null;
   readonly gender: string | null;
+  readonly version: number;
   readonly updatedAt: Date;
 }
 

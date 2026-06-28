@@ -1,11 +1,5 @@
 import { Box, type Theme, Typography } from "@mui/material";
-import type { ElementType } from "react";
-
-interface SectionHeaderProps {
-  title: string;
-  desktopIcon: ElementType;
-  mobileIcon: ElementType;
-}
+import type { SectionHeaderProps } from "../types";
 
 export function SectionHeader({
   title,

@@ -55,6 +55,12 @@ export interface StatusTrackingDaysLabels {
   readonly sun: string;
 }
 
+export interface StatusTrackingErrorsLabels {
+  readonly noStudentId: string;
+  readonly auditLogsComingSoon: string;
+  readonly failedToLoad: string;
+}
+
 export interface StatusTrackingLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
@@ -76,5 +82,6 @@ export interface StatusTrackingLabels {
   readonly status: StatusTrackingStatusLabels;
   readonly actions: StatusTrackingActionsLabels;
   readonly analytics: StatusTrackingAnalyticsLabels;
+  readonly errors: StatusTrackingErrorsLabels;
   readonly days: StatusTrackingDaysLabels;
 }

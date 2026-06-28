@@ -2,25 +2,96 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useMemo } from "react";
 import { studentClassHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-history.documents";
+import { useStudentHistoryStore } from "@/frontend/stores/studentHistoryStore";
 import { StudentHistoryView } from "./StudentHistoryView";
 import type { ClassSession, StudentHistoryMetrics } from "./types";
+import { mapStatusToAttendance } from "./types";
 
 export function StudentHistoryContainer() {
   const params = useParams<{ id: string }>();
-  const [currentMonth, setCurrentMonth] = useState<Date>(new Date(2026, 5, 18)); // default to current date/month context
-  const [selectedWeek, setSelectedWeek] = useState<number>(3);
+  const t = useTranslations("dashboard.studentHistory");
+  const notifications = useNotifications();
 
-  // Sync year and month with currentMonth state
+  const { currentMonth, selectedWeek, selectedDay, setCurrentMonth, setSelectedWeek, setSelectedDay } =
+    useStudentHistoryStore();
+
   const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth() + 1; // 1-indexed for backend query
+  const month = currentMonth.getMonth() + 1;
 
   const { data, loading, error } = useQuery(studentClassHistoryQueryDocument, {
     variables: { studentId: params.id, year, month },
     skip: !params.id,
   });
+
+  useEffect(() => {
+    if (error) {
+      notifications.show(t("errors.loadFailed", { message: error.message }), {
+        severity: "error",
+        autoHideDuration: 4000,
+      });
+    }
+  }, [error, notifications, t]);
+
+  const studentName = data?.studentClassHistory?.studentName ?? "Student";
+
+  const metrics: StudentHistoryMetrics = useMemo(
+    () => ({
+      totalClasses: data?.studentClassHistory?.metrics?.totalClasses ?? 0,
+      attendanceRate: data?.studentClassHistory?.metrics?.attendanceRate ?? 0,
+      hoursStudied: data?.studentClassHistory?.metrics?.hoursStudied ?? 0,
+      performance: data?.studentClassHistory?.metrics?.performance ?? 0,
+    }),
+    [data]
+  );
+
+  const classes: Record<number, ClassSession> = useMemo(() => {
+    const result: Record<number, ClassSession> = {};
+    if (data?.studentClassHistory?.sessions) {
+      for (const session of data.studentClassHistory.sessions) {
+        if (session?.dayOfMonth !== null && session.dayOfMonth !== undefined) {
+          result[session.dayOfMonth] = {
+            id: session.id ?? "",
+            dayOfMonth: session.dayOfMonth,
+            title: session.title ?? "Class Session",
+            time: session.time ?? "",
+            duration: session.duration ?? 0,
+            status: mapStatusToAttendance(session.status ?? "present"),
+            instructor: session.instructor ?? "",
+            timeSlot: session.timeSlot ?? "",
+            room: session.room ?? "",
+            notes: session.notes ?? "",
+          };
+        }
+      }
+    }
+    return result;
+  }, [data]);
+
+  const handlePrevMonth = useCallback(() => {
+    const prev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+    setCurrentMonth(prev);
+  }, [currentMonth, setCurrentMonth]);
+
+  const handleNextMonth = useCallback(() => {
+    const next = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+    setCurrentMonth(next);
+  }, [currentMonth, setCurrentMonth]);
+
+  const handlePrint = useCallback(() => {
+    window.print();
+  }, []);
+
+  const handleSelectDay = useCallback(
+    (day: number | null) => {
+      setSelectedDay(day);
+    },
+    [setSelectedDay]
+  );
 
   if (loading) {
     return (
@@ -30,42 +101,6 @@ export function StudentHistoryContainer() {
     );
   }
 
-  if (error) {
-    return (
-      <Box sx={{ p: 4, textAlign: "center", color: "error.main" }}>Error loading student history: {error.message}</Box>
-    );
-  }
-
-  // Map backend query results to frontend structures
-  const studentName = data?.studentClassHistory?.studentName ?? "Student";
-
-  const metrics: StudentHistoryMetrics = {
-    totalClasses: data?.studentClassHistory?.metrics?.totalClasses ?? 0,
-    attendanceRate: data?.studentClassHistory?.metrics?.attendanceRate ?? 0,
-    hoursStudied: data?.studentClassHistory?.metrics?.hoursStudied ?? 0,
-    performance: data?.studentClassHistory?.metrics?.performance ?? 0,
-  };
-
-  const classes: Record<number, ClassSession> = {};
-  if (data?.studentClassHistory?.sessions) {
-    for (const session of data.studentClassHistory.sessions) {
-      if (session?.dayOfMonth !== null && session.dayOfMonth !== undefined) {
-        classes[session.dayOfMonth] = {
-          id: session.id ?? "",
-          dayOfMonth: session.dayOfMonth,
-          title: session.title ?? "Class Session",
-          time: session.time ?? "",
-          duration: session.duration ?? 0,
-          status: session.status ?? "present",
-          instructor: session.instructor ?? "",
-          timeSlot: session.timeSlot ?? "",
-          room: session.room ?? "",
-          notes: session.notes ?? "",
-        };
-      }
-    }
-  }
-
   return (
     <StudentHistoryView
       studentName={studentName}
@@ -73,8 +108,12 @@ export function StudentHistoryContainer() {
       metrics={metrics}
       classes={classes}
       selectedWeek={selectedWeek}
+      selectedDay={selectedDay}
       onSelectWeek={setSelectedWeek}
-      onMonthChange={setCurrentMonth}
+      onSelectDay={handleSelectDay}
+      onPrevMonth={handlePrevMonth}
+      onNextMonth={handleNextMonth}
+      onPrint={handlePrint}
     />
   );
 }

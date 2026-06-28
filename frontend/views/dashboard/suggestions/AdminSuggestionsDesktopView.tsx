@@ -14,9 +14,13 @@ export function AdminSuggestionsDesktopView({
   searchQuery,
   activeTab,
   canManage,
+  canDelete,
   onSearchChange,
   onTabChange,
   onMarkReviewed,
+  onRespond,
+  onMarkDuplicate,
+  onDelete,
 }: Readonly<AdminSuggestionsViewProps>) {
   return (
     <PageContainer>
@@ -33,10 +37,20 @@ export function AdminSuggestionsDesktopView({
           activeTab={activeTab}
           pendingCount={summary.pending}
           reviewedCount={summary.reviewed}
+          duplicateCount={summary.duplicateCount}
           labels={labels}
           onTabChange={onTabChange}
         />
-        <SuggestionsDataGrid rows={rows} labels={labels} canManage={canManage} onMarkReviewed={onMarkReviewed} />
+        <SuggestionsDataGrid
+          rows={rows}
+          labels={labels}
+          canManage={canManage}
+          canDelete={canDelete}
+          onMarkReviewed={onMarkReviewed}
+          onRespond={onRespond}
+          onMarkDuplicate={onMarkDuplicate}
+          onDelete={onDelete}
+        />
       </SectionPanel>
     </PageContainer>
   );

@@ -1,27 +1,31 @@
-import { CalendarToday, PictureAsPdf, School, Timer, TrendingUp, VerifiedUser } from "@mui/icons-material";
-import { Box } from "@mui/material";
+import {
+  CalendarToday,
+  ChevronLeft,
+  ChevronRight,
+  PictureAsPdf,
+  School,
+  Timer,
+  TrendingUp,
+  VerifiedUser,
+} from "@mui/icons-material";
+import { Box, IconButton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { ExportButton, MetricCard, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import type { ClassSession, StudentHistoryMetrics } from "../types";
+import { ExportButton, MetricCard, PageHeader } from "@/frontend/components/ui";
+import type { StudentHistoryDesktopProps } from "../types";
 import { CalendarGrid } from "./CalendarGrid";
-
-interface StudentHistoryDesktopProps {
-  studentName: string;
-  currentMonth: Date;
-  metrics: StudentHistoryMetrics;
-  classes: Readonly<Partial<Record<number, ClassSession>>>;
-  onChangeMonth?: () => void;
-}
 
 export function StudentHistoryDesktop({
   studentName,
   currentMonth,
   metrics,
   classes,
-  onChangeMonth,
+  onPrevMonth,
+  onNextMonth,
+  onPrint,
 }: Readonly<StudentHistoryDesktopProps>) {
   const t = useTranslations("dashboard.studentHistory");
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
+  const yearStr = currentMonth.getFullYear();
 
   return (
     <Box sx={{ display: { xs: "none", md: "block" } }}>
@@ -33,14 +37,36 @@ export function StudentHistoryDesktop({
           titleVariant="headlineMd"
           breadcrumbs={[{ label: t("breadcrumbs.archive") }]}
           actions={
-            <>
-              <ExportButton startIcon={<PictureAsPdf sx={{ fontSize: 20 }} />}>{t("exportPdf")}</ExportButton>
-              <PrimaryPageAction onClick={onChangeMonth} startIcon={<CalendarToday sx={{ fontSize: 20 }} />}>
-                {t("changeMonth")}
-              </PrimaryPageAction>
-            </>
+            <ExportButton startIcon={<PictureAsPdf sx={{ fontSize: 20 }} />} onClick={onPrint}>
+              {t("exportPdf")}
+            </ExportButton>
           }
         />
+      </Box>
+
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 4, gap: 2 }}>
+        <IconButton
+          onClick={onPrevMonth}
+          sx={theme => ({
+            transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+          })}
+        >
+          <ChevronLeft />
+        </IconButton>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <CalendarToday sx={theme => ({ fontSize: 20, color: theme.palette.primary.main })} />
+          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+            {monthStr} {yearStr}
+          </Typography>
+        </Box>
+        <IconButton
+          onClick={onNextMonth}
+          sx={theme => ({
+            transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+          })}
+        >
+          <ChevronRight />
+        </IconButton>
       </Box>
 
       <Box sx={theme => ({ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: theme.layout.gutter, mb: 4 })}>
@@ -60,7 +86,7 @@ export function StudentHistoryDesktop({
         <MetricCard
           icon={TrendingUp}
           label={t("metrics.performance")}
-          value={typeof metrics.performance === "number" ? `${metrics.performance}%` : metrics.performance}
+          value={`${metrics.performance}%`}
           variant="default"
         />
       </Box>

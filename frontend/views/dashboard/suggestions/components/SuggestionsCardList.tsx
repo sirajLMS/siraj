@@ -2,25 +2,20 @@
 
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/components/ui";
-import type { SuggestionsAdminLabels } from "@/shared/messages/types/dashboard/suggestions/main";
-import type { AdminSuggestionRow, SuggestionStatus } from "../types/suggestions.types";
+import { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { mapStatusForBadge, statusLabelKey } from "../types/suggestions.types";
+import type { SuggestionsCardListProps } from "../types/suggestionsViewTypes";
 
-interface SuggestionsCardListProps {
-  readonly rows: readonly AdminSuggestionRow[];
-  readonly labels: SuggestionsAdminLabels;
-  readonly canManage: boolean;
-  readonly onMarkReviewed: (id: string) => void;
-}
-
-function mapStatusForBadge(status: SuggestionStatus): string {
-  if (status === "REVIEWED") {
-    return "paid";
-  }
-
-  return "pending";
-}
-
-export function SuggestionsCardList({ rows, labels, canManage, onMarkReviewed }: Readonly<SuggestionsCardListProps>) {
+export function SuggestionsCardList({
+  rows,
+  labels,
+  canManage,
+  canDelete,
+  onMarkReviewed,
+  onRespond,
+  onMarkDuplicate,
+  onDelete,
+}: Readonly<SuggestionsCardListProps>) {
   if (rows.length === 0) {
     return (
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, py: 4, textAlign: "center" })}>
@@ -32,8 +27,7 @@ export function SuggestionsCardList({ rows, labels, canManage, onMarkReviewed }:
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       {rows.map(row => {
-        const showAction = canManage && row.status === "PENDING";
-        const labelKey = row.status === "REVIEWED" ? "reviewed" : "pending";
+        const showActions = canManage && row.status === SuggestionStatus.Pending;
 
         return (
           <Paper
@@ -58,25 +52,73 @@ export function SuggestionsCardList({ rows, labels, canManage, onMarkReviewed }:
               <StatusBadge
                 category="invoice"
                 status={mapStatusForBadge(row.status)}
-                label={labels.statusLabels[labelKey]}
+                label={labels.statusLabels[statusLabelKey(row.status)]}
               />
             </Box>
             <Typography
               variant="bodyMd"
-              sx={theme => ({ color: theme.palette.text.secondary, mb: showAction ? 1.5 : 0 })}
+              sx={theme => ({ color: theme.palette.text.secondary, mb: showActions || canDelete ? 1.5 : 0 })}
             >
               {row.suggestionPreview}
             </Typography>
-            {showAction && (
+            {showActions && (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => {
+                    onMarkReviewed(row.id);
+                  }}
+                  sx={{ textTransform: "uppercase", fontWeight: 700 }}
+                >
+                  {labels.table.markReviewed}
+                </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => {
+                    onRespond(row.id);
+                  }}
+                  sx={{ textTransform: "uppercase", fontWeight: 700 }}
+                >
+                  {labels.table.respond}
+                </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => {
+                    onMarkDuplicate(row.id);
+                  }}
+                  sx={{ textTransform: "uppercase", fontWeight: 700 }}
+                >
+                  {labels.table.markDuplicate}
+                </Button>
+                {canDelete && (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    color="error"
+                    onClick={() => {
+                      onDelete(row.id);
+                    }}
+                    sx={{ textTransform: "uppercase", fontWeight: 700 }}
+                  >
+                    {labels.table.delete}
+                  </Button>
+                )}
+              </Box>
+            )}
+            {!showActions && canDelete && (
               <Button
                 fullWidth
                 variant="outlined"
+                color="error"
                 onClick={() => {
-                  onMarkReviewed(row.id);
+                  onDelete(row.id);
                 }}
                 sx={{ textTransform: "uppercase", fontWeight: 700 }}
               >
-                {labels.table.markReviewed}
+                {labels.table.delete}
               </Button>
             )}
           </Paper>

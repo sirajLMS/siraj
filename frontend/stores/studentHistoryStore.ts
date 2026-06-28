@@ -1,26 +1,6 @@
 import { create } from "zustand";
 
-export interface ClassSession {
-  readonly id: string;
-  readonly day: number;
-  readonly title: string;
-  readonly time: string;
-  readonly duration: string;
-  readonly status: "present" | "absent" | "late";
-  readonly instructor: string;
-  readonly timeSlot: string;
-  readonly room: string;
-  readonly notes: string;
-}
-
-export interface StudentHistoryMetrics {
-  readonly totalClasses: number;
-  readonly attendanceRate: number;
-  readonly hoursStudied: number;
-  readonly performance: string;
-}
-
-export interface StudentHistoryState {
+interface StudentHistoryState {
   readonly currentMonth: Date;
   readonly selectedDay: number | null;
   readonly selectedWeek: number;
@@ -30,15 +10,15 @@ export interface StudentHistoryState {
 }
 
 export const useStudentHistoryStore = create<StudentHistoryState>(set => ({
-  currentMonth: new Date(2024, 9, 1), // Oct 1, 2024
+  currentMonth: new Date(),
   selectedDay: null,
-  selectedWeek: 3,
+  selectedWeek: 1,
 
   setSelectedDay: day => {
     set({ selectedDay: day });
   },
   setCurrentMonth: date => {
-    set({ currentMonth: date });
+    set({ currentMonth: date, selectedDay: null, selectedWeek: 1 });
   },
   setSelectedWeek: week => {
     set({ selectedWeek: week });

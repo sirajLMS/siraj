@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
+import { Link } from "@/shared/i18n/routing";
 import type { MessageSchema } from "@/shared/messages/types/message";
 import { ContextualHelperCards } from "./components/ContextualHelperCards";
 import { CourseDetailsSection } from "./components/CourseDetailsSection";
@@ -23,9 +24,9 @@ import {
   type StudentQuotaFormData,
   type StudentQuotaFormInput,
 } from "./schemas/studentQuotaSchema";
-import type { StudentProfileData } from "./types";
+import type { FormActionsProps, MobileProfileHeaderProps, StudentQuotaViewProps } from "./types";
 
-function MobileProfileHeader({ studentData }: Readonly<{ studentData: StudentProfileData }>) {
+function MobileProfileHeader({ studentData, onEditAvatar }: Readonly<MobileProfileHeaderProps>) {
   const t = useTranslations("dashboard.studentQuota");
   return (
     <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", alignItems: "center", py: 4 }}>
@@ -41,6 +42,7 @@ function MobileProfileHeader({ studentData }: Readonly<{ studentData: StudentPro
           })}
         />
         <IconButton
+          onClick={onEditAvatar}
           sx={theme => ({
             position: "absolute",
             bottom: 0,
@@ -74,12 +76,18 @@ function DesktopBreadcrumbs() {
         color: theme.palette.onSurfaceVariant,
       })}
     >
-      <Typography
-        variant="labelMd"
-        sx={theme => ({ cursor: "pointer", "&:hover": { color: theme.palette.primary.main } })}
-      >
-        {t("breadcrumbs.students")}
-      </Typography>
+      <Link href="/students" style={{ textDecoration: "none" }}>
+        <Typography
+          variant="labelMd"
+          sx={theme => ({
+            cursor: "pointer",
+            "&:hover": { color: theme.palette.primary.main },
+            color: theme.palette.onSurfaceVariant,
+          })}
+        >
+          {t("breadcrumbs.students")}
+        </Typography>
+      </Link>
       <ChevronRight sx={{ fontSize: 14 }} />
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
         {t("breadcrumbs.editProfile")}
@@ -88,11 +96,7 @@ function DesktopBreadcrumbs() {
   );
 }
 
-function FormActions({
-  isSaving,
-  isSaved,
-  studentData,
-}: Readonly<{ isSaving: boolean; isSaved: boolean; studentData: StudentProfileData }>) {
+function FormActions({ isSaving, isSaved, studentData, onCancel }: Readonly<FormActionsProps>) {
   const t = useTranslations("dashboard.studentQuota");
 
   let saveIcon = <Save />;
@@ -147,6 +151,7 @@ function FormActions({
         </Button>
         <Button
           type="button"
+          onClick={onCancel}
           sx={theme => ({
             height: { xs: 48, md: 48 },
             px: { xs: 0, md: 4 },
@@ -181,20 +186,14 @@ function FormActions({
   );
 }
 
-interface StudentQuotaViewProps {
-  studentData: StudentProfileData | null;
-  isLoading: boolean;
-  isSaving: boolean;
-  isSaved: boolean;
-  onSave: (data: StudentQuotaFormData) => Promise<void>;
-}
-
 export function StudentQuotaView({
   studentData,
   isLoading,
   isSaving,
   isSaved,
   onSave,
+  onCancel,
+  onEditAvatar,
 }: Readonly<StudentQuotaViewProps>) {
   const validationMessages = useTranslations("dashboard.studentQuota.validation");
 
@@ -207,8 +206,8 @@ export function StudentQuotaView({
     defaultValues: {
       studentName: "",
       dateOfBirth: "",
-      language: "Arabic",
-      gender: "male",
+      language: "ar",
+      gender: "MALE",
       teacher: "",
       totalClasses: 0,
       classesLeft: 0,
@@ -245,7 +244,7 @@ export function StudentQuotaView({
 
   return (
     <PageContainer>
-      <MobileProfileHeader studentData={studentData} />
+      <MobileProfileHeader studentData={studentData} onEditAvatar={onEditAvatar} />
       <DesktopBreadcrumbs />
 
       <Box
@@ -275,7 +274,7 @@ export function StudentQuotaView({
           >
             <StudentInformationSection />
             <CourseDetailsSection />
-            <FormActions isSaving={isSaving} isSaved={isSaved} studentData={studentData} />
+            <FormActions isSaving={isSaving} isSaved={isSaved} studentData={studentData} onCancel={onCancel} />
           </Box>
         </FormProvider>
       </Box>

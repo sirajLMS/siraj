@@ -19,9 +19,12 @@ export const status: StudentStatusLabels = {
     quickReasons: "أسباب سريعة",
   },
   statusOptions: {
-    regular: "عادي / نشط",
-    suspended: "موقوف (مالي/تأديبي)",
-    onLeave: "في إجازة (طبية/مخطط لها)",
+    REGULAR: "عادي / نشط",
+    SUSPENDED: "موقوف (مالي/تأديبي)",
+    ON_LEAVE: "في إجازة (طبية/مخطط لها)",
+    ON_TRIAL: "تح التجربة",
+    DEACTIVATED: "معطّل",
+    GRADUATED: "متخرج",
   },
   reasons: {
     unpaidInvoice: "فاتورة غير مدفوعة",
@@ -41,6 +44,10 @@ export const status: StudentStatusLabels = {
     status: "الحالة",
     pendingHolds: "{count} تجميدات معلقة",
     footerInfo: "نهاية قائمة الحصص القادمة لـ {id}",
+    noUpcomingClasses: "لا توجد حصص قادمة",
+    frozen: "مجمّد",
+    active: "نشط",
+    minutesShort: "{minutes} د",
   },
   policies: {
     suspensionTitle: "الإيقاف",

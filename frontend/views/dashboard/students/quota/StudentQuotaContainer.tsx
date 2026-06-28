@@ -2,6 +2,8 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Typography } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
+import { formatDistanceToNow } from "date-fns";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -10,11 +12,13 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentByIdQueryDocument, updateStudentQuotaMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { StudentQuotaView } from "./StudentQuotaView";
 import type { StudentQuotaFormData } from "./schemas/studentQuotaSchema";
+import type { StudentProfileData } from "./types";
 
 export function StudentQuotaContainer() {
   const t = useTranslations("dashboard.studentQuota");
   const params = useParams();
   const studentId = typeof params?.id === "string" ? params.id : "";
+  const notifications = useNotifications();
 
   const [isSaved, setIsSaved] = useState(false);
 
@@ -26,10 +30,14 @@ export function StudentQuotaContainer() {
   const [updateQuota, { loading: saving }] = useMutation(updateStudentQuotaMutationDocument, {
     onCompleted: () => {
       setIsSaved(true);
+      notifications.show(t("actions.saveSuccess"), { severity: "success", autoHideDuration: 4000 });
       void refetch();
       setTimeout(() => {
         setIsSaved(false);
       }, 2000);
+    },
+    onError: mutationError => {
+      notifications.show(mutationError.message, { severity: "error", autoHideDuration: 5000 });
     },
   });
 
@@ -61,22 +69,31 @@ export function StudentQuotaContainer() {
   }
 
   const s = data?.studentById;
-  const studentData =
+  const studentData: StudentProfileData | null =
     s && typeof s.id === "string" && s.id.length > 0 && typeof s.name === "string" && s.name.length > 0
       ? {
           id: s.id,
           studentName: s.name,
           dateOfBirth: "",
-          language: s.language ?? "Arabic",
-          gender: (s.gender?.toLowerCase() ?? "male") as "male" | "female",
+          language: (s.language === "en" ? "en" : "ar") as "ar" | "en",
+          gender: (s.gender?.toUpperCase() === "FEMALE" ? "FEMALE" : "MALE") as "MALE" | "FEMALE",
           teacher: s.teacherName ?? "",
           totalClasses: s.classesTotal ?? 0,
           classesLeft: s.classesRemaining ?? 0,
           profileImage: "",
-          lastEditedBy: "admin",
-          lastEditedTime: "just now",
+          lastEditedBy: "system",
+          lastEditedTime: s.updatedAt ? formatDistanceToNow(new Date(s.updatedAt), { addSuffix: true }) : "",
+          primaryTeacherId: s.primaryTeacherId ?? null,
         }
       : null;
+
+  const handleCancel = () => {
+    window.history.back();
+  };
+
+  const handleEditAvatar = () => {
+    window.history.back();
+  };
 
   return (
     <RequirePermission permissions={[AppPermission.StudentEditQuota]}>
@@ -86,6 +103,8 @@ export function StudentQuotaContainer() {
         isSaving={saving}
         isSaved={isSaved}
         onSave={handleSave}
+        onCancel={handleCancel}
+        onEditAvatar={handleEditAvatar}
       />
     </RequirePermission>
   );

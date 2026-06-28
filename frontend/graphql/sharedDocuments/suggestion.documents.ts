@@ -17,6 +17,11 @@ export const adminSuggestionsQueryDocument: TypedDocumentNode<
         submitterName
         body
         status
+        adminResponse
+        duplicateOfId
+        duplicateOfBody
+        duplicateOfSubmitterName
+        responseCount
         emailSentAt
         createdAt
         parentName
@@ -25,9 +30,28 @@ export const adminSuggestionsQueryDocument: TypedDocumentNode<
         id
         pending
         reviewed
+        duplicate
         avgResponseTime
         totalCount
       }
+    }
+  }
+`;
+
+// ─── Query: searchSuggestions ──────────────────────────────────────────────
+
+export const searchSuggestionsQueryDocument: TypedDocumentNode<
+  Operations.SearchSuggestionsQuery,
+  Types.QuerySearchSuggestionsArgs
+> = gql`
+  query SearchSuggestions($query: String!, $excludeId: String!) {
+    searchSuggestions(query: $query, excludeId: $excludeId) {
+      id
+      submitterName
+      body
+      status
+      parentName
+      createdAt
     }
   }
 `;
@@ -59,5 +83,44 @@ export const markSuggestionReviewedMutationDocument: TypedDocumentNode<
       id
       emailSentAt
     }
+  }
+`;
+
+// ─── Mutation: respondToSuggestion ──────────────────────────────────────────
+
+export const respondToSuggestionMutationDocument: TypedDocumentNode<
+  Operations.RespondToSuggestionMutation,
+  Types.MutationRespondToSuggestionArgs
+> = gql`
+  mutation RespondToSuggestion($input: RespondToSuggestionInput!) {
+    respondToSuggestion(input: $input) {
+      id
+      adminResponse
+    }
+  }
+`;
+
+// ─── Mutation: markSuggestionDuplicate ──────────────────────────────────────
+
+export const markSuggestionDuplicateMutationDocument: TypedDocumentNode<
+  Operations.MarkSuggestionDuplicateMutation,
+  Types.MutationMarkSuggestionDuplicateArgs
+> = gql`
+  mutation MarkSuggestionDuplicate($input: MarkSuggestionDuplicateInput!) {
+    markSuggestionDuplicate(input: $input) {
+      id
+      duplicateOfId
+    }
+  }
+`;
+
+// ─── Mutation: deleteSuggestion ─────────────────────────────────────────────
+
+export const deleteSuggestionMutationDocument: TypedDocumentNode<
+  Operations.DeleteSuggestionMutation,
+  Types.MutationDeleteSuggestionArgs
+> = gql`
+  mutation DeleteSuggestion($suggestionId: String!) {
+    deleteSuggestion(suggestionId: $suggestionId)
   }
 `;

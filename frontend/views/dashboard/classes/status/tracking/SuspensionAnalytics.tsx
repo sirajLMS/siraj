@@ -4,24 +4,8 @@ import { OpenInNewOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { SuspensionAnalyticsChart } from "./SuspensionAnalyticsChart";
+import type { SuspensionAnalyticsProps } from "./types";
 
-export interface SuspensionAnalyticsLabels {
-  readonly suspensionAnalytics: string;
-  readonly analyticsNote: string;
-  readonly urgentTask: string;
-  readonly accountsLocked: string;
-  readonly auditDescription: string;
-  readonly openAuditLogs: string;
-  readonly suspended: string;
-  readonly days: readonly string[];
-}
-
-export interface SuspensionAnalyticsProps {
-  readonly suspendedCount: number;
-  readonly labels: SuspensionAnalyticsLabels;
-}
-
-// Primary-dark flex column container used for the urgent CTA card
 const StyledCtaContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   borderRadius: 3,
@@ -34,7 +18,6 @@ const StyledCtaContainer = styled(Box)(({ theme }) => ({
   minHeight: 220,
 }));
 
-// Decorative top-right blurred blob in the CTA background
 const StyledTopRightBlob = styled(Box)(({ theme }) => ({
   position: "absolute",
   top: "-20%",
@@ -47,7 +30,6 @@ const StyledTopRightBlob = styled(Box)(({ theme }) => ({
   pointerEvents: "none",
 }));
 
-// Decorative bottom-left blurred blob in the CTA background
 const StyledBottomLeftBlob = styled(Box)(({ theme }) => ({
   position: "absolute",
   bottom: "-10%",
@@ -60,7 +42,6 @@ const StyledBottomLeftBlob = styled(Box)(({ theme }) => ({
   pointerEvents: "none",
 }));
 
-// Translucent primaryContainer pill marking the urgent-task header inside the CTA
 const StyledUrgentTaskBadge = styled(Box)(({ theme }) => ({
   display: "inline-flex",
   alignItems: "center",
@@ -71,20 +52,17 @@ const StyledUrgentTaskBadge = styled(Box)(({ theme }) => ({
   borderRadius: 10,
 }));
 
-// Warning-colored icon leading the urgent-task badge
 const StyledUrgentTaskIcon = styled(WarningAmberOutlined)(({ theme }) => ({
   fontSize: 14,
   color: theme.palette.warning.main,
 }));
 
-// OnPrimary caption text inside the urgent-task badge
 const StyledUrgentTaskText = styled(Typography)(({ theme }) => ({
   fontSize: "11px",
   fontWeight: 600,
   color: theme.palette.onPrimary,
 }));
 
-// Hanken Grotesk headline inside the CTA announcing the account-lock count
 const StyledCtaHeadline = styled(Typography)(({ theme }) => ({
   fontFamily: '"Hanken Grotesk", sans-serif',
   fontSize: "24px",
@@ -93,14 +71,12 @@ const StyledCtaHeadline = styled(Typography)(({ theme }) => ({
   lineHeight: 1.2,
 }));
 
-// OnPrimary body caption describing the audit action beneath the headline
 const StyledCtaDescription = styled(Typography)(({ theme }) => ({
   fontSize: "14px",
   color: theme.palette.onPrimary,
   opacity: 0.8,
 }));
 
-// Primary-colored contained button that opens the audit logs
 const StyledOpenAuditLogsButton = styled(Button)(({ theme }) => ({
   position: "relative",
   zIndex: 1,
@@ -119,14 +95,12 @@ const StyledOpenAuditLogsButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const Cta = ({ labels, suspendedCount }: SuspensionAnalyticsProps) => {
+const Cta = ({ labels, suspendedCount, onOpenAuditLogs }: SuspensionAnalyticsProps) => {
   return (
     <StyledCtaContainer>
-      {/* Background blobs */}
       <StyledTopRightBlob />
       <StyledBottomLeftBlob />
 
-      {/* Content */}
       <Box sx={{ position: "relative", zIndex: 1 }}>
         <StyledUrgentTaskBadge sx={{ mb: 2 }}>
           <StyledUrgentTaskIcon />
@@ -144,6 +118,7 @@ const Cta = ({ labels, suspendedCount }: SuspensionAnalyticsProps) => {
         id="open-audit-logs-btn"
         variant="contained"
         startIcon={<OpenInNewOutlined sx={{ fontSize: 18 }} />}
+        onClick={onOpenAuditLogs}
       >
         {labels.openAuditLogs}
       </StyledOpenAuditLogsButton>
@@ -151,7 +126,7 @@ const Cta = ({ labels, suspendedCount }: SuspensionAnalyticsProps) => {
   );
 };
 
-export function SuspensionAnalytics({ labels, suspendedCount }: SuspensionAnalyticsProps) {
+export function SuspensionAnalytics({ labels, suspendedCount, onOpenAuditLogs }: SuspensionAnalyticsProps) {
   return (
     <Box
       sx={{
@@ -163,8 +138,7 @@ export function SuspensionAnalytics({ labels, suspendedCount }: SuspensionAnalyt
     >
       <SuspensionAnalyticsChart labels={labels} />
 
-      {/* Urgent CTA card */}
-      <Cta labels={labels} suspendedCount={suspendedCount} />
+      <Cta labels={labels} suspendedCount={suspendedCount} onOpenAuditLogs={onOpenAuditLogs} />
     </Box>
   );
 }

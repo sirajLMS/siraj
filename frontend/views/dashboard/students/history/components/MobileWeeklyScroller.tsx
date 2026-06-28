@@ -1,22 +1,79 @@
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
+import type { ClassSession, MobileWeeklyScrollerProps } from "../types";
+import { AttendanceStatus } from "../types";
 
-interface MobileWeeklyScrollerProps {
-  selectedWeek: number;
-  onSelectWeek: (week: number) => void;
+interface WeekDayData {
+  dayKey: string;
+  dayOfMonth: number;
+  displayDate: number;
+  hasSession: boolean;
+  isInMonth: boolean;
+  status: AttendanceStatus | null;
 }
 
-export function MobileWeeklyScroller({ selectedWeek, onSelectWeek }: Readonly<MobileWeeklyScrollerProps>) {
+function computeWeekDays(
+  currentMonth: Date,
+  selectedWeek: number,
+  classes: Readonly<Partial<Record<number, ClassSession>>>
+): WeekDayData[] {
+  const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
+  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+
+  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+
+  const weekStartDay = (selectedWeek - 1) * 7 + 1 - firstDayOfMonth;
+
+  const result: WeekDayData[] = [];
+  const weekDayIndices = [1, 2, 3, 4, 5, 6, 0];
+
+  for (let i = 0; i < 7; i++) {
+    const dayAbs = weekStartDay + i;
+    if (dayAbs < 1 || dayAbs > daysInMonth) {
+      const displayDate =
+        dayAbs < 1
+          ? new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0).getDate() + dayAbs
+          : dayAbs - daysInMonth;
+      result.push({
+        dayKey: dayKeys[weekDayIndices[i]],
+        dayOfMonth: -1,
+        displayDate,
+        hasSession: false,
+        isInMonth: false,
+        status: null,
+      });
+      continue;
+    }
+
+    const session = classes[dayAbs];
+    result.push({
+      dayKey: dayKeys[weekDayIndices[i]],
+      dayOfMonth: dayAbs,
+      displayDate: dayAbs,
+      hasSession: !!session,
+      isInMonth: true,
+      status: session?.status ?? null,
+    });
+  }
+
+  return result;
+}
+
+export function MobileWeeklyScroller({
+  selectedWeek,
+  selectedDay,
+  currentMonth,
+  classes,
+  onSelectWeek,
+  onSelectDay,
+}: Readonly<MobileWeeklyScrollerProps>) {
   const t = useTranslations("dashboard.studentHistory.calendar");
 
-  const days = [
-    { day: "mon", date: 14, hasClass: true, status: "present" },
-    { day: "tue", date: 15, hasClass: true, status: "active" }, // Currently selected
-    { day: "wed", date: 16, hasClass: true, status: "present" },
-    { day: "thu", date: 17, hasClass: true, status: "present" },
-    { day: "fri", date: 18, hasClass: true, status: "absent" },
-    { day: "sat", date: 19, hasClass: false, status: "none" },
-  ];
+  const weekDays = useMemo(
+    () => computeWeekDays(currentMonth, selectedWeek, classes),
+    [currentMonth, selectedWeek, classes]
+  );
 
   return (
     <Box
@@ -50,12 +107,22 @@ export function MobileWeeklyScroller({ selectedWeek, onSelectWeek }: Readonly<Mo
           "&::-webkit-scrollbar": { display: "none" },
         }}
       >
-        {days.map(d => {
-          const isSelected = d.date === 15; // Hardcoded for this mockup
+        {weekDays.map(d => {
+          const isSelected = d.isInMonth && d.dayOfMonth === selectedDay && d.hasSession;
+
+          let dotColor: string | ((theme: import("@mui/material/styles").Theme) => string) = theme =>
+            theme.palette.primary.main;
+          if (isSelected) {
+            dotColor = theme => theme.palette.onPrimaryContainer;
+          } else if (d.status === AttendanceStatus.ABSENT) {
+            dotColor = theme => theme.palette.error.main;
+          } else if (d.status === AttendanceStatus.LATE) {
+            dotColor = theme => theme.palette.warning.main;
+          }
 
           return (
             <Box
-              key={d.day}
+              key={d.dayKey}
               sx={theme => ({
                 display: "flex",
                 flexDirection: "column",
@@ -70,10 +137,13 @@ export function MobileWeeklyScroller({ selectedWeek, onSelectWeek }: Readonly<Mo
                 "&:hover": {
                   backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow,
                 },
-                opacity: d.hasClass ? 1 : 0.4,
-                cursor: "pointer",
+                opacity: d.hasSession ? 1 : 0.4,
+                cursor: d.isInMonth ? "pointer" : "default",
               })}
               onClick={() => {
+                if (d.isInMonth && d.hasSession) {
+                  onSelectDay(d.dayOfMonth);
+                }
                 onSelectWeek(selectedWeek);
               }}
             >
@@ -81,24 +151,18 @@ export function MobileWeeklyScroller({ selectedWeek, onSelectWeek }: Readonly<Mo
                 variant="labelMd"
                 sx={theme => ({ color: isSelected ? "inherit" : theme.palette.onSurfaceVariant, mb: 0.5 })}
               >
-                {t(`days.${d.day}`)}
+                {t(`days.${d.dayKey}`)}
               </Typography>
-              <Typography variant="titleLg">{d.date}</Typography>
-              {d.hasClass && (
+              <Typography variant="titleLg">{d.displayDate}</Typography>
+              {d.hasSession && (
                 <Box
-                  sx={theme => {
-                    let dotColor = theme.palette.primary.main;
-                    if (isSelected) dotColor = theme.palette.onPrimaryContainer;
-                    else if (d.status === "absent") dotColor = theme.palette.error.main;
-
-                    return {
-                      width: 6,
-                      height: 6,
-                      borderRadius: "full",
-                      backgroundColor: dotColor,
-                      mt: 0.5,
-                    };
-                  }}
+                  sx={theme => ({
+                    width: 6,
+                    height: 6,
+                    borderRadius: "full",
+                    backgroundColor: typeof dotColor === "function" ? dotColor(theme) : dotColor,
+                    mt: 0.5,
+                  })}
                 />
               )}
             </Box>

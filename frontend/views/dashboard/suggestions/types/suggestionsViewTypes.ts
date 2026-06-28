@@ -1,8 +1,9 @@
-import type { SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
+import type { GridColDef } from "@mui/x-data-grid";
+import type { SuggestionsAdminLabels, SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 import type { SuggestionFormData } from "../schemas/suggestionFormSchema";
 import type { AdminSuggestionRow, AdminSuggestionsSummary, SuggestionStatus } from "./suggestions.types";
 
-export type { SuggestionsLabels };
+export type { SuggestionsAdminLabels, SuggestionsLabels };
 
 export interface ParentSuggestionsViewProps {
   readonly labels: SuggestionsLabels["parent"];
@@ -14,13 +15,94 @@ export interface ParentSuggestionsViewProps {
 }
 
 export interface AdminSuggestionsViewProps {
-  readonly labels: SuggestionsLabels["admin"];
+  readonly labels: SuggestionsAdminLabels;
   readonly summary: AdminSuggestionsSummary;
   readonly rows: readonly AdminSuggestionRow[];
   readonly searchQuery: string;
   readonly activeTab: SuggestionStatus;
   readonly canManage: boolean;
+  readonly canDelete: boolean;
   readonly onSearchChange: (query: string) => void;
   readonly onTabChange: (tab: SuggestionStatus) => void;
   readonly onMarkReviewed: (id: string) => void;
+  readonly onRespond: (id: string) => void;
+  readonly onMarkDuplicate: (id: string) => void;
+  readonly onDelete: (id: string) => void;
+}
+
+export interface SuggestionsDataGridProps {
+  readonly rows: readonly AdminSuggestionRow[];
+  readonly labels: SuggestionsAdminLabels;
+  readonly canManage: boolean;
+  readonly canDelete: boolean;
+  readonly onMarkReviewed: (id: string) => void;
+  readonly onRespond: (id: string) => void;
+  readonly onMarkDuplicate: (id: string) => void;
+  readonly onDelete: (id: string) => void;
+  readonly columns?: readonly GridColDef<AdminSuggestionRow>[];
+}
+
+export interface SuggestionsCardListProps {
+  readonly rows: readonly AdminSuggestionRow[];
+  readonly labels: SuggestionsAdminLabels;
+  readonly canManage: boolean;
+  readonly canDelete: boolean;
+  readonly onMarkReviewed: (id: string) => void;
+  readonly onRespond: (id: string) => void;
+  readonly onMarkDuplicate: (id: string) => void;
+  readonly onDelete: (id: string) => void;
+}
+
+export interface SuggestionsMetricsRowProps {
+  readonly summary: AdminSuggestionsSummary;
+  readonly labels: SuggestionsAdminLabels;
+  readonly compact?: boolean;
+}
+
+export interface SuggestionsTabBarProps {
+  readonly activeTab: SuggestionStatus;
+  readonly pendingCount: number;
+  readonly reviewedCount: number;
+  readonly duplicateCount: number;
+  readonly labels: SuggestionsAdminLabels;
+  readonly onTabChange: (tab: SuggestionStatus) => void;
+}
+
+export interface SuggestionsSearchBarProps {
+  readonly value: string;
+  readonly placeholder: string;
+  readonly onChange: (value: string) => void;
+}
+
+export interface SuggestionRespondDialogLabels {
+  readonly respondTitle: string;
+  readonly respondPlaceholder: string;
+  readonly respondAction: string;
+  readonly cancel: string;
+}
+
+export interface SuggestionRespondDialogProps {
+  readonly open: boolean;
+  readonly suggestionId: string;
+  readonly isLoading: boolean;
+  readonly labels: SuggestionRespondDialogLabels;
+  readonly onConfirm: (suggestionId: string, adminResponse: string) => void;
+  readonly onCancel: () => void;
+}
+
+export interface SuggestionDuplicateDialogLabels {
+  readonly duplicateTitle: string;
+  readonly duplicateSearchPlaceholder: string;
+  readonly duplicateAction: string;
+  readonly duplicateNoneFound: string;
+  readonly cancel: string;
+}
+
+export interface SuggestionMarkDuplicateDialogProps {
+  readonly open: boolean;
+  readonly suggestionId: string;
+  readonly isLoading: boolean;
+  readonly labels: SuggestionDuplicateDialogLabels;
+  readonly onConfirm: (suggestionId: string, duplicateOfId: string) => void;
+  readonly onCancel: () => void;
 }

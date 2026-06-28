@@ -1,5 +1,6 @@
 import {
   CalendarToday,
+  ChevronLeft,
   ChevronRight,
   PictureAsPdf,
   School,
@@ -7,21 +8,43 @@ import {
   TrendingUp,
   VerifiedUser,
 } from "@mui/icons-material";
-import { Box, type Theme, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ClassSession, StudentHistoryMetrics } from "../types";
+import { useMemo } from "react";
+import type { ClassSession, MobileMetricProps, StudentHistoryMobileProps } from "../types";
+import { AttendanceStatus } from "../types";
 import { ClassSessionList } from "./ClassSessionList";
 import { MobileWeeklyScroller } from "./MobileWeeklyScroller";
 import { PerformanceStreak } from "./PerformanceStreak";
 
-interface StudentHistoryMobileProps {
-  studentName: string;
-  currentMonth: Date;
-  metrics: StudentHistoryMetrics;
-  classes: Readonly<Partial<Record<number, ClassSession>>>;
-  selectedWeek: number;
-  onSelectWeek: (week: number) => void;
-  onChangeMonth?: () => void;
+function deriveStreakDays(
+  classes: Readonly<Partial<Record<number, ClassSession>>>,
+  currentMonth: Date,
+  selectedWeek: number
+): number[] {
+  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+  const weekStartDay = (selectedWeek - 1) * 7 + 1 - firstDayOfMonth;
+
+  const result: number[] = [];
+  for (let i = 0; i < 7; i++) {
+    const day = weekStartDay + i;
+    if (day < 1 || day > daysInMonth) {
+      result.push(0);
+      continue;
+    }
+    const session = classes[day];
+    if (!session) {
+      result.push(0);
+    } else if (session.status === AttendanceStatus.ABSENT) {
+      result.push(0);
+    } else if (session.status === AttendanceStatus.LATE) {
+      result.push(24);
+    } else {
+      result.push(48);
+    }
+  }
+  return result;
 }
 
 export function StudentHistoryMobile({
@@ -30,20 +53,27 @@ export function StudentHistoryMobile({
   metrics,
   classes,
   selectedWeek,
+  selectedDay,
   onSelectWeek,
-  onChangeMonth,
+  onSelectDay,
+  onPrevMonth,
+  onNextMonth,
+  onPrint,
 }: Readonly<StudentHistoryMobileProps>) {
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" });
 
-  // Get first class in selected month, or day 15 as fallback
-  const fallbackDay = 15;
-  const activeDay =
-    Object.keys(classes)
-      .map(Number)
-      .find(d => classes[d]) ?? fallbackDay;
-  const activeClass = classes[activeDay];
-  const activeClassList = activeClass ? [activeClass] : [];
-  const dateStr = `Day ${activeDay} of ${monthStr}`;
+  const selectedDaySessions: ClassSession[] = useMemo(() => {
+    if (selectedDay === null) return [];
+    const session = classes[selectedDay];
+    return session ? [session] : [];
+  }, [selectedDay, classes]);
+
+  const dateStr = selectedDay !== null ? `Day ${selectedDay} of ${monthStr}` : `${monthStr}`;
+
+  const streakDays = useMemo(
+    () => deriveStreakDays(classes, currentMonth, selectedWeek),
+    [classes, currentMonth, selectedWeek]
+  );
 
   return (
     <Box sx={{ display: { xs: "block", md: "none" } }}>
@@ -51,11 +81,23 @@ export function StudentHistoryMobile({
 
       <HistoryMobileMetricsGrid metrics={metrics} />
 
-      <HistoryMobileActions currentMonth={currentMonth} onChangeMonth={onChangeMonth} />
+      <HistoryMobileActions
+        currentMonth={currentMonth}
+        onPrevMonth={onPrevMonth}
+        onNextMonth={onNextMonth}
+        onPrint={onPrint}
+      />
 
-      <MobileWeeklyScroller selectedWeek={selectedWeek} onSelectWeek={onSelectWeek} />
-      <ClassSessionList dateStr={dateStr} sessions={activeClassList} />
-      <PerformanceStreak />
+      <MobileWeeklyScroller
+        selectedWeek={selectedWeek}
+        selectedDay={selectedDay}
+        currentMonth={currentMonth}
+        classes={classes}
+        onSelectWeek={onSelectWeek}
+        onSelectDay={onSelectDay}
+      />
+      <ClassSessionList dateStr={dateStr} sessions={selectedDaySessions} />
+      <PerformanceStreak streakDays={streakDays} />
     </Box>
   );
 }
@@ -101,7 +143,9 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
   );
 }
 
-function HistoryMobileMetricsGrid({ metrics }: Readonly<{ metrics: StudentHistoryMetrics }>) {
+function HistoryMobileMetricsGrid({
+  metrics,
+}: Readonly<{ metrics: { totalClasses: number; attendanceRate: number; hoursStudied: number; performance: number } }>) {
   const t = useTranslations("dashboard.studentHistory");
   return (
     <Box
@@ -161,7 +205,7 @@ function HistoryMobileMetricsGrid({ metrics }: Readonly<{ metrics: StudentHistor
             })}
           />
         }
-        value={typeof metrics.performance === "number" ? `${metrics.performance}%` : metrics.performance}
+        value={`${metrics.performance}%`}
         bg={theme => theme.palette.errorContainer}
       />
     </Box>
@@ -170,10 +214,14 @@ function HistoryMobileMetricsGrid({ metrics }: Readonly<{ metrics: StudentHistor
 
 function HistoryMobileActions({
   currentMonth,
-  onChangeMonth,
+  onPrevMonth,
+  onNextMonth,
+  onPrint,
 }: Readonly<{
   currentMonth: Date;
-  onChangeMonth?: () => void;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+  onPrint: () => void;
 }>) {
   const monthStr = currentMonth.toLocaleString("en-US", { month: "long" }).toUpperCase();
   const yearStr = currentMonth.getFullYear();
@@ -187,29 +235,52 @@ function HistoryMobileActions({
         mb: 2,
       }}
     >
-      <Box
-        component="button"
-        onClick={onChangeMonth}
-        sx={theme => ({
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          backgroundColor: theme.palette.primary.main,
-          px: 2,
-          py: 1,
-          borderRadius: 2,
-          color: theme.palette.onPrimary,
-          border: "none",
-          cursor: "pointer",
-          "&:active": { transform: "scale(0.95)" },
-          transition: "transform 0.2s",
-        })}
-      >
-        <CalendarToday sx={{ fontSize: 18 }} />
-        <Typography variant="buttonText">{`${monthStr} ${yearStr}`}</Typography>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <IconButton
+          onClick={onPrevMonth}
+          size="small"
+          sx={theme => ({
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.onPrimary,
+            borderRadius: 2,
+            transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+            "&:hover": { backgroundColor: theme.palette.primary.dark },
+          })}
+        >
+          <ChevronLeft sx={{ fontSize: 18 }} />
+        </IconButton>
+        <Box
+          sx={theme => ({
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            backgroundColor: theme.palette.primary.main,
+            px: 2,
+            py: 1,
+            borderRadius: 2,
+            color: theme.palette.onPrimary,
+          })}
+        >
+          <CalendarToday sx={{ fontSize: 18 }} />
+          <Typography variant="buttonText">{`${monthStr} ${yearStr}`}</Typography>
+        </Box>
+        <IconButton
+          onClick={onNextMonth}
+          size="small"
+          sx={theme => ({
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.onPrimary,
+            borderRadius: 2,
+            transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+            "&:hover": { backgroundColor: theme.palette.primary.dark },
+          })}
+        >
+          <ChevronRight sx={{ fontSize: 18 }} />
+        </IconButton>
       </Box>
       <Box
         component="button"
+        onClick={onPrint}
         sx={theme => ({
           width: 40,
           height: 40,
@@ -230,17 +301,7 @@ function HistoryMobileActions({
   );
 }
 
-function MobileMetric({
-  title,
-  icon,
-  value,
-  bg,
-}: Readonly<{
-  title: string;
-  icon: React.ReactNode;
-  value: React.ReactNode;
-  bg: string | ((theme: Theme) => string);
-}>) {
+function MobileMetric({ title, icon, value, bg }: Readonly<MobileMetricProps>) {
   return (
     <Box
       sx={theme => ({

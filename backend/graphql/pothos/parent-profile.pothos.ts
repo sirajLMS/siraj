@@ -74,6 +74,7 @@ export const AssociatedStudentPothosObject = AssociatedStudentRef.implement({
     classesTotal: t.exposeInt("classesTotal"),
     language: t.exposeString("language", { nullable: true }),
     gender: t.exposeString("gender", { nullable: true }),
+    version: t.exposeInt("version"),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
   }),
 });

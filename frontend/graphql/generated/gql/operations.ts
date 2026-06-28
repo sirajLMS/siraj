@@ -137,10 +137,6 @@ export type AvailabilitySearchInput = {
   toTime: string;
 };
 
-export type AvailabilityStatus =
-  | 'AVAILABLE'
-  | 'OUT_OF_STOCK';
-
 export type BillingMonthInput = {
   month: number;
   year: number;
@@ -513,6 +509,12 @@ export type ManagerOnboardingInput = {
   skypeId: string | null | undefined;
 };
 
+/** Input for marking a suggestion as a duplicate of another suggestion. */
+export type MarkSuggestionDuplicateInput = {
+  duplicateOfId: string;
+  suggestionId: string;
+};
+
 export type OrderSortDirection =
   | 'ASC'
   | 'DESC';
@@ -592,6 +594,12 @@ export type RespondToComplaintInput = {
   body: string;
   complaintId: string;
   emailSent: boolean;
+};
+
+/** Input for responding to a suggestion with an admin response. */
+export type RespondToSuggestionInput = {
+  adminResponse: string;
+  suggestionId: string;
 };
 
 export type RevokePermissionGroupFromUserInput = {
@@ -945,16 +953,6 @@ export type SendPaymentReminderMutationVariables = Exact<{
 
 
 export type SendPaymentReminderMutation = SendPaymentReminderMutation_Mutation;
-
-export type BooksAndBagsQueryQuery_booksAndBags_Book = { id: string | null, name: string | null, availabilityStatus: Types.AvailabilityStatus | null };
-
-export type BooksAndBagsQueryQuery_Query = { booksAndBags: Array<BooksAndBagsQueryQuery_booksAndBags_Book> | null };
-
-
-export type BooksAndBagsQueryQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type BooksAndBagsQueryQuery = BooksAndBagsQueryQuery_Query;
 
 export type DeleteBookMutationMutation_Mutation = { deleteBook: boolean | null };
 
@@ -1986,6 +1984,20 @@ export type ChangeStudentStatusMutationVariables = Exact<{
 
 export type ChangeStudentStatusMutation = ChangeStudentStatusMutation_Mutation;
 
+export type StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass = { id: string | null, instructor: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: string | null, isFrozen: boolean | null };
+
+export type StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult = { id: string | null, studentId: string | null, studentName: string | null, status: string | null, classes: Array<StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult_classes_StudentUpcomingClass> | null };
+
+export type StudentUpcomingClassesQuery_Query = { studentUpcomingClasses: StudentUpcomingClassesQuery_studentUpcomingClasses_StudentUpcomingClassesResult | null };
+
+
+export type StudentUpcomingClassesQueryVariables = Exact<{
+  studentId: string;
+}>;
+
+
+export type StudentUpcomingClassesQuery = StudentUpcomingClassesQuery_Query;
+
 export type StudentsQuery_students_StudentsWithFiltersResponse_data_Student = { id: string, name: string };
 
 export type StudentsQuery_students_StudentsWithFiltersResponse_pageInfo_PageInfo = { total: number };
@@ -2004,7 +2016,7 @@ export type StudentsQueryVariables = Exact<{
 
 export type StudentsQuery = StudentsQuery_Query;
 
-export type StudentByIdQuery_studentById_AssociatedStudent = { id: string | null, name: string | null, status: string | null, primaryTeacherId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, updatedAt: string | null };
+export type StudentByIdQuery_studentById_AssociatedStudent = { id: string | null, name: string | null, status: string | null, primaryTeacherId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, version: number | null, updatedAt: string | null };
 
 export type StudentByIdQuery_Query = { studentById: StudentByIdQuery_studentById_AssociatedStudent | null };
 
@@ -2016,9 +2028,9 @@ export type StudentByIdQueryVariables = Exact<{
 
 export type StudentByIdQuery = StudentByIdQuery_Query;
 
-export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion = { id: string | null, parentId: string | null, submitterName: string | null, body: string | null, status: Types.SuggestionStatus | null, emailSentAt: string | null, createdAt: string | null, parentName: string | null };
+export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion = { id: string | null, parentId: string | null, submitterName: string | null, body: string | null, status: Types.SuggestionStatus | null, adminResponse: string | null, duplicateOfId: string | null, duplicateOfBody: string | null, duplicateOfSubmitterName: string | null, responseCount: number | null, emailSentAt: string | null, createdAt: string | null, parentName: string | null };
 
-export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_metrics_SuggestionMetrics = { id: string | null, pending: number | null, reviewed: number | null, avgResponseTime: string | null, totalCount: number | null };
+export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_metrics_SuggestionMetrics = { id: string | null, pending: number | null, reviewed: number | null, duplicate: number | null, avgResponseTime: string | null, totalCount: number | null };
 
 export type AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult = { id: string | null, rows: Array<AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_rows_Suggestion> | null, metrics: AdminSuggestionsQuery_adminSuggestions_AdminSuggestionResult_metrics_SuggestionMetrics | null };
 
@@ -2031,6 +2043,19 @@ export type AdminSuggestionsQueryVariables = Exact<{
 
 
 export type AdminSuggestionsQuery = AdminSuggestionsQuery_Query;
+
+export type SearchSuggestionsQuery_searchSuggestions_SuggestionSearchResult = { id: string | null, submitterName: string | null, body: string | null, status: Types.SuggestionStatus | null, parentName: string | null, createdAt: string | null };
+
+export type SearchSuggestionsQuery_Query = { searchSuggestions: Array<SearchSuggestionsQuery_searchSuggestions_SuggestionSearchResult> | null };
+
+
+export type SearchSuggestionsQueryVariables = Exact<{
+  query: string;
+  excludeId: string;
+}>;
+
+
+export type SearchSuggestionsQuery = SearchSuggestionsQuery_Query;
 
 export type SubmitSuggestionMutation_submitSuggestion_Suggestion = { id: string | null, submitterName: string | null, body: string | null, createdAt: string | null };
 
@@ -2055,6 +2080,40 @@ export type MarkSuggestionReviewedMutationVariables = Exact<{
 
 
 export type MarkSuggestionReviewedMutation = MarkSuggestionReviewedMutation_Mutation;
+
+export type RespondToSuggestionMutation_respondToSuggestion_Suggestion = { id: string | null, adminResponse: string | null };
+
+export type RespondToSuggestionMutation_Mutation = { respondToSuggestion: RespondToSuggestionMutation_respondToSuggestion_Suggestion | null };
+
+
+export type RespondToSuggestionMutationVariables = Exact<{
+  input: Types.RespondToSuggestionInput;
+}>;
+
+
+export type RespondToSuggestionMutation = RespondToSuggestionMutation_Mutation;
+
+export type MarkSuggestionDuplicateMutation_markSuggestionDuplicate_Suggestion = { id: string | null, duplicateOfId: string | null };
+
+export type MarkSuggestionDuplicateMutation_Mutation = { markSuggestionDuplicate: MarkSuggestionDuplicateMutation_markSuggestionDuplicate_Suggestion | null };
+
+
+export type MarkSuggestionDuplicateMutationVariables = Exact<{
+  input: Types.MarkSuggestionDuplicateInput;
+}>;
+
+
+export type MarkSuggestionDuplicateMutation = MarkSuggestionDuplicateMutation_Mutation;
+
+export type DeleteSuggestionMutation_Mutation = { deleteSuggestion: boolean | null };
+
+
+export type DeleteSuggestionMutationVariables = Exact<{
+  suggestionId: string;
+}>;
+
+
+export type DeleteSuggestionMutation = DeleteSuggestionMutation_Mutation;
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics = { total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 

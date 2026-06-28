@@ -193,6 +193,7 @@ export type AssociatedStudent = {
   status: Maybe<Scalars['String']['output']>;
   teacherName: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
+  version: Maybe<Scalars['Int']['output']>;
 };
 
 /** Filters applied to the dynamic attendance query engine. */
@@ -266,6 +267,7 @@ export type BillingMonthInput = {
 export type Book = {
   __typename?: 'Book';
   availabilityStatus: Maybe<AvailabilityStatus>;
+  createdAt: Maybe<Scalars['DateTime']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
 };
@@ -1215,7 +1217,7 @@ export type Mutation = {
   createTestEntities: Maybe<TestEntities>;
   createTestGroupClass: Maybe<TestGroupClass>;
   deactivateParent: Maybe<DeactivateParentResult>;
-  /** Permanently deletes a book from the database. */
+  /** Soft-deletes a book by marking it as deleted. */
   deleteBook: Maybe<Scalars['Boolean']['output']>;
   deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
   /** Soft-deletes a complaint (admin only). Returns true on success. */
@@ -2014,6 +2016,7 @@ export type Query = {
   studentCreditStatus: Maybe<Array<StudentCreditRow>>;
   /** Fetches the global student directory with cross-relational data. */
   studentDirectory: Maybe<Array<StudentDirectoryRow>>;
+  studentUpcomingClasses: Maybe<StudentUpcomingClassesResult>;
   students: StudentsWithFiltersResponse;
   teacherActiveDashboard: Maybe<TeacherDashboard>;
   teacherDashboard: Maybe<TeacherDashboard>;
@@ -2257,6 +2260,11 @@ export type QueryStudentDirectoryArgs = {
   filterArgs: InputMaybe<StudentFilterArgs>;
   orderBy: InputMaybe<Array<StudentsOrderByClause>>;
   paginationArgs: InputMaybe<PaginationArgs>;
+};
+
+
+export type QueryStudentUpcomingClassesArgs = {
+  studentId: Scalars['String']['input'];
 };
 
 
@@ -2650,6 +2658,26 @@ export enum StudentStatus {
   Regular = 'REGULAR',
   Suspended = 'SUSPENDED'
 }
+
+export type StudentUpcomingClass = {
+  __typename?: 'StudentUpcomingClass';
+  durationMinutes: Maybe<Scalars['Int']['output']>;
+  executionState: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  instructor: Maybe<Scalars['String']['output']>;
+  isFrozen: Maybe<Scalars['Boolean']['output']>;
+  scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
+  scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type StudentUpcomingClassesResult = {
+  __typename?: 'StudentUpcomingClassesResult';
+  classes: Maybe<Array<StudentUpcomingClass>>;
+  id: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+};
 
 export type StudentsOrderByClause = {
   column: StudentsOrderByColumn;

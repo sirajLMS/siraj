@@ -15,8 +15,8 @@ import { format, isValid, parse } from "date-fns";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { AppDatePicker } from "@/frontend/components/ui/form";
-
 import type { StudentQuotaFormData } from "../schemas/studentQuotaSchema";
+import { GENDER_OPTIONS, LANGUAGE_OPTIONS } from "../types";
 import { QuotaFormField } from "./QuotaFormField";
 import { quotaInputSx } from "./quotaFieldStyles";
 import { SectionHeader } from "./SectionHeader";
@@ -104,11 +104,11 @@ function LanguageField() {
         render={({ field }) => (
           <FormControl fullWidth error={!!errors.language}>
             <Select {...field} displayEmpty sx={quotaInputSx}>
-              <MenuItem value="English">English</MenuItem>
-              <MenuItem value="Arabic">Arabic</MenuItem>
-              <MenuItem value="French">French</MenuItem>
-              <MenuItem value="Urdu">Urdu</MenuItem>
-              <MenuItem value="Malay">Malay</MenuItem>
+              {LANGUAGE_OPTIONS.map(option => (
+                <MenuItem key={option.value} value={option.value}>
+                  {t(`fields.${option.labelKey}`)}
+                </MenuItem>
+              ))}
             </Select>
             {errors.language && <FormHelperText>{errors.language.message}</FormHelperText>}
           </FormControl>
@@ -135,31 +135,22 @@ function GenderField() {
             sx={{ height: "48px", justifyContent: "center", px: { xs: 0.5, md: 0 } }}
           >
             <RadioGroup {...field} row>
-              <FormControlLabel
-                value="male"
-                control={
-                  <Radio
-                    sx={theme => ({
-                      color: theme.palette.border.main,
-                      "&.Mui-checked": { color: theme.palette.primary.main },
-                    })}
-                  />
-                }
-                label={<Typography variant="bodyMd">{t("fields.male")}</Typography>}
-                sx={{ mr: 4 }}
-              />
-              <FormControlLabel
-                value="female"
-                control={
-                  <Radio
-                    sx={theme => ({
-                      color: theme.palette.border.main,
-                      "&.Mui-checked": { color: theme.palette.primary.main },
-                    })}
-                  />
-                }
-                label={<Typography variant="bodyMd">{t("fields.female")}</Typography>}
-              />
+              {GENDER_OPTIONS.map(option => (
+                <FormControlLabel
+                  key={option.value}
+                  value={option.value}
+                  control={
+                    <Radio
+                      sx={theme => ({
+                        color: theme.palette.border.main,
+                        "&.Mui-checked": { color: theme.palette.primary.main },
+                      })}
+                    />
+                  }
+                  label={<Typography variant="bodyMd">{t(`fields.${option.labelKey}`)}</Typography>}
+                  sx={option.value === GENDER_OPTIONS[0].value ? { mr: 4 } : undefined}
+                />
+              ))}
             </RadioGroup>
             {errors.gender && <FormHelperText>{errors.gender.message}</FormHelperText>}
           </FormControl>

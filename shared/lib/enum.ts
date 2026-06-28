@@ -537,3 +537,16 @@ export enum SystemPermissionGroupSlug {
   PARENT_DEFAULT = "parent_default",
   STAFF_DEFAULT = "staff_default",
 }
+
+export enum SessionStatus {
+  REGULAR = "regular",
+  SUSPENDED_PENDING = "suspended_pending",
+  ON_LEAVE = "on_leave",
+  PENDING_VERIFICATION = "pending_verification",
+}
+
+export enum AttendanceStatus {
+  PRESENT = "present",
+  ABSENT = "absent",
+  LATE = "late",
+}

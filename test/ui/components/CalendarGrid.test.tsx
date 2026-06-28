@@ -5,7 +5,7 @@ import { cleanup, screen } from "@testing-library/react";
 expect.extend(matchers);
 
 import { CalendarGrid } from "@/frontend/views/dashboard/students/history/components/CalendarGrid";
-import type { ClassSession } from "@/frontend/views/dashboard/students/history/types";
+import { AttendanceStatus, type ClassSession } from "@/frontend/views/dashboard/students/history/types";
 import { renderWithWrapper } from "./TestWrapper";
 
 afterEach(() => {
@@ -35,7 +35,7 @@ describe("CalendarGrid", () => {
       title: "Math Class",
       time: "10:00",
       duration: 60,
-      status: "present",
+      status: AttendanceStatus.PRESENT,
       instructor: "Teacher John",
       timeSlot: "morning",
       room: "Room A",
@@ -60,7 +60,7 @@ describe("CalendarGrid", () => {
       title: "Math Class",
       time: "10:00",
       duration: 60,
-      status: "present",
+      status: AttendanceStatus.PRESENT,
       instructor: "Teacher John",
       timeSlot: "morning",
       room: "Room A",

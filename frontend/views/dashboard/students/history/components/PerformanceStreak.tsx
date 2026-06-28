@@ -1,18 +1,14 @@
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import type { PerformanceStreakProps } from "../types";
 
-export function PerformanceStreak() {
+const MAX_STREAK_HEIGHT = 48;
+const MIN_STREAK_HEIGHT = 16;
+
+const WEEK_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+
+export function PerformanceStreak({ streakDays }: Readonly<PerformanceStreakProps>) {
   const t = useTranslations("dashboard.studentHistory.performanceStreak");
-
-  const streakData = [
-    { id: "streak-1", height: 16 },
-    { id: "streak-2", height: 24 },
-    { id: "streak-3", height: 32 },
-    { id: "streak-4", height: 40 },
-    { id: "streak-5", height: 48 },
-    { id: "streak-6", height: 0 },
-    { id: "streak-7", height: 0 },
-  ];
 
   return (
     <Box
@@ -34,29 +30,33 @@ export function PerformanceStreak() {
           {t("description")}
         </Typography>
 
-        <Box sx={{ display: "flex", gap: 0.5, height: 48, alignItems: "flex-end" }}>
-          {streakData.map(item => (
-            <Box
-              key={item.id}
-              sx={theme => ({
-                flex: 1,
-                backgroundColor: theme.palette.onPrimary,
-                opacity: item.height === 48 ? 1 : 0.2,
-                borderTopLeftRadius: 4,
-                borderTopRightRadius: 4,
-                height: item.height,
-                transition: "all 0.2s",
-                "&:hover": {
-                  height: 40,
-                  opacity: 0.4,
-                },
-              })}
-            />
-          ))}
+        <Box sx={{ display: "flex", gap: 0.5, height: MAX_STREAK_HEIGHT, alignItems: "flex-end" }}>
+          {streakDays.map((height, i) => {
+            const barHeight = height > 0 ? Math.max(MIN_STREAK_HEIGHT, height) : 0;
+            const isFull = height >= MAX_STREAK_HEIGHT;
+
+            return (
+              <Box
+                key={WEEK_DAYS[i]}
+                sx={theme => ({
+                  flex: 1,
+                  backgroundColor: theme.palette.onPrimary,
+                  opacity: isFull ? 1 : 0.2,
+                  borderTopLeftRadius: 4,
+                  borderTopRightRadius: 4,
+                  height: barHeight,
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    height: barHeight > 0 ? 40 : 0,
+                    opacity: barHeight > 0 ? 0.4 : 0.2,
+                  },
+                })}
+              />
+            );
+          })}
         </Box>
       </Box>
 
-      {/* Decorative background effect */}
       <Box
         sx={theme => ({
           position: "absolute",

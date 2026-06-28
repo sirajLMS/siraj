@@ -1,5 +1,4 @@
-// cspell:disable
-
+import { useQuery } from "@apollo/client/react";
 import {
   AutoStoriesOutlined,
   BookOutlined,
@@ -7,9 +6,19 @@ import {
   InfoOutlined,
   SyncProblemOutlined,
 } from "@mui/icons-material";
-import { Box, FormControl, FormHelperText, MenuItem, Select, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  FormControl,
+  FormHelperText,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
+import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import type { StudentQuotaFormData } from "../schemas/studentQuotaSchema";
 import { QuotaFormField } from "./QuotaFormField";
 import { quotaInputSx } from "./quotaFieldStyles";
@@ -21,6 +30,13 @@ function TeacherField() {
     control,
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
+
+  const { data, loading } = useQuery(teachersQueryDocument, {
+    variables: { search: "", limit: 100 },
+  });
+
+  const teachers = data?.teachers ?? [];
+
   return (
     <QuotaFormField label={t("fields.teacher")}>
       <Controller
@@ -28,13 +44,22 @@ function TeacherField() {
         control={control}
         render={({ field }) => (
           <FormControl fullWidth error={!!errors.teacher}>
-            <Select {...field} displayEmpty sx={quotaInputSx}>
-              <MenuItem value="Ahmed Mansour">Ahmed Mansour</MenuItem>
-              <MenuItem value="Sara Al-Hashimi">Sara Al-Hashimi</MenuItem>
-              <MenuItem value="Omar Farooq">Omar Farooq</MenuItem>
-              <MenuItem value="Sheikh Abdullah Al-Mansur">Sheikh Abdullah Al-Mansur</MenuItem>
-              <MenuItem value="Dr. Sarah Ibrahim">Dr. Sarah Ibrahim</MenuItem>
-              <MenuItem value="Ustaz Omar Farooq">Ustaz Omar Farooq</MenuItem>
+            <Select {...field} displayEmpty disabled={loading} sx={quotaInputSx}>
+              {loading && (
+                <MenuItem disabled value="">
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <CircularProgress size={16} />
+                    <Typography variant="bodyMd">{t("fields.loadingTeachers")}</Typography>
+                  </Box>
+                </MenuItem>
+              )}
+              {teachers.map(teacher =>
+                teacher?.name ? (
+                  <MenuItem key={teacher.id ?? ""} value={teacher.name}>
+                    {teacher.name}
+                  </MenuItem>
+                ) : null
+              )}
             </Select>
             {errors.teacher && <FormHelperText>{errors.teacher.message}</FormHelperText>}
           </FormControl>

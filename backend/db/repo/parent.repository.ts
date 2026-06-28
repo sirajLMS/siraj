@@ -323,6 +323,7 @@ export namespace ParentRepository {
     classesTotal: number;
     language: string | null;
     gender: string | null;
+    version: number;
     updatedAt: Date;
   };
 
@@ -339,6 +340,7 @@ export namespace ParentRepository {
         classesTotal: students.classesTotal,
         language: students.language,
         gender: students.gender,
+        version: students.version,
         updatedAt: students.updatedAt,
       })
       .from(students)
@@ -357,6 +359,7 @@ export namespace ParentRepository {
     classesTotal: number;
     language: string | null;
     gender: string | null;
+    version: number;
     updatedAt: Date;
   }): AssociatedStudentRow => ({
     id: r.id,
@@ -369,6 +372,7 @@ export namespace ParentRepository {
     classesTotal: r.classesTotal,
     language: r.language ?? null,
     gender: r.gender ?? null,
+    version: r.version,
     updatedAt: r.updatedAt,
   });
 

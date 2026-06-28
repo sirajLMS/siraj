@@ -15,9 +15,13 @@ export function AdminSuggestionsMobileView({
   searchQuery,
   activeTab,
   canManage,
+  canDelete,
   onSearchChange,
   onTabChange,
   onMarkReviewed,
+  onRespond,
+  onMarkDuplicate,
+  onDelete,
 }: Readonly<AdminSuggestionsViewProps>) {
   return (
     <PageContainer>
@@ -33,12 +37,22 @@ export function AdminSuggestionsMobileView({
         activeTab={activeTab}
         pendingCount={summary.pending}
         reviewedCount={summary.reviewed}
+        duplicateCount={summary.duplicateCount}
         labels={labels}
         onTabChange={onTabChange}
       />
 
       <Box sx={{ pt: 2 }}>
-        <SuggestionsCardList rows={rows} labels={labels} canManage={canManage} onMarkReviewed={onMarkReviewed} />
+        <SuggestionsCardList
+          rows={rows}
+          labels={labels}
+          canManage={canManage}
+          canDelete={canDelete}
+          onMarkReviewed={onMarkReviewed}
+          onRespond={onRespond}
+          onMarkDuplicate={onMarkDuplicate}
+          onDelete={onDelete}
+        />
       </Box>
     </PageContainer>
   );

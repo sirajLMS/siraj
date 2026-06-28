@@ -1,18 +1,39 @@
 import { CalendarTodayOutlined, PersonOutlined } from "@mui/icons-material";
 import { Box, Button, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useCallback } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { UpcomingClass } from "../types";
+import { useRouter } from "@/shared/i18n/routing";
+import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "../types";
 
-interface UpcomingClassesTableProps {
-  readonly classes: readonly UpcomingClass[];
-  readonly studentId: string;
+function formatDateTime(locale: string, dateStr: string): string {
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString(locale, { weekday: "short", month: "short", day: "numeric" });
+  } catch {
+    return dateStr;
+  }
 }
 
-function UpcomingClassesMobile({ classes }: Readonly<{ classes: readonly UpcomingClass[] }>) {
+function formatTime(locale: string, dateStr: string): string {
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return dateStr;
+  }
+}
+
+function UpcomingClassesMobile({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
   const t = useTranslations("dashboard.studentStatus");
+  const locale = useLocale();
+  const router = useRouter();
+
+  const handleViewAll = useCallback(() => {
+    router.push(`/students/${studentId}/history`);
+  }, [router, studentId]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -21,6 +42,7 @@ function UpcomingClassesMobile({ classes }: Readonly<{ classes: readonly Upcomin
           {t("sections.upcomingClasses").split(" Schedule")[0]}
         </Typography>
         <Button
+          onClick={handleViewAll}
           sx={theme => ({
             color: theme.palette.primary.main,
             fontWeight: 700,
@@ -30,66 +52,68 @@ function UpcomingClassesMobile({ classes }: Readonly<{ classes: readonly Upcomin
           {t("actions.viewAll")}
         </Button>
       </Box>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {classes.map(cls => (
-          <Box
-            key={cls.id}
-            sx={theme => ({
-              backgroundColor: theme.palette.background.paper,
-              borderRadius: "xl",
-              p: 2.5,
-              boxShadow: theme.palette.shadow.card,
-              borderLeft: `4px solid ${theme.palette.primary.main}`,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            })}
-          >
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <Typography variant="bodyLg" sx={{ fontWeight: 700 }}>
-                {cls.subject}
-              </Typography>
-              <Box
-                sx={theme => ({
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  color: theme.palette.onSurfaceVariant,
-                })}
-              >
-                <PersonOutlined sx={{ fontSize: 18 }} />
-                <Typography variant="bodyMd">{cls.instructor}</Typography>
-              </Box>
-              <Box
-                sx={theme => ({
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  color: theme.palette.onSurfaceVariant,
-                })}
-              >
-                <CalendarTodayOutlined sx={{ fontSize: 18 }} />
-                <Typography variant="bodyMd">
-                  {cls.date.split(",")[0]}, {cls.date.split(" ")[1]} • {cls.time.split(" -")[0]}
-                </Typography>
-              </Box>
-            </Box>
+      {classes.length === 0 ? (
+        <Typography
+          variant="bodyMd"
+          sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center", py: 4 })}
+        >
+          {t("table.noUpcomingClasses")}
+        </Typography>
+      ) : (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {classes.map(cls => (
             <Box
+              key={cls.id}
               sx={theme => ({
-                backgroundColor: theme.palette.secondaryContainer,
-                color: theme.palette.onSecondaryContainer,
-                px: 1,
-                py: 0.5,
-                borderRadius: 1,
-                fontSize: "10px",
-                fontWeight: 700,
+                backgroundColor: theme.palette.background.paper,
+                borderRadius: "xl",
+                p: 2.5,
+                boxShadow: theme.palette.shadow.card,
+                borderLeft: `4px solid ${cls.isFrozen ? theme.palette.error.main : theme.palette.primary.main}`,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                opacity: cls.isFrozen ? 0.7 : 1,
               })}
             >
-              {cls.status.toUpperCase()}
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <Typography variant="bodyLg" sx={{ fontWeight: 700 }}>
+                  {formatDateTime(locale, cls.scheduledStartAt)}
+                </Typography>
+                <Box
+                  sx={theme => ({
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    color: theme.palette.onSurfaceVariant,
+                  })}
+                >
+                  <PersonOutlined sx={{ fontSize: 18 }} />
+                  <Typography variant="bodyMd">{cls.instructor}</Typography>
+                </Box>
+                <Box
+                  sx={theme => ({
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    color: theme.palette.onSurfaceVariant,
+                  })}
+                >
+                  <CalendarTodayOutlined sx={{ fontSize: 18 }} />
+                  <Typography variant="bodyMd">
+                    {formatTime(locale, cls.scheduledStartAt)} - {formatTime(locale, cls.scheduledEndAt)}
+                  </Typography>
+                </Box>
+              </Box>
+              <StatusBadge
+                category="classInstance"
+                status={cls.executionState}
+                label={cls.isFrozen ? t("table.frozen").toUpperCase() : cls.executionState}
+              />
             </Box>
-          </Box>
-        ))}
-      </Box>
+          ))}
+        </Box>
+      )}
     </Box>
   );
 }
@@ -171,31 +195,42 @@ function DesktopFooter({ studentId }: Readonly<{ studentId: string }>) {
 
 function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClassesTableProps>) {
   const t = useTranslations("dashboard.studentStatus");
+  const locale = useLocale();
 
-  const columns: GridColDef<UpcomingClass>[] = [
+  const columns: GridColDef<UpcomingClassDisplay>[] = [
     {
-      field: "subject",
+      field: "instructor",
       headerName: t("table.subjectInstructor"),
       flex: 1.5,
       renderCell: params => (
-        <RenderCellWrapper primary={params.row.subject} secondary={params.row.instructor} primaryBold />
+        <RenderCellWrapper
+          primary={params.row.instructor}
+          secondary={t("table.minutesShort", { minutes: params.row.durationMinutes })}
+          primaryBold
+        />
       ),
     },
     {
-      field: "date",
+      field: "scheduledStartAt",
       headerName: t("table.dateTime"),
       flex: 1.2,
-      renderCell: params => <RenderCellWrapper primary={params.row.date} secondary={params.row.time} />,
+      renderCell: params => (
+        <RenderCellWrapper
+          primary={formatDateTime(locale, params.row.scheduledStartAt)}
+          secondary={`${formatTime(locale, params.row.scheduledStartAt)} - ${formatTime(locale, params.row.scheduledEndAt)}`}
+        />
+      ),
     },
     {
-      field: "room",
+      field: "isFrozen",
       headerName: t("table.roomLink"),
       flex: 1,
       renderCell: params => (
         <Box sx={{ py: 1.5 }}>
           <Box
             sx={theme => ({
-              backgroundColor: theme.palette.background.default,
+              backgroundColor: params.row.isFrozen ? theme.palette.errorContainer : theme.palette.background.default,
+              color: params.row.isFrozen ? theme.palette.onErrorContainer : theme.palette.onSurfaceVariant,
               px: 1,
               py: 0.5,
               borderRadius: 1,
@@ -203,27 +238,25 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
             })}
           >
             <Typography variant="labelMd" sx={{ fontWeight: 600 }}>
-              {params.row.room}
+              {params.row.isFrozen ? t("table.frozen") : t("table.active")}
             </Typography>
           </Box>
         </Box>
       ),
     },
     {
-      field: "status",
+      field: "executionState",
       headerName: t("table.status"),
       flex: 1,
-      renderCell: params => {
-        let statusVariant: "active" | "blocked" | "pending" = "pending";
-        if (params.row.status === "scheduled") statusVariant = "active";
-        else if (params.row.status === "suspended") statusVariant = "blocked";
-
-        return (
-          <Box sx={{ py: 1.5 }}>
-            <StatusBadge category="classSession" status={statusVariant} label={params.row.status.toUpperCase()} />
-          </Box>
-        );
-      },
+      renderCell: params => (
+        <Box sx={{ py: 1.5 }}>
+          <StatusBadge
+            category="classInstance"
+            status={params.row.executionState}
+            label={params.row.isFrozen ? t("table.frozen").toUpperCase() : params.row.executionState}
+          />
+        </Box>
+      ),
     },
   ];
 
@@ -267,7 +300,7 @@ export function UpcomingClassesTable({ classes, studentId }: Readonly<UpcomingCl
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   if (isMobile) {
-    return <UpcomingClassesMobile classes={classes} />;
+    return <UpcomingClassesMobile classes={classes} studentId={studentId} />;
   }
 
   return <UpcomingClassesDesktop classes={classes} studentId={studentId} />;

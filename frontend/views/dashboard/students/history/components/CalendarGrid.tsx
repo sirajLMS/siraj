@@ -2,7 +2,8 @@ import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, Paper, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Link } from "@/shared/i18n/routing";
-import type { ClassSession } from "../types";
+import type { CalendarGridProps, ClassSession } from "../types";
+import { AttendanceStatus } from "../types";
 
 const calendarCellBase = ({ theme }: { theme: import("@mui/material/styles").Theme }) => ({
   borderRight: `1px solid ${theme.palette.border.light}`,
@@ -37,14 +38,14 @@ const EmptyCell = styled(Box)(({ theme }) => ({
   opacity: 0.3,
 }));
 
-const StatusBadge = styled(Box)<{ status: "present" | "absent" | "late" }>(({ theme, status }) => {
+const StatusBadge = styled(Box)<{ status: AttendanceStatus }>(({ theme, status }) => {
   let backgroundColor = theme.palette.secondary.main;
   let color = theme.palette.onSecondary;
 
-  if (status === "present") {
+  if (status === AttendanceStatus.PRESENT) {
     backgroundColor = theme.palette.status.active;
     color = theme.palette.status.onActive;
-  } else if (status === "absent") {
+  } else if (status === AttendanceStatus.ABSENT) {
     backgroundColor = theme.palette.error.main;
     color = theme.palette.onError;
   }
@@ -59,11 +60,6 @@ const StatusBadge = styled(Box)<{ status: "present" | "absent" | "late" }>(({ th
     backgroundColor: backgroundColor,
   };
 });
-
-interface CalendarGridProps {
-  currentMonth: Date;
-  classes: Readonly<Partial<Record<number, ClassSession>>>;
-}
 
 function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: ClassSession }>) {
   const content = (
@@ -81,7 +77,7 @@ function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: Cla
 
       {session && (
         <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}>
-          <StatusBadge status={session.status as "present" | "absent" | "late"}>{session.title}</StatusBadge>
+          <StatusBadge status={session.status}>{session.title}</StatusBadge>
           <Box
             sx={{
               display: "flex",

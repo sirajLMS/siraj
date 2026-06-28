@@ -1,12 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import type { ReactNode } from "react";
-
-interface QuotaFormFieldProps {
-  readonly label: string;
-  readonly children: ReactNode;
-  readonly extraLabel?: ReactNode;
-  readonly helperText?: ReactNode;
-}
+import type { QuotaFormFieldProps } from "../types";
 
 export function QuotaFormField({ label, children, extraLabel, helperText }: QuotaFormFieldProps) {
   return (

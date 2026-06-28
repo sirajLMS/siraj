@@ -5,13 +5,17 @@ import { Box, Fab, useMediaQuery, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StatusTrackingCardList } from "./StatusTrackingCardList";
 import { StatusTrackingDataGrid } from "./StatusTrackingDataGrid";
-import { SuspensionAnalytics, type SuspensionAnalyticsLabels } from "./SuspensionAnalytics";
-import type { StatusTrackingRow } from "./types";
+import { SuspensionAnalytics } from "./SuspensionAnalytics";
+import type {
+  CardListLabels,
+  DesktopLayoutProps,
+  MobileLayoutProps,
+  StatusTrackingViewProps,
+  SuspensionAnalyticsLabels,
+} from "./types";
 
-// Primary-colored fixed FAB used on mobile to create a new report
 const StyledMobileFab = styled(Fab)(({ theme }) => ({
   position: "fixed",
   bottom: 88,
@@ -21,7 +25,6 @@ const StyledMobileFab = styled(Fab)(({ theme }) => ({
   "&:hover": { backgroundColor: theme.palette.primary.dark },
 }));
 
-// Selected-action pill badge showing the total-sessions count in the section header
 const StyledTotalSessionsBadge = styled(Box)(({ theme }) => ({
   paddingInline: theme.spacing(2),
   paddingBlock: theme.spacing(0.5),
@@ -33,7 +36,6 @@ const StyledTotalSessionsBadge = styled(Box)(({ theme }) => ({
   fontWeight: 500,
 }));
 
-// Primary-colored fixed FAB used on desktop to create a new report (scales on hover/active)
 const StyledDesktopFab = styled(Fab)(({ theme }) => ({
   position: "fixed",
   bottom: 32,
@@ -48,84 +50,6 @@ const StyledDesktopFab = styled(Fab)(({ theme }) => ({
   "&:active": { transform: "scale(0.95)" },
 }));
 
-export interface StatusTrackingLabels {
-  readonly pageTitle: string;
-  readonly pageSubtitle: string;
-  readonly filters: string;
-  readonly newReport: string;
-  readonly todaysClassSchedule: string;
-  readonly totalSessions: string;
-  readonly studentClass: string;
-  readonly teacher: string;
-  readonly schedule: string;
-  readonly status: string;
-  readonly actions: string;
-  readonly showingOf: string;
-  readonly previous: string;
-  readonly next: string;
-  readonly joinSession: string;
-  readonly activate: string;
-  readonly reschedule: string;
-  readonly verifyDocuments: string;
-  readonly sessionLocked: string;
-  readonly administrativeHold: string;
-  readonly holdDescription: string;
-  readonly seeAll: string;
-  readonly todaysSchedule: string;
-  readonly regular: string;
-  readonly suspendedPending: string;
-  readonly onLeave: string;
-  readonly pendingVerification: string;
-  // Metric sub-labels
-  readonly regularSubLabel: string;
-  readonly pendingSubLabel: string;
-  readonly suspendedSubLabel: string;
-  readonly onLeaveSubLabel: string;
-  // Analytics
-  readonly suspensionAnalytics: string;
-  readonly analyticsNote: string;
-  readonly urgentTask: string;
-  readonly accountsLocked: string;
-  readonly auditDescription: string;
-  readonly openAuditLogs: string;
-  readonly noEntries: string;
-  readonly days: readonly string[];
-}
-
-interface StatusTrackingViewProps {
-  readonly metrics: readonly MetricItem[];
-  readonly rows: readonly StatusTrackingRow[];
-  readonly totalSessions: number;
-  readonly suspendedCount: number;
-  readonly labels: StatusTrackingLabels;
-  readonly onActivate: (id: string) => void;
-  readonly onReschedule: (id: string) => void;
-  readonly onVerify: (id: string) => void;
-  readonly onNewReport: () => void;
-}
-
-type CardListLabels = {
-  readonly joinSession: string;
-  readonly activate: string;
-  readonly reschedule: string;
-  readonly verifyDocuments: string;
-  readonly sessionLocked: string;
-  readonly seeAll: string;
-  readonly todaysSchedule: string;
-  readonly regular: string;
-  readonly suspendedPending: string;
-  readonly onLeave: string;
-  readonly pendingVerification: string;
-};
-
-interface MobileLayoutProps extends Omit<StatusTrackingViewProps, "suspendedCount"> {
-  readonly cardListLabels: CardListLabels;
-}
-
-interface DesktopLayoutProps extends StatusTrackingViewProps {
-  readonly analyticsLabels: SuspensionAnalyticsLabels;
-}
-
 function MobileLayout({
   metrics,
   rows,
@@ -133,9 +57,10 @@ function MobileLayout({
   labels,
   cardListLabels,
   onActivate,
-  onReschedule,
   onVerify,
+  onJoin,
   onNewReport,
+  onSeeAll,
 }: MobileLayoutProps) {
   return (
     <PageContainer>
@@ -144,17 +69,16 @@ function MobileLayout({
 
         <MetricCardGrid metrics={metrics} />
 
-        {/* Mobile card list */}
         <StatusTrackingCardList
           rows={rows}
           totalSessions={totalSessions}
           labels={cardListLabels}
           onActivate={onActivate}
-          onReschedule={onReschedule}
           onVerify={onVerify}
+          onJoin={onJoin}
+          onSeeAll={onSeeAll}
         />
 
-        {/* Mobile FAB */}
         <StyledMobileFab id="status-fab-btn" aria-label={labels.newReport} onClick={onNewReport}>
           <AddOutlined />
         </StyledMobileFab>
@@ -173,7 +97,9 @@ function DesktopLayout({
   onActivate,
   onReschedule,
   onVerify,
+  onJoin,
   onNewReport,
+  onOpenAuditLogs,
 }: DesktopLayoutProps) {
   return (
     <PageContainer>
@@ -225,12 +151,12 @@ function DesktopLayout({
           onActivate={onActivate}
           onReschedule={onReschedule}
           onVerify={onVerify}
+          onJoin={onJoin}
         />
       </SectionPanel>
 
-      <SuspensionAnalytics labels={analyticsLabels} suspendedCount={suspendedCount} />
+      <SuspensionAnalytics labels={analyticsLabels} suspendedCount={suspendedCount} onOpenAuditLogs={onOpenAuditLogs} />
 
-      {/* Desktop FAB */}
       <StyledDesktopFab id="status-desktop-fab-btn" aria-label={labels.newReport} onClick={onNewReport}>
         <AddOutlined />
       </StyledDesktopFab>
@@ -246,7 +172,6 @@ export function StatusTrackingView(props: StatusTrackingViewProps) {
   const cardListLabels: CardListLabels = {
     joinSession: labels.joinSession,
     activate: labels.activate,
-    reschedule: labels.reschedule,
     verifyDocuments: labels.verifyDocuments,
     sessionLocked: labels.sessionLocked,
     seeAll: labels.seeAll,

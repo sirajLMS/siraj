@@ -55,6 +55,11 @@ export const statusTracking: StatusTrackingLabels = {
     auditDescription: "راجع سجلات الإيقاف لتحديد ما إذا كان يمكن الإفراج عن أي تعليقات إدارية يدوياً.",
     openAuditLogs: "فتح سجلات التدقيق",
   },
+  errors: {
+    noStudentId: "معرّف الطالب غير متاح لهذه الحصة",
+    auditLogsComingSoon: "ميزة سجلات التدقيق قريباً",
+    failedToLoad: "فشل تحميل بيانات تتبع الحالة.",
+  },
   days: {
     mon: "إ",
     tue: "ث",

@@ -798,3 +798,45 @@ export const getStudentFutureClasses = async (
     scheduledStartAt: r.scheduledStartAt,
   }));
 };
+
+export type UpcomingClassRow = {
+  id: string;
+  instructor: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  executionState: string;
+  isFrozen: boolean;
+};
+
+export const getUpcomingClassesForStudent = async (
+  studentId: string,
+  tx?: DBTransaction
+): Promise<UpcomingClassRow[]> => {
+  const queryDb = tx ?? db;
+  const fromDate = new Date();
+  const rows = await queryDb
+    .select({
+      id: classInstances.id,
+      scheduledStartAt: classInstances.scheduledStartAt,
+      scheduledEndAt: classInstances.scheduledEndAt,
+      durationMinutes: classInstances.durationMinutes,
+      executionState: classInstances.executionState,
+      isFrozen: classInstances.isFrozen,
+      instructor: users.name,
+    })
+    .from(classInstances)
+    .innerJoin(teachers, eq(classInstances.teacherId, teachers.id))
+    .innerJoin(users, eq(teachers.userId, users.id))
+    .where(
+      and(
+        eq(classInstances.studentId, studentId),
+        isNull(classInstances.deletedAt),
+        gte(classInstances.scheduledStartAt, fromDate),
+        inArray(classInstances.executionState, ["NOT_ACTIVATED", "ACTIVATED"])
+      )
+    )
+    .orderBy(classInstances.scheduledStartAt)
+    .limit(100);
+  return rows;
+};

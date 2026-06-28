@@ -9,22 +9,20 @@ import { useTranslations } from "next-intl";
 import { create } from "zustand";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { RawMetric } from "@/frontend/views/dashboard/classes/status/tracking/types";
 import { useRouter } from "@/shared/i18n/routing";
 import { StatusTrackingView } from "./StatusTrackingView";
 import type { StatusTrackingRow } from "./types";
 
-// ─── Mock Store (story-only) ─────────────────────────────────────────────────
-
 interface StoryStatusTrackingState {
-  readonly metrics: readonly MetricItem[];
+  readonly metrics: readonly RawMetric[];
   readonly rows: readonly StatusTrackingRow[];
   readonly totalSessions: number;
   activateSession: (id: string) => void;
   verifySession: (id: string) => void;
 }
 
-const STORY_METRICS: MetricItem[] = [
+const STORY_METRICS: RawMetric[] = [
   {
     key: "regular",
     count: 1248,
@@ -151,8 +149,6 @@ const useStoryStatusTrackingStore = create<StoryStatusTrackingState>(set => ({
   },
 }));
 
-// ─── Story Container (mock-data version of StatusTrackingContainer) ──────────
-
 function StoryStatusTrackingContainer() {
   const t = useTranslations("dashboard.statusTracking");
   const router = useRouter();
@@ -173,7 +169,7 @@ function StoryStatusTrackingContainer() {
     on_leave: t("subLabels.onLeave"),
   };
 
-  const metrics: readonly MetricItem[] = rawMetrics.map(m => ({
+  const metrics: readonly RawMetric[] = rawMetrics.map(m => ({
     ...m,
     subLabel: subLabelMap[m.key],
   }));
@@ -217,6 +213,8 @@ function StoryStatusTrackingContainer() {
     auditDescription: t("analytics.auditDescription"),
     openAuditLogs: t("analytics.openAuditLogs"),
     noEntries: t("noEntries"),
+    errorNoStudentId: t("errors.noStudentId"),
+    errorAuditLogsComingSoon: t("errors.auditLogsComingSoon"),
     days: [
       t("days.mon"),
       t("days.tue"),
@@ -229,7 +227,7 @@ function StoryStatusTrackingContainer() {
   };
 
   const handleNewReport = () => {
-    // Navigate or open modal in future
+    router.push("/classes/new");
   };
 
   const handleReschedule = (id: string) => {
@@ -239,11 +237,19 @@ function StoryStatusTrackingContainer() {
         sessionId: id,
         teacherName: row.teacherName ?? "",
         studentName: row.studentName ?? "",
-        teacherTimezone: "Africa/Cairo",
+        teacherTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
     }
     router.push("/reschedule");
   };
+
+  const handleJoin = (id: string) => {
+    router.push(`/classes/${id}`);
+  };
+
+  const handleOpenAuditLogs = () => {};
+
+  const handleSeeAll = () => {};
 
   return (
     <StatusTrackingView
@@ -256,11 +262,12 @@ function StoryStatusTrackingContainer() {
       onReschedule={handleReschedule}
       onVerify={verifySession}
       onNewReport={handleNewReport}
+      onJoin={handleJoin}
+      onOpenAuditLogs={handleOpenAuditLogs}
+      onSeeAll={handleSeeAll}
     />
   );
 }
-
-// ─── Storybook Meta ──────────────────────────────────────────────────────────
 
 const meta: Meta<typeof StoryStatusTrackingContainer> = {
   title: "Views/dashboard/classes/status/tracking/StatusTrackingContainer",

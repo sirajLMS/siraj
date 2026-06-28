@@ -5,17 +5,7 @@ import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { StudentHistoryDesktop } from "./components/StudentHistoryDesktop";
 import { StudentHistoryMobile } from "./components/StudentHistoryMobile";
-import type { ClassSession, StudentHistoryMetrics } from "./types";
-
-interface StudentHistoryViewProps {
-  studentName: string;
-  currentMonth: Date;
-  metrics: StudentHistoryMetrics;
-  classes: Readonly<Partial<Record<number, ClassSession>>>;
-  selectedWeek: number;
-  onSelectWeek: (week: number) => void;
-  onMonthChange?: (date: Date) => void;
-}
+import type { StudentHistoryViewProps } from "./types";
 
 export function StudentHistoryView({
   studentName,
@@ -23,15 +13,13 @@ export function StudentHistoryView({
   metrics,
   classes,
   selectedWeek,
+  selectedDay,
   onSelectWeek,
-  onMonthChange,
+  onSelectDay,
+  onPrevMonth,
+  onNextMonth,
+  onPrint,
 }: Readonly<StudentHistoryViewProps>) {
-  const handleMonthChange = () => {
-    if (!onMonthChange) return;
-    const nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
-    onMonthChange(nextMonth);
-  };
-
   return (
     <PageContainer>
       <RequirePermission permissions={[AppPermission.HistoryViewCalendar]}>
@@ -40,7 +28,9 @@ export function StudentHistoryView({
           currentMonth={currentMonth}
           metrics={metrics}
           classes={classes}
-          onChangeMonth={handleMonthChange}
+          onPrevMonth={onPrevMonth}
+          onNextMonth={onNextMonth}
+          onPrint={onPrint}
         />
         <StudentHistoryMobile
           studentName={studentName}
@@ -48,8 +38,12 @@ export function StudentHistoryView({
           metrics={metrics}
           classes={classes}
           selectedWeek={selectedWeek}
+          selectedDay={selectedDay}
           onSelectWeek={onSelectWeek}
-          onChangeMonth={handleMonthChange}
+          onSelectDay={onSelectDay}
+          onPrevMonth={onPrevMonth}
+          onNextMonth={onNextMonth}
+          onPrint={onPrint}
         />
       </RequirePermission>
     </PageContainer>

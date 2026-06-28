@@ -44,6 +44,9 @@ export function useStatusTrackingLabels() {
     auditDescription: t("analytics.auditDescription"),
     openAuditLogs: t("analytics.openAuditLogs"),
     noEntries: t("noEntries"),
+    errorNoStudentId: t("errors.noStudentId"),
+    errorAuditLogsComingSoon: t("errors.auditLogsComingSoon"),
+    errorFailedToLoad: t("errors.failedToLoad"),
     days: [
       t("days.mon"),
       t("days.tue"),

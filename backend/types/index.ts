@@ -18,6 +18,7 @@ export * from "./staff-profile.types";
 export * from "./storage.types";
 export * from "./student.types";
 export * from "./student-lifecycle.types";
+export * from "./student-status.types";
 export * from "./studentProgress.types";
 export * from "./studentStatusHistory.types";
 export * from "./suggestions.types";

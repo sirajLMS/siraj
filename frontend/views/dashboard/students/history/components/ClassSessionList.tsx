@@ -2,12 +2,8 @@ import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { Link } from "@/shared/i18n/routing";
-import type { ClassSession } from "../types";
-
-interface ClassSessionListProps {
-  dateStr: string;
-  sessions: ClassSession[];
-}
+import type { ClassSessionListProps } from "../types";
+import { AttendanceStatus } from "../types";
 
 export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionListProps>) {
   const t = useTranslations("dashboard.studentHistory.classDetails");
@@ -16,6 +12,34 @@ export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionLis
     const hrs = mins / 60;
     return `${hrs % 1 === 0 ? hrs : hrs.toFixed(1)}h`;
   };
+
+  if (sessions.length === 0) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 0.5 }}>
+          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
+            {t("title")}
+          </Typography>
+          <Typography
+            variant="labelMd"
+            sx={theme => ({
+              color: theme.palette.text.secondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+            })}
+          >
+            {dateStr}
+          </Typography>
+        </Box>
+        <Typography
+          variant="bodyMd"
+          sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center", py: 4 })}
+        >
+          {t("noSessions")}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -96,15 +120,20 @@ export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionLis
                     color: theme.palette.onSecondaryContainer,
                   };
 
-                  if (session.status === "present") {
+                  if (session.status === AttendanceStatus.PRESENT) {
                     colors = {
                       backgroundColor: theme.palette.status.activeContainer,
                       color: theme.palette.status.onActiveContainer,
                     };
-                  } else if (session.status === "absent") {
+                  } else if (session.status === AttendanceStatus.ABSENT) {
                     colors = {
                       backgroundColor: theme.palette.errorContainer,
                       color: theme.palette.onErrorContainer,
+                    };
+                  } else if (session.status === AttendanceStatus.LATE) {
+                    colors = {
+                      backgroundColor: theme.palette.warningContainer ?? theme.palette.tertiaryContainer,
+                      color: theme.palette.onWarningContainer ?? theme.palette.onTertiaryContainer,
                     };
                   }
 

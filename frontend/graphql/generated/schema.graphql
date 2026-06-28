@@ -164,6 +164,7 @@ type AssociatedStudent {
   status: String
   teacherName: String
   updatedAt: DateTime
+  version: Int
 }
 
 """Filters applied to the dynamic attendance query engine."""
@@ -237,6 +238,7 @@ input BillingMonthInput {
 
 type Book {
   availabilityStatus: AvailabilityStatus
+  createdAt: DateTime
   id: String
   name: String
 }
@@ -1162,7 +1164,7 @@ type Mutation {
   createTestGroupClass(classInstanceId: String!, teacherName: String!): TestGroupClass
   deactivateParent(parentId: String!): DeactivateParentResult
 
-  """Permanently deletes a book from the database."""
+  """Soft-deletes a book by marking it as deleted."""
   deleteBook(
     """The UUID of the book to delete"""
     id: ID!
@@ -1639,6 +1641,7 @@ type Query {
 
   """Fetches the global student directory with cross-relational data."""
   studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): [StudentDirectoryRow!]
+  studentUpcomingClasses(studentId: String!): StudentUpcomingClassesResult
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
   teacherActiveDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
   teacherDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
@@ -1969,6 +1972,24 @@ enum StudentStatus {
   ON_TRIAL
   REGULAR
   SUSPENDED
+}
+
+type StudentUpcomingClass {
+  durationMinutes: Int
+  executionState: String
+  id: String
+  instructor: String
+  isFrozen: Boolean
+  scheduledEndAt: DateTime
+  scheduledStartAt: DateTime
+}
+
+type StudentUpcomingClassesResult {
+  classes: [StudentUpcomingClass!]
+  id: String
+  status: String
+  studentId: String
+  studentName: String
 }
 
 input StudentsOrderByClause {

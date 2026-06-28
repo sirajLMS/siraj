@@ -2,12 +2,7 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { InputAdornment, TextField } from "@mui/material";
-
-interface SuggestionsSearchBarProps {
-  readonly value: string;
-  readonly placeholder: string;
-  readonly onChange: (value: string) => void;
-}
+import type { SuggestionsSearchBarProps } from "../types/suggestionsViewTypes";
 
 export function SuggestionsSearchBar({ value, placeholder, onChange }: Readonly<SuggestionsSearchBarProps>) {
   return (

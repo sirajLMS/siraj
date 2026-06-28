@@ -2,11 +2,9 @@ import { AdminPanelSettingsOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
+import { StudentStatus } from "@/shared/lib/enum";
 import type { StatusUpdateFormData } from "../schemas/statusUpdateSchema";
-
-interface AdminHoldControlsProps {
-  readonly isUpdating: boolean;
-}
+import type { AdminHoldControlsProps } from "../types";
 
 function StatusSelectionField() {
   const t = useTranslations("dashboard.studentStatus");
@@ -41,9 +39,12 @@ function StatusSelectionField() {
               },
             })}
           >
-            <MenuItem value="regular">{t("statusOptions.regular")}</MenuItem>
-            <MenuItem value="suspended">{t("statusOptions.suspended")}</MenuItem>
-            <MenuItem value="on-leave">{t("statusOptions.onLeave")}</MenuItem>
+            <MenuItem value={StudentStatus.REGULAR}>{t("statusOptions.REGULAR")}</MenuItem>
+            <MenuItem value={StudentStatus.SUSPENDED}>{t("statusOptions.SUSPENDED")}</MenuItem>
+            <MenuItem value={StudentStatus.ON_LEAVE}>{t("statusOptions.ON_LEAVE")}</MenuItem>
+            <MenuItem value={StudentStatus.ON_TRIAL}>{t("statusOptions.ON_TRIAL")}</MenuItem>
+            <MenuItem value={StudentStatus.DEACTIVATED}>{t("statusOptions.DEACTIVATED")}</MenuItem>
+            <MenuItem value={StudentStatus.GRADUATED}>{t("statusOptions.GRADUATED")}</MenuItem>
           </Select>
         )}
       />
@@ -62,15 +63,15 @@ function ReasonEntryField() {
   const quickReasons = [
     {
       label: t("reasons.unpaidInvoice"),
-      text: "Status change requested due to: Unpaid Invoice. Automated hold protocol initiated.",
+      text: t("reasons.unpaidInvoice"),
     },
     {
       label: t("reasons.misconduct"),
-      text: "Status change requested due to: Misconduct. Automated hold protocol initiated.",
+      text: t("reasons.misconduct"),
     },
     {
       label: t("reasons.vacation"),
-      text: "Status change requested due to: Vacation. Automated hold protocol initiated.",
+      text: t("reasons.vacation"),
     },
   ];
 
@@ -138,6 +139,8 @@ function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
   const { watch } = useFormContext<StatusUpdateFormData>();
   const currentStatus = watch("status");
 
+  const isSuspended = currentStatus === StudentStatus.SUSPENDED;
+
   return (
     <Button
       type="submit"
@@ -146,10 +149,10 @@ function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
       sx={theme => ({
         py: 1.5,
         borderRadius: "button",
-        backgroundColor: currentStatus === "suspended" ? theme.palette.error.main : theme.palette.primary.main,
-        color: currentStatus === "suspended" ? theme.palette.onError : theme.palette.onPrimary,
+        backgroundColor: isSuspended ? theme.palette.error.main : theme.palette.primary.main,
+        color: isSuspended ? theme.palette.onError : theme.palette.onPrimary,
         "&:hover": {
-          backgroundColor: currentStatus === "suspended" ? theme.palette.error.dark : theme.palette.primary.dark,
+          backgroundColor: isSuspended ? theme.palette.error.dark : theme.palette.primary.dark,
         },
         typography: "buttonText",
         textTransform: "uppercase",

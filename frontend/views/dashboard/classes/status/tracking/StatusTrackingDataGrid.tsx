@@ -4,11 +4,19 @@ import { BlockOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { Avatar, Box, type Theme, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
+import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import { StatusAction } from "./StatusBadgeAction";
-import { computeSessionStatus, formatScheduleRange, type SessionStatus, type StatusTrackingRow } from "./types";
+import {
+  computeSessionStatus,
+  formatScheduleRange,
+  SessionStatus,
+  type StatusTrackingDataGridLabels,
+  type StatusTrackingDataGridProps,
+  type StatusTrackingRow,
+} from "./types";
 
 const StyledClassNameText = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -16,45 +24,18 @@ const StyledClassNameText = styled(Typography)(({ theme }) => ({
   wordBreak: "break-word",
 }));
 
-interface StatusTrackingDataGridLabels {
-  readonly studentClass: string;
-  readonly teacher: string;
-  readonly schedule: string;
-  readonly status: string;
-  readonly actions: string;
-  readonly joinSession: string;
-  readonly activate: string;
-  readonly reschedule: string;
-  readonly verifyDocuments: string;
-  readonly administrativeHold: string;
-  readonly holdDescription: string;
-  readonly regular: string;
-  readonly suspendedPending: string;
-  readonly onLeave: string;
-  readonly pendingVerification: string;
-  readonly noEntries: string;
-}
-
-interface StatusTrackingDataGridProps {
-  readonly rows: readonly StatusTrackingRow[];
-  readonly labels: StatusTrackingDataGridLabels;
-  readonly onActivate: (id: string) => void;
-  readonly onReschedule: (id: string) => void;
-  readonly onVerify: (id: string) => void;
-}
-
 const STATUS_LABEL_KEYS: Record<SessionStatus, keyof StatusTrackingDataGridLabels> = {
-  regular: "regular",
-  suspended_pending: "suspendedPending",
-  on_leave: "onLeave",
-  pending_verification: "pendingVerification",
+  [SessionStatus.REGULAR]: "regular",
+  [SessionStatus.SUSPENDED_PENDING]: "suspendedPending",
+  [SessionStatus.ON_LEAVE]: "onLeave",
+  [SessionStatus.PENDING_VERIFICATION]: "pendingVerification",
 };
 
 function getStatusIcon(sessionStatus: SessionStatus) {
-  if (sessionStatus === "suspended_pending") {
+  if (sessionStatus === SessionStatus.SUSPENDED_PENDING) {
     return <BlockOutlined sx={{ fontSize: 12 }} />;
   }
-  if (sessionStatus === "pending_verification") {
+  if (sessionStatus === SessionStatus.PENDING_VERIFICATION) {
     return <WarningAmberOutlined sx={{ fontSize: 12 }} />;
   }
   return undefined;
@@ -68,22 +49,22 @@ function sessionLabelStyles(
   backgroundColor?: string;
 } {
   switch (sessionStatus) {
-    case "suspended_pending":
+    case SessionStatus.SUSPENDED_PENDING:
       return {
         color: theme.palette.status.onBlockedContainer,
         backgroundColor: theme.palette.status.blockedContainer,
       };
-    case "pending_verification":
+    case SessionStatus.PENDING_VERIFICATION:
       return {
         color: theme.palette.status.onPendingContainer,
         backgroundColor: theme.palette.status.pendingContainer,
       };
-    case "on_leave":
+    case SessionStatus.ON_LEAVE:
       return {
         color: theme.palette.secondaryContainer,
         backgroundColor: theme.palette.onSecondaryContainer,
       };
-    case "regular":
+    case SessionStatus.REGULAR:
       return {
         color: theme.palette.status.onActiveContainer,
         backgroundColor: theme.palette.status.activeContainer,
@@ -97,8 +78,10 @@ export function StatusTrackingDataGrid({
   onActivate,
   onReschedule,
   onVerify,
+  onJoin,
 }: StatusTrackingDataGridProps) {
   const theme = useTheme();
+  const locale = useLocale();
   const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
   const columns = useMemo<GridColDef<StatusTrackingRow>[]>(() => {
     const actionLabels = {
@@ -157,7 +140,7 @@ export function StatusTrackingDataGrid({
         headerName: labels.schedule,
         flex: 1,
         minWidth: 140,
-        valueGetter: (_value, row) => formatScheduleRange(row.scheduledStartAt, row.scheduledEndAt),
+        valueGetter: (_value, row) => formatScheduleRange(row.scheduledStartAt, row.scheduledEndAt, locale),
       },
       {
         field: "status",
@@ -190,11 +173,12 @@ export function StatusTrackingDataGrid({
             onActivate={onActivate}
             onReschedule={onReschedule}
             onVerify={onVerify}
+            onJoin={onJoin}
           />
         ),
       },
     ];
-  }, [isDesktop, labels, onActivate, onReschedule, onVerify, theme]);
+  }, [isDesktop, labels, locale, onActivate, onReschedule, onVerify, onJoin, theme]);
 
   return (
     <AppDataGrid<StatusTrackingRow>
@@ -206,7 +190,7 @@ export function StatusTrackingDataGrid({
       ariaLabel="status-tracking-table"
       emptyMessage={labels.noEntries}
       getRowClassName={({ row }) =>
-        computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState) === "suspended_pending"
+        computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState) === SessionStatus.SUSPENDED_PENDING
           ? "status-row-suspended"
           : ""
       }

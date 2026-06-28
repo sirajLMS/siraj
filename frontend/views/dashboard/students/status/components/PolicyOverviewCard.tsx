@@ -1,11 +1,7 @@
 import { CheckCircleOutlined, GavelOutlined, InfoOutlined } from "@mui/icons-material";
 import { Box, Divider, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-
-interface PolicyItemProps {
-  readonly title: string;
-  readonly description: string;
-}
+import type { PolicyItemProps } from "../types";
 
 function PolicyItem({ title, description }: Readonly<PolicyItemProps>) {
   return (
