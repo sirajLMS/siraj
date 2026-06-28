@@ -3,6 +3,7 @@ export interface RescheduleTrackingLabels {
   readonly sectionTitle: string;
   readonly exportData: string;
   readonly filter: string;
+  readonly filterAll: string;
   readonly showingOf: string;
   readonly noEntries: string;
   readonly metrics: {
@@ -27,10 +28,17 @@ export interface RescheduleTrackingLabels {
   readonly status: {
     readonly rescheduled: string;
     readonly pendingLeave: string;
+    readonly approved: string;
+    readonly cancelled: string;
   };
   readonly actions: {
     readonly viewDetails: string;
     readonly approveLeave: string;
+    readonly approveSuccess: string;
     readonly rejectLeave: string;
+  };
+  readonly errors: {
+    readonly missingOriginalClassId: string;
+    readonly approveFailed: string;
   };
 }

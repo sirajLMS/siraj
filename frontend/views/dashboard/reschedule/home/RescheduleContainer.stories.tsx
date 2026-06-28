@@ -6,6 +6,15 @@ import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { RescheduleView } from "./RescheduleView";
 import { type RescheduleFormData, rescheduleSchema } from "./schemas/rescheduleSchema";
 
+useRescheduleStore.setState({
+  session: {
+    sessionId: "cls-001",
+    teacherName: "Fatima Al-Rashid",
+    studentName: "Ahmed Hassan",
+    teacherTimezone: "Asia/Riyadh",
+  },
+});
+
 export function MockRescheduleContainer() {
   const session = useRescheduleStore(state => state.session);
   const isSubmitting = useRescheduleStore(state => state.isSubmitting);

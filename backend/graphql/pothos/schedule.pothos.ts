@@ -2,7 +2,12 @@ import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query
 import type { PageInfo } from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome, LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { ClassExecutionStatePothosObject, ClassOutcomePothosObject, LeaveRequestStatusPothosObject, RescheduleDateLabelPothosObject } from "./enum.pothos";
+import {
+  ClassExecutionStatePothosObject,
+  ClassOutcomePothosObject,
+  LeaveRequestStatusPothosObject,
+  RescheduleDateLabelPothosObject,
+} from "./enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 export type DailyScheduleMetricsDefinition = {

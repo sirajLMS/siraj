@@ -16,15 +16,6 @@
         "-y",
         "@mui/mcp@latest"
       ]
-    },
-    "playwright": {
-      "type": "local",
-      "command": [
-        "bun",
-        "x",
-        "-y",
-        "@playwright/mcp@0.0.38"
-      ]
     }
   }
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { LeaveRequestStatus as GqlLeaveRequestStatus, RescheduleDateLabel as GqlRescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   CalendarTodayOutlined,
   HistoryOutlined,
@@ -13,7 +12,12 @@ import {
 import { Box, Card, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
+import {
+  LeaveRequestStatus as GqlLeaveRequestStatus,
+  RescheduleDateLabel as GqlRescheduleDateLabel,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TrackingRow } from "./types";
+import { getTrackingStatusLabel } from "./types";
 
 interface RescheduleTrackingCardListProps {
   readonly rows: readonly TrackingRow[];
@@ -24,6 +28,10 @@ interface RescheduleTrackingCardListProps {
     readonly pendingLeave: string;
     readonly viewDetails: string;
     readonly noEntries: string;
+    readonly statusPending: string;
+    readonly statusRescheduled: string;
+    readonly statusApproved: string;
+    readonly statusCancelled: string;
   };
   readonly onView: (id: string) => void;
   readonly page?: number;
@@ -92,7 +100,7 @@ const CardBody = ({ row }: { row: TrackingRow }) => {
             color: theme.palette.text.secondary,
           })}
         >
-          {row.studentClass}
+          {row.studentName}
         </Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -164,7 +172,7 @@ const CardFooter = ({
       <StatusBadge
         category="trackingStatus"
         status={row.status}
-        label={row.status === GqlLeaveRequestStatus.Rescheduled ? labels.rescheduled : labels.pendingLeave}
+        label={getTrackingStatusLabel(row.status, { ...labels, filterAll: "" })}
         icon={
           row.status === GqlLeaveRequestStatus.Rescheduled ? (
             <HistoryOutlined sx={{ fontSize: 14 }} />

@@ -5,6 +5,7 @@ export const rescheduleTracking: RescheduleTrackingLabels = {
   sectionTitle: "جدول الحصص والمتابعة",
   exportData: "تصدير البيانات",
   filter: "تصفية",
+  filterAll: "الكل",
   showingOf: "عرض {shown} من {total} إدخال",
   noEntries: "لا توجد إدخالات",
   metrics: {
@@ -29,10 +30,17 @@ export const rescheduleTracking: RescheduleTrackingLabels = {
   status: {
     rescheduled: "عادي (مُعاد جدولته)",
     pendingLeave: "إجازة معلقة",
+    approved: "معتمد",
+    cancelled: "ملغى",
   },
   actions: {
     viewDetails: "عرض التفاصيل",
     approveLeave: "قبول الإجازة",
+    approveSuccess: "تم قبول الإجازة بنجاح",
     rejectLeave: "رفض الإجازة",
+  },
+  errors: {
+    missingOriginalClassId: "لا يمكن تنفيذ الإجراء: معرف الحصة الأصلية مفقود",
+    approveFailed: "فشل في قبول الإجازة",
   },
 };

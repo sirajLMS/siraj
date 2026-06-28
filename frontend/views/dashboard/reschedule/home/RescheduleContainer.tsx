@@ -4,11 +4,12 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, CircularProgress } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { classInstanceQueryDocument, rescheduleClassMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
 import { RescheduleView } from "./RescheduleView";
@@ -18,7 +19,8 @@ import { combineDateTime } from "./utils/rescheduleDateTime";
 export function RescheduleContainer() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const classInstanceId = searchParams.get("classInstanceId") ?? "";
+  const storeSession = useRescheduleStore(state => state.session);
+  const classInstanceId = searchParams.get("classInstanceId") || storeSession.sessionId || "";
 
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -55,6 +57,25 @@ export function RescheduleContainer() {
     }
   }, [classInstance, reset]);
 
+  const fallbackSession = useMemo(
+    () => ({
+      sessionId: storeSession.sessionId,
+      teacherName: storeSession.teacherName,
+      studentName: storeSession.studentName,
+      teacherTimezone: storeSession.teacherTimezone,
+    }),
+    [storeSession]
+  );
+
+  const session = classInstance
+    ? {
+        sessionId: classInstance.id ?? "",
+        teacherName: classInstance.teacher?.name ?? "",
+        studentName: classInstance.student?.name ?? "",
+        teacherTimezone: classInstance.teacherTimezone ?? "UTC",
+      }
+    : fallbackSession;
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
@@ -63,17 +84,10 @@ export function RescheduleContainer() {
     );
   }
 
-  if (error || !classInstance) {
+  if (!classInstanceId || !classInstance) {
     logger.error("Error fetching class details for rescheduling:", error);
     return <Box sx={{ p: 3, textAlign: "center" }}>Class instance not found.</Box>;
   }
-
-  const session = {
-    sessionId: classInstance.id ?? "",
-    teacherName: classInstance.teacher?.name ?? "",
-    studentName: classInstance.student?.name ?? "",
-    teacherTimezone: classInstance.studentTimezone ?? "UTC",
-  };
 
   const onSubmit = async (formData: RescheduleFormData) => {
     const startAt = combineDateTime(formData.newDate, formData.newTime);

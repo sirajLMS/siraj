@@ -1,6 +1,5 @@
 "use client";
 
-import { LeaveRequestStatus as GqlLeaveRequestStatus, RescheduleDateLabel as GqlRescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   CheckOutlined,
   CloseOutlined,
@@ -14,11 +13,16 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
+import {
+  LeaveRequestStatus as GqlLeaveRequestStatus,
+  RescheduleDateLabel as GqlRescheduleDateLabel,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TrackingRow } from "./types";
+import { getTrackingStatusLabel } from "./types";
 
 interface RescheduleTrackingDataGridHeaders {
   readonly teacherName: string;
-  readonly studentClass: string;
+  readonly studentName: string;
   readonly scheduledDate: string;
   readonly timeSlot: string;
   readonly classStatus: string;
@@ -34,6 +38,10 @@ interface RescheduleTrackingDataGridLabels {
   readonly approveLeave: string;
   readonly rejectLeave: string;
   readonly noEntries: string;
+  readonly statusPending: string;
+  readonly statusRescheduled: string;
+  readonly statusApproved: string;
+  readonly statusCancelled: string;
 }
 
 interface RescheduleTrackingDataGridProps {
@@ -103,13 +111,13 @@ export function RescheduleTrackingDataGrid({
         ),
       },
       {
-        field: "studentClass",
-        headerName: headers.studentClass,
+        field: "studentName",
+        headerName: headers.studentName,
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {row.studentClass}
+            {row.studentName}
           </Typography>
         ),
       },
@@ -177,7 +185,7 @@ export function RescheduleTrackingDataGrid({
           <StatusBadge
             category="trackingStatus"
             status={row.status}
-            label={row.status === GqlLeaveRequestStatus.Rescheduled ? labels.rescheduled : labels.pendingLeave}
+            label={getTrackingStatusLabel(row.status, { ...labels, filterAll: "" })}
             icon={
               row.status === GqlLeaveRequestStatus.Rescheduled ? (
                 <HistoryOutlined sx={{ fontSize: 14, color: "inherit" }} />

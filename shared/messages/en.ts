@@ -641,6 +641,7 @@ const en: MessageSchema = {
       sectionTitle: "Class Schedule & Tracking",
       exportData: "Export Data",
       filter: "Filter",
+      filterAll: "All",
       showingOf: "Showing {shown} of {total} filtered entries",
       noEntries: "No entries found",
       metrics: {
@@ -665,11 +666,18 @@ const en: MessageSchema = {
       status: {
         rescheduled: "Regular (Re Scheduled)",
         pendingLeave: "Pending Leave",
+        approved: "Approved",
+        cancelled: "Cancelled",
       },
       actions: {
         viewDetails: "View Details",
         approveLeave: "Approve Leave",
+        approveSuccess: "Leave request approved successfully",
         rejectLeave: "Reject Leave",
+      },
+      errors: {
+        missingOriginalClassId: "Cannot perform action: original class ID is missing",
+        approveFailed: "Failed to approve leave request",
       },
     },
     scheduleAlerts: {
