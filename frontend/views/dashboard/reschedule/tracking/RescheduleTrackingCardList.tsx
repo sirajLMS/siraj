@@ -2,22 +2,17 @@
 
 import {
   CalendarTodayOutlined,
-  HistoryOutlined,
   PersonOffOutlined,
   ScheduleOutlined,
   SchoolOutlined,
   VisibilityOutlined,
-  WarningAmberOutlined,
 } from "@mui/icons-material";
 import { Box, Card, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
-import {
-  LeaveRequestStatus as GqlLeaveRequestStatus,
-  RescheduleDateLabel as GqlRescheduleDateLabel,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+import { RescheduleDateLabel as GqlRescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TrackingRow } from "./types";
-import { getTrackingStatusLabel } from "./types";
+import { getTrackingStatusIcon, getTrackingStatusLabel } from "./types";
 
 interface RescheduleTrackingCardListProps {
   readonly rows: readonly TrackingRow[];
@@ -173,13 +168,7 @@ const CardFooter = ({
         category="trackingStatus"
         status={row.status}
         label={getTrackingStatusLabel(row.status, { ...labels, filterAll: "" })}
-        icon={
-          row.status === GqlLeaveRequestStatus.Rescheduled ? (
-            <HistoryOutlined sx={{ fontSize: 14 }} />
-          ) : (
-            <WarningAmberOutlined sx={{ fontSize: 14 }} />
-          )
-        }
+        icon={getTrackingStatusIcon(row.status, { fontSize: 14 })}
       />
     </Box>
   );

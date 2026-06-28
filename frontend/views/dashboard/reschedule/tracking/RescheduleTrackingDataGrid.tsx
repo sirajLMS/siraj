@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  CheckOutlined,
-  CloseOutlined,
-  Details as DetailsIcon,
-  HistoryOutlined,
-  WarningAmberOutlined,
-} from "@mui/icons-material";
+import { CheckOutlined, CloseOutlined, Details as DetailsIcon } from "@mui/icons-material";
 import { Avatar, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
@@ -18,7 +12,7 @@ import {
   RescheduleDateLabel as GqlRescheduleDateLabel,
 } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TrackingRow } from "./types";
-import { getTrackingStatusLabel } from "./types";
+import { getTrackingStatusIcon, getTrackingStatusLabel } from "./types";
 
 interface RescheduleTrackingDataGridHeaders {
   readonly teacherName: string;
@@ -186,13 +180,7 @@ export function RescheduleTrackingDataGrid({
             category="trackingStatus"
             status={row.status}
             label={getTrackingStatusLabel(row.status, { ...labels, filterAll: "" })}
-            icon={
-              row.status === GqlLeaveRequestStatus.Rescheduled ? (
-                <HistoryOutlined sx={{ fontSize: 14, color: "inherit" }} />
-              ) : (
-                <WarningAmberOutlined sx={{ fontSize: 14, color: "inherit" }} />
-              )
-            }
+            icon={getTrackingStatusIcon(row.status, { fontSize: 14, color: "inherit" })}
           />
         ),
       },

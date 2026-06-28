@@ -2,7 +2,6 @@ export interface RescheduleTrackingLabels {
   readonly pageTitle: string;
   readonly sectionTitle: string;
   readonly exportData: string;
-  readonly filter: string;
   readonly filterAll: string;
   readonly showingOf: string;
   readonly noEntries: string;

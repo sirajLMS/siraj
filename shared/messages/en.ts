@@ -640,7 +640,6 @@ const en: MessageSchema = {
       pageTitle: "Dashboard Overview",
       sectionTitle: "Class Schedule & Tracking",
       exportData: "Export Data",
-      filter: "Filter",
       filterAll: "All",
       showingOf: "Showing {shown} of {total} filtered entries",
       noEntries: "No entries found",

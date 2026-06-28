@@ -4,7 +4,6 @@ export const rescheduleTracking: RescheduleTrackingLabels = {
   pageTitle: "نظرة عامة على لوحة التحكم",
   sectionTitle: "جدول الحصص والمتابعة",
   exportData: "تصدير البيانات",
-  filter: "تصفية",
   filterAll: "الكل",
   showingOf: "عرض {shown} من {total} إدخال",
   noEntries: "لا توجد إدخالات",

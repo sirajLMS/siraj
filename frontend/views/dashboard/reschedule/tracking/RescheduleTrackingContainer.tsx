@@ -1,16 +1,10 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import {
-  CancelOutlined,
-  CheckCircleOutlineOutlined,
-  EventBusyOutlined,
-  EventRepeatOutlined,
-  PendingActionsOutlined,
-} from "@mui/icons-material";
-import { Alert, Box, CircularProgress, Snackbar } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type { RescheduleTrackingRow as GqlRescheduleTrackingRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
@@ -29,6 +23,7 @@ import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
 import { RescheduleTrackingView } from "./RescheduleTrackingView";
 import type { TrackingRow } from "./types";
+import { TRACKING_METRIC_DEFINITIONS } from "./types";
 
 type RawRow = GqlRescheduleTrackingRow;
 
@@ -41,40 +36,20 @@ type RawMetrics = {
 };
 
 function buildTrackingMetrics(rawMetrics: RawMetrics | null | undefined): MetricItem[] {
-  return [
-    {
-      key: "pending",
-      count: rawMetrics?.pending ?? 0,
-      labelKey: "dashboard.rescheduleTracking.metrics.pendingRequests",
-      icon: PendingActionsOutlined,
-    },
-    {
-      key: "approved",
-      count: rawMetrics?.approved ?? 0,
-      labelKey: "dashboard.rescheduleTracking.metrics.approvedClasses",
-      icon: CheckCircleOutlineOutlined,
-    },
-    {
-      key: "leave",
-      count: rawMetrics?.leave ?? 0,
-      labelKey: "dashboard.rescheduleTracking.metrics.leaveRequests",
-      icon: EventBusyOutlined,
-    },
-    {
-      key: "rescheduled",
-      count: rawMetrics?.rescheduled ?? 0,
-      labelKey: "dashboard.rescheduleTracking.metrics.reScheduled",
-      icon: EventRepeatOutlined,
-      variant: "highlight",
-    },
-    {
-      key: "cancelled",
-      count: rawMetrics?.cancelled ?? 0,
-      labelKey: "dashboard.rescheduleTracking.metrics.cancelled",
-      icon: CancelOutlined,
-      variant: "danger",
-    },
-  ];
+  const counts: Record<string, number | null | undefined> = {
+    pending: rawMetrics?.pending,
+    approved: rawMetrics?.approved,
+    leave: rawMetrics?.leave,
+    rescheduled: rawMetrics?.rescheduled,
+    cancelled: rawMetrics?.cancelled,
+  };
+  return TRACKING_METRIC_DEFINITIONS.map(def => ({
+    key: def.key,
+    count: counts[def.key] ?? 0,
+    labelKey: def.labelKey,
+    icon: def.icon,
+    ...(def.variant ? { variant: def.variant } : {}),
+  }));
 }
 
 function buildTrackingRows(rawRows: readonly RawRow[], locale: string): TrackingRow[] {
@@ -147,9 +122,7 @@ export function RescheduleTrackingContainer() {
   const router = useRouter();
   const { page, pageSize, setPage, statusFilter, setStatusFilter } = useRescheduleTrackingStore();
 
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+  const notifications = useNotifications();
 
   const [approveLeave] = useMutation(updateSessionStatusLeaveMutationDocument);
 
@@ -182,6 +155,16 @@ export function RescheduleTrackingContainer() {
     refetch: refetchMetrics,
   } = useQuery(rescheduleTrackingMetricsQueryDocument);
 
+  const metrics = useMemo(
+    () => buildTrackingMetrics(metricsData?.rescheduleTrackingMetrics),
+    [metricsData?.rescheduleTrackingMetrics]
+  );
+
+  const rows = useMemo(
+    () => buildTrackingRows(rowsData?.rescheduleTrackingRows?.rows ?? [], locale),
+    [rowsData?.rescheduleTrackingRows?.rows, locale]
+  );
+
   const labels = {
     pageTitle: t("pageTitle"),
     sectionTitle: t("sectionTitle"),
@@ -211,9 +194,7 @@ export function RescheduleTrackingContainer() {
   const handleApprove = async (id: string) => {
     const row = rows.find(r => r.id === id);
     if (!row?.originalClassId) {
-      setSnackbarMessage(t("errors.missingOriginalClassId"));
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+      notifications.show(t("errors.missingOriginalClassId"), { severity: "error", autoHideDuration: 4000 });
       return;
     }
     try {
@@ -223,15 +204,11 @@ export function RescheduleTrackingContainer() {
           leaveReason: "Admin approved leave request",
         },
       });
-      setSnackbarMessage(t("actions.approveSuccess"));
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
+      notifications.show(t("actions.approveSuccess"), { severity: "success", autoHideDuration: 4000 });
       await Promise.all([refetchRows(), refetchMetrics()]);
     } catch (err) {
       logger.error("Failed to approve leave request:", err);
-      setSnackbarMessage(t("errors.approveFailed"));
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+      notifications.show(t("errors.approveFailed"), { severity: "error", autoHideDuration: 4000 });
     }
   };
 
@@ -240,9 +217,7 @@ export function RescheduleTrackingContainer() {
     if (row?.originalClassId) {
       router.push(`/classes/${row.originalClassId}`);
     } else {
-      setSnackbarMessage(t("errors.missingOriginalClassId"));
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+      notifications.show(t("errors.missingOriginalClassId"), { severity: "error", autoHideDuration: 4000 });
     }
   };
 
@@ -271,10 +246,6 @@ export function RescheduleTrackingContainer() {
     return <Box sx={{ p: 3, textAlign: "center" }}>Failed to load tracking data.</Box>;
   }
 
-  const metrics = buildTrackingMetrics(metricsData?.rescheduleTrackingMetrics);
-
-  const rows = buildTrackingRows(rowsData?.rescheduleTrackingRows?.rows ?? [], locale);
-
   const totalCount = rowsData?.rescheduleTrackingRows?.totalCount ?? 0;
 
   return (
@@ -294,16 +265,6 @@ export function RescheduleTrackingContainer() {
         totalCount={totalCount}
         onPageChange={setPage}
       />
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)} sx={{ width: "100%" }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </RequirePermission>
   );
 }

@@ -1,53 +1,27 @@
-import {
-  CancelOutlined,
-  CheckCircleOutlineOutlined,
-  EventBusyOutlined,
-  EventRepeatOutlined,
-  PendingActionsOutlined,
-} from "@mui/icons-material";
 import type { Meta, StoryObj } from "@storybook/react";
 import {
   LeaveRequestStatus as GqlLeaveRequestStatus,
   RescheduleDateLabel as GqlRescheduleDateLabel,
 } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { RescheduleTrackingView } from "./RescheduleTrackingView";
 import type { TrackingRow } from "./types";
+import { TRACKING_METRIC_DEFINITIONS } from "./types";
 
-const MOCK_METRICS: MetricItem[] = [
-  {
-    key: "pending",
-    count: 24,
-    labelKey: "dashboard.rescheduleTracking.metrics.pendingRequests",
-    icon: PendingActionsOutlined,
-  },
-  {
-    key: "approved",
-    count: 156,
-    labelKey: "dashboard.rescheduleTracking.metrics.approvedClasses",
-    icon: CheckCircleOutlineOutlined,
-  },
-  {
-    key: "leave",
-    count: 8,
-    labelKey: "dashboard.rescheduleTracking.metrics.leaveRequests",
-    icon: EventBusyOutlined,
-  },
-  {
-    key: "rescheduled",
-    count: 12,
-    labelKey: "dashboard.rescheduleTracking.metrics.reScheduled",
-    icon: EventRepeatOutlined,
-    variant: "highlight",
-  },
-  {
-    key: "cancelled",
-    count: 3,
-    labelKey: "dashboard.rescheduleTracking.metrics.cancelled",
-    icon: CancelOutlined,
-    variant: "danger",
-  },
-];
+const MOCK_METRIC_COUNTS: Record<string, number> = {
+  pending: 24,
+  approved: 156,
+  leave: 8,
+  rescheduled: 12,
+  cancelled: 3,
+};
+
+const MOCK_METRICS = TRACKING_METRIC_DEFINITIONS.map(def => ({
+  key: def.key,
+  count: MOCK_METRIC_COUNTS[def.key] ?? 0,
+  labelKey: def.labelKey,
+  icon: def.icon,
+  ...(def.variant ? { variant: def.variant } : {}),
+}));
 
 const MOCK_ROWS: TrackingRow[] = [
   {
