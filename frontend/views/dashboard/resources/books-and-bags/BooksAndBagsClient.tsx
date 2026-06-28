@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -24,21 +24,23 @@ export function BooksAndBagsClient({ initialBooks }: Readonly<BooksAndBagsClient
     [t]
   );
 
-  const books: BookItem[] = useMemo(
-    () =>
-      initialBooks.map(book => ({
-        id: book.id,
-        name: book.name,
-        availabilityStatus: book.availabilityStatus,
-      })),
-    [initialBooks]
+  const [books, setBooks] = useState<BookItem[]>(() =>
+    initialBooks.map(book => ({
+      id: book.id,
+      name: book.name,
+      availabilityStatus: book.availabilityStatus,
+    }))
   );
+
+  const handleDelete = (bookId: string) => {
+    setBooks(prev => prev.filter(b => b.id !== bookId));
+  };
 
   return (
     <RequirePermission permissions={[AppPermission.ResourcesList]}>
       <PageContainer>
         <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
-        <BooksAndBagsGrid books={books} labels={labels} />
+        <BooksAndBagsGrid books={books} labels={labels} onDelete={handleDelete} />
       </PageContainer>
     </RequirePermission>
   );

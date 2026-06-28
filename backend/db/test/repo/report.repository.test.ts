@@ -208,11 +208,12 @@ describe("ReportRepository — generateAttendanceReport", () => {
   });
 
   reportRepoTest("aggregates and groups correctly by STUDENT", async tx => {
-    const { student } = await setupTestData(tx);
+    const { student, teacher } = await setupTestData(tx);
 
     const filters = {
       fromDate: new Date("2026-05-01T00:00:00Z"),
       toDate: new Date("2026-05-31T23:59:59Z"),
+      teacherId: teacher.id,
       groupBy: ReportGroupingMode.STUDENT,
     };
 

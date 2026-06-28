@@ -1,4 +1,5 @@
 import { BookRepository } from "@/backend/db/repo/book.repository";
+import { DomainError, UnauthorizedError } from "@/backend/lib";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -11,7 +12,7 @@ export namespace BookService {
 
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_LIST);
     if (!hasPermission) {
-      throw new Error(t("unauthorizedAction"));
+      throw new UnauthorizedError(t("unauthorizedAction"));
     }
 
     return await BookRepository.findMany();
@@ -23,26 +24,20 @@ export namespace BookService {
 
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_DELETE);
       if (!hasPermission) {
-        throw new Error(t("unauthorizedAction"));
+        throw new UnauthorizedError(t("unauthorizedAction"));
       }
 
-      const book = await BookRepository.findById(bookId);
-      if (!book) {
-        throw new Error(t("bookNotFound"));
-      }
-
-      await BookRepository.deleteBook(bookId, locale);
+      await BookRepository.deleteBook(bookId, actorUserId);
 
       logger.info("Book deleted", { bookId, actorUserId });
       return true;
     } catch (error) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      if (
-        error instanceof Error &&
-        (error.message === t("unauthorizedAction") || error.message === t("bookNotFound"))
-      ) {
-        throw error;
+      if (error instanceof DomainError) {
+        if (error.code === "UNAUTHORIZED" || error.code === "BOOKS_NOT_FOUND") {
+          throw error;
+        }
       }
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("bookDeleteFailed"), { cause: error });
     }
   }

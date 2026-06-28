@@ -23,11 +23,13 @@ export interface BooksAndBagsClientProps {
 export interface BookItemCardProps {
   readonly book: BookItem;
   readonly labels: BooksAndBagsLabels;
+  readonly onDelete: (bookId: string) => void;
 }
 
 export interface BooksAndBagsGridProps {
   readonly books: BookItem[];
   readonly labels: BooksAndBagsLabels;
+  readonly onDelete: (bookId: string) => void;
 }
 
 export interface BooksAndBagsPageProps {

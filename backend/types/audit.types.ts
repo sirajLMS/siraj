@@ -29,7 +29,8 @@ export type AuditEntityType =
   | "LEAVE_REQUEST"
   | "COMPLAINT"
   | "LEARNING_RESOURCE"
-  | "SUGGESTION";
+  | "SUGGESTION"
+  | "BOOK";
 
 /**
  * Action types for audit logs

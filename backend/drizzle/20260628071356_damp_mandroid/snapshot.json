@@ -1,8 +1,8 @@
 {
-  "id": "0cb7a5d5-bd9e-4cde-af0c-7b8c2b03dd6b",
-  "prevIds": ["348a06c7-3d07-4a4f-9e83-a88ffd2db696"],
   "version": "8",
   "dialect": "postgres",
+  "id": "de2536a2-8620-4d64-9095-ab6efbcb956d",
+  "prevIds": ["98af1171-489b-4c58-bb41-ad289437ce88"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
@@ -117,6 +117,12 @@
         "test.custom_only"
       ],
       "name": "app_permission",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": ["AVAILABLE", "OUT_OF_STOCK"],
+      "name": "availability_status",
       "entityType": "enums",
       "schema": "public"
     },
@@ -553,6 +559,12 @@
     {
       "isRlsEnabled": false,
       "name": "payments",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "books",
       "entityType": "tables",
       "schema": "public"
     },
@@ -1994,6 +2006,71 @@
       "entityType": "columns",
       "schema": "public",
       "table": "payments"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "books"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "books"
+    },
+    {
+      "type": "availability_status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "availability_status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "books"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "books"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deleted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "books"
     },
     {
       "type": "text",
@@ -9190,6 +9267,27 @@
       "nameExplicit": true,
       "columns": [
         {
+          "value": "deleted_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "books_deleted_at_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "books"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
           "value": "expires_at",
           "isExpression": false,
           "asc": true,
@@ -13451,6 +13549,14 @@
       "name": "payments_pkey",
       "schema": "public",
       "table": "payments",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "books_pkey",
+      "schema": "public",
+      "table": "books",
       "entityType": "pks"
     },
     {

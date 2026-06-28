@@ -6,10 +6,7 @@ import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import {
-  booksAndBagsQueryDocument,
-  deleteBookMutationDocument,
-} from "@/frontend/graphql/sharedDocuments/books-and-bags.documents";
+import { deleteBookMutationDocument } from "@/frontend/graphql/sharedDocuments/books-and-bags.documents";
 import { AvailabilityStatus } from "@/shared/lib/enum";
 import type { BookItemCardProps, BooksAndBagsLabels } from "./booksAndBags.types";
 
@@ -23,15 +20,14 @@ const statusPaletteKey: Record<AvailabilityStatus, "active" | "blocked"> = {
   [AvailabilityStatus.OUT_OF_STOCK]: "blocked",
 };
 
-export function BookItemCard({ book, labels }: Readonly<BookItemCardProps>) {
-  const [deleteBook] = useMutation(deleteBookMutationDocument, {
-    refetchQueries: [{ query: booksAndBagsQueryDocument }],
-  });
+export function BookItemCard({ book, labels, onDelete }: Readonly<BookItemCardProps>) {
+  const [deleteBook] = useMutation(deleteBookMutationDocument);
   const notifications = useNotifications();
 
   const handleDelete = () => {
     deleteBook({ variables: { id: book.id } })
       .then(() => {
+        onDelete(book.id);
         notifications.show(labels.deleteSuccess, {
           severity: "success",
           autoHideDuration: 3000,

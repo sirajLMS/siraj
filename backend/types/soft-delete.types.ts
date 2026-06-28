@@ -1,4 +1,5 @@
 import type {
+  books,
   classInstances,
   complaints,
   invoices,
@@ -16,7 +17,8 @@ export type SoftDeletableTableName =
   | "complaints"
   | "learning_resources"
   | "invoices"
-  | "suggestions";
+  | "suggestions"
+  | "books";
 
 export type SoftDeleteInput = {
   tableName: SoftDeletableTableName;
@@ -39,6 +41,7 @@ export type SoftDeletableEntityMap = {
   learning_resources: typeof learningResources.$inferSelect;
   invoices: typeof invoices.$inferSelect;
   suggestions: typeof suggestions.$inferSelect;
+  books: typeof books.$inferSelect;
 };
 
 export type SoftDeletableAuditEntityMap = {
@@ -49,4 +52,5 @@ export type SoftDeletableAuditEntityMap = {
   learning_resources: Extract<AuditEntityType, "LEARNING_RESOURCE">;
   invoices: Extract<AuditEntityType, "INVOICE">;
   suggestions: Extract<AuditEntityType, "SUGGESTION">;
+  books: Extract<AuditEntityType, "BOOK">;
 };

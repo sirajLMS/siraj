@@ -1,6 +1,7 @@
 CREATE TYPE "account_status" AS ENUM('ACTIVATED', 'DEACTIVATED');--> statement-breakpoint
 CREATE TYPE "app_language" AS ENUM('ar', 'en');--> statement-breakpoint
 CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile', 'schedule.delete_class', 'schedule.clear_weekly', 'staff.edit_profile', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_profile', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'suggestions.list', 'suggestions.review', 'suggestions.delete', 'test.system_only', 'test.custom_only');--> statement-breakpoint
+CREATE TYPE "availability_status" AS ENUM('AVAILABLE', 'OUT_OF_STOCK');--> statement-breakpoint
 CREATE TYPE "class_execution_state" AS ENUM('NOT_ACTIVATED', 'ACTIVATED', 'RUNNING', 'COMPLETED');--> statement-breakpoint
 CREATE TYPE "class_outcome" AS ENUM('PENDING', 'TAKEN', 'ABSENT', 'LEAVE');--> statement-breakpoint
 CREATE TYPE "class_type" AS ENUM('REGULAR', 'TRIAL', 'ADVANCE');--> statement-breakpoint
@@ -129,6 +130,14 @@ CREATE TABLE "payments" (
 	"idempotency_key" varchar(255) NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "books" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"name" varchar(255) NOT NULL,
+	"availability_status" "availability_status" NOT NULL,
+	"created_at" timestamp(3) with time zone NOT NULL,
+	"deleted_at" timestamp(3) with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "rate_limit_cache" (
@@ -868,6 +877,7 @@ CREATE UNIQUE INDEX "invoices_idempotency_key_unique_idx" ON "invoices" ("idempo
 CREATE INDEX "payments_invoice_id_idx" ON "payments" ("invoice_id");--> statement-breakpoint
 CREATE INDEX "payments_transaction_id_idx" ON "payments" ("transaction_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "payments_idempotency_key_unique_idx" ON "payments" ("idempotency_key");--> statement-breakpoint
+CREATE INDEX "books_deleted_at_idx" ON "books" ("deleted_at");--> statement-breakpoint
 CREATE INDEX "rate_limit_cache_expires_at_idx" ON "rate_limit_cache" ("expires_at");--> statement-breakpoint
 CREATE INDEX "session_cache_expires_at_idx" ON "session_cache" ("expires_at");--> statement-breakpoint
 CREATE INDEX "complaint_responses_complaint_id_idx" ON "complaint_responses" ("complaint_id");--> statement-breakpoint

@@ -2,6 +2,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { AuditRepository } from "@/backend/db/repo/audit.repository";
 import {
+  books,
   classInstances,
   complaints,
   invoices,
@@ -10,6 +11,7 @@ import {
   suggestions,
   users,
 } from "@/backend/db/schema";
+import { NotFoundError } from "@/backend/lib";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import type { DBTransaction } from "../db.types";
@@ -42,6 +44,10 @@ const SOFT_DELETE_TABLES = {
   suggestions: {
     table: suggestions,
     entityType: "SUGGESTION" as const,
+  },
+  books: {
+    table: books,
+    entityType: "BOOK" as const,
   },
 } as const;
 
@@ -78,7 +84,10 @@ export namespace SoftDeleteRepository {
 
       if (results.length === 0) {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("activeRecordNotFound", { tableName: input.tableName, entityId: input.entityId }));
+        throw new NotFoundError(
+          input.tableName.toUpperCase(),
+          tFunc("activeRecordNotFound", { tableName: input.tableName, entityId: input.entityId })
+        );
       }
 
       const existing = results[0];
@@ -176,6 +185,14 @@ export namespace SoftDeleteRepository {
     tx?: DBTransaction
   ): Promise<Types.SoftDeleteResult<Types.SoftDeletableEntityMap["suggestions"]>> => {
     return softDelete({ tableName: "suggestions", entityId: suggestionId, actorUserId }, tx);
+  };
+
+  export const softDeleteBook = async (
+    bookId: string,
+    actorUserId?: string | null,
+    tx?: DBTransaction
+  ): Promise<Types.SoftDeleteResult<Types.SoftDeletableEntityMap["books"]>> => {
+    return softDelete({ tableName: "books", entityId: bookId, actorUserId }, tx);
   };
 
   /**
