@@ -2,22 +2,12 @@
 
 import { CloudUploadOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
-
-interface ResourceUploadDropzoneProps {
-  readonly labels: ResourcesLabels;
-  readonly selectedFileName: string;
-  readonly hasError: boolean;
-  readonly errorMessage?: string;
-  readonly onFileSelect: (fileName: string) => void;
-  readonly variant: "desktop" | "mobile";
-}
+import type { ResourceUploadDropzoneProps } from "../types/resourcesTypes";
 
 export function ResourceUploadDropzone({
   labels,
   selectedFileName,
   hasError,
-  errorMessage,
   onFileSelect,
   variant,
 }: Readonly<ResourceUploadDropzoneProps>) {
@@ -51,7 +41,7 @@ export function ResourceUploadDropzone({
           onChange={event => {
             const file = event.target.files?.[0];
             if (file) {
-              onFileSelect(file.name);
+              onFileSelect(file);
             }
           }}
         />
@@ -70,11 +60,6 @@ export function ResourceUploadDropzone({
           </Typography>
         ) : null}
       </Box>
-      {errorMessage ? (
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main, mt: 0.5 })}>
-          {errorMessage}
-        </Typography>
-      ) : null}
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mt: 1, display: "block" })}>
         {labels.upload.supportedFormats}
       </Typography>

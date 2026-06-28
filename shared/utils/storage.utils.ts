@@ -94,3 +94,18 @@ export const inferContentType = (file: File): string => {
   // Default fallback
   return "text/plain";
 };
+
+const FILE_NAME_PATTERN = /^[a-zA-Z0-9._\-\s()[\]]+$/;
+
+export const validateFileName = (fileName: string): string | null => {
+  if (!fileName || fileName.trim().length === 0) {
+    return "File name cannot be empty";
+  }
+  if (!FILE_NAME_PATTERN.test(fileName)) {
+    return "File name contains invalid characters";
+  }
+  if (fileName.length > 255) {
+    return "File name is too long (max 255 characters)";
+  }
+  return null;
+};

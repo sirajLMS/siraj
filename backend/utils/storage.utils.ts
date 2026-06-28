@@ -1,6 +1,6 @@
 import * as Types from "@/backend/types";
 import { OrderSortDirection } from "@/shared/lib/enum";
-import { isAllowedMimeType } from "@/shared/utils/storage.utils";
+import { isAllowedMimeType, validateFileName as sharedValidateFileName } from "@/shared/utils/storage.utils";
 import logger from "../lib/logger";
 import { STORAGE_CONFIG } from "../storage/disk/storage.service.interface";
 
@@ -23,19 +23,7 @@ export namespace StorageUtils {
   };
 
   // Allow common file name characters: letters, numbers, spaces, parentheses, brackets, underscores, hyphens, periods
-  const FILE_NAME_PATTERN = /^[a-zA-Z0-9._\-\s()[\]]+$/;
-  export const validateFileName = (fileName: string): string | null => {
-    if (!fileName || fileName.trim().length === 0) {
-      return "File name cannot be empty";
-    }
-    if (!FILE_NAME_PATTERN.test(fileName)) {
-      return "File name contains invalid characters";
-    }
-    if (fileName.length > 255) {
-      return "File name is too long (max 255 characters)";
-    }
-    return null;
-  };
+  export const validateFileName = sharedValidateFileName;
 
   export const validateFileSize = (size: number): string | null => {
     if (size > STORAGE_CONFIG.MAX_FILE_SIZE) {

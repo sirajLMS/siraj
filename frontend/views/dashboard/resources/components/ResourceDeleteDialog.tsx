@@ -3,16 +3,7 @@
 import { WarningAmberOutlined } from "@mui/icons-material";
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
-import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
-
-interface ResourceDeleteDialogProps {
-  readonly labels: ResourcesLabels;
-  readonly open: boolean;
-  readonly resourceTitle: string | null;
-  readonly onCancel: () => void;
-  readonly onConfirm: () => void;
-  readonly loading?: boolean;
-}
+import type { ResourceDeleteDialogProps } from "../types/resourcesTypes";
 
 export function ResourceDeleteDialog({
   labels,

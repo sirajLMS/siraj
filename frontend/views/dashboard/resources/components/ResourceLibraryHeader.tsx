@@ -3,16 +3,7 @@
 import { FilterListOutlined, SortOutlined } from "@mui/icons-material";
 import { Box, Chip } from "@mui/material";
 import { FilterButton } from "@/frontend/components/ui";
-import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
-import type { ResourceFilterType, ResourceSortBy } from "../types/resourcesTypes";
-
-interface ResourceLibraryHeaderProps {
-  readonly labels: ResourcesLabels;
-  readonly filterType: ResourceFilterType;
-  readonly sortBy: ResourceSortBy;
-  readonly onFilterTypeChange: (type: ResourceFilterType) => void;
-  readonly onSortByChange: (sort: ResourceSortBy) => void;
-}
+import type { ResourceLibraryHeaderProps } from "../types/resourcesTypes";
 
 export function ResourceLibraryHeader({
   labels,

@@ -1,12 +1,9 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMediaQuery, useTheme } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { ResourcesDesktopView } from "./ResourcesDesktopView";
 import { ResourcesMobileView } from "./ResourcesMobileView";
-import { resourceUploadSchema } from "./schemas/resourceUploadSchema";
 import type { ResourcesViewProps } from "./types/resourcesViewTypes";
 
 export function ResourcesView({
@@ -18,60 +15,31 @@ export function ResourcesView({
   pendingDeleteTitle,
   isUploading,
   isDeleting,
-  showUploadSuccess,
   canManage,
   onFilterTypeChange,
   onSortByChange,
   onUpload,
-  onDismissSuccess,
   onDeleteRequest,
   onDeleteCancel,
   onDeleteConfirm,
+  onCardClick,
 }: Readonly<ResourcesViewProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [selectedFileName, setSelectedFileName] = useState("");
-  const schema = resourceUploadSchema(labels.validation);
+  const [documentName, setDocumentName] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      documentName: "",
-      fileName: "",
-    },
-  });
-
-  useEffect(() => {
-    if (!showUploadSuccess) {
-      return undefined;
-    }
-
-    const timer = setTimeout(() => {
-      onDismissSuccess();
-    }, 4000);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [showUploadSuccess, onDismissSuccess]);
-
-  const handleFileSelect = (fileName: string) => {
-    setSelectedFileName(fileName);
-    setValue("fileName", fileName, { shouldValidate: true });
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
   };
 
   const handleFormSubmit = () => {
-    handleSubmit(data => {
-      onUpload(data);
-      reset();
-      setSelectedFileName("");
-    })();
+    if (!selectedFile || !documentName.trim()) {
+      return;
+    }
+    onUpload({ documentName: documentName.trim(), fileName: selectedFile.name }, selectedFile);
+    setDocumentName("");
+    setSelectedFile(null);
   };
 
   const viewProps = {
@@ -83,19 +51,18 @@ export function ResourcesView({
     pendingDeleteTitle,
     isUploading,
     isDeleting,
-    showUploadSuccess,
     canManage,
-    control,
-    errors,
-    selectedFileName,
+    documentName,
+    selectedFileName: selectedFile?.name ?? "",
     onFilterTypeChange,
     onSortByChange,
+    onDocumentNameChange: setDocumentName,
     onFormSubmit: handleFormSubmit,
     onFileSelect: handleFileSelect,
-    onDismissSuccess,
     onDeleteRequest,
     onDeleteCancel,
     onDeleteConfirm,
+    onCardClick,
   };
 
   if (isMobile) {

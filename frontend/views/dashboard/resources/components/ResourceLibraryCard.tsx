@@ -4,23 +4,15 @@ import { AttachFileOutlined, DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
-import type { LearningResourceRow } from "../types/resourcesTypes";
+import type { ResourceLibraryCardProps } from "../types/resourcesTypes";
 import { ResourceFileTypeIcon } from "./ResourceFileTypeIcon";
-
-interface ResourceLibraryCardProps {
-  readonly resource: LearningResourceRow;
-  readonly labels: ResourcesLabels;
-  readonly canManage: boolean;
-  readonly onDeleteRequest: (id: string) => void;
-  readonly variant: "grid" | "list";
-}
 
 export function ResourceLibraryCard({
   resource,
   labels,
   canManage,
   onDeleteRequest,
+  onCardClick,
   variant,
 }: Readonly<ResourceLibraryCardProps>) {
   const isList = variant === "list";
@@ -28,6 +20,9 @@ export function ResourceLibraryCard({
   return (
     <Paper
       elevation={0}
+      onClick={() => {
+        onCardClick(resource.id);
+      }}
       sx={theme => ({
         p: isList ? 2 : 3,
         borderRadius: theme.layout.radius.card,
@@ -41,6 +36,7 @@ export function ResourceLibraryCard({
         minHeight: isList ? undefined : 160,
         justifyContent: "space-between",
         transition: "border-color 0.15s ease",
+        cursor: "pointer",
         "&:hover": { borderColor: theme.palette.primary.main },
       })}
     >
@@ -57,7 +53,8 @@ export function ResourceLibraryCard({
           <RequirePermission permissions={AppPermission.ResourcesDelete}>
             <IconButton
               aria-label="Delete resource"
-              onClick={() => {
+              onClick={e => {
+                e.stopPropagation();
                 onDeleteRequest(resource.id);
               }}
               sx={theme => ({ color: theme.palette.error.main })}
@@ -96,7 +93,8 @@ export function ResourceLibraryCard({
         <RequirePermission permissions={AppPermission.ResourcesDelete}>
           <IconButton
             aria-label="Delete resource"
-            onClick={() => {
+            onClick={e => {
+              e.stopPropagation();
               onDeleteRequest(resource.id);
             }}
             sx={theme => ({ color: theme.palette.error.main, position: "absolute", top: 8, right: 8 })}

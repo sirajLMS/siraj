@@ -1,3 +1,5 @@
+import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
+
 export type {
   LearningResourceRow as GqlLearningResourceRow,
   ResourceUploadInput,
@@ -43,7 +45,91 @@ export interface LearningResourceRow {
   readonly id: string;
   readonly title: string;
   readonly fileName: string;
+  readonly filePath: string;
   readonly fileType: ResourceFileType;
   readonly uploadedAt: string;
   readonly uploadedAtTimestamp: number;
+}
+
+export interface ResourceLibraryCardProps {
+  readonly resource: LearningResourceRow;
+  readonly labels: ResourcesLabels;
+  readonly canManage: boolean;
+  readonly onDeleteRequest: (id: string) => void;
+  readonly onCardClick: (id: string) => void;
+  readonly variant: "grid" | "list";
+}
+
+export interface ResourceUploadFormProps {
+  readonly labels: ResourcesLabels;
+  readonly documentName: string;
+  readonly selectedFileName: string;
+  readonly isUploading: boolean;
+  readonly canManage: boolean;
+  readonly onDocumentNameChange: (name: string) => void;
+  readonly onFormSubmit: () => void;
+  readonly onFileSelect: (file: File) => void;
+  readonly variant: "desktop" | "mobile";
+}
+
+export interface ResourceUploadDropzoneProps {
+  readonly labels: ResourcesLabels;
+  readonly selectedFileName: string;
+  readonly hasError?: boolean;
+  readonly errorMessage?: string;
+  readonly onFileSelect: (file: File) => void;
+  readonly variant: "desktop" | "mobile";
+}
+
+export interface ResourceUploadGuidelinesProps {
+  readonly labels: ResourcesLabels;
+}
+
+export interface ResourceLibraryHeaderProps {
+  readonly labels: ResourcesLabels;
+  readonly filterType: ResourceFilterType;
+  readonly sortBy: ResourceSortBy;
+  readonly onFilterTypeChange: (type: ResourceFilterType) => void;
+  readonly onSortByChange: (sort: ResourceSortBy) => void;
+}
+
+export interface ResourceLibraryGridProps {
+  readonly resources: readonly LearningResourceRow[];
+  readonly labels: ResourcesLabels;
+  readonly filterType: ResourceFilterType;
+  readonly sortBy: ResourceSortBy;
+  readonly canManage: boolean;
+  readonly onFilterTypeChange: (type: ResourceFilterType) => void;
+  readonly onSortByChange: (sort: ResourceSortBy) => void;
+  readonly onDeleteRequest: (id: string) => void;
+  readonly onCardClick: (id: string) => void;
+}
+
+export interface ResourceLibraryListProps {
+  readonly resources: readonly LearningResourceRow[];
+  readonly labels: ResourcesLabels;
+  readonly filterType: ResourceFilterType;
+  readonly sortBy: ResourceSortBy;
+  readonly canManage: boolean;
+  readonly onFilterTypeChange: (type: ResourceFilterType) => void;
+  readonly onSortByChange: (sort: ResourceSortBy) => void;
+  readonly onDeleteRequest: (id: string) => void;
+  readonly onCardClick: (id: string) => void;
+}
+
+export interface ResourceFileTypeIconProps {
+  readonly fileType: ResourceFileType;
+}
+
+export interface ResourceGovernancePanelProps {
+  readonly labels: ResourcesLabels;
+}
+
+export interface ResourceDeleteDialogProps {
+  readonly labels: ResourcesLabels;
+  readonly open: boolean;
+  readonly resourceTitle: string | null;
+  readonly onCancel: () => void;
+  readonly onConfirm: () => void;
+  readonly loading?: boolean;
 }

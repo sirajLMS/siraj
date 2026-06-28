@@ -2,11 +2,7 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
-
-interface ResourceUploadGuidelinesProps {
-  readonly labels: ResourcesLabels;
-}
+import type { ResourceUploadGuidelinesProps } from "../types/resourcesTypes";
 
 export function ResourceUploadGuidelines({ labels }: Readonly<ResourceUploadGuidelinesProps>) {
   return (

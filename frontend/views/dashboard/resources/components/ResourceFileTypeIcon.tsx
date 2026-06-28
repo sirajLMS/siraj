@@ -3,13 +3,9 @@
 import { ArticleOutlined, PictureAsPdfOutlined, SlideshowOutlined, TableChartOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import type { ResourceFileType } from "../types/resourcesTypes";
+import type { ResourceFileTypeIconProps } from "../types/resourcesTypes";
 
-interface ResourceFileTypeIconProps {
-  readonly fileType: ResourceFileType;
-}
-
-function renderIcon(fileType: ResourceFileType) {
+function renderIcon(fileType: ResourceFileTypeIconProps["fileType"]) {
   switch (fileType) {
     case "pptx":
       return <SlideshowOutlined fontSize="medium" />;
@@ -24,7 +20,7 @@ function renderIcon(fileType: ResourceFileType) {
 
 function getIconStyles(
   theme: Theme,
-  fileType: ResourceFileType
+  fileType: ResourceFileTypeIconProps["fileType"]
 ): { readonly backgroundColor: string; readonly color: string } {
   switch (fileType) {
     case "pptx":

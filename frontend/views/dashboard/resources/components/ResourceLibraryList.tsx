@@ -1,21 +1,9 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
-import type { LearningResourceRow, ResourceFilterType, ResourceSortBy } from "../types/resourcesTypes";
+import type { ResourceLibraryListProps } from "../types/resourcesTypes";
 import { ResourceLibraryCard } from "./ResourceLibraryCard";
 import { ResourceLibraryHeader } from "./ResourceLibraryHeader";
-
-interface ResourceLibraryListProps {
-  readonly resources: readonly LearningResourceRow[];
-  readonly labels: ResourcesLabels;
-  readonly filterType: ResourceFilterType;
-  readonly sortBy: ResourceSortBy;
-  readonly canManage: boolean;
-  readonly onFilterTypeChange: (type: ResourceFilterType) => void;
-  readonly onSortByChange: (sort: ResourceSortBy) => void;
-  readonly onDeleteRequest: (id: string) => void;
-}
 
 export function ResourceLibraryList({
   resources,
@@ -26,6 +14,7 @@ export function ResourceLibraryList({
   onFilterTypeChange,
   onSortByChange,
   onDeleteRequest,
+  onCardClick,
 }: Readonly<ResourceLibraryListProps>) {
   return (
     <Box>
@@ -59,6 +48,7 @@ export function ResourceLibraryList({
               labels={labels}
               canManage={canManage}
               onDeleteRequest={onDeleteRequest}
+              onCardClick={onCardClick}
               variant="list"
             />
           ))}

@@ -1,21 +1,9 @@
 "use client";
 
 import { Box, Grid, Typography } from "@mui/material";
-import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
-import type { LearningResourceRow, ResourceFilterType, ResourceSortBy } from "../types/resourcesTypes";
+import type { ResourceLibraryGridProps } from "../types/resourcesTypes";
 import { ResourceLibraryCard } from "./ResourceLibraryCard";
 import { ResourceLibraryHeader } from "./ResourceLibraryHeader";
-
-interface ResourceLibraryGridProps {
-  readonly resources: readonly LearningResourceRow[];
-  readonly labels: ResourcesLabels;
-  readonly filterType: ResourceFilterType;
-  readonly sortBy: ResourceSortBy;
-  readonly canManage: boolean;
-  readonly onFilterTypeChange: (type: ResourceFilterType) => void;
-  readonly onSortByChange: (sort: ResourceSortBy) => void;
-  readonly onDeleteRequest: (id: string) => void;
-}
 
 export function ResourceLibraryGrid({
   resources,
@@ -26,6 +14,7 @@ export function ResourceLibraryGrid({
   onFilterTypeChange,
   onSortByChange,
   onDeleteRequest,
+  onCardClick,
 }: Readonly<ResourceLibraryGridProps>) {
   return (
     <Box>
@@ -57,6 +46,7 @@ export function ResourceLibraryGrid({
                 labels={labels}
                 canManage={canManage}
                 onDeleteRequest={onDeleteRequest}
+                onCardClick={onCardClick}
                 variant="grid"
               />
             </Grid>

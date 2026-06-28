@@ -3,7 +3,7 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { ResourcesView } from "./ResourcesView";
-import type { ResourceFilterType, ResourceSortBy, ResourceUploadFormData } from "./types/resourcesTypes";
+import type { ResourceFilterType, ResourceSortBy } from "./types/resourcesTypes";
 
 const mockLabels = {
   pageTitle: "Resource Library",
@@ -56,6 +56,7 @@ const mockResources = [
     id: "res-1",
     title: "English Grammar Handbook",
     fileName: "grammar-handbook.pdf",
+    filePath: "resources/grammar-handbook.pdf",
     fileType: "pdf" as const,
     uploadedAt: "3/1/2025",
     uploadedAtTimestamp: 1740819600000,
@@ -64,6 +65,7 @@ const mockResources = [
     id: "res-2",
     title: "Math Worksheets Grade 5",
     fileName: "math-worksheets.xlsx",
+    filePath: "resources/math-worksheets.xlsx",
     fileType: "xlsx" as const,
     uploadedAt: "3/10/2025",
     uploadedAtTimestamp: 1741599600000,
@@ -80,7 +82,6 @@ const baseArgs = {
   pendingDeleteTitle: null,
   isUploading: false,
   isDeleting: false,
-  showUploadSuccess: false,
   canManage: true,
   onSearchChange: (query: string) => {
     logger.info("onSearchChange:", query);
@@ -91,11 +92,8 @@ const baseArgs = {
   onSortByChange: (sort: ResourceSortBy) => {
     logger.info("onSortByChange:", sort);
   },
-  onUpload: (data: ResourceUploadFormData) => {
+  onUpload: (data: { documentName: string; fileName: string }, _file: File) => {
     logger.info("onUpload:", data);
-  },
-  onDismissSuccess: () => {
-    logger.info("onDismissSuccess");
   },
   onDeleteRequest: (id: string) => {
     logger.info("onDeleteRequest:", id);
@@ -105,6 +103,9 @@ const baseArgs = {
   },
   onDeleteConfirm: () => {
     logger.info("onDeleteConfirm");
+  },
+  onCardClick: (id: string) => {
+    logger.info("onCardClick:", id);
   },
 };
 

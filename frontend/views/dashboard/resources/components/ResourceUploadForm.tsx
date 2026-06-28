@@ -2,31 +2,16 @@
 
 import { CloudUploadOutlined, DescriptionOutlined } from "@mui/icons-material";
 import { Box, TextField, Typography } from "@mui/material";
-import type { Control, FieldErrors } from "react-hook-form";
-import { Controller } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import type { ResourcesLabels } from "@/shared/messages/types/dashboard/resources/main";
-import type { ResourceUploadFormData } from "../schemas/resourceUploadSchema";
+import type { ResourceUploadFormProps } from "../types/resourcesTypes";
 import { ResourceUploadDropzone } from "./ResourceUploadDropzone";
-
-interface ResourceUploadFormProps {
-  readonly labels: ResourcesLabels;
-  readonly control: Control<ResourceUploadFormData>;
-  readonly errors: FieldErrors<ResourceUploadFormData>;
-  readonly isUploading: boolean;
-  readonly canManage: boolean;
-  readonly onFormSubmit: () => void;
-  readonly onFileSelect: (fileName: string) => void;
-  readonly selectedFileName: string;
-  readonly variant: "desktop" | "mobile";
-}
 
 export function ResourceUploadForm({
   labels,
-  control,
-  errors,
+  documentName,
   isUploading,
   canManage,
+  onDocumentNameChange,
   onFormSubmit,
   onFileSelect,
   selectedFileName,
@@ -49,19 +34,15 @@ export function ResourceUploadForm({
         >
           {labels.upload.documentName}
         </Typography>
-        <Controller
-          name="documentName"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              placeholder={labels.upload.documentNamePlaceholder}
-              fullWidth
-              error={Boolean(errors.documentName)}
-              helperText={errors.documentName?.message}
-              slotProps={{ htmlInput: { autoComplete: "off" } }}
-            />
-          )}
+        <TextField
+          value={documentName}
+          onChange={e => {
+            onDocumentNameChange(e.target.value);
+          }}
+          placeholder={labels.upload.documentNamePlaceholder}
+          fullWidth
+          disabled={isUploading}
+          slotProps={{ htmlInput: { autoComplete: "off" } }}
         />
       </Box>
 
@@ -69,8 +50,6 @@ export function ResourceUploadForm({
         <ResourceUploadDropzone
           labels={labels}
           selectedFileName={selectedFileName}
-          hasError={Boolean(errors.fileName)}
-          errorMessage={errors.fileName?.message}
           onFileSelect={onFileSelect}
           variant={variant}
         />
