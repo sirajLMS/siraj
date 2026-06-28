@@ -1,5 +1,6 @@
 "use client";
 
+import { LeaveRequestStatus as GqlLeaveRequestStatus, RescheduleDateLabel as GqlRescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   CheckOutlined,
   CloseOutlined,
@@ -118,7 +119,7 @@ export function RescheduleTrackingDataGrid({
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => {
-          const isLeaveRequest = row.dateLabel === "leave_request";
+          const isLeaveRequest = row.dateLabel === GqlRescheduleDateLabel.LeaveRequest;
           return (
             <Box
               sx={{
@@ -176,9 +177,9 @@ export function RescheduleTrackingDataGrid({
           <StatusBadge
             category="trackingStatus"
             status={row.status}
-            label={row.status === "rescheduled" ? labels.rescheduled : labels.pendingLeave}
+            label={row.status === GqlLeaveRequestStatus.Rescheduled ? labels.rescheduled : labels.pendingLeave}
             icon={
-              row.status === "rescheduled" ? (
+              row.status === GqlLeaveRequestStatus.Rescheduled ? (
                 <HistoryOutlined sx={{ fontSize: 14, color: "inherit" }} />
               ) : (
                 <WarningAmberOutlined sx={{ fontSize: 14, color: "inherit" }} />
@@ -195,7 +196,7 @@ export function RescheduleTrackingDataGrid({
         align: "right",
         headerAlign: "center",
         renderCell: ({ row }) => {
-          if (row.status === "pending_leave") {
+          if (row.status === GqlLeaveRequestStatus.Pending) {
             return (
               <Box sx={{ height: "100%", display: "flex", alignItems: "center" }}>
                 <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, width: "100%" }}>

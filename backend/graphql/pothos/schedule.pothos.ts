@@ -1,8 +1,8 @@
 import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
 import type { PageInfo } from "@/backend/types";
-import type { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
+import type { ClassExecutionState, ClassOutcome, LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { ClassExecutionStatePothosObject, ClassOutcomePothosObject } from "./enum.pothos";
+import { ClassExecutionStatePothosObject, ClassOutcomePothosObject, LeaveRequestStatusPothosObject, RescheduleDateLabelPothosObject } from "./enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 export type DailyScheduleMetricsDefinition = {
@@ -144,8 +144,8 @@ export type RescheduleTrackingRowDefinition = {
   studentName: string;
   scheduledStartAt: Date;
   scheduledEndAt: Date;
-  status: string;
-  dateLabel: string;
+  status: LeaveRequestStatus;
+  dateLabel: RescheduleDateLabel;
   remarks: string | null;
 };
 
@@ -162,8 +162,8 @@ export const RescheduleTrackingRowPothosObject = RescheduleTrackingRowRef.implem
     studentName: t.exposeString("studentName"),
     scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
     scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
-    status: t.exposeString("status"),
-    dateLabel: t.exposeString("dateLabel"),
+    status: t.expose("status", { type: LeaveRequestStatusPothosObject }),
+    dateLabel: t.expose("dateLabel", { type: RescheduleDateLabelPothosObject }),
     remarks: t.exposeString("remarks", { nullable: true }),
   }),
 });
@@ -193,7 +193,7 @@ export const RescheduleTrackingMetricsPothosObject = RescheduleTrackingMetricsRe
 
 export type RescheduleTrackingInputDefinition = {
   search?: string | null;
-  status?: string | null;
+  status?: LeaveRequestStatus | null;
 };
 
 export const RescheduleTrackingInputPothosObject = gqlSchemaBuilder
@@ -201,7 +201,7 @@ export const RescheduleTrackingInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       search: t.string(),
-      status: t.string(),
+      status: t.field({ type: LeaveRequestStatusPothosObject, required: false }),
     }),
   });
 

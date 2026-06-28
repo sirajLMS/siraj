@@ -5,6 +5,7 @@ import type {
   recurringSchedules,
   timezones,
 } from "@/backend/db/schema";
+import type { LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
 export type RecurringScheduleEntity = typeof recurringSchedules.$inferSelect;
@@ -32,14 +33,14 @@ export type RescheduleTrackingRow = {
   studentName: string;
   scheduledStartAt: Date;
   scheduledEndAt: Date;
-  status: "rescheduled" | "pending_leave";
-  dateLabel: "new_date" | "leave_request";
+  status: LeaveRequestStatus;
+  dateLabel: RescheduleDateLabel;
   remarks: string | null;
 };
 
 export type RescheduleTrackingInput = {
   search?: string | null;
-  status?: string | null;
+  status?: LeaveRequestStatus | null;
 };
 
 export type RescheduleTrackingPaginatedResult = {

@@ -1,10 +1,8 @@
-import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
-
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { DashboardLayoutContainer } from "@/frontend/views/dashboard/components/DashboardLayoutContainer";
-import { type AppLocale, locales } from "@/shared/i18n/routing";
+import { type AppLocale, locales, redirect } from "@/shared/i18n/routing";
 
 export default async function DashboardLayout({
   children,
@@ -21,7 +19,8 @@ export default async function DashboardLayout({
   }
 
   if (!userId || !context) {
-    redirect(`/${locale}/login`);
+    redirect({ href: "/login", locale });
+    return;
   }
 
   const userProfile = await getCurrentUser(userId);

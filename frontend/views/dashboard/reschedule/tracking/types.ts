@@ -1,4 +1,6 @@
-export type TrackingClassStatus = "rescheduled" | "pending_leave";
+import type { LeaveRequestStatus as GqlLeaveRequestStatus, RescheduleDateLabel as GqlRescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
+
+export type TrackingClassStatus = GqlLeaveRequestStatus;
 
 export interface TrackingRow {
   readonly id: string;
@@ -8,7 +10,7 @@ export interface TrackingRow {
   readonly teacherAvatarUrl?: string;
   readonly studentClass: string;
   readonly scheduledDate: string;
-  readonly dateLabel: "new_date" | "leave_request";
+  readonly dateLabel: GqlRescheduleDateLabel;
   readonly timeSlot: string;
-  readonly status: TrackingClassStatus;
+  readonly status: GqlLeaveRequestStatus;
 }

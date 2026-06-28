@@ -4,6 +4,7 @@ import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
 import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { LeaveRequestStatusPothosObject } from "../pothos/enum.pothos";
 import { PaginationArgsObject } from "../pothos/pagination.objects";
 import {
   AdminDashboardScheduleInputPothosObject,
@@ -122,7 +123,7 @@ gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
     type: RescheduleTrackingResultPothosObject,
     args: {
       search: t.arg.string({ required: false }),
-      status: t.arg.string({ required: false }),
+      status: t.arg({ type: LeaveRequestStatusPothosObject, required: false }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     authScopes: { loggedIn: true },

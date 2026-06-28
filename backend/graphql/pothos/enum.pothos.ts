@@ -5,9 +5,11 @@ import {
   CountryCode,
   Gender,
   InvoiceType,
+  LeaveRequestStatus,
   OrderSortDirection,
   ParentStatus,
   PaymentMethod,
+  RescheduleDateLabel,
   StudentStatus,
 } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
@@ -50,4 +52,12 @@ export const ClassOutcomePothosObject = gqlSchemaBuilder.enumType(ClassOutcome, 
 
 export const ClassExecutionStatePothosObject = gqlSchemaBuilder.enumType(ClassExecutionState, {
   name: "ClassExecutionState",
+});
+
+export const LeaveRequestStatusPothosObject = gqlSchemaBuilder.enumType(LeaveRequestStatus, {
+  name: "LeaveRequestStatus",
+});
+
+export const RescheduleDateLabelPothosObject = gqlSchemaBuilder.enumType(RescheduleDateLabel, {
+  name: "RescheduleDateLabel",
 });

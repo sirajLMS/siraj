@@ -7,8 +7,10 @@
       "enabled": true
     },
     "next-devtools": {
+      "type": "local",
       "command": ["bun", "x", "-y", "next-devtools-mcp@latest"],
       "enabled": true
     }
-  }
+  },
+  "snapshot": false
 }

@@ -12,6 +12,8 @@ import { Box, CircularProgress } from "@mui/material";
 import { useLocale, useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { RescheduleTrackingRow as GqlRescheduleTrackingRow } from "@/frontend/graphql/generated/gql/graphql-types";
+import { LeaveRequestStatus as GqlLeaveRequestStatus, RescheduleDateLabel as GqlRescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   rescheduleTrackingMetricsQueryDocument,
   rescheduleTrackingRowsQueryDocument,
@@ -23,17 +25,7 @@ import { useRouter } from "@/shared/i18n/routing";
 import { RescheduleTrackingView } from "./RescheduleTrackingView";
 import type { TrackingRow } from "./types";
 
-type RawRow = {
-  readonly id?: string | null;
-  readonly teacherName?: string | null;
-  readonly teacherId?: string | null;
-  readonly teacherAvatarUrl?: string | null;
-  readonly studentName?: string | null;
-  readonly scheduledStartAt?: unknown;
-  readonly scheduledEndAt?: unknown;
-  readonly dateLabel?: string | null;
-  readonly status?: string | null;
-};
+type RawRow = GqlRescheduleTrackingRow;
 
 type RawMetrics = {
   readonly pending?: number | null;
@@ -115,9 +107,9 @@ function buildTrackingRows(rawRows: readonly RawRow[], locale: string): Tracking
       teacherAvatarUrl: r.teacherAvatarUrl ?? undefined,
       studentClass: r.studentName ?? "",
       scheduledDate: formattedDate,
-      dateLabel: r.dateLabel === "leave_request" ? ("leave_request" as const) : ("new_date" as const),
+      dateLabel: r.dateLabel === GqlRescheduleDateLabel.LeaveRequest ? GqlRescheduleDateLabel.LeaveRequest : GqlRescheduleDateLabel.NewDate,
       timeSlot,
-      status: r.status === "pending_leave" ? ("pending_leave" as const) : ("rescheduled" as const),
+      status: r.status === GqlLeaveRequestStatus.Pending ? GqlLeaveRequestStatus.Pending : GqlLeaveRequestStatus.Rescheduled,
     };
   });
 }

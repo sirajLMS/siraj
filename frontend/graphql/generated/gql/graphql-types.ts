@@ -1062,6 +1062,13 @@ export type LeaveProcessResult = {
   rescheduledInstanceId: Maybe<Scalars['String']['output']>;
 };
 
+export enum LeaveRequestStatus {
+  Approved = 'APPROVED',
+  Cancelled = 'CANCELLED',
+  Pending = 'PENDING',
+  Rescheduled = 'RESCHEDULED'
+}
+
 export type LogSupportRequestInput = {
   reason: Scalars['String']['input'];
 };
@@ -2167,7 +2174,7 @@ export type QueryPermissionGroupArgs = {
 export type QueryRescheduleTrackingRowsArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
   search: InputMaybe<Scalars['String']['input']>;
-  status: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<LeaveRequestStatus>;
 };
 
 
@@ -2331,9 +2338,14 @@ export type RescheduleClassInput = {
   scheduledStartAt: Scalars['String']['input'];
 };
 
+export enum RescheduleDateLabel {
+  LeaveRequest = 'LEAVE_REQUEST',
+  NewDate = 'NEW_DATE'
+}
+
 export type RescheduleTrackingInput = {
   search: InputMaybe<Scalars['String']['input']>;
-  status: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<LeaveRequestStatus>;
 };
 
 export type RescheduleTrackingMetrics = {
@@ -2356,13 +2368,13 @@ export type RescheduleTrackingResult = {
 
 export type RescheduleTrackingRow = {
   __typename?: 'RescheduleTrackingRow';
-  dateLabel: Maybe<Scalars['String']['output']>;
+  dateLabel: Maybe<RescheduleDateLabel>;
   id: Maybe<Scalars['String']['output']>;
   originalClassId: Maybe<Scalars['String']['output']>;
   remarks: Maybe<Scalars['String']['output']>;
   scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
   scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
-  status: Maybe<Scalars['String']['output']>;
+  status: Maybe<LeaveRequestStatus>;
   studentId: Maybe<Scalars['String']['output']>;
   studentName: Maybe<Scalars['String']['output']>;
   teacherAvatarUrl: Maybe<Scalars['String']['output']>;

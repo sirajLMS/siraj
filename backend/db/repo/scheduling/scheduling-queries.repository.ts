@@ -18,6 +18,7 @@ import {
   type DailyScheduleMetricsCounts,
   matchesDashboardMetricFilter,
 } from "@/shared/lib/schedule-instance-dashboard-status";
+import { LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib/enum";
 
 type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -285,9 +286,9 @@ function buildRescheduleConditions(
 
   let conditions = baseConditions;
 
-  if (input.status === "pending_leave") {
+  if (input.status === LeaveRequestStatus.PENDING) {
     conditions = and(conditions, eq(originalClass.outcome, "LEAVE"));
-  } else if (input.status === "rescheduled") {
+  } else if (input.status === LeaveRequestStatus.RESCHEDULED) {
     conditions = and(conditions, ne(originalClass.outcome, "LEAVE"));
   }
 
@@ -351,8 +352,8 @@ function mapRescheduleRow(row: {
     studentName: row.studentName ?? "",
     scheduledStartAt: row.scheduledStartAt,
     scheduledEndAt: row.scheduledEndAt,
-    status: isLeave ? ("pending_leave" as const) : ("rescheduled" as const),
-    dateLabel: isLeave ? ("leave_request" as const) : ("new_date" as const),
+    status: isLeave ? LeaveRequestStatus.PENDING : LeaveRequestStatus.RESCHEDULED,
+    dateLabel: isLeave ? RescheduleDateLabel.LEAVE_REQUEST : RescheduleDateLabel.NEW_DATE,
     remarks: row.remarks,
   };
 }

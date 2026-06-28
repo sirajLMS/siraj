@@ -5,17 +5,22 @@ import {
   SIDEBAR_NAV_ITEMS,
 } from "@/frontend/views/dashboard/config/navigationConfig";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
+import { locales } from "@/shared/i18n/routing";
 
-export function getActiveNavKey(pathname: string, sidebarItems: readonly NavItem[], locale: string): string {
-  const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/dashboard";
+export function getActiveNavKey(pathname: string, sidebarItems: readonly NavItem[]): string {
+  for (const loc of locales) {
+    if (pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`) {
+      pathname = pathname.slice(`/${loc}`.length) || "/dashboard";
+      break;
+    }
+  }
 
-  return sidebarItems.find(item => pathWithoutLocale.startsWith(item.href))?.key ?? "home";
+  return sidebarItems.find(item => pathname.startsWith(item.href))?.key ?? "home";
 }
 
 export function getDashboardLayoutData(
   pathname: string,
-  permissions: readonly AppPermission[],
-  locale: string
+  permissions: readonly AppPermission[]
 ): {
   readonly sidebarItems: NavItem[];
   readonly bottomNavItems: NavItem[];
@@ -23,7 +28,7 @@ export function getDashboardLayoutData(
 } {
   const sidebarItems = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, permissions);
   const bottomNavItems = getNavItemsForPermissions(BOTTOM_NAV_ITEMS, permissions);
-  const activeNavKey = getActiveNavKey(pathname, sidebarItems, locale);
+  const activeNavKey = getActiveNavKey(pathname, sidebarItems);
 
   return { sidebarItems, bottomNavItems, activeNavKey };
 }

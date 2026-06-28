@@ -6,7 +6,7 @@ import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { PaginationArgs } from "@/backend/types";
+import type { PaginationArgs, RescheduleTrackingInput } from "@/backend/types";
 import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/shared/lib/enum";
 
 export namespace ScheduleService {
@@ -181,7 +181,7 @@ export namespace ScheduleService {
 
   export async function getRescheduleTracking(
     userId: string,
-    input: { search?: string | null; status?: string | null },
+    input: RescheduleTrackingInput,
     pagination: PaginationArgs | null = null,
     locale?: string
   ) {

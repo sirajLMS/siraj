@@ -69,6 +69,7 @@ const mockTeachers = [
 const mockRows = [
   {
     id: "2024-05-01",
+    entityId: null,
     name: "May 1, 2024",
     studentName: "",
     avatarInitials: "M1",
@@ -83,6 +84,7 @@ const mockRows = [
   },
   {
     id: "2024-05-02",
+    entityId: null,
     name: "May 2, 2024",
     studentName: "",
     avatarInitials: "M2",

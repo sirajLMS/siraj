@@ -479,6 +479,12 @@ export type InvoiceType =
   | 'MONTHLY'
   | 'PER_CLASSES';
 
+export type LeaveRequestStatus =
+  | 'APPROVED'
+  | 'CANCELLED'
+  | 'PENDING'
+  | 'RESCHEDULED';
+
 export type LogSupportRequestInput = {
   reason: string;
 };
@@ -566,6 +572,10 @@ export type RescheduleClassInput = {
   scheduledEndAt: string;
   scheduledStartAt: string;
 };
+
+export type RescheduleDateLabel =
+  | 'LEAVE_REQUEST'
+  | 'NEW_DATE';
 
 export type ResourceUploadInput = {
   displayName: string;
@@ -1749,7 +1759,7 @@ export type DailyScheduleListQueryVariables = Exact<{
 
 export type DailyScheduleListQuery = DailyScheduleListQuery_Query;
 
-export type RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingResult_rows_RescheduleTrackingRow = { id: string | null, originalClassId: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, status: string | null, dateLabel: string | null, remarks: string | null };
+export type RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingResult_rows_RescheduleTrackingRow = { id: string | null, originalClassId: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, status: Types.LeaveRequestStatus | null, dateLabel: Types.RescheduleDateLabel | null, remarks: string | null };
 
 export type RescheduleTrackingRowsQuery_rescheduleTrackingRows_RescheduleTrackingResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -1760,7 +1770,7 @@ export type RescheduleTrackingRowsQuery_Query = { rescheduleTrackingRows: Resche
 
 export type RescheduleTrackingRowsQueryVariables = Exact<{
   search: string | null | undefined;
-  status: string | null | undefined;
+  status: Types.LeaveRequestStatus | null | undefined;
   paginationArgs: Types.PaginationArgs | null | undefined;
 }>;
 

@@ -1014,6 +1014,13 @@ type LeaveProcessResult {
   rescheduledInstanceId: String
 }
 
+enum LeaveRequestStatus {
+  APPROVED
+  CANCELLED
+  PENDING
+  RESCHEDULED
+}
+
 input LogSupportRequestInput {
   reason: String!
 }
@@ -1576,7 +1583,7 @@ type Query {
   """List all permission catalog entries."""
   permissions: [Permission!]
   rescheduleTrackingMetrics: RescheduleTrackingMetrics
-  rescheduleTrackingRows(paginationArgs: PaginationArgs, search: String, status: String): RescheduleTrackingResult
+  rescheduleTrackingRows(paginationArgs: PaginationArgs, search: String, status: LeaveRequestStatus): RescheduleTrackingResult
   searchFiles(
     """File type filter (optional)"""
     fileType: String
@@ -1664,9 +1671,14 @@ input RescheduleClassInput {
   scheduledStartAt: String!
 }
 
+enum RescheduleDateLabel {
+  LEAVE_REQUEST
+  NEW_DATE
+}
+
 input RescheduleTrackingInput {
   search: String
-  status: String
+  status: LeaveRequestStatus
 }
 
 type RescheduleTrackingMetrics {
@@ -1686,13 +1698,13 @@ type RescheduleTrackingResult {
 }
 
 type RescheduleTrackingRow {
-  dateLabel: String
+  dateLabel: RescheduleDateLabel
   id: String
   originalClassId: String
   remarks: String
   scheduledEndAt: DateTime
   scheduledStartAt: DateTime
-  status: String
+  status: LeaveRequestStatus
   studentId: String
   studentName: String
   teacherAvatarUrl: String

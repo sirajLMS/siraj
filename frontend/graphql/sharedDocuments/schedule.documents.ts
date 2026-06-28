@@ -107,7 +107,7 @@ export const rescheduleTrackingRowsQueryDocument: TypedDocumentNode<
   Operations.RescheduleTrackingRowsQuery,
   Types.QueryRescheduleTrackingRowsArgs
 > = gql`
-  query rescheduleTrackingRows($search: String, $status: String, $paginationArgs: PaginationArgs) {
+  query rescheduleTrackingRows($search: String, $status: LeaveRequestStatus, $paginationArgs: PaginationArgs) {
     rescheduleTrackingRows(search: $search, status: $status, paginationArgs: $paginationArgs) {
       id
       totalCount

@@ -411,6 +411,11 @@ export enum CountryCode {
   ZW = "ZW",
 }
 
+export enum RescheduleDateLabel {
+  NEW_DATE = "new_date",
+  LEAVE_REQUEST = "leave_request",
+}
+
 export enum AppPermission {
   AUTH_LOGIN = "auth.login",
   AUTH_VIEW_OWN_PROFILE = "auth.view_own_profile",

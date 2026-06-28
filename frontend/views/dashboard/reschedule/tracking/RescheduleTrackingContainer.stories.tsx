@@ -8,9 +8,10 @@ import {
 import type { Meta, StoryObj } from "@storybook/react";
 import { create } from "zustand";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import { LeaveRequestStatus as GqlLeaveRequestStatus, RescheduleDateLabel as GqlRescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
 import { RescheduleTrackingView } from "./RescheduleTrackingView";
 
-type TrackingClassStatus = "rescheduled" | "pending_leave";
+type TrackingClassStatus = GqlLeaveRequestStatus;
 
 interface TrackingRow {
   readonly id: string;
@@ -20,7 +21,7 @@ interface TrackingRow {
   readonly teacherAvatarUrl?: string;
   readonly studentClass: string;
   readonly scheduledDate: string;
-  readonly dateLabel: "new_date" | "leave_request";
+  readonly dateLabel: GqlRescheduleDateLabel;
   readonly timeSlot: string;
   readonly status: TrackingClassStatus;
 }
@@ -74,81 +75,68 @@ const MOCK_METRICS: MetricItem[] = [
   },
 ];
 
-const MOCK_ROWS: TrackingRow[] = (
-  [
-    [
-      "1",
-      "Mohammad Al-Farsi",
-      "T-10293",
-      "MA",
-      "01.png",
-      "Grade 10 - Advanced Arabic",
-      "Oct 24, 2023",
-      "new_date",
-      "04:00 PM - 05:00 PM",
-      "rescheduled",
-    ],
-    [
-      "2",
-      "Sarah Omar",
-      "T-10452",
-      "SM",
-      "02.png",
-      "Grade 8 - Islamic Studies",
-      "Oct 25, 2023",
-      "leave_request",
-      "02:30 PM - 03:30 PM",
-      "pending_leave",
-    ],
-    [
-      "3",
-      "Rai Khan",
-      "T-10881",
-      "ZK",
-      "07.png",
-      "Grade 12 - Memo Program",
-      "Oct 26, 2023",
-      "new_date",
-      "05:00 PM - 06:00 PM",
-      "rescheduled",
-    ],
-    [
-      "4",
-      "Aisha Al-R",
-      "T-10932",
-      "AA",
-      "04.png",
-      "Grade 7 - Quran Memorization",
-      "Oct 27, 2023",
-      "leave_request",
-      "09:00 AM - 10:00 AM",
-      "pending_leave",
-    ],
-    [
-      "5",
-      "Omar Ahmed",
-      "T-11001",
-      "OF",
-      "03.png",
-      "Grade 11 - Islamic History",
-      "Oct 28, 2023",
-      "new_date",
-      "01:00 PM - 02:00 PM",
-      "rescheduled",
-    ],
-  ] as const
-).map(([id, name, tId, init, avatar, cls, date, label, slot, status]) => ({
-  id,
-  teacherName: name,
-  teacherId: tId,
-  teacherInitials: init,
-  teacherAvatarUrl: `/demo/avatars/${avatar}`,
-  studentClass: cls,
-  scheduledDate: date,
-  dateLabel: label,
-  timeSlot: slot,
-  status,
-}));
+const MOCK_ROWS: TrackingRow[] = [
+  {
+    id: "1",
+    teacherName: "Mohammad Al-Farsi",
+    teacherId: "T-10293",
+    teacherInitials: "MA",
+    teacherAvatarUrl: "/demo/avatars/01.png",
+    studentClass: "Grade 10 - Advanced Arabic",
+    scheduledDate: "Oct 24, 2023",
+    dateLabel: GqlRescheduleDateLabel.NewDate,
+    timeSlot: "04:00 PM - 05:00 PM",
+    status: GqlLeaveRequestStatus.Rescheduled,
+  },
+  {
+    id: "2",
+    teacherName: "Sarah Omar",
+    teacherId: "T-10452",
+    teacherInitials: "SM",
+    teacherAvatarUrl: "/demo/avatars/02.png",
+    studentClass: "Grade 8 - Islamic Studies",
+    scheduledDate: "Oct 25, 2023",
+    dateLabel: GqlRescheduleDateLabel.LeaveRequest,
+    timeSlot: "02:30 PM - 03:30 PM",
+    status: GqlLeaveRequestStatus.Pending,
+  },
+  {
+    id: "3",
+    teacherName: "Rai Khan",
+    teacherId: "T-10881",
+    teacherInitials: "ZK",
+    teacherAvatarUrl: "/demo/avatars/07.png",
+    studentClass: "Grade 12 - Memo Program",
+    scheduledDate: "Oct 26, 2023",
+    dateLabel: GqlRescheduleDateLabel.NewDate,
+    timeSlot: "05:00 PM - 06:00 PM",
+    status: GqlLeaveRequestStatus.Rescheduled,
+  },
+  {
+    id: "4",
+    teacherName: "Aisha Al-R",
+    teacherId: "T-10932",
+    teacherInitials: "AA",
+    teacherAvatarUrl: "/demo/avatars/04.png",
+    studentClass: "Grade 7 - Quran Memorization",
+    scheduledDate: "Oct 27, 2023",
+    dateLabel: GqlRescheduleDateLabel.LeaveRequest,
+    timeSlot: "09:00 AM - 10:00 AM",
+    status: GqlLeaveRequestStatus.Pending,
+  },
+  {
+    id: "5",
+    teacherName: "Omar Ahmed",
+    teacherId: "T-11001",
+    teacherInitials: "OF",
+    teacherAvatarUrl: "/demo/avatars/03.png",
+    studentClass: "Grade 11 - Islamic History",
+    scheduledDate: "Oct 28, 2023",
+    dateLabel: GqlRescheduleDateLabel.NewDate,
+    timeSlot: "01:00 PM - 02:00 PM",
+    status: GqlLeaveRequestStatus.Rescheduled,
+  },
+];
 
 const useRescheduleTrackingStore = create<RescheduleTrackingState>(set => ({
   metrics: MOCK_METRICS,
@@ -161,7 +149,7 @@ const useRescheduleTrackingStore = create<RescheduleTrackingState>(set => ({
   approveLeave: (id: string) => {
     set(state => ({
       rows: state.rows.map(row =>
-        row.id === id ? { ...row, status: "rescheduled", dateLabel: "new_date" as const } : row
+        row.id === id ? { ...row, status: GqlLeaveRequestStatus.Rescheduled, dateLabel: GqlRescheduleDateLabel.NewDate } : row
       ),
     }));
   },

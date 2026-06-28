@@ -1,9 +1,18 @@
 const mockPush = mock(() => {});
 
 mock.module("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush, back: mock(() => {}), forward: mock(() => {}) }),
   useParams: () => ({ locale: "en" }),
-  usePathname: () => "/en/dashboard",
+}));
+
+mock.module("@/shared/i18n/routing", () => ({
+  useRouter: () => ({ push: mockPush, back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
+  usePathname: () => "/dashboard",
+  Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+  redirect: () => {},
 }));
 
 import { afterEach, describe, expect, mock, test } from "bun:test";

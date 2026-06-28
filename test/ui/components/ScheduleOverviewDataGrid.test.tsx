@@ -1,7 +1,16 @@
 mock.module("next/navigation", () => ({
-  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}) }),
   useParams: () => ({ locale: "ar" }),
-  usePathname: () => "/ar/dashboard",
+}));
+
+mock.module("@/shared/i18n/routing", () => ({
+  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
+  usePathname: () => "/dashboard",
+  Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+  redirect: () => {},
 }));
 
 mock.module("next/link", () => ({
@@ -60,6 +69,7 @@ const mockRows: readonly DailyScheduleRow[] = [
     teacherTime: "11:00 AM",
     studentTime: "10:00 AM",
     duration: 60,
+    status: null,
     outcome: ClassOutcome.Pending,
     executionState: ClassExecutionState.NotActivated,
     student: { id: "student-1", name: "Ahmed Hassan" },
@@ -71,6 +81,7 @@ const mockRows: readonly DailyScheduleRow[] = [
     teacherTime: "3:00 PM",
     studentTime: "2:00 PM",
     duration: 60,
+    status: null,
     outcome: ClassOutcome.Taken,
     executionState: ClassExecutionState.Completed,
     student: { id: "student-2", name: "Fatima Ali" },

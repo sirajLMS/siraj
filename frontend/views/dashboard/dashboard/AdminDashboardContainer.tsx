@@ -128,7 +128,7 @@ export function AdminDashboardContainer() {
 
   const scheduleResult = dashboardData?.adminDashboardSchedule;
   const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null);
-  const rows = (scheduleResult?.rows ?? []) as readonly DailyScheduleRow[];
+  const rows = (scheduleResult?.rows ?? []) as unknown as readonly DailyScheduleRow[];
   const totalCount = scheduleResult?.pageInfo?.total ?? scheduleResult?.totalCount ?? 0;
 
   const selectedMetricLabel = filters.selectedStatus

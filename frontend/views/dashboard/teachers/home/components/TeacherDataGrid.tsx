@@ -1,7 +1,7 @@
 import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
 import { Avatar, Box, IconButton, Link, Typography } from "@mui/material";
 import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRouter } from "@/shared/i18n/routing";
@@ -42,7 +42,6 @@ function getActionCellRenderer(
   icon: React.ReactNode,
   variant: "primary" | "error",
   router: ReturnType<typeof useRouter>,
-  _locale: string,
   getPath: (id: string) => string
 ) {
   return function ActionCell({ row }: GridRenderCellParams<TeacherDirectoryRow>) {
@@ -69,7 +68,6 @@ export function TeacherDataGrid({
 }: Readonly<TeacherDataGridProps>) {
   const t = useTranslations("dashboard.teachersDirectory");
   const router = useRouter();
-  const locale = useLocale();
 
   const columns: GridColDef<TeacherDirectoryRow>[] = [
     {
@@ -164,8 +162,7 @@ export function TeacherDataGrid({
         <CalendarMonthOutlined />,
         "error",
         router,
-        locale,
-        id => `/${locale}/teachers/${id}/schedule/weekly`
+        id => `/teachers/${id}/schedule/weekly`
       ),
     },
     {
@@ -174,13 +171,7 @@ export function TeacherDataGrid({
       width: 100,
       align: "center",
       headerAlign: "center",
-      renderCell: getActionCellRenderer(
-        <SettingsOutlined />,
-        "primary",
-        router,
-        locale,
-        id => `/${locale}/teachers/${id}/profile`
-      ),
+      renderCell: getActionCellRenderer(<SettingsOutlined />, "primary", router, id => `/teachers/${id}/profile`),
     },
   ];
 

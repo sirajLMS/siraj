@@ -2,7 +2,6 @@ import { NotificationsProvider } from "@toolpad/core/useNotifications";
 import type { ReactNode } from "react";
 import type { CurrentUserProfile } from "@/backend/types";
 import type { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { getAppLocale } from "@/frontend/views/dashboard/lib/getAppLocale";
 import { getDashboardLayoutData } from "@/frontend/views/dashboard/lib/getDashboardLayoutData";
 import { getDashboardPathname } from "@/frontend/views/dashboard/lib/getDashboardPathname";
 import { AppPermission as BackendAppPermission } from "@/shared/lib/enum";
@@ -20,14 +19,14 @@ function isFrontendPermission(key: string): key is AppPermission {
 }
 
 export async function DashboardClientBridge({ children, userProfile, roleLabel }: DashboardClientBridgeProps) {
-  const [pathname, locale] = await Promise.all([getDashboardPathname(), getAppLocale()]);
+  const pathname = await getDashboardPathname();
   const permissions = userProfile.permissions
     .map(p => {
       const entry = Object.entries(BackendAppPermission).find(([_, val]) => val === p);
       return entry ? entry[0] : "";
     })
     .filter(isFrontendPermission);
-  const { sidebarItems, bottomNavItems, activeNavKey } = getDashboardLayoutData(pathname, permissions, locale);
+  const { sidebarItems, bottomNavItems, activeNavKey } = getDashboardLayoutData(pathname, permissions);
 
   return (
     <NotificationsProvider>

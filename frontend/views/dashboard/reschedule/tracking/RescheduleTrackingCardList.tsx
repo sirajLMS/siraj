@@ -1,5 +1,6 @@
 "use client";
 
+import { LeaveRequestStatus as GqlLeaveRequestStatus, RescheduleDateLabel as GqlRescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   CalendarTodayOutlined,
   HistoryOutlined,
@@ -163,9 +164,9 @@ const CardFooter = ({
       <StatusBadge
         category="trackingStatus"
         status={row.status}
-        label={row.status === "rescheduled" ? labels.rescheduled : labels.pendingLeave}
+        label={row.status === GqlLeaveRequestStatus.Rescheduled ? labels.rescheduled : labels.pendingLeave}
         icon={
-          row.status === "rescheduled" ? (
+          row.status === GqlLeaveRequestStatus.Rescheduled ? (
             <HistoryOutlined sx={{ fontSize: 14 }} />
           ) : (
             <WarningAmberOutlined sx={{ fontSize: 14 }} />
@@ -185,7 +186,7 @@ function TrackingCard({
   readonly labels: RescheduleTrackingCardListProps["labels"];
   readonly onView: (id: string) => void;
 }) {
-  const isLeave = row.dateLabel === "leave_request";
+  const isLeave = row.dateLabel === GqlRescheduleDateLabel.LeaveRequest;
 
   return (
     <Card
