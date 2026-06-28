@@ -42,6 +42,7 @@ export type ClassInstanceDetailReturnType = {
   remarks: string | null;
   hasTimezoneMismatch: boolean;
   studentTimezone: string | null;
+  teacherTimezone: string | null;
   zoomMeetingUrl: string | null;
   payrollCredited: boolean;
   isRescheduled: boolean;

@@ -48,6 +48,7 @@ export async function buildClassInstanceDetail(
     remarks: instance.remarks ?? null,
     hasTimezoneMismatch,
     studentTimezone,
+    teacherTimezone,
     zoomMeetingUrl: instance.zoomMeetingUrl ?? null,
     payrollCredited: instance.payrollCredited ?? false,
     isRescheduled: instance.isRescheduled ?? false,

@@ -20,6 +20,7 @@ export const classInstanceQueryDocument: TypedDocumentNode<
       remarks
       hasTimezoneMismatch
       studentTimezone
+      teacherTimezone
       zoomMeetingUrl
       payrollCredited
       isRescheduled

@@ -277,6 +277,7 @@ type ClassInstanceDetail {
   student: ClassInstanceStudentInfo
   studentTimezone: String
   teacher: ClassInstanceTeacherInfo
+  teacherTimezone: String
   zoomMeetingUrl: String
 }
 

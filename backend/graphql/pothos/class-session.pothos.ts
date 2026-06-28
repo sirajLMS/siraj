@@ -78,6 +78,7 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     remarks: t.exposeString("remarks", { nullable: true }),
     hasTimezoneMismatch: t.exposeBoolean("hasTimezoneMismatch"),
     studentTimezone: t.exposeString("studentTimezone", { nullable: true }),
+    teacherTimezone: t.exposeString("teacherTimezone", { nullable: true }),
     zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
     payrollCredited: t.exposeBoolean("payrollCredited"),
     isRescheduled: t.exposeBoolean("isRescheduled"),

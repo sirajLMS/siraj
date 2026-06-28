@@ -176,6 +176,7 @@ function mapMockToReal(mock: ClassInstance): ClassInstanceDetail {
     remarks: mock.remarks,
     hasTimezoneMismatch: mock.hasTimezoneMismatch,
     studentTimezone: mock.studentTimezone,
+    teacherTimezone: null,
     zoomMeetingUrl: "",
     executionState: "NOT_ACTIVATED",
     isRescheduled: false,

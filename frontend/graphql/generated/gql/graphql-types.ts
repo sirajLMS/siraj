@@ -309,6 +309,7 @@ export type ClassInstanceDetail = {
   student: Maybe<ClassInstanceStudentInfo>;
   studentTimezone: Maybe<Scalars['String']['output']>;
   teacher: Maybe<ClassInstanceTeacherInfo>;
+  teacherTimezone: Maybe<Scalars['String']['output']>;
   zoomMeetingUrl: Maybe<Scalars['String']['output']>;
 };
 
