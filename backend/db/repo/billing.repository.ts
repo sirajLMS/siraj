@@ -288,7 +288,8 @@ export namespace BillingRepository {
       })
       .from(invoices)
       .where(and(eq(invoices.status, "UNPAID"), sql`${invoices.dueDate} < CURRENT_DATE`))
-      .orderBy(invoices.dueDate);
+      .orderBy(invoices.dueDate)
+      .limit(500);
 
     if (unpaidInvoices.length === 0) {
       return {
@@ -581,7 +582,8 @@ export namespace BillingRepository {
       .leftJoin(parents, eq(students.parentId, parents.id))
       .leftJoin(users, eq(parents.userId, users.id))
       .where(sql`${students.classesRemaining} <= 5`)
-      .orderBy(students.classesRemaining);
+      .orderBy(students.classesRemaining)
+      .limit(200);
 
     return rows.map(r => ({
       id: r.id,

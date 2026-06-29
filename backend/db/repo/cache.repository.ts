@@ -1,4 +1,4 @@
-import { eq, lt } from "drizzle-orm";
+import { and, eq, gt, lt, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { rateLimitCache, sessionCache } from "@/backend/db/schema/cache";
 import logger from "@/backend/lib/logger";
@@ -77,20 +77,30 @@ export namespace CacheDbRepository {
    */
   export const incr = async (key: string): Promise<number> => {
     try {
-      // First, try to get existing value
-      const existing = await get(key);
+      const table = getTable(key);
+      const now = new Date();
+      const defaultExpiresAt = new Date(now.getTime() + 60 * 60 * 1000);
 
-      if (!existing) {
-        // Create new entry with value 1
-        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // Default 1 hour
-        await set(key, "1", expiresAt);
-        return 1;
+      const updated = await db
+        .update(table)
+        .set({ value: sql`(${table.value}::int + 1)::text` })
+        .where(and(eq(table.key, key), gt(table.expiresAt, now)))
+        .returning({ value: table.value });
+
+      if (updated.length > 0) {
+        return Number.parseInt(updated[0].value, 10);
       }
 
-      // Increment existing value
-      const newValue = (Number.parseInt(existing.value, 10) || 0) + 1;
-      await set(key, newValue.toString(), existing.expiresAt);
-      return newValue;
+      const inserted = await db
+        .insert(table)
+        .values({ key, value: "1", expiresAt: defaultExpiresAt })
+        .onConflictDoUpdate({
+          target: table.key,
+          set: { value: sql`(${table.value}::int + 1)::text`, expiresAt: defaultExpiresAt },
+        })
+        .returning();
+
+      return Number.parseInt(inserted[0]?.value ?? "1", 10);
     } catch (error) {
       logger.error(`Failed to increment cache value for key ${key}:`, error);
       throw error;
@@ -107,6 +117,22 @@ export namespace CacheDbRepository {
       return true;
     } catch (error) {
       logger.error(`Failed to delete cache entry for key ${key}:`, error);
+      return false;
+    }
+  };
+
+  export const insertIfNotExists = async (key: string, value: string, expiresAt: Date): Promise<boolean> => {
+    try {
+      const table = getTable(key);
+      const result = await db
+        .insert(table)
+        .values({ key, value, expiresAt })
+        .onConflictDoNothing({ target: table.key })
+        .returning();
+
+      return result.length > 0;
+    } catch (error) {
+      logger.error(`Failed to insert cache entry for key ${key}:`, error);
       return false;
     }
   };

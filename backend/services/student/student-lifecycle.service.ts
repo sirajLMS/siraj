@@ -2,11 +2,7 @@ import { StudentRepository, TeacherRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import {
-  ALLOWED_STATUS_TRANSITIONS,
-  type ChangeStudentStatusResult,
-  type ReassignStudentTeacherResult,
-} from "@/backend/types";
+import type { ChangeStudentStatusResult, ReassignStudentTeacherResult } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
 export namespace StudentLifecycleService {
@@ -80,32 +76,13 @@ export namespace StudentLifecycleService {
       throw new Error(tFunc("insufficientPermissions"));
     }
 
-    const student = await StudentRepository.findById(studentId);
-    if (!student) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("studentNotFound", { id: studentId }));
-    }
-
-    const currentStatus = student.status;
-    const allowedTargets = ALLOWED_STATUS_TRANSITIONS[currentStatus] ?? [];
-
-    if (!allowedTargets.includes(newStatus)) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(
-        tFunc("invalidStatusTransition", {
-          currentStatus,
-          newStatus,
-        })
-      );
-    }
-
     try {
       const updated = await StudentRepository.changeStatus(studentId, newStatus, expectedVersion, undefined, locale);
 
       logger.info("Student status changed", {
         actorUserId,
         studentId,
-        previousStatus: currentStatus,
+        previousStatus: "unknown",
         newStatus: updated.status,
       });
 

@@ -23,7 +23,7 @@ async function authenticateAdmin(request: NextRequest): Promise<{ userId: string
   }
 
   const adminEmail = process.env.ADMIN_EMAIL;
-  if (adminEmail && user.email !== adminEmail) {
+  if (!adminEmail || user.email !== adminEmail) {
     logger.warn("Unauthorized cleanup attempt - non-admin user", { userId: user.id, email: user.email });
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

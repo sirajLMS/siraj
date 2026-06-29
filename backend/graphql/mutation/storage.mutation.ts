@@ -6,6 +6,7 @@ import * as StoragePothos from "../pothos";
 
 gqlSchemaBuilder.mutationFields(t => ({
   renameFile: t.field({
+    authScopes: { loggedIn: true },
     type: StoragePothos.FileOperationResultPothosObject,
     args: {
       input: t.arg({
@@ -20,6 +21,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   }),
 
   deleteFile: t.field({
+    authScopes: { loggedIn: true },
     type: StoragePothos.FileOperationResultPothosObject,
     args: {
       path: t.arg.string({ required: true }),
@@ -31,6 +33,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   }),
 
   prepareUpload: t.field({
+    authScopes: { loggedIn: true },
     type: StoragePothos.UploadPreparationPothosObject,
     args: {
       input: t.arg({
@@ -50,6 +53,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   }),
 
   createFolder: t.field({
+    authScopes: { loggedIn: true },
     type: StoragePothos.FileOperationResultPothosObject,
     args: {
       input: t.arg({
@@ -64,6 +68,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   }),
 
   moveStorageItems: t.field({
+    authScopes: { loggedIn: true },
     type: StoragePothos.BulkOperationResultPothosObject,
     args: {
       input: t.arg({
@@ -78,6 +83,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   }),
 
   copyStorageItems: t.field({
+    authScopes: { loggedIn: true },
     type: StoragePothos.BulkOperationResultPothosObject,
     args: {
       input: t.arg({
@@ -92,6 +98,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   }),
 
   deleteStorageItems: t.field({
+    authScopes: { loggedIn: true },
     type: StoragePothos.BulkOperationResultPothosObject,
     args: {
       input: t.arg({
@@ -106,6 +113,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   }),
 
   updateDirectoryPermissions: t.field({
+    authScopes: { loggedIn: true },
     type: StoragePothos.FileOperationResultPothosObject,
     args: {
       input: t.arg({
@@ -119,6 +127,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   }),
 
   setStorageItemProtection: t.field({
+    authScopes: { loggedIn: true },
     type: StoragePothos.FileOperationResultPothosObject,
     args: {
       input: t.arg({

@@ -78,13 +78,19 @@ export namespace DstMigrationService {
         plannedTimes.set(schedule.id, newStartTime);
       }
 
-      const finalTimeMap = new Map<string, string>();
+      const finalTimeMap = new Map<string, string[]>();
       for (const schedule of schedules) {
         if (schedule.utcOffsetSnapshot === null) {
-          finalTimeMap.set(`${schedule.teacherId}:${schedule.defaultStartTime}`, schedule.id);
+          const key = `${schedule.teacherId}:${schedule.defaultStartTime}`;
+          const existing = finalTimeMap.get(key) ?? [];
+          existing.push(schedule.id);
+          finalTimeMap.set(key, existing);
         } else {
           const newTime = plannedTimes.get(schedule.id) ?? schedule.defaultStartTime;
-          finalTimeMap.set(`${schedule.teacherId}:${newTime}`, schedule.id);
+          const key = `${schedule.teacherId}:${newTime}`;
+          const existing = finalTimeMap.get(key) ?? [];
+          existing.push(schedule.id);
+          finalTimeMap.set(key, existing);
         }
       }
 
@@ -109,11 +115,12 @@ export namespace DstMigrationService {
         const currentOffset = schedule.utcOffsetSnapshot;
         const newOffset = currentOffset + offsetMinutes;
         const mapKey = `${schedule.teacherId}:${newStartTime}`;
-        const existingScheduleId = finalTimeMap.get(mapKey);
+        const schedulesAtTime = finalTimeMap.get(mapKey) ?? [];
+        const isConflict = schedulesAtTime.length > 1 && schedulesAtTime.includes(schedule.id);
 
-        if (existingScheduleId && existingScheduleId !== schedule.id) {
+        if (isConflict) {
           conflictCount++;
-          const conflictDetail = `Conflict with schedule ${existingScheduleId} at ${newStartTime}`;
+          const conflictDetail = `Conflict: ${schedulesAtTime.length} schedules at ${newStartTime} for same teacher`;
           const conflictItem: DstConflictItemReturnType = {
             id: schedule.id,
             studentName: schedule.studentName,

@@ -2,6 +2,8 @@ import { createReadStream, statSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
+import { UserRepository } from "@/backend/db/repo";
+import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
 import logger from "@/backend/lib/logger";
 import { extToMime } from "@/shared/utils/storage.utils";
 
@@ -109,7 +111,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "File path is required" }, { status: 400 });
     }
 
-    // Secure path resolution
+    const authHeader = request.headers.get("authorization");
+    const accessToken = extractTokenFromHeader(authHeader);
+    const payload = accessToken ? await verifyToken(accessToken) : null;
+
+    if (payload?.type !== "access") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await UserRepository.findById(payload.userId);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     let absolutePath: string;
     try {
       absolutePath = getAbsolutePath(relativePath);

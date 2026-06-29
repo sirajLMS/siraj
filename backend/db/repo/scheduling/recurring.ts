@@ -1,7 +1,7 @@
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
-import { classInstances, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
+import { classInstances, recurringScheduleDays, recurringSchedules, students } from "@/backend/db/schema";
 import { acquireLocks, checkOverlaps, type DBTransaction, validateTeacherAssignment } from "./shared";
 import { handleQuotaDeduction } from "./state-changes";
 
@@ -158,6 +158,24 @@ export async function deleteRecurringClass(classInstanceId: string, tx?: DBTrans
   const runner = async (t: DBTransaction) => {
     const now = new Date();
 
+    const [existing] = await t
+      .select({
+        id: classInstances.id,
+        quotaDeducted: classInstances.quotaDeducted,
+        deletedAt: classInstances.deletedAt,
+        studentId: classInstances.studentId,
+      })
+      .from(classInstances)
+      .where(eq(classInstances.id, classInstanceId))
+      .limit(1);
+
+    if (existing?.quotaDeducted && existing.deletedAt === null) {
+      await t
+        .update(students)
+        .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
+        .where(eq(students.id, existing.studentId));
+    }
+
     const [deleted] = await t
       .update(classInstances)
       .set({
@@ -199,6 +217,42 @@ export async function clearWeeklySchedule(teacherId: string, tx?: DBTransaction)
         updatedAt: now,
       })
       .where(inArray(recurringSchedules.id, scheduleIds));
+
+    const orphanedInstances = await t
+      .select({
+        id: classInstances.id,
+        quotaDeducted: classInstances.quotaDeducted,
+        studentId: classInstances.studentId,
+      })
+      .from(classInstances)
+      .where(
+        and(
+          inArray(classInstances.recurringScheduleId, scheduleIds),
+          isNull(classInstances.deletedAt),
+          gte(classInstances.scheduledStartAt, now)
+        )
+      );
+
+    for (const instance of orphanedInstances) {
+      if (instance.quotaDeducted) {
+        await t
+          .update(students)
+          .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
+          .where(eq(students.id, instance.studentId));
+      }
+    }
+
+    if (orphanedInstances.length > 0) {
+      await t
+        .update(classInstances)
+        .set({ deletedAt: now, updatedAt: now })
+        .where(
+          inArray(
+            classInstances.id,
+            orphanedInstances.map(i => i.id)
+          )
+        );
+    }
 
     return true;
   };

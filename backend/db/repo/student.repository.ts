@@ -6,6 +6,7 @@ import { queryWithPagination } from "@/backend/db/query.extensions";
 import { parents, students, teachers, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import * as Types from "@/backend/types";
+import { ALLOWED_STATUS_TRANSITIONS } from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
 import { OrderSortDirection } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
@@ -348,8 +349,30 @@ export namespace StudentRepository {
     expectedVersion?: number,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<Types.StudentEntity> =>
-    runStudentUpdate(studentId, () => ({ status: newStatus }), expectedVersion, tx, locale);
+  ): Promise<Types.StudentEntity> => {
+    const runner = async (t: DBTransaction) =>
+      adjustClassesQuota(
+        t,
+        studentId,
+        async current => {
+          const allowedTargets = ALLOWED_STATUS_TRANSITIONS[current.status] ?? [];
+          if (!allowedTargets.includes(newStatus)) {
+            const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+            throw new Error(
+              tFunc("invalidStatusTransition", {
+                currentStatus: current.status,
+                newStatus,
+              })
+            );
+          }
+          return { status: newStatus };
+        },
+        expectedVersion,
+        locale
+      );
+
+    return tx ? runner(tx) : db.transaction(runner);
+  };
 
   export const getDirectoryRows = async (
     paginationArgs: Types.PaginationArgs | null,

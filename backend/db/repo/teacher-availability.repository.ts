@@ -611,7 +611,8 @@ export namespace TeacherAvailabilityRepository {
       })
       .from(teachers)
       .leftJoin(users, eq(teachers.userId, users.id))
-      .where(and(...teacherConditions));
+      .where(and(...teacherConditions))
+      .limit(100);
 
     if (allTeachers.length === 0) {
       return {

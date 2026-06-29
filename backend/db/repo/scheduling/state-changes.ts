@@ -103,7 +103,8 @@ async function validateStateTransition(
     const isValidStandard = existing.executionState === "RUNNING";
     const isValidEarly =
       existing.executionState === "ACTIVATED" && (state.outcome === "ABSENT" || state.outcome === "LEAVE");
-    if (!isValidStandard && !isValidEarly) {
+    const isValidAutomatedLeave = existing.executionState === "NOT_ACTIVATED" && state.outcome === "LEAVE";
+    if (!isValidStandard && !isValidEarly && !isValidAutomatedLeave) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("invalidTransition"));
     }
@@ -246,15 +247,6 @@ async function executeProcessClassLeave(
     throw new Error(tFuncErrors("classInstanceNotFound", { id }));
   }
 
-  const [teacherRow] = await t
-    .select({ id: teachers.id })
-    .from(teachers)
-    .where(eq(teachers.id, existing.teacherId))
-    .limit(1);
-  if (teacherRow) {
-    await incrementTeacherLeaveQuotaFn(teacherRow.id, t, locale);
-  }
-
   await checkStateChangeAuth(t, existing, actorUserId, locale);
 
   if (existing.executionState !== "ACTIVATED" && existing.executionState !== "RUNNING") {
@@ -284,6 +276,15 @@ async function executeProcessClassLeave(
   }
 
   await insertLeaveRequestRecord(t, id, actorUserId, reason);
+
+  const [teacherRow] = await t
+    .select({ id: teachers.id })
+    .from(teachers)
+    .where(eq(teachers.id, existing.teacherId))
+    .limit(1);
+  if (teacherRow) {
+    await incrementTeacherLeaveQuotaFn(teacherRow.id, t, locale);
+  }
 
   return { originalId, successorId: successor.id };
 }
@@ -591,16 +592,20 @@ export async function processAutomatedClassLeave(
     }
     const offsetDays = await SystemSettingsRepository.getIntValue("session_leave_reschedule_offset_days", 7, t);
     const successor = await createRescheduledSuccessor(t, existing, offsetDays, "Automated leave reschedule");
-    await t
-      .update(classInstances)
-      .set({ outcome: "LEAVE", isRescheduled: true, updatedAt: new Date() })
-      .where(eq(classInstances.id, id));
+
+    const updated = await runStateChange(id, actorUserId, t, undefined, async () =>
+      buildLeaveStateChangePayload(existing, successor.id, reason, undefined)
+    );
+
+    const originalId = updated?.id ?? id;
+
     if (existing.quotaDeducted) {
       await t
         .update(students)
         .set({ classesRemaining: sql`${students.classesRemaining} + 1` })
         .where(eq(students.id, existing.studentId));
     }
+
     const now = new Date();
     await t
       .insert(leaveRequests)
@@ -615,13 +620,15 @@ export async function processAutomatedClassLeave(
         processedByUserId: actorUserId,
       })
       .onConflictDoNothing();
+
     const [teacherRow] = await t
       .select({ id: teachers.id })
       .from(teachers)
       .where(eq(teachers.id, existing.teacherId))
       .limit(1);
     if (teacherRow) await incrementTeacherLeaveQuotaFn(teacherRow.id, t);
-    return { originalId: id, successorId: successor.id };
+
+    return { originalId, successorId: successor.id };
   };
   return tx ? runner(tx) : db.transaction((t: DBTransaction) => runner(t));
 }

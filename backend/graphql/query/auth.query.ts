@@ -29,6 +29,7 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
 
   users: t.field({
+    authScopes: { loggedIn: true },
     type: [UserPothosObject],
     resolve: async () => await UserRepository.findAll(),
   }),

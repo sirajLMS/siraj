@@ -1,5 +1,5 @@
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
-import { resolveUserPermissions } from "@/backend/lib/auth/permissions";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 
 export type BaseContext = {
   user:
@@ -14,6 +14,7 @@ export type BaseContext = {
   sessionId: string | undefined;
   ipAddress?: string;
   cookies?: ResponseCookies;
+  role: string;
   locale: string;
 };
 
@@ -35,19 +36,21 @@ export async function createContext({
       permissions: [],
       permissionGroups: [],
       isSuperAdmin: false,
+      role: "Guest",
       refreshToken: undefined,
       sessionId: undefined,
       locale,
     };
   }
 
-  const permissionContext = await resolveUserPermissions(userId);
+  const permissionContext = await PermissionsService.getUserContext(userId);
 
   return {
     user: { id: userId },
     permissions: permissionContext.permissions,
     permissionGroups: permissionContext.permissionGroups,
     isSuperAdmin: permissionContext.isSuperAdmin,
+    role: permissionContext.role,
     refreshToken: undefined,
     sessionId: undefined,
     locale,

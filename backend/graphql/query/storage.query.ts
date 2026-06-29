@@ -5,6 +5,7 @@ import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 gqlSchemaBuilder.queryFields(t => ({
   listFiles: t.field({
+    authScopes: { loggedIn: true },
     type: Pothos.StorageObjectListPothosObject,
     args: {
       input: t.arg({
@@ -19,6 +20,7 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
 
   fileInfo: t.field({
+    authScopes: { loggedIn: true },
     type: Pothos.FileInfoPothosObject,
     args: {
       path: t.arg.string({ required: true }),
@@ -31,6 +33,7 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
 
   folderInfo: t.field({
+    authScopes: { loggedIn: true },
     type: Pothos.DirectoryInfoPothosObject,
     args: {
       path: t.arg.string({ required: true }),
@@ -42,6 +45,7 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
 
   searchFiles: t.field({
+    authScopes: { loggedIn: true },
     type: Pothos.StorageObjectListPothosObject,
     args: {
       searchTerm: t.arg.string({ required: true }),
@@ -72,6 +76,7 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
 
   storageStats: t.field({
+    authScopes: { loggedIn: true },
     type: Pothos.StorageStatsPothosObject,
     args: {
       path: t.arg.string({
@@ -86,6 +91,7 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
 
   directoryChildren: t.field({
+    authScopes: { loggedIn: true },
     type: [Pothos.DirectoryInfoPothosObject],
     args: {
       path: t.arg.string({
@@ -101,6 +107,7 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
 
   fileUsage: t.field({
+    authScopes: { loggedIn: true },
     type: Pothos.FileUsageResultPothosObject,
     args: {
       input: t.arg({

@@ -133,7 +133,8 @@ async function fetchDailyScheduleBaseRows(
             ilike(sql`${classInstances.id}::text`, searchPattern)
           )
         )
-      );
+      )
+      .limit(2000);
 
     return hydrateDailyScheduleRows(
       t,
@@ -141,7 +142,7 @@ async function fetchDailyScheduleBaseRows(
     );
   }
 
-  const rows = await t.select({ classInstance: classInstances }).from(classInstances).where(dayConditions);
+  const rows = await t.select({ classInstance: classInstances }).from(classInstances).where(dayConditions).limit(2000);
 
   return hydrateDailyScheduleRows(
     t,
@@ -773,18 +774,42 @@ async function setStudentClassesFrozenState(
   tx?: DBTransaction
 ): Promise<number> {
   const runner = async (t: DBTransaction): Promise<number> => {
+    const BATCH_SIZE = 500;
+    let totalUpdated = 0;
+
     const conditions = and(
       eq(classInstances.studentId, studentId),
       isNull(classInstances.deletedAt),
       gte(classInstances.scheduledStartAt, fromDate),
       extraPredicate
     );
-    const result = await t
-      .update(classInstances)
-      .set({ isFrozen, updatedAt: new Date() })
-      .where(conditions)
-      .returning({ id: classInstances.id });
-    return result.length;
+
+    while (true) {
+      const batch = await t
+        .select({ id: classInstances.id })
+        .from(classInstances)
+        .where(conditions)
+        .limit(BATCH_SIZE)
+        .for("update");
+
+      if (batch.length === 0) break;
+
+      await t
+        .update(classInstances)
+        .set({ isFrozen, updatedAt: new Date() })
+        .where(
+          inArray(
+            classInstances.id,
+            batch.map(b => b.id)
+          )
+        );
+
+      totalUpdated += batch.length;
+
+      if (batch.length < BATCH_SIZE) break;
+    }
+
+    return totalUpdated;
   };
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 }

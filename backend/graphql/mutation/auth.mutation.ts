@@ -63,6 +63,47 @@ async function resolveUserFromRefreshToken(
   return { session, user };
 }
 
+async function validateRefreshTokenJti(refreshToken: string | undefined, session: SessionEntity): Promise<boolean> {
+  if (!refreshToken) return true;
+  const refreshPayload = await verifyToken(refreshToken);
+  if (!refreshPayload?.jti || !session.payload) return true;
+  try {
+    const sessionData = JSON.parse(session.payload);
+    if (sessionData.refreshTokenJti && sessionData.refreshTokenJti !== refreshPayload.jti) {
+      return false;
+    }
+  } catch {
+    /* ignore parse error */
+  }
+  return true;
+}
+
+async function rotateTokensAndSession(
+  user: UserEntity,
+  session: SessionEntity,
+  ctx: BaseContext
+): Promise<{ token: string; user: UserEntity } | null> {
+  const newAccessToken = await generateAccessToken(user.id, user.email);
+  const newRefreshToken = await generateRefreshToken(user.id, user.email);
+
+  const newPayload = await verifyToken(newRefreshToken);
+  const newJti = newPayload?.jti;
+
+  const sessionPayload = session.payload ? JSON.parse(session.payload) : {};
+  sessionPayload.refreshTokenJti = newJti;
+
+  const newSession = await SessionRepository.update({
+    ...session,
+    payload: JSON.stringify(sessionPayload),
+  });
+
+  if (newSession.hashedId) {
+    setAuthCookies(ctx, newSession.hashedId, newRefreshToken);
+  }
+
+  return { token: newAccessToken, user };
+}
+
 gqlSchemaBuilder.mutationFields(t => ({
   login: t.field({
     type: LoginResponsePothosObject,
@@ -187,7 +228,6 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: RefreshTokenResponsePothosObject,
     nullable: true,
     resolve: async (_parent, _args, ctx) => {
-      // Try to get session ID from context (from cookie)
       const sessionId = ctx.sessionId;
       const refreshToken = ctx.refreshToken;
 
@@ -198,14 +238,12 @@ gqlSchemaBuilder.mutationFields(t => ({
       let session: SessionEntity | null = null;
       let user: UserEntity | null = null;
 
-      // First try to validate using session ID (cookie-based)
       if (sessionId) {
         const result = await resolveUserFromSession(sessionId);
         session = result.session;
         user = result.user;
       }
 
-      // If session validation failed, try refresh token
       if (!user && refreshToken) {
         const result = await resolveUserFromRefreshToken(refreshToken);
         session = result.session;
@@ -216,24 +254,11 @@ gqlSchemaBuilder.mutationFields(t => ({
         return null;
       }
 
-      // Generate new tokens (token rotation for security)
-      const newAccessToken = await generateAccessToken(user.id, user.email);
-      const newRefreshToken = await generateRefreshToken(user.id, user.email);
-
-      // Update session activity
-      const newSession = await SessionRepository.update({
-        ...session,
-      });
-
-      // Refresh the cookies with new refresh token (token rotation)
-      if (newSession.hashedId) {
-        setAuthCookies(ctx, newSession.hashedId, newRefreshToken);
+      if (!(await validateRefreshTokenJti(refreshToken, session))) {
+        return null;
       }
 
-      return {
-        token: newAccessToken,
-        user,
-      };
+      return rotateTokensAndSession(user, session, ctx);
     },
   }),
 

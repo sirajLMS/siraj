@@ -1,11 +1,11 @@
+import { randomUUID } from "node:crypto";
 import { type JWTPayload as JoseJWTPayload, jwtVerify, SignJWT } from "jose";
 
-// Validate JWT_SECRET is set in production
-if (process.env.NODE_ENV === "production" && !process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET must be set in production environment");
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this-in-production";
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_ACCESS_TOKEN_EXPIRY = "15m"; // 15 minutes
 const JWT_REFRESH_TOKEN_EXPIRY = "7d"; // 7 days
 
@@ -15,6 +15,7 @@ export interface CustomJWTPayload extends JoseJWTPayload {
   userId: string;
   email: string;
   type: "access" | "refresh";
+  jti?: string;
 }
 
 /**
@@ -38,10 +39,12 @@ export async function generateAccessToken(userId: string, email: string): Promis
  * Generate a refresh token for a user
  */
 export async function generateRefreshToken(userId: string, email: string): Promise<string> {
+  const jti = randomUUID();
   const token = await new SignJWT({
     userId,
     email,
     type: "refresh" as const,
+    jti,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()

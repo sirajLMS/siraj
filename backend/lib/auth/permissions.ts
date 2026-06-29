@@ -62,8 +62,3 @@ export async function resolveUserPermissions(userId: string): Promise<UserPermis
     isSuperAdmin: false,
   };
 }
-
-export async function userHasPermission(userId: string, permissionKey: AppPermission): Promise<boolean> {
-  const context = await resolveUserPermissions(userId);
-  return context.isSuperAdmin || (context.permissions as string[]).includes(permissionKey);
-}
