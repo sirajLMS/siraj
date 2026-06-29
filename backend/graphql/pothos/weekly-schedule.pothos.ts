@@ -1,17 +1,11 @@
+import type {
+  WeeklyScheduleClassReturnType,
+  WeeklyScheduleGridReturnType,
+  WeeklyWorkloadMetricsReturnType,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
-export type WeeklyScheduleClassDefinition = {
-  id: string;
-  studentName: string;
-  studentId: string;
-  duration: number;
-  startTime: string;
-  day: string;
-  executionState: string;
-  outcome: string;
-};
-
-const WeeklyScheduleClassRef = gqlSchemaBuilder.objectRef<WeeklyScheduleClassDefinition>("WeeklyScheduleClass");
+const WeeklyScheduleClassRef = gqlSchemaBuilder.objectRef<WeeklyScheduleClassReturnType>("WeeklyScheduleClass");
 
 export const WeeklyScheduleClassPothosObject = WeeklyScheduleClassRef.implement({
   fields: t => ({
@@ -21,20 +15,15 @@ export const WeeklyScheduleClassPothosObject = WeeklyScheduleClassRef.implement(
     duration: t.exposeInt("duration"),
     startTime: t.exposeString("startTime"),
     day: t.exposeString("day"),
-    executionState: t.exposeString("executionState"),
-    outcome: t.exposeString("outcome"),
+    executionState: t.exposeString("executionState", { nullable: true }),
+    outcome: t.exposeString("outcome", { nullable: true }),
+    subjectId: t.exposeString("subjectId", { nullable: true }),
+    subjectName: t.exposeString("subjectName", { nullable: true }),
+    classType: t.exposeString("classType", { nullable: true }),
   }),
 });
 
-export type WeeklyScheduleGridDefinition = {
-  id: string;
-  teacherId: string;
-  weekStart: string;
-  weekEnd: string;
-  classes: WeeklyScheduleClassDefinition[];
-};
-
-const WeeklyScheduleGridRef = gqlSchemaBuilder.objectRef<WeeklyScheduleGridDefinition>("WeeklyScheduleGrid");
+const WeeklyScheduleGridRef = gqlSchemaBuilder.objectRef<WeeklyScheduleGridReturnType>("WeeklyScheduleGrid");
 
 export const WeeklyScheduleGridPothosObject = WeeklyScheduleGridRef.implement({
   fields: t => ({
@@ -42,18 +31,12 @@ export const WeeklyScheduleGridPothosObject = WeeklyScheduleGridRef.implement({
     teacherId: t.exposeString("teacherId"),
     weekStart: t.exposeString("weekStart"),
     weekEnd: t.exposeString("weekEnd"),
+    teacherName: t.exposeString("teacherName", { nullable: true }),
     classes: t.expose("classes", { type: [WeeklyScheduleClassPothosObject] }),
   }),
 });
 
-export type WeeklyWorkloadMetricsDefinition = {
-  id: string;
-  weeklyHoursWorked: string;
-  totalMinutes: number;
-  classCount: number;
-};
-
-const WeeklyWorkloadMetricsRef = gqlSchemaBuilder.objectRef<WeeklyWorkloadMetricsDefinition>("WeeklyWorkloadMetrics");
+const WeeklyWorkloadMetricsRef = gqlSchemaBuilder.objectRef<WeeklyWorkloadMetricsReturnType>("WeeklyWorkloadMetrics");
 
 export const WeeklyWorkloadMetricsPothosObject = WeeklyWorkloadMetricsRef.implement({
   fields: t => ({

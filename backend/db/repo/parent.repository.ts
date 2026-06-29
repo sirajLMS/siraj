@@ -483,7 +483,8 @@ export namespace ParentRepository {
 
   async function mapScheduleRows(
     queryRows: Awaited<ReturnType<ReturnType<typeof buildScheduleDataQuery>["execute"]>>,
-    viewerTimezone: string
+    viewerTimezone: string,
+    locale?: string
   ): Promise<ParentDashboardScheduleRow[]> {
     const { formatInstantInTimezone } = await import("@/backend/lib/timezone");
 
@@ -511,14 +512,14 @@ export namespace ParentRepository {
         executionState: r.executionState,
         outcome: r.outcome,
         zoomMeetingUrl: r.zoomMeetingUrl ?? null,
-        classTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone),
+        classTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone, locale),
       };
     });
   }
 
   export const getParentDashboardSchedule = async (
     parentId: string,
-    input: { date?: Date | null; search?: string | null; pagination?: PaginationArgs | null },
+    input: { date?: Date | null; search?: string | null; pagination?: PaginationArgs | null; locale?: string },
     tx?: DBTransaction
   ): Promise<ParentDashboardScheduleResult> => {
     const runner = async (t: DBTransaction): Promise<ParentDashboardScheduleResult> => {
@@ -542,7 +543,7 @@ export namespace ParentRepository {
       const [queryRows, totalCount] = await Promise.all([dataQuery, fetchScheduleCount(t, whereClause)]);
 
       const timezoneForFormatting = await fetchParentTimezone(t, parentId);
-      const mappedRows = await mapScheduleRows(queryRows, timezoneForFormatting);
+      const mappedRows = await mapScheduleRows(queryRows, timezoneForFormatting, input.locale);
       const pageInfo = PaginationUtils.buildPageInfoFromArgs(input.pagination, mappedRows.length, totalCount);
 
       return { rows: mappedRows, totalCount, pageInfo };

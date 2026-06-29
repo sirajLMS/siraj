@@ -1,5 +1,4 @@
 import {
-  AddCircleOutlineOutlined,
   AnalyticsOutlined,
   AssessmentOutlined,
   BadgeOutlined,
@@ -29,6 +28,7 @@ import {
   UpdateOutlined,
 } from "@mui/icons-material";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { PAGE_PERMISSIONS } from "@/frontend/types/page-permissions.types";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 
 /**
@@ -41,7 +41,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: DashboardOutlined,
     href: "/dashboard",
     section: "main",
-    permission: [AppPermission.DashboardViewMetrics, AppPermission.DashboardView],
+    permission: PAGE_PERMISSIONS.dashboard,
   },
   teacherDashboard: {
     key: "teacher-dashboard",
@@ -49,7 +49,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: DashboardOutlined,
     href: "/dashboard?mode=teacher",
     section: "main",
-    permission: AppPermission.TeacherViewDashboard,
+    permission: PAGE_PERMISSIONS.teacherDashboard,
   },
   teacherDashboardActive: {
     key: "teacher-dashboard-active",
@@ -57,7 +57,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: PowerSettingsNewOutlined,
     href: "/dashboard?mode=teacher-active",
     section: "main",
-    permission: AppPermission.SessionActivateClass,
+    permission: PAGE_PERMISSIONS.teacherDashboardActive,
   },
   teachers: {
     key: "teachers",
@@ -65,7 +65,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: SchoolOutlined,
     href: "/teachers",
     section: "main",
-    permission: AppPermission.TeachersList,
+    permission: PAGE_PERMISSIONS.teachers,
   },
   teacherWeeklySchedule: {
     key: "teacher-weekly-schedule",
@@ -115,21 +115,13 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     section: "main",
     permission: AppPermission.StaffCreate,
   },
-  scheduleReschedule: {
-    key: "schedule-reschedule",
-    labelKey: "dashboard.nav.scheduleReschedule",
-    icon: EditOutlined,
-    href: "/reschedule",
-    section: "main",
-    permission: AppPermission.SessionReschedule,
-  },
   dstMigration: {
     key: "dst-migration",
     labelKey: "dashboard.nav.dstMigration",
     icon: UpdateOutlined,
     href: "/tools/dst-migration",
     section: "main",
-    permission: AppPermission.ScheduleDstMigrate,
+    permission: PAGE_PERMISSIONS.dstMigration,
   },
   teacherAvailability: {
     key: "teacher-availability",
@@ -145,7 +137,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: Diversity1Outlined,
     href: "/parents",
     section: "main",
-    permission: AppPermission.ParentsList,
+    permission: PAGE_PERMISSIONS.parents,
   },
   students: {
     key: "students",
@@ -153,7 +145,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: PersonOutlineOutlined,
     href: "/students",
     section: "main",
-    permission: AppPermission.StudentsList,
+    permission: PAGE_PERMISSIONS.students,
   },
   reports: {
     key: "reports",
@@ -161,7 +153,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: AssessmentOutlined,
     href: "/reports",
     section: "main",
-    permission: AppPermission.ReportsGenerate,
+    permission: PAGE_PERMISSIONS.reports,
   },
   billingAdmin: {
     key: "billing-admin",
@@ -169,7 +161,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: PaymentsOutlined,
     href: "/billing",
     section: "main",
-    permission: AppPermission.InvoicesEdit,
+    permission: PAGE_PERMISSIONS.billingAdmin,
   },
   billingParent: {
     key: "billing-parent",
@@ -177,7 +169,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: ReceiptLongOutlined,
     href: "/billing/invoices",
     section: "main",
-    permission: AppPermission.InvoicesList,
+    permission: PAGE_PERMISSIONS.billingParent,
   },
   billingManual: {
     key: "billing-manual",
@@ -193,7 +185,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: LightbulbOutlined,
     href: "/suggestions/manage",
     section: "main",
-    permission: AppPermission.ComplaintsRespond,
+    permission: PAGE_PERMISSIONS.suggestionsManage,
   },
   suggestionsSubmit: {
     key: "suggestions-submit",
@@ -201,7 +193,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: LightbulbOutlined,
     href: "/suggestions",
     section: "main",
-    permission: AppPermission.ComplaintsList,
+    permission: PAGE_PERMISSIONS.suggestionsSubmit,
   },
   complaintsManage: {
     key: "complaints-manage",
@@ -209,7 +201,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: ReportProblemOutlined,
     href: "/complaints/manage",
     section: "main",
-    permission: AppPermission.ComplaintsRespond,
+    permission: PAGE_PERMISSIONS.complaintsManage,
   },
   complaintsSubmit: {
     key: "complaints-submit",
@@ -217,7 +209,7 @@ const COMMON_NAV_ITEMS: Record<string, NavItem> = {
     icon: ReportProblemOutlined,
     href: "/complaints",
     section: "main",
-    permission: AppPermission.ComplaintsList,
+    permission: PAGE_PERMISSIONS.complaintsSubmit,
   },
 };
 
@@ -238,14 +230,13 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: AppPermission.ScheduleSearchAvailability,
   },
-  COMMON_NAV_ITEMS.scheduleReschedule,
   {
     key: "schedule-tracking",
     labelKey: "dashboard.nav.scheduleTracking",
     icon: EventRepeatOutlined,
     href: "/schedule/tracking/reschedule",
     section: "main",
-    permission: AppPermission.ScheduleManageRecurring,
+    permission: PAGE_PERMISSIONS.scheduleTracking,
   },
   {
     key: "status-tracking",
@@ -253,7 +244,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: TimelineOutlined,
     href: "/schedule/tracking/status",
     section: "main",
-    permission: AppPermission.ScheduleViewAll,
+    permission: PAGE_PERMISSIONS.statusTracking,
   },
   {
     key: "schedule-alerts",
@@ -261,7 +252,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: NotificationsActiveOutlined,
     href: "/schedule/alerts",
     section: "main",
-    permission: AppPermission.ScheduleViewList,
+    permission: PAGE_PERMISSIONS.scheduleAlerts,
   },
   {
     key: "class-details",
@@ -278,14 +269,6 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/classes/cls-9921/audit",
     section: "main",
     permission: AppPermission.SessionViewDetails,
-  },
-  {
-    key: "classes-create",
-    labelKey: "dashboard.nav.createClass",
-    icon: AddCircleOutlineOutlined,
-    href: "/classes/new",
-    section: "main",
-    permission: AppPermission.ScheduleManageRecurring,
   },
   COMMON_NAV_ITEMS.teachers,
   COMMON_NAV_ITEMS.teacherWeeklySchedule,
@@ -335,7 +318,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: BadgeOutlined,
     href: "/managers",
     section: "main",
-    permission: AppPermission.StaffList,
+    permission: PAGE_PERMISSIONS.managers,
   },
   {
     key: "resources",
@@ -343,7 +326,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: FolderOpenOutlined,
     href: "/resources",
     section: "main",
-    permission: AppPermission.ResourcesList,
+    permission: PAGE_PERMISSIONS.resources,
   },
   {
     key: "books-and-bags",
@@ -351,7 +334,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     icon: MenuBookOutlined,
     href: "/resources/books-and-bags",
     section: "main",
-    permission: AppPermission.ResourcesList,
+    permission: PAGE_PERMISSIONS.booksAndBags,
   },
   COMMON_NAV_ITEMS.reports,
   COMMON_NAV_ITEMS.billingAdmin,
@@ -400,7 +383,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     icon: GroupOutlined,
     href: "/students",
     section: "main",
-    permission: AppPermission.StudentsList,
+    permission: PAGE_PERMISSIONS.students,
   },
   {
     key: "reports",
@@ -408,7 +391,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     icon: AnalyticsOutlined,
     href: "/reports",
     section: "main",
-    permission: AppPermission.ReportsGenerate,
+    permission: PAGE_PERMISSIONS.reports,
   },
   COMMON_NAV_ITEMS.billingAdmin,
   COMMON_NAV_ITEMS.billingParent,

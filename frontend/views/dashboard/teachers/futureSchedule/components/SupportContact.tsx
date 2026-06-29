@@ -1,11 +1,30 @@
 "use client";
 
+import { useMutation } from "@apollo/client/react";
 import { Avatar, Box, Button, Stack, Typography } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
+import { logTeacherSupportRequestMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import type { SupportContactProps } from "../types";
 
-export function SupportContact() {
+export function SupportContact({ contact }: Readonly<SupportContactProps>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
+  const notifications = useNotifications();
+  const [logSupportRequest] = useMutation(logTeacherSupportRequestMutationDocument);
+
+  const handleContactAdmin = async () => {
+    try {
+      await logSupportRequest({
+        variables: {
+          input: { reason: t("supportRequestReason") },
+        },
+      });
+      notifications.show(t("notifications.supportRequestSent"), { severity: "success" });
+    } catch {
+      notifications.show(t("errors.supportRequestFailed"), { severity: "error" });
+    }
+  };
 
   return (
     <BaseCard
@@ -20,27 +39,30 @@ export function SupportContact() {
         {t("supportContact")}
       </Typography>
 
-      <Stack
-        direction="row"
-        spacing={2}
-        sx={{
-          alignItems: "center",
-        }}
-      >
-        <Avatar alt="Sarah Jenkins" src="/demo/avatars/01.png" sx={{ width: 40, height: 40 }} />
-        <Box>
-          <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-            Sarah Jenkins
-          </Typography>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            Faculty Coordinator
-          </Typography>
-        </Box>
-      </Stack>
+      {contact && (
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: "center",
+          }}
+        >
+          <Avatar alt={contact.name ?? ""} src={contact.avatarUrl ?? undefined} sx={{ width: 40, height: 40 }} />
+          <Box>
+            <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
+              {contact.name}
+            </Typography>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {contact.role}
+            </Typography>
+          </Box>
+        </Stack>
+      )}
 
       <Button
         fullWidth
         variant="outlined"
+        onClick={handleContactAdmin}
         sx={theme => ({
           mt: 3,
           borderRadius: 2,

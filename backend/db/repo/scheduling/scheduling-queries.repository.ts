@@ -5,6 +5,7 @@ import { queryWithPagination } from "@/backend/db/query.extensions";
 import {
   classInstances,
   classStatusEvents,
+  classSubjects,
   leaveQuotaUsage,
   leaveRequests,
   students,
@@ -49,6 +50,7 @@ export type AdminDashboardScheduleInput = {
   viewerTimezone: string;
   metricFilter?: string;
   pagination?: Types.PaginationArgs | null;
+  locale?: string;
 };
 
 export type AdminDashboardScheduleResult = {
@@ -149,13 +151,14 @@ async function fetchDailyScheduleBaseRows(
 
 async function applyViewerTimezoneFormatting(
   rows: DailyScheduleResult[],
-  viewerTimezone: string
+  viewerTimezone: string,
+  locale?: string
 ): Promise<DailyScheduleResult[]> {
   const { formatInstantInTimezone } = await import("@/backend/lib/timezone");
 
   return rows.map(row => ({
     ...row,
-    yourTimeFormatted: formatInstantInTimezone(row.scheduledStartAt, viewerTimezone),
+    yourTimeFormatted: formatInstantInTimezone(row.scheduledStartAt, viewerTimezone, locale),
   }));
 }
 
@@ -199,7 +202,7 @@ export const getAdminDashboardSchedule = async (
 
     return {
       metrics,
-      rows: await applyViewerTimezoneFormatting(paginatedRows, input.viewerTimezone),
+      rows: await applyViewerTimezoneFormatting(paginatedRows, input.viewerTimezone, input.locale),
       totalCount,
       pageInfo,
     };
@@ -508,6 +511,10 @@ export type FutureClassRow = {
   isRescheduled: boolean;
   studentName: string;
   studentId: string;
+  classType?: string | null;
+  subjectId?: string | null;
+  subjectName?: string | null;
+  zoomMeetingUrl?: string | null;
 };
 
 export async function getTeacherFutureClasses(
@@ -527,9 +534,14 @@ export async function getTeacherFutureClasses(
       isRescheduled: classInstances.isRescheduled,
       studentId: students.id,
       studentName: students.name,
+      classType: classInstances.classType,
+      subjectId: classInstances.subjectId,
+      subjectName: classSubjects.name,
+      zoomMeetingUrl: classInstances.zoomMeetingUrl,
     })
     .from(classInstances)
     .innerJoin(students, eq(classInstances.studentId, students.id))
+    .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
     .where(
       and(
         eq(classInstances.teacherId, teacherId),
@@ -555,6 +567,9 @@ export type WeeklyScheduleGridRow = {
   dayOfWeek: string;
   executionState: string;
   outcome: string;
+  subjectId?: string | null;
+  subjectName?: string | null;
+  classType?: string | null;
 };
 
 export const getWeeklyScheduleGrid = async (
@@ -576,9 +591,13 @@ export const getWeeklyScheduleGrid = async (
       durationMinutes: classInstances.durationMinutes,
       executionState: classInstances.executionState,
       outcome: classInstances.outcome,
+      subjectId: classInstances.subjectId,
+      subjectName: classSubjects.name,
+      classType: classInstances.classType,
     })
     .from(classInstances)
     .innerJoin(students, eq(classInstances.studentId, students.id))
+    .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
     .where(
       and(
         eq(classInstances.teacherId, teacherId),

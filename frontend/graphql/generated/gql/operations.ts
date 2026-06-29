@@ -28,6 +28,10 @@ export type AppPermission =
   | 'BILLING_UPDATE_STATUS_PAID'
   | 'BILLING_VIEW_HISTORY'
   | 'BILLING_VIEW_UNPAID_INVOICES'
+  | 'CATEGORIES_CREATE'
+  | 'CATEGORIES_DELETE'
+  | 'CATEGORIES_LIST'
+  | 'CATEGORIES_UPDATE'
   | 'COMMUNICATION_SUBMIT_SUGGESTION'
   | 'COMPLAINTS_DELETE'
   | 'COMPLAINTS_LIST'
@@ -45,6 +49,10 @@ export type AppPermission =
   | 'INVOICES_EDIT'
   | 'INVOICES_LIST'
   | 'INVOICES_MARK_PAID'
+  | 'NOTES_CREATE'
+  | 'NOTES_DELETE'
+  | 'NOTES_LIST'
+  | 'NOTES_UPDATE'
   | 'NOTIFICATION_VIEW_ALERTS'
   | 'PARENTS_CREATE'
   | 'PARENTS_EDIT'
@@ -97,6 +105,12 @@ export type AppPermission =
   | 'STUDENT_MANAGE_STATUS'
   | 'STUDENT_REASSIGN_TEACHER'
   | 'STUDENT_VIEW_ASSOCIATED'
+  | 'SUBJECTS_CREATE'
+  | 'SUBJECTS_DELETE'
+  | 'SUBJECTS_LIST'
+  | 'SUBJECTS_MANAGE_RESOURCES'
+  | 'SUBJECTS_UPDATE'
+  | 'SUBJECTS_VIEW_RESOURCES'
   | 'SUGGESTIONS_DELETE'
   | 'SUGGESTIONS_LIST'
   | 'SUGGESTIONS_REVIEW'
@@ -124,6 +138,13 @@ export type AssignPermissionGroupToUserInput = {
   userId: string;
 };
 
+export type AttachSubjectResourceInput = {
+  learningResourceId: string;
+  resourceType: string | null | undefined;
+  sortOrder: number | null | undefined;
+  subjectId: string;
+};
+
 /** Filters applied to the dynamic attendance query engine. */
 export type AttendanceReportFiltersInput = {
   /** ISO Date String representing start bound */
@@ -146,6 +167,22 @@ export type BillingMonthInput = {
   year: number;
 };
 
+export type ClassCategoryCreateInput = {
+  description: string | null | undefined;
+  isActive: boolean | null | undefined;
+  name: string;
+  slug: string;
+  sortOrder: number | null | undefined;
+};
+
+export type ClassCategoryUpdateInput = {
+  description: string | null | undefined;
+  isActive: boolean | null | undefined;
+  name: string | null | undefined;
+  slug: string | null | undefined;
+  sortOrder: number | null | undefined;
+};
+
 export type ClassExecutionState =
   | 'ACTIVATED'
   | 'COMPLETED'
@@ -157,6 +194,24 @@ export type ClassOutcome =
   | 'LEAVE'
   | 'PENDING'
   | 'TAKEN';
+
+export type ClassSubjectCreateInput = {
+  categoryId: string;
+  description: string | null | undefined;
+  isActive: boolean | null | undefined;
+  name: string;
+  slug: string;
+  sortOrder: number | null | undefined;
+};
+
+export type ClassSubjectUpdateInput = {
+  categoryId: string | null | undefined;
+  description: string | null | undefined;
+  isActive: boolean | null | undefined;
+  name: string | null | undefined;
+  slug: string | null | undefined;
+  sortOrder: number | null | undefined;
+};
 
 /** Categories for parent complaints. */
 export type ComplaintCategory =
@@ -466,6 +521,16 @@ export type CreateRecurringClassInput = {
   teacherId: string;
   timezone: string;
   timezoneId: number | null | undefined;
+};
+
+export type CreateTeacherNoteInput = {
+  body: string | null | undefined;
+  expiresAt: string | null | undefined;
+  isPublished: boolean | null | undefined;
+  priority: number | null | undefined;
+  startsAt: string | null | undefined;
+  teacherId: string | null | undefined;
+  title: string;
 };
 
 export type DayOfWeek =
@@ -784,6 +849,15 @@ export type UpdatePermissionGroupInput = {
   permissionIds: Array<string> | null | undefined;
 };
 
+export type UpdateTeacherNoteInput = {
+  body: string | null | undefined;
+  expiresAt: string | null | undefined;
+  isPublished: boolean | null | undefined;
+  priority: number | null | undefined;
+  startsAt: string | null | undefined;
+  title: string | null | undefined;
+};
+
 export type UploadPreparationInput = {
   contentHash: string;
   contentType: string;
@@ -977,6 +1051,53 @@ export type DeleteBookMutationMutationVariables = Exact<{
 
 export type DeleteBookMutationMutation = DeleteBookMutationMutation_Mutation;
 
+export type ClassCategoryFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null };
+
+export type ClassCategoriesQuery_classCategories_ClassCategory = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null };
+
+export type ClassCategoriesQuery_Query = { classCategories: Array<ClassCategoriesQuery_classCategories_ClassCategory> | null };
+
+
+export type ClassCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ClassCategoriesQuery = ClassCategoriesQuery_Query;
+
+export type CreateClassCategoryMutation_createClassCategory_ClassCategory = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null };
+
+export type CreateClassCategoryMutation_Mutation = { createClassCategory: CreateClassCategoryMutation_createClassCategory_ClassCategory | null };
+
+
+export type CreateClassCategoryMutationVariables = Exact<{
+  input: Types.ClassCategoryCreateInput;
+}>;
+
+
+export type CreateClassCategoryMutation = CreateClassCategoryMutation_Mutation;
+
+export type UpdateClassCategoryMutation_updateClassCategory_ClassCategory = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null };
+
+export type UpdateClassCategoryMutation_Mutation = { updateClassCategory: UpdateClassCategoryMutation_updateClassCategory_ClassCategory | null };
+
+
+export type UpdateClassCategoryMutationVariables = Exact<{
+  id: string | number;
+  input: Types.ClassCategoryUpdateInput;
+}>;
+
+
+export type UpdateClassCategoryMutation = UpdateClassCategoryMutation_Mutation;
+
+export type DeleteClassCategoryMutation_Mutation = { deleteClassCategory: boolean | null };
+
+
+export type DeleteClassCategoryMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeleteClassCategoryMutation = DeleteClassCategoryMutation_Mutation;
+
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo = { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null };
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo = { id: string | null, name: string | null, title: string | null, avatarUrl: string | null };
@@ -1116,6 +1237,98 @@ export type DeleteClassInstanceMutationVariables = Exact<{
 
 
 export type DeleteClassInstanceMutation = DeleteClassInstanceMutation_Mutation;
+
+export type ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory = { id: string | null, name: string | null, slug: string | null };
+
+export type ClassSubjectFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+
+export type SubjectResourceFieldsFragment = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
+
+export type ClassSubjectsQuery_classSubjects_ClassSubject_resources_SubjectResource = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
+
+export type ClassSubjectsQuery_classSubjects_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, resources: Array<ClassSubjectsQuery_classSubjects_ClassSubject_resources_SubjectResource> | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+
+export type ClassSubjectsQuery_Query = { classSubjects: Array<ClassSubjectsQuery_classSubjects_ClassSubject> | null };
+
+
+export type ClassSubjectsQueryVariables = Exact<{
+  categoryId: string | null | undefined;
+}>;
+
+
+export type ClassSubjectsQuery = ClassSubjectsQuery_Query;
+
+export type ClassSubjectByIdQuery_classSubject_ClassSubject_resources_SubjectResource = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
+
+export type ClassSubjectByIdQuery_classSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, resources: Array<ClassSubjectByIdQuery_classSubject_ClassSubject_resources_SubjectResource> | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+
+export type ClassSubjectByIdQuery_Query = { classSubject: ClassSubjectByIdQuery_classSubject_ClassSubject | null };
+
+
+export type ClassSubjectByIdQueryVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type ClassSubjectByIdQuery = ClassSubjectByIdQuery_Query;
+
+export type CreateClassSubjectMutation_createClassSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+
+export type CreateClassSubjectMutation_Mutation = { createClassSubject: CreateClassSubjectMutation_createClassSubject_ClassSubject | null };
+
+
+export type CreateClassSubjectMutationVariables = Exact<{
+  input: Types.ClassSubjectCreateInput;
+}>;
+
+
+export type CreateClassSubjectMutation = CreateClassSubjectMutation_Mutation;
+
+export type UpdateClassSubjectMutation_updateClassSubject_ClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, category: ClassSubjectFieldsFragment_ClassSubject_category_ClassCategory | null };
+
+export type UpdateClassSubjectMutation_Mutation = { updateClassSubject: UpdateClassSubjectMutation_updateClassSubject_ClassSubject | null };
+
+
+export type UpdateClassSubjectMutationVariables = Exact<{
+  id: string | number;
+  input: Types.ClassSubjectUpdateInput;
+}>;
+
+
+export type UpdateClassSubjectMutation = UpdateClassSubjectMutation_Mutation;
+
+export type DeleteClassSubjectMutation_Mutation = { deleteClassSubject: boolean | null };
+
+
+export type DeleteClassSubjectMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeleteClassSubjectMutation = DeleteClassSubjectMutation_Mutation;
+
+export type AttachSubjectResourceMutation_attachSubjectResource_SubjectResource = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
+
+export type AttachSubjectResourceMutation_Mutation = { attachSubjectResource: AttachSubjectResourceMutation_attachSubjectResource_SubjectResource | null };
+
+
+export type AttachSubjectResourceMutationVariables = Exact<{
+  input: Types.AttachSubjectResourceInput;
+}>;
+
+
+export type AttachSubjectResourceMutation = AttachSubjectResourceMutation_Mutation;
+
+export type DetachSubjectResourceMutation_Mutation = { detachSubjectResource: boolean | null };
+
+
+export type DetachSubjectResourceMutationVariables = Exact<{
+  subjectId: string | number;
+  learningResourceId: string | number;
+}>;
+
+
+export type DetachSubjectResourceMutation = DetachSubjectResourceMutation_Mutation;
 
 export type ParentComplaintsQuery_parentComplaints_ParentComplaintsResult_complaints_Complaint_responses_ComplaintResponse = { id: string | null, body: string | null, emailSent: boolean | null, createdAt: string | null, responderName: string | null };
 
@@ -2222,14 +2435,20 @@ export type LogTeacherSupportRequestMutationVariables = Exact<{
 
 export type LogTeacherSupportRequestMutation = LogTeacherSupportRequestMutation_Mutation;
 
-export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass = { id: string | null, courseName: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, isRescheduled: boolean | null, leaveRequestDisabled: boolean | null, leaveRequestDisabledReason: string | null, studentCount: number | null, location: string | null };
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass = { id: string | null, courseName: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, isRescheduled: boolean | null, leaveRequestDisabled: boolean | null, leaveRequestDisabledReason: string | null, studentCount: number | null, location: string | null, subjectId: string | null, subjectName: string | null, classType: string | null, zoomMeetingUrl: string | null };
 
-export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule = { id: string | null, leaveQuotaUsed: number | null, leaveQuotaTotal: number | null, totalClasses: number | null, classes: Array<TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass> | null };
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_importantNotes_TeacherImportantNote = { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null };
+
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_supportContact_SupportContact = { id: string | null, name: string | null, role: string | null, avatarUrl: string | null, phone: string | null, skypeId: string | null };
+
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule = { id: string | null, leaveQuotaUsed: number | null, leaveQuotaTotal: number | null, totalClasses: number | null, classes: Array<TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass> | null, importantNotes: Array<TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_importantNotes_TeacherImportantNote> | null, supportContact: TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_supportContact_SupportContact | null };
 
 export type TeacherFutureScheduleQuery_Query = { teacherFutureSchedule: TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule | null };
 
 
-export type TeacherFutureScheduleQueryVariables = Exact<{ [key: string]: never; }>;
+export type TeacherFutureScheduleQueryVariables = Exact<{
+  teacherId: string | null | undefined;
+}>;
 
 
 export type TeacherFutureScheduleQuery = TeacherFutureScheduleQuery_Query;
@@ -2243,6 +2462,43 @@ export type TeacherHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type TeacherHandbookUrlQuery = TeacherHandbookUrlQuery_Query;
+
+export type TeacherImportantNoteFieldsFragment = { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null };
+
+export type CreateTeacherImportantNoteMutation_createTeacherImportantNote_TeacherImportantNote = { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null };
+
+export type CreateTeacherImportantNoteMutation_Mutation = { createTeacherImportantNote: CreateTeacherImportantNoteMutation_createTeacherImportantNote_TeacherImportantNote | null };
+
+
+export type CreateTeacherImportantNoteMutationVariables = Exact<{
+  input: Types.CreateTeacherNoteInput;
+}>;
+
+
+export type CreateTeacherImportantNoteMutation = CreateTeacherImportantNoteMutation_Mutation;
+
+export type UpdateTeacherImportantNoteMutation_updateTeacherImportantNote_TeacherImportantNote = { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null };
+
+export type UpdateTeacherImportantNoteMutation_Mutation = { updateTeacherImportantNote: UpdateTeacherImportantNoteMutation_updateTeacherImportantNote_TeacherImportantNote | null };
+
+
+export type UpdateTeacherImportantNoteMutationVariables = Exact<{
+  id: string | number;
+  input: Types.UpdateTeacherNoteInput;
+}>;
+
+
+export type UpdateTeacherImportantNoteMutation = UpdateTeacherImportantNoteMutation_Mutation;
+
+export type DeleteTeacherImportantNoteMutation_Mutation = { deleteTeacherImportantNote: boolean | null };
+
+
+export type DeleteTeacherImportantNoteMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeleteTeacherImportantNoteMutation = DeleteTeacherImportantNoteMutation_Mutation;
 
 export type CreateTeacherMutation_createTeacher_TeacherOnboardingResult = { userId: string | null, teacherId: string | null, name: string | null, email: string | null, status: string | null };
 
@@ -2370,7 +2626,7 @@ export type UserBillingProfileInvoiceHistoryQueryVariables = Exact<{
 
 export type UserBillingProfileInvoiceHistoryQuery = UserBillingProfileInvoiceHistoryQuery_Query;
 
-export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass = { id: string | null, studentName: string | null, studentId: string | null, duration: number | null, startTime: string | null, day: string | null, executionState: string | null, outcome: string | null };
+export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass = { id: string | null, studentName: string | null, studentId: string | null, duration: number | null, startTime: string | null, day: string | null, executionState: string | null, outcome: string | null, subjectName: string | null, classType: string | null };
 
 export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid = { id: string | null, teacherId: string | null, weekStart: string | null, weekEnd: string | null, classes: Array<TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass> | null };
 

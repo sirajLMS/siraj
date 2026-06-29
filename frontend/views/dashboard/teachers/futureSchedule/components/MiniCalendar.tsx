@@ -3,14 +3,14 @@
 import { ChevronLeftOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import { alpha, Box, Grid, IconButton, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
+import type { MiniCalendarDate } from "../types";
 
-interface CalendarDate {
-  num: number;
-  muted?: boolean;
-  active?: boolean;
-  selected?: boolean;
-  dot?: boolean;
+interface MiniCalendarProps {
+  readonly selectedDate: string;
+  readonly onSelectDate: (date: string) => void;
+  readonly classDates: readonly string[];
 }
 
 const DAYS = [
@@ -22,113 +22,102 @@ const DAYS = [
   { id: "fri", label: "F" },
   { id: "sat", label: "S" },
 ];
-const DATES: CalendarDate[] = [
-  { num: 1, muted: true },
-  { num: 2, muted: true },
-  { num: 3, muted: true },
-  { num: 4, muted: true },
-  { num: 5, muted: true },
-  { num: 6, muted: true },
-  { num: 7, muted: true },
-  { num: 22 },
-  { num: 23, active: true },
-  { num: 24, dot: true, selected: true },
-  { num: 25, dot: true, selected: true },
-  { num: 26 },
-  { num: 27 },
-  { num: 28 },
-];
 
-function CalendarHeader() {
+function getCalendarGrid(
+  year: number,
+  month: number,
+  classDates: readonly string[],
+  selectedDate: string
+): MiniCalendarDate[] {
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+  const classDateSet = new Set(classDates);
+  const dates: MiniCalendarDate[] = [];
+
+  for (let i = firstDay - 1; i >= 0; i--) {
+    dates.push({ num: daysInPrevMonth - i, muted: true });
+  }
+
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    dates.push({
+      num: d,
+      active: dateStr === todayStr,
+      selected: dateStr === selectedDate,
+      dot: classDateSet.has(dateStr),
+    });
+  }
+
+  const remaining = 7 - (dates.length % 7);
+  if (remaining < 7) {
+    for (let i = 1; i <= remaining; i++) {
+      dates.push({ num: i, muted: true });
+    }
+  }
+
+  return dates;
+}
+
+export function MiniCalendar({ selectedDate, onSelectDate, classDates }: Readonly<MiniCalendarProps>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
-  return (
-    <Stack
-      direction="row"
-      spacing={2}
-      sx={{
-        justifyContent: "space-between",
-        alignItems: "center",
-        mb: 2,
-      }}
-    >
-      <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-        {t("monthDisplay", { month: "October", year: "2023" })}
-      </Typography>
-      <Stack direction="row" spacing={0.5}>
-        <IconButton size="small">
-          <ChevronLeftOutlined sx={{ fontSize: 16 }} />
-        </IconButton>
-        <IconButton size="small">
-          <ChevronRightOutlined sx={{ fontSize: 16 }} />
-        </IconButton>
-      </Stack>
-    </Stack>
-  );
-}
+  const [viewingMonth, setViewingMonth] = useState(() => {
+    const d = new Date(selectedDate + "T00:00:00");
+    return { year: d.getFullYear(), month: d.getMonth() };
+  });
 
-function CalendarDateCell({ date }: Readonly<{ date: CalendarDate }>) {
-  return (
-    <Grid size={{ xs: 1 }} sx={{ p: 0.5 }}>
-      <Box
-        sx={theme => ({
-          width: 28,
-          height: 28,
-          mx: "auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "50%",
-          position: "relative",
-          cursor: "pointer",
-          ...(date.active && {
-            backgroundColor: theme.palette.header,
-            color: theme.palette.onHeader,
-          }),
-          ...(date.selected && {
-            backgroundColor: alpha(theme.palette.primary.main, 0.1),
-            color: theme.palette.primary.main,
-            fontWeight: 700,
-          }),
-          ...(date.muted && { color: theme.palette.onSurface, opacity: 0.38 }),
-        })}
-      >
-        <Typography
-          variant="labelMd"
-          sx={theme => ({
-            fontSize: 11,
-            position: "relative",
-            zIndex: 1,
-            ...(date.selected && {
-              color: theme.palette.primary.main,
-              fontWeight: 700,
-            }),
-          })}
-        >
-          {date.num}
-        </Typography>
-        {date.dot && (
-          <Box
-            sx={theme => ({
-              width: 4,
-              height: 4,
-              backgroundColor: theme.palette.status.blocked,
-              borderRadius: "50%",
-              position: "absolute",
-              bottom: 2,
-              left: "50%",
-              transform: "translateX(-50%)",
-            })}
-          />
-        )}
-      </Box>
-    </Grid>
-  );
-}
+  const { year, month } = viewingMonth;
+  const dates = getCalendarGrid(year, month, classDates, selectedDate);
 
-export function MiniCalendar() {
+  const monthName = new Date(year, month).toLocaleString("en-US", { month: "long" });
+
+  const handlePrevMonth = () => {
+    setViewingMonth(prev => {
+      const d = new Date(prev.year, prev.month - 1, 1);
+      return { year: d.getFullYear(), month: d.getMonth() };
+    });
+  };
+
+  const handleNextMonth = () => {
+    setViewingMonth(prev => {
+      const d = new Date(prev.year, prev.month + 1, 1);
+      return { year: d.getFullYear(), month: d.getMonth() };
+    });
+  };
+
+  const handleDateClick = (num: number, muted?: boolean) => {
+    if (muted) return;
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(num).padStart(2, "0")}`;
+    onSelectDate(dateStr);
+  };
+
   return (
     <BaseCard sx={{ p: 3 }}>
-      <CalendarHeader />
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
+        <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
+          {t("monthDisplay", { month: monthName, year: String(year) })}
+        </Typography>
+        <Stack direction="row" spacing={0.5}>
+          <IconButton size="small" onClick={handlePrevMonth}>
+            <ChevronLeftOutlined sx={{ fontSize: 16 }} />
+          </IconButton>
+          <IconButton size="small" onClick={handleNextMonth}>
+            <ChevronRightOutlined sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Stack>
+      </Stack>
 
       <Grid container columns={7} sx={{ textAlign: "center" }}>
         {DAYS.map(day => (
@@ -145,8 +134,62 @@ export function MiniCalendar() {
             </Typography>
           </Grid>
         ))}
-        {DATES.map(date => (
-          <CalendarDateCell key={`date-${date.num}`} date={date} />
+        {dates.map((date, _idx) => (
+          <Grid size={{ xs: 1 }} key={`date-${date.num}-${date.muted}`} sx={{ p: 0.5 }}>
+            <Box
+              onClick={() => handleDateClick(date.num, date.muted)}
+              sx={theme => ({
+                width: 28,
+                height: 28,
+                mx: "auto",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "50%",
+                position: "relative",
+                cursor: date.muted ? "default" : "pointer",
+                ...(date.active && {
+                  backgroundColor: theme.palette.header,
+                  color: theme.palette.onHeader,
+                }),
+                ...(date.selected && {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                  color: theme.palette.primary.main,
+                  fontWeight: 700,
+                }),
+                ...(date.muted && { color: theme.palette.onSurface, opacity: 0.38 }),
+              })}
+            >
+              <Typography
+                variant="labelMd"
+                sx={theme => ({
+                  fontSize: 11,
+                  position: "relative",
+                  zIndex: 1,
+                  ...(date.selected && {
+                    color: theme.palette.primary.main,
+                    fontWeight: 700,
+                  }),
+                })}
+              >
+                {date.num}
+              </Typography>
+              {date.dot && (
+                <Box
+                  sx={theme => ({
+                    width: 4,
+                    height: 4,
+                    backgroundColor: theme.palette.status.blocked,
+                    borderRadius: "50%",
+                    position: "absolute",
+                    bottom: 2,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                  })}
+                />
+              )}
+            </Box>
+          </Grid>
         ))}
       </Grid>
     </BaseCard>

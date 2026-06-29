@@ -3,159 +3,161 @@ import type { PaletteOptions } from "@mui/material/styles";
 export const lightPalette: PaletteOptions = {
   // MUI Standard Families (as Objects)
   primary: {
-    main: "#003535",
-    light: "#104F4F",
-    dark: "#002020",
+    main: "#0D9488", // Vivid Teal
+    light: "#2DD4BF",
+    dark: "#0F766E",
     contrastText: "#FFFFFF",
   },
   onPrimary: "#FFFFFF",
-  primaryContainer: "#0D4D4D",
-  onPrimaryContainer: "#85BDBC",
+  primaryContainer: "#CCFBF1",
+  onPrimaryContainer: "#115E59",
 
   secondary: {
-    main: "#3C475A",
-    light: "#545F73",
-    dark: "#263143",
+    main: "#4F46E5", // Vivid Indigo
+    light: "#818CF8",
+    dark: "#3730A3",
     contrastText: "#FFFFFF",
   },
   onSecondary: "#FFFFFF",
-  secondaryContainer: "#545F73",
-  onSecondaryContainer: "#CED9F1",
+  secondaryContainer: "#E0E7FF",
+  onSecondaryContainer: "#312E81",
 
   error: {
-    main: "#BA1A1A",
-    light: "#DE3730",
-    dark: "#93000A",
+    main: "#DC2626", // Vivid Red
+    light: "#F87171",
+    dark: "#991B1B",
     contrastText: "#FFFFFF",
   },
   onError: "#FFFFFF",
-  errorContainer: "#FFDAD6",
-  onErrorContainer: "#93000A",
+  errorContainer: "#FEE2E2",
+  onErrorContainer: "#7F1D1D",
 
   success: {
-    main: "#006B2C",
-    light: "#00873A",
-    dark: "#003914",
+    main: "#16A34A", // Vivid Green
+    light: "#4ADE80",
+    dark: "#166534",
     contrastText: "#FFFFFF",
   },
   onSuccess: "#FFFFFF",
-  successContainer: "#00873A",
-  onSuccessContainer: "#F7FFF2",
+  successContainer: "#DCFCE7",
+  onSuccessContainer: "#14532D",
 
   warning: {
-    main: "#805600",
-    light: "#CA8A04",
-    dark: "#4B3100",
+    main: "#D97706", // Vivid Amber
+    light: "#FBBF24",
+    dark: "#92400E",
     contrastText: "#FFFFFF",
   },
   onWarning: "#FFFFFF",
-  warningContainer: "#CA8A04",
-  onWarningContainer: "#422A00",
+  warningContainer: "#FEF3C7",
+  onWarningContainer: "#78350F",
 
   info: {
-    main: "#004AC6",
-    light: "#2563EB",
-    dark: "#002F84",
+    main: "#2563EB", // Vivid Blue
+    light: "#60A5FA",
+    dark: "#1E40AF",
     contrastText: "#FFFFFF",
   },
   onInfo: "#FFFFFF",
-  infoContainer: "#2563EB",
-  onInfoContainer: "#EEEFFF",
+  infoContainer: "#DBEAFE",
+  onInfoContainer: "#1E3A8A",
 
   // Custom Families
-  tertiary: "#38274B",
+  tertiary: "#E11D48", // Vivid Rose
   onTertiary: "#FFFFFF",
-  tertiaryContainer: "#4F3D63",
-  onTertiaryContainer: "#C0A9D6",
+  tertiaryContainer: "#FFE4E6",
+  onTertiaryContainer: "#881337",
 
   // Layout Families
-  header: "#004545",
-  onHeader: "#FFFFFF",
-  headerContainer: "#135E5E",
-  onHeaderContainer: "#e5fafaff",
+  header: "#FFFFFF",
+  onHeader: "#171717",
+  headerContainer: "#FFFFFF",
+  onHeaderContainer: "#171717",
 
-  footer: "#000000",
-  onFooter: "#FFFFFF",
-  footerContainer: "#002020",
-  onFooterContainer: "#6B8A89",
+  footer: "#FFFFFF",
+  onFooter: "#171717",
+  footerContainer: "#FAFAFA",
+  onFooterContainer: "#52525B",
 
-  sidebar: "#002626",
-  onSidebar: "#FFFFFF",
-  sidebarContainer: "#0c3232ff",
-  onSidebarContainer: "#afc5c5ff",
+  sidebar: "#FFFFFF",
+  onSidebar: "#171717",
+  sidebarContainer: "#FAFAFA",
+  onSidebarContainer: "#52525B",
 
-  // Base Scheme
+  // Base Scheme (Strict Zinc/Neutral Gray Scale)
   background: {
-    default: "#F8FAF9",
+    default: "#FFFFFF",
     paper: "#FFFFFF",
   },
-  onBackground: "#191C1C",
-  surface: "#F8FAF9",
-  onSurface: "#191C1C",
-  surfaceVariant: "#DBE4E3",
-  onSurfaceVariant: "#404848",
-  outline: "#707978",
-  outlineVariant: "#BFC8C8",
+  onBackground: "#171717",
+  surface: "#FFFFFF",
+  onSurface: "#171717",
+  surfaceVariant: "#F4F4F5",
+  onSurfaceVariant: "#52525B",
+  outline: "#A1A1AA",
+  outlineVariant: "#E4E4E7",
   scrim: "#000000",
-  inverseSurface: "#2E3131",
-  inverseOnSurface: "#F0F1F0",
-  inversePrimary: "#98D1D0",
-  surfaceDim: "#D9DAD9",
-  surfaceBright: "#F8FAF9",
+  inverseSurface: "#171717",
+  inverseOnSurface: "#F4F4F5",
+  inversePrimary: "#2DD4BF",
+  surfaceDim: "#E4E4E7",
+  surfaceBright: "#FFFFFF",
+
+  // Material 3 Surface Containers (Strict Lightness Progression)
   surfaceContainerLowest: "#FFFFFF",
-  surfaceContainerLow: "#F2F4F3",
-  surfaceContainer: "#EDEEED",
-  surfaceContainerHigh: "#E7E8E8",
-  surfaceContainerHighest: "#E1E3E2",
+  surfaceContainerLow: "#FAFAFA",
+  surfaceContainer: "#F4F4F5",
+  surfaceContainerHigh: "#E4E4E7",
+  surfaceContainerHighest: "#D4D4D8",
 
   // Layout Helpers
   border: {
-    light: "#E2E8F0",
-    main: "#CBD5E1",
+    light: "#E4E4E7",
+    main: "#D4D4D8",
   },
   shadow: {
-    card: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
-    cardHover: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+    card: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)",
+    cardHover: "0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04)",
     button: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
     buttonHover: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
   },
 
   // Status Family
   status: {
-    pending: "#805600",
+    pending: "#D97706",
     onPending: "#FFFFFF",
-    pendingContainer: "#CA8A04",
-    onPendingContainer: "#422A00",
+    pendingContainer: "#FEF3C7",
+    onPendingContainer: "#78350F",
 
-    confirmed: "#004AC6",
+    confirmed: "#2563EB",
     onConfirmed: "#FFFFFF",
-    confirmedContainer: "#2563EB",
-    onConfirmedContainer: "#EEEFFF",
+    confirmedContainer: "#DBEAFE",
+    onConfirmedContainer: "#1E3A8A",
 
-    active: "#006B2C",
+    active: "#16A34A",
     onActive: "#FFFFFF",
-    activeContainer: "#00873A",
-    onActiveContainer: "#F7FFF2",
+    activeContainer: "#DCFCE7",
+    onActiveContainer: "#14532D",
 
-    completed: "#7800CE",
+    completed: "#9333EA", // Purple 600
     onCompleted: "#FFFFFF",
-    completedContainer: "#9333EA",
-    onCompletedContainer: "#F6E6FF",
+    completedContainer: "#F3E8FF", // Purple 100
+    onCompletedContainer: "#581C87", // Purple 900
 
-    cancelled: "#904a43",
-    onCancelled: "#ffffff",
-    cancelledContainer: "#ffdad6",
-    onCancelledContainer: "#73332e",
+    cancelled: "#DC2626", // Red 600
+    onCancelled: "#FFFFFF",
+    cancelledContainer: "#FEE2E2", // Red 100
+    onCancelledContainer: "#7F1D1D", // Red 900
 
-    blocked: "#93000B",
+    blocked: "#475569", // Slate 600
     onBlocked: "#FFFFFF",
-    blockedContainer: "#B91C1C",
-    onBlockedContainer: "#FFCDC7",
+    blockedContainer: "#F1F5F9", // Slate 100
+    onBlockedContainer: "#0F172A", // Slate 900
   },
 
   DataGrid: {
-    bg: "#eff7f7ff",
-    pinnedBg: "#293548",
-    headerBg: "#59adadff",
+    bg: "#FFFFFF",
+    pinnedBg: "#FAFAFA",
+    headerBg: "#F4F4F5",
   },
 };

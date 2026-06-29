@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import {
-  Alert,
   Box,
   Button,
   Checkbox,
@@ -19,6 +18,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
@@ -27,14 +27,13 @@ import { createRecurringClassMutationDocument } from "@/frontend/graphql/sharedD
 import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringClassStore";
 import { logger } from "@/frontend/utils/logger";
-
-interface CreateRecurringClassDialogProps {
-  readonly teacherId: string;
-  readonly onRefetch?: () => void;
-}
+import { CLASS_TYPE_OPTIONS, TIMEZONE_OPTIONS } from "@/frontend/views/dashboard/classes/recurring/types";
+import { ClassType as ClassTypeEnum } from "@/shared/lib/enum";
+import type { CreateRecurringClassDialogProps } from "../types";
 
 export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<CreateRecurringClassDialogProps>) {
   const t = useTranslations("dashboard.teacherCreateRecurringClass");
+  const notifications = useNotifications();
   const { isDialogOpen, closeDialog, days, toggleDay, setTimeOverride, toggleTimeOverride, resetDays } =
     useCreateRecurringClassStore();
 
@@ -42,9 +41,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
   const [duration, setDuration] = useState(60);
   const [defaultStartTime, setDefaultStartTime] = useState("09:00");
   const [timezone, setTimezone] = useState("Africa/Cairo");
-  const [classType, setClassType] = useState("REGULAR");
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [classType, setClassType] = useState<ClassTypeEnum>(ClassTypeEnum.REGULAR);
 
   const { data: studentsData, loading: loadingStudents } = useQuery(studentsQueryDocument, {
     variables: {
@@ -71,9 +68,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
       setDuration(60);
       setDefaultStartTime("09:00");
       setTimezone("Africa/Cairo");
-      setClassType("REGULAR");
-      setErrorMsg(null);
-      setSuccessMsg(null);
+      setClassType(ClassTypeEnum.REGULAR);
       resetDays();
     }
   }, [isDialogOpen, resetDays]);
@@ -82,22 +77,20 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setErrorMsg(null);
-    setSuccessMsg(null);
 
     if (!studentId) {
-      setErrorMsg(t("errors.noStudentSelected"));
+      notifications.show(t("errors.noStudentSelected"), { severity: "error" });
       return;
     }
 
     const activeDays = days.filter(d => d.enabled);
     if (activeDays.length === 0) {
-      setErrorMsg(t("errors.noDaysSelected"));
+      notifications.show(t("errors.noDaysSelected"), { severity: "error" });
       return;
     }
 
     if (duration <= 0) {
-      setErrorMsg("Duration must be greater than 0");
+      notifications.show(t("errors.durationMustBePositive"), { severity: "error" });
       return;
     }
 
@@ -125,7 +118,9 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
       });
 
       if (data?.createRecurringClass) {
-        setSuccessMsg(t("success.description", { count: data.createRecurringClass.classInstanceCount ?? 0 }));
+        notifications.show(t("success.description", { count: data.createRecurringClass.classInstanceCount ?? 0 }), {
+          severity: "success",
+        });
         logger.info("Recurring class created successfully", {
           id: data.createRecurringClass.id,
         });
@@ -134,15 +129,12 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
           onRefetch();
         }
 
-        // Close after a brief delay to show success
-        setTimeout(() => {
-          closeDialog();
-        }, 2000);
+        closeDialog();
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       logger.error("Failed to create recurring class", { err: error });
-      setErrorMsg(error.message || t("errors.creationFailed"));
+      notifications.show(t("errors.creationFailed"), { severity: "error" });
     }
   };
 
@@ -152,9 +144,6 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
       <form onSubmit={handleSubmit}>
         <DialogContent>
           <Stack spacing={3}>
-            {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
-            {successMsg && <Alert severity="success">{successMsg}</Alert>}
-
             <FormControl fullWidth>
               <InputLabel id="student-select-label">{t("fields.student")}</InputLabel>
               <Select
@@ -176,7 +165,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
             <Stack direction="row" spacing={2}>
               <TextField
                 fullWidth
-                label="Duration (minutes)"
+                label={t("fields.durationMinutes")}
                 type="number"
                 value={duration}
                 onChange={e => setDuration(Number(e.target.value))}
@@ -185,7 +174,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
 
               <TextField
                 fullWidth
-                label="Default Start Time"
+                label={t("fields.time")}
                 type="time"
                 value={defaultStartTime}
                 onChange={e => setDefaultStartTime(e.target.value)}
@@ -209,25 +198,29 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
                   onChange={e => setTimezone(e.target.value)}
                   disabled={mutationLoading}
                 >
-                  <MenuItem value="Africa/Cairo">Africa/Cairo (Cairo)</MenuItem>
-                  <MenuItem value="Asia/Riyadh">Asia/Riyadh (Riyadh)</MenuItem>
-                  <MenuItem value="UTC">UTC</MenuItem>
+                  {TIMEZONE_OPTIONS.map(opt => (
+                    <MenuItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
 
               <FormControl fullWidth>
-                <InputLabel id="class-type-select-label">Class Type</InputLabel>
+                <InputLabel id="class-type-select-label">{t("fields.classType")}</InputLabel>
                 <Select
                   labelId="class-type-select-label"
                   id="class-type-select"
                   value={classType}
-                  label="Class Type"
-                  onChange={e => setClassType(e.target.value)}
+                  label={t("fields.classType")}
+                  onChange={e => setClassType(e.target.value as ClassTypeEnum)}
                   disabled={mutationLoading}
                 >
-                  <MenuItem value="REGULAR">Regular</MenuItem>
-                  <MenuItem value="TRIAL">Trial</MenuItem>
-                  <MenuItem value="ADVANCE">Advance</MenuItem>
+                  {CLASS_TYPE_OPTIONS.map(opt => (
+                    <MenuItem key={opt} value={opt}>
+                      {t(`classTypes.${opt}`)}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Stack>
@@ -297,7 +290,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
           </Button>
           <RequirePermission permissions={[AppPermission.ScheduleCreateClass]}>
             <Button type="submit" variant="contained" color="primary" disabled={mutationLoading}>
-              {mutationLoading ? "Submitting..." : t("actions.create")}
+              {mutationLoading ? t("actions.submitting") : t("actions.create")}
             </Button>
           </RequirePermission>
         </DialogActions>

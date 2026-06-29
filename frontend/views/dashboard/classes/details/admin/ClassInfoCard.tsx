@@ -74,6 +74,7 @@ const StyledPersonRoleCaption = styled(Typography)(({ theme }) => ({
 
 const StyledPersonDetailCaption = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
+  display: "block",
 }));
 
 const StyledDecorativeIconWrapper = styled(Box)(({ theme }) => ({
@@ -162,7 +163,9 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
             ) : (
               <Typography variant="titleLg">{student.name}</Typography>
             )}
-            <StyledPersonDetailCaption variant="caption">ID: {student.id}</StyledPersonDetailCaption>
+            {student.id ? (
+              <StyledPersonDetailCaption variant="caption">ID: {student.id}</StyledPersonDetailCaption>
+            ) : null}
           </Box>
         </Stack>
 

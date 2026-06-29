@@ -6,5 +6,7 @@
   },
   "sonarlint.analysisExcludesStandalone": "**/.next-test/**,**/messages/**,**theme/palette/**,**/.scannerwork/**,**/.git/**,**/.agent/**,**/.ai/**,docs/**,backend/drizzle/**,**/node_modules/**,**/.next/**,**/dist/**,**/out/**,**/build/**,**/.storybook/**,**/*.stories.@(js|jsx|ts|tsx),**/*.test.@(js|jsx|ts|tsx),**/__tests__/**,**/*.d.ts,**/public/**,**/coverage/**,**/scripts/**,**/mockData/**,**/decorators/**,**/graphql/generated/**,storybook-static/**",
   "codescene.enableAutoRefactor": false,
-  "codescene.enableTelemetry": false
+  "codescene.enableTelemetry": false,
+  "chat.utilityModel": "customoai/nvidia-reasoning",
+  "chat.utilitySmallModel": "customoai/nvidia-reasoning"
 }

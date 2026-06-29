@@ -5,6 +5,8 @@ export interface EntityLinkTargets {
   readonly teacherId: string;
 }
 
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+
 export function formatClassDetailDate(value: string | null | undefined, locale: string): string {
   if (!value) {
     return "";
@@ -13,8 +15,7 @@ export function formatClassDetailDate(value: string | null | undefined, locale: 
   if (Number.isNaN(parsed.getTime())) {
     return value;
   }
-  const localeTag = locale === "ar" ? "ar-EG" : "en-US";
-  return parsed.toLocaleDateString(localeTag, {
+  return parsed.toLocaleDateString(getLatnLocaleTag(locale), {
     year: "numeric",
     month: "short",
     day: "numeric",

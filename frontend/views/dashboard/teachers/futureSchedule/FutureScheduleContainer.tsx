@@ -1,29 +1,35 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   teacherFutureScheduleQueryDocument,
   updateSessionStatusLeaveMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { useFutureScheduleDateStore } from "@/frontend/stores/futureScheduleDateStore";
 import { logger } from "@/frontend/utils/logger";
 import { getErrorMessage } from "@/shared/utils/error";
 import { FutureScheduleView } from "./FutureScheduleView";
+import type { FutureScheduleContainerProps, ImportantNoteItem, SupportContactData } from "./types";
 
-export function FutureScheduleContainer() {
+export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleContainerProps>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
-  const { data, loading, error, refetch } = useQuery(teacherFutureScheduleQueryDocument);
+  const notifications = useNotifications();
+  const { data, loading, error, refetch } = useQuery(teacherFutureScheduleQueryDocument, {
+    variables: { teacherId },
+  });
   const [requestLeave] = useMutation(updateSessionStatusLeaveMutationDocument);
-  const [leaveError, setLeaveError] = useState<string | null>(null);
+
+  const selectedDate = useFutureScheduleDateStore(s => s.selectedDate);
+  const setSelectedDate = useFutureScheduleDateStore(s => s.setSelectedDate);
 
   const schedule = data?.teacherFutureSchedule;
 
   const handleRequestLeave = async (classInstanceId: string) => {
-    setLeaveError(null);
     try {
       await requestLeave({
         variables: {
@@ -32,15 +38,20 @@ export function FutureScheduleContainer() {
         },
       });
       await refetch();
+      notifications.show(t("notifications.leaveRequested"), { severity: "success" });
     } catch (err) {
       const message = getErrorMessage(err);
       logger.error({ caller: "FutureScheduleContainer" }, `Leave request failed: ${message}`);
       if (message.includes("quota") || message.includes("Leave quota exceeded")) {
-        setLeaveError(t("errors.quotaExceeded"));
+        notifications.show(t("errors.quotaExceeded"), { severity: "error" });
       } else {
-        setLeaveError(message || t("errors.leaveRequestFailed"));
+        notifications.show(message || t("errors.leaveRequestFailed"), { severity: "error" });
       }
     }
+  };
+
+  const handleViewMaterials = () => {
+    notifications.show(t("notifications.noSubjectAssigned"), { severity: "info" });
   };
 
   if (loading) {
@@ -59,12 +70,32 @@ export function FutureScheduleContainer() {
   if (error || !schedule) {
     return (
       <Box sx={{ py: 4, px: 3 }}>
-        <Alert severity="error">{t("errors.failedToLoad")}</Alert>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main })}>
+          {t("errors.failedToLoad")}
+        </Typography>
       </Box>
     );
   }
 
   const classes = schedule.classes ?? [];
+  const notes: ImportantNoteItem[] = (schedule.importantNotes ?? []).map(n => ({
+    id: n.id ?? "",
+    title: n.title ?? "",
+    body: n.body,
+    priority: n.priority,
+    startsAt: n.startsAt,
+    expiresAt: n.expiresAt,
+  }));
+  const contact: SupportContactData | null = schedule.supportContact
+    ? {
+        id: schedule.supportContact.id,
+        name: schedule.supportContact.name,
+        role: schedule.supportContact.role,
+        avatarUrl: schedule.supportContact.avatarUrl,
+        phone: schedule.supportContact.phone,
+        skypeId: schedule.supportContact.skypeId,
+      }
+    : null;
 
   return (
     <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>
@@ -74,8 +105,11 @@ export function FutureScheduleContainer() {
         leaveQuotaTotal={schedule.leaveQuotaTotal ?? 0}
         totalClasses={schedule.totalClasses ?? 0}
         onRequestLeave={handleRequestLeave}
-        leaveError={leaveError}
-        onDismissError={() => setLeaveError(null)}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        notes={notes}
+        contact={contact}
+        onViewMaterials={handleViewMaterials}
       />
     </RequirePermission>
   );

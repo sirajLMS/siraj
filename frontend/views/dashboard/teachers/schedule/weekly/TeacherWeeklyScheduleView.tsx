@@ -21,22 +21,8 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { MetricCard, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import MobileScheduleList from "./MobileScheduleList";
-import WeeklyScheduleGrid, { type ScheduledClass } from "./WeeklyScheduleGrid";
-
-export interface TeacherWeeklySchedule {
-  readonly teacherId: string;
-  readonly teacherName: string;
-  readonly weeklyHoursWorked: string;
-  readonly classes: readonly ScheduledClass[];
-  readonly lastUpdated: string;
-}
-
-interface TeacherWeeklyScheduleViewProps {
-  readonly schedule: TeacherWeeklySchedule | null;
-  readonly onRemoveClass: (id: string) => void;
-  readonly onClearSchedule?: () => void;
-  readonly onAddClass?: () => void;
-}
+import type { TeacherWeeklyScheduleViewProps } from "./types";
+import WeeklyScheduleGrid from "./WeeklyScheduleGrid";
 
 interface ScheduleFooterLegendProps {
   readonly bookedClassLabel: string;

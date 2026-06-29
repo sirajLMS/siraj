@@ -237,6 +237,24 @@ export namespace StaffProfileRepository {
     return results[0] ?? null;
   }
 
+  export async function findByStaffProfileId(
+    staffProfileId: string,
+    tx?: DBTransaction
+  ): Promise<ManagerDirectoryRow | null> {
+    const queryDb = tx ?? db;
+
+    const results = await queryDb
+      .select(MANAGER_DIRECTORY_SELECT)
+      .from(staffProfiles)
+      .innerJoin(users, eq(staffProfiles.userId, users.id))
+      .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
+      .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
+      .where(eq(staffProfiles.id, staffProfileId))
+      .limit(1);
+
+    return results[0] ?? null;
+  }
+
   export async function updateManagerProfile(
     staffProfileId: string,
     input: ManagerProfileUpdateInput,

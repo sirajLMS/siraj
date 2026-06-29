@@ -1,0 +1,9 @@
+{
+  "llmFallback": {
+    "enabled": true,
+    "provider": "openai-compat",
+    "minPostMergeScore": 80,
+    "contextLines": 50,
+    "minMode": "strict"
+  }
+}

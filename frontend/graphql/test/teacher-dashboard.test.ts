@@ -188,6 +188,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
 
     const result = await testClient.query({
       query: teacherFutureScheduleQueryDocument,
+      variables: { teacherId: null },
       context: {
         headers: {
           Authorization: `Bearer ${teacherToken}`,
@@ -223,6 +224,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
 
     const result = await testClient.query({
       query: teacherFutureScheduleQueryDocument,
+      variables: { teacherId: null },
       errorPolicy: "all",
       context: {
         headers: {
@@ -237,6 +239,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   test("teacherFutureSchedule — denied when unauthenticated", async () => {
     const result = await testClient.query({
       query: teacherFutureScheduleQueryDocument,
+      variables: { teacherId: null },
       errorPolicy: "all",
     });
 

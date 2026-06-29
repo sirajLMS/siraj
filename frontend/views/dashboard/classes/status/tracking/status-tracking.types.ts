@@ -2,6 +2,7 @@ import type { SvgIconComponent } from "@mui/icons-material";
 import type { StatusTrackingScheduleRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { SessionStatus } from "@/shared/lib/enum";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export type { StatusTrackingScheduleRow };
 export { SessionStatus };
@@ -195,7 +196,7 @@ export function computeSessionStatus(
 export function formatScheduleRange(start: string | null, end: string | null, locale: string): string {
   const fmt = (d: string | null) => {
     if (!d) return "";
-    return new Date(d).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+    return new Date(d).toLocaleTimeString(getLatnLocaleTag(locale), { hour: "2-digit", minute: "2-digit" });
   };
   return `${fmt(start)} - ${fmt(end)}`;
 }

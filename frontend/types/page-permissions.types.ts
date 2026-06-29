@@ -1,0 +1,29 @@
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+
+export type PagePermissions = readonly AppPermission[];
+
+export const PAGE_PERMISSIONS = {
+  dashboard: [AppPermission.DashboardView, AppPermission.DashboardViewMetrics] as PagePermissions,
+  teacherDashboard: [AppPermission.TeacherViewDashboard] as PagePermissions,
+  teacherDashboardActive: [AppPermission.SessionActivateClass] as PagePermissions,
+  searchSchedule: [AppPermission.ScheduleSearchAvailability] as PagePermissions,
+  scheduleTracking: [AppPermission.SessionReschedule] as PagePermissions,
+  statusTracking: [AppPermission.ScheduleViewAll] as PagePermissions,
+  scheduleAlerts: [AppPermission.ScheduleViewList] as PagePermissions,
+  teachers: [AppPermission.StaffViewDirectory] as PagePermissions,
+  parents: [AppPermission.ParentViewDirectory] as PagePermissions,
+  students: [AppPermission.StudentsList] as PagePermissions,
+  managers: [AppPermission.StaffViewDirectory] as PagePermissions,
+  subjects: [AppPermission.SubjectsList] as PagePermissions,
+  resources: [AppPermission.ResourcesList] as PagePermissions,
+  booksAndBags: [AppPermission.ResourcesList] as PagePermissions,
+  reports: [AppPermission.ReportGenerateCustom] as PagePermissions,
+  billingAdmin: [AppPermission.BillingViewHistory] as PagePermissions,
+  billingParent: [AppPermission.BillingViewHistory] as PagePermissions,
+  complaintsManage: [AppPermission.ComplaintsRespond, AppPermission.ComplaintsList] as PagePermissions,
+  suggestionsSubmit: [AppPermission.CommunicationSubmitSuggestion] as PagePermissions,
+  suggestionsManage: [AppPermission.SuggestionsList] as PagePermissions,
+  complaintsSubmit: [AppPermission.SupportSubmitComplaint] as PagePermissions,
+  dstMigration: [AppPermission.SystemBulkUpdateDst] as PagePermissions,
+  permissions: [AppPermission.PermissionGroupsManage] as PagePermissions,
+} as const;

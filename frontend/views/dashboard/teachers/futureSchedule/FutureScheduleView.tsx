@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Box, Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { PageContainer } from "@/frontend/components/ui/PageContainer";
 import { PageHeader } from "@/frontend/components/ui/PageHeader";
@@ -10,16 +10,7 @@ import { ImportantNotes } from "./components/ImportantNotes";
 import { JumpToDateHeader } from "./components/JumpToDateHeader";
 import { MiniCalendar } from "./components/MiniCalendar";
 import { SupportContact } from "./components/SupportContact";
-
-interface FutureScheduleViewProps {
-  readonly classes: readonly FutureClass[];
-  readonly leaveQuotaUsed: number;
-  readonly leaveQuotaTotal: number;
-  readonly totalClasses: number;
-  readonly onRequestLeave: (classInstanceId: string) => Promise<void>;
-  readonly leaveError: string | null;
-  readonly onDismissError: () => void;
-}
+import type { FutureScheduleViewProps } from "./types";
 
 export function FutureScheduleView({
   classes,
@@ -27,8 +18,11 @@ export function FutureScheduleView({
   leaveQuotaTotal,
   totalClasses,
   onRequestLeave,
-  leaveError,
-  onDismissError,
+  selectedDate,
+  onDateChange,
+  notes,
+  contact,
+  onViewMaterials,
 }: Readonly<FutureScheduleViewProps>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
   const theme = useTheme();
@@ -39,24 +33,16 @@ export function FutureScheduleView({
       <PageHeader title={t("pageTitle")} />
 
       <Grid container spacing={3}>
-        {/* Top Header Section */}
         <Grid size={{ xs: 12 }}>
           <JumpToDateHeader
             leaveQuotaUsed={leaveQuotaUsed}
             leaveQuotaTotal={leaveQuotaTotal}
             totalClasses={totalClasses}
+            selectedDate={selectedDate}
+            onDateChange={onDateChange}
           />
         </Grid>
 
-        {leaveError && (
-          <Grid size={{ xs: 12 }}>
-            <Alert severity="error" onClose={onDismissError}>
-              {leaveError}
-            </Alert>
-          </Grid>
-        )}
-
-        {/* Main Content & Sidebar */}
         <Grid size={{ xs: 12, lg: 8 }}>
           <Stack spacing={2}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
@@ -100,6 +86,7 @@ export function FutureScheduleView({
                 onRequestLeave={() => {
                   if (item.id) onRequestLeave(item.id);
                 }}
+                onViewMaterials={onViewMaterials}
               />
             ))}
           </Stack>
@@ -108,9 +95,15 @@ export function FutureScheduleView({
         {!isMobile && (
           <Grid size={{ xs: 12, lg: 4 }}>
             <Stack spacing={3}>
-              <MiniCalendar />
-              <ImportantNotes />
-              <SupportContact />
+              <MiniCalendar
+                selectedDate={selectedDate}
+                onSelectDate={onDateChange}
+                classDates={classes
+                  .filter((c: FutureClass) => c.scheduledDate)
+                  .map((c: FutureClass) => c.scheduledDate as string)}
+              />
+              <ImportantNotes notes={notes} />
+              <SupportContact contact={contact} />
             </Stack>
           </Grid>
         )}
@@ -118,9 +111,15 @@ export function FutureScheduleView({
         {isMobile && (
           <Grid size={{ xs: 12 }}>
             <Stack spacing={3} sx={{ mt: 2 }}>
-              <MiniCalendar />
-              <ImportantNotes />
-              <SupportContact />
+              <MiniCalendar
+                selectedDate={selectedDate}
+                onSelectDate={onDateChange}
+                classDates={classes
+                  .filter((c: FutureClass) => c.scheduledDate)
+                  .map((c: FutureClass) => c.scheduledDate as string)}
+              />
+              <ImportantNotes notes={notes} />
+              <SupportContact contact={contact} />
             </Stack>
           </Grid>
         )}

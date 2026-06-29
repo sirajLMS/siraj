@@ -13,7 +13,7 @@ interface ReportsTotalsRowProps {
 }
 
 function formatCurrency(value: number): string {
-  return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export function ReportsTotalsRow({ summary, totalsLabel, egpLabel, usdLabel }: Readonly<ReportsTotalsRowProps>) {

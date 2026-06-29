@@ -14,6 +14,7 @@ export const nav: DashboardNavigationLabels = {
   studentStatus: "حالة الطالب",
   managers: "المديرون",
   resources: "الموارد",
+  subjects: "المواد",
   report: "التقارير",
   addAccount: "إضافة حساب",
   logout: "تسجيل الخروج",

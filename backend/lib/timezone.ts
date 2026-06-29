@@ -1,8 +1,10 @@
 import { logger } from "@/backend/lib/logger";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
-export function formatInstantInTimezone(date: Date, ianaTimezone: string): string {
+export function formatInstantInTimezone(date: Date, ianaTimezone: string, locale?: string): string {
+  const localeTag = locale ? getLatnLocaleTag(locale) : "en-US";
   try {
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(localeTag, {
       timeZone: ianaTimezone,
       hour: "2-digit",
       minute: "2-digit",
@@ -14,8 +16,7 @@ export function formatInstantInTimezone(date: Date, ianaTimezone: string): strin
       ianaTimezone,
       date: date.toISOString(),
     });
-    // Fallback to UTC if timezone is invalid
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(localeTag, {
       timeZone: "UTC",
       hour: "2-digit",
       minute: "2-digit",

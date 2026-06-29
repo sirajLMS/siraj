@@ -98,9 +98,7 @@ export function TodayClassesMobileScroll({ metrics, onMetricClick, selectedKey }
             </StyledIconWrapper>
             {/* Metric count and label text */}
             <StyledTextContainer size="auto">
-              <MetricCount>
-                {typeof metric.count === "number" ? metric.count.toLocaleString() : metric.count}
-              </MetricCount>
+              <MetricCount>{typeof metric.count === "number" ? String(metric.count) : metric.count}</MetricCount>
               <MetricLabel variant="labelUppercase">{metric.label ?? t(metric.labelKey)}</MetricLabel>
             </StyledTextContainer>
           </StyledMetricCard>

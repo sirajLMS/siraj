@@ -6,12 +6,13 @@ import { useCallback } from "react";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import { useRouter } from "@/shared/i18n/routing";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { UpcomingClassDisplay, UpcomingClassesTableProps } from "../types";
 
 function formatDateTime(locale: string, dateStr: string): string {
   try {
     const date = new Date(dateStr);
-    return date.toLocaleDateString(locale, { weekday: "short", month: "short", day: "numeric" });
+    return date.toLocaleDateString(getLatnLocaleTag(locale), { weekday: "short", month: "short", day: "numeric" });
   } catch {
     return dateStr;
   }
@@ -20,7 +21,7 @@ function formatDateTime(locale: string, dateStr: string): string {
 function formatTime(locale: string, dateStr: string): string {
   try {
     const date = new Date(dateStr);
-    return date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+    return date.toLocaleTimeString(getLatnLocaleTag(locale), { hour: "2-digit", minute: "2-digit" });
   } catch {
     return dateStr;
   }

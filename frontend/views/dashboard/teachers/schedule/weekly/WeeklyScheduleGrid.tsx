@@ -14,22 +14,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-
-export interface ScheduledClass {
-  readonly id: string;
-  readonly studentName: string;
-  readonly studentId: string;
-  readonly duration: number;
-  readonly startTime: string;
-  readonly day: string;
-  readonly executionState?: string | null;
-  readonly outcome?: string | null;
-}
-
-interface WeeklyScheduleGridProps {
-  readonly classes: readonly ScheduledClass[];
-  readonly onRemoveClass: (id: string) => void;
-}
+import type { ScheduledClass, WeeklyScheduleGridProps } from "./types";
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
 const TIMES = [
@@ -59,7 +44,7 @@ function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
 
   const handleConfirm = () => {
     setOpen(false);
-    onRemove(classItem.id);
+    onRemove(classItem.id ?? "");
   };
 
   const handleCancel = () => {
@@ -171,7 +156,7 @@ function GridRow({ time, classes, onRemoveClass }: Readonly<GridRowProps>) {
   const t = useTranslations("dashboard.teacherWeeklySchedule");
 
   const getClassesForSlot = (day: string) => {
-    return classes.filter(c => c.day.toLowerCase() === day && c.startTime === time);
+    return classes.filter(c => c.day?.toLowerCase() === day && c.startTime === time);
   };
 
   return (

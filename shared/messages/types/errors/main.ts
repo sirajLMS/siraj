@@ -118,4 +118,15 @@ export interface ErrorsLabels {
   readonly unauthorizedSearch: string;
   readonly invalidDstOffset: string;
   readonly dstMigrationAlreadyRun: string;
+  readonly categoryNotFound: string;
+  readonly subjectNotFound: string;
+  readonly noteNotFound: string;
+  readonly categoryCreateFailed: string;
+  readonly subjectCreateFailed: string;
+  readonly subjectResourceAttachFailed: string;
+  readonly subjectResourceLinkNotFound: string;
+  readonly subjectResourceNotFound: string;
+  readonly noteCreateFailed: string;
+  readonly categoryHasSubjects: string;
+  readonly unknownName: string;
 }

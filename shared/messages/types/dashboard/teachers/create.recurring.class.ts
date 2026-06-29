@@ -10,6 +10,12 @@ export interface TeacherCreateRecurringClassLabels {
     readonly durationMinutes: string;
     readonly days: string;
     readonly timezone: string;
+    readonly classType: string;
+  };
+  readonly classTypes: {
+    readonly REGULAR: string;
+    readonly TRIAL: string;
+    readonly ADVANCE: string;
   };
   readonly days: {
     readonly monday: string;
@@ -28,6 +34,7 @@ export interface TeacherCreateRecurringClassLabels {
   readonly actions: {
     readonly create: string;
     readonly cancel: string;
+    readonly submitting: string;
   };
   readonly success: {
     readonly title: string;
@@ -37,5 +44,6 @@ export interface TeacherCreateRecurringClassLabels {
     readonly noDaysSelected: string;
     readonly noStudentSelected: string;
     readonly creationFailed: string;
+    readonly durationMustBePositive: string;
   };
 }

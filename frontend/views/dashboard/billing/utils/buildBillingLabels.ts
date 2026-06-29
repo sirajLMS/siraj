@@ -101,10 +101,10 @@ function buildTableLabels(t: BillingTranslator) {
 function buildStatusLabels(t: BillingTranslator) {
   return {
     invoiceStatus: {
-      OVERDUE: t("invoiceStatus.overdue"),
-      PENDING: t("invoiceStatus.pending"),
-      PAID: t("invoiceStatus.paid"),
-      UNPAID: t("invoiceStatus.unpaid"),
+      OVERDUE: t("invoiceStatus.OVERDUE"),
+      PENDING: t("invoiceStatus.PENDING"),
+      PAID: t("invoiceStatus.PAID"),
+      UNPAID: t("invoiceStatus.UNPAID"),
     },
     creditStatus: {
       negative_balance: t("creditStatus.negative_balance"),
@@ -120,7 +120,10 @@ export function buildBillingLabels(t: BillingTranslator): BillingLabels {
     ...buildSectionAndSearchLabels(t),
     ...buildTableLabels(t),
     ...buildStatusLabels(t),
-    manual: buildManualInvoiceLabels((key: string) => t(`manual.${key}`)),
+    manual: buildManualInvoiceLabels((key: string) => {
+      if (key === "createSuccess") return t.raw(`manual.${key}`) as string;
+      return t(`manual.${key}`);
+    }),
     markAsPaidSuccess: t("markAsPaidSuccess"),
     noUnpaidInvoices: t("noUnpaidInvoices"),
     deleteInvoiceSuccess: t("deleteInvoiceSuccess"),

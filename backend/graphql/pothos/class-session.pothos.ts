@@ -1,3 +1,4 @@
+import { getBackendTranslations } from "@/backend/lib/intl";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import type {
   ClassInstanceDetailReturnType,
@@ -5,8 +6,14 @@ import type {
   ClassInstanceStudentReturnType,
   ClassInstanceTeacherReturnType,
   ClassStatusEventReturnType,
+  FutureClassReturnType,
+  LeaveProcessResultReturnType,
+  RescheduleClassInputType,
+  SupportRequestResultReturnType,
+  TeacherFutureScheduleReturnType,
 } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { SupportContactPothosObject, TeacherImportantNotePothosObject } from "./teacher-notes.pothos";
 
 // ─── Performance ─────────────────────────────────────────────────────────────
 
@@ -15,6 +22,7 @@ const ClassInstancePerformanceRef =
 
 export const ClassInstancePerformancePothosObject = ClassInstancePerformanceRef.implement({
   fields: t => ({
+    id: t.exposeString("id"),
     engagementScore: t.exposeInt("engagementScore", { nullable: true }),
     assessmentProgress: t.exposeInt("assessmentProgress", { nullable: true }),
     assessmentTotal: t.exposeInt("assessmentTotal", { nullable: true }),
@@ -108,14 +116,8 @@ export const ClassStatusEventPothosObject = ClassStatusEventRef.implement({
 
 // ─── Input: Reschedule Class ──────────────────────────────────────────────────
 
-export type RescheduleClassInputDefinition = {
-  scheduledStartAt: string;
-  scheduledEndAt: string;
-  durationMinutes: number;
-};
-
 export const RescheduleClassInputPothosObject = gqlSchemaBuilder
-  .inputRef<RescheduleClassInputDefinition>("RescheduleClassInput")
+  .inputRef<RescheduleClassInputType>("RescheduleClassInput")
   .implement({
     fields: t => ({
       scheduledStartAt: t.string({ required: true }),
@@ -126,12 +128,7 @@ export const RescheduleClassInputPothosObject = gqlSchemaBuilder
 
 // ─── Support Request Result ───────────────────────────────────────────────────
 
-export type SupportRequestResultDefinition = {
-  id: string;
-  success: boolean;
-};
-
-const SupportRequestResultRef = gqlSchemaBuilder.objectRef<SupportRequestResultDefinition>("SupportRequestResult");
+const SupportRequestResultRef = gqlSchemaBuilder.objectRef<SupportRequestResultReturnType>("SupportRequestResult");
 
 export const SupportRequestResultPothosObject = SupportRequestResultRef.implement({
   fields: t => ({
@@ -142,21 +139,7 @@ export const SupportRequestResultPothosObject = SupportRequestResultRef.implemen
 
 // ─── Future Class ────────────────────────────────────────────────────────────
 
-export type FutureClassDefinition = {
-  id: string;
-  courseName: string;
-  scheduledDate: string;
-  startTime: string;
-  endTime: string;
-  durationMinutes: number;
-  isRescheduled: boolean;
-  leaveRequestDisabled: boolean;
-  leaveRequestDisabledReason: string | null;
-  studentCount: number;
-  location: string;
-};
-
-const FutureClassRef = gqlSchemaBuilder.objectRef<FutureClassDefinition>("FutureClass");
+const FutureClassRef = gqlSchemaBuilder.objectRef<FutureClassReturnType>("FutureClass");
 
 export const FutureClassPothosObject = FutureClassRef.implement({
   fields: t => ({
@@ -171,20 +154,16 @@ export const FutureClassPothosObject = FutureClassRef.implement({
     leaveRequestDisabledReason: t.exposeString("leaveRequestDisabledReason", { nullable: true }),
     studentCount: t.exposeInt("studentCount"),
     location: t.exposeString("location"),
+    subjectId: t.exposeString("subjectId", { nullable: true }),
+    subjectName: t.exposeString("subjectName", { nullable: true }),
+    classType: t.exposeString("classType", { nullable: true }),
+    zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
   }),
 });
 
 // ─── Teacher Future Schedule ─────────────────────────────────────────────────
 
-export type TeacherFutureScheduleDefinition = {
-  id: string;
-  leaveQuotaUsed: number;
-  leaveQuotaTotal: number;
-  totalClasses: number;
-  classes: FutureClassDefinition[];
-};
-
-const TeacherFutureScheduleRef = gqlSchemaBuilder.objectRef<TeacherFutureScheduleDefinition>("TeacherFutureSchedule");
+const TeacherFutureScheduleRef = gqlSchemaBuilder.objectRef<TeacherFutureScheduleReturnType>("TeacherFutureSchedule");
 
 export const TeacherFutureSchedulePothosObject = TeacherFutureScheduleRef.implement({
   fields: t => ({
@@ -196,18 +175,21 @@ export const TeacherFutureSchedulePothosObject = TeacherFutureScheduleRef.implem
       type: [FutureClassPothosObject],
       resolve: parent => parent.classes,
     }),
+    importantNotes: t.field({
+      type: [TeacherImportantNotePothosObject],
+      resolve: parent => parent.importantNotes,
+    }),
+    supportContact: t.field({
+      type: SupportContactPothosObject,
+      nullable: true,
+      resolve: parent => parent.supportContact,
+    }),
   }),
 });
 
 // ─── Leave Process Result ───────────────────────────────────────────────────
 
-export type LeaveProcessResultDefinition = {
-  id: string;
-  completedInstanceId: string;
-  rescheduledInstanceId: string;
-};
-
-const LeaveProcessResultRef = gqlSchemaBuilder.objectRef<LeaveProcessResultDefinition>("LeaveProcessResult");
+const LeaveProcessResultRef = gqlSchemaBuilder.objectRef<LeaveProcessResultReturnType>("LeaveProcessResult");
 
 export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
   fields: t => ({
@@ -216,18 +198,20 @@ export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
     rescheduledInstanceId: t.exposeString("rescheduledInstanceId"),
     completedInstance: t.field({
       type: ClassInstanceDetailPothosObject,
-      resolve: (parent, _args, ctx) => {
+      resolve: async (parent, _args, ctx) => {
         if (!ctx.user) {
-          throw new Error("Unauthorized");
+          const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+          throw new Error(tFunc("unauthorized"));
         }
         return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.completedInstanceId, ctx.locale);
       },
     }),
     rescheduledInstance: t.field({
       type: ClassInstanceDetailPothosObject,
-      resolve: (parent, _args, ctx) => {
+      resolve: async (parent, _args, ctx) => {
         if (!ctx.user) {
-          throw new Error("Unauthorized");
+          const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+          throw new Error(tFunc("unauthorized"));
         }
         return ClassSessionService.getClassInstanceDetail(ctx.user.id, parent.rescheduledInstanceId, ctx.locale);
       },

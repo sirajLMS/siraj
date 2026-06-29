@@ -21,6 +21,8 @@ export const teacherWeeklyScheduleGridQueryDocument: TypedDocumentNode<
         day
         executionState
         outcome
+        subjectName
+        classType
       }
     }
   }

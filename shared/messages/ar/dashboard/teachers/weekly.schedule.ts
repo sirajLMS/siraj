@@ -49,4 +49,10 @@ export const weeklySchedule: TeacherWeeklyScheduleLabels = {
     confirmYes: "نعم",
     cancel: "إلغاء",
   },
+  notifications: {
+    classDeleted: "تم حذف الحصة بنجاح",
+    classDeleteFailed: "فشل حذف الحصة",
+    scheduleCleared: "تم مسح الجدول بنجاح",
+    scheduleClearFailed: "فشل مسح الجدول",
+  },
 };

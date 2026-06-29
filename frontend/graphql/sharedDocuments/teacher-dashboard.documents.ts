@@ -134,9 +134,12 @@ export const logTeacherSupportRequestMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const teacherFutureScheduleQueryDocument: TypedDocumentNode<Operations.TeacherFutureScheduleQuery> = gql`
-  query teacherFutureSchedule {
-    teacherFutureSchedule {
+export const teacherFutureScheduleQueryDocument: TypedDocumentNode<
+  Operations.TeacherFutureScheduleQuery,
+  Types.QueryTeacherFutureScheduleArgs
+> = gql`
+  query teacherFutureSchedule($teacherId: String) {
+    teacherFutureSchedule(teacherId: $teacherId) {
       id
       leaveQuotaUsed
       leaveQuotaTotal
@@ -153,6 +156,26 @@ export const teacherFutureScheduleQueryDocument: TypedDocumentNode<Operations.Te
         leaveRequestDisabledReason
         studentCount
         location
+        subjectId
+        subjectName
+        classType
+        zoomMeetingUrl
+      }
+      importantNotes {
+        id
+        title
+        body
+        priority
+        startsAt
+        expiresAt
+      }
+      supportContact {
+        id
+        name
+        role
+        avatarUrl
+        phone
+        skypeId
       }
     }
   }

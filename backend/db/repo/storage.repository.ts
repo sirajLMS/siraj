@@ -586,7 +586,7 @@ export namespace StorageDbRepository {
     const conditions = [eq(invoiceFiles.invoiceId, invoiceId)];
     if (usageType) conditions.push(eq(invoiceFiles.usageType, usageType));
 
-    let query = queryDb
+    const baseQuery = queryDb
       .select({
         id: invoiceFiles.id,
         fileId: invoiceFiles.fileId,
@@ -600,9 +600,7 @@ export namespace StorageDbRepository {
       .where(and(...conditions))
       .orderBy(desc(invoiceFiles.createdAt));
 
-    if (limit) query = query.limit(limit);
-
-    const results = await query;
+    const results = limit ? await baseQuery.limit(limit) : await baseQuery;
 
     return results.map(r => ({
       id: r.id,

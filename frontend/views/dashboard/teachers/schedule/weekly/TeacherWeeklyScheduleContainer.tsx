@@ -1,6 +1,8 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
+import { useNotifications } from "@toolpad/core/useNotifications";
+import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
@@ -16,14 +18,14 @@ import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringC
 import { useUserStore } from "@/frontend/stores/userStore";
 import { useWeeklyScheduleStore } from "@/frontend/stores/weeklyScheduleStore";
 import { logger } from "@/frontend/utils/logger";
+import type { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import { CreateRecurringClassDialog } from "./components/CreateRecurringClassDialog";
 import TeacherWeeklyScheduleView from "./TeacherWeeklyScheduleView";
-
-interface TeacherWeeklyScheduleContainerProps {
-  readonly teacherId: string;
-}
+import type { TeacherWeeklyScheduleContainerProps } from "./types";
 
 export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<TeacherWeeklyScheduleContainerProps>) {
+  const t = useTranslations("dashboard.teacherWeeklySchedule");
+  const notifications = useNotifications();
   const { selectedWeekDate } = useWeeklyScheduleStore();
   const { openDialog } = useCreateRecurringClassStore();
   const { name: loggedInUserName, hasPermission } = useUserStore();
@@ -63,8 +65,10 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
       });
       await refetchSchedule();
       await refetchWorkload();
+      notifications.show(t("notifications.classDeleted"), { severity: "success" });
     } catch (error) {
       logger.error("Failed to delete class instance", { error });
+      notifications.show(t("notifications.classDeleteFailed"), { severity: "error" });
     }
   };
 
@@ -75,8 +79,10 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
       });
       await refetchSchedule();
       await refetchWorkload();
+      notifications.show(t("notifications.scheduleCleared"), { severity: "success" });
     } catch (error) {
       logger.error("Failed to clear weekly schedule", { error });
+      notifications.show(t("notifications.scheduleClearFailed"), { severity: "error" });
     }
   };
 
@@ -103,10 +109,12 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
             duration: c.duration || 0,
             startTime: c.startTime || "",
             day: c.day || "",
-            executionState: c.executionState,
-            outcome: c.outcome,
+            executionState: (c.executionState as ClassExecutionState) ?? null,
+            outcome: (c.outcome as ClassOutcome) ?? null,
+            subjectName: c.subjectName ?? null,
+            classType: c.classType ?? null,
           })),
-          lastUpdated: new Date().toLocaleTimeString(),
+          lastUpdated: schedule.weekEnd || new Date().toLocaleTimeString(),
         }}
         onRemoveClass={handleRemoveClass}
         onClearSchedule={handleClearSchedule}

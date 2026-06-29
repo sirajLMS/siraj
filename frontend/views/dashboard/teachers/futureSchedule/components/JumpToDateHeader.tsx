@@ -4,17 +4,37 @@ import { CalendarTodayOutlined, ChevronLeftOutlined, ChevronRightOutlined } from
 import { alpha, Box, IconButton, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
+import type { JumpToDateHeaderProps } from "../types";
 
-interface JumpToDateHeaderProps {
-  readonly leaveQuotaUsed: number;
-  readonly leaveQuotaTotal: number;
-  readonly totalClasses: number;
-}
-
-export function JumpToDateHeader({ leaveQuotaUsed, leaveQuotaTotal, totalClasses }: Readonly<JumpToDateHeaderProps>) {
+export function JumpToDateHeader({
+  leaveQuotaUsed,
+  leaveQuotaTotal,
+  totalClasses,
+  selectedDate,
+  onDateChange,
+}: Readonly<JumpToDateHeaderProps>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const dateObj = new Date(selectedDate + "T00:00:00");
+  const formattedDate = dateObj.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const handlePrevDay = () => {
+    const d = new Date(selectedDate + "T00:00:00");
+    d.setDate(d.getDate() - 1);
+    onDateChange(d.toISOString().split("T")[0]);
+  };
+
+  const handleNextDay = () => {
+    const d = new Date(selectedDate + "T00:00:00");
+    d.setDate(d.getDate() + 1);
+    onDateChange(d.toISOString().split("T")[0]);
+  };
 
   return (
     <BaseCard sx={{ p: isMobile ? 2 : 3 }}>
@@ -38,6 +58,7 @@ export function JumpToDateHeader({ leaveQuotaUsed, leaveQuotaTotal, totalClasses
           >
             <IconButton
               size="small"
+              onClick={handlePrevDay}
               sx={theme => ({
                 border: `1px solid ${theme.palette.outlineVariant}`,
                 borderRadius: "50%",
@@ -62,11 +83,12 @@ export function JumpToDateHeader({ leaveQuotaUsed, leaveQuotaTotal, totalClasses
             >
               <CalendarTodayOutlined sx={theme => ({ color: theme.palette.primary.main })} fontSize="small" />
               <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-                October 24, 2023
+                {formattedDate}
               </Typography>
             </Box>
             <IconButton
               size="small"
+              onClick={handleNextDay}
               sx={theme => ({
                 border: `1px solid ${theme.palette.outlineVariant}`,
                 borderRadius: "50%",
@@ -80,7 +102,6 @@ export function JumpToDateHeader({ leaveQuotaUsed, leaveQuotaTotal, totalClasses
         </Stack>
 
         <Stack direction="row" spacing={2} sx={{ width: isMobile ? "100%" : "auto" }}>
-          {/* Leave Quota Stat */}
           <Box
             sx={theme => ({
               p: 2,
@@ -102,7 +123,6 @@ export function JumpToDateHeader({ leaveQuotaUsed, leaveQuotaTotal, totalClasses
             </Typography>
           </Box>
 
-          {/* Total Classes Stat */}
           <Box
             sx={theme => ({
               p: 2,

@@ -15,12 +15,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { ScheduledClass } from "./WeeklyScheduleGrid";
-
-interface MobileScheduleListProps {
-  readonly classes: readonly ScheduledClass[];
-  readonly onRemoveClass: (id: string) => void;
-}
+import type { MobileScheduleListProps, ScheduledClass } from "./types";
 
 interface MobileSlotItemProps {
   readonly classItem: ScheduledClass;
@@ -37,7 +32,7 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
 
   const handleConfirm = () => {
     setOpen(false);
-    onRemove(classItem.id);
+    onRemove(classItem.id ?? "");
   };
 
   const handleCancel = () => {
@@ -235,7 +230,7 @@ export default function MobileScheduleList({ classes, onRemoveClass }: Readonly<
   const [selectedDay, setSelectedDay] = useState<string>("monday");
 
   const getClassesForSlot = (day: string, time: string) => {
-    return classes.filter(c => c.day.toLowerCase() === day && c.startTime === time);
+    return classes.filter(c => c.day?.toLowerCase() === day && c.startTime === time);
   };
 
   return (

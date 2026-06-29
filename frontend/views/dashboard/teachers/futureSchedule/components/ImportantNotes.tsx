@@ -4,14 +4,10 @@ import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
+import type { ImportantNotesProps } from "../types";
 
-export function ImportantNotes() {
+export function ImportantNotes({ notes }: Readonly<ImportantNotesProps>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
-
-  const notes = [
-    { title: "Quarterly Review", subtitle: "Oct 26 • All day event" },
-    { title: "Final Exam Submission", subtitle: "Due in 4 days" },
-  ];
 
   return (
     <BaseCard
@@ -45,7 +41,7 @@ export function ImportantNotes() {
         <Stack spacing={1.5}>
           {notes.map(note => (
             <Box
-              key={note.title}
+              key={note.id}
               sx={theme => ({
                 p: 2,
                 backgroundColor: theme.palette.surfaceContainerLow,
@@ -58,15 +54,16 @@ export function ImportantNotes() {
               <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.text.primary })}>
                 {note.title}
               </Typography>
-              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                {note.subtitle}
-              </Typography>
+              {note.body && (
+                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+                  {note.body}
+                </Typography>
+              )}
             </Box>
           ))}
         </Stack>
       </Box>
 
-      {/* Decorative Circle */}
       <Box
         sx={theme => ({
           position: "absolute",

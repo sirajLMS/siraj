@@ -32,6 +32,7 @@ export namespace ParentDashboardService {
       date: date ? new Date(date) : null,
       search,
       pagination,
+      locale,
     });
 
     return result;

@@ -36,6 +36,7 @@ import type {
   StudentQuotaLabels,
   StudentStatusLabels,
 } from "./dashboard/students";
+import type { SubjectsLabels } from "./dashboard/subjects";
 import type { SuggestionsLabels } from "./dashboard/suggestions";
 import type {
   TeacherAvailabilityLabels,
@@ -79,8 +80,10 @@ export type {
   StudentHistoryLabels,
   StudentQuotaLabels,
   StudentStatusLabels,
+  SubjectsLabels,
   SuggestionsLabels,
   TeacherAvailabilityLabels,
+  TeacherCreateRecurringClassLabels,
   TeacherDashboardLabels,
   TeacherFutureScheduleLabels,
   TeacherOnboardingLabels,
@@ -132,6 +135,7 @@ export type MessageSchema = {
     readonly suggestions: SuggestionsLabels;
     readonly complaints: ComplaintsLabels;
     readonly resources: ResourcesLabels;
+    readonly subjects: SubjectsLabels;
     readonly booksAndBags: BooksAndBagsLabels;
     readonly permissions: PermissionsLabels;
     readonly searchSchedule: SearchScheduleLabels;

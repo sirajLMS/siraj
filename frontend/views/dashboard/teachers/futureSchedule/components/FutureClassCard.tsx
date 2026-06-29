@@ -12,11 +12,7 @@ import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
-
-interface FutureClassCardProps {
-  readonly item: FutureClass;
-  readonly onRequestLeave?: () => void;
-}
+import type { FutureClassCardProps } from "../types";
 
 function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isRescheduled: boolean }>) {
   const dateObj = new Date(date);
@@ -90,7 +86,7 @@ function ClassInfo({ item, isMobile }: Readonly<{ item: FutureClass; isMobile: b
         <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.onSurfaceVariant })}>
           <PersonOutlined sx={{ fontSize: 16 }} />
           <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
-            {item.studentCount} Students
+            {item.studentCount} {t("students")}
           </Typography>
         </Box>
       </Stack>
@@ -102,7 +98,8 @@ function ActionButtons({
   item,
   isMobile,
   onRequestLeave,
-}: Readonly<{ item: FutureClass; isMobile: boolean; onRequestLeave?: () => void }>) {
+  onViewMaterials,
+}: Readonly<{ item: FutureClass; isMobile: boolean; onRequestLeave?: () => void; onViewMaterials?: () => void }>) {
   const t = useTranslations("dashboard.teacherFutureSchedule");
 
   return (
@@ -157,6 +154,7 @@ function ActionButtons({
       )}
       <Button
         variant="contained"
+        onClick={() => onViewMaterials?.()}
         sx={theme => ({
           borderRadius: 2,
           fontSize: 11,
@@ -177,7 +175,7 @@ function ActionButtons({
   );
 }
 
-export function FutureClassCard({ item, onRequestLeave }: Readonly<FutureClassCardProps>) {
+export function FutureClassCard({ item, onRequestLeave, onViewMaterials }: Readonly<FutureClassCardProps>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isRescheduled = item.isRescheduled === true;
@@ -201,7 +199,12 @@ export function FutureClassCard({ item, onRequestLeave }: Readonly<FutureClassCa
           <DateSquare date={item.scheduledDate ?? ""} isRescheduled={isRescheduled} />
           <ClassInfo item={item} isMobile={isMobile} />
         </Stack>
-        <ActionButtons item={item} isMobile={isMobile} onRequestLeave={onRequestLeave} />
+        <ActionButtons
+          item={item}
+          isMobile={isMobile}
+          onRequestLeave={onRequestLeave}
+          onViewMaterials={onViewMaterials}
+        />
       </Stack>
     </BaseCard>
   );

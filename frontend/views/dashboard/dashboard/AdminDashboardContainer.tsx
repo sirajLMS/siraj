@@ -64,11 +64,11 @@ export function AdminDashboardContainer() {
     }
   }, [dashboardData, dataArrivedAt]);
 
-  const [lastUpdated, setLastUpdated] = useState(t("admin.updatedMinutesAgo"));
+  const [lastUpdated, setLastUpdated] = useState(t("admin.updatedJustNow"));
 
   useEffect(() => {
     if (dataArrivedAt === null) {
-      setLastUpdated(t("admin.updatedMinutesAgo"));
+      setLastUpdated(t("admin.updatedJustNow"));
       return;
     }
     const computeLabel = () => {

@@ -38,6 +38,7 @@ export namespace TeacherDashboardService {
       teacherId: teacher.id,
       viewerTimezone: teacher.timezone,
       pagination: pagination ?? null,
+      locale,
     });
 
     const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacher.id);

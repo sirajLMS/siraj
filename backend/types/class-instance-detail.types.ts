@@ -1,6 +1,7 @@
 import type { ClassType } from "@/shared/lib/enum";
 
 export type ClassInstancePerformanceReturnType = {
+  id: string;
   engagementScore: number | null;
   assessmentProgress: number | null;
   assessmentTotal: number | null;

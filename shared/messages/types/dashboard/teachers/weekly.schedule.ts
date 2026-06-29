@@ -47,4 +47,10 @@ export interface TeacherWeeklyScheduleLabels {
     readonly confirmYes: string;
     readonly cancel: string;
   };
+  readonly notifications: {
+    readonly classDeleted: string;
+    readonly classDeleteFailed: string;
+    readonly scheduleCleared: string;
+    readonly scheduleClearFailed: string;
+  };
 }

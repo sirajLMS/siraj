@@ -7,6 +7,7 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AppPermission } from "@/shared/lib/enum";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export namespace WeeklyScheduleService {
   function getWeekBoundaries(date: Date): { weekStart: Date; weekEnd: Date } {
@@ -65,7 +66,7 @@ export namespace WeeklyScheduleService {
           studentName: row.studentName,
           studentId: row.studentId,
           duration: row.durationMinutes,
-          startTime: row.scheduledStartAt.toLocaleTimeString("en-US", {
+          startTime: row.scheduledStartAt.toLocaleTimeString(locale ? getLatnLocaleTag(locale) : "en-US", {
             hour: "2-digit",
             minute: "2-digit",
             hour12: true,
@@ -74,6 +75,9 @@ export namespace WeeklyScheduleService {
           day: row.dayOfWeek,
           executionState: row.executionState,
           outcome: row.outcome,
+          subjectId: row.subjectId,
+          subjectName: row.subjectName,
+          classType: row.classType,
         })),
       };
     } catch (error) {

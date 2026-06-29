@@ -1,13 +1,22 @@
 import { ParentRepository } from "@/backend/db/repo/parent.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import type { DailyScheduleResult } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
+import { StaffProfileRepository } from "@/backend/db/repo/staff-profile.repository";
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { PaginationArgs, RescheduleTrackingInput } from "@/backend/types";
+import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
+import type {
+  PaginationArgs,
+  RescheduleTrackingInput,
+  SupportContactReturnType,
+  TeacherFutureScheduleReturnType,
+  TeacherImportantNoteReturnType,
+} from "@/backend/types";
 import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/shared/lib/enum";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export namespace ScheduleService {
   async function resolveViewerTimezone(userId: string): Promise<string> {
@@ -20,7 +29,9 @@ export namespace ScheduleService {
     return await SystemSettingsRepository.getStringValue("default_timezone", "UTC");
   }
 
-  function mapDailyScheduleListItem(item: DailyScheduleResult) {
+  async function mapDailyScheduleListItem(item: DailyScheduleResult, locale?: string) {
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    const unknownName = t("unknownName");
     return {
       id: item.id,
       studentTime: item.scheduledStartAt.toISOString(),
@@ -30,8 +41,8 @@ export namespace ScheduleService {
       status: item.outcome || item.executionState,
       outcome: item.outcome as ClassOutcome,
       executionState: item.executionState as ClassExecutionState,
-      student: { id: item.studentId, name: item.student?.name || "Unknown" },
-      teacher: { id: item.teacherId, name: item.teacher?.user?.name || "Unknown" },
+      student: { id: item.studentId, name: item.student?.name || unknownName },
+      teacher: { id: item.teacherId, name: item.teacher?.user?.name || unknownName },
     };
   }
 
@@ -110,9 +121,10 @@ export namespace ScheduleService {
         viewerTimezone,
         metricFilter,
         pagination: input.paginationArgs ?? null,
+        locale,
       });
 
-      const mappedRows = rows.map(mapDailyScheduleListItem);
+      const mappedRows = await Promise.all(rows.map(row => mapDailyScheduleListItem(row, locale)));
 
       return {
         id: `admin-dashboard-${input.date}-${teacherId || "all"}-${search || ""}`,
@@ -172,7 +184,7 @@ export namespace ScheduleService {
         metricFilter,
       });
 
-      return list.map(item => mapDailyScheduleListItem(item));
+      return await Promise.all(list.map(item => mapDailyScheduleListItem(item, locale)));
     } catch (error) {
       logger.error("Error fetching daily schedule", { userId, error });
       throw error;
@@ -208,12 +220,35 @@ export namespace ScheduleService {
     };
   }
 
-  export async function getTeacherFutureSchedule(userId: string, locale?: string) {
-    const teacherRecord = await SchedulingRepository.getTeacherByUserId(userId);
-    if (!teacherRecord) {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("unauthorizedAction"));
+  async function resolveTeacherId(
+    userId: string,
+    requestedTeacherId: string | null | undefined,
+    locale?: string
+  ): Promise<string> {
+    const isAdmin = await PermissionsService.hasAnyPermission(userId, [
+      AppPermission.STAFF_VIEW_DIRECTORY,
+      AppPermission.SCHEDULE_VIEW_ALL,
+    ]);
+
+    if (isAdmin && requestedTeacherId) {
+      return requestedTeacherId;
     }
+
+    const actorTeacher = await TeacherRepository.findByUserId(userId);
+    if (actorTeacher) {
+      return actorTeacher.id;
+    }
+
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(t("unauthorizedAction"));
+  }
+
+  export async function getTeacherFutureSchedule(
+    userId: string,
+    teacherId?: string,
+    locale?: string
+  ): Promise<TeacherFutureScheduleReturnType> {
+    const resolvedTeacherId = await resolveTeacherId(userId, teacherId ?? null, locale);
 
     const now = new Date();
     const fromDate = new Date(now);
@@ -225,9 +260,9 @@ export namespace ScheduleService {
     const periodMonth = now.getUTCMonth() + 1;
 
     const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2);
-    const usedLeaves = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacherRecord.id, periodYear, periodMonth);
+    const usedLeaves = await SchedulingRepository.getTeacherLeaveQuotaUsage(resolvedTeacherId, periodYear, periodMonth);
 
-    const futureClasses = await SchedulingRepository.getTeacherFutureClasses(teacherRecord.id, fromDate, toDate);
+    const futureClasses = await SchedulingRepository.getTeacherFutureClasses(resolvedTeacherId, fromDate, toDate);
 
     const classes = futureClasses.map(cls => {
       const classStart = new Date(cls.scheduledStartAt);
@@ -246,11 +281,15 @@ export namespace ScheduleService {
       }
 
       const formatTime = (date: Date): string =>
-        date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+        date.toLocaleTimeString(locale ? getLatnLocaleTag(locale) : "en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
 
       return {
         id: cls.id,
-        courseName: cls.studentName,
+        courseName: cls.subjectName || cls.studentName,
         scheduledDate: cls.scheduledStartAt.toISOString().split("T")[0],
         startTime: formatTime(cls.scheduledStartAt),
         endTime: formatTime(cls.scheduledEndAt),
@@ -259,16 +298,45 @@ export namespace ScheduleService {
         leaveRequestDisabled,
         leaveRequestDisabledReason,
         studentCount: 1,
-        location: "Virtual",
+        location: cls.zoomMeetingUrl || "Virtual",
+        subjectId: cls.subjectId,
+        subjectName: cls.subjectName,
+        classType: cls.classType,
+        zoomMeetingUrl: cls.zoomMeetingUrl ?? null,
       };
     });
 
+    const [importantNotes, supportContact] = await Promise.all([
+      TeacherNotesService.getActiveNotes(userId, resolvedTeacherId, locale).catch(
+        (): TeacherImportantNoteReturnType[] => []
+      ),
+      (async (): Promise<SupportContactReturnType | null> => {
+        const staffProfileId = await SystemSettingsRepository.getStringValue(
+          "teacher_support_contact_staff_profile_id",
+          ""
+        );
+        if (!staffProfileId) return null;
+        const staffRow = await StaffProfileRepository.findByStaffProfileId(staffProfileId);
+        if (!staffRow) return null;
+        return {
+          id: staffRow.staffProfileId,
+          name: staffRow.name,
+          role: staffRow.roleName,
+          avatarUrl: staffRow.avatarUrl,
+          phone: staffRow.phone,
+          skypeId: staffRow.skypeId,
+        };
+      })(),
+    ]);
+
     return {
-      id: `future-schedule-${teacherRecord.id}-${periodYear}-${periodMonth}`,
+      id: `future-schedule-${resolvedTeacherId}-${periodYear}-${periodMonth}`,
       leaveQuotaUsed: usedLeaves,
       leaveQuotaTotal: maxLeaves,
       totalClasses: classes.length,
       classes,
+      importantNotes,
+      supportContact,
     };
   }
 }

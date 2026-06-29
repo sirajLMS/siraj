@@ -1,4 +1,6 @@
-const localeTag = (locale: string) => (locale === "ar" ? "ar-EG" : "en-US");
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+
+const localeTag = getLatnLocaleTag;
 
 function parseScheduleDate(value: string | null | undefined): Date | null {
   if (!value) {
@@ -31,7 +33,11 @@ export function formatScheduleTimeOnly(value: string | null | undefined, locale:
     }
   }
   const timeMatch = withoutTimezone.match(/\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?/i);
-  return timeMatch?.[0] ?? withoutTimezone;
+  const result = timeMatch?.[0] ?? withoutTimezone;
+  if (locale === "ar") {
+    return result.replace(/\s*AM/i, " ص").replace(/\s*PM/i, " م");
+  }
+  return result;
 }
 
 export function formatScheduleYourTime(

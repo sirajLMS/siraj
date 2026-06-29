@@ -2,6 +2,8 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { adminDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
 import { useScheduleAlertsStore } from "@/frontend/stores/scheduleAlertsStore";
 import { ScheduleAlertsView } from "./ScheduleAlertsView";
@@ -127,22 +129,24 @@ export function ScheduleAlertsContainer() {
   const handleLeave = (_id: string) => {};
 
   return (
-    <ScheduleAlertsView
-      alerts={alerts}
-      metrics={metrics}
-      metricLabels={metricLabels}
-      classes={classes}
-      totalClasses={totalCount}
-      currentPage={page}
-      pageSize={pageSize}
-      labels={labels}
-      onJoin={handleJoin}
-      onLeave={handleLeave}
-      onPageChange={handlePageChange}
-      loading={loading}
-      onDownloadReport={() => {}}
-      onFilter={() => {}}
-      onExport={() => {}}
-    />
+    <RequirePermission permissions={[AppPermission.ScheduleViewList]}>
+      <ScheduleAlertsView
+        alerts={alerts}
+        metrics={metrics}
+        metricLabels={metricLabels}
+        classes={classes}
+        totalClasses={totalCount}
+        currentPage={page}
+        pageSize={pageSize}
+        labels={labels}
+        onJoin={handleJoin}
+        onLeave={handleLeave}
+        onPageChange={handlePageChange}
+        loading={loading}
+        onDownloadReport={() => {}}
+        onFilter={() => {}}
+        onExport={() => {}}
+      />
+    </RequirePermission>
   );
 }

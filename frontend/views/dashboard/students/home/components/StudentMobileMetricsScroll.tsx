@@ -66,7 +66,7 @@ export function StudentMobileMetricsScroll({ metrics }: StudentMobileMetricsScro
                     lineHeight: 1,
                   })}
                 >
-                  {typeof metric.count === "number" ? metric.count.toLocaleString() : metric.count}
+                  {typeof metric.count === "number" ? String(metric.count) : metric.count}
                 </Typography>
                 <Typography
                   sx={theme => ({

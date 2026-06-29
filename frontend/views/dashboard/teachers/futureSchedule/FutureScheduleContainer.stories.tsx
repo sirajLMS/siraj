@@ -1,94 +1,101 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { create } from "zustand";
-import type { FutureClass } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
 import { FutureScheduleView } from "./FutureScheduleView";
+import type { ImportantNoteItem, SupportContactData } from "./types";
 
-interface FutureSchedule {
-  readonly leaveQuotaUsed: number;
-  readonly leaveQuotaTotal: number;
-  readonly totalClasses: number;
-  readonly classes: readonly FutureClass[];
-}
+const MOCK_NOTES: readonly ImportantNoteItem[] = [
+  {
+    id: "n-1",
+    title: "Quarterly Review",
+    body: "Oct 26 • All day event",
+    priority: 1,
+    startsAt: null,
+    expiresAt: null,
+  },
+  { id: "n-2", title: "Final Exam Submission", body: "Due in 4 days", priority: 0, startsAt: null, expiresAt: null },
+];
 
-interface TeacherScheduleState {
-  readonly futureSchedule: FutureSchedule | null;
-  setFutureSchedule: (futureSchedule: FutureSchedule) => void;
-}
-
-const MOCK_FUTURE_SCHEDULE: FutureSchedule = {
-  leaveQuotaUsed: 0,
-  leaveQuotaTotal: 2,
-  totalClasses: 12,
-  classes: [
-    {
-      __typename: "FutureClass",
-      id: "fc-1",
-      courseName: "Advanced Mathematics - Group A",
-      isRescheduled: true,
-      startTime: "09:00 AM",
-      endTime: "10:30 AM",
-      scheduledDate: "2023-10-24",
-      location: "Virtual Room 12",
-      studentCount: 18,
-      durationMinutes: 90,
-      leaveRequestDisabled: true,
-      leaveRequestDisabledReason: "time",
-    },
-    {
-      __typename: "FutureClass",
-      id: "fc-2",
-      courseName: "Physics 101: Mechanics",
-      isRescheduled: false,
-      startTime: "11:00 AM",
-      endTime: "12:30 PM",
-      scheduledDate: "2023-10-24",
-      location: "Hall B - Campus",
-      studentCount: 24,
-      durationMinutes: 90,
-      leaveRequestDisabled: false,
-      leaveRequestDisabledReason: null,
-    },
-    {
-      __typename: "FutureClass",
-      id: "fc-3",
-      courseName: "Intro to Arabic Literature",
-      isRescheduled: true,
-      startTime: "02:00 PM",
-      endTime: "03:30 PM",
-      scheduledDate: "2023-10-25",
-      location: "Virtual Room 04",
-      studentCount: 12,
-      durationMinutes: 90,
-      leaveRequestDisabled: true,
-      leaveRequestDisabledReason: "quota",
-    },
-  ],
+const MOCK_CONTACT: SupportContactData = {
+  id: "sc-1",
+  name: "Sarah Jenkins",
+  role: "Faculty Coordinator",
+  avatarUrl: "/demo/avatars/01.png",
+  phone: null,
+  skypeId: null,
 };
 
-const useTeacherScheduleStore = create<TeacherScheduleState>(set => ({
-  futureSchedule: MOCK_FUTURE_SCHEDULE,
-  setFutureSchedule: futureSchedule => {
-    set({ futureSchedule });
+const MOCK_CLASSES = [
+  {
+    __typename: "FutureClass" as const,
+    id: "fc-1",
+    courseName: "Advanced Mathematics - Group A",
+    isRescheduled: true,
+    startTime: "09:00 AM",
+    endTime: "10:30 AM",
+    scheduledDate: "2026-07-01",
+    location: "Virtual Room 12",
+    studentCount: 18,
+    durationMinutes: 90,
+    leaveRequestDisabled: true,
+    leaveRequestDisabledReason: "time",
+    subjectId: null,
+    subjectName: null,
+    classType: null,
+    zoomMeetingUrl: null,
   },
-}));
+  {
+    __typename: "FutureClass" as const,
+    id: "fc-2",
+    courseName: "Physics 101: Mechanics",
+    isRescheduled: false,
+    startTime: "11:00 AM",
+    endTime: "12:30 PM",
+    scheduledDate: "2026-07-01",
+    location: "Hall B - Campus",
+    studentCount: 24,
+    durationMinutes: 90,
+    leaveRequestDisabled: false,
+    leaveRequestDisabledReason: null,
+    subjectId: null,
+    subjectName: null,
+    classType: null,
+    zoomMeetingUrl: null,
+  },
+  {
+    __typename: "FutureClass" as const,
+    id: "fc-3",
+    courseName: "Intro to Arabic Literature",
+    isRescheduled: true,
+    startTime: "02:00 PM",
+    endTime: "03:30 PM",
+    scheduledDate: "2026-07-02",
+    location: "Virtual Room 04",
+    studentCount: 12,
+    durationMinutes: 90,
+    leaveRequestDisabled: true,
+    leaveRequestDisabledReason: "quota",
+    subjectId: null,
+    subjectName: null,
+    classType: null,
+    zoomMeetingUrl: null,
+  },
+];
 
 export function MockFutureScheduleContainer() {
-  const futureSchedule = useTeacherScheduleStore(state => state.futureSchedule);
-
-  if (!futureSchedule) return null;
-
   return (
     <FutureScheduleView
-      classes={futureSchedule.classes}
-      leaveQuotaUsed={futureSchedule.leaveQuotaUsed}
-      leaveQuotaTotal={futureSchedule.leaveQuotaTotal}
-      totalClasses={futureSchedule.totalClasses}
+      classes={MOCK_CLASSES}
+      leaveQuotaUsed={0}
+      leaveQuotaTotal={2}
+      totalClasses={12}
       onRequestLeave={async id => {
         logger.info({ caller: "MockFutureScheduleContainer" }, `Request leave for: ${id}`);
       }}
-      leaveError={null}
-      onDismissError={() => {}}
+      selectedDate={new Date().toISOString().split("T")[0]}
+      onDateChange={() => {}}
+      notes={MOCK_NOTES}
+      contact={MOCK_CONTACT}
+      onViewMaterials={() => {}}
     />
   );
 }

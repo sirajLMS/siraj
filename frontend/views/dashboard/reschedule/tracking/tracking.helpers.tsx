@@ -10,6 +10,7 @@ import {
 import type { ReactNode } from "react";
 import type { RescheduleTrackingRow } from "@/frontend/graphql/generated/gql/graphql-types";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/graphql/generated/gql/graphql-types";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { MetricDefinition, RawMetrics, TrackingRow, TrackingStatusLabelMap } from "./tracking.types";
 
 export function getTrackingStatusLabel(
@@ -96,14 +97,14 @@ export function buildTrackingRows(rawRows: readonly RescheduleTrackingRow[], loc
       .substring(0, 2);
 
     const formatDate = (d: Date) =>
-      d.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+      d.toLocaleDateString(getLatnLocaleTag(locale), {
         month: "short",
         day: "numeric",
         year: "numeric",
       });
 
     const formatTime = (d: Date) =>
-      d.toLocaleTimeString(locale === "ar" ? "ar-EG" : "en-US", {
+      d.toLocaleTimeString(getLatnLocaleTag(locale), {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,

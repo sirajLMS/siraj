@@ -60,6 +60,10 @@ enum AppPermission {
   BILLING_UPDATE_STATUS_PAID
   BILLING_VIEW_HISTORY
   BILLING_VIEW_UNPAID_INVOICES
+  CATEGORIES_CREATE
+  CATEGORIES_DELETE
+  CATEGORIES_LIST
+  CATEGORIES_UPDATE
   COMMUNICATION_SUBMIT_SUGGESTION
   COMPLAINTS_DELETE
   COMPLAINTS_LIST
@@ -77,6 +81,10 @@ enum AppPermission {
   INVOICES_EDIT
   INVOICES_LIST
   INVOICES_MARK_PAID
+  NOTES_CREATE
+  NOTES_DELETE
+  NOTES_LIST
+  NOTES_UPDATE
   NOTIFICATION_VIEW_ALERTS
   PARENTS_CREATE
   PARENTS_EDIT
@@ -129,6 +137,12 @@ enum AppPermission {
   STUDENT_MANAGE_STATUS
   STUDENT_REASSIGN_TEACHER
   STUDENT_VIEW_ASSOCIATED
+  SUBJECTS_CREATE
+  SUBJECTS_DELETE
+  SUBJECTS_LIST
+  SUBJECTS_MANAGE_RESOURCES
+  SUBJECTS_UPDATE
+  SUBJECTS_VIEW_RESOURCES
   SUGGESTIONS_DELETE
   SUGGESTIONS_LIST
   SUGGESTIONS_REVIEW
@@ -170,6 +184,13 @@ type AssociatedStudent {
   teacherName: String
   updatedAt: DateTime
   version: Int
+}
+
+input AttachSubjectResourceInput {
+  learningResourceId: String!
+  resourceType: String
+  sortOrder: Int
+  subjectId: String!
 }
 
 """Filters applied to the dynamic attendance query engine."""
@@ -268,6 +289,31 @@ type ChangeStudentStatusResult {
   version: Int
 }
 
+type ClassCategory {
+  description: String
+  id: String
+  isActive: Boolean
+  name: String
+  slug: String
+  sortOrder: Int
+}
+
+input ClassCategoryCreateInput {
+  description: String
+  isActive: Boolean
+  name: String!
+  slug: String!
+  sortOrder: Int
+}
+
+input ClassCategoryUpdateInput {
+  description: String
+  isActive: Boolean
+  name: String
+  slug: String
+  sortOrder: Int
+}
+
 enum ClassExecutionState {
   ACTIVATED
   COMPLETED
@@ -340,6 +386,36 @@ type ClassStatusEvent {
   description: String
   eventType: String
   id: String
+}
+
+type ClassSubject {
+  category: ClassCategory
+  categoryId: String
+  description: String
+  id: String
+  isActive: Boolean
+  name: String
+  resources: [SubjectResource!]
+  slug: String
+  sortOrder: Int
+}
+
+input ClassSubjectCreateInput {
+  categoryId: String!
+  description: String
+  isActive: Boolean
+  name: String!
+  slug: String!
+  sortOrder: Int
+}
+
+input ClassSubjectUpdateInput {
+  categoryId: String
+  description: String
+  isActive: Boolean
+  name: String
+  slug: String
+  sortOrder: Int
 }
 
 type CommunicationLogEntry {
@@ -737,6 +813,16 @@ type CreateRecurringClassResult {
   recurringScheduleId: String
 }
 
+input CreateTeacherNoteInput {
+  body: String
+  expiresAt: DateTime
+  isPublished: Boolean
+  priority: Int
+  startsAt: DateTime
+  teacherId: String
+  title: String!
+}
+
 type DailyScheduleList {
   duration: Int
   executionState: ClassExecutionState
@@ -992,6 +1078,7 @@ input FolderCreateInput {
 }
 
 type FutureClass {
+  classType: String
   courseName: String
   durationMinutes: Int
   endTime: String
@@ -1003,6 +1090,9 @@ type FutureClass {
   scheduledDate: String
   startTime: String
   studentCount: Int
+  subjectId: String
+  subjectName: String
+  zoomMeetingUrl: String
 }
 
 enum Gender {
@@ -1184,6 +1274,7 @@ type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
   assignPermissionGroupToUser(input: AssignPermissionGroupToUserInput!): Boolean
+  attachSubjectResource(input: AttachSubjectResourceInput!): SubjectResource
   bulkAssignUsersToGroup(groupId: String!, userIds: [String!]!): Boolean
   bulkRevokeUsersFromGroup(groupId: String!, userIds: [String!]!): Boolean
   changeStudentStatus(expectedVersion: Int, newStatus: String!, studentId: String!): ChangeStudentStatusResult
@@ -1191,6 +1282,8 @@ type Mutation {
   cleanupTestGroupClass(groupClassId: String!): Boolean
   clearWeeklySchedule(teacherId: ID!): Boolean
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
+  createClassCategory(input: ClassCategoryCreateInput!): ClassCategory
+  createClassSubject(input: ClassSubjectCreateInput!): ClassSubject
   createFolder(input: FolderCreateInput!): FileOperationResult
 
   """Create a new manager/staff account (System Admin only)"""
@@ -1204,6 +1297,7 @@ type Mutation {
 
   """Create a new teacher account with comprehensive profile"""
   createTeacher(input: TeacherOnboardingInput!): TeacherOnboardingResult
+  createTeacherImportantNote(input: CreateTeacherNoteInput!): TeacherImportantNote
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
   createTestGroupClass(classInstanceId: String!, teacherName: String!): TestGroupClass
@@ -1214,7 +1308,9 @@ type Mutation {
     """The UUID of the book to delete"""
     id: ID!
   ): Boolean
+  deleteClassCategory(id: ID!): Boolean
   deleteClassInstance(classInstanceId: ID!): Boolean
+  deleteClassSubject(id: ID!): Boolean
 
   """Soft-deletes a complaint (admin only). Returns true on success."""
   deleteComplaint(complaintId: String!): Boolean
@@ -1235,11 +1331,13 @@ type Mutation {
 
   """Soft-deletes a suggestion (super admin only). Returns true on success."""
   deleteSuggestion(suggestionId: String!): Boolean
+  deleteTeacherImportantNote(id: ID!): Boolean
 
   """
   Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
   """
   demoLogin(input: DemoLoginInput!): LoginResponse
+  detachSubjectResource(learningResourceId: ID!, subjectId: ID!): Boolean
   executeDstBulkUpdate(description: String!, offsetMinutes: Int!): DstMigrationReport
   linkDocumentToParent(fileId: String!, parentId: String!, usageType: String!): ParentDocument
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
@@ -1278,6 +1376,8 @@ type Mutation {
   """Submits a new suggestion from the authenticated parent."""
   submitSuggestion(input: SubmitSuggestionInput!): Suggestion
   updateClassAdminNote(classInstanceId: String!, content: String!): GroupClassAudit
+  updateClassCategory(id: ID!, input: ClassCategoryUpdateInput!): ClassCategory
+  updateClassSubject(id: ID!, input: ClassSubjectUpdateInput!): ClassSubject
   updateDirectoryPermissions(input: DirectoryPermissionsUpdateInput!): FileOperationResult
 
   """Updates a manager's profile fields."""
@@ -1287,6 +1387,7 @@ type Mutation {
   updateSessionStatusLeave(classInstanceId: ID!, leaveReason: String!): LeaveProcessResult
   updateSessionStatusStart(classInstanceId: ID!): ClassInstanceDetail
   updateStudentQuota(expectedVersion: Int, newClassesRemaining: Int!, studentId: String!): EditQuotaResult
+  updateTeacherImportantNote(id: ID!, input: UpdateTeacherNoteInput!): TeacherImportantNote
   updateTeacherProfile(input: TeacherProfileUpdateInput!, teacherId: ID!): TeacherProfileResult
   updateUserOverrides(overrides: [UserOverrideInput!]!, userId: String!): Boolean
 
@@ -1588,8 +1689,11 @@ type Query {
 
   """Lists all books and bags available to the academy."""
   booksAndBags: [Book!]
+  classCategories: [ClassCategory!]
   classInstance(id: ID!): ClassInstanceDetail
   classStatusEvents(classInstanceId: ID!): [ClassStatusEvent!]
+  classSubject(id: ID!): ClassSubject
+  classSubjects(categoryId: String): [ClassSubject!]
 
   """
   Returns file attachments for a specific complaint. Accessible by the owning parent or admins.
@@ -1696,7 +1800,7 @@ type Query {
   teacherActiveDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
   teacherDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
   teacherDirectory(paginationArgs: PaginationArgs, search: String): TeacherDirectory
-  teacherFutureSchedule: TeacherFutureSchedule
+  teacherFutureSchedule(teacherId: String): TeacherFutureSchedule
   teacherHandbookUrl: TeacherHandbookUrl
   teacherProfileForEdit(teacherId: ID!): TeacherProfileResult
   teacherWeeklyScheduleGrid(teacherId: String, weekDate: String!): WeeklyScheduleGrid
@@ -2071,6 +2175,16 @@ type StudentsWithFiltersResponse {
   pageInfo: PageInfo!
 }
 
+type SubjectResource {
+  displayName: String
+  filePath: String
+  id: String
+  learningResourceId: String
+  resourceType: String
+  sortOrder: Int
+  subjectId: String
+}
+
 """Input for submitting a new suggestion."""
 input SubmitSuggestionInput {
   body: String!
@@ -2147,6 +2261,15 @@ enum SuggestionStatus {
   DUPLICATE
   PENDING
   REVIEWED
+}
+
+type SupportContact {
+  avatarUrl: String
+  id: String
+  name: String
+  phone: String
+  role: String
+  skypeId: String
 }
 
 type SupportRequestResult {
@@ -2237,14 +2360,27 @@ type TeacherDirectoryRow {
 type TeacherFutureSchedule {
   classes: [FutureClass!]
   id: String
+  importantNotes: [TeacherImportantNote!]
   leaveQuotaTotal: Int
   leaveQuotaUsed: Int
+  supportContact: SupportContact
   totalClasses: Int
 }
 
 type TeacherHandbookUrl {
   id: String
   url: String
+}
+
+type TeacherImportantNote {
+  body: String
+  expiresAt: DateTime
+  id: String
+  isPublished: Boolean
+  priority: Int
+  startsAt: DateTime
+  teacherId: String
+  title: String
 }
 
 """Input for creating a new teacher account with comprehensive profile"""
@@ -2441,6 +2577,15 @@ input UpdatePermissionGroupInput {
   permissionIds: [String!]
 }
 
+input UpdateTeacherNoteInput {
+  body: String
+  expiresAt: DateTime
+  isPublished: Boolean
+  priority: Int
+  startsAt: DateTime
+  title: String
+}
+
 type UploadPreparation {
   id: String!
   uploadType: UploadType!
@@ -2484,6 +2629,7 @@ input UserOverrideInput {
 }
 
 type WeeklyScheduleClass {
+  classType: String
   day: String
   duration: Int
   executionState: String
@@ -2492,12 +2638,15 @@ type WeeklyScheduleClass {
   startTime: String
   studentId: String
   studentName: String
+  subjectId: String
+  subjectName: String
 }
 
 type WeeklyScheduleGrid {
   classes: [WeeklyScheduleClass!]
   id: String
   teacherId: String
+  teacherName: String
   weekEnd: String
   weekStart: String
 }

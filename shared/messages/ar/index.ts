@@ -31,6 +31,7 @@ import {
   quota as studentQuota,
   status as studentStatus,
 } from "./dashboard/students";
+import { subjects as subjectsLabels } from "./dashboard/subjects";
 import { suggestions as suggestionsLabels } from "./dashboard/suggestions";
 import {
   availability as teacherAvailability,
@@ -108,6 +109,7 @@ export const arTranslations = {
     suggestions: suggestionsLabels,
     complaints: complaintsLabels,
     resources: resourcesLabels,
+    subjects: subjectsLabels,
     booksAndBags: booksAndBagsLabels,
     permissions: permissionsLabels,
     searchSchedule,

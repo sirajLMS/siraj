@@ -17,6 +17,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { classSubjects } from "./class-subject";
 import {
   classExecutionStateEnum,
   classOutcomeEnum,
@@ -51,6 +52,7 @@ export const recurringSchedules = pgTable(
     teacherId: uuid("teacher_id")
       .notNull()
       .references(() => teachers.id, { onDelete: "restrict" }),
+    subjectId: uuid("subject_id").references(() => classSubjects.id, { onDelete: "restrict" }),
     durationMinutes: integer("duration_minutes").notNull(),
     defaultStartTime: time("default_start_time").notNull(),
     timezoneId: integer("timezone_id").references(() => timezones.id),
@@ -66,6 +68,7 @@ export const recurringSchedules = pgTable(
     index("recurring_schedules_student_id_idx").on(table.studentId),
     index("recurring_schedules_teacher_id_idx").on(table.teacherId),
     index("recurring_schedules_timezone_id_idx").on(table.timezoneId),
+    index("recurring_schedules_subject_id_idx").on(table.subjectId),
     check("recurring_schedules_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
   ]
 );
@@ -116,6 +119,7 @@ export const classInstances = pgTable(
     teacherId: uuid("teacher_id")
       .notNull()
       .references(() => teachers.id, { onDelete: "restrict" }),
+    subjectId: uuid("subject_id").references(() => classSubjects.id, { onDelete: "restrict" }),
     recurringScheduleId: uuid("recurring_schedule_id").references(() => recurringSchedules.id, {
       onDelete: "set null",
     }),
@@ -158,6 +162,7 @@ export const classInstances = pgTable(
     index("class_instances_teacher_scheduled_idx").on(table.teacherId, table.scheduledStartAt),
     index("class_instances_student_scheduled_idx").on(table.studentId, table.scheduledStartAt),
     index("class_instances_original_class_id_idx").on(table.originalClassId),
+    index("class_instances_subject_id_idx").on(table.subjectId),
     index("class_instances_class_type_idx").on(table.classType),
     index("class_instances_outcome_idx").on(table.outcome),
     uniqueIndex("class_instances_idempotency_key_unique_idx").on(table.idempotencyKey),

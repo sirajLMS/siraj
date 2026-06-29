@@ -77,6 +77,8 @@ export async function provisionTestEntities(adminToken: string, prefix: string, 
   if (!entities) throw new Error("Failed to create test entities");
 
   if (!entities.teacherUserEmail) throw new Error("Teacher email not returned");
+  if (!entities.studentId) throw new Error("Student ID not returned");
+  if (!entities.teacherId) throw new Error("Teacher ID not returned");
   const teacherToken = await loginUser(entities.teacherUserEmail, "password");
 
   return {

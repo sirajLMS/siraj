@@ -16,15 +16,14 @@ function truncateQualifications(value: string | null | undefined, maxLength = 80
   return `${trimmed.slice(0, maxLength)}...`;
 }
 
-/**
- * Shared helper to build a ClassInstanceDetailReturnType from database entities.
- */
 export async function buildClassInstanceDetail(
   instance: ClassInstanceWithRelations,
   perf: ClassInstancePerformanceSelectType | null,
   locale?: string
 ): Promise<ClassInstanceDetailReturnType> {
   const t = await getBackendTranslations({ locale, namespace: "session" });
+  const tErrors = await getBackendTranslations({ locale, namespace: "errors" });
+  const unknownName = tErrors("unknownName");
   const classType = instance.classType as ClassType;
   const courseName = t(`classTypes.${classType}`);
 
@@ -56,19 +55,20 @@ export async function buildClassInstanceDetail(
     outcome: instance.outcome || "PENDING",
     student: {
       id: instance.student?.id || instance.studentId,
-      name: instance.student?.name || "Unknown",
+      name: instance.student?.name || unknownName,
       grade: null,
       level: null,
       avatarUrl: instance.student?.avatarUrl ?? null,
     },
     teacher: {
       id: instance.teacher?.id || instance.teacherId,
-      name: instance.teacher?.user?.name || "Unknown",
+      name: instance.teacher?.user?.name || unknownName,
       title: truncateQualifications(instance.teacher?.qualifications),
       avatarUrl: instance.teacher?.user?.avatarUrl ?? null,
     },
     performance: perf
       ? {
+          id: perf.id,
           engagementScore: perf.engagementScore ?? null,
           assessmentProgress: perf.assessmentProgress ?? null,
           assessmentTotal: perf.assessmentTotal ?? null,
@@ -85,9 +85,6 @@ export async function buildClassInstanceDetail(
   };
 }
 
-/**
- * Shared helper to resolve class instance details by ID for an authenticated user.
- */
 export async function resolveDetail(
   userId: string,
   classInstanceId: string,

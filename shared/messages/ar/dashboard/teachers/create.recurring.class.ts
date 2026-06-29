@@ -12,6 +12,12 @@ export const teacherCreateRecurringClass: TeacherCreateRecurringClassLabels = {
     durationMinutes: "المدة (بالدقائق)",
     days: "الأيام المتكررة",
     timezone: "المنطقة الزمنية",
+    classType: "نوع الحصة",
+  },
+  classTypes: {
+    REGULAR: "عادي",
+    TRIAL: "تجريبي",
+    ADVANCE: "متقدم",
   },
   days: {
     monday: "الاثنين",
@@ -30,6 +36,7 @@ export const teacherCreateRecurringClass: TeacherCreateRecurringClassLabels = {
   actions: {
     create: "إنشاء الحصة",
     cancel: "إلغاء",
+    submitting: "جارٍ الإرسال...",
   },
   success: {
     title: "تم إنشاء الحصة",
@@ -39,5 +46,6 @@ export const teacherCreateRecurringClass: TeacherCreateRecurringClassLabels = {
     noDaysSelected: "يرجى اختيار يوم واحد على الأقل للجدول المتكرر.",
     noStudentSelected: "يرجى اختيار طالب.",
     creationFailed: "فشل إنشاء الحصة المتكررة. يرجى المحاولة مرة أخرى.",
+    durationMustBePositive: "يجب أن تكون المدة أكبر من 0",
   },
 };

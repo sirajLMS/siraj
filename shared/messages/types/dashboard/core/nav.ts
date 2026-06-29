@@ -12,6 +12,7 @@ export interface DashboardNavigationLabels {
   readonly studentStatus: string;
   readonly managers: string;
   readonly resources: string;
+  readonly subjects: string;
   readonly report: string;
   readonly addAccount: string;
   readonly logout: string;

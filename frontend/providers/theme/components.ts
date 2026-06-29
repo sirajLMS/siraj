@@ -1,6 +1,3 @@
-// cspell:ignore: onepassword
-
-import type { ButtonOwnProps } from "@mui/material/Button";
 import type { Components, Theme } from "@mui/material/styles";
 
 interface ComponentProps {
@@ -16,10 +13,10 @@ const getMuiCssBaseline = ({
 }: ComponentProps): Components<Omit<Theme, "components">>["MuiCssBaseline"] => ({
   styleOverrides: {
     body: {
-      backgroundColor: isLight ? "#f7f9fb" : "#0e1515",
+      backgroundColor: isLight ? "#FFFFFF" : "#1A1A1A",
       backgroundImage: isLight
-        ? "radial-gradient(circle at top left, rgba(13, 77, 77, 0.04), transparent 32%), radial-gradient(circle at top right, rgba(84, 95, 115, 0.05), transparent 28%)"
-        : "radial-gradient(circle at top left, rgba(107, 215, 215, 0.08), transparent 32%), radial-gradient(circle at top right, rgba(47, 54, 54, 0.1), transparent 28%)",
+        ? "radial-gradient(circle at top left, rgba(13, 148, 136, 0.04), transparent 32%), radial-gradient(circle at top right, rgba(79, 70, 229, 0.05), transparent 28%)"
+        : "radial-gradient(circle at top left, rgba(45, 212, 191, 0.08), transparent 32%), radial-gradient(circle at top right, rgba(129, 140, 248, 0.1), transparent 28%)",
     },
     "input:-webkit-autofill": {
       WebkitBoxShadow: `0 0 0 1000px ${autofillBackground} inset !important`,
@@ -76,7 +73,7 @@ const getMuiCssBaseline = ({
     "*::-webkit-scrollbar-thumb": {
       background: isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.15)",
       borderRadius: "6px",
-      border: isLight ? "2px solid #f7f9fb" : "2px solid #0a0d0e",
+      border: isLight ? "2px solid #FFFFFF" : "2px solid #1A1A1A",
     },
     "*::-webkit-scrollbar-thumb:hover": {
       background: isLight ? "rgba(0, 0, 0, 0.25)" : "rgba(255, 255, 255, 0.25)",
@@ -90,11 +87,9 @@ const getMuiCssBaseline = ({
   },
 });
 
-const getMuiButton = ({
-  isLight,
-}: Pick<ComponentProps, "isLight">): Components<Omit<Theme, "components">>["MuiButton"] => ({
+const getMuiButton = (): Components<Omit<Theme, "components">>["MuiButton"] => ({
   styleOverrides: {
-    root: ({ ownerState }: { ownerState: ButtonOwnProps }) => ({
+    root: ({ ownerState, theme }) => ({
       borderRadius: 8, // Rounded buttons
       boxShadow: "none",
       fontWeight: 700,
@@ -105,10 +100,10 @@ const getMuiButton = ({
       },
       ...(ownerState.variant === "contained" &&
         ownerState.color === "primary" && {
-          backgroundColor: isLight ? "#0D4D4D" : "#6bd7d7",
-          color: isLight ? "#ffffff" : "#003737",
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.onPrimary,
           "&:hover": {
-            backgroundColor: isLight ? "#003535" : "#89f4f3",
+            backgroundColor: theme.palette.primary.dark,
             boxShadow: "none",
           },
         }),
@@ -124,16 +119,14 @@ const getMuiPaper = (): Components<Omit<Theme, "components">>["MuiPaper"] => ({
   },
 });
 
-const getMuiCard = ({
-  isLight,
-}: Pick<ComponentProps, "isLight">): Components<Omit<Theme, "components">>["MuiCard"] => ({
+const getMuiCard = (): Components<Omit<Theme, "components">>["MuiCard"] => ({
   styleOverrides: {
-    root: {
+    root: ({ theme }) => ({
       borderRadius: 16, // Data containers use modern rounded-xl (1rem/16px) standard
-      boxShadow: isLight ? "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)" : "none",
-      border: isLight ? "1px solid #E2E8F0" : "1px solid #3d4949",
-      backgroundColor: isLight ? "#ffffff" : "#161d1d",
-    },
+      boxShadow: theme.palette.shadow.card,
+      border: `1px solid ${theme.palette.border.light}`,
+      backgroundColor: theme.palette.background.paper,
+    }),
   },
 });
 
@@ -200,15 +193,13 @@ const getMuiInputOverrides = ({
   },
 });
 
-const getMuiDataGrid = ({
-  isLight,
-}: Pick<ComponentProps, "isLight">): Components<Omit<Theme, "components">>["MuiDataGrid"] => ({
+const getMuiDataGrid = (): Components<Omit<Theme, "components">>["MuiDataGrid"] => ({
   styleOverrides: {
-    root: {
+    root: ({ theme }) => ({
       border: "none",
       "--DataGrid-containerBackground": "transparent",
       "& .MuiDataGrid-columnHeader": {
-        backgroundColor: "table.header.background",
+        backgroundColor: theme.palette.surfaceContainerLow,
       },
       "& .MuiDataGrid-columnHeaderTitle": {
         fontFamily: '"Inter", sans-serif',
@@ -216,20 +207,20 @@ const getMuiDataGrid = ({
         fontWeight: 700,
         letterSpacing: "0.08em",
         textTransform: "uppercase",
-        color: "table.header.text",
+        color: theme.palette.onSurfaceVariant,
       },
       "& .MuiDataGrid-cell": {
         borderBottom: `1px solid`,
-        borderColor: "border.light",
+        borderColor: theme.palette.border.light,
       },
       "& .MuiDataGrid-row:hover": {
-        backgroundColor: isLight ? "rgba(13, 77, 77, 0.04)" : "rgba(107, 215, 215, 0.06)",
+        backgroundColor: theme.palette.mode === "light" ? "rgba(13, 148, 136, 0.04)" : "rgba(45, 212, 191, 0.06)",
       },
       "& .MuiDataGrid-footerContainer": {
         borderTop: `1px solid`,
-        borderColor: "border.light",
+        borderColor: theme.palette.border.light,
       },
-    },
+    }),
   },
 });
 
@@ -240,10 +231,10 @@ export const components = ({
 }: ComponentProps): Components<Omit<Theme, "components">> => {
   return {
     MuiCssBaseline: getMuiCssBaseline({ isLight, autofillBackground, autofillText }),
-    MuiButton: getMuiButton({ isLight }),
+    MuiButton: getMuiButton(),
     MuiPaper: getMuiPaper(),
-    MuiCard: getMuiCard({ isLight }),
+    MuiCard: getMuiCard(),
     ...getMuiInputOverrides({ autofillBackground, autofillText }),
-    MuiDataGrid: getMuiDataGrid({ isLight }),
+    MuiDataGrid: getMuiDataGrid(),
   };
 };

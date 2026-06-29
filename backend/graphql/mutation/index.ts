@@ -9,3 +9,6 @@ import "./schedule-deletion.mutation";
 import "./staff-profile.mutation";
 import "./dst-migration.mutation";
 import "./onboarding.mutation";
+import "./class-category.mutation";
+import "./class-subject.mutation";
+import "./teacher-notes.mutation";
