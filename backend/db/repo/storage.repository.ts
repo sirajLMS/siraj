@@ -579,13 +579,14 @@ export namespace StorageDbRepository {
   export const getFilesForInvoice = async (
     invoiceId: string,
     usageType?: string,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    limit?: number
   ): Promise<StorageTypes.LinkedFileReturnType[]> => {
     const queryDb = tx ?? db;
     const conditions = [eq(invoiceFiles.invoiceId, invoiceId)];
     if (usageType) conditions.push(eq(invoiceFiles.usageType, usageType));
 
-    const results = await queryDb
+    let query = queryDb
       .select({
         id: invoiceFiles.id,
         fileId: invoiceFiles.fileId,
@@ -598,6 +599,10 @@ export namespace StorageDbRepository {
       .innerJoin(storageFiles, eq(invoiceFiles.fileId, storageFiles.id))
       .where(and(...conditions))
       .orderBy(desc(invoiceFiles.createdAt));
+
+    if (limit) query = query.limit(limit);
+
+    const results = await query;
 
     return results.map(r => ({
       id: r.id,

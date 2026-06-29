@@ -16,7 +16,7 @@ import {
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/views/dashboard/students/home/types";
 import { useRouter } from "@/shared/i18n/routing";
-import { StudentStatus } from "@/shared/lib/enum";
+import type { StudentStatus } from "@/shared/lib/enum";
 import { TeacherReassignmentView } from "./TeacherReassignmentView";
 import type {
   ReassignmentStudentData,
@@ -51,7 +51,7 @@ export function TeacherReassignmentContainer() {
 
   const [reassignTeacher, { loading: isReassigning }] = useMutation(reassignStudentTeacherMutationDocument, {
     onCompleted: () => {
-      notifications.show(t("actions.submit"), { severity: "success", autoHideDuration: 4000 });
+      notifications.show(t("actions.reassignSuccess"), { severity: "success", autoHideDuration: 4000 });
     },
     onError: mutationError => {
       notifications.show(mutationError.message, { severity: "error", autoHideDuration: 5000 });
@@ -61,7 +61,7 @@ export function TeacherReassignmentContainer() {
 
   const [changeStatus, { loading: isChangingStatus }] = useMutation(changeStudentStatusMutationDocument, {
     onCompleted: () => {
-      notifications.show(t("actions.submit"), { severity: "success", autoHideDuration: 4000 });
+      notifications.show(t("actions.statusChangeSuccess"), { severity: "success", autoHideDuration: 4000 });
     },
     onError: mutationError => {
       notifications.show(mutationError.message, { severity: "error", autoHideDuration: 5000 });
@@ -71,8 +71,8 @@ export function TeacherReassignmentContainer() {
 
   const student: ReassignmentStudentData | null = useMemo(() => {
     const s = studentData?.studentById;
-    if (!s?.id || !s.name) return null;
-    const status = (s.status ?? StudentStatus.REGULAR) as StudentStatus;
+    if (!s?.id || !s.name || !s.status) return null;
+    const status = s.status as StudentStatus;
     return {
       id: s.id,
       name: s.name,

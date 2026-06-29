@@ -41,5 +41,7 @@ export const reassignment: TeacherReassignmentLabels = {
     submit: "إرسال",
     processing: "جاري المعالجة...",
     saved: "تم الحفظ",
+    reassignSuccess: "تم إعادة تعيين المعلم بنجاح",
+    statusChangeSuccess: "تم تغيير حالة الطالب بنجاح",
   },
 };

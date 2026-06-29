@@ -20,3 +20,9 @@ export class UnauthorizedError extends DomainError {
     super("UNAUTHORIZED", message, options);
   }
 }
+
+export class ForbiddenError extends DomainError {
+  constructor(message: string, options?: ErrorOptions) {
+    super("FORBIDDEN", message, options);
+  }
+}

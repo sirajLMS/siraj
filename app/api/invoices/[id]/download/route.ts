@@ -1,11 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { StorageDbRepository } from "@/backend/db/repo";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { ForbiddenError, NotFoundError } from "@/backend/lib/errors";
+import { StorageUtils } from "@/backend/utils/storage.utils";
 import logger from "@/backend/lib/logger";
 import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
-
-const NOT_FOUND_MESSAGES = new Set(["Invoice not found", "invoiceNotFound"]);
-const FORBIDDEN_MESSAGES = new Set(["Forbidden", "insufficientPermissions"]);
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: invoiceId } = await params;
@@ -18,26 +17,25 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   try {
     await BillingManagementService.verifyInvoiceAccess(userId, invoiceId, context);
 
-    const files = await StorageDbRepository.getFilesForInvoice(invoiceId, "invoice_pdf");
+    const files = await StorageDbRepository.getFilesForInvoice(invoiceId, "invoice_pdf", undefined, 50);
     const pdfFile = files[0];
 
     if (!pdfFile?.filePath) {
       return NextResponse.json({ error: "No PDF available for this invoice" }, { status: 404 });
     }
 
+    if (!StorageUtils.validatePath(pdfFile.filePath)) {
+      logger.error("Invoice PDF filePath failed validation", { invoiceId, filePath: pdfFile.filePath });
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+
     return NextResponse.redirect(new URL(`/api/storage/files/${pdfFile.filePath}`, _request.url));
   } catch (error) {
-    const message = error instanceof Error ? error.message : "";
-
-    if (
-      NOT_FOUND_MESSAGES.has(message) ||
-      message.toLowerCase().includes("notfound") ||
-      message.toLowerCase().includes("not found")
-    ) {
+    if (error instanceof NotFoundError) {
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
-    if (FORBIDDEN_MESSAGES.has(message) || message.toLowerCase().includes("insufficientpermissions")) {
+    if (error instanceof ForbiddenError) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

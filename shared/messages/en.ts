@@ -1245,6 +1245,8 @@ const en: MessageSchema = {
         submit: "SUBMIT",
         processing: "PROCESSING...",
         saved: "SAVED",
+        reassignSuccess: "Teacher reassigned successfully.",
+        statusChangeSuccess: "Student status updated successfully.",
       },
     },
     teacherOnboarding: {

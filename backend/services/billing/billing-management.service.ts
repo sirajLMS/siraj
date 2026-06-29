@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { BillingRepository, ParentRepository } from "@/backend/db/repo";
+import { ForbiddenError, NotFoundError } from "@/backend/lib/errors";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -244,7 +245,7 @@ export namespace BillingManagementService {
     const invoice = await BillingRepository.getInvoiceById(invoiceId);
     if (!invoice) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invoiceNotFound", { id: invoiceId }));
+      throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
     }
 
     const hasBillingAccess =
@@ -256,7 +257,7 @@ export namespace BillingManagementService {
       const parent = await ParentRepository.findByUserId(actorUserId);
       if (!parent || parent.id !== invoice.parentId) {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("insufficientPermissions"));
+        throw new ForbiddenError(tFunc("insufficientPermissions"));
       }
     }
 

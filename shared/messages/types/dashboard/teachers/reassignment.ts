@@ -39,5 +39,7 @@ export interface TeacherReassignmentLabels {
     readonly submit: string;
     readonly processing: string;
     readonly saved: string;
+    readonly reassignSuccess: string;
+    readonly statusChangeSuccess: string;
   };
 }
