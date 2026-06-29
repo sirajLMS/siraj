@@ -3,19 +3,13 @@ CREATE OR REPLACE FUNCTION fn_enforce_student_status_transition()
 RETURNS TRIGGER AS $$
 BEGIN
     -- Only for UPDATE: Enforcement of state machine
-    IF OLD.status IS DISTINCT FROM NEW.status THEN
-        -- GRADUATED is a terminal state
-        IF OLD.status = 'GRADUATED' THEN
-            RAISE EXCEPTION 'Cannot change status of a GRADUATED student.';
-        END IF;
-
-        -- Transitions from ON_TRIAL
+    IF OLD.status IS DISTINCT FROM NEW.status THEN-- Transitions from ON_TRIAL
         IF OLD.status = 'ON_TRIAL' AND NEW.status NOT IN ('REGULAR', 'DEACTIVATED') THEN
             RAISE EXCEPTION 'Invalid status transition: % to %', OLD.status, NEW.status;
         END IF;
 
         -- Transitions from REGULAR
-        IF OLD.status = 'REGULAR' AND NEW.status NOT IN ('SUSPENDED', 'ON_LEAVE', 'DEACTIVATED', 'GRADUATED') THEN
+        IF OLD.status = 'REGULAR' AND NEW.status NOT IN ('SUSPENDED', 'ON_LEAVE', 'DEACTIVATED') THEN
             RAISE EXCEPTION 'Invalid status transition: % to %', OLD.status, NEW.status;
         END IF;
 

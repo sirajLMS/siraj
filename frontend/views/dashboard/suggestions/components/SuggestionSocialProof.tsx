@@ -1,21 +1,37 @@
 "use client";
 
+import { useQuery } from "@apollo/client/react";
 import { Avatar, Box, Typography } from "@mui/material";
-import type { SuggestionsParentLabels } from "@/shared/messages/types/dashboard/suggestions/main";
+import { suggestionContributorStatsQueryDocument } from "@/frontend/graphql/sharedDocuments/suggestion.documents";
+import type { SuggestionSocialProofProps } from "../types/suggestionsView.types";
 
-interface SuggestionSocialProofProps {
-  readonly labels: SuggestionsParentLabels;
+const CONTRIBUTOR_AVATAR_LIMIT = 3;
+const CONTRIBUTOR_STATS_DAYS = 30;
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
 }
 
-const TEAM_AVATARS = ["AK", "SA", "JS"] as const;
-
 export function SuggestionSocialProof({ labels }: Readonly<SuggestionSocialProofProps>) {
+  const { data } = useQuery(suggestionContributorStatsQueryDocument, {
+    variables: { days: CONTRIBUTOR_STATS_DAYS },
+  });
+
+  const stats = data?.suggestionContributorStats;
+  const contributors = stats?.contributors ?? [];
+  const displayContributors = contributors.slice(0, CONTRIBUTOR_AVATAR_LIMIT);
+  const remainingCount = Math.max(0, (stats?.uniqueContributorCount ?? 0) - CONTRIBUTOR_AVATAR_LIMIT);
+
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
       <Box sx={{ display: "flex" }}>
-        {TEAM_AVATARS.map(initials => (
+        {displayContributors.map(contributor => (
           <Avatar
-            key={initials}
+            key={contributor?.id ?? ""}
             sx={theme => ({
               width: 32,
               height: 32,
@@ -26,22 +42,24 @@ export function SuggestionSocialProof({ labels }: Readonly<SuggestionSocialProof
               ml: -1,
             })}
           >
-            {initials}
+            {getInitials(contributor?.name ?? "")}
           </Avatar>
         ))}
-        <Avatar
-          sx={theme => ({
-            width: 32,
-            height: 32,
-            fontSize: 10,
-            backgroundColor: theme.palette.surfaceContainer,
-            color: theme.palette.onSurfaceVariant,
-            border: `2px solid ${theme.palette.background.paper}`,
-            ml: -1,
-          })}
-        >
-          +12
-        </Avatar>
+        {remainingCount > 0 && (
+          <Avatar
+            sx={theme => ({
+              width: 32,
+              height: 32,
+              fontSize: 10,
+              backgroundColor: theme.palette.surfaceContainer,
+              color: theme.palette.onSurfaceVariant,
+              border: `2px solid ${theme.palette.background.paper}`,
+              ml: -1,
+            })}
+          >
+            +{remainingCount}
+          </Avatar>
+        )}
       </Box>
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, fontStyle: "italic" })}>
         {labels.socialProof}

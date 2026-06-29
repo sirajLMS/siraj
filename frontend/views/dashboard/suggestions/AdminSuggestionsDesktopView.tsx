@@ -5,7 +5,7 @@ import { SuggestionsDataGrid } from "./components/SuggestionsDataGrid";
 import { SuggestionsMetricsRow } from "./components/SuggestionsMetricsRow";
 import { SuggestionsSearchBar } from "./components/SuggestionsSearchBar";
 import { SuggestionsTabBar } from "./components/SuggestionsTabBar";
-import type { AdminSuggestionsViewProps } from "./types/suggestionsViewTypes";
+import type { AdminSuggestionsViewProps } from "./types/suggestionsView.types";
 
 export function AdminSuggestionsDesktopView({
   labels,

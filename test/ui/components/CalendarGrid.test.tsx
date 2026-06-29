@@ -5,7 +5,8 @@ import { cleanup, screen } from "@testing-library/react";
 expect.extend(matchers);
 
 import { CalendarGrid } from "@/frontend/views/dashboard/students/history/components/CalendarGrid";
-import { AttendanceStatus, type ClassSession } from "@/frontend/views/dashboard/students/history/types";
+import type { ClassSession } from "@/frontend/views/dashboard/students/history/types";
+import { AttendanceStatus } from "@/shared/lib/enum";
 import { renderWithWrapper } from "./TestWrapper";
 
 afterEach(() => {

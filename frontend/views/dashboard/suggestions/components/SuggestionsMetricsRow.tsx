@@ -5,7 +5,7 @@ import { Box } from "@mui/material";
 import { MetricCard } from "@/frontend/components/ui";
 import type { MetricCardVariant } from "@/frontend/components/ui/MetricCard";
 import { AdminQueueEfficiencyBanner } from "@/frontend/views/dashboard/shared/AdminQueueEfficiencyBanner";
-import type { SuggestionsMetricsRowProps } from "../types/suggestionsViewTypes";
+import type { SuggestionsMetricsRowProps } from "../types/suggestionsView.types";
 
 export function SuggestionsMetricsRow({ summary, labels, compact = false }: Readonly<SuggestionsMetricsRowProps>) {
   const variant: MetricCardVariant = compact ? "compact" : "default";

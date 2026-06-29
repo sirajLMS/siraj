@@ -31,6 +31,10 @@ export const suggestions: SuggestionsLabels = {
       fullNameRequired: "يرجى إدخال اسمك الكامل.",
       suggestionRequired: "يرجى إدخال اقتراح لا يقل عن 10 أحرف.",
     },
+    notifications: {
+      submitSuccess: "تم إرسال اقتراحك بنجاح!",
+      submitError: "فشل إرسال الاقتراح. يرجى المحاولة مرة أخرى.",
+    },
   },
   admin: {
     pageTitle: "إدارة الاقتراحات",

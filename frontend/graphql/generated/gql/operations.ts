@@ -645,7 +645,6 @@ export type StudentFilterArgs = {
 
 export type StudentStatus =
   | 'DEACTIVATED'
-  | 'GRADUATED'
   | 'ON_LEAVE'
   | 'ON_TRIAL'
   | 'REGULAR'
@@ -1912,9 +1911,13 @@ export type UpdateTeacherProfileMutation = UpdateTeacherProfileMutation_Mutation
 
 export type StudentDirectoryRowFragmentFragment = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, parentName: string | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type StudentDirectoryQuery_studentDirectory_StudentDirectoryRow = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, parentName: string | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
+export type StudentDirectoryQuery_studentDirectory_StudentDirectoryPayload_rows_StudentDirectoryRow = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, parentName: string | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type StudentDirectoryQuery_Query = { studentDirectory: Array<StudentDirectoryQuery_studentDirectory_StudentDirectoryRow> | null };
+export type StudentDirectoryQuery_studentDirectory_StudentDirectoryPayload_pageInfo_PageInfo = { count: number, currentPage: number, hasMorePages: boolean, lastPage: number, perPage: number, total: number };
+
+export type StudentDirectoryQuery_studentDirectory_StudentDirectoryPayload = { id: string | null, totalCount: number | null, rows: Array<StudentDirectoryQuery_studentDirectory_StudentDirectoryPayload_rows_StudentDirectoryRow> | null, pageInfo: StudentDirectoryQuery_studentDirectory_StudentDirectoryPayload_pageInfo_PageInfo | null };
+
+export type StudentDirectoryQuery_Query = { studentDirectory: StudentDirectoryQuery_studentDirectory_StudentDirectoryPayload | null };
 
 
 export type StudentDirectoryQueryVariables = Exact<{
@@ -2114,6 +2117,20 @@ export type DeleteSuggestionMutationVariables = Exact<{
 
 
 export type DeleteSuggestionMutation = DeleteSuggestionMutation_Mutation;
+
+export type SuggestionContributorStatsQuery_suggestionContributorStats_SuggestionContributorStats_contributors_SuggestionContributor = { id: string | null, name: string | null, suggestionCount: number | null };
+
+export type SuggestionContributorStatsQuery_suggestionContributorStats_SuggestionContributorStats = { id: string | null, uniqueContributorCount: number | null, contributors: Array<SuggestionContributorStatsQuery_suggestionContributorStats_SuggestionContributorStats_contributors_SuggestionContributor> | null };
+
+export type SuggestionContributorStatsQuery_Query = { suggestionContributorStats: SuggestionContributorStatsQuery_suggestionContributorStats_SuggestionContributorStats | null };
+
+
+export type SuggestionContributorStatsQueryVariables = Exact<{
+  days: number;
+}>;
+
+
+export type SuggestionContributorStatsQuery = SuggestionContributorStatsQuery_Query;
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics = { total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 

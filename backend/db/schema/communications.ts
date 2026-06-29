@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
   foreignKey,
@@ -190,6 +191,7 @@ export const suggestions = pgTable(
     index("suggestions_duplicate_of_id_idx").on(table.duplicateOfId),
     index("suggestions_reviewed_by_user_id_idx").on(table.reviewedByUserId),
     index("suggestions_deleted_at_idx").on(table.deletedAt),
+    index("suggestions_active_created_at_idx").on(table.createdAt).where(sql`${table.deletedAt} IS NULL`),
   ]
 );
 

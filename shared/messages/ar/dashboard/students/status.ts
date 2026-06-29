@@ -24,7 +24,6 @@ export const status: StudentStatusLabels = {
     ON_LEAVE: "في إجازة (طبية/مخطط لها)",
     ON_TRIAL: "تح التجربة",
     DEACTIVATED: "معطّل",
-    GRADUATED: "متخرج",
   },
   reasons: {
     unpaidInvoice: "فاتورة غير مدفوعة",

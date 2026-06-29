@@ -81,28 +81,6 @@ describe("Student Status Transitions & History", () => {
     testLogger.info("Invalid status transition enforcement test passed.");
   });
 
-  test("Terminal state (GRADUATED) cannot be changed", async () => {
-    testLogger.info("Testing terminal status enforcement...");
-    await runInRollback(async tx => {
-      const { student } = await setupStudent(
-        tx,
-        { name: "Parent", email: `parent-terminal-${randomUUID()}@example.com` },
-        {},
-        { name: "Student", status: StudentStatus.GRADUATED }
-      );
-
-      try {
-        await tx.update(students).set({ status: StudentStatus.REGULAR }).where(eq(students.id, student.id));
-        expect(true).toBe(false);
-      } catch (error) {
-        const err = error as Error & { cause?: { message?: string } };
-        const message = err.cause?.message || err.message || "";
-        expect(message).toContain("Cannot change status of a GRADUATED student");
-      }
-    });
-    testLogger.info("Terminal status enforcement test passed.");
-  });
-
   test("Captures actor user ID in history if available in session", async () => {
     testLogger.info("Testing actor capture in status history...");
     await runInRollback(async tx => {

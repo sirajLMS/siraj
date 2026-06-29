@@ -6,7 +6,6 @@ const statusTransitionTargets: [string, ...string[]] = [
   StudentStatus.SUSPENDED,
   StudentStatus.ON_LEAVE,
   StudentStatus.DEACTIVATED,
-  StudentStatus.GRADUATED,
 ];
 
 export const statusUpdateSchema = z.object({

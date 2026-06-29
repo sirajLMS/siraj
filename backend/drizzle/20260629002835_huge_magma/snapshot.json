@@ -1,8 +1,8 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "de2536a2-8620-4d64-9095-ab6efbcb956d",
-  "prevIds": ["98af1171-489b-4c58-bb41-ad289437ce88"],
+  "id": "64b95fb7-1f82-4dda-b5d5-25a7e457f0c9",
+  "prevIds": ["7816a688-3df7-44f5-af87-7f933ef2005f"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
@@ -497,7 +497,7 @@
       "schema": "public"
     },
     {
-      "values": ["REGULAR", "ON_LEAVE", "SUSPENDED", "ON_TRIAL", "DEACTIVATED", "GRADUATED"],
+      "values": ["REGULAR", "ON_LEAVE", "SUSPENDED", "ON_TRIAL", "DEACTIVATED"],
       "name": "student_status",
       "entityType": "enums",
       "schema": "public"
@@ -9637,6 +9637,27 @@
       "method": "btree",
       "concurrently": false,
       "name": "suggestions_deleted_at_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "suggestions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "created_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": "\"deleted_at\" IS NULL",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "suggestions_active_created_at_idx",
       "entityType": "indexes",
       "schema": "public",
       "table": "suggestions"

@@ -47,7 +47,7 @@ async function upsertStudent(
       avatarUrl,
       status,
       classesTotal: 10,
-      classesRemaining: status === StudentStatus.GRADUATED ? 0 : 5,
+      classesRemaining: 5,
       version: 1,
       timezoneOverride,
       idempotencyKey,

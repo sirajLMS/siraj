@@ -1,4 +1,5 @@
 import { StudentDirectoryService } from "@/backend/services";
+import type { PageInfo } from "@/backend/types";
 import {
   PaginationArgs,
   type StudentDirectory,
@@ -6,7 +7,7 @@ import {
   type StudentsOrderByClause,
 } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-import { PaginationArgsObject } from "./pagination.objects";
+import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 import { StudentFilterArgsPothosObject, StudentsOrderByClausePothosObject } from "./student.pothos";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
@@ -32,11 +33,30 @@ export const StudentDirectoryRowPothosObject = gqlSchemaBuilder
     }),
   });
 
+type StudentDirectoryPayloadDefinition = {
+  id: string;
+  rows: StudentDirectory[];
+  totalCount: number;
+  pageInfo: PageInfo | null;
+};
+
+const StudentDirectoryPayloadRef =
+  gqlSchemaBuilder.objectRef<StudentDirectoryPayloadDefinition>("StudentDirectoryPayload");
+
+export const StudentDirectoryPayloadPothosObject = StudentDirectoryPayloadRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    rows: t.expose("rows", { type: [StudentDirectoryRowPothosObject] }),
+    totalCount: t.exposeInt("totalCount"),
+    pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
+  }),
+});
+
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 gqlSchemaBuilder.queryField("studentDirectory", t =>
   t.field({
-    type: [StudentDirectoryRowPothosObject],
+    type: StudentDirectoryPayloadPothosObject,
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
       filterArgs: t.arg({ type: StudentFilterArgsPothosObject, required: false }),
@@ -111,7 +131,12 @@ gqlSchemaBuilder.queryField("studentDirectory", t =>
 
       const result = await StudentDirectoryService.getStudentDirectory(userId, pagination, filters, orderBy, locale);
 
-      return result.rows;
+      return {
+        id: "student-directory",
+        rows: result.rows,
+        totalCount: result.totalCount,
+        pageInfo: null,
+      };
     },
     description: "Fetches the global student directory with cross-relational data.",
   })

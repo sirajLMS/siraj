@@ -12,7 +12,6 @@ export const directory: StudentDirectoryLabels = {
   next: "التالي",
   showingOf: "عرض {shown} من {total} طالب",
   metrics: {
-    activated: "مفعّل",
     deactivated: "معطّل",
     regular: "عادي",
     onLeave: "في إجازة",
@@ -29,7 +28,6 @@ export const directory: StudentDirectoryLabels = {
     actions: "الإجراءات",
   },
   status: {
-    activated: "مفعّل",
     deactivated: "معطّل",
     regular: "عادي",
     onLeave: "في إجازة",

@@ -124,3 +124,22 @@ export const deleteSuggestionMutationDocument: TypedDocumentNode<
     deleteSuggestion(suggestionId: $suggestionId)
   }
 `;
+
+// ─── Query: suggestionContributorStats ────────────────────────────────────────
+
+export const suggestionContributorStatsQueryDocument: TypedDocumentNode<
+  Operations.SuggestionContributorStatsQuery,
+  Types.QuerySuggestionContributorStatsArgs
+> = gql`
+  query SuggestionContributorStats($days: Int!) {
+    suggestionContributorStats(days: $days) {
+      id
+      uniqueContributorCount
+      contributors {
+        id
+        name
+        suggestionCount
+      }
+    }
+  }
+`;

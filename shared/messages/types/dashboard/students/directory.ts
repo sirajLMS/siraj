@@ -10,7 +10,6 @@ export interface StudentDirectoryLabels {
   readonly next: string;
   readonly showingOf: string;
   readonly metrics: {
-    readonly activated: string;
     readonly deactivated: string;
     readonly regular: string;
     readonly onLeave: string;
@@ -27,7 +26,6 @@ export interface StudentDirectoryLabels {
     readonly actions: string;
   };
   readonly status: {
-    readonly activated: string;
     readonly deactivated: string;
     readonly regular: string;
     readonly onLeave: string;

@@ -133,14 +133,6 @@ describe("GraphQL: changeStudentStatus mutation", () => {
     expect(data.changeStudentStatus?.status).toBe("ON_LEAVE");
   });
 
-  test("Threat 3 — invalid transition ON_LEAVE to GRADUATED returns error", async () => {
-    await expectMutationError(token, changeStudentStatusMutationDocument, {
-      studentId,
-      newStatus: "GRADUATED",
-      expectedVersion: null,
-    });
-  });
-
   test("teacher role is denied", async () => {
     await assertOperationDenied("teacher_default", "mutate", changeStudentStatusMutationDocument, {
       studentId: studentId || NIL_UUID,

@@ -80,7 +80,6 @@ export interface ParentProfileLabels {
       readonly suspended: string;
       readonly on_leave: string;
       readonly deactivated: string;
-      readonly graduated: string;
       readonly on_trial: string;
     };
   };

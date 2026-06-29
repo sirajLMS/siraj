@@ -3,12 +3,7 @@
 import { AutoAwesomeOutlined, SecurityOutlined, UpdateOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/components/ui";
-import type { SuggestionsParentLabels } from "@/shared/messages/types/dashboard/suggestions/main";
-
-interface SuggestionSupportCardsProps {
-  readonly labels: SuggestionsParentLabels;
-  readonly variant: "desktop" | "mobile";
-}
+import type { SuggestionSupportCardsProps } from "../types/suggestionsView.types";
 
 const SUPPORT_CARDS = [
   { key: "privacy", icon: SecurityOutlined },

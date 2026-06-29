@@ -1,19 +1,10 @@
 "use client";
 
 import { Card } from "@mui/material";
-import type { StudentAccountStatus, StudentDirectoryRowExtended, StudentEnrollmentStatus } from "../types";
+import type { StudentDirectoryCardLabels, StudentDirectoryRowExtended } from "../types";
 import { StudentDirectoryCardFooter } from "./StudentDirectoryCardFooter";
 import { StudentDirectoryCardHeader } from "./StudentDirectoryCardHeader";
 import { StudentDirectoryCardStats } from "./StudentDirectoryCardStats";
-
-interface StudentDirectoryCardLabels {
-  readonly weeklyHours: string;
-  readonly enrollmentStatus: string;
-  readonly classesLeft: string;
-  readonly viewProfile: string;
-  readonly statusLabels: Record<StudentAccountStatus, string>;
-  readonly enrollmentLabels: Record<StudentEnrollmentStatus, string>;
-}
 
 interface StudentDirectoryCardProps {
   readonly row: StudentDirectoryRowExtended;

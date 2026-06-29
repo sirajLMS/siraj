@@ -30,7 +30,6 @@ export const ALL_STUDENT_STATUSES = [
   StudentStatus.SUSPENDED,
   StudentStatus.ON_TRIAL,
   StudentStatus.DEACTIVATED,
-  StudentStatus.GRADUATED,
 ] as const;
 
 export const ALL_PARENT_STATUSES = [

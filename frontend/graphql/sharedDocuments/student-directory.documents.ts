@@ -34,7 +34,19 @@ export const studentDirectoryQueryDocument: TypedDocumentNode<
       orderBy: $orderBy
       filterArgs: $filterArgs
     ) {
-      ...StudentDirectoryRowFragment
+      id
+      totalCount
+      rows {
+        ...StudentDirectoryRowFragment
+      }
+      pageInfo {
+        count
+        currentPage
+        hasMorePages
+        lastPage
+        perPage
+        total
+      }
     }
   }
 `;

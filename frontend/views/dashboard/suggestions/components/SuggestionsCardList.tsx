@@ -3,8 +3,8 @@
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/components/ui";
 import { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-import { mapStatusForBadge, statusLabelKey } from "../types/suggestions.types";
-import type { SuggestionsCardListProps } from "../types/suggestionsViewTypes";
+import type { SuggestionsCardListProps } from "../types/suggestionsView.types";
+import { mapStatusForBadge, statusLabelKey } from "../utils/suggestionStatusMap";
 
 export function SuggestionsCardList({
   rows,

@@ -14,7 +14,6 @@ const STATUS_DOT_COLOR_MAP: Record<string, string> = {
   [StudentStatus.ON_LEAVE]: "warning",
   [StudentStatus.ON_TRIAL]: "info",
   [StudentStatus.DEACTIVATED]: "grey",
-  [StudentStatus.GRADUATED]: "success",
 };
 
 function getStatusDotColor(student: StudentStatusHeaderProps["student"], theme: Theme) {
@@ -33,7 +32,6 @@ const STATUS_BADGE_MAP: Record<string, string> = {
   [StudentStatus.ON_LEAVE]: "on_leave",
   [StudentStatus.ON_TRIAL]: "on_trial",
   [StudentStatus.DEACTIVATED]: "deactivated",
-  [StudentStatus.GRADUATED]: "regular",
 };
 
 function getBadgeStatusKey(status: StudentStatus): string {

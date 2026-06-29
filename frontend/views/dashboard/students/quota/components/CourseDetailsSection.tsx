@@ -44,7 +44,7 @@ function TeacherField() {
         control={control}
         render={({ field }) => (
           <FormControl fullWidth error={!!errors.teacher}>
-            <Select {...field} displayEmpty disabled={loading} sx={quotaInputSx}>
+            <Select {...field} displayEmpty disabled sx={quotaInputSx}>
               {loading && (
                 <MenuItem disabled value="">
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -86,6 +86,7 @@ function TotalClassesField() {
             type="number"
             variant="outlined"
             fullWidth
+            disabled
             error={!!errors.totalClasses}
             helperText={errors.totalClasses?.message}
             sx={quotaInputSx}

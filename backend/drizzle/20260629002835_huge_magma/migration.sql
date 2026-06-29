@@ -21,7 +21,7 @@ CREATE TYPE "notification_delivery_status" AS ENUM('PENDING', 'SENT', 'DELIVERED
 CREATE TYPE "notification_event_type" AS ENUM('CLASS_REMINDER', 'INVOICE_GENERATED', 'COMPLAINT_RESPONSE', 'BANKING_DETAILS_CHANGED', 'NEW_COMPLAINT', 'NEW_SUGGESTION', 'SUGGESTION_ACKNOWLEDGED', 'SUGGESTION_DUPLICATE_MARKED');--> statement-breakpoint
 CREATE TYPE "parent_status" AS ENUM('ACTIVATED', 'DEACTIVATED', 'REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL');--> statement-breakpoint
 CREATE TYPE "payment_method" AS ENUM('PAYPAL', 'BANK_ACCOUNT');--> statement-breakpoint
-CREATE TYPE "student_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL', 'DEACTIVATED', 'GRADUATED');--> statement-breakpoint
+CREATE TYPE "student_status" AS ENUM('REGULAR', 'ON_LEAVE', 'SUSPENDED', 'ON_TRIAL', 'DEACTIVATED');--> statement-breakpoint
 CREATE TYPE "suggestion_status" AS ENUM('PENDING', 'REVIEWED', 'DUPLICATE');--> statement-breakpoint
 CREATE TYPE "vacation_request_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');--> statement-breakpoint
 CREATE TABLE "admin_audit_logs" (
@@ -895,6 +895,7 @@ CREATE INDEX "suggestions_status_idx" ON "suggestions" ("status");--> statement-
 CREATE INDEX "suggestions_duplicate_of_id_idx" ON "suggestions" ("duplicate_of_id");--> statement-breakpoint
 CREATE INDEX "suggestions_reviewed_by_user_id_idx" ON "suggestions" ("reviewed_by_user_id");--> statement-breakpoint
 CREATE INDEX "suggestions_deleted_at_idx" ON "suggestions" ("deleted_at");--> statement-breakpoint
+CREATE INDEX "suggestions_active_created_at_idx" ON "suggestions" ("created_at") WHERE "deleted_at" IS NULL;--> statement-breakpoint
 CREATE INDEX "user_device_tokens_user_id_idx" ON "user_device_tokens" ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "user_device_tokens_token_unique_idx" ON "user_device_tokens" ("token");--> statement-breakpoint
 CREATE INDEX "user_notification_preferences_user_id_idx" ON "user_notification_preferences" ("user_id");--> statement-breakpoint

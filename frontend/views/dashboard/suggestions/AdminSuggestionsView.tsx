@@ -3,7 +3,7 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 import { AdminSuggestionsDesktopView } from "./AdminSuggestionsDesktopView";
 import { AdminSuggestionsMobileView } from "./AdminSuggestionsMobileView";
-import type { AdminSuggestionsViewProps } from "./types/suggestionsViewTypes";
+import type { AdminSuggestionsViewProps } from "./types/suggestionsView.types";
 
 export function AdminSuggestionsView(props: Readonly<AdminSuggestionsViewProps>) {
   const theme = useTheme();

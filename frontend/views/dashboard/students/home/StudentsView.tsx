@@ -4,34 +4,7 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentsDesktopView } from "./StudentsDesktopView";
 import { StudentsMobileView } from "./StudentsMobileView";
-import type { StudentAccountStatus, StudentDirectoryRowExtended, StudentEnrollmentStatus } from "./types";
-
-export interface StudentsViewLabels {
-  readonly pageTitle: string;
-  readonly pageSubtitle: string;
-  readonly mobileTitle: string;
-  readonly searchPlaceholder: string;
-  readonly addStudent: string;
-  readonly filters: string;
-  readonly globalRecord: string;
-  readonly index: string;
-  readonly student: string;
-  readonly email: string;
-  readonly status: string;
-  readonly hoursPerWeek: string;
-  readonly classesLeft: string;
-  readonly actions: string;
-  readonly showingOf: string;
-  readonly previous: string;
-  readonly next: string;
-  readonly viewProfile: string;
-  readonly viewHistory: string;
-  readonly noEntries: string;
-  readonly weeklyHours: string;
-  readonly enrollmentStatus: string;
-  readonly statusLabels: Record<StudentAccountStatus, string>;
-  readonly enrollmentLabels: Record<StudentEnrollmentStatus, string>;
-}
+import type { StudentDirectoryRowExtended, StudentsViewLabels } from "./types";
 
 interface StudentsViewProps {
   readonly metrics: readonly MetricItem[];
@@ -44,6 +17,7 @@ interface StudentsViewProps {
   readonly labels: StudentsViewLabels;
   readonly onSearchChange: (query: string) => void;
   readonly onAddStudent: () => void;
+  readonly onFilterClick: () => void;
   readonly onViewProfile: (id: string) => void;
   readonly onViewHistory: (id: string) => void;
   readonly onPageChange: (page: number) => void;
@@ -60,6 +34,7 @@ export function StudentsView({
   labels,
   onSearchChange,
   onAddStudent,
+  onFilterClick,
   onViewProfile,
   onViewHistory,
   onPageChange,
@@ -74,6 +49,7 @@ export function StudentsView({
         pageSubtitle={labels.pageSubtitle}
         searchPlaceholder={labels.searchPlaceholder}
         addStudentLabel={labels.addStudent}
+        filtersLabel={labels.filters}
         searchQuery={searchQuery}
         mobileMetrics={mobileMetrics}
         rows={rows}
@@ -91,6 +67,7 @@ export function StudentsView({
         }}
         onSearchChange={onSearchChange}
         onAddStudent={onAddStudent}
+        onFilterClick={onFilterClick}
         onViewProfile={onViewProfile}
       />
     );
@@ -126,6 +103,7 @@ export function StudentsView({
         statusLabels: labels.statusLabels,
       }}
       onAddStudent={onAddStudent}
+      onFilterClick={onFilterClick}
       onViewProfile={onViewProfile}
       onViewHistory={onViewHistory}
     />

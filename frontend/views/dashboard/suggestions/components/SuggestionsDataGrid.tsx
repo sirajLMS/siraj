@@ -6,8 +6,8 @@ import { useMemo } from "react";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
 import { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { AdminSuggestionRow } from "../types/suggestions.types";
-import { mapStatusForBadge, statusLabelKey } from "../types/suggestions.types";
-import type { SuggestionsDataGridProps } from "../types/suggestionsViewTypes";
+import type { SuggestionsDataGridProps } from "../types/suggestionsView.types";
+import { mapStatusForBadge, statusLabelKey } from "../utils/suggestionStatusMap";
 
 function actionButtons(
   row: AdminSuggestionRow,

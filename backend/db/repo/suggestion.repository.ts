@@ -1,8 +1,8 @@
-import { aliasedTable, and, count, desc, eq, ilike, isNull, ne, sql } from "drizzle-orm";
+import { aliasedTable, and, count, desc, eq, gte, ilike, isNull, ne, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { SuggestionReturnType, SuggestionSubmitInput } from "@/backend/types";
+import type { SuggestionContributorStats, SuggestionReturnType, SuggestionSubmitInput } from "@/backend/types";
 import { SuggestionStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
@@ -347,6 +347,52 @@ export namespace SuggestionRepository {
       reviewed,
       duplicate,
       avgResponseHours: Math.round((avgResult?.avgHours ?? 0) * 100) / 100,
+    };
+  };
+
+  export type ContributorRow = {
+    parentId: string;
+    name: string;
+    suggestionCount: number;
+  };
+
+  export const getContributorStats = async (days: number, tx?: DBTransaction): Promise<SuggestionContributorStats> => {
+    const queryDb = tx ?? db;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    const baseWhere = and(isNull(suggestions.deletedAt), gte(suggestions.createdAt, cutoffDate));
+
+    const [contributorRows, uniqueContributorResult] = await Promise.all([
+      queryDb
+        .select({
+          parentId: suggestions.parentId,
+          name: users.name,
+          suggestionCount: count(),
+        })
+        .from(suggestions)
+        .leftJoin(parents, eq(suggestions.parentId, parents.id))
+        .leftJoin(users, eq(parents.userId, users.id))
+        .where(baseWhere)
+        .groupBy(suggestions.parentId, users.name)
+        .orderBy(desc(count()))
+        .limit(10),
+      queryDb
+        .select({
+          count: sql<number>`COUNT(DISTINCT ${suggestions.parentId})`.mapWith(Number),
+        })
+        .from(suggestions)
+        .where(baseWhere),
+    ]);
+
+    return {
+      id: "suggestion-contributor-stats",
+      uniqueContributorCount: uniqueContributorResult[0]?.count ?? 0,
+      contributors: contributorRows.map(row => ({
+        id: row.parentId,
+        name: row.name ?? "",
+        suggestionCount: row.suggestionCount,
+      })),
     };
   };
 }

@@ -47,33 +47,25 @@ const MOCK_STUDENT_ROWS = [
   },
 ];
 
+const defaultVariables = {
+  filterArgs: null,
+  orderBy: null,
+  paginationArgs: {
+    first: 10,
+    page: 1,
+    skip: null,
+    after: null,
+    before: null,
+    last: null,
+    maxCount: null,
+  },
+};
+
 const studentDirectoryMocks = [
   {
     request: {
       query: studentDirectoryQueryDocument,
-      variables: {},
-    },
-    result: {
-      data: {
-        studentDirectory: MOCK_STUDENT_ROWS,
-      },
-    },
-  },
-  {
-    request: {
-      query: studentDirectoryQueryDocument,
-      variables: { paginationArgs: undefined, orderBy: undefined, filterArgs: undefined },
-    },
-    result: {
-      data: {
-        studentDirectory: MOCK_STUDENT_ROWS,
-      },
-    },
-  },
-  {
-    request: {
-      query: studentDirectoryQueryDocument,
-      variables: { paginationArgs: null, orderBy: null, filterArgs: null },
+      variables: defaultVariables,
     },
     result: {
       data: {
@@ -123,28 +115,9 @@ export const Empty: Story = {
       <MockedProvider
         mocks={[
           {
-            request: { query: studentDirectoryQueryDocument, variables: {} },
-            result: {
-              data: {
-                studentDirectory: [],
-              },
-            },
-          },
-          {
             request: {
               query: studentDirectoryQueryDocument,
-              variables: { paginationArgs: undefined, orderBy: undefined, filterArgs: undefined },
-            },
-            result: {
-              data: {
-                studentDirectory: [],
-              },
-            },
-          },
-          {
-            request: {
-              query: studentDirectoryQueryDocument,
-              variables: { paginationArgs: null, orderBy: null, filterArgs: null },
+              variables: defaultVariables,
             },
             result: {
               data: {

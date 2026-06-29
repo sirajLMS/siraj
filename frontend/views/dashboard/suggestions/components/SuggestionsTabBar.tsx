@@ -3,7 +3,7 @@
 import { SuggestionStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AdminQueueTabBar } from "@/frontend/views/dashboard/shared/AdminQueueTabBar";
 import { formatAdminQueueTabLabel } from "@/frontend/views/dashboard/shared/utils";
-import type { SuggestionsTabBarProps } from "../types/suggestionsViewTypes";
+import type { SuggestionsTabBarProps } from "../types/suggestionsView.types";
 
 export function SuggestionsTabBar({
   activeTab,

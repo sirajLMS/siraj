@@ -13,9 +13,6 @@ import { buildSuggestionsLabels } from "./utils/buildSuggestionsLabels";
 const PARENT_PERMISSIONS = [AppPermission.CommunicationSubmitSuggestion];
 
 const mockActions = {
-  onDismissSuccess: () => {
-    logger.info("onDismissSuccess");
-  },
   onFormSubmit: () => {
     logger.info("onFormSubmit");
   },
@@ -23,13 +20,11 @@ const mockActions = {
 
 interface ParentSuggestionsDesktopStoryProps {
   readonly isSubmitting: boolean;
-  readonly showSuccess: boolean;
   readonly canSubmit: boolean;
 }
 
 function ParentSuggestionsDesktopStoryRenderer({
   isSubmitting,
-  showSuccess,
   canSubmit,
 }: Readonly<ParentSuggestionsDesktopStoryProps>) {
   const t = useTranslations("dashboard.suggestions");
@@ -51,7 +46,6 @@ function ParentSuggestionsDesktopStoryRenderer({
       control={control}
       errors={errors}
       isSubmitting={isSubmitting}
-      showSuccess={showSuccess}
       canSubmit={canSubmit}
       {...mockActions}
     />
@@ -92,7 +86,6 @@ type Story = StoryObj<typeof ParentSuggestionsDesktopStoryRenderer>;
 export const Default: Story = {
   args: {
     isSubmitting: false,
-    showSuccess: false,
     canSubmit: true,
   },
 };
@@ -107,12 +100,5 @@ export const Submitting: Story = {
   args: {
     ...Default.args,
     isSubmitting: true,
-  },
-};
-
-export const Success: Story = {
-  args: {
-    ...Default.args,
-    showSuccess: true,
   },
 };

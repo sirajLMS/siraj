@@ -7,22 +7,8 @@ import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { StudentAccountStatus, StudentDirectoryRowExtended } from "../types";
+import type { StudentDirectoryDataGridLabels, StudentDirectoryRowExtended } from "../types";
 import { ClassesLeftProgress } from "./ClassesLeftProgress";
-
-export interface StudentDirectoryDataGridLabels {
-  readonly index: string;
-  readonly student: string;
-  readonly email: string;
-  readonly status: string;
-  readonly hoursPerWeek: string;
-  readonly classesLeft: string;
-  readonly actions: string;
-  readonly viewProfile: string;
-  readonly viewHistory: string;
-  readonly noEntries: string;
-  readonly statusLabels: Record<StudentAccountStatus, string>;
-}
 
 interface StudentDirectoryDataGridProps {
   readonly rows: readonly StudentDirectoryRowExtended[];

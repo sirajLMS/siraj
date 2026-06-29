@@ -2,17 +2,8 @@
 
 import { DescriptionOutlined, PersonOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField, Typography } from "@mui/material";
-import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import type { SuggestionsParentLabels } from "@/shared/messages/types/dashboard/suggestions/main";
-import type { SuggestionFormData } from "../schemas/suggestionFormSchema";
-
-interface SuggestionFormFieldsProps {
-  readonly control: Control<SuggestionFormData>;
-  readonly errors: FieldErrors<SuggestionFormData>;
-  readonly labels: SuggestionsParentLabels;
-  readonly variant: "desktop" | "mobile";
-}
+import type { SuggestionFormFieldsProps } from "../types/suggestionsView.types";
 
 function FieldLabel({ children }: Readonly<{ children: string }>) {
   return (

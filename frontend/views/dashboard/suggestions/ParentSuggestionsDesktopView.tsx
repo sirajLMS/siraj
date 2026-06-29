@@ -2,41 +2,23 @@
 
 import { SendOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import type { Control, FieldErrors } from "react-hook-form";
 import { BaseCard, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
-import { SubmissionSuccessBanner } from "@/frontend/views/dashboard/shared/SubmissionSuccessBanner";
-import type { SuggestionsParentLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 import { SuggestionFormFields } from "./components/SuggestionFormFields";
 import { SuggestionHeroBanner } from "./components/SuggestionHeroBanner";
 import { SuggestionSocialProof } from "./components/SuggestionSocialProof";
 import { SuggestionSupportCards } from "./components/SuggestionSupportCards";
-import type { SuggestionFormData } from "./schemas/suggestionFormSchema";
-
-interface ParentSuggestionsDesktopViewProps {
-  readonly labels: SuggestionsParentLabels;
-  readonly control: Control<SuggestionFormData>;
-  readonly errors: FieldErrors<SuggestionFormData>;
-  readonly isSubmitting: boolean;
-  readonly showSuccess: boolean;
-  readonly canSubmit: boolean;
-  readonly onDismissSuccess: () => void;
-  readonly onFormSubmit: () => void;
-}
+import type { ParentSuggestionsDesktopViewProps } from "./types/suggestionsView.types";
 
 export function ParentSuggestionsDesktopView({
   labels,
   control,
   errors,
   isSubmitting,
-  showSuccess,
   canSubmit,
-  onDismissSuccess,
   onFormSubmit,
 }: Readonly<ParentSuggestionsDesktopViewProps>) {
   return (
     <PageContainer>
-      {showSuccess ? <SubmissionSuccessBanner message={labels.successMessage} onDismiss={onDismissSuccess} /> : null}
-
       <PageHeader title={labels.pageTitle} />
 
       <SuggestionHeroBanner labels={labels} variant="desktop" />

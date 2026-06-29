@@ -22,7 +22,6 @@ export interface StudentStatusLabels {
     readonly ON_LEAVE: string;
     readonly ON_TRIAL: string;
     readonly DEACTIVATED: string;
-    readonly GRADUATED: string;
   };
   readonly reasons: {
     readonly unpaidInvoice: string;

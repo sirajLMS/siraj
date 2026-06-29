@@ -5,7 +5,7 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
@@ -88,7 +88,9 @@ export function StudentStatusContainer() {
   }, [studentData, upcomingData]);
 
   const versionRef = useRef(student?.version ?? null);
-  versionRef.current = student?.version ?? null;
+  useEffect(() => {
+    versionRef.current = student?.version ?? null;
+  }, [student?.version]);
 
   const handleUpdateStatus = useCallback(
     async (status: StudentStatus, _reason: string) => {

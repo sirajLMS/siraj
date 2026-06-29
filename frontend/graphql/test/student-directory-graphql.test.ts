@@ -15,7 +15,7 @@ describe("studentDirectory GraphQL Integration Tests", () => {
       orderBy: null,
     });
 
-    const students = data?.studentDirectory;
+    const students = data?.studentDirectory?.rows;
     if (!students) {
       throw new Error("studentDirectory was not returned");
     }
@@ -45,7 +45,7 @@ describe("studentDirectory GraphQL Integration Tests", () => {
       orderBy: null,
     });
 
-    const students = data?.studentDirectory;
+    const students = data?.studentDirectory?.rows;
     if (!students) {
       throw new Error("studentDirectory was not returned");
     }

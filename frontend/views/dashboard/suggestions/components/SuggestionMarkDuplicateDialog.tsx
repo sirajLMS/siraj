@@ -13,11 +13,9 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
-import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import { searchSuggestionsQueryDocument } from "@/frontend/graphql/sharedDocuments/suggestion.documents";
-import type { SuggestionMarkDuplicateDialogProps } from "../types/suggestionsViewTypes";
-
-type SearchResult = Operations.SearchSuggestionsQuery_searchSuggestions_SuggestionSearchResult;
+import type { SearchResult } from "../types/suggestions.types";
+import type { SuggestionMarkDuplicateDialogProps } from "../types/suggestionsView.types";
 
 const MIN_SEARCH_LENGTH = 2;
 

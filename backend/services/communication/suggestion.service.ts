@@ -3,6 +3,7 @@ import { getBackendTranslations, logger } from "@/backend/lib";
 import { CommunicationService, PermissionsService } from "@/backend/services";
 import type {
   ParentSuggestionOptions,
+  SuggestionContributorStats,
   SuggestionQueueFilter,
   SuggestionQueueResult,
   SuggestionReturnType,
@@ -391,6 +392,41 @@ export namespace SuggestionService {
       };
     } catch (error) {
       logger.error("Failed to delete suggestion", { actorUserId, suggestionId, error });
+      throw error;
+    }
+  }
+
+  export async function getContributorStats(
+    actorUserId: string,
+    days: number,
+    locale?: string
+  ): Promise<SuggestionContributorStats> {
+    const hasPermission = await PermissionsService.hasPermission(
+      actorUserId,
+      AppPermission.COMMUNICATION_SUBMIT_SUGGESTION
+    );
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    if (days < 1 || days > 365) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("invalidInput"));
+    }
+
+    try {
+      const result = await SuggestionRepository.getContributorStats(days);
+
+      logger.info("Suggestion contributor stats retrieved", {
+        actorUserId,
+        days,
+        uniqueContributorCount: result.uniqueContributorCount,
+      });
+
+      return result;
+    } catch (error) {
+      logger.error("Failed to get suggestion contributor stats", { actorUserId, days, error });
       throw error;
     }
   }

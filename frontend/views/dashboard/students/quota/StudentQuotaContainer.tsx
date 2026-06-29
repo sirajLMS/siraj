@@ -10,6 +10,7 @@ import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentByIdQueryDocument, updateStudentQuotaMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { useRouter } from "@/shared/i18n/routing";
 import { StudentQuotaView } from "./StudentQuotaView";
 import type { StudentQuotaFormData } from "./schemas/studentQuotaSchema";
 import type { StudentProfileData } from "./types";
@@ -19,6 +20,7 @@ export function StudentQuotaContainer() {
   const params = useParams();
   const studentId = typeof params?.id === "string" ? params.id : "";
   const notifications = useNotifications();
+  const router = useRouter();
 
   const [isSaved, setIsSaved] = useState(false);
 
@@ -88,11 +90,11 @@ export function StudentQuotaContainer() {
       : null;
 
   const handleCancel = () => {
-    window.history.back();
+    router.back();
   };
 
   const handleEditAvatar = () => {
-    window.history.back();
+    router.back();
   };
 
   return (
@@ -109,5 +111,3 @@ export function StudentQuotaContainer() {
     </RequirePermission>
   );
 }
-
-export default StudentQuotaContainer;

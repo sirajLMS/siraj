@@ -46,6 +46,7 @@ function StudentNameField() {
             placeholder={t("fields.studentNamePlaceholder")}
             variant="outlined"
             fullWidth
+            disabled
             error={!!errors.studentName}
             helperText={errors.studentName?.message}
             sx={quotaInputSx}
@@ -77,6 +78,7 @@ function DateOfBirthField() {
               textField: {
                 variant: "outlined",
                 fullWidth: true,
+                disabled: true,
                 error: !!errors.dateOfBirth,
                 helperText: errors.dateOfBirth?.message,
                 sx: quotaInputSx,
@@ -103,7 +105,7 @@ function LanguageField() {
         control={control}
         render={({ field }) => (
           <FormControl fullWidth error={!!errors.language}>
-            <Select {...field} displayEmpty sx={quotaInputSx}>
+            <Select {...field} displayEmpty disabled sx={quotaInputSx}>
               {LANGUAGE_OPTIONS.map(option => (
                 <MenuItem key={option.value} value={option.value}>
                   {t(`fields.${option.labelKey}`)}
@@ -139,6 +141,7 @@ function GenderField() {
                 <FormControlLabel
                   key={option.value}
                   value={option.value}
+                  disabled
                   control={
                     <Radio
                       sx={theme => ({

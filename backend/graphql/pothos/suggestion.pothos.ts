@@ -4,6 +4,7 @@ import type {
   DuplicateSuggestionInput,
   ParentSuggestionOptions,
   RespondToSuggestionInput,
+  SuggestionContributorStats,
   SuggestionMetrics,
   SuggestionQueueFilter,
   SuggestionQueueResult,
@@ -92,6 +93,30 @@ export const SuggestionSearchResultPothosObject = SuggestionSearchResultRef.impl
     status: t.expose("status", { type: SuggestionStatusPothosEnum }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     parentName: t.exposeString("parentName"),
+  }),
+});
+
+const SuggestionContributorRef =
+  gqlSchemaBuilder.objectRef<SuggestionContributorStats["contributors"][number]>("SuggestionContributor");
+
+export const SuggestionContributorPothosObject = SuggestionContributorRef.implement({
+  description: "A parent who recently submitted suggestions.",
+  fields: t => ({
+    id: t.exposeString("id"),
+    name: t.exposeString("name"),
+    suggestionCount: t.exposeInt("suggestionCount"),
+  }),
+});
+
+const SuggestionContributorStatsRef =
+  gqlSchemaBuilder.objectRef<SuggestionContributorStats>("SuggestionContributorStats");
+
+export const SuggestionContributorStatsPothosObject = SuggestionContributorStatsRef.implement({
+  description: "Statistics about recent suggestion contributors.",
+  fields: t => ({
+    id: t.exposeString("id"),
+    uniqueContributorCount: t.exposeInt("uniqueContributorCount"),
+    contributors: t.expose("contributors", { type: [SuggestionContributorPothosObject] }),
   }),
 });
 
@@ -229,6 +254,20 @@ gqlSchemaBuilder.queryField("searchSuggestions", t =>
 
       const results = await SuggestionService.searchSuggestions(userId, args.query, args.excludeId, ctx.locale);
       return results.map(normalizeSuggestionSearchResult);
+    },
+  })
+);
+
+gqlSchemaBuilder.queryField("suggestionContributorStats", t =>
+  t.field({
+    type: SuggestionContributorStatsPothosObject,
+    description: "Returns contributor statistics for the suggestion social proof display.",
+    args: {
+      days: t.arg.int({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const userId = requireAuth(ctx);
+      return SuggestionService.getContributorStats(userId, args.days, ctx.locale);
     },
   })
 );

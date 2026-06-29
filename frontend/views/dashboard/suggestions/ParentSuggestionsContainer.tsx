@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -13,25 +14,30 @@ import { buildSuggestionsLabels } from "./utils/buildSuggestionsLabels";
 export function ParentSuggestionsContainer() {
   const t = useTranslations("dashboard.suggestions");
   const labels = buildSuggestionsLabels(t);
+  const notifications = useNotifications();
 
   const isSubmitting = useParentSuggestionsStore(state => state.isSubmitting);
-  const showSuccess = useParentSuggestionsStore(state => state.showSuccess);
   const setSubmitting = useParentSuggestionsStore(state => state.setSubmitting);
-  const resetSuccess = useParentSuggestionsStore(state => state.resetSuccess);
 
   const [submitSuggestion] = useMutation(submitSuggestionMutationDocument, {
     onCompleted: () => {
       setSubmitting(false);
-      useParentSuggestionsStore.setState({ showSuccess: true });
+      notifications.show(labels.parent.notifications.submitSuccess, {
+        severity: "success",
+        autoHideDuration: 4000,
+      });
     },
     onError: () => {
       setSubmitting(false);
+      notifications.show(labels.parent.notifications.submitError, {
+        severity: "error",
+        autoHideDuration: 5000,
+      });
     },
   });
 
   const handleSubmit = (formData: SuggestionFormData) => {
     setSubmitting(true);
-    resetSuccess();
     void submitSuggestion({
       variables: {
         input: {
@@ -47,10 +53,8 @@ export function ParentSuggestionsContainer() {
       <ParentSuggestionsView
         labels={labels.parent}
         isSubmitting={isSubmitting}
-        showSuccess={showSuccess}
         canSubmit={true}
         onSubmit={handleSubmit}
-        onDismissSuccess={resetSuccess}
       />
     </RequirePermission>
   );

@@ -113,13 +113,13 @@ export function ManualInvoiceContainer() {
 
   const studentOptions: StudentOption[] = useMemo(
     () =>
-      (studentData?.studentDirectory ?? [])
+      (studentData?.studentDirectory?.rows ?? [])
         .filter((s): s is { id: string; name: string } & typeof s => s.id != null)
         .map(s => ({
           id: s.id,
           name: s.name ?? "Unknown",
         })),
-    [studentData?.studentDirectory]
+    [studentData?.studentDirectory?.rows]
   );
 
   return (

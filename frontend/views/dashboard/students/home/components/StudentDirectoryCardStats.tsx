@@ -3,6 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { StudentDirectoryRowExtended, StudentEnrollmentStatus } from "../types";
+import { StudentEnrollmentStatus as EnrollmentEnum } from "../types";
 
 interface StudentDirectoryCardStatsProps {
   readonly row: StudentDirectoryRowExtended;
@@ -32,9 +33,9 @@ const valueSx = (theme: Theme) => ({
 
 const labelBgColor = (status: StudentEnrollmentStatus, theme: Theme) => {
   switch (status) {
-    case "regular":
+    case EnrollmentEnum.REGULAR:
       return theme.palette.status.active;
-    case "prospect":
+    case EnrollmentEnum.PROSPECT:
       return theme.palette.status.pending;
     default:
       return theme.palette.status.cancelled;

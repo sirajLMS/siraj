@@ -2,9 +2,7 @@ import type { SvgIconComponent } from "@mui/icons-material";
 import {
   BlockOutlined,
   CancelOutlined,
-  CheckCircleOutlineOutlined,
   EventBusyOutlined,
-  HowToRegOutlined,
   PersonOutlined,
   TimerOutlined,
   VerifiedUserOutlined,
@@ -13,19 +11,26 @@ import {
 import type { useTranslations } from "next-intl";
 import type { StudentDirectoryQuery } from "@/frontend/graphql/generated/gql/operations";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-import type { StudentsViewLabels } from "./StudentsView";
-import type { StudentAccountStatus, StudentDirectoryRowExtended, StudentEnrollmentStatus } from "./types";
-import { MOBILE_METRIC_KEYS } from "./types";
+import { StudentStatus } from "@/shared/lib/enum";
+import type {
+  StudentAccountStatus,
+  StudentDirectoryRowExtended,
+  StudentEnrollmentStatus,
+  StudentsViewLabels,
+} from "./types";
+import {
+  StudentEnrollmentStatus as EnrollmentEnum,
+  MOBILE_METRIC_KEYS,
+  STUDENT_STATUS_TO_ACCOUNT_STATUS,
+} from "./types";
 
 const MOBILE_METRIC_ICONS = {
-  activated: HowToRegOutlined,
   regular: PersonOutlined,
   on_leave: EventBusyOutlined,
   suspended: BlockOutlined,
 } as const;
 
 const METRIC_DEFINITIONS = [
-  { key: "activated" as const, icon: CheckCircleOutlineOutlined },
   { key: "deactivated" as const, icon: CancelOutlined },
   { key: "regular" as const, icon: VerifiedUserOutlined },
   { key: "on_leave" as const, icon: EventBusyOutlined },
@@ -35,26 +40,19 @@ const METRIC_DEFINITIONS = [
 
 function mapStatus(status: string | null | undefined): StudentAccountStatus {
   if (!status) return "regular";
-  const s = status.toLowerCase();
-  if (
-    s === "on_leave" ||
-    s === "on_trial" ||
-    s === "activated" ||
-    s === "deactivated" ||
-    s === "suspended" ||
-    s === "regular"
-  ) {
-    return s;
+  const enumValue = Object.values(StudentStatus).find(v => v === status.toUpperCase());
+  if (enumValue) {
+    return STUDENT_STATUS_TO_ACCOUNT_STATUS[enumValue] ?? "regular";
   }
   return "regular";
 }
 
 function getEnrollmentStatus(status: string | null | undefined): StudentEnrollmentStatus {
-  if (!status) return "regular";
+  if (!status) return EnrollmentEnum.REGULAR;
   const s = status.toUpperCase();
-  if (s === "DEACTIVATED") return "withdrawn";
-  if (s === "ON_TRIAL") return "prospect";
-  return "regular";
+  if (s === StudentStatus.DEACTIVATED) return EnrollmentEnum.WITHDRAWN;
+  if (s === StudentStatus.ON_TRIAL) return EnrollmentEnum.PROSPECT;
+  return EnrollmentEnum.REGULAR;
 }
 
 function getMetricTranslationKey(key: string): string {
@@ -63,11 +61,11 @@ function getMetricTranslationKey(key: string): string {
   return key;
 }
 
-type RawStudentRow = NonNullable<StudentDirectoryQuery["studentDirectory"]>[number];
+type RawStudentRow = NonNullable<NonNullable<StudentDirectoryQuery["studentDirectory"]>["rows"]>[number];
 
 export function buildStudentRows(data: StudentDirectoryQuery | undefined): StudentDirectoryRowExtended[] {
-  if (!data?.studentDirectory) return [];
-  return data.studentDirectory.map((row: RawStudentRow, index: number) => {
+  if (!data?.studentDirectory?.rows) return [];
+  return data.studentDirectory.rows.map((row: RawStudentRow, index: number) => {
     const accountStatus = mapStatus(row.status);
     return {
       ...row,
@@ -87,7 +85,6 @@ export function buildStudentRows(data: StudentDirectoryQuery | undefined): Stude
 
 export function buildStatusCounts(rows: StudentDirectoryRowExtended[]): Record<StudentAccountStatus, number> {
   const res: Record<StudentAccountStatus, number> = {
-    activated: 0,
     deactivated: 0,
     regular: 0,
     on_leave: 0,
@@ -155,7 +152,6 @@ export function buildLabels(t: ReturnType<typeof useTranslations>): StudentsView
     weeklyHours: t("card.weeklyHours"),
     enrollmentStatus: t("card.enrollmentStatus"),
     statusLabels: {
-      activated: t("status.activated"),
       deactivated: t("status.deactivated"),
       regular: t("status.regular"),
       on_leave: t("status.onLeave"),
@@ -163,22 +159,9 @@ export function buildLabels(t: ReturnType<typeof useTranslations>): StudentsView
       on_trial: t("status.onTrial"),
     },
     enrollmentLabels: {
-      regular: t("enrollment.regular"),
-      prospect: t("enrollment.prospect"),
-      withdrawn: t("enrollment.withdrawn"),
+      [EnrollmentEnum.REGULAR]: t("enrollment.regular"),
+      [EnrollmentEnum.PROSPECT]: t("enrollment.prospect"),
+      [EnrollmentEnum.WITHDRAWN]: t("enrollment.withdrawn"),
     },
   };
-}
-
-export function buildFilteredRows(
-  rows: StudentDirectoryRowExtended[],
-  searchQuery: string
-): StudentDirectoryRowExtended[] {
-  const query = searchQuery.trim().toLowerCase();
-  if (!query) return rows;
-  return rows.filter(row => {
-    const name = row.name ?? "";
-    const email = row.email ?? "";
-    return name.toLowerCase().includes(query) || email.toLowerCase().includes(query);
-  });
 }

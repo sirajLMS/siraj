@@ -83,7 +83,6 @@ export const profile: ParentProfileLabels = {
       suspended: "موقوف",
       on_leave: "في إجازة",
       deactivated: "غير مفعل",
-      graduated: "متخرج",
       on_trial: "تحت التجربة",
     },
   },

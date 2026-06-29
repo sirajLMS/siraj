@@ -44,7 +44,6 @@ function StatusSelectionField() {
             <MenuItem value={StudentStatus.ON_LEAVE}>{t("statusOptions.ON_LEAVE")}</MenuItem>
             <MenuItem value={StudentStatus.ON_TRIAL}>{t("statusOptions.ON_TRIAL")}</MenuItem>
             <MenuItem value={StudentStatus.DEACTIVATED}>{t("statusOptions.DEACTIVATED")}</MenuItem>
-            <MenuItem value={StudentStatus.GRADUATED}>{t("statusOptions.GRADUATED")}</MenuItem>
           </Select>
         )}
       />

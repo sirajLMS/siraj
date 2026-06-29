@@ -69,3 +69,15 @@ export type SuggestionSubmitInputType = {
   readonly submitterName: string;
   readonly body: string;
 };
+
+export type SuggestionContributor = {
+  readonly id: string;
+  readonly name: string;
+  readonly suggestionCount: number;
+};
+
+export type SuggestionContributorStats = {
+  readonly id: string;
+  readonly uniqueContributorCount: number;
+  readonly contributors: ReadonlyArray<SuggestionContributor>;
+};

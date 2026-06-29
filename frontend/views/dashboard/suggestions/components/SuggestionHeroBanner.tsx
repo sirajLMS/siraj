@@ -1,12 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { SuggestionsParentLabels } from "@/shared/messages/types/dashboard/suggestions/main";
-
-interface SuggestionHeroBannerProps {
-  readonly labels: SuggestionsParentLabels;
-  readonly variant: "desktop" | "mobile";
-}
+import type { SuggestionHeroBannerProps } from "../types/suggestionsView.types";
 
 export function SuggestionHeroBanner({ labels, variant }: Readonly<SuggestionHeroBannerProps>) {
   const isMobile = variant === "mobile";

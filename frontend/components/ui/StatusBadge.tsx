@@ -125,10 +125,6 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
     case "studentAccount": {
       // Map studentAccount statuses to appropriate M3 status families
       const map: Record<string, { backgroundColor: string; color: string }> = {
-        activated: {
-          backgroundColor: theme.palette.status.activeContainer,
-          color: theme.palette.status.onActiveContainer,
-        },
         regular: {
           backgroundColor: theme.palette.status.activeContainer,
           color: theme.palette.status.onActiveContainer,

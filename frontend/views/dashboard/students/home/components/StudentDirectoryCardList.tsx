@@ -2,17 +2,8 @@
 
 import { Box } from "@mui/material";
 import { PaginationControls } from "@/frontend/components/ui";
-import type { StudentAccountStatus, StudentDirectoryRowExtended, StudentEnrollmentStatus } from "../types";
+import type { StudentDirectoryCardListLabels, StudentDirectoryRowExtended } from "../types";
 import { StudentDirectoryCard } from "./StudentDirectoryCard";
-
-interface StudentDirectoryCardListLabels {
-  readonly weeklyHours: string;
-  readonly enrollmentStatus: string;
-  readonly classesLeft: string;
-  readonly viewProfile: string;
-  readonly statusLabels: Record<StudentAccountStatus, string>;
-  readonly enrollmentLabels: Record<StudentEnrollmentStatus, string>;
-}
 
 interface StudentDirectoryCardListProps {
   readonly rows: readonly StudentDirectoryRowExtended[];

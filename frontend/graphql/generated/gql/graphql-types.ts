@@ -2015,9 +2015,11 @@ export type Query = {
   studentClassSessionDetail: Maybe<StudentSessionDetail>;
   studentCreditStatus: Maybe<Array<StudentCreditRow>>;
   /** Fetches the global student directory with cross-relational data. */
-  studentDirectory: Maybe<Array<StudentDirectoryRow>>;
+  studentDirectory: Maybe<StudentDirectoryPayload>;
   studentUpcomingClasses: Maybe<StudentUpcomingClassesResult>;
   students: StudentsWithFiltersResponse;
+  /** Returns contributor statistics for the suggestion social proof display. */
+  suggestionContributorStats: Maybe<SuggestionContributorStats>;
   teacherActiveDashboard: Maybe<TeacherDashboard>;
   teacherDashboard: Maybe<TeacherDashboard>;
   teacherDirectory: Maybe<TeacherDirectory>;
@@ -2272,6 +2274,11 @@ export type QueryStudentsArgs = {
   filterArgs: InputMaybe<StudentFilterArgs>;
   orderBy: InputMaybe<Array<StudentsOrderByClause>>;
   paginationArgs: InputMaybe<PaginationArgs>;
+};
+
+
+export type QuerySuggestionContributorStatsArgs = {
+  days: Scalars['Int']['input'];
 };
 
 
@@ -2556,6 +2563,14 @@ export type StudentCreditRow = {
   studentName: Maybe<Scalars['String']['output']>;
 };
 
+export type StudentDirectoryPayload = {
+  __typename?: 'StudentDirectoryPayload';
+  id: Maybe<Scalars['String']['output']>;
+  pageInfo: Maybe<PageInfo>;
+  rows: Maybe<Array<StudentDirectoryRow>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
 export type StudentDirectoryRow = {
   __typename?: 'StudentDirectoryRow';
   avatarUrl: Maybe<Scalars['String']['output']>;
@@ -2652,7 +2667,6 @@ export type StudentSessionDetail = {
 
 export enum StudentStatus {
   Deactivated = 'DEACTIVATED',
-  Graduated = 'GRADUATED',
   OnLeave = 'ON_LEAVE',
   OnTrial = 'ON_TRIAL',
   Regular = 'REGULAR',
@@ -2728,6 +2742,22 @@ export type Suggestion = {
   reviewedByUserId: Maybe<Scalars['String']['output']>;
   status: Maybe<SuggestionStatus>;
   submitterName: Maybe<Scalars['String']['output']>;
+};
+
+/** A parent who recently submitted suggestions. */
+export type SuggestionContributor = {
+  __typename?: 'SuggestionContributor';
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  suggestionCount: Maybe<Scalars['Int']['output']>;
+};
+
+/** Statistics about recent suggestion contributors. */
+export type SuggestionContributorStats = {
+  __typename?: 'SuggestionContributorStats';
+  contributors: Maybe<Array<SuggestionContributor>>;
+  id: Maybe<Scalars['String']['output']>;
+  uniqueContributorCount: Maybe<Scalars['Int']['output']>;
 };
 
 /** Filter and pagination options for the admin suggestion list. */

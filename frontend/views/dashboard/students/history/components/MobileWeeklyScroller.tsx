@@ -1,8 +1,8 @@
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { AttendanceStatus } from "@/shared/lib/enum";
 import type { ClassSession, MobileWeeklyScrollerProps } from "../types";
-import { AttendanceStatus } from "../types";
 
 interface WeekDayData {
   dayKey: string;

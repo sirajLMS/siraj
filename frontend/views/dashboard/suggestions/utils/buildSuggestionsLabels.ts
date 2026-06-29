@@ -33,6 +33,10 @@ export function buildSuggestionsLabels(t: SuggestionsTranslator): SuggestionsLab
         fullNameRequired: t("parent.validation.fullNameRequired"),
         suggestionRequired: t("parent.validation.suggestionRequired"),
       },
+      notifications: {
+        submitSuccess: t("parent.notifications.submitSuccess"),
+        submitError: t("parent.notifications.submitError"),
+      },
     },
     admin: {
       pageTitle: t("admin.pageTitle"),

@@ -11,8 +11,8 @@ import {
 import { Box, IconButton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { AttendanceStatus } from "@/shared/lib/enum";
 import type { ClassSession, MobileMetricProps, StudentHistoryMobileProps } from "../types";
-import { AttendanceStatus } from "../types";
 import { ClassSessionList } from "./ClassSessionList";
 import { MobileWeeklyScroller } from "./MobileWeeklyScroller";
 import { PerformanceStreak } from "./PerformanceStreak";

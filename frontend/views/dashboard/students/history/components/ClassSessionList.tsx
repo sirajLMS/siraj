@@ -2,8 +2,8 @@ import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { Link } from "@/shared/i18n/routing";
+import { AttendanceStatus } from "@/shared/lib/enum";
 import type { ClassSessionListProps } from "../types";
-import { AttendanceStatus } from "../types";
 
 export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionListProps>) {
   const t = useTranslations("dashboard.studentHistory.classDetails");

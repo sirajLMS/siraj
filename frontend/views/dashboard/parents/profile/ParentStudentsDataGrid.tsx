@@ -56,7 +56,6 @@ const ALLOWED_TARGET_STATUSES: Record<string, string[]> = {
   ],
   [StudentStatus.OnLeave.toLowerCase()]: [StudentStatus.Regular.toLowerCase(), StudentStatus.Deactivated.toLowerCase()],
   [StudentStatus.Deactivated.toLowerCase()]: [StudentStatus.Regular.toLowerCase()],
-  [StudentStatus.Graduated.toLowerCase()]: [],
 };
 
 // ─── Reassign Teacher Dialog ──────────────────────────────────────────────────

@@ -5,7 +5,7 @@ import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { FilterButton, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentDirectoryDataGrid } from "./components/StudentDirectoryDataGrid";
-import type { StudentAccountStatus, StudentDirectoryRowExtended } from "./types";
+import type { StudentDirectoryDataGridLabels, StudentDirectoryRowExtended } from "./types";
 
 interface StudentsDesktopViewProps {
   readonly pageTitle: string;
@@ -19,23 +19,9 @@ interface StudentsDesktopViewProps {
   readonly page?: number;
   readonly pageSize?: number;
   readonly onPageChange?: (page: number) => void;
-  readonly tableLabels: {
-    readonly index: string;
-    readonly student: string;
-    readonly email: string;
-    readonly status: string;
-    readonly hoursPerWeek: string;
-    readonly classesLeft: string;
-    readonly actions: string;
-    readonly showingOf: string;
-    readonly previous: string;
-    readonly next: string;
-    readonly viewProfile: string;
-    readonly viewHistory: string;
-    readonly noEntries: string;
-    readonly statusLabels: Record<StudentAccountStatus, string>;
-  };
+  readonly tableLabels: StudentDirectoryDataGridLabels;
   readonly onAddStudent: () => void;
+  readonly onFilterClick: () => void;
   readonly onViewProfile: (id: string) => void;
   readonly onViewHistory: (id: string) => void;
 }
@@ -54,6 +40,7 @@ export function StudentsDesktopView({
   onPageChange,
   tableLabels,
   onAddStudent,
+  onFilterClick,
   onViewProfile,
   onViewHistory,
 }: StudentsDesktopViewProps) {
@@ -70,7 +57,7 @@ export function StudentsDesktopView({
             <PrimaryPageAction id="students-add-btn" startIcon={<AddOutlined />} onClick={onAddStudent}>
               {addStudentLabel}
             </PrimaryPageAction>
-            <FilterButton id="students-filters-btn" startIcon={<FilterListOutlined />}>
+            <FilterButton id="students-filters-btn" startIcon={<FilterListOutlined />} onClick={onFilterClick}>
               {filtersLabel}
             </FilterButton>
           </>

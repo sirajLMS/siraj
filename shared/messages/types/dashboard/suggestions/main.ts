@@ -25,6 +25,10 @@ export interface SuggestionsParentLabels {
     readonly constantEvolution: SuggestionSupportCardLabels;
   };
   readonly validation: SuggestionValidationLabels;
+  readonly notifications: {
+    readonly submitSuccess: string;
+    readonly submitError: string;
+  };
 }
 
 export interface SuggestionsAdminLabels {

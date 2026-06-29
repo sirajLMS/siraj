@@ -1640,9 +1640,14 @@ type Query {
   studentCreditStatus: [StudentCreditRow!]
 
   """Fetches the global student directory with cross-relational data."""
-  studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): [StudentDirectoryRow!]
+  studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentDirectoryPayload
   studentUpcomingClasses(studentId: String!): StudentUpcomingClassesResult
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
+
+  """
+  Returns contributor statistics for the suggestion social proof display.
+  """
+  suggestionContributorStats(days: Int!): SuggestionContributorStats
   teacherActiveDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
   teacherDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
   teacherDirectory(paginationArgs: PaginationArgs, search: String): TeacherDirectory
@@ -1876,6 +1881,13 @@ type StudentCreditRow {
   studentName: String
 }
 
+type StudentDirectoryPayload {
+  id: String
+  pageInfo: PageInfo
+  rows: [StudentDirectoryRow!]
+  totalCount: Int
+}
+
 type StudentDirectoryRow {
   avatarUrl: String
   classesRemaining: Int
@@ -1967,7 +1979,6 @@ type StudentSessionDetail {
 
 enum StudentStatus {
   DEACTIVATED
-  GRADUATED
   ON_LEAVE
   ON_TRIAL
   REGULAR
@@ -2041,6 +2052,20 @@ type Suggestion {
   reviewedByUserId: String
   status: SuggestionStatus
   submitterName: String
+}
+
+"""A parent who recently submitted suggestions."""
+type SuggestionContributor {
+  id: String
+  name: String
+  suggestionCount: Int
+}
+
+"""Statistics about recent suggestion contributors."""
+type SuggestionContributorStats {
+  contributors: [SuggestionContributor!]
+  id: String
+  uniqueContributorCount: Int
 }
 
 """Filter and pagination options for the admin suggestion list."""

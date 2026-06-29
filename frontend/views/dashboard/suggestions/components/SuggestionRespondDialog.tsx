@@ -3,7 +3,7 @@
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
-import type { SuggestionRespondDialogProps } from "../types/suggestionsViewTypes";
+import type { SuggestionRespondDialogProps } from "../types/suggestionsView.types";
 
 export function SuggestionRespondDialog({
   open,

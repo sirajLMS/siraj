@@ -2,8 +2,8 @@ import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, Paper, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Link } from "@/shared/i18n/routing";
+import { AttendanceStatus } from "@/shared/lib/enum";
 import type { CalendarGridProps, ClassSession } from "../types";
-import { AttendanceStatus } from "../types";
 
 const calendarCellBase = ({ theme }: { theme: import("@mui/material/styles").Theme }) => ({
   borderRight: `1px solid ${theme.palette.border.light}`,

@@ -1,8 +1,6 @@
 import type { Theme } from "@mui/material";
 import { AttendanceStatus } from "@/shared/lib/enum";
 
-export { AttendanceStatus } from "@/shared/lib/enum";
-
 export interface ClassSession {
   readonly id: string;
   readonly dayOfMonth: number;

@@ -1,4 +1,5 @@
 import type { GridColDef } from "@mui/x-data-grid";
+import type { Control, FieldErrors } from "react-hook-form";
 import type { SuggestionsAdminLabels, SuggestionsLabels } from "@/shared/messages/types/dashboard/suggestions/main";
 import type { SuggestionFormData } from "../schemas/suggestionFormSchema";
 import type { AdminSuggestionRow, AdminSuggestionsSummary, SuggestionStatus } from "./suggestions.types";
@@ -8,10 +9,8 @@ export type { SuggestionsAdminLabels, SuggestionsLabels };
 export interface ParentSuggestionsViewProps {
   readonly labels: SuggestionsLabels["parent"];
   readonly isSubmitting: boolean;
-  readonly showSuccess: boolean;
   readonly canSubmit: boolean;
   readonly onSubmit: (data: SuggestionFormData) => void;
-  readonly onDismissSuccess: () => void;
 }
 
 export interface AdminSuggestionsViewProps {
@@ -105,4 +104,43 @@ export interface SuggestionMarkDuplicateDialogProps {
   readonly labels: SuggestionDuplicateDialogLabels;
   readonly onConfirm: (suggestionId: string, duplicateOfId: string) => void;
   readonly onCancel: () => void;
+}
+
+export interface ParentSuggestionsDesktopViewProps {
+  readonly labels: SuggestionsLabels["parent"];
+  readonly control: Control<SuggestionFormData>;
+  readonly errors: FieldErrors<SuggestionFormData>;
+  readonly isSubmitting: boolean;
+  readonly canSubmit: boolean;
+  readonly onFormSubmit: () => void;
+}
+
+export interface ParentSuggestionsMobileViewProps {
+  readonly labels: SuggestionsLabels["parent"];
+  readonly control: Control<SuggestionFormData>;
+  readonly errors: FieldErrors<SuggestionFormData>;
+  readonly isSubmitting: boolean;
+  readonly canSubmit: boolean;
+  readonly onFormSubmit: () => void;
+}
+
+export interface SuggestionFormFieldsProps {
+  readonly control: Control<SuggestionFormData>;
+  readonly errors: FieldErrors<SuggestionFormData>;
+  readonly labels: SuggestionsLabels["parent"];
+  readonly variant: "desktop" | "mobile";
+}
+
+export interface SuggestionHeroBannerProps {
+  readonly labels: SuggestionsLabels["parent"];
+  readonly variant: "desktop" | "mobile";
+}
+
+export interface SuggestionSupportCardsProps {
+  readonly labels: SuggestionsLabels["parent"];
+  readonly variant: "desktop" | "mobile";
+}
+
+export interface SuggestionSocialProofProps {
+  readonly labels: SuggestionsLabels["parent"];
 }

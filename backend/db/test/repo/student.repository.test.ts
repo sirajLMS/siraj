@@ -17,11 +17,6 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   return errorCaught as Error;
 }
 
-function getFullErrorMessage(error: Error): string {
-  const cause = error.cause as { message?: string } | undefined;
-  return `${error.message} ${cause?.message ?? ""}`;
-}
-
 async function makeStudent(
   tx: Parameters<typeof runInRollback>[0] extends (tx: infer T) => unknown ? T : never,
   prefix: string,
@@ -152,15 +147,6 @@ describe("StudentRepository — changeStatus", () => {
       await StudentRepository.changeStatus(student.id, "SUSPENDED", undefined, tx);
       const result = await StudentRepository.changeStatus(student.id, "REGULAR", undefined, tx);
       expect(result.status).toBe("REGULAR");
-    });
-  });
-
-  test("throws when DB trigger rejects GRADUATED to REGULAR transition", async () => {
-    await runInRollback(async tx => {
-      const { student } = await makeStudent(tx, "Grad", { status: "REGULAR" });
-      await StudentRepository.changeStatus(student.id, "GRADUATED", undefined, tx);
-      const error = await expectRepoError(() => StudentRepository.changeStatus(student.id, "REGULAR", undefined, tx));
-      expect(getFullErrorMessage(error)).toContain("GRADUATED");
     });
   });
 

@@ -1,18 +1,19 @@
 "use client";
 
-import { AddOutlined, PersonAddAltOutlined, SearchOutlined } from "@mui/icons-material";
+import { AddOutlined, FilterListOutlined, PersonAddAltOutlined, SearchOutlined } from "@mui/icons-material";
 import { Box, Fab, IconButton, InputAdornment, TextField } from "@mui/material";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
 import { StudentDirectoryCardList } from "./components/StudentDirectoryCardList";
 import { StudentMobileMetricsScroll } from "./components/StudentMobileMetricsScroll";
-import type { StudentAccountStatus, StudentDirectoryRowExtended, StudentEnrollmentStatus } from "./types";
+import type { StudentDirectoryCardListLabels, StudentDirectoryRowExtended } from "./types";
 
 interface StudentsMobileViewProps {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly searchPlaceholder: string;
   readonly addStudentLabel: string;
+  readonly filtersLabel: string;
   readonly searchQuery: string;
   readonly mobileMetrics: readonly MetricItem[];
   readonly rows: readonly StudentDirectoryRowExtended[];
@@ -20,16 +21,10 @@ interface StudentsMobileViewProps {
   readonly pageSize?: number;
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
-  readonly cardListLabels: {
-    readonly weeklyHours: string;
-    readonly enrollmentStatus: string;
-    readonly classesLeft: string;
-    readonly viewProfile: string;
-    readonly statusLabels: Record<StudentAccountStatus, string>;
-    readonly enrollmentLabels: Record<StudentEnrollmentStatus, string>;
-  };
+  readonly cardListLabels: StudentDirectoryCardListLabels;
   readonly onSearchChange: (query: string) => void;
   readonly onAddStudent: () => void;
+  readonly onFilterClick: () => void;
   readonly onViewProfile: (id: string) => void;
 }
 
@@ -38,6 +33,7 @@ export function StudentsMobileView({
   pageSubtitle,
   searchPlaceholder,
   addStudentLabel,
+  filtersLabel,
   searchQuery,
   mobileMetrics,
   rows,
@@ -48,6 +44,7 @@ export function StudentsMobileView({
   cardListLabels,
   onSearchChange,
   onAddStudent,
+  onFilterClick,
   onViewProfile,
 }: StudentsMobileViewProps) {
   return (
@@ -81,6 +78,20 @@ export function StudentsMobileView({
               },
             }}
           />
+          <IconButton
+            id="students-filter-mobile-btn"
+            aria-label={filtersLabel}
+            onClick={onFilterClick}
+            sx={theme => ({
+              backgroundColor: theme.palette.surfaceContainerHigh,
+              color: theme.palette.primary.main,
+              borderRadius: 3,
+              px: 2,
+              "&:hover": { backgroundColor: theme.palette.surfaceContainerHighest },
+            })}
+          >
+            <FilterListOutlined />
+          </IconButton>
           <IconButton
             id="students-add-mobile-btn"
             aria-label={addStudentLabel}

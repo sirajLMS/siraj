@@ -450,7 +450,6 @@ const en: MessageSchema = {
         ON_LEAVE: "On Leave (Medical/Planned)",
         ON_TRIAL: "On Trial",
         DEACTIVATED: "Deactivated",
-        GRADUATED: "Graduated",
       },
       reasons: {
         unpaidInvoice: "Unpaid Invoice",
@@ -616,7 +615,6 @@ const en: MessageSchema = {
       next: "Next",
       showingOf: "Showing {shown} of {total} students",
       metrics: {
-        activated: "Activated",
         deactivated: "Deactivated",
         regular: "Regular",
         onLeave: "On Leave",
@@ -633,7 +631,6 @@ const en: MessageSchema = {
         actions: "Actions",
       },
       status: {
-        activated: "Activated",
         deactivated: "Deactivated",
         regular: "Regular",
         onLeave: "On Leave",
@@ -1437,7 +1434,6 @@ const en: MessageSchema = {
           suspended: "Suspended",
           on_leave: "On Leave",
           deactivated: "Deactivated",
-          graduated: "Graduated",
           on_trial: "On Trial",
         },
       },
@@ -2075,6 +2071,10 @@ const en: MessageSchema = {
         validation: {
           fullNameRequired: "Please enter your full name.",
           suggestionRequired: "Please enter a suggestion of at least 10 characters.",
+        },
+        notifications: {
+          submitSuccess: "Your suggestion has been submitted successfully!",
+          submitError: "Failed to submit suggestion. Please try again.",
         },
       },
       admin: {
