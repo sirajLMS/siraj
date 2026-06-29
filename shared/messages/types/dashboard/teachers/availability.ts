@@ -2,6 +2,8 @@ export interface TeacherAvailabilityLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly exportPdf: string;
+  readonly exportPdfComingSoon: string;
+  readonly teacherSlotSelected: string;
   readonly searchTitle: string;
   readonly from: string;
   readonly to: string;
@@ -10,6 +12,13 @@ export interface TeacherAvailabilityLabels {
   readonly male: string;
   readonly female: string;
   readonly submit: string;
+  readonly breadcrumbs: {
+    readonly teachers: string;
+    readonly availability: string;
+  };
+  readonly errors: {
+    readonly missingTimeRange: string;
+  };
   readonly table: {
     readonly time: string;
     readonly monday: string;

@@ -9,14 +9,12 @@ import { userNotificationPreferences, users } from "../../schema";
 import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("User Notification Preferences", () => {
-  const RLS_ROLE = "test_rls_user_notif";
-
   beforeAll(async () => {
-    await setupRlsRole(RLS_ROLE);
+    await setupRlsRole();
   });
 
   afterAll(async () => {
-    await teardownRlsRole(RLS_ROLE);
+    await teardownRlsRole();
   });
 
   test("Can insert and retrieve preferences", async () => {
@@ -104,7 +102,7 @@ describe("User Notification Preferences", () => {
         enabled: true,
       });
 
-      const quotedRole = `"${RLS_ROLE}"`;
+      const quotedRole = '"test_rls_user"';
       await tx.execute(sql`SET LOCAL ROLE ${sql.raw(quotedRole)}`);
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userA.id}, true)`);
 

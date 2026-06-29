@@ -1075,6 +1075,8 @@ const en: MessageSchema = {
       pageTitle: "Teacher Availability Tool",
       pageSubtitle: "Visualize and search available time slots across your faculty workforce.",
       exportPdf: "EXPORT PDF",
+      exportPdfComingSoon: "PDF export coming soon",
+      teacherSlotSelected: "Selected {name}'s slot (Teacher {id})",
       searchTitle: "Search in Teachers Schedules",
       from: "FROM",
       to: "TO",
@@ -1083,6 +1085,13 @@ const en: MessageSchema = {
       male: "Male",
       female: "Female",
       submit: "SUBMIT",
+      breadcrumbs: {
+        teachers: "Teachers",
+        availability: "Availability",
+      },
+      errors: {
+        missingTimeRange: "Please select both from and to times.",
+      },
       table: {
         time: "TIME",
         monday: "MONDAY",
@@ -1663,9 +1672,10 @@ const en: MessageSchema = {
         updateSchedules: "Update Schedules",
         migrating: "Migrating...",
         migrationComplete: "Migration Complete",
-        viewAllUpdates: "View All {count} Updates",
-        viewAllSuccessful: "View All Successful Shifts",
         successMessage: "DST migration completed successfully. All eligible schedules have been shifted.",
+      },
+      errors: {
+        mutationFailed: "DST migration failed. Please try again.",
       },
       sections: {
         updated: "Updated",
@@ -1682,7 +1692,7 @@ const en: MessageSchema = {
         unchanged: "Unchanged",
       },
       table: {
-        className: "Class Name",
+        studentName: "Student Name",
         from: "From",
         to: "To",
         sessionsCount: "{count} Sessions",

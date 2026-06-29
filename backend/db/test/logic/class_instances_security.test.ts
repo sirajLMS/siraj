@@ -71,18 +71,19 @@ describe("Class Instances Security Logic", () => {
   it("should enforce RLS policies for teachers blocking unauthorized SELECT", async () => {
     await runInRollback(async tx => {
       const scenario1 = await setupTestEntities(tx, "SecLogic", { skipInstance: true });
-      await setupTestEntities(tx, "SecLogic", { skipInstance: true });
-
-      await createTestInstance(tx, scenario1.teacher.id, scenario1.student.id);
+      const otherTeacher = await setupTestEntities(tx, "SecLogicOther", { skipInstance: true });
+      const ownInstance = await createTestInstance(tx, scenario1.teacher.id, scenario1.student.id);
+      await createTestInstance(tx, otherTeacher.teacher.id, otherTeacher.student.id);
 
       await tx.execute(sql`SET LOCAL ROLE "test_rls_user"`);
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${scenario1.teacherUser.id}, true)`);
 
-      const instances = await tx.select({ teacherId: classInstances.teacherId }).from(classInstances);
-      expect(instances.length).toBeGreaterThanOrEqual(1);
-      for (const inst of instances) {
-        expect(inst.teacherId).toBe(scenario1.teacher.id);
-      }
+      const instances = await tx
+        .select({ id: classInstances.id, teacherId: classInstances.teacherId })
+        .from(classInstances);
+      expect(instances.some(i => i.teacherId === ownInstance.teacherId)).toBe(true);
+      expect(instances.some(i => i.id === ownInstance.id)).toBe(true);
+      expect(instances.some(i => i.teacherId === otherTeacher.teacher.id)).toBe(false);
     });
   });
 

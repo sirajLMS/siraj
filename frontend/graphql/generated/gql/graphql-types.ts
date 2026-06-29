@@ -234,7 +234,7 @@ export type AttendanceReportRow = {
 
 export type AvailabilitySearchInput = {
   fromTime: Scalars['String']['input'];
-  gender: InputMaybe<Scalars['String']['input']>;
+  gender: InputMaybe<Gender>;
   toTime: Scalars['String']['input'];
 };
 
@@ -248,7 +248,7 @@ export type AvailabilitySearchResult = {
 export type AvailabilitySearchTeacher = {
   __typename?: 'AvailabilitySearchTeacher';
   gaps: Maybe<Array<TeacherAvailabilityGap>>;
-  gender: Maybe<Scalars['String']['output']>;
+  gender: Maybe<Gender>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   timezone: Maybe<Scalars['String']['output']>;
@@ -814,6 +814,16 @@ export type DailyScheduleMetrics = {
   trial: Maybe<Scalars['Int']['output']>;
 };
 
+export enum DayOfWeek {
+  Friday = 'FRIDAY',
+  Monday = 'MONDAY',
+  Saturday = 'SATURDAY',
+  Sunday = 'SUNDAY',
+  Thursday = 'THURSDAY',
+  Tuesday = 'TUESDAY',
+  Wednesday = 'WEDNESDAY'
+}
+
 export type DeactivateParentResult = {
   __typename?: 'DeactivateParentResult';
   id: Maybe<Scalars['String']['output']>;
@@ -875,14 +885,48 @@ export type DirectoryPermissionsUpdateInput = {
   permissions: DirectoryPermissionsInput;
 };
 
+export type DstCheckedEmptyItem = {
+  __typename?: 'DstCheckedEmptyItem';
+  id: Maybe<Scalars['String']['output']>;
+  reason: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+};
+
+export type DstConflictGroup = {
+  __typename?: 'DstConflictGroup';
+  conflicts: Maybe<Array<DstConflictItem>>;
+  id: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
+};
+
+export type DstConflictItem = {
+  __typename?: 'DstConflictItem';
+  id: Maybe<Scalars['String']['output']>;
+  message: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+};
+
 export type DstMigrationReport = {
   __typename?: 'DstMigrationReport';
+  checkedEmptyItems: Maybe<Array<DstCheckedEmptyItem>>;
+  conflictGroups: Maybe<Array<DstConflictGroup>>;
   conflicts: Maybe<Scalars['Int']['output']>;
   id: Maybe<Scalars['String']['output']>;
   runId: Maybe<Scalars['String']['output']>;
+  status: Maybe<Scalars['String']['output']>;
   total: Maybe<Scalars['Int']['output']>;
   unchanged: Maybe<Scalars['Int']['output']>;
   updated: Maybe<Scalars['Int']['output']>;
+  updatedSessions: Maybe<Array<DstUpdatedSession>>;
+};
+
+export type DstUpdatedSession = {
+  __typename?: 'DstUpdatedSession';
+  fromTime: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
+  toTime: Maybe<Scalars['String']['output']>;
 };
 
 export type EditQuotaResult = {
@@ -2816,7 +2860,7 @@ export type SystemAlert = {
 
 export type TeacherAvailabilityGap = {
   __typename?: 'TeacherAvailabilityGap';
-  dayOfWeek: Maybe<Scalars['String']['output']>;
+  dayOfWeek: Maybe<DayOfWeek>;
   gapEndTime: Maybe<Scalars['String']['output']>;
   gapStartTime: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;

@@ -129,6 +129,12 @@ export enum DstMigrationResult {
   UNCHANGED = "UNCHANGED",
 }
 
+export enum MigrationStatus {
+  IDLE = "idle",
+  RUNNING = "running",
+  COMPLETE = "complete",
+}
+
 export enum NotificationChannel {
   EMAIL = "EMAIL",
   SMS = "SMS",

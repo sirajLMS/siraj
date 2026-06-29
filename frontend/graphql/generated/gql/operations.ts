@@ -133,7 +133,7 @@ export type AttendanceReportFiltersInput = {
 
 export type AvailabilitySearchInput = {
   fromTime: string;
-  gender: string | null | undefined;
+  gender: Gender | null | undefined;
   toTime: string;
 };
 
@@ -463,6 +463,15 @@ export type CreateRecurringClassInput = {
   timezone: string;
   timezoneId: number | null | undefined;
 };
+
+export type DayOfWeek =
+  | 'FRIDAY'
+  | 'MONDAY'
+  | 'SATURDAY'
+  | 'SUNDAY'
+  | 'THURSDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY';
 
 /** Input for the demo fast login mutation. */
 export type DemoLoginInput = {
@@ -866,9 +875,9 @@ export type RefreshTokenMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type RefreshTokenMutation = RefreshTokenMutation_Mutation;
 
-export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap = { id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: string | null, gapStartTime: string | null, gapEndTime: string | null, timezone: string | null };
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap = { id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: Types.DayOfWeek | null, gapStartTime: string | null, gapEndTime: string | null, timezone: string | null };
 
-export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher = { id: string | null, name: string | null, gender: string | null, timezone: string | null, gaps: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap> | null };
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher = { id: string | null, name: string | null, gender: Types.Gender | null, timezone: string | null, gaps: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher_gaps_TeacherAvailabilityGap> | null };
 
 export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult = { id: string | null, totalGaps: number | null, teachers: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_AvailabilitySearchResult_teachers_AvailabilitySearchTeacher> | null };
 
@@ -1176,7 +1185,15 @@ export type DeleteComplaintMutationVariables = Exact<{
 
 export type DeleteComplaintMutation = DeleteComplaintMutation_Mutation;
 
-export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport = { id: string | null, runId: string | null, updated: number | null, conflicts: number | null, unchanged: number | null, total: number | null };
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_updatedSessions_DstUpdatedSession = { id: string | null, studentName: string | null, teacherName: string | null, fromTime: string | null, toTime: string | null };
+
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_conflictGroups_DstConflictGroup_conflicts_DstConflictItem = { id: string | null, studentName: string | null, message: string | null };
+
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_conflictGroups_DstConflictGroup = { id: string | null, teacherName: string | null, conflicts: Array<ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_conflictGroups_DstConflictGroup_conflicts_DstConflictItem> | null };
+
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_checkedEmptyItems_DstCheckedEmptyItem = { id: string | null, studentName: string | null, reason: string | null };
+
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport = { id: string | null, runId: string | null, updated: number | null, conflicts: number | null, unchanged: number | null, total: number | null, status: string | null, updatedSessions: Array<ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_updatedSessions_DstUpdatedSession> | null, conflictGroups: Array<ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_conflictGroups_DstConflictGroup> | null, checkedEmptyItems: Array<ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport_checkedEmptyItems_DstCheckedEmptyItem> | null };
 
 export type ExecuteDstBulkUpdateMutation_Mutation = { executeDstBulkUpdate: ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_DstMigrationReport | null };
 

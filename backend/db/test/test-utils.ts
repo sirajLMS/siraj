@@ -78,10 +78,6 @@ export async function setupRlsRole(roleName: string = "test_rls_user"): Promise<
   const currentCount = rlsRoleRefCounts.get(roleName) ?? 0;
   rlsRoleRefCounts.set(roleName, currentCount + 1);
 
-  if (currentCount > 0) {
-    return;
-  }
-
   const quotedRole = quoteIdent(roleName);
 
   await db.execute(
@@ -154,14 +150,6 @@ export async function teardownRlsRole(roleName: string = "test_rls_user"): Promi
   }
 
   rlsRoleRefCounts.delete(roleName);
-  const quotedRole = quoteIdent(roleName);
-  try {
-    await db.execute(sql.raw(`REASSIGN OWNED BY ${quotedRole} TO postgres`));
-    await db.execute(sql.raw(`DROP OWNED BY ${quotedRole}`));
-    await db.execute(sql.raw(`DROP ROLE IF EXISTS ${quotedRole}`));
-  } catch {
-    // Ignore errors during teardown
-  }
 }
 
 function quoteIdent(ident: string): string {

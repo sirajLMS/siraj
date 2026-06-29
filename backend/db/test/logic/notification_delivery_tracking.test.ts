@@ -15,14 +15,12 @@ import { notificationDeliveries, userDeviceTokens, users } from "../../schema";
 import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("Notification Delivery Tracking", () => {
-  const RLS_ROLE = "test_rls_user_notif_delivery";
-
   beforeAll(async () => {
-    await setupRlsRole(RLS_ROLE);
+    await setupRlsRole();
   });
 
   afterAll(async () => {
-    await teardownRlsRole(RLS_ROLE);
+    await teardownRlsRole();
   });
 
   test("Registers device tokens and tracks delivery lifecycle", async () => {
@@ -218,8 +216,7 @@ describe("Notification Delivery Tracking", () => {
         tx
       );
 
-      const quotedRole = `"${RLS_ROLE}"`;
-      await tx.execute(sql`SET LOCAL ROLE ${sql.raw(quotedRole)}`);
+      await tx.execute(sql`SET LOCAL ROLE "test_rls_user"`);
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userA.id}, true)`);
 
       const visibleTokens = await tx.select({ userId: userDeviceTokens.userId }).from(userDeviceTokens);
@@ -229,7 +226,7 @@ describe("Notification Delivery Tracking", () => {
       expect(visibleDeliveries.length).toBe(0);
 
       await tx.execute(sql`RESET ROLE`);
-      await tx.execute(sql`SET LOCAL ROLE ${sql.raw(quotedRole)}`);
+      await tx.execute(sql`SET LOCAL ROLE "test_rls_user"`);
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userB.id}, true)`);
 
       const userBTokens = await tx.select({ userId: userDeviceTokens.userId }).from(userDeviceTokens);

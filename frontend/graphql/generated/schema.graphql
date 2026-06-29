@@ -208,7 +208,7 @@ type AttendanceReportRow {
 
 input AvailabilitySearchInput {
   fromTime: String!
-  gender: String
+  gender: Gender
   toTime: String!
 }
 
@@ -220,7 +220,7 @@ type AvailabilitySearchResult {
 
 type AvailabilitySearchTeacher {
   gaps: [TeacherAvailabilityGap!]
-  gender: String
+  gender: Gender
   id: String
   name: String
   timezone: String
@@ -776,6 +776,16 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
+enum DayOfWeek {
+  FRIDAY
+  MONDAY
+  SATURDAY
+  SUNDAY
+  THURSDAY
+  TUESDAY
+  WEDNESDAY
+}
+
 type DeactivateParentResult {
   id: String
   status: String
@@ -833,13 +843,43 @@ input DirectoryPermissionsUpdateInput {
   permissions: DirectoryPermissionsInput!
 }
 
+type DstCheckedEmptyItem {
+  id: String
+  reason: String
+  studentName: String
+}
+
+type DstConflictGroup {
+  conflicts: [DstConflictItem!]
+  id: String
+  teacherName: String
+}
+
+type DstConflictItem {
+  id: String
+  message: String
+  studentName: String
+}
+
 type DstMigrationReport {
+  checkedEmptyItems: [DstCheckedEmptyItem!]
+  conflictGroups: [DstConflictGroup!]
   conflicts: Int
   id: String
   runId: String
+  status: String
   total: Int
   unchanged: Int
   updated: Int
+  updatedSessions: [DstUpdatedSession!]
+}
+
+type DstUpdatedSession {
+  fromTime: String
+  id: String
+  studentName: String
+  teacherName: String
+  toTime: String
 }
 
 type EditQuotaResult {
@@ -2119,7 +2159,7 @@ type SystemAlert {
 }
 
 type TeacherAvailabilityGap {
-  dayOfWeek: String
+  dayOfWeek: DayOfWeek
   gapEndTime: String
   gapStartTime: String
   id: String

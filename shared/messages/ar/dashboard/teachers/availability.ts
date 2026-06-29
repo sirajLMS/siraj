@@ -4,6 +4,8 @@ export const availability: TeacherAvailabilityLabels = {
   pageTitle: "أداة توفر المعلمين",
   pageSubtitle: "عرض والبحث عن الفترات الزمنية المتاحة عبر كادر هيئة التدريس.",
   exportPdf: "تصدير PDF",
+  exportPdfComingSoon: "تصدير PDF قريبًا",
+  teacherSlotSelected: "تم تحديد فترة {name} (المعلم {id})",
   searchTitle: "البحث في جداول المعلمين",
   from: "من",
   to: "إلى",
@@ -12,6 +14,13 @@ export const availability: TeacherAvailabilityLabels = {
   male: "ذكر",
   female: "أنثى",
   submit: "إرسال",
+  breadcrumbs: {
+    teachers: "المعلمون",
+    availability: "التوفر",
+  },
+  errors: {
+    missingTimeRange: "يرجى تحديد وقت البداية والنهاية.",
+  },
   table: {
     time: "الوقت",
     monday: "الاثنين",

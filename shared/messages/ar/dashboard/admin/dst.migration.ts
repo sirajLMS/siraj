@@ -8,9 +8,10 @@ export const dstMigration: DstMigrationLabels = {
     updateSchedules: "تحديث الجداول",
     migrating: "جاري الترحيل...",
     migrationComplete: "اكتمل الترحيل",
-    viewAllUpdates: "عرض جميع التحديثات ({count})",
-    viewAllSuccessful: "عرض جميع التحولات الناجحة",
     successMessage: "اكتمل ترحيل التوقيت الصيفي بنجاح. تم تحويل جميع الجداول المؤهلة.",
+  },
+  errors: {
+    mutationFailed: "فشل ترحيل التوقيت الصيفي. يرجى المحاولة مرة أخرى.",
   },
   sections: {
     updated: "محدّث",
@@ -27,7 +28,7 @@ export const dstMigration: DstMigrationLabels = {
     unchanged: "بدون تغيير",
   },
   table: {
-    className: "اسم الحصة",
+    studentName: "اسم الطالب",
     from: "من",
     to: "إلى",
     sessionsCount: "{count} حصة",

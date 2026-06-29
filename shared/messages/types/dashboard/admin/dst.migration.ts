@@ -5,9 +5,10 @@ export interface DstMigrationLabels {
     readonly updateSchedules: string;
     readonly migrating: string;
     readonly migrationComplete: string;
-    readonly viewAllUpdates: string;
-    readonly viewAllSuccessful: string;
     readonly successMessage: string;
+  };
+  readonly errors: {
+    readonly mutationFailed: string;
   };
   readonly sections: {
     readonly updated: string;
@@ -24,7 +25,7 @@ export interface DstMigrationLabels {
     readonly unchanged: string;
   };
   readonly table: {
-    readonly className: string;
+    readonly studentName: string;
     readonly from: string;
     readonly to: string;
     readonly sessionsCount: string;
