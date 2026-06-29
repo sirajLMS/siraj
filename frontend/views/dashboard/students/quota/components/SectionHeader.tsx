@@ -32,7 +32,7 @@ export function SectionHeader({
         variant="titleLg"
         sx={(theme: Theme) => ({
           color: theme.palette.primary.main,
-          fontWeight: 700,
+
           textTransform: { md: "uppercase" },
           letterSpacing: { md: "0.05em" },
           fontSize: { md: "1.125rem" },

@@ -108,6 +108,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
     type: ParentInvoiceHistoryResultPothosObject,
     args: {
       parentId: t.arg.string({ required: false }),
+      userId: t.arg.string({ required: false }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     resolve: async (_root, args, ctx) => {
@@ -127,6 +128,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
       return BillingHistoryService.getParentInvoiceHistory(
         ctx.user?.id || "",
         args.parentId ?? null,
+        args.userId ?? null,
         pagination,
         ctx.locale
       );
@@ -182,9 +184,15 @@ gqlSchemaBuilder.queryField("parentBillingSummary", t =>
     type: ParentBillingSummaryPothosObject,
     args: {
       parentId: t.arg.string({ required: false }),
+      userId: t.arg.string({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
-      return BillingHistoryService.getParentBillingSummary(ctx.user?.id || "", args.parentId ?? null, ctx.locale);
+      return BillingHistoryService.getParentBillingSummary(
+        ctx.user?.id || "",
+        args.parentId ?? null,
+        args.userId ?? null,
+        ctx.locale
+      );
     },
   })
 );

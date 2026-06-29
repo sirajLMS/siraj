@@ -1,8 +1,8 @@
 {
+  "id": "f25db0f4-6a4f-47e0-a717-950d733d0735",
+  "prevIds": ["9712bc40-8eeb-4316-b7e3-28f289e1583a"],
   "version": "8",
   "dialect": "postgres",
-  "id": "544a84c7-d2bd-4799-b814-2e041a28df65",
-  "prevIds": ["4e6983c4-9813-40c1-9298-c4a5a58dc8fc"],
   "ddl": [
     {
       "values": ["ACTIVATED", "DEACTIVATED"],
@@ -8074,6 +8074,19 @@
       "generated": null,
       "identity": null,
       "name": "rate_currency",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "teachers"
+    },
+    {
+      "type": "payment_method",
+      "typeSchema": "public",
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "payment_method",
       "entityType": "columns",
       "schema": "public",
       "table": "teachers"

@@ -18,6 +18,7 @@ import {
 } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
 import { useRouter } from "@/shared/i18n/routing";
+import { InvoiceStatus } from "@/shared/lib/enum";
 import { AdminBillingView } from "./AdminBillingView";
 import type {
   AdminBillingSummary,
@@ -33,9 +34,9 @@ interface AdminBillingContainerProps {
 }
 
 function mapInvoiceStatus(gqlStatus: string | null, dueDate: string | null): AdminInvoiceStatus {
-  if (gqlStatus === "PAID") return "paid";
-  if (dueDate && new Date(dueDate) < new Date()) return "overdue";
-  return "pending";
+  if (gqlStatus === InvoiceStatus.PAID) return InvoiceStatus.PAID;
+  if (dueDate && new Date(dueDate) < new Date()) return "OVERDUE";
+  return "PENDING";
 }
 
 function formatCurrency(amount: string | null, currency: string | null): string {

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, useMediaQuery, useTheme } from "@mui/material";
+import { Box, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
@@ -19,14 +19,7 @@ import {
   type TeacherProfileFormData,
   type TeacherProfileFormInput,
 } from "./schemas/teacherProfileSchema";
-import type { TeacherProfileData } from "./types";
-
-interface TeacherProfileViewProps {
-  readonly profile: TeacherProfileData | null;
-  readonly isLoading: boolean;
-  readonly isSaving: boolean;
-  readonly onSave: (data: TeacherProfileFormData) => Promise<void>;
-}
+import type { TeacherProfileViewProps } from "./types";
 
 export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Readonly<TeacherProfileViewProps>) {
   const t = useTranslations("dashboard.teacherProfile");
@@ -44,12 +37,12 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
       fullName: "",
       email: "",
       phone: "",
-      gender: "female",
+      gender: "FEMALE",
       timezone: "Africa/Cairo",
       address: "",
       baseSalary: 0,
       currency: "USD",
-      paymentMethod: "paypal",
+      paymentMethod: "PAYPAL",
       zoomLink: "",
       accountStatus: true,
     },
@@ -57,16 +50,36 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
 
   useEffect(() => {
     if (profile) {
-      methods.reset(profile);
+      methods.reset({
+        ...profile,
+        gender: profile.gender ?? undefined,
+        paymentMethod: profile.paymentMethod ?? undefined,
+      });
     }
   }, [profile, methods]);
+
+  const handleDiscard = () => {
+    if (profile) {
+      methods.reset({
+        ...profile,
+        gender: profile.gender ?? undefined,
+        paymentMethod: profile.paymentMethod ?? undefined,
+      });
+    }
+  };
 
   const onSubmit = async (data: TeacherProfileFormData) => {
     await onSave(data);
   };
 
   if (isLoading || !profile) {
-    return <PageContainer>Loading...</PageContainer>;
+    return (
+      <PageContainer>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress />
+        </Box>
+      </PageContainer>
+    );
   }
 
   return (
@@ -101,11 +114,16 @@ export function TeacherProfileView({ profile, isLoading, isSaving, onSave }: Rea
             <TeacherInfoSection />
             <SalaryDetailsSection />
             <SystemConfigSection />
-            <TeacherProfileFormActions isSaving={isSaving} isMobile={isMobile} lastModified={profile.lastModified} />
+            <TeacherProfileFormActions
+              isSaving={isSaving}
+              isMobile={isMobile}
+              updatedAt={profile.updatedAt}
+              onDiscard={handleDiscard}
+            />
           </Box>
         </FormProvider>
 
-        <TeacherProfileStats totalClasses={profile.totalClasses} parentRating={profile.parentRating} />
+        <TeacherProfileStats totalClasses={profile.totalClasses} avgEngagementScore={profile.avgEngagementScore} />
       </Box>
     </PageContainer>
   );

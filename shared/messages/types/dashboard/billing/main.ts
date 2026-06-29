@@ -2,7 +2,7 @@ import type {
   AdminInvoiceStatus,
   StudentCreditStatus,
 } from "@/frontend/views/dashboard/billing/types/billingViewTypes";
-import type { ParentInvoiceStatus } from "@/frontend/views/dashboard/billing/types/parentBillingTypes";
+import type { InvoiceStatus } from "@/shared/lib/enum";
 import type { BillingManualLabels } from "./manual";
 
 export interface BillingLabels {
@@ -80,7 +80,7 @@ export interface BillingLabels {
     readonly emptyTitle: string;
     readonly emptySubtitle: string;
   };
-  readonly invoiceStatus: Record<AdminInvoiceStatus | ParentInvoiceStatus, string>;
+  readonly invoiceStatus: Record<AdminInvoiceStatus | InvoiceStatus, string>;
   readonly creditStatus: Record<StudentCreditStatus, string>;
   readonly manual: BillingManualLabels;
   readonly markAsPaidSuccess: string;

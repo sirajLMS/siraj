@@ -77,10 +77,10 @@ export const billing: BillingLabels = {
     emptySubtitle: "ستظهر دورات الفوترة القادمة هنا تلقائياً.",
   },
   invoiceStatus: {
-    overdue: "متأخرة",
-    pending: "معلقة",
-    paid: "مدفوعة",
-    unpaid: "غير مدفوعة",
+    OVERDUE: "متأخرة",
+    PENDING: "معلقة",
+    PAID: "مدفوعة",
+    UNPAID: "غير مدفوعة",
   },
   creditStatus: {
     negative_balance: "رصيد سالب",

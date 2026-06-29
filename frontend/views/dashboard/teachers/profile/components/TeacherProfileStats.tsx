@@ -1,14 +1,10 @@
-import { HistoryEduOutlined, StarHalfOutlined } from "@mui/icons-material";
+import { HistoryEduOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { Box, type Theme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { MetricCard } from "@/frontend/components/ui";
+import type { TeacherProfileStatsProps } from "../types";
 
-interface TeacherProfileStatsProps {
-  readonly totalClasses: number;
-  readonly parentRating: string;
-}
-
-export function TeacherProfileStats({ totalClasses, parentRating }: Readonly<TeacherProfileStatsProps>) {
+export function TeacherProfileStats({ totalClasses, avgEngagementScore }: Readonly<TeacherProfileStatsProps>) {
   const t = useTranslations("dashboard.teacherProfile.stats");
 
   return (
@@ -22,7 +18,7 @@ export function TeacherProfileStats({ totalClasses, parentRating }: Readonly<Tea
       })}
     >
       <MetricCard label={t("totalClasses")} value={totalClasses} icon={HistoryEduOutlined} variant="default" />
-      <MetricCard label={t("parentRating")} value={parentRating} icon={StarHalfOutlined} variant="default" />
+      <MetricCard label={t("avgEngagement")} value={avgEngagementScore} icon={TrendingUpOutlined} variant="default" />
     </Box>
   );
 }

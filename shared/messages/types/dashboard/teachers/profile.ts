@@ -33,10 +33,12 @@ export interface TeacherProfileLabels {
     readonly saveProfile: string;
     readonly discardChanges: string;
     readonly lastModified: string;
+    readonly saveSuccess: string;
+    readonly saveError: string;
   };
   readonly stats: {
     readonly totalClasses: string;
-    readonly parentRating: string;
+    readonly avgEngagement: string;
   };
   readonly validation: {
     readonly nameRequired: string;

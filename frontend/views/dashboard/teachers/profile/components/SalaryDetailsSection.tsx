@@ -10,10 +10,9 @@ export function SalaryDetailsSection() {
   const { control } = useFormContext<TeacherProfileFormData>();
 
   return (
-    <Box sx={{ component: "section" }}>
+    <Box component="section">
       <SectionHeader title={t("sections.salaryDetails")} icon={PaymentsOutlined} />
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 3 }}>
-        {/* Base Salary */}
         <Box>
           <Typography
             variant="labelMd"
@@ -40,7 +39,6 @@ export function SalaryDetailsSection() {
           />
         </Box>
 
-        {/* Currency */}
         <Box>
           <Typography
             variant="labelMd"
@@ -63,7 +61,6 @@ export function SalaryDetailsSection() {
           />
         </Box>
 
-        {/* Payment Method */}
         <Box>
           <Typography
             variant="labelMd"
@@ -77,9 +74,8 @@ export function SalaryDetailsSection() {
             render={({ field }) => (
               <FormControl fullWidth>
                 <Select {...field} sx={theme => ({ borderRadius: theme.layout.radius.card })}>
-                  <MenuItem value="bank">Bank Transfer</MenuItem>
-                  <MenuItem value="paypal">PayPal Business</MenuItem>
-                  <MenuItem value="cash">Internal Cash</MenuItem>
+                  <MenuItem value="BANK_ACCOUNT">Bank Account</MenuItem>
+                  <MenuItem value="PAYPAL">PayPal</MenuItem>
                 </Select>
               </FormControl>
             )}

@@ -1,7 +1,8 @@
+import type { InvoiceStatus } from "@/shared/lib/enum";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 import type { ParentBillingSummary, ParentInvoiceRow } from "./parentBillingTypes";
 
-export type AdminInvoiceStatus = "overdue" | "pending" | "paid";
+export type AdminInvoiceStatus = "OVERDUE" | "PENDING" | InvoiceStatus;
 
 export type StudentCreditStatus = "negative_balance" | "active_credit";
 

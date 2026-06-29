@@ -34,4 +34,5 @@ export * from "./teacher-dashboard.documents";
 export { createTeacherMutationDocument } from "./teacher-onboarding.documents";
 export * from "./test-helper.documents";
 export * from "./translation.documents";
+export * from "./user-billing-profile.documents";
 export * from "./weekly-schedule.documents";

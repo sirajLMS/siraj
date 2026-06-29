@@ -1,3 +1,8 @@
+enum AccountStatus {
+  ACTIVATED
+  DEACTIVATED
+}
+
 type AdminBillingSummary {
   id: String
   mtdRevenue: String
@@ -1621,7 +1626,7 @@ type Query {
   """Returns onboarding metrics for staff accounts."""
   onboardingMetrics: OnboardingMetrics
   parentAssociatedStudents(parentId: String!): [AssociatedStudent!]
-  parentBillingSummary(parentId: String): ParentBillingSummary
+  parentBillingSummary(parentId: String, userId: String): ParentBillingSummary
 
   """Returns the authenticated parent's complaint history with pagination."""
   parentComplaints(paginationArgs: PaginationArgs): ParentComplaintsResult
@@ -1629,7 +1634,7 @@ type Query {
   parentDashboardSchedule(date: String, paginationArgs: PaginationArgs, search: String): ParentDashboardScheduleResult
   parentDirectory(paginationArgs: PaginationArgs, search: String, statusFilter: ParentStatus): ParentDirectory
   parentDocuments(parentId: String!): [ParentDocument!]
-  parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String): ParentInvoiceHistoryResult
+  parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String, userId: String): ParentInvoiceHistoryResult
   parentProfile(parentId: String!): ParentProfile
 
   """
@@ -2340,19 +2345,23 @@ type TeacherOnboardingResult {
 
 type TeacherProfileResult {
   address: String
+  avgEngagementScore: Float
   dateOfBirth: String
   email: String
-  gender: String
+  gender: Gender
   hourlyRate: String
   id: String
   name: String
   nationalId: String
+  paymentMethod: PaymentMethod
   phone: String
   qualifications: String
   rateCurrency: String
   skypeId: String
-  status: String
+  status: AccountStatus
   timezone: String
+  totalClasses: Int
+  updatedAt: String
   zoomLink: String
   zoomUsername: String
 }
@@ -2360,9 +2369,10 @@ type TeacherProfileResult {
 input TeacherProfileUpdateInput {
   address: String
   dateOfBirth: String
-  gender: String
+  gender: Gender
   hourlyRate: String
   nationalId: String
+  paymentMethod: PaymentMethod
   phone: String
   qualifications: String
   rateCurrency: String

@@ -8,5 +8,5 @@ RETURNS BOOLEAN AS $$
 BEGIN
     RETURN EXISTS (SELECT 1 FROM pg_timezone_names WHERE name = tz);
 END;
-$$ LANGUAGE plpgsql IMMUTABLE;
+$$ LANGUAGE plpgsql STABLE;
 

@@ -1,44 +1,17 @@
 "use client";
 
-import { Box, Paper, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { useMediaQuery, useTheme } from "@mui/material";
+import type { UserBillingProfileViewProps } from "./types/userBillingProfile.types";
+import { UserBillingProfileDesktopView } from "./UserBillingProfileDesktopView";
+import { UserBillingProfileMobileView } from "./UserBillingProfileMobileView";
 
-interface UserBillingProfileViewProps {
-  readonly userId: string;
-}
+export function UserBillingProfileView(props: Readonly<UserBillingProfileViewProps>) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-export function UserBillingProfileView({ userId }: Readonly<UserBillingProfileViewProps>) {
-  const t = useTranslations("dashboard.billing");
-
-  if (!userId) {
-    return (
-      <PageContainer>
-        <Typography sx={theme => ({ color: theme.palette.error.main })}>{t("invalidUserId")}</Typography>
-      </PageContainer>
-    );
+  if (isMobile) {
+    return <UserBillingProfileMobileView {...props} />;
   }
 
-  return (
-    <RequirePermission permissions={[AppPermission.UserViewProfile]}>
-      <PageContainer>
-        <PageHeader title={t("billingProfileTitle")} />
-
-        <Box sx={{ mt: 3 }}>
-          <Paper
-            elevation={0}
-            sx={theme => ({
-              p: 3,
-              borderRadius: 2,
-              border: `1px solid ${theme.palette.outlineVariant}`,
-            })}
-          >
-            <Typography variant="body1">{t("profileForUser", { userId })}</Typography>
-          </Paper>
-        </Box>
-      </PageContainer>
-    </RequirePermission>
-  );
+  return <UserBillingProfileDesktopView {...props} />;
 }

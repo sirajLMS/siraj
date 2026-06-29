@@ -7,8 +7,8 @@ export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
   Operations.ParentInvoiceHistoryQuery,
   Types.QueryParentInvoiceHistoryArgs
 > = gql`
-  query ParentInvoiceHistory($parentId: String, $paginationArgs: PaginationArgs) {
-    parentInvoiceHistory(parentId: $parentId, paginationArgs: $paginationArgs) {
+  query ParentInvoiceHistory($parentId: String, $userId: String, $paginationArgs: PaginationArgs) {
+    parentInvoiceHistory(parentId: $parentId, userId: $userId, paginationArgs: $paginationArgs) {
       id
       rows {
         id
@@ -101,8 +101,8 @@ export const parentBillingSummaryQueryDocument: TypedDocumentNode<
   Operations.ParentBillingSummaryQuery,
   Types.QueryParentBillingSummaryArgs
 > = gql`
-  query ParentBillingSummary($parentId: String) {
-    parentBillingSummary(parentId: $parentId) {
+  query ParentBillingSummary($parentId: String, $userId: String) {
+    parentBillingSummary(parentId: $parentId, userId: $userId) {
       id
       outstandingBalance
       paidThisTerm

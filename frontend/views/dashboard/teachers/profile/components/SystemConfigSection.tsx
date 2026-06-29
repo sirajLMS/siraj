@@ -24,7 +24,6 @@ export function SystemConfigSection() {
           gap: theme.layout.sectionGap,
         })}
       >
-        {/* Zoom Link */}
         <Box>
           <Box
             sx={{
@@ -62,7 +61,6 @@ export function SystemConfigSection() {
           />
         </Box>
 
-        {/* Account Status */}
         <BaseCard
           sx={{
             display: "flex",
@@ -77,7 +75,6 @@ export function SystemConfigSection() {
               <Typography
                 variant="bodyMd"
                 sx={theme => ({
-                  fontWeight: 700,
                   color: theme.palette.primary.main,
                 })}
               >
@@ -106,7 +103,7 @@ export function SystemConfigSection() {
                   })}
                 />
                 <StatusBadge
-                  category="studentAccount"
+                  category="staffAccount"
                   status={field.value ? "activated" : "deactivated"}
                   label={field.value ? t("fields.active") : t("fields.inactive")}
                 />

@@ -4,6 +4,10 @@ type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import type * as Types from './graphql-types.ts';
 
+export type AccountStatus =
+  | 'ACTIVATED'
+  | 'DEACTIVATED';
+
 export type AdminDashboardScheduleInput = {
   date: string;
   metricFilter: string | null | undefined;
@@ -753,9 +757,10 @@ export type TeacherOnboardingInput = {
 export type TeacherProfileUpdateInput = {
   address: string | null | undefined;
   dateOfBirth: string | null | undefined;
-  gender: string | null | undefined;
+  gender: Gender | null | undefined;
   hourlyRate: string | null | undefined;
   nationalId: string | null | undefined;
+  paymentMethod: PaymentMethod | null | undefined;
   phone: string | null | undefined;
   qualifications: string | null | undefined;
   rateCurrency: string | null | undefined;
@@ -1342,6 +1347,7 @@ export type ParentInvoiceHistoryQuery_Query = { parentInvoiceHistory: ParentInvo
 
 export type ParentInvoiceHistoryQueryVariables = Exact<{
   parentId: string | null | undefined;
+  userId: string | null | undefined;
   paginationArgs: Types.PaginationArgs | null | undefined;
 }>;
 
@@ -1391,6 +1397,7 @@ export type ParentBillingSummaryQuery_Query = { parentBillingSummary: ParentBill
 
 export type ParentBillingSummaryQueryVariables = Exact<{
   parentId: string | null | undefined;
+  userId: string | null | undefined;
 }>;
 
 
@@ -1901,7 +1908,7 @@ export type OnboardingMetricsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type OnboardingMetricsQuery = OnboardingMetricsQuery_Query;
 
-export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: string | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: string | null };
+export type TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type TeacherProfileForEditQuery_Query = { teacherProfileForEdit: TeacherProfileForEditQuery_teacherProfileForEdit_TeacherProfileResult | null };
 
@@ -1913,7 +1920,7 @@ export type TeacherProfileForEditQueryVariables = Exact<{
 
 export type TeacherProfileForEditQuery = TeacherProfileForEditQuery_Query;
 
-export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: string | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: string | null };
+export type UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, skypeId: string | null, zoomLink: string | null, zoomUsername: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, status: Types.AccountStatus | null, updatedAt: string | null, paymentMethod: Types.PaymentMethod | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateTeacherProfileMutation_Mutation = { updateTeacherProfile: UpdateTeacherProfileMutation_updateTeacherProfile_TeacherProfileResult | null };
 
@@ -2331,6 +2338,37 @@ export type TranslatedMessageQueryVariables = Exact<{
 
 
 export type TranslatedMessageQuery = TranslatedMessageQuery_Query;
+
+export type UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary = { id: string | null, outstandingBalance: string | null, paidThisTerm: string | null, nextDueDate: string | null, activeStudents: number | null };
+
+export type UserBillingProfileSummaryQuery_Query = { parentBillingSummary: UserBillingProfileSummaryQuery_parentBillingSummary_ParentBillingSummary | null };
+
+
+export type UserBillingProfileSummaryQueryVariables = Exact<{
+  userId: string | null | undefined;
+  parentId: string | null | undefined;
+}>;
+
+
+export type UserBillingProfileSummaryQuery = UserBillingProfileSummaryQuery_Query;
+
+export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: string | null, status: string | null, invoiceType: string | null, studentId: string | null, studentName: string | null };
+
+export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult = { id: string | null, totalCount: number | null, rows: Array<UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow> | null, pageInfo: UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_pageInfo_PageInfo | null };
+
+export type UserBillingProfileInvoiceHistoryQuery_Query = { parentInvoiceHistory: UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult | null };
+
+
+export type UserBillingProfileInvoiceHistoryQueryVariables = Exact<{
+  userId: string | null | undefined;
+  parentId: string | null | undefined;
+  paginationArgs: Types.PaginationArgs | null | undefined;
+}>;
+
+
+export type UserBillingProfileInvoiceHistoryQuery = UserBillingProfileInvoiceHistoryQuery_Query;
 
 export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass = { id: string | null, studentName: string | null, studentId: string | null, duration: number | null, startTime: string | null, day: string | null, executionState: string | null, outcome: string | null };
 

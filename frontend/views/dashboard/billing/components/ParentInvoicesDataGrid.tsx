@@ -6,7 +6,8 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
-import type { ParentInvoiceRow, ParentInvoiceStatus } from "../types/parentBillingTypes";
+import { InvoiceStatus } from "@/shared/lib/enum";
+import type { ParentInvoiceRow } from "../types/parentBillingTypes";
 
 export interface ParentInvoicesDataGridLabels {
   readonly invoiceNumber: string;
@@ -21,7 +22,7 @@ export interface ParentInvoicesDataGridLabels {
   readonly downloadPdf: string;
   readonly payNow: string;
   readonly noEntries: string;
-  readonly statusLabels: Record<ParentInvoiceStatus, string>;
+  readonly statusLabels: Record<InvoiceStatus, string>;
 }
 
 interface ParentInvoicesDataGridProps {
@@ -125,7 +126,7 @@ export function ParentInvoicesDataGrid({
             return null;
           }
 
-          if (row.status === "unpaid") {
+          if (row.status === InvoiceStatus.UNPAID) {
             return (
               <PrimaryPageAction
                 size="small"

@@ -3,17 +3,13 @@ import { Box, Button, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 
 import { PrimaryPageAction } from "@/frontend/components/ui/ActionButtons";
-
-interface TeacherProfileFormActionsProps {
-  readonly isSaving: boolean;
-  readonly isMobile: boolean;
-  readonly lastModified: string;
-}
+import type { TeacherProfileFormActionsProps } from "../types";
 
 export function TeacherProfileFormActions({
   isSaving,
   isMobile,
-  lastModified,
+  updatedAt,
+  onDiscard,
 }: Readonly<TeacherProfileFormActionsProps>) {
   const t = useTranslations("dashboard.teacherProfile");
 
@@ -58,6 +54,7 @@ export function TeacherProfileFormActions({
         <Button
           variant="outlined"
           fullWidth={isMobile}
+          onClick={onDiscard}
           sx={theme => ({
             borderRadius: theme.layout.radius.button,
             px: 4,
@@ -83,10 +80,7 @@ export function TeacherProfileFormActions({
             mb: 0.5,
           })}
         >
-          Last modified
-        </Typography>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
-          {lastModified}
+          {t("actions.lastModified", { date: new Date(updatedAt).toLocaleDateString() })}
         </Typography>
       </Box>
     </Box>

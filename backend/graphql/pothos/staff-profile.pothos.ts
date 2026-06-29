@@ -1,25 +1,8 @@
+import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teacher.types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { AccountStatusPothosObject, GenderPothosObject, PaymentMethodPothosObject } from "./enum.pothos";
 
-export type TeacherProfileResultDefinition = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  nationalId: string | null;
-  dateOfBirth: string | null;
-  gender: string | null;
-  address: string | null;
-  qualifications: string | null;
-  skypeId: string | null;
-  zoomLink: string | null;
-  zoomUsername: string | null;
-  timezone: string;
-  hourlyRate: string | null;
-  rateCurrency: string | null;
-  status: string;
-};
-
-const TeacherProfileResultRef = gqlSchemaBuilder.objectRef<TeacherProfileResultDefinition>("TeacherProfileResult");
+const TeacherProfileResultRef = gqlSchemaBuilder.objectRef<TeacherProfileReturnType>("TeacherProfileResult");
 
 export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implement({
   fields: t => ({
@@ -29,7 +12,7 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
     phone: t.exposeString("phone", { nullable: true }),
     nationalId: t.exposeString("nationalId", { nullable: true }),
     dateOfBirth: t.exposeString("dateOfBirth", { nullable: true }),
-    gender: t.exposeString("gender", { nullable: true }),
+    gender: t.expose("gender", { type: GenderPothosObject, nullable: true }),
     address: t.exposeString("address", { nullable: true }),
     qualifications: t.exposeString("qualifications", { nullable: true }),
     skypeId: t.exposeString("skypeId", { nullable: true }),
@@ -38,34 +21,22 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
     timezone: t.exposeString("timezone"),
     hourlyRate: t.exposeString("hourlyRate", { nullable: true }),
     rateCurrency: t.exposeString("rateCurrency", { nullable: true }),
-    status: t.exposeString("status"),
+    status: t.expose("status", { type: AccountStatusPothosObject }),
+    updatedAt: t.exposeString("updatedAt"),
+    paymentMethod: t.expose("paymentMethod", { type: PaymentMethodPothosObject, nullable: true }),
+    totalClasses: t.exposeInt("totalClasses"),
+    avgEngagementScore: t.exposeFloat("avgEngagementScore"),
   }),
 });
 
-export type TeacherProfileUpdateInputDefinition = {
-  nationalId?: string | null;
-  phone?: string | null;
-  dateOfBirth?: string | null;
-  gender?: string | null;
-  address?: string | null;
-  qualifications?: string | null;
-  skypeId?: string | null;
-  zoomLink?: string | null;
-  zoomUsername?: string | null;
-  zoomPassword?: string | null;
-  timezone?: string | null;
-  hourlyRate?: string | null;
-  rateCurrency?: string | null;
-};
-
 export const TeacherProfileUpdateInputPothosObject = gqlSchemaBuilder
-  .inputRef<TeacherProfileUpdateInputDefinition>("TeacherProfileUpdateInput")
+  .inputRef<TeacherProfileUpdateInputType>("TeacherProfileUpdateInput")
   .implement({
     fields: t => ({
       nationalId: t.string({ required: false }),
       phone: t.string({ required: false }),
       dateOfBirth: t.string({ required: false }),
-      gender: t.string({ required: false }),
+      gender: t.field({ type: GenderPothosObject, required: false }),
       address: t.string({ required: false }),
       qualifications: t.string({ required: false }),
       skypeId: t.string({ required: false }),
@@ -75,5 +46,6 @@ export const TeacherProfileUpdateInputPothosObject = gqlSchemaBuilder
       timezone: t.string({ required: false }),
       hourlyRate: t.string({ required: false }),
       rateCurrency: t.string({ required: false }),
+      paymentMethod: t.field({ type: PaymentMethodPothosObject, required: false }),
     }),
   });

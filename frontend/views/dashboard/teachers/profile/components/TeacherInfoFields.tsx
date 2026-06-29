@@ -114,7 +114,7 @@ export function GenderField() {
         render={({ field }) => (
           <RadioGroup {...field} row sx={{ height: 56, alignItems: "center" }}>
             <FormControlLabel
-              value="male"
+              value="MALE"
               control={
                 <Radio
                   sx={theme => ({
@@ -128,7 +128,7 @@ export function GenderField() {
               label={t("fields.male")}
             />
             <FormControlLabel
-              value="female"
+              value="FEMALE"
               control={
                 <Radio
                   sx={theme => ({

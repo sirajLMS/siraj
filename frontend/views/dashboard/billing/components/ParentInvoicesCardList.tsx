@@ -4,13 +4,14 @@ import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls, PrimaryPageAction, StatusBadge } from "@/frontend/components/ui";
-import type { ParentInvoiceRow, ParentInvoiceStatus } from "../types/parentBillingTypes";
+import { InvoiceStatus } from "@/shared/lib/enum";
+import type { ParentInvoiceRow } from "../types/parentBillingTypes";
 
 interface ParentInvoicesCardListLabels {
   readonly viewDetails: string;
   readonly downloadPdf: string;
   readonly payNow: string;
-  readonly statusLabels: Record<ParentInvoiceStatus, string>;
+  readonly statusLabels: Record<InvoiceStatus, string>;
 }
 
 interface ParentInvoicesCardListProps {
@@ -82,7 +83,7 @@ export function ParentInvoicesCardList({
               {row.fee}
             </Typography>
           </Box>
-          {canView && row.status === "unpaid" && (
+          {canView && row.status === InvoiceStatus.UNPAID && (
             <PrimaryPageAction
               fullWidth
               onClick={() => {
@@ -92,7 +93,7 @@ export function ParentInvoicesCardList({
               {labels.payNow}
             </PrimaryPageAction>
           )}
-          {canView && row.status === "paid" && (
+          {canView && row.status === InvoiceStatus.PAID && (
             <StyledActionsContainer sx={{ gap: 0.5 }}>
               <IconButton size="small" aria-label={labels.viewDetails}>
                 <VisibilityOutlined fontSize="small" />

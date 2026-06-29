@@ -21,6 +21,11 @@ export type Scalars = {
   StringMap: { input: Record<string, string>; output: Record<string, string>; }
 };
 
+export enum AccountStatus {
+  Activated = 'ACTIVATED',
+  Deactivated = 'DEACTIVATED'
+}
+
 export type AdminBillingSummary = {
   __typename?: 'AdminBillingSummary';
   id: Maybe<Scalars['String']['output']>;
@@ -2194,6 +2199,7 @@ export type QueryParentAssociatedStudentsArgs = {
 
 export type QueryParentBillingSummaryArgs = {
   parentId: InputMaybe<Scalars['String']['input']>;
+  userId: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -2224,6 +2230,7 @@ export type QueryParentDocumentsArgs = {
 export type QueryParentInvoiceHistoryArgs = {
   paginationArgs: InputMaybe<PaginationArgs>;
   parentId: InputMaybe<Scalars['String']['input']>;
+  userId: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3023,19 +3030,23 @@ export type TeacherOnboardingResult = {
 export type TeacherProfileResult = {
   __typename?: 'TeacherProfileResult';
   address: Maybe<Scalars['String']['output']>;
+  avgEngagementScore: Maybe<Scalars['Float']['output']>;
   dateOfBirth: Maybe<Scalars['String']['output']>;
   email: Maybe<Scalars['String']['output']>;
-  gender: Maybe<Scalars['String']['output']>;
+  gender: Maybe<Gender>;
   hourlyRate: Maybe<Scalars['String']['output']>;
   id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   nationalId: Maybe<Scalars['String']['output']>;
+  paymentMethod: Maybe<PaymentMethod>;
   phone: Maybe<Scalars['String']['output']>;
   qualifications: Maybe<Scalars['String']['output']>;
   rateCurrency: Maybe<Scalars['String']['output']>;
   skypeId: Maybe<Scalars['String']['output']>;
-  status: Maybe<Scalars['String']['output']>;
+  status: Maybe<AccountStatus>;
   timezone: Maybe<Scalars['String']['output']>;
+  totalClasses: Maybe<Scalars['Int']['output']>;
+  updatedAt: Maybe<Scalars['String']['output']>;
   zoomLink: Maybe<Scalars['String']['output']>;
   zoomUsername: Maybe<Scalars['String']['output']>;
 };
@@ -3043,9 +3054,10 @@ export type TeacherProfileResult = {
 export type TeacherProfileUpdateInput = {
   address: InputMaybe<Scalars['String']['input']>;
   dateOfBirth: InputMaybe<Scalars['String']['input']>;
-  gender: InputMaybe<Scalars['String']['input']>;
+  gender: InputMaybe<Gender>;
   hourlyRate: InputMaybe<Scalars['String']['input']>;
   nationalId: InputMaybe<Scalars['String']['input']>;
+  paymentMethod: InputMaybe<PaymentMethod>;
   phone: InputMaybe<Scalars['String']['input']>;
   qualifications: InputMaybe<Scalars['String']['input']>;
   rateCurrency: InputMaybe<Scalars['String']['input']>;

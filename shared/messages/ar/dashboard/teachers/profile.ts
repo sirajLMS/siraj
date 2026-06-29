@@ -35,10 +35,12 @@ export const profile: TeacherProfileLabels = {
     saveProfile: "حفظ الملف الشخصي",
     discardChanges: "تجاهل التغييرات",
     lastModified: "آخر تعديل: {date}",
+    saveSuccess: "تم حفظ الملف الشخصي بنجاح",
+    saveError: "فشل حفظ الملف الشخصي",
   },
   stats: {
     totalClasses: "إجمالي الحصص المقدمة",
-    parentRating: "متوسط تقييم أولياء الأمور",
+    avgEngagement: "متوسط درجة التفاعل",
   },
   validation: {
     nameRequired: "الاسم الكامل مطلوب",

@@ -7,8 +7,8 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type { SearchTeacherAvailabilityQuery } from "@/frontend/graphql/generated/gql/graphql";
-import { AppPermission, type DayOfWeek, type Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/graphql/generated/gql/graphql";
+import { AppPermission, type Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
 import { TeacherAvailabilityView } from "./TeacherAvailabilityView";
 import type {
@@ -30,6 +30,41 @@ function buildGraphQLInput(formData: AvailabilitySearchFormData) {
 
 type AvailabilitySearchData = NonNullable<SearchTeacherAvailabilityQuery["searchTeacherAvailability"]>;
 
+type AvailabilityGap = {
+  id: string | null;
+  teacherId: string | null;
+  teacherName: string | null;
+  teacherGender: string | null;
+  dayOfWeek: DayOfWeek | null;
+  gapStartTime: string | null;
+  gapEndTime: string | null;
+  timezone: string | null;
+};
+
+function addGapToGrid(grid: Record<string, Partial<Record<DayOfWeek, AvailabilityEntry[]>>>, gap: AvailabilityGap) {
+  if (!gap?.dayOfWeek || !gap.gapStartTime || !gap.gapEndTime) return;
+
+  const timeKey = `${gap.gapStartTime}-${gap.gapEndTime}`;
+  if (!grid[timeKey]) {
+    grid[timeKey] = {};
+  }
+
+  const entry: AvailabilityEntry = {
+    id: gap.id ?? "",
+    teacherName: gap.teacherName ?? "Unknown",
+    localTime: gap.gapStartTime,
+  };
+
+  const timeSlot = grid[timeKey];
+  if (timeSlot) {
+    const day = gap.dayOfWeek as DayOfWeek;
+    if (!timeSlot[day]) {
+      timeSlot[day] = [];
+    }
+    (timeSlot[day] as AvailabilityEntry[]).push(entry);
+  }
+}
+
 function transformToWeeklyAvailability(data: AvailabilitySearchData | null | undefined): WeeklyAvailability {
   if (!data?.teachers) return {};
 
@@ -38,26 +73,7 @@ function transformToWeeklyAvailability(data: AvailabilitySearchData | null | und
   for (const teacher of data.teachers) {
     if (!teacher?.gaps) continue;
     for (const gap of teacher.gaps) {
-      if (!gap?.dayOfWeek || !gap.gapStartTime || !gap.gapEndTime) continue;
-
-      const timeKey = `${gap.gapStartTime}-${gap.gapEndTime}`;
-      if (!grid[timeKey]) {
-        grid[timeKey] = {};
-      }
-
-      const entry: AvailabilityEntry = {
-        id: gap.id ?? "",
-        teacherName: gap.teacherName ?? "Unknown",
-        localTime: gap.gapStartTime,
-      };
-
-      const timeSlot = grid[timeKey];
-      if (timeSlot) {
-        if (!timeSlot[gap.dayOfWeek]) {
-          timeSlot[gap.dayOfWeek] = [];
-        }
-        (timeSlot[gap.dayOfWeek] as AvailabilityEntry[]).push(entry);
-      }
+      addGapToGrid(grid, gap);
     }
   }
 

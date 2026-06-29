@@ -1,16 +1,6 @@
 import { Box, type Theme, Typography } from "@mui/material";
-import type { ElementType } from "react";
 
-export {
-  BadgeOutlined,
-  PaymentsOutlined,
-  SettingsSuggestOutlined,
-} from "@mui/icons-material";
-
-interface SectionHeaderProps {
-  readonly title: string;
-  readonly icon: ElementType;
-}
+import type { SectionHeaderProps } from "../types";
 
 export function SectionHeader({ title, icon: Icon }: Readonly<SectionHeaderProps>) {
   return (
@@ -26,9 +16,7 @@ export function SectionHeader({ title, icon: Icon }: Readonly<SectionHeaderProps
       })}
     >
       <Icon />
-      <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
-        {title}
-      </Typography>
+      <Typography variant="titleLg">{title}</Typography>
     </Box>
   );
 }

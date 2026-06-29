@@ -1,20 +1,33 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  AccountStatus as GqlAccountStatus,
+  type Gender as GqlGender,
+  type PaymentMethod as GqlPaymentMethod,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   teacherProfileForEditQueryDocument,
   updateTeacherProfileMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/staff-profile.documents";
 import { logger } from "@/frontend/utils/logger";
+import type { Gender, PaymentMethod } from "@/shared/lib/enum";
 import type { TeacherProfileFormData } from "./schemas/teacherProfileSchema";
 import { TeacherProfileView } from "./TeacherProfileView";
+import type { TeacherProfileData } from "./types";
 
 export function TeacherProfileContainer() {
   const params = useParams();
   const id = typeof params?.id === "string" ? params.id : "";
+
+  const notifications = useNotifications();
+  const tActions = useTranslations("dashboard.teacherProfile.actions");
 
   const { data, loading, refetch } = useQuery(teacherProfileForEditQueryDocument, {
     variables: { teacherId: id },
@@ -30,11 +43,12 @@ export function TeacherProfileContainer() {
           teacherId: id,
           input: {
             phone: formData.phone || null,
-            gender: formData.gender,
+            gender: formData.gender as GqlGender,
             timezone: formData.timezone,
             address: formData.address || null,
             hourlyRate: String(formData.baseSalary),
             rateCurrency: formData.currency,
+            paymentMethod: formData.paymentMethod as GqlPaymentMethod,
             zoomLink: formData.zoomLink || null,
             dateOfBirth: null,
             nationalId: null,
@@ -46,28 +60,30 @@ export function TeacherProfileContainer() {
         },
       });
       await refetch();
+      notifications.show(tActions("saveSuccess"), { severity: "success", autoHideDuration: 4000 });
     } catch (error) {
       logger.error("Failed to update teacher profile", { error });
+      notifications.show(tActions("saveError"), { severity: "error", autoHideDuration: 5000 });
     }
   };
 
-  const profile = data?.teacherProfileForEdit
+  const profile: TeacherProfileData | null = data?.teacherProfileForEdit
     ? {
         id: data.teacherProfileForEdit.id ?? "",
         fullName: data.teacherProfileForEdit.name ?? "",
         email: data.teacherProfileForEdit.email ?? "",
         phone: data.teacherProfileForEdit.phone ?? "",
-        gender: (data.teacherProfileForEdit.gender?.toLowerCase() as "male" | "female") ?? "female",
+        gender: data.teacherProfileForEdit.gender as unknown as Gender | null,
         timezone: data.teacherProfileForEdit.timezone ?? "",
         address: data.teacherProfileForEdit.address ?? "",
         baseSalary: Number.parseFloat(data.teacherProfileForEdit.hourlyRate ?? "0"),
         currency: data.teacherProfileForEdit.rateCurrency ?? "USD",
-        paymentMethod: "paypal",
+        paymentMethod: data.teacherProfileForEdit.paymentMethod as unknown as PaymentMethod | null,
         zoomLink: data.teacherProfileForEdit.zoomLink ?? "",
-        accountStatus: data.teacherProfileForEdit.status === "ACTIVATED",
-        lastModified: new Date().toLocaleDateString(),
-        totalClasses: 0,
-        parentRating: "0.0",
+        accountStatus: data.teacherProfileForEdit.status === GqlAccountStatus.Activated,
+        updatedAt: data.teacherProfileForEdit.updatedAt ?? "",
+        totalClasses: data.teacherProfileForEdit.totalClasses ?? 0,
+        avgEngagementScore: data.teacherProfileForEdit.avgEngagementScore ?? 0,
       }
     : null;
 

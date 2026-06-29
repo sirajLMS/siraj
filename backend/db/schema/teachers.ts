@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { check, date, index, integer, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { encryptedText } from "./custom-types";
-import { accountStatusEnum, countryCodeEnum, genderEnum } from "./enums";
+import { accountStatusEnum, countryCodeEnum, genderEnum, paymentMethodEnum } from "./enums";
 import { timezones } from "./timezones";
 import { users } from "./users";
 
@@ -38,6 +38,7 @@ export const teachers = pgTable(
     timezone: varchar("timezone", { length: 100 }).notNull(),
     hourlyRate: numeric("hourly_rate", { precision: 12, scale: 2 }),
     rateCurrency: varchar("rate_currency", { length: 10 }),
+    paymentMethod: paymentMethodEnum("payment_method"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },

@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import type { TeacherProfileUpdateInput } from "@/frontend/graphql/generated/gql/graphql-types";
+import { Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { teachers as demoTeachers } from "@/shared/demo-users";
-import { demoLoginMutationDocument } from "../sharedDocuments/auth.documents";
 import { teacherDirectoryQueryDocument } from "../sharedDocuments/staff-directory.documents";
 import {
   teacherProfileForEditQueryDocument,
   updateTeacherProfileMutationDocument,
 } from "../sharedDocuments/staff-profile.documents";
 import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
-import { authenticatedRequest, loginDemoUser } from "./helpers";
+import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -19,6 +19,7 @@ function makeUpdateInput(overrides: Partial<TeacherProfileUpdateInput>): Teacher
     gender: overrides.gender ?? null,
     hourlyRate: overrides.hourlyRate ?? null,
     nationalId: overrides.nationalId ?? null,
+    paymentMethod: overrides.paymentMethod ?? null,
     phone: overrides.phone ?? null,
     qualifications: overrides.qualifications ?? null,
     rateCurrency: overrides.rateCurrency ?? null,
@@ -97,19 +98,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("login as super_admin to perform teacher queries", async () => {
-    const result = await testClient.mutate({
-      mutation: demoLoginMutationDocument,
-      variables: {
-        input: {
-          groupSlug: "super_admin",
-        },
-      },
-    });
-
-    expect(result.data).toBeDefined();
-    expect(result.error).toBeUndefined();
-    authToken = result.data?.demoLogin?.token || null;
-    expect(authToken).not.toBeNull();
+    authToken = await loginDemoUser("super_admin");
   });
 
   test("returns list of teachers when authenticated", async () => {
@@ -152,22 +141,10 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("teacherDirectory returns error for unauthorized teacher", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
-
-    const result = await testClient.query({
-      query: teacherDirectoryQueryDocument,
-      variables: {
-        search: null,
-        paginationArgs: null,
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
+    await assertOperationDenied("teacher_default", "query", teacherDirectoryQueryDocument, {
+      search: null,
+      paginationArgs: null,
     });
-
-    expect(result.error).toBeDefined();
   });
 
   test("teacherDirectory returns directory data for authorized admin", async () => {
@@ -210,42 +187,16 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("teacherProfileForEdit — teacher role is denied access", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
     const teacherId = await getSeededTeacherId();
-
-    const editProfileResult = await testClient.query({
-      query: teacherProfileForEditQueryDocument,
-      variables: { teacherId },
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
-      errorPolicy: "all",
-    });
-    expect(editProfileResult.error).toBeDefined();
+    await assertOperationDenied("teacher_default", "query", teacherProfileForEditQueryDocument, { teacherId });
   });
 
   test("updateTeacherProfile — teacher role is denied to update profile", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
     const teacherId = await getSeededTeacherId();
-
-    const updateProfileDeniedResult = await testClient.mutate({
-      mutation: updateTeacherProfileMutationDocument,
-      variables: {
-        teacherId,
-        input: makeUpdateInput({
-          phone: "+9999999999",
-        }),
-      },
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
-      errorPolicy: "all",
+    await assertOperationDenied("teacher_default", "mutate", updateTeacherProfileMutationDocument, {
+      teacherId,
+      input: makeUpdateInput({ phone: "+9999999999" }),
     });
-    expect(updateProfileDeniedResult.error).toBeDefined();
   });
 
   test("updateTeacherProfile — returns error for non-existent teacher", async () => {
@@ -258,9 +209,10 @@ describe("GraphQL Teacher Integration Tests", () => {
         input: {
           address: "Fake Address",
           dateOfBirth: "1990-01-01",
-          gender: "Male",
+          gender: Gender.Male,
           hourlyRate: "20",
           nationalId: "12345",
+          paymentMethod: PaymentMethod.BankAccount,
           phone: "+1111111111",
           qualifications: "None",
           rateCurrency: "USD",
@@ -291,9 +243,10 @@ describe("GraphQL Teacher Integration Tests", () => {
       input: {
         address: null,
         dateOfBirth: null,
-        gender: "Female",
+        gender: Gender.Female,
         hourlyRate: null,
         nationalId: null,
+        paymentMethod: null,
         phone: newTeacherPhoneString,
         qualifications: null,
         rateCurrency: null,
@@ -318,9 +271,10 @@ describe("GraphQL Teacher Integration Tests", () => {
       input: {
         address: "Updated by admin and verified by tests",
         dateOfBirth: "1985-05-15",
-        gender: "Male",
+        gender: Gender.Male,
         hourlyRate: "50",
         nationalId: "999888",
+        paymentMethod: PaymentMethod.Paypal,
         phone: null,
         qualifications: "Certified Instructor",
         rateCurrency: "USD",

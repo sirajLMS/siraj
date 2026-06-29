@@ -101,10 +101,10 @@ function buildTableLabels(t: BillingTranslator) {
 function buildStatusLabels(t: BillingTranslator) {
   return {
     invoiceStatus: {
-      overdue: t("invoiceStatus.overdue"),
-      pending: t("invoiceStatus.pending"),
-      paid: t("invoiceStatus.paid"),
-      unpaid: t("invoiceStatus.unpaid"),
+      OVERDUE: t("invoiceStatus.overdue"),
+      PENDING: t("invoiceStatus.pending"),
+      PAID: t("invoiceStatus.paid"),
+      UNPAID: t("invoiceStatus.unpaid"),
     },
     creditStatus: {
       negative_balance: t("creditStatus.negative_balance"),

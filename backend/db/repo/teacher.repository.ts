@@ -3,7 +3,16 @@ import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
-import type { PaginationArgs, TeacherCreateResult, TeacherEntityInput } from "@/backend/types";
+import type {
+  PaginationArgs,
+  TeacherCreateResult,
+  TeacherDirectoryMetrics,
+  TeacherDirectoryRow,
+  TeacherEntityInput,
+  TeacherProfileReturnType,
+  TeacherProfileUpdateInputType,
+} from "@/backend/types";
+import type { AccountStatus, Gender, PaymentMethod } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 export namespace TeacherRepository {
@@ -23,13 +32,6 @@ export namespace TeacherRepository {
     if (existingTeacher.length > 0) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("teacher.alreadyExists"));
-    }
-
-    try {
-      Intl.DateTimeFormat(undefined, { timeZone: input.timezone });
-    } catch {
-      const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("teacher.invalidTimezone"));
     }
 
     const [created] = await queryDb
@@ -71,21 +73,6 @@ export namespace TeacherRepository {
       createdAt: created.createdAt,
     };
   }
-
-  export type TeacherDirectoryRow = {
-    id: string;
-    userId: string;
-    name: string;
-    email: string;
-    avatarUrl: string | null;
-    status: string;
-    zoomLink: string | null;
-  };
-
-  export type TeacherDirectoryMetrics = {
-    activated: number;
-    deactivated: number;
-  };
 
   export const findByUserId = async (userId: string, tx?: DBTransaction) => {
     const queryDb = tx ?? db;
@@ -153,12 +140,17 @@ export namespace TeacherRepository {
     }
 
     const countQuery = queryDb
-      .select({ count: sql<number>`count(*)::int` })
+      .select({ count: sql<number>`count(*)`.mapWith(Number) })
       .from(teachers)
       .innerJoin(users, eq(teachers.userId, users.id))
       .where(conditions);
 
-    const [rows, countResult] = await Promise.all([rowsQuery, countQuery]);
+    const [rawRows, countResult] = await Promise.all([rowsQuery, countQuery]);
+
+    const rows = rawRows.map(row => ({
+      ...row,
+      status: row.status as AccountStatus,
+    }));
 
     const totalCount = countResult[0]?.count ?? 0;
 
@@ -183,29 +175,10 @@ export namespace TeacherRepository {
     };
   };
 
-  export type TeacherProfileResult = {
-    id: string;
-    name: string;
-    email: string;
-    phone: string | null;
-    nationalId: string | null;
-    dateOfBirth: string | null;
-    gender: string | null;
-    address: string | null;
-    qualifications: string | null;
-    skypeId: string | null;
-    zoomLink: string | null;
-    zoomUsername: string | null;
-    timezone: string;
-    hourlyRate: string | null;
-    rateCurrency: string | null;
-    status: string;
-  };
-
   export const getTeacherProfileForEdit = async (
     teacherId: string,
     tx?: DBTransaction
-  ): Promise<TeacherProfileResult | null> => {
+  ): Promise<TeacherProfileReturnType | null> => {
     const queryDb = tx ?? db;
     const [teacher] = await queryDb
       .select({
@@ -224,7 +197,24 @@ export namespace TeacherRepository {
         timezone: teachers.timezone,
         hourlyRate: teachers.hourlyRate,
         rateCurrency: teachers.rateCurrency,
+        paymentMethod: teachers.paymentMethod,
         status: teachers.status,
+        updatedAt: teachers.updatedAt,
+        totalClasses: sql<number>`(
+          SELECT COUNT(*)
+          FROM class_instances
+          WHERE class_instances.teacher_id = ${teachers.id}
+            AND class_instances.outcome = 'TAKEN'
+            AND class_instances.execution_state = 'COMPLETED'
+            AND class_instances.deleted_at IS NULL
+        )`.mapWith(Number),
+        avgEngagementScore: sql<number>`(
+          SELECT COALESCE(AVG(class_instance_performance.engagement_score), 0)
+          FROM class_instance_performance
+          JOIN class_instances ON class_instances.id = class_instance_performance.class_instance_id
+          WHERE class_instances.teacher_id = ${teachers.id}
+            AND class_instance_performance.engagement_score IS NOT NULL
+        )`.mapWith(Number),
       })
       .from(teachers)
       .innerJoin(users, eq(teachers.userId, users.id))
@@ -234,24 +224,45 @@ export namespace TeacherRepository {
     if (!teacher) return null;
 
     return {
-      ...teacher,
+      id: teacher.id,
+      name: teacher.name,
+      email: teacher.email,
+      phone: teacher.phone,
+      nationalId: teacher.nationalId,
+      gender: teacher.gender as Gender | null,
+      address: teacher.address,
+      qualifications: teacher.qualifications,
+      skypeId: teacher.skypeId,
+      zoomLink: teacher.zoomLink,
+      zoomUsername: teacher.zoomUsername,
+      timezone: teacher.timezone,
+      hourlyRate: teacher.hourlyRate,
+      rateCurrency: teacher.rateCurrency,
+      paymentMethod: teacher.paymentMethod as PaymentMethod | null,
+      status: teacher.status as AccountStatus,
       dateOfBirth: teacher.dateOfBirth ? new Date(teacher.dateOfBirth).toISOString() : null,
+      updatedAt: new Date(teacher.updatedAt).toISOString(),
+      totalClasses: teacher.totalClasses,
+      avgEngagementScore: teacher.avgEngagementScore,
     };
   };
 
   export const updateTeacherProfile = async (
     teacherId: string,
-    input: Partial<typeof teachers.$inferInsert>,
+    input: TeacherProfileUpdateInputType,
     tx?: DBTransaction
   ): Promise<boolean> => {
     const queryDb = tx ?? db;
     const now = new Date();
+    const { timezone: tzInput, ...restInput } = input;
+    const setInput = {
+      ...restInput,
+      ...(tzInput != null ? { timezone: tzInput } : {}),
+      updatedAt: now,
+    };
     const [updated] = await queryDb
       .update(teachers)
-      .set({
-        ...input,
-        updatedAt: now,
-      })
+      .set(setInput)
       .where(eq(teachers.id, teacherId))
       .returning({ id: teachers.id });
     return !!updated;

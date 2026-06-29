@@ -304,6 +304,7 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
 
     const data = await authenticatedRequest(adminToken, "query", parentInvoiceHistoryQueryDocument, {
       parentId,
+      userId: null,
       paginationArgs: null,
     });
 
@@ -319,6 +320,7 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
   test("parentInvoiceHistory — teacher role denied", async () => {
     await assertOperationDenied("teacher_default", "query", parentInvoiceHistoryQueryDocument, {
       parentId: "00000000-0000-0000-0000-000000000000",
+      userId: null,
       paginationArgs: null,
     });
   });

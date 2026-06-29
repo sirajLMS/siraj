@@ -1,4 +1,6 @@
-export type ParentInvoiceStatus = "paid" | "unpaid";
+import type { InvoiceStatus } from "@/shared/lib/enum";
+
+export type ParentInvoiceStatus = `${InvoiceStatus}`;
 
 export interface ParentBillingSummary {
   readonly outstandingBalance: string;
@@ -15,5 +17,5 @@ export interface ParentInvoiceRow {
   readonly dueDate: string;
   readonly paidDate: string;
   readonly fee: string;
-  readonly status: ParentInvoiceStatus;
+  readonly status: InvoiceStatus;
 }

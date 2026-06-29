@@ -36,7 +36,7 @@ export const InvoiceOverdue: Story = {
   args: {
     label: "OVERDUE",
     category: "invoice",
-    status: "overdue",
+    status: "OVERDUE",
   },
 };
 

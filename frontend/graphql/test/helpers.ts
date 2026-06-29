@@ -1,9 +1,12 @@
 import { expect } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import type { CreateRecurringClassInput } from "../generated/gql/graphql-types";
+import { teachers as demoTeachers } from "@/shared/demo-users";
 import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocuments/auth.documents";
 import { createRecurringClassMutationDocument } from "../sharedDocuments/recurring-class.documents";
 import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
+import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
+import { teacherWeeklyScheduleGridQueryDocument } from "../sharedDocuments/weekly-schedule.documents";
 import { createTestEntitiesMutationDocument } from "../sharedDocuments/test-helper.documents";
 import { testClient } from "./testClient";
 
@@ -181,6 +184,81 @@ export async function fetchFirstStudentTeacherPair(
   }
 
   throw new Error("Could not find matching student/teacher pair");
+}
+
+export async function fetchDemoTeacherId(adminToken: string): Promise<string> {
+  const demoTeacher = demoTeachers[0];
+  if (!demoTeacher) throw new Error("No demo teachers configured");
+
+  const result = await testClient.query({
+    query: teachersQueryDocument,
+    variables: { search: demoTeacher.name, limit: 1 },
+    context: { headers: { Authorization: `Bearer ${adminToken}` } },
+  });
+
+  const teacherId = result.data?.teachers?.[0]?.id;
+  if (!teacherId) throw new Error("Could not find demo teacher via teachers query");
+  return teacherId;
+}
+
+export async function fetchNonDefaultTeacherId(adminToken: string): Promise<string | null> {
+  const result = await testClient.query({
+    query: teachersQueryDocument,
+    variables: { search: "", limit: 10 },
+    context: { headers: { Authorization: `Bearer ${adminToken}` } },
+  });
+
+  const defaultTeacher = demoTeachers[0];
+  const teachers = result.data?.teachers;
+  if (!teachers || teachers.length < 2) return null;
+  const other = teachers.find(t => t.name !== defaultTeacher?.name && t.id);
+  return other?.id ?? null;
+}
+
+export async function fetchFirstClassInstanceId(
+  adminToken: string,
+  date: string
+): Promise<string> {
+  const result = await testClient.query({
+    query: dailyScheduleListQueryDocument,
+    variables: { date, teacherId: null, search: null, metricFilter: null },
+    context: { headers: { Authorization: `Bearer ${adminToken}` } },
+  });
+
+  const list = result.data?.dailyScheduleList;
+  if (Array.isArray(list) && list.length > 0 && list[0]?.id) {
+    return list[0].id;
+  }
+
+  const entities = await provisionTestEntities(adminToken, "sched-del", 5);
+  
+  const d = new Date(date);
+  const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+  const dayOfWeek = days[d.getUTCDay()] || "MONDAY";
+
+  await mutateCreateRecurringClass(adminToken, {
+    studentId: entities.studentId,
+    teacherId: entities.teacherId,
+    durationMinutes: 60,
+    defaultStartTime: "10:00:00",
+    timezone: "UTC",
+    days: [{ dayOfWeek, startTime: "10:00:00", isActive: true }],
+    classType: "REGULAR",
+    generateInstancesForWeeks: 2,
+    effectiveFrom: date,
+    effectiveUntil: null,
+    timezoneId: null,
+  });
+
+  const gridResult = await testClient.query({
+    query: teacherWeeklyScheduleGridQueryDocument,
+    variables: { teacherId: entities.teacherId, weekDate: date },
+    context: { headers: { Authorization: `Bearer ${adminToken}` } },
+  });
+  const classItem = gridResult.data?.teacherWeeklyScheduleGrid?.classes?.[0];
+  if (classItem?.id) return classItem.id;
+
+  throw new Error("No class instance found in daily schedule list or weekly grid");
 }
 
 /**

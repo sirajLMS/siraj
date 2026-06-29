@@ -3,6 +3,7 @@
 import { Avatar, Box, Button, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls, StatusBadge } from "@/frontend/components/ui";
+import { InvoiceStatus } from "@/shared/lib/enum";
 import type { AdminInvoiceRow, AdminInvoiceStatus } from "../types/billingViewTypes";
 
 interface AdminInvoicesCardListLabels {
@@ -63,8 +64,8 @@ export function AdminInvoicesCardList({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       {rows.map(row => {
-        const actionLabel = row.status === "overdue" ? labels.markAsPaid : labels.quickPay;
-        const showAction = canManage && row.status !== "paid";
+        const actionLabel = row.status === "OVERDUE" ? labels.markAsPaid : labels.quickPay;
+        const showAction = canManage && row.status !== InvoiceStatus.PAID;
 
         return (
           <StyledInvoiceCard key={row.id} elevation={0}>

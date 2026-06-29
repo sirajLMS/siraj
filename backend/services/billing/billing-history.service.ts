@@ -14,6 +14,7 @@ export namespace BillingHistoryService {
   export async function getParentInvoiceHistory(
     actorUserId: string,
     parentId: string | null,
+    userId: string | null | undefined,
     pagination: PaginationArgs | null = null,
     locale?: string
   ): Promise<InvoiceHistoryPaginatedResult> {
@@ -25,7 +26,8 @@ export namespace BillingHistoryService {
 
     let resolvedParentId = parentId;
     if (!resolvedParentId) {
-      const parent = await ParentRepository.findByUserId(actorUserId);
+      const lookupUserId = userId || actorUserId;
+      const parent = await ParentRepository.findByUserId(lookupUserId);
       if (!parent) {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(tFunc("parentNotFound"));
@@ -83,6 +85,7 @@ export namespace BillingHistoryService {
   export async function getParentBillingSummary(
     actorUserId: string,
     parentId: string | null,
+    userId: string | null | undefined,
     locale?: string
   ): Promise<ParentBillingSummaryResult> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_VIEW_HISTORY);
@@ -93,7 +96,8 @@ export namespace BillingHistoryService {
 
     let resolvedParentId = parentId;
     if (!resolvedParentId) {
-      const parent = await ParentRepository.findByUserId(actorUserId);
+      const lookupUserId = userId || actorUserId;
+      const parent = await ParentRepository.findByUserId(lookupUserId);
       if (!parent) {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
         throw new Error(tFunc("parentNotFound"));

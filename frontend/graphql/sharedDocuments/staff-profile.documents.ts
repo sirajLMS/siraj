@@ -24,6 +24,10 @@ export const teacherProfileForEditQueryDocument: TypedDocumentNode<
       hourlyRate
       rateCurrency
       status
+      updatedAt
+      paymentMethod
+      totalClasses
+      avgEngagementScore
     }
   }
 `;
@@ -50,6 +54,10 @@ export const updateTeacherProfileMutationDocument: TypedDocumentNode<
       hourlyRate
       rateCurrency
       status
+      updatedAt
+      paymentMethod
+      totalClasses
+      avgEngagementScore
     }
   }
 `;

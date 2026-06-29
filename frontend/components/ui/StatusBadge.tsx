@@ -4,11 +4,9 @@ import { Box, Chip, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactElement, ReactNode } from "react";
 
-/**
- * Status categories supported by the StatusBadge component.
- */
 export type StatusBadgeCategory =
   | "studentAccount"
+  | "staffAccount"
   | "session"
   | "enrollment"
   | "classSession"
@@ -26,9 +24,6 @@ interface StatusBadgeProps {
   readonly icon?: ReactNode;
 }
 
-/**
- * Maps category-specific status strings to their corresponding Material 3 status palette base keys.
- */
 function resolveStatusPaletteKey(
   category: StatusBadgeCategory,
   status: string
@@ -83,10 +78,10 @@ function resolveStatusPaletteKey(
     }
     case "invoice": {
       const map: Record<string, "completed" | "pending" | "blocked"> = {
-        paid: "completed",
-        pending: "pending",
-        unpaid: "pending",
-        overdue: "blocked",
+        PAID: "completed",
+        PENDING: "pending",
+        UNPAID: "pending",
+        OVERDUE: "blocked",
       };
       return map[status] ?? "pending";
     }
@@ -95,12 +90,7 @@ function resolveStatusPaletteKey(
   }
 }
 
-/**
- * Resolves the appropriate Material 3 colors for a given status category.
- * Follows the pattern of using Container colors for badge backgrounds to ensure M3 compliance.
- */
 function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: string) {
-  // sessionTracking: on_leave uses secondary family
   if (category === "sessionTracking" && status === "on_leave") {
     return {
       backgroundColor: theme.palette.secondaryContainer,
@@ -110,7 +100,6 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
 
   const paletteKey = resolveStatusPaletteKey(category, status);
   if (paletteKey) {
-    // Dynamically access the M3 container and onContainer colors from the status palette
     const containerKey = `${paletteKey}Container` as keyof typeof theme.palette.status;
     const onContainerKey =
       `on${paletteKey.charAt(0).toUpperCase()}${paletteKey.slice(1)}Container` as keyof typeof theme.palette.status;
@@ -123,7 +112,6 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
 
   switch (category) {
     case "studentAccount": {
-      // Map studentAccount statuses to appropriate M3 status families
       const map: Record<string, { backgroundColor: string; color: string }> = {
         regular: {
           backgroundColor: theme.palette.status.activeContainer,
@@ -147,8 +135,22 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
         map[status] ?? { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant }
       );
     }
+    case "staffAccount": {
+      const map: Record<string, { backgroundColor: string; color: string }> = {
+        activated: {
+          backgroundColor: theme.palette.status.activeContainer,
+          color: theme.palette.status.onActiveContainer,
+        },
+        deactivated: {
+          backgroundColor: theme.palette.status.cancelledContainer,
+          color: theme.palette.status.onCancelledContainer,
+        },
+      };
+      return (
+        map[status] ?? { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant }
+      );
+    }
     case "session": {
-      // Direct access to status family based on the status string as the key
       const key = status as "active" | "pending" | "blocked" | "confirmed" | "completed" | "cancelled";
       const containerKey = `${key}Container` as keyof typeof theme.palette.status;
       const onContainerKey =
@@ -163,7 +165,6 @@ function getStatusColors(theme: Theme, category: StatusBadgeCategory, status: st
       return { backgroundColor: theme.palette.surfaceContainerHigh, color: theme.palette.onSurfaceVariant };
     }
     case "enrollment": {
-      // Map enrollment statuses to M3 families
       const map: Record<string, { backgroundColor: string; color: string }> = {
         regular: {
           backgroundColor: theme.palette.status.activeContainer,

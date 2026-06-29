@@ -13,6 +13,7 @@ import {
   parentInvoiceHistoryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
+import { InvoiceStatus } from "@/shared/lib/enum";
 import { ParentBillingView } from "./ParentBillingView";
 import type { ParentBillingViewProps } from "./types/billingViewTypes";
 import { filterParentInvoices } from "./utils/billingFilters";
@@ -58,6 +59,7 @@ export function ParentBillingContainer() {
   const { data, loading, error } = useQuery(parentInvoiceHistoryQueryDocument, {
     variables: {
       parentId: null,
+      userId: null,
       paginationArgs: {
         first: pageSize,
         page: page + 1,
@@ -72,7 +74,7 @@ export function ParentBillingContainer() {
   });
 
   const { data: summaryData } = useQuery(parentBillingSummaryQueryDocument, {
-    variables: { parentId: null },
+    variables: { parentId: null, userId: null },
     fetchPolicy: "cache-and-network",
   });
 
@@ -100,7 +102,7 @@ export function ParentBillingContainer() {
           dueDate: inv.dueDate ?? "",
           paidDate: inv.paidDate ?? "—",
           fee: `${inv.currency} ${inv.amount}`,
-          status: (inv.status?.toLowerCase() ?? "unpaid") as "paid" | "unpaid",
+          status: inv.status === InvoiceStatus.PAID ? InvoiceStatus.PAID : InvoiceStatus.UNPAID,
         })),
         searchQuery
       ),

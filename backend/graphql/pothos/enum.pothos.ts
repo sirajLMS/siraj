@@ -1,4 +1,5 @@
 import {
+  AccountStatus,
   AppLanguage,
   AvailabilityStatus,
   ClassExecutionState,
@@ -22,6 +23,10 @@ export const OrderSortDirectionPothosObject = gqlSchemaBuilder.enumType(OrderSor
 
 export const GenderPothosObject = gqlSchemaBuilder.enumType(Gender, {
   name: "Gender",
+});
+
+export const AccountStatusPothosObject = gqlSchemaBuilder.enumType(AccountStatus, {
+  name: "AccountStatus",
 });
 
 export const CountryCodePothosObject = gqlSchemaBuilder.enumType(CountryCode, {

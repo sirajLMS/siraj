@@ -387,10 +387,12 @@ const en: MessageSchema = {
         saveProfile: "Save Profile",
         discardChanges: "Discard Changes",
         lastModified: "Last modified: {date}",
+        saveSuccess: "Profile saved successfully",
+        saveError: "Failed to save profile",
       },
       stats: {
         totalClasses: "Total Classes Conducted",
-        parentRating: "Avg. Parent Rating",
+        avgEngagement: "Avg. Engagement Score",
       },
       validation: {
         nameRequired: "Full name is required",
@@ -1981,10 +1983,10 @@ const en: MessageSchema = {
         emptySubtitle: "Any upcoming billing cycles will appear here automatically.",
       },
       invoiceStatus: {
-        overdue: "Overdue",
-        pending: "Pending",
-        paid: "Paid",
-        unpaid: "Unpaid",
+        OVERDUE: "Overdue",
+        PENDING: "Pending",
+        PAID: "Paid",
+        UNPAID: "Unpaid",
       },
       creditStatus: {
         negative_balance: "Negative Balance",

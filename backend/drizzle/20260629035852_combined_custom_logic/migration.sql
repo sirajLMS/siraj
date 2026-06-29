@@ -1636,6 +1636,14 @@ SET hours_per_week = COALESCE((
   WHERE rs.student_id = s.id
     AND rs.deleted_at IS NULL
     AND rsd.is_active = true
+), 0)
+WHERE s.hours_per_week IS DISTINCT FROM COALESCE((
+  SELECT SUM(rs.duration_minutes)::numeric / 60.0
+  FROM recurring_schedules rs
+  JOIN recurring_schedule_days rsd ON rsd.recurring_schedule_id = rs.id
+  WHERE rs.student_id = s.id
+    AND rs.deleted_at IS NULL
+    AND rsd.is_active = true
 ), 0);
 
 -- Source: leave_quota_limits_trigger.sql

@@ -6,6 +6,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { TeacherRepository } from "@/backend/db/repo";
 import { teachers, users } from "@/backend/db/schema";
 import { PaginationArgs } from "@/backend/types";
+import { AccountStatus } from "@/shared/lib/enum";
 import { createTestUser, setupTeacher } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
@@ -29,7 +30,7 @@ describe("TeacherRepository", () => {
       expect(aliceRow).toBeDefined();
       expect(aliceRow?.name).toBe("Alice Teacher");
       expect(aliceRow?.email).toBe("alice@example.com");
-      expect(aliceRow?.status).toBe("ACTIVATED");
+      expect(aliceRow?.status).toBe(AccountStatus.ACTIVATED);
     });
   });
 
