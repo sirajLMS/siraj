@@ -154,6 +154,7 @@ const mockLabels: BillingLabels = {
   },
   markAsPaidSuccess: "Invoice marked as paid",
   deleteInvoiceSuccess: "Invoice deleted",
+  noUnpaidInvoices: "No unpaid invoices to pay",
   errors: {
     invalidId: "Invalid ID",
   },

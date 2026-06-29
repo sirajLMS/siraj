@@ -546,16 +546,10 @@ export namespace StorageDbRepository {
 
   type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
-  export type ParentFileRow = {
-    id: string;
-    fileId: string;
-    filePath: string;
-    isProtected: boolean;
-    usageType: string;
-    createdAt: Date;
-  };
-
-  export const getFilesForParent = async (parentId: string, tx?: DBTransaction): Promise<ParentFileRow[]> => {
+  export const getFilesForParent = async (
+    parentId: string,
+    tx?: DBTransaction
+  ): Promise<StorageTypes.LinkedFileReturnType[]> => {
     const queryDb = tx ?? db;
 
     const results = await queryDb
@@ -571,6 +565,39 @@ export namespace StorageDbRepository {
       .innerJoin(storageFiles, eq(parentFiles.fileId, storageFiles.id))
       .where(eq(parentFiles.parentId, parentId))
       .orderBy(desc(parentFiles.createdAt));
+
+    return results.map(r => ({
+      id: r.id,
+      fileId: r.fileId,
+      filePath: r.filePath,
+      isProtected: r.isProtected,
+      usageType: r.usageType,
+      createdAt: r.createdAt,
+    }));
+  };
+
+  export const getFilesForInvoice = async (
+    invoiceId: string,
+    usageType?: string,
+    tx?: DBTransaction
+  ): Promise<StorageTypes.LinkedFileReturnType[]> => {
+    const queryDb = tx ?? db;
+    const conditions = [eq(invoiceFiles.invoiceId, invoiceId)];
+    if (usageType) conditions.push(eq(invoiceFiles.usageType, usageType));
+
+    const results = await queryDb
+      .select({
+        id: invoiceFiles.id,
+        fileId: invoiceFiles.fileId,
+        filePath: storageFiles.path,
+        isProtected: storageFiles.isProtected,
+        usageType: invoiceFiles.usageType,
+        createdAt: invoiceFiles.createdAt,
+      })
+      .from(invoiceFiles)
+      .innerJoin(storageFiles, eq(invoiceFiles.fileId, storageFiles.id))
+      .where(and(...conditions))
+      .orderBy(desc(invoiceFiles.createdAt));
 
     return results.map(r => ({
       id: r.id,

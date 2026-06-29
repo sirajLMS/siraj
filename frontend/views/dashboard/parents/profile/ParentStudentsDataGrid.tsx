@@ -29,34 +29,14 @@ import type React from "react";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
-import { AppPermission, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   changeStudentStatusMutationDocument,
   reassignStudentTeacherMutationDocument,
 } from "@/frontend/graphql/sharedDocuments";
+import { ALLOWED_TARGET_STATUSES } from "@/frontend/utils/student-status-transitions";
 import { useRouter } from "@/shared/i18n/routing";
 import type { ParentStudent } from "../types/profile";
-
-interface ParentStudentsDataGridProps {
-  readonly rows: readonly ParentStudent[];
-  readonly loading?: boolean;
-  readonly onRefetch?: () => void;
-}
-
-const ALLOWED_TARGET_STATUSES: Record<string, string[]> = {
-  [StudentStatus.OnTrial.toLowerCase()]: [StudentStatus.Regular.toLowerCase(), StudentStatus.Deactivated.toLowerCase()],
-  [StudentStatus.Regular.toLowerCase()]: [
-    StudentStatus.Suspended.toLowerCase(),
-    StudentStatus.OnLeave.toLowerCase(),
-    StudentStatus.Deactivated.toLowerCase(),
-  ],
-  [StudentStatus.Suspended.toLowerCase()]: [
-    StudentStatus.Regular.toLowerCase(),
-    StudentStatus.Deactivated.toLowerCase(),
-  ],
-  [StudentStatus.OnLeave.toLowerCase()]: [StudentStatus.Regular.toLowerCase(), StudentStatus.Deactivated.toLowerCase()],
-  [StudentStatus.Deactivated.toLowerCase()]: [StudentStatus.Regular.toLowerCase()],
-};
 
 // ─── Reassign Teacher Dialog ──────────────────────────────────────────────────
 
@@ -165,7 +145,7 @@ const ChangeStatusDialog: React.FC<ChangeStatusDialogProps> = ({
 }) => {
   const t = useTranslations("dashboard.parentProfile.students");
   const [selectedStatus, setSelectedStatus] = useState("");
-  const allowedTargets = ALLOWED_TARGET_STATUSES[currentStatus.toLowerCase()] ?? [];
+  const allowedTargets = ALLOWED_TARGET_STATUSES[currentStatus.toUpperCase()] ?? [];
 
   const [changeStatus, { loading, error: mutationError }] = useMutation(changeStudentStatusMutationDocument, {
     onCompleted: () => {
@@ -244,6 +224,12 @@ const ChangeStatusDialog: React.FC<ChangeStatusDialogProps> = ({
 };
 
 // ─── Main Grid Component ──────────────────────────────────────────────────────
+
+interface ParentStudentsDataGridProps {
+  readonly rows: readonly ParentStudent[];
+  readonly loading?: boolean;
+  readonly onRefetch?: () => void;
+}
 
 const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, loading, onRefetch }) => {
   const t = useTranslations("dashboard.parentProfile.table");
@@ -326,7 +312,7 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
               sx={{
                 height: 6,
                 borderRadius: 3,
-                backgroundColor: theme.palette.grey[100],
+                backgroundColor: theme.palette.surfaceContainerLow,
                 "& .MuiLinearProgress-bar": {
                   backgroundColor: theme.palette.primary.main,
                 },

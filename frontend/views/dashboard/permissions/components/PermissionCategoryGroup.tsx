@@ -68,9 +68,9 @@ export function PermissionCategoryGroup({
             />
           }
           label={
-            <Typography sx={labelSx} component="span">
+            <Box component="span" sx={labelSx}>
               {t("allCategoriesOption")}
-            </Typography>
+            </Box>
           }
         />
       </StyledCategoryHeader>

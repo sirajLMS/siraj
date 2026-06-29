@@ -88,6 +88,7 @@ export const billing: BillingLabels = {
   },
   manual: billingManual,
   markAsPaidSuccess: "تم تحديد الفاتورة كمدفوعة بنجاح",
+  noUnpaidInvoices: "لا توجد فواتير غير مدفوعة للدفع",
   deleteInvoiceSuccess: "تم حذف الفاتورة بنجاح",
   errors: {
     invalidId: "معرف ولي الأمر غير صالح في عرض الفواتير.",

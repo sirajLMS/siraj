@@ -1,7 +1,7 @@
 "use client";
 
 import { ExpandMoreOutlined } from "@mui/icons-material";
-import { FormControl, FormHelperText, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
 import type { SimpleEntity } from "./types";
 
@@ -28,9 +28,9 @@ export function EntitySelect({
 }: EntitySelectProps) {
   return (
     <>
-      <Typography component="label" sx={labelSx}>
+      <Box component="label" sx={labelSx}>
         {label}
-      </Typography>
+      </Box>
       <FormControl fullWidth error={!!error} variant={isMobile ? "outlined" : "standard"}>
         {isMobile && <InputLabel id={`select-label-${label}`}>{placeholder}</InputLabel>}
         <Select

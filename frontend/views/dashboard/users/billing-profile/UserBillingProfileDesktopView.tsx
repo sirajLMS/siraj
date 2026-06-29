@@ -1,7 +1,8 @@
 "use client";
 
 import { FilterListOutlined } from "@mui/icons-material";
-import { Box, TextField } from "@mui/material";
+import { Box, CircularProgress, TextField } from "@mui/material";
+import { useRef } from "react";
 import { FilterButton, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { ParentInvoicesDataGrid } from "@/frontend/views/dashboard/billing/components/ParentInvoicesDataGrid";
@@ -23,6 +24,7 @@ export function UserBillingProfileDesktopView({
   onPageChange,
   loading,
 }: Readonly<UserBillingProfileDesktopViewProps>) {
+  const searchInputRef = useRef<HTMLInputElement>(null);
   return (
     <PageContainer>
       <PageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser} />
@@ -40,8 +42,11 @@ export function UserBillingProfileDesktopView({
               }}
               placeholder={labels.search.parentPlaceholder}
               slotProps={{ htmlInput: { autoComplete: "off" } }}
+              inputRef={searchInputRef}
             />
-            <FilterButton startIcon={<FilterListOutlined />}>{labels.search.filter}</FilterButton>
+            <FilterButton startIcon={<FilterListOutlined />} onClick={() => searchInputRef.current?.focus()}>
+              {labels.search.filter}
+            </FilterButton>
           </Box>
         }
       >
@@ -57,7 +62,11 @@ export function UserBillingProfileDesktopView({
           onPageChange={onPageChange}
         />
       </SectionPanel>
-      {loading && <Box sx={{ display: "flex", justifyContent: "center", py: 2 }} />}
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+          <CircularProgress size={24} />
+        </Box>
+      )}
     </PageContainer>
   );
 }

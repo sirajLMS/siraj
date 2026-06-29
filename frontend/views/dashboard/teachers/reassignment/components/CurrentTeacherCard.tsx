@@ -4,12 +4,9 @@ import { AssignmentIndOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui";
+import type { CurrentTeacherCardProps } from "../types";
 
-interface CurrentTeacherCardProps {
-  readonly currentTeacherName: string;
-}
-
-export function CurrentTeacherCard({ currentTeacherName }: Readonly<CurrentTeacherCardProps>) {
+export function CurrentTeacherCard({ currentTeacherName, teacherId }: Readonly<CurrentTeacherCardProps>) {
   const t = useTranslations("dashboard.teacherReassignment.currentTeacher");
 
   return (
@@ -21,6 +18,13 @@ export function CurrentTeacherCard({ currentTeacherName }: Readonly<CurrentTeach
         overflow: "hidden",
         boxShadow: theme.palette.shadow.card,
         border: "none",
+        ...(teacherId
+          ? {
+              cursor: "pointer",
+              "&:hover": { opacity: 0.9 },
+              transition: "opacity 0.2s",
+            }
+          : {}),
       })}
     >
       <Box sx={{ position: "relative", zIndex: 1 }}>

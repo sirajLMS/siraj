@@ -1,32 +1,28 @@
 "use client";
 
-import type { SvgIconComponent } from "@mui/icons-material";
 import { HistoryOutlined, MailOutlined } from "@mui/icons-material";
 import { Avatar, Box, Grid, Typography } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui";
+import { useRouter } from "@/shared/i18n/routing";
+import type { BentoCardProps, ReassignmentBentoGridProps } from "../types";
 
-interface BentoCardProps {
-  readonly icon: SvgIconComponent;
-  readonly title: string;
-  readonly subtitle: string;
-}
-
-function BentoCard({ icon: Icon, title, subtitle }: Readonly<BentoCardProps>) {
+function BentoCard({ icon: Icon, title, subtitle, onClick }: Readonly<BentoCardProps>) {
   return (
     <BaseCard
+      onClick={onClick}
       sx={theme => ({
         display: "flex",
         alignItems: "center",
         gap: 2,
-        cursor: "pointer",
-        "&:hover": { boxShadow: theme.palette.shadow.card },
+        cursor: onClick ? "pointer" : "default",
+        "&:hover": onClick ? { boxShadow: theme.palette.shadow.card } : undefined,
         transition: "box-shadow 0.2s",
       })}
     >
       <Avatar
         sx={theme => ({
-          backgroundColor: "transparent",
           border: `2px solid ${theme.palette.primary.main}`,
           color: theme.palette.primary.main,
           width: 48,
@@ -47,16 +43,36 @@ function BentoCard({ icon: Icon, title, subtitle }: Readonly<BentoCardProps>) {
   );
 }
 
-export function ReassignmentBentoGrid() {
+export function ReassignmentBentoGrid({
+  studentId,
+  lastUpdated,
+  pendingNotificationCount,
+}: Readonly<ReassignmentBentoGridProps>) {
   const t = useTranslations("dashboard.teacherReassignment.historyAndContact");
+  const router = useRouter();
+  const notifications = useNotifications();
+
+  const formattedDate = lastUpdated
+    ? new Date(lastUpdated).toLocaleDateString("en-US", { month: "short", year: "2-digit" })
+    : "N/A";
 
   return (
     <Grid container spacing={2}>
       <Grid size={{ xs: 12, md: 6 }}>
-        <BentoCard icon={HistoryOutlined} title={t("changeHistory")} subtitle={t("lastUpdated", { date: "Oct 24" })} />
+        <BentoCard
+          icon={HistoryOutlined}
+          title={t("changeHistory")}
+          subtitle={t("lastUpdated", { date: formattedDate })}
+          onClick={() => router.push(`/students/${studentId}/history`)}
+        />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <BentoCard icon={MailOutlined} title={t("parentContact")} subtitle={t("pendingNotifications", { count: 2 })} />
+        <BentoCard
+          icon={MailOutlined}
+          title={t("parentContact")}
+          subtitle={t("pendingNotifications", { count: pendingNotificationCount })}
+          onClick={() => notifications.show(t("parentContact"), { severity: "info", autoHideDuration: 4000 })}
+        />
       </Grid>
     </Grid>
   );

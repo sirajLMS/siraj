@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { useMemo } from "react";
 import type { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { labelSx, standardInputSx } from "@/frontend/components/ui/form";
@@ -76,9 +76,9 @@ function OptionSelect({
 }) {
   return (
     <>
-      <Typography component="label" sx={labelSx}>
+      <Box component="label" sx={labelSx}>
         {label}
-      </Typography>
+      </Box>
       <FormControl fullWidth error={!!error} variant={isMobile ? "outlined" : "standard"}>
         {isMobile && <InputLabel id={labelId}>{placeholder}</InputLabel>}
         <Select

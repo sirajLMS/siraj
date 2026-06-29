@@ -12,6 +12,8 @@ import {
   userBillingProfileSummaryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/user-billing-profile.documents";
 import { useUserBillingProfileStore } from "@/frontend/stores/userBillingProfileStore";
+import { useUserStore } from "@/frontend/stores/userStore";
+import { filterParentInvoices } from "@/frontend/views/dashboard/billing/utils/billingFilters";
 import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
 import { InvoiceStatus } from "@/shared/lib/enum";
@@ -134,26 +136,48 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
 
   const metrics = useMemo(() => buildParentMetrics(summary, labels), [summary, labels]);
 
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canManage = hasPermission(AppPermission.BillingUpdateStatusPaid);
+  const canCreate = hasPermission(AppPermission.BillingCreateInvoice);
+
   const handlePayNow = (invoiceId: string) => {
     void markAsPaidMutation({ variables: { invoiceId, expectedVersion: null } });
   };
+
+  const handleDownloadPdf = (invoiceId: string) => {
+    window.open(`/api/invoices/${invoiceId}/download`, "_blank");
+  };
+
+  const handleQuickPay = () => {
+    const firstUnpaid = invoices.find(inv => inv.status === InvoiceStatus.UNPAID);
+    if (firstUnpaid) {
+      handlePayNow(firstUnpaid.id);
+    } else {
+      notifications.show(labels.noUnpaidInvoices, {
+        severity: "info",
+        autoHideDuration: 4000,
+      });
+    }
+  };
+
+  const filteredInvoices = useMemo(() => filterParentInvoices(invoices, searchQuery), [invoices, searchQuery]);
 
   const viewProps = {
     labels,
     summary,
     metrics,
-    invoices: invoices,
+    invoices: filteredInvoices,
     searchQuery,
-    canManage: false,
-    canView: true,
-    canCreate: false,
+    canManage,
+    canView: hasPermission(AppPermission.BillingViewHistory),
+    canCreate,
     onSearchChange: setSearchQuery,
     onPayNow: handlePayNow,
-    onDownloadPdf: () => {},
-    onQuickPay: () => {},
+    onDownloadPdf: handleDownloadPdf,
+    onQuickPay: handleQuickPay,
     page,
     pageSize,
-    totalCount,
+    totalCount: searchQuery ? filteredInvoices.length : totalCount,
     onPageChange: setPage,
     loading: isLoading,
   };

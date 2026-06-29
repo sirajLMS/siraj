@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { BillingRepository } from "@/backend/db/repo";
+import { BillingRepository, ParentRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { NotificationSyncService } from "@/backend/services/system/notification-sync.service";
+import type * as Types from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
 export interface CreateManualInvoiceInput {
@@ -232,6 +233,34 @@ export namespace BillingManagementService {
       logger.error("Failed to delete invoice", { actorUserId, invoiceId, error });
       throw error;
     }
+  }
+
+  export async function verifyInvoiceAccess(
+    actorUserId: string,
+    invoiceId: string,
+    context: { isSuperAdmin?: boolean; permissions?: string[] } | null,
+    locale?: string
+  ): Promise<Types.InvoiceSelectType> {
+    const invoice = await BillingRepository.getInvoiceById(invoiceId);
+    if (!invoice) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("invoiceNotFound", { id: invoiceId }));
+    }
+
+    const hasBillingAccess =
+      context?.isSuperAdmin ||
+      context?.permissions?.includes(AppPermission.INVOICES_LIST) ||
+      context?.permissions?.includes(AppPermission.BILLING_VIEW_UNPAID_INVOICES);
+
+    if (!hasBillingAccess) {
+      const parent = await ParentRepository.findByUserId(actorUserId);
+      if (!parent || parent.id !== invoice.parentId) {
+        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+        throw new Error(tFunc("insufficientPermissions"));
+      }
+    }
+
+    return invoice;
   }
 
   export async function sendPaymentReminder(

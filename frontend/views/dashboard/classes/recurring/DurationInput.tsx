@@ -32,9 +32,9 @@ export function DurationInput({ register, errors, isSubmitting, isMobile, labels
 
   return (
     <Box>
-      <Typography component="label" sx={labelSx}>
+      <Box component="label" sx={labelSx}>
         {mainLabel}
-      </Typography>
+      </Box>
       <Box sx={{ display: "flex", gap: 2, flexDirection: isMobile ? "column" : "row" }}>
         <DurationField
           register={register}
@@ -81,9 +81,9 @@ function DurationField({ register, fieldName, label, unit, max, isSubmitting, is
   return (
     <Box sx={{ flex: 1 }}>
       {isMobile && (
-        <Typography component="label" sx={labelSx}>
+        <Box component="label" sx={labelSx}>
           {label}
-        </Typography>
+        </Box>
       )}
       <Box sx={durationBoxSx(isMobile)}>
         <TextField

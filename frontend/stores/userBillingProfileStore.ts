@@ -1,12 +1,8 @@
 import { create } from "zustand";
-
-const DEFAULT_PAGE_SIZE = 10;
-
-interface UserBillingProfileState {
-  readonly page: number;
-  readonly pageSize: number;
-  setPage: (page: number) => void;
-}
+import {
+  DEFAULT_PAGE_SIZE,
+  type UserBillingProfileState,
+} from "@/frontend/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 
 export const useUserBillingProfileStore = create<UserBillingProfileState>(set => ({
   page: 0,

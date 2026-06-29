@@ -2,26 +2,42 @@
 
 import { CheckCircleOutlined, InfoOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BaseCard, StatusBadge } from "@/frontend/components/ui";
 import { labelSx, outlinedInputSx } from "@/frontend/components/ui/form";
-import type { TeacherDirectoryRow } from "@/frontend/views/dashboard/teachers/home/types";
+import { ALLOWED_TARGET_STATUSES } from "@/frontend/utils/student-status-transitions";
+import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/views/dashboard/students/home/types";
+import type { StudentStatus } from "@/shared/lib/enum";
+import type { ManagementControlsCardProps, ReassignmentSubmitInput, StatusChangeInput } from "../types";
 
-interface ManagementControlsCardProps {
-  readonly teachers: readonly TeacherDirectoryRow[];
-  readonly currentStatus: string;
-}
-
-function TeacherSelection({ teachers }: Readonly<{ teachers: readonly TeacherDirectoryRow[] }>) {
+function TeacherSelection({
+  teachers,
+  selectedTeacherId,
+  onTeacherChange,
+}: Readonly<{
+  teachers: readonly { readonly id: string; readonly name: string }[];
+  selectedTeacherId: string;
+  onTeacherChange: (id: string) => void;
+}>) {
   const t = useTranslations("dashboard.teacherReassignment.controls");
   return (
     <Box>
-      <Typography component="label" sx={labelSx}>
+      <Box component="label" sx={labelSx}>
         {t("assignTeacher")}
-      </Typography>
+      </Box>
       <FormControl fullWidth sx={{ mt: 1.5 }}>
-        <Select displayEmpty defaultValue="" inputProps={{ "aria-label": "Without label" }} sx={outlinedInputSx}>
+        <Select
+          displayEmpty
+          value={selectedTeacherId}
+          inputProps={{ "aria-label": "Without label" }}
+          sx={outlinedInputSx}
+          onChange={e => {
+            const val = e.target.value;
+            if (typeof val === "string") onTeacherChange(val);
+          }}
+        >
           <MenuItem value="" disabled>
             {t("assignTeacherPlaceholder")}
           </MenuItem>
@@ -42,27 +58,40 @@ function TeacherSelection({ teachers }: Readonly<{ teachers: readonly TeacherDir
   );
 }
 
-function StatusUpdate({ currentStatus }: Readonly<{ currentStatus: string }>) {
+function StatusUpdate({
+  currentStatus,
+  selectedStatus,
+  onStatusChange,
+}: Readonly<{
+  currentStatus: StudentStatus;
+  selectedStatus: string;
+  onStatusChange: (status: string) => void;
+}>) {
   const t = useTranslations("dashboard.teacherReassignment.controls");
 
-  const statusMap: Record<string, string> = {
-    Regular: "regular",
-    "On Leave": "on_leave",
-    Suspended: "suspended",
-  };
+  const statusKey = STUDENT_STATUS_TO_ACCOUNT_STATUS[currentStatus] ?? currentStatus;
 
-  const statusKey = statusMap[currentStatus] || currentStatus.toLowerCase().replace(/\s+/g, "_");
+  const allowedTargets = ALLOWED_TARGET_STATUSES[currentStatus] ?? [];
 
   return (
     <Box>
-      <Typography component="label" sx={labelSx}>
+      <Box component="label" sx={labelSx}>
         {t("statusUpdate")}
-      </Typography>
+      </Box>
       <FormControl fullWidth sx={{ mt: 1.5 }}>
-        <Select defaultValue="regular" sx={outlinedInputSx}>
-          <MenuItem value="regular">Regular</MenuItem>
-          <MenuItem value="leave">On Leave</MenuItem>
-          <MenuItem value="suspended">Suspended</MenuItem>
+        <Select
+          value={selectedStatus}
+          sx={outlinedInputSx}
+          onChange={e => {
+            const val = e.target.value;
+            if (typeof val === "string") onStatusChange(val);
+          }}
+        >
+          {allowedTargets.map(status => (
+            <MenuItem key={status} value={status}>
+              {status}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
       <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}>
@@ -75,13 +104,15 @@ function StatusUpdate({ currentStatus }: Readonly<{ currentStatus: string }>) {
   );
 }
 
-interface ActionButtonsProps {
-  readonly loading: boolean;
-  readonly saved: boolean;
-  readonly onCancel: () => void;
-}
-
-function ActionButtons({ loading, saved, onCancel }: Readonly<ActionButtonsProps>) {
+function ActionButtons({
+  loading,
+  saved,
+  onCancel,
+}: Readonly<{
+  loading: boolean;
+  saved: boolean;
+  onCancel: () => void;
+}>) {
   const t = useTranslations("dashboard.teacherReassignment");
 
   const getButtonContent = (): React.ReactNode => {
@@ -164,21 +195,54 @@ function ActionButtons({ loading, saved, onCancel }: Readonly<ActionButtonsProps
   );
 }
 
-export function ManagementControlsCard({ teachers, currentStatus }: Readonly<ManagementControlsCardProps>) {
+export function ManagementControlsCard({
+  teachers,
+  currentStatus,
+  studentId,
+  version,
+  isSubmitting,
+  onReassign,
+  onStatusChange,
+  onCancel,
+}: Readonly<ManagementControlsCardProps>) {
   const t = useTranslations("dashboard.teacherReassignment");
-  const [loading, setLoading] = useState(false);
+  const notifications = useNotifications();
+  const [selectedTeacherId, setSelectedTeacherId] = useState("");
+  const [selectedNewStatus, setSelectedNewStatus] = useState("");
   const [saved, setSaved] = useState(false);
 
-  const handleSubmit = (e: React.SyntheticEvent): void => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    setLoading(true);
+
+    if (!selectedTeacherId && !selectedNewStatus) {
+      notifications.show(t("actions.info"), { severity: "warning", autoHideDuration: 4000 });
+      return;
+    }
+
+    const bothChanged = !!selectedTeacherId && !!selectedNewStatus;
+
+    if (selectedTeacherId) {
+      const input: ReassignmentSubmitInput = {
+        studentId,
+        newTeacherId: selectedTeacherId,
+        expectedVersion: version ?? undefined,
+      };
+      await onReassign(input);
+    }
+
+    if (selectedNewStatus) {
+      const input: StatusChangeInput = {
+        studentId,
+        newStatus: selectedNewStatus as StudentStatus,
+        expectedVersion: bothChanged ? undefined : (version ?? undefined),
+      };
+      await onStatusChange(input);
+    }
+
+    setSaved(true);
     setTimeout(() => {
-      setLoading(false);
-      setSaved(true);
-      setTimeout(() => {
-        setSaved(false);
-      }, 2000);
-    }, 1500);
+      setSaved(false);
+    }, 2000);
   };
 
   return (
@@ -193,9 +257,17 @@ export function ManagementControlsCard({ teachers, currentStatus }: Readonly<Man
       </Box>
 
       <Stack component="form" spacing={4} onSubmit={handleSubmit}>
-        <TeacherSelection teachers={teachers} />
-        <StatusUpdate currentStatus={currentStatus} />
-        <ActionButtons loading={loading} saved={saved} onCancel={() => {}} />
+        <TeacherSelection
+          teachers={teachers}
+          selectedTeacherId={selectedTeacherId}
+          onTeacherChange={setSelectedTeacherId}
+        />
+        <StatusUpdate
+          currentStatus={currentStatus}
+          selectedStatus={selectedNewStatus}
+          onStatusChange={setSelectedNewStatus}
+        />
+        <ActionButtons loading={isSubmitting} saved={saved} onCancel={onCancel} />
       </Stack>
     </BaseCard>
   );

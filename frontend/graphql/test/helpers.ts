@@ -1,13 +1,13 @@
 import { expect } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
-import type { CreateRecurringClassInput } from "../generated/gql/graphql-types";
 import { teachers as demoTeachers } from "@/shared/demo-users";
+import type { CreateRecurringClassInput } from "../generated/gql/graphql-types";
 import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocuments/auth.documents";
 import { createRecurringClassMutationDocument } from "../sharedDocuments/recurring-class.documents";
 import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
 import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
-import { teacherWeeklyScheduleGridQueryDocument } from "../sharedDocuments/weekly-schedule.documents";
 import { createTestEntitiesMutationDocument } from "../sharedDocuments/test-helper.documents";
+import { teacherWeeklyScheduleGridQueryDocument } from "../sharedDocuments/weekly-schedule.documents";
 import { testClient } from "./testClient";
 
 async function executeLogin<TData, TVars>(
@@ -215,10 +215,7 @@ export async function fetchNonDefaultTeacherId(adminToken: string): Promise<stri
   return other?.id ?? null;
 }
 
-export async function fetchFirstClassInstanceId(
-  adminToken: string,
-  date: string
-): Promise<string> {
+export async function fetchFirstClassInstanceId(adminToken: string, date: string): Promise<string> {
   const result = await testClient.query({
     query: dailyScheduleListQueryDocument,
     variables: { date, teacherId: null, search: null, metricFilter: null },
@@ -231,7 +228,7 @@ export async function fetchFirstClassInstanceId(
   }
 
   const entities = await provisionTestEntities(adminToken, "sched-del", 5);
-  
+
   const d = new Date(date);
   const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
   const dayOfWeek = days[d.getUTCDay()] || "MONDAY";

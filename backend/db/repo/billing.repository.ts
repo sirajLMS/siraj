@@ -672,6 +672,19 @@ export namespace BillingRepository {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
+  export const getInvoiceById = async (
+    invoiceId: string,
+    tx?: DBTransaction
+  ): Promise<Types.InvoiceSelectType | null> => {
+    const t = tx ?? db;
+    const results = await t
+      .select()
+      .from(invoices)
+      .where(and(eq(invoices.id, invoiceId), isNull(invoices.deletedAt)))
+      .limit(1);
+    return results[0] ?? null;
+  };
+
   export const markInvoiceAsPaid = async (
     invoiceId: string,
     expectedVersion?: number,

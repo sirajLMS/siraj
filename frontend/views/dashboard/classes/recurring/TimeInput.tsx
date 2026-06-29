@@ -1,7 +1,7 @@
 "use client";
 
 import { ScheduleOutlined } from "@mui/icons-material";
-import { InputAdornment, Typography } from "@mui/material";
+import { Box, InputAdornment } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { format, isValid, parse } from "date-fns";
 import { type Control, Controller } from "react-hook-form";
@@ -32,9 +32,9 @@ interface TimeInputProps {
 export function TimeInput({ label, control, isSubmitting, isMobile, error }: TimeInputProps) {
   return (
     <>
-      <Typography component="label" sx={labelSx}>
+      <Box component="label" sx={labelSx}>
         {label}
-      </Typography>
+      </Box>
       <Controller
         name="defaultStartTime"
         control={control}

@@ -1,4 +1,4 @@
-import type { storageDirectories, storageFiles } from "@/backend/db/schema/storage";
+import type { invoiceFiles, parentFiles, storageDirectories, storageFiles } from "@/backend/db/schema/storage";
 import type { OrderSortDirection } from "@/shared/lib/enum";
 
 // Type aliases to match Kotlin entities
@@ -262,3 +262,11 @@ export interface UploadPreparationResult {
    */
   uploadType: UploadType;
 }
+
+export type InvoiceFileSelectType = typeof invoiceFiles.$inferSelect;
+export type ParentFileSelectType = typeof parentFiles.$inferSelect;
+
+export type LinkedFileReturnType = Omit<InvoiceFileSelectType, "invoiceId"> & {
+  readonly filePath: string;
+  readonly isProtected: boolean;
+};

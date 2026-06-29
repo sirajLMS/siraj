@@ -16,6 +16,7 @@
     "biome:check": "bunx @biomejs/biome check --write --unsafe .",
     "biome:lint": "bunx @biomejs/biome lint --write .",
     "biome:imports": "bunx @biomejs/biome check --write --formatter-enabled=false --linter-enabled=false .",
+    "typecheck": "tsgo -b --noEmit",
     "tsgo": "tsgo -b --noEmit",
     "generate:gqlSchema": "bun run backend/graphql/generateGqlSchema.ts",
     "codegen": "graphql-codegen",

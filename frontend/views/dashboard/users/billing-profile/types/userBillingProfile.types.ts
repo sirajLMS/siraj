@@ -32,3 +32,11 @@ export interface UserBillingProfileViewProps {
 export type UserBillingProfileDesktopViewProps = UserBillingProfileViewProps;
 
 export type UserBillingProfileMobileViewProps = UserBillingProfileViewProps;
+
+export const DEFAULT_PAGE_SIZE = 10;
+
+export interface UserBillingProfileState {
+  readonly page: number;
+  readonly pageSize: number;
+  setPage: (page: number) => void;
+}

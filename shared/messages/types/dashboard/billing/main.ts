@@ -85,6 +85,7 @@ export interface BillingLabels {
   readonly manual: BillingManualLabels;
   readonly markAsPaidSuccess: string;
   readonly deleteInvoiceSuccess: string;
+  readonly noUnpaidInvoices: string;
   readonly errors: {
     readonly invalidId: string;
   };

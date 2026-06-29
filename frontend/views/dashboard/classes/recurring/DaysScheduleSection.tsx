@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, FormHelperText, Typography } from "@mui/material";
+import { Box, FormHelperText } from "@mui/material";
 import type { FieldErrors, UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { labelSx } from "@/frontend/components/ui/form";
 import type { CreateRecurringClassLabels } from "@/shared/messages/types/message";
@@ -50,9 +50,9 @@ export function DaysScheduleSection({ watch, setValue, errors, isMobile, labels 
 
   return (
     <Box>
-      <Typography component="label" sx={labelSx}>
+      <Box component="label" sx={labelSx}>
         {isMobile ? labels.classSchedule : labels.daysSelection}
-      </Typography>
+      </Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         {days.map((day, index) => {
           const labelKey = DAY_LABEL_KEY_MAP[day.day];

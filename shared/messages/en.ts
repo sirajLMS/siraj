@@ -2051,6 +2051,7 @@ const en: MessageSchema = {
         },
       },
       markAsPaidSuccess: "Invoice marked as paid successfully",
+      noUnpaidInvoices: "No unpaid invoices to pay",
       deleteInvoiceSuccess: "Invoice deleted successfully",
       errors: {
         invalidId: "Invalid parent ID in billing view.",
