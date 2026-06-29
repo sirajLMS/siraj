@@ -166,6 +166,8 @@ const en: MessageSchema = {
     },
     outOfQuota: "Remaining classes quota has been exhausted.",
     unauthorizedSearch: "Unauthorized: Missing schedule search permission.",
+    invalidDstOffset: "Invalid DST offset: {offset} minutes. Only standard DST offsets are allowed.",
+    dstMigrationAlreadyRun: "A DST migration with offset {offset} minutes was already executed on {date}.",
   },
   auth: {
     login: {
@@ -1676,6 +1678,7 @@ const en: MessageSchema = {
       },
       errors: {
         mutationFailed: "DST migration failed. Please try again.",
+        noDstTransitionDetected: "No DST transition detected. The system is outside a DST change period.",
       },
       sections: {
         updated: "Updated",

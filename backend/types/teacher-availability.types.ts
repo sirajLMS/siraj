@@ -63,14 +63,16 @@ export interface TeacherAvailabilityGap {
   timezone: string;
 }
 
+export interface AvailabilitySearchTeacher {
+  id: string;
+  name: string;
+  gender: Gender | null;
+  timezone: string;
+  gaps: TeacherAvailabilityGap[];
+}
+
 export interface AvailabilitySearchResult {
   id: string;
-  teachers: {
-    id: string;
-    name: string;
-    gender: string | null;
-    timezone: string;
-    gaps: TeacherAvailabilityGap[];
-  }[];
+  teachers: AvailabilitySearchTeacher[];
   totalGaps: number;
 }

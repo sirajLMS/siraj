@@ -1,62 +1,127 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { useState } from "react";
+import { useNotifications } from "@toolpad/core/useNotifications";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { executeDstBulkUpdateMutationDocument } from "@/frontend/graphql/sharedDocuments/dst-migration.documents";
 import { logger } from "@/frontend/utils/logger";
+import { MigrationStatus } from "@/shared/lib/enum";
 import { DstMigrationView } from "./DstMigrationView";
+import type { CheckedEmptyItem, ConflictGroup, DstMigrationMetrics, UpdatedSession } from "./dst-migration.types";
+
+function detectDstOffsetMinutes(): number | null {
+  const now = new Date();
+  const jan = new Date(now.getFullYear(), 0, 1);
+  const jul = new Date(now.getFullYear(), 6, 1);
+  const standardOffset = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+  const currentOffset = now.getTimezoneOffset();
+  const dstShiftMinutes = standardOffset - currentOffset;
+  if (dstShiftMinutes === 0) return null;
+  return dstShiftMinutes;
+}
 
 export function DstMigrationContainer() {
+  const notifications = useNotifications();
+  const t = useTranslations("dashboard.dstMigration");
   const [executeDstUpdate, { loading, data }] = useMutation(executeDstBulkUpdateMutationDocument);
-  const [showSuccess, setShowSuccess] = useState(false);
-
-  const handleUpdate = async () => {
-    try {
-      await executeDstUpdate({
-        variables: {
-          offsetMinutes: 60,
-          description: "DST adjustment executed by admin",
-        },
-      });
-      setShowSuccess(true);
-    } catch (error) {
-      logger.error("DST bulk update failed", { error });
-    }
-  };
 
   const report = data?.executeDstBulkUpdate;
 
-  const metrics = {
-    totalAudited: report?.total ?? 0,
-    successful: report?.updated ?? 0,
-    conflicts: report?.conflicts ?? 0,
-    unchanged: report?.unchanged ?? 0,
-  };
+  const metrics: DstMigrationMetrics = useMemo(
+    () => ({
+      totalAudited: report?.total ?? 0,
+      successful: report?.updated ?? 0,
+      conflicts: report?.conflicts ?? 0,
+      unchanged: report?.unchanged ?? 0,
+    }),
+    [report]
+  );
 
-  let migrationStatus: "running" | "complete" | "idle";
-  if (loading) {
-    migrationStatus = "running";
-  } else if (report) {
-    migrationStatus = "complete";
-  } else {
-    migrationStatus = "idle";
-  }
+  const migrationStatus: MigrationStatus = useMemo(() => {
+    if (loading) return MigrationStatus.RUNNING;
+    if (report) return MigrationStatus.COMPLETE;
+    return MigrationStatus.IDLE;
+  }, [loading, report]);
+
+  const updatedSessions: readonly UpdatedSession[] = useMemo(
+    () =>
+      report?.updatedSessions?.map(s => ({
+        id: s.id ?? "",
+        studentName: s.studentName ?? "",
+        teacherName: s.teacherName ?? "",
+        fromTime: s.fromTime ?? "",
+        toTime: s.toTime ?? "",
+      })) ?? [],
+    [report]
+  );
+
+  const conflictGroups: readonly ConflictGroup[] = useMemo(
+    () =>
+      report?.conflictGroups?.map(g => ({
+        id: g.id ?? "",
+        teacherName: g.teacherName ?? "",
+        conflicts:
+          g.conflicts?.map(c => ({
+            id: c.id ?? "",
+            studentName: c.studentName ?? "",
+            message: c.message ?? "",
+          })) ?? [],
+      })) ?? [],
+    [report]
+  );
+
+  const checkedEmptyItems: readonly CheckedEmptyItem[] = useMemo(
+    () =>
+      report?.checkedEmptyItems?.map(i => ({
+        id: i.id ?? "",
+        studentName: i.studentName ?? "",
+        reason: i.reason ?? "",
+      })) ?? [],
+    [report]
+  );
+
+  const handleUpdate = async () => {
+    try {
+      const offsetMinutes = detectDstOffsetMinutes();
+      if (offsetMinutes === null) {
+        notifications.show(t("errors.noDstTransitionDetected"), {
+          severity: "warning",
+          autoHideDuration: 5000,
+        });
+        return;
+      }
+      await executeDstUpdate({
+        variables: {
+          offsetMinutes,
+          description: `DST adjustment of ${offsetMinutes} minutes executed by admin`,
+        },
+      });
+      notifications.show(t("actions.successMessage"), {
+        severity: "success",
+        autoHideDuration: 5000,
+      });
+    } catch (error) {
+      logger.error("DST bulk update failed", { error });
+      notifications.show(t("errors.mutationFailed"), {
+        severity: "error",
+        autoHideDuration: 5000,
+      });
+    }
+  };
 
   return (
     <RequirePermission permissions={[AppPermission.SystemBulkUpdateDst]}>
       <DstMigrationView
         metrics={metrics}
-        updatedSessions={[]}
-        conflictGroups={[]}
-        checkedEmptyItems={[]}
+        updatedSessions={updatedSessions}
+        conflictGroups={conflictGroups}
+        checkedEmptyItems={checkedEmptyItems}
         migrationStatus={migrationStatus}
-        showSuccess={showSuccess}
         onUpdate={handleUpdate}
-        onDismissSuccess={() => {
-          setShowSuccess(false);
-        }}
+        dstOffsetDetected={detectDstOffsetMinutes() !== null}
       />
     </RequirePermission>
   );

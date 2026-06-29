@@ -4,6 +4,7 @@ import {
   ClassExecutionState,
   ClassOutcome,
   CountryCode,
+  DayOfWeek,
   Gender,
   InvoiceType,
   LeaveRequestStatus,
@@ -65,4 +66,8 @@ export const RescheduleDateLabelPothosObject = gqlSchemaBuilder.enumType(Resched
 
 export const AvailabilityStatusPothosObject = gqlSchemaBuilder.enumType(AvailabilityStatus, {
   name: "AvailabilityStatus",
+});
+
+export const DayOfWeekPothosObject = gqlSchemaBuilder.enumType(DayOfWeek, {
+  name: "DayOfWeek",
 });

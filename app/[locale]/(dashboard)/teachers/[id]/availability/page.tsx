@@ -7,6 +7,14 @@ export const metadata: Metadata = {
   description: "Visualize and search available time slots across the faculty.",
 };
 
-export default function TeacherAvailabilityPage() {
-  return <TeacherAvailabilityContainer />;
+interface PageProps {
+  readonly params: Promise<{
+    readonly id: string;
+    readonly locale: string;
+  }>;
+}
+
+export default async function TeacherAvailabilityPage({ params }: PageProps) {
+  const { id } = await params;
+  return <TeacherAvailabilityContainer teacherId={id} />;
 }

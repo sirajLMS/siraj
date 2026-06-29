@@ -1,22 +1,11 @@
 // cspell:disable
 "use client";
 
-import {
-  PersonSearch as PersonSearchIcon,
-  Public as PublicIcon,
-  TrendingUp as TrendingUpIcon,
-} from "@mui/icons-material";
+import { PersonSearchOutlined, PublicOutlined, TrendingUpOutlined } from "@mui/icons-material";
 import { Avatar, AvatarGroup, Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
-import type { TeacherAvailabilityInsights } from "../types";
-
-interface InsightCardProps {
-  readonly title: string;
-  readonly value: string;
-  readonly description: string;
-  readonly icon: React.ReactNode;
-}
+import type { AvailabilityInsightsProps, InsightCardProps } from "../types";
 
 function InsightCard({ title, value, description, icon }: Readonly<InsightCardProps>) {
   return (
@@ -89,12 +78,12 @@ function TimezoneInsight({
           },
         })}
       >
-        {timezones.map(tz => (
+        {timezones.map((tz, index) => (
           <Avatar
             key={tz}
             sx={theme => ({
-              backgroundColor: tz === "AST" ? theme.palette.primaryContainer : theme.palette.secondaryContainer,
-              color: tz === "AST" ? theme.palette.onPrimaryContainer : theme.palette.onSecondaryContainer,
+              backgroundColor: index === 0 ? theme.palette.primaryContainer : theme.palette.secondaryContainer,
+              color: index === 0 ? theme.palette.onPrimaryContainer : theme.palette.onSecondaryContainer,
             })}
           >
             {tz}
@@ -111,14 +100,10 @@ function TimezoneInsight({
           pointerEvents: "none",
         }}
       >
-        <PublicIcon sx={theme => ({ fontSize: 120, color: theme.palette.primary.main })} />
+        <PublicOutlined sx={theme => ({ fontSize: 120, color: theme.palette.primary.main })} />
       </Box>
     </BaseCard>
   );
-}
-
-interface AvailabilityInsightsProps {
-  readonly insights: TeacherAvailabilityInsights;
 }
 
 export function AvailabilityInsights({ insights }: Readonly<AvailabilityInsightsProps>) {
@@ -137,14 +122,14 @@ export function AvailabilityInsights({ insights }: Readonly<AvailabilityInsights
         title={t("peakLoad")}
         value={insights.peakLoad}
         description={t("peakLoadDesc")}
-        icon={<TrendingUpIcon sx={theme => ({ color: theme.palette.primary.main })} />}
+        icon={<TrendingUpOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
       />
 
       <InsightCard
         title={t("availableStaff")}
         value={t("teachersCount", { count: insights.availableStaff })}
         description={t("availableStaffDesc")}
-        icon={<PersonSearchIcon sx={theme => ({ color: theme.palette.primary.main })} />}
+        icon={<PersonSearchOutlined sx={theme => ({ color: theme.palette.primary.main })} />}
       />
 
       <TimezoneInsight

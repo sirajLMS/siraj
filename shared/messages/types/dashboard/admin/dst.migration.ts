@@ -9,6 +9,7 @@ export interface DstMigrationLabels {
   };
   readonly errors: {
     readonly mutationFailed: string;
+    readonly noDstTransitionDetected: string;
   };
   readonly sections: {
     readonly updated: string;

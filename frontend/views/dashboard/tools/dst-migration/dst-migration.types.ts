@@ -1,23 +1,16 @@
-/**
- * DST Migration view-layer types.
- *
- * These types describe the UI model for the DST migration tool.
- * They are intentionally defined here (not in a mock store) so that
- * components depend only on local domain types.
- */
+import type { MigrationStatus } from "@/shared/lib/enum";
 
 export interface UpdatedSession {
   readonly id: string;
-  readonly className: string;
-  readonly section: string;
-  readonly teacher: string;
+  readonly studentName: string;
+  readonly teacherName: string;
   readonly fromTime: string;
   readonly toTime: string;
 }
 
 export interface ConflictItem {
   readonly id: string;
-  readonly className: string;
+  readonly studentName: string;
   readonly message: string;
 }
 
@@ -29,8 +22,8 @@ export interface ConflictGroup {
 
 export interface CheckedEmptyItem {
   readonly id: string;
-  readonly title: string;
-  readonly description: string;
+  readonly studentName: string;
+  readonly reason: string;
 }
 
 export interface DstMigrationMetrics {
@@ -40,4 +33,4 @@ export interface DstMigrationMetrics {
   readonly unchanged: number;
 }
 
-export type MigrationStatus = "idle" | "running" | "complete";
+export type { MigrationStatus };

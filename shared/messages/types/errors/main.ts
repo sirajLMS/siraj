@@ -116,4 +116,6 @@ export interface ErrorsLabels {
   readonly suggestion: SuggestionErrorLabels;
   readonly outOfQuota: string;
   readonly unauthorizedSearch: string;
+  readonly invalidDstOffset: string;
+  readonly dstMigrationAlreadyRun: string;
 }

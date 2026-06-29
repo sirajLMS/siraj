@@ -1,12 +1,12 @@
 "use client";
 
 import { ArrowForwardOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/components/ui";
-import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/types";
+import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];
@@ -32,17 +32,17 @@ export function UpdatedSessionsDataGrid({ sessions }: Readonly<Props>) {
   const columns = useMemo<GridColDef<UpdatedSession>[]>(
     () => [
       {
-        field: "className",
-        headerName: t("table.className"),
+        field: "studentName",
+        headerName: t("table.studentName"),
         flex: 1.5,
         minWidth: 220,
         renderCell: params => (
           <Box sx={{ py: 1 }}>
             <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-              {params.row.className}
+              {params.row.studentName}
             </Typography>
             <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {params.row.section} • {params.row.teacher}
+              {params.row.teacherName}
             </Typography>
           </Box>
         ),
@@ -80,30 +80,14 @@ export function UpdatedSessionsDataGrid({ sessions }: Readonly<Props>) {
   );
 
   return (
-    <Box>
-      <AppDataGrid
-        rows={sessions}
-        columns={columns}
-        getRowId={row => row.id}
-        hideFooter
-        ariaLabel="dst-updated-sessions-table"
-        emptyMessage={t("sections.updated")}
-        sx={{ border: "none" }}
-      />
-      <Box
-        sx={theme => ({
-          px: 3,
-          py: 2,
-          display: "flex",
-          justifyContent: "center",
-          backgroundColor: theme.palette.surfaceContainerLow,
-          borderTop: `1px solid ${theme.palette.outlineVariant}`,
-        })}
-      >
-        <Button variant="text" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
-          {t("actions.viewAllSuccessful")}
-        </Button>
-      </Box>
-    </Box>
+    <AppDataGrid
+      rows={sessions}
+      columns={columns}
+      getRowId={row => row.id}
+      hideFooter
+      ariaLabel="dst-updated-sessions-table"
+      emptyMessage={t("sections.updated")}
+      sx={{ border: "none" }}
+    />
   );
 }

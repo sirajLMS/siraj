@@ -3,14 +3,14 @@
 import { InfoOutlined, ReportProblemOutlined } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { FormSuccessSnackbar, PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader } from "@/frontend/components/ui";
 import type {
   CheckedEmptyItem,
   ConflictGroup,
   DstMigrationMetrics,
   MigrationStatus,
   UpdatedSession,
-} from "@/frontend/views/dashboard/tools/dst-migration/types";
+} from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 import { CheckedEmptyPanel } from "./components/CheckedEmptyPanel";
 import { ConflictErrorsPanel } from "./components/ConflictErrorsPanel";
 import { DstMigrationMetricsRow } from "./components/DstMigrationMetricsRow";
@@ -24,9 +24,8 @@ interface Props {
   readonly conflictGroups: readonly ConflictGroup[];
   readonly checkedEmptyItems: readonly CheckedEmptyItem[];
   readonly migrationStatus: MigrationStatus;
-  readonly showSuccess: boolean;
   readonly onUpdate: () => void;
-  readonly onDismissSuccess: () => void;
+  readonly dstOffsetDetected: boolean;
 }
 
 function MobileInactiveNote() {
@@ -84,15 +83,16 @@ export function DstMigrationView({
   conflictGroups,
   checkedEmptyItems,
   migrationStatus,
-  showSuccess,
   onUpdate,
-  onDismissSuccess,
+  dstOffsetDetected,
 }: Readonly<Props>) {
   const t = useTranslations("dashboard.dstMigration");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
 
-  const headerActions = isMobile ? undefined : <UpdateSchedulesButton status={migrationStatus} onUpdate={onUpdate} />;
+  const headerActions = isMobile ? undefined : (
+    <UpdateSchedulesButton status={migrationStatus} onUpdate={onUpdate} dstOffsetDetected={dstOffsetDetected} />
+  );
 
   return (
     <PageContainer>
@@ -100,7 +100,11 @@ export function DstMigrationView({
 
       {isMobile && (
         <Box sx={{ mb: 3 }}>
-          <UpdateSchedulesButtonMobile status={migrationStatus} onUpdate={onUpdate} />
+          <UpdateSchedulesButtonMobile
+            status={migrationStatus}
+            onUpdate={onUpdate}
+            dstOffsetDetected={dstOffsetDetected}
+          />
         </Box>
       )}
 
@@ -137,8 +141,6 @@ export function DstMigrationView({
       )}
 
       {!isMobile && <DstMigrationMetricsRow metrics={metrics} />}
-
-      <FormSuccessSnackbar open={showSuccess} message={t("actions.successMessage")} onClose={onDismissSuccess} />
     </PageContainer>
   );
 }

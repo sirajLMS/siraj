@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
 import { SearchScheduleForm } from "./SearchScheduleForm";
 import { SearchScheduleView } from "./SearchScheduleView";
@@ -17,7 +17,7 @@ export function SearchScheduleContainer() {
   const [searchInput, setSearchInput] = useState<{
     fromTime: string;
     toTime: string;
-    gender: string | null;
+    gender: Gender | null;
   } | null>(null);
 
   const { data, loading, error } = useQuery(searchTeacherAvailabilityQueryDocument, {

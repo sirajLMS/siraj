@@ -14,6 +14,28 @@ export const executeDstBulkUpdateMutationDocument: TypedDocumentNode<
       conflicts
       unchanged
       total
+      status
+      updatedSessions {
+        id
+        studentName
+        teacherName
+        fromTime
+        toTime
+      }
+      conflictGroups {
+        id
+        teacherName
+        conflicts {
+          id
+          studentName
+          message
+        }
+      }
+      checkedEmptyItems {
+        id
+        studentName
+        reason
+      }
     }
   }
 `;

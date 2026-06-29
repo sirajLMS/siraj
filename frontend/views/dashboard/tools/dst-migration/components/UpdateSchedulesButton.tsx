@@ -3,34 +3,35 @@
 import { CheckCircleOutlined, SyncOutlined } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { MigrationStatus } from "@/frontend/views/dashboard/tools/dst-migration/types";
+import { MigrationStatus } from "@/shared/lib/enum";
 
 interface Props {
   readonly status: MigrationStatus;
   readonly onUpdate: () => void;
   readonly fullWidth?: boolean;
+  readonly dstOffsetDetected: boolean;
 }
 
 function getButtonLabel(status: MigrationStatus, t: (key: string) => string): string {
-  if (status === "running") return t("actions.migrating");
-  if (status === "complete") return t("actions.migrationComplete");
+  if (status === MigrationStatus.RUNNING) return t("actions.migrating");
+  if (status === MigrationStatus.COMPLETE) return t("actions.migrationComplete");
   return t("actions.updateSchedules");
 }
 
 function getStartIcon(status: MigrationStatus) {
-  if (status === "complete") return <CheckCircleOutlined />;
+  if (status === MigrationStatus.COMPLETE) return <CheckCircleOutlined />;
   return <SyncOutlined />;
 }
 
-export function UpdateSchedulesButton({ status, onUpdate, fullWidth = false }: Readonly<Props>) {
+export function UpdateSchedulesButton({ status, onUpdate, fullWidth = false, dstOffsetDetected }: Readonly<Props>) {
   const t = useTranslations("dashboard.dstMigration");
-  const isRunning = status === "running";
-  const isComplete = status === "complete";
+  const isRunning = status === MigrationStatus.RUNNING;
+  const isComplete = status === MigrationStatus.COMPLETE;
 
   return (
     <Button
       variant={isComplete ? "contained" : "outlined"}
-      disabled={isRunning}
+      disabled={isRunning || !dstOffsetDetected}
       onClick={onUpdate}
       startIcon={getStartIcon(status)}
       fullWidth={fullWidth}
@@ -63,17 +64,21 @@ export function UpdateSchedulesButton({ status, onUpdate, fullWidth = false }: R
   );
 }
 
-export function UpdateSchedulesButtonMobile({ status, onUpdate }: Readonly<Omit<Props, "fullWidth">>) {
+export function UpdateSchedulesButtonMobile({
+  status,
+  onUpdate,
+  dstOffsetDetected,
+}: Readonly<Omit<Props, "fullWidth">>) {
   const t = useTranslations("dashboard.dstMigration");
-  const isRunning = status === "running";
-  const isComplete = status === "complete";
+  const isRunning = status === MigrationStatus.RUNNING;
+  const isComplete = status === MigrationStatus.COMPLETE;
   const label = getButtonLabel(status, t);
   const Icon = isComplete ? CheckCircleOutlined : SyncOutlined;
 
   return (
     <Button
       variant="contained"
-      disabled={isRunning}
+      disabled={isRunning || !dstOffsetDetected}
       onClick={onUpdate}
       fullWidth
       startIcon={<Icon />}

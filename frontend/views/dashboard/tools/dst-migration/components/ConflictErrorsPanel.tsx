@@ -3,17 +3,17 @@
 import { CancelOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { alpha, Box, Chip, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { ConflictGroup } from "@/frontend/views/dashboard/tools/dst-migration/types";
+import type { ConflictGroup } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {
   readonly conflictGroups: readonly ConflictGroup[];
 }
 
 function ConflictCard({
-  className,
+  studentName,
   message,
 }: Readonly<{
-  className: string;
+  studentName: string;
   message: string;
 }>) {
   return (
@@ -27,7 +27,7 @@ function ConflictCard({
       })}
     >
       <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main, mb: 0.5 })}>
-        {className}
+        {studentName}
       </Typography>
       <Stack direction="row" spacing={0.5} sx={{ alignItems: "flex-start" }}>
         <WarningAmberOutlined sx={theme => ({ fontSize: 16, color: theme.palette.error.main, mt: 0.25 })} />
@@ -97,7 +97,7 @@ export function ConflictErrorsPanel({ conflictGroups }: Readonly<Props>) {
               })}
             />
             {group.conflicts.map(conflict => (
-              <ConflictCard key={conflict.id} className={conflict.className} message={conflict.message} />
+              <ConflictCard key={conflict.id} studentName={conflict.studentName} message={conflict.message} />
             ))}
           </Box>
         ))}

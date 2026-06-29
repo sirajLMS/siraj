@@ -239,6 +239,7 @@ describe("Timezone Handling & DST Adjustment", () => {
   describe("DstMigrationService Permission Gating", () => {
     const originalHasPermission = PermissionsService.hasPermission;
     const originalGetActiveSchedules = DstMigrationRepository.getActiveRecurringSchedules;
+    const originalGetRecentMigrationRun = DstMigrationRepository.getRecentMigrationRun;
     const mockPermissions = new Map<string, boolean>();
 
     beforeAll(() => {
@@ -251,12 +252,22 @@ describe("Timezone Handling & DST Adjustment", () => {
         writable: true,
         configurable: true,
       });
+      Object.defineProperty(DstMigrationRepository, "getRecentMigrationRun", {
+        value: async () => null,
+        writable: true,
+        configurable: true,
+      });
     });
 
     afterAll(() => {
       PermissionsService.hasPermission = originalHasPermission;
       Object.defineProperty(DstMigrationRepository, "getActiveRecurringSchedules", {
         value: originalGetActiveSchedules,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(DstMigrationRepository, "getRecentMigrationRun", {
+        value: originalGetRecentMigrationRun,
         writable: true,
         configurable: true,
       });

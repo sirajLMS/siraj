@@ -2,32 +2,30 @@
 "use client";
 
 import { alpha, Box, Paper, Typography } from "@mui/material";
-import type { AvailabilityEntry, DayOfWeek, WeeklyAvailability } from "../types";
+import { DayOfWeek } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { AvailabilityEntry, WeeklyAvailabilityGridLabels, WeeklyAvailabilityGridProps } from "../types";
 
-interface WeeklyAvailabilityGridProps {
-  readonly availability: WeeklyAvailability;
-  readonly labels: {
-    readonly time: string;
-    readonly monday: string;
-    readonly tuesday: string;
-    readonly wednesday: string;
-    readonly thursday: string;
-    readonly friday: string;
-    readonly saturday: string;
-    readonly sunday: string;
-    readonly mon: string;
-    readonly tue: string;
-    readonly wed: string;
-    readonly thu: string;
-    readonly fri: string;
-    readonly sat: string;
-    readonly sun: string;
-  };
-}
+const DAYS: DayOfWeek[] = [
+  DayOfWeek.Monday,
+  DayOfWeek.Tuesday,
+  DayOfWeek.Wednesday,
+  DayOfWeek.Thursday,
+  DayOfWeek.Friday,
+  DayOfWeek.Saturday,
+  DayOfWeek.Sunday,
+];
 
-const DAYS: DayOfWeek[] = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+const DAY_LABEL_KEYS: Record<DayOfWeek, keyof WeeklyAvailabilityGridLabels> = {
+  [DayOfWeek.Monday]: "monday",
+  [DayOfWeek.Tuesday]: "tuesday",
+  [DayOfWeek.Wednesday]: "wednesday",
+  [DayOfWeek.Thursday]: "thursday",
+  [DayOfWeek.Friday]: "friday",
+  [DayOfWeek.Saturday]: "saturday",
+  [DayOfWeek.Sunday]: "sunday",
+};
 
-function GridHeader({ labels }: Readonly<{ labels: WeeklyAvailabilityGridProps["labels"] }>) {
+function GridHeader({ labels }: Readonly<{ labels: WeeklyAvailabilityGridLabels }>) {
   return (
     <Box
       sx={theme => ({
@@ -60,7 +58,7 @@ function GridHeader({ labels }: Readonly<{ labels: WeeklyAvailabilityGridProps["
           })}
         >
           <Typography variant="labelUppercase" sx={{ color: "inherit" }}>
-            {labels[day]}
+            {labels[DAY_LABEL_KEYS[day]]}
           </Typography>
         </Box>
       ))}
@@ -68,9 +66,10 @@ function GridHeader({ labels }: Readonly<{ labels: WeeklyAvailabilityGridProps["
   );
 }
 
-function AvailabilityBlock({ entry }: Readonly<{ entry: AvailabilityEntry }>) {
+function AvailabilityBlock({ entry, onClick }: Readonly<{ entry: AvailabilityEntry; onClick?: () => void }>) {
   return (
     <Box
+      onClick={onClick}
       sx={theme => ({
         backgroundColor: theme.palette.primary.main,
         height: "100%",
@@ -81,13 +80,15 @@ function AvailabilityBlock({ entry }: Readonly<{ entry: AvailabilityEntry }>) {
         justifyContent: "center",
         alignItems: "center",
         p: 1,
-        cursor: "pointer",
+        cursor: onClick ? "pointer" : "default",
         transition: "all 0.2s",
-        "&:hover": {
-          backgroundColor: theme.palette.primary.dark,
-          transform: "scale(1.02)",
-          zIndex: 10,
-        },
+        "&:hover": onClick
+          ? {
+              backgroundColor: theme.palette.primary.dark,
+              transform: "scale(1.02)",
+              zIndex: 10,
+            }
+          : undefined,
       })}
     >
       <Typography
@@ -117,7 +118,15 @@ function AvailabilityBlock({ entry }: Readonly<{ entry: AvailabilityEntry }>) {
   );
 }
 
-function GridRow({ time, dayEntries }: Readonly<{ time: string; dayEntries: WeeklyAvailability[string] }>) {
+function GridRow({
+  time,
+  dayEntries,
+  onBlockClick,
+}: Readonly<{
+  time: string;
+  dayEntries: WeeklyAvailabilityGridProps["availability"][string];
+  onBlockClick?: (entry: AvailabilityEntry) => void;
+}>) {
   return (
     <Box
       sx={theme => ({
@@ -143,7 +152,7 @@ function GridRow({ time, dayEntries }: Readonly<{ time: string; dayEntries: Week
         </Typography>
       </Box>
       {DAYS.map((day, index) => {
-        const entry = dayEntries[day];
+        const entries = dayEntries?.[day];
         return (
           <Box
             key={`${time}-${day}`}
@@ -153,7 +162,13 @@ function GridRow({ time, dayEntries }: Readonly<{ time: string; dayEntries: Week
               position: "relative",
             })}
           >
-            {entry && <AvailabilityBlock entry={entry} />}
+            {entries?.map(entry => (
+              <AvailabilityBlock
+                key={entry.id}
+                entry={entry}
+                onClick={onBlockClick ? () => onBlockClick(entry) : undefined}
+              />
+            ))}
           </Box>
         );
       })}
@@ -161,7 +176,7 @@ function GridRow({ time, dayEntries }: Readonly<{ time: string; dayEntries: Week
   );
 }
 
-export function WeeklyAvailabilityGrid({ availability, labels }: Readonly<WeeklyAvailabilityGridProps>) {
+export function WeeklyAvailabilityGrid({ availability, labels, onBlockClick }: Readonly<WeeklyAvailabilityGridProps>) {
   return (
     <Paper
       elevation={0}
@@ -176,7 +191,7 @@ export function WeeklyAvailabilityGrid({ availability, labels }: Readonly<Weekly
           <GridHeader labels={labels} />
           <Box>
             {Object.entries(availability).map(([time, dayEntries]) => (
-              <GridRow key={time} time={time} dayEntries={dayEntries} />
+              <GridRow key={time} time={time} dayEntries={dayEntries} onBlockClick={onBlockClick} />
             ))}
           </Box>
         </Box>

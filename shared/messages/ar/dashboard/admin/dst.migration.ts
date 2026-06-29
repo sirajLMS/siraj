@@ -12,6 +12,7 @@ export const dstMigration: DstMigrationLabels = {
   },
   errors: {
     mutationFailed: "فشل ترحيل التوقيت الصيفي. يرجى المحاولة مرة أخرى.",
+    noDstTransitionDetected: "لم يتم اكتشاف انتقال للتوقيت الصيفي. النظام خارج فترة تغيير التوقيت الصيفي.",
   },
   sections: {
     updated: "محدّث",

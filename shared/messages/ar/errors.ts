@@ -141,4 +141,6 @@ export const errors: ErrorsLabels = {
   },
   outOfQuota: "تم استنفاد الحصص المتبقية.",
   unauthorizedSearch: "غير مصرح: لا توجد صلاحية للبحث في الجداول.",
+  invalidDstOffset: "إزاحة توقيت صيفي غير صالحة: {offset} دقيقة. يُسمح فقط بإزاحات التوقيت الصيفي القياسية.",
+  dstMigrationAlreadyRun: "تم تنفيذ ترحيل التوقيت الصيفي بإزاحة {offset} دقيقة بالفعل في {date}.",
 };

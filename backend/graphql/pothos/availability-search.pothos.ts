@@ -1,18 +1,13 @@
+import type {
+  AvailabilitySearchResult,
+  AvailabilitySearchTeacher,
+  CrossStaffSearchInput,
+  TeacherAvailabilityGap,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { DayOfWeekPothosObject, GenderPothosObject } from "./enum.pothos";
 
-export type TeacherAvailabilityGapDefinition = {
-  id: string;
-  teacherId: string;
-  teacherName: string;
-  teacherGender: string | null;
-  dayOfWeek: string;
-  gapStartTime: string;
-  gapEndTime: string;
-  timezone: string;
-};
-
-const TeacherAvailabilityGapRef =
-  gqlSchemaBuilder.objectRef<TeacherAvailabilityGapDefinition>("TeacherAvailabilityGap");
+const TeacherAvailabilityGapRef = gqlSchemaBuilder.objectRef<TeacherAvailabilityGap>("TeacherAvailabilityGap");
 
 export const TeacherAvailabilityGapPothosObject = TeacherAvailabilityGapRef.implement({
   fields: t => ({
@@ -20,42 +15,33 @@ export const TeacherAvailabilityGapPothosObject = TeacherAvailabilityGapRef.impl
     teacherId: t.exposeString("teacherId"),
     teacherName: t.exposeString("teacherName"),
     teacherGender: t.exposeString("teacherGender", { nullable: true }),
-    dayOfWeek: t.exposeString("dayOfWeek"),
+    dayOfWeek: t.field({
+      type: DayOfWeekPothosObject,
+      resolve: gap => gap.dayOfWeek,
+    }),
     gapStartTime: t.exposeString("gapStartTime"),
     gapEndTime: t.exposeString("gapEndTime"),
     timezone: t.exposeString("timezone"),
   }),
 });
 
-export type AvailabilitySearchTeacherDefinition = {
-  id: string;
-  name: string;
-  gender: string | null;
-  timezone: string;
-  gaps: TeacherAvailabilityGapDefinition[];
-};
-
-const AvailabilitySearchTeacherRef =
-  gqlSchemaBuilder.objectRef<AvailabilitySearchTeacherDefinition>("AvailabilitySearchTeacher");
+const AvailabilitySearchTeacherRef = gqlSchemaBuilder.objectRef<AvailabilitySearchTeacher>("AvailabilitySearchTeacher");
 
 export const AvailabilitySearchTeacherPothosObject = AvailabilitySearchTeacherRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
     name: t.exposeString("name"),
-    gender: t.exposeString("gender", { nullable: true }),
+    gender: t.field({
+      type: GenderPothosObject,
+      nullable: true,
+      resolve: teacher => teacher.gender,
+    }),
     timezone: t.exposeString("timezone"),
     gaps: t.expose("gaps", { type: [TeacherAvailabilityGapPothosObject] }),
   }),
 });
 
-export type AvailabilitySearchResultDefinition = {
-  id: string;
-  teachers: AvailabilitySearchTeacherDefinition[];
-  totalGaps: number;
-};
-
-const AvailabilitySearchResultRef =
-  gqlSchemaBuilder.objectRef<AvailabilitySearchResultDefinition>("AvailabilitySearchResult");
+const AvailabilitySearchResultRef = gqlSchemaBuilder.objectRef<AvailabilitySearchResult>("AvailabilitySearchResult");
 
 export const AvailabilitySearchResultPothosObject = AvailabilitySearchResultRef.implement({
   fields: t => ({
@@ -65,18 +51,12 @@ export const AvailabilitySearchResultPothosObject = AvailabilitySearchResultRef.
   }),
 });
 
-export type AvailabilitySearchInputDefinition = {
-  fromTime: string;
-  toTime: string;
-  gender?: string | null;
-};
-
 export const AvailabilitySearchInputPothosObject = gqlSchemaBuilder
-  .inputRef<AvailabilitySearchInputDefinition>("AvailabilitySearchInput")
+  .inputRef<CrossStaffSearchInput>("AvailabilitySearchInput")
   .implement({
     fields: t => ({
       fromTime: t.string({ required: true }),
       toTime: t.string({ required: true }),
-      gender: t.string({ required: false }),
+      gender: t.field({ type: GenderPothosObject, required: false }),
     }),
   });

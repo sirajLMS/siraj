@@ -1,15 +1,55 @@
+import type {
+  DstCheckedEmptyItemReturnType,
+  DstConflictGroupReturnType,
+  DstConflictItemReturnType,
+  DstMigrationReportReturnType,
+  DstUpdatedSessionReturnType,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
-export type DstMigrationReportDefinition = {
-  id: string;
-  runId: string;
-  updated: number;
-  conflicts: number;
-  unchanged: number;
-  total: number;
-};
+const DstUpdatedSessionRef = gqlSchemaBuilder.objectRef<DstUpdatedSessionReturnType>("DstUpdatedSession");
 
-const DstMigrationReportRef = gqlSchemaBuilder.objectRef<DstMigrationReportDefinition>("DstMigrationReport");
+export const DstUpdatedSessionPothosObject = DstUpdatedSessionRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    studentName: t.exposeString("studentName"),
+    teacherName: t.exposeString("teacherName"),
+    fromTime: t.exposeString("fromTime"),
+    toTime: t.exposeString("toTime"),
+  }),
+});
+
+const DstConflictItemRef = gqlSchemaBuilder.objectRef<DstConflictItemReturnType>("DstConflictItem");
+
+export const DstConflictItemPothosObject = DstConflictItemRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    studentName: t.exposeString("studentName"),
+    message: t.exposeString("message"),
+  }),
+});
+
+const DstConflictGroupRef = gqlSchemaBuilder.objectRef<DstConflictGroupReturnType>("DstConflictGroup");
+
+export const DstConflictGroupPothosObject = DstConflictGroupRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    teacherName: t.exposeString("teacherName"),
+    conflicts: t.expose("conflicts", { type: [DstConflictItemPothosObject] }),
+  }),
+});
+
+const DstCheckedEmptyItemRef = gqlSchemaBuilder.objectRef<DstCheckedEmptyItemReturnType>("DstCheckedEmptyItem");
+
+export const DstCheckedEmptyItemPothosObject = DstCheckedEmptyItemRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    studentName: t.exposeString("studentName"),
+    reason: t.exposeString("reason"),
+  }),
+});
+
+const DstMigrationReportRef = gqlSchemaBuilder.objectRef<DstMigrationReportReturnType>("DstMigrationReport");
 
 export const DstMigrationReportPothosObject = DstMigrationReportRef.implement({
   fields: t => ({
@@ -19,5 +59,9 @@ export const DstMigrationReportPothosObject = DstMigrationReportRef.implement({
     conflicts: t.exposeInt("conflicts"),
     unchanged: t.exposeInt("unchanged"),
     total: t.exposeInt("total"),
+    updatedSessions: t.expose("updatedSessions", { type: [DstUpdatedSessionPothosObject] }),
+    conflictGroups: t.expose("conflictGroups", { type: [DstConflictGroupPothosObject] }),
+    checkedEmptyItems: t.expose("checkedEmptyItems", { type: [DstCheckedEmptyItemPothosObject] }),
+    status: t.exposeString("status"),
   }),
 });

@@ -141,4 +141,6 @@ export const errors: ErrorsLabels = {
   },
   outOfQuota: "Remaining quota has been exhausted.",
   unauthorizedSearch: "Unauthorized: no permission to search tables.",
+  invalidDstOffset: "Invalid DST offset: {offset} minutes. Only standard DST offsets are allowed.",
+  dstMigrationAlreadyRun: "A DST migration with offset {offset} minutes was already executed on {date}.",
 };

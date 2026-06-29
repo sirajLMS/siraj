@@ -3,7 +3,7 @@
 import { CheckOutlined, ReportProblemOutlined } from "@mui/icons-material";
 import { alpha, Box, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type { CheckedEmptyItem } from "@/frontend/views/dashboard/tools/dst-migration/types";
+import type { CheckedEmptyItem } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {
   readonly items: readonly CheckedEmptyItem[];
@@ -57,10 +57,10 @@ export function CheckedEmptyPanel({ items }: Readonly<Props>) {
             <CheckOutlined sx={theme => ({ color: theme.palette.warning.main, mt: 0.25 })} />
             <Box>
               <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main })}>
-                {item.title}
+                {item.studentName}
               </Typography>
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                {item.description}
+                {item.reason}
               </Typography>
             </Box>
           </Box>

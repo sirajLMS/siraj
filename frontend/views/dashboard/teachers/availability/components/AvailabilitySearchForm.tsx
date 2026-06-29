@@ -1,18 +1,14 @@
 // cspell:disable
 "use client";
 
-import { Search as SearchIcon } from "@mui/icons-material";
+import { SearchOutlined } from "@mui/icons-material";
 import { Box, Button, MenuItem, Select, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
 import { AppTimePicker } from "@/frontend/components/ui/form/AppTimePicker";
 import { labelSx, outlinedInputSx, timeInputOutlinedSx } from "@/frontend/components/ui/form/formFieldStyles";
-import type { AvailabilitySearchFormData } from "../schemas/availabilitySearchSchema";
-
-interface TimeFieldProps {
-  readonly label: string;
-  readonly name: "fromTime" | "toTime";
-}
+import { Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { AvailabilitySearchFormData, AvailabilitySearchFormProps, TimeFieldProps } from "../types";
 
 function TimeField({ label, name }: Readonly<TimeFieldProps>) {
   const { control } = useFormContext<AvailabilitySearchFormData>();
@@ -43,12 +39,12 @@ function TimeField({ label, name }: Readonly<TimeFieldProps>) {
   );
 }
 
-export function AvailabilitySearchForm() {
+export function AvailabilitySearchForm({ onSearch }: Readonly<AvailabilitySearchFormProps>) {
   const t = useTranslations("dashboard.teacherAvailability");
   const { control, handleSubmit } = useFormContext<AvailabilitySearchFormData>();
 
-  const onSubmit = (_data: AvailabilitySearchFormData) => {
-    // In a real app, this would call a store action to filter the data
+  const onSubmit = (data: AvailabilitySearchFormData) => {
+    onSearch?.(data);
   };
 
   return (
@@ -68,7 +64,6 @@ export function AvailabilitySearchForm() {
       <TimeField label={t("from")} name="fromTime" />
       <TimeField label={t("to")} name="toTime" />
 
-      {/* Gender Filter */}
       <Box>
         <Typography variant="labelMd" sx={labelSx}>
           {t("gender")}
@@ -78,19 +73,18 @@ export function AvailabilitySearchForm() {
           control={control}
           render={({ field }) => (
             <Select {...field} fullWidth sx={outlinedInputSx}>
-              <MenuItem value="any">{t("any")}</MenuItem>
-              <MenuItem value="male">{t("male")}</MenuItem>
-              <MenuItem value="female">{t("female")}</MenuItem>
+              <MenuItem value="">{t("any")}</MenuItem>
+              <MenuItem value={Gender.Male}>{t("male")}</MenuItem>
+              <MenuItem value={Gender.Female}>{t("female")}</MenuItem>
             </Select>
           )}
         />
       </Box>
 
-      {/* Submit Button */}
       <Button
         type="submit"
         variant="contained"
-        startIcon={<SearchIcon />}
+        startIcon={<SearchOutlined />}
         sx={theme => ({
           height: 56,
           borderRadius: 3,

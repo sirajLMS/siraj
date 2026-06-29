@@ -1,9 +1,8 @@
 "use client";
 
 import { ArrowForwardOutlined, CheckCircleOutlined } from "@mui/icons-material";
-import { Box, Button, Stack, Typography } from "@mui/material";
-import { useTranslations } from "next-intl";
-import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/types";
+import { Box, Stack, Typography } from "@mui/material";
+import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];
@@ -25,7 +24,10 @@ function UpdatedSessionRow({ session }: Readonly<{ session: UpdatedSession }>) {
         <CheckCircleOutlined sx={theme => ({ color: theme.palette.tertiaryContainer })} />
         <Box>
           <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-            {session.className}
+            {session.studentName}
+          </Typography>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {session.teacherName}
           </Typography>
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -42,32 +44,12 @@ function UpdatedSessionRow({ session }: Readonly<{ session: UpdatedSession }>) {
   );
 }
 
-export function UpdatedSessionsCardList({ sessions, successfulCount }: Readonly<Props>) {
-  const t = useTranslations("dashboard.dstMigration");
-
+export function UpdatedSessionsCardList({ sessions }: Readonly<Props>) {
   return (
-    <Box>
-      <Box
-        sx={theme => ({ backgroundColor: theme.palette.surfaceContainerLowest, borderRadius: 3, overflow: "hidden" })}
-      >
-        {sessions.map(session => (
-          <UpdatedSessionRow key={session.id} session={session} />
-        ))}
-      </Box>
-      <Button
-        fullWidth
-        variant="outlined"
-        sx={theme => ({
-          mt: 2,
-          py: 1,
-          borderRadius: 2,
-          fontWeight: 700,
-          color: theme.palette.primary.main,
-          borderColor: theme.palette.primary.main,
-        })}
-      >
-        {t("actions.viewAllUpdates", { count: successfulCount })}
-      </Button>
+    <Box sx={theme => ({ backgroundColor: theme.palette.surfaceContainerLowest, borderRadius: 3, overflow: "hidden" })}>
+      {sessions.map(session => (
+        <UpdatedSessionRow key={session.id} session={session} />
+      ))}
     </Box>
   );
 }

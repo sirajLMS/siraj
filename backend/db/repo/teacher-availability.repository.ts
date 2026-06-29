@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
   teacherAvailabilityWindows,
@@ -9,7 +9,7 @@ import {
 } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
-import { DayOfWeek, VacationRequestStatus } from "@/shared/lib/enum";
+import { DayOfWeek, type Gender, VacationRequestStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 type TeacherGender = string | null;
@@ -621,20 +621,39 @@ export namespace TeacherAvailabilityRepository {
       };
     }
 
+    const teacherIds = allTeachers.map(teacher => teacher.teacherId);
+
+    const allWindows = await t
+      .select()
+      .from(teacherAvailabilityWindows)
+      .where(inArray(teacherAvailabilityWindows.teacherId, teacherIds));
+
+    const allUnavailabilities = await t
+      .select()
+      .from(teacherRecurringUnavailability)
+      .where(inArray(teacherRecurringUnavailability.teacherId, teacherIds));
+
+    const windowsByTeacher = new Map<string, Types.TeacherAvailabilityWindowSelectType[]>();
+    for (const w of allWindows) {
+      const list = windowsByTeacher.get(w.teacherId) ?? [];
+      list.push(w);
+      windowsByTeacher.set(w.teacherId, list);
+    }
+
+    const unavailabilitiesByTeacher = new Map<string, Types.TeacherRecurringUnavailabilitySelectType[]>();
+    for (const u of allUnavailabilities) {
+      const list = unavailabilitiesByTeacher.get(u.teacherId) ?? [];
+      list.push(u);
+      unavailabilitiesByTeacher.set(u.teacherId, list);
+    }
+
     const daysOfWeek = Object.values(DayOfWeek);
     const result: Types.AvailabilitySearchResult["teachers"] = [];
     let totalGaps = 0;
 
     for (const teacher of allTeachers) {
-      const windows = await t
-        .select()
-        .from(teacherAvailabilityWindows)
-        .where(eq(teacherAvailabilityWindows.teacherId, teacher.teacherId));
-
-      const unavailabilities = await t
-        .select()
-        .from(teacherRecurringUnavailability)
-        .where(eq(teacherRecurringUnavailability.teacherId, teacher.teacherId));
+      const windows = windowsByTeacher.get(teacher.teacherId) ?? [];
+      const unavailabilities = unavailabilitiesByTeacher.get(teacher.teacherId) ?? [];
 
       const gaps = findGapsForTeacher(teacher, daysOfWeek, windows, unavailabilities, fromMinutes, toMinutes);
 
@@ -642,7 +661,7 @@ export namespace TeacherAvailabilityRepository {
         result.push({
           id: teacher.teacherId,
           name: teacher.teacherName ?? "Unknown",
-          gender: teacher.teacherGender,
+          gender: teacher.teacherGender as Gender | null,
           timezone: teacher.teacherTimezone,
           gaps,
         });
