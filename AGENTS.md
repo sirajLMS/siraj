@@ -41,6 +41,11 @@ bun run test:graphql           # GraphQL integration tests
 bun run test:ui:components     # UI component tests
 bun run test:ui:e2e            # End-to-end tests
 
+# Run database tests with log capture (AI agents MUST use this instead of raw `bun test`)
+bun run scripts/run-test/run-test.ts <test-path>        # Run with log capture
+bun run scripts/run-test/run-test.ts --last <path>      # View last result (AI-optimized)
+bun run scripts/run-test/run-test.ts --last --focus "<pattern>" <path>  # Filtered view
+
 # Quality Gates
 bun quality-gate               # Automated quality verification (tsgo → biome → lint → codescene → sonar)
 bun quality-gate:fresh         # Reset state and run fresh
