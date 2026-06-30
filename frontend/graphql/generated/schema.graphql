@@ -128,6 +128,7 @@ enum AppPermission {
   STAFF_EDIT_PROFILE
   STAFF_LIST
   STAFF_VIEW_DIRECTORY
+  STORAGE_MANAGE
   STUDENTS_CHANGE_STATUS
   STUDENTS_CHANGE_TEACHER
   STUDENTS_EDIT
@@ -161,6 +162,7 @@ enum AppPermission {
   TEACHERS_LIST
   TEACHERS_MANAGE_SCHEDULE
   TEACHER_VIEW_DASHBOARD
+  TEST_CUSTOM_ALT
   TEST_CUSTOM_ONLY
   TEST_SYSTEM_ONLY
   USER_VIEW_PROFILE
@@ -354,6 +356,7 @@ type ClassInstancePerformance {
   engagementScore: Int
   focusLevel: String
   heatmapData: [JSON!]
+  id: String
   lastClassDaysAgo: Int
   latencyMs: Int
   sessionHealth: String
@@ -1280,6 +1283,7 @@ type Mutation {
   changeStudentStatus(expectedVersion: Int, newStatus: String!, studentId: String!): ChangeStudentStatusResult
   cleanupTestEntities(parentId: String!, parentUserId: String!, studentId: String!, studentUserId: String!, teacherId: String!, teacherUserId: String!): Boolean
   cleanupTestGroupClass(groupClassId: String!): Boolean
+  cleanupTestManager(userId: String!): Boolean
   clearWeeklySchedule(teacherId: ID!): Boolean
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createClassCategory(input: ClassCategoryCreateInput!): ClassCategory
@@ -2354,6 +2358,7 @@ type TeacherDirectoryRow {
   index: String
   name: String
   status: String
+  userId: String
   zoomLink: String
 }
 
@@ -2532,12 +2537,15 @@ type TeacherSimple {
 
 type TestEntities {
   parentId: String
+  parentName: String
   parentUserEmail: String
   parentUserId: String
   studentId: String
+  studentName: String
   studentUserEmail: String
   studentUserId: String
   teacherId: String
+  teacherName: String
   teacherUserEmail: String
   teacherUserId: String
 }

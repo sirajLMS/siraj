@@ -8,6 +8,7 @@ import {
   dailyScheduleListQueryDocument,
   dailyScheduleMetricsQueryDocument,
 } from "../sharedDocuments/schedule.documents";
+import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
 import {
   clearWeeklyScheduleMutationDocument,
   deleteRecurringClassMutationDocument,
@@ -19,9 +20,7 @@ import {
 import {
   assertRecurringClassDenied,
   authenticatedRequest,
-  fetchDemoTeacherId,
   fetchFirstClassInstanceId,
-  fetchNonDefaultTeacherId,
   loginDemoUser,
   verifyWeeklyScheduleGrid,
   verifyWorkloadMetrics,

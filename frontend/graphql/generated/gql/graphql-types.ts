@@ -156,6 +156,7 @@ export enum AppPermission {
   StaffEditProfile = 'STAFF_EDIT_PROFILE',
   StaffList = 'STAFF_LIST',
   StaffViewDirectory = 'STAFF_VIEW_DIRECTORY',
+  StorageManage = 'STORAGE_MANAGE',
   StudentsChangeStatus = 'STUDENTS_CHANGE_STATUS',
   StudentsChangeTeacher = 'STUDENTS_CHANGE_TEACHER',
   StudentsEdit = 'STUDENTS_EDIT',
@@ -189,6 +190,7 @@ export enum AppPermission {
   TeachersList = 'TEACHERS_LIST',
   TeachersManageSchedule = 'TEACHERS_MANAGE_SCHEDULE',
   TeacherViewDashboard = 'TEACHER_VIEW_DASHBOARD',
+  TestCustomAlt = 'TEST_CUSTOM_ALT',
   TestCustomOnly = 'TEST_CUSTOM_ONLY',
   TestSystemOnly = 'TEST_SYSTEM_ONLY',
   UserViewProfile = 'USER_VIEW_PROFILE'
@@ -389,6 +391,7 @@ export type ClassInstancePerformance = {
   engagementScore: Maybe<Scalars['Int']['output']>;
   focusLevel: Maybe<Scalars['String']['output']>;
   heatmapData: Maybe<Array<Scalars['JSON']['output']>>;
+  id: Maybe<Scalars['String']['output']>;
   lastClassDaysAgo: Maybe<Scalars['Int']['output']>;
   latencyMs: Maybe<Scalars['Int']['output']>;
   sessionHealth: Maybe<Scalars['String']['output']>;
@@ -1343,6 +1346,7 @@ export type Mutation = {
   changeStudentStatus: Maybe<ChangeStudentStatusResult>;
   cleanupTestEntities: Maybe<Scalars['Boolean']['output']>;
   cleanupTestGroupClass: Maybe<Scalars['Boolean']['output']>;
+  cleanupTestManager: Maybe<Scalars['Boolean']['output']>;
   clearWeeklySchedule: Maybe<Scalars['Boolean']['output']>;
   copyStorageItems: Maybe<BulkOperationResult>;
   createClassCategory: Maybe<ClassCategory>;
@@ -1484,6 +1488,11 @@ export type MutationCleanupTestEntitiesArgs = {
 
 export type MutationCleanupTestGroupClassArgs = {
   groupClassId: Scalars['String']['input'];
+};
+
+
+export type MutationCleanupTestManagerArgs = {
+  userId: Scalars['String']['input'];
 };
 
 
@@ -3141,6 +3150,7 @@ export type TeacherDirectoryRow = {
   index: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   status: Maybe<Scalars['String']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
   zoomLink: Maybe<Scalars['String']['output']>;
 };
 
@@ -3299,12 +3309,15 @@ export type TeacherSimple = {
 export type TestEntities = {
   __typename?: 'TestEntities';
   parentId: Maybe<Scalars['String']['output']>;
+  parentName: Maybe<Scalars['String']['output']>;
   parentUserEmail: Maybe<Scalars['String']['output']>;
   parentUserId: Maybe<Scalars['String']['output']>;
   studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
   studentUserEmail: Maybe<Scalars['String']['output']>;
   studentUserId: Maybe<Scalars['String']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
+  teacherName: Maybe<Scalars['String']['output']>;
   teacherUserEmail: Maybe<Scalars['String']['output']>;
   teacherUserId: Maybe<Scalars['String']['output']>;
 };

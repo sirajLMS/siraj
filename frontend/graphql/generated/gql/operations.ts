@@ -96,6 +96,7 @@ export type AppPermission =
   | 'STAFF_EDIT_PROFILE'
   | 'STAFF_LIST'
   | 'STAFF_VIEW_DIRECTORY'
+  | 'STORAGE_MANAGE'
   | 'STUDENTS_CHANGE_STATUS'
   | 'STUDENTS_CHANGE_TEACHER'
   | 'STUDENTS_EDIT'
@@ -129,6 +130,7 @@ export type AppPermission =
   | 'TEACHERS_LIST'
   | 'TEACHERS_MANAGE_SCHEDULE'
   | 'TEACHER_VIEW_DASHBOARD'
+  | 'TEST_CUSTOM_ALT'
   | 'TEST_CUSTOM_ONLY'
   | 'TEST_SYSTEM_ONLY'
   | 'USER_VIEW_PROFILE';
@@ -2525,7 +2527,7 @@ export type TeachersQueryVariables = Exact<{
 
 export type TeachersQuery = TeachersQuery_Query;
 
-export type CreateTestEntitiesMutation_createTestEntities_TestEntities = { studentUserEmail: string | null, studentUserId: string | null, studentId: string | null, parentUserEmail: string | null, parentUserId: string | null, parentId: string | null, teacherUserEmail: string | null, teacherUserId: string | null, teacherId: string | null };
+export type CreateTestEntitiesMutation_createTestEntities_TestEntities = { studentUserEmail: string | null, studentUserId: string | null, studentId: string | null, studentName: string | null, parentUserEmail: string | null, parentUserId: string | null, parentId: string | null, parentName: string | null, teacherUserEmail: string | null, teacherUserId: string | null, teacherId: string | null, teacherName: string | null };
 
 export type CreateTestEntitiesMutation_Mutation = { createTestEntities: CreateTestEntitiesMutation_createTestEntities_TestEntities | null };
 
@@ -2575,6 +2577,16 @@ export type CleanupTestGroupClassMutationVariables = Exact<{
 
 
 export type CleanupTestGroupClassMutation = CleanupTestGroupClassMutation_Mutation;
+
+export type CleanupTestManagerMutation_Mutation = { cleanupTestManager: boolean | null };
+
+
+export type CleanupTestManagerMutationVariables = Exact<{
+  userId: string;
+}>;
+
+
+export type CleanupTestManagerMutation = CleanupTestManagerMutation_Mutation;
 
 export type WelcomeMessageQuery_Query = { welcomeMessage: string | null };
 

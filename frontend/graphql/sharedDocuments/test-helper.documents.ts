@@ -11,12 +11,15 @@ export const createTestEntitiesMutationDocument: TypedDocumentNode<
       studentUserEmail
       studentUserId
       studentId
+      studentName
       parentUserEmail
       parentUserId
       parentId
+      parentName
       teacherUserEmail
       teacherUserId
       teacherId
+      teacherName
     }
   }
 `;
@@ -61,5 +64,14 @@ export const cleanupTestGroupClassMutationDocument: TypedDocumentNode<
 > = gql`
   mutation cleanupTestGroupClass($groupClassId: String!) {
     cleanupTestGroupClass(groupClassId: $groupClassId)
+  }
+`;
+
+export const cleanupTestManagerMutationDocument: TypedDocumentNode<
+  Operations.CleanupTestManagerMutation,
+  Types.MutationCleanupTestManagerArgs
+> = gql`
+  mutation cleanupTestManager($userId: String!) {
+    cleanupTestManager(userId: $userId)
   }
 `;

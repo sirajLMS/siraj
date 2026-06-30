@@ -1,12 +1,13 @@
 import { expect } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
-import { teachers as demoTeachers } from "@/shared/demo-users";
-import type { CreateRecurringClassInput } from "../generated/gql/graphql-types";
+import type { CreateRecurringClassInput, ManagerAccountType } from "../generated/gql/graphql-types";
 import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocuments/auth.documents";
+import { createManagerMutationDocument } from "../sharedDocuments/manager-onboarding.documents";
 import { createRecurringClassMutationDocument } from "../sharedDocuments/recurring-class.documents";
-import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
-import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
-import { createTestEntitiesMutationDocument } from "../sharedDocuments/test-helper.documents";
+import {
+  cleanupTestManagerMutationDocument,
+  createTestEntitiesMutationDocument,
+} from "../sharedDocuments/test-helper.documents";
 import { teacherWeeklyScheduleGridQueryDocument } from "../sharedDocuments/weekly-schedule.documents";
 import { testClient } from "./testClient";
 
@@ -89,6 +90,9 @@ export async function provisionTestEntities(adminToken: string, prefix: string, 
     parentUserId: entities.parentUserId,
     parentId: entities.parentId,
     parentUserEmail: entities.parentUserEmail,
+    teacherName: entities.teacherName,
+    parentName: entities.parentName,
+    studentName: entities.studentName,
     teacherToken,
   };
 }
@@ -118,6 +122,9 @@ export async function loginAndProvision(prefix: string) {
     parentUserId: result.parentUserId,
     parentId: result.parentId,
     parentUserEmail: result.parentUserEmail,
+    teacherName: result.teacherName,
+    parentName: result.parentName,
+    studentName: result.studentName,
   };
 }
 
@@ -152,83 +159,7 @@ export async function authenticatedRequest<TData, TVariables extends OperationVa
   return result.data as TData;
 }
 
-/**
- * Fetches the daily schedule list and returns the first student and teacher ID pair.
- */
-export async function fetchFirstStudentTeacherPair(
-  adminToken: string,
-  date: string
-): Promise<{ studentId: string; teacherId: string }> {
-  const result = await testClient.query({
-    query: dailyScheduleListQueryDocument,
-    variables: {
-      date,
-      teacherId: null,
-      search: null,
-      metricFilter: null,
-    },
-    context: {
-      headers: {
-        Authorization: `Bearer ${adminToken}`,
-      },
-    },
-  });
-
-  const list = result.data?.dailyScheduleList;
-  if (Array.isArray(list)) {
-    const found = list.find(item => item?.student?.id && item?.teacher?.id);
-    if (found?.student?.id && found?.teacher?.id) {
-      return {
-        studentId: found.student.id,
-        teacherId: found.teacher.id,
-      };
-    }
-  }
-
-  throw new Error("Could not find matching student/teacher pair");
-}
-
-export async function fetchDemoTeacherId(adminToken: string): Promise<string> {
-  const demoTeacher = demoTeachers[0];
-  if (!demoTeacher) throw new Error("No demo teachers configured");
-
-  const result = await testClient.query({
-    query: teachersQueryDocument,
-    variables: { search: demoTeacher.name, limit: 1 },
-    context: { headers: { Authorization: `Bearer ${adminToken}` } },
-  });
-
-  const teacherId = result.data?.teachers?.[0]?.id;
-  if (!teacherId) throw new Error("Could not find demo teacher via teachers query");
-  return teacherId;
-}
-
-export async function fetchNonDefaultTeacherId(adminToken: string): Promise<string | null> {
-  const result = await testClient.query({
-    query: teachersQueryDocument,
-    variables: { search: "", limit: 10 },
-    context: { headers: { Authorization: `Bearer ${adminToken}` } },
-  });
-
-  const defaultTeacher = demoTeachers[0];
-  const teachers = result.data?.teachers;
-  if (!teachers || teachers.length < 2) return null;
-  const other = teachers.find(t => t.name !== defaultTeacher?.name && t.id);
-  return other?.id ?? null;
-}
-
 export async function fetchFirstClassInstanceId(adminToken: string, date: string): Promise<string> {
-  const result = await testClient.query({
-    query: dailyScheduleListQueryDocument,
-    variables: { date, teacherId: null, search: null, metricFilter: null },
-    context: { headers: { Authorization: `Bearer ${adminToken}` } },
-  });
-
-  const list = result.data?.dailyScheduleList;
-  if (Array.isArray(list) && list.length > 0 && list[0]?.id) {
-    return list[0].id;
-  }
-
   const entities = await provisionTestEntities(adminToken, "sched-del", 5);
 
   const d = new Date(date);
@@ -257,7 +188,7 @@ export async function fetchFirstClassInstanceId(adminToken: string, date: string
   const classItem = gridResult.data?.teacherWeeklyScheduleGrid?.classes?.[0];
   if (classItem?.id) return classItem.id;
 
-  throw new Error("No class instance found in daily schedule list or weekly grid");
+  throw new Error("No class instance found in weekly grid");
 }
 
 /**
@@ -322,6 +253,44 @@ export async function expectMutationError<TData, TVars extends OperationVariable
     context: { headers: { Authorization: `Bearer ${token}` } },
   } as Parameters<typeof testClient.mutate>[0]);
   expect(result.error).toBeDefined();
+}
+
+export async function provisionTestManager(
+  superAdminToken: string,
+  prefix: string,
+  accountType: ManagerAccountType
+): Promise<{ userId: string; staffProfileId: string; name: string; assignedGroupSlug: string }> {
+  const result = await testClient.mutate({
+    mutation: createManagerMutationDocument,
+    variables: {
+      input: {
+        name: `${prefix}-manager`,
+        email: `${prefix}-manager@test.com`,
+        password: "password",
+        accountType,
+        phone: null,
+        skypeId: null,
+      },
+    },
+    context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
+  });
+
+  const manager = result.data?.createManager;
+  if (!manager?.userId) throw new Error("Manager creation failed: no userId");
+  if (!manager.staffProfileId) throw new Error("Manager creation failed: no staffProfileId");
+  if (!manager.name) throw new Error("Manager creation failed: no name");
+  if (!manager.assignedGroupSlug) throw new Error("Manager creation failed: no assignedGroupSlug");
+
+  return {
+    userId: manager.userId,
+    staffProfileId: manager.staffProfileId,
+    name: manager.name,
+    assignedGroupSlug: manager.assignedGroupSlug,
+  };
+}
+
+export async function cleanupTestManager(superAdminToken: string, userId: string): Promise<void> {
+  await authenticatedRequest(superAdminToken, "mutate", cleanupTestManagerMutationDocument, { userId });
 }
 
 export async function assertRecurringClassDenied(

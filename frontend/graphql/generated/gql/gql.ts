@@ -146,10 +146,11 @@ type Documents = {
     "\n  mutation deleteTeacherImportantNote($id: ID!) {\n    deleteTeacherImportantNote(id: $id)\n  }\n": typeof types.DeleteTeacherImportantNoteDocument,
     "\n  mutation createTeacher($input: TeacherOnboardingInput!) {\n    createTeacher(input: $input) {\n      userId\n      teacherId\n      name\n      email\n      status\n    }\n  }\n": typeof types.CreateTeacherDocument,
     "\n  query teachers($search: String!, $limit: Int!) {\n    teachers(search: $search, limit: $limit) {\n      id\n      name\n    }\n  }\n": typeof types.TeachersDocument,
-    "\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      parentUserEmail\n      parentUserId\n      parentId\n      teacherUserEmail\n      teacherUserId\n      teacherId\n    }\n  }\n": typeof types.CreateTestEntitiesDocument,
+    "\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      studentName\n      parentUserEmail\n      parentUserId\n      parentId\n      parentName\n      teacherUserEmail\n      teacherUserId\n      teacherId\n      teacherName\n    }\n  }\n": typeof types.CreateTestEntitiesDocument,
     "\n  mutation cleanupTestEntities(\n    $studentUserId: String!\n    $teacherUserId: String!\n    $parentUserId: String!\n    $studentId: String!\n    $teacherId: String!\n    $parentId: String!\n  ) {\n    cleanupTestEntities(\n      studentUserId: $studentUserId\n      teacherUserId: $teacherUserId\n      parentUserId: $parentUserId\n      studentId: $studentId\n      teacherId: $teacherId\n      parentId: $parentId\n    )\n  }\n": typeof types.CleanupTestEntitiesDocument,
     "\n  mutation createTestGroupClass($classInstanceId: String!, $teacherName: String!) {\n    createTestGroupClass(classInstanceId: $classInstanceId, teacherName: $teacherName) {\n      groupClassId\n    }\n  }\n": typeof types.CreateTestGroupClassDocument,
     "\n  mutation cleanupTestGroupClass($groupClassId: String!) {\n    cleanupTestGroupClass(groupClassId: $groupClassId)\n  }\n": typeof types.CleanupTestGroupClassDocument,
+    "\n  mutation cleanupTestManager($userId: String!) {\n    cleanupTestManager(userId: $userId)\n  }\n": typeof types.CleanupTestManagerDocument,
     "\n  query welcomeMessage {\n    welcomeMessage\n  }\n": typeof types.WelcomeMessageDocument,
     "\n  query translatedMessage($key: String!, $namespace: String!) {\n    translatedMessage(key: $key, namespace: $namespace)\n  }\n": typeof types.TranslatedMessageDocument,
     "\n  query UserBillingProfileSummary($userId: String, $parentId: String) {\n    parentBillingSummary(userId: $userId, parentId: $parentId) {\n      id\n      outstandingBalance\n      paidThisTerm\n      nextDueDate\n      activeStudents\n    }\n  }\n": typeof types.UserBillingProfileSummaryDocument,
@@ -290,10 +291,11 @@ const documents: Documents = {
     "\n  mutation deleteTeacherImportantNote($id: ID!) {\n    deleteTeacherImportantNote(id: $id)\n  }\n": types.DeleteTeacherImportantNoteDocument,
     "\n  mutation createTeacher($input: TeacherOnboardingInput!) {\n    createTeacher(input: $input) {\n      userId\n      teacherId\n      name\n      email\n      status\n    }\n  }\n": types.CreateTeacherDocument,
     "\n  query teachers($search: String!, $limit: Int!) {\n    teachers(search: $search, limit: $limit) {\n      id\n      name\n    }\n  }\n": types.TeachersDocument,
-    "\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      parentUserEmail\n      parentUserId\n      parentId\n      teacherUserEmail\n      teacherUserId\n      teacherId\n    }\n  }\n": types.CreateTestEntitiesDocument,
+    "\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      studentName\n      parentUserEmail\n      parentUserId\n      parentId\n      parentName\n      teacherUserEmail\n      teacherUserId\n      teacherId\n      teacherName\n    }\n  }\n": types.CreateTestEntitiesDocument,
     "\n  mutation cleanupTestEntities(\n    $studentUserId: String!\n    $teacherUserId: String!\n    $parentUserId: String!\n    $studentId: String!\n    $teacherId: String!\n    $parentId: String!\n  ) {\n    cleanupTestEntities(\n      studentUserId: $studentUserId\n      teacherUserId: $teacherUserId\n      parentUserId: $parentUserId\n      studentId: $studentId\n      teacherId: $teacherId\n      parentId: $parentId\n    )\n  }\n": types.CleanupTestEntitiesDocument,
     "\n  mutation createTestGroupClass($classInstanceId: String!, $teacherName: String!) {\n    createTestGroupClass(classInstanceId: $classInstanceId, teacherName: $teacherName) {\n      groupClassId\n    }\n  }\n": types.CreateTestGroupClassDocument,
     "\n  mutation cleanupTestGroupClass($groupClassId: String!) {\n    cleanupTestGroupClass(groupClassId: $groupClassId)\n  }\n": types.CleanupTestGroupClassDocument,
+    "\n  mutation cleanupTestManager($userId: String!) {\n    cleanupTestManager(userId: $userId)\n  }\n": types.CleanupTestManagerDocument,
     "\n  query welcomeMessage {\n    welcomeMessage\n  }\n": types.WelcomeMessageDocument,
     "\n  query translatedMessage($key: String!, $namespace: String!) {\n    translatedMessage(key: $key, namespace: $namespace)\n  }\n": types.TranslatedMessageDocument,
     "\n  query UserBillingProfileSummary($userId: String, $parentId: String) {\n    parentBillingSummary(userId: $userId, parentId: $parentId) {\n      id\n      outstandingBalance\n      paidThisTerm\n      nextDueDate\n      activeStudents\n    }\n  }\n": types.UserBillingProfileSummaryDocument,
@@ -847,7 +849,7 @@ export function graphql(source: "\n  query teachers($search: String!, $limit: In
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      parentUserEmail\n      parentUserId\n      parentId\n      teacherUserEmail\n      teacherUserId\n      teacherId\n    }\n  }\n"): (typeof documents)["\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      parentUserEmail\n      parentUserId\n      parentId\n      teacherUserEmail\n      teacherUserId\n      teacherId\n    }\n  }\n"];
+export function graphql(source: "\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      studentName\n      parentUserEmail\n      parentUserId\n      parentId\n      parentName\n      teacherUserEmail\n      teacherUserId\n      teacherId\n      teacherName\n    }\n  }\n"): (typeof documents)["\n  mutation createTestEntities($prefix: String!, $classesRemaining: Int) {\n    createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {\n      studentUserEmail\n      studentUserId\n      studentId\n      studentName\n      parentUserEmail\n      parentUserId\n      parentId\n      parentName\n      teacherUserEmail\n      teacherUserId\n      teacherId\n      teacherName\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -860,6 +862,10 @@ export function graphql(source: "\n  mutation createTestGroupClass($classInstanc
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation cleanupTestGroupClass($groupClassId: String!) {\n    cleanupTestGroupClass(groupClassId: $groupClassId)\n  }\n"): (typeof documents)["\n  mutation cleanupTestGroupClass($groupClassId: String!) {\n    cleanupTestGroupClass(groupClassId: $groupClassId)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation cleanupTestManager($userId: String!) {\n    cleanupTestManager(userId: $userId)\n  }\n"): (typeof documents)["\n  mutation cleanupTestManager($userId: String!) {\n    cleanupTestManager(userId: $userId)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
