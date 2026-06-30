@@ -26,7 +26,9 @@ We need a **second** custom test permission key for tests that need 2 distinct p
 
 ## Implementation Steps
 
-### Step 1: Add `TEST_CUSTOM_ALT` enum value
+> **Migration constraint**: Steps 1 and 2 modify the DB schema/migrations and MUST be executed sequentially in a single subagent (not in parallel). After each schema/migration modification, run `bun db cleanGenerate` immediately to verify no cascading issues accumulate. This verification must happen **before** any other subagents are dispatched for test-only changes.
+
+### Step 1: Add `TEST_CUSTOM_ALT` enum value [depends on: nothing]
 
 **File**: `shared/lib/enum.ts`
 - Add `TEST_CUSTOM_ALT = "test.custom_alt"` after `TEST_CUSTOM_ONLY` (line 539)
@@ -36,7 +38,9 @@ We need a **second** custom test permission key for tests that need 2 distinct p
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'test.custom_alt';
 ```
 
-### Step 2: Add `createTestPermission` helper to `entity-setup.ts`
+**Immediately after**: Run `bun db cleanGenerate` to confirm the enum + migration apply cleanly. Fix any errors before proceeding to Step 2.
+
+### Step 2: Add `createTestPermission` helper to `entity-setup.ts` [depends on: Step 1 ✅]
 
 **File**: `backend/db/test/entity-setup.ts`
 
@@ -64,7 +68,9 @@ export async function createTestPermission(
 }
 ```
 
-### Step 3: Fix `repo/permission-management.repository.test.ts`
+**Immediately after**: Run `bun db cleanGenerate` again to confirm the helper doesn't introduce schema/type drift. Fix any errors before proceeding. **Phase 1 gate: this must pass before any Phase 2 subagent is dispatched.**
+
+### Step 3: Fix `repo/permission-management.repository.test.ts` [depends on: Step 2 ✅]
 
 | Lines | Current Issue | Fix |
 |-------|--------------|-----|
@@ -82,7 +88,7 @@ export async function createTestPermission(
 - Remove the `db.delete(users)` cleanup and the `db.transaction` sub-transaction for creating temp user
 - Use `createTestUser(tx)` directly inside the rolled-back transaction
 
-### Step 4: Fix `logic/permission-management.service.test.ts`
+### Step 4: Fix `logic/permission-management.service.test.ts` [depends on: Step 1 ✅]
 
 | Lines | Current Issue | Fix |
 |-------|--------------|-----|
@@ -99,7 +105,7 @@ export async function createTestPermission(
 - Clean up in `afterAll` using `db.delete(permissions).where(eq(permissions.key, AppPermission.TEST_CUSTOM_ONLY))` (and same for `TEST_CUSTOM_ALT`)
 - Use `onConflictDoNothing` to handle re-runs
 
-### Step 5: Add comments to `repo/permissions.test.ts`
+### Step 5: Add comments to `repo/permissions.test.ts` [depends on: nothing]
 
 **File**: `backend/db/test/repo/permissions.test.ts`
 
@@ -112,16 +118,59 @@ export async function createTestPermission(
 
 ---
 
+## Task Dependency Graph
+
+```
+Step 1 (enum + migration)
+  └─▶ Step 2 (entity-setup helper)          [depends on Step 1: imports AppPermission.TEST_CUSTOM_ALT]
+       └─▶ Step 3 (repo test fixes)          [depends on Step 2: uses createTestPermission()]
+       └─▶ Step 4 (service test fixes)       [depends on Step 1: uses AppPermission.TEST_CUSTOM_ALT]
+       └─▶ Step 5 (comments only)            [no dependencies, but grouped with Phase 2]
+```
+
+### Dependency Rules
+
+| Step | Depends On | Cannot Start Until |
+|------|-----------|-------------------|
+| 1 | — | Can start immediately |
+| 2 | Step 1 | Step 1's `bun db cleanGenerate` passes |
+| 3 | Step 2 | Step 2's `bun db cleanGenerate` passes (needs `createTestPermission` helper to exist) |
+| 4 | Step 1 | Step 1's `bun db cleanGenerate` passes (needs `TEST_CUSTOM_ALT` enum value to exist) |
+| 5 | — | Can start anytime, but grouped in Phase 2 for efficiency |
+
+## Execution Order & Subagent Strategy
+
+### Phase 1: Schema & Helper (MUST be sequential, single subagent)
+
+Steps 1 → 2 must run sequentially in **one subagent** because:
+- Step 2 depends on Step 1's enum value existing
+- Both modify schema/migration files requiring `bun db cleanGenerate` verification
+
+**Gate**: Phase 1 is not "done" until BOTH `bun db cleanGenerate` runs pass. The main agent must confirm this before dispatching Phase 2 subagents.
+
+### Phase 2: Test Fixes (parallel subagents, each knows its dependencies)
+
+| Step | Subagent | Prerequisite Check (subagent MUST verify before starting) |
+|------|----------|----------------------------------------------------------|
+| 3 | Subagent A | `import { createTestPermission } from '@/backend/db/test/entity-setup'` resolves — if not, abort and report: "Step 2 not complete" |
+| 4 | Subagent B | `AppPermission.TEST_CUSTOM_ALT` exists in `shared/lib/enum.ts` — if not, abort and report: "Step 1 not complete" |
+| 5 | Subagent C | No prerequisite check needed |
+
+Each Phase 2 subagent must:
+1. **Verify its dependency exists** before making any file changes
+2. If dependency is missing, **abort immediately** with a clear message — do not attempt partial changes
+3. If dependency exists, proceed with its task
+
 ## Files to Modify
 
-| # | File | Type | Changes |
-|---|------|------|---------|
-| 1 | `shared/lib/enum.ts` | Enum | Add `TEST_CUSTOM_ALT` |
-| 2 | `backend/db/migration/<N>-add_test_custom_alt_permission.sql` | New | ALTER TYPE migration |
-| 3 | `backend/db/test/entity-setup.ts` | Helper | Add `createTestPermission()` |
-| 4 | `backend/db/test/repo/permission-management.repository.test.ts` | Test | Fix 5 seed queries + wrap non-tx test |
-| 5 | `backend/db/test/logic/permission-management.service.test.ts` | Test | Fix 2 seed queries + wrap trigger tests |
-| 6 | `backend/db/test/repo/permissions.test.ts` | Test | Add explanatory comments only |
+| # | File | Type | Phase | Step | Depends On | Changes |
+|---|------|------|-------|------|------------|---------|
+| 1 | `shared/lib/enum.ts` | Enum | Phase 1 | 1 | — | Add `TEST_CUSTOM_ALT` |
+| 2 | `backend/db/migration/<N>-add_test_custom_alt_permission.sql` | New migration | Phase 1 | 1 | — | ALTER TYPE migration |
+| 3 | `backend/db/test/entity-setup.ts` | Helper | Phase 1 | 2 | Step 1 | Add `createTestPermission()` |
+| 4 | `backend/db/test/repo/permission-management.repository.test.ts` | Test | Phase 2 | 3 | Step 2 | Fix 5 seed queries + wrap non-tx test |
+| 5 | `backend/db/test/logic/permission-management.service.test.ts` | Test | Phase 2 | 4 | Step 1 | Fix 2 seed queries + wrap trigger tests |
+| 6 | `backend/db/test/repo/permissions.test.ts` | Test | Phase 2 | 5 | — | Add explanatory comments only |
 
 ---
 
@@ -139,7 +188,23 @@ Each gets an explicit comment: `// Uses seed system group — required: DB trigg
 
 ## Verification Plan
 
-After all changes, run each modified test file through the `run-test` script:
+### Phase 1: Schema & Migration Verification (sequential, single subagent)
+
+After each modification in Phase 1, run `bun db cleanGenerate` immediately to confirm no cascading issues:
+
+```bash
+# After Step 1 (enum + migration):
+bun db cleanGenerate
+
+# After Step 2 (entity-setup helper — confirm no type drift):
+bun db cleanGenerate
+```
+
+If either `cleanGenerate` fails, fix the issue and re-run before proceeding. **Phase 2 must not start until Phase 1 completes successfully.**
+
+### Phase 2: Test Verification (parallel subagents)
+
+After Phase 1 succeeds, run each modified test file through the `run-test` script:
 
 ```bash
 # Run each modified test
@@ -164,16 +229,6 @@ After all test changes:
 bun tsgo                    # Type checking
 bun biome:check             # Formatting/lint
 bun run lint                # ESLint
-```
-
-### After migration is applied
-
-```bash
-# Run the migration (check with `bun run db` for migration commands)
-# Then re-run the full test suite
-bun run scripts/run-test/run-test.ts backend/db/test/repo/permission-management.repository.test.ts
-bun run scripts/run-test/run-test.ts backend/db/test/logic/permission-management.service.test.ts
-bun run scripts/run-test/run-test.ts backend/db/test/repo/permissions.test.ts
 ```
 
 ---

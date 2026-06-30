@@ -64,9 +64,28 @@ bun run scripts/run-test/run-test.ts --last --focus "<pattern>" frontend/graphql
 
 ---
 
+## Mandatory Commands per Change Type
+
+Before implementing any phase, the subagent MUST run the required post-change commands based on what was modified. **Skipping any of these causes cascading type/codegen errors that break all downstream phases.**
+
+| Change Type | Required Commands (in order) | When Required |
+|---|---|---|
+| Database schema change (drizzle schema files) | `bun db` → select option `8` (cleanGenerate = Reset → Gen → Migrate → Seed) | Adding/modifying columns, tables, indexes |
+| Backend GraphQL/Pothos schema change | `bun run generate:gqlSchema && bun codegen` | Adding/modifying mutations, queries, types, fields |
+| Frontend GraphQL document change | `bun codegen` | Adding/modifying `*.documents.ts` files |
+| Any code change | Quality loop (tsgo → biome → lint queue) | Every modified file |
+
+**Critical sequencing rule:** If a phase modifies both backend Pothos schema AND frontend documents, run `bun run generate:gqlSchema && bun codegen` AFTER both are changed, then quality-check the generated files before proceeding. If a phase also touches DB schema, `bun db` cleanGenerate must run FIRST (before codegen) since codegen depends on the running DB having the new schema.
+
+**Do NOT mark a phase as complete until ALL of its required commands have passed.** A phase that modifies backend GraphQL but skips codegen will produce stale types that cause every downstream phase to fail.
+
+---
+
 ## Execution Phases
 
 ### Phase 1: Backend — Extend `createTestEntities` + Add `cleanupTestManager`
+
+**Depends on:** Nothing (root phase)
 
 **Files modified:**
 - `backend/services/system/test-helper.service.ts`
@@ -88,13 +107,25 @@ bun run scripts/run-test/run-test.ts --last --focus "<pattern>" frontend/graphql
    - Add `teacherName`, `parentName`, `studentName` to `createTestEntitiesMutationDocument` selection set
    - Add `cleanupTestManagerMutationDocument` — mutation with `$userId: String!` arg, returns Boolean
 
-4. Run codegen: `bun run generate:gqlSchema && bun codegen`
+**Mandatory post-change commands (ALL must pass before marking complete):**
+1. If any DB schema was touched: `bun db` → option `8` (cleanGenerate)
+2. `bun run generate:gqlSchema && bun codegen` (Pothos schema changed + frontend document changed)
+3. Quality loop on ALL modified files AND generated files under `frontend/graphql/generated/`
 
-**Subagent instructions:** Modify all 3 backend/frontend files, then loop quality checks on each. Run codegen after all 3 pass. Then quality-check the generated files.
+**Subagent instructions:** Modify all 3 backend/frontend files, then run the mandatory commands in order (codegen after both Pothos + document changes). Then quality-check the generated files. **Do NOT proceed to Phase 2 until codegen succeeds and generated files pass quality checks.**
+
+**Completion criteria:**
+- [ ] All 3 files modified
+- [ ] `bun run generate:gqlSchema` passes
+- [ ] `bun codegen` passes
+- [ ] Quality loop passes on all modified + generated files
+- [ ] Test smoke: `bun run scripts/run-test/run-test.ts frontend/graphql/test/` — existing tests still pass
 
 ---
 
 ### Phase 2: helpers.ts Cleanup
+
+**Depends on:** Phase 1 (needs generated types from Phase 1's codegen)
 
 **File modified:** `frontend/graphql/test/helpers.ts`
 
@@ -116,11 +147,20 @@ bun run scripts/run-test/run-test.ts --last --focus "<pattern>" frontend/graphql
 - Import `cleanupTestManagerMutationDocument` from `../sharedDocuments/test-helper.documents`
 - `provisionTestManager(superAdminToken, prefix, accountType)` — Calls `createManagerMutationDocument`, returns `{ userId, staffProfileId, name, assignedGroupSlug }`. Keep under 70-80 lines per Rule 9.
 
-**Subagent instructions:** Modify helpers.ts, run quality loop until clean.
+**Mandatory post-change commands:**
+1. Quality loop on `helpers.ts`
+2. No codegen needed (no schema/document changes, only test helper code)
+
+**Completion criteria:**
+- [ ] All removals and additions done
+- [ ] Quality loop passes on helpers.ts
+- [ ] No import errors (verify generated types exist from Phase 1)
 
 ---
 
 ### Phase 3: Update `frontend/graphql/test/AGENTS.md` Rule 6
+
+**Depends on:** Phase 2 (AGENTS.md rules must reflect the actual helper API after Phase 2 refactors)
 
 **File modified:** `frontend/graphql/test/AGENTS.md`
 
@@ -131,11 +171,15 @@ Replace Rule 6 with:
 >    - Authentication role lookups (e.g., `loginDemoUser("academy_admin")`) are acceptable since they only provide auth tokens, not entity references.
 >    - Do not import or reference `@/shared/demo-users` for entity data — demo users are seed data and must not be relied upon in tests.
 
-**Subagent instructions:** Modify AGENTS.md, run quality loop.
+**Completion criteria:**
+- [ ] Rule 6 replaced
+- [ ] Content accurately reflects the new helper API from Phase 2
 
 ---
 
 ### Phase 4: teacher.test.ts Refactor
+
+**Depends on:** Phase 2 (needs `loginAndProvision` returning `teacherName`, `cleanupTestEntitiesMutationDocument`)
 
 **File modified:** `frontend/graphql/test/teacher.test.ts`
 
@@ -163,11 +207,23 @@ Replace Rule 6 with:
 | "updateTeacherProfile — admin can update" (lines 236-263) | Use `teacherId` — now mutates provisioned teacher |
 | "updateTeacherProfile — admin can edit any" (lines 265-291) | Use `teacherId` — now mutates provisioned teacher |
 
-**Subagent instructions:** Modify teacher.test.ts, run quality loop, run test with `bun run scripts/run-test/run-test.ts frontend/graphql/test/teacher.test.ts`, check `--last` for pass/fail.
+**Mandatory post-change commands:**
+1. Quality loop on `teacher.test.ts`
+2. Run test: `bun run scripts/run-test/run-test.ts frontend/graphql/test/teacher.test.ts`
+3. Check results: `bun run scripts/run-test/run-test.ts --last frontend/graphql/test/teacher.test.ts`
+4. All tests must pass before marking complete
+
+**Completion criteria:**
+- [ ] All test changes implemented
+- [ ] Quality loop passes
+- [ ] All tests pass (green)
+- [ ] No references to `demoTeachers` or `getSeededTeacherId` remain
 
 ---
 
 ### Phase 5: parent.test.ts Refactor
+
+**Depends on:** Phase 2 (needs `loginAndProvision` returning `parentId`/`parentName`/`studentName`, `cleanupTestEntitiesMutationDocument`)
 
 **File modified:** `frontend/graphql/test/parent.test.ts`
 
@@ -183,11 +239,23 @@ All 7 `describe` blocks. Each one that needs entity IDs provisions its own test 
 | parentInvoiceHistory (lines 284-327) | Provision via `loginAndProvision("ParentInvTest")`, use `parentId`, add afterAll |
 | parentDocuments (lines 329-361) | Provision via `loginAndProvision("ParentDocTest")`, use `parentId`, add afterAll |
 
-**Subagent instructions:** Modify parent.test.ts, run quality loop, run test.
+**Mandatory post-change commands:**
+1. Quality loop on `parent.test.ts`
+2. Run test: `bun run scripts/run-test/run-test.ts frontend/graphql/test/parent.test.ts`
+3. Check results: `bun run scripts/run-test/run-test.ts --last frontend/graphql/test/parent.test.ts`
+4. All tests must pass before marking complete
+
+**Completion criteria:**
+- [ ] All 7 describe blocks refactored
+- [ ] Quality loop passes
+- [ ] All tests pass (green)
+- [ ] No references to seeded parent data remain
 
 ---
 
 ### Phase 6: manager-directory-graphql.test.ts Refactor
+
+**Depends on:** Phase 2 (needs `provisionTestManager`, `cleanupTestManagerMutationDocument`)
 
 **File modified:** `frontend/graphql/test/manager-directory-graphql.test.ts`
 
@@ -205,11 +273,24 @@ All 7 `describe` blocks. Each one that needs entity IDs provisions its own test 
 
 **Cleanup:** Add `afterAll` calling `cleanupTestManagerMutationDocument` for both provisioned managers (by `userId`).
 
-**Subagent instructions:** Modify manager-directory-graphql.test.ts, run quality loop, run test.
+**Mandatory post-change commands:**
+1. Quality loop on `manager-directory-graphql.test.ts`
+2. Run test: `bun run scripts/run-test/run-test.ts frontend/graphql/test/manager-directory-graphql.test.ts`
+3. Check results: `bun run scripts/run-test/run-test.ts --last frontend/graphql/test/manager-directory-graphql.test.ts`
+4. All tests must pass before marking complete
+
+**Completion criteria:**
+- [ ] Both test managers provisioned at suite start
+- [ ] IDOR + update tests use provisioned managers
+- [ ] afterAll cleanup added for both managers
+- [ ] Quality loop passes
+- [ ] All tests pass (green)
 
 ---
 
 ### Phase 7: billing-management.test.ts Refactor
+
+**Depends on:** Phase 2 (needs `loginAndProvision` returning `parentId`, `cleanupTestEntitiesMutationDocument`)
 
 **File modified:** `frontend/graphql/test/billing-management.test.ts`
 
@@ -220,11 +301,24 @@ Both `describe` blocks:
 2. Use returned `parentId` for all invoice operations
 3. Add `afterAll` with `cleanupTestEntitiesMutationDocument`
 
-**Subagent instructions:** Modify billing-management.test.ts, run quality loop, run test.
+**Mandatory post-change commands:**
+1. Quality loop on `billing-management.test.ts`
+2. Run test: `bun run scripts/run-test/run-test.ts frontend/graphql/test/billing-management.test.ts`
+3. Check results: `bun run scripts/run-test/run-test.ts --last frontend/graphql/test/billing-management.test.ts`
+4. All tests must pass before marking complete
+
+**Completion criteria:**
+- [ ] `loginAndGetParentId()` removed
+- [ ] Both describe blocks use `loginAndProvision`
+- [ ] afterAll cleanup added
+- [ ] Quality loop passes
+- [ ] All tests pass (green)
 
 ---
 
 ### Phase 8: report.test.ts Refactor
+
+**Depends on:** Phase 2 (needs `loginAndProvision` returning `teacherUserId`/`teacherToken`, `cleanupTestEntitiesMutationDocument`)
 
 **File modified:** `frontend/graphql/test/report.test.ts`
 
@@ -238,11 +332,24 @@ In the masking test (lines 47-106):
 
 The first test (full financial data for admin) doesn't use any seeded entity ID — keep as-is.
 
-**Subagent instructions:** Modify report.test.ts, run quality loop, run test.
+**Mandatory post-change commands:**
+1. Quality loop on `report.test.ts`
+2. Run test: `bun run scripts/run-test/run-test.ts frontend/graphql/test/report.test.ts`
+3. Check results: `bun run scripts/run-test/run-test.ts --last frontend/graphql/test/report.test.ts`
+4. All tests must pass before marking complete
+
+**Completion criteria:**
+- [ ] Masking test uses provisioned teacher
+- [ ] No seeded entity references in masking test
+- [ ] afterAll cleanup added
+- [ ] Quality loop passes
+- [ ] All tests pass (green)
 
 ---
 
 ### Phase 9: schedule.test.ts Refactor (most complex)
+
+**Depends on:** Phase 2 (needs `loginAndProvision`, `provisionTestEntities`, `cleanupTestEntitiesMutationDocument`), Phase 2 (needs refactored `fetchFirstClassInstanceId` that uses provisioning)
 
 **File modified:** `frontend/graphql/test/schedule.test.ts`
 
@@ -275,11 +382,26 @@ The first test (full financial data for admin) doesn't use any seeded entity ID 
 
 **Add** `afterAll` cleanup for both provisioned entity sets via `cleanupTestEntitiesMutationDocument`.
 
-**Subagent instructions:** Modify schedule.test.ts, run quality loop, run test. This file is the most complex — may need multiple test runs with `--last --focus` to debug.
+**Mandatory post-change commands:**
+1. Quality loop on `schedule.test.ts`
+2. Run test: `bun run scripts/run-test/run-test.ts frontend/graphql/test/schedule.test.ts`
+3. Check results: `bun run scripts/run-test/run-test.ts --last frontend/graphql/test/schedule.test.ts`
+4. May need multiple test runs with `--last --focus "<pattern>"` to debug — this file is the most complex
+5. All tests must pass before marking complete
+
+**Completion criteria:**
+- [ ] All demo-user imports removed
+- [ ] All `fetchDemoTeacherId`/`fetchNonDefaultTeacherId`/`fetchFirstClassInstanceId` usages replaced
+- [ ] afterAll cleanup for both entity sets
+- [ ] Quality loop passes
+- [ ] All tests pass (green)
+- [ ] Search params use `teacherName` from provisioning, not hardcoded demo name
 
 ---
 
 ### Phase 10: student-directory-graphql.test.ts Refactor
+
+**Depends on:** Phase 2 (needs `loginAndProvision` returning `studentName`/`parentName`, `cleanupTestEntitiesMutationDocument`)
 
 **File modified:** `frontend/graphql/test/student-directory-graphql.test.ts`
 
@@ -288,11 +410,24 @@ The first test (full financial data for admin) doesn't use any seeded entity ID 
 3. Auth-denial tests: no change (role-only, no entity dependency)
 4. Add `afterAll` cleanup
 
-**Subagent instructions:** Modify student-directory-graphql.test.ts, run quality loop, run test.
+**Mandatory post-change commands:**
+1. Quality loop on `student-directory-graphql.test.ts`
+2. Run test: `bun run scripts/run-test/run-test.ts frontend/graphql/test/student-directory-graphql.test.ts`
+3. Check results: `bun run scripts/run-test/run-test.ts --last frontend/graphql/test/student-directory-graphql.test.ts`
+4. All tests must pass before marking complete
+
+**Completion criteria:**
+- [ ] All describe blocks use provisioned entities
+- [ ] Search assertions use `studentName`/`parentName`
+- [ ] afterAll cleanup added
+- [ ] Quality loop passes
+- [ ] All tests pass (green)
 
 ---
 
 ### Phase 11: Final Verification
+
+**Depends on:** All phases 1-10 must be FULLY complete (all their completion criteria met)
 
 After all phases complete:
 
@@ -301,6 +436,11 @@ After all phases complete:
 3. If failures found, use `--last --focus "<pattern>"` to debug specific tests
 4. Run `bun quality-gate:fresh` for comprehensive quality verification
 5. All checks must pass: tsgo, biome, lint, codescene, sonar
+
+**Completion criteria:**
+- [ ] Full GraphQL test suite passes (green)
+- [ ] `bun quality-gate:fresh` passes all stages
+- [ ] No file has references to `demo-users` for entity data (auth-only is OK)
 
 ---
 
@@ -321,10 +461,26 @@ After all phases complete:
 | `frontend/graphql/test/schedule.test.ts` | 9 | Full refactor, all entity refs use provisioned |
 | `frontend/graphql/test/student-directory-graphql.test.ts` | 10 | Provision test student |
 
-## Dependency Order
+## Dependency Graph
 
 ```
-Phase 1 (backend) → codegen → Phase 2 (helpers) → Phase 3 (AGENTS.md) → Phases 4-10 (tests, can run in parallel after 2+3)
+Phase 1 (backend + codegen)
+  └─→ Phase 2 (helpers.ts)
+        ├─→ Phase 3 (AGENTS.md)
+        ├─→ Phase 4 (teacher.test.ts)
+        ├─→ Phase 5 (parent.test.ts)
+        ├─→ Phase 6 (manager-directory.test.ts)
+        ├─→ Phase 7 (billing-management.test.ts)
+        ├─→ Phase 8 (report.test.ts)
+        ├─→ Phase 9 (schedule.test.ts)
+        └─→ Phase 10 (student-directory.test.ts)
+              └─→ Phase 11 (final verification, depends on ALL 1-10)
 ```
 
-Phases 4-10 are independent of each other and can be parallelized across subagents once Phases 1-3 are complete.
+**Strict rules:**
+- Phase 1 MUST complete (including `bun run generate:gqlSchema && bun codegen`) before Phase 2 starts — otherwise helpers.ts will have missing/stale types
+- Phase 2 MUST complete before Phases 3-10 start — otherwise tests will import helpers that don't exist yet
+- Phases 4-10 CAN run in parallel (they are independent of each other)
+- Phase 11 MUST NOT start until ALL of Phases 1-10 have met their completion criteria
+- If Phase 1 fails (e.g., codegen errors), STOP. Do not proceed to Phase 2 — it will cascade errors.
+- If any Phase 4-10 test fails after implementation, fix that phase independently before reporting completion — do not rely on Phase 11 to catch bugs
