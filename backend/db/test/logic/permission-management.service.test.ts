@@ -27,6 +27,9 @@ describe("PermissionManagementService Business Logic", () => {
   let testPerm1: typeof permissions.$inferSelect | undefined;
   let testPerm2: typeof permissions.$inferSelect | undefined;
 
+  // Track groups created by this test file for targeted cleanup (avoid wiping parallel tests' data)
+  const createdGroupIds = new Set<string>();
+
   // Track original getUserContext to restore later
   const originalGetUserContext = PermissionsService.getUserContext;
   let mockContext: UserPermissionContext | null = null;
@@ -164,8 +167,14 @@ describe("PermissionManagementService Business Logic", () => {
 
   afterEach(async () => {
     mockContext = null;
-    // Clean up non-system groups
-    await db.delete(permissionGroups).where(eq(permissionGroups.isSystem, false));
+    // Only delete groups this test file created — avoid wiping parallel tests' data
+    for (const groupId of createdGroupIds) {
+      await db
+        .delete(permissionGroups)
+        .where(eq(permissionGroups.id, groupId))
+        .catch(() => {});
+    }
+    createdGroupIds.clear();
   });
 
   describe("Access Control (Authorization Guards)", () => {
@@ -216,6 +225,7 @@ describe("PermissionManagementService Business Logic", () => {
         description: "Custom group description",
         permissionIds: testPerm1 ? [testPerm1.id] : [],
       });
+      createdGroupIds.add(group.id);
 
       expect(group).toBeDefined();
       expect(group.name).toBe("My Custom Group & Permissions!!");
@@ -233,6 +243,7 @@ describe("PermissionManagementService Business Logic", () => {
         name: "Initial Group",
         permissionIds: [],
       });
+      createdGroupIds.add(group.id);
 
       const updated = await PermissionManagementService.updateGroup(adminUser.id, {
         groupId: group.id,
@@ -249,6 +260,7 @@ describe("PermissionManagementService Business Logic", () => {
       mockContext = manageContext();
 
       // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
+      // Justified seed query: system groups are immutable seed data always present in the database
       const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
@@ -262,6 +274,7 @@ describe("PermissionManagementService Business Logic", () => {
       mockContext = manageContext();
 
       // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
+      // Justified seed query: system groups are immutable seed data always present in the database
       const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
@@ -289,6 +302,7 @@ describe("PermissionManagementService Business Logic", () => {
           .returning();
         return g;
       });
+      createdGroupIds.add(group.id);
 
       // Verify list initially empty
       let userGroups = await PermissionManagementService.listGroupsForUser(adminUser.id, regularUser.id);
@@ -317,6 +331,7 @@ describe("PermissionManagementService Business Logic", () => {
       mockContext = assignContext();
 
       // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
+      // Justified seed query: system groups are immutable seed data always present in the database
       const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
@@ -386,6 +401,7 @@ describe("PermissionManagementService Business Logic", () => {
           .returning();
         return g;
       });
+      createdGroupIds.add(group.id);
 
       // Bulk assign
       await PermissionManagementService.bulkAssignUsersToGroup(adminUser.id, {
@@ -416,11 +432,13 @@ describe("PermissionManagementService Business Logic", () => {
         name: "Collision Group Name",
         permissionIds: [],
       });
+      createdGroupIds.add(group1.id);
 
       const group2 = await PermissionManagementService.createGroup(adminUser.id, {
         name: "Collision Group Name!",
         permissionIds: [],
       });
+      createdGroupIds.add(group2.id);
 
       expect(group1.slug).toBe("collision_group_name");
       expect(group2.slug).toBe("collision_group_name_1");

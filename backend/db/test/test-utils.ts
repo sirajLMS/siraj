@@ -177,7 +177,9 @@ async function installPolicy(policy: RlsPolicyDef): Promise<void> {
       await db.execute(sql.raw(`CREATE POLICY ${pol} ON ${tbl} ${policy.definition}`));
       return;
     } catch (e) {
-      if (isPolicyConflictError(e) && attempt < 4) {
+      const isConflict = isPolicyConflictError(e);
+      const isDeadlock = isConcurrentConflictError(e);
+      if ((isConflict || isDeadlock) && attempt < 4) {
         await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
         continue;
       }

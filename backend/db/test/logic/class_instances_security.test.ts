@@ -174,7 +174,7 @@ describe("Class Instances Security Logic", () => {
         const { teacher, student } = await setupTestEntities(tx, "S2-4", { skipInstance: true });
         const instance = await createTestInstance(tx, teacher.id, student.id, {
           executionState: "COMPLETED",
-          outcome: "TAKEN",
+          outcome: "ABSENT",
           actualStartAt: new Date(),
           actualEndAt: new Date(Date.now() + 3600000),
         });

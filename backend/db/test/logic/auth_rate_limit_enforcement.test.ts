@@ -1,17 +1,40 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, like } from "drizzle-orm";
 import { testLogger } from "@/shared/lib/testlogger";
 import { db } from "../../drizzleDb";
 import { RateLimitRepository } from "../../repo";
 import { authRateLimits, passwordResetTokens } from "../../schema";
 
+/** Generate a unique IP address to avoid collision across parallel test runs. */
+function uniqueTestIp(): string {
+  const hex = randomUUID().replace(/-/g, "");
+  // Build a valid IPv4 in 10.x.y.z range (3 octets from UUID hex)
+  const x = Number.parseInt(hex.slice(0, 2), 16); // 0-255
+  const y = Number.parseInt(hex.slice(2, 4), 16); // 0-255
+  const z = (Number.parseInt(hex.slice(4, 6), 16) % 253) + 1; // 1-253
+  return `10.${x}.${y}.${z}`;
+}
+
+const CLEANUP_PREFIX = "test-rate-limits-";
+
 describe("Authentication Rate Limiting Enforcement", () => {
+  afterAll(async () => {
+    testLogger.info("Cleaning up rate limit enforcement test records...");
+    try {
+      await db.delete(authRateLimits).where(like(authRateLimits.email, `${CLEANUP_PREFIX}%`));
+      await db.delete(passwordResetTokens).where(like(passwordResetTokens.email, `${CLEANUP_PREFIX}%`));
+      testLogger.info("Rate limit enforcement test records cleaned up.");
+    } catch (error) {
+      testLogger.error("Error during rate limit test cleanup:", error);
+    }
+  });
+
   test("Failed login attempts should eventually lock the account/IP", async () => {
     testLogger.info("Testing rate limit enforcement on failed login attempts...");
 
-    const email = `test-rate-${randomUUID()}@example.com`;
-    const ip = "127.0.0.1";
+    const email = `${CLEANUP_PREFIX}${randomUUID()}@example.com`;
+    const ip = uniqueTestIp();
     const maxAttempts = 3;
 
     // Simulate failed attempts
@@ -42,8 +65,8 @@ describe("Authentication Rate Limiting Enforcement", () => {
   test("Cleanup job should remove expired security data", async () => {
     testLogger.info("Testing security data cleanup job...");
 
-    const email = `test-cleanup-${randomUUID()}@example.com`;
-    const ip = "127.0.0.2";
+    const email = `${CLEANUP_PREFIX}cleanup-${randomUUID()}@example.com`;
+    const ip = uniqueTestIp();
 
     // Create an expired record (maxAttempts=1, lockoutMinutes=-1 ensures it locks and expires immediately)
     const result = await RateLimitRepository.recordAttempt(ip, email, 1, -1);
@@ -65,7 +88,7 @@ describe("Authentication Rate Limiting Enforcement", () => {
     expect(recordsAfter.length).toBe(0);
 
     // Verify password reset token cleanup
-    const tokenEmail = `token-cleanup-${randomUUID()}@example.com`;
+    const tokenEmail = `${CLEANUP_PREFIX}token-${randomUUID()}@example.com`;
     await db.insert(passwordResetTokens).values({
       email: tokenEmail,
       hashedToken: "abc",
