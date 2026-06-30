@@ -1,43 +1,32 @@
 import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
-import type { OnboardingMetricsResult, PageInfo } from "@/backend/types";
+import type { OnboardingMetricsResult, PageInfo, TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
-export type TeacherDirectoryRowDefinition = {
-  id: string;
-  index: string;
-  name: string;
-  email: string;
-  avatarUrl: string;
-  status: string;
-  zoomLink: string | null;
-};
-
-const TeacherDirectoryRowRef = gqlSchemaBuilder.objectRef<TeacherDirectoryRowDefinition>("TeacherDirectoryRow");
+const TeacherDirectoryRowRef = gqlSchemaBuilder.objectRef<TeacherDirectoryRow>("TeacherDirectoryRow");
 
 export const TeacherDirectoryRowPothosObject = TeacherDirectoryRowRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
-    index: t.exposeString("index"),
+    index: t.string({
+      resolve: (_parent, _args, _ctx, info) => {
+        const idx = info.path.prev?.prev?.key;
+        return typeof idx === "number" ? String(idx + 1) : "0";
+      },
+    }),
+    userId: t.exposeString("userId"),
     name: t.exposeString("name"),
     email: t.exposeString("email"),
-    avatarUrl: t.exposeString("avatarUrl"),
+    avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     status: t.exposeString("status"),
     zoomLink: t.exposeString("zoomLink", { nullable: true }),
   }),
 });
 
-export type TeacherDirectoryMetricsDefinition = {
-  id: string;
-  activated: number;
-  deactivated: number;
-};
-
-const TeacherDirectoryMetricsRef =
-  gqlSchemaBuilder.objectRef<TeacherDirectoryMetricsDefinition>("TeacherDirectoryMetrics");
+const TeacherDirectoryMetricsRef = gqlSchemaBuilder.objectRef<TeacherDirectoryMetrics>("TeacherDirectoryMetrics");
 
 export const TeacherDirectoryMetricsPothosObject = TeacherDirectoryMetricsRef.implement({
   fields: t => ({
@@ -49,8 +38,8 @@ export const TeacherDirectoryMetricsPothosObject = TeacherDirectoryMetricsRef.im
 
 export type TeacherDirectoryDefinition = {
   id: string;
-  metrics: TeacherDirectoryMetricsDefinition;
-  rows: TeacherDirectoryRowDefinition[];
+  metrics: TeacherDirectoryMetrics;
+  rows: TeacherDirectoryRow[];
   totalTeachers: number;
   pageInfo: PageInfo | null;
 };

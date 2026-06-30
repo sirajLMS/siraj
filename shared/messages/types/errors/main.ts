@@ -86,6 +86,7 @@ export interface ErrorsLabels {
   readonly invalidParentId: string;
   readonly invalidInvoiceAmount: string;
   readonly invoiceAlreadyPaid: string;
+  readonly cannotDeletePaidInvoice: string;
   readonly invalidStatusTransition: string;
   readonly staffProfileNotFound: string;
   readonly staffProfileUpdateFailed: string;

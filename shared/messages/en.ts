@@ -104,6 +104,7 @@ const en: MessageSchema = {
     invalidParentId: "Invalid or missing parent ID",
     invalidInvoiceAmount: "Invoice amount must be a positive number",
     invoiceAlreadyPaid: "Invoice {id} is already marked as paid (current status: {status})",
+    cannotDeletePaidInvoice: "Cannot delete invoice {id} because it has already been paid",
     invalidStatusTransition: "Invalid status transition: {currentStatus} \u2192 {newStatus} is not permitted",
     staffProfileNotFound: "Staff profile not found",
     staffProfileUpdateFailed: "Failed to update staff profile",

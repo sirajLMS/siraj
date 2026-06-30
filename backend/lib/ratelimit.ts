@@ -15,11 +15,17 @@ class RateLimiter {
   private readonly prefix: string;
   private readonly maxRequests: number;
   private readonly windowMs: number;
+  private readonly _failOpen: boolean;
 
-  constructor(prefix: string, maxRequests: number, windowMs: number) {
+  constructor(prefix: string, maxRequests: number, windowMs: number, failOpen = true) {
     this.prefix = prefix;
     this.maxRequests = maxRequests;
     this.windowMs = windowMs;
+    this._failOpen = failOpen;
+  }
+
+  get isFailOpen(): boolean {
+    return this._failOpen;
   }
 
   /**
@@ -62,11 +68,10 @@ class RateLimiter {
       };
     } catch (error) {
       logger.error("Rate limiting error:", error);
-      // Fail open - allow request if cache has issues
       return {
-        success: true,
+        success: this._failOpen,
         limit: this.maxRequests,
-        remaining: this.maxRequests,
+        remaining: this._failOpen ? this.maxRequests : 0,
         reset: now + this.windowMs,
       };
     }
@@ -139,11 +144,10 @@ class RateLimiter {
       };
     } catch (error) {
       logger.error("Rate limiting error:", error);
-      // Fail open - allow request if cache has issues
       return {
-        success: true,
+        success: this._failOpen,
         limit: this.maxRequests,
-        remaining: this.maxRequests,
+        remaining: this._failOpen ? this.maxRequests : 0,
         reset: now + this.windowMs,
       };
     }
@@ -168,7 +172,8 @@ export const graphqlRateLimiter = new RateLimiter(
 export const authRateLimiter = new RateLimiter(
   "ratelimit:auth",
   10,
-  15 * 60 * 1000 // 15 minutes
+  15 * 60 * 1000, // 15 minutes
+  false
 );
 
 /**
@@ -210,9 +215,10 @@ export async function checkRateLimit(
     logger.warn(`Rate limit exceeded for identifier: ${identifier}`);
     return { success, limit, remaining, reset };
   } catch (error) {
-    // If rate limiting fails (e.g., cache is down), allow the request
-    // but log the error for monitoring
     logger.error("Rate limiting error:", error);
+    if (!limiter.isFailOpen) {
+      return { success: false, limit: 0, remaining: 0, reset: 0 };
+    }
     return { success: true, limit: 0, remaining: 0, reset: 0 };
   }
 }

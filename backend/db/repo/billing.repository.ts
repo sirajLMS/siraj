@@ -410,7 +410,8 @@ export namespace BillingRepository {
         .from(invoices)
         .leftJoin(students, eq(invoices.studentId, students.id))
         .where(whereCondition)
-        .orderBy(desc(invoices.issueDate));
+        .orderBy(desc(invoices.issueDate))
+        .limit(200);
 
       return {
         id: `parent-invoice-history-${parentId}`,
@@ -479,7 +480,8 @@ export namespace BillingRepository {
         .from(invoices)
         .leftJoin(students, eq(invoices.studentId, students.id))
         .where(whereCondition)
-        .orderBy(desc(invoices.issueDate));
+        .orderBy(desc(invoices.issueDate))
+        .limit(200);
 
       return {
         id: "admin-invoice-history",

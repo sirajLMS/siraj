@@ -2,6 +2,7 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { books } from "@/backend/db/schema";
+import type { PaginationArgs } from "@/backend/types";
 import type { BookReturnType } from "@/backend/types/book.types";
 import type { AvailabilityStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
@@ -16,10 +17,10 @@ function mapRow(row: { id: string; name: string; availabilityStatus: string; cre
 }
 
 export namespace BookRepository {
-  export async function findMany(tx?: DBTransaction): Promise<BookReturnType[]> {
+  export async function findMany(pagination?: PaginationArgs | null, tx?: DBTransaction): Promise<BookReturnType[]> {
     const queryDb = tx ?? db;
 
-    const rows = await queryDb
+    const baseQuery = queryDb
       .select({
         id: books.id,
         name: books.name,
@@ -30,6 +31,12 @@ export namespace BookRepository {
       .where(isNull(books.deletedAt))
       .orderBy(desc(books.createdAt));
 
+    if (pagination) {
+      const rows = await baseQuery.limit(pagination.perPage).offset(pagination.offset);
+      return rows.map(mapRow);
+    }
+
+    const rows = await baseQuery.limit(200);
     return rows.map(mapRow);
   }
 

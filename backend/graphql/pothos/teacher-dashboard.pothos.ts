@@ -1,4 +1,4 @@
-import type { PageInfo } from "@/backend/types";
+import type { ClassSessionMetrics, PageInfo } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PageInfoObject } from "../pothos/pagination.objects";
 
@@ -48,23 +48,7 @@ export const TeacherProgressFeedItemPothosObject = TeacherProgressFeedItemRef.im
   }),
 });
 
-export type TeacherDashboardMetricsDefinition = {
-  total: number;
-  regular: number;
-  trial: number;
-  advance: number;
-  rescheduled: number;
-  suspended: number;
-  taken: number;
-  pending: number;
-  activated: number;
-  running: number;
-  absent: number;
-  leave: number;
-};
-
-const TeacherDashboardMetricsRef =
-  gqlSchemaBuilder.objectRef<TeacherDashboardMetricsDefinition>("TeacherDashboardMetrics");
+const TeacherDashboardMetricsRef = gqlSchemaBuilder.objectRef<ClassSessionMetrics>("TeacherDashboardMetrics");
 
 export const TeacherDashboardMetricsPothosObject = TeacherDashboardMetricsRef.implement({
   fields: t => ({
@@ -85,7 +69,7 @@ export const TeacherDashboardMetricsPothosObject = TeacherDashboardMetricsRef.im
 
 export type TeacherDashboardDefinition = {
   id: string;
-  metrics: TeacherDashboardMetricsDefinition;
+  metrics: ClassSessionMetrics;
   scheduleRows: TeacherDashboardScheduleRowDefinition[];
   progressFeed: TeacherProgressFeedItemDefinition[];
   totalCount: number;

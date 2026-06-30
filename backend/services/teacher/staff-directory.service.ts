@@ -2,9 +2,9 @@ import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { PageInfo, PaginationArgs } from "@/backend/types";
+import type { PageInfo, PaginationArgs, TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
-import { AppPermission } from "@/shared/lib/enum";
+import { type AccountStatus, AppPermission } from "@/shared/lib/enum";
 
 export namespace StaffDirectoryService {
   async function assertDirectoryAccess(userId: string, locale?: string): Promise<void> {
@@ -22,16 +22,8 @@ export namespace StaffDirectoryService {
     locale?: string
   ): Promise<{
     id: string;
-    metrics: { id: string; activated: number; deactivated: number };
-    rows: {
-      id: string;
-      index: string;
-      name: string;
-      email: string;
-      avatarUrl: string;
-      status: string;
-      zoomLink: string | null;
-    }[];
+    metrics: TeacherDirectoryMetrics;
+    rows: TeacherDirectoryRow[];
     totalTeachers: number;
     pageInfo: PageInfo | null;
   }> {
@@ -45,18 +37,14 @@ export namespace StaffDirectoryService {
 
       return {
         id: `teacher-directory-${search ?? "all"}`,
-        metrics: {
-          id: "teacher-directory-metrics",
-          activated: metrics.activated,
-          deactivated: metrics.deactivated,
-        },
-        rows: rawRows.map((row, index) => ({
+        metrics,
+        rows: rawRows.map(row => ({
           id: row.id,
-          index: String((paginationArgs?.offset ?? 0) + index + 1).padStart(2, "0"),
+          userId: row.userId,
           name: row.name,
           email: row.email,
-          avatarUrl: row.avatarUrl ?? "",
-          status: row.status === "ACTIVATED" ? "active" : "offline",
+          avatarUrl: row.avatarUrl,
+          status: row.status as AccountStatus,
           zoomLink: row.zoomLink,
         })),
         totalTeachers: totalCount,

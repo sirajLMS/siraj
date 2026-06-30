@@ -79,6 +79,7 @@ export const errors: ErrorsLabels = {
   invalidParentId: "معرف ولي الأمر مفقود أو غير صالح",
   invalidInvoiceAmount: "يجب أن يكون مبلغ الفاتورة رقمًا موجبًا",
   invoiceAlreadyPaid: "الفاتورة {id} مُحددة بالفعل كمدفوعة (الحالة الحالية: {status})",
+  cannotDeletePaidInvoice: "لا يمكن حذف الفاتورة {id} لأنها مدفوعة بالفعل",
   invalidStatusTransition: "تحول الحالة غير صالح: {currentStatus} \u2192 {newStatus} غير مسموح به",
   staffProfileNotFound: "لم يتم العثور على الملف الشخصي للموظف",
   staffProfileUpdateFailed: "فشل تحديث الملف الشخصي للموظف",

@@ -1004,6 +1004,108 @@ WHERE
         FROM permission_groups
         WHERE
             is_system = true
+    )
+    AND permission_id IN (
+        SELECT id
+        FROM permissions
+        WHERE
+            key IN (
+                'auth.login',
+                'auth.view_own_profile',
+                'dashboard.view',
+                'dashboard.view_metrics',
+                'dashboard.filter_metrics',
+                'dashboard.metrics.view_all',
+                'dashboard.search',
+                'schedule.view_list',
+                'schedule.filter_advanced',
+                'schedule.view_all',
+                'schedule.view_assigned',
+                'schedule.view_family',
+                'schedule.search_availability',
+                'schedule.manage_recurring',
+                'schedule.dst_migrate',
+                'schedule.view_timezones',
+                'schedule.view_weekly',
+                'schedule.view_workload',
+                'schedule.create_class',
+                'schedule.delete_class',
+                'schedule.clear_weekly',
+                'session.view_details',
+                'session.activate_class',
+                'session.activate_override',
+                'session.update_status.start',
+                'session.update_status.absent',
+                'session.update_status.leave',
+                'session.reschedule',
+                'session.reset',
+                'session.override_actions',
+                'history.view_calendar',
+                'history.view_details',
+                'teacher.view_dashboard',
+                'system.enforce_time_window',
+                'system.enforce_leave_limit',
+                'system.sync_notifications',
+                'system.enforce_suspended_lock',
+                'system.process_student_leave',
+                'system.restrict_resource_access',
+                'system.dispatch_email',
+                'system.bulk_update_dst',
+                'teachers.list',
+                'teachers.create',
+                'teachers.edit',
+                'teachers.manage_schedule',
+                'parents.list',
+                'parents.create',
+                'parents.edit',
+                'students.list',
+                'students.edit',
+                'students.change_teacher',
+                'students.change_status',
+                'students.override_quota',
+                'invoices.list',
+                'invoices.delete',
+                'invoices.create',
+                'invoices.mark_paid',
+                'invoices.edit',
+                'resources.list',
+                'resources.delete',
+                'resources.upload',
+                'reports.generate',
+                'complaints.list',
+                'complaints.delete',
+                'complaints.respond',
+                'staff.list',
+                'staff.create',
+                'staff.edit',
+                'permission_groups.manage',
+                'permission_groups.assign',
+                'notification.view_alerts',
+                'billing.view_unpaid_invoices',
+                'user.view_profile',
+                'staff.view_directory',
+                'staff.edit_profile',
+                'parent.view_directory',
+                'parent.view_profile',
+                'parent.manage_status',
+                'student.view_associated',
+                'student.edit_quota',
+                'student.reassign_teacher',
+                'student.manage_status',
+                'billing.view_history',
+                'document.manage_parent_docs',
+                'billing.create_invoice',
+                'billing.update_status_paid',
+                'billing.delete_invoice',
+                'report.generate_custom',
+                'report.view_financials',
+                'support.submit_complaint',
+                'support.view_history',
+                'communication.submit_suggestion',
+                'suggestions.list',
+                'suggestions.review',
+                'suggestions.delete'
+            )
     );
 
 INSERT INTO
@@ -1522,6 +1624,11 @@ BEGIN
             RAISE EXCEPTION 'Invalid transition: Cannot reactivate a COMPLETED class instance.';
         END IF;
 
+        -- COMPLETED+TAKEN cannot be reset to NOT_ACTIVATED (financial integrity)
+        IF OLD.execution_state = 'COMPLETED' AND NEW.execution_state = 'NOT_ACTIVATED' AND OLD.outcome = 'TAKEN' THEN
+            RAISE EXCEPTION 'Invalid transition: Cannot reset a COMPLETED instance with TAKEN outcome.';
+        END IF;
+
         -- RUNNING cannot transition to ACTIVATED
         IF OLD.execution_state = 'RUNNING' AND NEW.execution_state = 'ACTIVATED' THEN
             RAISE EXCEPTION 'Invalid transition: Cannot move a RUNNING class instance back to ACTIVATED.';
@@ -1531,11 +1638,16 @@ BEGIN
         IF OLD.execution_state = 'ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('ABSENT', 'LEAVE') THEN
             RAISE EXCEPTION 'Invalid transition: ACTIVATED instance can only complete with ABSENT or LEAVE outcome.';
         END IF;
+
+        -- NOT_ACTIVATED can only transition to COMPLETED with LEAVE outcome
+        IF OLD.execution_state = 'NOT_ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('LEAVE') THEN
+            RAISE EXCEPTION 'Invalid transition: NOT_ACTIVATED instance can only complete with LEAVE outcome.';
+        END IF;
     END IF;
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql STABLE;
 
 DROP TRIGGER IF EXISTS trg_enforce_class_instance_transition ON class_instances;
 CREATE TRIGGER trg_enforce_class_instance_transition

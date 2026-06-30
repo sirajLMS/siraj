@@ -6,11 +6,20 @@ import { NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/testlogger";
 import type { UserEntity, UserNotificationPreferenceSelectType } from "../../../types";
 import { userNotificationPreferences, users } from "../../schema";
-import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { createTestUser, runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("User Notification Preferences", () => {
   beforeAll(async () => {
     await setupRlsRole();
+    await setupRlsPolicies([
+      { table: "users", name: "users_select_policy", definition: "FOR SELECT USING (deleted_at IS NULL)" },
+      { table: "users", name: "users_insert_policy", definition: "FOR INSERT WITH CHECK (deleted_at IS NULL)" },
+      {
+        table: "user_notification_preferences",
+        name: "notification_preferences_access_policy",
+        definition: "FOR ALL USING (user_id = current_user_id()) WITH CHECK (user_id = current_user_id())",
+      },
+    ]);
   });
 
   afterAll(async () => {

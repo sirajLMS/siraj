@@ -12,16 +12,6 @@ export type DemoUser = Omit<InternalDemoUser, "plainPassword">;
 
 const PWD = "12345678";
 
-const _superAdmins: InternalDemoUser[] = [
-  {
-    name: "Super Admin",
-    email: "admin@siraj.local",
-    plainPassword: PWD,
-    isSuperAdmin: true,
-    groupSlug: SystemPermissionGroupSlug.SUPER_ADMIN,
-  },
-];
-
 const _academyAdmins: InternalDemoUser[] = [
   {
     name: "Academy Admin",
@@ -52,29 +42,8 @@ const _parents: InternalDemoUser[] = [
   },
 ];
 
-const _staff: InternalDemoUser[] = [
-  {
-    name: "Default Staff",
-    email: "staff@siraj.local",
-    plainPassword: PWD,
-    isSuperAdmin: false,
-    groupSlug: SystemPermissionGroupSlug.STAFF_DEFAULT,
-  },
-];
-
-export const superAdmins: DemoUser[] = _superAdmins.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 export const academyAdmins: DemoUser[] = _academyAdmins.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 export const teachers: DemoUser[] = _teachers.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 export const parents: DemoUser[] = _parents.map(({ plainPassword: _plainPassword, ...rest }) => rest);
-export const staff: DemoUser[] = _staff.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 
-export const ALL_DEMO_USERS: DemoUser[] = [...superAdmins, ...academyAdmins, ...teachers, ...parents, ...staff];
-
-// Exported exclusively for backend seeders, DO NOT import this in frontend code
-export const INTERNAL_DEMO_USERS: InternalDemoUser[] = [
-  ..._superAdmins,
-  ..._academyAdmins,
-  ..._teachers,
-  ..._parents,
-  ..._staff,
-];
+export const INTERNAL_DEMO_USERS: InternalDemoUser[] = [..._academyAdmins, ..._teachers, ..._parents];

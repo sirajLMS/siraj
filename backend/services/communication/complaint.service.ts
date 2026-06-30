@@ -129,10 +129,11 @@ export namespace ComplaintService {
 
     try {
       const result = await ComplaintRepository.getComplaintsByParent(parent.id, pagination);
+      const complaintIds = result.complaints.map(c => c.id);
+      const responsesMap = await ComplaintResponseRepository.getResponsesByComplaints(complaintIds);
       const complaints: ComplaintReturnType[] = [];
 
       for (const complaint of result.complaints) {
-        const responses = await ComplaintResponseRepository.getResponsesByComplaint(complaint.id);
         complaints.push({
           id: complaint.id,
           parentId: complaint.parentId,
@@ -144,7 +145,7 @@ export namespace ComplaintService {
           createdAt: complaint.createdAt,
           updatedAt: complaint.updatedAt,
           studentName: complaint.studentName,
-          responses: responses,
+          responses: responsesMap.get(complaint.id) ?? [],
         });
       }
 

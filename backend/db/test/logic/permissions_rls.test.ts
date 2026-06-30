@@ -6,7 +6,7 @@ import type { ParentEntity, StudentEntity, UserEntity } from "../../../types";
 import type { DBTransaction } from "../../db.types";
 import { db } from "../../drizzleDb";
 import { parents, students, users } from "../../schema";
-import { setupRlsRole, teardownRlsRole } from "../test-utils";
+import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 /**
  * Helper to setup common test data for RLS tests
@@ -92,6 +92,34 @@ async function setupTestData(tx: DBTransaction) {
 describe("Row Level Security for Students", () => {
   beforeAll(async () => {
     await setupRlsRole();
+    await setupRlsPolicies([
+      { table: "users", name: "users_select_policy", definition: "FOR SELECT USING (deleted_at IS NULL)" },
+      { table: "users", name: "users_insert_policy", definition: "FOR INSERT WITH CHECK (deleted_at IS NULL)" },
+      {
+        table: "students",
+        name: "students_select_policy",
+        definition:
+          "FOR SELECT USING (NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()) OR parent_id = (SELECT id FROM parents WHERE user_id = current_user_id()))",
+      },
+      {
+        table: "students",
+        name: "students_insert_policy",
+        definition:
+          "FOR INSERT WITH CHECK (NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()) OR parent_id = (SELECT id FROM parents WHERE user_id = current_user_id()))",
+      },
+      {
+        table: "students",
+        name: "students_update_policy",
+        definition:
+          "FOR UPDATE USING (NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()) OR parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())) WITH CHECK (NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()) OR parent_id = (SELECT id FROM parents WHERE user_id = current_user_id()))",
+      },
+      {
+        table: "students",
+        name: "students_delete_policy",
+        definition:
+          "FOR DELETE USING (NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()) OR parent_id = (SELECT id FROM parents WHERE user_id = current_user_id()))",
+      },
+    ]);
   });
 
   afterAll(async () => {

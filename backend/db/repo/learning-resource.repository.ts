@@ -4,6 +4,7 @@ import { learningResources } from "@/backend/db/schema";
 import { learningResourceFiles } from "@/backend/db/schema/storage";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
+import type { PaginationArgs } from "@/backend/types";
 import type { DBTransaction } from "../db.types";
 
 export interface LearningResourceRow {
@@ -30,10 +31,42 @@ export interface LearningResourceListResult {
 }
 
 export namespace LearningResourceRepository {
-  export async function listResources(tx?: DBTransaction): Promise<LearningResourceListResult> {
+  export async function listResources(
+    pagination?: PaginationArgs | null,
+    tx?: DBTransaction
+  ): Promise<LearningResourceListResult> {
     const queryDb = tx ?? db;
 
     const baseWhere = isNull(learningResources.deletedAt);
+
+    if (pagination) {
+      const perPage = pagination.perPage;
+      const offset = pagination.offset;
+
+      const [rows, countResult] = await Promise.all([
+        queryDb
+          .select({
+            id: learningResources.id,
+            displayName: learningResources.displayName,
+            filePath: learningResources.filePath,
+            uploadedByUserId: learningResources.uploadedByUserId,
+            uploadedByUserName: sql<string | null>`NULL`,
+            fileSize: sql<number | null>`NULL`,
+            contentType: sql<string | null>`NULL`,
+            createdAt: learningResources.createdAt,
+          })
+          .from(learningResources)
+          .where(baseWhere)
+          .orderBy(desc(learningResources.createdAt))
+          .limit(perPage)
+          .offset(offset),
+        queryDb.select({ count: sql<number>`count(*)::int` }).from(learningResources).where(baseWhere),
+      ]);
+
+      const totalCount = countResult[0]?.count ?? 0;
+
+      return { rows, totalCount };
+    }
 
     const rowsQuery = queryDb
       .select({
@@ -48,7 +81,8 @@ export namespace LearningResourceRepository {
       })
       .from(learningResources)
       .where(baseWhere)
-      .orderBy(desc(learningResources.createdAt));
+      .orderBy(desc(learningResources.createdAt))
+      .limit(200);
 
     const countQuery = queryDb.select({ count: sql<number>`count(*)::int` }).from(learningResources).where(baseWhere);
 

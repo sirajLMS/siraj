@@ -79,6 +79,7 @@ export const errors: ErrorsLabels = {
   invalidParentId: "Parent ID is missing or invalid",
   invalidInvoiceAmount: "Invoice amount must be a positive number",
   invoiceAlreadyPaid: "Invoice {id} is already marked as paid (current status: {status})",
+  cannotDeletePaidInvoice: "Cannot delete invoice {id} because it has already been paid",
   invalidStatusTransition: "Invalid status transition: {currentStatus} \u2192 {newStatus} is not allowed",
   staffProfileNotFound: "Staff profile not found",
   staffProfileUpdateFailed: "Failed to update staff profile",

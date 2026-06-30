@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import { BillingRepository, ParentRepository } from "@/backend/db/repo";
 import { ForbiddenError, NotFoundError } from "@/backend/lib/errors";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -20,6 +20,7 @@ export interface CreateManualInvoiceInput {
   readonly exchangeRateSource?: string | null;
   readonly billingMonths?: readonly { readonly year: number; readonly month: number }[] | null;
   readonly sendEmail?: boolean | null;
+  readonly idempotencyKey?: string;
 }
 
 export interface ManualInvoiceResult {
@@ -63,6 +64,17 @@ export interface SendPaymentReminderResult {
   readonly success: boolean;
 }
 
+function deriveIdempotencyKey(input: {
+  parentId: string;
+  studentId?: string | null;
+  amount: string;
+  currency: string;
+  invoiceType: string;
+}): string {
+  const parts = [input.parentId, input.studentId ?? "", input.amount, input.currency, input.invoiceType];
+  return createHash("sha256").update(parts.join(":")).digest("hex");
+}
+
 export namespace BillingManagementService {
   export async function createManualInvoice(
     actorUserId: string,
@@ -100,7 +112,7 @@ export namespace BillingManagementService {
           exchangeRateSnapshot: input.exchangeRateSnapshot ?? null,
           exchangeRateSource: input.exchangeRateSource ?? null,
           createdByUserId: actorUserId,
-          idempotencyKey: randomUUID(),
+          idempotencyKey: input.idempotencyKey ?? deriveIdempotencyKey(input),
         },
         undefined,
         locale
@@ -204,6 +216,16 @@ export namespace BillingManagementService {
     if (!hasPermission) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("insufficientPermissions"));
+    }
+
+    const invoice = await BillingRepository.getInvoiceById(invoiceId);
+    if (!invoice) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new NotFoundError("INVOICE", tFunc("invoiceNotFound", { id: invoiceId }));
+    }
+    if (invoice.status === "PAID") {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("cannotDeletePaidInvoice", { id: invoiceId }));
     }
 
     try {

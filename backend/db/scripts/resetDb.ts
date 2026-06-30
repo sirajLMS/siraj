@@ -37,6 +37,11 @@ async function resetDatabase() {
     process.exit(1);
   }
 
+  if (process.env.NODE_ENV === "production") {
+    logger.error("Database reset is not allowed in production environment");
+    process.exit(1);
+  }
+
   const provider = process.env.DB_PROVIDER || "postgres";
 
   if (provider === "neon") {

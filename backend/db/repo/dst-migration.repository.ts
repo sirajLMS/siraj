@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, or, sql } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -59,7 +59,10 @@ export namespace DstMigrationRepository {
     return run;
   };
 
-  export const getActiveRecurringSchedules = async (tx?: DBTransaction): Promise<RecurringScheduleRow[]> => {
+  export const getActiveRecurringSchedules = async (
+    tx?: DBTransaction,
+    limit: number = 500
+  ): Promise<RecurringScheduleRow[]> => {
     const queryDb = tx ?? db;
     return await queryDb
       .select({
@@ -76,7 +79,13 @@ export namespace DstMigrationRepository {
       .innerJoin(students, eq(recurringSchedules.studentId, students.id))
       .innerJoin(teachers, eq(recurringSchedules.teacherId, teachers.id))
       .innerJoin(users, eq(teachers.userId, users.id))
-      .where(isNull(recurringSchedules.deletedAt));
+      .where(
+        and(
+          isNull(recurringSchedules.deletedAt),
+          or(isNull(recurringSchedules.effectiveUntil), gte(recurringSchedules.effectiveUntil, sql`NOW()`))
+        )
+      )
+      .limit(limit);
   };
 
   export const recordMigrationEntries = async (

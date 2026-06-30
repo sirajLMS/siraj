@@ -6,6 +6,7 @@ import { testLogger } from "@/shared/lib/testlogger";
 import { db } from "../../drizzleDb";
 import { AuditRepository, SoftDeleteRepository } from "../../repo";
 import { auditLogs, users } from "../../schema";
+import { setupRlsPolicies } from "../test-utils";
 
 describe("Soft Delete Security (Issue #2)", () => {
   beforeAll(async () => {
@@ -21,6 +22,17 @@ describe("Soft Delete Security (Issue #2)", () => {
       GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO test_rls_user_soft_delete;
       GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO test_rls_user_soft_delete;
     `);
+    await setupRlsPolicies([
+      { table: "users", name: "users_select_policy", definition: "FOR SELECT USING (deleted_at IS NULL)" },
+      { table: "users", name: "users_insert_policy", definition: "FOR INSERT WITH CHECK (deleted_at IS NULL)" },
+      {
+        table: "users",
+        name: "users_update_policy",
+        definition:
+          "FOR UPDATE USING (deleted_at IS NULL) WITH CHECK (deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true'))",
+      },
+      { table: "users", name: "users_delete_policy", definition: "FOR DELETE USING (false)" },
+    ]);
   });
 
   afterAll(async () => {

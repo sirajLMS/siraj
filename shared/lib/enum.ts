@@ -3,11 +3,6 @@ export enum AppLanguage {
   en = "en",
 }
 
-export enum Calendar {
-  Gregorian,
-  Hijri,
-}
-
 export enum OrderSortDirection {
   ASC = "ASC",
   DESC = "DESC",

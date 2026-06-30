@@ -201,6 +201,35 @@ export namespace ParentRepository {
     return await queryDb.select({ name: students.name }).from(students).where(eq(students.parentId, parentId)).limit(5);
   };
 
+  export const getStudentsForParents = async (
+    parentIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<Map<string, { name: string }[]>> => {
+    const queryDb = tx ?? db;
+
+    if (parentIds.length === 0) {
+      return new Map();
+    }
+
+    const rows = await queryDb
+      .select({
+        parentId: students.parentId,
+        name: students.name,
+      })
+      .from(students)
+      .where(inArray(students.parentId, [...parentIds]))
+      .limit(5 * parentIds.length);
+
+    const result = new Map<string, { name: string }[]>();
+    for (const id of parentIds) {
+      result.set(id, []);
+    }
+    for (const row of rows) {
+      result.get(row.parentId)?.push({ name: row.name });
+    }
+    return result;
+  };
+
   export type ParentProfileResult = {
     id: string;
     userId: string;
@@ -531,7 +560,8 @@ export namespace ParentRepository {
         return { rows: [], totalCount: 0, pageInfo };
       }
 
-      const viewerTimezone = input.date ? await fetchParentTimezone(t, parentId) : "UTC";
+      const timezoneForFormatting = await fetchParentTimezone(t, parentId);
+      const viewerTimezone = input.date ? timezoneForFormatting : "UTC";
       const whereClause = await buildScheduleConditions(input, studentIds, viewerTimezone);
 
       let dataQuery = buildScheduleDataQuery(t).where(whereClause).orderBy(classInstances.scheduledStartAt).$dynamic();
@@ -542,7 +572,6 @@ export namespace ParentRepository {
 
       const [queryRows, totalCount] = await Promise.all([dataQuery, fetchScheduleCount(t, whereClause)]);
 
-      const timezoneForFormatting = await fetchParentTimezone(t, parentId);
       const mappedRows = await mapScheduleRows(queryRows, timezoneForFormatting, input.locale);
       const pageInfo = PaginationUtils.buildPageInfoFromArgs(input.pagination, mappedRows.length, totalCount);
 

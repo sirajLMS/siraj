@@ -170,6 +170,7 @@ export namespace TeacherRepository {
       .where(isNull(users.deletedAt));
 
     return {
+      id: "teacher-directory-metrics",
       activated: metrics?.activated ?? 0,
       deactivated: metrics?.deactivated ?? 0,
     };

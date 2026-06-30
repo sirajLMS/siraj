@@ -2,6 +2,11 @@ import { createReadStream, statSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
+import { StorageDbRepository } from "@/backend/db/repo/storage.repository";
+import type * as StorageTypes from "@/backend/types";
+import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
+import { ParentRepository } from "@/backend/db/repo/parent.repository";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { UserRepository } from "@/backend/db/repo";
 import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
 import logger from "@/backend/lib/logger";
@@ -99,6 +104,77 @@ function createRangeResponse(options: RangeResponseOptions): NextResponse {
   });
 }
 
+async function authenticateRequest(request: NextRequest): Promise<{ userId: string } | NextResponse> {
+  const authHeader = request.headers.get("authorization");
+  const accessToken = extractTokenFromHeader(authHeader);
+  const payload = accessToken ? await verifyToken(accessToken) : null;
+
+  if (payload?.type !== "access") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const user = await UserRepository.findById(payload.userId);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  return { userId: payload.userId };
+}
+
+async function checkFileAccess(userId: string, usages: StorageTypes.FileUsageInfo[]): Promise<NextResponse | null> {
+  if (usages.length === 0) return null;
+
+  const userContext = await PermissionsService.getUserContext(userId);
+  if (userContext.isSuperAdmin) return null;
+
+  const hasAccess = await hasMatchingEntityAccess(userId, usages);
+  if (!hasAccess) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  return null;
+}
+
+async function hasMatchingEntityAccess(userId: string, usages: StorageTypes.FileUsageInfo[]): Promise<boolean> {
+  for (const usage of usages) {
+    if (usage.referenceTable === "users" && usage.referenceId === userId) {
+      return true;
+    }
+    if (usage.referenceTable === "teachers") {
+      const teacher = await TeacherRepository.findByUserId(userId);
+      if (teacher?.id === usage.referenceId) return true;
+    }
+    if (usage.referenceTable === "parents") {
+      const parent = await ParentRepository.findByUserId(userId);
+      if (parent?.id === usage.referenceId) return true;
+    }
+  }
+  return false;
+}
+
+function buildFileResponse(absolutePath: string, relativePath: string, rangeHeader: string | null): NextResponse {
+  const stats = statSync(absolutePath);
+  const fileSize = stats.size;
+  const contentType = getContentType(relativePath);
+  const lastModified = stats.mtime.toUTCString();
+
+  if (rangeHeader) {
+    return createRangeResponse({ absolutePath, rangeHeader, fileSize, contentType, lastModified });
+  }
+
+  const stream = createReadStream(absolutePath);
+  return new NextResponse(stream as unknown as BodyInit, {
+    status: 200,
+    headers: {
+      "Content-Type": contentType,
+      "Content-Length": fileSize.toString(),
+      "Accept-Ranges": "bytes",
+      "Cache-Control": "public, max-age=31536000, immutable",
+      "Last-Modified": lastModified,
+    },
+  });
+}
+
 /**
  * Handle file downloads and streaming
  * GET /api/storage/files/[[...path]]
@@ -111,18 +187,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "File path is required" }, { status: 400 });
     }
 
-    const authHeader = request.headers.get("authorization");
-    const accessToken = extractTokenFromHeader(authHeader);
-    const payload = accessToken ? await verifyToken(accessToken) : null;
+    const authResult = await authenticateRequest(request);
+    if (authResult instanceof NextResponse) return authResult;
 
-    if (payload?.type !== "access") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = await UserRepository.findById(payload.userId);
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const usages = await StorageDbRepository.getFileUsages(relativePath);
+    const accessDenied = await checkFileAccess(authResult.userId, usages);
+    if (accessDenied) return accessDenied;
 
     let absolutePath: string;
     try {
@@ -132,7 +202,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
     }
 
-    // Check if file exists
     try {
       await fs.access(absolutePath);
     } catch {
@@ -140,35 +209,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    const stats = statSync(absolutePath);
-    const fileSize = stats.size;
-    const contentType = getContentType(relativePath);
-    const lastModified = stats.mtime.toUTCString();
-
-    // Handle range requests
-    const rangeHeader = request.headers.get("range");
-    if (rangeHeader) {
-      return createRangeResponse({
-        absolutePath,
-        rangeHeader,
-        fileSize,
-        contentType,
-        lastModified,
-      });
-    }
-
-    // Stream full file
-    const stream = createReadStream(absolutePath);
-    return new NextResponse(stream as unknown as BodyInit, {
-      status: 200,
-      headers: {
-        "Content-Type": contentType,
-        "Content-Length": fileSize.toString(),
-        "Accept-Ranges": "bytes",
-        "Cache-Control": "public, max-age=31536000, immutable",
-        "Last-Modified": lastModified,
-      },
-    });
+    return buildFileResponse(absolutePath, relativePath, request.headers.get("range"));
   } catch (error) {
     logger.error("Unexpected error in file serving handler", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

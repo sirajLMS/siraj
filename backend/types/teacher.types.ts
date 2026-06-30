@@ -97,6 +97,7 @@ export type TeacherDirectoryRow = {
 };
 
 export type TeacherDirectoryMetrics = {
+  id: string;
   activated: number;
   deactivated: number;
 };

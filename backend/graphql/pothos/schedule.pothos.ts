@@ -1,5 +1,5 @@
 import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
-import type { PageInfo } from "@/backend/types";
+import type { ClassSessionMetrics, PageInfo } from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome, LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
@@ -10,28 +10,11 @@ import {
 } from "./enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
-export type DailyScheduleMetricsDefinition = {
-  id: string;
-  total: number;
-  regular: number;
-  trial: number;
-  advance: number;
-  rescheduled: number;
-  suspended: number;
-  taken: number;
-  pending: number;
-  activated: number;
-  running: number;
-  absent: number;
-  leave: number;
-};
-
-const DailyScheduleMetricsObjectRef =
-  gqlSchemaBuilder.objectRef<DailyScheduleMetricsDefinition>("DailyScheduleMetrics");
+const DailyScheduleMetricsObjectRef = gqlSchemaBuilder.objectRef<ClassSessionMetrics>("DailyScheduleMetrics");
 
 export const DailyScheduleMetricsPothosObject = DailyScheduleMetricsObjectRef.implement({
   fields: t => ({
-    id: t.exposeString("id"),
+    id: t.exposeString("id", { nullable: true }),
     total: t.exposeInt("total"),
     regular: t.exposeInt("regular"),
     trial: t.exposeInt("trial"),
@@ -121,7 +104,7 @@ export const AdminDashboardScheduleInputPothosObject = gqlSchemaBuilder
 export type AdminDashboardScheduleResultDefinition = {
   id: string;
   totalCount: number;
-  metrics: DailyScheduleMetricsDefinition;
+  metrics: ClassSessionMetrics;
   rows: DailyScheduleListDefinition[];
   pageInfo: PageInfo | null;
 };

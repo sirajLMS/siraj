@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm";
 import { db } from "../../drizzleDb";
 import { SoftDeleteRepository } from "../../repo";
 import { users } from "../../schema";
-import { setupRlsRole, teardownRlsRole } from "../test-utils";
+import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 async function rlsQuery<T>(roleName: string, userId: string, querySql: string): Promise<T[]> {
   return db.transaction(async tx => {
@@ -19,6 +19,17 @@ async function rlsQuery<T>(roleName: string, userId: string, querySql: string): 
 describe("Row Level Security and Soft Delete", () => {
   beforeAll(async () => {
     await setupRlsRole();
+    await setupRlsPolicies([
+      { table: "users", name: "users_select_policy", definition: "FOR SELECT USING (deleted_at IS NULL)" },
+      { table: "users", name: "users_insert_policy", definition: "FOR INSERT WITH CHECK (deleted_at IS NULL)" },
+      {
+        table: "users",
+        name: "users_update_policy",
+        definition:
+          "FOR UPDATE USING (deleted_at IS NULL) WITH CHECK (deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true'))",
+      },
+      { table: "users", name: "users_delete_policy", definition: "FOR DELETE USING (false)" },
+    ]);
   });
 
   afterAll(async () => {

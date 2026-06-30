@@ -152,6 +152,49 @@ export async function teardownRlsRole(roleName: string = "test_rls_user"): Promi
   rlsRoleRefCounts.delete(roleName);
 }
 
+const installedPolicies = new Set<string>();
+
+export type RlsPolicyDef = {
+  table: string;
+  name: string;
+  definition: string;
+};
+
+function isPolicyConflictError(e: unknown): boolean {
+  const msg = e instanceof Error ? e.message : String(e);
+  if (msg.includes("duplicate_object") || msg.includes("already exists")) return true;
+  const cause = e instanceof Error ? (e as { cause?: { code?: string } }).cause : undefined;
+  const code = cause && typeof cause === "object" && "code" in cause ? (cause as { code: string }).code : "";
+  return code === "42710";
+}
+
+async function installPolicy(policy: RlsPolicyDef): Promise<void> {
+  const tbl = quoteIdent(policy.table);
+  const pol = quoteIdent(policy.name);
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      await db.execute(sql.raw(`DROP POLICY IF EXISTS ${pol} ON ${tbl}`));
+      await db.execute(sql.raw(`CREATE POLICY ${pol} ON ${tbl} ${policy.definition}`));
+      return;
+    } catch (e) {
+      if (isPolicyConflictError(e) && attempt < 4) {
+        await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
+        continue;
+      }
+      throw e;
+    }
+  }
+}
+
+export async function setupRlsPolicies(policies: RlsPolicyDef[]): Promise<void> {
+  for (const policy of policies) {
+    const key = `${policy.table}.${policy.name}`;
+    if (installedPolicies.has(key)) continue;
+    installedPolicies.add(key);
+    await installPolicy(policy);
+  }
+}
+
 function quoteIdent(ident: string): string {
   return `"${ident.replaceAll('"', '""')}"`;
 }

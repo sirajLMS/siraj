@@ -59,10 +59,13 @@ export namespace ParentDirectoryService {
       pageInfo,
     } = await ParentRepository.getParentDirectory({ search, pagination, accountStatus });
 
+    const parentIds = rawRows.map(r => r.id);
+    const studentsMap = await ParentRepository.getStudentsForParents(parentIds);
+
     const rows: ParentDirectoryRow[] = [];
     for (let i = 0; i < rawRows.length; i++) {
       const row = rawRows[i];
-      const students = await ParentRepository.getStudentsForParent(row.id);
+      const students = studentsMap.get(row.id) ?? [];
       const guardianOf = students.map(s => s.name).join(", ") || "No students";
 
       rows.push({

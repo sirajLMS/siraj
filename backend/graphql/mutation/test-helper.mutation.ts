@@ -38,9 +38,10 @@ if (process.env.NODE_ENV !== "production") {
     }),
   });
 
-  gqlSchemaBuilder.mutationFields(t => ({
-    createTestEntities: t.field({
+  gqlSchemaBuilder.mutationField("createTestEntities", t =>
+    t.field({
       type: TestEntitiesType,
+      authScopes: { loggedIn: true },
       args: {
         prefix: t.arg.string({ required: true }),
         classesRemaining: t.arg.int({ required: false }),
@@ -48,10 +49,13 @@ if (process.env.NODE_ENV !== "production") {
       resolve: async (_query, args) => {
         return await TestHelperService.createTestEntities(args.prefix, args.classesRemaining ?? undefined);
       },
-    }),
+    })
+  );
 
-    cleanupTestEntities: t.field({
+  gqlSchemaBuilder.mutationField("cleanupTestEntities", t =>
+    t.field({
       type: "Boolean",
+      authScopes: { loggedIn: true },
       args: {
         studentUserId: t.arg.string({ required: true }),
         teacherUserId: t.arg.string({ required: true }),
@@ -63,10 +67,13 @@ if (process.env.NODE_ENV !== "production") {
       resolve: async (_query, args) => {
         return await TestHelperService.cleanupTestEntities(args);
       },
-    }),
+    })
+  );
 
-    createTestGroupClass: t.field({
+  gqlSchemaBuilder.mutationField("createTestGroupClass", t =>
+    t.field({
       type: TestGroupClassType,
+      authScopes: { loggedIn: true },
       args: {
         classInstanceId: t.arg.string({ required: true }),
         teacherName: t.arg.string({ required: true }),
@@ -74,16 +81,19 @@ if (process.env.NODE_ENV !== "production") {
       resolve: async (_query, args) => {
         return await TestHelperService.createTestGroupClass(args.classInstanceId, args.teacherName);
       },
-    }),
+    })
+  );
 
-    cleanupTestGroupClass: t.field({
+  gqlSchemaBuilder.mutationField("cleanupTestGroupClass", t =>
+    t.field({
       type: "Boolean",
+      authScopes: { loggedIn: true },
       args: {
         groupClassId: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
         return await TestHelperService.cleanupTestGroupClass(args.groupClassId);
       },
-    }),
-  }));
+    })
+  );
 }

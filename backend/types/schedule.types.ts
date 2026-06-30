@@ -1,5 +1,21 @@
 import type { SupportContactReturnType, TeacherImportantNoteReturnType } from "./teacher-notes.types";
 
+export type ClassSessionMetrics = {
+  id?: string;
+  total: number;
+  regular: number;
+  trial: number;
+  advance: number;
+  rescheduled: number;
+  suspended: number;
+  taken: number;
+  pending: number;
+  activated: number;
+  running: number;
+  absent: number;
+  leave: number;
+};
+
 export type RescheduleClassInputType = {
   scheduledStartAt: string;
   scheduledEndAt: string;

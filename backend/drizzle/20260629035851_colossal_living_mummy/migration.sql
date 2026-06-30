@@ -970,8 +970,8 @@ CREATE INDEX "student_status_history_changed_by_user_id_idx" ON "student_status_
 CREATE INDEX "students_parent_id_idx" ON "students" ("parent_id");--> statement-breakpoint
 CREATE INDEX "students_primary_teacher_id_idx" ON "students" ("primary_teacher_id");--> statement-breakpoint
 CREATE INDEX "students_status_idx" ON "students" ("status");--> statement-breakpoint
-CREATE INDEX CONCURRENTLY "idx_students_name_fts" ON "students" USING gin (to_tsvector('simple', "name"));--> statement-breakpoint
-CREATE INDEX CONCURRENTLY "idx_students_name_trgm" ON "students" USING gist ("name" gist_trgm_ops);--> statement-breakpoint
+CREATE INDEX "idx_students_name_fts" ON "students" USING gin (to_tsvector('simple', "name"));--> statement-breakpoint
+CREATE INDEX "idx_students_name_trgm" ON "students" USING gist ("name" gist_trgm_ops);--> statement-breakpoint
 CREATE UNIQUE INDEX "students_idempotency_key_unique_idx" ON "students" ("idempotency_key");--> statement-breakpoint
 CREATE INDEX "students_pagination_idx" ON "students" ("created_at","id");--> statement-breakpoint
 CREATE INDEX "idx_students_filter_mobile" ON "students" ("status","primary_teacher_id","date_of_birth");--> statement-breakpoint

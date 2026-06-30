@@ -12,11 +12,25 @@ import { testLogger } from "@/shared/lib/testlogger";
 import type { UserEntity } from "../../../types";
 import { NotificationRepository } from "../../repo/notification.repository";
 import { notificationDeliveries, userDeviceTokens, users } from "../../schema";
-import { createTestUser, runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { createTestUser, runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("Notification Delivery Tracking", () => {
   beforeAll(async () => {
     await setupRlsRole();
+    await setupRlsPolicies([
+      { table: "users", name: "users_select_policy", definition: "FOR SELECT USING (deleted_at IS NULL)" },
+      { table: "users", name: "users_insert_policy", definition: "FOR INSERT WITH CHECK (deleted_at IS NULL)" },
+      {
+        table: "user_device_tokens",
+        name: "user_device_tokens_access_policy",
+        definition: "FOR ALL USING (user_id = current_user_id()) WITH CHECK (user_id = current_user_id())",
+      },
+      {
+        table: "notification_deliveries",
+        name: "notification_deliveries_access_policy",
+        definition: "FOR ALL USING (user_id = current_user_id()) WITH CHECK (user_id = current_user_id())",
+      },
+    ]);
   });
 
   afterAll(async () => {

@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { classInstances, students } from "@/backend/db/schema";
 import { setupTestEntities } from "@/backend/db/test/entity-setup";
-import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
+import { runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { getErrorMessage } from "@/shared/utils/error";
 import type { DBTransaction } from "../../db.types";
 
@@ -39,6 +39,37 @@ async function createTestInstance(
 describe("Class Instances Security Logic", () => {
   beforeAll(async () => {
     await setupRlsRole();
+    await setupRlsPolicies([
+      {
+        table: "class_instances",
+        name: "class_instances_select_policy",
+        definition: "FOR SELECT USING (deleted_at IS NULL)",
+      },
+      {
+        table: "class_instances",
+        name: "class_instances_insert_policy",
+        definition: "FOR INSERT WITH CHECK (deleted_at IS NULL)",
+      },
+      {
+        table: "class_instances",
+        name: "class_instances_update_policy",
+        definition:
+          "FOR UPDATE USING (deleted_at IS NULL) WITH CHECK (deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true'))",
+      },
+      { table: "class_instances", name: "class_instances_delete_policy", definition: "FOR DELETE USING (false)" },
+      {
+        table: "class_instances",
+        name: "class_instances_access_select_policy",
+        definition:
+          "AS RESTRICTIVE FOR SELECT USING (deleted_at IS NULL AND ((NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id())) OR (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id())) OR (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))))",
+      },
+      {
+        table: "class_instances",
+        name: "class_instances_access_update_policy",
+        definition:
+          "AS RESTRICTIVE FOR UPDATE USING (deleted_at IS NULL AND ((NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id())) OR (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id())) OR (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id()))))) WITH CHECK ((deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true')) AND ((NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id())) OR (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id())) OR (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))))",
+      },
+    ]);
   });
 
   afterAll(async () => {

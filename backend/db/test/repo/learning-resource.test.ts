@@ -62,7 +62,7 @@ describe("LearningResourceRepository — listResources", () => {
     await createTestResource(tx, user.id, "Doc A", "/res/a.pdf", file1.id);
     await createTestResource(tx, user.id, "Doc B", "/res/b.pdf", file2.id);
 
-    const result = await LearningResourceRepository.listResources(tx);
+    const result = await LearningResourceRepository.listResources(null, tx);
 
     expect(result.rows.length).toBeGreaterThanOrEqual(2);
     expect(result.totalCount).toBeGreaterThanOrEqual(2);
@@ -80,25 +80,25 @@ describe("LearningResourceRepository — listResources", () => {
     const file = await createTestFile(tx);
     const resource = await createTestResource(tx, user.id, "Deleted Doc", "/res/del.pdf", file.id);
 
-    const beforeDelete = await LearningResourceRepository.listResources(tx);
+    const beforeDelete = await LearningResourceRepository.listResources(null, tx);
     const foundBefore = beforeDelete.rows.find(r => r.id === resource.id);
     expect(foundBefore).toBeDefined();
 
     await softDeleteResource(tx, resource.id);
 
-    const afterDelete = await LearningResourceRepository.listResources(tx);
+    const afterDelete = await LearningResourceRepository.listResources(null, tx);
     const foundAfter = afterDelete.rows.find(r => r.id === resource.id);
     expect(foundAfter).toBeUndefined();
   });
 
   resTest("returns correct totalCount", async tx => {
-    const result = await LearningResourceRepository.listResources(tx);
+    const result = await LearningResourceRepository.listResources(null, tx);
     expect(typeof result.totalCount).toBe("number");
     expect(result.totalCount).toBe(result.rows.length);
   });
 
   resTest("returns empty result when no resources exist", async tx => {
-    const result = await LearningResourceRepository.listResources(tx);
+    const result = await LearningResourceRepository.listResources(null, tx);
     expect(Array.isArray(result.rows)).toBe(true);
   });
 });
@@ -148,7 +148,7 @@ describe("LearningResourceRepository — createResource", () => {
 
     const resource = await createTestResource(tx, user.id, "Listed After Create", "/res/lac.pdf", file.id);
 
-    const result = await LearningResourceRepository.listResources(tx);
+    const result = await LearningResourceRepository.listResources(null, tx);
     const found = result.rows.find(r => r.id === resource.id);
     expect(found).toBeDefined();
     expect(found?.displayName).toBe("Listed After Create");
