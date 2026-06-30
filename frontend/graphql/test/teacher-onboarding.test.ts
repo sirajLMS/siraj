@@ -1,7 +1,13 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import { CountryCode, Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments/teacher-onboarding.documents";
-import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  loginDemoUser,
+  provisionTestSuperAdmin,
+} from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
 const createMinimalTeacherInput = (
@@ -40,6 +46,16 @@ const createMinimalTeacherInput = (
 describe("Teacher Onboarding GraphQL API", () => {
   setupTestServerLifecycle();
 
+  let superAdminToken = "";
+  let superAdminUserId = "";
+
+  test("provision super admin for onboarding tests", async () => {
+    const adminToken = await loginDemoUser("academy_admin");
+    const sa = await provisionTestSuperAdmin(adminToken, "tchrOnboard");
+    superAdminToken = sa.token;
+    superAdminUserId = sa.userId;
+  });
+
   test("Academy Admin can create teacher", async () => {
     const token = await loginDemoUser("academy_admin");
 
@@ -58,9 +74,7 @@ describe("Teacher Onboarding GraphQL API", () => {
   });
 
   test("Super Admin can create teacher", async () => {
-    const token = await loginDemoUser("super_admin");
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, {
+    const result = await authenticatedRequest(superAdminToken, "mutate", createTeacherMutationDocument, {
       input: createMinimalTeacherInput({
         name: "Super Admin Teacher",
         email: `super_teacher_${Date.now()}@test.com`,
@@ -95,5 +109,11 @@ describe("Teacher Onboarding GraphQL API", () => {
     });
 
     expect(result.error).toBeDefined();
+  });
+
+  afterAll(async () => {
+    if (superAdminToken && superAdminUserId) {
+      await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
+    }
   });
 });

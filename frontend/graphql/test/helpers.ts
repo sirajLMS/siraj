@@ -5,6 +5,7 @@ import { demoLoginMutationDocument, loginMutationDocument } from "../sharedDocum
 import { createManagerMutationDocument } from "../sharedDocuments/manager-onboarding.documents";
 import { createRecurringClassMutationDocument } from "../sharedDocuments/recurring-class.documents";
 import {
+  cleanupTestEntitiesMutationDocument,
   cleanupTestManagerMutationDocument,
   cleanupTestSuperAdminMutationDocument,
   createTestEntitiesMutationDocument,
@@ -67,11 +68,44 @@ export async function loginUser(email: string, password = "password"): Promise<s
   return executeLogin(loginMutationDocument, { input: { email, password } }, data => data?.login?.token, email);
 }
 
+export interface TestEntitiesResult {
+  studentId: string;
+  teacherId: string;
+  studentUserId: string;
+  teacherUserId: string;
+  parentUserId: string;
+  parentId: string;
+  parentUserEmail: string;
+  teacherName: string;
+  parentName: string;
+  studentName: string;
+  teacherToken: string;
+}
+
+export interface LoginAndProvisionResult {
+  adminToken: string;
+  teacherToken: string;
+  studentId: string;
+  teacherId: string;
+  studentUserId: string;
+  teacherUserId: string;
+  parentUserId: string;
+  parentId: string;
+  parentUserEmail: string;
+  teacherName: string;
+  parentName: string;
+  studentName: string;
+}
+
 /**
  * Provisions isolated test entities via the admin token, then logs in as the
  * created teacher. Returns all entity IDs plus the teacher's auth token.
  */
-export async function provisionTestEntities(adminToken: string, prefix: string, classesRemaining = 10) {
+export async function provisionTestEntities(
+  adminToken: string,
+  prefix: string,
+  classesRemaining = 10
+): Promise<TestEntitiesResult> {
   const setupRes = await authenticatedRequest(adminToken, "mutate", createTestEntitiesMutationDocument, {
     prefix,
     classesRemaining,
@@ -85,16 +119,16 @@ export async function provisionTestEntities(adminToken: string, prefix: string, 
   const teacherToken = await loginUser(entities.teacherUserEmail, "password");
 
   return {
-    studentId: entities.studentId,
-    teacherId: entities.teacherId,
-    studentUserId: entities.studentUserId,
-    teacherUserId: entities.teacherUserId,
-    parentUserId: entities.parentUserId,
-    parentId: entities.parentId,
-    parentUserEmail: entities.parentUserEmail,
-    teacherName: entities.teacherName,
-    parentName: entities.parentName,
-    studentName: entities.studentName,
+    studentId: entities.studentId ?? "",
+    teacherId: entities.teacherId ?? "",
+    studentUserId: entities.studentUserId ?? "",
+    teacherUserId: entities.teacherUserId ?? "",
+    parentUserId: entities.parentUserId ?? "",
+    parentId: entities.parentId ?? "",
+    parentUserEmail: entities.parentUserEmail ?? "",
+    teacherName: entities.teacherName ?? "",
+    parentName: entities.parentName ?? "",
+    studentName: entities.studentName ?? "",
     teacherToken,
   };
 }
@@ -109,7 +143,7 @@ export async function provisionTestEntities(adminToken: string, prefix: string, 
  * @param variables - Optional variables required for the GraphQL operation.
  * @returns A promise resolving to the data returned by the GraphQL operation.
  */
-export async function loginAndProvision(prefix: string) {
+export async function loginAndProvision(prefix: string): Promise<LoginAndProvisionResult> {
   const adminToken = await loginDemoUser("academy_admin");
   expect(adminToken).not.toBeNull();
   const result = await provisionTestEntities(adminToken, prefix);
@@ -293,6 +327,20 @@ export async function provisionTestManager(
 
 export async function cleanupTestManager(superAdminToken: string, userId: string): Promise<void> {
   await authenticatedRequest(superAdminToken, "mutate", cleanupTestManagerMutationDocument, { userId });
+}
+
+export async function cleanupTestEntities(
+  adminToken: string,
+  ids: {
+    studentUserId: string;
+    teacherUserId: string;
+    parentUserId: string;
+    studentId: string;
+    teacherId: string;
+    parentId: string;
+  }
+): Promise<void> {
+  await authenticatedRequest(adminToken, "mutate", cleanupTestEntitiesMutationDocument, ids);
 }
 
 export async function provisionTestSuperAdmin(

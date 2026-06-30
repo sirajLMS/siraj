@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import { teachers as demoTeachers } from "@/shared/demo-users";
 import { ClassOutcome } from "@/shared/lib/enum";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule-instance-dashboard-status";
 import { executeDstBulkUpdateMutationDocument } from "../sharedDocuments/dst-migration.documents";
@@ -8,7 +7,6 @@ import {
   dailyScheduleListQueryDocument,
   dailyScheduleMetricsQueryDocument,
 } from "../sharedDocuments/schedule.documents";
-import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
 import {
   clearWeeklyScheduleMutationDocument,
   deleteRecurringClassMutationDocument,
@@ -20,8 +18,12 @@ import {
 import {
   assertRecurringClassDenied,
   authenticatedRequest,
+  cleanupTestEntities,
+  cleanupTestSuperAdmin,
   fetchFirstClassInstanceId,
-  loginDemoUser,
+  loginAndProvision,
+  provisionTestEntities,
+  provisionTestSuperAdmin,
   verifyWeeklyScheduleGrid,
   verifyWorkloadMetrics,
 } from "./helpers";
@@ -48,17 +50,51 @@ async function assertDstBulkUpdateFails(token: string) {
 describe("GraphQL Schedule Integration Tests", () => {
   setupTestServerLifecycle();
 
-  let authToken: string | null = null;
+  let adminToken = "";
+  let teacherToken = "";
+  let teacherId = "";
+  let studentId = "";
+  let studentUserId = "";
+  let teacherUserId = "";
+  let parentUserId = "";
+  let parentId = "";
+  let superAdminToken = "";
+  let superAdminUserId = "";
+  let secondTeacherId = "";
+  let secondStudentId = "";
+  let secondStudentUserId = "";
+  let secondTeacherUserId = "";
+  let secondParentUserId = "";
+  let secondParentId = "";
   const testDate = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 
-  test("login as super_admin to perform schedule queries", async () => {
-    authToken = await loginDemoUser("super_admin");
-    expect(authToken).not.toBeNull();
+  test("provision test entities and super admin", async () => {
+    const r = await loginAndProvision("SchedTest");
+    adminToken = r.adminToken;
+    teacherToken = r.teacherToken;
+    teacherId = r.teacherId;
+    studentId = r.studentId;
+    studentUserId = r.studentUserId;
+    teacherUserId = r.teacherUserId;
+    parentUserId = r.parentUserId;
+    parentId = r.parentId;
+
+    const sa = await provisionTestSuperAdmin(adminToken, "SchedTestSA");
+    superAdminToken = sa.token;
+    superAdminUserId = sa.userId;
+
+    // Provision a second teacher for cross-access tests
+    const secondEntities = await provisionTestEntities(adminToken, "SchedTest2");
+    secondTeacherId = secondEntities.teacherId;
+    secondStudentId = secondEntities.studentId;
+    secondStudentUserId = secondEntities.studentUserId;
+    secondTeacherUserId = secondEntities.teacherUserId;
+    secondParentUserId = secondEntities.parentUserId;
+    secondParentId = secondEntities.parentId;
   });
 
   test("returns daily schedule metrics", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const data = await authenticatedRequest(authToken, "query", dailyScheduleMetricsQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", dailyScheduleMetricsQueryDocument, {
       date: testDate,
       teacherId: null,
     });
@@ -69,8 +105,7 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("returns daily schedule list and includes timezone times", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const data = await authenticatedRequest(authToken, "query", dailyScheduleListQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", dailyScheduleListQueryDocument, {
       date: testDate,
       teacherId: null,
       search: null,
@@ -90,14 +125,10 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("dailyScheduleList with search param returns filtered rows", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const expectedTeacher = demoTeachers[0];
-    if (!expectedTeacher) throw new Error("No demo teachers");
-
-    const data = await authenticatedRequest(authToken, "query", dailyScheduleListQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", dailyScheduleListQueryDocument, {
       date: testDate,
       teacherId: null,
-      search: expectedTeacher.name,
+      search: "SchedTest",
       metricFilter: null,
     });
     const list = data.dailyScheduleList;
@@ -109,22 +140,19 @@ describe("GraphQL Schedule Integration Tests", () => {
       const studentName = item.student?.name;
       if (!teacherName || !studentName) throw new Error("Missing teacher/student name");
       const nameMatch =
-        teacherName.toLowerCase().includes(expectedTeacher.name.toLowerCase()) ||
-        studentName.toLowerCase().includes(expectedTeacher.name.toLowerCase());
+        teacherName.toLowerCase().includes("schedtest") || studentName.toLowerCase().includes("schedtest");
       expect(nameMatch).toBeTrue();
     }
   });
 
   test("dailyScheduleList with metricFilter returns subset of rows", async () => {
-    if (!authToken) throw new Error("No auth token");
-
-    const allData = await authenticatedRequest(authToken, "query", dailyScheduleListQueryDocument, {
+    const allData = await authenticatedRequest(superAdminToken, "query", dailyScheduleListQueryDocument, {
       date: testDate,
       teacherId: null,
       search: null,
       metricFilter: null,
     });
-    const pendingData = await authenticatedRequest(authToken, "query", dailyScheduleListQueryDocument, {
+    const pendingData = await authenticatedRequest(superAdminToken, "query", dailyScheduleListQueryDocument, {
       date: testDate,
       teacherId: null,
       search: null,
@@ -143,9 +171,7 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("adminDashboardSchedule returns aligned metrics and filtered rows", async () => {
-    if (!authToken) throw new Error("No auth token");
-
-    const data = await authenticatedRequest(authToken, "query", adminDashboardScheduleQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", adminDashboardScheduleQueryDocument, {
       input: {
         date: testDate,
         teacherId: null,
@@ -169,16 +195,12 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("user without dashboard.search + search arg returns GraphQL error", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
-    const expectedTeacher = demoTeachers[0];
-    if (!expectedTeacher) throw new Error("No demo teachers");
-
     const result = await testClient.query({
       query: dailyScheduleListQueryDocument,
       variables: {
         date: testDate,
         teacherId: null,
-        search: expectedTeacher.name,
+        search: "SchedTest",
         metricFilter: null,
       },
       context: {
@@ -192,9 +214,7 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("teacherWeeklyScheduleGrid returns schedule for admin", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const teacherId = await fetchDemoTeacherId(authToken);
-    const data = await authenticatedRequest(authToken, "query", teacherWeeklyScheduleGridQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", teacherWeeklyScheduleGridQueryDocument, {
       teacherId,
       weekDate: testDate,
     });
@@ -202,7 +222,6 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("teacherWeeklyScheduleGrid returns own schedule for teacher", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
     const data = await authenticatedRequest(teacherToken, "query", teacherWeeklyScheduleGridQueryDocument, {
       teacherId: null,
       weekDate: testDate,
@@ -211,16 +230,10 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("teacherWeeklyScheduleGrid denies cross-teacher access", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const otherTeacherId = await fetchNonDefaultTeacherId(authToken);
-    if (!otherTeacherId) return;
-
-    const teacherToken = await loginDemoUser("teacher_default");
-
     const result = await testClient.query({
       query: teacherWeeklyScheduleGridQueryDocument,
       variables: {
-        teacherId: otherTeacherId,
+        teacherId: secondTeacherId,
         weekDate: testDate,
       },
       context: {
@@ -231,13 +244,11 @@ describe("GraphQL Schedule Integration Tests", () => {
     });
 
     expect(result.error).toBeUndefined();
-    expect(result.data?.teacherWeeklyScheduleGrid?.teacherId).not.toBe(otherTeacherId);
+    expect(result.data?.teacherWeeklyScheduleGrid?.teacherId).not.toBe(secondTeacherId);
   });
 
   test("teacherWorkloadMetrics returns metrics for admin", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const teacherId = await fetchDemoTeacherId(authToken);
-    const data = await authenticatedRequest(authToken, "query", teacherWorkloadMetricsQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", teacherWorkloadMetricsQueryDocument, {
       teacherId,
       weekDate: testDate,
     });
@@ -247,7 +258,6 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("teacherWorkloadMetrics returns own metrics for teacher", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
     const data = await authenticatedRequest(teacherToken, "query", teacherWorkloadMetricsQueryDocument, {
       teacherId: null,
       weekDate: testDate,
@@ -256,18 +266,15 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("createRecurringClass denied for teacher role", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
     await assertRecurringClassDenied(teacherToken, [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }]);
   });
 
   test("createRecurringClass denied for invalid input (no days)", async () => {
-    if (!authToken) throw new Error("No auth token");
-    await assertRecurringClassDenied(authToken, []);
+    await assertRecurringClassDenied(superAdminToken, []);
   });
 
   // DST Migration tests
   test("executeDstBulkUpdate — system admin succeeds", async () => {
-    if (!authToken) throw new Error("No auth token");
     const result = await testClient.mutate({
       mutation: executeDstBulkUpdateMutationDocument,
       variables: {
@@ -277,7 +284,7 @@ describe("GraphQL Schedule Integration Tests", () => {
       errorPolicy: "all",
       context: {
         headers: {
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${superAdminToken}`,
         },
       },
     });
@@ -293,20 +300,16 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("executeDstBulkUpdate — academy admin denied", async () => {
-    const academyToken = await loginDemoUser("academy_admin");
-    await assertDstBulkUpdateFails(academyToken);
+    await assertDstBulkUpdateFails(adminToken);
   });
 
   test("executeDstBulkUpdate — teacher denied", async () => {
-    const teacherToken = await loginDemoUser("teacher_default");
     await assertDstBulkUpdateFails(teacherToken);
   });
 
   // Schedule deletion tests (including security/IDOR coverage)
   test("deleteRecurringClass — teacher denied (other's class)", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const classInstanceId = await fetchFirstClassInstanceId(authToken, testDate);
-    const teacherToken = await loginDemoUser("teacher_default");
+    const classInstanceId = await fetchFirstClassInstanceId(adminToken, testDate);
 
     const result = await testClient.mutate({
       mutation: deleteRecurringClassMutationDocument,
@@ -324,10 +327,6 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("clearWeeklySchedule — teacher denied (other's schedule)", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const teacherToken = await loginDemoUser("teacher_default");
-    const teacherId = await fetchDemoTeacherId(authToken);
-
     const result = await testClient.mutate({
       mutation: clearWeeklyScheduleMutationDocument,
       variables: {
@@ -344,12 +343,31 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("deleteRecurringClass — admin succeeds (any class)", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const classInstanceId = await fetchFirstClassInstanceId(authToken, testDate);
+    const classInstanceId = await fetchFirstClassInstanceId(adminToken, testDate);
 
-    const deleteData = await authenticatedRequest(authToken, "mutate", deleteRecurringClassMutationDocument, {
+    const deleteData = await authenticatedRequest(superAdminToken, "mutate", deleteRecurringClassMutationDocument, {
       classInstanceId,
     });
     expect(deleteData.deleteRecurringClass).toBeTrue();
+  });
+
+  test("cleanup provisioned entities", async () => {
+    await cleanupTestEntities(adminToken, {
+      studentUserId,
+      teacherUserId,
+      parentUserId,
+      studentId,
+      teacherId,
+      parentId,
+    });
+    await cleanupTestEntities(adminToken, {
+      studentUserId: secondStudentUserId,
+      teacherUserId: secondTeacherUserId,
+      parentUserId: secondParentUserId,
+      studentId: secondStudentId,
+      teacherId: secondTeacherId,
+      parentId: secondParentId,
+    });
+    await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
   });
 });

@@ -1,10 +1,17 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import {
   adminSuggestionsQueryDocument,
   markSuggestionReviewedMutationDocument,
   submitSuggestionMutationDocument,
 } from "../sharedDocuments";
-import { assertOperationDenied, authenticatedRequest, expectMutationError, loginDemoUser } from "./helpers";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  expectMutationError,
+  loginDemoUser,
+  provisionTestSuperAdmin,
+} from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
@@ -27,10 +34,16 @@ describe("GraphQL: adminSuggestions query", () => {
   setupTestServerLifecycle();
 
   let adminToken = "";
+  let superAdminToken = "";
+  let superAdminUserId = "";
 
   test("login as academy_admin", async () => {
     adminToken = await loginDemoUser("academy_admin");
     expect(adminToken).not.toBeNull();
+
+    const sa = await provisionTestSuperAdmin(adminToken, "suggSa");
+    superAdminToken = sa.token;
+    superAdminUserId = sa.userId;
   });
 
   test("authorized admin gets all suggestions with metrics", async () => {
@@ -73,13 +86,18 @@ describe("GraphQL: adminSuggestions query", () => {
   });
 
   test("super_admin can also access adminSuggestions", async () => {
-    const superAdminToken = await loginDemoUser("super_admin");
     const data = await authenticatedRequest(superAdminToken, "query", adminSuggestionsQueryDocument, {
       filter: DEFAULT_FILTER,
     });
 
     expect(data.adminSuggestions).toBeDefined();
     expect(Array.isArray(data.adminSuggestions?.rows)).toBeTrue();
+  });
+
+  afterAll(async () => {
+    if (superAdminToken && superAdminUserId) {
+      await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
+    }
   });
 });
 

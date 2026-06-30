@@ -9,7 +9,14 @@ import {
   revokePermissionGroupFromUserMutationDocument,
 } from "../sharedDocuments/permission-management.documents";
 import { generateAttendanceReportQueryDocument } from "../sharedDocuments/report.documents";
-import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  cleanupTestEntities,
+  cleanupTestSuperAdmin,
+  loginAndProvision,
+  provisionTestSuperAdmin,
+} from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
 describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
@@ -18,15 +25,38 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
   const filters = {
     fromDate: new Date("2026-01-01").toISOString(),
     toDate: new Date("2026-12-31").toISOString(),
-    teacherId: null,
+    teacherId: null as string | null,
     groupBy: ReportGroupingMode.Date,
   };
 
-  test("SECURITY: Returns full financial data for Admin with both permissions", async () => {
-    // 1. Arrange & login as academy_admin (has both permissions by default)
-    const adminToken = await loginDemoUser("academy_admin");
+  let adminToken = "";
+  let teacherToken = "";
+  let teacherId = "";
+  let teacherUserId = "";
+  let studentId = "";
+  let studentUserId = "";
+  let parentUserId = "";
+  let parentId = "";
+  let superAdminToken = "";
+  let superAdminUserId = "";
 
-    // 2. Act
+  test("provision test entities and super admin", async () => {
+    const r = await loginAndProvision("ReportTest");
+    adminToken = r.adminToken;
+    teacherToken = r.teacherToken;
+    teacherId = r.teacherId;
+    teacherUserId = r.teacherUserId;
+    studentId = r.studentId;
+    studentUserId = r.studentUserId;
+    parentUserId = r.parentUserId;
+    parentId = r.parentId;
+
+    const sa = await provisionTestSuperAdmin(adminToken, "ReportTestSA");
+    superAdminToken = sa.token;
+    superAdminUserId = sa.userId;
+  });
+
+  test("SECURITY: Returns full financial data for Admin with both permissions", async () => {
     const data = await authenticatedRequest(adminToken, "query", generateAttendanceReportQueryDocument, { filters });
 
     const payload = data?.generateAttendanceReport;
@@ -45,12 +75,9 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
   });
 
   test("SECURITY: Masks financial data for user lacking report.view_financials", async () => {
-    const superAdminToken = await loginDemoUser("super_admin");
-    const teacherToken = await loginDemoUser("teacher_default");
-
     const meData = await authenticatedRequest(teacherToken, "query", meQueryDocument);
-    const teacherUserId = meData?.me?.id;
-    if (typeof teacherUserId !== "string") throw new Error("Could not fetch teacher userId");
+    const teacherIdFromMe = meData?.me?.id;
+    if (typeof teacherIdFromMe !== "string") throw new Error("Could not fetch teacher userId");
 
     const permissionsData = await authenticatedRequest(superAdminToken, "query", permissionsQueryDocument);
     const customPerm = permissionsData?.permissions?.find(p => p.key === "report.generate_custom");
@@ -69,7 +96,7 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     await authenticatedRequest(superAdminToken, "mutate", assignPermissionGroupToUserMutationDocument, {
       input: {
         groupId,
-        userId: teacherUserId,
+        userId: teacherIdFromMe,
       },
     });
 
@@ -91,11 +118,10 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
         expect(row.paidUSD === 0 || row.paidUSD === null).toBeTrue();
       }
     } finally {
-      // 7. Cleanup - Revoke the group and delete it
       await authenticatedRequest(superAdminToken, "mutate", revokePermissionGroupFromUserMutationDocument, {
         input: {
           groupId,
-          userId: teacherUserId,
+          userId: teacherIdFromMe,
         },
       });
 
@@ -106,7 +132,18 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
   });
 
   test("SECURITY: Rejects user entirely lacking report.generate_custom", async () => {
-    // Standard teacher lacks generate_custom permission by default
     await assertOperationDenied("teacher_default", "query", generateAttendanceReportQueryDocument, { filters });
+  });
+
+  test("cleanup provisioned entities", async () => {
+    await cleanupTestEntities(adminToken, {
+      studentUserId,
+      teacherUserId,
+      parentUserId,
+      studentId,
+      teacherId,
+      parentId,
+    });
+    await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
   });
 });

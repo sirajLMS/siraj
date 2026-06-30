@@ -1,7 +1,13 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import { InvoiceType, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments/parent-onboarding.documents";
-import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  loginDemoUser,
+  provisionTestSuperAdmin,
+} from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
 const createMinimalParentInput = (
@@ -68,6 +74,16 @@ const createFullParentInput = (
 describe("Parent Onboarding GraphQL API", () => {
   setupTestServerLifecycle();
 
+  let superAdminToken = "";
+  let superAdminUserId = "";
+
+  test("provision super admin for onboarding tests", async () => {
+    const adminToken = await loginDemoUser("academy_admin");
+    const sa = await provisionTestSuperAdmin(adminToken, "parOnboard");
+    superAdminToken = sa.token;
+    superAdminUserId = sa.userId;
+  });
+
   test("Academy Admin can create parent with billing", async () => {
     const token = await loginDemoUser("academy_admin");
 
@@ -86,9 +102,7 @@ describe("Parent Onboarding GraphQL API", () => {
   });
 
   test("Super Admin can create parent", async () => {
-    const token = await loginDemoUser("super_admin");
-
-    const result = await authenticatedRequest(token, "mutate", createParentMutationDocument, {
+    const result = await authenticatedRequest(superAdminToken, "mutate", createParentMutationDocument, {
       input: createMinimalParentInput({
         name: "Super Admin Parent",
         email: `super_parent_${Date.now()}@test.com`,
@@ -117,5 +131,11 @@ describe("Parent Onboarding GraphQL API", () => {
     });
 
     expect(result.error).toBeDefined();
+  });
+
+  afterAll(async () => {
+    if (superAdminToken && superAdminUserId) {
+      await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
+    }
   });
 });

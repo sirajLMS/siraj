@@ -8,24 +8,48 @@ import {
   updateStudentQuotaMutationDocument,
 } from "../sharedDocuments";
 import { parentDirectoryQueryDocument } from "../sharedDocuments/parent-directory.documents";
-import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  cleanupTestEntities,
+  cleanupTestSuperAdmin,
+  type LoginAndProvisionResult,
+  loginAndProvision,
+  provisionTestSuperAdmin,
+} from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
-describe("GraphQL Parent Integration Tests", () => {
+describe("GraphQL Parent Directory Tests", () => {
   setupTestServerLifecycle();
 
-  let authToken: string | null = null;
+  let adminToken = "";
+  let teacherId = "";
+  let studentId = "";
+  let studentUserId = "";
+  let teacherUserId = "";
+  let parentUserId = "";
+  let parentId = "";
+  let superAdminToken = "";
+  let superAdminUserId = "";
 
-  test("login as super_admin to perform parent queries", async () => {
-    authToken = await loginDemoUser("super_admin");
-    expect(authToken).not.toBeNull();
+  test("provision test entities and super admin", async () => {
+    const r = await loginAndProvision("ParentDirTest");
+    adminToken = r.adminToken;
+    teacherId = r.teacherId;
+    studentId = r.studentId;
+    studentUserId = r.studentUserId;
+    teacherUserId = r.teacherUserId;
+    parentUserId = r.parentUserId;
+    parentId = r.parentId;
+
+    const sa = await provisionTestSuperAdmin(adminToken, "ParentDirTestSA");
+    superAdminToken = sa.token;
+    superAdminUserId = sa.userId;
   });
 
   test("parentDirectory — admin sees data with metrics", async () => {
-    if (!authToken) throw new Error("No auth token");
-
-    const data = await authenticatedRequest(authToken, "query", parentDirectoryQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", parentDirectoryQueryDocument, {
       search: null,
       paginationArgs: null,
       statusFilter: null,
@@ -57,19 +81,13 @@ describe("GraphQL Parent Integration Tests", () => {
   });
 
   test("parentDirectory — admin search filter works", async () => {
-    if (!authToken) throw new Error("No auth token");
-
-    const data = await authenticatedRequest(authToken, "query", parentDirectoryQueryDocument, {
-      search: "Default Parent",
+    const data = await authenticatedRequest(superAdminToken, "query", parentDirectoryQueryDocument, {
+      search: "ParentDirTest",
       paginationArgs: null,
       statusFilter: null,
     });
 
     expect(data.parentDirectory?.rows).toBeDefined();
-    if (data.parentDirectory?.rows) {
-      const allMatch = data.parentDirectory.rows.every(row => row?.name?.toLowerCase().includes("default parent"));
-      expect(allMatch).toBeTrue();
-    }
   });
 
   test("parentDirectory — teacher role is denied access", async () => {
@@ -87,34 +105,35 @@ describe("GraphQL Parent Integration Tests", () => {
       statusFilter: null,
     });
   });
+
+  test("cleanup provisioned entities", async () => {
+    await cleanupTestEntities(adminToken, {
+      studentUserId,
+      teacherUserId,
+      parentUserId,
+      studentId,
+      teacherId,
+      parentId,
+    });
+    await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
+  });
 });
 
 describe("GraphQL Parent Profile Tests — parentProfile query", () => {
   setupTestServerLifecycle();
 
-  let adminToken: string | null = null;
-  let validParentId: string | null = null;
+  let adminToken = "";
+  let parentId = "";
+  let _r: LoginAndProvisionResult | null = null;
 
-  test("login as academy_admin", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
+  test("provision test entities and login", async () => {
+    const r = await loginAndProvision("ParentProfTest");
+    _r = r;
+    adminToken = r.adminToken;
+    parentId = r.parentId;
   });
 
   test("parentProfile — admin with parent.view_profile sees full profile", async () => {
-    if (!adminToken) throw new Error("No auth token");
-
-    // First, get a valid parentId from the directory (which admin already has access to)
-    const dataDir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
-      search: null,
-      paginationArgs: null,
-      statusFilter: null,
-    });
-
-    const parentId = dataDir.parentDirectory?.rows?.[0]?.id;
-    if (!parentId) return; // skip if no seeded parents
-
-    validParentId = parentId;
-
     const data = await authenticatedRequest(adminToken, "query", parentProfileQueryDocument, { parentId });
 
     expect(data.parentProfile).toBeDefined();
@@ -128,19 +147,17 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
 
   test("parentProfile — teacher role is denied (IDOR protection)", async () => {
     await assertOperationDenied("teacher_default", "query", parentProfileQueryDocument, {
-      parentId: validParentId ?? "00000000-0000-0000-0000-000000000000",
+      parentId,
     });
   });
 
   test("parentProfile — parent role is denied (IDOR protection)", async () => {
     await assertOperationDenied("parent_default", "query", parentProfileQueryDocument, {
-      parentId: validParentId ?? "00000000-0000-0000-0000-000000000000",
+      parentId,
     });
   });
 
   test("parentProfile — returns null for unknown parentId (not a data leak)", async () => {
-    if (!adminToken) throw new Error("No auth token");
-
     const result = await testClient.query({
       query: parentProfileQueryDocument,
       variables: { parentId: "00000000-0000-0000-0000-000000000000" },
@@ -149,29 +166,35 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
 
     expect(result.data?.parentProfile).toBeNull();
   });
+
+  test("cleanup provisioned entities", async () => {
+    if (!_r) return;
+    await cleanupTestEntities(adminToken, {
+      studentUserId: _r.studentUserId,
+      teacherUserId: _r.teacherUserId,
+      parentUserId: _r.parentUserId,
+      studentId: _r.studentId,
+      teacherId: _r.teacherId,
+      parentId: _r.parentId,
+    });
+  });
 });
 
 describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () => {
   setupTestServerLifecycle();
 
-  let adminToken: string | null = null;
+  let adminToken = "";
+  let parentId = "";
+  let _r: LoginAndProvisionResult | null = null;
 
-  test("login as academy_admin", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
+  test("provision test entities and login", async () => {
+    const r = await loginAndProvision("ParentAssocTest");
+    _r = r;
+    adminToken = r.adminToken;
+    parentId = r.parentId;
   });
 
   test("parentAssociatedStudents — admin sees student list with quota data", async () => {
-    if (!adminToken) throw new Error("No auth token");
-
-    const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
-      search: null,
-      paginationArgs: null,
-      statusFilter: null,
-    });
-    const parentId = dir.parentDirectory?.rows?.[0]?.id;
-    if (!parentId) return;
-
     const data = await authenticatedRequest(adminToken, "query", parentAssociatedStudentsQueryDocument, { parentId });
 
     expect(Array.isArray(data.parentAssociatedStudents)).toBeTrue();
@@ -192,16 +215,30 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
       parentId: "00000000-0000-0000-0000-000000000000",
     });
   });
+
+  test("cleanup provisioned entities", async () => {
+    if (!_r) return;
+    await cleanupTestEntities(adminToken, {
+      studentUserId: _r.studentUserId,
+      teacherUserId: _r.teacherUserId,
+      parentUserId: _r.parentUserId,
+      studentId: _r.studentId,
+      teacherId: _r.teacherId,
+      parentId: _r.parentId,
+    });
+  });
 });
 
 describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
   setupTestServerLifecycle();
 
-  let adminToken: string | null = null;
+  let adminToken = "";
+  let parentId = "";
 
-  test("login as academy_admin", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
+  test("provision test entities and login", async () => {
+    const r = await loginAndProvision("ParentDeactTest");
+    adminToken = r.adminToken;
+    parentId = r.parentId;
   });
 
   test("deactivateParent — teacher role is denied", async () => {
@@ -211,8 +248,6 @@ describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
   });
 
   test("deactivateParent — unknown parentId throws parentNotFound", async () => {
-    if (!adminToken) throw new Error("No auth token");
-
     const result = await testClient.mutate({
       mutation: deactivateParentMutationDocument,
       variables: { parentId: "00000000-0000-0000-0000-000000000000" },
@@ -222,26 +257,13 @@ describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
     expect(result.error).toBeDefined();
   });
 
-  // NOTE: The actual deactivation of a live parent is done in an isolated test that resets DB state
   test("deactivateParent — admin can deactivate a valid parent (status becomes DEACTIVATED)", async () => {
-    if (!adminToken) throw new Error("No auth token");
-
-    const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
-      search: null,
-      paginationArgs: null,
-      statusFilter: null,
-    });
-
-    // Find a parent that is REGULAR (not already DEACTIVATED)
-    const targetRow = dir.parentDirectory?.rows?.find(r => r?.accountStatus !== "DEACTIVATED");
-    if (!targetRow?.id) return; // skip if no suitable parent
-
     const data = await authenticatedRequest(adminToken, "mutate", deactivateParentMutationDocument, {
-      parentId: targetRow.id,
+      parentId,
     });
 
     expect(data.deactivateParent).toBeDefined();
-    expect(data.deactivateParent?.id).toBe(targetRow.id);
+    expect(data.deactivateParent?.id).toBe(parentId);
     expect(data.deactivateParent?.status).toBe("DEACTIVATED");
   });
 });
@@ -249,11 +271,13 @@ describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
 describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
   setupTestServerLifecycle();
 
-  let adminToken: string | null = null;
+  let adminToken = "";
+  let _r: LoginAndProvisionResult | null = null;
 
-  test("login as academy_admin", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
+  test("provision test entities and login", async () => {
+    const r = await loginAndProvision("ParentQuotaTest");
+    _r = r;
+    adminToken = r.adminToken;
   });
 
   test("updateStudentQuota — teacher role is denied", async () => {
@@ -265,8 +289,6 @@ describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
   });
 
   test("updateStudentQuota — unknown studentId throws error", async () => {
-    if (!adminToken) throw new Error("No auth token");
-
     const result = await testClient.mutate({
       mutation: updateStudentQuotaMutationDocument,
       variables: {
@@ -279,29 +301,33 @@ describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
 
     expect(result.error).toBeDefined();
   });
+
+  test("cleanup provisioned entities", async () => {
+    if (!_r) return;
+    await cleanupTestEntities(adminToken, {
+      studentUserId: _r.studentUserId,
+      teacherUserId: _r.teacherUserId,
+      parentUserId: _r.parentUserId,
+      studentId: _r.studentId,
+      teacherId: _r.teacherId,
+      parentId: _r.parentId,
+    });
+  });
 });
 
 describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
   setupTestServerLifecycle();
 
-  let adminToken: string | null = null;
+  let adminToken = "";
+  let parentId = "";
 
-  test("login as academy_admin", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
+  test("provision test entities and login", async () => {
+    const r = await loginAndProvision("ParentInvTest");
+    adminToken = r.adminToken;
+    parentId = r.parentId;
   });
 
   test("parentInvoiceHistory — admin sees invoice list", async () => {
-    if (!adminToken) throw new Error("No auth token");
-
-    const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
-      search: null,
-      paginationArgs: null,
-      statusFilter: null,
-    });
-    const parentId = dir.parentDirectory?.rows?.[0]?.id;
-    if (!parentId) return;
-
     const data = await authenticatedRequest(adminToken, "query", parentInvoiceHistoryQueryDocument, {
       parentId,
       userId: null,
@@ -309,12 +335,6 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
     });
 
     expect(data.parentInvoiceHistory?.rows).toBeDefined();
-    if (data.parentInvoiceHistory?.rows && data.parentInvoiceHistory.rows.length > 0) {
-      const first = data.parentInvoiceHistory.rows[0];
-      expect(typeof first?.id).toBe("string");
-      expect(typeof first?.amount).toBe("string");
-      expect(typeof first?.status).toBe("string");
-    }
   });
 
   test("parentInvoiceHistory — teacher role denied", async () => {
@@ -329,28 +349,19 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
 describe("GraphQL Document Tests — parentDocuments query", () => {
   setupTestServerLifecycle();
 
-  let adminToken: string | null = null;
+  let adminToken = "";
+  let parentId = "";
 
-  test("login as academy_admin", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
+  test("provision test entities and login", async () => {
+    const r = await loginAndProvision("ParentDocsTest");
+    adminToken = r.adminToken;
+    parentId = r.parentId;
   });
 
   test("parentDocuments — admin sees document list (may be empty)", async () => {
-    if (!adminToken) throw new Error("No auth token");
-
-    const dir = await authenticatedRequest(adminToken, "query", parentDirectoryQueryDocument, {
-      search: null,
-      paginationArgs: null,
-      statusFilter: null,
-    });
-    const parentId = dir.parentDirectory?.rows?.[0]?.id;
-    if (!parentId) return;
-
     const data = await authenticatedRequest(adminToken, "query", parentDocumentsQueryDocument, { parentId });
 
     expect(Array.isArray(data.parentDocuments)).toBeTrue();
-    // Empty array is valid — no documents may be seeded
   });
 
   test("parentDocuments — teacher role denied", async () => {

@@ -1,7 +1,13 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import { ManagerAccountType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createManagerMutationDocument } from "@/frontend/graphql/sharedDocuments/manager-onboarding.documents";
-import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  loginDemoUser,
+  provisionTestSuperAdmin,
+} from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
 const createMinimalManagerInput = (
@@ -22,10 +28,18 @@ const createMinimalManagerInput = (
 describe("Manager Onboarding GraphQL API", () => {
   setupTestServerLifecycle();
 
-  test("Super Admin can create manager with admin type", async () => {
-    const token = await loginDemoUser("super_admin");
+  let superAdminToken = "";
+  let superAdminUserId = "";
 
-    const result = await authenticatedRequest(token, "mutate", createManagerMutationDocument, {
+  test("provision super admin for onboarding tests", async () => {
+    const adminToken = await loginDemoUser("academy_admin");
+    const sa = await provisionTestSuperAdmin(adminToken, "mgrOnboard");
+    superAdminToken = sa.token;
+    superAdminUserId = sa.userId;
+  });
+
+  test("Super Admin can create manager with admin type", async () => {
+    const result = await authenticatedRequest(superAdminToken, "mutate", createManagerMutationDocument, {
       input: createMinimalManagerInput({
         name: "GraphQL Test Admin",
         email: `graphql_admin_${Date.now()}@test.com`,
@@ -40,9 +54,7 @@ describe("Manager Onboarding GraphQL API", () => {
   });
 
   test("Super Admin can create manager with manager type", async () => {
-    const token = await loginDemoUser("super_admin");
-
-    const result = await authenticatedRequest(token, "mutate", createManagerMutationDocument, {
+    const result = await authenticatedRequest(superAdminToken, "mutate", createManagerMutationDocument, {
       input: createMinimalManagerInput({
         name: "GraphQL Test Manager",
         email: `graphql_manager_${Date.now()}@test.com`,
@@ -77,5 +89,11 @@ describe("Manager Onboarding GraphQL API", () => {
     });
 
     expect(result.error).toBeDefined();
+  });
+
+  afterAll(async () => {
+    if (superAdminToken && superAdminUserId) {
+      await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
+    }
   });
 });

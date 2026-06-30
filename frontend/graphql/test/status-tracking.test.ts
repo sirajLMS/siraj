@@ -1,7 +1,14 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import { statusTrackingScheduleQueryDocument } from "../sharedDocuments/schedule.documents";
 import { changeStudentStatusMutationDocument } from "../sharedDocuments/student-lifecycle.documents";
-import { assertOperationDenied, authenticatedRequest, loginDemoUser, provisionTestEntities } from "./helpers";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  loginDemoUser,
+  provisionTestEntities,
+  provisionTestSuperAdmin,
+} from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -38,6 +45,8 @@ describe("GraphQL: statusTrackingSchedule query", () => {
 
   let adminToken = "";
   let studentId = "";
+  let superAdminToken = "";
+  let superAdminUserId = "";
   const testDate = new Date().toISOString().split("T")[0];
 
   test("login as academy_admin and provision test entities", async () => {
@@ -48,6 +57,10 @@ describe("GraphQL: statusTrackingSchedule query", () => {
     if (!entities.studentId) throw new Error("No studentId provisioned");
     if (!entities.teacherId) throw new Error("No teacherId provisioned");
     studentId = entities.studentId;
+
+    const sa = await provisionTestSuperAdmin(adminToken, "s10statusSa");
+    superAdminToken = sa.token;
+    superAdminUserId = sa.userId;
   });
 
   // ─── Authorization Tests ─────────────────────────────────────────────────────
@@ -76,7 +89,6 @@ describe("GraphQL: statusTrackingSchedule query", () => {
   });
 
   test("super_admin can also access statusTrackingSchedule", async () => {
-    const superAdminToken = await loginDemoUser("super_admin");
     const data = await fetchStatusTracking(superAdminToken, testDate);
 
     expect(data.statusTrackingSchedule).toBeDefined();
@@ -212,5 +224,11 @@ describe("GraphQL: statusTrackingSchedule query", () => {
         expect(restoredRow.studentStatus).toBe("REGULAR");
       }
     });
+  });
+
+  afterAll(async () => {
+    if (superAdminToken && superAdminUserId) {
+      await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
+    }
   });
 });

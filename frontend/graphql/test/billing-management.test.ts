@@ -4,44 +4,26 @@ import {
   createManualInvoiceMutationDocument,
   deleteInvoiceMutationDocument,
   markInvoicePaidMutationDocument,
-  parentDirectoryQueryDocument,
 } from "../sharedDocuments";
-import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
+import { assertOperationDenied, authenticatedRequest, cleanupTestEntities, loginAndProvision } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
-async function loginAndGetParentId(): Promise<{ token: string; parentId: string }> {
-  const token = await loginDemoUser("academy_admin");
-  expect(token).not.toBeNull();
-
-  const dir = await authenticatedRequest(token, "query", parentDirectoryQueryDocument, {
-    search: null,
-    paginationArgs: null,
-    statusFilter: null,
-  });
-
-  const parentId = dir.parentDirectory?.rows?.[0]?.id;
-  expect(parentId).toBeTruthy();
-  if (!parentId) throw new Error("No parentId");
-
-  return { token, parentId };
-}
-
 function invoiceVars(parentId: string, amount: string) {
   return {
     parentId,
-    studentId: null,
+    studentId: null as string | null,
     amount,
     currency: "USD",
     invoiceType: "MANUAL",
     issueDate: "2026-06-22",
     dueDate: "2026-07-22",
-    exchangeRateSnapshot: null,
-    exchangeRateSource: null,
-    billingMonths: null,
-    sendEmail: null,
+    exchangeRateSnapshot: null as string | null,
+    exchangeRateSource: null as string | null,
+    billingMonths: null as Array<{ month: number; year: number }> | null,
+    sendEmail: null as boolean | null,
   };
 }
 
@@ -76,11 +58,23 @@ describe("GraphQL: createManualInvoice mutation", () => {
 
   let token = "";
   let parentId = "";
+  let adminToken = "";
+  let teacherId = "";
+  let studentId = "";
+  let studentUserId = "";
+  let teacherUserId = "";
+  let parentUserId = "";
 
-  test("login and fetch parentId", async () => {
-    const setup = await loginAndGetParentId();
-    token = setup.token;
-    parentId = setup.parentId;
+  test("provision test entities and login", async () => {
+    const r = await loginAndProvision("BillTest");
+    adminToken = r.adminToken;
+    teacherId = r.teacherId;
+    studentId = r.studentId;
+    studentUserId = r.studentUserId;
+    teacherUserId = r.teacherUserId;
+    parentUserId = r.parentUserId;
+    parentId = r.parentId;
+    token = adminToken;
   });
 
   test("admin creates a manual invoice with UNPAID status", async () => {
@@ -118,6 +112,17 @@ describe("GraphQL: createManualInvoice mutation", () => {
   test("invalid negative amount returns validation error", async () => {
     await expectMutationError(token, createManualInvoiceMutationDocument, invoiceVars(parentId, "-50.00"));
   });
+
+  test("cleanup provisioned entities", async () => {
+    await cleanupTestEntities(adminToken, {
+      studentUserId,
+      teacherUserId,
+      parentUserId,
+      studentId,
+      teacherId,
+      parentId,
+    });
+  });
 });
 
 describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
@@ -127,11 +132,23 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   let parentId = "";
   let unpaidInvoiceId = "";
   let deleteInvoiceId = "";
+  let adminToken = "";
+  let teacherId = "";
+  let studentId = "";
+  let studentUserId = "";
+  let teacherUserId = "";
+  let parentUserId = "";
 
-  test("login and fetch parentId", async () => {
-    const setup = await loginAndGetParentId();
-    token = setup.token;
-    parentId = setup.parentId;
+  test("provision test entities and login", async () => {
+    const r = await loginAndProvision("BillPaidTest");
+    adminToken = r.adminToken;
+    teacherId = r.teacherId;
+    studentId = r.studentId;
+    studentUserId = r.studentUserId;
+    teacherUserId = r.teacherUserId;
+    parentUserId = r.parentUserId;
+    parentId = r.parentId;
+    token = adminToken;
   });
 
   test("create an UNPAID invoice for mark-paid tests", async () => {
@@ -189,5 +206,16 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
 
   test("teacher role is denied deleteInvoice", async () => {
     await assertOperationDenied("teacher_default", "mutate", deleteInvoiceMutationDocument, { invoiceId: NIL_UUID });
+  });
+
+  test("cleanup provisioned entities", async () => {
+    await cleanupTestEntities(adminToken, {
+      studentUserId,
+      teacherUserId,
+      parentUserId,
+      studentId,
+      teacherId,
+      parentId,
+    });
   });
 });

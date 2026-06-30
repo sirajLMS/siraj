@@ -47,8 +47,9 @@ Integration tests for GraphQL queries/mutations under `frontend/graphql/test/` m
    - Since the test client is configured with `errorPolicy: "all"`, GraphQL errors (like unauthorized access) do not throw. Instead, assert against the `result.error` property (type `ApolloError | undefined`) rather than `result.errors`.
    - Always verify that target query properties (e.g., `result.data?.teachers`) are defined and not null before performing assertions on them, to satisfy TypeScript's strict null checking. Use guards (e.g., `if (!teachers) throw new Error("...")`) to narrow the type cleanly.
 
-6. **Align Test Data with Shared Constants**:
-   - Avoid hardcoding search strings or expected names (e.g., `"Default Teacher"`). Instead, import the shared demo users definition from `@/shared/demo-users` (e.g., `teachers as demoTeachers`) and use these values dynamically in both search parameters and assertions to ensure test and database seed consistency.
+6. **Align Test Data with Provisioned Entities**:
+   - Avoid hardcoding search strings or expected names (e.g., `"Default Teacher"`). Instead, use provisioned test entity names via `loginAndProvision(prefix)` from `helpers.ts` — the prefix argument is injected into entity names (e.g., `"TeacherTest"` → teacher named `"TeacherTest Teacher"`). Use these names in both search parameters and assertions. For super_admin-only operations, use `provisionTestSuperAdmin(adminToken, prefix)`.
+   - Never import from `@/shared/demo-users` in integration tests — all test data should be provisioned via `loginAndProvision` or `provisionTestEntities`.
 
 7. **Optional Chaining Preference (Linter & TS Compliance)**:
    - Prefer optional chain expressions (`?.`) over verbose logical checks. Avoid code structures like `if (!result.data || !result.data.field)`. Instead, use `if (!result.data?.field)`. This complies with the `@typescript-eslint/prefer-optional-chain` lint rule.
