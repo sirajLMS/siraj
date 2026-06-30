@@ -1,4 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
+import { ClassExecutionState, ClassOutcome, ClassType } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   activateClassMutationDocument,
   activateOverrideClassMutationDocument,
@@ -108,7 +109,7 @@ describe("GraphQL Class Session Integration Tests", () => {
           scheduledStartAt: now.toISOString(),
           scheduledEndAt: end.toISOString(),
           durationMinutes: 60,
-          classType: "REGULAR",
+          classType: ClassType.Regular,
         },
       },
       errorPolicy: "all",
@@ -161,7 +162,7 @@ describe("GraphQL Class Session Integration Tests", () => {
     const activatedRow = rows.find(r => r?.id === classInstanceId);
     expect(activatedRow).toBeDefined();
     if (!activatedRow) throw new Error("No activatedRow found");
-    expect(activatedRow.executionState).toBe("ACTIVATED");
+    expect(activatedRow.executionState).toBe(ClassExecutionState.Activated);
   });
 
   test("teacher activation outside window fails with YOU MISSED THE CLASS TIME message", async () => {
@@ -182,7 +183,7 @@ describe("GraphQL Class Session Integration Tests", () => {
           scheduledStartAt: startOutside.toISOString(),
           scheduledEndAt: endOutside.toISOString(),
           durationMinutes: 60,
-          classType: "REGULAR",
+          classType: ClassType.Regular,
         },
       },
       errorPolicy: "all",
@@ -256,7 +257,7 @@ describe("GraphQL Class Session Integration Tests", () => {
     const activatedRow = rows.find(r => r?.id === outsideClassInstanceId);
     expect(activatedRow).toBeDefined();
     if (!activatedRow) throw new Error("No activatedRow found");
-    expect(activatedRow.executionState).toBe("ACTIVATED");
+    expect(activatedRow.executionState).toBe(ClassExecutionState.Activated);
   });
 
   test("session lifecycle: start, reset, restart, and leave flow", async () => {
@@ -266,7 +267,7 @@ describe("GraphQL Class Session Integration Tests", () => {
     const startData = await authenticatedRequest(teacherToken, "mutate", updateSessionStatusStartMutationDocument, {
       classInstanceId: outsideClassInstanceId,
     });
-    expect(startData.updateSessionStatusStart?.executionState).toBe("RUNNING");
+    expect(startData.updateSessionStatusStart?.executionState).toBe(ClassExecutionState.Running);
 
     // 2. Academy admin resets the running session successfully
     const resetData = await authenticatedRequest(adminToken, "mutate", resetClassMutationDocument, {
@@ -278,13 +279,13 @@ describe("GraphQL Class Session Integration Tests", () => {
     const forceData = await authenticatedRequest(adminToken, "mutate", activateOverrideClassMutationDocument, {
       classInstanceId: outsideClassInstanceId,
     });
-    expect(forceData.activateOverrideClass?.executionState).toBe("ACTIVATED");
+    expect(forceData.activateOverrideClass?.executionState).toBe(ClassExecutionState.Activated);
 
     // 4. Start it again as teacher
     const restartData = await authenticatedRequest(teacherToken, "mutate", updateSessionStatusStartMutationDocument, {
       classInstanceId: outsideClassInstanceId,
     });
-    expect(restartData.updateSessionStatusStart?.executionState).toBe("RUNNING");
+    expect(restartData.updateSessionStatusStart?.executionState).toBe(ClassExecutionState.Running);
 
     // 5. Teacher processes leave on the running session
     const leaveData = await authenticatedRequest(teacherToken, "mutate", updateSessionStatusLeaveMutationDocument, {
@@ -292,7 +293,7 @@ describe("GraphQL Class Session Integration Tests", () => {
       leaveReason: "Teacher has an emergency",
     });
     expect(leaveData.updateSessionStatusLeave?.completedInstanceId).toBe(outsideClassInstanceId);
-    expect(leaveData.updateSessionStatusLeave?.completedInstance?.outcome).toBe("LEAVE");
+    expect(leaveData.updateSessionStatusLeave?.completedInstance?.outcome).toBe(ClassOutcome.Leave);
     expect(leaveData.updateSessionStatusLeave?.completedInstance?.isRescheduled).toBe(true);
     expect(leaveData.updateSessionStatusLeave?.rescheduledInstanceId).toBeDefined();
   });
@@ -319,7 +320,7 @@ describe("GraphQL Class Session Integration Tests", () => {
           scheduledStartAt: startAbsent.toISOString(),
           scheduledEndAt: endAbsent.toISOString(),
           durationMinutes: 60,
-          classType: "REGULAR",
+          classType: ClassType.Regular,
         },
       }
     );
@@ -336,8 +337,8 @@ describe("GraphQL Class Session Integration Tests", () => {
       classInstanceId: instanceId,
     });
 
-    expect(absentData.updateSessionStatusAbsent?.executionState).toBe("COMPLETED");
-    expect(absentData.updateSessionStatusAbsent?.outcome).toBe("ABSENT");
+    expect(absentData.updateSessionStatusAbsent?.executionState).toBe(ClassExecutionState.Completed);
+    expect(absentData.updateSessionStatusAbsent?.outcome).toBe(ClassOutcome.Absent);
     expect(absentData.updateSessionStatusAbsent?.payrollCredited).toBe(true);
   });
 

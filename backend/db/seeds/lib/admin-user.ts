@@ -1,4 +1,3 @@
-import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
 
 /** Email used to identify the system super admin (from ADMIN_EMAIL env var, fallback admin@siraj.local) */

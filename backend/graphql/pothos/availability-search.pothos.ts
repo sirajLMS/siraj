@@ -15,10 +15,7 @@ export const TeacherAvailabilityGapPothosObject = TeacherAvailabilityGapRef.impl
     teacherId: t.exposeString("teacherId"),
     teacherName: t.exposeString("teacherName"),
     teacherGender: t.exposeString("teacherGender", { nullable: true }),
-    dayOfWeek: t.field({
-      type: DayOfWeekPothosObject,
-      resolve: gap => gap.dayOfWeek,
-    }),
+    dayOfWeek: t.expose("dayOfWeek", { type: DayOfWeekPothosObject }),
     gapStartTime: t.exposeString("gapStartTime"),
     gapEndTime: t.exposeString("gapEndTime"),
     timezone: t.exposeString("timezone"),
@@ -31,11 +28,7 @@ export const AvailabilitySearchTeacherPothosObject = AvailabilitySearchTeacherRe
   fields: t => ({
     id: t.exposeString("id"),
     name: t.exposeString("name"),
-    gender: t.field({
-      type: GenderPothosObject,
-      nullable: true,
-      resolve: teacher => teacher.gender,
-    }),
+    gender: t.expose("gender", { type: GenderPothosObject, nullable: true }),
     timezone: t.exposeString("timezone"),
     gaps: t.expose("gaps", { type: [TeacherAvailabilityGapPothosObject] }),
   }),

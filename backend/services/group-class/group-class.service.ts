@@ -11,7 +11,13 @@ import type {
   GroupClassStudentReturnType,
   OnlineMeetingInfoReturnType,
 } from "@/backend/types";
-import { AppPermission, NotificationChannel, NotificationEventType } from "@/shared/lib/enum";
+import {
+  AppPermission,
+  type ClassExecutionState,
+  type GroupClassAttendanceStatus,
+  NotificationChannel,
+  NotificationEventType,
+} from "@/shared/lib/enum";
 
 export namespace GroupClassService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
@@ -59,7 +65,7 @@ export namespace GroupClassService {
         .join("")
         .toUpperCase()
         .slice(0, 2),
-      attendanceStatus: e.attendanceStatus,
+      attendanceStatus: e.attendanceStatus as GroupClassAttendanceStatus,
       avatarUrl: e.studentAvatarUrl,
     }));
 
@@ -75,7 +81,6 @@ export namespace GroupClassService {
 
     const meetingInfo: OnlineMeetingInfoReturnType = {
       platform: "zoom",
-      zoomMeetingUrl: classInstance.zoomMeetingUrl ?? null,
       meetingId: classInstance.zoomMeetingUrl ? extractZoomMeetingId(classInstance.zoomMeetingUrl) : null,
       joinUrl: classInstance.zoomMeetingUrl ?? null,
     };
@@ -97,7 +102,7 @@ export namespace GroupClassService {
       rescheduledDate,
       timeSlot: groupClass.timeSlot,
       venue: "Online",
-      status: groupClass.status,
+      status: groupClass.status as ClassExecutionState,
       auditRemark: groupClass.auditRemark ?? null,
       auditLoggedAt: groupClass.auditLoggedAt.toISOString(),
       registeredStudentCount: students.length,

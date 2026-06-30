@@ -98,6 +98,7 @@ const mockLabels: BillingLabels = {
     PENDING: "Pending",
     PAID: "Paid",
     UNPAID: "Unpaid",
+    CANCELLED: "Cancelled",
   },
   creditStatus: {
     negative_balance: "Negative Balance",

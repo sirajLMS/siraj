@@ -7,7 +7,11 @@ import { SuggestionStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 export namespace SuggestionRepository {
-  export const submitSuggestion = async (input: SuggestionSubmitInput, tx?: DBTransaction, locale?: string) => {
+  export const submitSuggestion = async (
+    input: SuggestionSubmitInput & { parentId: string },
+    tx?: DBTransaction,
+    locale?: string
+  ) => {
     const queryDb = tx ?? db;
     const now = new Date();
 

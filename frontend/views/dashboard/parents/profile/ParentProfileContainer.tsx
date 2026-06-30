@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { parentAssociatedStudentsQueryDocument, parentProfileQueryDocument } from "@/frontend/graphql/sharedDocuments";
+import { logger } from "@/frontend/utils/logger";
 import type { ParentProfileData, ParentStudent } from "../types/profile";
 import ParentProfileView from "./ParentProfileView";
 
@@ -108,6 +109,7 @@ function mapProfileData(
 
 export function ParentProfileContainer({ id }: ParentProfileContainerProps) {
   const t = useTranslations("dashboard.parentProfile");
+  const tc = useTranslations("common");
   const parentId = id;
 
   const {
@@ -141,11 +143,8 @@ export function ParentProfileContainer({ id }: ParentProfileContainerProps) {
   }
 
   if (profileError || !profileData?.parentProfile) {
-    return (
-      <Typography sx={{ color: theme => theme.palette.error.main }}>
-        {profileError?.message ?? t("errors.notFound")}
-      </Typography>
-    );
+    logger.error("Error loading parent profile:", { profileError });
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc("loadFailed")}</Typography>;
   }
 
   const parentData = mapProfileData(profileData.parentProfile, studentsData?.parentAssociatedStudents ?? []);

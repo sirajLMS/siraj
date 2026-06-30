@@ -24,6 +24,9 @@ const en: MessageSchema = {
     retry: "Retry",
     checkNetworkConnection: "Please check your network connection",
     connectionRestored: "Connection restored",
+    somethingWentWrong: "Something went wrong. Please try again.",
+    operationFailed: "Operation failed. Please try again.",
+    loadFailed: "Failed to load data. Please try again.",
   },
   errors: {
     unauthorizedViewMetrics: "Unauthorized: Missing dashboard.view_metrics permission",
@@ -141,6 +144,12 @@ const en: MessageSchema = {
     },
     auth: {
       invalidRoleTab: "The selected role tab is not valid.",
+      passwordMinLength: "Password must be at least 8 characters long.",
+      passwordRequiresUppercase: "Password must contain at least one uppercase letter.",
+      passwordRequiresLowercase: "Password must contain at least one lowercase letter.",
+      passwordRequiresDigit: "Password must contain at least one digit.",
+      passwordRequiresSpecialChar:
+        "Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
     },
     user: {
       emailAlreadyExists: "An account with this email address already exists.",
@@ -1893,6 +1902,8 @@ const en: MessageSchema = {
       errors: {
         meetingUrlNotAvailable: "Meeting URL not available.",
         handbookUrlNotFound: "Handbook URL not found.",
+        missedClassTime: "Cannot activate class outside of the allowed time window",
+        activationFailed: "An error occurred while activating the class.",
       },
       supportRequestSubmitted: "Support request submitted to {type}.",
     },
@@ -2024,6 +2035,7 @@ const en: MessageSchema = {
         PENDING: "Pending",
         PAID: "Paid",
         UNPAID: "Unpaid",
+        CANCELLED: "Cancelled",
       },
       creditStatus: {
         negative_balance: "Negative Balance",

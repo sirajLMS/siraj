@@ -4,13 +4,13 @@ declare module "@apollo/client" {
   namespace ApolloClient {
     namespace DeclareDefaultOptions {
       interface WatchQuery {
-        errorPolicy: "all";
+        errorPolicy?: "none" | "ignore" | "all";
       }
       interface Query {
-        errorPolicy: "all";
+        errorPolicy?: "none" | "ignore" | "all";
       }
       interface Mutate {
-        errorPolicy: "all";
+        errorPolicy?: "none" | "ignore" | "all";
       }
     }
   }

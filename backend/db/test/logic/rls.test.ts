@@ -4,35 +4,15 @@ import { sql } from "drizzle-orm";
 import { db } from "../../drizzleDb";
 import { SoftDeleteRepository } from "../../repo";
 import { users } from "../../schema";
-import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
-
-async function rlsQuery<T>(roleName: string, userId: string, querySql: string): Promise<T[]> {
-  return db.transaction(async tx => {
-    const quotedRole = `"${roleName}"`;
-    await tx.execute(sql`SET LOCAL ROLE ${sql.raw(quotedRole)}`);
-    await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
-    const result = await tx.execute(sql.raw(querySql));
-    return result.rows as T[];
-  });
-}
+import { closeRlsClients, queryAsRlsRole, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 describe("Row Level Security and Soft Delete", () => {
   beforeAll(async () => {
     await setupRlsRole();
-    await setupRlsPolicies([
-      { table: "users", name: "users_select_policy", definition: "FOR SELECT USING (deleted_at IS NULL)" },
-      { table: "users", name: "users_insert_policy", definition: "FOR INSERT WITH CHECK (deleted_at IS NULL)" },
-      {
-        table: "users",
-        name: "users_update_policy",
-        definition:
-          "FOR UPDATE USING (deleted_at IS NULL) WITH CHECK (deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true'))",
-      },
-      { table: "users", name: "users_delete_policy", definition: "FOR DELETE USING (false)" },
-    ]);
   });
 
   afterAll(async () => {
+    await closeRlsClients();
     await teardownRlsRole();
   });
 
@@ -41,19 +21,21 @@ describe("Row Level Security and Soft Delete", () => {
     const emailInvalid = `rls-test-${randomUUID()}@example.com`;
     const now = new Date();
 
-    const validRows = await rlsQuery<{ id: string }>(
+    const validRows = await queryAsRlsRole<{ id: string }>(
       "test_rls_user",
       "00000000-0000-0000-0000-000000000000",
-      `INSERT INTO "users" (name, email, password, created_at, updated_at) VALUES ('RLS Test User', '${emailValid}', 'securePassword', '${now.toISOString()}', '${now.toISOString()}') RETURNING id`
+      `INSERT INTO "users" (name, email, password, created_at, updated_at) VALUES ('RLS Test User', $1, 'securePassword', $2, $2) RETURNING id`,
+      [emailValid, now.toISOString()]
     );
     expect(validRows.length).toBe(1);
 
     let insertError: unknown = null;
     try {
-      await rlsQuery(
+      await queryAsRlsRole(
         "test_rls_user",
         "00000000-0000-0000-0000-000000000000",
-        `INSERT INTO "users" (name, email, password, created_at, updated_at, deleted_at) VALUES ('RLS Deleted User', '${emailInvalid}', 'securePassword', '${now.toISOString()}', '${now.toISOString()}', '${now.toISOString()}')`
+        `INSERT INTO "users" (name, email, password, created_at, updated_at, deleted_at) VALUES ('RLS Deleted User', $1, 'securePassword', $2, $2, $2)`,
+        [emailInvalid, now.toISOString()]
       );
     } catch (e) {
       insertError = e;
@@ -81,10 +63,11 @@ describe("Row Level Security and Soft Delete", () => {
 
     let updateError: unknown = null;
     try {
-      await rlsQuery(
+      await queryAsRlsRole(
         "test_rls_user",
         "00000000-0000-0000-0000-000000000000",
-        `UPDATE "users" SET deleted_at = '${now.toISOString()}' WHERE id = '${user.id}'`
+        `UPDATE "users" SET deleted_at = $1 WHERE id = $2`,
+        [now.toISOString(), user.id]
       );
     } catch (e) {
       updateError = e;
@@ -112,10 +95,11 @@ describe("Row Level Security and Soft Delete", () => {
 
     await SoftDeleteRepository.softDeleteUser(user.id);
 
-    const selectedUsers = await rlsQuery<{ id: string }>(
+    const selectedUsers = await queryAsRlsRole<{ id: string }>(
       "test_rls_user",
       "00000000-0000-0000-0000-000000000000",
-      `SELECT id FROM "users" WHERE id = '${user.id}'`
+      `SELECT id FROM "users" WHERE id = $1`,
+      [user.id]
     );
     expect(selectedUsers.length).toBe(0);
 
@@ -123,10 +107,11 @@ describe("Row Level Security and Soft Delete", () => {
     expect(superuserSelect).toBeDefined();
     expect(superuserSelect.deletedAt).not.toBeNull();
 
-    const deleteResult = await rlsQuery<{ id: string }>(
+    const deleteResult = await queryAsRlsRole<{ id: string }>(
       "test_rls_user",
       "00000000-0000-0000-0000-000000000000",
-      `DELETE FROM "users" WHERE id = '${user.id}' RETURNING id`
+      `DELETE FROM "users" WHERE id = $1 RETURNING id`,
+      [user.id]
     );
     expect(deleteResult.length).toBe(0);
 

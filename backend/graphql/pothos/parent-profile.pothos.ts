@@ -6,7 +6,6 @@ import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 export type ParentProfileDefinition = {
   id: string;
-  userId: string;
   name: string;
   email: string;
   avatarUrl: string | null;
@@ -33,7 +32,6 @@ const ParentProfileRef = gqlSchemaBuilder.objectRef<ParentProfileDefinition>("Pa
 export const ParentProfilePothosObject = ParentProfileRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
-    userId: t.exposeString("userId"),
     name: t.exposeString("name"),
     email: t.exposeString("email"),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
@@ -83,7 +81,6 @@ export const AssociatedStudentPothosObject = AssociatedStudentRef.implement({
 
 export type DeactivateParentResultDefinition = {
   id: string;
-  userId: string;
   status: string;
 };
 
@@ -93,7 +90,6 @@ const DeactivateParentResultRef =
 export const DeactivateParentResultPothosObject = DeactivateParentResultRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
-    userId: t.exposeString("userId"),
     status: t.exposeString("status"),
   }),
 });

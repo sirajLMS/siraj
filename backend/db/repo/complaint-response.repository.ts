@@ -6,8 +6,13 @@ import type { ComplaintResponse, ComplaintResponseInput } from "@/backend/types"
 import { ComplaintStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
+type CreateComplaintResponseInput = ComplaintResponseInput & {
+  responderUserId: string | null;
+  emailSent: boolean;
+};
+
 export namespace ComplaintResponseRepository {
-  export const createResponse = async (input: ComplaintResponseInput, tx?: DBTransaction, locale?: string) => {
+  export const createResponse = async (input: CreateComplaintResponseInput, tx?: DBTransaction, locale?: string) => {
     const runner = async (t: DBTransaction) => {
       const now = new Date();
 
@@ -48,7 +53,6 @@ export namespace ComplaintResponseRepository {
       .select({
         id: complaintResponses.id,
         complaintId: complaintResponses.complaintId,
-        responderUserId: complaintResponses.responderUserId,
         responderName: users.name,
         body: complaintResponses.body,
         emailSent: complaintResponses.emailSent,
@@ -74,7 +78,6 @@ export namespace ComplaintResponseRepository {
       .select({
         id: complaintResponses.id,
         complaintId: complaintResponses.complaintId,
-        responderUserId: complaintResponses.responderUserId,
         responderName: users.name,
         body: complaintResponses.body,
         emailSent: complaintResponses.emailSent,

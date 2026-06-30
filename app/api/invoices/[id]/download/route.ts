@@ -25,7 +25,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     }
 
     if (!StorageUtils.validatePath(pdfFile.filePath)) {
-      logger.error("Invoice PDF filePath failed validation", { invoiceId, filePath: pdfFile.filePath });
+      logger.error("Invoice PDF filePath failed validation", { invoiceId });
       return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 

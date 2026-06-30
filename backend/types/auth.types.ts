@@ -26,7 +26,7 @@ export type CurrentUserProfile = SafeUser & {
   notificationCount: number;
 };
 
-export type UserPothosDefinition = UserEntity & {
+export type UserPothosDefinition = SafeUser & {
   permissionGroups?: PermissionGroupPothosDefinition[];
   userPermissionGroups?: UserPermissionGroupPothosDefinition[];
   sessions?: SessionPothosDefinition[];
@@ -46,7 +46,7 @@ export type UserUpdateInput = {
 };
 
 export type PaginatedUsersResponseSelectType = {
-  data: UserEntity[];
+  data: SafeUser[];
   pageInfo: PageInfo;
 };
 

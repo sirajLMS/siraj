@@ -12,6 +12,13 @@ import { PerformanceOverviewCard } from "./PerformanceOverviewCard";
 import { RemarksCard } from "./RemarksCard";
 import { StudentProfileCard } from "./StudentProfileCard";
 
+const EXECUTION_STATE_TO_STATUS: Record<string, ClassInstanceStatus> = {
+  NOT_ACTIVATED: "pending",
+  ACTIVATED: "active",
+  RUNNING: "active",
+  COMPLETED: "completed",
+};
+
 interface ClassDetailsTeacherViewProps {
   readonly instance: ClassInstanceDetail;
   readonly viewMode: ClassDetailsViewMode;
@@ -57,7 +64,7 @@ export function ClassDetailsTeacherView({
   isResetting,
   error,
 }: ClassDetailsTeacherViewProps) {
-  const status = (instance.status as ClassInstanceStatus) || "pending";
+  const status: ClassInstanceStatus = EXECUTION_STATE_TO_STATUS[instance.status ?? ""] ?? "pending";
   const performance = instance.performance;
   const hasPerformance = performance != null;
   const showActionsPanel = viewMode === "teacher";

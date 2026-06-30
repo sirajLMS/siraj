@@ -52,10 +52,7 @@ export const adminComplaintQueueQueryDocument: TypedDocumentNode<
       id
       rows {
         id
-        parentId
-        studentId
         category
-        submitterEmail
         body
         status
         createdAt

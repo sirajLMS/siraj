@@ -123,7 +123,7 @@ const MobileMeetingCard = ({ meetingInfo, labels, onJoinMeeting }: OnlineMeeting
           variant="contained"
           startIcon={<OpenInNewOutlined />}
           onClick={onJoinMeeting}
-          disabled={!meetingInfo?.zoomMeetingUrl && !meetingInfo?.joinUrl}
+          disabled={!meetingInfo?.joinUrl}
           sx={{ typography: "labelUppercase" }}
         >
           {labels.joinMeeting}

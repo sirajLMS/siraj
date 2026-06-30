@@ -58,6 +58,7 @@ export enum ClassExecutionState {
 export enum InvoiceStatus {
   UNPAID = "UNPAID",
   PAID = "PAID",
+  CANCELLED = "CANCELLED",
 }
 
 export enum InvoiceType {
@@ -541,6 +542,16 @@ export enum AppPermission {
   STORAGE_MANAGE = "storage.manage",
 }
 
+export enum UserRole {
+  SUPER_ADMIN = "SUPER_ADMIN",
+  ACADEMY_ADMIN = "ACADEMY_ADMIN",
+  TEACHER = "TEACHER",
+  PARENT = "PARENT",
+  STAFF = "STAFF",
+  USER = "USER",
+  GUEST = "GUEST",
+}
+
 export enum AvailabilityStatus {
   AVAILABLE = "AVAILABLE",
   OUT_OF_STOCK = "OUT_OF_STOCK",
@@ -565,4 +576,21 @@ export enum AttendanceStatus {
   PRESENT = "present",
   ABSENT = "absent",
   LATE = "late",
+}
+
+export enum BookingStatus {
+  CONFIRMED = "confirmed",
+  RESCHEDULED = "rescheduled",
+}
+
+export enum GroupClassAttendanceStatus {
+  PENDING = "pending",
+  PRESENT = "present",
+  ABSENT = "absent",
+  LATE = "late",
+}
+
+export enum OverrideState {
+  GRANTED = "GRANTED",
+  DENIED = "DENIED",
 }

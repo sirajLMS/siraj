@@ -124,7 +124,6 @@ describe("GraphQL: adminComplaintQueue query", () => {
       expect(typeof first.category).toBe("string");
       expect(typeof first.body).toBe("string");
       expect(typeof first.status).toBe("string");
-      expect(typeof first.parentId).toBe("string");
       expect(first.createdAt).toBeTruthy();
     }
   });
@@ -283,14 +282,13 @@ describe("GraphQL: respondToComplaint mutation", () => {
       input: {
         complaintId,
         body: "We have reviewed your complaint",
-        emailSent: true,
       },
     });
 
     expect(data.respondToComplaint).toBeDefined();
     expect(data.respondToComplaint?.id).toBeDefined();
     expect(data.respondToComplaint?.body).toBe("We have reviewed your complaint");
-    expect(data.respondToComplaint?.emailSent).toBe(true);
+    expect(data.respondToComplaint?.emailSent).toBe(false);
     expect(data.respondToComplaint?.createdAt).toBeTruthy();
   });
 
@@ -310,7 +308,6 @@ describe("GraphQL: respondToComplaint mutation", () => {
       input: {
         complaintId,
         body: "Parent should not respond",
-        emailSent: false,
       },
     });
   });
@@ -320,7 +317,6 @@ describe("GraphQL: respondToComplaint mutation", () => {
       input: {
         complaintId,
         body: "Teacher should not respond",
-        emailSent: false,
       },
     });
   });
@@ -330,7 +326,6 @@ describe("GraphQL: respondToComplaint mutation", () => {
       input: {
         complaintId: NIL_UUID,
         body: "Should fail",
-        emailSent: false,
       },
     });
   });
@@ -442,7 +437,6 @@ describe("GraphQL: Complaint security tests (Section 4)", () => {
       input: {
         complaintId: targetId,
         body: "Parent trying to respond",
-        emailSent: false,
       },
     });
   });

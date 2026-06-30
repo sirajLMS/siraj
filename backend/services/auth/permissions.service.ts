@@ -1,13 +1,13 @@
 import { db } from "@/backend/db/drizzleDb";
 import { permissions } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
-import type { AppPermission } from "@/shared/lib/enum";
+import { type AppPermission, UserRole } from "@/shared/lib/enum";
 
 export type UserPermissionContext = {
   permissions: AppPermission[];
   permissionGroups: string[];
   isSuperAdmin: boolean;
-  role: string;
+  role: UserRole;
 };
 
 export namespace PermissionsService {
@@ -38,7 +38,7 @@ export namespace PermissionsService {
       });
 
       if (!user) {
-        return { permissions: [], permissionGroups: [], isSuperAdmin: false, role: "Guest" };
+        return { permissions: [], permissionGroups: [], isSuperAdmin: false, role: UserRole.GUEST };
       }
 
       if (user.isSuperAdmin) {
@@ -47,7 +47,7 @@ export namespace PermissionsService {
           permissions: allPermissions.map(p => p.key),
           permissionGroups: user.permissionGroups.map(g => g.slug),
           isSuperAdmin: true,
-          role: "Academy Admin",
+          role: UserRole.SUPER_ADMIN,
         };
       }
 
@@ -62,9 +62,9 @@ export namespace PermissionsService {
       }
 
       // Default role mapping
-      let role = "User";
-      if (groupSlugs.includes("teacher")) role = "Teacher";
-      if (groupSlugs.includes("parent")) role = "Parent";
+      let role = UserRole.USER as UserRole;
+      if (groupSlugs.includes("teacher")) role = UserRole.TEACHER;
+      if (groupSlugs.includes("parent")) role = UserRole.PARENT;
 
       return {
         permissions: [...permissionSet],
@@ -79,24 +79,14 @@ export namespace PermissionsService {
   }
 
   export async function hasPermission(userId: string, permissionKey: AppPermission): Promise<boolean> {
-    try {
-      const context = await PermissionsService.getUserContext(userId);
-      return context.isSuperAdmin || (context.permissions as string[]).includes(permissionKey);
-    } catch (error) {
-      logger.error("Failed to check permission", { userId, permissionKey, error });
-      return false;
-    }
+    const context = await PermissionsService.getUserContext(userId);
+    return context.isSuperAdmin || context.permissions.includes(permissionKey);
   }
 
   export async function hasAnyPermission(userId: string, permissionKeys: AppPermission[]): Promise<boolean> {
-    try {
-      if (permissionKeys.length === 0) return false;
-      const context = await PermissionsService.getUserContext(userId);
-      if (context.isSuperAdmin) return true;
-      return permissionKeys.some(key => (context.permissions as string[]).includes(key));
-    } catch (error) {
-      logger.error("Failed to check any permission", { userId, permissionKeys, error });
-      return false;
-    }
+    if (permissionKeys.length === 0) return false;
+    const context = await PermissionsService.getUserContext(userId);
+    if (context.isSuperAdmin) return true;
+    return permissionKeys.some(key => context.permissions.includes(key));
   }
 }

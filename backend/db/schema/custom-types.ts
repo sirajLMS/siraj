@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { customType } from "drizzle-orm/pg-core";
+import { logger } from "@/backend/lib/logger";
 
 const ENCRYPTION_KEY_RAW = process.env.DATABASE_ENCRYPTION_KEY;
 if (!ENCRYPTION_KEY_RAW) {
@@ -22,10 +23,11 @@ function encrypt(text: string): string {
   return `${iv.toString("hex")}:${encrypted}:${authTag}`;
 }
 
-function decrypt(encryptedText: string): string {
+function decrypt(encryptedText: string): string | null {
   const parts = encryptedText.split(":");
   if (parts.length !== 3) {
-    return encryptedText; // Legacy plain text data fallback
+    // Legacy plain text data fallback — not encrypted, return as-is
+    return encryptedText;
   }
 
   const [ivHex, encryptedHex, authTagHex] = parts;
@@ -38,20 +40,22 @@ function decrypt(encryptedText: string): string {
     let decrypted = decipher.update(encryptedHex, "hex", "utf8");
     decrypted += decipher.final("utf8");
     return decrypted;
-  } catch {
-    return encryptedText; // Graceful fallback
+  } catch (error) {
+    logger.error("Decryption failed — returning null instead of raw ciphertext", { error });
+    return null;
   }
 }
 
 export const encryptedText = (name: string) =>
-  customType<{ data: string; driverData: string }>({
+  customType<{ data: string | null; driverData: string }>({
     dataType() {
       return "text";
     },
-    toDriver(value: string): string {
+    toDriver(value: string | null): string {
+      if (value === null) return "";
       return encrypt(value);
     },
-    fromDriver(value: string): string {
+    fromDriver(value: string): string | null {
       return decrypt(value);
     },
   })(name);

@@ -103,6 +103,13 @@ describe("StaffProfileService Permission Gating", () => {
       address: newAddress,
     });
     expect(result.id).toBe(teacherId);
-    expect(result.address).toBe(newAddress);
+
+    // Verify address was persisted (field is omitted from API return type for PII protection)
+    const [updated] = await db
+      .select({ address: teachers.address })
+      .from(teachers)
+      .where(eq(teachers.id, teacherId))
+      .limit(1);
+    expect(updated?.address).toBe(newAddress);
   });
 });

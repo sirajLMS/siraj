@@ -1,15 +1,21 @@
 import {
   AccountStatus,
   AppLanguage,
+  AttendanceStatus,
   AvailabilityStatus,
+  BookingStatus,
   ClassExecutionState,
   ClassOutcome,
+  ClassType,
   CountryCode,
   DayOfWeek,
   Gender,
+  GroupClassAttendanceStatus,
+  InvoiceStatus,
   InvoiceType,
   LeaveRequestStatus,
   OrderSortDirection,
+  OverrideState,
   ParentStatus,
   PaymentMethod,
   RescheduleDateLabel,
@@ -75,4 +81,28 @@ export const AvailabilityStatusPothosObject = gqlSchemaBuilder.enumType(Availabi
 
 export const DayOfWeekPothosObject = gqlSchemaBuilder.enumType(DayOfWeek, {
   name: "DayOfWeek",
+});
+
+export const InvoiceStatusPothosObject = gqlSchemaBuilder.enumType(InvoiceStatus, {
+  name: "InvoiceStatus",
+});
+
+export const BookingStatusPothosObject = gqlSchemaBuilder.enumType(BookingStatus, {
+  name: "BookingStatus",
+});
+
+export const AttendanceStatusPothosObject = gqlSchemaBuilder.enumType(AttendanceStatus, {
+  name: "AttendanceStatus",
+});
+
+export const GroupClassAttendanceStatusPothosObject = gqlSchemaBuilder.enumType(GroupClassAttendanceStatus, {
+  name: "GroupClassAttendanceStatus",
+});
+
+export const OverrideStatePothosObject = gqlSchemaBuilder.enumType(OverrideState, {
+  name: "OverrideState",
+});
+
+export const ClassTypePothosObject = gqlSchemaBuilder.enumType(ClassType, {
+  name: "ClassType",
 });

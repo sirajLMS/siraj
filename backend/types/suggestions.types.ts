@@ -15,7 +15,15 @@ export type SuggestionReturnType = Omit<SuggestionSelectType, "deletedAt"> & {
 
 export type SuggestionSubmitInput = Omit<
   SuggestionInsertType,
-  "status" | "createdAt" | "deletedAt" | "reviewedAt" | "reviewedByUserId" | "duplicateOfId"
+  | "status"
+  | "createdAt"
+  | "deletedAt"
+  | "reviewedAt"
+  | "reviewedByUserId"
+  | "duplicateOfId"
+  | "parentId"
+  | "adminResponse"
+  | "emailSentAt"
 >;
 
 export type SuggestionQueueFilter = {

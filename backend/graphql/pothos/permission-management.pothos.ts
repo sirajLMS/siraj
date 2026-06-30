@@ -1,7 +1,14 @@
 import { PermissionManagementRepository } from "@/backend/db/repo";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
-import type { GroupUserEntity, GroupWithPermissionIds, PermissionEntity, UserOverrideEntity } from "@/backend/types";
+import type {
+  GroupUserEntity,
+  GroupWithPermissionIds,
+  PermissionEntity,
+  UserOverrideReturnType,
+} from "@/backend/types";
+import { AppPermission, type OverrideState } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { OverrideStatePothosObject } from "./enum.pothos";
 
 let groupUsersCache: Map<string, GroupUserEntity[]> | null = null;
 
@@ -58,10 +65,10 @@ export const PermissionGroupObject = gqlSchemaBuilder.objectRef<GroupWithPermiss
   }),
 });
 
-export const UserOverrideObject = gqlSchemaBuilder.objectRef<UserOverrideEntity>("UserOverride").implement({
+export const UserOverrideObject = gqlSchemaBuilder.objectRef<UserOverrideReturnType>("UserOverride").implement({
   fields: t => ({
     permissionId: t.exposeString("permissionId"),
-    state: t.exposeString("state"),
+    state: t.expose("state", { type: OverrideStatePothosObject }),
     assignedBy: t.exposeString("assignedByUserId", { nullable: true }),
   }),
 });
@@ -102,7 +109,7 @@ const RevokePermissionGroupFromUserInput = gqlSchemaBuilder.inputType("RevokePer
 const UserOverrideInputRef = gqlSchemaBuilder.inputType("UserOverrideInput", {
   fields: t => ({
     permissionId: t.string({ required: true }),
-    state: t.string({ required: true }),
+    state: t.field({ type: OverrideStatePothosObject, required: true }),
   }),
 });
 
@@ -111,11 +118,13 @@ const UserOverrideInputRef = gqlSchemaBuilder.inputType("UserOverrideInput", {
 gqlSchemaBuilder.queryFields(t => ({
   permissions: t.field({
     type: [PermissionObject],
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
     description: "List all permission catalog entries.",
     resolve: async (_root, _args, ctx) => PermissionManagementService.listPermissions(ctx.user?.id || "", ctx.locale),
   }),
   permissionGroups: t.field({
     type: [PermissionGroupObject],
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
     description: "List all permission groups with their permission IDs.",
     resolve: async (_root, _args, ctx) => {
       clearGroupUsersCache();
@@ -124,11 +133,13 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
   permissionGroup: t.field({
     type: PermissionGroupObject,
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
     args: { id: t.arg.string({ required: true }) },
     description: "Fetch a single permission group by ID.",
     resolve: async (_root, args, ctx) => PermissionManagementService.getGroup(ctx.user?.id || "", args.id, ctx.locale),
   }),
   userPermissionGroups: t.stringList({
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
     args: { userId: t.arg.string({ required: true }) },
     description: "Return group IDs assigned to a user.",
     resolve: async (_root, args, ctx) =>
@@ -136,12 +147,16 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
   userOverrides: t.field({
     type: [UserOverrideObject],
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
     args: { userId: t.arg.string({ required: true }) },
     description: "List overrides for a user.",
     resolve: async (_root, args, ctx) =>
-      PermissionManagementService.listUserOverrides(ctx.user?.id || "", args.userId, ctx.locale),
+      PermissionManagementService.listUserOverrides(ctx.user?.id || "", args.userId, ctx.locale).then(overrides =>
+        overrides.map(o => ({ ...o, state: o.state as OverrideState }))
+      ),
   }),
   effectiveUserPermissions: t.stringList({
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
     args: { userId: t.arg.string({ required: true }) },
     description: "Return effective permissions for a user, combining groups and overrides.",
     resolve: async (_root, args, ctx) =>
@@ -154,6 +169,7 @@ gqlSchemaBuilder.queryFields(t => ({
 gqlSchemaBuilder.mutationFields(t => ({
   createPermissionGroup: t.field({
     type: PermissionGroupObject,
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
     args: { input: t.arg({ type: CreatePermissionGroupInput, required: true }) },
     resolve: async (_root, args, ctx) =>
       PermissionManagementService.createGroup(
@@ -168,6 +184,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   }),
   updatePermissionGroup: t.field({
     type: PermissionGroupObject,
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
     args: { input: t.arg({ type: UpdatePermissionGroupInput, required: true }) },
     resolve: async (_root, args, ctx) =>
       PermissionManagementService.updateGroup(
@@ -182,6 +199,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       ),
   }),
   deletePermissionGroup: t.boolean({
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
     args: { groupId: t.arg.string({ required: true }) },
     resolve: async (_root, args, ctx) => {
       await PermissionManagementService.deleteGroup(ctx.user?.id || "", args.groupId, ctx.locale);
@@ -189,6 +207,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
   }),
   assignPermissionGroupToUser: t.boolean({
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN },
     args: { input: t.arg({ type: AssignPermissionGroupToUserInput, required: true }) },
     resolve: async (_root, args, ctx) => {
       clearGroupUsersCache();
@@ -201,6 +220,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
   }),
   revokePermissionGroupFromUser: t.boolean({
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN },
     args: { input: t.arg({ type: RevokePermissionGroupFromUserInput, required: true }) },
     resolve: async (_root, args, ctx) => {
       clearGroupUsersCache();
@@ -213,6 +233,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
   }),
   bulkAssignUsersToGroup: t.boolean({
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN },
     args: {
       groupId: t.arg.string({ required: true }),
       userIds: t.arg.stringList({ required: true }),
@@ -228,6 +249,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
   }),
   bulkRevokeUsersFromGroup: t.boolean({
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN },
     args: {
       groupId: t.arg.string({ required: true }),
       userIds: t.arg.stringList({ required: true }),
@@ -243,21 +265,16 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
   }),
   updateUserOverrides: t.boolean({
+    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
     args: {
       userId: t.arg.string({ required: true }),
       overrides: t.arg({ type: [UserOverrideInputRef], required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const formattedOverrides = args.overrides.map(o => {
-        if (o.state !== "GRANTED" && o.state !== "DENIED") {
-          throw new Error("Invalid override state. Must be 'GRANTED' or 'DENIED'.");
-        }
-        const state = o.state === "GRANTED" ? ("GRANTED" as const) : ("DENIED" as const);
-        return {
-          permissionId: o.permissionId,
-          state,
-        };
-      });
+      const formattedOverrides = args.overrides.map(o => ({
+        permissionId: o.permissionId,
+        state: o.state as OverrideState,
+      }));
       await PermissionManagementService.updateUserOverrides(
         ctx.user?.id || "",
         { userId: args.userId, overrides: formattedOverrides },

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { PaginationControls } from "@/frontend/components/ui";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRouter } from "@/shared/i18n/routing";
 
 interface TeacherCardListProps {
@@ -70,7 +71,7 @@ function TeacherCard({
         p: 2,
         boxShadow: theme.palette.shadow.card,
         border: `1px solid ${theme.palette.border.main}`,
-        opacity: row.status === "offline" ? 0.75 : 1,
+        opacity: row.status === AccountStatus.Deactivated ? 0.75 : 1,
       })}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
@@ -80,7 +81,7 @@ function TeacherCard({
           sx={theme => ({
             width: 48,
             height: 48,
-            filter: row.status === "offline" ? "grayscale(1)" : "none",
+            filter: row.status === AccountStatus.Deactivated ? "grayscale(1)" : "none",
             border: `1px solid ${theme.palette.border.main}`,
           })}
         />
@@ -94,8 +95,8 @@ function TeacherCard({
         </Box>
         <StatusBadge
           category="studentAccount"
-          status={row.status === "active" ? "regular" : "deactivated"}
-          label={row.status === "active" ? t("status.active") : t("status.offline")}
+          status={row.status === AccountStatus.Activated ? "regular" : "deactivated"}
+          label={row.status === AccountStatus.Activated ? t("status.active") : t("status.offline")}
         />
       </Box>
 
@@ -110,7 +111,7 @@ function TeacherCard({
       >
         <Button
           startIcon={<VideoChatOutlined />}
-          disabled={row.status === "offline"}
+          disabled={row.status === AccountStatus.Deactivated}
           sx={theme => ({
             color: theme.palette.primary.main,
             fontWeight: 700,

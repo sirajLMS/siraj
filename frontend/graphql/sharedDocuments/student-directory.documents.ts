@@ -12,6 +12,22 @@ export const studentDirectoryRowFragment = gql`
     classesRemaining
     classesTotal
     hoursPerWeek
+    teacherName
+    createdAt
+    updatedAt
+  }
+`;
+
+export const studentDirectoryDetailFragment = gql`
+  fragment StudentDirectoryDetailFragment on StudentDirectoryRow {
+    id
+    name
+    email
+    avatarUrl
+    status
+    classesRemaining
+    classesTotal
+    hoursPerWeek
     parentName
     teacherName
     createdAt

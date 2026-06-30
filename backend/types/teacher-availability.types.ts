@@ -15,7 +15,6 @@ export type TeacherVacationRequestSelectType = typeof teacherVacationRequests.$i
 export type TeacherVacationRequestInsertInput = typeof teacherVacationRequests.$inferInsert;
 
 export type AvailabilityWindowInput = {
-  teacherId: string;
   dayOfWeek: DayOfWeek;
   startTime: string;
   endTime: string;
@@ -31,8 +30,6 @@ export type RecurringUnavailabilityInput = AvailabilityWindowInput & {
 };
 
 export type SubmitVacationRequestInput = {
-  teacherId: string;
-  requestedByUserId: string;
   startAt: Date;
   endAt: Date;
   timezone: string;
@@ -43,7 +40,6 @@ export type SubmitVacationRequestInput = {
 
 export type ProcessVacationRequestInput = {
   vacationRequestId: string;
-  processedByUserId: string;
 };
 
 export interface CrossStaffSearchInput {

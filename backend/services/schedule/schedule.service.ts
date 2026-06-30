@@ -15,7 +15,7 @@ import type {
   TeacherFutureScheduleReturnType,
   TeacherImportantNoteReturnType,
 } from "@/backend/types";
-import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/shared/lib/enum";
+import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/shared/lib/enum";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export namespace ScheduleService {
@@ -38,7 +38,7 @@ export namespace ScheduleService {
       teacherTime: item.scheduledStartAt.toISOString(),
       yourTime: item.yourTimeFormatted || item.scheduledStartAt.toISOString(),
       duration: item.durationMinutes,
-      status: item.outcome || item.executionState,
+      status: (item.outcome || item.executionState) as ClassExecutionState,
       outcome: item.outcome as ClassOutcome,
       executionState: item.executionState as ClassExecutionState,
       student: { id: item.studentId, name: item.student?.name || unknownName },
@@ -301,7 +301,7 @@ export namespace ScheduleService {
         location: cls.zoomMeetingUrl || "Virtual",
         subjectId: cls.subjectId,
         subjectName: cls.subjectName,
-        classType: cls.classType,
+        classType: cls.classType as ClassType | null | undefined,
         zoomMeetingUrl: cls.zoomMeetingUrl ?? null,
       };
     });

@@ -66,6 +66,36 @@ export class SessionRedisService {
   }
 
   /**
+   * Validate that parsed data conforms to RedisSessionData shape.
+   * Prevents corrupted/tampered Redis data from bypassing type assertions.
+   */
+  private validateSessionData(data: unknown, _sessionId: string): data is RedisSessionData {
+    if (typeof data !== "object" || data === null || Array.isArray(data)) {
+      return false;
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.userId !== "string" || typeof obj.hashedId !== "string" || typeof obj.payload !== "string") {
+      return false;
+    }
+    if (typeof obj.createdAt !== "string" || typeof obj.lastActivityAt !== "string") {
+      return false;
+    }
+    if (obj.ipAddress !== undefined && typeof obj.ipAddress !== "string") {
+      return false;
+    }
+    if (obj.userAgent !== undefined && typeof obj.userAgent !== "string") {
+      return false;
+    }
+    if (obj.deviceType !== undefined && typeof obj.deviceType !== "string") {
+      return false;
+    }
+    if (obj.deviceName !== undefined && typeof obj.deviceName !== "string") {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Get session from Redis
    */
   async getSession(sessionId: string): Promise<RedisSessionData | null> {
@@ -77,7 +107,12 @@ export class SessionRedisService {
     }
 
     try {
-      return JSON.parse(value) as RedisSessionData;
+      const parsed = JSON.parse(value);
+      if (!this.validateSessionData(parsed, sessionId)) {
+        logger.error(`Session data validation failed for ${sessionId} — data shape does not match RedisSessionData`);
+        return null;
+      }
+      return parsed;
     } catch (error) {
       logger.error(`Failed to parse session data for ${sessionId}:`, error);
       return null;

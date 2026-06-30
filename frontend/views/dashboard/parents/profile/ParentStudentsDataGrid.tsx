@@ -29,7 +29,7 @@ import type React from "react";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type StudentStatus as GqlStudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   changeStudentStatusMutationDocument,
   reassignStudentTeacherMutationDocument,
@@ -158,7 +158,7 @@ const ChangeStatusDialog: React.FC<ChangeStatusDialogProps> = ({
   const handleConfirm = () => {
     if (!selectedStatus) return;
     void changeStatus({
-      variables: { studentId, newStatus: selectedStatus.toUpperCase(), expectedVersion: null },
+      variables: { studentId, newStatus: selectedStatus.toUpperCase() as GqlStudentStatus, expectedVersion: null },
     });
   };
 

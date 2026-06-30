@@ -1,9 +1,9 @@
 import { and, eq, lte, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
+import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
-
 import { getRedisService } from "@/backend/services/redis";
 import { SessionRedisService } from "@/backend/services/redis/SessionRedisService";
 import type {
@@ -97,7 +97,8 @@ export namespace SessionRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const findSessionById = async (hashedId: string): Promise<SessionEntity | null> => {
+  export const findSessionById = async (rawSessionId: string): Promise<SessionEntity | null> => {
+    const hashedId = hashSessionId(rawSessionId);
     try {
       if (redisSessionsEnabled()) {
         const redisService = getSessionRedisService();
@@ -191,6 +192,9 @@ export namespace SessionRepository {
 
   /**
    * Create a new session.
+   * The input.hashedId field should contain the raw (plaintext) session ID —
+   * it will be hashed before storage so that a database compromise does not
+   * leak usable session identifiers.
    */
   export const create = async (
     input: SessionCreationOptions,
@@ -203,7 +207,9 @@ export namespace SessionRepository {
         throw new Error(tFunc("userIdRequiredSessionCreate"));
       }
 
-      if (!redisSessionsEnabled()) return await createPostgresSession(t, input);
+      const hashedId = hashSessionId(input.hashedId);
+
+      if (!redisSessionsEnabled()) return await createPostgresSession(t, { ...input, hashedId });
 
       await acquireUserLock(t, input.userId);
       const config = await getSessionConfig(input.roleName || "default", t);
@@ -215,10 +221,10 @@ export namespace SessionRepository {
       const expiresAt = new Date(now.getTime() + config.ttlSeconds * 1000);
 
       await redisService.setSession({
-        sessionId: input.hashedId,
+        sessionId: hashedId,
         data: {
           userId: input.userId,
-          hashedId: input.hashedId,
+          hashedId,
           payload: input.payload,
           ipAddress: input.ipAddress?.toString(),
           userAgent: input.userAgent || undefined,
@@ -231,7 +237,7 @@ export namespace SessionRepository {
       });
 
       await t.insert(sessionMetadata).values({
-        sessionId: input.hashedId,
+        sessionId: hashedId,
         userId: input.userId,
         deviceType: input.deviceType || null,
         deviceName: input.deviceName || null,
@@ -242,9 +248,9 @@ export namespace SessionRepository {
         expiresAt,
       });
 
-      logger.info(`Created session ${input.hashedId} for user ${input.userId}`);
+      logger.info(`Created session ${hashedId} for user ${input.userId}`);
       return {
-        hashedId: input.hashedId,
+        hashedId,
         userId: input.userId,
         ipAddress: input.ipAddress || null,
         userAgent: input.userAgent || null,
@@ -258,6 +264,8 @@ export namespace SessionRepository {
 
   /**
    * Update session.
+   * The input.hashedId field should contain the raw (plaintext) session ID —
+   * it will be hashed before lookup.
    */
   export const update = async (
     input: Omit<SessionEntityInput, "lastActivity"> & { roleName?: string },
@@ -270,39 +278,40 @@ export namespace SessionRepository {
         throw new Error(tFunc("userIdRequiredSessionUpdate"));
       }
 
+      const hashedId = hashSessionId(input.hashedId);
       const now = new Date();
 
       if (!redisSessionsEnabled()) {
         const returning = await t
           .update(sessions)
           .set({ lastActivity: BigInt(Math.floor(now.getTime() / 1000)) })
-          .where(eq(sessions.hashedId, input.hashedId))
+          .where(eq(sessions.hashedId, hashedId))
           .returning();
         if (returning.length === 0) {
           const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-          throw new Error(tFunc("sessionNotFound", { id: input.hashedId }));
+          throw new Error(tFunc("sessionNotFound", { id: hashedId }));
         }
         return returning[0];
       }
 
       const config = await getSessionConfig(input.roleName || "default", t);
       const redisService = getSessionRedisService();
-      const success = await redisService.touchSession(input.hashedId, config.ttlSeconds);
+      const success = await redisService.touchSession(hashedId, config.ttlSeconds);
 
       if (!success) {
         const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("sessionNotFound", { id: input.hashedId }));
+        throw new Error(tFunc("sessionNotFound", { id: hashedId }));
       }
 
       const expiresAt = new Date(now.getTime() + config.ttlSeconds * 1000);
       await t
         .update(sessionMetadata)
         .set({ lastActivityAt: now, expiresAt })
-        .where(eq(sessionMetadata.sessionId, input.hashedId));
+        .where(eq(sessionMetadata.sessionId, hashedId));
 
-      logger.debug(`Updated session ${input.hashedId}`);
+      logger.debug(`Updated session ${hashedId}`);
       return {
-        hashedId: input.hashedId,
+        hashedId,
         userId: input.userId,
         ipAddress: input.ipAddress || null,
         userAgent: input.userAgent || null,
@@ -314,9 +323,10 @@ export namespace SessionRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const deleteSessionById = async (hashedId: string, tx?: DBTransaction): Promise<SessionEntity | null> => {
+  export const deleteSessionById = async (rawSessionId: string, tx?: DBTransaction): Promise<SessionEntity | null> => {
+    const hashedId = hashSessionId(rawSessionId);
     const runner = async (t: DBTransaction) => {
-      const existingSession = await findSessionById(hashedId);
+      const existingSession = await findSessionById(rawSessionId);
       if (existingSession) {
         if (redisSessionsEnabled()) {
           const redisService = getSessionRedisService();
@@ -357,53 +367,51 @@ export namespace SessionRepository {
 
   /**
    * Validate session.
+   * The sessionId parameter is the raw (plaintext) session ID from the cookie —
+   * it will be hashed before looking up the stored record.
    */
-  export const validate = async (sessionId: string, roleName: string = "default"): Promise<SessionEntity | null> => {
-    try {
-      if (!redisSessionsEnabled()) {
-        const session = await findSessionById(sessionId);
-        if (!session) return null;
-
-        const config = await getSessionConfig(roleName);
-        const now = BigInt(Math.floor(Date.now() / 1000));
-        const isExpired = Number(now - session.lastActivity) > config.ttlSeconds;
-
-        if (isExpired) {
-          await db.delete(sessions).where(eq(sessions.hashedId, sessionId));
-          return null;
-        }
-
-        await db.update(sessions).set({ lastActivity: now }).where(eq(sessions.hashedId, sessionId));
-        return { ...session, lastActivity: now };
-      }
-
-      const redisService = getSessionRedisService();
-      const session = await redisService.getSession(sessionId);
+  export const validate = async (rawSessionId: string, roleName: string = "default"): Promise<SessionEntity | null> => {
+    const hashedId = hashSessionId(rawSessionId);
+    if (!redisSessionsEnabled()) {
+      const session = await findSessionById(rawSessionId);
       if (!session) return null;
 
       const config = await getSessionConfig(roleName);
-      await redisService.touchSession(sessionId, config.ttlSeconds);
+      const now = BigInt(Math.floor(Date.now() / 1000));
+      const isExpired = Number(now - session.lastActivity) > config.ttlSeconds;
 
-      const now = new Date();
-      const expiresAt = new Date(now.getTime() + config.ttlSeconds * 1000);
+      if (isExpired) {
+        await db.delete(sessions).where(eq(sessions.hashedId, hashedId));
+        return null;
+      }
 
-      await db
-        .update(sessionMetadata)
-        .set({ lastActivityAt: now, expiresAt })
-        .where(eq(sessionMetadata.sessionId, sessionId));
-
-      return {
-        hashedId: session.hashedId,
-        userId: session.userId,
-        ipAddress: session.ipAddress || null,
-        userAgent: session.userAgent || null,
-        payload: session.payload,
-        lastActivity: BigInt(Math.floor(new Date(session.lastActivityAt).getTime() / 1000)),
-      };
-    } catch (error) {
-      logger.error("Error validating session:", error);
-      return null;
+      await db.update(sessions).set({ lastActivity: now }).where(eq(sessions.hashedId, hashedId));
+      return { ...session, lastActivity: now };
     }
+
+    const redisService = getSessionRedisService();
+    const session = await redisService.getSession(hashedId);
+    if (!session) return null;
+
+    const config = await getSessionConfig(roleName);
+    await redisService.touchSession(hashedId, config.ttlSeconds);
+
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + config.ttlSeconds * 1000);
+
+    await db
+      .update(sessionMetadata)
+      .set({ lastActivityAt: now, expiresAt })
+      .where(eq(sessionMetadata.sessionId, hashedId));
+
+    return {
+      hashedId: session.hashedId,
+      userId: session.userId,
+      ipAddress: session.ipAddress || null,
+      userAgent: session.userAgent || null,
+      payload: session.payload,
+      lastActivity: BigInt(Math.floor(new Date(session.lastActivityAt).getTime() / 1000)),
+    };
   };
 
   export const cleanupExpiredSessions = async (): Promise<number> => {
@@ -429,8 +437,9 @@ export namespace SessionRepository {
     return await redisService.countUserSessions(userId);
   };
 
-  export const getSessionTTL = async (sessionId: string): Promise<number> => {
+  export const getSessionTTL = async (rawSessionId: string): Promise<number> => {
+    const hashedId = hashSessionId(rawSessionId);
     const redisService = getSessionRedisService();
-    return await redisService.getSessionTTL(sessionId);
+    return await redisService.getSessionTTL(hashedId);
   };
 }

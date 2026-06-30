@@ -38,7 +38,9 @@ gqlSchemaBuilder.mutationFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_parent, { input }) => {
+    resolve: async (_parent, { input }, ctx) => {
+      const userId = await requireAuth(ctx);
+      await requireStorageManageOrOwner(userId, input.currentPath, ctx.locale);
       const storageService = await getStorageService();
       return await storageService.renameFile(input);
     },
@@ -67,7 +69,9 @@ gqlSchemaBuilder.mutationFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_parent, { input }) => {
+    resolve: async (_parent, { input }, ctx) => {
+      const userId = await requireAuth(ctx);
+      await requireStorageManage(userId, ctx.locale);
       logger.info("GraphQL mutation: prepareUpload", { input });
       const storageService = await getStorageService();
       const result = await storageService.prepareUpload(input);
@@ -87,7 +91,9 @@ gqlSchemaBuilder.mutationFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_parent, { input }) => {
+    resolve: async (_parent, { input }, ctx) => {
+      const userId = await requireAuth(ctx);
+      await requireStorageManage(userId, ctx.locale);
       const storageService = await getStorageService();
       return await storageService.createFolder(input);
     },
@@ -102,7 +108,11 @@ gqlSchemaBuilder.mutationFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_parent, { input }) => {
+    resolve: async (_parent, { input }, ctx) => {
+      const userId = await requireAuth(ctx);
+      for (const itemPath of input.sourcePaths) {
+        await requireStorageManageOrOwner(userId, itemPath, ctx.locale);
+      }
       const storageService = await getStorageService();
       return await storageService.moveItems(input);
     },
@@ -117,7 +127,11 @@ gqlSchemaBuilder.mutationFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_parent, { input }) => {
+    resolve: async (_parent, { input }, ctx) => {
+      const userId = await requireAuth(ctx);
+      for (const itemPath of input.sourcePaths) {
+        await requireStorageManageOrOwner(userId, itemPath, ctx.locale);
+      }
       const storageService = await getStorageService();
       return await storageService.copyItems(input);
     },

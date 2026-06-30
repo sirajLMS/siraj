@@ -30,7 +30,7 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
 
   users: t.field({
-    authScopes: { loggedIn: true },
+    authScopes: { permission: AppPermission.STAFF_LIST },
     type: [UserPothosObject],
     resolve: async () => await UserRepository.findUsers({ limit: 50, offset: 0 }),
   }),

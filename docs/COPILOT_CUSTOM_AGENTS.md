@@ -830,6 +830,36 @@ Key rules:
 - **Batch up to 8 per parallel group** — practical limit for credit/rate management
 - **Sequential groups if many fixes** — group 1 runs, completes, then group 2
 
+### Pattern 10: Per-Issue Fix Scoping (Human-in-the-Loop Fix Confirmation)
+
+Best for: Orchestrators that need user confirmation on each fix approach before implementing
+
+Before implementing any fixes, the orchestrator walks through each finding with the user. This prevents wasted work on issues the user wants to skip, and allows the user to shape the fix approach.
+
+```markdown
+## Per-Issue Fix Scoping
+1. Ask which severity levels to fix (CRITICAL only / CRITICAL+WARNING / All / Individually)
+2. For each finding at selected severity:
+   a. Present: [SEVERITY] <subagent>: <file>:<line> — <description>
+   b. Propose: specific fix approach
+   c. Ask: ask_user with choices:
+      - "Fix as proposed (Recommended)"
+      - "Skip this issue"
+      - "Different approach — let me describe"
+   d. Record decision in plan file
+3. For >10 findings: group by subagent/category, ask about group
+4. Final confirmation: present complete fix plan summary, ask "implement all now? / adjust / cancel"
+5. ONLY THEN proceed to fix implementation (Phase 7)
+6. SKIPPED findings are EXPLICITLY NOT implemented in Phase 7
+```
+
+Key rules:
+- **Never implement without explicit user confirmation** — no "fix all" shortcuts
+- **User's confirmed fix approach is passed to fix subagents** in Phase 7 prompt
+- **Group optimization for >10 findings** — avoid asking 20+ individual questions
+- **Final summary before implementing** — gives user one last chance to cancel/adjust
+- **"Skip" is a valid answer** — user may not want every finding fixed
+
 ---
 
 ## 9. Agent Conflict Analysis
@@ -1003,6 +1033,9 @@ repo-review (orchestrator)
 | 2026-06-30 | Updated repo-review Phase 6 for parallel fix batching | Independent fixes batched into groups of up to 8 `general-purpose` subagents with full tooling |
 | 2026-06-30 | Updated conflict prevention rule #3 | Changed from "no nesting" to "1-level nesting allowed, explore subagents only" |
 | 2026-06-30 | Added Pattern 8 (Nested Parallel Discovery) and Pattern 9 (Parallel Fix Batching) | Documented nesting and parallel fix patterns for future agent creation |
+| 2026-06-30 | Upgraded all 5 review skills to full 10-phase orchestrators | Added review→plan→plan-review→per-issue fix scoping→fix→verify→commit pipeline |
+| 2026-06-30 | Added Phase 6 per-issue fix scoping to all 6 skills | User confirms each fix approach before implementation; group optimization for >10 findings; SKIPPED findings are NOT implemented |
+| 2026-06-30 | Updated repo-review skill from 9 to 10 phases | Added same Phase 6 per-issue fix scoping as the 5 domain skills |
 
 ---
 

@@ -1,4 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
+import { ClassType } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   groupClassAuditQueryDocument,
   resendClassNotificationsMutationDocument,
@@ -55,7 +56,7 @@ describe("GraphQL: Group Class integration tests", () => {
           scheduledStartAt: now.toISOString(),
           scheduledEndAt: end.toISOString(),
           durationMinutes: 60,
-          classType: "REGULAR",
+          classType: ClassType.Regular,
         },
       },
       errorPolicy: "all",
@@ -152,8 +153,9 @@ describe("GraphQL: Group Class integration tests", () => {
       context: { headers: { Authorization: `Bearer ${adminToken}` } },
     });
 
-    if (result.error) {
-      expect(result.error.message.length).toBeGreaterThan(0);
+    const err = result.error as Error | undefined;
+    if (err) {
+      expect(err.message.length).toBeGreaterThan(0);
     } else if (result.data?.resendClassNotifications) {
       expect(typeof result.data.resendClassNotifications.id).toBe("string");
       expect(typeof result.data.resendClassNotifications.success).toBe("boolean");

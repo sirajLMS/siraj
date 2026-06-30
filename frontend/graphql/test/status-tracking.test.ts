@@ -1,4 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
+import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { statusTrackingScheduleQueryDocument } from "../sharedDocuments/schedule.documents";
 import { changeStudentStatusMutationDocument } from "../sharedDocuments/student-lifecycle.documents";
 import {
@@ -193,7 +194,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
       // Step 1: Change student to SUSPENDED (triggers bulkFreezeStudentClasses)
       await authenticatedRequest(adminToken, "mutate", changeStudentStatusMutationDocument, {
         studentId,
-        newStatus: "SUSPENDED",
+        newStatus: StudentStatus.Suspended,
         expectedVersion: null,
       });
 
@@ -204,13 +205,13 @@ describe("GraphQL: statusTrackingSchedule query", () => {
       const frozenRow = suspendedRows?.find(r => r?.studentId === studentId);
       if (frozenRow) {
         expect(frozenRow.isFrozen).toBe(true);
-        expect(frozenRow.studentStatus).toBe("SUSPENDED");
+        expect(frozenRow.studentStatus).toBe(StudentStatus.Suspended);
       }
 
       // Step 3: Change student back to REGULAR (triggers bulkUnfreezeStudentClasses)
       await authenticatedRequest(adminToken, "mutate", changeStudentStatusMutationDocument, {
         studentId,
-        newStatus: "REGULAR",
+        newStatus: StudentStatus.Regular,
         expectedVersion: null,
       });
 
@@ -221,7 +222,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
       const restoredRow = restoredRows?.find(r => r?.studentId === studentId);
       if (restoredRow) {
         expect(restoredRow.isFrozen).toBe(false);
-        expect(restoredRow.studentStatus).toBe("REGULAR");
+        expect(restoredRow.studentStatus).toBe(StudentStatus.Regular);
       }
     });
   });

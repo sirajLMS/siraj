@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { BillingRepository } from "@/backend/db/repo";
 import { invoices } from "@/backend/db/schema";
+import { InvoiceStatus, InvoiceType } from "@/shared/lib/enum";
 import { createTestParent, createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
@@ -23,7 +24,7 @@ async function createOverdueInvoice(
   parentId: string,
   amount: string,
   dueDateOffsetDays: number,
-  status: "UNPAID" | "PAID" | "CANCELLED" = "UNPAID"
+  status: InvoiceStatus.UNPAID | InvoiceStatus.PAID | InvoiceStatus.CANCELLED = InvoiceStatus.UNPAID
 ) {
   const now = new Date();
   const dueDate = new Date(now.getTime() + dueDateOffsetDays * 86400000);
@@ -38,7 +39,7 @@ async function createOverdueInvoice(
       amount,
       currency: "USD",
       status,
-      invoiceType: "MONTHLY",
+      invoiceType: InvoiceType.MONTHLY,
       idempotencyKey: randomUUID(),
       createdAt: now,
       updatedAt: now,
@@ -94,9 +95,9 @@ describe("BillingRepository.getUnpaidInvoicesSummary", () => {
       const parentUser = await createTestUser(tx, { name: "Mixed Parent", email: `mixed-${randomUUID()}@test.com` });
       const parent = await createTestParent(tx, parentUser.id);
 
-      await createOverdueInvoice(tx, parent.id, "100.00", -10, "UNPAID");
-      await createOverdueInvoice(tx, parent.id, "200.00", -5, "PAID");
-      await createOverdueInvoice(tx, parent.id, "300.00", 10, "UNPAID");
+      await createOverdueInvoice(tx, parent.id, "100.00", -10, InvoiceStatus.UNPAID);
+      await createOverdueInvoice(tx, parent.id, "200.00", -5, InvoiceStatus.PAID);
+      await createOverdueInvoice(tx, parent.id, "300.00", 10, InvoiceStatus.UNPAID);
 
       const result = await BillingRepository.getUnpaidInvoicesSummary(tx);
 
@@ -143,8 +144,8 @@ describe("BillingRepository — getInvoicesForParent", () => {
       });
       const parent = await createTestParent(tx, parentUser.id);
 
-      const inv1 = await createOverdueInvoice(tx, parent.id, "120.00", -5, "UNPAID");
-      const inv2 = await createOverdueInvoice(tx, parent.id, "80.00", -10, "PAID");
+      const inv1 = await createOverdueInvoice(tx, parent.id, "120.00", -5, InvoiceStatus.UNPAID);
+      const inv2 = await createOverdueInvoice(tx, parent.id, "80.00", -10, InvoiceStatus.PAID);
 
       const result = await BillingRepository.getInvoicesForParent(parent.id, null, tx);
 
@@ -160,14 +161,14 @@ describe("BillingRepository — getInvoicesForParent", () => {
       expect(item1?.dueDate).toBe(inv1.dueDate);
       expect(item1?.amount).toBe("120.00");
       expect(item1?.currency).toBe("USD");
-      expect(item1?.status).toBe("UNPAID");
-      expect(item1?.invoiceType).toBe("MONTHLY");
+      expect(item1?.status).toBe(InvoiceStatus.UNPAID);
+      expect(item1?.invoiceType).toBe(InvoiceType.MONTHLY);
       expect(item1?.paidDate).toBeNull();
 
       const item2 = itemsMap.get(inv2.id);
       expect(item2).toBeDefined();
       expect(item2?.amount).toBe("80.00");
-      expect(item2?.status).toBe("PAID");
+      expect(item2?.status).toBe(InvoiceStatus.PAID);
     });
   });
 
@@ -196,8 +197,8 @@ describe("BillingRepository — getInvoicesForParent", () => {
           dueDate: now.toISOString().split("T")[0],
           amount: "150.00",
           currency: "USD",
-          status: "UNPAID",
-          invoiceType: "MONTHLY",
+          status: InvoiceStatus.UNPAID,
+          invoiceType: InvoiceType.MONTHLY,
           idempotencyKey: randomUUID(),
           deletedAt: now,
           createdAt: now,
@@ -211,7 +212,10 @@ describe("BillingRepository — getInvoicesForParent", () => {
   });
 });
 
-async function setupInvoiceTest(tx: DBTransaction, status: "UNPAID" | "PAID" = "UNPAID") {
+async function setupInvoiceTest(
+  tx: DBTransaction,
+  status: InvoiceStatus.UNPAID | InvoiceStatus.PAID = InvoiceStatus.UNPAID
+) {
   const parentUser = await createTestUser(tx, {
     name: "Delete Test Parent",
     email: `del-${randomUUID()}@test.com`,
@@ -276,7 +280,7 @@ async function setupUnpaidInvoice(tx: DBTransaction) {
     email: `markpaid-${randomUUID()}@test.com`,
   });
   const parent = await createTestParent(tx, parentUser.id);
-  const invoice = await createOverdueInvoice(tx, parent.id, "150.00", -5, "UNPAID");
+  const invoice = await createOverdueInvoice(tx, parent.id, "150.00", -5, InvoiceStatus.UNPAID);
   return { parent, invoice };
 }
 
@@ -287,7 +291,7 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
       const result = await BillingRepository.markInvoiceAsPaid(invoice.id, undefined, tx);
 
       expect(result.id).toBe(invoice.id);
-      expect(result.status).toBe("PAID");
+      expect(result.status).toBe(InvoiceStatus.PAID);
       expect(result.paidDate).not.toBeNull();
       expect(result.version).toBeGreaterThan(0);
 
@@ -336,7 +340,7 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
       const { invoice } = await setupUnpaidInvoice(tx);
       const [current] = await tx.select().from(invoices).where(eq(invoices.id, invoice.id)).limit(1);
       const result = await BillingRepository.markInvoiceAsPaid(invoice.id, current.version, tx);
-      expect(result.status).toBe("PAID");
+      expect(result.status).toBe(InvoiceStatus.PAID);
     });
   });
 });

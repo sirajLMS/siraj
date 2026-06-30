@@ -32,7 +32,7 @@ export const ComplaintFilePothosObject = ComplaintFileRef.implement({
   description: "A file attached to a complaint.",
   fields: t => ({
     fileId: t.exposeString("fileId"),
-    filePath: t.exposeString("filePath"),
+    publicUrl: t.exposeString("publicUrl"),
     isProtected: t.exposeBoolean("isProtected"),
     usageType: t.exposeString("usageType"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
@@ -46,11 +46,8 @@ export const ComplaintPothosObject = ComplaintRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
     body: t.exposeString("body"),
-    parentId: t.exposeString("parentId"),
     parentName: t.exposeString("parentName", { nullable: true }),
     parentAvatarUrl: t.exposeString("parentAvatarUrl", { nullable: true }),
-    submitterEmail: t.exposeString("submitterEmail"),
-    studentId: t.exposeString("studentId", { nullable: true }),
     studentName: t.exposeString("studentName", { nullable: true }),
     status: t.expose("status", { type: ComplaintStatusPothosEnum }),
     category: t.expose("category", { type: ComplaintCategoryPothosEnum }),
@@ -294,10 +291,7 @@ gqlSchemaBuilder.mutationField("submitComplaint", t =>
 
       return normalizeComplaint({
         id: created.id,
-        parentId: created.parentId,
-        studentId: created.studentId ?? null,
         category: created.category as ComplaintCategory,
-        submitterEmail: created.submitterEmail,
         body: created.body,
         status: created.status as ComplaintStatus,
         createdAt: created.createdAt,

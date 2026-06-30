@@ -4,7 +4,7 @@ import { SearchOutlined } from "@mui/icons-material";
 import { Box, Button, MenuItem, TextField } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { type SyntheticEvent, useState } from "react";
-import { Gender } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface SearchScheduleFormProps {
   readonly onSearch: (fromTime: string, toTime: string, gender: Gender | null) => void;
@@ -64,8 +64,8 @@ export function SearchScheduleForm({ onSearch }: Readonly<SearchScheduleFormProp
         sx={{ minWidth: 150 }}
       >
         <MenuItem value="">{t("allGenders")}</MenuItem>
-        <MenuItem value={Gender.Male}>{t("male")}</MenuItem>
-        <MenuItem value={Gender.Female}>{t("female")}</MenuItem>
+        <MenuItem value="MALE">{t("male")}</MenuItem>
+        <MenuItem value="FEMALE">{t("female")}</MenuItem>
       </TextField>
 
       <Button type="submit" variant="contained" startIcon={<SearchOutlined />} sx={{ height: 56 }}>

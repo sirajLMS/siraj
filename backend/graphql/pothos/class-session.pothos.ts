@@ -13,6 +13,7 @@ import type {
   TeacherFutureScheduleReturnType,
 } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { ClassExecutionStatePothosObject, ClassOutcomePothosObject, ClassTypePothosObject } from "./enum.pothos";
 import { SupportContactPothosObject, TeacherImportantNotePothosObject } from "./teacher-notes.pothos";
 
 // ─── Performance ─────────────────────────────────────────────────────────────
@@ -76,13 +77,13 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
   fields: t => ({
     id: t.exposeString("id"),
     courseName: t.exposeString("courseName"),
-    classType: t.exposeString("classType"),
+    classType: t.expose("classType", { type: ClassTypePothosObject }),
     instanceId: t.exposeString("instanceId"),
     scheduledDate: t.exposeString("scheduledDate"),
     startTime: t.exposeString("startTime"),
     endTime: t.exposeString("endTime"),
     durationMinutes: t.exposeInt("durationMinutes"),
-    status: t.exposeString("status"),
+    status: t.expose("status", { type: ClassExecutionStatePothosObject }),
     remarks: t.exposeString("remarks", { nullable: true }),
     hasTimezoneMismatch: t.exposeBoolean("hasTimezoneMismatch"),
     studentTimezone: t.exposeString("studentTimezone", { nullable: true }),
@@ -90,8 +91,8 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
     payrollCredited: t.exposeBoolean("payrollCredited"),
     isRescheduled: t.exposeBoolean("isRescheduled"),
-    executionState: t.exposeString("executionState"),
-    outcome: t.exposeString("outcome"),
+    executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
+    outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
     student: t.expose("student", { type: ClassInstanceStudentPothosObject }),
     teacher: t.expose("teacher", { type: ClassInstanceTeacherPothosObject }),
     performance: t.expose("performance", {
@@ -156,7 +157,7 @@ export const FutureClassPothosObject = FutureClassRef.implement({
     location: t.exposeString("location"),
     subjectId: t.exposeString("subjectId", { nullable: true }),
     subjectName: t.exposeString("subjectName", { nullable: true }),
-    classType: t.exposeString("classType", { nullable: true }),
+    classType: t.expose("classType", { type: ClassTypePothosObject, nullable: true }),
     zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
   }),
 });

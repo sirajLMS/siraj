@@ -50,6 +50,14 @@ When all nested subagents return, combine their findings into the standard FINDI
 
 Review ONLY uncommitted changes — staged, unstaged, and untracked files. Do NOT review committed code or the entire codebase. Do NOT review style, conventions, lint, naming, or formatting (handled by @review-backend, @review-frontend, @review-types, @review-config).
 
+## Excluded Paths
+
+The following paths are internal development tooling and should be **excluded from security findings**:
+- `scripts/health/` — SonarQube/CodeScene health check tooling (dev-only, not production code)
+- `scripts/lint-queue-server.ts` — Dev-only lint queue server (runs locally, not in production)
+
+Do NOT flag security issues (plaintext tokens, command injection, missing auth) in these excluded files.
+
 ## Diff Discovery
 
 Run these commands to determine what has changed:

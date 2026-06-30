@@ -136,10 +136,7 @@ export namespace ComplaintService {
       for (const complaint of result.complaints) {
         complaints.push({
           id: complaint.id,
-          parentId: complaint.parentId,
-          studentId: complaint.studentId,
           category: complaint.category,
-          submitterEmail: complaint.submitterEmail,
           body: complaint.body,
           status: complaint.status,
           createdAt: complaint.createdAt,

@@ -22,10 +22,12 @@ export interface CustomJWTPayload extends JoseJWTPayload {
  * Generate an access token for a user
  */
 export async function generateAccessToken(userId: string, email: string): Promise<string> {
+  const jti = randomUUID();
   const token = await new SignJWT({
     userId,
     email,
     type: "access" as const,
+    jti,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()

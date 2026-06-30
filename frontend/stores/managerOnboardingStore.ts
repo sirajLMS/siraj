@@ -2,6 +2,7 @@ import { useApolloClient, useMutation } from "@apollo/client/react";
 import { create } from "zustand";
 import type { ManagerOnboardingInput, ManagerOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createManagerMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { logger } from "@/frontend/utils/logger";
 import type { ManagerOnboardingFormData } from "@/frontend/views/dashboard/managers/onboarding/types";
 
 interface ManagerOnboardingState {
@@ -48,8 +49,9 @@ export function useCreateManagerMutation() {
 
       throw new Error("Mutation returned no data");
     } catch (err) {
+      logger.error("Manager creation failed:", { err });
       useManagerOnboardingStore.setState({
-        error: err instanceof Error ? err.message : "Unknown error",
+        error: "operationFailed",
         isSubmitting: false,
       });
       throw err;

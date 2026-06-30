@@ -2,19 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Person, Visibility, VisibilityOff } from "@mui/icons-material";
-import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  CircularProgress,
-  FormControlLabel,
-  IconButton,
-  InputAdornment,
-  Link,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, CircularProgress, IconButton, InputAdornment, Link, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -32,17 +20,12 @@ const StyledLockIcon = styled(Lock)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-// Form actions container with flex layout for remember me and forgot password
+// Form actions container with flex layout for forgot password
 const StyledFormActionsContainer = styled(Box)({
   display: "flex",
-  justifyContent: "space-between",
+  justifyContent: "flex-end",
   alignItems: "center",
 });
-
-// Remember me label text with secondary color
-const StyledRememberMeLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-}));
 
 // Forgot password link with primary color
 const StyledForgotPasswordLink = styled(Link)(({ theme }) => ({
@@ -141,21 +124,11 @@ const FormFields = ({
   );
 };
 
-const FormActions = ({ control, isSubmitting }: { control: Control<LoginFormData>; isSubmitting: boolean }) => {
+const FormActions = ({ isSubmitting: _isSubmitting }: { isSubmitting: boolean }) => {
   const t = useTranslations("auth.login");
 
   return (
     <StyledFormActionsContainer>
-      <Controller
-        name="rememberMe"
-        control={control}
-        render={({ field }) => (
-          <FormControlLabel
-            control={<Checkbox {...field} checked={field.value} disabled={isSubmitting} />}
-            label={<StyledRememberMeLabel variant="bodyMd">{t("rememberMe")}</StyledRememberMeLabel>}
-          />
-        )}
-      />
       <StyledForgotPasswordLink href="#" underline="hover">
         {t("forgotPassword")}
       </StyledForgotPasswordLink>
@@ -193,7 +166,6 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
     defaultValues: {
       email: "",
       password: "",
-      rememberMe: false,
     },
   });
 
@@ -268,7 +240,7 @@ export function LoginForm({ onSubmitAction, externalLoginResult }: LoginFormProp
         setShowPassword={setShowPassword}
       />
 
-      <FormActions control={control} isSubmitting={isSubmitting} />
+      <FormActions isSubmitting={isSubmitting} />
 
       <StyledSubmitButton
         type="submit"

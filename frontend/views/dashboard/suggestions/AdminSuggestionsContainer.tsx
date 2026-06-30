@@ -27,6 +27,7 @@ import {
 } from "@/frontend/graphql/sharedDocuments/suggestion.documents";
 import { useAdminSuggestionsStore } from "@/frontend/stores/adminSuggestionsStore";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { logger } from "@/frontend/utils/logger";
 import { AdminSuggestionsView } from "./AdminSuggestionsView";
 import { SuggestionMarkDuplicateDialog } from "./components/SuggestionMarkDuplicateDialog";
 import { SuggestionRespondDialog } from "./components/SuggestionRespondDialog";
@@ -40,6 +41,7 @@ const StyledErrorTypography = styled(Typography)(({ theme }) => ({
 
 export function AdminSuggestionsContainer() {
   const t = useTranslations("dashboard.suggestions");
+  const tc = useTranslations("common");
   const labels = buildSuggestionsLabels(t);
   const notifications = useNotifications();
   const hasPermission = useUserStore(state => state.hasPermission);
@@ -213,7 +215,8 @@ export function AdminSuggestionsContainer() {
   }
 
   if (error) {
-    return <StyledErrorTypography>{error.message}</StyledErrorTypography>;
+    logger.error("Error loading suggestions:", { error });
+    return <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>;
   }
 
   return (

@@ -15,7 +15,6 @@ export type TeacherImportantNoteSubmitInput = {
   priority?: number;
   startsAt?: Date | null;
   expiresAt?: Date | null;
-  teacherId?: string | null;
 };
 
 export type TeacherImportantNoteUpdateInput = {

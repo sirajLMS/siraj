@@ -164,6 +164,7 @@ function AdminNoteDialog({
 export function ClassAuditContainer() {
   const router = useRouter();
   const t = useTranslations("dashboard.classAudit");
+  const tc = useTranslations("common");
   const client = useApolloClient();
 
   const params = useParams();
@@ -209,7 +210,7 @@ export function ClassAuditContainer() {
 
   if (error || !audit) {
     logger.error("Error fetching class audit:", error);
-    return <Alert severity="error">{error?.message ?? "Failed to load class audit data"}</Alert>;
+    return <Alert severity="error">{tc("loadFailed")}</Alert>;
   }
 
   const handleGenerateReport = () => {
@@ -229,9 +230,9 @@ export function ClassAuditContainer() {
   };
 
   const handleJoinMeeting = () => {
-    const url = audit?.meetingInfo?.zoomMeetingUrl ?? audit?.meetingInfo?.joinUrl;
+    const url = audit?.meetingInfo?.joinUrl;
     if (url) {
-      window.open(url, "_blank");
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 

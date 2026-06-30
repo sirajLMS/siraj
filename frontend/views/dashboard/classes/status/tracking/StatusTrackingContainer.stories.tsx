@@ -7,7 +7,7 @@ import {
 import type { Meta, StoryObj } from "@storybook/react";
 import { useTranslations } from "next-intl";
 import { create } from "zustand";
-import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useRescheduleStore } from "@/frontend/stores/rescheduleStore";
 import type { RawMetric } from "@/frontend/views/dashboard/classes/status/tracking/types";
 import { useRouter } from "@/shared/i18n/routing";
@@ -53,8 +53,8 @@ const STORY_ROWS: StatusTrackingRow[] = [
     scheduledStartAt: "2026-06-22T10:30:00Z",
     scheduledEndAt: "2026-06-22T11:30:00Z",
     durationMinutes: 60,
-    executionState: "ACTIVATED",
-    outcome: "PENDING",
+    executionState: ClassExecutionState.Activated,
+    outcome: ClassOutcome.Pending,
     isFrozen: false,
   },
   {
@@ -69,8 +69,8 @@ const STORY_ROWS: StatusTrackingRow[] = [
     scheduledStartAt: "2026-06-22T11:00:00Z",
     scheduledEndAt: "2026-06-22T12:00:00Z",
     durationMinutes: 60,
-    executionState: "ACTIVATED",
-    outcome: "PENDING",
+    executionState: ClassExecutionState.Activated,
+    outcome: ClassOutcome.Pending,
     isFrozen: true,
   },
   {
@@ -85,8 +85,8 @@ const STORY_ROWS: StatusTrackingRow[] = [
     scheduledStartAt: "2026-06-22T11:45:00Z",
     scheduledEndAt: "2026-06-22T13:00:00Z",
     durationMinutes: 75,
-    executionState: "ACTIVATED",
-    outcome: "PENDING",
+    executionState: ClassExecutionState.Activated,
+    outcome: ClassOutcome.Pending,
     isFrozen: false,
   },
   {
@@ -101,8 +101,8 @@ const STORY_ROWS: StatusTrackingRow[] = [
     scheduledStartAt: "2026-06-22T14:00:00Z",
     scheduledEndAt: "2026-06-22T15:00:00Z",
     durationMinutes: 60,
-    executionState: "ACTIVATED",
-    outcome: "PENDING",
+    executionState: ClassExecutionState.Activated,
+    outcome: ClassOutcome.Pending,
     isFrozen: true,
   },
   {
@@ -117,8 +117,8 @@ const STORY_ROWS: StatusTrackingRow[] = [
     scheduledStartAt: "2026-06-22T15:30:00Z",
     scheduledEndAt: "2026-06-22T16:30:00Z",
     durationMinutes: 60,
-    executionState: "NOT_ACTIVATED",
-    outcome: "PENDING",
+    executionState: ClassExecutionState.NotActivated,
+    outcome: ClassOutcome.Pending,
     isFrozen: false,
   },
 ];
@@ -132,7 +132,12 @@ const useStoryStatusTrackingStore = create<StoryStatusTrackingState>(set => ({
     set(state => ({
       rows: state.rows.map(row =>
         row.id === id
-          ? { ...row, studentStatus: StudentStatus.Regular, isFrozen: false, executionState: "ACTIVATED" }
+          ? {
+              ...row,
+              studentStatus: StudentStatus.Regular,
+              isFrozen: false,
+              executionState: ClassExecutionState.Activated,
+            }
           : row
       ),
     }));
@@ -142,7 +147,12 @@ const useStoryStatusTrackingStore = create<StoryStatusTrackingState>(set => ({
     set(state => ({
       rows: state.rows.map(row =>
         row.id === id
-          ? { ...row, studentStatus: StudentStatus.Regular, isFrozen: false, executionState: "ACTIVATED" }
+          ? {
+              ...row,
+              studentStatus: StudentStatus.Regular,
+              isFrozen: false,
+              executionState: ClassExecutionState.Activated,
+            }
           : row
       ),
     }));

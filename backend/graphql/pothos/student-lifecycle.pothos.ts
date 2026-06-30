@@ -1,6 +1,7 @@
 import { StudentLifecycleService } from "@/backend/services";
 import type { ChangeStudentStatusResult, ReassignStudentTeacherResult } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { StudentStatusPothosObject } from "./enum.pothos";
 
 // ─── ReassignStudentTeacherResult Object ─────────────────────────────────────
 
@@ -22,7 +23,7 @@ const ChangeStudentStatusResultRef = gqlSchemaBuilder.objectRef<ChangeStudentSta
 export const ChangeStudentStatusResultPothosObject = ChangeStudentStatusResultRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
-    status: t.exposeString("status"),
+    status: t.expose("status", { type: StudentStatusPothosObject }),
     version: t.exposeInt("version"),
   }),
 });
@@ -54,7 +55,7 @@ gqlSchemaBuilder.mutationField("changeStudentStatus", t =>
     type: ChangeStudentStatusResultRef,
     args: {
       studentId: t.arg.string({ required: true }),
-      newStatus: t.arg.string({ required: true }),
+      newStatus: t.arg({ type: StudentStatusPothosObject, required: true }),
       expectedVersion: t.arg.int({ required: false }),
     },
     resolve: async (_root, args, ctx) => {

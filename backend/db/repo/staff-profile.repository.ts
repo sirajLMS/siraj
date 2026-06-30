@@ -13,6 +13,7 @@ import type {
   StaffProfileCreateResult,
   StaffProfileEntityInput,
 } from "@/backend/types";
+import type { AccountStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 export interface ManagerProfileUpdateInput {
@@ -123,7 +124,7 @@ export namespace StaffProfileRepository {
       const [rows, metrics] = await Promise.all([baseQuery, getManagerDirectoryMetrics(queryDb)]);
       return {
         metrics,
-        rows,
+        rows: rows.map(row => ({ ...row, status: row.status as AccountStatus })),
         totalCount: rows.length,
         pageInfo: null,
       };
@@ -150,7 +151,7 @@ export namespace StaffProfileRepository {
 
     return {
       metrics,
-      rows,
+      rows: rows.map(row => ({ ...row, status: row.status as AccountStatus })),
       totalCount,
       pageInfo: {
         count: rows.length,
@@ -234,7 +235,7 @@ export namespace StaffProfileRepository {
       .where(eq(users.id, userId))
       .limit(1);
 
-    return results[0] ?? null;
+    return (results[0] ? { ...results[0], status: results[0].status as AccountStatus } : null) ?? null;
   }
 
   export async function findByStaffProfileId(
@@ -252,7 +253,7 @@ export namespace StaffProfileRepository {
       .where(eq(staffProfiles.id, staffProfileId))
       .limit(1);
 
-    return results[0] ?? null;
+    return (results[0] ? { ...results[0], status: results[0].status as AccountStatus } : null) ?? null;
   }
 
   export async function updateManagerProfile(
@@ -301,7 +302,7 @@ export namespace StaffProfileRepository {
 
       logger.info("Manager profile updated", { staffProfileId });
 
-      return updated[0];
+      return { ...updated[0], status: updated[0].status as AccountStatus };
     };
 
     if (tx) {

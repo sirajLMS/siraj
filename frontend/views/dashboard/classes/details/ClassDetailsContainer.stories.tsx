@@ -2,7 +2,13 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { create } from "zustand";
 import { PageContainer } from "@/frontend/components/ui";
-import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  ClassExecutionState,
+  type ClassInstanceDetail,
+  ClassOutcome,
+  ClassType,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import type { ClassInstance } from "@/frontend/views/dashboard/types/dashboard";
@@ -167,20 +173,20 @@ function mapMockToReal(mock: ClassInstance): ClassInstanceDetail {
     id: mock.id,
     instanceId: mock.instanceId,
     courseName: mock.courseName,
-    classType: "REGULAR",
+    classType: ClassType.Regular,
     scheduledDate: mock.scheduledDate,
     startTime: mock.startTime,
     endTime: mock.endTime,
     durationMinutes: mock.durationMinutes,
-    status: mock.status,
+    status: ClassExecutionState.NotActivated,
     remarks: mock.remarks,
     hasTimezoneMismatch: mock.hasTimezoneMismatch,
     studentTimezone: mock.studentTimezone,
     teacherTimezone: null,
     zoomMeetingUrl: "",
-    executionState: "NOT_ACTIVATED",
+    executionState: ClassExecutionState.NotActivated,
     isRescheduled: false,
-    outcome: "PENDING",
+    outcome: ClassOutcome.Pending,
     payrollCredited: false,
     student: {
       __typename: "ClassInstanceStudentInfo",
@@ -199,6 +205,7 @@ function mapMockToReal(mock: ClassInstance): ClassInstanceDetail {
     },
     performance: {
       __typename: "ClassInstancePerformance",
+      id: "perf-1",
       engagementScore: 92,
       assessmentProgress: 14,
       assessmentTotal: 20,

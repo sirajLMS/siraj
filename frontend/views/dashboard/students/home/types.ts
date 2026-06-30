@@ -25,7 +25,7 @@ export const MOBILE_METRIC_ICON_KEYS = {
   suspended: "BlockOutlined",
 } as const;
 
-export type StudentDirectoryRowExtended = Readonly<StudentDirectoryRow> & {
+export type StudentDirectoryRowExtended = Readonly<Omit<StudentDirectoryRow, "parentName">> & {
   readonly index: number;
   readonly accountStatus: StudentAccountStatus;
   readonly enrollmentStatus: StudentEnrollmentStatus;

@@ -35,7 +35,7 @@ async function setupRegularStudent(
 
 describe("fn_enforce_student_status_transition DB trigger", () => {
   describe("Valid transitions from REGULAR", () => {
-    for (const target of ["SUSPENDED", "ON_LEAVE", "DEACTIVATED"] as const) {
+    for (const target of [StudentStatus.SUSPENDED, StudentStatus.ON_LEAVE, StudentStatus.DEACTIVATED] as const) {
       test(`REGULAR → ${target}: allowed`, async () => {
         await runInRollback(async tx => {
           const student = await setupRegularStudent(tx);
@@ -47,13 +47,13 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
   });
 
   describe("Valid transitions back to REGULAR", () => {
-    for (const from of ["SUSPENDED", "ON_LEAVE", "DEACTIVATED"] as const) {
+    for (const from of [StudentStatus.SUSPENDED, StudentStatus.ON_LEAVE, StudentStatus.DEACTIVATED] as const) {
       test(`${from} → REGULAR: allowed`, async () => {
         await runInRollback(async tx => {
           const student = await setupRegularStudent(tx);
           await StudentRepository.changeStatus(student.id, from, undefined, tx);
-          const result = await StudentRepository.changeStatus(student.id, "REGULAR", undefined, tx);
-          expect(result.status).toBe("REGULAR");
+          const result = await StudentRepository.changeStatus(student.id, StudentStatus.REGULAR, undefined, tx);
+          expect(result.status).toBe(StudentStatus.REGULAR);
         });
       });
     }
@@ -61,8 +61,8 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
 
   describe("Valid transitions from ON_TRIAL", () => {
     for (const [target, label] of [
-      ["REGULAR", "activate"],
-      ["DEACTIVATED", "deactivate"],
+      [StudentStatus.REGULAR, "activate"],
+      [StudentStatus.DEACTIVATED, "deactivate"],
     ] as const) {
       test(`ON_TRIAL → ${target}: allowed`, async () => {
         await runInRollback(async tx => {
@@ -81,8 +81,8 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
 
   describe("Valid secondary transitions", () => {
     for (const [via, target] of [
-      ["SUSPENDED", "DEACTIVATED"],
-      ["ON_LEAVE", "DEACTIVATED"],
+      [StudentStatus.SUSPENDED, StudentStatus.DEACTIVATED],
+      [StudentStatus.ON_LEAVE, StudentStatus.DEACTIVATED],
     ] as const) {
       test(`REGULAR → ${via} → ${target}: allowed`, async () => {
         await runInRollback(async tx => {
@@ -100,7 +100,7 @@ describe("fn_enforce_student_status_transition DB trigger", () => {
       await runInRollback(async tx => {
         const student = await setupRegularStudent(tx);
         const error = await expectRepoError(() =>
-          StudentRepository.changeStatus(student.id, "ON_TRIAL", undefined, tx)
+          StudentRepository.changeStatus(student.id, StudentStatus.ON_TRIAL, undefined, tx)
         );
         expect(getFullErrorMessage(error)).toContain("Invalid status transition");
       });

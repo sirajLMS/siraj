@@ -19,4 +19,7 @@ export interface CommonLabels {
   readonly retry: string;
   readonly checkNetworkConnection: string;
   readonly connectionRestored: string;
+  readonly somethingWentWrong: string;
+  readonly operationFailed: string;
+  readonly loadFailed: string;
 }

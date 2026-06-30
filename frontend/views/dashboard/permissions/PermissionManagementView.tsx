@@ -134,7 +134,9 @@ export function PermissionManagementView({
           <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3 }}>
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
+                {error === "operationFailed"
+                  ? t("errors.operationFailed", { defaultValue: "Operation failed. Please try again." })
+                  : error}
               </Alert>
             )}
 

@@ -3,7 +3,7 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ChangeStudentStatusResult, ReassignStudentTeacherResult } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
+import { AppPermission, type StudentStatus } from "@/shared/lib/enum";
 
 export namespace StudentLifecycleService {
   export async function reassignTeacher(
@@ -66,7 +66,7 @@ export namespace StudentLifecycleService {
   export async function changeStudentStatus(
     actorUserId: string,
     studentId: string,
-    newStatus: string,
+    newStatus: StudentStatus,
     expectedVersion?: number,
     locale?: string
   ): Promise<ChangeStudentStatusResult> {
@@ -88,7 +88,7 @@ export namespace StudentLifecycleService {
 
       return {
         id: updated.id,
-        status: updated.status,
+        status: updated.status as StudentStatus,
         version: updated.version,
       };
     } catch (error) {

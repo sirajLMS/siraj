@@ -5,10 +5,11 @@ import { Alert, Snackbar } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createManualInvoiceMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
 import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
+import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
 import { ManualInvoiceView } from "./ManualInvoiceView";
 import type { ManualInvoiceFormData } from "./schemas/manualInvoiceSchema";
@@ -42,6 +43,7 @@ function billingMonthsToInput(months: string[], year?: number): { year: number; 
 
 export function ManualInvoiceContainer() {
   const t = useTranslations("dashboard.billing.manual");
+  const tc = useTranslations("common");
   const router = useRouter();
   const labels = buildManualInvoiceLabels(t);
 
@@ -75,7 +77,8 @@ export function ManualInvoiceContainer() {
       setSnackbarOpen(true);
     },
     onError: error => {
-      setSnackbarMessage(error.message);
+      logger.error("Create manual invoice failed:", { error });
+      setSnackbarMessage(tc("operationFailed"));
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     },
@@ -92,7 +95,7 @@ export function ManualInvoiceContainer() {
         studentId: (data as ManualInvoiceFormData & { studentId?: string }).studentId ?? null,
         amount: data.feeAmount,
         currency: "USD",
-        invoiceType: "MANUAL",
+        invoiceType: InvoiceType.Manual,
         issueDate: data.issueDate,
         dueDate: data.dueDate,
         exchangeRateSnapshot: null,

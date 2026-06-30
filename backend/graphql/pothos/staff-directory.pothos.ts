@@ -1,7 +1,9 @@
 import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
 import type { OnboardingMetricsResult, PageInfo, TeacherDirectoryMetrics, TeacherDirectoryRow } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
+import type { AccountStatus } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { AccountStatusPothosObject } from "./enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
@@ -21,7 +23,7 @@ export const TeacherDirectoryRowPothosObject = TeacherDirectoryRowRef.implement(
     name: t.exposeString("name"),
     email: t.exposeString("email"),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
-    status: t.exposeString("status"),
+    status: t.expose("status", { type: AccountStatusPothosObject }),
     zoomLink: t.exposeString("zoomLink", { nullable: true }),
   }),
 });
@@ -66,7 +68,7 @@ export type ManagerDirectoryRowDefinition = {
   avatarUrl: string | null;
   phone: string | null;
   skypeId: string | null;
-  status: string;
+  status: AccountStatus;
   roleSlug: string | null;
   roleName: string | null;
 };
@@ -82,7 +84,7 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     phone: t.exposeString("phone", { nullable: true }),
     skypeId: t.exposeString("skypeId", { nullable: true }),
-    status: t.exposeString("status"),
+    status: t.expose("status", { type: AccountStatusPothosObject }),
     roleSlug: t.exposeString("roleSlug", { nullable: true }),
     roleName: t.exposeString("roleName", { nullable: true }),
   }),
@@ -208,7 +210,7 @@ gqlSchemaBuilder.queryField("onboardingMetrics", t =>
 export interface UpdateManagerProfileInputDefinition {
   phone?: string | null;
   skypeId?: string | null;
-  status?: string | null;
+  status?: AccountStatus | null;
 }
 
 export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
@@ -217,7 +219,7 @@ export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
     fields: t => ({
       phone: t.string({ required: false }),
       skypeId: t.string({ required: false }),
-      status: t.string({ required: false }),
+      status: t.field({ type: AccountStatusPothosObject, required: false }),
     }),
   });
 

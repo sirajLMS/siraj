@@ -38,7 +38,7 @@ export namespace TeacherNotesRepository {
   }
 
   export async function createNote(
-    input: TeacherImportantNoteSubmitInput & { createdByUserId: string },
+    input: TeacherImportantNoteSubmitInput & { createdByUserId: string; teacherId: string | null },
     locale?: string,
     tx?: DBTransaction
   ): Promise<TeacherImportantNoteSelectType> {

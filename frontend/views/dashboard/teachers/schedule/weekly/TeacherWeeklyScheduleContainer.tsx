@@ -4,6 +4,10 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+import type {
+  ClassExecutionState as GqlClassExecutionState,
+  ClassOutcome as GqlClassOutcome,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   clearWeeklyScheduleMutationDocument,
@@ -18,7 +22,6 @@ import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringC
 import { useUserStore } from "@/frontend/stores/userStore";
 import { useWeeklyScheduleStore } from "@/frontend/stores/weeklyScheduleStore";
 import { logger } from "@/frontend/utils/logger";
-import type { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import { CreateRecurringClassDialog } from "./components/CreateRecurringClassDialog";
 import TeacherWeeklyScheduleView from "./TeacherWeeklyScheduleView";
 import type { TeacherWeeklyScheduleContainerProps } from "./types";
@@ -109,8 +112,8 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
             duration: c.duration || 0,
             startTime: c.startTime || "",
             day: c.day || "",
-            executionState: (c.executionState as ClassExecutionState) ?? null,
-            outcome: (c.outcome as ClassOutcome) ?? null,
+            executionState: c.executionState as GqlClassExecutionState | null,
+            outcome: c.outcome as GqlClassOutcome | null,
             subjectName: c.subjectName ?? null,
             classType: c.classType ?? null,
           })),

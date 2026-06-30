@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { config } from "dotenv";
-import type { DBTransaction } from "@/backend/db/db.types";
+import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { checkRedisHealth, getRedisService, resetRedisService } from "@/backend/services/redis";
 import { testLogger } from "@/shared/lib/testlogger";
 import { db } from "../../drizzleDb";
@@ -12,6 +12,8 @@ import { IP_ADDRESS_1, IP_ADDRESS_2 } from "../const";
 config({ path: ".env.redis", override: true });
 
 let redisAvailable = false;
+
+type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 async function runInRollback(fn: (tx: DBTransaction) => Promise<void>): Promise<void> {
   try {
@@ -26,7 +28,6 @@ async function runInRollback(fn: (tx: DBTransaction) => Promise<void>): Promise<
   }
 }
 
-// Helper to create test user
 async function createTestUser(tx: DBTransaction, email: string) {
   const [user] = await tx
     .insert(users)
@@ -41,7 +42,6 @@ async function createTestUser(tx: DBTransaction, email: string) {
   return user;
 }
 
-// Helper to create test session
 async function setupTestSession(
   tx: DBTransaction,
   emailPrefix: string,
@@ -49,6 +49,7 @@ async function setupTestSession(
 ) {
   const user = await createTestUser(tx, `${emailPrefix}-${randomUUID()}@example.com`);
   const sessionId = overrides.hashedId || `session-${randomUUID()}`;
+  const hashedSessionId = hashSessionId(sessionId);
 
   const session = await SessionRepository.create(
     {
@@ -62,7 +63,7 @@ async function setupTestSession(
     tx
   );
 
-  return { user, sessionId, session };
+  return { user, sessionId, hashedSessionId, session };
 }
 
 describe("Session Scalability and Redis Integration", () => {
@@ -140,12 +141,12 @@ describe("Session Scalability and Redis Integration", () => {
   describe("Redis Session Storage", () => {
     it.skipIf(!redisAvailable)("should create session in Redis and store metadata in PostgreSQL", async () => {
       await runInRollback(async tx => {
-        const { user, sessionId, session } = await setupTestSession(tx, "redis-test", {
+        const { user, sessionId, hashedSessionId, session } = await setupTestSession(tx, "redis-test", {
           deviceType: "desktop",
           deviceName: "Test Device",
         });
 
-        expect(session.hashedId).toBe(sessionId);
+        expect(session.hashedId).toBe(hashedSessionId);
         expect(session.userId).toBe(user.id);
 
         // Verify session exists in Redis
@@ -167,7 +168,7 @@ describe("Session Scalability and Redis Integration", () => {
 
     it.skipIf(!redisAvailable)("should retrieve session from Redis", async () => {
       await runInRollback(async tx => {
-        const { user, sessionId } = await setupTestSession(tx, "redis-retrieve", {
+        const { user, sessionId, hashedSessionId } = await setupTestSession(tx, "redis-retrieve", {
           payload: JSON.stringify({ role: "admin" }),
           ipAddress: IP_ADDRESS_2,
           userAgent: "Test Agent",
@@ -176,7 +177,7 @@ describe("Session Scalability and Redis Integration", () => {
         const retrieved = await SessionRepository.findSessionById(sessionId);
 
         expect(retrieved).not.toBeNull();
-        expect(retrieved?.hashedId).toBe(sessionId);
+        expect(retrieved?.hashedId).toBe(hashedSessionId);
         expect(retrieved?.userId).toBe(user.id);
         expect(retrieved?.ipAddress).toBe(IP_ADDRESS_2);
 
@@ -215,12 +216,12 @@ describe("Session Scalability and Redis Integration", () => {
 
     it.skipIf(!redisAvailable)("should validate session and update last activity", async () => {
       await runInRollback(async tx => {
-        const { user, sessionId } = await setupTestSession(tx, "redis-validate");
+        const { user, sessionId, hashedSessionId } = await setupTestSession(tx, "redis-validate");
 
         const validated = await SessionRepository.validate(sessionId);
 
         expect(validated).not.toBeNull();
-        expect(validated?.hashedId).toBe(sessionId);
+        expect(validated?.hashedId).toBe(hashedSessionId);
         expect(validated?.userId).toBe(user.id);
 
         testLogger.info(`Session ${sessionId} validated successfully`);
@@ -240,12 +241,12 @@ describe("Session Scalability and Redis Integration", () => {
 
     it.skipIf(!redisAvailable)("should delete session from Redis and PostgreSQL", async () => {
       await runInRollback(async tx => {
-        const { sessionId } = await setupTestSession(tx, "redis-delete");
+        const { sessionId, hashedSessionId } = await setupTestSession(tx, "redis-delete");
 
         const deleted = await SessionRepository.deleteSessionById(sessionId, tx);
 
         expect(deleted).not.toBeNull();
-        expect(deleted?.hashedId).toBe(sessionId);
+        expect(deleted?.hashedId).toBe(hashedSessionId);
 
         // Verify session removed from Redis
         const retrieved = await SessionRepository.findSessionById(sessionId);
@@ -257,7 +258,7 @@ describe("Session Scalability and Redis Integration", () => {
   });
 
   describe("Concurrent Session Limits", () => {
-    it.skipIf(!redisAvailable)("should enforce concurrent session limit", async () => {
+    it("should enforce concurrent session limit", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `concurrent-limit-${randomUUID()}@example.com`);
 
@@ -300,7 +301,7 @@ describe("Session Scalability and Redis Integration", () => {
       });
     });
 
-    it.skipIf(!redisAvailable)("should remove oldest sessions when limit exceeded", async () => {
+    it("should remove oldest sessions when limit exceeded", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `oldest-removal-${randomUUID()}@example.com`);
 
@@ -369,7 +370,7 @@ describe("Session Scalability and Redis Integration", () => {
       });
     });
 
-    it.skipIf(!redisAvailable)("should handle multiple users with different limits independently", async () => {
+    it("should handle multiple users with different limits independently", async () => {
       await runInRollback(async tx => {
         const user1 = await createTestUser(tx, `multi-user-1-${randomUUID()}@example.com`);
         const user2 = await createTestUser(tx, `multi-user-2-${randomUUID()}@example.com`);
@@ -436,7 +437,7 @@ describe("Session Scalability and Redis Integration", () => {
   });
 
   describe("Logout Everywhere Functionality", () => {
-    it.skipIf(!redisAvailable)("should delete all sessions for a user", async () => {
+    it("should delete all sessions for a user", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `logout-everywhere-${randomUUID()}@example.com`);
 
@@ -476,7 +477,7 @@ describe("Session Scalability and Redis Integration", () => {
       });
     });
 
-    it.skipIf(!redisAvailable)("should remove metadata from PostgreSQL when logging out everywhere", async () => {
+    it("should remove metadata from PostgreSQL when logging out everywhere", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `logout-metadata-${randomUUID()}@example.com`);
 
@@ -510,7 +511,7 @@ describe("Session Scalability and Redis Integration", () => {
   });
 
   describe("Concurrency Control", () => {
-    it.skipIf(!redisAvailable)("should prevent race conditions with advisory locks", async () => {
+    it("should prevent race conditions with advisory locks", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `race-condition-${randomUUID()}@example.com`);
 
@@ -550,12 +551,14 @@ describe("Session Scalability and Redis Integration", () => {
   });
 
   describe("Session Metadata Management", () => {
-    it.skipIf(!redisAvailable)("should retrieve user session metadata ordered by last activity", async () => {
+    it("should retrieve user session metadata ordered by last activity", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `metadata-order-${randomUUID()}@example.com`);
 
         const firstSessionId = `session-first-${randomUUID()}`;
         const secondSessionId = `session-second-${randomUUID()}`;
+        const firstHashedId = hashSessionId(firstSessionId);
+        const secondHashedId = hashSessionId(secondSessionId);
 
         await SessionRepository.create(
           {
@@ -583,8 +586,8 @@ describe("Session Scalability and Redis Integration", () => {
 
         expect(metadata.length).toBe(2);
         // Most recent should be first
-        expect(metadata[0].sessionId).toBe(secondSessionId);
-        expect(metadata[1].sessionId).toBe(firstSessionId);
+        expect(metadata[0].sessionId).toBe(secondHashedId);
+        expect(metadata[1].sessionId).toBe(firstHashedId);
 
         testLogger.info("Session metadata retrieved in correct order");
 
@@ -593,7 +596,7 @@ describe("Session Scalability and Redis Integration", () => {
       });
     });
 
-    it.skipIf(!redisAvailable)("should filter out expired metadata", async () => {
+    it("should filter out expired metadata", async () => {
       await runInRollback(async tx => {
         const { user, sessionId } = await setupTestSession(tx, "expired-metadata");
 
@@ -610,7 +613,7 @@ describe("Session Scalability and Redis Integration", () => {
   });
 
   describe("Session TTL", () => {
-    it.skipIf(!redisAvailable)("should get session TTL from Redis", async () => {
+    it("should get session TTL from Redis", async () => {
       await runInRollback(async tx => {
         const { sessionId } = await setupTestSession(tx, "ttl-test");
 

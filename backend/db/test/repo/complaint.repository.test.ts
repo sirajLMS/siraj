@@ -188,12 +188,10 @@ describe("ComplaintRepository — getComplaintsByParent", () => {
     const resultB = await ComplaintRepository.getComplaintsByParent(parentB.parent.id, null, tx);
 
     expect(resultA.complaints.length).toBeGreaterThanOrEqual(1);
-    expect(resultA.complaints.every(c => c.parentId === parentA.parent.id)).toBeTrue();
     expect(resultA.complaints.some(c => c.body === "Parent A complaint")).toBeTrue();
     expect(resultA.complaints.some(c => c.body === "Parent B complaint")).toBeFalse();
 
     expect(resultB.complaints.length).toBeGreaterThanOrEqual(1);
-    expect(resultB.complaints.every(c => c.parentId === parentB.parent.id)).toBeTrue();
   });
 
   complaintTest("excludes soft-deleted complaints", async tx => {
@@ -253,7 +251,6 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
     expect(matched).toBeDefined();
     expect(matched?.parentName).toBe("AdminQ Parent");
     expect(matched?.studentName).toBe("AdminQ Student");
-    expect(matched?.parentId).toBe(parent.id);
     expect(typeof matched?.responseCount).toBe("number");
   });
 
@@ -451,8 +448,8 @@ describe("ComplaintRepository — getComplaintFiles", () => {
     const result = await ComplaintRepository.getComplaintFiles(complaint.id, tx);
 
     expect(result.length).toBe(2);
-    expect(result.some(f => f.filePath === file1.path)).toBeTrue();
-    expect(result.some(f => f.filePath === file2.path)).toBeTrue();
+    expect(result.some(f => f.publicUrl === file1.path)).toBeTrue();
+    expect(result.some(f => f.publicUrl === file2.path)).toBeTrue();
     expect(result.every(f => f.usageType === "attachment")).toBeTrue();
     expect(result.every(f => typeof f.fileId === "string")).toBeTrue();
   });
@@ -472,7 +469,7 @@ describe("ComplaintRepository — getComplaintFiles", () => {
     expect(result).toEqual([]);
   });
 
-  complaintTest("includes file metadata fields (id, path, usageType, createdAt)", async tx => {
+  complaintTest("includes file metadata fields (id, publicUrl, usageType, createdAt)", async tx => {
     const { parent } = await setupParentWithStudent(tx, "FileMeta");
 
     const complaint = await insertComplaint(tx, parent.id, { body: "Complaint with metadata" });
@@ -488,7 +485,7 @@ describe("ComplaintRepository — getComplaintFiles", () => {
 
     expect(result.length).toBe(1);
     expect(result[0].fileId).toBe(file.id);
-    expect(result[0].filePath).toBe(file.path);
+    expect(result[0].publicUrl).toBe(file.path);
     expect(result[0].usageType).toBe("evidence");
     expect(result[0].createdAt).toBeInstanceOf(Date);
   });

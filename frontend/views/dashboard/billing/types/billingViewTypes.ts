@@ -1,3 +1,4 @@
+import type { InvoiceType } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { InvoiceStatus } from "@/shared/lib/enum";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 import type { ParentBillingSummary, ParentInvoiceRow } from "./parentBillingTypes";
@@ -26,9 +27,9 @@ export interface StudentCreditRow {
   readonly id: string;
   readonly studentName: string;
   readonly parentEmail: string;
-  readonly planType: string;
-  readonly classesLeft: number;
-  readonly classesTotal: number;
+  readonly planType: InvoiceType | null;
+  readonly classesLeft: number | null;
+  readonly classesTotal: number | null;
   readonly status: StudentCreditStatus;
 }
 

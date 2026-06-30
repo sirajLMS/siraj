@@ -3,6 +3,7 @@ import { Box, Grid, Link, Stack, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { SectionPanel } from "@/frontend/components/ui";
+import { isSafeUrl } from "@/frontend/lib/safeRedirect";
 import type { ParentProfileData } from "../types/profile";
 
 interface ParentProfileDetailsProps {
@@ -15,15 +16,17 @@ const DetailItem: React.FC<{ readonly label: string; readonly value: string | nu
   isLink,
 }) => {
   const theme = useTheme();
+  const safeUrl = isSafeUrl(`https://${value}`);
   return (
     <Stack spacing={0.5}>
       <Typography variant="labelUppercase" sx={{ color: theme.palette.text.secondary }}>
         {label}
       </Typography>
-      {isLink ? (
+      {isLink && safeUrl ? (
         <Link
-          href={`https://${value}`}
+          href={safeUrl}
           target="_blank"
+          rel="noopener noreferrer"
           sx={{
             color: theme.palette.primary.main,
             textDecoration: "underline",

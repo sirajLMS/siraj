@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { demoLoginMutationDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useAuth } from "@/frontend/hooks/useAuth";
 import { useAuthToken } from "@/frontend/hooks/useAuthToken";
+import { isSafeRedirect } from "@/frontend/lib/safeRedirect";
 import { useRouter } from "@/shared/i18n/routing";
 import { LoginView } from "./LoginView";
 import type { LoginFormData } from "./schemas/loginSchema";
@@ -28,7 +29,7 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
   useEffect(() => {
     if (isAuthenticated) {
       const redirectUrl = searchParams.get("redirect");
-      const targetUrl = redirectUrl || "/dashboard";
+      const targetUrl = isSafeRedirect(redirectUrl);
       router.replace(targetUrl);
     }
   }, [isAuthenticated, router, searchParams]);
@@ -64,7 +65,7 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
       const { data } = await demoLoginMutation({ variables: { input: { groupSlug } } });
       if (data?.demoLogin?.token && data.demoLogin.user) {
         updateAuthToken(data.demoLogin.token);
-        globalThis.location.href = redirectUrl || "/dashboard";
+        globalThis.location.href = isSafeRedirect(redirectUrl);
       } else {
         setLoginResult({ type: "error", message: t("invalidCredentials") });
       }

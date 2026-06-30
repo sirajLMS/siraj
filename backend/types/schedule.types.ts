@@ -1,3 +1,4 @@
+import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/lib/enum";
 import type { SupportContactReturnType, TeacherImportantNoteReturnType } from "./teacher-notes.types";
 
 export type ClassSessionMetrics = {
@@ -47,7 +48,7 @@ export type FutureClassReturnType = {
   location: string;
   subjectId?: string | null;
   subjectName?: string | null;
-  classType?: string | null;
+  classType?: ClassType | null;
   zoomMeetingUrl?: string | null;
 };
 
@@ -68,11 +69,11 @@ export type WeeklyScheduleClassReturnType = {
   duration: number;
   startTime: string;
   day: string;
-  executionState: string | null;
-  outcome: string | null;
+  executionState: ClassExecutionState | null;
+  outcome: ClassOutcome | null;
   subjectId?: string | null;
   subjectName?: string | null;
-  classType?: string | null;
+  classType?: ClassType | null;
 };
 
 export type WeeklyScheduleGridReturnType = {

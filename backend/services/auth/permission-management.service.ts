@@ -13,7 +13,7 @@ export namespace PermissionManagementService {
 
   async function requireManageAccess(actorUserId: string, locale?: string): Promise<void> {
     const context = await PermissionsService.getUserContext(actorUserId);
-    if (!context.isSuperAdmin && !(context.permissions as string[]).includes(AppPermission.PERMISSION_GROUPS_MANAGE)) {
+    if (!context.isSuperAdmin && !context.permissions.includes(AppPermission.PERMISSION_GROUPS_MANAGE)) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("unauthorized"));
     }
@@ -21,7 +21,7 @@ export namespace PermissionManagementService {
 
   async function requireAssignAccess(actorUserId: string, locale?: string): Promise<void> {
     const context = await PermissionsService.getUserContext(actorUserId);
-    if (!context.isSuperAdmin && !(context.permissions as string[]).includes(AppPermission.PERMISSION_GROUPS_ASSIGN)) {
+    if (!context.isSuperAdmin && !context.permissions.includes(AppPermission.PERMISSION_GROUPS_ASSIGN)) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("unauthorized"));
     }

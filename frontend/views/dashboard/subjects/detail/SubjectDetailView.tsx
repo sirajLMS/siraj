@@ -20,7 +20,7 @@ function ResourceItem({ resource }: { readonly resource: SubjectResourceItem }) 
   const t = useTranslations("dashboard.subjects.detail");
   const handleDownload = () => {
     if (resource.filePath) {
-      window.open(`/api/storage/files/` + `${resource.filePath}`, `_blank`);
+      window.open(`/api/storage/files/` + `${resource.filePath}`, `_blank`, "noopener,noreferrer");
     }
   };
 

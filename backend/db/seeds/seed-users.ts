@@ -22,7 +22,8 @@ async function seedUserFromSpec(
   groupMap: Map<string, string>,
   now: Date
 ) {
-  const plainPassword = "plainPassword" in spec ? (spec.plainPassword ?? "12345678") : "12345678";
+  // eslint-disable-next-line sonarjs/no-hardcoded-passwords
+  const plainPassword = "plainPassword" in spec ? (spec.plainPassword ?? "Seed_Pass1!") : "Seed_Pass1!";
   const hashedPassword = await hashPassword(plainPassword);
 
   const [insertedUser] = await db

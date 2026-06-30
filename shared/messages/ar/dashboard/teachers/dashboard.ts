@@ -94,6 +94,8 @@ export const dashboard: TeacherDashboardLabels = {
   errors: {
     meetingUrlNotAvailable: "رابط الاجتماع غير متاح.",
     handbookUrlNotFound: "رابط دليل المعلم غير موجود.",
+    missedClassTime: "لا يمكن تفعيل الحصة خارج النافذة الزمنية المسموح بها",
+    activationFailed: "حدث خطأ أثناء تفعيل الحصة.",
   },
   supportRequestSubmitted: "تم إرسال طلب الدعم إلى {type}.",
 };

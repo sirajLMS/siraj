@@ -1,12 +1,19 @@
 import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
 import type { ClassSessionMetrics, PageInfo } from "@/backend/types";
-import type { ClassExecutionState, ClassOutcome, LeaveRequestStatus, RescheduleDateLabel } from "@/shared/lib/enum";
+import type {
+  ClassExecutionState,
+  ClassOutcome,
+  LeaveRequestStatus,
+  RescheduleDateLabel,
+  StudentStatus,
+} from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
   LeaveRequestStatusPothosObject,
   RescheduleDateLabelPothosObject,
+  StudentStatusPothosObject,
 } from "./enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
@@ -49,7 +56,7 @@ export type DailyScheduleListDefinition = {
   teacherTime: string;
   yourTime: string;
   duration: number;
-  status: string;
+  status: ClassExecutionState;
   outcome: ClassOutcome;
   executionState: ClassExecutionState;
   student: DailyScheduleListUserItem;
@@ -65,7 +72,7 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
     teacherTime: t.exposeString("teacherTime"),
     yourTime: t.exposeString("yourTime"),
     duration: t.exposeInt("duration"),
-    status: t.exposeString("status"),
+    status: t.expose("status", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
     student: t.expose("student", { type: DailyScheduleListUserItemObject }),
@@ -225,14 +232,14 @@ export type StatusTrackingScheduleRowDefinition = {
   studentId: string;
   studentName: string;
   studentInitials: string;
-  studentStatus: string;
+  studentStatus: StudentStatus;
   teacherId: string;
   teacherName: string;
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;
-  executionState: string;
-  outcome: string;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome;
   isFrozen: boolean;
 };
 
@@ -245,14 +252,14 @@ export const StatusTrackingScheduleRowPothosObject = StatusTrackingScheduleRowRe
     studentId: t.exposeString("studentId"),
     studentName: t.exposeString("studentName"),
     studentInitials: t.exposeString("studentInitials"),
-    studentStatus: t.exposeString("studentStatus"),
+    studentStatus: t.expose("studentStatus", { type: StudentStatusPothosObject }),
     teacherId: t.exposeString("teacherId"),
     teacherName: t.exposeString("teacherName"),
     scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
     scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
     durationMinutes: t.exposeInt("durationMinutes"),
-    executionState: t.exposeString("executionState"),
-    outcome: t.exposeString("outcome"),
+    executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
+    outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
     isFrozen: t.exposeBoolean("isFrozen"),
   }),
 });

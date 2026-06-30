@@ -6,9 +6,9 @@ export type ComplaintResponseInsert = typeof complaintResponses.$inferInsert;
 export type ComplaintResponseInput = Omit<
   ComplaintResponseInsert,
   // forbidden
-  "id" | "createdAt"
+  "id" | "createdAt" | "responderUserId" | "emailSent"
 >;
 
-export type ComplaintResponse = ComplaintResponseSelect & {
+export type ComplaintResponse = Omit<ComplaintResponseSelect, "responderUserId"> & {
   responderName?: string | null;
 };

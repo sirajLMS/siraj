@@ -25,7 +25,8 @@ export namespace TeacherNotesService {
 
   export async function createNote(
     userId: string,
-    input: TeacherImportantNoteSubmitInput & { createdByUserId: string },
+    input: TeacherImportantNoteSubmitInput,
+    teacherId: string | null,
     locale?: string
   ): Promise<TeacherImportantNoteReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_CREATE);
@@ -34,7 +35,7 @@ export namespace TeacherNotesService {
       throw new Error(tFunc("unauthorizedAction"));
     }
 
-    return await TeacherNotesRepository.createNote(input, locale);
+    return await TeacherNotesRepository.createNote({ ...input, createdByUserId: userId, teacherId }, locale);
   }
 
   export async function updateNote(

@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { classInstances, students, teacherAssignments, users } from "@/backend/db/schema";
+import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/shared/lib/enum";
 import { createMockClassInstance, setupTestEntities } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
@@ -23,8 +24,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
       const instance = await createMockClassInstance(tx, entities.student.id, entities.teacher.id, {
         scheduledStartAt: FUTURE_DATE,
         scheduledEndAt: FUTURE_END,
-        executionState: "NOT_ACTIVATED",
-        outcome: "PENDING",
+        executionState: ClassExecutionState.NOT_ACTIVATED,
+        outcome: ClassOutcome.PENDING,
         isFrozen: false,
         ...overrides,
       });
@@ -40,11 +41,11 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
 
         expect(found).toBeDefined();
         expect(found?.studentName).toBe(student.name);
-        expect(found?.studentStatus).toBe("REGULAR");
+        expect(found?.studentStatus).toBe(StudentStatus.REGULAR);
         expect(found?.teacherName).toBe(teacherUser.name);
-        expect(found?.executionState).toBe("NOT_ACTIVATED");
+        expect(found?.executionState).toBe(ClassExecutionState.NOT_ACTIVATED);
         expect(found?.isFrozen).toBe(false);
-        expect(found?.outcome).toBe("PENDING");
+        expect(found?.outcome).toBe(ClassOutcome.PENDING);
       });
     });
 
@@ -117,14 +118,14 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
         const early = await createMockClassInstance(tx, student.id, teacher.id, {
           scheduledStartAt: FUTURE_DATE,
           scheduledEndAt: FUTURE_END,
-          executionState: "NOT_ACTIVATED",
-          outcome: "PENDING",
+          executionState: ClassExecutionState.NOT_ACTIVATED,
+          outcome: ClassOutcome.PENDING,
         });
         const late = await createMockClassInstance(tx, student.id, teacher.id, {
           scheduledStartAt: LATER_START,
           scheduledEndAt: LATER_END,
-          executionState: "NOT_ACTIVATED",
-          outcome: "PENDING",
+          executionState: ClassExecutionState.NOT_ACTIVATED,
+          outcome: ClassOutcome.PENDING,
         });
 
         const rows = await SchedulingRepository.getStatusTrackingRows(FUTURE_DATE, { viewerTimezone: "UTC" }, tx);
@@ -156,8 +157,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
           await createMockClassInstance(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_1,
             scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-            executionState: "NOT_ACTIVATED",
-            outcome: "PENDING",
+            executionState: ClassExecutionState.NOT_ACTIVATED,
+            outcome: ClassOutcome.PENDING,
           })
         ).id;
 
@@ -165,8 +166,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
           await createMockClassInstance(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_2,
             scheduledEndAt: new Date(FUTURE_2.getTime() + CLASS_END_OFFSET),
-            executionState: "ACTIVATED",
-            outcome: "PENDING",
+            executionState: ClassExecutionState.ACTIVATED,
+            outcome: ClassOutcome.PENDING,
           })
         ).id;
 
@@ -174,8 +175,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
           await createMockClassInstance(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_1,
             scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-            executionState: "COMPLETED",
-            outcome: "TAKEN",
+            executionState: ClassExecutionState.COMPLETED,
+            outcome: ClassOutcome.TAKEN,
             actualStartAt: FUTURE_1,
             actualEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
           })
@@ -211,16 +212,16 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
         await createMockClassInstance(tx, sA.id, teacher.id, {
           scheduledStartAt: FUTURE_1,
           scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-          executionState: "NOT_ACTIVATED",
-          outcome: "PENDING",
+          executionState: ClassExecutionState.NOT_ACTIVATED,
+          outcome: ClassOutcome.PENDING,
         });
 
         const otherId = (
           await createMockClassInstance(tx, sB.id, teacher.id, {
             scheduledStartAt: FUTURE_1,
             scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-            executionState: "NOT_ACTIVATED",
-            outcome: "PENDING",
+            executionState: ClassExecutionState.NOT_ACTIVATED,
+            outcome: ClassOutcome.PENDING,
           })
         ).id;
 
@@ -252,8 +253,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
           await createMockClassInstance(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_1,
             scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-            executionState: "NOT_ACTIVATED",
-            outcome: "PENDING",
+            executionState: ClassExecutionState.NOT_ACTIVATED,
+            outcome: ClassOutcome.PENDING,
           })
         ).id;
 
@@ -293,8 +294,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
         await createMockClassInstance(tx, studentId, teacherId, {
           scheduledStartAt: scheduledAt,
           scheduledEndAt: new Date(scheduledAt.getTime() + CLASS_END_OFFSET),
-          executionState: "NOT_ACTIVATED",
-          outcome: "PENDING",
+          executionState: ClassExecutionState.NOT_ACTIVATED,
+          outcome: ClassOutcome.PENDING,
           isFrozen: true,
         })
       ).id;
@@ -329,8 +330,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
         await createMockClassInstance(tx, student.id, teacher.id, {
           scheduledStartAt: FUTURE_1,
           scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-          executionState: "NOT_ACTIVATED",
-          outcome: "PENDING",
+          executionState: ClassExecutionState.NOT_ACTIVATED,
+          outcome: ClassOutcome.PENDING,
           isFrozen: false,
         });
 
@@ -376,8 +377,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
           await createMockClassInstance(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_1,
             scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-            executionState: "NOT_ACTIVATED",
-            outcome: "PENDING",
+            executionState: ClassExecutionState.NOT_ACTIVATED,
+            outcome: ClassOutcome.PENDING,
             isFrozen: false,
           })
         ).id;
@@ -422,8 +423,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
           await createMockClassInstance(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_1,
             scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-            executionState: "NOT_ACTIVATED",
-            outcome: "PENDING",
+            executionState: ClassExecutionState.NOT_ACTIVATED,
+            outcome: ClassOutcome.PENDING,
           })
         ).id;
 
@@ -431,8 +432,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
           await createMockClassInstance(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_2,
             scheduledEndAt: new Date(FUTURE_2.getTime() + CLASS_END_OFFSET),
-            executionState: "ACTIVATED",
-            outcome: "PENDING",
+            executionState: ClassExecutionState.ACTIVATED,
+            outcome: ClassOutcome.PENDING,
           })
         ).id;
 
@@ -440,8 +441,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
           await createMockClassInstance(tx, student.id, teacher.id, {
             scheduledStartAt: PAST_DATE,
             scheduledEndAt: new Date(PAST_DATE.getTime() + CLASS_END_OFFSET),
-            executionState: "COMPLETED",
-            outcome: "TAKEN",
+            executionState: ClassExecutionState.COMPLETED,
+            outcome: ClassOutcome.TAKEN,
             actualStartAt: PAST_DATE,
             actualEndAt: new Date(PAST_DATE.getTime() + CLASS_END_OFFSET),
           })
@@ -469,8 +470,8 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
         await createMockClassInstance(tx, student.id, teacher.id, {
           scheduledStartAt: FUTURE_1,
           scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-          executionState: "NOT_ACTIVATED",
-          outcome: "PENDING",
+          executionState: ClassExecutionState.NOT_ACTIVATED,
+          outcome: ClassOutcome.PENDING,
         });
 
         const result = await SchedulingRepository.getStudentFutureClasses(student.id, FROM_DATE, tx);
@@ -489,16 +490,16 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
           await createMockClassInstance(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_2,
             scheduledEndAt: new Date(FUTURE_2.getTime() + CLASS_END_OFFSET),
-            executionState: "NOT_ACTIVATED",
-            outcome: "PENDING",
+            executionState: ClassExecutionState.NOT_ACTIVATED,
+            outcome: ClassOutcome.PENDING,
           })
         ).id;
         const earlierId = (
           await createMockClassInstance(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_1,
             scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-            executionState: "NOT_ACTIVATED",
-            outcome: "PENDING",
+            executionState: ClassExecutionState.NOT_ACTIVATED,
+            outcome: ClassOutcome.PENDING,
           })
         ).id;
 

@@ -23,7 +23,7 @@ import type {
   WorkshopPromoReturnType,
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
-import type { ParentStatus } from "@/shared/lib/enum";
+import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 export namespace ParentRepository {
@@ -560,9 +560,9 @@ export namespace ParentRepository {
         scheduledStartAt: r.scheduledStartAt,
         scheduledEndAt: r.scheduledEndAt,
         durationMinutes: r.durationMinutes,
-        bookingStatus: r.isRescheduled ? ("rescheduled" as const) : ("confirmed" as const),
-        executionState: r.executionState,
-        outcome: r.outcome,
+        bookingStatus: r.isRescheduled ? ("rescheduled" as BookingStatus) : ("confirmed" as BookingStatus),
+        executionState: r.executionState as ClassExecutionState,
+        outcome: r.outcome as ClassOutcome,
         zoomMeetingUrl: r.zoomMeetingUrl ?? null,
         classTimeFormatted: formatInstantInTimezone(r.scheduledStartAt, viewerTimezone, locale),
       };

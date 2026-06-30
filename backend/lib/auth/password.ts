@@ -1,6 +1,37 @@
 import bcrypt from "bcryptjs";
+import { getBackendTranslations } from "@/backend/lib/intl";
 
 const SALT_ROUNDS = 12;
+
+/**
+ * Validate password strength/complexity.
+ * Enforces: min 8 chars, uppercase, lowercase, digit, special character.
+ * Returns i18n-friendly error messages for each failed rule.
+ */
+export async function validatePasswordStrength(password: string, locale?: string): Promise<void> {
+  const t = await getBackendTranslations({ locale, namespace: "errors" });
+  const errors: string[] = [];
+
+  if (password.length < 8) {
+    errors.push(t("auth.passwordMinLength"));
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push(t("auth.passwordRequiresUppercase"));
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push(t("auth.passwordRequiresLowercase"));
+  }
+  if (!/\d/.test(password)) {
+    errors.push(t("auth.passwordRequiresDigit"));
+  }
+  if (!/[!@#$%^&*()_+\-=[\]{}|;:',.<>?/]/.test(password)) {
+    errors.push(t("auth.passwordRequiresSpecialChar"));
+  }
+
+  if (errors.length > 0) {
+    throw new Error(errors.join(" "));
+  }
+}
 
 /**
  * Hash a plain text password

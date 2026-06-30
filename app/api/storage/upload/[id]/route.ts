@@ -24,7 +24,11 @@ function validateHeaders(request: NextRequest, signedUrl: SignedUrlData): NextRe
     return NextResponse.json({ error: `Content-Type mismatch. Expected: ${signedUrl.contentType}` }, { status: 400 });
   }
 
-  if (contentLength && BigInt(contentLength) > signedUrl.fileSize) {
+  if (!contentLength) {
+    return NextResponse.json({ error: "Content-Length header is required" }, { status: 411 });
+  }
+
+  if (BigInt(contentLength) > signedUrl.fileSize) {
     return NextResponse.json(
       { error: `Content-Length exceeds declared size of ${signedUrl.fileSize} bytes` },
       { status: 413 }

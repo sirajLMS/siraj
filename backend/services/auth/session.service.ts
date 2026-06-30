@@ -1,17 +1,11 @@
 import { SessionRepository } from "@/backend/db/repo";
 import { UserRepository } from "@/backend/db/repo/user.repository";
-import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { CurrentUserProfile, SessionEntity } from "@/backend/types";
 
 export namespace SessionService {
   export async function validateSession(sessionId: string): Promise<SessionEntity | null> {
-    try {
-      return await SessionRepository.validate(sessionId);
-    } catch (error) {
-      logger.error("Failed to validate session in SessionService", { sessionId, error });
-      return null;
-    }
+    return await SessionRepository.validate(sessionId);
   }
 
   export async function getCurrentUserProfile(userId: string): Promise<CurrentUserProfile> {

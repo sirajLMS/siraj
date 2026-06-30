@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { PermissionManagementRepository } from "@/backend/db/repo";
 import { permissionGroups, permissions } from "@/backend/db/schema";
-import { AppPermission } from "@/shared/lib/enum";
+import { AppPermission, OverrideState } from "@/shared/lib/enum";
 import { getErrorMessage } from "@/shared/utils/error";
 import type { DBTransaction } from "../../db.types";
 import { createTestPermission } from "../entity-setup";
@@ -370,8 +370,8 @@ describe("PermissionManagementRepository", () => {
       await PermissionManagementRepository.setUserOverrides(
         user.id,
         [
-          { permissionId: perm1.id, state: "GRANTED" },
-          { permissionId: perm2.id, state: "DENIED" },
+          { permissionId: perm1.id, state: OverrideState.GRANTED },
+          { permissionId: perm2.id, state: OverrideState.DENIED },
         ],
         undefined,
         tx
@@ -382,16 +382,16 @@ describe("PermissionManagementRepository", () => {
 
       const o1 = overrides.find(o => o.permissionId === perm1.id);
       expect(o1).toBeDefined();
-      expect(o1?.state).toBe("GRANTED");
+      expect(o1?.state).toBe(OverrideState.GRANTED);
 
       const o2 = overrides.find(o => o.permissionId === perm2.id);
       expect(o2).toBeDefined();
-      expect(o2?.state).toBe("DENIED");
+      expect(o2?.state).toBe(OverrideState.DENIED);
 
       // Replace overrides (clear and insert)
       await PermissionManagementRepository.setUserOverrides(
         user.id,
-        [{ permissionId: perm1.id, state: "DENIED" }],
+        [{ permissionId: perm1.id, state: OverrideState.DENIED }],
         undefined,
         tx
       );
@@ -399,7 +399,7 @@ describe("PermissionManagementRepository", () => {
       const finalOverrides = await PermissionManagementRepository.getUserOverrides(user.id, tx);
       expect(finalOverrides.length).toBe(1);
       expect(finalOverrides[0].permissionId).toBe(perm1.id);
-      expect(finalOverrides[0].state).toBe("DENIED");
+      expect(finalOverrides[0].state).toBe(OverrideState.DENIED);
     });
 
     testRepoError("getUserOverrides should throw on database error", () =>

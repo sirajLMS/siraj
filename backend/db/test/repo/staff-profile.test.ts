@@ -7,6 +7,7 @@ import { StaffProfileRepository } from "@/backend/db/repo";
 import type { ManagerProfileUpdateInput } from "@/backend/db/repo/staff-profile.repository";
 import { permissionGroups, staffProfiles, userPermissionGroups } from "@/backend/db/schema";
 import { PaginationArgs } from "@/backend/types";
+import { AccountStatus } from "@/shared/lib/enum";
 import { createTestUser } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
@@ -44,7 +45,7 @@ async function createStaffUser(
       userId: user.id,
       phone: overrides.phone ?? null,
       skypeId: overrides.skypeId ?? null,
-      status: "ACTIVATED",
+      status: AccountStatus.ACTIVATED,
       createdAt: now,
       updatedAt: now,
     })
@@ -171,9 +172,9 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
 
   staffTest("filters by active status", async tx => {
     const activeUser = await createTestUser(tx, { name: "ActiveS", email: `active-s-${randomUUID()}@t.com` });
-    await insertStaffProfile(tx, activeUser.id, "ACTIVATED");
+    await insertStaffProfile(tx, activeUser.id, AccountStatus.ACTIVATED);
     const deactivatedUser = await createTestUser(tx, { name: "DeactivatedS", email: `deact-s-${randomUUID()}@t.com` });
-    await insertStaffProfile(tx, deactivatedUser.id, "DEACTIVATED");
+    await insertStaffProfile(tx, deactivatedUser.id, AccountStatus.DEACTIVATED);
 
     const result = await StaffProfileRepository.getManagerDirectory(null, { statusFilter: "active" }, tx);
     expect(result.rows.find(r => r.id === activeUser.id)).toBeDefined();
@@ -182,12 +183,12 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
 
   staffTest("filters by offline status", async tx => {
     const activeUser = await createTestUser(tx, { name: "ActiveOff", email: `active-off-${randomUUID()}@t.com` });
-    await insertStaffProfile(tx, activeUser.id, "ACTIVATED");
+    await insertStaffProfile(tx, activeUser.id, AccountStatus.ACTIVATED);
     const deactivatedUser = await createTestUser(tx, {
       name: "DeactivatedOff",
       email: `deact-off-${randomUUID()}@t.com`,
     });
-    await insertStaffProfile(tx, deactivatedUser.id, "DEACTIVATED");
+    await insertStaffProfile(tx, deactivatedUser.id, AccountStatus.DEACTIVATED);
 
     const result = await StaffProfileRepository.getManagerDirectory(null, { statusFilter: "offline" }, tx);
     expect(result.rows.find(r => r.id === activeUser.id)).toBeUndefined();
@@ -299,15 +300,15 @@ describe("StaffProfileRepository — updateManagerProfile", () => {
       phone: "+4444444444",
     });
 
-    const result = await updateProfile(tx, profile.id, { status: "DEACTIVATED", statusIsSet: true });
-    expect(result.status).toBe("DEACTIVATED");
+    const result = await updateProfile(tx, profile.id, { status: AccountStatus.DEACTIVATED, statusIsSet: true });
+    expect(result.status).toBe(AccountStatus.DEACTIVATED);
   });
 
   staffTest("defaults status to ACTIVATED when statusIsSet is true and status is null", async tx => {
     const { profile } = await createStaffUser(tx, "StatusDefault");
 
     const result = await updateProfile(tx, profile.id, { status: null, statusIsSet: true });
-    expect(result.status).toBe("ACTIVATED");
+    expect(result.status).toBe(AccountStatus.ACTIVATED);
   });
 
   staffTest("throws error for non-existent staff profile ID", async tx => {
@@ -389,12 +390,12 @@ describe("StaffProfileRepository — getOnboardingMetrics", () => {
 
   staffTest("counts active and deactivated staff correctly", async tx => {
     const activeUser = await createTestUser(tx, { name: "ActiveOM", email: `active-om-${randomUUID()}@t.com` });
-    await insertStaffProfile(tx, activeUser.id, "ACTIVATED");
+    await insertStaffProfile(tx, activeUser.id, AccountStatus.ACTIVATED);
     const deactivatedUser = await createTestUser(tx, {
       name: "DeactivatedOM",
       email: `deact-om-${randomUUID()}@t.com`,
     });
-    await insertStaffProfile(tx, deactivatedUser.id, "DEACTIVATED");
+    await insertStaffProfile(tx, deactivatedUser.id, AccountStatus.DEACTIVATED);
 
     const result = await StaffProfileRepository.getOnboardingMetrics(tx);
     expect(result.activeStaff).toBeGreaterThanOrEqual(1);
@@ -414,7 +415,7 @@ describe("StaffProfileRepository — create", () => {
     const result = await StaffProfileRepository.create(
       {
         userId: user.id,
-        status: "ACTIVATED",
+        status: AccountStatus.ACTIVATED,
         phone: "+1234567890",
         skypeId: "test_skype",
         createdAt: new Date(),
@@ -425,7 +426,7 @@ describe("StaffProfileRepository — create", () => {
 
     expect(result.id).toBeDefined();
     expect(result.userId).toBe(user.id);
-    expect(result.status).toBe("ACTIVATED");
+    expect(result.status).toBe(AccountStatus.ACTIVATED);
     expect(result.phone).toBe("+1234567890");
     expect(result.skypeId).toBe("test_skype");
   });
@@ -434,14 +435,14 @@ describe("StaffProfileRepository — create", () => {
     const user = await createTestUser(tx, { name: "Dup Staff", email: `dups-${randomUUID()}@test.com` });
 
     await StaffProfileRepository.create(
-      { userId: user.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
+      { userId: user.id, status: AccountStatus.ACTIVATED, createdAt: new Date(), updatedAt: new Date() },
       tx
     );
 
     let error: unknown = null;
     try {
       await StaffProfileRepository.create(
-        { userId: user.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
+        { userId: user.id, status: AccountStatus.ACTIVATED, createdAt: new Date(), updatedAt: new Date() },
         tx
       );
     } catch (e) {
@@ -465,7 +466,7 @@ describe("StaffProfileRepository — create", () => {
     let error: unknown = null;
     try {
       await StaffProfileRepository.create(
-        { userId: randomUUID(), status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
+        { userId: randomUUID(), status: AccountStatus.ACTIVATED, createdAt: new Date(), updatedAt: new Date() },
         mockTx
       );
     } catch (e) {
@@ -525,7 +526,7 @@ describe("StaffProfileRepository — create", () => {
     await runInRollback(async outerTx => {
       const u = await createTestUser(outerTx, { name: "Rollback User", email: `rb-${randomUUID()}@test.com` });
       const profile = await StaffProfileRepository.create(
-        { userId: u.id, status: "ACTIVATED", createdAt: new Date(), updatedAt: new Date() },
+        { userId: u.id, status: AccountStatus.ACTIVATED, createdAt: new Date(), updatedAt: new Date() },
         outerTx
       );
       createdStaffId = profile.id;

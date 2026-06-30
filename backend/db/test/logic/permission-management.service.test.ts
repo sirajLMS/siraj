@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { eq, like } from "drizzle-orm";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
 import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
-import { AppPermission } from "@/shared/lib/enum";
+import { AppPermission, OverrideState, UserRole } from "@/shared/lib/enum";
 import { getErrorMessage } from "@/shared/utils/error";
 import { db } from "../../drizzleDb";
 import { permissionGroups, permissions, users } from "../../schema";
@@ -38,28 +38,28 @@ describe("PermissionManagementService Business Logic", () => {
     permissions: [AppPermission.PERMISSION_GROUPS_MANAGE],
     permissionGroups: ["admin_group"],
     isSuperAdmin: false,
-    role: "Admin",
+    role: UserRole.ACADEMY_ADMIN,
   });
 
   const assignContext = (): UserPermissionContext => ({
     permissions: [AppPermission.PERMISSION_GROUPS_ASSIGN],
     permissionGroups: ["assigner_group"],
     isSuperAdmin: false,
-    role: "Assigner",
+    role: UserRole.STAFF,
   });
 
   const userContext = (): UserPermissionContext => ({
     permissions: [],
     permissionGroups: [],
     isSuperAdmin: false,
-    role: "User",
+    role: UserRole.USER,
   });
 
   const superAdminContext = (): UserPermissionContext => ({
     permissions: [],
     permissionGroups: [],
     isSuperAdmin: true,
-    role: "SuperAdmin",
+    role: UserRole.SUPER_ADMIN,
   });
 
   beforeAll(async () => {
@@ -462,16 +462,16 @@ describe("PermissionManagementService Business Logic", () => {
       await PermissionManagementService.updateUserOverrides(adminUser.id, {
         userId: regularUser.id,
         overrides: [
-          { permissionId: perm1Id, state: "GRANTED" },
-          { permissionId: perm2Id, state: "DENIED" },
+          { permissionId: perm1Id, state: OverrideState.GRANTED },
+          { permissionId: perm2Id, state: OverrideState.DENIED },
         ],
       });
 
       // List overrides
       const overrides = await PermissionManagementService.listUserOverrides(adminUser.id, regularUser.id);
       expect(overrides.length).toBe(2);
-      expect(overrides.find(o => o.permissionId === perm1Id)?.state).toBe("GRANTED");
-      expect(overrides.find(o => o.permissionId === perm2Id)?.state).toBe("DENIED");
+      expect(overrides.find(o => o.permissionId === perm1Id)?.state).toBe(OverrideState.GRANTED);
+      expect(overrides.find(o => o.permissionId === perm2Id)?.state).toBe(OverrideState.DENIED);
 
       // Verify effective permissions combining overrides
       const effective = await PermissionManagementService.getEffectiveUserPermissions(adminUser.id, regularUser.id);

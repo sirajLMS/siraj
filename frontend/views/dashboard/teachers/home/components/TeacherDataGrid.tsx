@@ -4,6 +4,7 @@ import type { GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui
 import { useTranslations } from "next-intl";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import type { TeacherDirectoryRow } from "@/frontend/graphql/generated/gql/graphql-types";
+import { isSafeUrl } from "@/frontend/lib/safeRedirect";
 import { useRouter } from "@/shared/i18n/routing";
 
 interface TeacherDataGridProps {
@@ -135,8 +136,9 @@ export function TeacherDataGrid({
         }
         return (
           <Link
-            href={params.value as string}
+            href={isSafeUrl(params.value as string)}
             target="_blank"
+            rel="noopener noreferrer"
             underline="hover"
             variant="labelMd"
             sx={theme => ({

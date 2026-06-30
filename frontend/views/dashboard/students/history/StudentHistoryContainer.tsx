@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo } from "react";
 import { studentClassHistoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-history.documents";
 import { useStudentHistoryStore } from "@/frontend/stores/studentHistoryStore";
+import { logger } from "@/frontend/utils/logger";
 import { StudentHistoryView } from "./StudentHistoryView";
 import type { ClassSession, StudentHistoryMetrics } from "./types";
 import { mapStatusToAttendance } from "./types";
@@ -30,7 +31,8 @@ export function StudentHistoryContainer() {
 
   useEffect(() => {
     if (error) {
-      notifications.show(t("errors.loadFailed", { message: error.message }), {
+      logger.error("Error loading student history:", { error });
+      notifications.show(t("errors.loadFailed"), {
         severity: "error",
         autoHideDuration: 4000,
       });

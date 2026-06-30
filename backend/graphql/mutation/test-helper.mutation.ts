@@ -47,7 +47,7 @@ if (process.env.NODE_ENV !== "production") {
   gqlSchemaBuilder.mutationField("createTestEntities", t =>
     t.field({
       type: TestEntitiesType,
-      authScopes: { loggedIn: true },
+      authScopes: { superAdmin: true },
       args: {
         prefix: t.arg.string({ required: true }),
         classesRemaining: t.arg.int({ required: false }),
@@ -61,7 +61,7 @@ if (process.env.NODE_ENV !== "production") {
   gqlSchemaBuilder.mutationField("cleanupTestEntities", t =>
     t.field({
       type: "Boolean",
-      authScopes: { loggedIn: true },
+      authScopes: { superAdmin: true },
       args: {
         studentUserId: t.arg.string({ required: true }),
         teacherUserId: t.arg.string({ required: true }),
@@ -79,7 +79,7 @@ if (process.env.NODE_ENV !== "production") {
   gqlSchemaBuilder.mutationField("createTestGroupClass", t =>
     t.field({
       type: TestGroupClassType,
-      authScopes: { loggedIn: true },
+      authScopes: { superAdmin: true },
       args: {
         classInstanceId: t.arg.string({ required: true }),
         teacherName: t.arg.string({ required: true }),
@@ -93,7 +93,7 @@ if (process.env.NODE_ENV !== "production") {
   gqlSchemaBuilder.mutationField("cleanupTestGroupClass", t =>
     t.field({
       type: "Boolean",
-      authScopes: { loggedIn: true },
+      authScopes: { superAdmin: true },
       args: {
         groupClassId: t.arg.string({ required: true }),
       },
@@ -118,7 +118,7 @@ if (process.env.NODE_ENV !== "production") {
   gqlSchemaBuilder.mutationField("createTestSuperAdmin", t =>
     t.field({
       type: TestSuperAdminType,
-      authScopes: { loggedIn: true },
+      authScopes: { superAdmin: true },
       args: {
         prefix: t.arg.string({ required: true }),
       },
@@ -131,7 +131,7 @@ if (process.env.NODE_ENV !== "production") {
   gqlSchemaBuilder.mutationField("cleanupTestSuperAdmin", t =>
     t.field({
       type: "Boolean",
-      authScopes: { loggedIn: true },
+      authScopes: { superAdmin: true },
       args: {
         userId: t.arg.string({ required: true }),
       },
@@ -144,7 +144,7 @@ if (process.env.NODE_ENV !== "production") {
   gqlSchemaBuilder.mutationField("cleanupTestManager", t =>
     t.field({
       type: "Boolean",
-      authScopes: { loggedIn: true },
+      authScopes: { superAdmin: true },
       args: {
         userId: t.arg.string({ required: true }),
       },

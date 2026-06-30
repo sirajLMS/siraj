@@ -1,4 +1,5 @@
 import type { staffProfiles } from "@/backend/db/schema";
+import type { AccountStatus } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
 export type StaffProfileEntity = typeof staffProfiles.$inferSelect;
@@ -32,7 +33,7 @@ export interface ManagerDirectoryRow {
   readonly avatarUrl: string | null;
   readonly phone: string | null;
   readonly skypeId: string | null;
-  readonly status: string;
+  readonly status: AccountStatus;
   readonly roleSlug: string | null;
   readonly roleName: string | null;
 }

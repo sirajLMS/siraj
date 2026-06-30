@@ -1,4 +1,4 @@
-import type { ClassType } from "@/shared/lib/enum";
+import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/lib/enum";
 
 export type ClassInstancePerformanceReturnType = {
   id: string;
@@ -39,7 +39,7 @@ export type ClassInstanceDetailReturnType = {
   startTime: string;
   endTime: string;
   durationMinutes: number;
-  status: string;
+  status: ClassExecutionState;
   remarks: string | null;
   hasTimezoneMismatch: boolean;
   studentTimezone: string | null;
@@ -47,8 +47,8 @@ export type ClassInstanceDetailReturnType = {
   zoomMeetingUrl: string | null;
   payrollCredited: boolean;
   isRescheduled: boolean;
-  executionState: string;
-  outcome: string;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome;
   student: ClassInstanceStudentReturnType;
   teacher: ClassInstanceTeacherReturnType;
   performance: ClassInstancePerformanceReturnType | null;

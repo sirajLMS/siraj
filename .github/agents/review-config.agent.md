@@ -102,9 +102,17 @@ Scan all changed files in scope and check for each of the following violations. 
 - Missing `bun install` step before build/test.
 - Incorrect Node.js version or missing Bun setup step.
 
-### Environment Variables & Secrets
+## Excluded Paths
 
-- Hardcoded secrets, API keys, tokens, or passwords in any config file.
+The following paths are internal development tooling and should be **excluded from security findings**:
+- `scripts/health/` — SonarQube/CodeScene health check tooling (dev-only, not production code)
+- `scripts/lint-queue-server.ts` — Dev-only lint queue server (runs locally, not in production)
+
+Do NOT flag security issues (plaintext tokens, command injection, missing auth) in these files. Convention issues (wrong commands, broken scripts) are still valid findings.
+
+## Environment Variables & Secrets
+
+- Hardcoded secrets, API keys, tokens, or passwords in **non-excluded** config files.
 - Environment variables accessed via `process.env` without validation through `env.ts` or equivalent env validation module.
 - `.env` files committed to the repository.
 - Sensitive values in `next.config.ts` or other config files not using environment variable references.

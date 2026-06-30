@@ -8,6 +8,7 @@ import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MutationLoginArgs, User } from "@/frontend/graphql/generated/gql/graphql-types";
 import * as Document from "@/frontend/graphql/sharedDocuments";
+import { isSafeRedirect } from "@/frontend/lib/safeRedirect";
 import { AuthContext } from "../../context/AuthContext";
 import { useAuthToken } from "../../hooks/useAuthToken";
 import logger from "../../lib/logger";
@@ -113,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // for security reasons (prevents XSS attacks).
 
           // Perform a hard redirect to break any race conditions and ensure a clean state.
-          globalThis.location.href = redirectUrl || "/dashboard";
+          globalThis.location.href = isSafeRedirect(redirectUrl);
           return true;
         } else {
           logger.error({ caller: "AuthProvider.login" }, "Login failed: No token or user in response");

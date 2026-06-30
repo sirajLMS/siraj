@@ -51,16 +51,62 @@ class ClientLogger {
     return colors[level] || "#888";
   }
 
+  private readonly PII_KEYS: ReadonlySet<string> = new Set([
+    "email",
+    "phone",
+    "phoneNumber",
+    "mobile",
+    "address",
+    "streetAddress",
+    "city",
+    "zipCode",
+    "postalCode",
+    "nationalId",
+    "nationalIdNumber",
+    "idNumber",
+    "passportNumber",
+    "ssn",
+    "socialSecurityNumber",
+    "dateOfBirth",
+    "dob",
+    "birthDate",
+    "creditCard",
+    "cardNumber",
+    "cvv",
+    "password",
+    "secret",
+    "token",
+    "accessToken",
+    "refreshToken",
+  ]);
+
+  private sanitizeObject(obj: Record<string, unknown>): Record<string, unknown> {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (this.PII_KEYS.has(key)) {
+        sanitized[key] = "[REDACTED]";
+      } else if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+        sanitized[key] = this.sanitizeObject(value as Record<string, unknown>);
+      } else {
+        sanitized[key] = value;
+      }
+    }
+    return sanitized;
+  }
+
   private serializeForAPI(...args: unknown[]): string {
-    // Convert args to a string for API logging only
     return args
       .map(arg => {
         if (typeof arg === "string") return arg;
-        if (arg instanceof Error) return `${arg.name}: ${arg.message}`;
+        if (arg instanceof Error) return `${arg.name}: [REDACTED]`;
         try {
-          return JSON.stringify(arg);
+          const parsed = JSON.parse(JSON.stringify(arg));
+          if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+            return JSON.stringify(this.sanitizeObject(parsed as Record<string, unknown>));
+          }
+          return JSON.stringify(parsed);
         } catch {
-          return String(arg);
+          return "[non-serializable]";
         }
       })
       .join(" ");

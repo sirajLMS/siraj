@@ -1,32 +1,16 @@
 import type {
   PageInfo,
   ParentDashboardMetricsType,
+  ParentDashboardScheduleRow,
   StudentProgressReturnType,
   WorkshopPromoReturnType,
 } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { BookingStatusPothosObject, ClassExecutionStatePothosObject, ClassOutcomePothosObject } from "./enum.pothos";
 import { PageInfoObject } from "./pagination.objects";
 
-export type ParentDashboardScheduleRowDefinition = {
-  id: string;
-  studentId: string;
-  studentName: string;
-  studentInitials: string;
-  studentAvatarUrl: string | null;
-  teacherId: string;
-  teacherName: string;
-  scheduledStartAt: Date;
-  scheduledEndAt: Date;
-  durationMinutes: number;
-  bookingStatus: string;
-  executionState: string;
-  outcome: string;
-  zoomMeetingUrl: string | null;
-  classTimeFormatted: string;
-};
-
 const ParentDashboardScheduleRowRef =
-  gqlSchemaBuilder.objectRef<ParentDashboardScheduleRowDefinition>("ParentDashboardScheduleRow");
+  gqlSchemaBuilder.objectRef<ParentDashboardScheduleRow>("ParentDashboardScheduleRow");
 
 export const ParentDashboardScheduleRowPothosObject = ParentDashboardScheduleRowRef.implement({
   fields: t => ({
@@ -40,9 +24,9 @@ export const ParentDashboardScheduleRowPothosObject = ParentDashboardScheduleRow
     scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
     scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
     durationMinutes: t.exposeInt("durationMinutes"),
-    bookingStatus: t.exposeString("bookingStatus"),
-    executionState: t.exposeString("executionState"),
-    outcome: t.exposeString("outcome"),
+    bookingStatus: t.expose("bookingStatus", { type: BookingStatusPothosObject }),
+    executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
+    outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
     zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
     classTimeFormatted: t.exposeString("classTimeFormatted"),
   }),
@@ -50,7 +34,7 @@ export const ParentDashboardScheduleRowPothosObject = ParentDashboardScheduleRow
 
 export type ParentDashboardScheduleResultDefinition = {
   id: string;
-  rows: ParentDashboardScheduleRowDefinition[];
+  rows: ParentDashboardScheduleRow[];
   totalCount: number;
   pageInfo: PageInfo | null;
 };

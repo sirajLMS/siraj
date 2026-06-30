@@ -111,7 +111,6 @@ describe("ComplaintResponseRepository — createResponse", () => {
     );
 
     expect(result).toBeDefined();
-    expect(result.responderUserId).toBeNull();
   });
 
   responseTest("fails with invalid complaintId (FK violation)", async tx => {
@@ -119,6 +118,7 @@ describe("ComplaintResponseRepository — createResponse", () => {
       ComplaintResponseRepository.createResponse(
         {
           complaintId: "00000000-0000-0000-0000-000000000000",
+          responderUserId: "00000000-0000-0000-0000-000000000000",
           body: "Should fail",
           emailSent: false,
         },

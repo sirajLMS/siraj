@@ -7,13 +7,14 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type StudentStatus as GqlStudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import {
   changeStudentStatusMutationDocument,
   reassignStudentTeacherMutationDocument,
 } from "@/frontend/graphql/sharedDocuments/student-lifecycle.documents";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
+import { logger } from "@/frontend/utils/logger";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/views/dashboard/students/home/types";
 import { useRouter } from "@/shared/i18n/routing";
 import type { StudentStatus } from "@/shared/lib/enum";
@@ -27,6 +28,7 @@ import type {
 
 export function TeacherReassignmentContainer() {
   const t = useTranslations("dashboard.teacherReassignment");
+  const tc = useTranslations("common");
   const searchParams = useSearchParams();
   const studentId = searchParams.get("studentId") ?? "";
   const notifications = useNotifications();
@@ -54,7 +56,8 @@ export function TeacherReassignmentContainer() {
       notifications.show(t("actions.reassignSuccess"), { severity: "success", autoHideDuration: 4000 });
     },
     onError: mutationError => {
-      notifications.show(mutationError.message, { severity: "error", autoHideDuration: 5000 });
+      logger.error("Teacher reassignment failed:", { mutationError });
+      notifications.show(tc("operationFailed"), { severity: "error", autoHideDuration: 5000 });
     },
     refetchQueries: [{ query: studentByIdQueryDocument, variables: { studentId } }],
   });
@@ -64,7 +67,8 @@ export function TeacherReassignmentContainer() {
       notifications.show(t("actions.statusChangeSuccess"), { severity: "success", autoHideDuration: 4000 });
     },
     onError: mutationError => {
-      notifications.show(mutationError.message, { severity: "error", autoHideDuration: 5000 });
+      logger.error("Student status change failed:", { mutationError });
+      notifications.show(tc("operationFailed"), { severity: "error", autoHideDuration: 5000 });
     },
     refetchQueries: [{ query: studentByIdQueryDocument, variables: { studentId } }],
   });
@@ -125,7 +129,7 @@ export function TeacherReassignmentContainer() {
       await changeStatus({
         variables: {
           studentId: input.studentId,
-          newStatus: input.newStatus,
+          newStatus: input.newStatus as unknown as GqlStudentStatus,
           expectedVersion: input.expectedVersion ?? versionRef.current,
         },
       });
@@ -150,8 +154,8 @@ export function TeacherReassignmentContainer() {
   }
 
   if (studentError || teachersError) {
-    const msg = studentError?.message ?? teachersError?.message ?? "Unknown error";
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{msg}</Typography>;
+    logger.error("Error loading teacher reassignment data:", { studentError, teachersError });
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc("loadFailed")}</Typography>;
   }
 
   if (!student) {

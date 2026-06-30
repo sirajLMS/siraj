@@ -5,7 +5,8 @@ import { SessionRepository } from "@/backend/db/repo";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { generateAccessToken, generateRefreshToken } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
-import type { UserEntity } from "@/backend/types";
+import type { SafeUser, UserEntity } from "@/backend/types";
+import { AuthUtils } from "@/backend/utils";
 
 export namespace DemoAuthService {
   /**
@@ -43,7 +44,7 @@ export namespace DemoAuthService {
    * @returns The user entity along with newly generated access and refresh tokens.
    */
   export async function loginWithGroupSlug(groupSlug: string): Promise<{
-    user: UserEntity;
+    user: SafeUser;
     accessToken: string;
     refreshToken: string;
     sessionId: string;
@@ -90,6 +91,6 @@ export namespace DemoAuthService {
       }),
     });
 
-    return { user, accessToken, refreshToken, sessionId };
+    return { user: AuthUtils.toSafeUser(user), accessToken, refreshToken, sessionId };
   }
 }

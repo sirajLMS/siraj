@@ -5,7 +5,11 @@ import { Alert, Snackbar } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  type InvoiceType as GqlInvoiceType,
+  type StudentStatus as GqlStudentStatus,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   deleteInvoiceMutationDocument,
   markInvoicePaidMutationDocument,
@@ -17,6 +21,7 @@ import {
   studentCreditStatusQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { useAdminBillingStore } from "@/frontend/stores/adminBillingStore";
+import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
 import { InvoiceStatus } from "@/shared/lib/enum";
 import { AdminBillingView } from "./AdminBillingView";
@@ -63,6 +68,7 @@ function deriveInitials(name: string | null): string {
 
 export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const t = useTranslations("dashboard.billing");
+  const tc = useTranslations("common");
   const router = useRouter();
   const labels = buildBillingLabels(t);
 
@@ -110,7 +116,8 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       void refetchInvoices();
     },
     onError: error => {
-      showFeedback(error.message, "error");
+      logger.error("Mark as paid failed:", { error });
+      showFeedback(tc("operationFailed"), "error");
     },
   });
 
@@ -120,7 +127,8 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       void refetchInvoices();
     },
     onError: error => {
-      showFeedback(error.message, "error");
+      logger.error("Delete invoice failed:", { error });
+      showFeedback(tc("operationFailed"), "error");
     },
   });
 
@@ -131,7 +139,8 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       }
     },
     onError: error => {
-      showFeedback(error.message, "error");
+      logger.error("Send reminder failed:", { error });
+      showFeedback(tc("operationFailed"), "error");
     },
   });
 
@@ -172,11 +181,11 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
             id: string;
             studentName: string;
             parentEmail: string;
-            planType: string;
+            planType: GqlInvoiceType | null;
             classesRemaining: number;
             classesTotal: number;
-            status: string;
-          } => row.id != null
+            status: GqlStudentStatus;
+          } => row.id != null && row.studentName != null && row.parentEmail != null && row.status != null
         )
         .map(row => ({
           id: row.id,

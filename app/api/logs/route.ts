@@ -12,6 +12,15 @@ interface LogEntry {
   sequence: number;
 }
 
+const SAFE_SESSION_ID_REGEX = /^[a-zA-Z0-9-]+$/;
+
+function sanitizeSessionId(sessionId: string): string {
+  if (!SAFE_SESSION_ID_REGEX.test(sessionId)) {
+    throw new Error("Invalid sessionId: must be alphanumeric with hyphens only");
+  }
+  return sessionId;
+}
+
 interface BatchLogRequest {
   logs: LogEntry[];
 }
@@ -52,6 +61,26 @@ async function cleanupOldClientLogs(logsDir: string, sessionId: string): Promise
   }
 }
 
+/**
+ * Strip ANSI escape sequences from a string to prevent log injection
+ */
+function stripAnsiEscapes(str: string): string {
+  // eslint-disable-next-line no-control-regex
+  return str.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "");
+}
+
+/**
+ * Sanitize a string for safe rendering — strips ANSI and escapes HTML entities
+ */
+function sanitizeForRendering(str: string): string {
+  const withoutAnsi = stripAnsiEscapes(str);
+  return withoutAnsi
+    .replace(/&/g, "\x26amp;")
+    .replace(/</g, "\x26lt;")
+    .replace(/>/g, "\x26gt;")
+    .replace(/"/g, "\x26quot;");
+}
+
 async function writeLogEntry(logEntry: LogEntry, logsDir: string): Promise<void> {
   const { sessionId } = logEntry;
 
@@ -80,7 +109,8 @@ async function writeLogEntry(logEntry: LogEntry, logsDir: string): Promise<void>
   });
 
   try {
-    const logFilePath = join(logsDir, `client_${sessionId}.log`);
+    const safeSessionId = sanitizeSessionId(logEntry.sessionId);
+    const logFilePath = join(logsDir, `client_${safeSessionId}.log`);
 
     while (buffer.entries.length > 0) {
       const entry = buffer.entries.shift();
@@ -91,9 +121,9 @@ async function writeLogEntry(logEntry: LogEntry, logsDir: string): Promise<void>
         buffer.nextSequence = entry.sequence;
       }
 
-      const logLine = `[${entry.timestamp}] [${entry.level.toUpperCase()}] [SEQ:${entry.sequence}] [${
-        entry.caller || "unknown"
-      }] ${entry.message}\n`;
+      const sanitizedMessage = sanitizeForRendering(entry.message);
+      const sanitizedCaller = entry.caller ? sanitizeForRendering(entry.caller) : "unknown";
+      const logLine = `[${entry.timestamp}] [${entry.level.toUpperCase()}] [SEQ:${entry.sequence}] [${sanitizedCaller}] ${sanitizedMessage}\n`;
 
       await writeFile(logFilePath, logLine, { flag: "a" });
 
@@ -142,6 +172,15 @@ export async function POST(request: NextRequest) {
 
     if (!body.logs.every(isValidLogEntry)) {
       return NextResponse.json({ error: "Missing required fields in log entry" }, { status: 400 });
+    }
+
+    // Sanitize all session IDs to prevent path traversal
+    for (const log of body.logs) {
+      try {
+        sanitizeSessionId(log.sessionId);
+      } catch {
+        return NextResponse.json({ error: "Invalid sessionId in log entry" }, { status: 400 });
+      }
     }
 
     const logsDir = join(process.cwd(), "logs");

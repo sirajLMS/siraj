@@ -13,6 +13,7 @@ import {
 } from "@/frontend/graphql/sharedDocuments/complaint.documents";
 import { parentAssociatedStudentsQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-profile.documents";
 import { useParentComplaintsStore } from "@/frontend/stores/parentComplaintsStore";
+import { logger } from "@/frontend/utils/logger";
 import { ParentComplaintsView } from "./ParentComplaintsView";
 import type { ComplaintFormData } from "./schemas/complaintFormSchema";
 import type { ParentComplaintRecord, ParentStudentOption } from "./types/complaints.types";
@@ -28,6 +29,7 @@ export interface ParentComplaintsContainerProps {
 
 export function ParentComplaintsContainer({ parentId }: ParentComplaintsContainerProps) {
   const t = useTranslations("dashboard.complaints");
+  const tc = useTranslations("common");
   const labels = buildComplaintsLabels(t);
 
   const isSubmitting = useParentComplaintsStore(state => state.isSubmitting);
@@ -132,7 +134,8 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
   }
 
   if (error) {
-    return <StyledErrorTypography>{error.message}</StyledErrorTypography>;
+    logger.error("Error loading parent complaints:", { error });
+    return <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>;
   }
 
   return (

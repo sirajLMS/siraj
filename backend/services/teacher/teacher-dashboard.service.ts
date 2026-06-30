@@ -5,7 +5,7 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertInput, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
+import { AppPermission, type ClassExecutionState, type ClassOutcome } from "@/shared/lib/enum";
 
 export namespace TeacherDashboardService {
   async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
@@ -45,11 +45,19 @@ export namespace TeacherDashboardService {
 
     const progressFeed = await SchedulingRepository.getTeacherProgressFeed(teacher.id, targetDate);
 
+    const mappedScheduleRows = result.rows.map(r => ({
+      ...r,
+      executionState: r.executionState as ClassExecutionState,
+      outcome: r.outcome as ClassOutcome | null,
+    }));
+
+    const mappedProgressFeed = progressFeed; // progressFeed items don't need enum casts
+
     return {
       id: `teacher-dashboard-${teacher.id}-${date}`,
       metrics,
-      scheduleRows: result.rows,
-      progressFeed,
+      scheduleRows: mappedScheduleRows,
+      progressFeed: mappedProgressFeed,
       totalCount: result.totalCount,
       pageInfo: result.pageInfo,
     };

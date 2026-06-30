@@ -5,7 +5,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, InvoiceStatus as GqlInvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
   userBillingProfileInvoiceHistoryQueryDocument,
@@ -13,6 +13,7 @@ import {
 } from "@/frontend/graphql/sharedDocuments/user-billing-profile.documents";
 import { useUserBillingProfileStore } from "@/frontend/stores/userBillingProfileStore";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { logger } from "@/frontend/utils/logger";
 import { filterParentInvoices } from "@/frontend/views/dashboard/billing/utils/billingFilters";
 import { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 import { buildBillingLabels } from "@/frontend/views/dashboard/billing/utils/buildBillingLabels";
@@ -36,6 +37,7 @@ function formatDate(dateStr: string | null): string {
 
 export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProfileContainerProps>) {
   const t = useTranslations("dashboard.billing");
+  const tc = useTranslations("common");
   const labels = buildBillingLabels(t);
   const notifications = useNotifications();
 
@@ -98,7 +100,8 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
       });
     },
     onError: err => {
-      notifications.show(err.message, {
+      logger.error("Failed to mark invoice as paid:", { err });
+      notifications.show(tc("operationFailed"), {
         severity: "error",
         autoHideDuration: 5000,
       });
@@ -117,7 +120,9 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
         dueDate: inv.dueDate ?? "",
         paidDate: inv.paidDate ?? "—",
         fee: `${inv.currency} ${inv.amount}`,
-        status: inv.status === InvoiceStatus.PAID ? InvoiceStatus.PAID : InvoiceStatus.UNPAID,
+        status: (inv.status === GqlInvoiceStatus.Paid
+          ? GqlInvoiceStatus.Paid
+          : GqlInvoiceStatus.Unpaid) as unknown as InvoiceStatus,
       })),
     [data?.parentInvoiceHistory]
   );
@@ -145,7 +150,7 @@ export function UserBillingProfileContainer({ userId }: Readonly<UserBillingProf
   };
 
   const handleDownloadPdf = (invoiceId: string) => {
-    window.open(`/api/invoices/${invoiceId}/download`, "_blank");
+    window.open(`/api/invoices/${invoiceId}/download`, "_blank", "noopener,noreferrer");
   };
 
   const handleQuickPay = () => {

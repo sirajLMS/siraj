@@ -5,7 +5,6 @@ export type UserNotificationPreferenceSelectType = typeof userNotificationPrefer
 export type UserNotificationPreferenceInsertType = typeof userNotificationPreferences.$inferInsert;
 
 export type SetNotificationPreferenceInput = {
-  userId: string;
   channel: NotificationChannel;
   eventType: NotificationEventType;
   enabled: boolean;

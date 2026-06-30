@@ -1,6 +1,6 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import type { StatusTrackingScheduleRow } from "@/frontend/graphql/generated/gql/graphql-types";
-import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { SessionStatus } from "@/shared/lib/enum";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
@@ -187,7 +187,7 @@ export function computeSessionStatus(
   if (studentStatus === StudentStatus.OnLeave) {
     return SessionStatus.ON_LEAVE;
   }
-  if (executionState === "NOT_ACTIVATED") {
+  if (executionState === ClassExecutionState.NotActivated) {
     return SessionStatus.PENDING_VERIFICATION;
   }
   return SessionStatus.REGULAR;

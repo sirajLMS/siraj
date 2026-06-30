@@ -7,6 +7,7 @@ import type {
 } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { InvoiceStatusPothosObject, InvoiceTypePothosObject, StudentStatusPothosObject } from "./enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
 const ParentInvoiceRowRef = gqlSchemaBuilder.objectRef<InvoiceHistoryRow>("ParentInvoiceRow");
@@ -19,8 +20,8 @@ export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
     paidDate: t.exposeString("paidDate", { nullable: true }),
     amount: t.exposeString("amount"),
     currency: t.exposeString("currency"),
-    status: t.exposeString("status"),
-    invoiceType: t.exposeString("invoiceType"),
+    status: t.expose("status", { type: InvoiceStatusPothosObject }),
+    invoiceType: t.expose("invoiceType", { type: InvoiceTypePothosObject }),
     studentId: t.exposeString("studentId", { nullable: true }),
     studentName: t.exposeString("studentName", { nullable: true }),
   }),
@@ -75,10 +76,10 @@ export const StudentCreditRowPothosObject = StudentCreditRowRef.implement({
     id: t.exposeString("id"),
     studentName: t.exposeString("studentName"),
     parentEmail: t.exposeString("parentEmail"),
-    planType: t.exposeString("planType"),
+    planType: t.expose("planType", { type: InvoiceTypePothosObject }),
     classesRemaining: t.exposeInt("classesRemaining"),
     classesTotal: t.exposeInt("classesTotal"),
-    status: t.exposeString("status"),
+    status: t.expose("status", { type: StudentStatusPothosObject }),
   }),
 });
 

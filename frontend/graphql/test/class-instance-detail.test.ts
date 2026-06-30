@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { ClassType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { classInstanceQueryDocument } from "../sharedDocuments/class-session.documents";
 import { createTeacherManualClassEntryMutationDocument } from "../sharedDocuments/teacher-dashboard.documents";
 import { assertOperationDenied, authenticatedRequest, loginAndProvision, loginUser } from "./helpers";
@@ -36,7 +37,7 @@ describe("GraphQL Class Instance Detail Query", () => {
           scheduledStartAt: new Date().toISOString(),
           scheduledEndAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
           durationMinutes: 60,
-          classType: "REGULAR",
+          classType: ClassType.Regular,
         },
       }
     );
@@ -54,7 +55,7 @@ describe("GraphQL Class Instance Detail Query", () => {
 
     const instance = data.classInstance;
     expect(instance?.id).toBe(classInstanceId);
-    expect(instance?.classType).toBe("REGULAR");
+    expect(instance?.classType).toBe(ClassType.Regular);
     expect(instance?.courseName).toBeTruthy();
     expect(instance?.student?.id).toBe(studentId);
     expect(instance?.teacher?.id).toBe(teacherId);

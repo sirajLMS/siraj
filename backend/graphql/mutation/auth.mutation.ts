@@ -5,7 +5,8 @@ import { generateAccessToken, generateRefreshToken, verifyToken } from "@/backen
 import { comparePassword } from "@/backend/lib/auth/password";
 import logger from "@/backend/lib/logger";
 import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
-import type { SessionEntity, UserEntity } from "@/backend/types";
+import type { SafeUser, SessionEntity, UserEntity } from "@/backend/types";
+import { AuthUtils } from "@/backend/utils";
 import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
@@ -20,8 +21,8 @@ function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: strin
 
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
+    secure: true,
+    sameSite: "strict" as const,
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
   };
@@ -81,8 +82,9 @@ async function validateRefreshTokenJti(refreshToken: string | undefined, session
 async function rotateTokensAndSession(
   user: UserEntity,
   session: SessionEntity,
-  ctx: BaseContext
-): Promise<{ token: string; user: UserEntity } | null> {
+  ctx: BaseContext,
+  rawSessionId?: string
+): Promise<{ token: string; user: SafeUser } | null> {
   const newAccessToken = await generateAccessToken(user.id, user.email);
   const newRefreshToken = await generateRefreshToken(user.id, user.email);
 
@@ -92,16 +94,23 @@ async function rotateTokensAndSession(
   const sessionPayload = session.payload ? JSON.parse(session.payload) : {};
   sessionPayload.refreshTokenJti = newJti;
 
-  const newSession = await SessionRepository.update({
-    ...session,
+  // Use the raw (plaintext) session ID for the update call — the repository
+  // hashes it internally before storage lookup.
+  const sessionIdForUpdate = rawSessionId || session.hashedId;
+  await SessionRepository.update({
+    hashedId: sessionIdForUpdate,
+    userId: session.userId,
+    ipAddress: session.ipAddress,
+    userAgent: session.userAgent,
     payload: JSON.stringify(sessionPayload),
   });
 
-  if (newSession.hashedId) {
-    setAuthCookies(ctx, newSession.hashedId, newRefreshToken);
+  // The cookie must store the *raw* session ID so it can be looked up again.
+  if (rawSessionId) {
+    setAuthCookies(ctx, rawSessionId, newRefreshToken);
   }
 
-  return { token: newAccessToken, user };
+  return { token: newAccessToken, user: AuthUtils.toSafeUser(user) };
 }
 
 gqlSchemaBuilder.mutationFields(t => ({
@@ -127,7 +136,9 @@ gqlSchemaBuilder.mutationFields(t => ({
         user = (await UserRepository.findByEmail(email.value)) ?? null;
       } catch (err) {
         logger.error(err);
-        return null;
+        throw new GraphQLError("Authentication service temporarily unavailable", {
+          extensions: { code: "SERVICE_UNAVAILABLE" },
+        });
       }
 
       if (!user) {
@@ -177,7 +188,7 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       return {
         token: accessToken,
-        user,
+        user: AuthUtils.toSafeUser(user),
       };
     },
   }),
@@ -217,7 +228,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       } catch (error) {
         const err = error as Error;
         logger.error("Demo login failed", { error: err });
-        throw new GraphQLError(err.message || "Demo login failed", {
+        throw new GraphQLError("Demo login failed", {
           extensions: { code: "UNAUTHENTICATED" },
         });
       }
@@ -258,7 +269,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         return null;
       }
 
-      return rotateTokensAndSession(user, session, ctx);
+      return rotateTokensAndSession(user, session, ctx, sessionId);
     },
   }),
 

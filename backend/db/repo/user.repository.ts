@@ -4,6 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { users } from "@/backend/db/schema";
 import { PaginationArgsDefault } from "@/backend/graphql/pothos";
+import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import type {
@@ -99,18 +100,20 @@ export namespace UserRepository {
       .limit(500);
   };
 
-  export const findUsers = async (opts: { limit: number; offset: number }): Promise<UserEntity[]> => {
-    return await db.select().from(users).orderBy(users.createdAt).limit(opts.limit).offset(opts.offset);
+  export const findUsers = async (opts: { limit: number; offset: number }): Promise<SafeUser[]> => {
+    const results = await db.select().from(users).orderBy(users.createdAt).limit(opts.limit).offset(opts.offset);
+    return results.map(user => AuthUtils.toSafeUser(user));
   };
 
-  export const loadByIds = async (ids: string[], locale?: string): Promise<(UserEntity | Error)[]> => {
+  export const loadByIds = async (ids: string[], locale?: string): Promise<(SafeUser | Error)[]> => {
     if (ids.length === 0) return [];
     const filteredUsers = await db.select().from(users).where(inArray(users.id, ids));
     const t = await getBackendTranslations({ locale, namespace: "errors" });
 
     return ids.map(id => {
       const matchingUser = filteredUsers.find(c => c.id === id);
-      return matchingUser || new Error(t("userNotFound", { id }));
+      if (!matchingUser) return new Error(t("userNotFound", { id }));
+      return AuthUtils.toSafeUser(matchingUser);
     });
   };
 
@@ -157,6 +160,7 @@ export namespace UserRepository {
     }
 
     AuthUtils.validateUserName(input.name);
+    await validatePasswordStrength(input.password, locale);
     const now = new Date();
     const hashedPassword = await bcrypt.hash(input.password, 12);
 

@@ -2,6 +2,7 @@ import { useMutation } from "@apollo/client/react";
 import { create } from "zustand";
 import type { ParentOnboardingInput, ParentOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { logger } from "@/frontend/utils/logger";
 import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/parents/onboarding/types";
 
 interface ParentOnboardingState {
@@ -55,8 +56,9 @@ export function useCreateParentMutation() {
 
       throw new Error("Mutation returned no data");
     } catch (err) {
+      logger.error("Parent creation failed:", { err });
       useParentOnboardingStore.setState({
-        error: err instanceof Error ? err.message : "Unknown error",
+        error: "operationFailed",
         isSubmitting: false,
       });
       throw err;

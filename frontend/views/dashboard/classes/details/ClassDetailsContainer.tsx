@@ -138,17 +138,20 @@ export function ClassDetailsContainer() {
   useEffect(() => {
     if (shouldLoadEvents && eventsError) {
       logger.error("Error fetching class status events:", eventsError);
-      setErrorState(eventsError.message);
+      setErrorState(t("loadError"));
       setShouldLoadEvents(false);
     }
-  }, [eventsError, shouldLoadEvents]);
+  }, [eventsError, shouldLoadEvents, t]);
 
   const [activateClass] = useMutation(activateClassMutationDocument, {
     onCompleted: () => {
       setErrorState(null);
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
-    onError: err => setErrorState(err.message),
+    onError: err => {
+      logger.error("Activate class failed:", { err });
+      setErrorState(t("loadError"));
+    },
   });
 
   const [activateOverrideClass] = useMutation(activateOverrideClassMutationDocument, {
@@ -156,7 +159,10 @@ export function ClassDetailsContainer() {
       setErrorState(null);
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
-    onError: err => setErrorState(err.message),
+    onError: err => {
+      logger.error("Activate override class failed:", { err });
+      setErrorState(t("loadError"));
+    },
   });
 
   const [stopClass] = useMutation(stopClassMutationDocument, {
@@ -164,7 +170,10 @@ export function ClassDetailsContainer() {
       setErrorState(null);
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
-    onError: err => setErrorState(err.message),
+    onError: err => {
+      logger.error("Stop class failed:", { err });
+      setErrorState(t("loadError"));
+    },
   });
 
   const [deleteClass] = useMutation(deleteClassInstanceMutationDocument, {
@@ -172,7 +181,10 @@ export function ClassDetailsContainer() {
       setErrorState(null);
       setDeleteDialogOpen(false);
     },
-    onError: err => setErrorState(err.message),
+    onError: err => {
+      logger.error("Delete class failed:", { err });
+      setErrorState(t("loadError"));
+    },
   });
 
   const [startSession, { loading: isStarting }] = useMutation(updateSessionStatusStartMutationDocument, {
@@ -180,7 +192,10 @@ export function ClassDetailsContainer() {
       setErrorState(null);
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
-    onError: err => setErrorState(err.message),
+    onError: err => {
+      logger.error("Start session failed:", { err });
+      setErrorState(t("loadError"));
+    },
   });
 
   const [markAbsent, { loading: isMarkingAbsent }] = useMutation(updateSessionStatusAbsentMutationDocument, {
@@ -188,7 +203,10 @@ export function ClassDetailsContainer() {
       setErrorState(null);
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
-    onError: err => setErrorState(err.message),
+    onError: err => {
+      logger.error("Mark absent failed:", { err });
+      setErrorState(t("loadError"));
+    },
   });
 
   const [processLeave, { loading: isProcessingLeave }] = useMutation(updateSessionStatusLeaveMutationDocument, {
@@ -196,7 +214,10 @@ export function ClassDetailsContainer() {
       setErrorState(null);
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
-    onError: err => setErrorState(err.message),
+    onError: err => {
+      logger.error("Process leave failed:", { err });
+      setErrorState(t("loadError"));
+    },
   });
 
   const [resetSession, { loading: isResetting }] = useMutation(resetClassMutationDocument, {
@@ -204,7 +225,10 @@ export function ClassDetailsContainer() {
       setErrorState(null);
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
-    onError: err => setErrorState(err.message),
+    onError: err => {
+      logger.error("Reset session failed:", { err });
+      setErrorState(t("loadError"));
+    },
   });
 
   const canOverride = hasPermission(AppPermission.SessionOverrideActions);
@@ -228,7 +252,7 @@ export function ClassDetailsContainer() {
     logger.error("Error fetching class details:", error);
     return (
       <PageContainer>
-        <Alert severity="error">{error?.message ?? t("loadError")}</Alert>
+        <Alert severity="error">{t("loadError")}</Alert>
       </PageContainer>
     );
   }
@@ -291,7 +315,9 @@ export function ClassDetailsContainer() {
     router.push(`/classes/${id}/audit`);
   };
 
-  const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;
+  const pageHeader = (
+    <ClassDetailsHeader instance={instance as ClassInstanceDetail} canOverride={canOverride} isMobile={isMobile} />
+  );
 
   const sessionActionProps = {
     formattedScheduledDate,
@@ -328,7 +354,7 @@ export function ClassDetailsContainer() {
       <PageContainer>
         {pageHeader}
         <AdminView
-          instance={instance}
+          instance={instance as ClassInstanceDetail}
           isWarningDismissed={isWarningDismissed}
           onDismissWarning={() => setIsWarningDismissed(true)}
           onForceActivate={handleForceActivate}
@@ -348,7 +374,7 @@ export function ClassDetailsContainer() {
       <PageContainer>
         {pageHeader}
         <TeacherView
-          instance={instance}
+          instance={instance as ClassInstanceDetail}
           viewMode={isParentView ? "parent" : "teacher"}
           isWarningDismissed={isWarningDismissed}
           onDismissWarning={() => setIsWarningDismissed(true)}

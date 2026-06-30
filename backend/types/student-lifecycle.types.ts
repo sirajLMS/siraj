@@ -1,3 +1,5 @@
+import { StudentStatus } from "@/shared/lib/enum";
+
 export interface LeaveProcessingResult {
   readonly processedCount: number;
   readonly successorIds: string[];
@@ -11,14 +13,14 @@ export interface ReassignStudentTeacherResult {
 
 export interface ChangeStudentStatusResult {
   readonly id: string;
-  readonly status: string;
+  readonly status: StudentStatus;
   readonly version: number;
 }
 
-export const ALLOWED_STATUS_TRANSITIONS: Record<string, readonly string[]> = {
-  ON_TRIAL: ["REGULAR", "DEACTIVATED"],
-  REGULAR: ["SUSPENDED", "ON_LEAVE", "DEACTIVATED"],
-  SUSPENDED: ["REGULAR", "DEACTIVATED"],
-  ON_LEAVE: ["REGULAR", "DEACTIVATED"],
-  DEACTIVATED: ["REGULAR"],
+export const ALLOWED_STATUS_TRANSITIONS: Record<StudentStatus, readonly StudentStatus[]> = {
+  [StudentStatus.ON_TRIAL]: [StudentStatus.REGULAR, StudentStatus.DEACTIVATED],
+  [StudentStatus.REGULAR]: [StudentStatus.SUSPENDED, StudentStatus.ON_LEAVE, StudentStatus.DEACTIVATED],
+  [StudentStatus.SUSPENDED]: [StudentStatus.REGULAR, StudentStatus.DEACTIVATED],
+  [StudentStatus.ON_LEAVE]: [StudentStatus.REGULAR, StudentStatus.DEACTIVATED],
+  [StudentStatus.DEACTIVATED]: [StudentStatus.REGULAR],
 };

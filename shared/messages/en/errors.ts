@@ -116,6 +116,11 @@ export const errors: ErrorsLabels = {
   },
   auth: {
     invalidRoleTab: "The selected role tab is invalid.",
+    passwordMinLength: "Password must be at least 8 characters long.",
+    passwordRequiresUppercase: "Password must contain at least one uppercase letter.",
+    passwordRequiresLowercase: "Password must contain at least one lowercase letter.",
+    passwordRequiresDigit: "Password must contain at least one digit.",
+    passwordRequiresSpecialChar: "Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
   },
   user: {
     emailAlreadyExists: "An account with this email already exists.",

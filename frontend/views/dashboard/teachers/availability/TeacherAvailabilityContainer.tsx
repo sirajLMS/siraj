@@ -10,6 +10,7 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/graphql/generated/gql/graphql";
 import { AppPermission, type Gender } from "@/frontend/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/graphql/sharedDocuments/availability-search.documents";
+import { logger } from "@/frontend/utils/logger";
 import { TeacherAvailabilityView } from "./TeacherAvailabilityView";
 import type {
   AvailabilityEntry,
@@ -116,6 +117,7 @@ function computeInsights(data: AvailabilitySearchData | null | undefined): Teach
 
 export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId: string }>) {
   const t = useTranslations("dashboard.teacherAvailability");
+  const tc = useTranslations("common");
   const notifications = useNotifications();
 
   const [searchInput, setSearchInput] = useState<AvailabilitySearchFormData>({
@@ -181,10 +183,11 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
   }, [notifications, t]);
 
   if (error) {
+    logger.error("Error loading teacher availability:", { error });
     return (
       <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
         <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <Typography sx={theme => ({ color: theme.palette.error.main })}>{error.message}</Typography>
+          <Typography sx={theme => ({ color: theme.palette.error.main })}>{tc("loadFailed")}</Typography>
         </Box>
       </RequirePermission>
     );

@@ -190,7 +190,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         // Return metadata to attach to the blob
         return Promise.resolve({
-          allowOverwrite: true,
+          allowOverwrite: false,
           allowedContentTypes: [contentType],
           tokenPayload: JSON.stringify({
             sessionId,

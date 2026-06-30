@@ -2,6 +2,7 @@ import { useMutation } from "@apollo/client/react";
 import { create } from "zustand";
 import type { TeacherOnboardingInput, TeacherOnboardingResult } from "@/frontend/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { logger } from "@/frontend/utils/logger";
 import type { TeacherOnboardingFormData } from "@/frontend/views/dashboard/teachers/onboarding/types";
 
 interface TeacherOnboardingState {
@@ -64,8 +65,9 @@ export function useCreateTeacherMutation() {
 
       throw new Error("Mutation returned no data");
     } catch (err) {
+      logger.error("Teacher creation failed:", { err });
       useTeacherOnboardingStore.setState({
-        error: err instanceof Error ? err.message : "Unknown error",
+        error: "operationFailed",
         isSubmitting: false,
       });
       throw err;

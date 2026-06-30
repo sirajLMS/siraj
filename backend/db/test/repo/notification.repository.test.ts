@@ -46,10 +46,7 @@ function runSetPreferenceTest(
 ) {
   notificationTest(name, async tx => {
     const user = await makeUser(tx, prefix);
-    const result = await NotificationRepository.setPreference(
-      { userId: user.id, channel, eventType, enabled: true },
-      tx
-    );
+    const result = await NotificationRepository.setPreference(user.id, { channel, eventType, enabled: true }, tx);
     expect(result).toBeDefined();
     expect(result.channel).toBe(channel);
     expect(result.eventType).toBe(eventType);
@@ -112,8 +109,8 @@ describe("NotificationRepository — setPreference", () => {
     const user = await makeUser(tx, "PrefUpdate");
 
     await NotificationRepository.setPreference(
+      user.id,
       {
-        userId: user.id,
         channel: NotificationChannel.SMS,
         eventType: NotificationEventType.COMPLAINT_RESPONSE,
         enabled: true,
@@ -122,8 +119,8 @@ describe("NotificationRepository — setPreference", () => {
     );
 
     const updated = await NotificationRepository.setPreference(
+      user.id,
       {
-        userId: user.id,
         channel: NotificationChannel.SMS,
         eventType: NotificationEventType.COMPLAINT_RESPONSE,
         enabled: false,
@@ -399,8 +396,8 @@ describe("NotificationRepository — transaction rollback (Story 15)", () => {
       prefUserId = user.id;
 
       await NotificationRepository.setPreference(
+        user.id,
         {
-          userId: user.id,
           channel: NotificationChannel.EMAIL,
           eventType: NotificationEventType.COMPLAINT_RESPONSE,
           enabled: false,

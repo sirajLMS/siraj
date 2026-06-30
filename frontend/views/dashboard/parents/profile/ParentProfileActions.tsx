@@ -25,6 +25,7 @@ import { useTranslations } from "next-intl";
 import type React from "react";
 import { useState } from "react";
 import { deactivateParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { logger } from "@/frontend/utils/logger";
 import { Link, useRouter } from "@/shared/i18n/routing";
 
 interface DeactivateParentDialogProps {
@@ -43,6 +44,7 @@ const DeactivateParentDialog: React.FC<DeactivateParentDialogProps> = ({
   error,
 }) => {
   const t = useTranslations("dashboard.parentProfile.actions");
+  const tc = useTranslations("common");
 
   return (
     <Dialog
@@ -56,7 +58,7 @@ const DeactivateParentDialog: React.FC<DeactivateParentDialogProps> = ({
         <DialogContentText id="deactivate-parent-dialog-desc">{t("deactivateConfirmText")}</DialogContentText>
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>
-            {error.message}
+            {tc("operationFailed")}
           </Alert>
         )}
       </DialogContent>
@@ -86,6 +88,7 @@ interface ParentProfileActionsProps {
 const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, onEditAvatar }) => {
   const theme = useTheme();
   const t = useTranslations("dashboard.parentProfile.actions");
+  const tc = useTranslations("common");
   const router = useRouter();
   const notifications = useNotifications();
 
@@ -100,7 +103,8 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, o
         router.push("/parents");
       },
       onError: error => {
-        notifications.show(error.message, { severity: "error", autoHideDuration: 4000 });
+        logger.error("Deactivate parent failed:", { error });
+        notifications.show(tc("operationFailed"), { severity: "error", autoHideDuration: 4000 });
       },
     }
   );

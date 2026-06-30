@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { verifyToken } from "@/backend/lib/auth/jwt";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
 import { SessionService } from "@/backend/services/auth/session.service";
 
@@ -15,7 +16,14 @@ export async function getServerUserContext(): Promise<{
     return { userId: null, context: null };
   }
 
-  const session = await SessionService.validateSession(sessionId);
+  let session: Awaited<ReturnType<typeof SessionService.validateSession>>;
+  try {
+    session = await SessionService.validateSession(sessionId);
+  } catch (error) {
+    logger.error("Session validation system error — treating as unauthenticated", { sessionId, error });
+    throw error;
+  }
+
   if (!session?.userId) {
     return { userId: null, context: null };
   }

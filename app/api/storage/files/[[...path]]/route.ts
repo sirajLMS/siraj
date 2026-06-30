@@ -98,7 +98,7 @@ function createRangeResponse(options: RangeResponseOptions): NextResponse {
       "Content-Length": chunkSize.toString(),
       "Content-Range": `bytes ${start}-${end}/${fileSize}`,
       "Accept-Ranges": "bytes",
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, max-age=3600",
       "Last-Modified": lastModified,
     },
   });
@@ -169,7 +169,7 @@ function buildFileResponse(absolutePath: string, relativePath: string, rangeHead
       "Content-Type": contentType,
       "Content-Length": fileSize.toString(),
       "Accept-Ranges": "bytes",
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, max-age=3600",
       "Last-Modified": lastModified,
     },
   });

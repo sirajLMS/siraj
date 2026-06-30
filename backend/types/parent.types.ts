@@ -1,8 +1,9 @@
-import type { parents } from "@/backend/db/schema";
+import type { BookingStatus, ClassExecutionState, ClassOutcome, ParentStatus } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
-export type ParentEntity = typeof parents.$inferSelect;
-export type ParentEntityInput = typeof parents.$inferInsert;
+export type ParentEntity = typeof import("@/backend/db/schema").parents.$inferSelect;
+
+export type ParentEntityInput = typeof import("@/backend/db/schema").parents.$inferInsert;
 
 export type ParentCreateResult = Pick<
   ParentEntity,
@@ -23,7 +24,7 @@ export type ParentDirectoryRow = {
   name: string;
   email: string;
   avatarUrl: string | null;
-  status: string;
+  status: ParentStatus;
   updatedAt: Date;
   unpaidInvoices: number;
 };
@@ -46,9 +47,9 @@ export type ParentDashboardScheduleRow = {
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;
-  bookingStatus: "confirmed" | "rescheduled";
-  executionState: string;
-  outcome: string;
+  bookingStatus: BookingStatus;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome;
   zoomMeetingUrl: string | null;
   classTimeFormatted: string;
 };

@@ -1,4 +1,5 @@
 import type { currencyExchangeRates, invoices, payments } from "@/backend/db/schema";
+import type { InvoiceStatus, InvoiceType } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
@@ -42,8 +43,8 @@ export interface InvoiceHistoryRow {
   readonly paidDate: string | null;
   readonly amount: string;
   readonly currency: string;
-  readonly status: string;
-  readonly invoiceType: string;
+  readonly status: InvoiceStatus;
+  readonly invoiceType: InvoiceType;
   readonly studentId: string | null;
   readonly studentName: string | null;
 }
@@ -60,10 +61,10 @@ export interface StudentCreditRow {
   readonly id: string;
   readonly studentName: string;
   readonly parentEmail: string;
-  readonly planType: string;
+  readonly planType: InvoiceType;
   readonly classesRemaining: number;
   readonly classesTotal: number;
-  readonly status: string;
+  readonly status: import("@/shared/lib/enum").StudentStatus;
 }
 
 export interface ParentBillingSummaryResult {

@@ -9,7 +9,6 @@ export const ComplaintResponsePothosObject = ComplaintResponseRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
     complaintId: t.exposeString("complaintId"),
-    responderUserId: t.exposeString("responderUserId", { nullable: true }),
     body: t.exposeString("body"),
     emailSent: t.exposeBoolean("emailSent"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
@@ -24,7 +23,6 @@ export const RespondToComplaintInputPothosObject = gqlSchemaBuilder
     fields: t => ({
       complaintId: t.string({ required: true }),
       body: t.string({ required: true }),
-      emailSent: t.boolean({ required: true, defaultValue: false }),
     }),
   });
 
@@ -41,7 +39,7 @@ gqlSchemaBuilder.mutationField("respondToComplaint", t =>
       }
 
       const response = await ComplaintResponseService.respondToComplaint(
-        { complaintId: args.input.complaintId, body: args.input.body, emailSent: args.input.emailSent ?? false },
+        { complaintId: args.input.complaintId, body: args.input.body },
         ctx.user.id,
         ctx.locale
       );
@@ -49,7 +47,6 @@ gqlSchemaBuilder.mutationField("respondToComplaint", t =>
       return {
         id: response.id,
         complaintId: response.complaintId,
-        responderUserId: response.responderUserId,
         body: response.body,
         emailSent: response.emailSent,
         createdAt: response.createdAt,

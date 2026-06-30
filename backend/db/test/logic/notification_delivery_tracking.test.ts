@@ -47,8 +47,8 @@ describe("Notification Delivery Tracking", () => {
 
       const pushToken = `fcm-token-${randomUUID()}`;
       const deviceToken = await NotificationRepository.registerDeviceToken(
+        user.id,
         {
-          userId: user.id,
           token: pushToken,
           platform: DevicePlatform.ANDROID,
           deviceName: "Pixel Test Device",
@@ -214,8 +214,8 @@ describe("Notification Delivery Tracking", () => {
       const userB = await createTestUser(tx, { name: "UserB" });
 
       await NotificationRepository.registerDeviceToken(
+        userB.id,
         {
-          userId: userB.id,
           token: `token-${randomUUID()}`,
           platform: DevicePlatform.IOS,
         },

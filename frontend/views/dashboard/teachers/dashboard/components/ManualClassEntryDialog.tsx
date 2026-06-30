@@ -18,6 +18,7 @@ import {
 import { useEffect, useState } from "react";
 import type { PaginationArgs, StudentFilterArgs } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentsQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
+import { logger } from "@/frontend/utils/logger";
 
 interface ManualClassEntryDialogProps {
   readonly open: boolean;
@@ -118,8 +119,8 @@ export function ManualClassEntryDialog({
       });
       onClose();
     } catch (err) {
-      const error = err as Error;
-      setError(error.message || "Failed to create manual class entry.");
+      logger.error("Manual class entry creation failed:", { err });
+      setError("Failed to create manual class entry.");
     } finally {
       setSubmitting(false);
     }

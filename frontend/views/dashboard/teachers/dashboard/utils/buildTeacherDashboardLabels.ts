@@ -116,6 +116,8 @@ export function buildTeacherDashboardLabels(t: TeacherDashboardTranslator): Teac
     errors: {
       meetingUrlNotAvailable: t("errors.meetingUrlNotAvailable"),
       handbookUrlNotFound: t("errors.handbookUrlNotFound"),
+      missedClassTime: t("errors.missedClassTime"),
+      activationFailed: t("errors.activationFailed"),
     },
     supportRequestSubmitted: t.raw("supportRequestSubmitted") as string,
   };

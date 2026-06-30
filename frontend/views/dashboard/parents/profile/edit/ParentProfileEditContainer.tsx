@@ -20,6 +20,7 @@ interface ParentProfileEditContainerProps {
 
 export default function ParentProfileEditContainer({ id }: ParentProfileEditContainerProps) {
   const t = useTranslations("dashboard.parentProfile");
+  const tc = useTranslations("common");
   const router = useRouter();
   const parentId = id;
 
@@ -96,11 +97,8 @@ export default function ParentProfileEditContainer({ id }: ParentProfileEditCont
   }
 
   if (error || !profile) {
-    return (
-      <Typography sx={{ color: theme => theme.palette.error.main }}>
-        {error?.message ?? t("errors.notFound")}
-      </Typography>
-    );
+    logger.error("Error loading parent profile for edit:", { error });
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc("loadFailed")}</Typography>;
   }
 
   return <ParentProfileEditView register={register} errors={errors} handleSubmit={handleSubmit} onSubmit={onSubmit} />;

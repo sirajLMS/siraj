@@ -116,6 +116,11 @@ export const errors: ErrorsLabels = {
   },
   auth: {
     invalidRoleTab: "علامة التبويب المحددة للدور غير صالحة.",
+    passwordMinLength: "يجب أن تكون كلمة المرور ٨ أحرف على الأقل.",
+    passwordRequiresUppercase: "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل.",
+    passwordRequiresLowercase: "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل.",
+    passwordRequiresDigit: "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل.",
+    passwordRequiresSpecialChar: "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
   },
   user: {
     emailAlreadyExists: "الحساب بهذا البريد الإلكتروني موجود بالفعل.",

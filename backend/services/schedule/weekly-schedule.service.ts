@@ -6,7 +6,7 @@ import { TeacherRepository } from "@/backend/db/repo/teacher.repository";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { AppPermission } from "@/shared/lib/enum";
+import { AppPermission, type ClassExecutionState, type ClassOutcome, type ClassType } from "@/shared/lib/enum";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 export namespace WeeklyScheduleService {
@@ -73,11 +73,11 @@ export namespace WeeklyScheduleService {
             timeZone: "UTC",
           }),
           day: row.dayOfWeek,
-          executionState: row.executionState,
-          outcome: row.outcome,
+          executionState: row.executionState as ClassExecutionState,
+          outcome: row.outcome as ClassOutcome,
           subjectId: row.subjectId,
           subjectName: row.subjectName,
-          classType: row.classType,
+          classType: row.classType as ClassType,
         })),
       };
     } catch (error) {

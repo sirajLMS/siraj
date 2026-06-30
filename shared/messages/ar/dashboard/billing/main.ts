@@ -81,6 +81,7 @@ export const billing: BillingLabels = {
     PENDING: "معلقة",
     PAID: "مدفوعة",
     UNPAID: "غير مدفوعة",
+    CANCELLED: "ملغاة",
   },
   creditStatus: {
     negative_balance: "رصيد سالب",

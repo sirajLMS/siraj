@@ -9,7 +9,7 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import * as Types from "@/backend/types";
 import { ALLOWED_STATUS_TRANSITIONS } from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
-import { OrderSortDirection } from "@/shared/lib/enum";
+import { OrderSortDirection, type StudentStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 const _processStudentQuery = async (
@@ -144,7 +144,7 @@ export namespace StudentRepository {
       return await db.insert(students).values(values).returning();
     } catch (error) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(t("studentCreateError", { message: error instanceof Error ? error.message : "Unknown error" }), {
+      throw new Error(t("studentCreateFailed"), {
         cause: error,
       });
     }
@@ -366,7 +366,7 @@ export namespace StudentRepository {
 
   export const changeStatus = async (
     studentId: string,
-    newStatus: Types.StudentEntity["status"],
+    newStatus: StudentStatus,
     expectedVersion?: number,
     tx?: DBTransaction,
     locale?: string
@@ -376,7 +376,7 @@ export namespace StudentRepository {
         t,
         studentId,
         async current => {
-          const allowedTargets = ALLOWED_STATUS_TRANSITIONS[current.status] ?? [];
+          const allowedTargets = ALLOWED_STATUS_TRANSITIONS[current.status as StudentStatus] ?? [];
           if (!allowedTargets.includes(newStatus)) {
             const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
             throw new Error(

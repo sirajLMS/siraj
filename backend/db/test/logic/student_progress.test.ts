@@ -7,7 +7,7 @@ import type { ParentEntity, StudentEntity, StudentProgressSelectType, TeacherEnt
 import type { ClassInstanceEntity } from "../../../types/scheduling.types";
 import type { DBTransaction } from "../../db.types";
 import { classInstances, parents, studentProgress, students, teacherAssignments, teachers, users } from "../../schema";
-import { runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "../test-utils";
+import { runInRollback, setupRlsRole, teardownRlsRole } from "../test-utils";
 
 async function setupTestEnvironment(tx: DBTransaction, now: Date) {
   const [userP] = (await tx
@@ -76,34 +76,6 @@ describe("Student Progress Tracking", () => {
 
   beforeAll(async () => {
     await setupRlsRole(ROLE_NAME);
-    await setupRlsPolicies([
-      { table: "users", name: "users_select_policy", definition: "FOR SELECT USING (deleted_at IS NULL)" },
-      { table: "users", name: "users_insert_policy", definition: "FOR INSERT WITH CHECK (deleted_at IS NULL)" },
-      {
-        table: "students",
-        name: "students_select_policy",
-        definition:
-          "FOR SELECT USING (NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()) OR parent_id = (SELECT id FROM parents WHERE user_id = current_user_id()))",
-      },
-      {
-        table: "students",
-        name: "students_insert_policy",
-        definition:
-          "FOR INSERT WITH CHECK (NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()) OR parent_id = (SELECT id FROM parents WHERE user_id = current_user_id()))",
-      },
-      {
-        table: "student_progress",
-        name: "student_progress_teacher_policy",
-        definition:
-          "FOR ALL USING (teacher_id IN (SELECT id FROM teachers WHERE user_id = current_user_id())) WITH CHECK (teacher_id IN (SELECT id FROM teachers WHERE user_id = current_user_id()))",
-      },
-      {
-        table: "student_progress",
-        name: "student_progress_parent_policy",
-        definition:
-          "FOR SELECT USING (parent_visible = true AND student_id IN (SELECT s.id FROM students s JOIN parents p ON s.parent_id = p.id WHERE p.user_id = current_user_id()))",
-      },
-    ]);
   });
 
   afterAll(async () => {
@@ -175,7 +147,7 @@ describe("Student Progress Tracking", () => {
     testLogger.info("Testing parent RLS for progress...");
     await runInRollback(async tx => {
       const now = new Date();
-      const { userP, teacher, student, classInst } = await setupTestEnvironment(tx, now);
+      const { userP, student, classInst } = await setupTestEnvironment(tx, now);
 
       await tx.insert(studentProgress).values({
         studentId: student.id,

@@ -1,4 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
+import { ClassType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { deleteClassInstanceMutationDocument } from "../sharedDocuments/class-session.documents";
 import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
 import {
@@ -143,7 +144,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
           scheduledStartAt: startAt,
           scheduledEndAt: endAt,
           durationMinutes: 60,
-          classType: "REGULAR",
+          classType: ClassType.Regular,
         },
       },
       errorPolicy: "all",

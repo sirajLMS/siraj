@@ -65,7 +65,7 @@ export function CreateRecurringClassContainer() {
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         logger.error("Error creating recurring class", { err: error });
-        setErrorMessage(error.message || t("validation.creationFailed"));
+        setErrorMessage(t("validation.creationFailed"));
       } finally {
         setSubmitting(false);
       }

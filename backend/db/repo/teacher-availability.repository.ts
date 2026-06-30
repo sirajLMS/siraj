@@ -229,19 +229,20 @@ export namespace TeacherAvailabilityRepository {
   }
 
   export const addAvailabilityWindow = async (
+    teacherId: string,
     input: Types.AvailabilityWindowInput,
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.TeacherAvailabilityWindowSelectType> => {
     const runner = async (t: DBTransaction) => {
-      await acquireAvailabilityLock(t, input.teacherId);
+      await acquireAvailabilityLock(t, teacherId);
       await assertValidTimeRange(input.startTime, input.endTime, locale);
       const now = new Date();
 
       const [created] = await t
         .insert(teacherAvailabilityWindows)
         .values({
-          teacherId: input.teacherId,
+          teacherId,
           dayOfWeek: input.dayOfWeek,
           startTime: input.startTime,
           endTime: input.endTime,
@@ -262,19 +263,20 @@ export namespace TeacherAvailabilityRepository {
   };
 
   export const addRecurringUnavailability = async (
+    teacherId: string,
     input: Types.RecurringUnavailabilityInput,
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.TeacherRecurringUnavailabilitySelectType> => {
     const runner = async (t: DBTransaction) => {
-      await acquireAvailabilityLock(t, input.teacherId);
+      await acquireAvailabilityLock(t, teacherId);
       await assertValidTimeRange(input.startTime, input.endTime, locale);
       const now = new Date();
 
       const [created] = await t
         .insert(teacherRecurringUnavailability)
         .values({
-          teacherId: input.teacherId,
+          teacherId,
           dayOfWeek: input.dayOfWeek,
           startTime: input.startTime,
           endTime: input.endTime,
@@ -297,6 +299,8 @@ export namespace TeacherAvailabilityRepository {
 
   export const submitVacationRequest = async (
     input: Types.SubmitVacationRequestInput,
+    requestedByUserId: string,
+    teacherId: string,
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> => {
@@ -306,14 +310,14 @@ export namespace TeacherAvailabilityRepository {
         throw new Error(tFunc("vacationStartBeforeEnd"));
       }
 
-      await acquireAvailabilityLock(t, input.teacherId);
+      await acquireAvailabilityLock(t, teacherId);
       const now = new Date();
 
       const [created] = await t
         .insert(teacherVacationRequests)
         .values({
-          teacherId: input.teacherId,
-          requestedByUserId: input.requestedByUserId,
+          teacherId,
+          requestedByUserId,
           startAt: input.startAt,
           endAt: input.endAt,
           timezoneId: input.timezoneId ?? null,
@@ -334,23 +338,26 @@ export namespace TeacherAvailabilityRepository {
 
   export const approveVacationRequest = async (
     input: Types.ProcessVacationRequestInput,
+    processedByUserId: string,
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> => {
-    return processVacationRequest(input, VacationRequestStatus.APPROVED, tx, locale);
+    return processVacationRequest(input, VacationRequestStatus.APPROVED, processedByUserId, tx, locale);
   };
 
   export const rejectVacationRequest = async (
     input: Types.ProcessVacationRequestInput,
+    processedByUserId: string,
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> => {
-    return processVacationRequest(input, VacationRequestStatus.REJECTED, tx, locale);
+    return processVacationRequest(input, VacationRequestStatus.REJECTED, processedByUserId, tx, locale);
   };
 
   async function processVacationRequest(
     input: Types.ProcessVacationRequestInput,
     status: VacationRequestStatus.APPROVED | VacationRequestStatus.REJECTED,
+    processedByUserId: string,
     tx?: DBTransaction,
     locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> {
@@ -380,7 +387,7 @@ export namespace TeacherAvailabilityRepository {
         .set({
           status,
           processedAt: now,
-          processedByUserId: input.processedByUserId,
+          processedByUserId,
           updatedAt: now,
         })
         .where(eq(teacherVacationRequests.id, input.vacationRequestId))

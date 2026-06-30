@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, type ClassType } from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import { useRouter } from "@/shared/i18n/routing";
 
@@ -425,9 +425,9 @@ export function TeacherDashboardContainer() {
       const error = err as Error;
       logger.error("Error activating class:", error);
       if (error.message?.includes("missedClassTime") || error.message?.toLowerCase().includes("missed class time")) {
-        setActivationError(t("errors.missedClassTime") || "YOU MISSED THE CLASS TIME");
+        setActivationError(t("errors.missedClassTime"));
       } else {
-        setActivationError(error.message || "An error occurred while activating the class.");
+        setActivationError(t("errors.activationFailed"));
       }
     }
   };
@@ -450,7 +450,7 @@ export function TeacherDashboardContainer() {
           scheduledStartAt: data.scheduledStartAt,
           scheduledEndAt: data.scheduledEndAt,
           durationMinutes: data.durationMinutes,
-          classType: data.classType,
+          classType: data.classType as ClassType,
         },
       },
     });

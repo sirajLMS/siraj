@@ -22,4 +22,7 @@ export const common: CommonLabels = {
   retry: "إعادة المحاولة",
   checkNetworkConnection: "يرجى التحقق من اتصال الشبكة الخاص بك",
   connectionRestored: "تمت استعادة الاتصال",
+  somethingWentWrong: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  operationFailed: "فشلت العملية. يرجى المحاولة مرة أخرى.",
+  loadFailed: "فشل تحميل البيانات. يرجى المحاولة مرة أخرى.",
 };

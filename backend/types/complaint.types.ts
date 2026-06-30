@@ -29,6 +29,10 @@ export type ComplaintReturnType = Omit<
   | "status"
   // forbidden
   | "deletedAt"
+  // PII / internal FKs — not exposed via API
+  | "parentId"
+  | "studentId"
+  | "submitterEmail"
 > & {
   // enums
   category: ComplaintCategory;
@@ -72,7 +76,7 @@ export type ComplaintQueuePaginatedResult = {
 
 export type ComplaintFileReturnType = {
   fileId: string;
-  filePath: string;
+  publicUrl: string;
   isProtected: boolean;
   usageType: string;
   createdAt: Date;

@@ -22,7 +22,8 @@ export type LoginResponse =
  */
 function secureRandom(): number {
   const array = new Uint32Array(1);
-  return array[0] / (0xffffffff + 1);
+  crypto.getRandomValues(array);
+  return array[0] / 4294967295; // Normalize to 0-1 range
 }
 
 /**
@@ -43,6 +44,7 @@ export async function mockLogin(data: LoginFormData): Promise<LoginResponse> {
 
     // Generate secure random ID
     const randomBytes = new Uint8Array(4);
+    crypto.getRandomValues(randomBytes);
     const id = Array.from(randomBytes, byte => byte.toString(36)).join("");
 
     return {

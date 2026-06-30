@@ -7,7 +7,7 @@ import {
   type ManagerOnboardingResult,
   ManagerOnboardingService,
 } from "@/backend/services/staff/manager-onboarding.service";
-import { AppPermission, SystemPermissionGroupSlug } from "@/shared/lib/enum";
+import { AppPermission, SystemPermissionGroupSlug, UserRole } from "@/shared/lib/enum";
 
 const DEFAULT_ACTOR_ID = "00000000-0000-0000-0000-000000000000";
 
@@ -16,7 +16,7 @@ interface UserContextMock {
   permissions: AppPermission[];
   permissionGroups: SystemPermissionGroupSlug[];
   isSuperAdmin: boolean;
-  role: string;
+  role: UserRole;
 }
 
 function mockUserContext(opts: UserContextMock) {
@@ -36,7 +36,7 @@ function mockSuperAdmin() {
     permissions: [],
     permissionGroups: [SystemPermissionGroupSlug.SUPER_ADMIN],
     isSuperAdmin: true,
-    role: "Super Admin",
+    role: UserRole.SUPER_ADMIN,
   });
 }
 
@@ -86,7 +86,7 @@ describe("ManagerOnboardingService.createManager", () => {
       permissions: [],
       permissionGroups: [],
       isSuperAdmin: false,
-      role: "User",
+      role: UserRole.USER,
     });
 
     await expectRejection(() =>
@@ -107,7 +107,7 @@ describe("ManagerOnboardingService.createManager", () => {
       permissions: [],
       permissionGroups: [SystemPermissionGroupSlug.STAFF_DEFAULT],
       isSuperAdmin: false,
-      role: "Staff",
+      role: UserRole.STAFF,
     });
 
     const error = await expectRejection(() =>
@@ -199,7 +199,7 @@ describe("ManagerOnboardingService.createManager", () => {
       permissions: [AppPermission.TEACHERS_CREATE, AppPermission.PARENTS_CREATE],
       permissionGroups: [SystemPermissionGroupSlug.ACADEMY_ADMIN],
       isSuperAdmin: false,
-      role: "Academy Admin",
+      role: UserRole.ACADEMY_ADMIN,
     });
 
     const error = await expectRejection(() =>

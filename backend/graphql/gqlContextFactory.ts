@@ -58,8 +58,8 @@ export async function createGraphQLContext(): Promise<BaseContext> {
   const headersList = await headers();
   const cookieStore = await cookies();
 
-  // Extract refresh token from cookie or custom header
-  const refreshToken = cookieStore.get("refresh_token")?.value || headersList.get("x-refresh-token") || undefined;
+  // Extract refresh token from httpOnly cookie only (never from headers — prevents XSS token theft)
+  const refreshToken = cookieStore.get("refresh_token")?.value || undefined;
 
   // Extract session ID from cookie
   const sessionId = cookieStore.get("session_id")?.value || undefined;

@@ -4,6 +4,7 @@ import type {
   WeeklyWorkloadMetricsReturnType,
 } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { ClassExecutionStatePothosObject, ClassOutcomePothosObject, ClassTypePothosObject } from "./enum.pothos";
 
 const WeeklyScheduleClassRef = gqlSchemaBuilder.objectRef<WeeklyScheduleClassReturnType>("WeeklyScheduleClass");
 
@@ -15,11 +16,11 @@ export const WeeklyScheduleClassPothosObject = WeeklyScheduleClassRef.implement(
     duration: t.exposeInt("duration"),
     startTime: t.exposeString("startTime"),
     day: t.exposeString("day"),
-    executionState: t.exposeString("executionState", { nullable: true }),
-    outcome: t.exposeString("outcome", { nullable: true }),
+    executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject, nullable: true }),
+    outcome: t.expose("outcome", { type: ClassOutcomePothosObject, nullable: true }),
     subjectId: t.exposeString("subjectId", { nullable: true }),
     subjectName: t.exposeString("subjectName", { nullable: true }),
-    classType: t.exposeString("classType", { nullable: true }),
+    classType: t.expose("classType", { type: ClassTypePothosObject, nullable: true }),
   }),
 });
 

@@ -6,7 +6,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { NotificationSyncService } from "@/backend/services/system/notification-sync.service";
 import type * as Types from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
+import { AppPermission, type InvoiceStatus, type InvoiceType } from "@/shared/lib/enum";
 
 export interface CreateManualInvoiceInput {
   readonly parentId: string;
@@ -29,8 +29,8 @@ export interface ManualInvoiceResult {
   readonly studentId: string | null;
   readonly amount: string;
   readonly currency: string;
-  readonly status: string;
-  readonly invoiceType: string;
+  readonly status: InvoiceStatus;
+  readonly invoiceType: InvoiceType;
   readonly issueDate: string;
   readonly dueDate: string;
   readonly paidDate: string | null;
@@ -42,7 +42,7 @@ export interface MarkInvoicePaidResult {
   readonly invoice: {
     readonly id: string;
     readonly parentId: string;
-    readonly status: string;
+    readonly status: InvoiceStatus;
     readonly paidDate: string | null;
     readonly version: number;
   };
@@ -147,8 +147,8 @@ export namespace BillingManagementService {
         studentId: created.studentId ?? null,
         amount: created.amount,
         currency: created.currency,
-        status: created.status,
-        invoiceType: created.invoiceType,
+        status: created.status as InvoiceStatus,
+        invoiceType: created.invoiceType as InvoiceType,
         issueDate: created.issueDate,
         dueDate: created.dueDate,
         paidDate: created.paidDate ?? null,
@@ -195,7 +195,7 @@ export namespace BillingManagementService {
         invoice: {
           id: updated.id,
           parentId: updated.parentId,
-          status: updated.status,
+          status: updated.status as InvoiceStatus,
           paidDate: updated.paidDate ?? null,
           version: updated.version,
         },

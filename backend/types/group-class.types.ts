@@ -1,4 +1,5 @@
 import type { classCommunications, groupClassEnrollments, groupClasses } from "@/backend/db/schema";
+import type { ClassExecutionState, GroupClassAttendanceStatus } from "@/shared/lib/enum";
 
 export type GroupClassSelectType = typeof groupClasses.$inferSelect;
 export type GroupClassInsertType = typeof groupClasses.$inferInsert;
@@ -18,7 +19,7 @@ export type GroupClassAuditReturnType = {
   rescheduledDate: string | null;
   timeSlot: string;
   venue: string;
-  status: string;
+  status: ClassExecutionState;
   auditRemark: string | null;
   auditLoggedAt: string;
   registeredStudentCount: number;
@@ -34,13 +35,12 @@ export type GroupClassStudentReturnType = {
   name: string;
   studentId: string;
   initials: string;
-  attendanceStatus: string;
+  attendanceStatus: GroupClassAttendanceStatus;
   avatarUrl: string | null;
 };
 
 export type OnlineMeetingInfoReturnType = {
   platform: string;
-  zoomMeetingUrl: string | null;
   meetingId: string | null;
   joinUrl: string | null;
 };

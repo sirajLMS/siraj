@@ -24,6 +24,7 @@ import {
 } from "@/frontend/graphql/sharedDocuments/complaint.documents";
 import { useAdminComplaintsStore } from "@/frontend/stores/adminComplaintsStore";
 import { useUserStore } from "@/frontend/stores/userStore";
+import { logger } from "@/frontend/utils/logger";
 import { AdminComplaintsView } from "./AdminComplaintsView";
 import type { AdminComplaintRow, AdminComplaintsSummary } from "./types/complaints.types";
 import { buildComplaintsLabels } from "./utils/buildComplaintsLabels";
@@ -34,6 +35,7 @@ const StyledErrorTypography = styled(Typography)(({ theme }) => ({
 
 export function AdminComplaintsContainer() {
   const t = useTranslations("dashboard.complaints");
+  const tc = useTranslations("common");
   const labels = buildComplaintsLabels(t);
   const hasPermission = useUserStore(state => state.hasPermission);
 
@@ -94,7 +96,7 @@ export function AdminComplaintsContainer() {
     if (!data?.adminComplaintQueue?.rows) return [];
     return data.adminComplaintQueue.rows.map(row => ({
       id: row.id ?? "",
-      submitterName: row.parentName ?? row.submitterEmail ?? "",
+      submitterName: row.parentName ?? "",
       submitterRole: row.studentName ? `Guardian • ${row.studentName}` : "Guardian",
       avatarUrl: row.parentAvatarUrl ?? "",
       priority: row.category?.toLowerCase().includes("urgent") ? "urgent" : "general",
@@ -124,14 +126,13 @@ export function AdminComplaintsContainer() {
     },
   });
 
-  const handleAnswer = (id: string, options: { readonly sendEmail: boolean }) => {
+  const handleAnswer = (id: string, _options: { readonly sendEmail: boolean }) => {
     const draft = draftResponses[id] ?? "";
     void respondToComplaint({
       variables: {
         input: {
           complaintId: id,
           body: draft,
-          emailSent: options.sendEmail,
         },
       },
     });
@@ -161,7 +162,8 @@ export function AdminComplaintsContainer() {
   }
 
   if (error) {
-    return <StyledErrorTypography>{error.message}</StyledErrorTypography>;
+    logger.error("Error loading complaints:", { error });
+    return <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>;
   }
 
   return (

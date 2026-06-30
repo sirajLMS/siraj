@@ -11,7 +11,7 @@ export const createManualInvoiceMutationDocument: TypedDocumentNode<
     $studentId: String
     $amount: String!
     $currency: String!
-    $invoiceType: String!
+    $invoiceType: InvoiceType!
     $issueDate: String!
     $dueDate: String!
     $exchangeRateSnapshot: String
@@ -72,7 +72,6 @@ export const deleteInvoiceMutationDocument: TypedDocumentNode<
     deleteInvoice(invoiceId: $invoiceId) {
       id
       parentId
-      deletedAt
       version
       notificationSummaryUpdated
     }

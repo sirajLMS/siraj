@@ -50,7 +50,6 @@ const mockAuditData = {
     ],
     meetingInfo: {
       platform: "zoom",
-      zoomMeetingUrl: "https://zoom.us/j/123456789",
       meetingId: "123456789",
       joinUrl: "https://zoom.us/j/123456789",
     },

@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
+import type { StudentStatus as StudentStatusType } from "@/frontend/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { changeStudentStatusMutationDocument, reassignStudentTeacherMutationDocument } from "../sharedDocuments";
 import { assertOperationDenied, authenticatedRequest, loginDemoUser, provisionTestEntities } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
@@ -105,38 +107,38 @@ describe("GraphQL: changeStudentStatus mutation", () => {
   test("admin changes status from REGULAR to SUSPENDED", async () => {
     const data = await authenticatedRequest(token, "mutate", changeStudentStatusMutationDocument, {
       studentId,
-      newStatus: "SUSPENDED",
+      newStatus: StudentStatus.Suspended as StudentStatusType,
       expectedVersion: null,
     });
 
     expect(data.changeStudentStatus?.id).toBe(studentId);
-    expect(data.changeStudentStatus?.status).toBe("SUSPENDED");
+    expect(data.changeStudentStatus?.status).toBe(StudentStatus.Suspended);
   });
 
   test("admin changes status from SUSPENDED back to REGULAR", async () => {
     const data = await authenticatedRequest(token, "mutate", changeStudentStatusMutationDocument, {
       studentId,
-      newStatus: "REGULAR",
+      newStatus: StudentStatus.Regular as StudentStatusType,
       expectedVersion: null,
     });
 
-    expect(data.changeStudentStatus?.status).toBe("REGULAR");
+    expect(data.changeStudentStatus?.status).toBe(StudentStatus.Regular);
   });
 
   test("admin changes status from REGULAR to ON_LEAVE", async () => {
     const data = await authenticatedRequest(token, "mutate", changeStudentStatusMutationDocument, {
       studentId,
-      newStatus: "ON_LEAVE",
+      newStatus: StudentStatus.OnLeave as StudentStatusType,
       expectedVersion: null,
     });
 
-    expect(data.changeStudentStatus?.status).toBe("ON_LEAVE");
+    expect(data.changeStudentStatus?.status).toBe(StudentStatus.OnLeave);
   });
 
   test("teacher role is denied", async () => {
     await assertOperationDenied("teacher_default", "mutate", changeStudentStatusMutationDocument, {
       studentId: studentId || NIL_UUID,
-      newStatus: "SUSPENDED",
+      newStatus: StudentStatus.Suspended as StudentStatusType,
       expectedVersion: null,
     });
   });
@@ -144,7 +146,7 @@ describe("GraphQL: changeStudentStatus mutation", () => {
   test("parent role is denied", async () => {
     await assertOperationDenied("parent_default", "mutate", changeStudentStatusMutationDocument, {
       studentId: studentId || NIL_UUID,
-      newStatus: "SUSPENDED",
+      newStatus: StudentStatus.Suspended as StudentStatusType,
       expectedVersion: null,
     });
   });
@@ -152,7 +154,7 @@ describe("GraphQL: changeStudentStatus mutation", () => {
   test("non-existent student returns studentNotFound", async () => {
     await expectMutationError(token, changeStudentStatusMutationDocument, {
       studentId: "00000000-0000-0000-0000-000000000006",
-      newStatus: "SUSPENDED",
+      newStatus: StudentStatus.Suspended as StudentStatusType,
       expectedVersion: null,
     });
   });

@@ -2,8 +2,10 @@ import {
   BillingManagementService,
   type SendPaymentReminderResult,
 } from "@/backend/services/billing/billing-management.service";
+import type { InvoiceStatus, InvoiceType } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { BillingMonthInputRef } from "./billing-history.pothos";
+import { InvoiceStatusPothosObject, InvoiceTypePothosObject } from "./enum.pothos";
 
 // ─── ManualInvoiceResult Object ──────────────────────────────────────────────
 
@@ -13,8 +15,8 @@ export type ManualInvoiceResultDefinition = {
   studentId: string | null;
   amount: string;
   currency: string;
-  status: string;
-  invoiceType: string;
+  status: InvoiceStatus;
+  invoiceType: InvoiceType;
   issueDate: string;
   dueDate: string;
   paidDate: string | null;
@@ -31,8 +33,8 @@ export const ManualInvoiceResultPothosObject = ManualInvoiceResultRef.implement(
     studentId: t.exposeString("studentId", { nullable: true }),
     amount: t.exposeString("amount"),
     currency: t.exposeString("currency"),
-    status: t.exposeString("status"),
-    invoiceType: t.exposeString("invoiceType"),
+    status: t.expose("status", { type: InvoiceStatusPothosObject }),
+    invoiceType: t.expose("invoiceType", { type: InvoiceTypePothosObject }),
     issueDate: t.exposeString("issueDate"),
     dueDate: t.exposeString("dueDate"),
     paidDate: t.exposeString("paidDate", { nullable: true }),
@@ -46,7 +48,7 @@ export const ManualInvoiceResultPothosObject = ManualInvoiceResultRef.implement(
 export type MarkInvoicePaidResultDefinition = {
   id: string;
   parentId: string;
-  status: string;
+  status: InvoiceStatus;
   paidDate: string | null;
   version: number;
   notificationSummaryUpdated: boolean;
@@ -58,7 +60,7 @@ export const MarkInvoicePaidResultPothosObject = MarkInvoicePaidResultRef.implem
   fields: t => ({
     id: t.exposeString("id"),
     parentId: t.exposeString("parentId"),
-    status: t.exposeString("status"),
+    status: t.expose("status", { type: InvoiceStatusPothosObject }),
     paidDate: t.exposeString("paidDate", { nullable: true }),
     version: t.exposeInt("version"),
     notificationSummaryUpdated: t.exposeBoolean("notificationSummaryUpdated"),
@@ -70,7 +72,6 @@ export const MarkInvoicePaidResultPothosObject = MarkInvoicePaidResultRef.implem
 export type DeleteInvoiceResultDefinition = {
   id: string;
   parentId: string;
-  deletedAt: string | null;
   version: number;
   notificationSummaryUpdated: boolean;
 };
@@ -81,7 +82,6 @@ export const DeleteInvoiceResultPothosObject = DeleteInvoiceResultRef.implement(
   fields: t => ({
     id: t.exposeString("id"),
     parentId: t.exposeString("parentId"),
-    deletedAt: t.exposeString("deletedAt", { nullable: true }),
     version: t.exposeInt("version"),
     notificationSummaryUpdated: t.exposeBoolean("notificationSummaryUpdated"),
   }),
@@ -97,7 +97,7 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
       studentId: t.arg.string({ required: false }),
       amount: t.arg.string({ required: true }),
       currency: t.arg.string({ required: true }),
-      invoiceType: t.arg.string({ required: true }),
+      invoiceType: t.arg({ type: InvoiceTypePothosObject, required: true }),
       issueDate: t.arg.string({ required: true }),
       dueDate: t.arg.string({ required: true }),
       exchangeRateSnapshot: t.arg.string({ required: false }),
@@ -164,7 +164,6 @@ gqlSchemaBuilder.mutationField("deleteInvoice", t =>
       return {
         id: result.invoice.id,
         parentId: result.invoice.parentId,
-        deletedAt: result.invoice.deletedAt,
         version: result.invoice.version,
         notificationSummaryUpdated: result.notificationSummaryUpdated,
       };

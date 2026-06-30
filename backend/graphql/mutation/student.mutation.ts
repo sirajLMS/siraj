@@ -23,7 +23,7 @@ async function requireStudentManageStatus(userId: string, locale?: string): Prom
 gqlSchemaBuilder.mutationFields(t => ({
   partiallyUpdateStudent: t.field({
     type: StudentPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { permission: AppPermission.STUDENTS_EDIT },
     args: {
       input: t.arg({
         type: PartialStudentUpdateInputPothosObject,
@@ -32,12 +32,12 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_query, args, ctx) => {
       const userId = await requireAuth(ctx);
-      await requireStudentManageStatus(userId, ctx.locale);
       const input = Object.fromEntries(
         Object.entries(args.input).filter(([, value]) => value !== null)
       ) as Types.PartialStudentUpdateInput;
       const { status, ...restInput } = input;
       if (status) {
+        await requireStudentManageStatus(userId, ctx.locale);
         await StudentRepository.changeStatus(input.id, status, undefined, undefined, ctx.locale);
       }
       return await StudentRepository.partiallyUpdate(restInput as Types.PartialStudentUpdateInput).then(s =>

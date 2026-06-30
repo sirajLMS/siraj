@@ -6,13 +6,14 @@ import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission, InvoiceStatus as GqlInvoiceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import { markInvoicePaidMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import {
   parentBillingSummaryQueryDocument,
   parentInvoiceHistoryQueryDocument,
 } from "@/frontend/graphql/sharedDocuments/parent-billing-history.documents";
 import { useParentBillingStore } from "@/frontend/stores/parentBillingStore";
+import { logger } from "@/frontend/utils/logger";
 import { InvoiceStatus } from "@/shared/lib/enum";
 import { ParentBillingView } from "./ParentBillingView";
 import type { ParentBillingViewProps } from "./types/billingViewTypes";
@@ -39,6 +40,7 @@ function formatDate(dateStr: string | null): string {
 
 export function ParentBillingContainer() {
   const t = useTranslations("dashboard.billing");
+  const tc = useTranslations("common");
   const labels = buildBillingLabels(t);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -83,7 +85,8 @@ export function ParentBillingContainer() {
       showFeedback(t("markAsPaidSuccess", { defaultValue: "Invoice marked as paid" }), "success");
     },
     onError: err => {
-      showFeedback(err.message, "error");
+      logger.error("Mark as paid failed:", { err });
+      showFeedback(tc("operationFailed"), "error");
     },
   });
 
@@ -102,7 +105,7 @@ export function ParentBillingContainer() {
           dueDate: inv.dueDate ?? "",
           paidDate: inv.paidDate ?? "—",
           fee: `${inv.currency} ${inv.amount}`,
-          status: inv.status === InvoiceStatus.PAID ? InvoiceStatus.PAID : InvoiceStatus.UNPAID,
+          status: inv.status === GqlInvoiceStatus.Paid ? InvoiceStatus.PAID : InvoiceStatus.UNPAID,
         })),
         searchQuery
       ),
@@ -128,7 +131,7 @@ export function ParentBillingContainer() {
   }
 
   if (error) {
-    return <StyledErrorTypography>{error.message}</StyledErrorTypography>;
+    return <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>;
   }
 
   const handlePayNow = (invoiceId: string) => {

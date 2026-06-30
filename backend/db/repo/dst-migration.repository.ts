@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, isNull, or, sql } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -9,7 +9,6 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
-import type { DstMigrationResult } from "@/shared/lib/enum";
 
 export namespace DstMigrationRepository {
   export type RecurringScheduleRow = {
@@ -21,22 +20,6 @@ export namespace DstMigrationRepository {
     defaultStartTime: string;
     timezone: string;
     utcOffsetSnapshot: number | null;
-  };
-
-  export const getRecentMigrationRun = async (offsetMinutes: number, tx?: DBTransaction) => {
-    const queryDb = tx ?? db;
-    const rows = await queryDb
-      .select()
-      .from(dstMigrationRuns)
-      .where(
-        and(
-          eq(dstMigrationRuns.offsetMinutes, offsetMinutes),
-          gte(dstMigrationRuns.createdAt, sql`NOW() - INTERVAL '7 days'`)
-        )
-      )
-      .orderBy(desc(dstMigrationRuns.createdAt))
-      .limit(1);
-    return rows[0] ?? null;
   };
 
   export const createMigrationRun = async (
@@ -59,10 +42,7 @@ export namespace DstMigrationRepository {
     return run;
   };
 
-  export const getActiveRecurringSchedules = async (
-    tx?: DBTransaction,
-    limit: number = 500
-  ): Promise<RecurringScheduleRow[]> => {
+  export const getActiveRecurringSchedules = async (tx?: DBTransaction): Promise<RecurringScheduleRow[]> => {
     const queryDb = tx ?? db;
     return await queryDb
       .select({
@@ -79,52 +59,59 @@ export namespace DstMigrationRepository {
       .innerJoin(students, eq(recurringSchedules.studentId, students.id))
       .innerJoin(teachers, eq(recurringSchedules.teacherId, teachers.id))
       .innerJoin(users, eq(teachers.userId, users.id))
+      .where(isNull(recurringSchedules.deletedAt));
+  };
+
+  export const checkConflictingSchedules = async (
+    teacherId: string,
+    defaultStartTime: string,
+    tx?: DBTransaction
+  ): Promise<{ id: string }[]> => {
+    const queryDb = tx ?? db;
+    return await queryDb
+      .select({ id: recurringSchedules.id })
+      .from(recurringSchedules)
       .where(
         and(
-          isNull(recurringSchedules.deletedAt),
-          or(isNull(recurringSchedules.effectiveUntil), gte(recurringSchedules.effectiveUntil, sql`NOW()`))
+          eq(recurringSchedules.teacherId, teacherId),
+          eq(recurringSchedules.defaultStartTime, defaultStartTime),
+          isNull(recurringSchedules.deletedAt)
         )
-      )
-      .limit(limit);
+      );
   };
 
-  export const recordMigrationEntries = async (
-    entries: Array<{
-      runId: string;
-      recurringScheduleId: string;
-      result: DstMigrationResult;
-      conflictDetail: string | null;
-    }>,
+  export const recordMigrationEntry = async (
+    runId: string,
+    recurringScheduleId: string,
+    result: "UPDATED" | "CONFLICT" | "UNCHANGED",
+    conflictDetail: string | null,
     tx?: DBTransaction
   ) => {
     const queryDb = tx ?? db;
-    if (entries.length === 0) return;
-    await queryDb.insert(dstMigrationEntries).values(entries);
+    await queryDb.insert(dstMigrationEntries).values({
+      runId,
+      recurringScheduleId,
+      result,
+      conflictDetail,
+    });
   };
 
-  export const updateRecurringScheduleTimesBatch = async (
-    updates: Array<{ scheduleId: string; newStartTime: string; newOffset: number }>,
+  export const updateRecurringScheduleTime = async (
+    scheduleId: string,
+    newStartTime: string,
+    newOffset: number,
     tx?: DBTransaction
   ) => {
     const queryDb = tx ?? db;
-    if (updates.length === 0) return;
     const now = new Date();
-    const values = sql.join(
-      updates.map(u => sql`(${u.scheduleId}, ${u.newStartTime}, ${u.newOffset})`),
-      sql`, `
-    );
-    await queryDb.execute(sql`
-      UPDATE recurring_schedules rs
-      SET default_start_time = data.new_start,
-          utc_offset_snapshot = data.new_offset,
-          updated_at = ${now}
-      FROM (VALUES ${values}) AS data(id, new_start, new_offset)
-      WHERE rs.id = data.id::uuid
-    `);
-  };
-
-  export const acquireMigrationLock = async (offsetMinutes: number, tx: DBTransaction): Promise<void> => {
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('dst_migration_' || ${offsetMinutes}::text))`);
+    await queryDb
+      .update(recurringSchedules)
+      .set({
+        defaultStartTime: newStartTime,
+        utcOffsetSnapshot: newOffset,
+        updatedAt: now,
+      })
+      .where(eq(recurringSchedules.id, scheduleId));
   };
 
   export const runTransaction = async <T>(cb: (tx: DBTransaction) => Promise<T>): Promise<T> => {

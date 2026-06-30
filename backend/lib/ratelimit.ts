@@ -179,7 +179,8 @@ export const authRateLimiter = new RateLimiter(
 export const apiRateLimiter = new RateLimiter(
   "ratelimit:api",
   200,
-  60 * 1000 // 1 minute
+  60 * 1000, // 1 minute
+  false
 );
 
 /**
@@ -195,6 +196,7 @@ export async function checkRateLimit(
   reset: number;
 }> {
   const isDev = process.env.NODE_ENV === "development";
+  const disableRateLimiting = process.env.DISABLE_RATE_LIMITING === "true";
   try {
     const { success, limit, remaining, reset } = await limiter.limitSimple(identifier);
 
@@ -202,9 +204,13 @@ export async function checkRateLimit(
       return { success, limit, remaining, reset };
     }
 
-    if (isDev) {
+    if (isDev && !disableRateLimiting) {
       logger.warn(`Rate limit would have been exceeded for identifier: ${identifier} (development mode, not enforced)`);
-      // Always allow in development
+      return { success: true, limit, remaining, reset };
+    }
+
+    if (disableRateLimiting) {
+      logger.warn(`Rate limiting explicitly disabled (DISABLE_RATE_LIMITING=true) for identifier: ${identifier}`);
       return { success: true, limit, remaining, reset };
     }
 

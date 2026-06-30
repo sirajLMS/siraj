@@ -7,16 +7,22 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  ClassExecutionState as GqlClassExecutionState,
+} from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import { changeStudentStatusMutationDocument } from "@/frontend/graphql/sharedDocuments/student-lifecycle.documents";
 import { studentUpcomingClassesQueryDocument } from "@/frontend/graphql/sharedDocuments/student-status.documents";
+import { logger } from "@/frontend/utils/logger";
 import { StudentStatus } from "@/shared/lib/enum";
 import { StudentStatusView } from "./StudentStatusView";
 import type { StudentStatusPageData, UpcomingClassDisplay } from "./types";
 
 export function StudentStatusContainer() {
   const t = useTranslations("dashboard.studentStatus");
+  const tc = useTranslations("common");
   const params = useParams();
   const studentId = typeof params?.id === "string" ? params.id : "";
   const notifications = useNotifications();
@@ -49,7 +55,8 @@ export function StudentStatusContainer() {
       void refetchUpcoming();
     },
     onError: error => {
-      notifications.show(error.message, {
+      logger.error("Change student status failed:", { error });
+      notifications.show(tc("operationFailed"), {
         severity: "error",
         autoHideDuration: 5000,
       });
@@ -68,7 +75,7 @@ export function StudentStatusContainer() {
       scheduledStartAt: cls?.scheduledStartAt ?? "",
       scheduledEndAt: cls?.scheduledEndAt ?? "",
       durationMinutes: cls?.durationMinutes ?? 0,
-      executionState: cls?.executionState ?? "NOT_ACTIVATED",
+      executionState: (cls?.executionState ?? GqlClassExecutionState.NotActivated) as string,
       isFrozen: cls?.isFrozen ?? false,
     }));
 
@@ -98,7 +105,7 @@ export function StudentStatusContainer() {
       await changeStatus({
         variables: {
           studentId,
-          newStatus: status,
+          newStatus: status as unknown as Types.StudentStatus,
           expectedVersion: versionRef.current,
         },
       });
@@ -119,8 +126,8 @@ export function StudentStatusContainer() {
   }
 
   if (studentError || upcomingError) {
-    const msg = studentError?.message ?? upcomingError?.message ?? "Unknown error";
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{msg}</Typography>;
+    logger.error("Error loading student status:", { studentError, upcomingError });
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc("loadFailed")}</Typography>;
   }
 
   if (!student) {

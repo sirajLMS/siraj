@@ -12,7 +12,6 @@ export const createLoginSchema = (messages: {
       .min(1, messages.emailRequired)
       .pipe(z.email({ message: messages.emailInvalid })),
     password: z.string().min(1, messages.passwordRequired).min(6, messages.passwordMinLength),
-    rememberMe: z.boolean().optional(),
   });
 };
 

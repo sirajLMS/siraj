@@ -90,6 +90,8 @@ export interface TeacherDashboardLabels {
   readonly errors: {
     readonly meetingUrlNotAvailable: string;
     readonly handbookUrlNotFound: string;
+    readonly missedClassTime: string;
+    readonly activationFailed: string;
   };
   readonly supportRequestSubmitted: string;
 }

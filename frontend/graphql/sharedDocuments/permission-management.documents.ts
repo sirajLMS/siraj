@@ -24,6 +24,19 @@ const PERMISSION_GROUP_FIELDS = gql`
     createdAt
     updatedAt
     permissionIds
+  }
+`;
+
+const PERMISSION_GROUP_DETAIL_FIELDS = gql`
+  fragment PermissionGroupDetailFields on PermissionGroup {
+    id
+    name
+    slug
+    description
+    isSystem
+    createdAt
+    updatedAt
+    permissionIds
     assignedUsers {
       id
       name
@@ -62,10 +75,10 @@ export const permissionGroupQueryDocument: TypedDocumentNode<
   Operations.PermissionGroupQuery,
   Types.QueryPermissionGroupArgs
 > = gql`
-  ${PERMISSION_GROUP_FIELDS}
+  ${PERMISSION_GROUP_DETAIL_FIELDS}
   query permissionGroup($id: String!) {
     permissionGroup(id: $id) {
-      ...PermissionGroupFields
+      ...PermissionGroupDetailFields
     }
   }
 `;
@@ -104,10 +117,10 @@ export const createPermissionGroupMutationDocument: TypedDocumentNode<
   Operations.CreatePermissionGroupMutation,
   Types.MutationCreatePermissionGroupArgs
 > = gql`
-  ${PERMISSION_GROUP_FIELDS}
+  ${PERMISSION_GROUP_DETAIL_FIELDS}
   mutation createPermissionGroup($input: CreatePermissionGroupInput!) {
     createPermissionGroup(input: $input) {
-      ...PermissionGroupFields
+      ...PermissionGroupDetailFields
     }
   }
 `;
@@ -116,10 +129,10 @@ export const updatePermissionGroupMutationDocument: TypedDocumentNode<
   Operations.UpdatePermissionGroupMutation,
   Types.MutationUpdatePermissionGroupArgs
 > = gql`
-  ${PERMISSION_GROUP_FIELDS}
+  ${PERMISSION_GROUP_DETAIL_FIELDS}
   mutation updatePermissionGroup($input: UpdatePermissionGroupInput!) {
     updatePermissionGroup(input: $input) {
-      ...PermissionGroupFields
+      ...PermissionGroupDetailFields
     }
   }
 `;

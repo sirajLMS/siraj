@@ -14,6 +14,7 @@ interface BrowserCookieStore {
     readonly expires: number;
     readonly path: string;
     readonly sameSite: "lax";
+    readonly secure: true;
   }) => Promise<void>;
 }
 
@@ -71,6 +72,7 @@ async function setCookie(name: string, value: string, days: number) {
         expires,
         path: "/",
         sameSite: "lax",
+        secure: true,
       });
       return;
     } catch {
@@ -82,7 +84,7 @@ async function setCookie(name: string, value: string, days: number) {
   const date = new Date(expires);
   const expiresStr = `expires=${date.toUTCString()}`;
   // biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
-  globalThis.document.cookie = `${name}=${value};${expiresStr};path=/;SameSite=Lax`;
+  globalThis.document.cookie = `${name}=${value};${expiresStr};path=/;SameSite=Lax;Secure`;
 }
 
 /**

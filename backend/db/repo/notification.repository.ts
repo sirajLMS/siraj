@@ -79,17 +79,18 @@ export namespace NotificationRepository {
   }
 
   export const registerDeviceToken = async (
+    userId: string,
     input: RegisterDeviceTokenInput,
     tx?: DBTransaction
   ): Promise<UserDeviceTokenSelectType> => {
     const runner = async (t: DBTransaction) => {
-      await acquireDeviceTokenLock(t, input.userId);
+      await acquireDeviceTokenLock(t, userId);
       const now = new Date();
 
       const [token] = await t
         .insert(userDeviceTokens)
         .values({
-          userId: input.userId,
+          userId,
           token: input.token,
           platform: input.platform,
           deviceName: input.deviceName ?? null,
@@ -101,7 +102,7 @@ export namespace NotificationRepository {
         .onConflictDoUpdate({
           target: userDeviceTokens.token,
           set: {
-            userId: input.userId,
+            userId,
             platform: input.platform,
             deviceName: input.deviceName ?? null,
             isActive: true,
@@ -382,12 +383,13 @@ export namespace NotificationRepository {
   };
 
   export const setPreference = async (
+    userId: string,
     input: SetNotificationPreferenceInput,
     tx?: DBTransaction
   ): Promise<UserNotificationPreferenceSelectType> => {
     const runner = async (t: DBTransaction) => {
       await t.execute(
-        sql`SELECT pg_advisory_xact_lock(hashtext('notification_pref_' || ${input.userId}::text || '_' || ${input.channel}::text || '_' || ${input.eventType}::text))`
+        sql`SELECT pg_advisory_xact_lock(hashtext('notification_pref_' || ${userId}::text || '_' || ${input.channel}::text || '_' || ${input.eventType}::text))`
       );
 
       const now = new Date();
@@ -395,7 +397,7 @@ export namespace NotificationRepository {
       const [result] = await t
         .insert(userNotificationPreferences)
         .values({
-          userId: input.userId,
+          userId,
           channel: input.channel,
           eventType: input.eventType,
           enabled: input.enabled,

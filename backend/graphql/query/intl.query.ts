@@ -14,6 +14,7 @@ gqlSchemaBuilder.queryFields(t => ({
 
   translatedMessage: t.field({
     type: "String",
+    authScopes: { loggedIn: true },
     args: {
       key: t.arg.string({ required: true }),
       namespace: t.arg.string({ required: true }),

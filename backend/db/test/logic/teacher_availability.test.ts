@@ -129,13 +129,13 @@ async function submitTestVacation(args: {
 }) {
   return TeacherAvailabilityRepository.submitVacationRequest(
     {
-      teacherId: args.teacherId,
-      requestedByUserId: args.userId,
       startAt: new Date(args.start),
       endAt: new Date(args.end),
       timezone: "UTC",
       reason: args.reason,
     },
+    args.userId,
+    args.teacherId,
     args.tx
   );
 }
@@ -153,8 +153,8 @@ describe("Teacher Availability & Vacation Workflow", () => {
   test("Allows booking within defined availability window", () =>
     runTestInFixture(async (tx, { teacher, student }) => {
       await TeacherAvailabilityRepository.addAvailabilityWindow(
+        teacher.id,
         {
-          teacherId: teacher.id,
           dayOfWeek: DayOfWeek.WEDNESDAY,
           startTime: "09:00:00",
           endTime: "17:00:00",
@@ -177,8 +177,8 @@ describe("Teacher Availability & Vacation Workflow", () => {
   test("Blocks booking outside defined availability windows", () =>
     runTestInFixture(async (tx, { teacher, student }) => {
       await TeacherAvailabilityRepository.addAvailabilityWindow(
+        teacher.id,
         {
-          teacherId: teacher.id,
           dayOfWeek: DayOfWeek.WEDNESDAY,
           startTime: "09:00:00",
           endTime: "12:00:00",
@@ -200,8 +200,8 @@ describe("Teacher Availability & Vacation Workflow", () => {
   test("Blocks booking during recurring unavailability pattern", () =>
     runTestInFixture(async (tx, { teacher, student }) => {
       await TeacherAvailabilityRepository.addRecurringUnavailability(
+        teacher.id,
         {
-          teacherId: teacher.id,
           dayOfWeek: DayOfWeek.FRIDAY,
           startTime: "12:00:00",
           endTime: "14:00:00",
@@ -247,8 +247,8 @@ describe("Teacher Availability & Vacation Workflow", () => {
       const approved = await TeacherAvailabilityRepository.approveVacationRequest(
         {
           vacationRequestId: vacation.id,
-          processedByUserId: adminUser.id,
         },
+        adminUser.id,
         tx
       );
 
@@ -277,8 +277,8 @@ describe("Teacher Availability & Vacation Workflow", () => {
       const rejected = await TeacherAvailabilityRepository.rejectVacationRequest(
         {
           vacationRequestId: vacation.id,
-          processedByUserId: adminUser.id,
         },
+        adminUser.id,
         tx
       );
 

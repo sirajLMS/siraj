@@ -66,11 +66,12 @@ export namespace ComplaintResponseService {
     responderUserId: string,
     locale?: string
   ): Promise<ComplaintResponse> {
-    const { complaintId, body, emailSent } = input;
+    const { complaintId, body } = input;
 
     const complaint = await assertCanRespondToComplaint(responderUserId, complaintId, locale);
 
     try {
+      const emailSent = false;
       const response = await ComplaintResponseRepository.createResponse(
         {
           complaintId,
@@ -94,7 +95,6 @@ export namespace ComplaintResponseService {
       return {
         id: response.id,
         complaintId: response.complaintId,
-        responderUserId: response.responderUserId ?? null,
         body: response.body,
         emailSent: response.emailSent,
         createdAt: response.createdAt,

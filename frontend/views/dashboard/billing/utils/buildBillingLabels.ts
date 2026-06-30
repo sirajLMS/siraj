@@ -105,6 +105,7 @@ function buildStatusLabels(t: BillingTranslator) {
       PENDING: t("invoiceStatus.PENDING"),
       PAID: t("invoiceStatus.PAID"),
       UNPAID: t("invoiceStatus.UNPAID"),
+      CANCELLED: t("invoiceStatus.CANCELLED"),
     },
     creditStatus: {
       negative_balance: t("creditStatus.negative_balance"),

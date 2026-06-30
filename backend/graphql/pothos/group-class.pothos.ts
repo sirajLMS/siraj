@@ -8,6 +8,7 @@ import type {
 } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { SupportRequestResultPothosObject } from "./class-session.pothos";
+import { ClassExecutionStatePothosObject, GroupClassAttendanceStatusPothosObject } from "./enum.pothos";
 
 const GroupClassStudentRef = gqlSchemaBuilder.objectRef<GroupClassStudentReturnType>("GroupClassStudent");
 
@@ -17,7 +18,7 @@ export const GroupClassStudentPothosObject = GroupClassStudentRef.implement({
     name: t.exposeString("name"),
     studentId: t.exposeString("studentId"),
     initials: t.exposeString("initials"),
-    attendanceStatus: t.exposeString("attendanceStatus"),
+    attendanceStatus: t.expose("attendanceStatus", { type: GroupClassAttendanceStatusPothosObject }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
   }),
 });
@@ -27,7 +28,6 @@ const OnlineMeetingInfoRef = gqlSchemaBuilder.objectRef<OnlineMeetingInfoReturnT
 export const OnlineMeetingInfoPothosObject = OnlineMeetingInfoRef.implement({
   fields: t => ({
     platform: t.exposeString("platform"),
-    zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
     meetingId: t.exposeString("meetingId", { nullable: true }),
     joinUrl: t.exposeString("joinUrl", { nullable: true }),
   }),
@@ -68,7 +68,7 @@ export const GroupClassAuditPothosObject = GroupClassAuditRef.implement({
     rescheduledDate: t.exposeString("rescheduledDate", { nullable: true }),
     timeSlot: t.exposeString("timeSlot"),
     venue: t.exposeString("venue"),
-    status: t.exposeString("status"),
+    status: t.expose("status", { type: ClassExecutionStatePothosObject }),
     auditRemark: t.exposeString("auditRemark", { nullable: true }),
     auditLoggedAt: t.exposeString("auditLoggedAt"),
     registeredStudentCount: t.exposeInt("registeredStudentCount"),

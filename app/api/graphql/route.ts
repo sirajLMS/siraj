@@ -5,6 +5,7 @@ import {
   // ApolloServerPluginLandingPageProductionDefault,
 } from "@apollo/server/plugin/landingPage/default";
 import { startServerAndCreateNextHandler } from "@as-integrations/next";
+import depthLimit from "graphql-depth-limit";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { createGraphQLContext } from "@/backend/graphql/gqlContextFactory";
@@ -15,6 +16,7 @@ import { ApolloCacheAdapter } from "@/backend/services/cache";
 import { IdempotencyService } from "@/backend/services/idempotency.service";
 
 const isProduction = process.env.NODE_ENV === "production";
+const MAX_GRAPHQL_DEPTH = 7;
 
 const cache = new ApolloCacheAdapter();
 const server = new ApolloServer({
@@ -25,6 +27,7 @@ const server = new ApolloServer({
       ? ApolloServerPluginLandingPageDisabled()
       : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
   ],
+  validationRules: [depthLimit(MAX_GRAPHQL_DEPTH)],
   hideSchemaDetailsFromClientErrors: isProduction,
   includeStacktraceInErrorResponses: !isProduction,
   logger: logger,
@@ -151,17 +154,13 @@ async function withIdempotency(
 }
 
 /**
- * POST handler for GraphQL mutations
+ * POST handler for GraphQL requests
  * Applies rate limiting and idempotency
+ *
+ * Only POST is supported for GraphQL requests. GET is intentionally excluded
+ * to prevent CSRF attacks — browsers automatically send cookies with GET
+ * requests, allowing malicious sites to make authenticated GraphQL queries.
  */
 export async function POST(request: NextRequest) {
   return withRateLimit(request, req => withIdempotency(req, handler));
-}
-
-/**
- * GET handler for GraphQL queries
- * Applies rate limiting
- */
-export async function GET(request: NextRequest) {
-  return withRateLimit(request, handler);
 }

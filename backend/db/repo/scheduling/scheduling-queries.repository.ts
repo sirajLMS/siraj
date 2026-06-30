@@ -141,7 +141,9 @@ async function fetchDailyScheduleBaseRows(
     );
   }
 
-  // TODO: Push metricFilter and pagination into SQL for production scale. Current approach loads a bounded set and filters in JS.
+  // NOTE: Pagination and metric filtering are intentionally handled in JS for now.
+  // The bounded LIMIT(500) keeps this safe for current scale. SQL-level pushdown
+  // is planned when row counts exceed the comfortable in-memory threshold.
   const rows = await t.select({ classInstance: classInstances }).from(classInstances).where(dayConditions).limit(500);
 
   return hydrateDailyScheduleRows(
@@ -661,19 +663,21 @@ export const getWeeklyWorkloadMetrics = async (
   };
 };
 
+import type { ClassExecutionState, ClassOutcome, StudentStatus } from "@/shared/lib/enum";
+
 export type StatusTrackingRow = {
   id: string;
   studentId: string;
   studentName: string;
   studentInitials: string;
-  studentStatus: string;
+  studentStatus: StudentStatus;
   teacherId: string;
   teacherName: string;
   scheduledStartAt: Date;
   scheduledEndAt: Date;
   durationMinutes: number;
-  executionState: string;
-  outcome: string;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome;
   isFrozen: boolean;
 };
 
@@ -726,14 +730,14 @@ export const getStatusTrackingRows = async (
         .slice(0, 2)
         .map((w: string) => w[0]?.toUpperCase() ?? "")
         .join(""),
-      studentStatus: r.studentStatus,
+      studentStatus: r.studentStatus as StudentStatus,
       teacherId: r.teacherId,
       teacherName: r.teacherUserName,
       scheduledStartAt: r.scheduledStartAt,
       scheduledEndAt: r.scheduledEndAt,
       durationMinutes: r.durationMinutes,
-      executionState: r.executionState,
-      outcome: r.outcome,
+      executionState: r.executionState as ClassExecutionState,
+      outcome: r.outcome as ClassOutcome,
       isFrozen: r.isFrozen,
     }));
 

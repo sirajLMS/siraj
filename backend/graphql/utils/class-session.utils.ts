@@ -1,7 +1,7 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceDetailReturnType, ClassInstancePerformanceSelectType } from "@/backend/types";
-import type { ClassType } from "@/shared/lib/enum";
+import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/lib/enum";
 
 type ClassInstanceWithRelations = NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>;
 
@@ -43,7 +43,7 @@ export async function buildClassInstanceDetail(
     startTime: start.toISOString(),
     endTime: end.toISOString(),
     durationMinutes: instance.durationMinutes,
-    status: instance.outcome || instance.executionState,
+    status: (instance.outcome || instance.executionState) as ClassExecutionState,
     remarks: instance.remarks ?? null,
     hasTimezoneMismatch,
     studentTimezone,
@@ -51,8 +51,8 @@ export async function buildClassInstanceDetail(
     zoomMeetingUrl: instance.zoomMeetingUrl ?? null,
     payrollCredited: instance.payrollCredited ?? false,
     isRescheduled: instance.isRescheduled ?? false,
-    executionState: instance.executionState,
-    outcome: instance.outcome || "PENDING",
+    executionState: instance.executionState as ClassExecutionState,
+    outcome: (instance.outcome || "PENDING") as ClassOutcome,
     student: {
       id: instance.student?.id || instance.studentId,
       name: instance.student?.name || unknownName,

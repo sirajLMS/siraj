@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import logger from "@/backend/lib/logger";
 
 /**
@@ -41,8 +42,10 @@ function validateJwtSecret(): string {
     if (process.env.NODE_ENV === "production") {
       throw new Error("CRITICAL: JWT_SECRET is not set in production environment.");
     }
-    logger.warn("⚠️  JWT_SECRET not set. Using default for development.");
-    return "development-secret-change-me-in-production";
+    logger.warn(
+      "⚠️  JWT_SECRET not set. Generating a random secret for this session. Set JWT_SECRET in .env for stability."
+    );
+    return randomBytes(32).toString("hex");
   }
 
   if (process.env.NODE_ENV === "production" && jwtSecret.length < 32) {
@@ -133,10 +136,27 @@ function logEnvironmentConfig(config: EnvironmentConfig): void {
 }
 
 /**
+ * Validate NODE_ENV to prevent typos from silently disabling security checks
+ */
+function validateNodeEnv(): string {
+  const nodeEnv = process.env.NODE_ENV;
+  if (!nodeEnv) return "development";
+
+  const validEnvs = ["development", "production", "test", "staging"];
+  if (!validEnvs.includes(nodeEnv)) {
+    logger.warn(
+      `⚠️  Invalid NODE_ENV: "${nodeEnv}". Must be one of: ${validEnvs.join(", ")}. Defaulting to "development".`
+    );
+    return "development";
+  }
+  return nodeEnv;
+}
+
+/**
  * Main validation function
  */
 export function validateEnvironment(): EnvironmentConfig {
-  const nodeEnv = (process.env.NODE_ENV as string) || "development";
+  const nodeEnv = validateNodeEnv();
 
   logger.log("🔍 Validating environment variables...");
   logger.log(`Environment: ${nodeEnv}`);

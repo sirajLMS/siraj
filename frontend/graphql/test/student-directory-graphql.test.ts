@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { studentDirectoryQueryDocument } from "../sharedDocuments/student-directory.documents";
-import { authenticatedRequest, assertOperationDenied, cleanupTestEntities, loginAndProvision } from "./helpers";
+import { assertOperationDenied, authenticatedRequest, cleanupTestEntities, loginAndProvision } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -49,7 +49,6 @@ describe("studentDirectory GraphQL Integration Tests", () => {
       expect(student.classesRemaining).toBeDefined();
       expect(student.classesTotal).toBeDefined();
       expect(student.hoursPerWeek).toBeDefined();
-      expect(student.parentName).toBeDefined();
       expect(student.teacherName !== undefined).toBeTrue();
       expect(student.createdAt).toBeDefined();
     }

@@ -91,10 +91,7 @@ function mapComplaintQueueRow(r: {
 }): ComplaintReturnType {
   return {
     id: r.id,
-    parentId: r.parentId,
-    studentId: r.studentId ?? null,
     category: r.category as ComplaintCategory,
-    submitterEmail: r.submitterEmail,
     body: r.body,
     status: r.status as ComplaintStatus,
     createdAt: r.createdAt,
@@ -174,10 +171,7 @@ export namespace ComplaintRepository {
 
     const complaintsList: ComplaintReturnType[] = rows.map(r => ({
       id: r.id,
-      parentId: r.parentId,
-      studentId: r.studentId ?? null,
       category: r.category as ComplaintCategory,
-      submitterEmail: r.submitterEmail,
       body: r.body,
       status: r.status as ComplaintStatus,
       createdAt: r.createdAt,
@@ -357,7 +351,7 @@ export namespace ComplaintRepository {
     return queryDb
       .select({
         fileId: storageFiles.id,
-        filePath: storageFiles.path,
+        publicUrl: storageFiles.path,
         isProtected: storageFiles.isProtected,
         usageType: complaintFiles.usageType,
         createdAt: complaintFiles.createdAt,

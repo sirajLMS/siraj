@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect } from "react";
-import type { User } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { OverrideState, PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
 import { usersQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import {
   assignPermissionGroupToUserMutationDocument,
@@ -39,7 +39,7 @@ const usePermissionQueries = () => {
   }, [permissionsData, setPermissions]);
 
   useEffect(() => {
-    if (groupsData?.permissionGroups) setGroups(groupsData.permissionGroups);
+    if (groupsData?.permissionGroups) setGroups(groupsData.permissionGroups as PermissionGroup[]);
   }, [groupsData, setGroups]);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const usePermissionQueries = () => {
   useEffect(() => {
     if (queryError) {
       logger.error("[PermissionManagement] Query error:", queryError);
-      setError(queryError.message);
+      setError("operationFailed");
     } else {
       setError(null);
     }
@@ -76,7 +76,7 @@ const usePermissionMutations = () => {
       : {}),
     onError: (err: Error) => {
       logger.error(`[PermissionManagement] ${label} error:`, err);
-      store.setError(err.message);
+      store.setError("operationFailed");
     },
   });
 
@@ -190,7 +190,13 @@ export function usePermissionManagementData() {
   const handleUpdateOverrides = (userId: string, overrides: Array<{ permissionId: string; state: string }>) =>
     run(
       "handleUpdateOverrides",
-      () => updateOverridesMutation({ variables: { userId, overrides } }),
+      () =>
+        updateOverridesMutation({
+          variables: {
+            userId,
+            overrides: overrides as Array<{ permissionId: string; state: OverrideState }>,
+          },
+        }),
       store.closeManageOverrides
     );
 

@@ -33,7 +33,7 @@ export const changeStudentStatusMutationDocument: TypedDocumentNode<
 > = gql`
   mutation ChangeStudentStatus(
     $studentId: String!
-    $newStatus: String!
+    $newStatus: StudentStatus!
     $expectedVersion: Int
   ) {
     changeStudentStatus(

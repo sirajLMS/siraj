@@ -31,7 +31,6 @@ export const groupClassAuditQueryDocument: TypedDocumentNode<
       }
       meetingInfo {
         platform
-        zoomMeetingUrl
         meetingId
         joinUrl
       }
@@ -81,7 +80,6 @@ export const updateClassAdminNoteMutationDocument: TypedDocumentNode<
       }
       meetingInfo {
         platform
-        zoomMeetingUrl
         meetingId
         joinUrl
       }

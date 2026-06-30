@@ -15,6 +15,7 @@ import {
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
 import type { PaginationArgs } from "@/backend/types";
+import type { InvoiceStatus, InvoiceType, StudentStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
 type CurrencyExchangeRateUpdateInput = Omit<Types.CurrencyExchangeRateInsertInput, "id" | "createdAt" | "updatedAt">;
@@ -389,8 +390,8 @@ export namespace BillingRepository {
       paidDate: r.paidDate ?? null,
       amount: r.amount,
       currency: r.currency,
-      status: r.status,
-      invoiceType: r.invoiceType ?? "",
+      status: r.status as InvoiceStatus,
+      invoiceType: (r.invoiceType ?? "MONTHLY") as InvoiceType,
       studentId: r.studentId ?? null,
       studentName: r.studentName ?? null,
     };
@@ -591,10 +592,10 @@ export namespace BillingRepository {
       id: r.id,
       studentName: r.studentName ?? "Unknown",
       parentEmail: r.parentEmail ?? "",
-      planType: r.planType ?? "MONTHLY",
+      planType: (r.planType ?? "MONTHLY") as InvoiceType,
       classesRemaining: r.classesRemaining,
       classesTotal: r.classesTotal,
-      status: r.status ?? "active",
+      status: (r.status ?? "active") as StudentStatus,
     }));
   };
 

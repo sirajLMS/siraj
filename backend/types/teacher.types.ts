@@ -1,6 +1,7 @@
 import type { teacherBankingDetailsHistory, teacherPayments, teachers } from "@/backend/db/schema";
-import type { AccountStatus, Gender, PaymentMethod } from "@/shared/lib/enum";
+import type { AccountStatus, ClassExecutionState, ClassOutcome, Gender, PaymentMethod } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
+import type { ClassSessionMetrics } from "./schedule.types";
 
 export type TeacherEntity = typeof teachers.$inferSelect;
 export type TeacherEntityInput = typeof teachers.$inferInsert;
@@ -31,11 +32,29 @@ export type CreateTeacherPaymentInput = {
 
 export type TeacherCreateResult = Pick<TeacherEntity, "id" | "userId" | "status" | "timezone" | "createdAt">;
 
+export type TeacherDashboardScheduleRow = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  scheduledStartAt: Date | string;
+  durationMinutes: number;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome | null;
+  zoomMeetingUrl: string | null;
+  yourTimeFormatted: string | null;
+};
+
+export type TeacherProgressFeedItem = {
+  id: string;
+  title: string;
+  type: string;
+};
+
 export type TeacherDashboardPaginatedResult = {
   id: string;
-  metrics: Record<string, number>;
-  scheduleRows: Record<string, unknown>[];
-  progressFeed: Record<string, unknown>[];
+  metrics: ClassSessionMetrics;
+  scheduleRows: TeacherDashboardScheduleRow[];
+  progressFeed: TeacherProgressFeedItem[];
   totalCount: number;
   pageInfo: PageInfo | null;
 };

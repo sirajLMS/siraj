@@ -3,7 +3,7 @@ import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { StudentUpcomingClassesResult } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
+import { AppPermission, type ClassExecutionState, type StudentStatus } from "@/shared/lib/enum";
 
 export namespace StudentStatusService {
   export async function getUpcomingClasses(
@@ -35,8 +35,8 @@ export namespace StudentStatusService {
       id: `upcoming-${studentId}`,
       studentId,
       studentName: student.name,
-      status: student.status,
-      classes,
+      status: student.status as StudentStatus,
+      classes: classes.map(c => ({ ...c, executionState: c.executionState as ClassExecutionState })),
     };
   }
 }

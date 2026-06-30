@@ -10,7 +10,8 @@ interface InternalDemoUser {
 
 export type DemoUser = Omit<InternalDemoUser, "plainPassword">;
 
-const PWD = "12345678";
+// eslint-disable-next-line sonarjs/no-hardcoded-passwords
+const PWD = "Seed_Pass1!";
 
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@siraj.local";
 

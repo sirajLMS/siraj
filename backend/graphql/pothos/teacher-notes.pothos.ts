@@ -37,7 +37,6 @@ export const CreateTeacherNoteInputPothos = gqlSchemaBuilder.inputType("CreateTe
     priority: t.int({ required: false }),
     startsAt: t.field({ type: "DateTime", required: false }),
     expiresAt: t.field({ type: "DateTime", required: false }),
-    teacherId: t.string({ required: false }),
   }),
 });
 

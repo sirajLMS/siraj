@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { ExportButton, SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import type { GroupClassStudent } from "@/frontend/graphql/generated/gql/graphql-types";
+import { GroupClassAttendanceStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
 interface RegisteredStudentsSectionProps {
   readonly students: readonly (GroupClassStudent | null)[] | null | undefined;
@@ -38,14 +39,21 @@ const StyledViewActionButton = styled(IconButton)(({ theme }) => ({
 
 type AttendanceStatus = "pending" | "present" | "absent";
 
+const ATTENDANCE_STATUS_MAP: Record<GroupClassAttendanceStatus, AttendanceStatus> = {
+  [GroupClassAttendanceStatus.Pending]: "pending",
+  [GroupClassAttendanceStatus.Present]: "present",
+  [GroupClassAttendanceStatus.Absent]: "absent",
+  [GroupClassAttendanceStatus.Late]: "pending",
+};
+
 function getAttendanceChipProps(
-  status: string | null | undefined,
+  status: GroupClassAttendanceStatus | null | undefined,
   labels: RegisteredStudentsSectionProps["labels"]
 ): { label: string } {
-  if (status === "present") {
+  if (status === GroupClassAttendanceStatus.Present) {
     return { label: labels.present };
   }
-  if (status === "absent") {
+  if (status === GroupClassAttendanceStatus.Absent) {
     return { label: labels.absent };
   }
   return { label: labels.pending };
@@ -107,14 +115,9 @@ export function RegisteredStudentsSection({
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => {
+          const attendanceDisplay = row.attendanceStatus ? ATTENDANCE_STATUS_MAP[row.attendanceStatus] : "pending";
           const chip = getAttendanceChipProps(row.attendanceStatus, labels);
-          return (
-            <StatusBadge
-              category="sessionTracking"
-              status={(row.attendanceStatus as AttendanceStatus) ?? "pending"}
-              label={chip.label}
-            />
-          );
+          return <StatusBadge category="sessionTracking" status={attendanceDisplay} label={chip.label} />;
         },
       },
       {

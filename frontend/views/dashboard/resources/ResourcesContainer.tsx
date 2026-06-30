@@ -209,7 +209,7 @@ export function ResourcesContainer() {
   const handleCardClick = (id: string) => {
     const resource = resources.find(r => r.id === id);
     if (resource?.filePath) {
-      window.open(`/api/storage/files/${resource.filePath}`, "_blank");
+      window.open(`/api/storage/files/${resource.filePath}`, "_blank", "noopener,noreferrer");
     }
   };
 

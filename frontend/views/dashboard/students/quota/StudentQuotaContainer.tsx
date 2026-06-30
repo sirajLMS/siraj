@@ -10,6 +10,7 @@ import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentByIdQueryDocument, updateStudentQuotaMutationDocument } from "@/frontend/graphql/sharedDocuments";
+import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
 import { StudentQuotaView } from "./StudentQuotaView";
 import type { StudentQuotaFormData } from "./schemas/studentQuotaSchema";
@@ -17,6 +18,7 @@ import type { StudentProfileData } from "./types";
 
 export function StudentQuotaContainer() {
   const t = useTranslations("dashboard.studentQuota");
+  const tc = useTranslations("common");
   const params = useParams();
   const studentId = typeof params?.id === "string" ? params.id : "";
   const notifications = useNotifications();
@@ -39,7 +41,8 @@ export function StudentQuotaContainer() {
       }, 2000);
     },
     onError: mutationError => {
-      notifications.show(mutationError.message, { severity: "error", autoHideDuration: 5000 });
+      logger.error("Update quota failed:", { mutationError });
+      notifications.show(tc("operationFailed"), { severity: "error", autoHideDuration: 5000 });
     },
   });
 
@@ -67,7 +70,8 @@ export function StudentQuotaContainer() {
   }
 
   if (error) {
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{error.message}</Typography>;
+    logger.error("Error loading student quota:", { error });
+    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc("loadFailed")}</Typography>;
   }
 
   const s = data?.studentById;

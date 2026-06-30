@@ -3,6 +3,7 @@
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
 import type { CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
+import { logger } from "@/frontend/utils/logger";
 import type { RecurringClassFormData } from "../recurringClassSchema";
 
 function buildActiveDays(data: RecurringClassFormData) {
@@ -63,8 +64,8 @@ export async function createRecurringClass(
       classInstanceCount: result.classInstanceIds.length,
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to create recurring class";
-    return { success: false, message };
+    logger.error("Failed to create recurring class", { error });
+    return { success: false, message: "Failed to create recurring class" };
   }
 }
 

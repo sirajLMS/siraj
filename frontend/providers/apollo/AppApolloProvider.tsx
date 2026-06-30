@@ -94,14 +94,14 @@ export const AppApolloProvider: React.FC<{
           cache: new InMemoryCache(),
           defaultOptions: {
             watchQuery: {
-              errorPolicy: "all",
+              errorPolicy: "none",
               notifyOnNetworkStatusChange: true,
             },
             query: {
-              errorPolicy: "all",
+              errorPolicy: "none",
             },
             mutate: {
-              errorPolicy: "all",
+              errorPolicy: "none",
             },
           },
         })

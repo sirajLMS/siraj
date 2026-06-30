@@ -1,21 +1,16 @@
-import type { ClassSessionMetrics, PageInfo } from "@/backend/types";
+import type {
+  ClassSessionMetrics,
+  TeacherDashboardPaginatedResult,
+  TeacherDashboardScheduleRow,
+  TeacherProgressFeedItem,
+} from "@/backend/types";
+import type { ClassType } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PageInfoObject } from "../pothos/pagination.objects";
-
-export type TeacherDashboardScheduleRowDefinition = {
-  id: string;
-  studentId: string;
-  studentName: string;
-  scheduledStartAt: Date | string;
-  durationMinutes: number;
-  executionState: string;
-  outcome: string | null;
-  zoomMeetingUrl: string | null;
-  yourTimeFormatted: string | null;
-};
+import { ClassExecutionStatePothosObject, ClassOutcomePothosObject, ClassTypePothosObject } from "./enum.pothos";
 
 const TeacherDashboardScheduleRowRef =
-  gqlSchemaBuilder.objectRef<TeacherDashboardScheduleRowDefinition>("TeacherDashboardScheduleRow");
+  gqlSchemaBuilder.objectRef<TeacherDashboardScheduleRow>("TeacherDashboardScheduleRow");
 
 export const TeacherDashboardScheduleRowPothosObject = TeacherDashboardScheduleRowRef.implement({
   fields: t => ({
@@ -24,21 +19,14 @@ export const TeacherDashboardScheduleRowPothosObject = TeacherDashboardScheduleR
     studentName: t.exposeString("studentName"),
     scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
     durationMinutes: t.exposeInt("durationMinutes"),
-    executionState: t.exposeString("executionState"),
-    outcome: t.exposeString("outcome", { nullable: true }),
+    executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
+    outcome: t.expose("outcome", { type: ClassOutcomePothosObject, nullable: true }),
     zoomMeetingUrl: t.exposeString("zoomMeetingUrl", { nullable: true }),
     yourTimeFormatted: t.exposeString("yourTimeFormatted", { nullable: true }),
   }),
 });
 
-export type TeacherProgressFeedItemDefinition = {
-  id: string;
-  title: string;
-  type: string;
-};
-
-const TeacherProgressFeedItemRef =
-  gqlSchemaBuilder.objectRef<TeacherProgressFeedItemDefinition>("TeacherProgressFeedItem");
+const TeacherProgressFeedItemRef = gqlSchemaBuilder.objectRef<TeacherProgressFeedItem>("TeacherProgressFeedItem");
 
 export const TeacherProgressFeedItemPothosObject = TeacherProgressFeedItemRef.implement({
   fields: t => ({
@@ -67,16 +55,7 @@ export const TeacherDashboardMetricsPothosObject = TeacherDashboardMetricsRef.im
   }),
 });
 
-export type TeacherDashboardDefinition = {
-  id: string;
-  metrics: ClassSessionMetrics;
-  scheduleRows: TeacherDashboardScheduleRowDefinition[];
-  progressFeed: TeacherProgressFeedItemDefinition[];
-  totalCount: number;
-  pageInfo: PageInfo | null;
-};
-
-const TeacherDashboardRef = gqlSchemaBuilder.objectRef<TeacherDashboardDefinition>("TeacherDashboard");
+const TeacherDashboardRef = gqlSchemaBuilder.objectRef<TeacherDashboardPaginatedResult>("TeacherDashboard");
 
 export const TeacherDashboardPothosObject = TeacherDashboardRef.implement({
   fields: t => ({
@@ -95,7 +74,7 @@ export type CreateManualClassEntryInputDefinition = {
   scheduledStartAt: string;
   scheduledEndAt: string;
   durationMinutes: number;
-  classType?: string | null;
+  classType?: ClassType | null;
 };
 
 export const CreateManualClassEntryInputPothosObject = gqlSchemaBuilder
@@ -107,7 +86,7 @@ export const CreateManualClassEntryInputPothosObject = gqlSchemaBuilder
       scheduledStartAt: t.string({ required: true }),
       scheduledEndAt: t.string({ required: true }),
       durationMinutes: t.int({ required: true }),
-      classType: t.string({ required: false }),
+      classType: t.field({ type: ClassTypePothosObject, required: false }),
     }),
   });
 
