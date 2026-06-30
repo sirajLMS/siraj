@@ -151,6 +151,8 @@ type Documents = {
     "\n  mutation createTestGroupClass($classInstanceId: String!, $teacherName: String!) {\n    createTestGroupClass(classInstanceId: $classInstanceId, teacherName: $teacherName) {\n      groupClassId\n    }\n  }\n": typeof types.CreateTestGroupClassDocument,
     "\n  mutation cleanupTestGroupClass($groupClassId: String!) {\n    cleanupTestGroupClass(groupClassId: $groupClassId)\n  }\n": typeof types.CleanupTestGroupClassDocument,
     "\n  mutation cleanupTestManager($userId: String!) {\n    cleanupTestManager(userId: $userId)\n  }\n": typeof types.CleanupTestManagerDocument,
+    "\n  mutation createTestSuperAdmin($prefix: String!) {\n    createTestSuperAdmin(prefix: $prefix) {\n      userId\n      email\n    }\n  }\n": typeof types.CreateTestSuperAdminDocument,
+    "\n  mutation cleanupTestSuperAdmin($userId: String!) {\n    cleanupTestSuperAdmin(userId: $userId)\n  }\n": typeof types.CleanupTestSuperAdminDocument,
     "\n  query welcomeMessage {\n    welcomeMessage\n  }\n": typeof types.WelcomeMessageDocument,
     "\n  query translatedMessage($key: String!, $namespace: String!) {\n    translatedMessage(key: $key, namespace: $namespace)\n  }\n": typeof types.TranslatedMessageDocument,
     "\n  query UserBillingProfileSummary($userId: String, $parentId: String) {\n    parentBillingSummary(userId: $userId, parentId: $parentId) {\n      id\n      outstandingBalance\n      paidThisTerm\n      nextDueDate\n      activeStudents\n    }\n  }\n": typeof types.UserBillingProfileSummaryDocument,
@@ -296,6 +298,8 @@ const documents: Documents = {
     "\n  mutation createTestGroupClass($classInstanceId: String!, $teacherName: String!) {\n    createTestGroupClass(classInstanceId: $classInstanceId, teacherName: $teacherName) {\n      groupClassId\n    }\n  }\n": types.CreateTestGroupClassDocument,
     "\n  mutation cleanupTestGroupClass($groupClassId: String!) {\n    cleanupTestGroupClass(groupClassId: $groupClassId)\n  }\n": types.CleanupTestGroupClassDocument,
     "\n  mutation cleanupTestManager($userId: String!) {\n    cleanupTestManager(userId: $userId)\n  }\n": types.CleanupTestManagerDocument,
+    "\n  mutation createTestSuperAdmin($prefix: String!) {\n    createTestSuperAdmin(prefix: $prefix) {\n      userId\n      email\n    }\n  }\n": types.CreateTestSuperAdminDocument,
+    "\n  mutation cleanupTestSuperAdmin($userId: String!) {\n    cleanupTestSuperAdmin(userId: $userId)\n  }\n": types.CleanupTestSuperAdminDocument,
     "\n  query welcomeMessage {\n    welcomeMessage\n  }\n": types.WelcomeMessageDocument,
     "\n  query translatedMessage($key: String!, $namespace: String!) {\n    translatedMessage(key: $key, namespace: $namespace)\n  }\n": types.TranslatedMessageDocument,
     "\n  query UserBillingProfileSummary($userId: String, $parentId: String) {\n    parentBillingSummary(userId: $userId, parentId: $parentId) {\n      id\n      outstandingBalance\n      paidThisTerm\n      nextDueDate\n      activeStudents\n    }\n  }\n": types.UserBillingProfileSummaryDocument,
@@ -866,6 +870,14 @@ export function graphql(source: "\n  mutation cleanupTestGroupClass($groupClassI
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation cleanupTestManager($userId: String!) {\n    cleanupTestManager(userId: $userId)\n  }\n"): (typeof documents)["\n  mutation cleanupTestManager($userId: String!) {\n    cleanupTestManager(userId: $userId)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation createTestSuperAdmin($prefix: String!) {\n    createTestSuperAdmin(prefix: $prefix) {\n      userId\n      email\n    }\n  }\n"): (typeof documents)["\n  mutation createTestSuperAdmin($prefix: String!) {\n    createTestSuperAdmin(prefix: $prefix) {\n      userId\n      email\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation cleanupTestSuperAdmin($userId: String!) {\n    cleanupTestSuperAdmin(userId: $userId)\n  }\n"): (typeof documents)["\n  mutation cleanupTestSuperAdmin($userId: String!) {\n    cleanupTestSuperAdmin(userId: $userId)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

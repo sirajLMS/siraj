@@ -1284,6 +1284,7 @@ type Mutation {
   cleanupTestEntities(parentId: String!, parentUserId: String!, studentId: String!, studentUserId: String!, teacherId: String!, teacherUserId: String!): Boolean
   cleanupTestGroupClass(groupClassId: String!): Boolean
   cleanupTestManager(userId: String!): Boolean
+  cleanupTestSuperAdmin(userId: String!): Boolean
   clearWeeklySchedule(teacherId: ID!): Boolean
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
   createClassCategory(input: ClassCategoryCreateInput!): ClassCategory
@@ -1305,6 +1306,7 @@ type Mutation {
   createTeacherManualClassEntry(input: CreateManualClassEntryInput!): ClassInstanceDetail
   createTestEntities(classesRemaining: Int, prefix: String!): TestEntities
   createTestGroupClass(classInstanceId: String!, teacherName: String!): TestGroupClass
+  createTestSuperAdmin(prefix: String!): TestSuperAdmin
   deactivateParent(parentId: String!): DeactivateParentResult
 
   """Soft-deletes a book by marking it as deleted."""
@@ -2552,6 +2554,11 @@ type TestEntities {
 
 type TestGroupClass {
   groupClassId: String
+}
+
+type TestSuperAdmin {
+  email: String
+  userId: String
 }
 
 type UnpaidInvoiceItem {

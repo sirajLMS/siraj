@@ -111,6 +111,7 @@ export async function startTestServer() {
     env: {
       ...process.env,
       NEXT_DIST_DIR: ".next-test",
+      IS_DEMO: "true",
     },
   });
 

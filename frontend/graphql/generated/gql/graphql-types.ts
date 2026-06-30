@@ -1347,6 +1347,7 @@ export type Mutation = {
   cleanupTestEntities: Maybe<Scalars['Boolean']['output']>;
   cleanupTestGroupClass: Maybe<Scalars['Boolean']['output']>;
   cleanupTestManager: Maybe<Scalars['Boolean']['output']>;
+  cleanupTestSuperAdmin: Maybe<Scalars['Boolean']['output']>;
   clearWeeklySchedule: Maybe<Scalars['Boolean']['output']>;
   copyStorageItems: Maybe<BulkOperationResult>;
   createClassCategory: Maybe<ClassCategory>;
@@ -1365,6 +1366,7 @@ export type Mutation = {
   createTeacherManualClassEntry: Maybe<ClassInstanceDetail>;
   createTestEntities: Maybe<TestEntities>;
   createTestGroupClass: Maybe<TestGroupClass>;
+  createTestSuperAdmin: Maybe<TestSuperAdmin>;
   deactivateParent: Maybe<DeactivateParentResult>;
   /** Soft-deletes a book by marking it as deleted. */
   deleteBook: Maybe<Scalars['Boolean']['output']>;
@@ -1496,6 +1498,11 @@ export type MutationCleanupTestManagerArgs = {
 };
 
 
+export type MutationCleanupTestSuperAdminArgs = {
+  userId: Scalars['String']['input'];
+};
+
+
 export type MutationClearWeeklyScheduleArgs = {
   teacherId: Scalars['ID']['input'];
 };
@@ -1580,6 +1587,11 @@ export type MutationCreateTestEntitiesArgs = {
 export type MutationCreateTestGroupClassArgs = {
   classInstanceId: Scalars['String']['input'];
   teacherName: Scalars['String']['input'];
+};
+
+
+export type MutationCreateTestSuperAdminArgs = {
+  prefix: Scalars['String']['input'];
 };
 
 
@@ -3325,6 +3337,12 @@ export type TestEntities = {
 export type TestGroupClass = {
   __typename?: 'TestGroupClass';
   groupClassId: Maybe<Scalars['String']['output']>;
+};
+
+export type TestSuperAdmin = {
+  __typename?: 'TestSuperAdmin';
+  email: Maybe<Scalars['String']['output']>;
+  userId: Maybe<Scalars['String']['output']>;
 };
 
 export type UnpaidInvoiceItem = {

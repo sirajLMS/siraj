@@ -6,12 +6,15 @@ if (process.env.NODE_ENV !== "production") {
     studentUserEmail: string;
     studentUserId: string;
     studentId: string;
+    studentName: string;
     parentUserEmail: string;
     parentUserId: string;
     parentId: string;
+    parentName: string;
     teacherUserEmail: string;
     teacherUserId: string;
     teacherId: string;
+    teacherName: string;
   }>("TestEntities");
 
   TestEntitiesType.implement({
@@ -19,12 +22,15 @@ if (process.env.NODE_ENV !== "production") {
       studentUserEmail: t.exposeString("studentUserEmail"),
       studentUserId: t.exposeString("studentUserId"),
       studentId: t.exposeString("studentId"),
+      studentName: t.exposeString("studentName"),
       parentUserEmail: t.exposeString("parentUserEmail"),
       parentUserId: t.exposeString("parentUserId"),
       parentId: t.exposeString("parentId"),
+      parentName: t.exposeString("parentName"),
       teacherUserEmail: t.exposeString("teacherUserEmail"),
       teacherUserId: t.exposeString("teacherUserId"),
       teacherId: t.exposeString("teacherId"),
+      teacherName: t.exposeString("teacherName"),
     }),
   });
 
@@ -93,6 +99,57 @@ if (process.env.NODE_ENV !== "production") {
       },
       resolve: async (_query, args) => {
         return await TestHelperService.cleanupTestGroupClass(args.groupClassId);
+      },
+    })
+  );
+
+  const TestSuperAdminType = gqlSchemaBuilder.objectRef<{
+    userId: string;
+    email: string;
+  }>("TestSuperAdmin");
+
+  TestSuperAdminType.implement({
+    fields: t => ({
+      userId: t.exposeString("userId"),
+      email: t.exposeString("email"),
+    }),
+  });
+
+  gqlSchemaBuilder.mutationField("createTestSuperAdmin", t =>
+    t.field({
+      type: TestSuperAdminType,
+      authScopes: { loggedIn: true },
+      args: {
+        prefix: t.arg.string({ required: true }),
+      },
+      resolve: async (_query, args) => {
+        return await TestHelperService.createTestSuperAdmin(args.prefix);
+      },
+    })
+  );
+
+  gqlSchemaBuilder.mutationField("cleanupTestSuperAdmin", t =>
+    t.field({
+      type: "Boolean",
+      authScopes: { loggedIn: true },
+      args: {
+        userId: t.arg.string({ required: true }),
+      },
+      resolve: async (_query, args) => {
+        return await TestHelperService.cleanupTestSuperAdmin(args.userId);
+      },
+    })
+  );
+
+  gqlSchemaBuilder.mutationField("cleanupTestManager", t =>
+    t.field({
+      type: "Boolean",
+      authScopes: { loggedIn: true },
+      args: {
+        userId: t.arg.string({ required: true }),
+      },
+      resolve: async (_query, args) => {
+        return await TestHelperService.cleanupTestManager(args.userId);
       },
     })
   );

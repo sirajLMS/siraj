@@ -6,7 +6,9 @@ import { createManagerMutationDocument } from "../sharedDocuments/manager-onboar
 import { createRecurringClassMutationDocument } from "../sharedDocuments/recurring-class.documents";
 import {
   cleanupTestManagerMutationDocument,
+  cleanupTestSuperAdminMutationDocument,
   createTestEntitiesMutationDocument,
+  createTestSuperAdminMutationDocument,
 } from "../sharedDocuments/test-helper.documents";
 import { teacherWeeklyScheduleGridQueryDocument } from "../sharedDocuments/weekly-schedule.documents";
 import { testClient } from "./testClient";
@@ -291,6 +293,24 @@ export async function provisionTestManager(
 
 export async function cleanupTestManager(superAdminToken: string, userId: string): Promise<void> {
   await authenticatedRequest(superAdminToken, "mutate", cleanupTestManagerMutationDocument, { userId });
+}
+
+export async function provisionTestSuperAdmin(
+  adminToken: string,
+  prefix: string
+): Promise<{ token: string; userId: string }> {
+  const createRes = await authenticatedRequest(adminToken, "mutate", createTestSuperAdminMutationDocument, {
+    prefix,
+  });
+  const sa = createRes.createTestSuperAdmin;
+  if (!sa?.email || !sa?.userId) throw new Error("Failed to create test super admin");
+
+  const token = await loginUser(sa.email, "password");
+  return { token, userId: sa.userId };
+}
+
+export async function cleanupTestSuperAdmin(superAdminToken: string, userId: string): Promise<void> {
+  await authenticatedRequest(superAdminToken, "mutate", cleanupTestSuperAdminMutationDocument, { userId });
 }
 
 export async function assertRecurringClassDenied(

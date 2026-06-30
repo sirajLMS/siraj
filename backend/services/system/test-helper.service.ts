@@ -7,6 +7,7 @@ import {
   groupClasses,
   parents,
   permissionGroups,
+  staffProfiles,
   students,
   teacherAssignments,
   teachers,
@@ -20,12 +21,15 @@ export interface TestEntitiesResult {
   studentUserEmail: string;
   studentUserId: string;
   studentId: string;
+  studentName: string;
   parentUserEmail: string;
   parentUserId: string;
   parentId: string;
+  parentName: string;
   teacherUserEmail: string;
   teacherUserId: string;
   teacherId: string;
+  teacherName: string;
 }
 
 export namespace TestHelperService {
@@ -199,12 +203,15 @@ export namespace TestHelperService {
         studentUserEmail: studentEmail,
         studentUserId: studentUserRow.id,
         studentId,
+        studentName: `${prefix} Student`,
         parentUserEmail: parentEmail,
         parentUserId: parentUserRow.id,
         parentId,
+        parentName: parentUserRow.name,
         teacherUserEmail: teacherEmail,
         teacherUserId: teacherUserRow.id,
         teacherId,
+        teacherName: teacherUserRow.name,
       };
     });
   }
@@ -314,6 +321,73 @@ export namespace TestHelperService {
       return true;
     } catch (error) {
       logger.error("Failed to clean up test group class", { error });
+      return false;
+    }
+  }
+
+  export async function createTestSuperAdmin(prefix: string): Promise<{ userId: string; email: string }> {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Test helper service is not allowed in production environment.");
+    }
+
+    const now = new Date();
+    const email = `${prefix}-superadmin-${randomUUID()}@example.com`;
+    const plainPassword = "password";
+    const hashedPassword = await hashPassword(plainPassword);
+
+    const [userRow] = await db
+      .insert(users)
+      .values({
+        name: `${prefix} Super Admin`,
+        email,
+        password: hashedPassword,
+        isSuperAdmin: true,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+
+    logger.info("Test super admin created successfully via helper service", { prefix, userId: userRow.id });
+
+    return { userId: userRow.id, email: userRow.email };
+  }
+
+  export async function cleanupTestSuperAdmin(userId: string): Promise<boolean> {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Test helper service is not allowed in production environment.");
+    }
+
+    try {
+      await db.transaction(async tx => {
+        await tx.delete(userPermissionGroups).where(eq(userPermissionGroups.userId, userId));
+        await tx.delete(staffProfiles).where(eq(staffProfiles.userId, userId));
+        await tx.delete(users).where(eq(users.id, userId));
+      });
+
+      logger.info("Test super admin cleaned up successfully via helper service", { userId });
+      return true;
+    } catch (error) {
+      logger.error("Failed to clean up test super admin via helper service", { error });
+      return false;
+    }
+  }
+
+  export async function cleanupTestManager(userId: string): Promise<boolean> {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Test helper service is not allowed in production environment.");
+    }
+
+    try {
+      await db.transaction(async tx => {
+        await tx.delete(userPermissionGroups).where(eq(userPermissionGroups.userId, userId));
+        await tx.delete(staffProfiles).where(eq(staffProfiles.userId, userId));
+        await tx.delete(users).where(eq(users.id, userId));
+      });
+
+      logger.info("Test manager cleaned up successfully via helper service", { userId });
+      return true;
+    } catch (error) {
+      logger.error("Failed to clean up test manager via helper service", { error });
       return false;
     }
   }

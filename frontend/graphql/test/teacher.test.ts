@@ -1,14 +1,20 @@
 import { describe, expect, test } from "bun:test";
 import type { TeacherProfileUpdateInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { Gender, PaymentMethod } from "@/frontend/graphql/generated/gql/graphql-types";
-import { teachers as demoTeachers } from "@/shared/demo-users";
 import { teacherDirectoryQueryDocument } from "../sharedDocuments/staff-directory.documents";
 import {
   teacherProfileForEditQueryDocument,
   updateTeacherProfileMutationDocument,
 } from "../sharedDocuments/staff-profile.documents";
 import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
-import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  cleanupTestEntities,
+  loginAndProvision,
+  provisionTestSuperAdmin,
+  cleanupTestSuperAdmin,
+} from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -64,26 +70,32 @@ async function queryTeacherDirectory(
 describe("GraphQL Teacher Integration Tests", () => {
   setupTestServerLifecycle();
 
-  let authToken: string | null = null;
+  let adminToken = "";
+  let teacherToken = "";
+  let teacherId = "";
+  let studentId = "";
+  let studentUserId = "";
+  let teacherUserId = "";
+  let parentUserId = "";
+  let parentId = "";
+  let superAdminToken = "";
+  let superAdminUserId = "";
 
-  async function getSeededTeacherId(): Promise<string> {
-    if (!authToken) throw new Error("No auth token");
-    const directory = await queryTeacherDirectory(authToken, null, {
-      first: 1,
-      page: 1,
-      skip: null,
-      after: null,
-      before: null,
-      last: null,
-      maxCount: null,
-    });
-    const teacherId = directory.rows?.[0]?.id;
-    if (!teacherId) throw new Error("No seeded teacher found in directory");
-    return teacherId;
-  }
+  test("provision test entities and login", async () => {
+    const r = await loginAndProvision("TeacherTest");
+    adminToken = r.adminToken;
+    teacherToken = r.teacherToken;
+    teacherId = r.teacherId;
+    studentId = r.studentId;
+    studentUserId = r.studentUserId;
+    teacherUserId = r.teacherUserId;
+    parentUserId = r.parentUserId;
+    parentId = r.parentId;
 
-  const expectedTeacher = demoTeachers[0];
-  if (!expectedTeacher) throw new Error("No demo teachers defined in demo-users");
+    const sa = await provisionTestSuperAdmin(adminToken, "TeacherTestSA");
+    superAdminToken = sa.token;
+    superAdminUserId = sa.userId;
+  });
 
   test("returns error on teachers query when unauthenticated", async () => {
     const result = await testClient.query({
@@ -97,14 +109,8 @@ describe("GraphQL Teacher Integration Tests", () => {
     expect(result.error).toBeDefined();
   });
 
-  test("login as super_admin to perform teacher queries", async () => {
-    authToken = await loginDemoUser("super_admin");
-  });
-
   test("returns list of teachers when authenticated", async () => {
-    if (!authToken) throw new Error("No auth token");
-
-    const teachersList = await queryTeachers(authToken, "", 10);
+    const teachersList = await queryTeachers(superAdminToken, "TeacherTest", 10);
 
     expect(Array.isArray(teachersList)).toBeTrue();
     expect(teachersList.length).toBeGreaterThan(0);
@@ -114,27 +120,21 @@ describe("GraphQL Teacher Integration Tests", () => {
     expect(firstTeacher?.id).toBeDefined();
     expect(firstTeacher?.name).toBeDefined();
 
-    // Verify expected teacher is in the list
-    const hasExpectedTeacher = teachersList.some(t => t.name === expectedTeacher.name);
+    const hasExpectedTeacher = teachersList.some(t => t.name?.includes("TeacherTest"));
     expect(hasExpectedTeacher).toBeTrue();
   });
 
   test("filters list of teachers by search query", async () => {
-    if (!authToken) throw new Error("No auth token");
-
-    // Search using the name from demo-users
-    const teachersList = await queryTeachers(authToken, expectedTeacher.name, 10);
+    const teachersList = await queryTeachers(superAdminToken, "TeacherTest", 10);
 
     expect(Array.isArray(teachersList)).toBeTrue();
 
-    const matched = teachersList.some(t => t.name === expectedTeacher.name);
+    const matched = teachersList.some(t => t.name?.includes("TeacherTest"));
     expect(matched).toBeTrue();
   });
 
   test("respects limit argument on teacher query", async () => {
-    if (!authToken) throw new Error("No auth token");
-
-    const teachersList = await queryTeachers(authToken, "", 1);
+    const teachersList = await queryTeachers(superAdminToken, "TeacherTest", 1);
 
     expect(Array.isArray(teachersList)).toBeTrue();
     expect(teachersList.length).toBeLessThanOrEqual(1);
@@ -148,9 +148,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("teacherDirectory returns directory data for authorized admin", async () => {
-    if (!authToken) throw new Error("No auth token");
-
-    const directory = await queryTeacherDirectory(authToken, null, null);
+    const directory = await queryTeacherDirectory(superAdminToken, null, null);
 
     expect(directory.id).toBeDefined();
     expect(directory.metrics).toBeDefined();
@@ -161,21 +159,14 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("teacherDirectory supports search filtering", async () => {
-    if (!authToken) throw new Error("No auth token");
-    const expectedTeacher = demoTeachers[0];
-    if (!expectedTeacher) throw new Error("No demo teachers");
+    const directory = await queryTeacherDirectory(superAdminToken, "TeacherTest", null);
 
-    const directory = await queryTeacherDirectory(authToken, expectedTeacher.name, null);
-
-    const matched = directory.rows?.some(r => r?.name === expectedTeacher.name);
+    const matched = directory.rows?.some(r => r?.name?.includes("TeacherTest"));
     expect(matched).toBeTrue();
   });
 
   test("teacherProfileForEdit — admin can read teacher profile", async () => {
-    const teacherId = await getSeededTeacherId();
-    if (!authToken) throw new Error("No auth token");
-
-    const profileData = await authenticatedRequest(authToken, "query", teacherProfileForEditQueryDocument, {
+    const profileData = await authenticatedRequest(superAdminToken, "query", teacherProfileForEditQueryDocument, {
       teacherId,
     });
     expect(profileData.teacherProfileForEdit).toBeDefined();
@@ -187,12 +178,10 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("teacherProfileForEdit — teacher role is denied access", async () => {
-    const teacherId = await getSeededTeacherId();
     await assertOperationDenied("teacher_default", "query", teacherProfileForEditQueryDocument, { teacherId });
   });
 
   test("updateTeacherProfile — teacher role is denied to update profile", async () => {
-    const teacherId = await getSeededTeacherId();
     await assertOperationDenied("teacher_default", "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
       input: makeUpdateInput({ phone: "+9999999999" }),
@@ -200,7 +189,6 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("updateTeacherProfile — returns error for non-existent teacher", async () => {
-    if (!authToken) throw new Error("No auth token");
     const fakeTeacherIdVal = "00000000-0000-0000-0000-000000000000";
     const updateNonExistentResult = await testClient.mutate({
       mutation: updateTeacherProfileMutationDocument,
@@ -225,7 +213,7 @@ describe("GraphQL Teacher Integration Tests", () => {
       },
       context: {
         headers: {
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${superAdminToken}`,
         },
       },
       errorPolicy: "all",
@@ -234,12 +222,9 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("updateTeacherProfile — admin can update teacher profile", async () => {
-    const targetTeacherIdForAdmin = await getSeededTeacherId();
-    if (!authToken) throw new Error("No auth token");
-
     const newTeacherPhoneString = "+1234567890";
-    const updateProfileData = await authenticatedRequest(authToken, "mutate", updateTeacherProfileMutationDocument, {
-      teacherId: targetTeacherIdForAdmin,
+    const updateProfileData = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
+      teacherId,
       input: {
         address: null,
         dateOfBirth: null,
@@ -258,16 +243,13 @@ describe("GraphQL Teacher Integration Tests", () => {
       },
     });
     expect(updateProfileData.updateTeacherProfile).toBeDefined();
-    expect(updateProfileData.updateTeacherProfile?.id).toBe(targetTeacherIdForAdmin);
+    expect(updateProfileData.updateTeacherProfile?.id).toBe(teacherId);
     expect(updateProfileData.updateTeacherProfile?.phone).toBe(newTeacherPhoneString);
   });
 
   test("updateTeacherProfile — admin can edit any teacher (no IDOR for admins)", async () => {
-    const adminEditTeacherTargetId = await getSeededTeacherId();
-    if (!authToken) throw new Error("No auth token");
-
-    const updateAnyTeacherData = await authenticatedRequest(authToken, "mutate", updateTeacherProfileMutationDocument, {
-      teacherId: adminEditTeacherTargetId,
+    const updateAnyTeacherData = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
+      teacherId,
       input: {
         address: "Updated by admin and verified by tests",
         dateOfBirth: "1985-05-15",
@@ -286,7 +268,19 @@ describe("GraphQL Teacher Integration Tests", () => {
       },
     });
     expect(updateAnyTeacherData.updateTeacherProfile).toBeDefined();
-    expect(updateAnyTeacherData.updateTeacherProfile?.id).toBe(adminEditTeacherTargetId);
+    expect(updateAnyTeacherData.updateTeacherProfile?.id).toBe(teacherId);
     expect(updateAnyTeacherData.updateTeacherProfile?.address).toBe("Updated by admin and verified by tests");
+  });
+
+  test("cleanup provisioned entities", async () => {
+    await cleanupTestEntities(adminToken, {
+      studentUserId,
+      teacherUserId,
+      parentUserId,
+      studentId,
+      teacherId,
+      parentId,
+    });
+    await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
   });
 });

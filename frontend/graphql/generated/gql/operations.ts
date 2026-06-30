@@ -2588,6 +2588,28 @@ export type CleanupTestManagerMutationVariables = Exact<{
 
 export type CleanupTestManagerMutation = CleanupTestManagerMutation_Mutation;
 
+export type CreateTestSuperAdminMutation_createTestSuperAdmin_TestSuperAdmin = { userId: string | null, email: string | null };
+
+export type CreateTestSuperAdminMutation_Mutation = { createTestSuperAdmin: CreateTestSuperAdminMutation_createTestSuperAdmin_TestSuperAdmin | null };
+
+
+export type CreateTestSuperAdminMutationVariables = Exact<{
+  prefix: string;
+}>;
+
+
+export type CreateTestSuperAdminMutation = CreateTestSuperAdminMutation_Mutation;
+
+export type CleanupTestSuperAdminMutation_Mutation = { cleanupTestSuperAdmin: boolean | null };
+
+
+export type CleanupTestSuperAdminMutationVariables = Exact<{
+  userId: string;
+}>;
+
+
+export type CleanupTestSuperAdminMutation = CleanupTestSuperAdminMutation_Mutation;
+
 export type WelcomeMessageQuery_Query = { welcomeMessage: string | null };
 
 

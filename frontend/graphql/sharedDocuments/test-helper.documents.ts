@@ -75,3 +75,24 @@ export const cleanupTestManagerMutationDocument: TypedDocumentNode<
     cleanupTestManager(userId: $userId)
   }
 `;
+
+export const createTestSuperAdminMutationDocument: TypedDocumentNode<
+  Operations.CreateTestSuperAdminMutation,
+  Types.MutationCreateTestSuperAdminArgs
+> = gql`
+  mutation createTestSuperAdmin($prefix: String!) {
+    createTestSuperAdmin(prefix: $prefix) {
+      userId
+      email
+    }
+  }
+`;
+
+export const cleanupTestSuperAdminMutationDocument: TypedDocumentNode<
+  Operations.CleanupTestSuperAdminMutation,
+  Types.MutationCleanupTestSuperAdminArgs
+> = gql`
+  mutation cleanupTestSuperAdmin($userId: String!) {
+    cleanupTestSuperAdmin(userId: $userId)
+  }
+`;
