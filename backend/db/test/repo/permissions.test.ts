@@ -31,10 +31,12 @@ function testConstraint(name: string, operation: (tx: Tx) => unknown, expectedEr
 
 describe("Permissions and Permission Groups Database Constraints", () => {
   testConstraint("Should verify system permissions and groups exist", async tx => {
+    // Uses seed system permission — required: testing DB trigger that only applies to isSystem=true entities
     const [sysPerm] = await tx.select().from(permissions).where(eq(permissions.key, AppPermission.AUTH_LOGIN));
     expect(sysPerm).toBeDefined();
     expect(sysPerm.isSystem).toBe(true);
 
+    // Uses seed system group — required: testing DB trigger that only applies to isSystem=true entities
     const [sysGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.slug, "super_admin"));
     expect(sysGroup).toBeDefined();
     expect(sysGroup.isSystem).toBe(true);
@@ -42,12 +44,14 @@ describe("Permissions and Permission Groups Database Constraints", () => {
 
   testConstraint(
     "Should prevent deleting a system permission",
+    // Operates on seed auth.login permission — required: trigger test target
     tx => tx.delete(permissions).where(eq(permissions.key, AppPermission.AUTH_LOGIN)),
     "Cannot delete a system permission or group"
   );
 
   testConstraint(
     "Should prevent deleting a system permission group",
+    // Operates on seed super_admin group — required: trigger test target
     tx => tx.delete(permissionGroups).where(eq(permissionGroups.slug, "super_admin")),
     "Cannot delete a system permission or group"
   );

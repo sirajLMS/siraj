@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
+import type { AppPermission } from "@/shared/lib/enum";
 import type { ClassInstanceEntity, ParentEntity, StudentEntity, TeacherEntity, UserEntity } from "../../types";
 import type { DBTransaction } from "../db.types";
-import { classInstances, parents, students, teacherAssignments, teachers, users } from "../schema";
+import { classInstances, parents, permissions, students, teacherAssignments, teachers, users } from "../schema";
 
 export async function createTestUser(
   tx: DBTransaction,
@@ -20,6 +21,26 @@ export async function createTestUser(
     })
     .returning()) as [UserEntity];
   return user;
+}
+
+export async function createTestPermission(
+  tx: DBTransaction,
+  key: AppPermission,
+  overrides: Partial<typeof permissions.$inferInsert> = {}
+): Promise<typeof permissions.$inferSelect> {
+  const [perm] = await tx
+    .insert(permissions)
+    .values({
+      key,
+      resource: "test",
+      action: "test_action",
+      description: "Test permission",
+      category: "Test",
+      isSystem: false,
+      ...overrides,
+    })
+    .returning();
+  return perm;
 }
 
 export async function createTestTeacher(

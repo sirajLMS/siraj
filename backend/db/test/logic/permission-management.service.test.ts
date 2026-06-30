@@ -7,6 +7,7 @@ import { AppPermission } from "@/shared/lib/enum";
 import { getErrorMessage } from "@/shared/utils/error";
 import { db } from "../../drizzleDb";
 import { permissionGroups, permissions, users } from "../../schema";
+import { runInRollback } from "../test-utils";
 
 async function assertThrows(fn: () => Promise<unknown>, message: string) {
   let err: unknown = null;
@@ -23,6 +24,8 @@ describe("PermissionManagementService Business Logic", () => {
   let adminUser: typeof users.$inferSelect;
   let regularUser: typeof users.$inferSelect;
   let superAdminUser: typeof users.$inferSelect;
+  let testPerm1: typeof permissions.$inferSelect | undefined;
+  let testPerm2: typeof permissions.$inferSelect | undefined;
 
   // Track original getUserContext to restore later
   const originalGetUserContext = PermissionsService.getUserContext;
@@ -100,6 +103,51 @@ describe("PermissionManagementService Business Logic", () => {
         updatedAt: now,
       })
       .returning();
+
+    // Insert test permissions for tests that need them
+    const existing1 = await db
+      .select()
+      .from(permissions)
+      .where(eq(permissions.key, AppPermission.TEST_CUSTOM_ONLY))
+      .limit(1);
+
+    if (existing1.length > 0) {
+      testPerm1 = existing1[0];
+    } else {
+      [testPerm1] = await db
+        .insert(permissions)
+        .values({
+          key: AppPermission.TEST_CUSTOM_ONLY,
+          resource: "test",
+          action: "test_action_1",
+          description: "Test permission 1",
+          category: "Test",
+          isSystem: false,
+        })
+        .returning();
+    }
+
+    const existing2 = await db
+      .select()
+      .from(permissions)
+      .where(eq(permissions.key, AppPermission.TEST_CUSTOM_ALT))
+      .limit(1);
+
+    if (existing2.length > 0) {
+      testPerm2 = existing2[0];
+    } else {
+      [testPerm2] = await db
+        .insert(permissions)
+        .values({
+          key: AppPermission.TEST_CUSTOM_ALT,
+          resource: "test",
+          action: "test_action_2",
+          description: "Test permission 2",
+          category: "Test",
+          isSystem: false,
+        })
+        .returning();
+    }
   });
 
   afterAll(async () => {
@@ -108,6 +156,10 @@ describe("PermissionManagementService Business Logic", () => {
 
     // Cleanup users
     await db.delete(users).where(like(users.email, "service-test-%"));
+
+    // Cleanup test permissions
+    await db.delete(permissions).where(eq(permissions.key, AppPermission.TEST_CUSTOM_ONLY));
+    await db.delete(permissions).where(eq(permissions.key, AppPermission.TEST_CUSTOM_ALT));
   });
 
   afterEach(async () => {
@@ -159,19 +211,18 @@ describe("PermissionManagementService Business Logic", () => {
     test("createGroup should auto-generate slug and succeed", async () => {
       mockContext = manageContext();
 
-      const [perm] = await db.select().from(permissions).limit(1);
       const group = await PermissionManagementService.createGroup(adminUser.id, {
         name: "My Custom Group & Permissions!!",
         description: "Custom group description",
-        permissionIds: perm ? [perm.id] : [],
+        permissionIds: testPerm1 ? [testPerm1.id] : [],
       });
 
       expect(group).toBeDefined();
       expect(group.name).toBe("My Custom Group & Permissions!!");
       expect(group.slug).toBe("my_custom_group_permissions");
       expect(group.description).toBe("Custom group description");
-      if (perm) {
-        expect(group.permissionIds).toContain(perm.id);
+      if (testPerm1) {
+        expect(group.permissionIds).toContain(testPerm1.id);
       }
     });
 
@@ -197,6 +248,7 @@ describe("PermissionManagementService Business Logic", () => {
     test("updateGroup on system group should throw cannotModifySystemPermissionGroup", async () => {
       mockContext = manageContext();
 
+      // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
       const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
@@ -209,6 +261,7 @@ describe("PermissionManagementService Business Logic", () => {
     test("deleteGroup on system group should throw cannotDeleteSystemPermissionGroup", async () => {
       mockContext = manageContext();
 
+      // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
       const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
@@ -263,6 +316,7 @@ describe("PermissionManagementService Business Logic", () => {
     test("revokeGroupFromUser on SuperAdmin should throw cannotModifySuperAdmin", async () => {
       mockContext = assignContext();
 
+      // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
       const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
@@ -279,49 +333,39 @@ describe("PermissionManagementService Business Logic", () => {
 
   describe("System Permission Database Constraints", () => {
     test("should prevent creating a new system permission", async () => {
-      let err: unknown = null;
-      try {
-        await db.insert(permissions).values({
-          key: AppPermission.TEST_SYSTEM_ONLY,
-          resource: "custom",
-          action: "test_system_permission",
-          description: "Test description",
-          category: "Custom",
-          isSystem: true,
-        });
-      } catch (e) {
-        err = e;
-      }
-      expect(err).not.toBeNull();
-      expect(getErrorMessage(err)).toContain("Cannot create system permissions");
+      await runInRollback(async tx => {
+        let err: unknown = null;
+        try {
+          await tx.insert(permissions).values({
+            key: AppPermission.TEST_SYSTEM_ONLY,
+            resource: "custom",
+            action: "test_system_permission",
+            description: "Test description",
+            category: "Custom",
+            isSystem: true,
+          });
+        } catch (e) {
+          err = e;
+        }
+        expect(err).not.toBeNull();
+        expect(getErrorMessage(err)).toContain("Cannot create system permissions");
+      });
     });
 
     test("should prevent modifying custom permission to system permission", async () => {
-      // First insert custom permission with isSystem = false
-      const [customPerm] = await db
-        .insert(permissions)
-        .values({
-          key: AppPermission.TEST_CUSTOM_ONLY,
-          resource: "custom",
-          action: "test_custom_permission",
-          description: "Test description",
-          category: "Custom",
-          isSystem: false,
-        })
-        .returning();
+      if (!testPerm1) return;
+      const perm1Id = testPerm1.id;
+      await runInRollback(async tx => {
+        let err: unknown = null;
+        try {
+          await tx.update(permissions).set({ isSystem: true }).where(eq(permissions.id, perm1Id));
+        } catch (e) {
+          err = e;
+        }
 
-      let err: unknown = null;
-      try {
-        await db.update(permissions).set({ isSystem: true }).where(eq(permissions.id, customPerm.id));
-      } catch (e) {
-        err = e;
-      }
-
-      // Cleanup custom permission
-      await db.delete(permissions).where(eq(permissions.id, customPerm.id));
-
-      expect(err).not.toBeNull();
-      expect(getErrorMessage(err)).toContain("Cannot change is_system to true");
+        expect(err).not.toBeNull();
+        expect(getErrorMessage(err)).toContain("Cannot change is_system to true");
+      });
     });
   });
 
@@ -387,29 +431,34 @@ describe("PermissionManagementService Business Logic", () => {
     test("listUserOverrides, updateUserOverrides, and getEffectiveUserPermissions logic", async () => {
       mockContext = manageContext();
 
-      const [perm1, perm2] = await db.select().from(permissions).limit(2);
-      expect(perm1).toBeDefined();
-      expect(perm2).toBeDefined();
+      expect(testPerm1).toBeDefined();
+      expect(testPerm2).toBeDefined();
+      if (!testPerm1 || !testPerm2) return;
+
+      const perm1Id = testPerm1.id;
+      const perm1Key = testPerm1.key;
+      const perm2Id = testPerm2.id;
+      const perm2Key = testPerm2.key;
 
       // Set overrides for regularUser
       await PermissionManagementService.updateUserOverrides(adminUser.id, {
         userId: regularUser.id,
         overrides: [
-          { permissionId: perm1.id, state: "GRANTED" },
-          { permissionId: perm2.id, state: "DENIED" },
+          { permissionId: perm1Id, state: "GRANTED" },
+          { permissionId: perm2Id, state: "DENIED" },
         ],
       });
 
       // List overrides
       const overrides = await PermissionManagementService.listUserOverrides(adminUser.id, regularUser.id);
       expect(overrides.length).toBe(2);
-      expect(overrides.find(o => o.permissionId === perm1.id)?.state).toBe("GRANTED");
-      expect(overrides.find(o => o.permissionId === perm2.id)?.state).toBe("DENIED");
+      expect(overrides.find(o => o.permissionId === perm1Id)?.state).toBe("GRANTED");
+      expect(overrides.find(o => o.permissionId === perm2Id)?.state).toBe("DENIED");
 
       // Verify effective permissions combining overrides
       const effective = await PermissionManagementService.getEffectiveUserPermissions(adminUser.id, regularUser.id);
-      expect(effective).toContain(perm1.key);
-      expect(effective).not.toContain(perm2.key);
+      expect(effective).toContain(perm1Key);
+      expect(effective).not.toContain(perm2Key);
 
       // Clean up overrides
       await PermissionManagementService.updateUserOverrides(adminUser.id, {

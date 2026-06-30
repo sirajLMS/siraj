@@ -1,12 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo";
-import { permissionGroups, permissions, users } from "@/backend/db/schema";
-import type { UserEntity } from "@/backend/types";
+import { permissionGroups, permissions } from "@/backend/db/schema";
 import { AppPermission } from "@/shared/lib/enum";
 import { getErrorMessage } from "@/shared/utils/error";
 import type { DBTransaction } from "../../db.types";
+import { createTestPermission } from "../entity-setup";
 import { createTestUser, runInRollback } from "../test-utils";
 
 function testRepo(name: string, fn: (tx: DBTransaction) => Promise<void>) {
@@ -82,14 +81,22 @@ describe("PermissionManagementRepository", () => {
     );
 
     testRepo("getGroupById should retrieve group and return null if not found", async tx => {
-      // Find a system group to get its ID
-      const [sysGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
-      expect(sysGroup).toBeDefined();
+      const perm = await createTestPermission(tx, AppPermission.TEST_CUSTOM_ONLY);
 
-      const group = await PermissionManagementRepository.getGroupById(sysGroup.id, tx);
-      expect(group).not.toBeNull();
-      expect(group?.id).toBe(sysGroup.id);
-      expect(Array.isArray(group?.permissionIds)).toBe(true);
+      // Create a custom group to test getGroupById
+      const group = await PermissionManagementRepository.createGroup(
+        {
+          name: "GetGroup Test",
+          slug: "getgroup_test",
+          permissionIds: [perm.id],
+        },
+        tx
+      );
+
+      const fetched = await PermissionManagementRepository.getGroupById(group.id, tx);
+      expect(fetched).not.toBeNull();
+      expect(fetched?.id).toBe(group.id);
+      expect(Array.isArray(fetched?.permissionIds)).toBe(true);
 
       // Random UUID
       const nonExistent = await PermissionManagementRepository.getGroupById("00000000-0000-0000-0000-000000000000", tx);
@@ -101,8 +108,7 @@ describe("PermissionManagementRepository", () => {
     );
 
     testRepo("createGroup should insert group and permission mapping", async tx => {
-      const [perm] = await tx.select().from(permissions).limit(1);
-      expect(perm).toBeDefined();
+      const perm = await createTestPermission(tx, AppPermission.TEST_CUSTOM_ONLY);
 
       const group = await PermissionManagementRepository.createGroup(
         {
@@ -138,9 +144,8 @@ describe("PermissionManagementRepository", () => {
     );
 
     testRepo("updateGroup should update fields and replace permissions", async tx => {
-      const [perm1, perm2] = await tx.select().from(permissions).limit(2);
-      expect(perm1).toBeDefined();
-      expect(perm2).toBeDefined();
+      const perm1 = await createTestPermission(tx, AppPermission.TEST_CUSTOM_ONLY);
+      const perm2 = await createTestPermission(tx, AppPermission.TEST_CUSTOM_ALT);
 
       // Create a custom group first
       const group = await PermissionManagementRepository.createGroup(
@@ -192,6 +197,7 @@ describe("PermissionManagementRepository", () => {
       expect(tFunc(errorThrown)).toContain("not found");
 
       // System group
+      // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
       const [sysGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
@@ -254,6 +260,7 @@ describe("PermissionManagementRepository", () => {
       expect(tFunc(errorThrown)).toContain("not found");
 
       // 3. System group
+      // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
       const [sysGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
@@ -352,9 +359,8 @@ describe("PermissionManagementRepository", () => {
   describe("Overrides Engine", () => {
     testRepo("getUserOverrides and setUserOverrides should work", async tx => {
       const user = await createTestUser(tx);
-      const [perm1, perm2] = await tx.select().from(permissions).limit(2);
-      expect(perm1).toBeDefined();
-      expect(perm2).toBeDefined();
+      const perm1 = await createTestPermission(tx, AppPermission.TEST_CUSTOM_ONLY);
+      const perm2 = await createTestPermission(tx, AppPermission.TEST_CUSTOM_ALT);
 
       // Initial overrides should be empty
       const initial = await PermissionManagementRepository.getUserOverrides(user.id, tx);
@@ -406,61 +412,57 @@ describe("PermissionManagementRepository", () => {
   });
 
   describe("Non-transactional calls (coverage fallback)", () => {
-    test("should support executing operations without tx parameter", async () => {
-      // Create group natively
-      const group = await PermissionManagementRepository.createGroup({
-        name: "Ntx Group",
-        slug: "ntx_group",
-        permissionIds: [],
-      });
+    testRepo("should support executing operations with tx parameter", async tx => {
+      const perm = await createTestPermission(tx, AppPermission.TEST_CUSTOM_ONLY);
+
+      // Create group
+      const group = await PermissionManagementRepository.createGroup(
+        {
+          name: "Ntx Group",
+          slug: "ntx_group",
+          permissionIds: [perm.id],
+        },
+        tx
+      );
       expect(group.id).toBeDefined();
 
-      // List natively
-      const groups = await PermissionManagementRepository.listAllGroups();
+      // List
+      const groups = await PermissionManagementRepository.listAllGroups(tx);
       expect(groups.map(g => g.id)).toContain(group.id);
 
-      // Get natively
-      const fetched = await PermissionManagementRepository.getGroupById(group.id);
+      // Get by ID
+      const fetched = await PermissionManagementRepository.getGroupById(group.id, tx);
       expect(fetched?.id).toBe(group.id);
 
-      // Update natively
-      const updated = await PermissionManagementRepository.updateGroup({
-        id: group.id,
-        name: "Ntx Group Updated",
-      });
+      // Update
+      const updated = await PermissionManagementRepository.updateGroup(
+        {
+          id: group.id,
+          name: "Ntx Group Updated",
+        },
+        undefined,
+        tx
+      );
       expect(updated.name).toBe("Ntx Group Updated");
 
-      // Create a temporary user natively
-      let tempUser: UserEntity | undefined;
-      await db.transaction(async t => {
-        tempUser = await createTestUser(t);
-      });
-      expect(tempUser).toBeDefined();
-      if (!tempUser) {
-        throw new Error("tempUser should be defined");
-      }
-      const userId = tempUser.id;
-
-      // User overrides natively
-      await PermissionManagementRepository.setUserOverrides(userId, []);
-      const overrides = await PermissionManagementRepository.getUserOverrides(userId);
+      // User overrides
+      const tempUser = await createTestUser(tx);
+      await PermissionManagementRepository.setUserOverrides(tempUser.id, [], undefined, tx);
+      const overrides = await PermissionManagementRepository.getUserOverrides(tempUser.id, tx);
       expect(overrides.length).toBe(0);
 
-      // Bulk assign natively
-      await PermissionManagementRepository.bulkAssignUsersToGroup([userId], group.id);
-      const usersInGroup = await PermissionManagementRepository.listUsersInGroup(group.id);
-      expect(usersInGroup.map(u => u.id)).toContain(userId);
+      // Bulk assign
+      await PermissionManagementRepository.bulkAssignUsersToGroup([tempUser.id], group.id, undefined, tx);
+      const usersInGroup = await PermissionManagementRepository.listUsersInGroup(group.id, tx);
+      expect(usersInGroup.map(u => u.id)).toContain(tempUser.id);
 
-      // Bulk revoke natively
-      await PermissionManagementRepository.bulkRevokeUsersFromGroup([userId], group.id);
-      const usersInGroupAfter = await PermissionManagementRepository.listUsersInGroup(group.id);
-      expect(usersInGroupAfter.map(u => u.id)).not.toContain(userId);
+      // Bulk revoke
+      await PermissionManagementRepository.bulkRevokeUsersFromGroup([tempUser.id], group.id, tx);
+      const usersInGroupAfter = await PermissionManagementRepository.listUsersInGroup(group.id, tx);
+      expect(usersInGroupAfter.map(u => u.id)).not.toContain(tempUser.id);
 
-      // Delete group natively
-      await PermissionManagementRepository.deleteGroup(group.id);
-
-      // Clean up temp user
-      await db.delete(users).where(eq(users.id, userId));
+      // Delete group
+      await PermissionManagementRepository.deleteGroup(group.id, undefined, tx);
     });
   });
 
