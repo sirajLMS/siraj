@@ -1,7 +1,6 @@
 ---
 name: repo-review
-description: "Interactive repository review orchestrator: asks scoping questions, delegates investigation to specialized subagents, writes a validated plan to .ai/plans/, implements fixes using project instruction files, and verifies via quality-gate."
-model: claude-sonnet-4-20250514
+description: Interactive repository review orchestrator: asks scoping questions, delegates investigation to specialized subagents, writes a validated plan to .ai/plans/, implements fixes using project instruction files, and verifies via quality-gate.
 tools:
   - execute
   - read
