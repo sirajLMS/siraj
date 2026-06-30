@@ -1,6 +1,7 @@
 import type { ClassAuditLabels } from "../../../types/dashboard/classes";
 
 export const classAudit: ClassAuditLabels = {
+  invalidClassId: "معرف الحصة غير صالح",
   pageTitle: "عرض تفاصيل الحصة",
   mobileTitle: "سجل تدقيق الحصة",
   breadcrumbs: {

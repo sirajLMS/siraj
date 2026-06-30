@@ -205,7 +205,7 @@ export function ClassAuditContainer() {
   }
 
   if (!id) {
-    return <Box sx={{ p: 3, textAlign: "center" }}>Invalid Class ID</Box>;
+    return <Box sx={{ p: 3, textAlign: "center" }}>{t("invalidClassId")}</Box>;
   }
 
   if (error || !audit) {

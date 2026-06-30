@@ -1,4 +1,5 @@
 export interface ClassAuditLabels {
+  readonly invalidClassId: string;
   readonly pageTitle: string;
   readonly mobileTitle: string;
   readonly breadcrumbs: {

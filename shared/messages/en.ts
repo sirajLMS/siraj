@@ -150,6 +150,8 @@ const en: MessageSchema = {
       passwordRequiresDigit: "Password must contain at least one digit.",
       passwordRequiresSpecialChar:
         "Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
+      demoGroupNotFound: "Demo group not found: {groupSlug}",
+      demoGroupNoUser: "No user found for demo group: {groupSlug}",
     },
     user: {
       emailAlreadyExists: "An account with this email address already exists.",
@@ -947,6 +949,7 @@ const en: MessageSchema = {
       reschedule: "Reschedule Class",
     },
     classAudit: {
+      invalidClassId: "Invalid Class ID",
       pageTitle: "Class Detail View",
       mobileTitle: "Class Audit Trail",
       breadcrumbs: {

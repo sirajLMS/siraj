@@ -121,6 +121,8 @@ export const errors: ErrorsLabels = {
     passwordRequiresLowercase: "Password must contain at least one lowercase letter.",
     passwordRequiresDigit: "Password must contain at least one digit.",
     passwordRequiresSpecialChar: "Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
+    demoGroupNotFound: "Demo group not found: {groupSlug}",
+    demoGroupNoUser: "No user found for demo group: {groupSlug}",
   },
   user: {
     emailAlreadyExists: "An account with this email already exists.",

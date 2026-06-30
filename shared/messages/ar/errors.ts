@@ -121,6 +121,8 @@ export const errors: ErrorsLabels = {
     passwordRequiresLowercase: "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل.",
     passwordRequiresDigit: "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل.",
     passwordRequiresSpecialChar: "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
+    demoGroupNotFound: "مجموعة العرض غير موجودة: {groupSlug}",
+    demoGroupNoUser: "لم يتم العثور على مستخدم لمجموعة العرض: {groupSlug}",
   },
   user: {
     emailAlreadyExists: "الحساب بهذا البريد الإلكتروني موجود بالفعل.",

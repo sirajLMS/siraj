@@ -1,32 +1,9 @@
-import { StorageDbRepository } from "@/backend/db/repo";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { StorageAuthService, StorageManageService } from "@/backend/services/storage";
 import { getStorageService } from "@/backend/storage/storage.service";
-import { AppPermission } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import * as StoragePothos from "../pothos";
 import { requireAuth } from "../utils/requireAuth";
-
-async function requireStorageManage(userId: string, locale?: string): Promise<void> {
-  const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.STORAGE_MANAGE);
-  if (!hasPermission) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("insufficientPermissions"));
-  }
-}
-
-async function requireStorageManageOrOwner(userId: string, filePath: string, locale?: string): Promise<void> {
-  const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.STORAGE_MANAGE);
-  if (hasPermission) return;
-
-  const usages = await StorageDbRepository.getFileUsages(filePath);
-  const isOwner = usages.some(u => u.referenceTable === "users" && u.referenceId === userId);
-  if (!isOwner) {
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-    throw new Error(tFunc("insufficientPermissions"));
-  }
-}
 
 gqlSchemaBuilder.mutationFields(t => ({
   renameFile: t.field({
@@ -40,7 +17,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      await requireStorageManageOrOwner(userId, input.currentPath, ctx.locale);
+      await StorageAuthService.requireStorageManageOrOwner(userId, input.currentPath, ctx.locale);
       const storageService = await getStorageService();
       return await storageService.renameFile(input);
     },
@@ -54,7 +31,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { path }, ctx) => {
       const userId = await requireAuth(ctx);
-      await requireStorageManageOrOwner(userId, path, ctx.locale);
+      await StorageAuthService.requireStorageManageOrOwner(userId, path, ctx.locale);
       const storageService = await getStorageService();
       return await storageService.deleteFile(path);
     },
@@ -71,8 +48,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      await requireStorageManage(userId, ctx.locale);
-      logger.info("GraphQL mutation: prepareUpload", { input });
+      await StorageAuthService.requireStorageManage(userId, ctx.locale);
       const storageService = await getStorageService();
       const result = await storageService.prepareUpload(input);
       logger.info("GraphQL mutation: prepareUpload completed", {
@@ -93,7 +69,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      await requireStorageManage(userId, ctx.locale);
+      await StorageAuthService.requireStorageManage(userId, ctx.locale);
       const storageService = await getStorageService();
       return await storageService.createFolder(input);
     },
@@ -111,7 +87,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
       for (const itemPath of input.sourcePaths) {
-        await requireStorageManageOrOwner(userId, itemPath, ctx.locale);
+        await StorageAuthService.requireStorageManageOrOwner(userId, itemPath, ctx.locale);
       }
       const storageService = await getStorageService();
       return await storageService.moveItems(input);
@@ -130,7 +106,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
       for (const itemPath of input.sourcePaths) {
-        await requireStorageManageOrOwner(userId, itemPath, ctx.locale);
+        await StorageAuthService.requireStorageManageOrOwner(userId, itemPath, ctx.locale);
       }
       const storageService = await getStorageService();
       return await storageService.copyItems(input);
@@ -149,7 +125,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
       for (const itemPath of input.paths) {
-        await requireStorageManageOrOwner(userId, itemPath, ctx.locale);
+        await StorageAuthService.requireStorageManageOrOwner(userId, itemPath, ctx.locale);
       }
       const storageService = await getStorageService();
       return await storageService.deleteItems(input);
@@ -167,8 +143,8 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      await requireStorageManage(userId, ctx.locale);
-      return await StorageDbRepository.updateDirectoryPermissions(input);
+      await StorageAuthService.requireStorageManage(userId, ctx.locale);
+      return await StorageManageService.updateDirectoryPermissions(input);
     },
   }),
 
@@ -183,8 +159,8 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      await requireStorageManage(userId, ctx.locale);
-      return await StorageDbRepository.setProtection(input);
+      await StorageAuthService.requireStorageManage(userId, ctx.locale);
+      return await StorageManageService.setStorageItemProtection(input);
     },
   }),
 }));

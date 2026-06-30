@@ -5,4 +5,6 @@ export interface AuthErrorLabels {
   readonly passwordRequiresLowercase: string;
   readonly passwordRequiresDigit: string;
   readonly passwordRequiresSpecialChar: string;
+  readonly demoGroupNotFound: string;
+  readonly demoGroupNoUser: string;
 }

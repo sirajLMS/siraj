@@ -219,7 +219,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       const { groupSlug } = args.input;
 
       try {
-        const result = await DemoAuthService.loginWithGroupSlug(groupSlug);
+        const result = await DemoAuthService.loginWithGroupSlug(groupSlug, ctx.locale);
         setAuthCookies(ctx, result.sessionId, result.refreshToken);
         return {
           token: result.accessToken,
