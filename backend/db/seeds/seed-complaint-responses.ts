@@ -4,7 +4,7 @@ import { complaintResponses } from "@/backend/db/schema/communications";
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
 import { ComplaintStatus } from "@/shared/lib/enum";
-import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
+import { findAdminUser, getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
 
 type ComplaintRow = {
   id: string;
@@ -20,7 +20,7 @@ export async function seedOrGet(complaintsList: ComplaintRow[], usersList: UserE
     return [];
   }
 
-  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
+  const adminUser = findAdminUser(usersList);
   const results = [];
 
   for (let i = 0; i < complaintsList.length; i++) {

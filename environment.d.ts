@@ -68,7 +68,7 @@ declare global {
       ALLOWED_ORIGIN?: string;
 
       // Admin Configuration
-      ADMIN_EMAIL?: string;
+      ADMIN_EMAIL: string;
       ADMIN_PASSWORD?: string;
 
       // Serverless Platform Detection

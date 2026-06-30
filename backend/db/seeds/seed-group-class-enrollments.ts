@@ -14,10 +14,12 @@ export async function seedOrGet(
 ) {
   logger.info("Seeding system group class enrollments...");
   if (!groupClassesList?.length) {
-    throw new Error("No group classes available to link enrollments.");
+    logger.info("No group classes available to link enrollments. Skipping.");
+    return [];
   }
   if (!studentsList?.length) {
-    throw new Error("No students available for group class enrollments.");
+    logger.info("No students available for group class enrollments. Skipping.");
+    return [];
   }
 
   const results = [];

@@ -1,7 +1,7 @@
 import { TeacherBankingRepository } from "@/backend/db/repo/teacher-banking.repository";
 import logger from "@/backend/lib/logger";
 import type { TeacherEntity, UserEntity } from "@/backend/types";
-import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
+import { findAdminUser, getFakerForIndex, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(teachersList: TeacherEntity[], usersList: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding teacher banking details...");
@@ -11,7 +11,7 @@ export async function seedOrGet(teachersList: TeacherEntity[], usersList: UserEn
     return [];
   }
 
-  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
+  const adminUser = findAdminUser(usersList);
   const results = [];
 
   for (let i = 0; i < teachersList.length; i++) {

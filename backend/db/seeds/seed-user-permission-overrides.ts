@@ -4,7 +4,7 @@ import { permissions, userPermissionOverrides } from "@/backend/db/schema/permis
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
-import { loadSeedConfig, type SeedConfig } from "./lib";
+import { findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding user permission overrides...");
@@ -16,7 +16,7 @@ export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
   }
 
   const parentUser = usersList.find(u => u.email === "parent@siraj.local");
-  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
+  const adminUser = findAdminUser(usersList);
   if (!parentUser || !adminUser) return [];
 
   const [permission] = await db

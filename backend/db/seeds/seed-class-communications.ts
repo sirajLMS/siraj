@@ -9,7 +9,8 @@ type GroupClassEntity = { id: string; classInstanceId: string; courseName: strin
 export async function seedOrGet(groupClassesList: GroupClassEntity[], _config?: SeedConfig) {
   logger.info("Seeding system class communications...");
   if (!groupClassesList?.length) {
-    throw new Error("No group classes available for class communications.");
+    logger.info("No group classes available for class communications. Skipping.");
+    return [];
   }
 
   const results = [];

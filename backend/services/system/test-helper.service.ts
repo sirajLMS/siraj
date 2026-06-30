@@ -347,6 +347,35 @@ export namespace TestHelperService {
       })
       .returning();
 
+    // Assign to the super_admin permission group so demoLogin("super_admin") can find this user
+    const [superAdminGroup] = await db
+      .select()
+      .from(permissionGroups)
+      .where(eq(permissionGroups.slug, "super_admin"))
+      .limit(1);
+
+    if (superAdminGroup) {
+      await db
+        .insert(userPermissionGroups)
+        .values({
+          userId: userRow.id,
+          groupId: superAdminGroup.id,
+          assignedAt: now,
+        })
+        .onConflictDoNothing();
+    }
+
+    // Create staff profile (required for manager/super-admin queries)
+    await db
+      .insert(staffProfiles)
+      .values({
+        userId: userRow.id,
+        status: "ACTIVATED",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoNothing();
+
     logger.info("Test super admin created successfully via helper service", { prefix, userId: userRow.id });
 
     return { userId: userRow.id, email: userRow.email };

@@ -7,6 +7,7 @@ import { ClassOutcome, LeaveRequesterType, LeaveRequestStatus } from "@/shared/l
 import {
   ALL_LEAVE_REQUESTER_TYPES,
   cycleAtIndex,
+  findAdminUser,
   getFakerForIndex,
   loadSeedConfig,
   type SeedConfig,
@@ -167,7 +168,7 @@ export async function seedOrGet(
       .map(s => [s.id, parentById.get(s.parentId)?.userId])
       .filter((entry): entry is [string, string] => !!entry[1])
   );
-  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
+  const adminUser = findAdminUser(usersList);
   const ctx: LeaveRequestContext = {
     teacherUserMap,
     studentParentUserMap,

@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { adminAuditLogs } from "@/backend/db/schema/audit";
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
-import { ADMIN_AUDIT_ACTIONS, buildAdminAuditDescription, loadSeedConfig, type SeedConfig } from "./lib";
+import { ADMIN_AUDIT_ACTIONS, buildAdminAuditDescription, findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding admin audit logs...");
@@ -21,7 +21,7 @@ export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
     return db.select().from(adminAuditLogs).limit(targetCount);
   }
 
-  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
+  const adminUser = findAdminUser(usersList);
   const targetUser = usersList.find(u => u.email === "teacher@siraj.local");
   if (!adminUser) return [];
 

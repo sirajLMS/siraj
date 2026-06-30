@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { studentStatusHistory } from "@/backend/db/schema/students";
 import logger from "@/backend/lib/logger";
 import type { StudentEntity, UserEntity } from "@/backend/types";
-import { loadSeedConfig, type SeedConfig } from "./lib";
+import { findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(studentsList: StudentEntity[], usersList: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding student status history...");
@@ -13,7 +13,7 @@ export async function seedOrGet(studentsList: StudentEntity[], usersList: UserEn
     return [];
   }
 
-  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
+  const adminUser = findAdminUser(usersList);
   const results = [];
 
   for (const student of studentsList) {

@@ -3,7 +3,7 @@ import { suggestions } from "@/backend/db/schema/communications";
 import logger from "@/backend/lib/logger";
 import type { ParentEntity, UserEntity } from "@/backend/types";
 import { SuggestionStatus } from "@/shared/lib/enum";
-import { buildSuggestionBody, loadSeedConfig, pickSuggestionStatus, type SeedConfig } from "./lib";
+import { buildSuggestionBody, findAdminUser, loadSeedConfig, pickSuggestionStatus, type SeedConfig } from "./lib";
 
 export async function seedOrGet(parentsList: ParentEntity[], usersList: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding suggestions...");
@@ -14,7 +14,7 @@ export async function seedOrGet(parentsList: ParentEntity[], usersList: UserEnti
     return [];
   }
 
-  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
+  const adminUser = findAdminUser(usersList);
   const count = seedConfig.profile === "standard" ? 10 : 2;
   const results = [];
 

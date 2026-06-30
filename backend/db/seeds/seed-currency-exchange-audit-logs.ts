@@ -2,7 +2,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { currencyExchangeAuditLogs } from "@/backend/db/schema/billing";
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
-import { loadSeedConfig, type SeedConfig } from "./lib";
+import { findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
 type ExchangeRateRow = { fromCurrency: string; toCurrency: string; rate: string; createdAt: Date };
 
@@ -14,7 +14,7 @@ export async function seedOrGet(ratesList: ExchangeRateRow[], usersList: UserEnt
     return [];
   }
 
-  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
+  const adminUser = findAdminUser(usersList);
   const results = [];
 
   for (const rate of ratesList.slice(0, seedConfig.profile === "standard" ? ratesList.length : 3)) {

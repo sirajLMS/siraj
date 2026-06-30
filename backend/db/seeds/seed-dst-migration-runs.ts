@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { dstMigrationRuns } from "@/backend/db/schema/scheduling";
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
-import { loadSeedConfig, type SeedConfig } from "./lib";
+import { findAdminUser, loadSeedConfig, type SeedConfig } from "./lib";
 
 export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding DST migration runs...");
@@ -14,9 +14,10 @@ export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
     return [];
   }
 
-  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
+  const adminUser = findAdminUser(usersList);
   if (!adminUser) {
-    throw new Error("Admin user required for DST migration run seeding.");
+    logger.warn("Admin user not found; skipping DST migration run seeding.");
+    return [];
   }
 
   const [existing] = await db

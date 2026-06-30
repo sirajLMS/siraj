@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { siteContent } from "@/backend/db/schema/site-content";
 import logger from "@/backend/lib/logger";
 import type { UserEntity } from "@/backend/types";
-import { loadSeedConfig, type SeedConfig, SITE_CONTENT_SPECS } from "./lib";
+import { findAdminUserOrFallback, loadSeedConfig, type SeedConfig, SITE_CONTENT_SPECS } from "./lib";
 
 export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding site content...");
@@ -14,7 +14,7 @@ export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
     return [];
   }
 
-  const editor = usersList.find(u => u.email === "admin@siraj.local") ?? usersList[0];
+  const editor = findAdminUserOrFallback(usersList);
   const results = [];
 
   for (const spec of SITE_CONTENT_SPECS) {

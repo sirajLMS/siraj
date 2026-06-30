@@ -22,12 +22,15 @@ export async function seedOrGet(
 
   for (const instance of classInstancesList.slice(0, 5)) {
     const [existing] = await db
-      .select({ id: groupClasses.id })
+      .select({ id: groupClasses.id, classInstanceId: groupClasses.classInstanceId, courseName: groupClasses.courseName })
       .from(groupClasses)
       .where(eq(groupClasses.classInstanceId, instance.id))
       .limit(1);
 
-    if (existing) continue;
+    if (existing) {
+      results.push(existing);
+      continue;
+    }
 
     const now = new Date();
     const [inserted] = await db

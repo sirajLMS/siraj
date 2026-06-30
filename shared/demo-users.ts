@@ -12,6 +12,18 @@ export type DemoUser = Omit<InternalDemoUser, "plainPassword">;
 
 const PWD = "12345678";
 
+export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@siraj.local";
+
+const _superAdmins: InternalDemoUser[] = [
+  {
+    name: "Super Admin",
+    email: ADMIN_EMAIL,
+    plainPassword: process.env.ADMIN_PASSWORD || PWD,
+    isSuperAdmin: true,
+    groupSlug: SystemPermissionGroupSlug.SUPER_ADMIN,
+  },
+];
+
 const _academyAdmins: InternalDemoUser[] = [
   {
     name: "Academy Admin",
@@ -42,8 +54,9 @@ const _parents: InternalDemoUser[] = [
   },
 ];
 
+export const superAdmins: DemoUser[] = _superAdmins.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 export const academyAdmins: DemoUser[] = _academyAdmins.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 export const teachers: DemoUser[] = _teachers.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 export const parents: DemoUser[] = _parents.map(({ plainPassword: _plainPassword, ...rest }) => rest);
 
-export const INTERNAL_DEMO_USERS: InternalDemoUser[] = [..._academyAdmins, ..._teachers, ..._parents];
+export const INTERNAL_DEMO_USERS: InternalDemoUser[] = [..._superAdmins, ..._academyAdmins, ..._teachers, ..._parents];

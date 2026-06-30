@@ -4,7 +4,7 @@ import { teacherVacationRequests } from "@/backend/db/schema/teacher-availabilit
 import logger from "@/backend/lib/logger";
 import type { TeacherEntity, TimezoneEntity, UserEntity } from "@/backend/types";
 import { VacationRequestStatus } from "@/shared/lib/enum";
-import { addMonths, loadSeedConfig, type SeedConfig, startOfDay } from "./lib";
+import { addMonths, findAdminUser, loadSeedConfig, type SeedConfig, startOfDay } from "./lib";
 
 async function upsertVacationRequest(
   teacher: TeacherEntity,
@@ -93,7 +93,7 @@ export async function seedOrGet(
     return [];
   }
 
-  const adminUser = usersList.find(u => u.email === "admin@siraj.local");
+  const adminUser = findAdminUser(usersList);
   const teacherUserMap = new Map(teachersList.map(t => [t.id, usersList.find(u => u.id === t.userId)?.id]));
   const anchor = startOfDay(seedConfig.anchorDate);
   const specs = buildVacationSpecs(teachersList, seedConfig.profile);
