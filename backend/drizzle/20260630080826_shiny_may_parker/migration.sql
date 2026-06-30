@@ -1,6 +1,6 @@
 CREATE TYPE "account_status" AS ENUM('ACTIVATED', 'DEACTIVATED');--> statement-breakpoint
 CREATE TYPE "app_language" AS ENUM('ar', 'en');--> statement-breakpoint
-CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile', 'schedule.delete_class', 'schedule.clear_weekly', 'staff.edit_profile', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_profile', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'suggestions.list', 'suggestions.review', 'suggestions.delete', 'test.system_only', 'test.custom_only');--> statement-breakpoint
+CREATE TYPE "app_permission" AS ENUM('auth.login', 'auth.view_own_profile', 'dashboard.view', 'dashboard.view_metrics', 'dashboard.filter_metrics', 'dashboard.metrics.view_all', 'schedule.view_list', 'schedule.filter_advanced', 'schedule.view_all', 'schedule.view_assigned', 'schedule.view_family', 'schedule.search_availability', 'schedule.manage_recurring', 'schedule.dst_migrate', 'session.view_details', 'session.activate_class', 'session.activate_override', 'session.update_status.start', 'session.update_status.absent', 'session.update_status.leave', 'session.reschedule', 'session.reset', 'session.override_actions', 'dashboard.search', 'schedule.view_timezones', 'history.view_calendar', 'history.view_details', 'teacher.view_dashboard', 'system.enforce_time_window', 'system.enforce_leave_limit', 'teachers.list', 'teachers.create', 'teachers.edit', 'teachers.manage_schedule', 'staff.view_directory', 'schedule.view_weekly', 'schedule.view_workload', 'schedule.create_class', 'parents.list', 'parents.create', 'parents.edit', 'students.list', 'students.edit', 'students.change_teacher', 'students.change_status', 'students.override_quota', 'invoices.list', 'invoices.delete', 'invoices.create', 'invoices.mark_paid', 'invoices.edit', 'resources.list', 'resources.delete', 'resources.upload', 'reports.generate', 'report.generate_custom', 'report.view_financials', 'complaints.list', 'complaints.delete', 'complaints.respond', 'support.submit_complaint', 'support.view_history', 'communication.submit_suggestion', 'system.dispatch_email', 'staff.list', 'staff.create', 'staff.edit', 'permission_groups.manage', 'permission_groups.assign', 'notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile', 'schedule.delete_class', 'schedule.clear_weekly', 'staff.edit_profile', 'system.bulk_update_dst', 'parent.view_directory', 'parent.view_profile', 'parent.manage_status', 'student.view_associated', 'student.edit_quota', 'billing.view_history', 'document.manage_parent_docs', 'billing.create_invoice', 'billing.update_status_paid', 'billing.delete_invoice', 'student.reassign_teacher', 'student.manage_status', 'system.sync_notifications', 'system.enforce_suspended_lock', 'system.process_student_leave', 'system.restrict_resource_access', 'suggestions.list', 'suggestions.review', 'suggestions.delete', 'subjects.list', 'subjects.create', 'subjects.update', 'subjects.delete', 'subjects.view_resources', 'subjects.manage_resources', 'categories.list', 'categories.create', 'categories.update', 'categories.delete', 'notes.list', 'notes.create', 'notes.update', 'notes.delete', 'test.system_only', 'test.custom_only', 'test.custom_alt', 'storage.manage');--> statement-breakpoint
 CREATE TYPE "availability_status" AS ENUM('AVAILABLE', 'OUT_OF_STOCK');--> statement-breakpoint
 CREATE TYPE "class_execution_state" AS ENUM('NOT_ACTIVATED', 'ACTIVATED', 'RUNNING', 'COMPLETED');--> statement-breakpoint
 CREATE TYPE "class_outcome" AS ENUM('PENDING', 'TAKEN', 'ABSENT', 'LEAVE');--> statement-breakpoint
@@ -150,6 +150,31 @@ CREATE TABLE "session_cache" (
 	"key" text PRIMARY KEY,
 	"value" text NOT NULL,
 	"expires_at" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "class_categories" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"name" varchar(200) NOT NULL,
+	"slug" varchar(100) NOT NULL UNIQUE,
+	"description" text,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"sort_order" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp(3) with time zone
+);
+--> statement-breakpoint
+CREATE TABLE "class_subjects" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"category_id" uuid NOT NULL,
+	"name" varchar(200) NOT NULL,
+	"slug" varchar(100) NOT NULL UNIQUE,
+	"description" text,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"sort_order" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp(3) with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "complaint_responses" (
@@ -368,6 +393,7 @@ CREATE TABLE "class_instances" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
 	"teacher_id" uuid NOT NULL,
+	"subject_id" uuid,
 	"recurring_schedule_id" uuid,
 	"original_class_id" uuid,
 	"scheduled_start_at" timestamp(3) with time zone NOT NULL,
@@ -472,6 +498,7 @@ CREATE TABLE "recurring_schedules" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"student_id" uuid NOT NULL,
 	"teacher_id" uuid NOT NULL,
+	"subject_id" uuid,
 	"duration_minutes" integer NOT NULL,
 	"default_start_time" time NOT NULL,
 	"timezone_id" integer,
@@ -681,6 +708,15 @@ CREATE TABLE "teacher_assignments" (
 	"ended_at" timestamp(3) with time zone
 );
 --> statement-breakpoint
+CREATE TABLE "subject_resources" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"subject_id" uuid NOT NULL,
+	"learning_resource_id" uuid NOT NULL,
+	"resource_type" varchar(50),
+	"sort_order" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "teacher_availability_windows" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"teacher_id" uuid NOT NULL,
@@ -756,6 +792,21 @@ CREATE TABLE "teacher_payments" (
 	"is_test_payment" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp(3) with time zone NOT NULL,
 	"updated_at" timestamp(3) with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "teacher_important_notes" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"teacher_id" uuid,
+	"title" varchar(300) NOT NULL,
+	"body" text,
+	"is_published" boolean DEFAULT false NOT NULL,
+	"priority" integer DEFAULT 0 NOT NULL,
+	"starts_at" timestamp(3) with time zone,
+	"expires_at" timestamp(3) with time zone,
+	"created_by_user_id" uuid NOT NULL,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp(3) with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "teachers" (
@@ -881,6 +932,9 @@ CREATE UNIQUE INDEX "payments_idempotency_key_unique_idx" ON "payments" ("idempo
 CREATE INDEX "books_deleted_at_idx" ON "books" ("deleted_at");--> statement-breakpoint
 CREATE INDEX "rate_limit_cache_expires_at_idx" ON "rate_limit_cache" ("expires_at");--> statement-breakpoint
 CREATE INDEX "session_cache_expires_at_idx" ON "session_cache" ("expires_at");--> statement-breakpoint
+CREATE INDEX "class_categories_slug_idx" ON "class_categories" ("slug");--> statement-breakpoint
+CREATE INDEX "class_subjects_category_id_idx" ON "class_subjects" ("category_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "class_subjects_slug_idx" ON "class_subjects" ("slug");--> statement-breakpoint
 CREATE INDEX "complaint_responses_complaint_id_idx" ON "complaint_responses" ("complaint_id");--> statement-breakpoint
 CREATE INDEX "complaints_status_idx" ON "complaints" ("status");--> statement-breakpoint
 CREATE INDEX "complaints_parent_id_idx" ON "complaints" ("parent_id");--> statement-breakpoint
@@ -918,6 +972,7 @@ CREATE INDEX "class_instances_scheduled_start_at_idx" ON "class_instances" ("sch
 CREATE INDEX "class_instances_teacher_scheduled_idx" ON "class_instances" ("teacher_id","scheduled_start_at");--> statement-breakpoint
 CREATE INDEX "class_instances_student_scheduled_idx" ON "class_instances" ("student_id","scheduled_start_at");--> statement-breakpoint
 CREATE INDEX "class_instances_original_class_id_idx" ON "class_instances" ("original_class_id");--> statement-breakpoint
+CREATE INDEX "class_instances_subject_id_idx" ON "class_instances" ("subject_id");--> statement-breakpoint
 CREATE INDEX "class_instances_class_type_idx" ON "class_instances" ("class_type");--> statement-breakpoint
 CREATE INDEX "class_instances_outcome_idx" ON "class_instances" ("outcome");--> statement-breakpoint
 CREATE UNIQUE INDEX "class_instances_idempotency_key_unique_idx" ON "class_instances" ("idempotency_key");--> statement-breakpoint
@@ -935,6 +990,7 @@ CREATE UNIQUE INDEX "recurring_schedule_days_schedule_day_idx" ON "recurring_sch
 CREATE INDEX "recurring_schedules_student_id_idx" ON "recurring_schedules" ("student_id");--> statement-breakpoint
 CREATE INDEX "recurring_schedules_teacher_id_idx" ON "recurring_schedules" ("teacher_id");--> statement-breakpoint
 CREATE INDEX "recurring_schedules_timezone_id_idx" ON "recurring_schedules" ("timezone_id");--> statement-breakpoint
+CREATE INDEX "recurring_schedules_subject_id_idx" ON "recurring_schedules" ("subject_id");--> statement-breakpoint
 CREATE INDEX "system_settings_category_idx" ON "system_settings" ("category");--> statement-breakpoint
 CREATE INDEX "site_content_slug_idx" ON "site_content" ("slug");--> statement-breakpoint
 CREATE INDEX "site_content_type_idx" ON "site_content" ("content_type");--> statement-breakpoint
@@ -979,6 +1035,7 @@ CREATE INDEX "idx_students_parent_status" ON "students" ("parent_id","status");-
 CREATE INDEX "idx_students_status_created" ON "students" ("status","created_at");--> statement-breakpoint
 CREATE INDEX "teacher_assignments_student_id_idx" ON "teacher_assignments" ("student_id");--> statement-breakpoint
 CREATE INDEX "teacher_assignments_teacher_id_idx" ON "teacher_assignments" ("teacher_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "subject_resources_subject_id_learning_resource_id_idx" ON "subject_resources" ("subject_id","learning_resource_id");--> statement-breakpoint
 CREATE INDEX "teacher_availability_windows_teacher_id_idx" ON "teacher_availability_windows" ("teacher_id");--> statement-breakpoint
 CREATE INDEX "teacher_availability_windows_teacher_day_idx" ON "teacher_availability_windows" ("teacher_id","day_of_week");--> statement-breakpoint
 CREATE INDEX "teacher_recurring_unavailability_teacher_id_idx" ON "teacher_recurring_unavailability" ("teacher_id");--> statement-breakpoint
@@ -990,6 +1047,7 @@ CREATE INDEX "teacher_banking_details_history_teacher_id_idx" ON "teacher_bankin
 CREATE UNIQUE INDEX "teacher_banking_details_history_active_idx" ON "teacher_banking_details_history" ("teacher_id") WHERE "valid_until" IS NULL;--> statement-breakpoint
 CREATE INDEX "teacher_payments_teacher_id_idx" ON "teacher_payments" ("teacher_id");--> statement-breakpoint
 CREATE INDEX "teacher_payments_banking_details_history_id_idx" ON "teacher_payments" ("banking_details_history_id");--> statement-breakpoint
+CREATE INDEX "teacher_important_notes_teacher_id_idx" ON "teacher_important_notes" ("teacher_id");--> statement-breakpoint
 CREATE INDEX "teachers_user_id_idx" ON "teachers" ("user_id");--> statement-breakpoint
 CREATE INDEX "teachers_status_idx" ON "teachers" ("status");--> statement-breakpoint
 CREATE INDEX "teachers_timezone_id_idx" ON "teachers" ("timezone_id");--> statement-breakpoint
@@ -1014,6 +1072,7 @@ ALTER TABLE "invoices" ADD CONSTRAINT "invoices_parent_id_parents_id_fkey" FOREI
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_created_by_user_id_users_id_fkey" FOREIGN KEY ("created_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "payments" ADD CONSTRAINT "payments_invoice_id_invoices_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "invoices"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "class_subjects" ADD CONSTRAINT "class_subjects_category_id_class_categories_id_fkey" FOREIGN KEY ("category_id") REFERENCES "class_categories"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "complaint_responses" ADD CONSTRAINT "complaint_responses_complaint_id_complaints_id_fkey" FOREIGN KEY ("complaint_id") REFERENCES "complaints"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "complaint_responses" ADD CONSTRAINT "complaint_responses_responder_user_id_users_id_fkey" FOREIGN KEY ("responder_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "complaints" ADD CONSTRAINT "complaints_parent_id_parents_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "parents"("id") ON DELETE RESTRICT;--> statement-breakpoint
@@ -1045,6 +1104,7 @@ ALTER TABLE "user_permission_overrides" ADD CONSTRAINT "user_permission_override
 ALTER TABLE "class_instance_performance" ADD CONSTRAINT "class_instance_performance_aA1hiAMGrLBk_fkey" FOREIGN KEY ("class_instance_id") REFERENCES "class_instances"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_subject_id_class_subjects_id_fkey" FOREIGN KEY ("subject_id") REFERENCES "class_subjects"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_PylSk1pBxELI_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_original_class_id_class_instances_id_fkey" FOREIGN KEY ("original_class_id") REFERENCES "class_instances"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "class_instances" ADD CONSTRAINT "class_instances_booking_timezone_id_timezones_id_fkey" FOREIGN KEY ("booking_timezone_id") REFERENCES "timezones"("id");--> statement-breakpoint
@@ -1063,6 +1123,7 @@ ALTER TABLE "leave_requests" ADD CONSTRAINT "leave_requests_processed_by_user_id
 ALTER TABLE "recurring_schedule_days" ADD CONSTRAINT "recurring_schedule_days_ok4vhL3oaFBE_fkey" FOREIGN KEY ("recurring_schedule_id") REFERENCES "recurring_schedules"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_subject_id_class_subjects_id_fkey" FOREIGN KEY ("subject_id") REFERENCES "class_subjects"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "recurring_schedules" ADD CONSTRAINT "recurring_schedules_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");--> statement-breakpoint
 ALTER TABLE "system_settings" ADD CONSTRAINT "system_settings_updated_by_user_id_users_id_fkey" FOREIGN KEY ("updated_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "site_content" ADD CONSTRAINT "site_content_updated_by_user_id_users_id_fkey" FOREIGN KEY ("updated_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
@@ -1097,6 +1158,8 @@ ALTER TABLE "students" ADD CONSTRAINT "students_primary_teacher_id_teachers_id_f
 ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_student_id_students_id_fkey" FOREIGN KEY ("student_id") REFERENCES "students"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "teacher_assignments" ADD CONSTRAINT "teacher_assignments_assigned_by_user_id_users_id_fkey" FOREIGN KEY ("assigned_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "subject_resources" ADD CONSTRAINT "subject_resources_subject_id_class_subjects_id_fkey" FOREIGN KEY ("subject_id") REFERENCES "class_subjects"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "subject_resources" ADD CONSTRAINT "subject_resources_5NKkB933Dpb5_fkey" FOREIGN KEY ("learning_resource_id") REFERENCES "learning_resources"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "teacher_availability_windows" ADD CONSTRAINT "teacher_availability_windows_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "teacher_availability_windows" ADD CONSTRAINT "teacher_availability_windows_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");--> statement-breakpoint
 ALTER TABLE "teacher_recurring_unavailability" ADD CONSTRAINT "teacher_recurring_unavailability_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE CASCADE;--> statement-breakpoint
@@ -1109,6 +1172,8 @@ ALTER TABLE "teacher_banking_details_history" ADD CONSTRAINT "teacher_banking_de
 ALTER TABLE "teacher_banking_details_history" ADD CONSTRAINT "teacher_banking_details_history_M2JKQjWemqEv_fkey" FOREIGN KEY ("verified_by_user_id") REFERENCES "users"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "teacher_payments" ADD CONSTRAINT "teacher_payments_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "teacher_payments" ADD CONSTRAINT "teacher_payments_5SKCg5lB6byn_fkey" FOREIGN KEY ("banking_details_history_id") REFERENCES "teacher_banking_details_history"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "teacher_important_notes" ADD CONSTRAINT "teacher_important_notes_teacher_id_teachers_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "teacher_important_notes" ADD CONSTRAINT "teacher_important_notes_created_by_user_id_users_id_fkey" FOREIGN KEY ("created_by_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "teachers" ADD CONSTRAINT "teachers_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "teachers" ADD CONSTRAINT "teachers_timezone_id_timezones_id_fkey" FOREIGN KEY ("timezone_id") REFERENCES "timezones"("id");--> statement-breakpoint
 ALTER TABLE "session_metadata" ADD CONSTRAINT "session_metadata_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint

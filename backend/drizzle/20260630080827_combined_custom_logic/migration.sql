@@ -998,115 +998,106 @@ SET
     updated_at = NOW();
 
 DELETE FROM group_permissions
-WHERE
-    group_id IN (
-        SELECT id
-        FROM permission_groups
-        WHERE
-            is_system = true
+WHERE group_id IN (SELECT id FROM permission_groups WHERE is_system = true)
+AND permission_id IN (
+    SELECT id FROM permissions WHERE key IN (
+        'auth.login',
+        'auth.view_own_profile',
+        'dashboard.view',
+        'dashboard.view_metrics',
+        'dashboard.filter_metrics',
+        'dashboard.metrics.view_all',
+        'dashboard.search',
+        'schedule.view_list',
+        'schedule.filter_advanced',
+        'schedule.view_all',
+        'schedule.view_assigned',
+        'schedule.view_family',
+        'schedule.search_availability',
+        'schedule.manage_recurring',
+        'schedule.dst_migrate',
+        'schedule.view_timezones',
+        'schedule.view_weekly',
+        'schedule.view_workload',
+        'schedule.create_class',
+        'schedule.delete_class',
+        'schedule.clear_weekly',
+        'session.view_details',
+        'session.activate_class',
+        'session.activate_override',
+        'session.update_status.start',
+        'session.update_status.absent',
+        'session.update_status.leave',
+        'session.reschedule',
+        'session.reset',
+        'session.override_actions',
+        'history.view_calendar',
+        'history.view_details',
+        'teacher.view_dashboard',
+        'system.enforce_time_window',
+        'system.enforce_leave_limit',
+        'system.bulk_update_dst',
+        'system.sync_notifications',
+        'system.enforce_suspended_lock',
+        'system.process_student_leave',
+        'system.restrict_resource_access',
+        'system.dispatch_email',
+        'teachers.list',
+        'teachers.create',
+        'teachers.edit',
+        'teachers.manage_schedule',
+        'parents.list',
+        'parents.create',
+        'parents.edit',
+        'students.list',
+        'students.edit',
+        'students.change_teacher',
+        'students.change_status',
+        'students.override_quota',
+        'invoices.list',
+        'invoices.delete',
+        'invoices.create',
+        'invoices.mark_paid',
+        'invoices.edit',
+        'resources.list',
+        'resources.delete',
+        'resources.upload',
+        'reports.generate',
+        'complaints.list',
+        'complaints.delete',
+        'complaints.respond',
+        'staff.list',
+        'staff.create',
+        'staff.edit',
+        'staff.view_directory',
+        'staff.edit_profile',
+        'permission_groups.manage',
+        'permission_groups.assign',
+        'notification.view_alerts',
+        'billing.view_unpaid_invoices',
+        'billing.view_history',
+        'billing.create_invoice',
+        'billing.update_status_paid',
+        'billing.delete_invoice',
+        'user.view_profile',
+        'parent.view_directory',
+        'parent.view_profile',
+        'parent.manage_status',
+        'student.view_associated',
+        'student.edit_quota',
+        'student.reassign_teacher',
+        'student.manage_status',
+        'document.manage_parent_docs',
+        'report.generate_custom',
+        'report.view_financials',
+        'support.submit_complaint',
+        'support.view_history',
+        'communication.submit_suggestion',
+        'suggestions.list',
+        'suggestions.review',
+        'suggestions.delete'
     )
-    AND permission_id IN (
-        SELECT id
-        FROM permissions
-        WHERE
-            key IN (
-                'auth.login',
-                'auth.view_own_profile',
-                'dashboard.view',
-                'dashboard.view_metrics',
-                'dashboard.filter_metrics',
-                'dashboard.metrics.view_all',
-                'dashboard.search',
-                'schedule.view_list',
-                'schedule.filter_advanced',
-                'schedule.view_all',
-                'schedule.view_assigned',
-                'schedule.view_family',
-                'schedule.search_availability',
-                'schedule.manage_recurring',
-                'schedule.dst_migrate',
-                'schedule.view_timezones',
-                'schedule.view_weekly',
-                'schedule.view_workload',
-                'schedule.create_class',
-                'schedule.delete_class',
-                'schedule.clear_weekly',
-                'session.view_details',
-                'session.activate_class',
-                'session.activate_override',
-                'session.update_status.start',
-                'session.update_status.absent',
-                'session.update_status.leave',
-                'session.reschedule',
-                'session.reset',
-                'session.override_actions',
-                'history.view_calendar',
-                'history.view_details',
-                'teacher.view_dashboard',
-                'system.enforce_time_window',
-                'system.enforce_leave_limit',
-                'system.sync_notifications',
-                'system.enforce_suspended_lock',
-                'system.process_student_leave',
-                'system.restrict_resource_access',
-                'system.dispatch_email',
-                'system.bulk_update_dst',
-                'teachers.list',
-                'teachers.create',
-                'teachers.edit',
-                'teachers.manage_schedule',
-                'parents.list',
-                'parents.create',
-                'parents.edit',
-                'students.list',
-                'students.edit',
-                'students.change_teacher',
-                'students.change_status',
-                'students.override_quota',
-                'invoices.list',
-                'invoices.delete',
-                'invoices.create',
-                'invoices.mark_paid',
-                'invoices.edit',
-                'resources.list',
-                'resources.delete',
-                'resources.upload',
-                'reports.generate',
-                'complaints.list',
-                'complaints.delete',
-                'complaints.respond',
-                'staff.list',
-                'staff.create',
-                'staff.edit',
-                'permission_groups.manage',
-                'permission_groups.assign',
-                'notification.view_alerts',
-                'billing.view_unpaid_invoices',
-                'user.view_profile',
-                'staff.view_directory',
-                'staff.edit_profile',
-                'parent.view_directory',
-                'parent.view_profile',
-                'parent.manage_status',
-                'student.view_associated',
-                'student.edit_quota',
-                'student.reassign_teacher',
-                'student.manage_status',
-                'billing.view_history',
-                'document.manage_parent_docs',
-                'billing.create_invoice',
-                'billing.update_status_paid',
-                'billing.delete_invoice',
-                'report.generate_custom',
-                'report.view_financials',
-                'support.submit_complaint',
-                'support.view_history',
-                'communication.submit_suggestion',
-                'suggestions.list',
-                'suggestions.review',
-                'suggestions.delete'
-            )
-    );
+);
 
 INSERT INTO
     group_permissions (group_id, permission_id)
@@ -1407,6 +1398,269 @@ DROP TRIGGER IF EXISTS trg_protect_system_permission_groups ON permission_groups
 CREATE TRIGGER trg_protect_system_permission_groups
 BEFORE UPDATE OR DELETE ON permission_groups
 FOR EACH ROW EXECUTE FUNCTION protect_system_permissions();
+
+-- Source: 4-class_categories_and_subjects.sql
+-- Migration 4: Class Categories, Subjects, Subject Resources, Teacher Important Notes
+-- Creates 4 new tables, adds subject_id FK to recurring_schedules and class_instances,
+-- adds 13 new permissions to app_permission enum.
+
+-- ============================================================
+-- 1. CREATE TABLES
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS class_categories (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(200) NOT NULL,
+  slug varchar(100) NOT NULL UNIQUE,
+  description text,
+  is_active boolean NOT NULL DEFAULT true,
+  sort_order integer NOT NULL DEFAULT 0,
+  created_at timestamptz(3) NOT NULL DEFAULT NOW(),
+  updated_at timestamptz(3) NOT NULL DEFAULT NOW(),
+  deleted_at timestamptz(3)
+);
+
+CREATE INDEX IF NOT EXISTS class_categories_slug_idx ON class_categories (slug);
+
+CREATE TABLE IF NOT EXISTS class_subjects (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  category_id uuid NOT NULL REFERENCES class_categories(id) ON DELETE RESTRICT,
+  name varchar(200) NOT NULL,
+  slug varchar(100) NOT NULL UNIQUE,
+  description text,
+  is_active boolean NOT NULL DEFAULT true,
+  sort_order integer NOT NULL DEFAULT 0,
+  created_at timestamptz(3) NOT NULL DEFAULT NOW(),
+  updated_at timestamptz(3) NOT NULL DEFAULT NOW(),
+  deleted_at timestamptz(3)
+);
+
+CREATE INDEX IF NOT EXISTS class_subjects_category_id_idx ON class_subjects (category_id);
+CREATE UNIQUE INDEX IF NOT EXISTS class_subjects_slug_idx ON class_subjects (slug);
+
+CREATE TABLE IF NOT EXISTS subject_resources (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  subject_id uuid NOT NULL REFERENCES class_subjects(id) ON DELETE CASCADE,
+  learning_resource_id uuid NOT NULL REFERENCES learning_resources(id) ON DELETE CASCADE,
+  resource_type varchar(50),
+  sort_order integer NOT NULL DEFAULT 0,
+  created_at timestamptz(3) NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS subject_resources_subject_id_learning_resource_id_idx ON subject_resources (subject_id, learning_resource_id);
+
+CREATE TABLE IF NOT EXISTS teacher_important_notes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  teacher_id uuid REFERENCES teachers(id) ON DELETE RESTRICT,
+  title varchar(300) NOT NULL,
+  body text,
+  is_published boolean NOT NULL DEFAULT false,
+  priority integer NOT NULL DEFAULT 0,
+  starts_at timestamptz(3),
+  expires_at timestamptz(3),
+  created_by_user_id uuid NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  created_at timestamptz(3) NOT NULL DEFAULT NOW(),
+  updated_at timestamptz(3) NOT NULL DEFAULT NOW(),
+  deleted_at timestamptz(3)
+);
+
+CREATE INDEX IF NOT EXISTS teacher_important_notes_teacher_id_idx ON teacher_important_notes (teacher_id);
+
+-- ============================================================
+-- 2. ALTER TABLE — Add subject_id FK to scheduling tables
+-- ============================================================
+
+ALTER TABLE recurring_schedules
+  ADD COLUMN IF NOT EXISTS subject_id uuid REFERENCES class_subjects(id) ON DELETE RESTRICT;
+
+ALTER TABLE class_instances
+  ADD COLUMN IF NOT EXISTS subject_id uuid REFERENCES class_subjects(id) ON DELETE RESTRICT;
+
+-- subject_id indexes are created by the drizzle schema migration (same_sphinx);
+-- CONCURRENTLY cannot run inside drizzle's transactional migrator.
+
+-- ============================================================
+-- 3. ALTER TYPE — Add 13 new permission values to app_permission enum
+-- ============================================================
+
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.list';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.create';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.update';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.delete';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'categories.list';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'categories.create';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'categories.update';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'categories.delete';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.view_resources';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'subjects.manage_resources';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'notes.list';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'notes.create';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'notes.update';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'notes.delete';
+
+
+-- Source: 4a-class_categories_and_subjects_seed.sql
+-- Migration 4-seed: Seed data for class categories, subjects, permissions, and settings
+-- MUST run AFTER 4-class_categories_and_subjects.sql in a separate transaction.
+-- The app_permission enum values must be committed before this runs.
+
+-- Temporarily disable the system permission trigger to allow INSERT with is_system = true
+-- Uses DO block to ensure trigger is re-enabled even if INSERT fails
+DO $$
+BEGIN
+  ALTER TABLE permissions DISABLE TRIGGER trg_protect_system_permissions;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Could not disable trigger: %', SQLERRM;
+END $$;
+
+-- ============================================================
+-- 1. INSERT INTO permissions — 13 new permission keys
+-- ============================================================
+
+INSERT INTO permissions (id, key, resource, action, description, category, is_system)
+VALUES
+  (gen_random_uuid(), 'subjects.list', 'subjects', 'list', 'List class subjects', 'Subjects', true),
+  (gen_random_uuid(), 'subjects.create', 'subjects', 'create', 'Create class subjects', 'Subjects', true),
+  (gen_random_uuid(), 'subjects.update', 'subjects', 'update', 'Update class subjects', 'Subjects', true),
+  (gen_random_uuid(), 'subjects.delete', 'subjects', 'delete', 'Delete class subjects', 'Subjects', true),
+  (gen_random_uuid(), 'categories.list', 'categories', 'list', 'List class categories', 'Categories', true),
+  (gen_random_uuid(), 'categories.create', 'categories', 'create', 'Create class categories', 'Categories', true),
+  (gen_random_uuid(), 'categories.update', 'categories', 'update', 'Update class categories', 'Categories', true),
+  (gen_random_uuid(), 'categories.delete', 'categories', 'delete', 'Delete class categories', 'Categories', true),
+  (gen_random_uuid(), 'subjects.view_resources', 'subjects', 'view_resources', 'View subject resources', 'Subjects', true),
+  (gen_random_uuid(), 'subjects.manage_resources', 'subjects', 'manage_resources', 'Attach and detach subject resources', 'Subjects', true),
+  (gen_random_uuid(), 'notes.list', 'notes', 'list', 'List teacher important notes', 'Notes', true),
+  (gen_random_uuid(), 'notes.create', 'notes', 'create', 'Create teacher important notes', 'Notes', true),
+  (gen_random_uuid(), 'notes.update', 'notes', 'update', 'Update teacher important notes', 'Notes', true),
+  (gen_random_uuid(), 'notes.delete', 'notes', 'delete', 'Delete teacher important notes', 'Notes', true)
+ON CONFLICT (key) DO UPDATE SET
+  resource = EXCLUDED.resource,
+  action = EXCLUDED.action,
+  description = EXCLUDED.description,
+  category = EXCLUDED.category,
+  is_system = EXCLUDED.is_system;
+
+-- Re-enable the trigger (guaranteed even if INSERT fails above)
+DO $$
+BEGIN
+  ALTER TABLE permissions ENABLE TRIGGER trg_protect_system_permissions;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Could not re-enable trigger: %', SQLERRM;
+END $$;
+
+-- ============================================================
+-- 2. INSERT INTO group_permissions — assign to super_admin + academy_admin
+-- ============================================================
+
+INSERT INTO group_permissions (group_id, permission_id)
+SELECT g.id, p.id
+FROM permission_groups g, permissions p
+WHERE g.slug = 'super_admin'
+  AND p.key IN (
+    'subjects.list',
+    'subjects.create',
+    'subjects.update',
+    'subjects.delete',
+    'categories.list',
+    'categories.create',
+    'categories.update',
+    'categories.delete',
+    'subjects.view_resources',
+    'subjects.manage_resources',
+    'notes.list',
+    'notes.create',
+    'notes.update',
+    'notes.delete'
+  )
+ON CONFLICT DO NOTHING;
+
+INSERT INTO group_permissions (group_id, permission_id)
+SELECT g.id, p.id
+FROM permission_groups g, permissions p
+WHERE g.slug = 'academy_admin'
+  AND p.key IN (
+    'subjects.list',
+    'subjects.create',
+    'subjects.update',
+    'subjects.delete',
+    'categories.list',
+    'categories.create',
+    'categories.update',
+    'categories.delete',
+    'subjects.view_resources',
+    'subjects.manage_resources',
+    'notes.list',
+    'notes.create',
+    'notes.update',
+    'notes.delete'
+  )
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- 3. INSERT default categories and subjects
+-- ============================================================
+
+INSERT INTO class_categories (name, slug, description, is_active, sort_order)
+VALUES
+  ('Quran', 'quran', 'Quran recitation and memorization studies', true, 1),
+  ('Arabic Language', 'arabic-language', 'Arabic language and grammar studies', true, 2),
+  ('Islamic Studies', 'islamic-studies', 'Islamic studies including fiqh, aqidah, and seerah', true, 3)
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
+SELECT cat.id, 'Quran Recitation', 'quran-recitation', 'Quran recitation practice and tajweed', true, 1
+FROM class_categories cat WHERE cat.slug = 'quran'
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
+SELECT cat.id, 'Quran Memorization', 'quran-memorization', 'Hifz — Quran memorization and review', true, 2
+FROM class_categories cat WHERE cat.slug = 'quran'
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
+SELECT cat.id, 'Arabic Grammar', 'arabic-grammar', 'Nahw and Sarf — Arabic grammar foundations', true, 1
+FROM class_categories cat WHERE cat.slug = 'arabic-language'
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
+SELECT cat.id, 'Arabic Conversation', 'arabic-conversation', 'Arabic speaking and conversation practice', true, 2
+FROM class_categories cat WHERE cat.slug = 'arabic-language'
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
+SELECT cat.id, 'Fiqh', 'fiqh', 'Islamic jurisprudence and rulings', true, 1
+FROM class_categories cat WHERE cat.slug = 'islamic-studies'
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
+SELECT cat.id, 'Aqidah', 'aqidah', 'Islamic creed and theology', true, 2
+FROM class_categories cat WHERE cat.slug = 'islamic-studies'
+ON CONFLICT (slug) DO NOTHING;
+
+INSERT INTO class_subjects (category_id, name, slug, description, is_active, sort_order)
+SELECT cat.id, 'Seerah', 'seerah', 'Prophetic biography and life of the Prophet', true, 3
+FROM class_categories cat WHERE cat.slug = 'islamic-studies'
+ON CONFLICT (slug) DO NOTHING;
+
+
+-- Source: 4b-teacher_support_contact_setting.sql
+-- Migration 4b: Teacher Support Contact System Setting
+-- Inserts the teacher_support_contact_staff_profile_id setting into system_settings.
+
+INSERT INTO system_settings (key, value, data_type, description, category, updated_at)
+VALUES (
+  'teacher_support_contact_staff_profile_id',
+  '',
+  'string',
+  'Staff profile ID of the teacher support coordinator displayed on the teacher schedule page',
+  'Scheduling',
+  NOW()
+)
+ON CONFLICT (key) DO UPDATE SET
+  description = EXCLUDED.description,
+  category = EXCLUDED.category,
+  updated_at = NOW();
+
 
 -- Source: audit_log_immutability_trigger.sql
 -- Trigger to prevent modifications to audit_logs table (immutability enforcement)
@@ -1740,16 +1994,14 @@ AFTER INSERT OR UPDATE OR DELETE ON recurring_schedule_days
 FOR EACH ROW EXECUTE FUNCTION trg_fn_recurring_schedule_days_hours_recalc();
 
 -- 5. One-time recalculation for existing students
+-- DEPLOY SAFETY: This one-time backfill UPDATE runs across ALL students in a single statement.
+-- For production deployments with large student tables (1000+ rows), consider splitting into
+-- batched updates of 500 rows at a time:
+--   UPDATE students s SET hours_per_week = ...
+--   WHERE s.id IN (SELECT id FROM students ORDER BY id LIMIT 500 OFFSET 0);
+-- Repeat with increasing OFFSET until no rows remain.
 UPDATE students s
 SET hours_per_week = COALESCE((
-  SELECT SUM(rs.duration_minutes)::numeric / 60.0
-  FROM recurring_schedules rs
-  JOIN recurring_schedule_days rsd ON rsd.recurring_schedule_id = rs.id
-  WHERE rs.student_id = s.id
-    AND rs.deleted_at IS NULL
-    AND rsd.is_active = true
-), 0)
-WHERE s.hours_per_week IS DISTINCT FROM COALESCE((
   SELECT SUM(rs.duration_minutes)::numeric / 60.0
   FROM recurring_schedules rs
   JOIN recurring_schedule_days rsd ON rsd.recurring_schedule_id = rs.id
@@ -2135,6 +2387,13 @@ DECLARE
     updated_count INTEGER := 0;
 BEGIN
     -- Update scheduled_start_at and scheduled_end_at for future classes where a DST drift is detected
+    -- DEPLOY SAFETY: This UPDATE touches all future class instances with DST drift in a single
+    -- statement, holding row locks for the duration. For databases with many future class instances,
+    -- consider refactoring to process in batches of 500 using a cursor loop:
+    --   LOOP
+    --     UPDATE class_instances ... WHERE id IN (SELECT id FROM affected_classes LIMIT 500) RETURNING 1;
+    --     EXIT WHEN NOT FOUND;
+    --   END LOOP;
     WITH affected_classes AS (
         SELECT 
             id,

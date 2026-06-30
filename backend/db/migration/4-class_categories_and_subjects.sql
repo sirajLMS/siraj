@@ -71,12 +71,11 @@ CREATE INDEX IF NOT EXISTS teacher_important_notes_teacher_id_idx ON teacher_imp
 ALTER TABLE recurring_schedules
   ADD COLUMN IF NOT EXISTS subject_id uuid REFERENCES class_subjects(id) ON DELETE RESTRICT;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS recurring_schedules_subject_id_idx ON recurring_schedules (subject_id);
-
 ALTER TABLE class_instances
   ADD COLUMN IF NOT EXISTS subject_id uuid REFERENCES class_subjects(id) ON DELETE RESTRICT;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS class_instances_subject_id_idx ON class_instances (subject_id);
+-- subject_id indexes are created by the drizzle schema migration (same_sphinx);
+-- CONCURRENTLY cannot run inside drizzle's transactional migrator.
 
 -- ============================================================
 -- 3. ALTER TYPE — Add 13 new permission values to app_permission enum

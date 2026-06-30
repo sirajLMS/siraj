@@ -1,0 +1,145 @@
+# Database Migration Issues (Drizzle + Custom SQL)
+
+This document records a migration failure discovered in June 2026: what broke, why it blocked `bun db migrate`, and how it was fixed.
+
+## Summary
+
+`bun db migrate` failed in two different ways depending on database state:
+
+| State | Error | Migration step |
+|-------|-------|----------------|
+| Dirty / partial DB | `type "account_status" already exists` (42710) | Schema migration (`same_sphinx` / `shiny_may_parker`) |
+| Clean DB (after reset) | `CREATE INDEX CONCURRENTLY cannot run inside a transaction block` (25001) | Combined custom logic migration |
+
+The **root blocker on a clean database** was `CREATE INDEX CONCURRENTLY` in `backend/db/migration/4-class_categories_and_subjects.sql`, bundled into the `combined_custom_logic` drizzle folder.
+
+## Migration pipeline
+
+Siraj does **not** run `drizzle-kit migrate` directly. Use `bun db`:
+
+```bash
+bun db migrate          # Apply pending migrations
+bun db reset            # Drop/recreate DB, then migrate
+bun db cleanGenerate    # Reset → regenerate drizzle folders → migrate → seed
+```
+
+`cleanGenerate` (in `scripts/dbActions.ts`) produces three drizzle migration folders in order:
+
+1. **`extensions`** — content from `backend/db/migration/1-extensions.sql` (`pg_trgm`, `is_valid_timezone()`)
+2. **Schema migration** — `drizzle-kit generate` from `backend/db/schema/`
+3. **`combined_custom_logic`** — all other `backend/db/migration/*.sql` files concatenated alphabetically (excluding `1-extensions.sql`)
+
+Custom SQL lives in `backend/db/migration/`. Generated artifacts live in `backend/drizzle/`.
+
+## The block: `CREATE INDEX CONCURRENTLY` inside a transaction
+
+### Symptom
+
+```
+error: CREATE INDEX CONCURRENTLY cannot run inside a transaction block
+code: "25001"
+```
+
+### Cause
+
+Drizzle ORM `1.0.0-rc.3` runs **all pending migrations in a single transaction** (`node_modules/drizzle-orm/pg-core/async/session.js`). PostgreSQL forbids `CREATE INDEX CONCURRENTLY` in any transaction block.
+
+The combined custom migration file has no `--> statement-breakpoint` markers, so the entire ~2,500-line SQL blob executes as one statement inside that transaction.
+
+### Offending code (before fix)
+
+In `backend/db/migration/4-class_categories_and_subjects.sql`:
+
+```sql
+CREATE INDEX CONCURRENTLY IF NOT EXISTS recurring_schedules_subject_id_idx ON recurring_schedules (subject_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS class_instances_subject_id_idx ON class_instances (subject_id);
+```
+
+These indexes were **also redundant**: the schema migration already creates `recurring_schedules_subject_id_idx` and `class_instances_subject_id_idx` as normal indexes.
+
+## The problem: dirty DB vs empty migration journal
+
+### Symptom
+
+```
+error: type "account_status" already exists
+code: "42710"
+```
+
+### Cause
+
+The database had schema objects (enum types, some tables, `pg_trgm`) but an **empty** `drizzle.__drizzle_migrations` journal. That mismatch typically happens when:
+
+- `bun db push` was used (applies schema without recording migrations), or
+- Migrations were regenerated (new timestamped folders) after a partial/failed run, or
+- A failed migrate rolled back the journal insert while leaving objects from a prior non-transactional apply
+
+Drizzle then treats the DB as fresh and re-runs migration 2, which starts with `CREATE TYPE "account_status" ...` and conflicts with existing types.
+
+### Why the journal stayed empty after failed runs
+
+When migration 3 failed, the single transaction rolled back **everything** in that batch—including journal rows for migrations 1 and 2. On a truly clean reset, the DB ended with 0 tables until the fix was applied.
+
+## The fix (June 2026)
+
+### 1. Remove `CONCURRENTLY` index creation
+
+In `backend/db/migration/4-class_categories_and_subjects.sql`, removed the two `CREATE INDEX CONCURRENTLY` lines. Kept idempotent `ALTER TABLE ... ADD COLUMN IF NOT EXISTS subject_id` for databases that may have been created before `subject_id` was in the drizzle schema.
+
+Added a comment noting that indexes come from the schema migration and cannot use `CONCURRENTLY` under Drizzle’s migrator.
+
+### 2. Remove redundant enum migration
+
+Deleted `backend/db/migration/5-add_test_custom_alt_permission.sql`. The value `test.custom_alt` is already defined in `shared/lib/enum.ts` and emitted by the schema migration’s `app_permission` enum.
+
+### 3. Regenerate and verify
+
+```bash
+bun db cleanGenerate
+bun db migrate   # should succeed; re-run should be a no-op
+```
+
+After the fix, three migrations are recorded:
+
+- `*_extensions`
+- `*_shiny_may_parker` (schema; name varies per generate)
+- `*_combined_custom_logic`
+
+## Custom migration file order
+
+Files in `backend/db/migration/` are combined using `localeCompare` (alphabetical). Numbered prefixes enforce intent:
+
+| Order | File | Role |
+|-------|------|------|
+| 1 | `2-functions.sql` | `current_user_id()` — required before RLS policies |
+| 2 | `3-system_permissions_and_groups.sql` | Permission seeds, groups, protection triggers |
+| 3 | `4-class_categories_and_subjects.sql` | Incremental DDL (tables/columns/enums for older DBs) |
+| 4 | `4a-class_categories_and_subjects_seed.sql` | Category/subject seed data |
+| 5 | `4b-teacher_support_contact_setting.sql` | System setting seed |
+| 6+ | `*_rls_policies.sql`, triggers, etc. | Alphabetical |
+
+**Note:** `4a` comments say enum values must be committed in a separate transaction before seed inserts. That requirement is not honored when files are bundled into one custom migration. On a fresh install this is acceptable because the schema migration already defines the full `app_permission` enum before combined logic runs.
+
+## Prevention guidelines
+
+1. **Never use `CREATE INDEX CONCURRENTLY`** in `backend/db/migration/` — Drizzle’s migrator is always transactional.
+2. **Prefer schema for structure** — tables, columns, and indexes belong in `backend/db/schema/`; custom SQL should hold seeds, triggers, RLS, and functions Drizzle cannot express.
+3. **Use `bun db migrate` / `bun db reset`**, not `bun db push`, when you rely on the migration journal.
+4. **After changing custom SQL**, run `bun db cleanGenerate` (or regenerate the `combined_custom_logic` folder) so `backend/drizzle/` stays in sync.
+5. **Adding enum values** — add to `shared/lib/enum.ts` first, then `bun db cleanGenerate`; avoid duplicate `ALTER TYPE ... ADD VALUE` files unless upgrading legacy databases only.
+
+## Drizzle migrator reference (installed: `drizzle-orm@1.0.0-rc.3`)
+
+- Journal table: `drizzle.__drizzle_migrations` (`id`, `hash`, `created_at`, `name`, `applied_at`)
+- Skip logic: compares migration **folder name**, not hash
+- Pending migrations: executed in **one transaction** per `migrate()` call
+- Statement splitting: only on `--> statement-breakpoint` (schema migrations use this; combined custom migration does not)
+
+## Related commands
+
+```bash
+bun db migrate --help
+bun db reset
+bun db cleanGenerate
+bun db seed
+```
