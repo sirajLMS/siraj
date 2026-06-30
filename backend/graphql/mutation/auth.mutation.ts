@@ -198,7 +198,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       input: t.arg({ type: DemoLoginInputPothosObject, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const isDemo = process.env.NEXT_PUBLIC_IS_DEMO === "true" || process.env.IS_DEMO === "true";
+      const isDemo = process.env.IS_DEMO === "true";
       if (!isDemo) {
         throw new GraphQLError("Demo login is not enabled", {
           extensions: { code: "UNAUTHENTICATED" },

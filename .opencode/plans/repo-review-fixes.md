@@ -3,407 +3,512 @@
 ## Subagent Quality Loop (MUST follow for EVERY modified file)
 
 After modifying each file, the subagent MUST run this verification loop:
-1. Run `~/.bun/bin/bun run tsgo -- <file>` (typecheck)
-2. Run `~/.bun/bin/bun run biome:check -- <file>` (format/lint)
-3. Submit to lint queue:
+
+1. Run `~/.bun/bin/bun tsgo` (typecheck — no args needed, checks whole project)
+2. Run `~/.bun/bin/bun biome:check` (format/lint — no args needed, checks whole project)
+3. Submit to lint queue server (already running at `http://localhost:4777`):
    ```powershell
-   $body = @{ id = "<subagent-id>"; files = @("<file>") } | ConvertTo-Json
+   $body = @{ id = "<subagent-id>"; files = @("<file>", "<file2>") } | ConvertTo-Json
    Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body
    ```
-4. If ANY check has errors, fix them in the SAME file, then re-run ALL three checks.
+4. If ANY check has errors, fix them in the SAME file, then re-run ALL three checks from step 1.
 5. A file is "done" only when a complete round of all 3 checks passes with zero issues.
 6. Only then move to the next file.
 
-**CRITICAL**: Fix ALL issues in one file before starting another file. Never leave a file with failing checks.
+**CRITICAL RULES:**
+- Fix ALL issues in one file before starting another file. Never leave a file with failing checks.
+- The quality loop is: tsgo → biome:check → lint-queue → if any fail, fix and restart the loop from tsgo.
+- Only move to the next file when a full round (all 3) passes clean.
 
 ---
 
-## Group A — Security: Unauthenticated Mutations & RLS
+## Group A — Security (CRITICAL + WARNING)
 
-### Subagent A1: Auth guards on mutations
+### Subagent A1: Auth guards on GraphQL queries/mutations
 
 **Files to modify:**
-1. `backend/graphql/mutation/student.mutation.ts`
-2. `backend/graphql/mutation/onboarding.mutation.ts`
-3. `backend/graphql/mutation/test-helper.mutation.ts`
+1. `backend/graphql/query/student.query.ts`
+2. `backend/graphql/query/auth.query.ts`
+3. `backend/graphql/mutation/auth.mutation.ts`
+4. `backend/graphql/mutation/student.mutation.ts`
 
 **Changes:**
 
-#### File 1: `backend/graphql/mutation/student.mutation.ts`
-- Add `authScopes: { loggedIn: true }` to both `partiallyUpdateStudent` and `deleteStudent` fields.
-- Change `(args)` in resolve to `(_query, args, ctx)` to access the context.
-- Add a null guard: replace the inline resolve with a check that `ctx.user` exists; if not, throw an error.
-- For `partiallyUpdateStudent`: pass `ctx.user.id` as `actorUserId` and add permission check via `PermissionsService.hasPermission(ctx.user.id, AppPermission.STUDENT_MANAGE_STATUS)` before calling the repo.
-- For `deleteStudent`: similarly require auth and `AppPermission.STUDENT_MANAGE_STATUS`.
-- Import `PermissionsService` from `@/backend/services/auth/permissions.service` and `AppPermission` from `@/shared/lib/enum`.
-- Import `getBackendTranslations` from `@/backend/lib/intl` for localized error messages.
-- Do NOT call repository directly — delegate to a service method or add permission check at minimum.
+#### File 1: `backend/graphql/query/student.query.ts`
+- Add `authScopes: { loggedIn: true }` to both `student` and `students` query fields.
+- These fields currently have NO authScopes, making them accessible to unauthenticated callers.
 
-#### File 2: `backend/graphql/mutation/onboarding.mutation.ts`
-- Add `authScopes: { loggedIn: true }` to `createTeacher`, `createParent`, and `createManager` fields.
-- Replace `ctx.user?.id || ""` with a proper null guard: check `ctx.user?.id` and throw a localized "insufficientPermissions" error if undefined.
-- Import `getBackendTranslations` from `@/backend/lib/intl`.
+```typescript
+// For both 'student' and 'students' fields, add:
+authScopes: { loggedIn: true },
+```
 
-#### File 3: `backend/graphql/mutation/test-helper.mutation.ts`
-- Add `authScopes: { loggedIn: true }` to all four test mutations (`createTestEntities`, `cleanupTestEntities`, `createTestGroupClass`, `cleanupTestGroupClass`) that are inside the `if (process.env.NODE_ENV !== "production")` block.
-- This means the entire `gqlSchemaBuilder.mutationFields` call needs `authScopes` on each field.
+#### File 2: `backend/graphql/query/auth.query.ts`
+- Restrict `user(id)` query: change `authScopes` from `{ loggedIn: true }` to `{ permission: "USER_MANAGE" }` or add a permission check.
+- Add a `limit` to `users` query: it currently calls `UserRepository.findAll()` which returns up to 500 rows with password hashes.
+- Change `users` query to use `UserRepository.findUsers({ limit: 50, offset: 0 })` instead of `findAll()`.
+- Read `backend/graphql/gqlSchemaBuilder.ts` first to check how `authScopes: { permission: "..." }` works — it may use a different key name.
+
+#### File 3: `backend/graphql/mutation/auth.mutation.ts`
+- Line 201: Remove `process.env.NEXT_PUBLIC_IS_DEMO` from the demo login gate.
+- Change the condition from `process.env.NEXT_PUBLIC_IS_DEMO === "true" || process.env.IS_DEMO === "true"` to only `process.env.IS_DEMO === "true"`.
+- `NEXT_PUBLIC_` env vars are embedded in client-side JS and spoofable — only use server-side `IS_DEMO`.
+
+#### File 4: `backend/graphql/mutation/student.mutation.ts`
+- `partiallyUpdateStudent` (line 47) bypasses status transition validation. It calls `StudentRepository.partiallyUpdate()` which sets `status` directly without checking `ALLOWED_STATUS_TRANSITIONS`.
+- Fix: In `partiallyUpdateStudent`'s resolve, if `input.status` is present, route the status change through `StudentRepository.changeStatus(input.id, input.status)` instead. Remove `status` from the partial update input before calling `partiallyUpdate`.
+- Read `backend/db/repo/student.repository.ts` to confirm `changeStatus` signature: `changeStatus(studentId, newStatus, expectedVersion?, tx?, locale?)`.
+- The transition-validated status change must happen first, then the remaining fields can be updated via `partiallyUpdate` (with status removed from the input).
 
 ---
 
-### Subagent A2: File serving authorization + Rate limiter fail-open
+### Subagent A2: Storage mutations + Rate limiter fail-open
 
 **Files to modify:**
-1. `app/api/storage/files/[[...path]]/route.ts`
+1. `backend/graphql/mutation/storage.mutation.ts`
 2. `backend/lib/ratelimit.ts`
 
 **Changes:**
 
-#### File 1: `app/api/storage/files/[[...path]]/route.ts`
-After the user is authenticated (after line 125), add file ownership verification:
-- Import `StorageDbRepository` from `@/backend/db/repo/storage.repository`.
-- Import `TeacherRepository` from `@/backend/db/repo/teacher.repository`.
-- Import `ParentRepository` from `@/backend/db/repo/parent.repository`.
-- Call `StorageDbRepository.getFileUsages(relativePath)` to get the list of entities that reference this file.
-- If `usages.length > 0`, check if the authenticated user has access to at least one of the referenced entities:
-  - For `users` usages: allow if `usage.referenceId === payload.userId`
-  - For `teachers` usages: allow if the user is a teacher with that `teacherId` (check via `TeacherRepository`), or the user is an admin/superadmin (check via `ctx.isSuperAdmin` or permissions)
-  - For `parents` usages: allow if the user is the parent with that `parentId`, or is admin
-  - For `invoices`, `complaints`, `students`, `learning_resources`, `staff_profiles`, `recurring_schedules`, `class_instances` usages: allow if the user is a superAdmin or has relevant admin permissions
-  - If the user has no matching entity access, return 403 Forbidden.
-- If `usages.length === 0` (file not associated with any entity yet), allow access for any authenticated user (it's likely newly uploaded).
-- Simplified approach: Import `PermissionsService` from `@/backend/services/auth/permissions.service`. If the user is a superAdmin, allow. Otherwise, check if the user's role (from DB lookup) has a matching entity relationship. A pragmatic minimal fix: check if file usages exist and the user is superAdmin OR one of the usage referenceIds matches the user's own entity IDs (teacher/parent/user), otherwise deny with 403.
+#### File 1: `backend/graphql/mutation/storage.mutation.ts`
+- Storage mutations (`deleteFile`, `deleteStorageItems`, `setStorageItemProtection`, `updateDirectoryPermissions`) have no object-level authorization — any logged-in user can act on any file.
+- Minimal fix: Add `ctx` parameter to each resolver that currently ignores it.
+- For destructive mutations (`deleteFile`, `deleteStorageItems`): In the resolver, after getting the storage service, validate that the user has admin permissions OR owns the target resource.
+- Import `PermissionsService` from `@/backend/services/auth/permissions.service`.
+- Import `AppPermission` from `@/shared/lib/enum`.
+- Add a permission check: `await PermissionsService.hasPermission(ctx.user.id, AppPermission.STORAGE_MANAGE)` — if user lacks, check if the file belongs to them by querying usages. If no match, throw a localized error.
+- For `setStorageItemProtection` and `updateDirectoryPermissions`: require `AppPermission.STORAGE_MANAGE` (admin-only).
+- Read `backend/graphql/gqlContext.ts` first to understand the `ctx` shape.
 
 #### File 2: `backend/lib/ratelimit.ts`
-- Add a `failOpen` constructor parameter (default `true` for backward compatibility).
-- In the `limit()` catch block (line 63): return `success: false` if `!this.failOpen`.
-- In the `limitSimple()` catch block (line 140): return `success: false` if `!this.failOpen`.
-- In `checkRateLimit()` catch block (line 212): check if the limiter is fail-open; if not, return `success: false`.
-- Make `authRateLimiter` (line 168) use `failOpen: false` — change `new RateLimiter("ratelimit:auth", 10, ...)` to pass `false` as 4th arg.
-  - Constructor signature becomes: `constructor(prefix, maxRequests, windowMs, failOpen = true)`
-- Keep `graphqlRateLimiter` and `apiRateLimiter` as fail-open (current behavior).
+- Line 161: Change `graphqlRateLimiter` from `failOpen: true` (default) to `failOpen: false`.
+- Change: `new RateLimiter("ratelimit:graphql", 100, 60 * 1000)` → `new RateLimiter("ratelimit:graphql", 100, 60 * 1000, false)`.
+- This matches `authRateLimiter`'s fail-closed behavior. If Redis/Postgres goes down, rate limiting should block requests, not open the floodgates.
+- The `apiRateLimiter` (line 183) can remain fail-open since it's a general throttle.
 
 ---
 
-## Group B — Business Logic: Billing & State Machine
+## Group B — Performance (WARNING)
 
-### Subagent B1: Billing idempotency + paid invoice deletion guard
+### Subagent B1: N+1 query fixes
 
 **Files to modify:**
-1. `backend/services/billing/billing-management.service.ts`
+1. `backend/db/repo/permission-management.repository.ts`
+2. `backend/graphql/pothos/permission-management.pothos.ts`
+3. `backend/db/repo/storage.repository.ts`
+4. `backend/db/repo/scheduling/scheduling-queries.repository.ts`
+5. `backend/graphql/query/teacher-dashboard.query.ts`
 
 **Changes:**
 
-#### File 1: `backend/services/billing/billing-management.service.ts`
-
-**Fix 1 — Idempotency key (line 103):**
-- Add an optional `idempotencyKey` parameter to `CreateManualInvoiceInput` interface.
-- In `createManualInvoice`, use `input.idempotencyKey ?? deriveIdempotencyKey(input)` instead of `randomUUID()`.
-- Add a helper function `deriveIdempotencyKey` that creates a deterministic key from `parentId`, `studentId`, `amount`, `currency`, `invoiceType` (use `crypto.createHash("sha256").update(parts.join(":")).digest("hex")` — import `createHash` from `node:crypto`).
-- This makes duplicate submissions produce the same key, enabling the existing idempotency check in `BillingRepository.createInvoice` to actually prevent duplicates.
-
-**Fix 2 — Paid invoice deletion guard (line 198):**
-- In `deleteInvoice`, after the permission check, add a status guard:
-  - Fetch the invoice using `BillingRepository.getInvoiceById(invoiceId, undefined, locale)`.
-  - If `invoice.status === "PAID"`, throw a localized error ("cannotDeletePaidInvoice" or similar — add to error namespace).
-  - Only then proceed to `BillingRepository.deleteInvoice(...)`.
-
----
-
-### Subagent B2: State transition trigger fix
-
-**Files to modify:**
-1. `backend/db/migration/class_instances_state_transition_trigger.sql`
-
-**Changes:**
-
-#### File 1: `backend/db/migration/class_instances_state_transition_trigger.sql`
-Replace the trigger function body to add two missing guards:
-
-```sql
-CREATE OR REPLACE FUNCTION fn_enforce_class_instance_transition()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF OLD.execution_state IS DISTINCT FROM NEW.execution_state THEN
-        -- COMPLETED can only transition to NOT_ACTIVATED (revert) or remain COMPLETED
-        IF OLD.execution_state = 'COMPLETED' AND NEW.execution_state IN ('ACTIVATED', 'RUNNING') THEN
-            RAISE EXCEPTION 'Invalid transition: Cannot reactivate a COMPLETED class instance.';
-        END IF;
-
-        -- COMPLETED+TAKEN cannot be reset to NOT_ACTIVATED (financial integrity)
-        IF OLD.execution_state = 'COMPLETED' AND NEW.execution_state = 'NOT_ACTIVATED' AND OLD.outcome = 'TAKEN' THEN
-            RAISE EXCEPTION 'Invalid transition: Cannot reset a COMPLETED instance with TAKEN outcome.';
-        END IF;
-
-        -- RUNNING cannot transition to ACTIVATED
-        IF OLD.execution_state = 'RUNNING' AND NEW.execution_state = 'ACTIVATED' THEN
-            RAISE EXCEPTION 'Invalid transition: Cannot move a RUNNING class instance back to ACTIVATED.';
-        END IF;
-
-        -- ACTIVATED can only transition to COMPLETED if outcome is ABSENT or LEAVE
-        IF OLD.execution_state = 'ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('ABSENT', 'LEAVE') THEN
-            RAISE EXCEPTION 'Invalid transition: ACTIVATED instance can only complete with ABSENT or LEAVE outcome.';
-        END IF;
-
-        -- NOT_ACTIVATED can only transition to COMPLETED with LEAVE outcome
-        IF OLD.execution_state = 'NOT_ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('LEAVE') THEN
-            RAISE EXCEPTION 'Invalid transition: NOT_ACTIVATED instance can only complete with LEAVE outcome.';
-        END IF;
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql STABLE;
-```
-
-Note: Also update the Drizzle migration copy at `backend/drizzle/20260629035852_combined_custom_logic/migration.sql` — find the same trigger function definition and apply the same changes there. Search for `fn_enforce_class_instance_transition` in that file.
-
----
-
-## Group C — Performance: N+1 Queries & Unbounded Results
-
-### Subagent C1: N+1 query fixes (parent directory + complaint service)
-
-**Files to modify:**
-1. `backend/services/parent/parent-directory.service.ts`
-2. `backend/services/communication/complaint.service.ts`
-
-**Changes:**
-
-#### File 1: `backend/services/parent/parent-directory.service.ts`
-- Replace the loop (line 63-79) that calls `getStudentsForParent(row.id)` per parent with a batch query.
-- After getting `rawRows`, extract all parent IDs: `const parentIds = rawRows.map(r => r.id)`.
-- Add a new batch method `ParentRepository.getStudentsForParents(parentIds: string[])` that returns a `Map<string, StudentRow[]>`:
-  - In `backend/db/repo/parent.repository.ts`, add this method: query `students` table where `parentId IN (parentIds)`, group results by `parentId`.
-- In the service, call the batch method once, then look up each parent's students from the Map.
-- Loop becomes: for each `row` in `rawRows`, get `studentsMap.get(row.id) ?? []`.
-
-**Also modify:** `backend/db/repo/parent.repository.ts` — add `getStudentsForParents` method.
-
-#### File 2: `backend/services/communication/complaint.service.ts`
-- In the parent complaints method (line 130-155), replace the per-complaint loop with the existing batch method.
-- After getting `result.complaints`, extract `complaintIds = result.complaints.map(c => c.id)`.
-- Call `ComplaintResponseRepository.getResponsesByComplaints(complaintIds)` (the batch method already used by the admin path at line 266-267).
-- Build a `Map<string, ComplaintResponse[]>` from the batch result.
-- Replace the loop body to look up responses from the map instead of making individual calls.
-
----
-
-### Subagent C2: Repository unbounded queries + duplicate timezone fetch
-
-**Files to modify:**
-1. `backend/db/repo/learning-resource.repository.ts`
-2. `backend/db/repo/book.repository.ts`
-3. `backend/db/repo/user.repository.ts`
-4. `backend/db/repo/parent.repository.ts`
-5. `backend/db/repo/billing.repository.ts`
-6. `backend/db/repo/dst-migration.repository.ts`
-
-**Changes:**
-
-#### File 1: `backend/db/repo/learning-resource.repository.ts`
-- Change `listResources` signature to accept `pagination?: PaginationArgs | null`.
-- Add `PaginationArgs` import from `@/backend/types`.
-- When pagination is provided, add `.limit(perPage).offset(offset)` to the rows query (same pattern as billing repo).
-- When pagination is null, add a default `.limit(200)` to prevent unbounded results.
-- Add count query that already exists — keep it but ensure it's consistent.
-
-#### File 2: `backend/db/repo/book.repository.ts`
-- Add pagination parameter: `findMany(pagination?: PaginationArgs, tx?)`.
-- Add `PaginationArgs` import.
-- When pagination provided, apply `.limit().offset()`.
-- When null, add default `.limit(200)`.
-- Check all callers of `findMany` and update them if needed.
-
-#### File 3: `backend/db/repo/user.repository.ts`
-- Add `@deprecated` JSDoc comment to `findAll` recommending `findUsersPaginated`.
-- Add a default `.limit(500)` to `findAll` to prevent truly unbounded results.
-- Alternatively, make `findAll` private or remove it if no callers exist (check with grep first).
-
-#### File 4: `backend/db/repo/parent.repository.ts`
-- In `getParentDashboardSchedule` (around lines 534-545):
-  - Fetch `timezoneForFormatting` once using `fetchParentTimezone(t, parentId)` before the conditional.
-  - Use the same variable for both the date filter condition (line 534) and the formatting (line 545).
-  - Remove the second call at line 545.
-
-#### File 5: `backend/db/repo/billing.repository.ts`
-- In `getInvoicesForParent` (line 407): when no pagination, add `.limit(200)` default.
-- In `getAllInvoices` (line 476): when no pagination, add `.limit(200)` default.
-- These default limits prevent unbounded queries while preserving backward compatibility.
-
-#### File 6: `backend/db/repo/dst-migration.repository.ts`
-- In `getActiveRecurringSchedules` (line 62): add an optional `limit` parameter (default 500).
-- Add `.limit(limit)` to the query.
-- Also add a date filter for `effective_until IS NULL OR effective_until > NOW()`:
-  - Import `gte` and `sql` from drizzle-orm if not already imported.
-  - Add condition `.where(and(isNull(recurringSchedules.deletedAt), or(isNull(recurringSchedules.effectiveUntil), gte(recurringSchedules.effectiveUntil, sql`NOW()`))))`
-
----
-
-## Group D — Deploy Safety: Migration & Script Guards
-
-### Subagent D1: Script production guards + migration fixes
-
-**Files to modify:**
-1. `backend/db/scripts/drizzleSeed.ts`
-2. `backend/db/scripts/resetDb.ts`
-3. `backend/drizzle/20260629035851_colossal_living_mummy/migration.sql`
-4. `backend/drizzle/20260629035852_combined_custom_logic/migration.sql`
-
-**Changes:**
-
-#### File 1: `backend/db/scripts/drizzleSeed.ts`
-- Add at the top of `runSeed()` (before any other logic):
+#### File 1: `backend/db/repo/permission-management.repository.ts` (line 50)
+- `listAllGroups` fetches two full tables then joins in JavaScript O(N*M).
+- Replace with a single SQL query using LEFT JOIN and `sql` template:
   ```typescript
-  if (process.env.NODE_ENV === "production") {
-    logger.error("Seeding is not allowed in production environment");
-    process.exit(1);
+  export async function listAllGroups(tx?: DBTransaction): Promise<GroupWithPermissionIds[]> {
+    const client = tx ?? db;
+    const rows = await client
+      .select({
+        id: permissionGroups.id,
+        name: permissionGroups.name,
+        slug: permissionGroups.slug,
+        description: permissionGroups.description,
+        isSystem: permissionGroups.isSystem,
+        createdByUserId: permissionGroups.createdByUserId,
+        createdAt: permissionGroups.createdAt,
+        updatedAt: permissionGroups.updatedAt,
+        permissionId: groupPermissions.permissionId,
+      })
+      .from(permissionGroups)
+      .leftJoin(groupPermissions, eq(groupPermissions.groupId, permissionGroups.id))
+      .orderBy(permissionGroups.name);
+
+    const groupMap = new Map<string, GroupWithPermissionIds>();
+    for (const row of rows) {
+      if (!groupMap.has(row.id)) {
+        groupMap.set(row.id, {
+          id: row.id,
+          name: row.name,
+          slug: row.slug,
+          description: row.description,
+          isSystem: row.isSystem,
+          createdByUserId: row.createdByUserId,
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+          permissionIds: [],
+        });
+      }
+      if (row.permissionId) {
+        groupMap.get(row.id)!.permissionIds.push(row.permissionId);
+      }
+    }
+    return [...groupMap.values()];
   }
   ```
 
-#### File 2: `backend/db/scripts/resetDb.ts`
-- Add at the top of `resetDatabase()` (after the DATABASE_URL check, before any DB operations):
+#### File 2: `backend/graphql/pothos/permission-management.pothos.ts` (line 38)
+- The `assignedUsers` field resolver on `PermissionGroupObject` fires a separate DB query per group (N+1).
+- Fix: Batch the resolution by pre-fetching in the top-level query resolver.
+- Read the file first. In the `permissionGroups` query resolver (or wherever `listAllGroups` is called), also call `PermissionManagementRepository.listUsersInGroup` for all group IDs in a batch.
+- Create a new batch method `listAllGroupUsers(tx?)` in the repository that returns `Map<string, UserEntity[]>`.
+- In the Pothos field, use a DataLoader pattern or look up from the pre-fetched data stored on the parent object.
+- Pragmatic approach: Add `assignedUserIds` to the `GroupWithPermissionIds` return type, fetch them in `listAllGroups` via a single JOIN query, and expose them via a pre-computed field rather than a per-row resolver.
+
+#### File 3: `backend/db/repo/storage.repository.ts` (line 204)
+- `fetchAllUsages` fires 10 parallel SELECT queries against 10 junction tables for every single file.
+- Replace with a UNION ALL approach for `isFileInUse` (which only needs existence):
   ```typescript
-  if (process.env.NODE_ENV === "production") {
-    logger.error("Database reset is not allowed in production environment");
-    process.exit(1);
+  async function isFileInUseOptimized(fId: string): Promise<boolean> {
+    const result = await db.execute(sql`
+      SELECT 1 FROM (
+        SELECT id FROM user_files WHERE file_id = ${fId} LIMIT 1
+        UNION ALL SELECT id FROM teacher_files WHERE file_id = ${fId} LIMIT 1
+        UNION ALL SELECT id FROM student_files WHERE file_id = ${fId} LIMIT 1
+        UNION ALL SELECT id FROM parent_files WHERE file_id = ${fId} LIMIT 1
+        UNION ALL SELECT id FROM invoice_files WHERE file_id = ${fId} LIMIT 1
+        UNION ALL SELECT id FROM complaint_files WHERE file_id = ${fId} LIMIT 1
+        UNION ALL SELECT id FROM learning_resource_files WHERE file_id = ${fId} LIMIT 1
+        UNION ALL SELECT id FROM staff_profile_files WHERE file_id = ${fId} LIMIT 1
+        UNION ALL SELECT id FROM recurring_schedule_files WHERE file_id = ${fId} LIMIT 1
+        UNION ALL SELECT id FROM class_instance_files WHERE file_id = ${fId} LIMIT 1
+      ) sub LIMIT 1
+    `);
+    return result.length > 0;
   }
   ```
+- Keep `fetchAllUsages` for `getFileUsages` which needs full usage details, but add `.limit(1)` to each sub-query's columns to minimize data transfer (just `SELECT id` instead of `SELECT *`).
 
-#### File 3: `backend/drizzle/20260629035851_colossal_living_mummy/migration.sql`
-- On lines 973-974, change `CREATE INDEX CONCURRENTLY` to `CREATE INDEX` (remove `CONCURRENTLY`).
-  - The comment `--> statement-breakpoint` must remain as Drizzle uses it.
-  - `CREATE INDEX CONCURRENTLY` cannot run inside a transaction, and Drizzle runs migrations in transactions.
-  - The manual migration counterpart (`2-functions.sql` etc.) handles this correctly for production.
+#### File 3 (also): `backend/db/repo/storage.repository.ts` (line 97)
+- `directoriesByParentPath` with no `parentPath` returns entire table with no LIMIT.
+- Add `.limit(500)` as a defensive cap when `parentPath` is undefined.
 
-#### File 4: `backend/drizzle/20260629035852_combined_custom_logic/migration.sql`
-- On line 1000, replace the destructive `DELETE FROM group_permissions WHERE group_id IN (SELECT id FROM permission_groups WHERE is_system = true)` with a more targeted approach.
-- Change to:
-  ```sql
-  DELETE FROM group_permissions
-  WHERE group_id IN (
-      SELECT id FROM permission_groups WHERE is_system = true
-  )
-  AND permission_id IN (
-      SELECT id FROM permissions
-      WHERE key IN (
-          -- List only the specific permission keys that this migration manages
-          'auth.login',
-          'auth.view_own_profile',
-          -- ... include ALL the permission keys from the subsequent INSERT block
-      )
-  );
+#### File 4: `backend/db/repo/scheduling/scheduling-queries.repository.ts` (line 137-188)
+- Dashboard fetches up to 2000 rows then filters/paginates in JavaScript.
+- This is a complex change. Minimal safe fix: reduce `.limit(2000)` to `.limit(500)`.
+- Add a comment explaining the architecture: `// TODO: Push metricFilter and pagination into SQL for production scale. Current approach loads a bounded set and filters in JS.`
+- Reducing the limit from 2000 to 500 is a safe interim improvement that reduces memory and CPU overhead.
+
+#### File 5: `backend/graphql/query/teacher-dashboard.query.ts` (line 16-83)
+- Two queries (`teacherDashboard` and `teacherActiveDashboard`) duplicate identical 20+ line resolve blocks with only the mode string differing.
+- Extract a shared resolve helper:
+  ```typescript
+  async function resolveTeacherDashboard(ctx: BaseContext, args: { date: string; pagination?: ... }, mode: "teacher" | "teacher-active") {
+    if (!ctx.user) { /* throw */ }
+    const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
+    const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, mode, ctx.locale, pagination);
+    return {
+      ...result,
+      scheduleRows: result.scheduleRows.map(r => ({
+        id: r.id,
+        studentId: r.studentId,
+        studentName: r.student?.name || "Unknown",
+        scheduledStartAt: r.scheduledStartAt,
+        durationMinutes: r.durationMinutes,
+        executionState: r.executionState,
+        outcome: r.outcome ?? null,
+        zoomMeetingUrl: r.zoomMeetingUrl ?? null,
+        yourTimeFormatted: r.yourTimeFormatted ?? null,
+      })),
+    };
+  }
   ```
-  - Extract the complete list of permission keys from the INSERT INTO group_permissions blocks that follow (lines 1009+). This ensures only the permissions this migration manages are deleted, preserving any custom admin assignments.
+- Then both query fields call `resolveTeacherDashboard(ctx, args, "teacher")` and `resolveTeacherDashboard(ctx, args, "teacher-active")`.
 
 ---
 
-## Group E — Duplication & Dead Code
-
-### Subagent E1: Pothos type duplication fixes
+### Subagent B2: Unbounded queries + correlated subqueries
 
 **Files to modify:**
-1. `backend/types/schedule.types.ts` (or create metric type there)
-2. `backend/graphql/pothos/schedule.pothos.ts`
-3. `backend/graphql/pothos/teacher-dashboard.pothos.ts`
-4. `backend/graphql/pothos/staff-directory.pothos.ts`
+1. `backend/db/repo/user.repository.ts`
+2. `backend/db/repo/parent.repository.ts`
+3. `backend/db/repo/dst-migration.repository.ts`
+4. `backend/db/repo/student.repository.ts`
 
 **Changes:**
 
-#### File 1: `backend/types/schedule.types.ts` (add shared metrics type)
-- Add a new exported type:
+#### File 1: `backend/db/repo/user.repository.ts` (line 89)
+- `findAll` returns up to 500 user rows including password hashes.
+- Change `findAll` to select only safe fields: `id, name, email, isActive, createdAt`.
+- Use explicit column selection instead of `db.select().from(users)`:
   ```typescript
-  export type ClassSessionMetrics = {
-    id?: string;
-    total: number;
-    regular: number;
-    trial: number;
-    advance: number;
-    rescheduled: number;
-    suspended: number;
-    taken: number;
-    pending: number;
-    activated: number;
-    running: number;
-    absent: number;
-    leave: number;
+  export const findAll = async (): Promise<Pick<UserEntity, "id" | "name" | "email" | "isActive" | "createdAt">[]> => {
+    return await db.select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      isActive: users.isActive,
+      createdAt: users.createdAt,
+    }).from(users).limit(500);
   };
   ```
-  Note: `id` is optional because `TeacherDashboardMetricsDefinition` does not have it but `DailyScheduleMetricsDefinition` does.
+- Check all callers of `findAll` — if they need password hash, redirect them to `findByEmail` or `findById`.
 
-#### File 2: `backend/graphql/pothos/schedule.pothos.ts`
-- Remove the local `DailyScheduleMetricsDefinition` type (lines 13-26).
-- Import `ClassSessionMetrics` from `@/backend/types`.
-- Change: `export type DailyScheduleMetricsDefinition = { ... }` → use `ClassSessionMetrics` as the objectRef type.
-- Update `gqlSchemaBuilder.objectRef<ClassSessionMetrics>("DailyScheduleMetrics")`.
-- Ensure the `id` field is still exposed if present in the data.
+#### File 2: `backend/db/repo/parent.repository.ts` (line 165-168)
+- `getParentDirectory` uses a correlated subquery for `unpaidInvoices` count per parent row.
+- Replace with a LEFT JOIN on a pre-aggregated subquery:
+  ```typescript
+  // Add to the query builder:
+  .leftJoin(
+    sql`(SELECT parent_id, COUNT(*)::int as cnt FROM ${invoices} WHERE ${invoices.status} = 'UNPAID' GROUP BY parent_id)`,
+    sql`unpaid_inv`,
+    sql`unpaid_inv.parent_id = ${parents.id}`
+  )
+  ```
+  Then use `sql<number>`COALESCE(unpaid_inv.cnt, 0)`` instead of the correlated subquery.
+- Read the full function first to understand the query builder structure before modifying.
 
-#### File 3: `backend/graphql/pothos/teacher-dashboard.pothos.ts`
-- Remove the local `TeacherDashboardMetricsDefinition` type (lines 51-64).
-- Import `ClassSessionMetrics` from `@/backend/types`.
-- Change ref to: `gqlSchemaBuilder.objectRef<ClassSessionMetrics>("TeacherDashboardMetrics")`.
-- Update field implementations to match.
+#### File 3: `backend/db/repo/dst-migration.repository.ts` (line 111)
+- `updateRecurringScheduleTimesBatch` issues N individual UPDATE statements in a for-loop.
+- Replace with a batched UPDATE using VALUES list:
+  ```typescript
+  export const updateRecurringScheduleTimesBatch = async (
+    updates: Array<{ scheduleId: string; newStartTime: string; newOffset: number }>,
+    tx?: DBTransaction
+  ) => {
+    const queryDb = tx ?? db;
+    if (updates.length === 0) return;
+    const now = new Date();
+    const values = sql.join(
+      updates.map(u => sql`(${u.scheduleId}, ${u.newStartTime}, ${u.newOffset})`),
+      sql`, `
+    );
+    await queryDb.execute(sql`
+      UPDATE recurring_schedules rs
+      SET default_start_time = data.new_start,
+          utc_offset_snapshot = data.new_offset,
+          updated_at = ${now}
+      FROM (VALUES ${values}) AS data(id, new_start, new_offset)
+      WHERE rs.id = data.id::uuid
+    `);
+  };
+  ```
+- Read the file first to check column names and types.
 
-#### File 4: `backend/graphql/pothos/staff-directory.pothos.ts`
-- Remove the local `TeacherDirectoryRowDefinition` type (lines 9-17).
-- Import `TeacherDirectoryRow` from `@/backend/types`.
-- Use `TeacherDirectoryRow` as the objectRef type but add `index` as a computed field.
-- Change `avatarUrl: t.exposeString("avatarUrl")` to `avatarUrl: t.exposeString("avatarUrl", { nullable: true })` to match the canonical type's nullability.
+#### File 4: `backend/db/repo/student.repository.ts` (line 163)
+- `deleteById` performs hard delete outside a transaction.
+- Wrap in `db.transaction()`:
+  ```typescript
+  export const deleteById = async (id: string, locale?: string): Promise<Types.StudentEntity> => {
+    const existingStudent = await findById(id);
+    if (!existingStudent) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("studentNotFound", { id }));
+    }
+    await db.transaction(async (tx) => {
+      await tx.delete(students).where(eq(students.id, id));
+    });
+    return existingStudent;
+  };
+  ```
+- Also: `createList` (line 119-131) inserts students one at a time via `Promise.all(input.map(item => create(...)))`. Replace with a bulk INSERT:
+  ```typescript
+  export const createList = async (
+    input: Types.StudentCreateInput[],
+    locale?: string
+  ): Promise<Types.StudentEntity[]> => {
+    if (input.length === 0) return [];
+    try {
+      // Validate names first
+      for (const item of input) {
+        const nameErr = await StudentUtils.validateName(item.name, locale);
+        if (nameErr) throw new Error(nameErr);
+      }
+      const values = input.map(item => ({
+        ...item,
+        idempotencyKey: item.idempotencyKey ?? randomUUID(),
+      }));
+      return await db.insert(students).values(values).returning();
+    } catch (error) {
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(t("studentCreateError", { message: error instanceof Error ? error.message : "Unknown error" }), {
+        cause: error,
+      });
+    }
+  };
+  ```
 
 ---
 
-### Subagent E2: Dead code removal
+## Group C — Deploy Safety (WARNING)
 
-**Files to delete:**
-1. `frontend/stores/classAuditStore.ts`
-2. `frontend/stores/classDetailsStore.ts`
-3. `frontend/stores/studentStatusStore.ts`
-4. `shared/lib/simpleLogger.ts`
-5. `shared/lib/middleware.ts`
-6. `shared/utils/auth.ts`
-7. `backend/utils/types.utils.ts`
+### Subagent C1: Migration safety improvements
 
 **Files to modify:**
-1. `shared/lib/enum.ts` (remove `Calendar` enum — lines 6-9)
-2. `shared/demo-users.ts` (remove unused exports: `superAdmins`, `staff`, `ALL_DEMO_USERS` — lines 65, 69, 71, verify lines)
-3. `frontend/stores/classDetailsStore.ts` — actually just delete the file
-4. `scratch/get-issue.ts` — delete
-5. `scratch/query-db.ts` — delete
+1. `backend/drizzle/20260629101653_class_categories_and_subjects_seed/migration.sql`
+2. `backend/db/migration/hours_per_week_recalculation.sql`
+3. `backend/db/migration/timezone_dst_logic.sql`
+4. `backend/db/migration/3-system_permissions_and_groups.sql`
 
-**Important**: Before deleting each file, verify no imports exist with grep. If an import is found, do not delete — instead note it as blocked.
+**Changes:**
 
-**Changes for `shared/lib/enum.ts`:**
-- Remove the `Calendar` enum (lines 6-9). It uses numeric values (0, 1) and is never imported by any consumer.
+#### File 1: `backend/drizzle/20260629101653_class_categories_and_subjects_seed/migration.sql`
+- Lines 79 and 84: Non-concurrent `CREATE INDEX` on `recurring_schedules` and `class_instances` will lock these tables for writes.
+- The migration already has a comment noting this (lines 75-78). Strengthen it by adding a deployment instruction block:
+  ```sql
+  -- ============================================================
+  -- DEPLOY SAFETY: These CREATE INDEX statements will lock recurring_schedules
+  -- and class_instances for writes during index build. For production deployments
+  -- with existing data, run these indexes manually BEFORE applying this migration:
+  --   CREATE INDEX CONCURRENTLY recurring_schedules_subject_id_idx ON recurring_schedules (subject_id);
+  --   CREATE INDEX CONCURRENTLY class_instances_subject_id_idx ON class_instances (subject_id);
+  -- Then change the statements below to IF NOT EXISTS (they will be no-ops since indexes already exist).
+  -- ============================================================
+  ```
 
-**Changes for `shared/demo-users.ts`:**
-- Remove the `superAdmins`, `staff`, and `ALL_DEMO_USERS` exports. Keep `INTERNAL_DEMO_USERS`, `academyAdmins`, `teachers`, `parents`.
-- Remove any variables only used by those exports.
+#### File 2: `backend/db/migration/hours_per_week_recalculation.sql`
+- Line 85: Full-table backfill UPDATE on `students` without batching.
+- Add a comment block before the UPDATE:
+  ```sql
+  -- DEPLOY SAFETY: This one-time backfill UPDATE runs across ALL students in a single statement.
+  -- For production deployments with large student tables (1000+ rows), consider splitting into
+  -- batched updates of 500 rows at a time:
+  --   UPDATE students s SET hours_per_week = ...
+  --   WHERE s.id IN (SELECT id FROM students ORDER BY id LIMIT 500 OFFSET 0);
+  -- Repeat with increasing OFFSET until no rows remain.
+  ```
+
+#### File 3: `backend/db/migration/timezone_dst_logic.sql`
+- Line 57: `auto_adjust_dst_bookings()` UPDATEs all future class instances in a single statement.
+- Add a comment block inside the function body (before the CTE):
+  ```sql
+  -- DEPLOY SAFETY: This UPDATE touches all future class instances with DST drift in a single
+  -- statement, holding row locks for the duration. For databases with many future class instances,
+  -- consider refactoring to process in batches of 500 using a cursor loop:
+  --   LOOP
+  --     UPDATE class_instances ... WHERE id IN (SELECT id FROM affected_classes LIMIT 500) RETURNING 1;
+  --     EXIT WHEN NOT FOUND;
+  --   END LOOP;
+  ```
+
+#### File 4: `backend/db/migration/3-system_permissions_and_groups.sql`
+- Line 987: Destructive `DELETE FROM group_permissions` for all system groups.
+- This wipes custom permission assignments on re-deploy. The migration should be more targeted.
+- Change the DELETE to only affect the specific permission keys this migration manages.
+- Read the INSERT INTO group_permissions blocks after the DELETE (lines 996+) to extract the list of permission keys.
+- Modify to:
+  ```sql
+  DELETE FROM group_permissions
+  WHERE group_id IN (SELECT id FROM permission_groups WHERE is_system = true)
+  AND permission_id IN (
+    SELECT id FROM permissions WHERE key IN (
+      'auth.login',
+      'auth.view_own_profile',
+      -- ... include ALL permission keys from the subsequent INSERT blocks
+    )
+  );
+  ```
+- **Important**: Read the full file to get the complete list of permission keys from the INSERT blocks.
+
+---
+
+## Group D — Duplication & Dead Code
+
+### Subagent D1: RequireAuth deduplication + dead code
+
+**Files to modify:**
+1. Create `backend/graphql/utils/requireAuth.ts` (new shared utility)
+2. `backend/graphql/mutation/student.mutation.ts`
+3. `backend/graphql/mutation/onboarding.mutation.ts`
+4. All other mutation files that duplicate `requireAuth` (grep for the pattern)
+5. `backend/services/student/suspended-lock.service.ts` (delete)
+6. `backend/services/student/student-leave-processing.service.ts` (delete)
+7. `backend/services/student/index.ts` (remove exports)
+
+**Changes:**
+
+#### File 1: Create `backend/graphql/utils/requireAuth.ts`
+- Create a shared utility:
+  ```typescript
+  import { getBackendTranslations } from "@/backend/lib/intl";
+  import type { BaseContext } from "../gqlContext";
+
+  export async function requireAuth(ctx: BaseContext): Promise<string> {
+    if (!ctx.user?.id) {
+      const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+      throw new Error(tFunc("unauthorized"));
+    }
+    return ctx.user.id;
+  }
+  ```
+
+#### Files 2-4: Replace all local `requireAuth` functions
+- Grep for `async function requireAuth(ctx: BaseContext)` across all mutation files.
+- In each file that defines its own `requireAuth`, delete the local function and import from `@/backend/graphql/utils/requireAuth`.
+- The onboarding mutation currently uses `tFunc("insufficientPermissions")` — standardize to `"unauthorized"` (same as all others).
+- Also replace any inline `if (!ctx.user?.id)` checks that could use the shared utility.
+
+#### Files 5-6: Delete dead code files
+- Delete `backend/services/student/suspended-lock.service.ts`
+- Delete `backend/services/student/student-leave-processing.service.ts`
+
+#### File 7: Remove exports
+- In `backend/services/student/index.ts`, remove:
+  - `export * from "./suspended-lock.service";`
+  - `export * from "./student-leave-processing.service";`
+- Also verify with grep that no other file imports from these before deleting.
+
+---
+
+### Subagent D2: Dead code in test + DBTransaction type deduplication
+
+**Files to modify:**
+1. `backend/db/test/logic/class_quota_race.test.ts`
+2. All files that locally redefine `DBTransaction` type (grep for the pattern)
+
+**Changes:**
+
+#### File 1: `backend/db/test/logic/class_quota_race.test.ts` (line 104-105)
+- Fix SQL injection pattern in test code: replace `sql.raw()` with string interpolation to Drizzle's parameterized `sql` template tag.
+- Change:
+  ```typescript
+  // FROM:
+  await db.execute(sql.raw(`UPDATE class_instances SET deleted_at = NOW() WHERE student_id = '${data.studentId}'`));
+  await db.execute(sql.raw(`DELETE FROM class_instances WHERE student_id = '${data.studentId}'`));
+  // TO:
+  await db.execute(sql`UPDATE class_instances SET deleted_at = NOW() WHERE student_id = ${data.studentId}`);
+  await db.execute(sql`DELETE FROM class_instances WHERE student_id = ${data.studentId}`);
+  ```
+
+#### File 2+: DBTransaction type deduplication
+- Grep for `type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0]` across all files.
+- Read `backend/db/db.types.ts` to confirm it exports `DBTransaction`.
+- In each file that locally redefines `DBTransaction`, delete the local definition and import from `@/backend/db/db.types`.
+- Files likely affected (verify with grep):
+  - `backend/services/teacher/teacher-onboarding.service.ts`
+  - `backend/services/parent/parent-onboarding.service.ts`
+  - `backend/services/staff/manager-onboarding.service.ts`
+  - `backend/db/repo/storage.repository.ts`
+  - `backend/db/repo/scheduling/scheduling-queries.repository.ts`
+  - Test files that redefine it
 
 ---
 
 ## Execution Order for Parallel Subagents
 
-These groups can run in parallel:
-- **A1** + **A2**: Security (no file overlap)
-- **B1** + **B2**: Business logic (no file overlap)
-- **C1** + **C2**: Performance (no file overlap between C1 and C2)
-- **D1**: Deploy safety
-- **E1** + **E2**: Duplication & dead code (no file overlap)
+These subagents can run in parallel since they modify different files:
 
-Recommended parallel batch:
-- Batch 1: A1, A2, B1, B2, C1, C2, D1, E1, E2 (all can run in parallel since they modify different files)
+**Batch 1** (all can run in parallel):
+- **A1**: student.query.ts, auth.query.ts, auth.mutation.ts, student.mutation.ts
+- **A2**: storage.mutation.ts, ratelimit.ts
+- **B1**: permission-management.repository.ts, permission-management.pothos.ts, storage.repository.ts, scheduling-queries.repository.ts, teacher-dashboard.query.ts
+- **B2**: user.repository.ts, parent.repository.ts, dst-migration.repository.ts, student.repository.ts
+- **C1**: Drizzle migration SQL, hours_per_week SQL, timezone_dst SQL, 3-system_permissions SQL
+- **D1**: Create requireAuth.ts, update mutation files, delete dead services, update index.ts
+- **D2**: class_quota_race.test.ts, DBTransaction dedup files
 
-**Note on C1**: C1 modifies both `parent-directory.service.ts` AND `parent.repository.ts`. C2 also modifies `parent.repository.ts`. To avoid conflicts, C2 should skip the parent.repository.ts change OR C1 and C2 should be merged. **Decision**: C2 should NOT touch parent.repository.ts for the timezone fix — let C1 handle that file. Move the timezone fix in parent.repository.ts to C1's file list.
-
-**Updated C2 file list** (remove parent.repository.ts, add to C1):
-- C1 files: `parent-directory.service.ts`, `complaint.service.ts`, `parent.repository.ts` (for both getStudentsForParents batch method + timezone fix)
-- C2 files: `learning-resource.repository.ts`, `book.repository.ts`, `user.repository.ts`, `billing.repository.ts`, `dst-migration.repository.ts`
+**Conflict avoidance:**
+- B1 touches `storage.repository.ts` and B2 does NOT → OK
+- B2 touches `student.repository.ts` and A1 touches `student.mutation.ts` → different files, OK
+- B2 touches `parent.repository.ts` and B1 does NOT → OK
+- D1 creates a new file `backend/graphql/utils/requireAuth.ts` → no conflict
+- D2 may touch test files → no overlap with other subagents
 
 ---
 
 ## Post-verification
 
 After ALL subagents complete:
-1. Run `~/.bun/bin/bun run tsgo` (full typecheck — no single file)
-2. Run `~/.bun/bin/bun run biome:check` (full check)
+1. Run `~/.bun/bin/bun tsgo` (full typecheck)
+2. Run `~/.bun/bin/bun biome:check` (full check)
 3. Submit lint queue request for ALL modified files at once
 4. Fix any remaining issues

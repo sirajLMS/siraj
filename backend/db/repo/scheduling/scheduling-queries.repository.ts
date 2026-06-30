@@ -1,5 +1,6 @@
 import { and, eq, gte, ilike, inArray, isNull, lt, ne, or, type SQL, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import {
@@ -20,8 +21,6 @@ import {
   type DailyScheduleMetricsCounts,
   matchesDashboardMetricFilter,
 } from "@/shared/lib/schedule-instance-dashboard-status";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export type DailyScheduleMetricFilter =
   | "total"
@@ -134,7 +133,7 @@ async function fetchDailyScheduleBaseRows(
           )
         )
       )
-      .limit(2000);
+      .limit(500);
 
     return hydrateDailyScheduleRows(
       t,
@@ -142,7 +141,8 @@ async function fetchDailyScheduleBaseRows(
     );
   }
 
-  const rows = await t.select({ classInstance: classInstances }).from(classInstances).where(dayConditions).limit(2000);
+  // TODO: Push metricFilter and pagination into SQL for production scale. Current approach loads a bounded set and filters in JS.
+  const rows = await t.select({ classInstance: classInstances }).from(classInstances).where(dayConditions).limit(500);
 
   return hydrateDailyScheduleRows(
     t,

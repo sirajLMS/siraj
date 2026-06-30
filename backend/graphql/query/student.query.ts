@@ -8,6 +8,7 @@ gqlSchemaBuilder.queryFields(t => ({
   student: t.field({
     type: Pothos.StudentPothosObject,
     nullable: true,
+    authScopes: { loggedIn: true },
     args: {
       id: t.arg.string({ required: true }),
     },
@@ -18,6 +19,7 @@ gqlSchemaBuilder.queryFields(t => ({
   students: t.field({
     type: Pothos.StudentsWithFiltersPothosObject,
     nullable: false,
+    authScopes: { loggedIn: true },
     args: {
       paginationArgs: t.arg({
         type: Pothos.PaginationArgsObject,

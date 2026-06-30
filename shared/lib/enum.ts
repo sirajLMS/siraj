@@ -537,6 +537,7 @@ export enum AppPermission {
   NOTES_DELETE = "notes.delete",
   TEST_SYSTEM_ONLY = "test.system_only",
   TEST_CUSTOM_ONLY = "test.custom_only",
+  STORAGE_MANAGE = "storage.manage",
 }
 
 export enum AvailabilityStatus {

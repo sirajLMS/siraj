@@ -82,6 +82,12 @@ AFTER INSERT OR UPDATE OR DELETE ON recurring_schedule_days
 FOR EACH ROW EXECUTE FUNCTION trg_fn_recurring_schedule_days_hours_recalc();
 
 -- 5. One-time recalculation for existing students
+-- DEPLOY SAFETY: This one-time backfill UPDATE runs across ALL students in a single statement.
+-- For production deployments with large student tables (1000+ rows), consider splitting into
+-- batched updates of 500 rows at a time:
+--   UPDATE students s SET hours_per_week = ...
+--   WHERE s.id IN (SELECT id FROM students ORDER BY id LIMIT 500 OFFSET 0);
+-- Repeat with increasing OFFSET until no rows remain.
 UPDATE students s
 SET hours_per_week = COALESCE((
   SELECT SUM(rs.duration_minutes)::numeric / 60.0

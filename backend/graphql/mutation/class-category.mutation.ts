@@ -1,20 +1,11 @@
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { ClassCategoryService } from "@/backend/services/subject/class-category.service";
-import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   ClassCategoryCreateInputPothos,
   ClassCategoryPothosObject,
   ClassCategoryUpdateInputPothos,
 } from "../pothos/class-category.pothos";
-
-async function requireAuth(ctx: BaseContext): Promise<string> {
-  if (!ctx.user?.id) {
-    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-    throw new Error(tFunc("unauthorized"));
-  }
-  return ctx.user.id;
-}
+import { requireAuth } from "../utils/requireAuth";
 
 gqlSchemaBuilder.mutationField("createClassCategory", t =>
   t.field({

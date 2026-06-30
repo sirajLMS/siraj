@@ -158,11 +158,7 @@ class RateLimiter {
  * GraphQL API rate limiter
  * Allows 100 requests per minute per IP address
  */
-export const graphqlRateLimiter = new RateLimiter(
-  "ratelimit:graphql",
-  100,
-  60 * 1000 // 1 minute
-);
+export const graphqlRateLimiter = new RateLimiter("ratelimit:graphql", 100, 60 * 1000, false);
 
 /**
  * Authentication endpoints rate limiter (more restrictive)

@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { config } from "dotenv";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { checkRedisHealth, getRedisService, resetRedisService } from "@/backend/services/redis";
 import { testLogger } from "@/shared/lib/testlogger";
 import { db } from "../../drizzleDb";
@@ -11,8 +12,6 @@ import { IP_ADDRESS_1, IP_ADDRESS_2 } from "../const";
 config({ path: ".env.redis", override: true });
 
 let redisAvailable = false;
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 async function runInRollback(fn: (tx: DBTransaction) => Promise<void>): Promise<void> {
   try {

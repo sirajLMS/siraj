@@ -1,4 +1,5 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   classInstanceFiles,
@@ -94,7 +95,7 @@ export namespace StorageDbRepository {
         .from(storageDirectories)
         .where(sql`${storageDirectories.path} LIKE ${parentPath + "/%"}`);
     }
-    return await db.select().from(storageDirectories);
+    return await db.select().from(storageDirectories).limit(500);
   };
 
   export const directoriesByPaths = async (paths: string[]): Promise<StorageTypes.DirectoryEntity[]> => {
@@ -203,16 +204,106 @@ export namespace StorageDbRepository {
 
   async function fetchAllUsages(fId: string) {
     return Promise.all([
-      db.select().from(userFiles).where(eq(userFiles.fileId, fId)),
-      db.select().from(teacherFiles).where(eq(teacherFiles.fileId, fId)),
-      db.select().from(studentFiles).where(eq(studentFiles.fileId, fId)),
-      db.select().from(parentFiles).where(eq(parentFiles.fileId, fId)),
-      db.select().from(invoiceFiles).where(eq(invoiceFiles.fileId, fId)),
-      db.select().from(complaintFiles).where(eq(complaintFiles.fileId, fId)),
-      db.select().from(learningResourceFiles).where(eq(learningResourceFiles.fileId, fId)),
-      db.select().from(staffProfileFiles).where(eq(staffProfileFiles.fileId, fId)),
-      db.select().from(recurringScheduleFiles).where(eq(recurringScheduleFiles.fileId, fId)),
-      db.select().from(classInstanceFiles).where(eq(classInstanceFiles.fileId, fId)),
+      db
+        .select({
+          id: userFiles.id,
+          fileId: userFiles.fileId,
+          userId: userFiles.userId,
+          usageType: userFiles.usageType,
+          createdAt: userFiles.createdAt,
+        })
+        .from(userFiles)
+        .where(eq(userFiles.fileId, fId)),
+      db
+        .select({
+          id: teacherFiles.id,
+          fileId: teacherFiles.fileId,
+          teacherId: teacherFiles.teacherId,
+          usageType: teacherFiles.usageType,
+          createdAt: teacherFiles.createdAt,
+        })
+        .from(teacherFiles)
+        .where(eq(teacherFiles.fileId, fId)),
+      db
+        .select({
+          id: studentFiles.id,
+          fileId: studentFiles.fileId,
+          studentId: studentFiles.studentId,
+          usageType: studentFiles.usageType,
+          createdAt: studentFiles.createdAt,
+        })
+        .from(studentFiles)
+        .where(eq(studentFiles.fileId, fId)),
+      db
+        .select({
+          id: parentFiles.id,
+          fileId: parentFiles.fileId,
+          parentId: parentFiles.parentId,
+          usageType: parentFiles.usageType,
+          createdAt: parentFiles.createdAt,
+        })
+        .from(parentFiles)
+        .where(eq(parentFiles.fileId, fId)),
+      db
+        .select({
+          id: invoiceFiles.id,
+          fileId: invoiceFiles.fileId,
+          invoiceId: invoiceFiles.invoiceId,
+          usageType: invoiceFiles.usageType,
+          createdAt: invoiceFiles.createdAt,
+        })
+        .from(invoiceFiles)
+        .where(eq(invoiceFiles.fileId, fId)),
+      db
+        .select({
+          id: complaintFiles.id,
+          fileId: complaintFiles.fileId,
+          complaintId: complaintFiles.complaintId,
+          usageType: complaintFiles.usageType,
+          createdAt: complaintFiles.createdAt,
+        })
+        .from(complaintFiles)
+        .where(eq(complaintFiles.fileId, fId)),
+      db
+        .select({
+          id: learningResourceFiles.id,
+          fileId: learningResourceFiles.fileId,
+          learningResourceId: learningResourceFiles.learningResourceId,
+          usageType: learningResourceFiles.usageType,
+          createdAt: learningResourceFiles.createdAt,
+        })
+        .from(learningResourceFiles)
+        .where(eq(learningResourceFiles.fileId, fId)),
+      db
+        .select({
+          id: staffProfileFiles.id,
+          fileId: staffProfileFiles.fileId,
+          staffProfileId: staffProfileFiles.staffProfileId,
+          usageType: staffProfileFiles.usageType,
+          createdAt: staffProfileFiles.createdAt,
+        })
+        .from(staffProfileFiles)
+        .where(eq(staffProfileFiles.fileId, fId)),
+      db
+        .select({
+          id: recurringScheduleFiles.id,
+          fileId: recurringScheduleFiles.fileId,
+          recurringScheduleId: recurringScheduleFiles.recurringScheduleId,
+          usageType: recurringScheduleFiles.usageType,
+          createdAt: recurringScheduleFiles.createdAt,
+        })
+        .from(recurringScheduleFiles)
+        .where(eq(recurringScheduleFiles.fileId, fId)),
+      db
+        .select({
+          id: classInstanceFiles.id,
+          fileId: classInstanceFiles.fileId,
+          classInstanceId: classInstanceFiles.classInstanceId,
+          usageType: classInstanceFiles.usageType,
+          createdAt: classInstanceFiles.createdAt,
+        })
+        .from(classInstanceFiles)
+        .where(eq(classInstanceFiles.fileId, fId)),
     ]);
   }
 
@@ -236,25 +327,21 @@ export namespace StorageDbRepository {
     const file = await fileByPath(filePath);
     if (!file) return false;
 
-    const tables = [
-      userFiles,
-      teacherFiles,
-      studentFiles,
-      parentFiles,
-      invoiceFiles,
-      complaintFiles,
-      learningResourceFiles,
-      staffProfileFiles,
-      recurringScheduleFiles,
-      classInstanceFiles,
-    ];
-
-    for (const table of tables) {
-      const results = await db.select({ id: table.id }).from(table).where(eq(table.fileId, file.id)).limit(1);
-      if (results.length > 0) return true;
-    }
-
-    return false;
+    const result = await db.execute(sql`
+      SELECT 1 FROM (
+        SELECT id FROM user_files WHERE file_id = ${file.id} LIMIT 1
+        UNION ALL SELECT id FROM teacher_files WHERE file_id = ${file.id} LIMIT 1
+        UNION ALL SELECT id FROM student_files WHERE file_id = ${file.id} LIMIT 1
+        UNION ALL SELECT id FROM parent_files WHERE file_id = ${file.id} LIMIT 1
+        UNION ALL SELECT id FROM invoice_files WHERE file_id = ${file.id} LIMIT 1
+        UNION ALL SELECT id FROM complaint_files WHERE file_id = ${file.id} LIMIT 1
+        UNION ALL SELECT id FROM learning_resource_files WHERE file_id = ${file.id} LIMIT 1
+        UNION ALL SELECT id FROM staff_profile_files WHERE file_id = ${file.id} LIMIT 1
+        UNION ALL SELECT id FROM recurring_schedule_files WHERE file_id = ${file.id} LIMIT 1
+        UNION ALL SELECT id FROM class_instance_files WHERE file_id = ${file.id} LIMIT 1
+      ) sub LIMIT 1
+    `);
+    return result.rows.length > 0;
   };
 
   export const registerFileUsage = async (
@@ -543,8 +630,6 @@ export namespace StorageDbRepository {
       return { success: false, message: `Failed to set protection: ${error}` };
     }
   };
-
-  type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
   export const getFilesForParent = async (
     parentId: string,

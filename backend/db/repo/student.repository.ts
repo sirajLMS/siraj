@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { and, eq, gt, inArray, lt, or, sql } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
 import { alias } from "drizzle-orm/pg-core";
@@ -122,7 +123,25 @@ export namespace StudentRepository {
   ): Promise<Types.StudentEntity[]> => {
     if (input.length === 0) return [];
     try {
-      return await Promise.all(input.map(item => create(item, locale)));
+      for (const item of input) {
+        const nameErr = await StudentUtils.validateName(item.name, locale);
+        if (nameErr) throw new Error(nameErr);
+      }
+      const values: Types.StudentEntityInput[] = input.map(item => ({
+        parentId: item.parentId,
+        primaryTeacherId: item.primaryTeacherId ?? null,
+        name: item.name,
+        dateOfBirth: item.dateOfBirth,
+        gender: item.gender,
+        language: item.language,
+        status: item.status,
+        classesTotal: item.classesTotal ?? 0,
+        classesRemaining: item.classesRemaining ?? 0,
+        idempotencyKey: item.idempotencyKey ?? randomUUID(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
+      return await db.insert(students).values(values).returning();
     } catch (error) {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("studentCreateError", { message: error instanceof Error ? error.message : "Unknown error" }), {
@@ -160,7 +179,9 @@ export namespace StudentRepository {
       const t = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(t("studentNotFound", { id }));
     }
-    await db.delete(students).where(eq(students.id, id));
+    await db.transaction(async tx => {
+      await tx.delete(students).where(eq(students.id, id));
+    });
     return existingStudent;
   };
 

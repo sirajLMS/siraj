@@ -1,5 +1,3 @@
-import type { BaseContext } from "@/backend/graphql/gqlContext";
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
 import { PaginationArgs } from "@/backend/types";
@@ -15,14 +13,7 @@ import {
   RescheduleTrackingResultPothosObject,
 } from "../pothos/schedule.pothos";
 import { WeeklyScheduleGridPothosObject, WeeklyWorkloadMetricsPothosObject } from "../pothos/weekly-schedule.pothos";
-
-async function requireAuth(ctx: BaseContext): Promise<string> {
-  if (!ctx.user) {
-    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-    throw new Error(tFunc("unauthorized"));
-  }
-  return ctx.user.id;
-}
+import { requireAuth } from "../utils/requireAuth";
 
 type PaginationArgsInput = {
   first?: number | null;

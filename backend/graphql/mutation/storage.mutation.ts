@@ -1,8 +1,32 @@
 import { StorageDbRepository } from "@/backend/db/repo";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getStorageService } from "@/backend/storage/storage.service";
+import { AppPermission } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import * as StoragePothos from "../pothos";
+import { requireAuth } from "../utils/requireAuth";
+
+async function requireStorageManage(userId: string, locale?: string): Promise<void> {
+  const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.STORAGE_MANAGE);
+  if (!hasPermission) {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc("insufficientPermissions"));
+  }
+}
+
+async function requireStorageManageOrOwner(userId: string, filePath: string, locale?: string): Promise<void> {
+  const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.STORAGE_MANAGE);
+  if (hasPermission) return;
+
+  const usages = await StorageDbRepository.getFileUsages(filePath);
+  const isOwner = usages.some(u => u.referenceTable === "users" && u.referenceId === userId);
+  if (!isOwner) {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc("insufficientPermissions"));
+  }
+}
 
 gqlSchemaBuilder.mutationFields(t => ({
   renameFile: t.field({
@@ -26,7 +50,9 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       path: t.arg.string({ required: true }),
     },
-    resolve: async (_parent, { path }) => {
+    resolve: async (_parent, { path }, ctx) => {
+      const userId = await requireAuth(ctx);
+      await requireStorageManageOrOwner(userId, path, ctx.locale);
       const storageService = await getStorageService();
       return await storageService.deleteFile(path);
     },
@@ -106,7 +132,11 @@ gqlSchemaBuilder.mutationFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_parent, { input }) => {
+    resolve: async (_parent, { input }, ctx) => {
+      const userId = await requireAuth(ctx);
+      for (const itemPath of input.paths) {
+        await requireStorageManageOrOwner(userId, itemPath, ctx.locale);
+      }
       const storageService = await getStorageService();
       return await storageService.deleteItems(input);
     },
@@ -121,7 +151,9 @@ gqlSchemaBuilder.mutationFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_parent, { input }) => {
+    resolve: async (_parent, { input }, ctx) => {
+      const userId = await requireAuth(ctx);
+      await requireStorageManage(userId, ctx.locale);
       return await StorageDbRepository.updateDirectoryPermissions(input);
     },
   }),
@@ -135,7 +167,9 @@ gqlSchemaBuilder.mutationFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_parent, { input }) => {
+    resolve: async (_parent, { input }, ctx) => {
+      const userId = await requireAuth(ctx);
+      await requireStorageManage(userId, ctx.locale);
       return await StorageDbRepository.setProtection(input);
     },
   }),

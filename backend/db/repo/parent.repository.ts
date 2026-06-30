@@ -162,10 +162,6 @@ export namespace ParentRepository {
         avatarUrl: users.avatarUrl,
         status: parents.status,
         updatedAt: parents.updatedAt,
-        unpaidInvoices: sql<number>`COALESCE(
-          (SELECT COUNT(*) FROM ${invoices} 
-           WHERE ${invoices.parentId} = ${parents.id} 
-           AND ${invoices.status} = 'UNPAID'), 0)`.mapWith(Number),
       })
       .from(parents)
       .innerJoin(users, eq(parents.userId, users.id))
@@ -179,18 +175,45 @@ export namespace ParentRepository {
 
     const rows = await rowsQuery;
 
-    const [totalCount] = await queryDb
-      .select({ count: count() })
-      .from(parents)
-      .innerJoin(users, eq(parents.userId, users.id))
-      .where(conditions.length > 0 ? and(...conditions) : undefined);
+    const [totalCount, unpaidCounts] = await Promise.all([
+      queryDb
+        .select({ count: count() })
+        .from(parents)
+        .innerJoin(users, eq(parents.userId, users.id))
+        .where(conditions.length > 0 ? and(...conditions) : undefined),
+      rows.length > 0
+        ? queryDb
+            .select({
+              parentId: invoices.parentId,
+              cnt: sql<number>`COUNT(*)::int`.mapWith(Number),
+            })
+            .from(invoices)
+            .where(
+              and(
+                inArray(
+                  invoices.parentId,
+                  rows.map(r => r.id)
+                ),
+                eq(invoices.status, "UNPAID")
+              )
+            )
+            .groupBy(invoices.parentId)
+        : [],
+    ] as const);
 
-    const total = totalCount?.count ?? 0;
-    const pageInfo = PaginationUtils.buildPageInfoFromArgs(options.pagination ?? null, rows.length, total);
+    const unpaidMap = new Map(unpaidCounts.map(r => [r.parentId, r.cnt]));
+
+    const rowsWithUnpaid = rows.map(r => ({
+      ...r,
+      unpaidInvoices: unpaidMap.get(r.id) ?? 0,
+    }));
+
+    const total = totalCount[0]?.count ?? 0;
+    const pageInfo = PaginationUtils.buildPageInfoFromArgs(options.pagination ?? null, rowsWithUnpaid.length, total);
 
     return {
       metrics,
-      rows,
+      rows: rowsWithUnpaid,
       totalCount: total,
       pageInfo,
     };

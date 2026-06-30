@@ -3,6 +3,19 @@ import { PermissionManagementService } from "@/backend/services/auth/permission-
 import type { GroupUserEntity, GroupWithPermissionIds, PermissionEntity, UserOverrideEntity } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
+let groupUsersCache: Map<string, GroupUserEntity[]> | null = null;
+
+function clearGroupUsersCache() {
+  groupUsersCache = null;
+}
+
+async function getGroupUsersMap(): Promise<Map<string, GroupUserEntity[]>> {
+  if (!groupUsersCache) {
+    groupUsersCache = await PermissionManagementRepository.listAllGroupUsers();
+  }
+  return groupUsersCache;
+}
+
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
 export const PermissionObject = gqlSchemaBuilder.objectRef<PermissionEntity>("Permission").implement({
@@ -37,7 +50,10 @@ export const PermissionGroupObject = gqlSchemaBuilder.objectRef<GroupWithPermiss
     permissionIds: t.exposeStringList("permissionIds"),
     assignedUsers: t.field({
       type: [GroupUserObject],
-      resolve: async group => PermissionManagementRepository.listUsersInGroup(group.id),
+      resolve: async group => {
+        const map = await getGroupUsersMap();
+        return map.get(group.id) ?? [];
+      },
     }),
   }),
 });
@@ -101,7 +117,10 @@ gqlSchemaBuilder.queryFields(t => ({
   permissionGroups: t.field({
     type: [PermissionGroupObject],
     description: "List all permission groups with their permission IDs.",
-    resolve: async (_root, _args, ctx) => PermissionManagementService.listGroups(ctx.user?.id || "", ctx.locale),
+    resolve: async (_root, _args, ctx) => {
+      clearGroupUsersCache();
+      return PermissionManagementService.listGroups(ctx.user?.id || "", ctx.locale);
+    },
   }),
   permissionGroup: t.field({
     type: PermissionGroupObject,
@@ -172,6 +191,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   assignPermissionGroupToUser: t.boolean({
     args: { input: t.arg({ type: AssignPermissionGroupToUserInput, required: true }) },
     resolve: async (_root, args, ctx) => {
+      clearGroupUsersCache();
       await PermissionManagementService.assignGroupToUser(
         ctx.user?.id || "",
         { userId: args.input.userId, groupId: args.input.groupId },
@@ -183,6 +203,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   revokePermissionGroupFromUser: t.boolean({
     args: { input: t.arg({ type: RevokePermissionGroupFromUserInput, required: true }) },
     resolve: async (_root, args, ctx) => {
+      clearGroupUsersCache();
       await PermissionManagementService.revokeGroupFromUser(
         ctx.user?.id || "",
         { userId: args.input.userId, groupId: args.input.groupId },
@@ -197,6 +218,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       userIds: t.arg.stringList({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
+      clearGroupUsersCache();
       await PermissionManagementService.bulkAssignUsersToGroup(
         ctx.user?.id || "",
         { userIds: args.userIds, groupId: args.groupId },
@@ -211,6 +233,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       userIds: t.arg.stringList({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
+      clearGroupUsersCache();
       await PermissionManagementService.bulkRevokeUsersFromGroup(
         ctx.user?.id || "",
         { userIds: args.userIds, groupId: args.groupId },

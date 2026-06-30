@@ -1,4 +1,3 @@
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { type ClassActionFn, ClassSessionService } from "@/backend/services/session/class-session.service";
 import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
@@ -7,16 +6,7 @@ import {
   LeaveProcessResultPothosObject,
   RescheduleClassInputPothosObject,
 } from "../pothos/class-session.pothos";
-
-// ─── Shared Helpers ───────────────────────────────────────────────────────────
-
-async function requireAuth(ctx: BaseContext): Promise<string> {
-  if (!ctx.user?.id) {
-    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-    throw new Error(tFunc("unauthorized"));
-  }
-  return ctx.user.id;
-}
+import { requireAuth } from "../utils/requireAuth";
 
 async function handleClassAction<R>(ctx: BaseContext, classInstanceId: string, action: ClassActionFn<R>) {
   const userId = await requireAuth(ctx);

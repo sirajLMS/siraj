@@ -1,4 +1,5 @@
 import { UserRepository } from "@/backend/db/repo";
+import { AppPermission } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { UserPothosObject } from "../pothos";
 
@@ -20,7 +21,7 @@ gqlSchemaBuilder.queryFields(t => ({
     type: UserPothosObject,
     nullable: true,
     authScopes: {
-      loggedIn: true,
+      permission: AppPermission.STAFF_EDIT,
     },
     args: {
       id: t.arg.string({ required: true }),
@@ -31,6 +32,6 @@ gqlSchemaBuilder.queryFields(t => ({
   users: t.field({
     authScopes: { loggedIn: true },
     type: [UserPothosObject],
-    resolve: async () => await UserRepository.findAll(),
+    resolve: async () => await UserRepository.findUsers({ limit: 50, offset: 0 }),
   }),
 }));

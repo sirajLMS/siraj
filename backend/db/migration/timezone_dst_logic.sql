@@ -42,6 +42,13 @@ DECLARE
     updated_count INTEGER := 0;
 BEGIN
     -- Update scheduled_start_at and scheduled_end_at for future classes where a DST drift is detected
+    -- DEPLOY SAFETY: This UPDATE touches all future class instances with DST drift in a single
+    -- statement, holding row locks for the duration. For databases with many future class instances,
+    -- consider refactoring to process in batches of 500 using a cursor loop:
+    --   LOOP
+    --     UPDATE class_instances ... WHERE id IN (SELECT id FROM affected_classes LIMIT 500) RETURNING 1;
+    --     EXIT WHEN NOT FOUND;
+    --   END LOOP;
     WITH affected_classes AS (
         SELECT 
             id,

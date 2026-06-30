@@ -1,3 +1,4 @@
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   PermissionManagementRepository,
@@ -49,8 +50,6 @@ export interface TeacherOnboardingResult {
 }
 
 export namespace TeacherOnboardingService {
-  type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
   async function createUserAndTeacher(
     input: TeacherOnboardingInput,
     locale: string | undefined,

@@ -1,21 +1,12 @@
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { ParentDashboardService } from "@/backend/services/parent/parent-dashboard.service";
 import { PaginationArgs } from "@/backend/types";
-import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PaginationArgsObject } from "../pothos/pagination.objects";
 import {
   ParentDashboardMetricsResultPothosObject,
   ParentDashboardScheduleResultPothosObject,
 } from "../pothos/parent-dashboard.pothos";
-
-async function requireAuth(ctx: BaseContext): Promise<string> {
-  if (!ctx.user?.id) {
-    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-    throw new Error(tFunc("unauthorized"));
-  }
-  return ctx.user.id;
-}
+import { requireAuth } from "../utils/requireAuth";
 
 gqlSchemaBuilder.queryField("parentDashboardSchedule", t =>
   t.field({

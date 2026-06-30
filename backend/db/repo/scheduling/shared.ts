@@ -1,12 +1,14 @@
 import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+
+export type { DBTransaction };
+
 import { SystemSettingsRepository } from "@/backend/db/repo/system-settings.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teacher-availability.repository";
 import { classInstances, parents, students, teacherAssignments } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type * as Types from "@/backend/types";
-
-export type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export async function acquireLocks(tx: DBTransaction, teacherId: string, studentId: string) {
   await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('booking_teacher_' || ${teacherId}::text))`);

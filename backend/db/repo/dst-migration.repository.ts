@@ -107,17 +107,20 @@ export namespace DstMigrationRepository {
     tx?: DBTransaction
   ) => {
     const queryDb = tx ?? db;
+    if (updates.length === 0) return;
     const now = new Date();
-    for (const update of updates) {
-      await queryDb
-        .update(recurringSchedules)
-        .set({
-          defaultStartTime: update.newStartTime,
-          utcOffsetSnapshot: update.newOffset,
-          updatedAt: now,
-        })
-        .where(eq(recurringSchedules.id, update.scheduleId));
-    }
+    const values = sql.join(
+      updates.map(u => sql`(${u.scheduleId}, ${u.newStartTime}, ${u.newOffset})`),
+      sql`, `
+    );
+    await queryDb.execute(sql`
+      UPDATE recurring_schedules rs
+      SET default_start_time = data.new_start,
+          utc_offset_snapshot = data.new_offset,
+          updated_at = ${now}
+      FROM (VALUES ${values}) AS data(id, new_start, new_offset)
+      WHERE rs.id = data.id::uuid
+    `);
   };
 
   export const acquireMigrationLock = async (offsetMinutes: number, tx: DBTransaction): Promise<void> => {

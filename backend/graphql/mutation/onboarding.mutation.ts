@@ -1,8 +1,6 @@
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
 import { ManagerOnboardingService } from "@/backend/services/staff/manager-onboarding.service";
 import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
-import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   ManagerOnboardingInputPothosObject,
@@ -12,14 +10,7 @@ import {
   TeacherOnboardingInputPothosObject,
   TeacherOnboardingResultPothosObject,
 } from "../pothos";
-
-async function requireAuth(ctx: BaseContext): Promise<string> {
-  if (!ctx.user?.id) {
-    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-    throw new Error(tFunc("insufficientPermissions"));
-  }
-  return ctx.user.id;
-}
+import { requireAuth } from "../utils/requireAuth";
 
 gqlSchemaBuilder.mutationFields(t => ({
   createTeacher: t.field({

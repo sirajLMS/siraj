@@ -5,6 +5,35 @@ import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PaginationArgsObject } from "../pothos/pagination.objects";
 import { TeacherDashboardPothosObject, TeacherHandbookUrlPothosObject } from "../pothos/teacher-dashboard.pothos";
 
+async function resolveTeacherDashboard(
+  ctx: { user?: { id: string } | null; locale?: string },
+  args: { date: string; pagination?: Record<string, unknown> | null },
+  mode: "teacher" | "teacher-active"
+) {
+  if (!ctx.user) {
+    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+    throw new Error(tFunc("unauthorized"));
+  }
+  const pagination = args.pagination
+    ? new PaginationArgs(args.pagination as ConstructorParameters<typeof PaginationArgs>[0])
+    : null;
+  const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, mode, ctx.locale, pagination);
+  return {
+    ...result,
+    scheduleRows: result.scheduleRows.map(r => ({
+      id: r.id,
+      studentId: r.studentId,
+      studentName: r.student?.name || "Unknown",
+      scheduledStartAt: r.scheduledStartAt,
+      durationMinutes: r.durationMinutes,
+      executionState: r.executionState,
+      outcome: r.outcome ?? null,
+      zoomMeetingUrl: r.zoomMeetingUrl ?? null,
+      yourTimeFormatted: r.yourTimeFormatted ?? null,
+    })),
+  };
+}
+
 gqlSchemaBuilder.queryField("teacherDashboard", t =>
   t.field({
     type: TeacherDashboardPothosObject,
@@ -13,34 +42,7 @@ gqlSchemaBuilder.queryField("teacherDashboard", t =>
       pagination: t.arg({ type: PaginationArgsObject, required: false }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
-      const result = await TeacherDashboardService.getDashboard(
-        ctx.user.id,
-        args.date,
-        "teacher",
-        ctx.locale,
-        pagination
-      );
-      return {
-        ...result,
-        scheduleRows: result.scheduleRows.map(r => ({
-          id: r.id,
-          studentId: r.studentId,
-          studentName: r.student?.name || "Unknown",
-          scheduledStartAt: r.scheduledStartAt,
-          durationMinutes: r.durationMinutes,
-          executionState: r.executionState,
-          outcome: r.outcome ?? null,
-          zoomMeetingUrl: r.zoomMeetingUrl ?? null,
-          yourTimeFormatted: r.yourTimeFormatted ?? null,
-        })),
-      };
-    },
+    resolve: async (_parent, args, ctx) => resolveTeacherDashboard(ctx, args, "teacher"),
   })
 );
 
@@ -52,34 +54,7 @@ gqlSchemaBuilder.queryField("teacherActiveDashboard", t =>
       pagination: t.arg({ type: PaginationArgsObject, required: false }),
     },
     authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      if (!ctx.user) {
-        const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-        throw new Error(tFunc("unauthorized"));
-      }
-      const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
-      const result = await TeacherDashboardService.getDashboard(
-        ctx.user.id,
-        args.date,
-        "teacher-active",
-        ctx.locale,
-        pagination
-      );
-      return {
-        ...result,
-        scheduleRows: result.scheduleRows.map(r => ({
-          id: r.id,
-          studentId: r.studentId,
-          studentName: r.student?.name || "Unknown",
-          scheduledStartAt: r.scheduledStartAt,
-          durationMinutes: r.durationMinutes,
-          executionState: r.executionState,
-          outcome: r.outcome ?? null,
-          zoomMeetingUrl: r.zoomMeetingUrl ?? null,
-          yourTimeFormatted: r.yourTimeFormatted ?? null,
-        })),
-      };
-    },
+    resolve: async (_parent, args, ctx) => resolveTeacherDashboard(ctx, args, "teacher-active"),
   })
 );
 

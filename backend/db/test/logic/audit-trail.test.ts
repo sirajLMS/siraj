@@ -13,14 +13,13 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
+import type { DBTransaction } from "@/backend/db/db.types";
 import { testLogger } from "@/shared/lib/testlogger";
 import type * as Types from "../../../types";
 import { db } from "../../drizzleDb";
 import { AuditRepository } from "../../repo";
 import { auditLogs, users } from "../../schema";
 import { IP_ADDRESS_1 } from "../const";
-
-type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 describe("Audit Trail System", () => {
   let testUser1: Types.UserEntity;

@@ -72,10 +72,14 @@ CREATE INDEX IF NOT EXISTS teacher_important_notes_teacher_id_idx ON teacher_imp
 ALTER TABLE recurring_schedules
   ADD COLUMN IF NOT EXISTS subject_id uuid REFERENCES class_subjects(id) ON DELETE RESTRICT;
 
--- NOTE: CREATE INDEX CONCURRENTLY cannot run inside a transaction.
--- These indexes on existing tables (recurring_schedules, class_instances) should be
--- created CONCURRENTLY when running against a populated database.
--- Use the manual migration 4-class_categories_and_subjects.sql for production deployments.
+-- ============================================================
+-- DEPLOY SAFETY: These CREATE INDEX statements will lock recurring_schedules
+-- and class_instances for writes during index build. For production deployments
+-- with existing data, run these indexes manually BEFORE applying this migration:
+--   CREATE INDEX CONCURRENTLY recurring_schedules_subject_id_idx ON recurring_schedules (subject_id);
+--   CREATE INDEX CONCURRENTLY class_instances_subject_id_idx ON class_instances (subject_id);
+-- Then change the statements below to IF NOT EXISTS (they will be no-ops since indexes already exist).
+-- ============================================================
 CREATE INDEX IF NOT EXISTS recurring_schedules_subject_id_idx ON recurring_schedules (subject_id);
 
 ALTER TABLE class_instances

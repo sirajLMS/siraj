@@ -1,15 +1,6 @@
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { ScheduleDeletionService } from "@/backend/services/schedule/schedule-deletion.service";
-import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
-
-async function requireAuth(ctx: BaseContext): Promise<string> {
-  if (!ctx.user?.id) {
-    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-    throw new Error(tFunc("unauthorized"));
-  }
-  return ctx.user.id;
-}
+import { requireAuth } from "../utils/requireAuth";
 
 gqlSchemaBuilder.mutationField("deleteRecurringClass", t =>
   t.field({

@@ -1,3 +1,4 @@
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository, StaffProfileRepository, UserRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -25,8 +26,6 @@ export interface ManagerOnboardingResult {
 }
 
 export namespace ManagerOnboardingService {
-  type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
   export async function createManager(
     actorUserId: string,
     input: ManagerOnboardingInput,

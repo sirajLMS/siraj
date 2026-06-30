@@ -47,23 +47,42 @@ export namespace PermissionManagementRepository {
   export async function listAllGroups(tx?: DBTransaction): Promise<GroupWithPermissionIds[]> {
     try {
       const client = tx ?? db;
-      const allGroups = await client.select().from(permissionGroups);
-      const gpList = await client.select().from(groupPermissions);
+      const rows = await client
+        .select({
+          id: permissionGroups.id,
+          name: permissionGroups.name,
+          slug: permissionGroups.slug,
+          description: permissionGroups.description,
+          isSystem: permissionGroups.isSystem,
+          createdByUserId: permissionGroups.createdByUserId,
+          createdAt: permissionGroups.createdAt,
+          updatedAt: permissionGroups.updatedAt,
+          permissionId: groupPermissions.permissionId,
+        })
+        .from(permissionGroups)
+        .leftJoin(groupPermissions, eq(groupPermissions.groupId, permissionGroups.id))
+        .orderBy(permissionGroups.name);
 
-      return allGroups.map(group => {
-        const pIds = gpList.filter(gp => gp.groupId === group.id).map(gp => gp.permissionId);
-        return {
-          id: group.id,
-          name: group.name,
-          slug: group.slug,
-          description: group.description,
-          isSystem: group.isSystem,
-          createdByUserId: group.createdByUserId,
-          createdAt: group.createdAt,
-          updatedAt: group.updatedAt,
-          permissionIds: pIds,
-        };
-      });
+      const groupMap = new Map<string, GroupWithPermissionIds>();
+      for (const row of rows) {
+        if (!groupMap.has(row.id)) {
+          groupMap.set(row.id, {
+            id: row.id,
+            name: row.name,
+            slug: row.slug,
+            description: row.description,
+            isSystem: row.isSystem,
+            createdByUserId: row.createdByUserId,
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt,
+            permissionIds: [],
+          });
+        }
+        if (row.permissionId) {
+          groupMap.get(row.id)?.permissionIds.push(row.permissionId);
+        }
+      }
+      return [...groupMap.values()];
     } catch (error) {
       logger.error("Error listing all permission groups:", error);
       throw error;
@@ -388,6 +407,37 @@ export namespace PermissionManagementRepository {
       }
     } catch (error) {
       logger.error(`Error setting overrides for user ${userId}:`, error);
+      throw error;
+    }
+  }
+
+  export async function listAllGroupUsers(tx?: DBTransaction): Promise<Map<string, GroupUserEntity[]>> {
+    try {
+      const client = tx ?? db;
+      const rows = await client
+        .select({
+          groupId: userPermissionGroups.groupId,
+          userId: users.id,
+          userName: users.name,
+          userEmail: users.email,
+        })
+        .from(userPermissionGroups)
+        .innerJoin(users, eq(users.id, userPermissionGroups.userId));
+
+      const map = new Map<string, GroupUserEntity[]>();
+      for (const row of rows) {
+        if (!map.has(row.groupId)) {
+          map.set(row.groupId, []);
+        }
+        map.get(row.groupId)?.push({
+          id: row.userId,
+          name: row.userName,
+          email: row.userEmail,
+        });
+      }
+      return map;
+    } catch (error) {
+      logger.error("Error listing all group users:", error);
       throw error;
     }
   }

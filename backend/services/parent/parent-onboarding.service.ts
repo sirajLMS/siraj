@@ -1,3 +1,4 @@
+import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository, PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
@@ -36,8 +37,6 @@ export interface ParentOnboardingResult {
 }
 
 export namespace ParentOnboardingService {
-  type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
   export async function createParent(
     actorUserId: string,
     input: ParentOnboardingInput,

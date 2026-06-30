@@ -86,8 +86,17 @@ export namespace UserRepository {
   /**
    * @deprecated Use `findUsersPaginated` instead. This method lacks pagination and returns all rows.
    */
-  export const findAll = async (): Promise<UserEntity[]> => {
-    return await db.select().from(users).limit(500);
+  export const findAll = async (): Promise<Pick<UserEntity, "id" | "name" | "email" | "isActive" | "createdAt">[]> => {
+    return await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        isActive: users.isActive,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .limit(500);
   };
 
   export const findUsers = async (opts: { limit: number; offset: number }): Promise<UserEntity[]> => {

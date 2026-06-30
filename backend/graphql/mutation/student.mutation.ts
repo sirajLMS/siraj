@@ -4,21 +4,13 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import type * as Types from "@/backend/types";
 import { StudentUtils } from "@/backend/utils";
 import { AppPermission } from "@/shared/lib/enum";
-import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import {
   PartialStudentUpdateInputPothosObject,
   // StudentCreateInputPothosObject,
   StudentPothosObject,
 } from "../pothos";
-
-async function requireAuth(ctx: BaseContext): Promise<string> {
-  if (!ctx.user?.id) {
-    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-    throw new Error(tFunc("unauthorized"));
-  }
-  return ctx.user.id;
-}
+import { requireAuth } from "../utils/requireAuth";
 
 async function requireStudentManageStatus(userId: string, locale?: string): Promise<void> {
   const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.STUDENT_MANAGE_STATUS);
@@ -44,7 +36,13 @@ gqlSchemaBuilder.mutationFields(t => ({
       const input = Object.fromEntries(
         Object.entries(args.input).filter(([, value]) => value !== null)
       ) as Types.PartialStudentUpdateInput;
-      return await StudentRepository.partiallyUpdate(input).then(s => StudentUtils.mapEntityToDto(s));
+      const { status, ...restInput } = input;
+      if (status) {
+        await StudentRepository.changeStatus(input.id, status, undefined, undefined, ctx.locale);
+      }
+      return await StudentRepository.partiallyUpdate(restInput as Types.PartialStudentUpdateInput).then(s =>
+        StudentUtils.mapEntityToDto(s)
+      );
     },
   }),
 

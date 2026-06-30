@@ -1,20 +1,11 @@
-import { getBackendTranslations } from "@/backend/lib/intl";
 import { ParentDirectoryService } from "@/backend/services/parent/parent-directory.service";
 import { PaginationArgs } from "@/backend/types";
 import type { ParentStatus } from "@/shared/lib/enum";
-import type { BaseContext } from "../gqlContext";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { ParentStatusPothosEnum } from "../pothos/enum.pothos";
 import { PaginationArgsObject } from "../pothos/pagination.objects";
 import { ParentDirectoryPothosObject } from "../pothos/parent-directory.pothos";
-
-async function requireAuth(ctx: BaseContext): Promise<string> {
-  if (!ctx.user?.id) {
-    const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
-    throw new Error(tFunc("unauthorized"));
-  }
-  return ctx.user.id;
-}
+import { requireAuth } from "../utils/requireAuth";
 
 gqlSchemaBuilder.queryField("parentDirectory", t =>
   t.field({

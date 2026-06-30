@@ -101,8 +101,8 @@ async function cleanupRaceTestData(data: {
 }) {
   // 1. Soft delete class instances first (set deleted_at), then hard delete
   //    This is required because of the soft_delete_row_trigger_fn trigger
-  await db.execute(sql.raw(`UPDATE class_instances SET deleted_at = NOW() WHERE student_id = '${data.studentId}'`));
-  await db.execute(sql.raw(`DELETE FROM class_instances WHERE student_id = '${data.studentId}'`));
+  await db.execute(sql`UPDATE class_instances SET deleted_at = NOW() WHERE student_id = ${data.studentId}`);
+  await db.execute(sql`DELETE FROM class_instances WHERE student_id = ${data.studentId}`);
 
   // 2. Delete teacher assignments
   await db.delete(teacherAssignments).where(eq(teacherAssignments.studentId, data.studentId));
