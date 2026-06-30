@@ -1,9 +1,6 @@
 ---
 name: review-uncommitted
-description: >
-  Reviews uncommitted changes (staged, unstaged, untracked) for security vulnerabilities,
-  performance bugs, business logic errors, deploy safety risks, duplication with drift risk,
-  and dead code. Use when asked to review uncommitted changes, pending diff, or pre-commit review.
+description: Reviews uncommitted changes (staged, unstaged, untracked) for security vulnerabilities, performance bugs, business logic errors, deploy safety risks, duplication with drift risk, and dead code.
 tools:
   - shell(git)
   - shell(rg)
