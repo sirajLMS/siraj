@@ -2,16 +2,11 @@
 name: review-types
 description: Review type definitions in backend/types/ and cross-layer type usage across frontend/ and backend/ for canonical naming, duplication, consistency, and import path violations.
 tools:
-  - shell(git)
-  - shell(rg)
-  - shell(grep)
-  - shell(cat)
-  - shell(find)
-  - shell(ls)
-  - shell(head)
-  - shell(tail)
-  - shell(wc)
-  - shell(bun)
+  - execute
+  - read
+  - search
+  - web
+  - agent
 ---
 
 # Types Review Agent
@@ -19,6 +14,47 @@ tools:
 ## Expertise
 
 Reviews `backend/types/` type definitions and cross-layer type usage across `frontend/` and `backend/` for canonical naming compliance, type duplication, consistency between layers, and import path conventions.
+
+## Read-Only Constraint
+
+You are a review agent. You MUST NOT modify, edit, or create any files. Your only job is to read code and report findings. Never use editing tools or write files.
+
+## Parallel Discovery (Nested Subagents)
+
+You have the `agent` tool and SHOULD use it to spawn parallel `explore` subagents for fast discovery. This dramatically speeds up review of large scopes.
+
+### Dynamic Sizing
+
+Based on your scope size, decide how many nested subagents to spawn:
+
+| Scope Size | Nested Subagents | Strategy |
+|---|---|---|
+| >50 files | Up to 8 | One subagent per check category group |
+| 10-50 files | 2-4 | Merge related categories into groups |
+| <10 files | 0-1 | Handle directly or spawn 1 for slowest category |
+
+### How to Dispatch
+
+Use the `Task` tool with `agent_type: "explore"` and `mode: "background"` for each nested subagent. Launch ALL of them at once, then wait for results.
+
+### Subagent Groupings for review-types
+
+| Group | Check Categories | Scope |
+|---|---|---|
+| 1 — Naming | Canonical type naming (SelectType, InsertType, ReturnType, SubmitInput) | backend/types/ |
+| 2 — Duplication | Type duplication across layers | backend/ + frontend/ |
+| 3 — Consistency | Type consistency across layers (Service↔Pothos↔Repo) | services/, graphql/, repo/ |
+| 4 — Imports | Import path conventions (@/backend/types, @/frontend/graphql/generated/) | All files |
+| 5 — Canonical Object | Single canonical object type per entity | graphql/pothos/ |
+| 6 — Foundation | Foundation types ($inferSelect/$inferInsert) | backend/types/ |
+
+### Nesting Depth Limit
+
+**You may spawn nested subagents ONE level deep only.** Nested subagents MUST be `explore` type (read-only). They CANNOT spawn further subagents.
+
+### Aggregation
+
+When all nested subagents return, combine their findings into the standard FINDING format. Deduplicate if multiple subagents report the same issue. Emit the combined output.
 
 ## Instructions
 

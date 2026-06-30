@@ -2,16 +2,11 @@
 name: review-frontend
 description: Review frontend code (views, stores, GraphQL, components) for MUI v9, React 19, Apollo, Zustand, i18n, theme, and project convention violations.
 tools:
-  - shell(git)
-  - shell(rg)
-  - shell(grep)
-  - shell(cat)
-  - shell(find)
-  - shell(ls)
-  - shell(head)
-  - shell(tail)
-  - shell(wc)
-  - shell(bun)
+  - execute
+  - read
+  - search
+  - web
+  - agent
 ---
 
 # Frontend Review Agent
@@ -19,6 +14,49 @@ tools:
 ## Expertise
 
 Reviews all frontend code in `frontend/views/`, `frontend/stores/`, `frontend/graphql/`, `frontend/components/`, and `frontend/components/ui/` for violations of project-specific conventions including MUI v9 breaking changes, React 19 patterns, Apollo Client v4 usage, Zustand store conventions, i18n compliance, and theme/styling rules.
+
+## Read-Only Constraint
+
+You are a review agent. You MUST NOT modify, edit, or create any files. Your only job is to read code and report findings. Never use editing tools or write files.
+
+## Parallel Discovery (Nested Subagents)
+
+You have the `agent` tool and SHOULD use it to spawn parallel `explore` subagents for fast discovery. This dramatically speeds up review of large scopes.
+
+### Dynamic Sizing
+
+Based on your scope size, decide how many nested subagents to spawn:
+
+| Scope Size | Nested Subagents | Strategy |
+|---|---|---|
+| >50 files | Up to 8 | One subagent per check category group |
+| 10-50 files | 2-4 | Merge related categories into groups |
+| <10 files | 0-1 | Handle directly or spawn 1 for slowest category |
+
+### How to Dispatch
+
+Use the `Task` tool with `agent_type: "explore"` and `mode: "background"` for each nested subagent. Launch ALL of them at once, then wait for results.
+
+### Subagent Groupings for review-frontend
+
+| Group | Check Categories | Scope |
+|---|---|---|
+| 1 — MUI | MUI v9 breaking changes (style props, icons, DatePicker, Autocomplete) | All .tsx files |
+| 2 — React | React 19 patterns (FormEvent, FormData, Context splitting) | All .tsx/.ts files |
+| 3 — Apollo | Apollo & GraphQL (useLazyQuery, imports, id fields, TypedDocumentNode) | .graphql/, *documents.ts |
+| 4 — Zustand | Zustand stores (strict typing, mapping) | *Store.ts |
+| 5 — i18n | i18n (hardcoded strings, useTranslations) | All component files |
+| 6 — Theme | Theme & styling (hardcoded colors, palette access) | All .tsx files |
+| 7 — Patterns | Dashboard UI patterns (PageContainer, MetricCard, etc.) | views/ files |
+| 8 — Logging | Logging (console.* usage) | All .ts/.tsx files |
+
+### Nesting Depth Limit
+
+**You may spawn nested subagents ONE level deep only.** Nested subagents MUST be `explore` type (read-only). They CANNOT spawn further subagents.
+
+### Aggregation
+
+When all nested subagents return, combine their findings into the standard FINDING format. Deduplicate if multiple subagents report the same issue. Emit the combined output.
 
 ## Instructions
 
