@@ -17,7 +17,7 @@ class RateLimiter {
   private readonly windowMs: number;
   private readonly _failOpen: boolean;
 
-  constructor(prefix: string, maxRequests: number, windowMs: number, failOpen = true) {
+  constructor(prefix: string, maxRequests: number, windowMs: number, failOpen = false) {
     this.prefix = prefix;
     this.maxRequests = maxRequests;
     this.windowMs = windowMs;
@@ -79,15 +79,17 @@ class RateLimiter {
 
   /**
    * Get current request count for a key
+   * Uses ZCARD to count members in the sorted set
    */
   private async getCount(key: string): Promise<number> {
     try {
-      const value = await cacheService.get(key);
-      if (!value) return 0;
-
-      // For sorted set implementation, we need to count members
-      // For now, use simple counter
-      return Number.parseInt(value, 10) || 0;
+      const results = await cacheService.pipeline([
+        { command: "zremrangebyscore", args: [key, 0, Date.now() - this.windowMs] },
+        { command: "zcard", args: [key] },
+      ]);
+      // zcard result is the second item in the pipeline results
+      const count = results?.[1];
+      return typeof count === "number" ? count : 0;
     } catch {
       return 0;
     }
@@ -196,6 +198,7 @@ export async function checkRateLimit(
   reset: number;
 }> {
   const isDev = process.env.NODE_ENV === "development";
+  const isProduction = process.env.NODE_ENV === "production";
   const disableRateLimiting = process.env.DISABLE_RATE_LIMITING === "true";
   try {
     const { success, limit, remaining, reset } = await limiter.limitSimple(identifier);
@@ -204,13 +207,13 @@ export async function checkRateLimit(
       return { success, limit, remaining, reset };
     }
 
-    if (isDev && !disableRateLimiting) {
-      logger.warn(`Rate limit would have been exceeded for identifier: ${identifier} (development mode, not enforced)`);
+    if (disableRateLimiting && !isProduction) {
+      logger.warn(`Rate limiting explicitly disabled (DISABLE_RATE_LIMITING=true) for identifier: ${identifier}`);
       return { success: true, limit, remaining, reset };
     }
 
-    if (disableRateLimiting) {
-      logger.warn(`Rate limiting explicitly disabled (DISABLE_RATE_LIMITING=true) for identifier: ${identifier}`);
+    if (isDev && !disableRateLimiting) {
+      logger.warn(`Rate limit would have been exceeded for identifier: ${identifier} (development mode, not enforced)`);
       return { success: true, limit, remaining, reset };
     }
 

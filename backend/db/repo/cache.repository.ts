@@ -41,7 +41,7 @@ export namespace CacheDbRepository {
         expiresAt: entry.expiresAt,
       };
     } catch (error) {
-      logger.error(`Failed to get cache entry for key ${key}:`, error);
+      logger.error("Failed to get cache entry", { error });
       return null;
     }
   };

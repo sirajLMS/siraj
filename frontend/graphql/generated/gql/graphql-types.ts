@@ -17,7 +17,7 @@ export type Scalars = {
   JSON: { input: unknown; output: unknown; }
   /** A type representing a validated phone number */
   PhoneNumber: { input: string; output: string; }
-  /** A map of string keys to string values (Record<string, string>) */
+  /** A map of string keys to string values (Record<string, string>). Limits: max 100 entries, keys up to 64 chars, values up to 1024 chars. */
   StringMap: { input: Record<string, string>; output: Record<string, string>; }
 };
 
@@ -586,7 +586,7 @@ export type ComplaintSubmitInput = {
   body: Scalars['String']['input'];
   category: ComplaintCategory;
   files: InputMaybe<Array<ComplaintFileMetadataInput>>;
-  studentId: InputMaybe<Scalars['String']['input']>;
+  studentId: Scalars['String']['input'];
   submitterEmail: Scalars['String']['input'];
 };
 
@@ -2619,6 +2619,12 @@ export type QueryUserOverridesArgs = {
 
 export type QueryUserPermissionGroupsArgs = {
   userId: Scalars['String']['input'];
+};
+
+
+export type QueryUsersArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type ReassignStudentTeacherResult = {

@@ -7,6 +7,7 @@ import type {
 } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { requireAuth } from "../utils/requireAuth";
 import { InvoiceStatusPothosObject, InvoiceTypePothosObject, StudentStatusPothosObject } from "./enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
@@ -107,12 +108,14 @@ BillingMonthInputRef.implement({
 gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
   t.field({
     type: ParentInvoiceHistoryResultPothosObject,
+    authScopes: { loggedIn: true },
     args: {
       parentId: t.arg.string({ required: false }),
       userId: t.arg.string({ required: false }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
       let pagination: PaginationArgs | null = null;
       if (args.paginationArgs) {
         pagination = new PaginationArgs({
@@ -127,7 +130,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
       }
 
       return BillingHistoryService.getParentInvoiceHistory(
-        ctx.user?.id || "",
+        userId,
         args.parentId ?? null,
         args.userId ?? null,
         pagination,
@@ -140,10 +143,12 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
 gqlSchemaBuilder.queryField("adminInvoices", t =>
   t.field({
     type: AdminInvoiceHistoryResultPothosObject,
+    authScopes: { superAdmin: true },
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
       let pagination: PaginationArgs | null = null;
       if (args.paginationArgs) {
         pagination = new PaginationArgs({
@@ -157,7 +162,7 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
         });
       }
 
-      return BillingHistoryService.getAdminInvoices(ctx.user?.id || "", pagination, ctx.locale);
+      return BillingHistoryService.getAdminInvoices(userId, pagination, ctx.locale);
     },
   })
 );
@@ -165,8 +170,10 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
 gqlSchemaBuilder.queryField("adminBillingSummary", t =>
   t.field({
     type: AdminBillingSummaryPothosObject,
+    authScopes: { superAdmin: true },
     resolve: async (_root, _args, ctx) => {
-      return BillingHistoryService.getAdminBillingSummary(ctx.user?.id || "", ctx.locale);
+      const userId = await requireAuth(ctx);
+      return BillingHistoryService.getAdminBillingSummary(userId, ctx.locale);
     },
   })
 );
@@ -174,8 +181,10 @@ gqlSchemaBuilder.queryField("adminBillingSummary", t =>
 gqlSchemaBuilder.queryField("studentCreditStatus", t =>
   t.field({
     type: [StudentCreditRowPothosObject],
+    authScopes: { loggedIn: true },
     resolve: async (_root, _args, ctx) => {
-      return BillingHistoryService.getStudentCreditStatus(ctx.user?.id || "", ctx.locale);
+      const userId = await requireAuth(ctx);
+      return BillingHistoryService.getStudentCreditStatus(userId, ctx.locale);
     },
   })
 );
@@ -183,13 +192,15 @@ gqlSchemaBuilder.queryField("studentCreditStatus", t =>
 gqlSchemaBuilder.queryField("parentBillingSummary", t =>
   t.field({
     type: ParentBillingSummaryPothosObject,
+    authScopes: { loggedIn: true },
     args: {
       parentId: t.arg.string({ required: false }),
       userId: t.arg.string({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
+      const callerUserId = await requireAuth(ctx);
       return BillingHistoryService.getParentBillingSummary(
-        ctx.user?.id || "",
+        callerUserId,
         args.parentId ?? null,
         args.userId ?? null,
         ctx.locale

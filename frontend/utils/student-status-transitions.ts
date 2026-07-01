@@ -1,3 +1,5 @@
+// NOTE: This frontend utility imports directly from backend types.
+// Consider creating a shared frontend-friendly types layer to avoid cross-layer coupling.
 import { ALLOWED_STATUS_TRANSITIONS } from "@/backend/types/student-lifecycle.types";
 import { StudentStatus } from "@/shared/lib/enum";
 

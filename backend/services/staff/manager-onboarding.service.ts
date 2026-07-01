@@ -90,8 +90,6 @@ export namespace ManagerOnboardingService {
       logger.info("Manager onboarded successfully", {
         staffProfileId: staffProfile.id,
         userId: user.id,
-        name: user.name,
-        email: user.email,
         accountType: input.accountType,
         assignedGroup: targetGroupSlug,
       });

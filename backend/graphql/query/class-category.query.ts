@@ -20,7 +20,7 @@ gqlSchemaBuilder.queryField("classSubjects", t =>
   t.field({
     type: [ClassSubjectPothosObject],
     args: {
-      categoryId: t.arg.string({ required: false }),
+      categoryId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {

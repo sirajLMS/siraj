@@ -69,7 +69,7 @@ declare global {
 
       // Admin Configuration
       ADMIN_EMAIL: string;
-      ADMIN_PASSWORD?: string;
+      ADMIN_PASSWORD: string;
 
       // Serverless Platform Detection
       VERCEL?: string;

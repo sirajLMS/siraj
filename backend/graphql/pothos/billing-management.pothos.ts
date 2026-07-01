@@ -4,6 +4,7 @@ import {
 } from "@/backend/services/billing/billing-management.service";
 import type { InvoiceStatus, InvoiceType } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { requireAuth } from "../utils/requireAuth";
 import { BillingMonthInputRef } from "./billing-history.pothos";
 import { InvoiceStatusPothosObject, InvoiceTypePothosObject } from "./enum.pothos";
 
@@ -92,6 +93,7 @@ export const DeleteInvoiceResultPothosObject = DeleteInvoiceResultRef.implement(
 gqlSchemaBuilder.mutationField("createManualInvoice", t =>
   t.field({
     type: ManualInvoiceResultRef,
+    authScopes: { superAdmin: true },
     args: {
       parentId: t.arg.string({ required: true }),
       studentId: t.arg.string({ required: false }),
@@ -106,8 +108,9 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
       sendEmail: t.arg.boolean({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
       return BillingManagementService.createManualInvoice(
-        ctx.user?.id || "",
+        userId,
         {
           parentId: args.parentId,
           studentId: args.studentId ?? null,
@@ -130,13 +133,15 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
 gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
   t.field({
     type: MarkInvoicePaidResultRef,
+    authScopes: { superAdmin: true },
     args: {
       invoiceId: t.arg.string({ required: true }),
       expectedVersion: t.arg.int({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
       const result = await BillingManagementService.markInvoicePaid(
-        ctx.user?.id || "",
+        userId,
         args.invoiceId,
         args.expectedVersion ?? undefined,
         ctx.locale
@@ -156,11 +161,13 @@ gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
 gqlSchemaBuilder.mutationField("deleteInvoice", t =>
   t.field({
     type: DeleteInvoiceResultRef,
+    authScopes: { superAdmin: true },
     args: {
       invoiceId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const result = await BillingManagementService.deleteInvoice(ctx.user?.id || "", args.invoiceId, ctx.locale);
+      const userId = await requireAuth(ctx);
+      const result = await BillingManagementService.deleteInvoice(userId, args.invoiceId, ctx.locale);
       return {
         id: result.invoice.id,
         parentId: result.invoice.parentId,
@@ -183,11 +190,13 @@ export const SendPaymentReminderResultPothosObject = SendPaymentReminderResultRe
 gqlSchemaBuilder.mutationField("sendPaymentReminder", t =>
   t.field({
     type: SendPaymentReminderResultRef,
+    authScopes: { superAdmin: true },
     args: {
       studentId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      return BillingManagementService.sendPaymentReminder(ctx.user?.id || "", args.studentId, ctx.locale);
+      const userId = await requireAuth(ctx);
+      return BillingManagementService.sendPaymentReminder(userId, args.studentId, ctx.locale);
     },
   })
 );

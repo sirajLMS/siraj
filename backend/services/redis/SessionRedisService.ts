@@ -62,7 +62,7 @@ export class SessionRedisService {
       }
     }
 
-    logger.debug(`Session ${sessionId} stored in Redis for user ${data.userId}`);
+    logger.debug("Session stored in Redis", { userId: data.userId });
   }
 
   /**
@@ -258,14 +258,15 @@ export class SessionRedisService {
       return;
     }
 
-    // Get all sessions with their creation times
-    const sessionsWithTime: Array<{ id: string; createdAt: Date }> = [];
+    // Get all sessions with their creation times (batched for performance)
+    const sessionResults = await Promise.all(sessionIds.map(sessionId => this.getSession(sessionId)));
 
-    for (const sessionId of sessionIds) {
-      const session = await this.getSession(sessionId);
+    const sessionsWithTime: Array<{ id: string; createdAt: Date }> = [];
+    for (let i = 0; i < sessionIds.length; i++) {
+      const session = sessionResults[i];
       if (session) {
         sessionsWithTime.push({
-          id: sessionId,
+          id: sessionIds[i],
           createdAt: new Date(session.createdAt),
         });
       }

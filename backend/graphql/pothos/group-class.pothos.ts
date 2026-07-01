@@ -95,6 +95,7 @@ export const GroupClassAuditPothosObject = GroupClassAuditRef.implement({
 gqlSchemaBuilder.queryField("groupClassAudit", t =>
   t.field({
     type: GroupClassAuditRef,
+    authScopes: { superAdmin: true },
     args: {
       classInstanceId: t.arg.string({ required: true }),
     },
@@ -110,6 +111,7 @@ gqlSchemaBuilder.queryField("groupClassAudit", t =>
 gqlSchemaBuilder.mutationField("updateClassAdminNote", t =>
   t.field({
     type: GroupClassAuditRef,
+    authScopes: { superAdmin: true },
     args: {
       classInstanceId: t.arg.string({ required: true }),
       content: t.arg.string({ required: true }),
@@ -126,6 +128,7 @@ gqlSchemaBuilder.mutationField("updateClassAdminNote", t =>
 gqlSchemaBuilder.mutationField("resendClassNotifications", t =>
   t.field({
     type: SupportRequestResultPothosObject,
+    authScopes: { superAdmin: true },
     args: {
       classInstanceId: t.arg.string({ required: true }),
     },

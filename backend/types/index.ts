@@ -1,3 +1,12 @@
+/**
+ * @warning SelectType exports include all database columns — some contain sensitive data
+ * (hashed tokens, banking details, internal keys, etc.). Always use ReturnType variants
+ * for API responses and client-facing code to ensure sensitive fields are omitted.
+ */
+// ⚠️ WARNING: This barrel file re-exports all backend types, including sensitive types
+// (e.g., insert types with password fields, encryption key types). Only import what you
+// need via deep imports (e.g., `import type { ... } from "@/backend/types/auth.types"`)
+// rather than importing from this index file in frontend or public-facing code.
 export * from "./audit.types";
 export * from "./auth.types";
 export * from "./billing.types";

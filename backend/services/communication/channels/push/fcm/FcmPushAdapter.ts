@@ -6,6 +6,7 @@ import { logger } from "@/backend/lib/logger";
 import type { NotificationDeliverySelectType } from "@/backend/types/notificationDeliveries.types";
 import type { UserDeviceTokenSelectType } from "@/backend/types/userDeviceTokens.types";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/shared/lib/enum";
+import { deliveryFailedMessage } from "../../../utils";
 import type { IPushChannel, PushPayload, PushSendResult } from "../IPushChannel";
 import type { FcmPushContext } from "./fcm.types";
 import { FCM_INVALID_TOKEN_ERROR, FCM_TOKEN_EXPIRED_ERROR } from "./fcm.types";
@@ -162,7 +163,7 @@ export class FcmPushAdapter implements IPushChannel {
     const errorCode = tokenResponse.error?.code ?? "unknown";
     const errorMessage = tokenResponse.error?.message ?? "Unknown FCM error";
 
-    errors.push(errorMessage);
+    errors.push(deliveryFailedMessage("push"));
 
     await NotificationRepository.updateDeliveryStatus({
       deliveryId,
@@ -219,7 +220,7 @@ export class FcmPushAdapter implements IPushChannel {
       success: false,
       successCount: 0,
       failureCount: deliveries.length,
-      errors: [errorMessage],
+      errors: [deliveryFailedMessage("push")],
     };
   }
 }

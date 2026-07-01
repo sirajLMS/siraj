@@ -140,7 +140,8 @@ export namespace TeacherBankingRepository {
   export const verifyBankingDetails = async (
     input: Types.VerifyBankingDetailsInput,
     tx?: DBTransaction,
-    locale?: string
+    locale?: string,
+    verifiedByUserId?: string
   ): Promise<Types.TeacherBankingDetailsHistorySelectType> => {
     const runner = async (t: DBTransaction) => {
       const results = await t
@@ -172,7 +173,7 @@ export namespace TeacherBankingRepository {
         .update(teacherBankingDetailsHistory)
         .set({
           verifiedAt: now,
-          verifiedByUserId: input.verifiedByUserId,
+          verifiedByUserId: verifiedByUserId ?? null,
           updatedAt: now,
         })
         .where(eq(teacherBankingDetailsHistory.id, input.bankingDetailsId))

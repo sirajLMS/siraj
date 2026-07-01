@@ -17,6 +17,7 @@ export const BookPothosObject = BookRef.implement({
 gqlSchemaBuilder.queryField("booksAndBags", t =>
   t.field({
     type: [BookPothosObject],
+    authScopes: { loggedIn: true },
     resolve: async (_root, _args, ctx) => {
       if (!ctx.user?.id) {
         throw new Error("unauthenticated");
@@ -33,6 +34,7 @@ gqlSchemaBuilder.queryField("booksAndBags", t =>
 
 gqlSchemaBuilder.mutationField("deleteBook", t =>
   t.boolean({
+    authScopes: { superAdmin: true },
     description: "Soft-deletes a book by marking it as deleted.",
     args: {
       id: t.arg.id({ required: true, description: "The UUID of the book to delete" }),

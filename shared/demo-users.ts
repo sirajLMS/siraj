@@ -1,3 +1,4 @@
+// DEV ONLY: Never use these credentials in production
 import { SystemPermissionGroupSlug } from "./lib/enum";
 
 interface InternalDemoUser {

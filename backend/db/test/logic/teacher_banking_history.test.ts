@@ -188,9 +188,10 @@ describe("Teacher Banking Details Versioning & History", () => {
       await TeacherBankingRepository.verifyBankingDetails(
         {
           bankingDetailsId: banking.id,
-          verifiedByUserId: admin.id,
         },
-        tx
+        tx,
+        undefined,
+        admin.id
       );
 
       // Attempt to modify a banking field

@@ -30,10 +30,11 @@ function resolveStatusPaletteKey(
 ): "active" | "pending" | "blocked" | "confirmed" | "completed" | "cancelled" | null {
   switch (category) {
     case "classSession": {
-      const map: Record<string, "active" | "pending" | "blocked"> = {
+      const map: Record<string, "active" | "pending" | "blocked" | "confirmed"> = {
         active: "active",
         upcoming: "pending",
         missed: "blocked",
+        late: "confirmed",
       };
       return map[status] ?? "pending";
     }

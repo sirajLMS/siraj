@@ -2,8 +2,6 @@ import { create } from "zustand";
 import type { DailyScheduleList } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { DashboardFilters, MetricItem, Pagination, TeacherFilterItem } from "@/frontend/types/shared.types";
 
-export type { DashboardFilters, Pagination };
-
 export interface DashboardState {
   readonly filters: DashboardFilters;
   readonly setDateFilter: (date: string) => void;

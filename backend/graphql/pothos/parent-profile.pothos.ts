@@ -119,6 +119,7 @@ export const EditQuotaResultPothosObject = EditQuotaResultRef.implement({
 gqlSchemaBuilder.queryField("parentProfile", t =>
   t.field({
     type: ParentProfileRef,
+    authScopes: { loggedIn: true },
     nullable: true,
     args: {
       parentId: t.arg.string({ required: true }),
@@ -132,6 +133,7 @@ gqlSchemaBuilder.queryField("parentProfile", t =>
 gqlSchemaBuilder.queryField("parentAssociatedStudents", t =>
   t.field({
     type: [AssociatedStudentRef],
+    authScopes: { loggedIn: true },
     args: {
       parentId: t.arg.string({ required: true }),
     },
@@ -144,6 +146,7 @@ gqlSchemaBuilder.queryField("parentAssociatedStudents", t =>
 gqlSchemaBuilder.queryField("studentById", t =>
   t.field({
     type: AssociatedStudentRef,
+    authScopes: { loggedIn: true },
     nullable: true,
     args: {
       studentId: t.arg.string({ required: true }),
@@ -162,6 +165,7 @@ gqlSchemaBuilder.queryField("studentById", t =>
 gqlSchemaBuilder.mutationField("deactivateParent", t =>
   t.field({
     type: DeactivateParentResultRef,
+    authScopes: { superAdmin: true },
     args: {
       parentId: t.arg.string({ required: true }),
     },
@@ -174,6 +178,7 @@ gqlSchemaBuilder.mutationField("deactivateParent", t =>
 gqlSchemaBuilder.mutationField("updateStudentQuota", t =>
   t.field({
     type: EditQuotaResultRef,
+    authScopes: { superAdmin: true },
     args: {
       studentId: t.arg.string({ required: true }),
       newClassesRemaining: t.arg.int({ required: true }),

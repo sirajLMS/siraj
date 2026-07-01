@@ -5,7 +5,7 @@
       "args": [
         "x",
         "-y",
-        "next-devtools-mcp@latest"
+        "next-devtools-mcp@0.4.0"
       ]
     },
     "mui-mcp": {
@@ -14,7 +14,7 @@
       "args": [
         "x",
         "-y",
-        "@mui/mcp@latest"
+        "@mui/mcp@0.2.0"
       ]
     }
   }

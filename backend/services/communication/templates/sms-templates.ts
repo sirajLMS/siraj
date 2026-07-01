@@ -1,5 +1,9 @@
 import { getBackendTranslations } from "@/backend/lib/intl";
 
+function sanitizeSms(text: string): string {
+  return text.replace(/[\r\n\t]/g, " ").trim();
+}
+
 type GenericTranslationFn = (key: string, values?: Record<string, unknown>) => string;
 
 interface UrgentComplaintResponseSmsData {
@@ -18,9 +22,9 @@ export const renderUrgentComplaintResponseSms = async (
   })) as GenericTranslationFn;
 
   const message = t("urgentResponse", {
-    parentName: data.parentName,
-    complaintTitle: data.complaintTitle,
-    responseSummary: data.responseSummary,
+    parentName: sanitizeSms(data.parentName),
+    complaintTitle: sanitizeSms(data.complaintTitle),
+    responseSummary: sanitizeSms(data.responseSummary),
   });
 
   return message;
@@ -36,8 +40,8 @@ export const renderSuggestionAcknowledgedSms = async (
   })) as GenericTranslationFn;
 
   const message = t("acknowledged", {
-    parentName: data.parentName,
-    suggestionTitle: data.suggestionTitle,
+    parentName: sanitizeSms(data.parentName),
+    suggestionTitle: sanitizeSms(data.suggestionTitle),
   });
 
   return message;

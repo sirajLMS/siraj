@@ -18,6 +18,7 @@ import {
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import type * as StorageTypes from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
 
 export namespace StorageDbRepository {
   // File operations
@@ -93,7 +94,7 @@ export namespace StorageDbRepository {
       return await db
         .select()
         .from(storageDirectories)
-        .where(sql`${storageDirectories.path} LIKE ${parentPath + "/%"}`);
+        .where(sql`${storageDirectories.path} LIKE ${escapeLikeWildcards(parentPath) + "/%"}`);
     }
     return await db.select().from(storageDirectories).limit(500);
   };
@@ -311,7 +312,7 @@ export namespace StorageDbRepository {
     r: { id: string; usageType: string; createdAt: Date },
     filePath: string,
     referenceId: string,
-    referenceTable: string
+    referenceTable: StorageTypes.ValidReferenceTable
   ): StorageTypes.FileUsageInfo {
     return {
       id: r.id,

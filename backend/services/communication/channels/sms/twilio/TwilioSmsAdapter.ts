@@ -2,6 +2,7 @@ import twilio from "twilio";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
 import { logger } from "@/backend/lib/logger";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/shared/lib/enum";
+import { deliveryFailedMessage } from "../../../utils";
 import type { ISmsChannel, SmsPayload, SmsSendResult } from "../ISmsChannel";
 import type { TwilioRateLimitConfig, TwilioSmsContext } from "./twilio.types";
 
@@ -114,7 +115,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
 
       return {
         success: false,
-        error: errorMessage,
+        error: deliveryFailedMessage("sms"),
       };
     }
   }
@@ -141,7 +142,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
     return {
       success: false,
       providerMessageId: message.sid,
-      error: failureReason,
+      error: deliveryFailedMessage("sms"),
     };
   }
 

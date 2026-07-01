@@ -5,6 +5,7 @@ import { generateAccessToken, generateRefreshToken, verifyToken } from "@/backen
 import { comparePassword } from "@/backend/lib/auth/password";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
+import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
 import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
 import type { SafeUser, SessionEntity, UserEntity } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
@@ -22,7 +23,7 @@ function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: strin
 
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "strict" as const,
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
@@ -66,9 +67,11 @@ async function resolveUserFromRefreshToken(
 }
 
 async function validateRefreshTokenJti(refreshToken: string | undefined, session: SessionEntity): Promise<boolean> {
-  if (!refreshToken) return true;
-  const refreshPayload = await verifyToken(refreshToken);
-  if (!refreshPayload?.jti || !session.payload) return true;
+  const refreshPayload = refreshToken ? await verifyToken(refreshToken) : null;
+  // If no refresh token is present and no JTI is stored in session, there's nothing to validate
+  if (!refreshPayload?.jti && !session.payload) return true;
+  // If refresh token is missing but session expects one, or vice versa, reject
+  if (!refreshPayload?.jti || !session.payload) return false;
   try {
     const sessionData = JSON.parse(session.payload);
     if (sessionData.refreshTokenJti && sessionData.refreshTokenJti !== refreshPayload.jti) {
@@ -124,6 +127,14 @@ gqlSchemaBuilder.mutationFields(t => ({
       const { email, password } = args.input;
       const ipAddress = ctx.ipAddress || "unknown";
       const t = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
+
+      // 0. Enforce auth rate limit before any credential checks
+      const rateLimitResult = await checkRateLimit(ipAddress, authRateLimiter);
+      if (!rateLimitResult.success) {
+        throw new GraphQLError(t("auth.tooManyLoginAttempts"), {
+          extensions: { code: "TOO_MANY_ATTEMPTS" },
+        });
+      }
 
       // 1. Check if already locked
       const isLocked = await RateLimitRepository.isLocked(ipAddress, email.value);

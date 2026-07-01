@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { NotificationRepository } from "@/backend/db/repo/notification.repository";
 import { logger } from "@/backend/lib/logger";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/shared/lib/enum";
+import { deliveryFailedMessage } from "../../../utils";
 import type { EmailPayload, EmailSendResult, IEmailChannel } from "../IEmailChannel";
 import type { ResendEmailContext } from "./resend.types";
 
@@ -57,7 +58,7 @@ export class ResendEmailAdapter implements IEmailChannel {
 
         return {
           success: false,
-          error: response.error.message,
+          error: deliveryFailedMessage("email"),
         };
       }
 
@@ -92,7 +93,7 @@ export class ResendEmailAdapter implements IEmailChannel {
 
       return {
         success: false,
-        error: errorMessage,
+        error: deliveryFailedMessage("email"),
       };
     }
   }

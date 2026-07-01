@@ -32,7 +32,8 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value:
               "default-src 'self'; " +
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " +
+              "script-src 'self' " +
+              (process.env.NODE_ENV === "development" ? "'unsafe-eval' 'unsafe-inline' " : "") +
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
               "font-src 'self' https://fonts.gstatic.com; " +
               "img-src 'self' data: blob: https://images.unsplash.com https://flagcdn.com http://localhost http://127.0.0.1 https://localhost https://127.0.0.1; " +
@@ -46,7 +47,9 @@ const nextConfig: NextConfig = {
   images: {
     // Disable image optimization for localhost URLs to avoid 400 errors
     // The Next.js Image Optimization API can't reach localhost:5000 from the server side
-    unoptimized: true,
+    unoptimized: process.env.NODE_ENV === "development",
+    // NOTE: localhost/127.0.0.1 patterns should ONLY be used in development environments.
+    // Remove or restrict these in production to prevent unauthorized image source origins.
     remotePatterns: [
       ...["localhost", "127.0.0.1", "backend"].flatMap(hostname => [
         {

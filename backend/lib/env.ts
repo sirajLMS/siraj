@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import logger from "@/backend/lib/logger";
+import { sanitizeUrlCredentials } from "./utils/url";
 
 /**
  * Environment variable validation
@@ -89,7 +90,8 @@ function validateRedisConfig(): {
 
   if (provider === "local") {
     const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-    logger.log(`Redis provider: local (${redisUrl})`);
+    const sanitizedUrl = sanitizeUrlCredentials(redisUrl);
+    logger.log(`Redis provider: local (${sanitizedUrl})`);
     return { redisProvider: provider, redisUrl };
   }
 
@@ -127,7 +129,7 @@ function logEnvironmentConfig(config: EnvironmentConfig): void {
   logger.log(`  REDIS_PROVIDER: ${config.redisProvider}`);
 
   if (config.redisProvider === "local") {
-    logger.log(`  REDIS_URL: ${config.redisUrl}`);
+    logger.log(`  REDIS_URL: ${sanitizeUrlCredentials(config.redisUrl)}`);
   } else {
     logger.log(`  UPSTASH_REDIS_REST_URL: ${config.upstashRedisUrl ? "[SET]" : "[NOT SET]"}`);
     logger.log(`  UPSTASH_REDIS_REST_TOKEN: ${config.upstashRedisToken ? "[SET]" : "[NOT SET]"}`);
@@ -153,6 +155,33 @@ function validateNodeEnv(): string {
 }
 
 /**
+ * Validate that secret environment variables don't contain placeholder values
+ * (i.e. values with `<` or `>` from .env.example templates that were never replaced)
+ */
+function validateNoPlaceholderSecrets(): void {
+  const secretEnvVars = [
+    "DATABASE_ENCRYPTION_KEY",
+    "JWT_SECRET",
+    "CRON_SECRET",
+    "GRAPHQL_ENCRYPTION_KEY",
+    "ADMIN_PASSWORD",
+  ] as const;
+
+  for (const name of secretEnvVars) {
+    const value = process.env[name];
+    if (!value) continue;
+
+    if (value.includes("<") || value.includes(">")) {
+      const message = `CRITICAL: ${name} contains placeholder value. Replace it with a real secret before deploying.`;
+      if (process.env.NODE_ENV === "production") {
+        throw new Error(message);
+      }
+      logger.warn(message);
+    }
+  }
+}
+
+/**
  * Main validation function
  */
 export function validateEnvironment(): EnvironmentConfig {
@@ -170,6 +199,8 @@ export function validateEnvironment(): EnvironmentConfig {
             redisProvider: "local" as const,
             redisUrl: process.env.REDIS_URL || "redis://localhost:6379",
           };
+
+    validateNoPlaceholderSecrets();
 
     const config: EnvironmentConfig = {
       nodeEnv,

@@ -77,38 +77,38 @@ export const UserOverrideObject = gqlSchemaBuilder.objectRef<UserOverrideReturnT
 
 const CreatePermissionGroupInput = gqlSchemaBuilder.inputType("CreatePermissionGroupInput", {
   fields: t => ({
-    name: t.string({ required: true }),
-    description: t.string({ required: false }),
-    permissionIds: t.stringList({ required: true }),
+    name: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
+    description: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
+    permissionIds: t.stringList({ required: true, directives: { constraint: { maxItems: 100 } } }),
   }),
 });
 
 const UpdatePermissionGroupInput = gqlSchemaBuilder.inputType("UpdatePermissionGroupInput", {
   fields: t => ({
-    groupId: t.string({ required: true }),
-    name: t.string({ required: false }),
-    description: t.string({ required: false }),
-    permissionIds: t.stringList({ required: false }),
+    groupId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+    name: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+    description: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
+    permissionIds: t.stringList({ required: false, directives: { constraint: { maxItems: 100 } } }),
   }),
 });
 
 const AssignPermissionGroupToUserInput = gqlSchemaBuilder.inputType("AssignPermissionGroupToUserInput", {
   fields: t => ({
-    userId: t.string({ required: true }),
-    groupId: t.string({ required: true }),
+    userId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+    groupId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
   }),
 });
 
 const RevokePermissionGroupFromUserInput = gqlSchemaBuilder.inputType("RevokePermissionGroupFromUserInput", {
   fields: t => ({
-    userId: t.string({ required: true }),
-    groupId: t.string({ required: true }),
+    userId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+    groupId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
   }),
 });
 
 const UserOverrideInputRef = gqlSchemaBuilder.inputType("UserOverrideInput", {
   fields: t => ({
-    permissionId: t.string({ required: true }),
+    permissionId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     state: t.field({ type: OverrideStatePothosObject, required: true }),
   }),
 });
@@ -134,13 +134,13 @@ gqlSchemaBuilder.queryFields(t => ({
   permissionGroup: t.field({
     type: PermissionGroupObject,
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
-    args: { id: t.arg.string({ required: true }) },
+    args: { id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "Fetch a single permission group by ID.",
     resolve: async (_root, args, ctx) => PermissionManagementService.getGroup(ctx.user?.id || "", args.id, ctx.locale),
   }),
   userPermissionGroups: t.stringList({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
-    args: { userId: t.arg.string({ required: true }) },
+    args: { userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "Return group IDs assigned to a user.",
     resolve: async (_root, args, ctx) =>
       PermissionManagementService.listGroupsForUser(ctx.user?.id || "", args.userId, ctx.locale),
@@ -148,7 +148,7 @@ gqlSchemaBuilder.queryFields(t => ({
   userOverrides: t.field({
     type: [UserOverrideObject],
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
-    args: { userId: t.arg.string({ required: true }) },
+    args: { userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "List overrides for a user.",
     resolve: async (_root, args, ctx) =>
       PermissionManagementService.listUserOverrides(ctx.user?.id || "", args.userId, ctx.locale).then(overrides =>
@@ -157,7 +157,7 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
   effectiveUserPermissions: t.stringList({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
-    args: { userId: t.arg.string({ required: true }) },
+    args: { userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "Return effective permissions for a user, combining groups and overrides.",
     resolve: async (_root, args, ctx) =>
       PermissionManagementService.getEffectiveUserPermissions(ctx.user?.id || "", args.userId, ctx.locale),
@@ -200,7 +200,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   }),
   deletePermissionGroup: t.boolean({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
-    args: { groupId: t.arg.string({ required: true }) },
+    args: { groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     resolve: async (_root, args, ctx) => {
       await PermissionManagementService.deleteGroup(ctx.user?.id || "", args.groupId, ctx.locale);
       return true;
@@ -235,8 +235,8 @@ gqlSchemaBuilder.mutationFields(t => ({
   bulkAssignUsersToGroup: t.boolean({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN },
     args: {
-      groupId: t.arg.string({ required: true }),
-      userIds: t.arg.stringList({ required: true }),
+      groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      userIds: t.arg.stringList({ required: true, directives: { constraint: { maxItems: 100 } } }),
     },
     resolve: async (_root, args, ctx) => {
       clearGroupUsersCache();
@@ -251,8 +251,8 @@ gqlSchemaBuilder.mutationFields(t => ({
   bulkRevokeUsersFromGroup: t.boolean({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN },
     args: {
-      groupId: t.arg.string({ required: true }),
-      userIds: t.arg.stringList({ required: true }),
+      groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      userIds: t.arg.stringList({ required: true, directives: { constraint: { maxItems: 100 } } }),
     },
     resolve: async (_root, args, ctx) => {
       clearGroupUsersCache();
@@ -267,7 +267,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   updateUserOverrides: t.boolean({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE },
     args: {
-      userId: t.arg.string({ required: true }),
+      userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       overrides: t.arg({ type: [UserOverrideInputRef], required: true }),
     },
     resolve: async (_root, args, ctx) => {

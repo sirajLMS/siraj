@@ -2,6 +2,8 @@ import "./query";
 import "./mutation";
 import "./pothos/schema.types";
 
+import { extendSchema, parse } from "graphql";
+import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 import { DateResolver, DateTimeResolver } from "graphql-scalars";
 import { gqlSchemaBuilder } from "./gqlSchemaBuilder";
 import { EmailScalar } from "./scalars/emailScalar";
@@ -20,4 +22,11 @@ gqlSchemaBuilder.mutationType({});
 
 gqlSchemaBuilder.queryType({});
 
-export const graphQLSchema = gqlSchemaBuilder.toSchema();
+const baseSchema = gqlSchemaBuilder.toSchema();
+
+// Register the @constraint directive definition in the schema so that
+// the Apollo 4 validation plugin can recognize and enforce it at query time.
+// We use extendSchema (not constraintDirective() transformer) to avoid
+// replacing all scalar types with wrapping validators, which can break
+// custom scalars and complex input types.
+export const graphQLSchema = extendSchema(baseSchema, parse(constraintDirectiveTypeDefs));

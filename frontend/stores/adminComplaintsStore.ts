@@ -1,20 +1,18 @@
 import { create } from "zustand";
 import { ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 
-export type ComplaintTab = ComplaintStatus;
-
 const DEFAULT_PAGE_SIZE = 10;
 
 interface AdminComplaintsState {
   readonly searchQuery: string;
-  readonly activeTab: ComplaintTab;
+  readonly activeTab: ComplaintStatus;
   readonly draftResponses: Readonly<Record<string, string>>;
   readonly respondingToId: string;
   readonly isResponding: boolean;
   readonly page: number;
   readonly pageSize: number;
   setSearchQuery: (query: string) => void;
-  setActiveTab: (tab: ComplaintTab) => void;
+  setActiveTab: (tab: ComplaintStatus) => void;
   setDraftResponse: (id: string, text: string) => void;
   clearDraftResponse: (id: string) => void;
   setRespondingToId: (id: string) => void;

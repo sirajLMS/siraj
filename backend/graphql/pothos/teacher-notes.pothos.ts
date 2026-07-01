@@ -31,8 +31,8 @@ export const SupportContactPothosObject = SupportContactRef.implement({
 
 export const CreateTeacherNoteInputPothos = gqlSchemaBuilder.inputType("CreateTeacherNoteInput", {
   fields: t => ({
-    title: t.string({ required: true }),
-    body: t.string({ required: false }),
+    title: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
+    body: t.string({ required: false, directives: { constraint: { maxLength: 10000 } } }),
     isPublished: t.boolean({ required: false }),
     priority: t.int({ required: false }),
     startsAt: t.field({ type: "DateTime", required: false }),
@@ -42,8 +42,8 @@ export const CreateTeacherNoteInputPothos = gqlSchemaBuilder.inputType("CreateTe
 
 export const UpdateTeacherNoteInputPothos = gqlSchemaBuilder.inputType("UpdateTeacherNoteInput", {
   fields: t => ({
-    title: t.string({ required: false }),
-    body: t.string({ required: false }),
+    title: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+    body: t.string({ required: false, directives: { constraint: { maxLength: 10000 } } }),
     isPublished: t.boolean({ required: false }),
     priority: t.int({ required: false }),
     startsAt: t.field({ type: "DateTime", required: false }),

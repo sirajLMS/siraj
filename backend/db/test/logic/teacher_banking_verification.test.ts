@@ -88,9 +88,10 @@ describe("Teacher Banking Verification & Payments", () => {
       const verified = await TeacherBankingRepository.verifyBankingDetails(
         {
           bankingDetailsId: banking.id,
-          verifiedByUserId: adminUser.id,
         },
-        tx
+        tx,
+        undefined,
+        adminUser.id
       );
 
       expect(verified.verifiedAt).not.toBeNull();
@@ -162,9 +163,10 @@ describe("Teacher Banking Verification & Payments", () => {
       await TeacherBankingRepository.verifyBankingDetails(
         {
           bankingDetailsId: firstBanking.id,
-          verifiedByUserId: adminUser.id,
         },
-        tx
+        tx,
+        undefined,
+        adminUser.id
       );
 
       const firstPayment = await TeacherBankingRepository.createTeacherPayment(
@@ -190,9 +192,10 @@ describe("Teacher Banking Verification & Payments", () => {
       await TeacherBankingRepository.verifyBankingDetails(
         {
           bankingDetailsId: secondBanking.id,
-          verifiedByUserId: adminUser.id,
         },
-        tx
+        tx,
+        undefined,
+        adminUser.id
       );
 
       const secondPayment = await TeacherBankingRepository.createTeacherPayment(

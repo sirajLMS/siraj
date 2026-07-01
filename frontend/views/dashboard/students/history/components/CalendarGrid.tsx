@@ -40,8 +40,16 @@ const EmptyCell = styled(Box)(({ theme }) => ({
 }));
 
 function CalendarStatusBadge({ status, label }: Readonly<{ status: AttendanceStatus; label: string }>) {
-  const badgeStatus =
-    status === AttendanceStatus.PRESENT ? "active" : status === AttendanceStatus.ABSENT ? "blocked" : "pending";
+  let badgeStatus: string;
+  if (status === AttendanceStatus.PRESENT) {
+    badgeStatus = "active";
+  } else if (status === AttendanceStatus.LATE) {
+    badgeStatus = "late";
+  } else if (status === AttendanceStatus.ABSENT) {
+    badgeStatus = "blocked";
+  } else {
+    badgeStatus = "pending";
+  }
   return <StatusBadge category="classSession" status={badgeStatus} label={label} />;
 }
 

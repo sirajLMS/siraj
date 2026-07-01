@@ -1,3 +1,5 @@
+directive @constraint(minLength: Int, maxLength: Int, startsWith: String, endsWith: String, contains: String, notContains: String, pattern: String, format: String, min: Float, max: Float, exclusiveMin: Float, exclusiveMax: Float, multipleOf: Float, minItems: Int, maxItems: Int, uniqueTypeName: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | ARGUMENT_DEFINITION
+
 enum AccountStatus {
   ACTIVATED
   DEACTIVATED
@@ -540,7 +542,7 @@ input ComplaintSubmitInput {
   body: String!
   category: ComplaintCategory!
   files: [ComplaintFileMetadataInput!]
-  studentId: String
+  studentId: String!
   submitterEmail: String!
 }
 
@@ -1847,7 +1849,11 @@ type Query {
 
   """Return group IDs assigned to a user."""
   userPermissionGroups(userId: String!): [String!]
-  users: [User!]
+  users(
+    """Max results (max 200)"""
+    limit: Int = 50
+    offset: Int = 0
+  ): [User!]
   welcomeMessage: String
 }
 
@@ -2008,7 +2014,9 @@ type StorageStats {
   totalSize: String
 }
 
-"""A map of string keys to string values (Record<string, string>)"""
+"""
+A map of string keys to string values (Record<string, string>). Limits: max 100 entries, keys up to 64 chars, values up to 1024 chars.
+"""
 scalar StringMap
 
 type Student {

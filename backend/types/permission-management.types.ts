@@ -16,12 +16,12 @@ export type GroupWithPermissionIds = PermissionGroupEntity & {
   permissionIds: string[];
 };
 
-export type CreateGroupInput = Omit<PermissionGroupEntityInput, "createdAt" | "updatedAt"> & {
+export type CreateGroupInput = Omit<PermissionGroupEntityInput, "id" | "createdAt" | "updatedAt"> & {
   permissionIds: string[];
 };
 
-export type UpdateGroupInput = Partial<Omit<PermissionGroupEntityInput, "createdAt" | "updatedAt">> & {
-  id: string;
+export type UpdateGroupInput = Partial<Omit<PermissionGroupEntityInput, "id" | "createdAt" | "updatedAt">> & {
+  readonly id: string;
   permissionIds?: string[];
 };
 

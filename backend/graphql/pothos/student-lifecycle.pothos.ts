@@ -33,6 +33,7 @@ export const ChangeStudentStatusResultPothosObject = ChangeStudentStatusResultRe
 gqlSchemaBuilder.mutationField("reassignStudentTeacher", t =>
   t.field({
     type: ReassignStudentTeacherResultRef,
+    authScopes: { superAdmin: true },
     args: {
       studentId: t.arg.string({ required: true }),
       newTeacherId: t.arg.string({ required: true }),
@@ -53,6 +54,7 @@ gqlSchemaBuilder.mutationField("reassignStudentTeacher", t =>
 gqlSchemaBuilder.mutationField("changeStudentStatus", t =>
   t.field({
     type: ChangeStudentStatusResultRef,
+    authScopes: { superAdmin: true },
     args: {
       studentId: t.arg.string({ required: true }),
       newStatus: t.arg({ type: StudentStatusPothosObject, required: true }),

@@ -1,4 +1,5 @@
 import logger from "@/backend/lib/logger";
+import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
 import type { IRedisService } from "./IRedisService";
 import { LocalRedisAdapter } from "./LocalRedisAdapter";
 import { UpstashRedisAdapter } from "./UpstashRedisAdapter";
@@ -12,7 +13,8 @@ let instance: IRedisService | null = null;
 function createLocalRedis(): IRedisService {
   const url = process.env.REDIS_URL || "redis://localhost:6379";
 
-  logger.log(`Connecting to local Redis: ${url}`);
+  const sanitizedUrl = sanitizeUrlCredentials(url);
+  logger.log(`Connecting to local Redis: ${sanitizedUrl}`);
 
   return new LocalRedisAdapter(url);
 }

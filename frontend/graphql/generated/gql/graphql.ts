@@ -253,7 +253,7 @@ export type ComplaintSubmitInput = {
   body: string;
   category: ComplaintCategory;
   files: Array<ComplaintFileMetadataInput> | null | undefined;
-  studentId: string | null | undefined;
+  studentId: string;
   submitterEmail: string;
 };
 

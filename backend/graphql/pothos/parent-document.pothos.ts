@@ -26,6 +26,7 @@ export const ParentDocumentPothosObject = ParentDocumentRef.implement({
 gqlSchemaBuilder.queryField("parentDocuments", t =>
   t.field({
     type: [ParentDocumentRef],
+    authScopes: { loggedIn: true },
     args: {
       parentId: t.arg.string({ required: true }),
     },
@@ -38,6 +39,7 @@ gqlSchemaBuilder.queryField("parentDocuments", t =>
 gqlSchemaBuilder.mutationField("linkDocumentToParent", t =>
   t.field({
     type: ParentDocumentRef,
+    authScopes: { superAdmin: true },
     args: {
       parentId: t.arg.string({ required: true }),
       fileId: t.arg.string({ required: true }),

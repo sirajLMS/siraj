@@ -133,13 +133,7 @@ export namespace BillingManagementService {
         }
       }
 
-      logger.info("Manual invoice created", {
-        actorUserId,
-        invoiceId: created.id,
-        parentId: created.parentId,
-        amount: created.amount,
-        currency: created.currency,
-      });
+      logger.info("Manual invoice created", { actorUserId, invoiceId: created.id });
 
       return {
         id: created.id,
@@ -156,7 +150,7 @@ export namespace BillingManagementService {
         createdAt: created.createdAt,
       };
     } catch (error) {
-      logger.error("Failed to create manual invoice", { actorUserId, input, error });
+      logger.error("Failed to create manual invoice", { actorUserId, error });
       throw error;
     }
   }

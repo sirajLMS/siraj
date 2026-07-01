@@ -53,7 +53,7 @@ export const LoginInputPothosObject = gqlSchemaBuilder.inputRef<LoginInput>("Log
       type: "Email",
       required: true,
     }),
-    password: t.string({ required: true }),
+    password: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
   }),
 });
 
@@ -62,6 +62,7 @@ export const DemoLoginInputPothosObject = gqlSchemaBuilder.inputRef<DemoLoginInp
   fields: t => ({
     groupSlug: t.string({
       required: true,
+      directives: { constraint: { maxLength: 255 } },
       description: "The unique slug of the permission group to authenticate as.",
     }),
   }),

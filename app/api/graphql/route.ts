@@ -5,6 +5,7 @@ import {
   // ApolloServerPluginLandingPageProductionDefault,
 } from "@apollo/server/plugin/landingPage/default";
 import { startServerAndCreateNextHandler } from "@as-integrations/next";
+import { createApollo4QueryValidationPlugin } from "graphql-constraint-directive/apollo4";
 import depthLimit from "graphql-depth-limit";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -27,6 +28,8 @@ const server = new ApolloServer({
     process.env.NODE_ENV === "production"
       ? ApolloServerPluginLandingPageDisabled()
       : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+    // Enforce @constraint directive validation at query time
+    createApollo4QueryValidationPlugin(),
   ],
   validationRules: [depthLimit(MAX_GRAPHQL_DEPTH)],
   hideSchemaDetailsFromClientErrors: isProduction,

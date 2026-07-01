@@ -3,6 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { SuggestionContributorStats, SuggestionReturnType, SuggestionSubmitInput } from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
 import { SuggestionStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
@@ -103,7 +104,7 @@ export namespace SuggestionRepository {
     }
 
     if (options.search) {
-      conditions.push(ilike(users.name, `%${options.search}%`));
+      conditions.push(ilike(users.name, `%${escapeLikeWildcards(options.search)}%`));
     }
 
     const whereClause = and(...conditions);
@@ -297,7 +298,7 @@ export namespace SuggestionRepository {
       .from(suggestions)
       .where(
         and(
-          ilike(suggestions.body, `%${query}%`),
+          ilike(suggestions.body, `%${escapeLikeWildcards(query)}%`),
           ne(suggestions.id, excludeId),
           isNull(suggestions.deletedAt),
           ne(suggestions.status, SuggestionStatus.DUPLICATE)

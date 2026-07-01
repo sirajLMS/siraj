@@ -20,11 +20,11 @@ export const ManagerOnboardingInputPothosObject = gqlSchemaBuilder
   .implement({
     description: "Input for creating a new manager/staff account with RBAC assignment",
     fields: t => ({
-      name: t.string({ required: true }),
+      name: t.string({ required: true, directives: { constraint: { maxLength: 512 } } }),
       email: t.field({ type: "Email", required: true }),
-      password: t.string({ required: true }),
-      phone: t.string(),
-      skypeId: t.string(),
+      password: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
+      phone: t.string({ directives: { constraint: { maxLength: 512 } } }),
+      skypeId: t.string({ directives: { constraint: { maxLength: 512 } } }),
       accountType: t.field({ type: ManagerAccountTypePothosEnum, required: true }),
     }),
   });

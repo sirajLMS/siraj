@@ -15,7 +15,7 @@ import type {
   PaginationArgs,
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
-import { PaginationUtils } from "@/backend/utils";
+import { escapeLikeWildcards, PaginationUtils } from "@/backend/utils";
 import { type ComplaintCategory, ComplaintStatus } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
@@ -42,7 +42,7 @@ function buildComplaintQueueConditions(
   }
 
   if (options.search) {
-    conditions.push(ilike(users.name, `%${options.search}%`));
+    conditions.push(ilike(users.name, `%${escapeLikeWildcards(options.search)}%`));
   }
 
   return and(...conditions);

@@ -5,4 +5,5 @@ export * from "./env";
 export * from "./errors";
 export * from "./intl";
 export * from "./logger";
+export * from "./path-validator";
 export * from "./phoneNumber";

@@ -1,11 +1,26 @@
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 
-/**
- * Hash a session ID using SHA-256 for secure storage.
- * The plaintext session ID is only ever stored in the user's cookie —
- * the database and Redis always store the hash instead.
- * This ensures that a database compromise does not leak usable session IDs.
- */
+const SESSION_HMAC_KEY = process.env.JWT_SECRET
+  ? `siraj-session-hmac:${process.env.JWT_SECRET}`
+  : "siraj-session-hmac:fallback-dev-key";
+
+/** HMAC-SHA256 — current secure hash for new sessions. */
 export function hashSessionId(sessionId: string): string {
+  return createHmac("sha256", SESSION_HMAC_KEY).update(sessionId).digest("hex");
+}
+
+/** Legacy unsalted SHA-256 — used only to verify sessions hashed before the HMAC migration. */
+export function hashSessionIdLegacy(sessionId: string): string {
   return createHash("sha256").update(sessionId).digest("hex");
+}
+
+/** Verify a stored hash and determine if it needs migration from legacy → HMAC. */
+export function verifyAndMigrateSessionHash(
+  sessionId: string,
+  storedHash: string
+): { valid: boolean; needsRehash: boolean; newHash?: string } {
+  if (hashSessionId(sessionId) === storedHash) return { valid: true, needsRehash: false };
+  if (hashSessionIdLegacy(sessionId) === storedHash)
+    return { valid: true, needsRehash: true, newHash: hashSessionId(sessionId) };
+  return { valid: false, needsRehash: false };
 }

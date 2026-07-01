@@ -12,6 +12,7 @@ import type {
   TeacherProfileReturnType,
   TeacherProfileUpdateInputType,
 } from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
 import type { AccountStatus, Gender, PaymentMethod } from "@/shared/lib/enum";
 import type { DBTransaction } from "../db.types";
 
@@ -99,7 +100,7 @@ export namespace TeacherRepository {
         and(
           isNull(users.deletedAt),
           eq(users.isActive, true),
-          searchQuery ? ilike(users.name, `%${searchQuery}%`) : undefined
+          searchQuery ? ilike(users.name, `%${escapeLikeWildcards(searchQuery)}%`) : undefined
         )
       )
       .limit(limit);
@@ -114,7 +115,12 @@ export namespace TeacherRepository {
 
     const conditions = and(
       isNull(users.deletedAt),
-      search ? or(ilike(users.name, `%${search}%`), ilike(users.email, `%${search}%`)) : undefined
+      search
+        ? or(
+            ilike(users.name, `%${escapeLikeWildcards(search)}%`),
+            ilike(users.email, `%${escapeLikeWildcards(search)}%`)
+          )
+        : undefined
     );
 
     const baseSelect = {

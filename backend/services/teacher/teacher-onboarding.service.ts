@@ -159,12 +159,7 @@ export namespace TeacherOnboardingService {
       await assignTeacherPermissionGroup(user, actorUserId, t, txObj);
       await createBankingDetailsIfProvided(input, teacher.id, txObj, locale);
 
-      logger.info("Teacher onboarded successfully", {
-        teacherId: teacher.id,
-        userId: user.id,
-        name: user.name,
-        email: user.email,
-      });
+      logger.info("Teacher onboarded successfully", { teacherId: teacher.id, userId: user.id });
 
       return {
         userId: user.id,

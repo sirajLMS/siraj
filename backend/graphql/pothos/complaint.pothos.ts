@@ -118,8 +118,8 @@ const ComplaintFileMetadataInputRef = gqlSchemaBuilder.inputRef<{ path: string; 
 export const ComplaintFileMetadataInputPothosObject = ComplaintFileMetadataInputRef.implement({
   description: "Input metadata for a pre-uploaded complaint attachment.",
   fields: t => ({
-    path: t.string({ required: true }),
-    mimeType: t.string({ required: true }),
+    path: t.string({ required: true, directives: { constraint: { maxLength: 512 } } }),
+    mimeType: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
     sizeBytes: t.int({ required: true }),
   }),
 });
@@ -129,10 +129,10 @@ export const SubmitComplaintInputPothosObject = gqlSchemaBuilder
   .implement({
     description: "Input for submitting a new complaint.",
     fields: t => ({
-      studentId: t.string({ required: false }),
+      studentId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       category: t.field({ type: ComplaintCategoryPothosEnum, required: true }),
-      submitterEmail: t.string({ required: true }),
-      body: t.string({ required: true }),
+      submitterEmail: t.string({ required: true, directives: { constraint: { maxLength: 254 } } }),
+      body: t.string({ required: true, directives: { constraint: { maxLength: 5000 } } }),
       files: t.field({ type: [ComplaintFileMetadataInputPothosObject], required: false }),
     }),
   });
@@ -142,7 +142,7 @@ export const ComplaintQueueFilterPothosObject = gqlSchemaBuilder
   .implement({
     description: "Filter options for the admin complaint queue.",
     fields: t => ({
-      search: t.string({ required: false }),
+      search: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       status: t.field({ type: ComplaintStatusPothosEnum, required: false }),
     }),
   });
@@ -161,6 +161,7 @@ function normalizeComplaint(complaint: ComplaintReturnType): ComplaintReturnType
 gqlSchemaBuilder.queryField("parentComplaints", t =>
   t.field({
     type: ParentComplaintsResultPothosObject,
+    authScopes: { loggedIn: true },
     description: "Returns the authenticated parent's complaint history with pagination.",
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
@@ -198,6 +199,7 @@ gqlSchemaBuilder.queryField("parentComplaints", t =>
 gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
   t.field({
     type: ComplaintQueueResultPothosObject,
+    authScopes: { superAdmin: true },
     description: "Returns the paginated admin complaint queue with metrics.",
     args: {
       filter: t.arg({ type: ComplaintQueueFilterPothosObject, required: true }),
@@ -251,9 +253,10 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
 gqlSchemaBuilder.queryField("complaintFiles", t =>
   t.field({
     type: [ComplaintFilePothosObject],
+    authScopes: { loggedIn: true },
     description: "Returns file attachments for a specific complaint. Accessible by the owning parent or admins.",
     args: {
-      complaintId: t.arg.string({ required: true }),
+      complaintId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       if (!ctx.user?.id) {
@@ -268,6 +271,7 @@ gqlSchemaBuilder.queryField("complaintFiles", t =>
 gqlSchemaBuilder.mutationField("submitComplaint", t =>
   t.field({
     type: ComplaintPothosObject,
+    authScopes: { loggedIn: true },
     description: "Submits a new complaint from the authenticated parent.",
     args: {
       input: t.arg({ type: SubmitComplaintInputPothosObject, required: true }),
@@ -309,9 +313,10 @@ gqlSchemaBuilder.mutationField("submitComplaint", t =>
 gqlSchemaBuilder.mutationField("deleteComplaint", t =>
   t.field({
     type: "Boolean",
+    authScopes: { superAdmin: true },
     description: "Soft-deletes a complaint (admin only). Returns true on success.",
     args: {
-      complaintId: t.arg.string({ required: true }),
+      complaintId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       if (!ctx.user?.id) {

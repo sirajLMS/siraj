@@ -7,6 +7,7 @@ import {
   type StudentsOrderByClause,
 } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { requireAuth } from "../utils/requireAuth";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 import { StudentFilterArgsPothosObject, StudentsOrderByClausePothosObject } from "./student.pothos";
 
@@ -57,14 +58,15 @@ export const StudentDirectoryPayloadPothosObject = StudentDirectoryPayloadRef.im
 gqlSchemaBuilder.queryField("studentDirectory", t =>
   t.field({
     type: StudentDirectoryPayloadPothosObject,
+    authScopes: { loggedIn: true },
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
       filterArgs: t.arg({ type: StudentFilterArgsPothosObject, required: false }),
       orderBy: t.arg({ type: [StudentsOrderByClausePothosObject], required: false }),
     },
     resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
       const locale = ctx.locale || "en";
-      const userId = ctx.user?.id || "";
 
       // Construct PaginationArgs from GraphQL input
       let pagination: PaginationArgs | null = null;

@@ -29,6 +29,7 @@ export const RespondToComplaintInputPothosObject = gqlSchemaBuilder
 gqlSchemaBuilder.mutationField("respondToComplaint", t =>
   t.field({
     type: ComplaintResponsePothosObject,
+    authScopes: { superAdmin: true },
     description: "Creates a response to an existing complaint (admin only).",
     args: {
       input: t.arg({ type: RespondToComplaintInputPothosObject, required: true }),

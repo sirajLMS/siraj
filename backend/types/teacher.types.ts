@@ -9,8 +9,17 @@ export type TeacherEntityInput = typeof teachers.$inferInsert;
 export type TeacherBankingDetailsHistorySelectType = typeof teacherBankingDetailsHistory.$inferSelect;
 export type TeacherBankingDetailsHistoryInsertInput = typeof teacherBankingDetailsHistory.$inferInsert;
 
+/** @remarks NOT used as API output — use TeacherBankingDetailsHistoryReturnType which omits sensitive banking fields */
+
+export type TeacherBankingDetailsHistoryReturnType = Omit<
+  TeacherBankingDetailsHistorySelectType,
+  "accountNumber" | "routingNumber" | "swiftBic" | "iban" | "beneficiaryName"
+>;
+
 export type TeacherPaymentSelectType = typeof teacherPayments.$inferSelect;
 export type TeacherPaymentInsertInput = typeof teacherPayments.$inferInsert;
+
+export type TeacherPaymentReturnType = Omit<TeacherPaymentSelectType, "bankingDetailsHistoryId">;
 
 export type SubmitBankingDetailsInput = Pick<
   TeacherBankingDetailsHistoryInsertInput,
@@ -19,7 +28,6 @@ export type SubmitBankingDetailsInput = Pick<
 
 export type VerifyBankingDetailsInput = {
   bankingDetailsId: string;
-  verifiedByUserId: string;
 };
 
 export type CreateTeacherPaymentInput = {

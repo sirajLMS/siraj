@@ -60,6 +60,7 @@ export const AttendanceReportPayloadObj = AttendanceReportPayloadRef.implement({
 gqlSchemaBuilder.queryField("generateAttendanceReport", t =>
   t.field({
     type: AttendanceReportPayloadObj,
+    authScopes: { superAdmin: true },
     description: "Generates dynamic attendance and financial reports.",
     args: {
       filters: t.arg({ type: AttendanceReportFiltersInput, required: true }),

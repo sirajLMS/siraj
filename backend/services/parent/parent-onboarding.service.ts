@@ -99,12 +99,7 @@ export namespace ParentOnboardingService {
 
       await PermissionManagementRepository.bulkAssignUsersToGroup([user.id], targetGroup.id, actorUserId, txObj);
 
-      logger.info("Parent onboarded successfully", {
-        parentId: parent.id,
-        userId: user.id,
-        name: user.name,
-        email: user.email,
-      });
+      logger.info("Parent onboarded successfully", { parentId: parent.id, userId: user.id });
 
       return {
         userId: user.id,

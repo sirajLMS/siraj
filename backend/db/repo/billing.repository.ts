@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNull, type SQL, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNull, type SQL, sql } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
 import {
@@ -303,6 +303,16 @@ export namespace BillingRepository {
 
     const parentIds = [...new Set(unpaidInvoices.map(inv => inv.parentId))];
 
+    // Guard against empty array in manual IN clause
+    if (parentIds.length === 0) {
+      return {
+        id: "unpaid-invoices-summary",
+        totalOverdueInvoices: unpaidInvoices.length,
+        totalOverdueAmount: "0.00",
+        items: [],
+      };
+    }
+
     const parentUsers = await t
       .select({
         parentId: parents.id,
@@ -312,12 +322,7 @@ export namespace BillingRepository {
       })
       .from(parents)
       .leftJoin(users, eq(parents.userId, users.id))
-      .where(
-        sql`${parents.id} IN (${sql.join(
-          parentIds.map(id => sql`${id}`),
-          sql`, `
-        )})`
-      );
+      .where(inArray(parents.id, parentIds));
 
     const parentMap = new Map(parentUsers.map(p => [p.parentId, p]));
 

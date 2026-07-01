@@ -10,8 +10,8 @@ export const RecurringClassDayInputPothosObject = gqlSchemaBuilder
   .inputRef<RecurringClassDayInputDefinition>("RecurringClassDayInput")
   .implement({
     fields: t => ({
-      dayOfWeek: t.string({ required: true }),
-      startTime: t.string({ required: true }),
+      dayOfWeek: t.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
+      startTime: t.string({ required: true, directives: { constraint: { maxLength: 10 } } }),
       isActive: t.boolean({ required: true }),
     }),
   });
@@ -34,16 +34,20 @@ export const CreateRecurringClassInputPothosObject = gqlSchemaBuilder
   .inputRef<CreateRecurringClassInputDefinition>("CreateRecurringClassInput")
   .implement({
     fields: t => ({
-      studentId: t.string({ required: true }),
-      teacherId: t.string({ required: true }),
+      studentId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      teacherId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       durationMinutes: t.int({ required: true }),
-      defaultStartTime: t.string({ required: true }),
-      timezone: t.string({ required: true }),
+      defaultStartTime: t.string({ required: true, directives: { constraint: { maxLength: 10 } } }),
+      timezone: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
       timezoneId: t.int({ required: false }),
-      effectiveFrom: t.string({ required: false }),
-      effectiveUntil: t.string({ required: false }),
-      days: t.field({ type: [RecurringClassDayInputPothosObject], required: true }),
-      classType: t.string({ required: false }),
+      effectiveFrom: t.string({ required: false, directives: { constraint: { maxLength: 20 } } }),
+      effectiveUntil: t.string({ required: false, directives: { constraint: { maxLength: 20 } } }),
+      days: t.field({
+        type: [RecurringClassDayInputPothosObject],
+        required: true,
+        directives: { constraint: { maxItems: 7 } },
+      }),
+      classType: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       generateInstancesForWeeks: t.int({ required: false }),
     }),
   });

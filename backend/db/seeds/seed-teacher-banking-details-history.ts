@@ -19,10 +19,14 @@ export async function seedOrGet(teachersList: TeacherEntity[], usersList: UserEn
     const existing = await TeacherBankingRepository.getActiveBankingDetails(teacher.id);
     if (existing) {
       if (existing.verifiedAt === null && adminUser) {
-        const verified = await TeacherBankingRepository.verifyBankingDetails({
-          bankingDetailsId: existing.id,
-          verifiedByUserId: adminUser.id,
-        });
+        const verified = await TeacherBankingRepository.verifyBankingDetails(
+          {
+            bankingDetailsId: existing.id,
+          },
+          undefined,
+          undefined,
+          adminUser.id
+        );
         results.push(verified);
       } else {
         results.push(existing);
@@ -42,10 +46,14 @@ export async function seedOrGet(teachersList: TeacherEntity[], usersList: UserEn
     });
 
     if (adminUser) {
-      const verified = await TeacherBankingRepository.verifyBankingDetails({
-        bankingDetailsId: created.id,
-        verifiedByUserId: adminUser.id,
-      });
+      const verified = await TeacherBankingRepository.verifyBankingDetails(
+        {
+          bankingDetailsId: created.id,
+        },
+        undefined,
+        undefined,
+        adminUser.id
+      );
       results.push(verified);
     } else {
       results.push(created);

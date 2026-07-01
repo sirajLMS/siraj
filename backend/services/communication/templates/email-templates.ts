@@ -1,5 +1,14 @@
 import { getBackendTranslations } from "@/backend/lib/intl";
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 type GenericTranslationFn = (key: string, values?: Record<string, unknown>) => string;
 
 interface ComplaintResponseEmailData {
@@ -27,9 +36,9 @@ export const renderComplaintResponseEmail = async (
     namespace: "emails.complaintResponse",
   })) as GenericTranslationFn;
 
-  const subject = t("subject", { complaintTitle: data.complaintTitle });
-  const greeting = t("greeting", { parentName: data.parentName });
-  const body = t("body", { complaintTitle: data.complaintTitle });
+  const subject = t("subject", { complaintTitle: escapeHtml(data.complaintTitle) });
+  const greeting = t("greeting", { parentName: escapeHtml(data.parentName) });
+  const body = t("body", { complaintTitle: escapeHtml(data.complaintTitle) });
   const responseLabel = t("responseLabel");
   const dateLabel = t("dateLabel");
   const footer = t("footer");
@@ -66,7 +75,7 @@ export const renderComplaintResponseEmail = async (
       <p class="message">${body}</p>
       <div class="response-box">
         <div class="label">${responseLabel}</div>
-        <div class="text">${data.responseText}</div>
+        <div class="text">${escapeHtml(data.responseText)}</div>
       </div>
       <p class="meta">${dateLabel}: ${data.respondedAt}</p>
     </div>
@@ -88,7 +97,7 @@ export const renderSuggestionAcknowledgedEmail = async (
   })) as GenericTranslationFn;
 
   const subject = t("subject");
-  const greeting = t("greeting", { parentName: data.parentName });
+  const greeting = t("greeting", { parentName: escapeHtml(data.parentName) });
   const body = t("body");
   const suggestionLabel = t("suggestionLabel");
   const dateLabel = t("dateLabel");
@@ -127,8 +136,8 @@ export const renderSuggestionAcknowledgedEmail = async (
       <p class="message">${body}</p>
       <div class="suggestion-box">
         <div class="label">${suggestionLabel}</div>
-        <div class="title">${data.suggestionTitle}</div>
-        <div class="text">${data.suggestionText}</div>
+        <div class="title">${escapeHtml(data.suggestionTitle)}</div>
+        <div class="text">${escapeHtml(data.suggestionText)}</div>
       </div>
       <p class="meta">${dateLabel}: ${data.acknowledgedAt}</p>
     </div>

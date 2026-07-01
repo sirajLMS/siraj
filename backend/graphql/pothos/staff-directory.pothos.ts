@@ -3,6 +3,7 @@ import type { OnboardingMetricsResult, PageInfo, TeacherDirectoryMetrics, Teache
 import { PaginationArgs } from "@/backend/types";
 import type { AccountStatus } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { requireAuth } from "../utils/requireAuth";
 import { AccountStatusPothosObject } from "./enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
@@ -151,14 +152,15 @@ export const OnboardingMetricsPothosObject = OnboardingMetricsRef.implement({
 gqlSchemaBuilder.queryField("managerDirectory", t =>
   t.field({
     type: ManagerDirectoryResultPothosObject,
+    authScopes: { loggedIn: true },
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
       roleFilter: t.arg.string({ required: false }),
       statusFilter: t.arg.string({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
+      const userId = await requireAuth(ctx);
       const locale = ctx.locale || "en";
-      const userId = ctx.user?.id || "";
 
       let pagination: PaginationArgs | null = null;
       if (args.paginationArgs) {
@@ -195,9 +197,10 @@ gqlSchemaBuilder.queryField("managerDirectory", t =>
 gqlSchemaBuilder.queryField("onboardingMetrics", t =>
   t.field({
     type: OnboardingMetricsPothosObject,
+    authScopes: { superAdmin: true },
     resolve: async (_root, _args, ctx) => {
+      const userId = await requireAuth(ctx);
       const locale = ctx.locale || "en";
-      const userId = ctx.user?.id || "";
 
       return await ManagerDirectoryService.getOnboardingMetrics(userId, locale);
     },
@@ -226,14 +229,15 @@ export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
 gqlSchemaBuilder.mutationField("updateManagerProfile", t =>
   t.field({
     type: ManagerDirectoryRowPothosObject,
+    authScopes: { superAdmin: true },
     args: {
       staffProfileId: t.arg.id({ required: true }),
       input: t.arg({ type: UpdateManagerProfileInputPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
       const { ManagerProfileService } = await import("@/backend/services/staff/manager-profile.service");
+      const actorUserId = await requireAuth(ctx);
       const locale = ctx.locale || "en";
-      const actorUserId = ctx.user?.id || "";
 
       return await ManagerProfileService.updateManagerProfile(actorUserId, args.staffProfileId, args.input, locale);
     },

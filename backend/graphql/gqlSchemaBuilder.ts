@@ -1,6 +1,7 @@
 import SchemaBuilder from "@pothos/core";
 import AddGraphQL from "@pothos/plugin-add-graphql";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
+import DirectivesPlugin from "@pothos/plugin-directives";
 import DrizzlePlugin from "@pothos/plugin-drizzle";
 import ErrorsPlugin from "@pothos/plugin-errors";
 import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
@@ -36,12 +37,28 @@ export interface PothosTypes {
     PhoneNumber: { Input: PhoneNumber; Output: PhoneNumber };
     Email: { Input: Email; Output: Email };
   };
+  Directives: {
+    constraint: {
+      locations: "INPUT_FIELD_DEFINITION" | "ARGUMENT_DEFINITION" | "FIELD_DEFINITION";
+      args: {
+        maxLength?: number;
+        minLength?: number;
+        max?: number;
+        min?: number;
+        maxItems?: number;
+        minItems?: number;
+        pattern?: string;
+        format?: string;
+      };
+    };
+  };
 }
 
 export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
   plugins: [
     DrizzlePlugin,
     AddGraphQL,
+    DirectivesPlugin,
     ErrorsPlugin,
     ScopeAuthPlugin,
     WithInputPlugin,

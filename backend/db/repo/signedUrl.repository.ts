@@ -18,6 +18,7 @@ export namespace SignedUrlRepository {
 
   /**
    * Get a signed URL by its token ID
+   * // NOTE: Authorization should be checked by the calling service before using this method
    */
   export const getSignedUrlById = async (id: string): Promise<SignedUrlEntity | null> => {
     const result = await db.select().from(signedUrls).where(eq(signedUrls.id, id)).limit(1);

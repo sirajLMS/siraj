@@ -193,6 +193,7 @@ function normalizeSuggestionSearchResult(result: SuggestionSearchResultType): Su
 gqlSchemaBuilder.queryField("adminSuggestions", t =>
   t.field({
     type: AdminSuggestionResultPothosObject,
+    authScopes: { superAdmin: true },
     description: "Returns the paginated admin suggestion list with metrics.",
     args: {
       filter: t.arg({ type: SuggestionFilterPothosObject, required: true }),
@@ -305,6 +306,7 @@ async function authenticatedSuggestionMutation(
 gqlSchemaBuilder.mutationField("submitSuggestion", t =>
   t.field({
     type: SuggestionPothosObject,
+    authScopes: { loggedIn: true },
     description: "Submits a new suggestion from the authenticated parent.",
     args: {
       input: t.arg({ type: SubmitSuggestionInputPothosObject, required: true }),
@@ -323,6 +325,7 @@ gqlSchemaBuilder.mutationField("submitSuggestion", t =>
 gqlSchemaBuilder.mutationField("markSuggestionReviewed", t =>
   t.field({
     type: SuggestionPothosObject,
+    authScopes: { superAdmin: true },
     description: "Marks a suggestion as reviewed (admin only).",
     args: {
       suggestionId: t.arg.string({ required: true }),
@@ -337,6 +340,7 @@ gqlSchemaBuilder.mutationField("markSuggestionReviewed", t =>
 gqlSchemaBuilder.mutationField("respondToSuggestion", t =>
   t.field({
     type: SuggestionPothosObject,
+    authScopes: { superAdmin: true },
     description: "Responds to a suggestion with an admin text response (admin only).",
     args: {
       input: t.arg({ type: RespondToSuggestionInputPothosObject, required: true }),
@@ -351,6 +355,7 @@ gqlSchemaBuilder.mutationField("respondToSuggestion", t =>
 gqlSchemaBuilder.mutationField("markSuggestionDuplicate", t =>
   t.field({
     type: SuggestionPothosObject,
+    authScopes: { superAdmin: true },
     description: "Marks a suggestion as a duplicate of another suggestion (admin only).",
     args: {
       input: t.arg({ type: MarkSuggestionDuplicateInputPothosObject, required: true }),
@@ -365,6 +370,7 @@ gqlSchemaBuilder.mutationField("markSuggestionDuplicate", t =>
 gqlSchemaBuilder.mutationField("deleteSuggestion", t =>
   t.field({
     type: "Boolean",
+    authScopes: { superAdmin: true },
     description: "Soft-deletes a suggestion (super admin only). Returns true on success.",
     args: {
       suggestionId: t.arg.string({ required: true }),

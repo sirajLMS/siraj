@@ -34,8 +34,10 @@ export class PostgresCacheAdapter implements ICacheService {
    */
   async set(key: string, value: string, options?: { ex?: number; px?: number }): Promise<void> {
     try {
-      const ttlSeconds = options?.ex || options?.px ? options.ex || (options.px ?? 0) / 1000 : 3600; // Default 1 hour
-      const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
+      // Default to no expiry if no TTL is provided — callers must be explicit
+      const ttlSeconds = options?.ex ? options.ex : options?.px ? options.px / 1000 : 0;
+      // No expiry: far-future date (year 2100) so the entry never expires via TTL cleanup
+      const expiresAt = ttlSeconds > 0 ? new Date(Date.now() + ttlSeconds * 1000) : new Date("2100-01-01T00:00:00Z");
 
       await CacheDbRepository.set(key, value, expiresAt);
     } catch (error) {
@@ -130,9 +132,10 @@ export class PostgresCacheAdapter implements ICacheService {
         return 0;
 
       case "zadd": {
-        // For rate limiting: add new entry
-        const [key, score, member] = cmd.args as [string, number, string];
-        const expiresAt = new Date(score + 3600000); // 1 hour from score
+        // For rate limiting: add new entry using server-side timestamp
+        const [key, , member] = cmd.args as [string, number, string];
+        const now = Date.now();
+        const expiresAt = new Date(now + 3600000); // 1 hour from now
         await CacheDbRepository.set(key, member, expiresAt);
         return 1;
       }

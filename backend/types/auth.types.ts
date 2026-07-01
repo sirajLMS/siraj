@@ -18,6 +18,7 @@ import type { PageInfo } from "./pagination.types";
 export type UserEntity = typeof users.$inferSelect;
 export type UserEntityInput = typeof users.$inferInsert;
 
+/** @remarks isSuperAdmin should only be used for UI rendering decisions — ALL auth checks must use server-side session/permissions */
 export type SafeUser = Omit<UserEntity, "password" | "rememberTokenHash" | "deletedAt">;
 
 // Note: role field exists on PermissionsService.getUserContext() and DashboardLayout — needs cleanup (see .ai/task-files/fix-user-role.md)
@@ -39,7 +40,6 @@ export type UserCreateInput = {
 };
 
 export type UserUpdateInput = {
-  id: string;
   name: string;
   email: Email;
   password: string;
@@ -114,6 +114,8 @@ export type RedisSessionData = {
 
 export type PasswordResetTokenSelectType = typeof passwordResetTokens.$inferSelect;
 export type PasswordResetTokenInsertInput = typeof passwordResetTokens.$inferInsert;
+
+export type PasswordResetTokenReturnType = Omit<PasswordResetTokenSelectType, "hashedToken">;
 
 export type LoginInput = {
   email: Email;

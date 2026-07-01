@@ -56,17 +56,13 @@ function MobileInactiveNote() {
 function MobileConflictsHeader() {
   const t = useTranslations("dashboard.dstMigration");
 
-  return (
-    <SectionPanel title={t("sections.conflictsDetected")} />
-  );
+  return <SectionPanel title={t("sections.conflictsDetected")} />;
 }
 
 function MobileUpdatedHeader() {
   const t = useTranslations("dashboard.dstMigration");
 
-  return (
-    <SectionPanel title={t("sections.successfullyUpdated")} />
-  );
+  return <SectionPanel title={t("sections.successfullyUpdated")} />;
 }
 
 export function DstMigrationView({

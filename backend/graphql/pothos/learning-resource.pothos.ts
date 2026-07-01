@@ -44,6 +44,7 @@ export const LearningResourceRowPothosObject = LearningResourceRowRef.implement(
 gqlSchemaBuilder.queryField("learningResources", t =>
   t.field({
     type: [LearningResourceRowPothosObject],
+    authScopes: { loggedIn: true },
     args: {
       searchQuery: t.arg.string({ required: false }),
     },
@@ -62,6 +63,7 @@ gqlSchemaBuilder.queryField("learningResources", t =>
 gqlSchemaBuilder.mutationField("uploadLearningResource", t =>
   t.field({
     type: LearningResourceRowPothosObject,
+    authScopes: { superAdmin: true },
     args: {
       input: t.arg({ type: ResourceUploadInput, required: true }),
     },
@@ -81,6 +83,7 @@ gqlSchemaBuilder.mutationField("uploadLearningResource", t =>
  */
 gqlSchemaBuilder.mutationField("deleteLearningResource", t =>
   t.boolean({
+    authScopes: { superAdmin: true },
     description: "Permanently deletes a learning resource from physical storage and the database.",
     args: {
       id: t.arg.id({ required: true, description: "The UUID of the resource to delete" }),

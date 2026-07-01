@@ -10,8 +10,8 @@ gqlSchemaBuilder.queryField("teachers", t =>
   t.field({
     type: [TeacherSimplePothosObject],
     args: {
-      search: t.arg.string({ required: true }),
-      limit: t.arg.int({ required: true }),
+      search: t.arg.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
+      limit: t.arg.int({ required: true, directives: { constraint: { max: 200 } } }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
@@ -24,7 +24,7 @@ gqlSchemaBuilder.queryField("teacherDirectory", t =>
   t.field({
     type: TeacherDirectoryPothosObject,
     args: {
-      search: t.arg.string({ required: false }),
+      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     authScopes: { loggedIn: true },
