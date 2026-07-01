@@ -130,4 +130,9 @@ export interface ErrorsLabels {
   readonly noteCreateFailed: string;
   readonly categoryHasSubjects: string;
   readonly unknownName: string;
+  readonly rateLimitExceeded: string;
+  readonly duplicateRequest: string;
+  readonly internalServerError: string;
+  readonly atLeastOneDayRequired: string;
+  readonly failedToCreateRecurringClass: string;
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
 import type { CreateRecurringClassInput } from "@/frontend/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/utils/logger";
@@ -29,14 +30,16 @@ export async function createRecurringClass(
 > {
   const { userId } = await getServerUserContext();
   if (!userId) {
-    return { success: false, message: "Unauthorized" };
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    return { success: false, message: t("unauthorized") };
   }
 
   try {
     const activeDays = buildActiveDays(data);
 
     if (activeDays.length === 0) {
-      return { success: false, message: "At least one day must be selected" };
+      const t = await getBackendTranslations({ locale, namespace: "errors" });
+      return { success: false, message: t("atLeastOneDayRequired") };
     }
 
     const result = await RecurringClassService.createRecurringClass(
@@ -65,7 +68,8 @@ export async function createRecurringClass(
     };
   } catch (error) {
     logger.error("Failed to create recurring class", { error });
-    return { success: false, message: "Failed to create recurring class" };
+    const t = await getBackendTranslations({ locale, namespace: "errors" });
+    return { success: false, message: t("failedToCreateRecurringClass") };
   }
 }
 

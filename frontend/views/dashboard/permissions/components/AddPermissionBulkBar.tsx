@@ -11,7 +11,7 @@ const StyledBulkBarContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  boxShadow: theme.shadows[2],
+  boxShadow: theme.palette.shadow.card,
 }));
 
 const StyledSelectionLabel = styled(Typography)({

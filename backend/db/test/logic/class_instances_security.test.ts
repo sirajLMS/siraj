@@ -89,13 +89,16 @@ describe("Class Instances Security Logic", () => {
 
       expect(instance.executionState).toBe("COMPLETED");
 
-      const error = await tx
-        .update(classInstances)
-        .set({ executionState: "RUNNING", outcome: "PENDING" })
-        .where(eq(classInstances.id, instance.id))
-        .catch(e => e);
-
-      expect(error).toBeInstanceOf(Error);
+      let error: Error | null = null;
+      try {
+        await tx
+          .update(classInstances)
+          .set({ executionState: "RUNNING", outcome: "PENDING" })
+          .where(eq(classInstances.id, instance.id));
+      } catch (e) {
+        error = e as Error;
+      }
+      expect(error).toBeTruthy();
       expect(getErrorMessage(error)).toMatch(/Invalid transition: Cannot reactivate a COMPLETED class instance/);
     }));
 
@@ -124,13 +127,16 @@ describe("Class Instances Security Logic", () => {
 
       await tx.update(students).set({ classesRemaining: 0 }).where(eq(students.id, student.id));
 
-      const error = await tx
-        .update(students)
-        .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
-        .where(eq(students.id, student.id))
-        .catch(e => e);
-
-      expect(error).toBeInstanceOf(Error);
+      let error: Error | null = null;
+      try {
+        await tx
+          .update(students)
+          .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
+          .where(eq(students.id, student.id));
+      } catch (e) {
+        error = e as Error;
+      }
+      expect(error).toBeTruthy();
       expect(getErrorMessage(error)).toMatch(/students_classes_remaining_chk/);
     }));
 
@@ -160,12 +166,16 @@ describe("Class Instances Security Logic", () => {
         const { teacher, student } = await setupTestEntities(tx, "S2-3", { skipInstance: true });
         const instance = await createTestInstance(tx, teacher.id, student.id, { executionState: "ACTIVATED" });
 
-        const error = await tx
-          .update(classInstances)
-          .set({ executionState: "COMPLETED", outcome: "TAKEN" })
-          .where(eq(classInstances.id, instance.id))
-          .catch(e => e);
-        expect(error).toBeInstanceOf(Error);
+        let error: Error | null = null;
+        try {
+          await tx
+            .update(classInstances)
+            .set({ executionState: "COMPLETED", outcome: "TAKEN" })
+            .where(eq(classInstances.id, instance.id));
+        } catch (e) {
+          error = e as Error;
+        }
+        expect(error).toBeTruthy();
         expect(getErrorMessage(error)).toMatch(/Invalid transition:/);
       }));
 

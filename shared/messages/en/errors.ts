@@ -123,6 +123,12 @@ export const errors: ErrorsLabels = {
     passwordRequiresSpecialChar: "Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
     demoGroupNotFound: "Demo group not found: {groupSlug}",
     demoGroupNoUser: "No user found for demo group: {groupSlug}",
+    tooManyLoginAttempts: "Too many login attempts. Please try again later.",
+    serviceUnavailable: "Authentication service temporarily unavailable",
+    invalidCredentials: "Invalid email or password",
+    accountLocked: "Too many login attempts. Your account has been temporarily locked.",
+    demoLoginNotEnabled: "Demo login is not enabled",
+    demoLoginFailed: "Demo login failed",
   },
   user: {
     emailAlreadyExists: "An account with this email already exists.",
@@ -162,4 +168,9 @@ export const errors: ErrorsLabels = {
   noteCreateFailed: "Failed to create teacher note",
   categoryHasSubjects: "Cannot delete category that has subjects. Remove or reassign subjects first.",
   unknownName: "Unknown",
+  rateLimitExceeded: "Too many requests. Please try again later.",
+  duplicateRequest: "Duplicate request detected. This operation has already been processed.",
+  internalServerError: "An unexpected error occurred. Please try again later.",
+  atLeastOneDayRequired: "At least one day must be selected",
+  failedToCreateRecurringClass: "Failed to create recurring class",
 };

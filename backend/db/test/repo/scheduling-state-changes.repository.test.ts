@@ -229,10 +229,10 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         expect(feed.length).toBeGreaterThan(0);
         expect(feed[0].id).toBe(events[0].id);
 
-        const feedNoTx = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date());
+        const feedNoTx = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date(), tx);
         expect(Array.isArray(feedNoTx)).toBe(true);
 
-        const eventsNoTx = await SchedulingRepository.getClassStatusEvents(id);
+        const eventsNoTx = await SchedulingRepository.getClassStatusEvents(id, tx);
         expect(Array.isArray(eventsNoTx)).toBe(true);
       });
     });

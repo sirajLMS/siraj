@@ -2,7 +2,7 @@
 
 import { DeleteOutlined, PersonAddOutlined, PersonRemoveOutlined, SearchOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, Checkbox, InputAdornment, TextField, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
@@ -48,12 +48,12 @@ const StyledAssignUsersButton = styled(Button)(({ theme }) => ({
 const StyledBulkActionBar = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
   borderRadius: Number(theme.shape.borderRadius) * 1.5,
-  backgroundColor: theme.palette.errorContainer ?? "rgba(211, 47, 47, 0.15)",
+  backgroundColor: theme.palette.errorContainer ?? alpha(theme.palette.error.main, 0.15),
   color: theme.palette.onErrorContainer ?? theme.palette.error.main,
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  boxShadow: theme.shadows[2],
+  boxShadow: theme.palette.shadow.card,
 }));
 
 const StyledRemoveSelectedButton = styled(Button)(({ theme }) => ({
@@ -67,7 +67,7 @@ const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
   height: 32,
   backgroundColor: theme.palette.primaryContainer,
   color: theme.palette.onPrimaryContainer,
-  fontSize: "0.875rem",
+  typography: "bodyMd",
   fontWeight: 600,
 }));
 
@@ -86,16 +86,16 @@ const StyledUserNameText = styled(Typography)({
 
 const StyledUserEmailText = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
-  fontSize: "0.75rem",
+  typography: "labelMd",
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
 }));
 
-const StyledRemoveButton = styled(Button)({
+const StyledRemoveButton = styled(Button)(() => ({
   fontWeight: 600,
-  fontSize: "0.75rem",
-});
+  typography: "labelMd",
+}));
 
 interface AssignedUsersTabProps {
   readonly group: PermissionGroup;
@@ -162,7 +162,7 @@ export function AssignedUsersTab({
       },
       {
         field: "assignedDate",
-        headerName: "Assigned Date",
+        headerName: t("assignedDate"),
         flex: 1.2,
         minWidth: 150,
         renderCell: () => {
@@ -176,12 +176,12 @@ export function AssignedUsersTab({
       },
       {
         field: "assignedBy",
-        headerName: "Assigned By",
+        headerName: t("assignedBy"),
         flex: 1,
         minWidth: 120,
         renderCell: () => (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            System
+            {t("assignedBySystem")}
           </Typography>
         ),
       },
@@ -198,7 +198,7 @@ export function AssignedUsersTab({
             startIcon={<PersonRemoveOutlined fontSize="small" />}
             onClick={() => params.row.id && onRevokeUser(params.row.id)}
           >
-            Remove
+            {t("removeUser")}
           </StyledRemoveButton>
         ),
       },
@@ -211,7 +211,7 @@ export function AssignedUsersTab({
       <StyledUserToolbar>
         <TextField
           size="small"
-          placeholder="Search assigned users by name or email..."
+          placeholder={t("searchAssignedUsers")}
           value={searchQuery}
           onChange={e => onSearchChange(e.target.value)}
           slotProps={{
@@ -230,7 +230,7 @@ export function AssignedUsersTab({
           startIcon={<PersonAddOutlined />}
           onClick={() => group.id && onAssignGroup(group.id)}
         >
-          Assign Users
+          {t("assignUsers")}
         </StyledAssignUsersButton>
       </StyledUserToolbar>
 
@@ -238,7 +238,7 @@ export function AssignedUsersTab({
       {selectedAssignedUserIds.length > 0 && (
         <StyledBulkActionBar>
           <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-            {selectedAssignedUserIds.length} users selected
+            {t("usersSelected", { count: selectedAssignedUserIds.length })}
           </Typography>
           <StyledRemoveSelectedButton
             variant="contained"
@@ -246,18 +246,18 @@ export function AssignedUsersTab({
             startIcon={<DeleteOutlined />}
             onClick={onBulkRevokeUsers}
           >
-            Remove Selected
+            {t("removeSelected")}
           </StyledRemoveSelectedButton>
         </StyledBulkActionBar>
       )}
 
       {/* Users Data Grid */}
-      <SectionPanel title="Assigned Group Members">
+      <SectionPanel title={t("assignedGroupMembers")}>
         <AppDataGrid<GroupUser>
           rows={filteredAssignedUsers}
           columns={assignedUsersColumns}
           getRowId={row => row.id ?? row.email ?? ""}
-          emptyMessage="No users are currently assigned to this permission group."
+          emptyMessage={t("noAssignedUsers")}
           autoHeight
         />
       </SectionPanel>

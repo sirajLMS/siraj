@@ -1,18 +1,6 @@
 import { create } from "zustand";
-import type { DayScheduleConfig as BaseDayScheduleConfig } from "@/frontend/stores/recurring-schedule-types";
-import type { DayOfWeek } from "@/frontend/views/dashboard/classes/recurring/types";
-
-export type DayScheduleConfig = BaseDayScheduleConfig<DayOfWeek>;
-
-export const DEFAULT_DAY_SCHEDULE: readonly DayScheduleConfig[] = [
-  { day: "MONDAY", enabled: true, timeOverride: "09:00", showOverride: false, isWeekend: false },
-  { day: "TUESDAY", enabled: true, timeOverride: "09:00", showOverride: false, isWeekend: false },
-  { day: "WEDNESDAY", enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: false },
-  { day: "THURSDAY", enabled: true, timeOverride: "13:30", showOverride: true, isWeekend: false },
-  { day: "FRIDAY", enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: false },
-  { day: "SATURDAY", enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: true },
-  { day: "SUNDAY", enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: true },
-];
+import type { DayOfWeek } from "@/frontend/graphql/generated/gql/graphql-types";
+import { type DayScheduleConfig, DEFAULT_DAY_SCHEDULE } from "@/frontend/views/dashboard/classes/recurring/types";
 
 interface CreateRecurringClassState {
   readonly isDialogOpen: boolean;

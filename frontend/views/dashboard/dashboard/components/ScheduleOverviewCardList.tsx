@@ -49,7 +49,7 @@ const StyledScheduleCard = styled(Paper, {
   backgroundColor: theme.palette.surfaceContainerLowest,
   border: `1px solid ${theme.palette.border.light}`,
   borderLeft: `4px solid ${getLeftBorderColor(displayStatus, theme)}`,
-  boxShadow: theme.shadows[1],
+  boxShadow: theme.palette.shadow.card,
 }));
 
 const StyledCardHeaderRow = styled(Box)({

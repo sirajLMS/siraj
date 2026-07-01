@@ -49,7 +49,7 @@ function GroupCard({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGro
     <BaseCard
       sx={theme => ({
         p: 2,
-        boxShadow: theme.palette.shadow?.card ?? theme.shadows[1],
+        boxShadow: theme.palette.shadow.card,
       })}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -71,10 +71,9 @@ function GroupCard({ group, onViewGroup, onEditGroup, onDeleteGroup, onAssignGro
               {group.name}
             </Typography>
             <Typography
-              variant="bodyMd"
+              variant="labelMd"
               sx={theme => ({
                 fontFamily: "JetBrains Mono, monospace",
-                fontSize: "0.75rem",
                 color: theme.palette.text.secondary,
               })}
             >

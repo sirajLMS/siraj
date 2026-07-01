@@ -43,5 +43,14 @@ export function buildResourcesLabels(t: ResourcesTranslator): ResourcesLabels {
       documentNameRequired: t("validation.documentNameRequired"),
       fileRequired: t("validation.fileRequired"),
     },
+    notification: {
+      fileTypeNotAllowed: t("notification.fileTypeNotAllowed"),
+      uploadPrepareFailed: t("notification.uploadPrepareFailed"),
+      uploadFailed: t("notification.uploadFailed"),
+      createRecordFailed: t("notification.createRecordFailed"),
+      uploadRetryFailed: t("notification.uploadRetryFailed"),
+      deleteSuccess: t("notification.deleteSuccess"),
+      deleteFailed: t("notification.deleteFailed"),
+    },
   };
 }

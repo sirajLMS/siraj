@@ -13,6 +13,9 @@ interface OnlineMeetingCardProps {
     readonly joinMeeting: string;
     readonly capacityBadge: string;
     readonly capacity: string;
+    readonly meetingIdLabel: string;
+    readonly online: string;
+    readonly meetingIdNA: string;
   };
   readonly onJoinMeeting: () => void;
 }
@@ -115,7 +118,9 @@ const MobileMeetingCard = ({ meetingInfo, labels, onJoinMeeting }: OnlineMeeting
         <Box>
           <StyledMobilePlatformName variant="titleLg">{labels.title}</StyledMobilePlatformName>
           {meetingInfo?.meetingId ? (
-            <StyledLocationText variant="bodyMd">ID: {meetingInfo.meetingId}</StyledLocationText>
+            <StyledLocationText variant="bodyMd">
+              {labels.meetingIdLabel} {meetingInfo.meetingId}
+            </StyledLocationText>
           ) : null}
         </Box>
         <Button
@@ -153,15 +158,17 @@ const DesktopMeetingCard = ({ meetingInfo, labels }: Omit<OnlineMeetingCardProps
         <StyledDesktopScrimOverlay>
           <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
             <StyledOverlayPlatformName variant="bodyLg">{platform}:</StyledOverlayPlatformName>
-            <StyledOverlayMeetingId variant="labelMd">{meetingInfo?.meetingId ?? "Online"}</StyledOverlayMeetingId>
+            <StyledOverlayMeetingId variant="labelMd">{meetingInfo?.meetingId ?? labels.online}</StyledOverlayMeetingId>
           </Box>
         </StyledDesktopScrimOverlay>
       </StyledPreviewContainer>
       <StyledMeetingInfoRow>
         <StyledMeetingInfoIcon />
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          <StyledMeetingIdLabel variant="labelMd">Meeting ID:</StyledMeetingIdLabel>
-          <StyledMeetingUrlText variant="labelUppercase">{meetingInfo?.meetingId ?? "N/A"}</StyledMeetingUrlText>
+          <StyledMeetingIdLabel variant="labelMd">{labels.meetingIdLabel}</StyledMeetingIdLabel>
+          <StyledMeetingUrlText variant="labelUppercase">
+            {meetingInfo?.meetingId ?? labels.meetingIdNA}
+          </StyledMeetingUrlText>
         </Box>
       </StyledMeetingInfoRow>
     </BaseCard>

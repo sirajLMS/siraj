@@ -1,17 +1,16 @@
+import { DayOfWeek } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { DayScheduleConfig as BaseDayScheduleConfig } from "@/frontend/stores/recurring-schedule-types";
-
-export type DayOfWeek = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
 
 export type DayScheduleConfig = BaseDayScheduleConfig<DayOfWeek>;
 
 export const DEFAULT_DAY_SCHEDULE: readonly DayScheduleConfig[] = [
-  { day: "MONDAY", enabled: true, timeOverride: "09:00", showOverride: false, isWeekend: false },
-  { day: "TUESDAY", enabled: true, timeOverride: "09:00", showOverride: false, isWeekend: false },
-  { day: "WEDNESDAY", enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: false },
-  { day: "THURSDAY", enabled: true, timeOverride: "13:30", showOverride: true, isWeekend: false },
-  { day: "FRIDAY", enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: false },
-  { day: "SATURDAY", enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: true },
-  { day: "SUNDAY", enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: true },
+  { day: DayOfWeek.Monday, enabled: true, timeOverride: "09:00", showOverride: false, isWeekend: false },
+  { day: DayOfWeek.Tuesday, enabled: true, timeOverride: "09:00", showOverride: false, isWeekend: false },
+  { day: DayOfWeek.Wednesday, enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: false },
+  { day: DayOfWeek.Thursday, enabled: true, timeOverride: "13:30", showOverride: true, isWeekend: false },
+  { day: DayOfWeek.Friday, enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: false },
+  { day: DayOfWeek.Saturday, enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: true },
+  { day: DayOfWeek.Sunday, enabled: false, timeOverride: "09:00", showOverride: false, isWeekend: true },
 ];
 
 export interface SimpleEntity {

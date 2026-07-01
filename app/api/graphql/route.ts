@@ -10,6 +10,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { createGraphQLContext } from "@/backend/graphql/gqlContextFactory";
 import { graphQLSchema } from "@/backend/graphql/gqlSchema";
+import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { checkRateLimit, getClientIdentifier, graphqlRateLimiter } from "@/backend/lib/ratelimit";
 import { ApolloCacheAdapter } from "@/backend/services/cache";
@@ -69,12 +70,13 @@ async function withRateLimit(
 
   if (!success) {
     logger.warn(`Rate limit exceeded for ${identifier}`);
+    const t = await getBackendTranslations({ namespace: "errors" });
 
     return NextResponse.json(
       {
         errors: [
           {
-            message: "Too many requests. Please try again later.",
+            message: t("rateLimitExceeded"),
             extensions: {
               code: "RATE_LIMIT_EXCEEDED",
               limit,
@@ -129,11 +131,12 @@ async function withIdempotency(
 
   if (!isNew) {
     logger.warn(`Duplicate request detected with idempotency key: ${idempotencyKey} for ${identifier}`);
+    const t = await getBackendTranslations({ namespace: "errors" });
     return NextResponse.json(
       {
         errors: [
           {
-            message: "Duplicate request detected. This operation has already been processed.",
+            message: t("duplicateRequest"),
             extensions: {
               code: "DUPLICATE_REQUEST",
             },
@@ -162,5 +165,23 @@ async function withIdempotency(
  * requests, allowing malicious sites to make authenticated GraphQL queries.
  */
 export async function POST(request: NextRequest) {
-  return withRateLimit(request, req => withIdempotency(req, handler));
+  try {
+    return await withRateLimit(request, req => withIdempotency(req, handler));
+  } catch (error) {
+    logger.error("Unhandled error in GraphQL POST handler", error);
+    const t = await getBackendTranslations({ namespace: "errors" });
+    return NextResponse.json(
+      {
+        errors: [
+          {
+            message: t("internalServerError"),
+            extensions: {
+              code: "INTERNAL_SERVER_ERROR",
+            },
+          },
+        ],
+      },
+      { status: 500 }
+    );
+  }
 }

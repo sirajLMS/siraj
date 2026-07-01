@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { DayOfWeek } from "@/frontend/graphql/generated/gql/graphql-types";
 
 const dayScheduleSchema = z.object({
-  day: z.enum(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]),
+  day: z.nativeEnum(DayOfWeek),
   enabled: z.boolean(),
   timeOverride: z.string(),
   showOverride: z.boolean(),

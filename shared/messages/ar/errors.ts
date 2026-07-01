@@ -123,6 +123,12 @@ export const errors: ErrorsLabels = {
     passwordRequiresSpecialChar: "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
     demoGroupNotFound: "مجموعة العرض غير موجودة: {groupSlug}",
     demoGroupNoUser: "لم يتم العثور على مستخدم لمجموعة العرض: {groupSlug}",
+    tooManyLoginAttempts: "عدد محاولات تسجيل الدخول كثيرة جداً. يرجى المحاولة لاحقاً.",
+    serviceUnavailable: "خدمة المصادقة غير متاحة مؤقتاً",
+    invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صالحة",
+    accountLocked: "عدد محاولات تسجيل الدخول كثيرة جداً. تم قفل حسابك مؤقتاً.",
+    demoLoginNotEnabled: "تسجيل الدخول التجريبي غير مفعل",
+    demoLoginFailed: "فشل تسجيل الدخول التجريبي",
   },
   user: {
     emailAlreadyExists: "الحساب بهذا البريد الإلكتروني موجود بالفعل.",
@@ -162,4 +168,9 @@ export const errors: ErrorsLabels = {
   noteCreateFailed: "فشل إنشاء ملاحظة المعلم",
   categoryHasSubjects: "لا يمكن حذف فئة تحتوي على مواد. قم بإزالة أو إعادة تعيين المواد أولاً.",
   unknownName: "غير معروف",
+  rateLimitExceeded: "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
+  duplicateRequest: "طلب مكرر. هذه العملية تمت معالجتها بالفعل.",
+  internalServerError: "حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.",
+  atLeastOneDayRequired: "يجب اختيار يوم واحد على الأقل",
+  failedToCreateRecurringClass: "فشل إنشاء الحصة المتكررة",
 };

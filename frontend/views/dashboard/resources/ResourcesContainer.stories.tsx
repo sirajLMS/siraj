@@ -49,6 +49,15 @@ const mockLabels = {
     documentNameRequired: "Document name is required",
     fileRequired: "File selection is required",
   },
+  notification: {
+    fileTypeNotAllowed: "{type} is not an allowed file type",
+    uploadPrepareFailed: "Failed to prepare upload",
+    uploadFailed: "File upload failed. Please try again.",
+    createRecordFailed: "Failed to create resource record.",
+    uploadRetryFailed: "Failed to upload resource. Please try again.",
+    deleteSuccess: "Resource deleted successfully.",
+    deleteFailed: "Failed to delete resource.",
+  },
 };
 
 const mockResources = [

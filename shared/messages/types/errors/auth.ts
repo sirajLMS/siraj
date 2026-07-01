@@ -7,4 +7,10 @@ export interface AuthErrorLabels {
   readonly passwordRequiresSpecialChar: string;
   readonly demoGroupNotFound: string;
   readonly demoGroupNoUser: string;
+  readonly tooManyLoginAttempts: string;
+  readonly serviceUnavailable: string;
+  readonly invalidCredentials: string;
+  readonly accountLocked: string;
+  readonly demoLoginNotEnabled: string;
+  readonly demoLoginFailed: string;
 }

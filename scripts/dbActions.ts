@@ -158,7 +158,8 @@ async function dispatchAction(key: string): Promise<number> {
     case "8":
       return cleanGenerate();
     default:
-      return 0;
+      globalThis.console.error(`Invalid action key: "${key}". Please select a valid option.`);
+      return 1;
   }
 }
 

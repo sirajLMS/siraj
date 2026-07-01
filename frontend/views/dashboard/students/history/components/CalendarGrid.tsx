@@ -1,6 +1,7 @@
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, Paper, styled, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { StatusBadge } from "@/frontend/components/ui";
 import { Link } from "@/shared/i18n/routing";
 import { AttendanceStatus } from "@/shared/lib/enum";
 import type { CalendarGridProps, ClassSession } from "../types";
@@ -38,28 +39,11 @@ const EmptyCell = styled(Box)(({ theme }) => ({
   opacity: 0.3,
 }));
 
-const StatusBadge = styled(Box)<{ status: AttendanceStatus }>(({ theme, status }) => {
-  let backgroundColor = theme.palette.secondary.main;
-  let color = theme.palette.onSecondary;
-
-  if (status === AttendanceStatus.PRESENT) {
-    backgroundColor = theme.palette.status.active;
-    color = theme.palette.status.onActive;
-  } else if (status === AttendanceStatus.ABSENT) {
-    backgroundColor = theme.palette.error.main;
-    color = theme.palette.onError;
-  }
-
-  return {
-    padding: theme.spacing(0.75),
-    borderRadius: theme.layout.radius.badge,
-    fontSize: "10px",
-    lineHeight: 1.2,
-    fontWeight: 700,
-    color,
-    backgroundColor: backgroundColor,
-  };
-});
+function CalendarStatusBadge({ status, label }: Readonly<{ status: AttendanceStatus; label: string }>) {
+  const badgeStatus =
+    status === AttendanceStatus.PRESENT ? "active" : status === AttendanceStatus.ABSENT ? "blocked" : "pending";
+  return <StatusBadge category="classSession" status={badgeStatus} label={label} />;
+}
 
 function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: ClassSession }>) {
   const content = (
@@ -77,7 +61,7 @@ function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: Cla
 
       {session && (
         <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}>
-          <StatusBadge status={session.status}>{session.title}</StatusBadge>
+          <CalendarStatusBadge status={session.status} label={session.title} />
           <Box
             sx={{
               display: "flex",
@@ -87,7 +71,7 @@ function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: Cla
             }}
           >
             <ScheduleOutlined sx={{ fontSize: 10 }} />
-            <Typography sx={{ fontSize: "9px" }}>{session.time}</Typography>
+            <Typography sx={{ typography: "labelSm" }}>{session.time}</Typography>
           </Box>
         </Box>
       )}
