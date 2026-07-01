@@ -3,6 +3,10 @@ import * as Pothos from "@/backend/graphql/pothos";
 import { getStorageService } from "@/backend/storage/storage.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
+// IMPORTANT: Service layer must verify user has access to the requested storage path
+// These queries accept arbitrary path parameters — the service layer is responsible
+// for enforcing per-user path access restrictions to prevent IDOR.
+
 gqlSchemaBuilder.queryFields(t => ({
   listFiles: t.field({
     authScopes: { loggedIn: true },

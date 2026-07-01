@@ -32,6 +32,14 @@ gqlSchemaBuilder.queryFields(t => ({
   users: t.field({
     authScopes: { permission: AppPermission.STAFF_LIST },
     type: [UserPothosObject],
-    resolve: async () => await UserRepository.findUsers({ limit: 50, offset: 0 }),
+    args: {
+      limit: t.arg.int({ required: false, defaultValue: 50, description: "Max results (max 200)" }),
+      offset: t.arg.int({ required: false, defaultValue: 0 }),
+    },
+    resolve: async (_parent, args) => {
+      const limit = Math.min(args.limit ?? 50, 200);
+      const offset = args.offset ?? 0;
+      return await UserRepository.findUsers({ limit, offset });
+    },
   }),
 }));

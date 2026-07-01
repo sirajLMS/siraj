@@ -1,4 +1,5 @@
 import logger from "@/backend/lib/logger";
+import { sanitizeStoragePath, validateStoragePath } from "@/backend/lib/path-validator";
 import { StorageAuthService, StorageManageService } from "@/backend/services/storage";
 import { getStorageService } from "@/backend/storage/storage.service";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
@@ -17,9 +18,11 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      await StorageAuthService.requireStorageManageOrOwner(userId, input.currentPath, ctx.locale);
+      const currentPath = sanitizeStoragePath(input.currentPath);
+      validateStoragePath(currentPath);
+      await StorageAuthService.requireStorageManageOrOwner(userId, currentPath, ctx.locale);
       const storageService = await getStorageService();
-      return await storageService.renameFile(input);
+      return await storageService.renameFile({ ...input, currentPath });
     },
   }),
 
@@ -31,9 +34,11 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { path }, ctx) => {
       const userId = await requireAuth(ctx);
-      await StorageAuthService.requireStorageManageOrOwner(userId, path, ctx.locale);
+      const sanitizedPath = sanitizeStoragePath(path);
+      validateStoragePath(sanitizedPath);
+      await StorageAuthService.requireStorageManageOrOwner(userId, sanitizedPath, ctx.locale);
       const storageService = await getStorageService();
-      return await storageService.deleteFile(path);
+      return await storageService.deleteFile(sanitizedPath);
     },
   }),
 
@@ -48,9 +53,11 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
+      const sanitizedPath = sanitizeStoragePath(input.path);
+      validateStoragePath(sanitizedPath);
       await StorageAuthService.requireStorageManage(userId, ctx.locale);
       const storageService = await getStorageService();
-      const result = await storageService.prepareUpload(input);
+      const result = await storageService.prepareUpload({ ...input, path: sanitizedPath });
       logger.info("GraphQL mutation: prepareUpload completed", {
         uploadType: result.uploadType,
       });
@@ -69,9 +76,11 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
+      const sanitizedPath = sanitizeStoragePath(input.path);
+      validateStoragePath(sanitizedPath);
       await StorageAuthService.requireStorageManage(userId, ctx.locale);
       const storageService = await getStorageService();
-      return await storageService.createFolder(input);
+      return await storageService.createFolder({ ...input, path: sanitizedPath });
     },
   }),
 
@@ -86,11 +95,25 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      for (const itemPath of input.sourcePaths) {
+      const sanitizedSourcePaths = input.sourcePaths.map(p => {
+        const sanitized = sanitizeStoragePath(p);
+        validateStoragePath(sanitized);
+        return sanitized;
+      });
+      const sanitizedDestPath = sanitizeStoragePath(input.destinationPath);
+      validateStoragePath(sanitizedDestPath);
+      if (sanitizedSourcePaths.length > 100) {
+        throw new Error("Bulk move operation limited to 100 items maximum");
+      }
+      for (const itemPath of sanitizedSourcePaths) {
         await StorageAuthService.requireStorageManageOrOwner(userId, itemPath, ctx.locale);
       }
       const storageService = await getStorageService();
-      return await storageService.moveItems(input);
+      return await storageService.moveItems({
+        ...input,
+        sourcePaths: sanitizedSourcePaths,
+        destinationPath: sanitizedDestPath,
+      });
     },
   }),
 
@@ -105,11 +128,25 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      for (const itemPath of input.sourcePaths) {
+      const sanitizedSourcePaths = input.sourcePaths.map(p => {
+        const sanitized = sanitizeStoragePath(p);
+        validateStoragePath(sanitized);
+        return sanitized;
+      });
+      const sanitizedDestPath = sanitizeStoragePath(input.destinationPath);
+      validateStoragePath(sanitizedDestPath);
+      if (sanitizedSourcePaths.length > 100) {
+        throw new Error("Bulk copy operation limited to 100 items maximum");
+      }
+      for (const itemPath of sanitizedSourcePaths) {
         await StorageAuthService.requireStorageManageOrOwner(userId, itemPath, ctx.locale);
       }
       const storageService = await getStorageService();
-      return await storageService.copyItems(input);
+      return await storageService.copyItems({
+        ...input,
+        sourcePaths: sanitizedSourcePaths,
+        destinationPath: sanitizedDestPath,
+      });
     },
   }),
 
@@ -124,11 +161,19 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      for (const itemPath of input.paths) {
+      const sanitizedPaths = input.paths.map(p => {
+        const sanitized = sanitizeStoragePath(p);
+        validateStoragePath(sanitized);
+        return sanitized;
+      });
+      if (sanitizedPaths.length > 100) {
+        throw new Error("Bulk delete operation limited to 100 items maximum");
+      }
+      for (const itemPath of sanitizedPaths) {
         await StorageAuthService.requireStorageManageOrOwner(userId, itemPath, ctx.locale);
       }
       const storageService = await getStorageService();
-      return await storageService.deleteItems(input);
+      return await storageService.deleteItems({ ...input, paths: sanitizedPaths });
     },
   }),
 
@@ -143,8 +188,10 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
+      const sanitizedPath = sanitizeStoragePath(input.path);
+      validateStoragePath(sanitizedPath);
       await StorageAuthService.requireStorageManage(userId, ctx.locale);
-      return await StorageManageService.updateDirectoryPermissions(input);
+      return await StorageManageService.updateDirectoryPermissions({ ...input, path: sanitizedPath });
     },
   }),
 
@@ -159,8 +206,10 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
+      const sanitizedPath = sanitizeStoragePath(input.path);
+      validateStoragePath(sanitizedPath);
       await StorageAuthService.requireStorageManage(userId, ctx.locale);
-      return await StorageManageService.setStorageItemProtection(input);
+      return await StorageManageService.setStorageItemProtection({ ...input, path: sanitizedPath });
     },
   }),
 }));

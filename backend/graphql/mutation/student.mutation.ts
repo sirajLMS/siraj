@@ -32,13 +32,17 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_query, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const input = Object.fromEntries(
-        Object.entries(args.input).filter(([, value]) => value !== null)
-      ) as Types.PartialStudentUpdateInput;
-      const { status, ...restInput } = input;
+      const input: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(args.input)) {
+        if (value !== null) {
+          input[key] = value;
+        }
+      }
+      const typedInput = input as Types.PartialStudentUpdateInput;
+      const { status, ...restInput } = typedInput;
       if (status) {
         await requireStudentManageStatus(userId, ctx.locale);
-        await StudentRepository.changeStatus(input.id, status, undefined, undefined, ctx.locale);
+        await StudentRepository.changeStatus(typedInput.id, status, undefined, undefined, ctx.locale);
       }
       return await StudentRepository.partiallyUpdate(restInput as Types.PartialStudentUpdateInput).then(s =>
         StudentUtils.mapEntityToDto(s)

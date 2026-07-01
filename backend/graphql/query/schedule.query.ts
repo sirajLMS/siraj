@@ -158,12 +158,8 @@ gqlSchemaBuilder.queryField("teacherWeeklyScheduleGrid", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      return await WeeklyScheduleService.getWeeklySchedule(
-        ctx.user?.id || "",
-        args.teacherId || null,
-        args.weekDate,
-        ctx.locale
-      );
+      const userId = await requireAuth(ctx);
+      return await WeeklyScheduleService.getWeeklySchedule(userId, args.teacherId || null, args.weekDate, ctx.locale);
     },
   })
 );
@@ -177,12 +173,8 @@ gqlSchemaBuilder.queryField("teacherWorkloadMetrics", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
-      return await WeeklyScheduleService.getWorkloadMetrics(
-        ctx.user?.id || "",
-        args.teacherId || null,
-        args.weekDate,
-        ctx.locale
-      );
+      const userId = await requireAuth(ctx);
+      return await WeeklyScheduleService.getWorkloadMetrics(userId, args.teacherId || null, args.weekDate, ctx.locale);
     },
   })
 );

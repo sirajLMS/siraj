@@ -12,7 +12,7 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
     args: {
       input: t.arg({ type: CreateRecurringClassInputPothosObject, required: true }),
     },
-    authScopes: { loggedIn: true },
+    authScopes: { superAdmin: true },
     resolve: async (_parent, args, ctx) => {
       if (!ctx.user?.id) {
         const tFunc = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });

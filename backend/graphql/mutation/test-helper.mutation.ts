@@ -53,6 +53,9 @@ if (process.env.NODE_ENV !== "production") {
         classesRemaining: t.arg.int({ required: false }),
       },
       resolve: async (_query, args) => {
+        if (process.env.NODE_ENV === "production") {
+          throw new Error("Test mutations are not available in production");
+        }
         return await TestHelperService.createTestEntities(args.prefix, args.classesRemaining ?? undefined);
       },
     })
@@ -71,6 +74,9 @@ if (process.env.NODE_ENV !== "production") {
         parentId: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
+        if (process.env.NODE_ENV === "production") {
+          throw new Error("Test mutations are not available in production");
+        }
         return await TestHelperService.cleanupTestEntities(args);
       },
     })
@@ -85,6 +91,9 @@ if (process.env.NODE_ENV !== "production") {
         teacherName: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
+        if (process.env.NODE_ENV === "production") {
+          throw new Error("Test mutations are not available in production");
+        }
         return await TestHelperService.createTestGroupClass(args.classInstanceId, args.teacherName);
       },
     })
@@ -98,6 +107,9 @@ if (process.env.NODE_ENV !== "production") {
         groupClassId: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
+        if (process.env.NODE_ENV === "production") {
+          throw new Error("Test mutations are not available in production");
+        }
         return await TestHelperService.cleanupTestGroupClass(args.groupClassId);
       },
     })
@@ -123,6 +135,9 @@ if (process.env.NODE_ENV !== "production") {
         prefix: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
+        if (process.env.NODE_ENV === "production") {
+          throw new Error("Test mutations are not available in production");
+        }
         return await TestHelperService.createTestSuperAdmin(args.prefix);
       },
     })
@@ -136,6 +151,9 @@ if (process.env.NODE_ENV !== "production") {
         userId: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
+        if (process.env.NODE_ENV === "production") {
+          throw new Error("Test mutations are not available in production");
+        }
         return await TestHelperService.cleanupTestSuperAdmin(args.userId);
       },
     })
@@ -149,6 +167,9 @@ if (process.env.NODE_ENV !== "production") {
         userId: t.arg.string({ required: true }),
       },
       resolve: async (_query, args) => {
+        if (process.env.NODE_ENV === "production") {
+          throw new Error("Test mutations are not available in production");
+        }
         return await TestHelperService.cleanupTestManager(args.userId);
       },
     })

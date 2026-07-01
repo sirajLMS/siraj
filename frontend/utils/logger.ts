@@ -17,6 +17,21 @@ export const logger = {
     }
   },
   error: (...args: unknown[]) => {
-    console.error("[ERROR]", ...args);
+    if (isDev) {
+      // In development, log full error details for debugging
+      console.error("[ERROR]", ...args);
+    } else {
+      // In production, log limited info to avoid exposing PII in error objects
+      const sanitized = args.map(arg => {
+        if (arg instanceof Error) {
+          return `[ERROR] ${arg.name}: ${arg.message}`;
+        }
+        if (typeof arg === "string") {
+          return arg;
+        }
+        return "[redacted]";
+      });
+      console.error(...sanitized);
+    }
   },
 };

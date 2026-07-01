@@ -54,6 +54,13 @@ export function setThemePreference(mode: PaletteMode) {
 
 /**
  * Set a cookie with the given name, value, and expiration days
+ *
+ * SECURITY NOTE: This cookie cannot use httpOnly=true because it is set from
+ * client-side JavaScript (both Cookie Store API and document.cookie fallback).
+ * The httpOnly flag prevents JavaScript access, which would break the cookieStore
+ * reads in getCookie(). For a more secure alternative, consider setting the theme
+ * cookie server-side via Next.js middleware or a Server Action with httpOnly:true,
+ * and reading it only from the request headers on subsequent page loads.
  */
 async function setCookie(name: string, value: string, days: number) {
   if (!hasClientWindow()) {
