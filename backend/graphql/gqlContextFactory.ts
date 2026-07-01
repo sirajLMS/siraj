@@ -20,13 +20,15 @@ async function getUserIdFromRequest(headersList: Headers): Promise<string | null
   return null;
 }
 
-/**
- * Extract IP address from headers
- */
+const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+
 function getIpAddress(headersList: Headers): string {
-  const forwardedFor = headersList.get("x-forwarded-for");
+  const forwardedFor = headersList.get("x-forwarded-for")?.split(",")[0]?.trim();
   const realIp = headersList.get("x-real-ip");
-  return realIp || forwardedFor?.split(",")[0]?.trim() || "unknown";
+  const raw = realIp || forwardedFor || "127.0.0.1";
+  const parts = raw.split(":");
+  const ip = parts.length === 2 ? parts[0] : raw;
+  return IPV4_REGEX.test(ip) ? ip : "127.0.0.1";
 }
 
 /**

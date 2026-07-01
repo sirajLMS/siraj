@@ -3,22 +3,29 @@ import { db } from "@/backend/db/drizzleDb";
 import { authRateLimits } from "@/backend/db/schema";
 
 export namespace RateLimitRepository {
-  /**
-   * Records a failed authentication attempt and returns the current state.
-   */
+  const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+
+  function sanitizeIpAddress(ip: string): string {
+    if (IPV4_REGEX.test(ip)) return ip;
+    const parts = ip.split(":");
+    if (parts.length === 2 && IPV4_REGEX.test(parts[0])) return parts[0];
+    return "127.0.0.1";
+  }
+
   export const recordAttempt = async (
     ipAddress: string,
     email: string,
     maxAttempts: number = 5,
     lockoutMinutes: number = 15
   ): Promise<{ attempts: number; lockedUntil: Date | null; isLocked: boolean }> => {
+    const safeIp = sanitizeIpAddress(ipAddress);
     const result = await db.execute<{
       attempts: number;
       locked_until: string | null;
       is_locked: boolean;
     }>(sql`
       SELECT * FROM check_and_record_auth_attempt(
-        ${ipAddress}::inet, 
+        ${safeIp}::inet, 
         ${email}, 
         ${maxAttempts}, 
         ${lockoutMinutes}
@@ -33,14 +40,12 @@ export namespace RateLimitRepository {
     };
   };
 
-  /**
-   * Checks if an IP/Email combination is currently locked.
-   */
   export const isLocked = async (ipAddress: string, email: string): Promise<boolean> => {
+    const safeIp = sanitizeIpAddress(ipAddress);
     const results = await db
       .select()
       .from(authRateLimits)
-      .where(and(eq(authRateLimits.ipAddress, ipAddress), eq(authRateLimits.email, email)));
+      .where(and(eq(authRateLimits.ipAddress, safeIp), eq(authRateLimits.email, email)));
 
     if (results.length === 0) {
       return false;
@@ -54,16 +59,11 @@ export namespace RateLimitRepository {
     return record.lockedUntil > new Date();
   };
 
-  /**
-   * Resets attempts for a successful login.
-   */
   export const resetAttempts = async (ipAddress: string, email: string): Promise<void> => {
-    await db.execute(sql`SELECT reset_auth_attempts(${ipAddress}::inet, ${email})`);
+    const safeIp = sanitizeIpAddress(ipAddress);
+    await db.execute(sql`SELECT reset_auth_attempts(${safeIp}::inet, ${email})`);
   };
 
-  /**
-   * Cleans up expired rate limit records, tokens, and cache.
-   */
   export const cleanupExpired = async (): Promise<void> => {
     await db.execute(sql`SELECT cleanup_expired_security_data()`);
   };

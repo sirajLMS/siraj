@@ -16,7 +16,7 @@ type DBTransaction = NonNullable<Parameters<typeof TeacherBankingRepository.subm
 async function setupBankingTest(tx: DBTransaction, prefix: string, beneficiaryName = "Original Name") {
   const { teacher } = await setupTeacher(tx, {
     name: `${prefix} Teacher`,
-    email: `teacher-${prefix.toLowerCase().replace(/\s+/g, "-")}-${randomUUID()}@example.com`,
+    email: `tea-${prefix.toLowerCase().replace(/\s+/g, "-")}-${randomUUID().slice(0, 8)}@example.com`,
   });
 
   const banking = await TeacherBankingRepository.submitBankingDetails(

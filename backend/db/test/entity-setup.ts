@@ -177,7 +177,7 @@ export async function setupTestEntities(
     student,
   } = await setupStudent(
     tx,
-    { name: `${prefix} ParentUser`, email: `${prefix}-parent-${randomUUID()}@example.com` },
+    { name: `${prefix} ParentUser`, email: `${prefix}-par-${randomUUID().slice(0, 8)}@example.com` },
     {},
     {
       name: `${prefix} Student`,
@@ -188,7 +188,7 @@ export async function setupTestEntities(
 
   const { user: teacherUser, teacher } = await setupTeacher(tx, {
     name: `${prefix} TeacherUser`,
-    email: `${prefix}-teacher-${randomUUID()}@example.com`,
+    email: `${prefix}-tea-${randomUUID().slice(0, 8)}@example.com`,
   });
 
   const [assignment] = await tx

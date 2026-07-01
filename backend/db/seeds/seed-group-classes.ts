@@ -47,7 +47,7 @@ export async function seedOrGet(
         originalDate: instance.isRescheduled ? instance.scheduledStartAt : null,
         rescheduledDate: instance.isRescheduled ? now : null,
         timeSlot: `${instance.scheduledStartAt.toISOString().slice(11, 16)} - ${instance.scheduledEndAt.toISOString().slice(11, 16)}`,
-        status: instance.isRescheduled ? "regular_rescheduled" : "regular_scheduled",
+        status: instance.executionState ?? "NOT_ACTIVATED",
         auditRemark: instance.isRescheduled ? "Class rescheduled by system" : null,
         auditLoggedAt: now,
       })

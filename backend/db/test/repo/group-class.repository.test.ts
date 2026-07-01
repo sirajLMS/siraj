@@ -40,13 +40,13 @@ async function setupGroupClassFixture(tx: DBTransaction, prefix: string) {
     student,
   } = await setupStudent(
     tx,
-    { name: `${prefix} ParentUser`, email: `${prefix.toLowerCase()}-parent-${randomUUID()}@example.com` },
+    { name: `${prefix} ParentUser`, email: `${prefix.toLowerCase()}-par-${randomUUID().slice(0, 8)}@example.com` },
     {},
     { name: `${prefix} Student` }
   );
   const { user: teacherUser, teacher } = await setupTeacher(tx, {
     name: `${prefix} TeacherUser`,
-    email: `${prefix.toLowerCase()}-teacher-${randomUUID()}@example.com`,
+    email: `${prefix.toLowerCase()}-tea-${randomUUID().slice(0, 8)}@example.com`,
   });
 
   const instance = await createMockClassInstance(tx, student.id, teacher.id);

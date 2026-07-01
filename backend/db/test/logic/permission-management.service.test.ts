@@ -77,7 +77,7 @@ describe("PermissionManagementService Business Logic", () => {
       .insert(users)
       .values({
         name: "Service Admin User",
-        email: `service-test-admin-${randomUUID()}@example.com`,
+        email: `svc-adm-${randomUUID().slice(0, 8)}@example.com`,
         password: "password",
         createdAt: now,
         updatedAt: now,
@@ -88,7 +88,7 @@ describe("PermissionManagementService Business Logic", () => {
       .insert(users)
       .values({
         name: "Service Regular User",
-        email: `service-test-regular-${randomUUID()}@example.com`,
+        email: `svc-reg-${randomUUID().slice(0, 8)}@example.com`,
         password: "password",
         createdAt: now,
         updatedAt: now,
@@ -99,7 +99,7 @@ describe("PermissionManagementService Business Logic", () => {
       .insert(users)
       .values({
         name: "Service SuperAdmin User",
-        email: `service-test-superadmin-${randomUUID()}@example.com`,
+        email: `svc-sa-${randomUUID().slice(0, 8)}@example.com`,
         password: "password",
         isSuperAdmin: true,
         createdAt: now,

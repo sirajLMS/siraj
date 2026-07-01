@@ -34,6 +34,15 @@ function getSessionRedisService(): SessionRedisService {
   return sessionRedisService;
 }
 
+const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+
+function sanitizeIpAddress(ip: string | null | undefined): string | null {
+  if (!ip) return null;
+  const parts = ip.split(":");
+  const cleanIp = parts.length === 2 ? parts[0] : ip;
+  return IPV4_REGEX.test(cleanIp) ? cleanIp : "127.0.0.1";
+}
+
 export namespace SessionRepository {
   /**
    * Acquire advisory lock for a user
@@ -181,7 +190,7 @@ export namespace SessionRepository {
       .values({
         hashedId: input.hashedId,
         userId: input.userId,
-        ipAddress: input.ipAddress || null,
+        ipAddress: sanitizeIpAddress(input.ipAddress),
         userAgent: input.userAgent || null,
         payload: input.payload,
         lastActivity: now,
@@ -226,7 +235,7 @@ export namespace SessionRepository {
           userId: input.userId,
           hashedId,
           payload: input.payload,
-          ipAddress: input.ipAddress?.toString(),
+          ipAddress: sanitizeIpAddress(input.ipAddress) ?? undefined,
           userAgent: input.userAgent || undefined,
           deviceType: input.deviceType,
           deviceName: input.deviceName,
@@ -241,7 +250,7 @@ export namespace SessionRepository {
         userId: input.userId,
         deviceType: input.deviceType || null,
         deviceName: input.deviceName || null,
-        ipAddress: input.ipAddress || null,
+        ipAddress: sanitizeIpAddress(input.ipAddress),
         userAgent: input.userAgent || null,
         createdAt: now,
         lastActivityAt: now,

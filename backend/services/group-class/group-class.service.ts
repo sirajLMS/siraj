@@ -13,7 +13,7 @@ import type {
 } from "@/backend/types";
 import {
   AppPermission,
-  type ClassExecutionState,
+  ClassExecutionState,
   type GroupClassAttendanceStatus,
   NotificationChannel,
   NotificationEventType,
@@ -102,7 +102,7 @@ export namespace GroupClassService {
       rescheduledDate,
       timeSlot: groupClass.timeSlot,
       venue: "Online",
-      status: groupClass.status as ClassExecutionState,
+      status: resolveGroupClassStatus(classInstance.executionState),
       auditRemark: groupClass.auditRemark ?? null,
       auditLoggedAt: groupClass.auditLoggedAt.toISOString(),
       registeredStudentCount: students.length,
@@ -177,6 +177,14 @@ export namespace GroupClassService {
 
     return { id: classInstanceId, success: true };
   }
+}
+
+function resolveGroupClassStatus(executionState: string | null | undefined): ClassExecutionState {
+  const state = (executionState ?? ClassExecutionState.NOT_ACTIVATED) as ClassExecutionState;
+  if (state === ClassExecutionState.COMPLETED) return ClassExecutionState.COMPLETED;
+  if (state === ClassExecutionState.ACTIVATED) return ClassExecutionState.ACTIVATED;
+  if (state === ClassExecutionState.RUNNING) return ClassExecutionState.RUNNING;
+  return ClassExecutionState.NOT_ACTIVATED;
 }
 
 function extractZoomMeetingId(url: string): string | null {

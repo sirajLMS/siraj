@@ -11,6 +11,15 @@ async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTran
   return tx ? await fn(tx) : await db.transaction((t: DBTransaction) => fn(t));
 }
 
+const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+
+function sanitizeIpAddress(ip: string | null | undefined): string | null {
+  if (!ip) return null;
+  const parts = ip.split(":");
+  const cleanIp = parts.length === 2 ? parts[0] : ip;
+  return IPV4_REGEX.test(cleanIp) ? cleanIp : "127.0.0.1";
+}
+
 export namespace AuditRepository {
   /**
    * Create an audit log entry.
@@ -32,7 +41,7 @@ export namespace AuditRepository {
           previousState: input.previousState ?? null,
           newState: input.newState ?? null,
           changes: input.changes ?? null,
-          ipAddress: input.ipAddress ?? null,
+          ipAddress: sanitizeIpAddress(input.ipAddress),
           userAgent: input.userAgent ?? null,
           metadata: input.metadata ?? null,
           createdAt: new Date(),

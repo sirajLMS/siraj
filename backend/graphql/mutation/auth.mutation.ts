@@ -144,7 +144,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, args, ctx) => {
       const { email, password } = args.input;
-      const ipAddress = ctx.ipAddress || "unknown";
+      const ipAddress = ctx.ipAddress || "127.0.0.1";
       const t = await getBackendTranslations({ locale: ctx.locale, namespace: "errors" });
 
       // 0. Enforce auth rate limit before any credential checks

@@ -36,9 +36,9 @@ export namespace TestHelperService {
   type TxType = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
   async function createTestUsers(tx: TxType, prefix: string, hashedPassword: string, now: Date) {
-    const studentEmail = `${prefix}-student-${randomUUID()}@example.com`;
-    const parentEmail = `${prefix}-parent-${randomUUID()}@example.com`;
-    const teacherEmail = `${prefix}-teacher-${randomUUID()}@example.com`;
+    const studentEmail = `${prefix}-stu-${randomUUID().slice(0, 8)}@example.com`;
+    const parentEmail = `${prefix}-par-${randomUUID().slice(0, 8)}@example.com`;
+    const teacherEmail = `${prefix}-tea-${randomUUID().slice(0, 8)}@example.com`;
 
     const [studentUserRow] = await tx
       .insert(users)
@@ -298,7 +298,7 @@ export namespace TestHelperService {
         originalDate: null,
         rescheduledDate: null,
         timeSlot: `${classInstance.scheduledStartAt.toISOString().slice(11, 16)} - ${classInstance.scheduledEndAt.toISOString().slice(11, 16)}`,
-        status: "regular_scheduled",
+        status: "NOT_ACTIVATED",
         auditRemark: null,
         auditLoggedAt: now,
       })
@@ -332,7 +332,7 @@ export namespace TestHelperService {
     }
 
     const now = new Date();
-    const email = `${prefix}-superadmin-${randomUUID()}@example.com`;
+    const email = `${prefix}-sa-${randomUUID().slice(0, 8)}@example.com`;
     // eslint-disable-next-line sonarjs/no-hardcoded-passwords
     const plainPassword = "Test_Pass1!";
     const hashedPassword = await hashPassword(plainPassword);

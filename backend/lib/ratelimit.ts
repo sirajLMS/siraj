@@ -243,7 +243,7 @@ export function getClientIdentifier(request: Request): string {
   const cfConnectingIp = request.headers.get("cf-connecting-ip"); // Cloudflare
 
   // Use the first available IP
-  const ip = cfConnectingIp || realIp || forwardedFor?.split(",")[0] || "unknown";
+  const ip = cfConnectingIp || realIp || forwardedFor?.split(",")[0] || "127.0.0.1";
 
   return ip.trim();
 }
