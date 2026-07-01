@@ -1,11 +1,11 @@
 "use client";
 
 import { WarningAmberOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/components/ui";
+import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
 import type { StudentCreditRow, StudentCreditStatus } from "../types/billingViewTypes";
 
 export interface StudentCreditDataGridLabels {
@@ -85,15 +85,7 @@ export function StudentCreditDataGrid({
           const isNegative = row.status === "negative_balance";
           return (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, height: "100%" }}>
-              <Chip
-                label={formatClassesLeft(row)}
-                size="small"
-                sx={theme => ({
-                  fontWeight: 700,
-                  backgroundColor: isNegative ? theme.palette.errorContainer : theme.palette.secondaryContainer,
-                  color: isNegative ? theme.palette.error.main : theme.palette.onSecondaryContainer,
-                })}
-              />
+              <StatusBadge category="invoice" status={isNegative ? "OVERDUE" : "PAID"} label={formatClassesLeft(row)} />
               {isNegative && <StyledWarningIcon />}
             </Box>
           );

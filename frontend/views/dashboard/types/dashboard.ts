@@ -1,7 +1,16 @@
 import type { SvgIconComponent } from "@mui/icons-material";
-import type { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import type {
+  AppPermission,
+  ClassExecutionState,
+  ClassOutcome,
+  DailyScheduleList,
+} from "@/frontend/graphql/generated/gql/graphql-types";
+import type { DashboardFilters, MetricItem, Pagination, TeacherFilterItem } from "@/frontend/types/shared.types";
 import type { DashboardNavigationLabels } from "@/shared/messages/types/message";
+
+export type { DailyScheduleList as DailyScheduleRow, DashboardFilters, MetricItem, Pagination, TeacherFilterItem };
+
+type DailyScheduleRow = DailyScheduleList;
 
 export interface NavItem {
   readonly key: string;
@@ -10,16 +19,6 @@ export interface NavItem {
   readonly href: string;
   readonly section: "main" | "footer";
   readonly permission?: AppPermission | readonly AppPermission[];
-}
-
-export interface MetricItem {
-  readonly key: string;
-  readonly count: number | string;
-  readonly labelKey: string;
-  readonly label?: string;
-  readonly icon: SvgIconComponent;
-  readonly subLabel?: string;
-  readonly variant?: "default" | "error" | "highlight" | "danger" | "compact";
 }
 
 export type ClassInstanceStatus = "active" | "scheduled" | "pending" | "completed" | "cancelled";
@@ -66,11 +65,6 @@ export interface ClassInstance {
   readonly attendanceRate: number;
   readonly avgGrade: string;
   readonly lastClassDaysAgo: number;
-}
-
-export interface TeacherFilterItem {
-  readonly id: string;
-  readonly name: string;
 }
 
 export interface ScheduleOverviewData {
@@ -120,52 +114,10 @@ export interface UserInfo {
   readonly notificationCount: number;
 }
 
-export type TeacherSessionStatus =
-  | "missed"
-  | "pending"
-  | "upcoming"
-  | "completed"
-  | "active"
-  | "connecting"
-  | "activated";
-
-export interface TeacherScheduleRow {
-  readonly id: string;
-  readonly rowNumber: number;
-  readonly classId: string;
-  readonly studentName: string;
-  readonly studentInitials: string;
-  readonly timeRange: string;
-  readonly status: TeacherSessionStatus;
-  readonly videoEnabled: boolean;
-  readonly activateEnabled: boolean;
-  readonly durationMinutes?: number;
-  readonly courseTitle?: string;
-  readonly locationLabel?: string;
-  readonly isLive?: boolean;
-  readonly isCurrent?: boolean;
-  readonly studentId?: string;
-  readonly zoomMeetingUrl?: string | null;
-}
-
-export interface TeacherDashboardMetrics {
-  readonly totalClasses: number;
-  readonly missedSlots: number;
-  readonly completed: number;
-  readonly studentsToday: number;
-  readonly activeSessions?: number;
-}
-
-export interface StudentProgressFeedItem {
-  readonly id: string;
-  readonly studentName: string;
-  readonly studentInitials: string;
-  readonly summary: string;
-  readonly timeAgo: string;
-  readonly icon: "description" | "grade" | "login";
-}
-
-export interface MissedClassAlert {
-  readonly classId: string;
-  readonly scheduledTime: string;
-}
+export type {
+  MissedClassAlert,
+  StudentProgressFeedItem,
+  TeacherDashboardMetrics,
+  TeacherScheduleRow,
+  TeacherSessionStatus,
+} from "@/frontend/types/shared.types";

@@ -1,9 +1,9 @@
 "use client";
 
-import { InfoOutlined, ReportProblemOutlined } from "@mui/icons-material";
+import { ReportProblemOutlined } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import type {
   CheckedEmptyItem,
   ConflictGroup,
@@ -33,10 +33,7 @@ function MobileInactiveNote() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-        <InfoOutlined sx={theme => ({ color: theme.palette.warning.main })} />
-        <Typography variant="titleLg">{t("sections.inactiveVerified")}</Typography>
-      </Stack>
+      <SectionPanel title={t("sections.inactiveVerified")} />
       <Box
         sx={theme => ({
           p: 2,
@@ -60,10 +57,7 @@ function MobileConflictsHeader() {
   const t = useTranslations("dashboard.dstMigration");
 
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 2 }}>
-      <ReportProblemOutlined sx={theme => ({ color: theme.palette.error.main })} />
-      <Typography variant="titleLg">{t("sections.conflictsDetected")}</Typography>
-    </Stack>
+    <SectionPanel title={t("sections.conflictsDetected")} />
   );
 }
 
@@ -71,9 +65,7 @@ function MobileUpdatedHeader() {
   const t = useTranslations("dashboard.dstMigration");
 
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 2 }}>
-      <Typography variant="titleLg">{t("sections.successfullyUpdated")}</Typography>
-    </Stack>
+    <SectionPanel title={t("sections.successfullyUpdated")} />
   );
 }
 

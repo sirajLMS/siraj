@@ -60,4 +60,7 @@ export const classAudit: ClassAuditLabels = {
     update: "تحديث",
     edit: "تعديل",
   },
+  meetingIdLabel: "معرف الاجتماع:",
+  online: "عبر الإنترنت",
+  meetingIdNA: "غير متوفر",
 };

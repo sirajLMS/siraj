@@ -57,11 +57,9 @@ export function BottomNavbar({ items, activeKey }: BottomNavbarProps) {
             >
               <IconComponent fontSize="small" />
               <Typography
+                variant="labelMd"
                 sx={{
-                  fontFamily: '"Inter", sans-serif',
-                  fontSize: "12px",
                   fontWeight: 500,
-                  letterSpacing: "0.05em",
                 }}
               >
                 {t(item.labelKey)}

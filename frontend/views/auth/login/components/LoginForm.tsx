@@ -30,7 +30,7 @@ const StyledFormActionsContainer = styled(Box)({
 // Forgot password link with primary color
 const StyledForgotPasswordLink = styled(Link)(({ theme }) => ({
   color: theme.palette.primary.main,
-  fontSize: "14px",
+  fontSize: theme.typography.bodyMd.fontSize,
   fontWeight: 500,
 }));
 

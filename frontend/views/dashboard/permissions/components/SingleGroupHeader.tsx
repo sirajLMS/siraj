@@ -16,7 +16,7 @@ const StyledBreadcrumbNav = styled(Box)({
 const StyledBackButton = styled(Button)(({ theme }) => ({
   color: theme.palette.text.secondary,
   textTransform: "none",
-  fontSize: "0.875rem",
+  fontSize: theme.typography.bodyMd.fontSize,
   "&:hover": {
     backgroundColor: "transparent",
     color: theme.palette.primary.main,

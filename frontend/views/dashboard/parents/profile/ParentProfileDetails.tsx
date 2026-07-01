@@ -1,7 +1,6 @@
 import { ContactPageOutlined, PaymentsOutlined, ShareOutlined } from "@mui/icons-material";
 import { Box, Grid, Link, Stack, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type React from "react";
 import { SectionPanel } from "@/frontend/components/ui";
 import { isSafeUrl } from "@/frontend/lib/safeRedirect";
 import type { ParentProfileData } from "../types/profile";
@@ -10,16 +9,19 @@ interface ParentProfileDetailsProps {
   readonly parent: ParentProfileData;
 }
 
-const DetailItem: React.FC<{ readonly label: string; readonly value: string | number; readonly isLink?: boolean }> = ({
+function DetailItem({
   label,
   value,
   isLink,
-}) => {
-  const theme = useTheme();
+}: {
+  readonly label: string;
+  readonly value: string | number;
+  readonly isLink?: boolean;
+}) {
   const safeUrl = isSafeUrl(`https://${value}`);
   return (
     <Stack spacing={0.5}>
-      <Typography variant="labelUppercase" sx={{ color: theme.palette.text.secondary }}>
+      <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
         {label}
       </Typography>
       {isLink && safeUrl ? (
@@ -27,25 +29,25 @@ const DetailItem: React.FC<{ readonly label: string; readonly value: string | nu
           href={safeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          sx={{
+          sx={theme => ({
             color: theme.palette.primary.main,
             textDecoration: "underline",
             typography: "bodyLg",
             wordBreak: "break-all",
-          }}
+          })}
         >
           {value}
         </Link>
       ) : (
-        <Typography variant="bodyLg" sx={{ color: theme.palette.text.primary, fontWeight: 500 }}>
+        <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.text.primary, fontWeight: 500 })}>
           {value}
         </Typography>
       )}
     </Stack>
   );
-};
+}
 
-const ParentProfileDetails: React.FC<ParentProfileDetailsProps> = ({ parent }) => {
+function ParentProfileDetails({ parent }: ParentProfileDetailsProps) {
   const t = useTranslations("dashboard.parentProfile");
   const theme = useTheme();
 
@@ -53,7 +55,7 @@ const ParentProfileDetails: React.FC<ParentProfileDetailsProps> = ({ parent }) =
     <Stack spacing={theme.layout.sectionGap}>
       <SectionPanel>
         <Box
-          sx={{
+          sx={theme => ({
             display: "flex",
             alignItems: "center",
             gap: 1.5,
@@ -61,7 +63,7 @@ const ParentProfileDetails: React.FC<ParentProfileDetailsProps> = ({ parent }) =
             py: 1.5,
             backgroundColor: theme.palette.primary.main,
             color: theme.palette.onPrimary,
-          }}
+          })}
         >
           <ContactPageOutlined />
           <Typography variant="titleLg">{t("sections.parentInfo")}</Typography>
@@ -84,7 +86,7 @@ const ParentProfileDetails: React.FC<ParentProfileDetailsProps> = ({ parent }) =
 
       <SectionPanel>
         <Box
-          sx={{
+          sx={theme => ({
             display: "flex",
             alignItems: "center",
             gap: 1.5,
@@ -92,7 +94,7 @@ const ParentProfileDetails: React.FC<ParentProfileDetailsProps> = ({ parent }) =
             py: 1.5,
             backgroundColor: theme.palette.primary.main,
             color: theme.palette.onPrimary,
-          }}
+          })}
         >
           <ShareOutlined />
           <Typography variant="titleLg">{t("sections.socialMedia")}</Typography>
@@ -115,7 +117,7 @@ const ParentProfileDetails: React.FC<ParentProfileDetailsProps> = ({ parent }) =
 
       <SectionPanel>
         <Box
-          sx={{
+          sx={theme => ({
             display: "flex",
             alignItems: "center",
             gap: 1.5,
@@ -123,7 +125,7 @@ const ParentProfileDetails: React.FC<ParentProfileDetailsProps> = ({ parent }) =
             py: 1.5,
             backgroundColor: theme.palette.primary.main,
             color: theme.palette.onPrimary,
-          }}
+          })}
         >
           <PaymentsOutlined />
           <Typography variant="titleLg">{t("sections.feesDetails")}</Typography>
@@ -145,6 +147,6 @@ const ParentProfileDetails: React.FC<ParentProfileDetailsProps> = ({ parent }) =
       </SectionPanel>
     </Stack>
   );
-};
+}
 
 export default ParentProfileDetails;

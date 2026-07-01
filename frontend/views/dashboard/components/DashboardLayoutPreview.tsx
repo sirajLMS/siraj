@@ -76,23 +76,17 @@ function Navbar({
           </Box>
           <Box sx={{ display: { xs: "none", md: "block" } }}>
             <Typography
+              variant="titleLg"
               sx={{
                 color: theme => theme.palette.onHeaderContainer,
-                fontFamily: '"Hanken Grotesk", sans-serif',
-                fontSize: "20px",
-                fontWeight: 600,
-                lineHeight: 1.2,
               }}
             >
               {t("layout.appTitle")}
             </Typography>
             <Typography
+              variant="labelMd"
               sx={{
                 color: theme => alpha(theme.palette.onHeaderContainer, 0.7),
-                fontFamily: '"Inter", sans-serif',
-                fontSize: "12px",
-                fontWeight: 500,
-                letterSpacing: "0.05em",
               }}
             >
               {roleLabel}
@@ -163,11 +157,9 @@ function BottomNavItem({ item, isActive }: { readonly item: TranslatedNavItem; r
     >
       <IconComponent fontSize="small" />
       <Typography
+        variant="labelMd"
         sx={{
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "12px",
           fontWeight: 500,
-          letterSpacing: "0.05em",
         }}
       >
         {item.label}

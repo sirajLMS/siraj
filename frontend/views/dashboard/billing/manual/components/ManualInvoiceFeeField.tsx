@@ -52,7 +52,11 @@ export function ManualInvoiceFeeField({ control, errors, labels, variant }: Read
             },
             htmlInput: { autoComplete: "off" },
           }}
-          sx={isMobile ? { "& input": { fontSize: "2rem", fontWeight: 700 } } : undefined}
+          sx={
+            isMobile
+              ? { "& input": { fontSize: theme => theme.typography.headlineLg.fontSize, fontWeight: 700 } }
+              : undefined
+          }
         />
       )}
     />

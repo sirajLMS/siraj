@@ -56,7 +56,7 @@ function MobileSlotItem({ classItem, onRemove }: Readonly<MobileSlotItemProps>) 
         })}
       >
         <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="titleLg" sx={{ fontSize: "1rem", color: "inherit" }}>
+          <Typography variant="bodyLg" sx={{ color: "inherit" }}>
             {classItem.studentName} ({classItem.duration}m)
           </Typography>
         </Box>
@@ -162,7 +162,9 @@ function TimeSlotRow({ time, slotClasses, onRemoveClass }: Readonly<TimeSlotRowP
   const isLunch = time === "12:00 PM";
 
   let content = (
-    <Typography sx={theme => ({ m: "auto", color: theme.palette.text.disabled, fontSize: "0.85rem" })}>
+    <Typography
+      sx={theme => ({ m: "auto", color: theme.palette.text.disabled, fontSize: theme.typography.bodyMd.fontSize })}
+    >
       {t("grid.available")}
     </Typography>
   );
@@ -216,7 +218,7 @@ function TimeSlotRow({ time, slotClasses, onRemoveClass }: Readonly<TimeSlotRowP
       >
         <Typography
           variant="labelUppercase"
-          sx={theme => ({ fontSize: "0.7rem", color: theme.palette.text.secondary })}
+          sx={theme => ({ fontSize: theme.typography.labelUppercase.fontSize, color: theme.palette.text.secondary })}
         >
           {time}
         </Typography>

@@ -2,10 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircleOutlined } from "@mui/icons-material";
-import { Box, Button, Snackbar, Typography } from "@mui/material";
+import { Box, Snackbar, Typography } from "@mui/material";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
 import type { MessageSchema } from "@/shared/messages/types/message";
 import { BankingLedgerSection } from "./components/BankingLedgerSection";
 import { OfficialDetailsSection } from "./components/OfficialDetailsSection";
@@ -24,6 +25,8 @@ interface TeacherOnboardingViewProps {
 }
 
 function OnboardingBanner() {
+  const t = useTranslations("dashboard.teacherOnboarding");
+
   return (
     <Box
       sx={{
@@ -45,9 +48,9 @@ function OnboardingBanner() {
       />
       <Box sx={theme => ({ position: "absolute", bottom: 16, left: 16, color: theme.palette.common.white })}>
         <Typography variant="labelUppercase" sx={{ opacity: 0.9 }}>
-          Join our faculty
+          {t("bannerJoinFaculty")}
         </Typography>
-        <Typography variant="headlineMd">Registration Form</Typography>
+        <Typography variant="headlineMd">{t("bannerRegistrationForm")}</Typography>
       </Box>
     </Box>
   );
@@ -62,9 +65,8 @@ function FormActions({
 }) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-      <Button
+      <PrimaryPageAction
         type="submit"
-        variant="contained"
         disabled={isSubmitting}
         sx={theme => ({
           backgroundColor: theme.palette.status.active,
@@ -72,20 +74,19 @@ function FormActions({
           "&:hover": { backgroundColor: theme.palette.status.active },
           px: 5,
           py: 1.5,
-          borderRadius: 2,
           fontWeight: 700,
           letterSpacing: "0.1em",
         })}
       >
         {isSubmitting ? labels.actions.proceeding : labels.actions.signup}
-      </Button>
-      <Button
+      </PrimaryPageAction>
+      <PrimaryPageAction
         type="reset"
         variant="text"
         sx={theme => ({ color: theme.palette.text.secondary, fontWeight: 700, letterSpacing: "0.1em" })}
       >
         {labels.actions.cancel}
-      </Button>
+      </PrimaryPageAction>
     </Box>
   );
 }

@@ -11,10 +11,10 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  type SxProps,
-  type Theme,
   Tooltip,
 } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 import { useEffect } from "react";
 import { useLayoutStore } from "@/frontend/stores/layoutStore";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
@@ -46,7 +46,7 @@ function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter =
     backgroundColor: isActive ? theme.palette.primaryContainer : "transparent",
     color: isActive ? theme.palette.primary.main : theme.palette.onSurfaceVariant,
     "&:hover": {
-      backgroundColor: theme.palette.mode === "light" ? "rgba(0, 122, 122, 0.08)" : "rgba(0, 229, 217, 0.08)",
+      backgroundColor: alpha(theme.palette.primary.main, 0.08),
       color: theme.palette.primary.main,
     },
     transition: "all 0.2s ease",
@@ -87,10 +87,8 @@ function SidebarNavItem({ item, isActive = false, isCollapsed, isFooter = false 
           slotProps={{
             primary: {
               sx: {
-                fontFamily: '"Inter", sans-serif',
-                fontSize: "12px",
+                typography: "labelMd",
                 fontWeight: isFooter ? 500 : "inherit",
-                letterSpacing: "0.05em",
               },
             },
           }}

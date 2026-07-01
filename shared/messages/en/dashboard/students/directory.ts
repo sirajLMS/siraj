@@ -1,0 +1,55 @@
+import type { StudentDirectoryLabels } from "../../../types/dashboard/students";
+
+export const directory: StudentDirectoryLabels = {
+  pageTitle: "Student Directory",
+  pageSubtitle: "Comprehensive management of enrolled and historical student data.",
+  mobileTitle: "Student Directory",
+  searchPlaceholder: "Search students...",
+  addStudent: "Add Student",
+  filters: "Filters",
+  globalRecord: "Global Student Record",
+  previous: "Previous",
+  next: "Next",
+  showingOf: "Showing {shown} of {total} students",
+  metrics: {
+    deactivated: "Deactivated",
+    regular: "Regular",
+    onLeave: "On Leave",
+    suspended: "Suspended",
+    onTrial: "On Trial",
+  },
+  table: {
+    index: "#",
+    student: "Student",
+    email: "Email",
+    status: "Status",
+    hoursPerWeek: "Hrs/Week",
+    classesLeft: "Classes Left",
+    actions: "Actions",
+  },
+  status: {
+    deactivated: "Deactivated",
+    regular: "Regular",
+    onLeave: "On Leave",
+    suspended: "Suspended",
+    onTrial: "On Trial",
+  },
+  enrollment: {
+    regular: "Regular",
+    prospect: "Prospect",
+    withdrawn: "Withdrawn",
+  },
+  card: {
+    weeklyHours: "Weekly Hours",
+    enrollmentStatus: "Status",
+  },
+  actions: {
+    viewProfile: "View Profile",
+    viewHistory: "View History",
+  },
+  noEntries: "No students found",
+  registrationComingSoon: "Student registration coming soon.",
+  registrationComingSoonDescription: "Student registration will be available soon.",
+  registrationComingSoonNotice: "Student registration coming soon. Please check back later.",
+  loadFailed: "Failed to load student directory.",
+};

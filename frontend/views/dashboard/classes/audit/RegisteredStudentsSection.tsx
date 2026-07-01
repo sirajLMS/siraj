@@ -85,8 +85,7 @@ export function RegisteredStudentsSection({
                 sx={theme => ({
                   width: 32,
                   height: 32,
-                  typography: "labelUppercase",
-                  fontSize: "12px",
+                  typography: "labelMd",
                   backgroundColor:
                     rowIndex % 2 === 0 ? theme.palette.secondaryContainer : theme.palette.primaryContainer,
                   color: rowIndex % 2 === 0 ? theme.palette.onSecondaryContainer : theme.palette.onPrimaryContainer,

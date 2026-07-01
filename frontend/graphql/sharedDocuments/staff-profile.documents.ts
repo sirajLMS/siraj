@@ -12,7 +12,6 @@ export const teacherProfileForEditQueryDocument: TypedDocumentNode<
       name
       email
       phone
-      nationalId
       dateOfBirth
       gender
       address
@@ -42,7 +41,6 @@ export const updateTeacherProfileMutationDocument: TypedDocumentNode<
       name
       email
       phone
-      nationalId
       dateOfBirth
       gender
       address

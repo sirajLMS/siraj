@@ -54,7 +54,7 @@ export function NotificationPanel() {
   if (error) {
     return (
       <Box sx={{ p: 2 }}>
-        <Typography variant="body2" color="error">
+        <Typography variant="body2" sx={theme => ({ color: theme.palette.error.main })}>
           {t("errorLoading")}
         </Typography>
       </Box>
@@ -97,7 +97,7 @@ export function NotificationPanel() {
       {alerts.length === 0 ? (
         <Box sx={{ p: 3, textAlign: "center" }}>
           <NotificationsOutlined sx={{ fontSize: 40, opacity: 0.4 }} />
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary, mt: 1 })}>
             {t("noAlerts")}
           </Typography>
         </Box>

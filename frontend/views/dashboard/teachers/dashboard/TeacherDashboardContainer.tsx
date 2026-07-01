@@ -440,7 +440,7 @@ export function TeacherDashboardContainer() {
     classType: string;
   }) => {
     if (!teacherId) {
-      throw new Error("Teacher ID could not be resolved.");
+      throw new Error(t("manualClassEntry.teacherIdNotFound"));
     }
     await createManualEntry({
       variables: {

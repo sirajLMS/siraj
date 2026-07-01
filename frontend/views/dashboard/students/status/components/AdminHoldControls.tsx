@@ -1,7 +1,8 @@
 import { AdminPanelSettingsOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Box, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext } from "react-hook-form";
+import { FilterButton, PrimaryPageAction } from "@/frontend/components/ui";
 import { StudentStatus } from "@/shared/lib/enum";
 import type { StatusUpdateFormData } from "../schemas/statusUpdateSchema";
 import type { AdminHoldControlsProps } from "../types";
@@ -112,21 +113,15 @@ function ReasonEntryField() {
       />
       <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 1 }}>
         {quickReasons.map(reason => (
-          <Chip
+          <FilterButton
             key={reason.label}
-            label={reason.label}
+            size="small"
             onClick={() => {
               setValue("reason", reason.text, { shouldValidate: true });
             }}
-            size="small"
-            sx={theme => ({
-              fontSize: "10px",
-              fontWeight: 600,
-              backgroundColor: theme.palette.surfaceContainerLow,
-              color: theme.palette.onSurfaceVariant,
-              "&:hover": { backgroundColor: theme.palette.surfaceContainerHigh },
-            })}
-          />
+          >
+            {reason.label}
+          </FilterButton>
         ))}
       </Box>
     </Box>
@@ -141,29 +136,20 @@ function SubmitStatusButton({ isUpdating }: Readonly<{ isUpdating: boolean }>) {
   const isSuspended = currentStatus === StudentStatus.SUSPENDED;
 
   return (
-    <Button
+    <PrimaryPageAction
       type="submit"
-      variant="contained"
       disabled={isUpdating}
       sx={theme => ({
         py: 1.5,
         borderRadius: "button",
         backgroundColor: isSuspended ? theme.palette.error.main : theme.palette.primary.main,
         color: isSuspended ? theme.palette.onError : theme.palette.onPrimary,
-        "&:hover": {
-          backgroundColor: isSuspended ? theme.palette.error.dark : theme.palette.primary.dark,
-        },
-        typography: "buttonText",
-        textTransform: "uppercase",
-        letterSpacing: "0.1em",
-        boxShadow: theme.palette.shadow.button,
-        "&:hover:not(:disabled)": {
-          boxShadow: theme.palette.shadow.buttonHover,
-        },
+        "&:hover": { backgroundColor: isSuspended ? theme.palette.error.dark : theme.palette.primary.dark },
+        textTransform: "uppercase" as const,
       })}
     >
       {t("actions.applyChange")}
-    </Button>
+    </PrimaryPageAction>
   );
 }
 

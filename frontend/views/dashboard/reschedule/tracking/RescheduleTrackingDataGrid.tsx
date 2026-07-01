@@ -37,7 +37,7 @@ export function RescheduleTrackingDataGrid({
               sx={theme => ({
                 width: 36,
                 height: 36,
-                fontSize: "12px",
+                typography: "labelMd",
                 fontWeight: 700,
                 backgroundColor: theme.palette.secondaryContainer,
                 color: theme.palette.onSecondaryContainer,
@@ -168,7 +168,7 @@ export function RescheduleTrackingDataGrid({
                         onApprove(rowId);
                       }}
                       sx={theme => ({
-                        fontSize: "11px",
+                        typography: "labelUppercase",
                         borderRadius: 1.5,
                         boxShadow: "none",
                         backgroundColor: theme.palette.primary.main,
@@ -189,7 +189,7 @@ export function RescheduleTrackingDataGrid({
                         onReject(rowId);
                       }}
                       sx={theme => ({
-                        fontSize: "11px",
+                        typography: "labelUppercase",
                         borderRadius: 1.5,
                         boxShadow: "none",
                         backgroundColor: theme.palette.error.main,

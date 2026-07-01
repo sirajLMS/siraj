@@ -12,9 +12,7 @@ import { NetworkConnectivityContext } from "../../context/NetworkConnectivityCon
 import { InitializingUI } from "./AppApolloProviderHelpers";
 import { createAuthLink, createConnectivityLink, createErrorLinkHandler, sha256 } from "./utils";
 
-export const AppApolloProvider: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
+export function AppApolloProvider({ children }: { children: React.ReactNode }) {
   const t = useTranslations("common");
   const {
     isConnected,
@@ -148,4 +146,4 @@ export const AppApolloProvider: React.FC<{
       <ApolloProvider client={apolloClient}>{children}</ApolloProvider>
     </NetworkConnectivityContext.Provider>
   );
-};
+}

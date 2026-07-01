@@ -111,7 +111,10 @@ export function ResourcesContainer() {
           : (extToMime[fileNameOnly.split(".").pop()?.toLowerCase() ?? ""] ?? "application/octet-stream");
 
       if (!isAllowedMimeType(contentType)) {
-        notifications.show(`${contentType} is not an allowed file type`, { severity: "error", autoHideDuration: 4000 });
+        notifications.show(t("notification.fileTypeNotAllowed", { contentType }), {
+          severity: "error",
+          autoHideDuration: 4000,
+        });
         return;
       }
 
@@ -130,7 +133,7 @@ export function ResourcesContainer() {
       });
 
       if (!prepData?.prepareUpload) {
-        notifications.show("Failed to prepare upload", { severity: "error", autoHideDuration: 4000 });
+        notifications.show(t("notification.uploadPrepareFailed"), { severity: "error", autoHideDuration: 4000 });
         return;
       }
 
@@ -150,7 +153,7 @@ export function ResourcesContainer() {
       if (!putResponse.ok) {
         const errorText = await putResponse.text().catch(() => "Upload failed");
         logger.error("File upload failed", { status: putResponse.status, errorText });
-        notifications.show("File upload failed. Please try again.", { severity: "error", autoHideDuration: 4000 });
+        notifications.show(t("notification.uploadFailed"), { severity: "error", autoHideDuration: 4000 });
         return;
       }
 
@@ -165,7 +168,7 @@ export function ResourcesContainer() {
       });
 
       if (!uploadData?.uploadLearningResource) {
-        notifications.show("Failed to create resource record.", { severity: "error", autoHideDuration: 4000 });
+        notifications.show(t("notification.createRecordFailed"), { severity: "error", autoHideDuration: 4000 });
         return;
       }
 
@@ -173,7 +176,7 @@ export function ResourcesContainer() {
       await refetch();
     } catch (err) {
       logger.error("Error uploading resource", err);
-      notifications.show("Failed to upload resource. Please try again.", { severity: "error", autoHideDuration: 4000 });
+      notifications.show(t("notification.uploadRetryFailed"), { severity: "error", autoHideDuration: 4000 });
     } finally {
       setUploading(false);
     }
@@ -196,11 +199,11 @@ export function ResourcesContainer() {
       }
 
       logger.info(`Successfully deleted resource: ${pendingDeleteId}`);
-      notifications.show("Resource deleted successfully.", { severity: "success", autoHideDuration: 3000 });
+      notifications.show(t("notification.deleteSuccess"), { severity: "success", autoHideDuration: 3000 });
       await refetch();
     } catch (err) {
       logger.error(`Failed to delete resource ${pendingDeleteId}:`, err);
-      notifications.show("Failed to delete resource.", { severity: "error", autoHideDuration: 4000 });
+      notifications.show(t("notification.deleteFailed"), { severity: "error", autoHideDuration: 4000 });
     } finally {
       closeDeleteDialog();
     }

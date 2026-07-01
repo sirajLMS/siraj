@@ -42,4 +42,5 @@ export const rescheduleTracking: RescheduleTrackingLabels = {
     missingOriginalClassId: "لا يمكن تنفيذ الإجراء: معرف الحصة الأصلية مفقود",
     approveFailed: "فشل في قبول الإجازة",
   },
+  loadFailed: "فشل تحميل بيانات التتبع.",
 };

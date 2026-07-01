@@ -3,7 +3,7 @@ import type { LeaveRequestStatus } from "@/frontend/graphql/generated/gql/graphq
 
 const DEFAULT_PAGE_SIZE = 10;
 
-interface RescheduleTrackingState {
+export interface RescheduleTrackingState {
   readonly page: number;
   readonly pageSize: number;
   readonly statusFilter: LeaveRequestStatus | null;

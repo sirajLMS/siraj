@@ -284,7 +284,7 @@ function UpcomingClassesDesktop({ classes, studentId }: Readonly<UpcomingClasses
           "& .MuiDataGrid-columnHeader": {
             backgroundColor: theme.palette.background.default,
             color: theme.palette.onSurfaceVariant,
-            fontSize: "10px",
+            typography: "labelSm",
             fontWeight: 700,
             textTransform: "uppercase",
             letterSpacing: "0.1em",

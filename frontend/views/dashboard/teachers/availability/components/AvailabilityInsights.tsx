@@ -70,7 +70,7 @@ function TimezoneInsight({
           "& .MuiAvatar-root": {
             width: 32,
             height: 32,
-            fontSize: "10px",
+            fontSize: theme.typography.labelSm.fontSize,
             fontWeight: 700,
             border: `2px solid ${theme.palette.background.paper}`,
             backgroundColor: theme.palette.secondaryContainer,

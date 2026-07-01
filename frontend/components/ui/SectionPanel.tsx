@@ -9,7 +9,7 @@ interface SectionPanelProps {
   readonly title?: ReactNode;
   readonly subTitle?: string;
   readonly actions?: ReactNode;
-  readonly children: ReactNode;
+  readonly children?: ReactNode;
   readonly sx?: SxProps<Theme>;
 }
 

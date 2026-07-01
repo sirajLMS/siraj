@@ -166,7 +166,7 @@ export function RescheduleTrackingContainer() {
 
   if (rowsError || metricsError) {
     logger.error("Error fetching reschedule tracking data:", rowsError || metricsError);
-    return <Box sx={{ p: 3, textAlign: "center" }}>Failed to load tracking data.</Box>;
+    return <Box sx={{ p: 3, textAlign: "center" }}>{t("loadFailed")}</Box>;
   }
 
   const totalCount = rowsData?.rescheduleTrackingRows?.totalCount ?? 0;

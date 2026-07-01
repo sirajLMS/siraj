@@ -3,19 +3,15 @@ import type { StudentFilterArgs } from "@/frontend/graphql/generated/gql/graphql
 
 const DEFAULT_PAGE_SIZE = 10;
 
-type NullableFilterArgs = {
-  [K in keyof StudentFilterArgs]: StudentFilterArgs[K] | null;
-};
-
 interface StudentDirectoryState {
   readonly searchQuery: string;
   readonly page: number;
   readonly pageSize: number;
-  readonly filterArgs: NullableFilterArgs | null;
+  readonly filterArgs: StudentFilterArgs | null;
   readonly filterPanelOpen: boolean;
   setSearchQuery: (query: string) => void;
   setPage: (page: number) => void;
-  setFilterArgs: (args: NullableFilterArgs) => void;
+  setFilterArgs: (args: StudentFilterArgs) => void;
   setFilterPanelOpen: (open: boolean) => void;
   clearFilters: () => void;
 }

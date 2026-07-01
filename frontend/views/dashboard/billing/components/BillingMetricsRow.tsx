@@ -27,7 +27,7 @@ export function BillingMetricsRow({ metrics, compact = false }: Readonly<Billing
             label={metric.label}
             value={metric.value}
             variant={metric.variant}
-            sx={compact ? { "& .MuiTypography-headlineLg": { fontSize: "1.25rem" } } : undefined}
+            sx={compact ? { "& .MuiTypography-headlineLg": { typography: "titleLg" } } : undefined}
           />
         </Grid>
       ))}

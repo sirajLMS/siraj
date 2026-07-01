@@ -14,7 +14,7 @@ const StyledPermissionKeyContainer = styled(Box)({
 
 const StyledPermissionKeyText = styled(Typography)(({ theme }) => ({
   fontFamily: "JetBrains Mono, monospace",
-  fontSize: "0.8rem",
+  fontSize: theme.typography.labelMd.fontSize,
   fontWeight: 600,
   color: theme.palette.primary.main,
 }));
@@ -28,7 +28,6 @@ const StyledBaselineText = styled(Typography, {
   shouldForwardProp: prop => prop !== "isAllowed",
 })<{ isAllowed: boolean }>(({ theme, isAllowed }) => ({
   color: isAllowed ? theme.palette.success.main : theme.palette.text.secondary,
-  fontSize: "0.875rem",
 }));
 
 interface OverridesTableRowProps {

@@ -110,7 +110,7 @@ export function StatusTrackingDataGrid({
                   width: 40,
                   height: 40,
                   borderRadius: 1.5,
-                  fontSize: "13px",
+                  typography: "bodyMd",
                   fontWeight: 700,
                   backgroundColor: styles.backgroundColor,
                   color: styles.color,

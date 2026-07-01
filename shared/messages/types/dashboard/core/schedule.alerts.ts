@@ -43,4 +43,5 @@ export interface ScheduleAlertsLabels {
   readonly showingOf: string;
   readonly noEntries: string;
   readonly endOfSchedule: string;
+  readonly loading: string;
 }

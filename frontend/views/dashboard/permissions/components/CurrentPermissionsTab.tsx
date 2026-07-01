@@ -11,7 +11,7 @@ import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/g
 
 const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
   fontFamily: "JetBrains Mono, monospace",
-  fontSize: "0.75rem",
+  typography: "labelMd",
   backgroundColor: theme.palette.surfaceVariant,
   color: theme.palette.onSurfaceVariant,
   padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
@@ -22,7 +22,7 @@ const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
 const StyledRevokeButton = styled(Button)(({ theme }) => ({
   color: theme.palette.error.main,
   fontWeight: 600,
-  fontSize: "0.75rem",
+  typography: "labelMd",
 }));
 
 const StyledEmptyStateContainer = styled(Box)(({ theme }) => ({
@@ -119,7 +119,7 @@ export function CurrentPermissionsTab({
             startIcon={<RemoveCircleOutlined fontSize="small" />}
             onClick={() => params.row.id && onRevokePermission(params.row.id)}
           >
-            Revoke
+            {t("revoke")}
           </StyledRevokeButton>
         ),
       });
@@ -138,15 +138,12 @@ export function CurrentPermissionsTab({
             <SecurityOutlined fontSize="large" sx={theme => ({ color: theme.palette.text.secondary })} />
           </StyledEmptyStateIconCircle>
           {/* Title & Description */}
-          <StyledEmptyStateTitle variant="titleLg">No Permissions Assigned Yet</StyledEmptyStateTitle>
-          <StyledEmptyStateDescription variant="bodyMd">
-            This custom group currently has no active policies. Add specific resource permissions to grant access to
-            content modules.
-          </StyledEmptyStateDescription>
+          <StyledEmptyStateTitle variant="titleLg">{t("noPermissionsAssignedYet")}</StyledEmptyStateTitle>
+          <StyledEmptyStateDescription variant="bodyMd">{t("noPermissionsDescription")}</StyledEmptyStateDescription>
           {/* Primary Action */}
           {!group.isSystem && (
             <StyledAssignFirstButton variant="contained" onClick={onSwitchToAddTab}>
-              Assign First Permission
+              {t("assignFirstPermission")}
             </StyledAssignFirstButton>
           )}
         </StyledEmptyStateContainer>

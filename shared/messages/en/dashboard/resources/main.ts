@@ -54,4 +54,13 @@ export const resources: ResourcesLabels = {
     documentNameRequired: "Please enter a document name.",
     fileRequired: "Please select a file to upload.",
   },
+  notification: {
+    fileTypeNotAllowed: "{type} is not an allowed file type",
+    uploadPrepareFailed: "Failed to prepare upload",
+    uploadFailed: "File upload failed. Please try again.",
+    createRecordFailed: "Failed to create resource record.",
+    uploadRetryFailed: "Failed to upload resource. Please try again.",
+    deleteSuccess: "Resource deleted successfully.",
+    deleteFailed: "Failed to delete resource.",
+  },
 };

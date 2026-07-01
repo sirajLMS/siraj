@@ -1,6 +1,7 @@
 import { create } from "zustand";
-import type { ComplaintTab } from "@/frontend/views/dashboard/complaints/types/complaints.types";
-import { ComplaintStatus } from "@/frontend/views/dashboard/complaints/types/complaints.types";
+import { ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+
+export type ComplaintTab = ComplaintStatus;
 
 const DEFAULT_PAGE_SIZE = 10;
 

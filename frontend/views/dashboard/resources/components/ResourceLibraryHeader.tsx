@@ -1,7 +1,7 @@
 "use client";
 
 import { FilterListOutlined, SortOutlined } from "@mui/icons-material";
-import { Box, Chip } from "@mui/material";
+import { Box } from "@mui/material";
 import { FilterButton } from "@/frontend/components/ui";
 import type { ResourceLibraryHeaderProps } from "../types/resourcesTypes";
 
@@ -45,12 +45,9 @@ export function ResourceLibraryHeader({
       <FilterButton startIcon={<FilterListOutlined />} onClick={handleFilterToggle} sx={{ borderRadius: 999 }}>
         {filterLabel}
       </FilterButton>
-      <Chip
-        icon={<SortOutlined />}
-        label={sortLabel}
-        onClick={handleSortToggle}
-        sx={theme => ({ backgroundColor: theme.palette.surfaceContainerHigh })}
-      />
+      <FilterButton startIcon={<SortOutlined />} onClick={handleSortToggle} sx={{ borderRadius: 999 }}>
+        {sortLabel}
+      </FilterButton>
     </Box>
   );
 }

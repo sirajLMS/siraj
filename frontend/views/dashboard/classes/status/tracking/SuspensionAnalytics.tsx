@@ -58,21 +58,21 @@ const StyledUrgentTaskIcon = styled(WarningAmberOutlined)(({ theme }) => ({
 }));
 
 const StyledUrgentTaskText = styled(Typography)(({ theme }) => ({
-  fontSize: "11px",
+  fontSize: theme.typography.labelUppercase.fontSize,
   fontWeight: 600,
   color: theme.palette.onPrimary,
 }));
 
 const StyledCtaHeadline = styled(Typography)(({ theme }) => ({
   fontFamily: '"Hanken Grotesk", sans-serif',
-  fontSize: "24px",
+  fontSize: theme.typography.headlineMd.fontSize,
   fontWeight: 700,
   color: theme.palette.onPrimary,
   lineHeight: 1.2,
 }));
 
 const StyledCtaDescription = styled(Typography)(({ theme }) => ({
-  fontSize: "14px",
+  fontSize: theme.typography.bodyMd.fontSize,
   color: theme.palette.onPrimary,
   opacity: 0.8,
 }));
@@ -84,7 +84,7 @@ const StyledOpenAuditLogsButton = styled(Button)(({ theme }) => ({
   color: theme.palette.onPrimary,
   fontFamily: '"Inter", sans-serif',
   fontWeight: 700,
-  fontSize: "13px",
+  fontSize: theme.typography.bodyMd.fontSize,
   letterSpacing: "0.04em",
   alignSelf: "flex-start",
   paddingInline: theme.spacing(3),

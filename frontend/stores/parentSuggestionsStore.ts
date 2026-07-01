@@ -1,9 +1,11 @@
 import { create } from "zustand";
 
-export const useParentSuggestionsStore = create<{
+export interface ParentSuggestionsState {
   isSubmitting: boolean;
   setSubmitting: (value: boolean) => void;
-}>(set => ({
+}
+
+export const useParentSuggestionsStore = create<ParentSuggestionsState>(set => ({
   isSubmitting: false,
   setSubmitting: value => {
     set({ isSubmitting: value });

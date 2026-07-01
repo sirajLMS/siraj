@@ -18,11 +18,9 @@ import {
   DialogContentText,
   DialogTitle,
   Stack,
-  useTheme,
 } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
-import type React from "react";
 import { useState } from "react";
 import { deactivateParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
@@ -36,13 +34,7 @@ interface DeactivateParentDialogProps {
   readonly error: { message: string } | null | undefined;
 }
 
-const DeactivateParentDialog: React.FC<DeactivateParentDialogProps> = ({
-  open,
-  onClose,
-  onConfirm,
-  deactivating,
-  error,
-}) => {
+function DeactivateParentDialog({ open, onClose, onConfirm, deactivating, error }: DeactivateParentDialogProps) {
   const t = useTranslations("dashboard.parentProfile.actions");
   const tc = useTranslations("common");
 
@@ -78,15 +70,14 @@ const DeactivateParentDialog: React.FC<DeactivateParentDialogProps> = ({
       </DialogActions>
     </Dialog>
   );
-};
+}
 
 interface ParentProfileActionsProps {
   readonly parentId: string;
   readonly onEditAvatar: () => void;
 }
 
-const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, onEditAvatar }) => {
-  const theme = useTheme();
+function ParentProfileActions({ parentId, onEditAvatar }: ParentProfileActionsProps) {
   const t = useTranslations("dashboard.parentProfile.actions");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -126,17 +117,17 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, o
       <Stack
         direction="row"
         spacing={4}
-        sx={{
+        sx={theme => ({
           flexWrap: "wrap",
           pb: 2,
           borderBottom: `1px solid ${theme.palette.divider}`,
           mb: theme.layout.sectionGap,
-        }}
+        })}
       >
         <Button
           onClick={onEditAvatar}
           startIcon={<PhotoCameraOutlined sx={{ fontSize: 18 }} />}
-          sx={{ ...actionStyle, color: theme.palette.primary.main }}
+          sx={theme => ({ ...actionStyle, color: theme.palette.primary.main })}
         >
           {t("editPicture")}
         </Button>
@@ -144,7 +135,7 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, o
         <Link href={`/parents/${parentId}/profile/edit`} style={{ textDecoration: "none" }}>
           <Button
             startIcon={<EditNoteOutlined sx={{ fontSize: 18 }} />}
-            sx={{ ...actionStyle, color: theme.palette.primary.main }}
+            sx={theme => ({ ...actionStyle, color: theme.palette.primary.main })}
           >
             {t("editProfile")}
           </Button>
@@ -153,7 +144,7 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, o
         <Link href={`/students/onboarding?parentId=${parentId}`} style={{ textDecoration: "none" }}>
           <Button
             startIcon={<PersonAddOutlined sx={{ fontSize: 18 }} />}
-            sx={{ ...actionStyle, color: theme.palette.primary.main }}
+            sx={theme => ({ ...actionStyle, color: theme.palette.primary.main })}
           >
             {t("addNewStudent")}
           </Button>
@@ -162,7 +153,7 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, o
         <Link href={`/billing/invoices?parentId=${parentId}`} style={{ textDecoration: "none" }}>
           <Button
             startIcon={<ReceiptLongOutlined sx={{ fontSize: 18 }} />}
-            sx={{ ...actionStyle, color: theme.palette.primary.main }}
+            sx={theme => ({ ...actionStyle, color: theme.palette.primary.main })}
           >
             {t("viewInvoices")}
           </Button>
@@ -171,11 +162,11 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, o
         <Button
           onClick={() => setDeactivateDialogOpen(true)}
           startIcon={<PersonOffOutlined sx={{ fontSize: 18 }} />}
-          sx={{
+          sx={theme => ({
             ...actionStyle,
             color: theme.palette.error.main,
             ml: "auto !important",
-          }}
+          })}
         >
           {t("deactivateAccount")}
         </Button>
@@ -190,6 +181,6 @@ const ParentProfileActions: React.FC<ParentProfileActionsProps> = ({ parentId, o
       />
     </>
   );
-};
+}
 
 export default ParentProfileActions;

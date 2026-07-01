@@ -59,7 +59,7 @@ function SlotItem({ classItem, onRemove }: Readonly<SlotItemProps>) {
           color: theme.palette.onPrimary,
           borderRadius: 1,
           p: 1,
-          fontSize: "0.75rem",
+          typography: "labelMd",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",

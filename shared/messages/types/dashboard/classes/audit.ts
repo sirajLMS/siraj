@@ -58,4 +58,7 @@ export interface ClassAuditLabels {
     readonly update: string;
     readonly edit: string;
   };
+  readonly meetingIdLabel: string;
+  readonly online: string;
+  readonly meetingIdNA: string;
 }

@@ -1,10 +1,10 @@
 "use client";
 
 import { SearchOutlined } from "@mui/icons-material";
-import { Box, Chip, InputAdornment, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Box, InputAdornment, Paper, Stack, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import { PaginationControls, SectionPanel } from "@/frontend/components/ui";
+import { PaginationControls, SectionPanel, StatusBadge } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { ScheduleOverviewData } from "@/frontend/views/dashboard/types/dashboard";
 import { ScheduleFilters } from "./ScheduleFilters";
@@ -29,17 +29,6 @@ const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
 }));
 
-const StyledMobileSectionHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  flexWrap: "wrap",
-}));
-
-const StyledMobileSectionTitle = styled(Typography)(({ theme }) => ({
-  color: theme.palette.primary.main,
-}));
-
 const StyledSectionTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurface,
 }));
@@ -55,7 +44,7 @@ function ScheduleOverviewTitle({
     <>
       <StyledSectionTitle variant="titleLg">{title}</StyledSectionTitle>
       {selectedMetricLabel ? (
-        <Chip size="small" color="primary" variant="outlined" label={selectedMetricLabel} />
+        <StatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
       ) : null}
     </>
   );
@@ -243,63 +232,65 @@ const MobileLayout = ({
         gap: 2,
       }}
     >
-      <StyledMobileSectionHeader>
-        <StyledMobileSectionTitle variant="titleLg">{title}</StyledMobileSectionTitle>
-        {selectedMetricLabel ? (
-          <Chip size="small" color="primary" variant="outlined" label={selectedMetricLabel} />
-        ) : null}
-      </StyledMobileSectionHeader>
+      <SectionPanel
+        title={title}
+        actions={
+          selectedMetricLabel ? (
+            <StatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
+          ) : undefined
+        }
+      >
+        <ScheduleOverviewFilters
+          dateLabel={dateLabel}
+          dateValue={dateValue}
+          todayLabel={todayLabel}
+          previousDayLabel={previousDayLabel}
+          nextDayLabel={nextDayLabel}
+          teacherPlaceholder={teacherPlaceholder}
+          teacherValue={teacherValue}
+          submitLabel={submitLabel}
+          teachers={teachers}
+          onDateChange={onDateChange}
+          onTeacherChange={onTeacherChange}
+          onSubmit={onSubmit}
+        />
 
-      <ScheduleOverviewFilters
-        dateLabel={dateLabel}
-        dateValue={dateValue}
-        todayLabel={todayLabel}
-        previousDayLabel={previousDayLabel}
-        nextDayLabel={nextDayLabel}
-        teacherPlaceholder={teacherPlaceholder}
-        teacherValue={teacherValue}
-        submitLabel={submitLabel}
-        teachers={teachers}
-        onDateChange={onDateChange}
-        onTeacherChange={onTeacherChange}
-        onSubmit={onSubmit}
-      />
+        <Box sx={{ display: "flex", gap: 1.5 }}>
+          <RequirePermission permissions={[AppPermission.DashboardSearch]}>
+            <TextField
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={event => {
+                onSearchChange(event.target.value);
+              }}
+              fullWidth
+              size="small"
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <StyledSearchIcon />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  backgroundColor: theme => theme.palette.surfaceContainerLowest,
+                },
+              }}
+            />
+          </RequirePermission>
+        </Box>
 
-      <Box sx={{ display: "flex", gap: 1.5 }}>
-        <RequirePermission permissions={[AppPermission.DashboardSearch]}>
-          <TextField
-            placeholder={searchPlaceholder}
-            value={searchValue}
-            onChange={event => {
-              onSearchChange(event.target.value);
-            }}
-            fullWidth
-            size="small"
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <StyledSearchIcon />
-                  </InputAdornment>
-                ),
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                backgroundColor: theme => theme.palette.surfaceContainerLowest,
-              },
-            }}
-          />
-        </RequirePermission>
-      </Box>
-
-      <ScheduleOverviewCardList
-        rows={rows}
-        statusLabels={statusLabels}
-        detailsLabel={detailsLabel}
-        emptyMessage={emptyMessage}
-      />
+        <ScheduleOverviewCardList
+          rows={rows}
+          statusLabels={statusLabels}
+          detailsLabel={detailsLabel}
+          emptyMessage={emptyMessage}
+        />
+      </SectionPanel>
 
       <PaginationControls
         page={page}

@@ -3,7 +3,7 @@ import { config } from "dotenv";
 
 config({ path: path.resolve(process.cwd(), ".env.test") });
 
-import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client/core";
+import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 
 export const TEST_HOST = "http://localhost";
 export const TEST_PORT = 3001;

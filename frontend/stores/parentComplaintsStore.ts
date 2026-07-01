@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ParentStudentOption } from "@/frontend/views/dashboard/complaints/types/complaints.types";
+import type { ParentStudentOption } from "@/frontend/types/shared.types";
 
 const DEFAULT_PAGE_SIZE = 10;
 

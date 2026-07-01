@@ -92,12 +92,11 @@ function AvailabilityBlock({ entry, onClick }: Readonly<{ entry: AvailabilityEnt
       })}
     >
       <Typography
-        variant="labelMd"
+        variant="labelSm"
         sx={theme => ({
           color: theme.palette.onPrimary,
           fontWeight: 700,
           textAlign: "center",
-          fontSize: "10px",
           lineHeight: 1.2,
           textTransform: "uppercase",
         })}
@@ -105,10 +104,9 @@ function AvailabilityBlock({ entry, onClick }: Readonly<{ entry: AvailabilityEnt
         {entry.teacherName}
       </Typography>
       <Typography
-        variant="labelMd"
         sx={theme => ({
+          typography: "labelSm",
           color: alpha(theme.palette.onPrimary, 0.7),
-          fontSize: "9px",
           fontWeight: 500,
         })}
       >

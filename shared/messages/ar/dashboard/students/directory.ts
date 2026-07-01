@@ -48,4 +48,8 @@ export const directory: StudentDirectoryLabels = {
     viewHistory: "عرض السجل",
   },
   noEntries: "لا يوجد طلاب",
+  registrationComingSoon: "تسجيل الطالب قريباً.",
+  registrationComingSoonDescription: "تسجيل الطالب سيكون متاحاً قريباً.",
+  registrationComingSoonNotice: "تسجيل الطالب قريباً. يرجى التحقق لاحقاً.",
+  loadFailed: "فشل تحميل دليل الطلاب.",
 };

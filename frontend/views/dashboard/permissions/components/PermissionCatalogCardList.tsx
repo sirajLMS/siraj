@@ -40,7 +40,7 @@ export function PermissionCatalogCardList({ permissions, groups }: Readonly<Perm
                 <Box
                   sx={theme => ({
                     fontFamily: "JetBrains Mono, monospace",
-                    fontSize: "0.8125rem",
+                    typography: "bodyMd",
                     fontWeight: 500,
                     backgroundColor: theme.palette.primaryContainer,
                     color: theme.palette.onPrimaryContainer,
@@ -55,7 +55,7 @@ export function PermissionCatalogCardList({ permissions, groups }: Readonly<Perm
                 {permission.category && (
                   <Box
                     sx={theme => ({
-                      fontSize: "0.75rem",
+                      typography: "labelMd",
                       fontWeight: 500,
                       backgroundColor: theme.palette.surfaceVariant,
                       color: theme.palette.onSurfaceVariant,
@@ -89,7 +89,6 @@ export function PermissionCatalogCardList({ permissions, groups }: Readonly<Perm
                     variant="labelUppercase"
                     sx={theme => ({
                       display: "block",
-                      fontSize: "0.6875rem",
                       color: theme.palette.text.secondary,
                       mb: 1,
                     })}
@@ -103,7 +102,7 @@ export function PermissionCatalogCardList({ permissions, groups }: Readonly<Perm
                         <Box
                           key={g.id}
                           sx={theme => ({
-                            fontSize: "0.75rem",
+                            typography: "labelMd",
                             fontWeight: 500,
                             backgroundColor: theme.palette.secondaryContainer,
                             color: theme.palette.onSecondaryContainer,

@@ -100,6 +100,15 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
   import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
   import type * as Operations from "@/frontend/graphql/generated/gql/operations";
   ```
+- Import generated TYPES from `graphql-types.ts`, NOT `operations.ts`:
+  ```ts
+  import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";  // ✅ CORRECT — has all type definitions
+  import type * as Operations from "@/frontend/graphql/generated/gql/operations"; // ✅ CORRECT — only for operation result/variable types
+  // ❌ WRONG — do NOT import entity types from operations.ts; it has poorer type definitions
+  ```
+- `graphql-types.ts` has the complete and canonical type definitions (enums, interfaces, input types, etc.)
+- `operations.ts` is only for operation-specific result/variable types (e.g., `DeleteBookMutationMutation`)
+- Zustand stores and other type consumers: always prefer `graphql-types.ts` for entity types
 - NEVER inline type literals - always use generated types from `frontend/graphql/generated/gql/`
 - Codegen after schema/document changes (both steps required):
   ```bash

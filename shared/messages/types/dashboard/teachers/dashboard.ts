@@ -93,5 +93,27 @@ export interface TeacherDashboardLabels {
     readonly missedClassTime: string;
     readonly activationFailed: string;
   };
+  readonly manualClassEntry: {
+    readonly titleCreate: string;
+    readonly titleCreateActive: string;
+    readonly cancel: string;
+    readonly create: string;
+    readonly creating: string;
+    readonly studentLabel: string;
+    readonly studentLoading: string;
+    readonly noStudentsAssigned: string;
+    readonly scheduledDate: string;
+    readonly startTime: string;
+    readonly durationMinutes: string;
+    readonly classType: string;
+    readonly classTypeRegular: string;
+    readonly classTypeTrial: string;
+    readonly classTypePromotion: string;
+    readonly selectStudent: string;
+    readonly selectDate: string;
+    readonly selectTime: string;
+    readonly createFailed: string;
+    readonly teacherIdNotFound: string;
+  };
   readonly supportRequestSubmitted: string;
 }

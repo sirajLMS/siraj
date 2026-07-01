@@ -11,7 +11,7 @@ export function PrimaryPageAction({ sx, ...props }: Readonly<ButtonProps>) {
       sx={mergeSx(
         theme => ({
           borderRadius: theme.layout.radius.button,
-          fontSize: "12px",
+          typography: "labelMd",
           letterSpacing: "0.1em",
         }),
         sx

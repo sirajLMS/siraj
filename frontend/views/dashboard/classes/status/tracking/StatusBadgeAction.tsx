@@ -13,7 +13,7 @@ const StyledActionButton = styled(Button, {
   shouldForwardProp: prop => prop !== "minWidthLg",
 })<{ minWidthLg?: number | string }>(({ theme, minWidthLg }) => ({
   fontFamily: '"Inter", sans-serif',
-  fontSize: "11px",
+  fontSize: theme.typography.labelUppercase.fontSize,
   fontWeight: 700,
   letterSpacing: "0.08em",
   textTransform: "uppercase",
@@ -134,7 +134,7 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify, 
             <Typography
               sx={theme => ({
                 fontFamily: '"Inter", sans-serif',
-                fontSize: "11px",
+                typography: "labelUppercase",
                 fontWeight: 700,
                 mb: 0.5,
                 color: theme.palette.text.primary,
@@ -142,7 +142,7 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify, 
             >
               {labels.administrativeHold}
             </Typography>
-            <Typography sx={{ fontSize: "11px" }}>{labels.holdDescription}</Typography>
+            <Typography sx={{ typography: "labelUppercase" }}>{labels.holdDescription}</Typography>
           </Box>
         }
         variant="outlined"

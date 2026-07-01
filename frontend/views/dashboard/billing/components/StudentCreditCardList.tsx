@@ -1,8 +1,9 @@
 "use client";
 
 import { WarningAmberOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, Paper, Typography } from "@mui/material";
+import { Box, Button, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { StatusBadge } from "@/frontend/components/ui";
 import type { StudentCreditRow, StudentCreditStatus } from "../types/billingViewTypes";
 
 interface StudentCreditCardListLabels {
@@ -72,14 +73,10 @@ export function StudentCreditCardList({
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Chip
+                <StatusBadge
+                  category="invoice"
+                  status={isNegative ? "OVERDUE" : "PAID"}
                   label={formatClassesLeft(row)}
-                  size="small"
-                  sx={theme => ({
-                    fontWeight: 700,
-                    backgroundColor: isNegative ? theme.palette.errorContainer : theme.palette.secondaryContainer,
-                    color: isNegative ? theme.palette.error.main : theme.palette.onSecondaryContainer,
-                  })}
                 />
                 {isNegative && (
                   <WarningAmberOutlined sx={theme => ({ fontSize: 16, color: theme.palette.error.main })} />

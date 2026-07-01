@@ -90,7 +90,7 @@ export function TeacherAvailabilityGrid({ teacher }: Readonly<TeacherAvailabilit
                         borderRadius: 1,
                         px: 1,
                         py: 0.5,
-                        fontSize: "0.75rem",
+                        typography: "labelMd",
                         fontWeight: 600,
                         textAlign: "center",
                       })}

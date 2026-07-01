@@ -2,6 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { meQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
@@ -33,6 +34,7 @@ export function DashboardContainer() {
   const { user, setUser } = useUserStore();
   const searchParams = useSearchParams();
   const modeParam = searchParams.get("mode");
+  const t = useTranslations("common");
 
   const { data, loading } = useQuery(meQueryDocument, {
     skip: !!user,
@@ -45,7 +47,7 @@ export function DashboardContainer() {
   }, [data, setUser]);
 
   if (!user && loading) {
-    return <div>Loading...</div>; // Render a loading state while fetching the profile
+    return <div>{t("loading")}</div>; // Render a loading state while fetching the profile
   }
 
   const permissions = user?.permissions || [];

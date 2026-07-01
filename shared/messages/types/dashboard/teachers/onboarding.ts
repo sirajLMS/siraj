@@ -79,4 +79,6 @@ export interface TeacherOnboardingLabels {
     readonly ibanRequired: string;
     readonly urlInvalid: string;
   };
+  readonly bannerJoinFaculty: string;
+  readonly bannerRegistrationForm: string;
 }

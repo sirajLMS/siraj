@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@apollo/client/react";
+import { useApolloClient, useMutation } from "@apollo/client/react";
 import { ErrorOutlined as ErrorIcon } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
@@ -14,50 +14,57 @@ import { useAuthToken } from "../../hooks/useAuthToken";
 import logger from "../../lib/logger";
 
 // A simple UI for the initial loading state
-const LoadingUI: React.FC<{
+function LoadingUI({
+  onRetry,
+  error,
+  t,
+}: {
   onRetry: () => void;
   error?: string | null;
   t: ReturnType<typeof useTranslations<"auth.login">>;
-}> = ({ onRetry, error, t }) => (
-  <Box
-    sx={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      height: "100vh",
-      gap: 2,
-    }}
-  >
-    {error ? (
-      <>
-        <ErrorIcon
-          sx={{
-            fontSize: 48,
-            color: theme => theme.palette.error.main,
-          }}
-        />
-        <Typography
-          gutterBottom
-          sx={{
-            color: theme => theme.palette.error.main,
-          }}
-        >
-          {error}
-        </Typography>
-        <Button variant="contained" onClick={onRetry} sx={{ mt: 2 }}>
-          {t("tryAgain")}
-        </Button>
-      </>
-    ) : (
-      <CircularProgress size={48} />
-    )}
-  </Box>
-);
+}) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        gap: 2,
+      }}
+    >
+      {error ? (
+        <>
+          <ErrorIcon
+            sx={{
+              fontSize: 48,
+              color: theme => theme.palette.error.main,
+            }}
+          />
+          <Typography
+            gutterBottom
+            sx={{
+              color: theme => theme.palette.error.main,
+            }}
+          >
+            {error}
+          </Typography>
+          <Button variant="contained" onClick={onRetry} sx={{ mt: 2 }}>
+            {t("tryAgain")}
+          </Button>
+        </>
+      ) : (
+        <CircularProgress size={48} />
+      )}
+    </Box>
+  );
+}
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const t = useTranslations("auth.login");
   const { updateAuthToken, clearAuthData } = useAuthToken();
+  const client = useApolloClient();
   const [loginMutation] = useMutation(Document.loginMutationDocument);
   const [logoutMutation] = useMutation(Document.logoutMutationDocument);
   const [refreshTokenMutation] = useMutation(Document.refreshTokenMutationDocument);
@@ -92,10 +99,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await logoutMutation();
     } finally {
       clearAuthData();
+      await client.clearStore();
       // Perform a hard redirect to ensure all state is cleared.
       globalThis.location.href = "/login";
     }
-  }, [logoutMutation, clearAuthData]);
+  }, [logoutMutation, clearAuthData, client]);
 
   const login = useCallback(
     async (credentials: MutationLoginArgs, redirectUrl: string | null = null): Promise<boolean> => {
@@ -151,4 +159,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
-};
+}

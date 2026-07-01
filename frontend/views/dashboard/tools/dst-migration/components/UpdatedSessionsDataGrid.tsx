@@ -1,29 +1,15 @@
 "use client";
 
 import { ArrowForwardOutlined } from "@mui/icons-material";
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/components/ui";
+import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
 import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {
   readonly sessions: readonly UpdatedSession[];
-}
-
-function TimeChip({ value, highlighted }: Readonly<{ value: string; highlighted?: boolean }>) {
-  return (
-    <Chip
-      label={value}
-      size="small"
-      sx={theme => ({
-        fontWeight: highlighted ? 700 : 500,
-        backgroundColor: highlighted ? theme.palette.successContainer : theme.palette.surfaceContainerHigh,
-        color: highlighted ? theme.palette.onSuccessContainer : theme.palette.onSurface,
-      })}
-    />
-  );
 }
 
 export function UpdatedSessionsDataGrid({ sessions }: Readonly<Props>) {
@@ -53,7 +39,7 @@ export function UpdatedSessionsDataGrid({ sessions }: Readonly<Props>) {
         width: 130,
         align: "center",
         headerAlign: "center",
-        renderCell: params => <TimeChip value={params.row.fromTime} />,
+        renderCell: params => <StatusBadge category="session" status="pending" label={params.row.fromTime} />,
       },
       {
         field: "arrow",
@@ -73,7 +59,7 @@ export function UpdatedSessionsDataGrid({ sessions }: Readonly<Props>) {
         width: 130,
         align: "center",
         headerAlign: "center",
-        renderCell: params => <TimeChip value={params.row.toTime} highlighted />,
+        renderCell: params => <StatusBadge category="session" status="completed" label={params.row.toTime} />,
       },
     ],
     [t]

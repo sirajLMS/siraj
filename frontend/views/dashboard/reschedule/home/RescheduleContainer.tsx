@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, CircularProgress } from "@mui/material";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
@@ -19,6 +20,7 @@ import { combineDateTime } from "./utils/rescheduleDateTime";
 export function RescheduleContainer() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("dashboard.rescheduleForm");
   const storeSession = useRescheduleStore(state => state.session);
   const classInstanceId = searchParams.get("classInstanceId") || storeSession.sessionId || "";
 
@@ -86,7 +88,7 @@ export function RescheduleContainer() {
 
   if (!classInstanceId || !classInstance) {
     logger.error("Error fetching class details for rescheduling:", error);
-    return <Box sx={{ p: 3, textAlign: "center" }}>Class instance not found.</Box>;
+    return <Box sx={{ p: 3, textAlign: "center" }}>{t("classInstanceNotFound")}</Box>;
   }
 
   const onSubmit = async (formData: RescheduleFormData) => {

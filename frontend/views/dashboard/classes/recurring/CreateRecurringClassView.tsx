@@ -116,7 +116,6 @@ function SuccessSnackbar({
         <Typography
           variant="labelUppercase"
           sx={{
-            fontSize: "14px",
             fontWeight: 700,
             whiteSpace: "nowrap",
           }}
@@ -149,7 +148,6 @@ function ErrorSnackbar({
         <Typography
           variant="labelUppercase"
           sx={{
-            fontSize: "14px",
             fontWeight: 700,
             whiteSpace: "nowrap",
           }}

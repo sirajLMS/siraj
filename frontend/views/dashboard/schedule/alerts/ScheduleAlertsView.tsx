@@ -42,6 +42,7 @@ export interface ScheduleAlertsLabels {
   readonly missed: string;
   readonly endOfSchedule: string;
   readonly noEntries: string;
+  readonly loading: string;
 }
 
 interface ScheduleAlertsViewProps {
@@ -311,7 +312,7 @@ export function ScheduleAlertsView({
             color: theme.palette.text.secondary,
           })}
         >
-          <Typography variant="bodyLg">Loading...</Typography>
+          <Typography variant="bodyLg">{labels.loading}</Typography>
         </Box>
       ) : isMobile ? (
         <MobileAlertsLayout

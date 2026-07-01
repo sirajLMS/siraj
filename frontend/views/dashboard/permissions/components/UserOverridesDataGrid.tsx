@@ -3,6 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { CheckCircleOutlined, WarningOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, CircularProgress, Tooltip, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
@@ -107,7 +108,7 @@ function UserGroupsCell({ userGroups }: Readonly<UserGroupsCellProps>) {
         <Box
           key={g.id || g.slug}
           sx={theme => ({
-            fontSize: "0.75rem",
+            typography: "labelMd",
             fontWeight: 500,
             backgroundColor: theme.palette.secondaryContainer,
             color: theme.palette.onSecondaryContainer,
@@ -146,18 +147,18 @@ function DynamicOverridesCell({ userId, userGroups, type }: Readonly<DynamicOver
       return (
         <Box
           sx={theme => ({
+            fontSize: theme.typography.bodyMd.fontSize,
+            fontWeight: "bold",
             minWidth: 24,
             height: 24,
             borderRadius: 1,
             px: 1,
-            backgroundColor: "rgba(27, 59, 43, 0.15)",
+            backgroundColor: theme.palette.successContainer ?? alpha(theme.palette.success.main, 0.15),
             color: theme.palette.success.main,
             border: `1px solid ${theme.palette.success.light}`,
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            fontWeight: "bold",
-            fontSize: "0.85rem",
           })}
         >
           {info.grants}
@@ -176,18 +177,18 @@ function DynamicOverridesCell({ userId, userGroups, type }: Readonly<DynamicOver
       return (
         <Box
           sx={theme => ({
+            fontSize: theme.typography.bodyMd.fontSize,
+            fontWeight: "bold",
             minWidth: 24,
             height: 24,
             borderRadius: 1,
             px: 1,
-            backgroundColor: "rgba(74, 22, 22, 0.15)",
+            backgroundColor: theme.palette.errorContainer ?? alpha(theme.palette.error.main, 0.15),
             color: theme.palette.error.main,
             border: `1px solid ${theme.palette.error.light}`,
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            fontWeight: "bold",
-            fontSize: "0.85rem",
           })}
         >
           {info.revokes}
@@ -216,7 +217,7 @@ function DynamicOverridesCell({ userId, userGroups, type }: Readonly<DynamicOver
           })}
         >
           <WarningOutlined fontSize="small" />
-          <Typography variant="bodyMd" sx={{ fontSize: "0.75rem", fontWeight: 600 }}>
+          <Typography variant="labelMd" sx={{ fontWeight: 600 }}>
             Conflict
           </Typography>
         </Box>
@@ -227,7 +228,7 @@ function DynamicOverridesCell({ userId, userGroups, type }: Readonly<DynamicOver
   return (
     <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.success.main })}>
       <CheckCircleOutlined fontSize="small" />
-      <Typography variant="bodyMd" sx={{ fontSize: "0.75rem", fontWeight: 600 }}>
+      <Typography variant="labelMd" sx={{ fontWeight: 600 }}>
         Healthy
       </Typography>
     </Box>
@@ -256,7 +257,7 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
                   height: 32,
                   backgroundColor: theme.palette.primaryContainer,
                   color: theme.palette.onPrimaryContainer,
-                  fontSize: "0.875rem",
+                  typography: "bodyMd",
                   fontWeight: 600,
                 })}
               >
@@ -280,10 +281,9 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
                   {user.name}
                 </Typography>
                 <Typography
-                  variant="bodyMd"
+                  variant="labelMd"
                   sx={theme => ({
                     color: theme.palette.text.secondary,
-                    fontSize: "0.75rem",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -363,7 +363,7 @@ export function UserOverridesDataGrid({ users, groups, onManageOverrides }: Read
               onClick={() => onManageOverrides(userId)}
               sx={theme => ({
                 textTransform: "uppercase",
-                fontSize: "0.75rem",
+                typography: "labelMd",
                 fontWeight: 700,
                 letterSpacing: "0.05em",
                 color: theme.palette.primary.main,

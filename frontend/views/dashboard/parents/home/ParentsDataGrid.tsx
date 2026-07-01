@@ -85,7 +85,7 @@ export function ParentsDataGrid({
             <Typography variant="bodyLg" sx={theme => ({ fontWeight: 600, color: theme.palette.primary.main })}>
               {row.name}
             </Typography>
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, fontSize: "12px" })}>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {labels.guardianOf(row.guardianOf)}
             </Typography>
           </Stack>

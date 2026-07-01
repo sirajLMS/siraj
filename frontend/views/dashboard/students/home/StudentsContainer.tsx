@@ -98,12 +98,12 @@ export function StudentsContainer() {
 
   useEffect(() => {
     if (error) {
-      notifications.show("Failed to load student directory.", {
+      notifications.show(t("loadFailed"), {
         severity: "error",
         autoHideDuration: 5000,
       });
     }
-  }, [error, notifications]);
+  }, [error, notifications, t]);
 
   const rows = useMemo(() => buildStudentRows(data as StudentDirectoryQuery | undefined), [data]);
   const totalCount = (data as StudentDirectoryQuery | undefined)?.studentDirectory?.totalCount ?? 0;

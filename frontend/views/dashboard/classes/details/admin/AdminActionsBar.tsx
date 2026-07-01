@@ -20,6 +20,9 @@ interface AdminActionsBarProps {
     readonly administrativeActions: string;
     readonly generateLog: string;
     readonly reschedule: string;
+    readonly forceActivate: string;
+    readonly stopPause: string;
+    readonly deleteInstance: string;
   };
 }
 
@@ -92,7 +95,11 @@ function LeftAdminActions({
   onForceActivate,
   onStop,
 }: {
-  readonly labels: { readonly administrativeActions: string };
+  readonly labels: {
+    readonly administrativeActions: string;
+    readonly forceActivate: string;
+    readonly stopPause: string;
+  };
   readonly onForceActivate: () => void;
   readonly onStop: () => void;
 }) {
@@ -108,10 +115,10 @@ function LeftAdminActions({
       </Typography>
       <StyledActionsDivider />
       <Stack direction="row" sx={{ gap: 1 }}>
-        <StyledForceActivateButton aria-label="force-activate" title="Force Activate" onClick={onForceActivate}>
+        <StyledForceActivateButton aria-label="force-activate" title={labels.forceActivate} onClick={onForceActivate}>
           <PowerSettingsNewIcon />
         </StyledForceActivateButton>
-        <StyledStopPauseButton aria-label="stop-pause" title="Stop/Pause" onClick={onStop}>
+        <StyledStopPauseButton aria-label="stop-pause" title={labels.stopPause} onClick={onStop}>
           <PauseIcon />
         </StyledStopPauseButton>
       </Stack>
@@ -125,7 +132,7 @@ function RightAdminActions({
   onGenerateLog,
   onDelete,
 }: {
-  readonly labels: { readonly reschedule: string; readonly generateLog: string };
+  readonly labels: { readonly reschedule: string; readonly generateLog: string; readonly deleteInstance: string };
   readonly onReschedule: () => void;
   readonly onGenerateLog: () => void;
   readonly onDelete: () => void;
@@ -178,7 +185,7 @@ function RightAdminActions({
         <ArticleIcon sx={{ fontSize: 16 }} />
         {labels.generateLog}
       </Box>
-      <StyledDeleteIconButton aria-label="delete-instance" title="Delete Instance" onClick={onDelete}>
+      <StyledDeleteIconButton aria-label="delete-instance" title={labels.deleteInstance} onClick={onDelete}>
         <DeleteIcon />
       </StyledDeleteIconButton>
     </Stack>

@@ -19,13 +19,11 @@ import {
   Select,
   Stack,
   Typography,
-  useTheme,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
-import type React from "react";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppDataGrid, StatusBadge } from "@/frontend/components/ui";
@@ -48,13 +46,13 @@ interface ReassignTeacherDialogProps {
   readonly onSuccess: () => void;
 }
 
-const ReassignTeacherDialog: React.FC<ReassignTeacherDialogProps> = ({
+function ReassignTeacherDialog({
   open,
   studentId,
   currentTeacherName,
   onClose,
   onSuccess,
-}) => {
+}: ReassignTeacherDialogProps) {
   const t = useTranslations("dashboard.parentProfile.students");
   const [newTeacherId, setNewTeacherId] = useState("");
 
@@ -124,7 +122,7 @@ const ReassignTeacherDialog: React.FC<ReassignTeacherDialogProps> = ({
       </DialogActions>
     </Dialog>
   );
-};
+}
 
 // ─── Change Status Dialog ─────────────────────────────────────────────────────
 
@@ -136,13 +134,7 @@ interface ChangeStatusDialogProps {
   readonly onSuccess: () => void;
 }
 
-const ChangeStatusDialog: React.FC<ChangeStatusDialogProps> = ({
-  open,
-  studentId,
-  currentStatus,
-  onClose,
-  onSuccess,
-}) => {
+function ChangeStatusDialog({ open, studentId, currentStatus, onClose, onSuccess }: ChangeStatusDialogProps) {
   const t = useTranslations("dashboard.parentProfile.students");
   const [selectedStatus, setSelectedStatus] = useState("");
   const allowedTargets = ALLOWED_TARGET_STATUSES[currentStatus.toUpperCase()] ?? [];
@@ -221,7 +213,7 @@ const ChangeStatusDialog: React.FC<ChangeStatusDialogProps> = ({
       </DialogActions>
     </Dialog>
   );
-};
+}
 
 // ─── Main Grid Component ──────────────────────────────────────────────────────
 
@@ -231,10 +223,9 @@ interface ParentStudentsDataGridProps {
   readonly onRefetch?: () => void;
 }
 
-const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, loading, onRefetch }) => {
+function ParentStudentsDataGrid({ rows, loading, onRefetch }: ParentStudentsDataGridProps) {
   const t = useTranslations("dashboard.parentProfile.table");
   const tStudents = useTranslations("dashboard.parentProfile.students");
-  const theme = useTheme();
   const router = useRouter();
   const notifications = useNotifications();
 
@@ -260,14 +251,14 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
         <Stack direction="row" spacing={2} sx={{ alignItems: "center", height: "100%" }}>
           <Avatar
             src={params.row.avatarUrl}
-            sx={{
+            sx={theme => ({
               width: 32,
               height: 32,
               fontSize: 12,
               backgroundColor: alpha(theme.palette.primary.main, 0.1),
               color: theme.palette.primary.main,
               fontWeight: 700,
-            }}
+            })}
           >
             {params.row.name
               .split(" ")
@@ -309,14 +300,14 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
             <LinearProgress
               variant="determinate"
               value={percentage}
-              sx={{
+              sx={theme => ({
                 height: 6,
                 borderRadius: 3,
                 backgroundColor: theme.palette.surfaceContainerLow,
                 "& .MuiLinearProgress-bar": {
                   backgroundColor: theme.palette.primary.main,
                 },
-              }}
+              })}
             />
           </Stack>
         );
@@ -343,11 +334,11 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
           <PersonOutlined
             onClick={() => router.push(`/students/${params.row.id}`)}
-            sx={{
+            sx={theme => ({
               color: theme.palette.text.secondary,
               cursor: "pointer",
               "&:hover": { color: theme.palette.primary.main },
-            }}
+            })}
           />
         </Box>
       ),
@@ -362,7 +353,7 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
           permissions={[AppPermission.StudentReassignTeacher]}
           fallback={
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-              <SettingsOutlined sx={{ color: theme.palette.action.disabled, fontSize: 20 }} />
+              <SettingsOutlined sx={theme => ({ color: theme.palette.action.disabled, fontSize: 20 })} />
             </Box>
           }
         >
@@ -375,11 +366,11 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
                   currentTeacherName: params.row.teacher,
                 })
               }
-              sx={{
+              sx={theme => ({
                 color: theme.palette.text.secondary,
                 cursor: "pointer",
                 "&:hover": { color: theme.palette.primary.main },
-              }}
+              })}
             />
           </Box>
         </RequirePermission>
@@ -449,6 +440,6 @@ const ParentStudentsDataGrid: React.FC<ParentStudentsDataGridProps> = ({ rows, l
       />
     </>
   );
-};
+}
 
 export default ParentStudentsDataGrid;

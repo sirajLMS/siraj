@@ -20,9 +20,9 @@ const CardHeader = ({ row, onView }: { row: TrackingRow; onView: (id: string) =>
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
       <Box>
         <Typography
+          variant="bodyLg"
           sx={theme => ({
             fontFamily: '"Hanken Grotesk", sans-serif',
-            fontSize: "16px",
             fontWeight: 700,
             color: theme.palette.text.primary,
           })}
@@ -30,9 +30,9 @@ const CardHeader = ({ row, onView }: { row: TrackingRow; onView: (id: string) =>
           {row.teacherName ?? ""}
         </Typography>
         <Typography
+          variant="labelMd"
           sx={theme => ({
             fontFamily: '"Inter", sans-serif',
-            fontSize: "12px",
             color: theme.palette.text.secondary,
             fontWeight: 500,
           })}
@@ -69,9 +69,9 @@ const CardBody = ({ row }: { row: TrackingRow }) => {
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}>
         <SchoolOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />
         <Typography
+          variant="bodyMd"
           sx={theme => ({
             fontFamily: '"Hanken Grotesk", sans-serif',
-            fontSize: "14px",
             color: theme.palette.text.secondary,
           })}
         >
@@ -81,9 +81,9 @@ const CardBody = ({ row }: { row: TrackingRow }) => {
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <ScheduleOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />
         <Typography
+          variant="bodyMd"
           sx={theme => ({
             fontFamily: '"Hanken Grotesk", sans-serif',
-            fontSize: "14px",
             fontWeight: 600,
             color: theme.palette.text.primary,
           })}
@@ -131,9 +131,9 @@ const CardFooter = ({
           <CalendarTodayOutlined sx={theme => ({ fontSize: 14, color: theme.palette.onPrimary })} />
         )}
         <Typography
+          variant="labelSm"
           sx={theme => ({
             fontFamily: '"Inter", sans-serif',
-            fontSize: "10px",
             fontWeight: 700,
             letterSpacing: "0.05em",
             textTransform: "uppercase",
@@ -206,7 +206,7 @@ export function RescheduleTrackingCardList({
   if (rows.length === 0) {
     return (
       <Box sx={{ textAlign: "center", py: 6 }}>
-        <Typography sx={theme => ({ color: theme.palette.text.secondary, fontSize: "14px" })}>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {labels.noEntries}
         </Typography>
       </Box>

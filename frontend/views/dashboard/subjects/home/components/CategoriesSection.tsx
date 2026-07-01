@@ -32,19 +32,15 @@ export function CategoriesSection({
         <Chip
           label={t("allCategories")}
           variant={activeCategoryId === null ? "filled" : "outlined"}
+          color={activeCategoryId === null ? "primary" : "default"}
           onClick={() => onCategoryChange(null)}
-          sx={theme => ({
-            ...(activeCategoryId === null && {
-              backgroundColor: theme.palette.primaryContainer,
-              color: theme.palette.onPrimaryContainer,
-            }),
-          })}
         />
         {categories.map(cat => (
           <Chip
             key={cat.id}
             label={cat.name}
             variant={activeCategoryId === cat.id ? "filled" : "outlined"}
+            color={activeCategoryId === cat.id ? "primary" : "default"}
             onClick={() => onCategoryChange(cat.id ?? null)}
             onDelete={canManage ? () => onDeleteCategory(cat.id ?? "") : undefined}
             deleteIcon={
@@ -64,12 +60,6 @@ export function CategoriesSection({
                 </Box>
               ) : undefined
             }
-            sx={theme => ({
-              ...(activeCategoryId === cat.id && {
-                backgroundColor: theme.palette.primaryContainer,
-                color: theme.palette.onPrimaryContainer,
-              }),
-            })}
           />
         ))}
       </Stack>

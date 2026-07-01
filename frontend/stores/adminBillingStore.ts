@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-interface AdminBillingState {
+export interface AdminBillingState {
   readonly page: number;
   readonly pageSize: number;
   setPage: (page: number) => void;

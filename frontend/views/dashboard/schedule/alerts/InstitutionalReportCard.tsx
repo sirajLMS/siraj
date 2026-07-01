@@ -27,9 +27,9 @@ const MobileReportCard = ({ title, description, downloadLabel, onDownload }: Ins
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <Box>
             <Typography
+              variant="titleLg"
               sx={theme => ({
                 fontFamily: '"Hanken Grotesk", sans-serif',
-                fontSize: "20px",
                 fontWeight: 600,
                 color: theme.palette.primary.main,
               })}
@@ -37,8 +37,8 @@ const MobileReportCard = ({ title, description, downloadLabel, onDownload }: Ins
               {title}
             </Typography>
             <Typography
+              variant="bodyMd"
               sx={theme => ({
-                fontSize: "14px",
                 color: theme.palette.text.secondary,
                 mt: 0.5,
               })}
@@ -62,7 +62,7 @@ const MobileReportCard = ({ title, description, downloadLabel, onDownload }: Ins
           sx={{
             py: 1.5,
             fontFamily: '"Inter", sans-serif',
-            fontSize: "12px",
+            typography: "labelMd",
             fontWeight: 700,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
@@ -96,9 +96,9 @@ const DesktopReportCard = ({ title, description, downloadLabel, onDownload }: In
     >
       <Box sx={{ position: "relative", zIndex: 1 }}>
         <Typography
+          variant="headlineMd"
           sx={theme => ({
             fontFamily: '"Hanken Grotesk", sans-serif',
-            fontSize: "24px",
             fontWeight: 600,
             color: theme.palette.onSidebar,
             mb: 1,
@@ -107,8 +107,8 @@ const DesktopReportCard = ({ title, description, downloadLabel, onDownload }: In
           {title}
         </Typography>
         <Typography
+          variant="bodyMd"
           sx={theme => ({
-            fontSize: "14px",
             color: alpha(theme.palette.onSidebar, 0.7),
             mb: 3,
             maxWidth: 280,
@@ -126,7 +126,7 @@ const DesktopReportCard = ({ title, description, downloadLabel, onDownload }: In
             backgroundColor: theme.palette.primary.main,
             color: theme.palette.onPrimary,
             fontFamily: '"Inter", sans-serif',
-            fontSize: "12px",
+            typography: "labelMd",
             fontWeight: 700,
             letterSpacing: "0.1em",
             textTransform: "uppercase",

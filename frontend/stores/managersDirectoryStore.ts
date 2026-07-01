@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/views/dashboard/managers/home/types";
+import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/types/shared.types";
 
 interface ManagersDirectoryState {
   readonly roleFilter: ManagerRoleFilter;

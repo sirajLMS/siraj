@@ -1,8 +1,9 @@
 "use client";
 
 import { CheckCircleOutlined } from "@mui/icons-material";
-import { alpha, Box, Chip, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { alpha, Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { StatusBadge } from "@/frontend/components/ui";
 import type { UpdatedSession } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 import { UpdatedSessionsCardList } from "./UpdatedSessionsCardList";
 import { UpdatedSessionsDataGrid } from "./UpdatedSessionsDataGrid";
@@ -57,14 +58,10 @@ export function UpdatedSessionsSection({ sessions, successfulCount }: Readonly<P
             {t("sections.updated")}
           </Typography>
         </Box>
-        <Chip
+        <StatusBadge
+          category="session"
+          status="completed"
           label={t("table.sessionsCount", { count: successfulCount })}
-          size="small"
-          sx={theme => ({
-            fontWeight: 700,
-            backgroundColor: theme.palette.successContainer,
-            color: theme.palette.onSuccessContainer,
-          })}
         />
       </Box>
       <Box sx={{ p: { xs: 2, lg: 0 } }}>

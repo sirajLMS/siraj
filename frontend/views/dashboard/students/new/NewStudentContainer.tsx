@@ -15,11 +15,11 @@ export function NewStudentContainer() {
   const notifications = useNotifications();
 
   useEffect(() => {
-    notifications.show("Student registration is coming soon.", {
+    notifications.show(t("registrationComingSoonNotice"), {
       severity: "info",
       autoHideDuration: 5000,
     });
-  }, [notifications]);
+  }, [notifications, t]);
 
   const handleGoBack = () => {
     router.push("/students");
@@ -27,7 +27,7 @@ export function NewStudentContainer() {
 
   return (
     <PageContainer>
-      <PageHeader title={t("addStudent")} subtitle="Student registration will be available soon." />
+      <PageHeader title={t("addStudent")} subtitle={t("registrationComingSoon")} />
 
       <Box
         sx={theme => ({
@@ -62,7 +62,7 @@ export function NewStudentContainer() {
           {t("addStudent")}
         </Typography>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center" })}>
-          Student registration is coming soon. Please check back later.
+          {t("registrationComingSoonDescription")}
         </Typography>
         <Button variant="outlined" onClick={handleGoBack} sx={theme => ({ borderColor: theme.palette.border.main })}>
           {t("previous")}

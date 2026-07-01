@@ -40,4 +40,5 @@ export interface RescheduleTrackingLabels {
     readonly missingOriginalClassId: string;
     readonly approveFailed: string;
   };
+  readonly loadFailed: string;
 }

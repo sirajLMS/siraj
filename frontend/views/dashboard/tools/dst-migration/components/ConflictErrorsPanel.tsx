@@ -1,8 +1,9 @@
 "use client";
 
 import { CancelOutlined, WarningAmberOutlined } from "@mui/icons-material";
-import { alpha, Box, Chip, Stack, Typography } from "@mui/material";
+import { alpha, Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
+import { StatusBadge } from "@/frontend/components/ui";
 import type { ConflictGroup } from "@/frontend/views/dashboard/tools/dst-migration/dst-migration.types";
 
 interface Props {
@@ -84,17 +85,10 @@ export function ConflictErrorsPanel({ conflictGroups }: Readonly<Props>) {
       <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3, maxHeight: 500, overflowY: "auto" }}>
         {conflictGroups.map(group => (
           <Box key={group.id} sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-            <Chip
+            <StatusBadge
+              category="session"
+              status="pending"
               label={t("conflicts.teacherLabel", { name: group.teacherName })}
-              size="small"
-              sx={theme => ({
-                alignSelf: "flex-start",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                backgroundColor: theme.palette.secondaryContainer,
-                color: theme.palette.onSecondaryContainer,
-              })}
             />
             {group.conflicts.map(conflict => (
               <ConflictCard key={conflict.id} studentName={conflict.studentName} message={conflict.message} />

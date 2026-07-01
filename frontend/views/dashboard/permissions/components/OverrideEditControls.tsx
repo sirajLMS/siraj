@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, ButtonGroup } from "@mui/material";
-import { styled, type Theme } from "@mui/material/styles";
+import { alpha, styled, type Theme } from "@mui/material/styles";
 import type { OverrideState } from "./OverridesTable";
 
 type OverrideColorVariant = "inherit" | "allow" | "deny";
@@ -11,9 +11,12 @@ function getVariantColors(variant: OverrideColorVariant, theme: Theme) {
     return { bg: theme.palette.primaryContainer, color: theme.palette.onPrimaryContainer };
   }
   if (variant === "allow") {
-    return { bg: "rgba(46, 125, 50, 0.15)", color: theme.palette.success.main };
+    return {
+      bg: theme.palette.successContainer ?? alpha(theme.palette.success.main, 0.15),
+      color: theme.palette.success.main,
+    };
   }
-  return { bg: "rgba(211, 47, 47, 0.15)", color: theme.palette.error.main };
+  return { bg: theme.palette.errorContainer ?? alpha(theme.palette.error.main, 0.15), color: theme.palette.error.main };
 }
 
 const StyledOverrideButton = styled(Button, {
@@ -22,7 +25,7 @@ const StyledOverrideButton = styled(Button, {
   const { bg: activeBg, color: activeColor } = getVariantColors(colorVariant, theme);
 
   return {
-    fontSize: "0.75rem",
+    fontSize: theme.typography.labelMd.fontSize,
     borderColor: theme.palette.divider,
     backgroundColor: isActive ? activeBg : "transparent",
     color: isActive ? activeColor : theme.palette.text.secondary,

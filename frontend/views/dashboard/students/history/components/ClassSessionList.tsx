@@ -142,7 +142,7 @@ export function ClassSessionList({ dateStr, sessions }: Readonly<ClassSessionLis
                     px: 1,
                     py: 0.25,
                     borderRadius: 1,
-                    fontSize: "10px",
+                    typography: "labelSm",
                     fontWeight: 700,
                     textTransform: "uppercase",
                     letterSpacing: "0.05em",

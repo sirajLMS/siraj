@@ -40,6 +40,7 @@ export const classInstanceQueryDocument: TypedDocumentNode<
         avatarUrl
       }
       performance {
+        id
         engagementScore
         assessmentProgress
         assessmentTotal

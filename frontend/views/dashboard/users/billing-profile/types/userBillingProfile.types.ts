@@ -5,6 +5,9 @@ import type {
 import type { buildParentMetrics } from "@/frontend/views/dashboard/billing/utils/billingMetrics";
 import type { BillingLabels } from "@/shared/messages/types/dashboard/billing";
 
+export type { UserBillingProfileState } from "@/frontend/stores/userBillingProfileStore";
+export { DEFAULT_PAGE_SIZE } from "@/frontend/stores/userBillingProfileStore";
+
 export interface UserBillingProfileContainerProps {
   readonly userId: string;
 }
@@ -32,11 +35,3 @@ export interface UserBillingProfileViewProps {
 export type UserBillingProfileDesktopViewProps = UserBillingProfileViewProps;
 
 export type UserBillingProfileMobileViewProps = UserBillingProfileViewProps;
-
-export const DEFAULT_PAGE_SIZE = 10;
-
-export interface UserBillingProfileState {
-  readonly page: number;
-  readonly pageSize: number;
-  setPage: (page: number) => void;
-}

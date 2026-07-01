@@ -16,7 +16,7 @@ const StyledAllowedIndicator = styled(Box)(({ theme }) => ({
   alignItems: "center",
   gap: 4,
   color: theme.palette.success.main,
-  fontSize: "0.875rem",
+  typography: "bodyMd",
   fontWeight: 600,
 }));
 
@@ -25,7 +25,7 @@ const StyledDeniedIndicator = styled(Box)(({ theme }) => ({
   alignItems: "center",
   gap: 4,
   color: theme.palette.error.main,
-  fontSize: "0.875rem",
+  typography: "bodyMd",
   fontWeight: 600,
 }));
 
@@ -35,7 +35,7 @@ const StyledNotSetText = styled(Typography)(({ theme }) => ({
 
 const StyledOverrideLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.disabled,
-  fontSize: "0.75rem",
+  fontSize: theme.typography.labelMd.fontSize,
   marginLeft: theme.spacing(1),
 }));
 
@@ -44,28 +44,32 @@ interface OverrideEffectiveDisplayProps {
   readonly overrideState: OverrideState;
 }
 
+import { useTranslations } from "next-intl";
+
 export function OverrideEffectiveDisplay({ effectiveState, overrideState }: Readonly<OverrideEffectiveDisplayProps>) {
+  const t = useTranslations("dashboard.permissions");
+
   return (
     <StyledEffectiveContainer>
       {/* Status Indicator */}
       {effectiveState === "allowed" && (
         <StyledAllowedIndicator>
           <CheckCircleOutlined fontSize="small" />
-          Allowed
+          {t("statusAllowed")}
         </StyledAllowedIndicator>
       )}
       {effectiveState === "denied" && (
         <StyledDeniedIndicator>
           <BlockOutlined fontSize="small" />
-          Denied
+          {t("statusDenied")}
         </StyledDeniedIndicator>
       )}
-      {effectiveState === "not_set" && <StyledNotSetText variant="bodyMd">Not Set</StyledNotSetText>}
+      {effectiveState === "not_set" && <StyledNotSetText variant="bodyMd">{t("notSet")}</StyledNotSetText>}
       {/* Override Label */}
       <StyledOverrideLabel variant="caption">
-        {overrideState === "GRANTED" && "(Explicit Grant)"}
-        {overrideState === "DENIED" && "(Explicit Deny)"}
-        {overrideState === "INHERIT" && "(Inherited)"}
+        {overrideState === "GRANTED" && t("labelExplicitGrant")}
+        {overrideState === "DENIED" && t("labelExplicitDeny")}
+        {overrideState === "INHERIT" && t("labelInherited")}
       </StyledOverrideLabel>
     </StyledEffectiveContainer>
   );

@@ -1,9 +1,15 @@
 "use client";
 
-import { Box, type BoxProps, Button, type ButtonProps, Divider, styled, useMediaQuery, useTheme } from "@mui/material";
+import { Box, type BoxProps, Divider, styled, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormGetValues, UseFormHandleSubmit, UseFormSetValue } from "react-hook-form";
-import { FormSuccessSnackbar, PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
+import {
+  FormSuccessSnackbar,
+  PageContainer,
+  PageHeader,
+  PrimaryPageAction,
+  SectionPanel,
+} from "@/frontend/components/ui";
 import { ClassParticipantsSection } from "./ClassParticipantsSection";
 import { NotificationPolicyCard } from "./NotificationPolicyCard";
 import { QuickAdjustSection } from "./QuickAdjustSection";
@@ -26,52 +32,12 @@ interface Props {
   readonly onDismissSuccess: () => void;
 }
 
-const CancelButton = styled(Button)<ButtonProps>(({ theme }) => ({
-  // Keep the responsive maxWidth using standard CSS/MUI MQ syntax
-  width: "100%", // handles the 'fullWidth' behavior natively if preferred
-  [theme.breakpoints.up("sm")]: {
-    maxWidth: 200,
-  },
-  paddingTop: theme.spacing(1.5),
-  paddingBottom: theme.spacing(1.5),
-  borderRadius: 99,
-  fontWeight: 700,
-  letterSpacing: "0.1em",
-  backgroundColor: theme.palette.errorContainer,
-  color: theme.palette.error.main,
-  boxShadow: "none",
-  "&:hover": {
-    backgroundColor: theme.palette.errorContainer,
-    filter: "brightness(0.95)",
-    boxShadow: "none", // ensures shadow doesn't reappear on hover
-  },
-}));
-
-const SubmitButton = styled(Button)<ButtonProps>(({ theme }) => ({
-  width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    maxWidth: 200,
-  },
-  paddingTop: theme.spacing(1.5),
-  paddingBottom: theme.spacing(1.5),
-  borderRadius: 99,
-  fontWeight: 700,
-  letterSpacing: "0.1em",
-  backgroundColor: theme.palette.primary.main,
-  "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
-  },
-}));
-
 const ActionContainer = styled(Box)<BoxProps>(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  // theme.spacing(2) ensures it uses your theme's spacing baseline (usually 16px)
   gap: theme.spacing(2),
-
-  // Responsive switch to row layout on small screens and up
   [theme.breakpoints.up("sm")]: {
     flexDirection: "row",
   },
@@ -118,14 +84,20 @@ export function RescheduleView({
           <QuickAdjustSection setValue={setValue} getValues={getValues} />
 
           <ActionContainer>
-            {/* submit */}
-            <SubmitButton type="submit" variant="contained" disabled={isSubmitting}>
+            <PrimaryPageAction type="submit" disabled={isSubmitting}>
               {isSubmitting ? t("actions.processing") : submitLabel}
-            </SubmitButton>
-            {/* cancel */}
-            <CancelButton type="button" variant="contained" onClick={onCancel}>
+            </PrimaryPageAction>
+            <PrimaryPageAction
+              type="button"
+              variant="text"
+              onClick={onCancel}
+              sx={theme => ({
+                color: theme.palette.error.main,
+                "&:hover": { color: theme.palette.error.dark },
+              })}
+            >
               {t("actions.cancel")}
-            </CancelButton>
+            </PrimaryPageAction>
           </ActionContainer>
         </Box>
       </SectionPanel>

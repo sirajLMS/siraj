@@ -84,5 +84,7 @@ export function useTeacherOnboardingLabels(): MessageSchema["dashboard"]["teache
       ibanRequired: t("validation.ibanRequired"),
       urlInvalid: t("validation.urlInvalid"),
     },
+    bannerJoinFaculty: t("bannerJoinFaculty"),
+    bannerRegistrationForm: t("bannerRegistrationForm"),
   };
 }

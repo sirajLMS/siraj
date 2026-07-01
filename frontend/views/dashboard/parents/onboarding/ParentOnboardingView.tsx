@@ -1,10 +1,10 @@
 "use client";
 
 import { InfoOutlined } from "@mui/icons-material";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
 import { FeesContractSection } from "./FeesContractSection";
 import { ParentInfoSection } from "./ParentInfoSection";
 import { SocialCommsSection } from "./SocialCommsSection";
@@ -69,21 +69,19 @@ export function ParentOnboardingView({ register, errors, handleSubmit, isSubmitt
             gap: 2,
           })}
         >
-          <Button
+          <PrimaryPageAction
             type="submit"
-            variant="contained"
             disabled={isSubmitting}
             sx={{
               px: 6,
               py: 2,
-              borderRadius: 2,
               fontWeight: "bold",
               letterSpacing: "0.1em",
               minWidth: 200,
             }}
           >
             {isSubmitting ? t("actions.processing") : t("actions.signup")}
-          </Button>
+          </PrimaryPageAction>
           <Typography variant="labelMd" sx={theme => ({ fontStyle: "italic", color: theme.palette.text.secondary })}>
             {t("privacyNote")}
           </Typography>

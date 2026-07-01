@@ -23,7 +23,7 @@ const STATUS_LABEL_KEYS: Record<SessionStatus, "regular" | "suspendedPending" | 
 
 const StyledCardActionButtonBase = styled(Button)(({ theme }) => ({
   fontFamily: theme.typography.labelUppercase.fontFamily,
-  fontSize: "12px",
+  fontSize: theme.typography.labelMd.fontSize,
   fontWeight: 700,
   letterSpacing: "0.1em",
   textTransform: "uppercase",
@@ -41,12 +41,12 @@ const StyledActivateActionButton = styled(StyledCardActionButtonBase)(({ theme }
 
 const StyledStudentNameText = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
-  fontSize: "15px",
+  fontSize: theme.typography.bodyLg.fontSize,
   color: theme.palette.text.primary,
 }));
 
 const StyledClassNameText = styled(Typography)(({ theme }) => ({
-  fontSize: "12px",
+  fontSize: theme.typography.labelMd.fontSize,
   color: theme.palette.primary.main,
   fontWeight: 500,
 }));
@@ -60,7 +60,7 @@ const StyledMetaInfoRow = styled(Box)(({ theme }) => ({
 
 const StyledSectionTitle = styled(Typography)(({ theme }) => ({
   fontFamily: theme.typography.fontFamily,
-  fontSize: "18px",
+  fontSize: theme.typography.titleLg.fontSize,
   fontWeight: 700,
   color: theme.palette.primary.main,
 }));
@@ -68,7 +68,7 @@ const StyledSectionTitle = styled(Typography)(({ theme }) => ({
 const StyledSeeAllButton = styled(Button)(({ theme }) => ({
   color: theme.palette.primary.main,
   fontFamily: theme.typography.labelUppercase.fontFamily,
-  fontSize: "11px",
+  fontSize: theme.typography.labelUppercase.fontSize,
   fontWeight: 700,
   letterSpacing: "0.1em",
   textTransform: "uppercase",
@@ -85,7 +85,7 @@ const StyledStatusAvatar = styled(Box, {
   alignItems: "center",
   justifyContent: "center",
   fontFamily: theme.typography.labelUppercase.fontFamily,
-  fontSize: "14px",
+  fontSize: theme.typography.bodyMd.fontSize,
   fontWeight: 700,
   color: colorToken,
   flexShrink: 0,
@@ -239,11 +239,11 @@ function StatusTrackingCard({
             <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 0.75 }}>
               <StyledMetaInfoRow>
                 <PersonOutlined sx={{ fontSize: 16 }} />
-                <Typography sx={{ fontSize: "13px" }}>{row.teacherName ?? ""}</Typography>
+                <Typography sx={{ typography: "bodyMd" }}>{row.teacherName ?? ""}</Typography>
               </StyledMetaInfoRow>
               <StyledMetaInfoRow>
                 <ScheduleOutlined sx={{ fontSize: 16 }} />
-                <Typography sx={{ fontSize: "13px" }}>
+                <Typography sx={{ typography: "bodyMd" }}>
                   {formatScheduleRange(row.scheduledStartAt, row.scheduledEndAt, locale)}
                 </Typography>
               </StyledMetaInfoRow>
@@ -276,7 +276,7 @@ export function StatusTrackingCardList({
             sx={theme => ({
               color: theme.palette.text.secondary,
               fontWeight: 400,
-              fontSize: "14px",
+              typography: "bodyMd",
             })}
           >
             ({totalSessions})

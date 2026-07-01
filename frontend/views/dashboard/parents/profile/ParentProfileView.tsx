@@ -4,7 +4,6 @@ import { ArrowForwardOutlined, GroupOutlined } from "@mui/icons-material";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
-import type React from "react";
 import { useState } from "react";
 import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { logger } from "@/frontend/utils/logger";
@@ -22,7 +21,7 @@ interface ParentProfileViewProps {
   readonly onRefetchStudents?: () => void;
 }
 
-const ParentProfileView: React.FC<ParentProfileViewProps> = ({ parent, parentId, onRefetchStudents }) => {
+function ParentProfileView({ parent, parentId, onRefetchStudents }: ParentProfileViewProps) {
   const t = useTranslations("dashboard.parentProfile");
   const tActions = useTranslations("dashboard.parentProfile.actions");
   const theme = useTheme();
@@ -119,6 +118,6 @@ const ParentProfileView: React.FC<ParentProfileViewProps> = ({ parent, parentId,
       />
     </PageContainer>
   );
-};
+}
 
 export default ParentProfileView;

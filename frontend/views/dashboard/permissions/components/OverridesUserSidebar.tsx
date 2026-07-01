@@ -2,6 +2,7 @@
 
 import { Avatar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useTranslations } from "next-intl";
 import type { PermissionGroup, User } from "@/frontend/graphql/generated/gql/graphql-types";
 
 const StyledSidebarContainer = styled(Box)(({ theme }) => ({
@@ -34,7 +35,7 @@ const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
   height: 80,
   backgroundColor: theme.palette.primaryContainer,
   color: theme.palette.onPrimaryContainer,
-  fontSize: "2rem",
+  typography: "headlineLg",
   fontWeight: 600,
 }));
 
@@ -45,7 +46,6 @@ const StyledGroupsSection = styled(Box)({
 
 const StyledGroupsSectionLabel = styled(Typography)(({ theme }) => ({
   textTransform: "uppercase",
-  fontSize: "0.75rem",
   fontWeight: 600,
   color: theme.palette.text.secondary,
   marginBottom: theme.spacing(1.5),
@@ -65,7 +65,6 @@ const StyledGroupChip = styled(Box)(({ theme }) => ({
 
 const StyledGroupName = styled(Typography)({
   fontWeight: 500,
-  fontSize: "0.875rem",
 });
 
 interface OverridesUserSidebarProps {
@@ -74,6 +73,8 @@ interface OverridesUserSidebarProps {
 }
 
 export function OverridesUserSidebar({ user, userGroups }: Readonly<OverridesUserSidebarProps>) {
+  const t = useTranslations("dashboard.permissions");
+
   return (
     <StyledSidebarContainer>
       {/* User Avatar & Info */}
@@ -98,10 +99,10 @@ export function OverridesUserSidebar({ user, userGroups }: Readonly<OverridesUse
 
       {/* Current Groups */}
       <StyledGroupsSection>
-        <StyledGroupsSectionLabel variant="bodyMd">Current Groups</StyledGroupsSectionLabel>
+        <StyledGroupsSectionLabel variant="labelMd">{t("currentGroups")}</StyledGroupsSectionLabel>
         {userGroups.length === 0 ? (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.disabled, fontStyle: "italic" })}>
-            No assigned groups
+            {t("noAssignedGroups")}
           </Typography>
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>

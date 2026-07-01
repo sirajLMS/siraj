@@ -20,7 +20,7 @@ const StyledChartPaper = styled(Paper)(({ theme }) => ({
 
 const StyledChartTitle = styled(Typography)(({ theme }) => ({
   fontFamily: '"Hanken Grotesk", sans-serif',
-  fontSize: "18px",
+  fontSize: theme.typography.titleLg.fontSize,
   fontWeight: 700,
   color: theme.palette.primary.main,
 }));
@@ -40,14 +40,14 @@ const StyledDayLabel = styled(Typography, {
 })<{ isHighlighted: boolean }>(({ theme, isHighlighted }) => ({
   flex: 1,
   textAlign: "center",
-  fontSize: "11px",
+  fontSize: theme.typography.labelUppercase.fontSize,
   fontFamily: '"Inter", sans-serif',
   fontWeight: isHighlighted ? 700 : 400,
   color: isHighlighted ? theme.palette.error.main : theme.palette.text.secondary,
 }));
 
 const StyledAnalyticsNote = styled(Typography)(({ theme }) => ({
-  fontSize: "13px",
+  fontSize: theme.typography.bodyMd.fontSize,
   color: theme.palette.text.secondary,
 }));
 

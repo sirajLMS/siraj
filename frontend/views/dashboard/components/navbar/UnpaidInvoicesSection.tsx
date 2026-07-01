@@ -18,7 +18,7 @@ export function UnpaidInvoicesSection() {
   if (loading) {
     return (
       <Box sx={{ px: 2, py: 1.5 }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
           {t("loadingBilling")}
         </Typography>
       </Box>
@@ -30,7 +30,7 @@ export function UnpaidInvoicesSection() {
   if (!summary || summary.totalOverdueInvoices === 0) {
     return (
       <Box sx={{ px: 2, py: 1.5, textAlign: "center" }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
           {t("noUnpaidInvoices")}
         </Typography>
       </Box>

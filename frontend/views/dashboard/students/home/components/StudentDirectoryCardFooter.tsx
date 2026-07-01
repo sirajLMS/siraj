@@ -32,11 +32,9 @@ export function StudentDirectoryCardFooter({
       <Box sx={{ flex: 1, mr: 2 }}>
         <Typography
           sx={theme => ({
-            fontFamily: '"Inter", sans-serif',
-            fontSize: "11px",
+            typography: "labelUppercase",
             fontWeight: 700,
             letterSpacing: "0.04em",
-            textTransform: "uppercase",
             color: theme.palette.text.secondary,
             mb: 0.5,
           })}

@@ -38,11 +38,11 @@ export function DashboardErrorView({ errorMessage }: DashboardErrorViewProps) {
         textAlign: "center",
       }}
     >
-      <ErrorIcon color="error" sx={{ fontSize: 48 }} />
-      <Typography variant="h6" color="text.primary">
+      <ErrorIcon sx={theme => ({ fontSize: 48, color: theme.palette.error.main })} />
+      <Typography variant="h6" sx={theme => ({ color: theme.palette.text.primary })}>
         {errorTitle}
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, mb: 1 }}>
+      <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary, maxWidth: 400, mb: 1 })}>
         {errorDesc}
       </Typography>
       {showRetry ? (

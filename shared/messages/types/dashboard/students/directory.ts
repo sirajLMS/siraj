@@ -46,4 +46,8 @@ export interface StudentDirectoryLabels {
     readonly viewHistory: string;
   };
   readonly noEntries: string;
+  readonly registrationComingSoon: string;
+  readonly registrationComingSoonDescription: string;
+  readonly registrationComingSoonNotice: string;
+  readonly loadFailed: string;
 }

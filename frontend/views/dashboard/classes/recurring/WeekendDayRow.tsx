@@ -29,7 +29,7 @@ const StyledWeekendDayLabel = styled(Typography)(({ theme }) => ({
 
 // "Weekend off" badge typography with uppercase italic styling
 const StyledWeekendOffBadge = styled(Typography)(({ theme }) => ({
-  fontSize: "12px",
+  fontSize: theme.typography.labelMd.fontSize,
   fontWeight: 700,
   color: theme.palette.onSurfaceVariant,
   letterSpacing: "0.05em",

@@ -34,4 +34,5 @@ export interface RescheduleFormLabels {
     readonly dateRequired: string;
     readonly timeRequired: string;
   };
+  readonly classInstanceNotFound: string;
 }

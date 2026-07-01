@@ -1,9 +1,16 @@
 "use client";
 
 import { AddOutlined, PrintOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Button, Stack, useMediaQuery, useTheme } from "@mui/material";
 import type { ReactNode } from "react";
-import { DateNavigator, PageContainer, PageHeader, PrimaryPageAction, SectionPanel } from "@/frontend/components/ui";
+import {
+  DateNavigator,
+  PageContainer,
+  PageHeader,
+  PrimaryPageAction,
+  SectionPanel,
+  StatusBadge,
+} from "@/frontend/components/ui";
 import type {
   MissedClassAlert,
   TeacherDashboardMetrics,
@@ -124,9 +131,7 @@ export function TeacherDashboardView({
         {missedAlert && isMobile && <MissedClassAlertBanner alert={missedAlert} labels={labels.alert} />}
 
         {isMobile ? (
-          <Typography sx={{ typography: "titleLg", color: theme.palette.primary.main, mb: 2 }}>
-            {labels.overviewTitle}
-          </Typography>
+          <PageHeader title={labels.overviewTitle} titleVariant="titleLg" />
         ) : (
           <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} actions={headerActions} />
         )}
@@ -148,30 +153,22 @@ export function TeacherDashboardView({
 
         {isMobile ? (
           <Box sx={{ mb: 4 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-              <Typography sx={{ typography: "titleLg", color: theme.palette.primary.main }}>
-                {labels.schedule.title}
-              </Typography>
-              <Chip
-                label={labels.todayChip}
-                size="small"
-                sx={theme => ({
-                  backgroundColor: theme.palette.secondary.main,
-                  color: theme.palette.onSecondary,
-                })}
+            <SectionPanel
+              title={labels.schedule.title}
+              actions={<StatusBadge category="session" status="pending" label={labels.todayChip} />}
+            >
+              <TeacherScheduleCardList
+                rows={scheduleRows}
+                labels={labels}
+                canActivate={canActivate}
+                onJoinVideo={onJoinVideo}
+                onActivate={onActivate}
+                page={page}
+                pageSize={pageSize}
+                totalCount={totalCount}
+                onPageChange={onPageChange}
               />
-            </Box>
-            <TeacherScheduleCardList
-              rows={scheduleRows}
-              labels={labels}
-              canActivate={canActivate}
-              onJoinVideo={onJoinVideo}
-              onActivate={onActivate}
-              page={page}
-              pageSize={pageSize}
-              totalCount={totalCount}
-              onPageChange={onPageChange}
-            />
+            </SectionPanel>
           </Box>
         ) : (
           <SectionPanel title={labels.schedule.title} subTitle={scheduleDateLabel} sx={{ mb: 4 }}>

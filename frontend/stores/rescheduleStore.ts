@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { RescheduleSession } from "@/frontend/views/dashboard/reschedule/home/types";
+import type { RescheduleSession } from "@/frontend/types/shared.types";
 
 interface RescheduleState {
   readonly session: RescheduleSession;

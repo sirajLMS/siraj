@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-interface StudentHistoryState {
+export interface StudentHistoryState {
   readonly currentMonth: Date;
   readonly selectedDay: number | null;
   readonly selectedWeek: number;

@@ -82,6 +82,8 @@ const mockLabels = {
     ibanRequired: "IBAN is required",
     urlInvalid: "Invalid URL",
   },
+  bannerJoinFaculty: "Join our faculty",
+  bannerRegistrationForm: "Registration Form",
 };
 
 const meta: Meta<typeof TeacherOnboardingView> = {

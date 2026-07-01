@@ -17,6 +17,9 @@ export interface AdminViewLabels {
     readonly administrativeActions: string;
     readonly generateLog: string;
     readonly reschedule: string;
+    readonly forceActivate: string;
+    readonly stopPause: string;
+    readonly deleteInstance: string;
   };
   readonly classInfo: {
     readonly liveInstance: string;

@@ -53,7 +53,7 @@ const StyledRoleChip = styled(Chip, {
 })<{ isStaff: boolean }>(({ theme, isStaff }) => ({
   fontWeight: 700,
   textTransform: "uppercase",
-  fontSize: "10px",
+  fontSize: theme.typography.labelSm.fontSize,
   height: 20,
   backgroundColor: isStaff ? theme.palette.secondaryContainer : theme.palette.primaryContainer,
   color: isStaff ? theme.palette.onSecondaryContainer : theme.palette.onPrimaryContainer,

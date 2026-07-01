@@ -50,4 +50,13 @@ export interface ResourcesLabels {
     readonly cancel: string;
   };
   readonly validation: ResourceValidationLabels;
+  readonly notification: {
+    readonly fileTypeNotAllowed: string;
+    readonly uploadPrepareFailed: string;
+    readonly uploadFailed: string;
+    readonly createRecordFailed: string;
+    readonly uploadRetryFailed: string;
+    readonly deleteSuccess: string;
+    readonly deleteFailed: string;
+  };
 }

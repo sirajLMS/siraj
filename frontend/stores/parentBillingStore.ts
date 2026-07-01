@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-interface ParentBillingState {
+export interface ParentBillingState {
   readonly page: number;
   readonly pageSize: number;
   setPage: (page: number) => void;

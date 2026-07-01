@@ -1,7 +1,6 @@
 import { EditOutlined } from "@mui/icons-material";
 import { Avatar, Box, Stack, Typography, useTheme } from "@mui/material";
 import { useTranslations } from "next-intl";
-import type React from "react";
 import { StatusBadge } from "@/frontend/components/ui";
 
 interface ParentProfileHeaderProps {
@@ -11,7 +10,7 @@ interface ParentProfileHeaderProps {
   readonly onEditAvatar: () => void;
 }
 
-const ParentProfileHeader: React.FC<ParentProfileHeaderProps> = ({ name, avatarUrl, status, onEditAvatar }) => {
+function ParentProfileHeader({ name, avatarUrl, status, onEditAvatar }: ParentProfileHeaderProps) {
   const theme = useTheme();
   const t = useTranslations("dashboard.parentProfile");
 
@@ -66,13 +65,13 @@ const ParentProfileHeader: React.FC<ParentProfileHeaderProps> = ({ name, avatarU
       </Box>
 
       <Stack spacing={1}>
-        <Typography variant="headlineLg" sx={{ color: theme.palette.primary.main }}>
+        <Typography variant="headlineLg" sx={theme => ({ color: theme.palette.primary.main })}>
           {name}
         </Typography>
         <StatusBadge category="studentAccount" status={status} label={t(`status.${status}`)} />
       </Stack>
     </Stack>
   );
-};
+}
 
 export default ParentProfileHeader;

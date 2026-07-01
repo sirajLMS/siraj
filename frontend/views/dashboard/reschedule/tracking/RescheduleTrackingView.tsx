@@ -66,7 +66,7 @@ export function RescheduleTrackingView({
       displayEmpty
       sx={theme => ({
         minWidth: 140,
-        fontSize: "0.875rem",
+        typography: "bodyMd",
         backgroundColor: theme.palette.surfaceContainerLow,
         "& .MuiSelect-select": { py: 0.5 },
       })}

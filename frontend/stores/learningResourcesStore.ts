@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ResourceFilterType, ResourceSortBy } from "@/frontend/views/dashboard/resources/types/resourcesTypes";
+import type { ResourceFilterType, ResourceSortBy } from "@/frontend/types/shared.types";
 
 interface LearningResourcesState {
   readonly searchQuery: string;

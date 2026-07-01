@@ -15,6 +15,9 @@ export const classDetails: ClassDetailsLabels = {
     administrativeActions: "الإجراءات الإدارية",
     generateLog: "إنشاء سجل",
     reschedule: "تعديل موعد الحصة",
+    forceActivate: "فرض التفعيل",
+    stopPause: "إيقاف/تعليق",
+    deleteInstance: "حذف الحصة",
   },
   classInfo: {
     liveInstance: "حصة مباشرة",
@@ -109,4 +112,5 @@ export const classDetails: ClassDetailsLabels = {
   editInfo: "تعديل المعلومات",
   generateLog: "إنشاء سجل",
   reschedule: "تعديل موعد الحصة",
+  invalidClassId: "معرف الحصة غير صالح",
 };

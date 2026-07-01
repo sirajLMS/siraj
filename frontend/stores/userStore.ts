@@ -25,7 +25,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       name: user?.name || "",
       role: user?.role || "",
       avatarUrl: user?.avatarUrl || "",
-      permissions: (user?.permissions as AppPermission[]) || [],
+      permissions: user?.permissions ?? [],
       notificationCount: user?.notificationCount || 0,
     }),
   hasPermission: permission => {

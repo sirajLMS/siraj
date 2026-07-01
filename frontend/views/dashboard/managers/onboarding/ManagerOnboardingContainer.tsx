@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useCreateManagerMutation } from "@/frontend/stores/managerOnboardingStore";
+import { useCreateManagerOnboarding } from "@/frontend/hooks/useCreateManagerOnboarding";
 import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
 import { ManagerOnboardingView } from "./ManagerOnboardingView";
@@ -24,7 +24,7 @@ const defaultValues: ManagerOnboardingFormData = {
 
 export function ManagerOnboardingContainer() {
   const router = useRouter();
-  const { execute, loading } = useCreateManagerMutation();
+  const { execute, loading } = useCreateManagerOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
 
   const {

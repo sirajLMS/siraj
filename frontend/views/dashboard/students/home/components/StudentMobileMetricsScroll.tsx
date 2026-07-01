@@ -59,8 +59,8 @@ export function StudentMobileMetricsScroll({ metrics }: StudentMobileMetricsScro
               <Box>
                 <Typography
                   sx={theme => ({
-                    fontFamily: theme.typography.h3.fontFamily,
-                    fontSize: "18px",
+                    fontFamily: theme.typography.titleLg.fontFamily,
+                    fontSize: theme.typography.titleLg.fontSize,
                     fontWeight: 700,
                     color: theme.palette.primary.main,
                     lineHeight: 1,
@@ -71,7 +71,7 @@ export function StudentMobileMetricsScroll({ metrics }: StudentMobileMetricsScro
                 <Typography
                   sx={theme => ({
                     fontFamily: theme.typography.caption.fontFamily,
-                    fontSize: "10px",
+                    fontSize: theme.typography.labelSm.fontSize,
                     fontWeight: 700,
                     letterSpacing: "0.06em",
                     textTransform: "uppercase",

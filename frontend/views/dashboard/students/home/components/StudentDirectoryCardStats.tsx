@@ -18,8 +18,7 @@ function formatHours(hours: number): string {
 }
 
 const labelSx = (theme: Theme) => ({
-  ...theme.typography.labelUppercase,
-  fontSize: "10px",
+  ...theme.typography.labelSm,
   letterSpacing: "0.06em",
   color: theme.palette.text.secondary,
   mb: 0.5,

@@ -30,7 +30,7 @@ const StyledTotalSessionsBadge = styled(Box)(({ theme }) => ({
   paddingBlock: theme.spacing(0.5),
   backgroundColor: theme.palette.action.selected,
   borderRadius: 10,
-  fontSize: "12px",
+  fontSize: theme.typography.labelMd.fontSize,
   color: theme.palette.text.secondary,
   fontFamily: theme.typography.fontFamily,
   fontWeight: 500,

@@ -3,7 +3,7 @@
 import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Fab, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { BillingMetricsRow } from "@/frontend/views/dashboard/billing/components/BillingMetricsRow";
 import { BillingMobileSearchBar } from "@/frontend/views/dashboard/billing/components/BillingMobileSearchBar";
 import { ParentInvoicesCardList } from "@/frontend/views/dashboard/billing/components/ParentInvoicesCardList";
@@ -56,32 +56,33 @@ export function UserBillingProfileMobileView({
           filterLabel={labels.search.filter}
           onChange={onSearchChange}
         />
-        <Typography variant="titleLg">{labels.sections.invoiceHistory}</Typography>
-        {invoices.length === 0 ? (
-          <Box sx={{ py: 6, textAlign: "center" }}>
-            <Typography variant="headlineMd" sx={{ mb: 1 }}>
-              {labels.parentTable.emptyTitle}
-            </Typography>
-            <StyledEmptySubtitle variant="bodyMd">{labels.parentTable.emptySubtitle}</StyledEmptySubtitle>
-          </Box>
-        ) : (
-          <ParentInvoicesCardList
-            rows={invoices}
-            canView={canView}
-            onPayNow={onPayNow}
-            onDownloadPdf={onDownloadPdf}
-            labels={{
-              viewDetails: labels.parentTable.viewDetails,
-              downloadPdf: labels.parentTable.downloadPdf,
-              payNow: labels.parentTable.payNow,
-              statusLabels: labels.invoiceStatus,
-            }}
-            page={page}
-            pageSize={pageSize}
-            totalCount={totalCount}
-            onPageChange={onPageChange}
-          />
-        )}
+        <SectionPanel title={labels.sections.invoiceHistory}>
+          {invoices.length === 0 ? (
+            <Box sx={{ py: 6, textAlign: "center" }}>
+              <Typography variant="headlineMd" sx={{ mb: 1 }}>
+                {labels.parentTable.emptyTitle}
+              </Typography>
+              <StyledEmptySubtitle variant="bodyMd">{labels.parentTable.emptySubtitle}</StyledEmptySubtitle>
+            </Box>
+          ) : (
+            <ParentInvoicesCardList
+              rows={invoices}
+              canView={canView}
+              onPayNow={onPayNow}
+              onDownloadPdf={onDownloadPdf}
+              labels={{
+                viewDetails: labels.parentTable.viewDetails,
+                downloadPdf: labels.parentTable.downloadPdf,
+                payNow: labels.parentTable.payNow,
+                statusLabels: labels.invoiceStatus,
+              }}
+              page={page}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              onPageChange={onPageChange}
+            />
+          )}
+        </SectionPanel>
       </PageContainer>
       {showQuickPayFab && (
         <StyledQuickPayFab variant="extended" aria-label={labels.quickPay} onClick={onQuickPay}>

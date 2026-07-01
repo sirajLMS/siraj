@@ -1,9 +1,9 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Fab, Typography } from "@mui/material";
+import { Fab } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import { AdminInvoicesCardList } from "./components/AdminInvoicesCardList";
 import { BillingMetricsRow } from "./components/BillingMetricsRow";
 import { BillingMobileSearchBar } from "./components/BillingMobileSearchBar";
@@ -52,24 +52,24 @@ export function AdminBillingMobileView({
           filterLabel={labels.search.filter}
           onChange={onSearchChange}
         />
-        <Typography variant="titleLg">{labels.sections.recentInvoices}</Typography>
-        <AdminInvoicesCardList
-          rows={invoices}
-          canManage={canManage}
-          onMarkAsPaid={onMarkAsPaid}
-          labels={{
-            markAsPaid: labels.adminTable.markAsPaid,
-            quickPay: labels.adminTable.quickPay,
-            statusLabels: labels.invoiceStatus,
-          }}
-          page={page}
-          pageSize={pageSize}
-          totalCount={totalCount}
-          onPageChange={onPageChange}
-        />
+        <SectionPanel title={labels.sections.recentInvoices}>
+          <AdminInvoicesCardList
+            rows={invoices}
+            canManage={canManage}
+            onMarkAsPaid={onMarkAsPaid}
+            labels={{
+              markAsPaid: labels.adminTable.markAsPaid,
+              quickPay: labels.adminTable.quickPay,
+              statusLabels: labels.invoiceStatus,
+            }}
+            page={page}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            onPageChange={onPageChange}
+          />
+        </SectionPanel>
         {canManage && (
-          <>
-            <Typography variant="titleLg">{labels.sections.studentCreditStatus}</Typography>
+          <SectionPanel title={labels.sections.studentCreditStatus}>
             <StudentCreditCardList
               rows={creditRows}
               canManage={canManage}
@@ -80,7 +80,7 @@ export function AdminBillingMobileView({
                 creditStatusLabels: labels.creditStatus,
               }}
             />
-          </>
+          </SectionPanel>
         )}
       </PageContainer>
       {canCreate && (

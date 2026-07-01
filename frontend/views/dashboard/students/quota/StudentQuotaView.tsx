@@ -1,20 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  CheckCircleOutlined,
-  ChevronRight,
-  EditOutlined,
-  Save,
-  ScheduleOutlined,
-  SyncOutlined,
-} from "@mui/icons-material";
-import { Avatar, Box, Button, CircularProgress, IconButton, Typography } from "@mui/material";
+import { CheckCircleOutlined, EditOutlined, Save, ScheduleOutlined, SyncOutlined } from "@mui/icons-material";
+import { Avatar, Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { FormProvider, type UseFormReturn, useForm } from "react-hook-form";
-import { PageContainer } from "@/frontend/components/ui/PageContainer";
-import { Link } from "@/shared/i18n/routing";
+import { PageContainer, PageHeader, type PageHeaderBreadcrumb, PrimaryPageAction } from "@/frontend/components/ui";
 import type { MessageSchema } from "@/shared/messages/types/message";
 import { ContextualHelperCards } from "./components/ContextualHelperCards";
 import { CourseDetailsSection } from "./components/CourseDetailsSection";
@@ -64,36 +56,13 @@ function MobileProfileHeader({ studentData, onEditAvatar }: Readonly<MobileProfi
   );
 }
 
-function DesktopBreadcrumbs() {
-  const t = useTranslations("dashboard.studentQuota");
-  return (
-    <Box
-      sx={theme => ({
-        display: { xs: "none", md: "flex" },
-        alignItems: "center",
-        gap: 1,
-        mb: 3,
-        color: theme.palette.onSurfaceVariant,
-      })}
-    >
-      <Link href="/students" style={{ textDecoration: "none" }}>
-        <Typography
-          variant="labelMd"
-          sx={theme => ({
-            cursor: "pointer",
-            "&:hover": { color: theme.palette.primary.main },
-            color: theme.palette.onSurfaceVariant,
-          })}
-        >
-          {t("breadcrumbs.students")}
-        </Typography>
-      </Link>
-      <ChevronRight sx={{ fontSize: 14 }} />
-      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-        {t("breadcrumbs.editProfile")}
-      </Typography>
-    </Box>
-  );
+function DesktopBreadcrumbs(
+  t: ReturnType<typeof useTranslations<"dashboard.studentQuota">>
+): readonly PageHeaderBreadcrumb[] {
+  return [
+    { label: t("breadcrumbs.students"), href: "/students" },
+    { label: t("breadcrumbs.editProfile"), current: true },
+  ];
 }
 
 function FormActions({ isSaving, isSaved, studentData, onCancel }: Readonly<FormActionsProps>) {
@@ -126,7 +95,7 @@ function FormActions({ isSaving, isSaved, studentData, onCancel }: Readonly<Form
           width: { xs: "100%", md: "auto" },
         }}
       >
-        <Button
+        <PrimaryPageAction
           type="submit"
           disabled={isSaving || isSaved}
           startIcon={saveIcon}
@@ -135,9 +104,6 @@ function FormActions({ isSaving, isSaved, studentData, onCancel }: Readonly<Form
             px: { xs: 0, md: 5 },
             backgroundColor: isSaved ? theme.palette.primary.main : theme.palette.success.main,
             color: isSaved ? theme.palette.onPrimary : theme.palette.onSuccess,
-            borderRadius: 1,
-            fontWeight: 700,
-            letterSpacing: "0.1em",
             "&:hover": { backgroundColor: isSaved ? theme.palette.primary.dark : theme.palette.success.dark },
             "&.Mui-disabled": {
               backgroundColor: theme.palette.primary.main,
@@ -148,16 +114,15 @@ function FormActions({ isSaving, isSaved, studentData, onCancel }: Readonly<Form
           })}
         >
           {saveText}
-        </Button>
-        <Button
+        </PrimaryPageAction>
+        <PrimaryPageAction
           type="button"
+          variant="text"
           onClick={onCancel}
           sx={theme => ({
             height: { xs: 48, md: 48 },
             px: { xs: 0, md: 4 },
             color: theme.palette.onSurfaceVariant,
-            fontWeight: 700,
-            letterSpacing: "0.1em",
             "&:hover": {
               color: theme.palette.error.main,
               backgroundColor: { xs: theme.palette.surfaceContainerLow, md: "transparent" },
@@ -166,7 +131,7 @@ function FormActions({ isSaving, isSaved, studentData, onCancel }: Readonly<Form
           })}
         >
           {t("actions.cancel")}
-        </Button>
+        </PrimaryPageAction>
       </Box>
 
       <Box
@@ -195,6 +160,7 @@ export function StudentQuotaView({
   onCancel,
   onEditAvatar,
 }: Readonly<StudentQuotaViewProps>) {
+  const t = useTranslations("dashboard.studentQuota");
   const validationMessages = useTranslations("dashboard.studentQuota.validation");
 
   const schema = createStudentQuotaSchema(
@@ -245,7 +211,9 @@ export function StudentQuotaView({
   return (
     <PageContainer>
       <MobileProfileHeader studentData={studentData} onEditAvatar={onEditAvatar} />
-      <DesktopBreadcrumbs />
+      <Box sx={{ display: { xs: "none", md: "flex" }, mb: 3 }}>
+        <PageHeader title={t("breadcrumbs.editProfile")} titleVariant="titleLg" breadcrumbs={DesktopBreadcrumbs(t)} />
+      </Box>
 
       <Box
         sx={theme => ({

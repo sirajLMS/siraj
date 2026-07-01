@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { FormSuccessSnackbar } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useCreateParentMutation } from "@/frontend/stores/parentOnboardingStore";
+import { useCreateParentOnboarding } from "@/frontend/hooks/useCreateParentOnboarding";
 import { logger } from "@/frontend/utils/logger";
 import { ParentOnboardingView } from "./ParentOnboardingView";
 import { type ParentOnboardingFormData, parentOnboardingSchema } from "./schemas/parentOnboardingSchema";
@@ -33,7 +33,7 @@ const defaultValues: ParentOnboardingFormData = {
 
 export function ParentOnboardingContainer() {
   const t = useTranslations("dashboard.parentOnboarding");
-  const { execute, loading } = useCreateParentMutation();
+  const { execute, loading } = useCreateParentOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
 
   const {

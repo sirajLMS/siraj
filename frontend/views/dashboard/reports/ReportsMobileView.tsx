@@ -1,7 +1,6 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
-import { PageContainer, PageHeader } from "@/frontend/components/ui";
+import { PageContainer, PageHeader, SectionPanel } from "@/frontend/components/ui";
 import type {
   LedgerStatus,
   ReportLedgerRow,
@@ -116,12 +115,9 @@ export function ReportsMobileView({
         compact
       />
 
-      <Box>
-        <Typography variant="titleLg" sx={{ color: theme => theme.palette.primary.main, mb: 2, px: 0.5 }}>
-          {ledgerTitle}
-        </Typography>
+      <SectionPanel title={ledgerTitle}>
         <PerformanceLedgerCardList rows={rows} labels={ledgerLabels} onRowClick={onRowClick} />
-      </Box>
+      </SectionPanel>
     </PageContainer>
   );
 }

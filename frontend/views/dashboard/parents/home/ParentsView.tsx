@@ -180,33 +180,28 @@ export function ParentsView({
             </Typography>
             {STATUS_FILTER_OPTIONS.map(status => {
               const displayStatus = toParentAccountStatus(status);
+              const isActive = statusFilter === status;
               return (
                 <Chip
                   key={status}
                   label={labels.statusLabels[displayStatus]}
                   size="small"
-                  variant={statusFilter === status ? "filled" : "outlined"}
+                  variant={isActive ? "filled" : "outlined"}
+                  color={isActive ? "primary" : "default"}
                   onClick={() => {
                     onStatusFilterChange(statusFilter === status ? null : status);
                   }}
-                  sx={theme => ({
-                    ...(statusFilter === status && {
-                      backgroundColor: theme.palette.primary.main,
-                      color: theme.palette.onPrimary,
-                    }),
-                  })}
                 />
               );
             })}
             {statusFilter && (
-              <Chip
-                label={labels.clearFilters}
+              <FilterButton
                 size="small"
-                variant="outlined"
-                onDelete={onResetFilters}
                 onClick={onResetFilters}
-                sx={theme => ({ borderColor: theme.palette.error.main, color: theme.palette.error.main })}
-              />
+                sx={theme => ({ color: theme.palette.error.main, borderColor: theme.palette.error.main })}
+              >
+                {labels.clearFilters}
+              </FilterButton>
             )}
           </Stack>
         </Collapse>

@@ -59,23 +59,17 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
 
           <Box sx={{ display: { xs: "none", md: "block" } }}>
             <Typography
+              variant="titleLg"
               sx={{
                 color: theme => theme.palette.onHeaderContainer,
-                fontFamily: '"Hanken Grotesk", sans-serif',
-                fontSize: "20px",
-                fontWeight: 600,
-                lineHeight: 1.2,
               }}
             >
               {t("layout.appTitle")}
             </Typography>
             <Typography
+              variant="labelMd"
               sx={{
                 color: theme => alpha(theme.palette.onHeaderContainer, 0.7),
-                fontFamily: '"Inter", sans-serif',
-                fontSize: "12px",
-                fontWeight: 500,
-                letterSpacing: "0.05em",
               }}
             >
               {roleLabel}
@@ -98,9 +92,8 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
           >
             <Box sx={{ textAlign: "end", display: { xs: "none", sm: "block" } }}>
               <Typography
+                variant="labelMd"
                 sx={{
-                  fontFamily: '"Inter", sans-serif',
-                  fontSize: "12px",
                   fontWeight: 500,
                   lineHeight: 1,
                 }}
@@ -108,11 +101,9 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
                 {userName}
               </Typography>
               <Typography
+                variant="labelSm"
                 sx={{
                   color: theme => alpha(theme.palette.onHeaderContainer, 0.7),
-                  fontSize: "10px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
                   mt: 0.5,
                 }}
               >

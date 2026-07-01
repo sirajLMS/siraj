@@ -117,10 +117,9 @@ export function PermissionGroupsDataGrid({
         minWidth: 150,
         renderCell: params => (
           <Typography
-            variant="bodyMd"
+            variant="labelMd"
             sx={theme => ({
               fontFamily: "JetBrains Mono, monospace",
-              fontSize: "0.75rem",
               color: theme.palette.text.secondary,
             })}
           >

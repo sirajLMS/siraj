@@ -119,6 +119,7 @@ export function ScheduleAlertsContainer() {
     missed: t("sessionStatus.missed"),
     endOfSchedule: t("endOfSchedule"),
     noEntries: t("noEntries"),
+    loading: t("loading"),
   };
 
   const handlePageChange = (newPage: number) => {

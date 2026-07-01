@@ -22,7 +22,7 @@ function PermissionKeyCell({ value }: Readonly<PermissionKeyCellProps>) {
     <Box
       sx={theme => ({
         fontFamily: "JetBrains Mono, monospace",
-        fontSize: "0.75rem",
+        typography: "labelMd",
         backgroundColor: theme.palette.surfaceVariant,
         color: theme.palette.onSurfaceVariant,
         px: 1,
@@ -59,7 +59,7 @@ function UsedInCell({ permission, groups }: Readonly<UsedInCellProps>) {
           <Box
             key={g.id}
             sx={theme => ({
-              fontSize: "0.75rem",
+              typography: "labelMd",
               fontWeight: 500,
               backgroundColor: theme.palette.secondaryContainer,
               color: theme.palette.onSecondaryContainer,

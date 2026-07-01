@@ -77,4 +77,5 @@ export interface ClassDetailsLabels {
   readonly editInfo: string;
   readonly generateLog: string;
   readonly reschedule: string;
+  readonly invalidClassId: string;
 }

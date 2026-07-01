@@ -54,4 +54,13 @@ export const resources: ResourcesLabels = {
     documentNameRequired: "يرجى إدخال اسم المستند.",
     fileRequired: "يرجى اختيار ملف للرفع.",
   },
+  notification: {
+    fileTypeNotAllowed: "{type} ليس نوع ملف مسموح به",
+    uploadPrepareFailed: "فشل تحضير الرفع",
+    uploadFailed: "فشل رفع الملف. يرجى المحاولة مرة أخرى.",
+    createRecordFailed: "فشل إنشاء سجل المورد.",
+    uploadRetryFailed: "فشل رفع المورد. يرجى المحاولة مرة أخرى.",
+    deleteSuccess: "تم حذف المورد بنجاح.",
+    deleteFailed: "فشل حذف المورد.",
+  },
 };

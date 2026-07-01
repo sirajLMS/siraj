@@ -45,4 +45,5 @@ export const scheduleAlerts: ScheduleAlertsLabels = {
   showingOf: "عرض {shown} من {total} حصة",
   noEntries: "لا توجد حصص",
   endOfSchedule: "نهاية جدول اليوم الرئيسي",
+  loading: "جارٍ التحميل...",
 };

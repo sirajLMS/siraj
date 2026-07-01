@@ -49,6 +49,9 @@ export interface ClassAuditLabels {
     readonly joinMeeting: string;
     readonly capacityBadge: string;
     readonly capacity: string;
+    readonly meetingIdLabel: string;
+    readonly online: string;
+    readonly meetingIdNA: string;
   };
   readonly communicationLog: {
     readonly title: string;
@@ -79,7 +82,7 @@ interface ClassAuditViewProps {
 
 const StyledMobileClassTitle = styled(Typography)(({ theme }) => ({
   fontFamily: '"Hanken Grotesk", sans-serif',
-  fontSize: "24px",
+  fontSize: theme.typography.headlineMd.fontSize,
   fontWeight: 600,
   color: theme.palette.primary.main,
   lineHeight: 1.2,
@@ -89,7 +92,7 @@ const StyledMobileStatusChip = styled(Chip)(({ theme }) => ({
   backgroundColor: theme.palette.primaryContainer,
   color: theme.palette.onPrimaryContainer,
   fontFamily: '"Inter", sans-serif',
-  fontSize: "11px",
+  fontSize: theme.typography.labelUppercase.fontSize,
   fontWeight: 700,
   letterSpacing: "0.06em",
   textTransform: "uppercase",

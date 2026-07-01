@@ -43,7 +43,6 @@ export function StudentContextCard({ student }: Readonly<StudentContextCardProps
             variant="labelUppercase"
             sx={theme => ({
               color: theme.palette.onSurfaceVariant,
-              fontSize: "10px",
               display: "block",
               mb: 0.5,
             })}

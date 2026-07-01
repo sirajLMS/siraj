@@ -1,10 +1,10 @@
 "use client";
 
-import { Box, Button } from "@mui/material";
+import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
-import { FormSuccessSnackbar, PageContainer, PageHeader } from "@/frontend/components/ui";
+import { FormSuccessSnackbar, PageContainer, PageHeader, PrimaryPageAction } from "@/frontend/components/ui";
 import { OnboardingMetricsOverview } from "./OnboardingMetricsOverview";
 import { StaffInfoSection } from "./StaffInfoSection";
 import { SystemAccessSection } from "./SystemAccessSection";
@@ -38,32 +38,6 @@ const StyledFormActions = styled(Box)(({ theme }) => ({
   [theme.breakpoints.up("sm")]: {
     flexDirection: "row",
   },
-}));
-
-/**
- * Primary submit button with bold styling and primary color.
- */
-const StyledSubmitButton = styled(Button)(({ theme }) => ({
-  maxWidth: 280,
-  paddingLeft: theme.spacing(6),
-  paddingRight: theme.spacing(6),
-  paddingTop: theme.spacing(2),
-  paddingBottom: theme.spacing(2),
-  borderRadius: Number(theme.shape.borderRadius) * 2,
-  fontWeight: 700,
-  letterSpacing: "0.1em",
-  backgroundColor: theme.palette.primary.main,
-  "&:hover": { backgroundColor: theme.palette.primary.dark },
-}));
-
-/**
- * Secondary cancel button with text styling.
- */
-const StyledCancelButton = styled(Button)(({ theme }) => ({
-  maxWidth: 200,
-  color: theme.palette.text.secondary,
-  fontWeight: 700,
-  letterSpacing: "0.1em",
 }));
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -157,12 +131,29 @@ export function ManagerOnboardingView({
 
           {/* Form action buttons */}
           <StyledFormActions>
-            <StyledSubmitButton type="submit" variant="contained" disabled={isSubmitting} fullWidth>
+            <PrimaryPageAction
+              type="submit"
+              disabled={isSubmitting}
+              sx={theme => ({
+                maxWidth: 280,
+                px: 6,
+                py: 2,
+                borderRadius: Number(theme.shape.borderRadius) * 2,
+              })}
+            >
               {isSubmitting ? t("actions.processing") : t("actions.signup")}
-            </StyledSubmitButton>
-            <StyledCancelButton type="button" variant="text" onClick={onCancel} fullWidth>
+            </PrimaryPageAction>
+            <PrimaryPageAction
+              type="button"
+              variant="text"
+              onClick={onCancel}
+              sx={theme => ({
+                maxWidth: 200,
+                color: theme.palette.text.secondary,
+              })}
+            >
               {t("actions.cancel")}
-            </StyledCancelButton>
+            </PrimaryPageAction>
           </StyledFormActions>
         </StyledFormWrapper>
       </Box>

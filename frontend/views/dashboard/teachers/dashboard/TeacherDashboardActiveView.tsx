@@ -135,8 +135,6 @@ function DashboardMobileView({
   totalCount,
   onPageChange,
 }: Readonly<TeacherDashboardActiveViewProps>) {
-  const theme = useTheme();
-
   return (
     <PageContainer>
       {activationError && (
@@ -148,7 +146,7 @@ function DashboardMobileView({
         <Typography sx={{ typography: "labelUppercase", color: theme => theme.palette.text.secondary }}>
           {labels.activeWelcome.overviewLabel}
         </Typography>
-        <Typography sx={{ typography: "headlineMd", color: theme.palette.primary.main, mt: 0.5 }}>
+        <Typography sx={theme => ({ typography: "headlineMd", color: theme.palette.primary.main, mt: 0.5 })}>
           {labels.activeWelcome.title.replace("{name}", userName)}
         </Typography>
         <Box

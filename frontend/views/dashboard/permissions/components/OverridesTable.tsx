@@ -2,6 +2,7 @@
 
 import { Box, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useTranslations } from "next-intl";
 import type { Permission, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 import { OverridesTableRow } from "./OverridesTableRow";
 
@@ -46,6 +47,8 @@ export function OverridesTable({
   isDialogLoading,
   handleOverrideChange,
 }: Readonly<OverridesTableProps>) {
+  const t = useTranslations("dashboard.permissions");
+
   return (
     <StyledTableWrapper>
       {/* Loading State */}
@@ -60,9 +63,9 @@ export function OverridesTable({
             {/* Table Header */}
             <TableHead>
               <TableRow>
-                <StyledHeaderCell>Permission</StyledHeaderCell>
-                <StyledHeaderCell>Group Baseline</StyledHeaderCell>
-                <StyledOverrideControlCell>Override Control</StyledOverrideControlCell>
+                <StyledHeaderCell>{t("columnPermission")}</StyledHeaderCell>
+                <StyledHeaderCell>{t("columnGroupBaseline")}</StyledHeaderCell>
+                <StyledOverrideControlCell>{t("columnOverrideControl")}</StyledOverrideControlCell>
               </TableRow>
             </TableHead>
             {/* Table Body - Permission Rows */}
@@ -75,8 +78,8 @@ export function OverridesTable({
                 );
                 const isAllowedByGroup = baselineGroups.length > 0;
                 const baselineText = isAllowedByGroup
-                  ? `Allowed via ${baselineGroups.map(g => g.name).join(", ")}`
-                  : "Not Set";
+                  ? t("allowedViaGroups", { groups: baselineGroups.map(g => g.name).join(", ") })
+                  : t("notSet");
 
                 const overrideState: OverrideState = localOverrides[p.id] || "INHERIT";
 

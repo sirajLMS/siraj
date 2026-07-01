@@ -86,9 +86,9 @@ const AcademicClassCard = ({
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
           <Box>
             <Typography
+              variant="titleLg"
               sx={theme => ({
                 fontFamily: '"Hanken Grotesk", sans-serif',
-                fontSize: "20px",
                 fontWeight: 600,
                 color: theme.palette.primary.main,
                 lineHeight: 1.2,
@@ -98,7 +98,7 @@ const AcademicClassCard = ({
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}>
               <PersonOutlined sx={theme => ({ fontSize: 14, color: theme.palette.text.secondary })} />
-              <Typography sx={theme => ({ fontSize: "14px", color: theme.palette.text.secondary })}>
+              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
                 {row.instructor}
               </Typography>
             </Box>
@@ -119,13 +119,13 @@ const AcademicClassCard = ({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
             <ScheduleOutlined sx={theme => ({ fontSize: 16, color: theme.palette.header })} />
-            <Typography sx={theme => ({ fontSize: "12px", fontWeight: 500, color: theme.palette.primary.main })}>
+            <Typography variant="labelMd" sx={theme => ({ fontWeight: 500, color: theme.palette.primary.main })}>
               {row.time}
             </Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
             <Box component={getRoomIcon(row.room)} sx={theme => ({ fontSize: 16, color: theme.palette.header })} />
-            <Typography sx={theme => ({ fontSize: "12px", fontWeight: 500, color: theme.palette.primary.main })}>
+            <Typography variant="labelMd" sx={theme => ({ fontWeight: 500, color: theme.palette.primary.main })}>
               {row.room}
             </Typography>
           </Box>
@@ -184,7 +184,7 @@ const EndOfSchedule = ({ label }: { label: string }) => {
       >
         <ScheduleOutlined sx={theme => ({ fontSize: 64, color: theme.palette.text.disabled, opacity: 0.4 })} />
       </Box>
-      <Typography sx={theme => ({ fontSize: "14px", color: theme.palette.text.secondary, fontStyle: "italic" })}>
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, fontStyle: "italic" })}>
         {label}
       </Typography>
     </Box>

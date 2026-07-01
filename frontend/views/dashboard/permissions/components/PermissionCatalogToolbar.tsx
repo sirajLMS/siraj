@@ -21,7 +21,7 @@ function CategoryChip({ label, active, onClick }: Readonly<CategoryChipProps>) {
         borderRadius: "9999px",
         px: 2,
         py: 0.75,
-        fontSize: "0.75rem",
+        typography: "labelMd",
         fontWeight: 500,
         backgroundColor: active ? theme.palette.primaryContainer : theme.palette.surfaceContainer,
         color: active ? theme.palette.onPrimaryContainer : theme.palette.onSurfaceVariant,

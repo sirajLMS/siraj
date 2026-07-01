@@ -19,6 +19,9 @@ const mockLabels = {
   administrativeActions: "Administrative Actions",
   generateLog: "Generate Log",
   reschedule: "Reschedule",
+  forceActivate: "Force Activate",
+  stopPause: "Stop/Pause",
+  deleteInstance: "Delete Instance",
 };
 
 const createMockHandlers = () => ({

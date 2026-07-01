@@ -24,7 +24,7 @@ const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
   justifyContent: "flex-start",
   alignItems: "center",
   gap: theme.spacing(0.5),
-  fontSize: "0.8125rem",
+  fontSize: theme.typography.bodyMd.fontSize,
   fontWeight: 500,
   transition: theme.transitions.create(["all"], {
     duration: theme.transitions.duration.shorter,

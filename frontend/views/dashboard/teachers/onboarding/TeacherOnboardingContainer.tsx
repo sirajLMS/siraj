@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import { useCreateTeacherMutation } from "@/frontend/stores/teacherOnboardingStore";
+import { useCreateTeacherOnboarding } from "@/frontend/hooks/useCreateTeacherOnboarding";
 import { logger } from "@/frontend/utils/logger";
 import type { TeacherOnboardingFormData } from "./schemas/teacherOnboardingSchema";
 import { TeacherOnboardingView } from "./TeacherOnboardingView";
 import { useTeacherOnboardingLabels } from "./useTeacherOnboardingLabels";
 
 export function TeacherOnboardingContainer() {
-  const { execute, loading } = useCreateTeacherMutation();
+  const { execute, loading } = useCreateTeacherOnboarding();
   const [showSuccess, setShowSuccess] = useState(false);
   const labels = useTeacherOnboardingLabels();
 

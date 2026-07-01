@@ -46,9 +46,9 @@ const LanguageOptionLayout = styled(Stack)(({ theme }) => ({
 /**
  * Standardizes the minimum width and size of the short code (e.g., "EN", "AR").
  */
-const ShortLabel = styled(Typography)(() => ({
+const ShortLabel = styled(Typography)(({ theme }) => ({
   minWidth: "32px",
-  fontSize: "0.875rem",
+  fontSize: theme.typography.bodyMd.fontSize,
 }));
 
 // --- Main Component ---

@@ -81,4 +81,6 @@ export const onboarding: TeacherOnboardingLabels = {
     ibanRequired: "رقم الآيبان مطلوب",
     urlInvalid: "الرابط غير صالح",
   },
+  bannerJoinFaculty: "انضم لهيئة التدريس",
+  bannerRegistrationForm: "نموذج التسجيل",
 };

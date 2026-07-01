@@ -37,4 +37,5 @@ export const rescheduleForm: RescheduleFormLabels = {
     dateRequired: "التاريخ الجديد مطلوب",
     timeRequired: "الوقت الجديد مطلوب",
   },
+  classInstanceNotFound: "لم يتم العثور على الحصة.",
 };

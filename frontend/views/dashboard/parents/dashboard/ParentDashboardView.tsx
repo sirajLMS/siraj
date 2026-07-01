@@ -70,14 +70,14 @@ function MobileScheduleHeader({
   readonly onViewAll: () => void;
 }) {
   return (
-    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-      <Box component="span" sx={{ typography: "titleLg", color: theme => theme.palette.primary.main }}>
-        {labels.schedule.titleMobile}
-      </Box>
-      <PrimaryPageAction variant="text" onClick={onViewAll} sx={{ minWidth: "auto", px: 0 }}>
-        {labels.schedule.viewAll}
-      </PrimaryPageAction>
-    </Box>
+    <SectionPanel
+      title={labels.schedule.titleMobile}
+      actions={
+        <PrimaryPageAction variant="text" onClick={onViewAll} sx={{ minWidth: "auto", px: 0 }}>
+          {labels.schedule.viewAll}
+        </PrimaryPageAction>
+      }
+    />
   );
 }
 
