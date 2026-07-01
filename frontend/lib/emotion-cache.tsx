@@ -1,4 +1,3 @@
-// cspell:ignore: stylis
 "use client";
 
 import createCache from "@emotion/cache";
@@ -9,23 +8,32 @@ import type { ReactNode } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 
-const cacheLtr = createCache({
-  key: "ltr",
-  prepend: true,
-});
-cacheLtr.compat = true;
+interface EmotionCacheProviderProps {
+  readonly children: ReactNode;
+  readonly nonce?: string;
+}
 
-const cacheRtl = createCache({
-  key: "rtl",
-  prepend: true,
-  stylisPlugins: [prefixer, rtlPlugin],
-});
-cacheRtl.compat = true;
+function createLtrCache(nonce?: string) {
+  const cache = createCache({ key: "ltr", prepend: true, nonce });
+  cache.compat = true;
+  return cache;
+}
 
-export default function EmotionCacheProvider({ children }: Readonly<{ children: ReactNode }>) {
+function createRtlCache(nonce?: string) {
+  const cache = createCache({
+    key: "rtl",
+    prepend: true,
+    nonce,
+    stylisPlugins: [prefixer, rtlPlugin],
+  });
+  cache.compat = true;
+  return cache;
+}
+
+export default function EmotionCacheProvider({ children, nonce }: EmotionCacheProviderProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
-  const cache = isRtl ? cacheRtl : cacheLtr;
+  const cache = isRtl ? createRtlCache(nonce) : createLtrCache(nonce);
 
   useServerInsertedHTML(() => {
     const names = Object.keys(cache.inserted);
@@ -36,6 +44,7 @@ export default function EmotionCacheProvider({ children }: Readonly<{ children: 
     return (
       <style
         data-emotion={`${cache.key} ${names.join(" ")}`}
+        nonce={nonce || undefined}
         // biome-ignore lint/security/noDangerouslySetInnerHtml: Emotion requires this for SSR style injection
         dangerouslySetInnerHTML={{
           __html: styles,

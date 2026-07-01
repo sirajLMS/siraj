@@ -8,11 +8,12 @@ import { AppThemeProvider } from "./ThemeProvider";
 interface MuiProviderProps {
   readonly children: ReactNode;
   readonly initialTheme?: PaletteMode;
+  readonly nonce?: string;
 }
 
-export default function MuiProvider({ children, initialTheme }: MuiProviderProps) {
+export default function MuiProvider({ children, initialTheme, nonce }: MuiProviderProps) {
   return (
-    <EmotionCacheProvider>
+    <EmotionCacheProvider nonce={nonce}>
       <AppThemeProvider initialTheme={initialTheme}>{children}</AppThemeProvider>
     </EmotionCacheProvider>
   );

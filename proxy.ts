@@ -1,17 +1,15 @@
-//cspell:ignore: NOSONAR
-// Next.js 16 uses proxy.ts for request interception
-// We're adapting next-intl's middleware pattern to the new proxy convention
-
+import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "@/shared/i18n/routing";
 
-// Create the next-intl middleware with localePrefix: 'never'
 const intlMiddleware = createMiddleware(routing);
 
 export default function proxy(request: NextRequest) {
+  const nonce = crypto.randomBytes(16).toString("base64");
   const response = intlMiddleware(request);
   response.headers.set("x-pathname", request.nextUrl.pathname);
+  response.headers.set("x-nonce", nonce);
   return response;
 }
 
