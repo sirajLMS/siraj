@@ -10,6 +10,11 @@ export async function getServerUserContext(): Promise<{
 }> {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get("session_id")?.value;
+  // The access_token is set as an httpOnly cookie by setAuthCookies() in
+  // auth.mutation.ts with a 15-minute maxAge matching the JWT expiry.
+  // When it expires, SSR page loads redirect to /login, but the client-side
+  // AuthProvider.checkAuth() runs the refreshToken mutation which sets a fresh
+  // access_token cookie — so subsequent SSR loads succeed without a loop.
   const token = cookieStore.get("access_token")?.value;
 
   if (!sessionId || !token) {

@@ -55,6 +55,9 @@ export async function loginAsDemoUser(page: Page, context: BrowserContext, group
       value: token,
       domain: "localhost",
       path: "/",
+      httpOnly: true,
+      sameSite: "Strict",
+      secure: false,
     },
   ]);
 

@@ -20,7 +20,7 @@ import {
   RefreshTokenResponsePothosObject,
 } from "../pothos";
 
-function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: string) {
+function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: string, accessToken?: string) {
   if (!ctx.cookies) return;
 
   const options = {
@@ -33,6 +33,23 @@ function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: strin
 
   ctx.cookies.set("session_id", sessionId, options);
   ctx.cookies.set("refresh_token", refreshToken, options);
+
+  // The access_token cookie is required by getServerUserContext() (server-auth.ts)
+  // for Server Component auth checks on SSR page loads. Without it, the dashboard
+  // layout cannot verify the user server-side, causing an infinite redirect loop.
+  // Short-lived (15 min) to match the JWT access token expiry (JWT_ACCESS_TOKEN_EXPIRY
+  // in jwt.ts) — refreshes automatically via the refreshToken mutation called by
+  // AuthProvider.checkAuth(), which triggers rotateTokensAndSession() → setAuthCookies()
+  // with a fresh access token, resetting this cookie for subsequent SSR requests.
+  if (accessToken) {
+    ctx.cookies.set("access_token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict" as const,
+      maxAge: 60 * 15, // 15 minutes — matches JWT_ACCESS_TOKEN_EXPIRY
+      path: "/",
+    });
+  }
 }
 
 async function resolveUserFromSession(
@@ -113,7 +130,7 @@ async function rotateTokensAndSession(
 
   // The cookie must store the *raw* session ID so it can be looked up again.
   if (rawSessionId) {
-    setAuthCookies(ctx, rawSessionId, newRefreshToken);
+    setAuthCookies(ctx, rawSessionId, newRefreshToken, newAccessToken);
   }
 
   return { token: newAccessToken, user: AuthUtils.toSafeUser(user) };
@@ -199,7 +216,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       });
 
       // Set httpOnly cookies for session and refresh token
-      setAuthCookies(ctx, sessionId, refreshToken);
+      setAuthCookies(ctx, sessionId, refreshToken, accessToken);
 
       return {
         token: accessToken,
@@ -236,7 +253,7 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       try {
         const result = await DemoAuthService.loginWithGroupSlug(groupSlug, ctx.locale);
-        setAuthCookies(ctx, result.sessionId, result.refreshToken);
+        setAuthCookies(ctx, result.sessionId, result.refreshToken, result.accessToken);
         return {
           token: result.accessToken,
           user: result.user,
@@ -306,6 +323,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       if (ctx.cookies) {
         ctx.cookies.delete("session_id");
         ctx.cookies.delete("refresh_token");
+        ctx.cookies.delete("access_token");
       }
 
       return true;

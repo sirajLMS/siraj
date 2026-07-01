@@ -1,0 +1,88 @@
+[run-test] Running: bun test C:\Users\PC\Projects\siraj\frontend\graphql\test\group-class.test.ts
+[run-test] Log saved to: C:\Users\PC\Projects\siraj\logs\2026-07-01T12-49-47\frontend\graphql\test\group-class.test.ts.log
+bun test v1.3.14 (0d9b296a)
+◇ injected env (0) from .env.test // tip: ⌘ override existing { override: true }
+[2026-07-01 09:49:48.746] [INFO] Starting Next.js dev server for GraphQL integration tests...
+[2026-07-01 09:49:48.748] [INFO] Killing any process on port 3001 (Windows)...
+[2026-07-01 09:49:52.229] [DEBUG] Dev server not ready yet
+[2026-07-01 09:49:52.749] [DEBUG] Dev server not ready yet
+[2026-07-01 09:49:55.994] [INFO] Next.js dev server is ready on port 3001!
+[2026-07-01 09:49:59.489] [DEBUG] All active test suites finished. Scheduling test server stop...
+
+
+frontend\graphql\test\group-class.test.ts:
+27 |   const result = await testClient.mutate({ mutation, variables } as unknown as Parameters<typeof testClient.mutate>[0]);
+28 |   const token = extractToken(result.data as TData | null | undefined);
+29 |   if (!token) {
+30 |     const gqlErrors =
+31 |       (result as { errors?: Array<{ message: string }> }).errors?.map(e => e.message).join("; ") ?? "unknown";
+32 |     throw new Error(`Failed to login: ${errorLabel} (${gqlErrors})`);
+                   ^
+error: Failed to login: GroupClassIntTestSA-superadmin-79d2e71f-3ed1-407e-870a-12991195f60c@example.com (unknown)
+      at executeLogin (C:\Users\PC\Projects\siraj\frontend\graphql\test\helpers.ts:32:15)
+(fail) GraphQL: Group Class integration tests > provision test entities, class instance, and group class [3488.94ms]
+82 |     groupClassId = gcRes.createTestGroupClass?.groupClassId ?? null;
+83 |     expect(groupClassId).toBeTruthy();
+84 |   });
+85 | 
+86 |   test("admin can query groupClassAudit with valid classInstanceId", async () => {
+87 |     if (!superAdminToken || !classInstanceId) throw new Error("Missing test context");
+                                                             ^
+error: Missing test context
+      at <anonymous> (C:\Users\PC\Projects\siraj\frontend\graphql\test\group-class.test.ts:87:57)
+(fail) GraphQL: Group Class integration tests > admin can query groupClassAudit with valid classInstanceId [2.21ms]
+112 |     expect(typeof audit.adminNote?.content).toBe("string");
+113 |     expect(typeof audit.adminNote?.lastUpdated).toBe("string");
+114 |   });
+115 | 
+116 |   test("groupClassAudit: non-existent classInstanceId returns GraphQL error", async () => {
+117 |     if (!superAdminToken) throw new Error("Missing test context");
+                                          ^
+error: Missing test context
+      at <anonymous> (C:\Users\PC\Projects\siraj\frontend\graphql\test\group-class.test.ts:117:37)
+(fail) GraphQL: Group Class integration tests > groupClassAudit: non-existent classInstanceId returns GraphQL error [0.57ms]
+124 | 
+125 |     expect(result.error).toBeDefined();
+126 |   });
+127 | 
+128 |   test("admin can update admin note via updateClassAdminNote", async () => {
+129 |     if (!superAdminToken || !classInstanceId) throw new Error("Missing test context");
+                                                              ^
+error: Missing test context
+      at <anonymous> (C:\Users\PC\Projects\siraj\frontend\graphql\test\group-class.test.ts:129:57)
+(fail) GraphQL: Group Class integration tests > admin can update admin note via updateClassAdminNote [0.34ms]
+138 |     expect(data.updateClassAdminNote.adminNote).toBeDefined();
+139 |     expect(data.updateClassAdminNote.adminNote?.content).toBe("Updated by integration test");
+140 |   });
+141 | 
+142 |   test("updateClassAdminNote: non-existent classInstanceId returns GraphQL error", async () => {
+143 |     if (!superAdminToken) throw new Error("Missing test context");
+                                          ^
+error: Missing test context
+      at <anonymous> (C:\Users\PC\Projects\siraj\frontend\graphql\test\group-class.test.ts:143:37)
+(fail) GraphQL: Group Class integration tests > updateClassAdminNote: non-existent classInstanceId returns GraphQL error [0.26ms]
+150 | 
+151 |     expect(result.error).toBeDefined();
+152 |   });
+153 | 
+154 |   test("resendClassNotifications returns result or permission error for valid classInstanceId", async () => {
+155 |     if (!superAdminToken || !classInstanceId) throw new Error("Missing test context");
+                                                              ^
+error: Missing test context
+      at <anonymous> (C:\Users\PC\Projects\siraj\frontend\graphql\test\group-class.test.ts:155:57)
+(fail) GraphQL: Group Class integration tests > resendClassNotifications returns result or permission error for valid classInstanceId [0.28ms]
+168 |       expect(typeof result.data.resendClassNotifications.success).toBe("boolean");
+169 |     }
+170 |   });
+171 | 
+172 |   test("resendClassNotifications: non-existent classInstanceId returns GraphQL error", async () => {
+173 |     if (!superAdminToken) throw new Error("Missing test context");
+                                          ^
+error: Missing test context
+      at <anonymous> (C:\Users\PC\Projects\siraj\frontend\graphql\test\group-class.test.ts:173:37)
+(fail) GraphQL: Group Class integration tests > resendClassNotifications: non-existent classInstanceId returns GraphQL error [0.19ms]
+
+ 0 pass
+ 7 fail
+ 7 expect() calls
+Ran 7 tests across 1 file. [11.53s]

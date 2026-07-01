@@ -114,10 +114,8 @@ function handleAuthError(error: unknown, operationName: string | undefined): boo
     const pathname = globalThis.window.location.pathname;
     const search = globalThis.window.location.search;
     const currentUrl = `${pathname}${search}`;
-    const segments = pathname.split("/");
-    const detectedLocale = ["ar", "en"].includes(segments[1]) ? segments[1] : "ar";
     const encodedRedirect = encodeURIComponent(currentUrl);
-    globalThis.window.location.href = `/${detectedLocale}/login?redirect=${encodedRedirect}`;
+    globalThis.window.location.href = `/login?redirect=${encodedRedirect}`;
     return true;
   }
 

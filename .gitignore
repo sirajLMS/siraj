@@ -90,5 +90,5 @@ storybook-static
 
 storage
 .aider*
-.ai/
+ai/.archive
 prompt/

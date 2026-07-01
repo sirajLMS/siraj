@@ -2,6 +2,9 @@ import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
 import { LoginContainer } from "@/frontend/views/auth/login";
 
 export default async function LoginPage() {
+  // Checks both env vars: NEXT_PUBLIC_IS_DEMO (client-accessible,controls UI) and
+  // IS_DEMO (server-only, security-critical gate for demoLogin mutation).
+  // Both are checked here since this is a Server Component that can access both.
   const isDemo = process.env.NEXT_PUBLIC_IS_DEMO === "true" || process.env.IS_DEMO === "true";
   let demoGroups: { slug: string; name: string; description: string | null }[] = [];
 

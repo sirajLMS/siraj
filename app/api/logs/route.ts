@@ -12,6 +12,10 @@ interface LogEntry {
   sequence: number;
 }
 
+// Regex intentionally excludes underscores and special characters to prevent
+// path traversal attacks when using sessionId in filesystem operations.
+// Client-side logger (frontend/lib/logger/index.ts) must generate session IDs
+// that match this regex — it uses the format YYYY-MM-DD-HH-mm-ss (hyphens only).
 const SAFE_SESSION_ID_REGEX = /^[a-zA-Z0-9-]+$/;
 
 function sanitizeSessionId(sessionId: string): string {

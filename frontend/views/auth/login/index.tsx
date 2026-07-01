@@ -74,6 +74,8 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
     }
   };
 
+  // NEXT_PUBLIC_IS_DEMO controls client-side demo UI visibility.
+  // The actual demo login is gated server-side by IS_DEMO env var in auth.mutation.ts.
   const isDemo = Boolean(process.env.NEXT_PUBLIC_IS_DEMO);
 
   return (

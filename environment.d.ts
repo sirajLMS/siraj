@@ -89,7 +89,13 @@ declare global {
       BLOB_READ_WRITE_TOKEN?: string;
 
       // Demo Site Configuration
+      // NEXT_PUBLIC_IS_DEMO controls the client-side demo UI (fast-login buttons).
+      // IS_DEMO is the authoritative server-side gate for the demoLogin mutation.
+      // Both are intentional: NEXT_PUBLIC_ prefix is required for client components
+      // which cannot access server-only env vars. IS_DEMO is the security-critical
+      // guard — it must be "true" for demo login to work server-side.
       NEXT_PUBLIC_IS_DEMO?: string;
+      IS_DEMO?: string;
     }
   }
 }
