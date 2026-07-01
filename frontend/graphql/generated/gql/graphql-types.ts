@@ -586,7 +586,7 @@ export type ComplaintSubmitInput = {
   body: Scalars['String']['input'];
   category: ComplaintCategory;
   files: InputMaybe<Array<ComplaintFileMetadataInput>>;
-  studentId: Scalars['String']['input'];
+  studentId: InputMaybe<Scalars['String']['input']>;
   submitterEmail: Scalars['String']['input'];
 };
 

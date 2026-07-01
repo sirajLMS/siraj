@@ -15,6 +15,10 @@ export async function seedOrGet(usersList: UserEntity[], config?: SeedConfig) {
   }
 
   const editor = findAdminUserOrFallback(usersList);
+  if (!editor) {
+    logger.warn("No admin user found for site content seeding — skipping.");
+    return [];
+  }
   const results = [];
 
   for (const spec of SITE_CONTENT_SPECS) {

@@ -14,6 +14,10 @@ import {
 import { teacherWeeklyScheduleGridQueryDocument } from "../sharedDocuments/weekly-schedule.documents";
 import { testClient } from "./testClient";
 
+/** Shared test password — all provisioned test users use this value. */
+// eslint-disable-next-line sonarjs/no-hardcoded-passwords
+const TEST_USER_PASSWORD = "Test_Pass1!";
+
 async function executeLogin<TData, TVars>(
   mutation: TypedDocumentNode<TData, TVars>,
   variables: TVars,
@@ -23,7 +27,9 @@ async function executeLogin<TData, TVars>(
   const result = await testClient.mutate({ mutation, variables } as unknown as Parameters<typeof testClient.mutate>[0]);
   const token = extractToken(result.data as TData | null | undefined);
   if (!token) {
-    throw new Error(`Failed to login: ${errorLabel}`);
+    const gqlErrors =
+      (result as { errors?: Array<{ message: string }> }).errors?.map(e => e.message).join("; ") ?? "unknown";
+    throw new Error(`Failed to login: ${errorLabel} (${gqlErrors})`);
   }
   return token;
 }
@@ -117,7 +123,19 @@ export async function provisionTestEntities(
   if (!entities.teacherUserEmail) throw new Error("Teacher email not returned");
   if (!entities.studentId) throw new Error("Student ID not returned");
   if (!entities.teacherId) throw new Error("Teacher ID not returned");
-  const teacherToken = await loginUser(entities.teacherUserEmail, "Test_Pass1!");
+
+  // Retry login to handle race condition where the DB transaction creating
+  // the user may not yet be visible when the login query fires.
+  let teacherToken!: string;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      teacherToken = await loginUser(entities.teacherUserEmail, TEST_USER_PASSWORD);
+      break;
+    } catch {
+      if (attempt < 3) await new Promise(resolve => setTimeout(resolve, 500));
+      else throw new Error("Failed to login teacher after 3 attempts");
+    }
+  }
 
   return {
     studentId: entities.studentId ?? "",
@@ -306,7 +324,7 @@ export async function provisionTestManager(
       input: {
         name: `${prefix}-manager`,
         email: `${prefix}-manager@test.com`,
-        password: "Test_Pass1!",
+        password: TEST_USER_PASSWORD,
         accountType,
         phone: null,
         skypeId: null,
@@ -357,8 +375,24 @@ export async function provisionTestSuperAdmin(
   const sa = createRes.createTestSuperAdmin;
   if (!sa?.email || !sa?.userId) throw new Error("Failed to create test super admin");
 
-  const token = await loginUser(sa.email, "Test_Pass1!");
-  return { token, userId: sa.userId };
+  // Retry login to handle race condition where the DB transaction creating
+  // the user may not yet be visible when the login query fires (common in
+  // parallel test suites sharing the same DB connection pool).
+  const maxAttempts = 3;
+  const delayMs = 500;
+  let lastError: Error | undefined;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const token = await loginUser(sa.email, TEST_USER_PASSWORD);
+      return { token, userId: sa.userId };
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (attempt < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    }
+  }
+  throw lastError;
 }
 
 export async function cleanupTestSuperAdmin(superAdminToken: string, userId: string): Promise<void> {

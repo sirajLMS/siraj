@@ -542,7 +542,7 @@ input ComplaintSubmitInput {
   body: String!
   category: ComplaintCategory!
   files: [ComplaintFileMetadataInput!]
-  studentId: String!
+  studentId: String
   submitterEmail: String!
 }
 

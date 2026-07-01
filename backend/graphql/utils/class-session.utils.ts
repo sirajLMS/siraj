@@ -62,7 +62,10 @@ export async function buildClassInstanceDetail(
     startTime: start.toISOString(),
     endTime: end.toISOString(),
     durationMinutes: instance.durationMinutes,
-    status: resolveClassInstanceStatus(instance.executionState as ClassExecutionState, instance.outcome as ClassOutcome),
+    status: resolveClassInstanceStatus(
+      instance.executionState as ClassExecutionState,
+      instance.outcome as ClassOutcome
+    ),
     remarks: instance.remarks ?? null,
     hasTimezoneMismatch,
     studentTimezone,
