@@ -45,7 +45,7 @@ describe("GraphQL: Group Class integration tests", () => {
     parentUserId = r.parentUserId;
     parentId = r.parentId;
 
-    const sa = await provisionTestSuperAdmin(r.adminToken, "GroupClassIntTestSA");
+    const sa = await provisionTestSuperAdmin(r.superAdminToken, "GroupClassIntTestSA");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
 

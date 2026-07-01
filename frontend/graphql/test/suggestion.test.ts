@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
   adminSuggestionsQueryDocument,
   markSuggestionReviewedMutationDocument,
@@ -7,10 +7,8 @@ import {
 import {
   assertOperationDenied,
   authenticatedRequest,
-  cleanupTestSuperAdmin,
   expectMutationError,
   loginDemoUser,
-  provisionTestSuperAdmin,
 } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
@@ -35,19 +33,17 @@ describe("GraphQL: adminSuggestions query", () => {
 
   let adminToken = "";
   let superAdminToken = "";
-  let superAdminUserId = "";
 
-  test("login as academy_admin", async () => {
+  test("login as academy_admin and super_admin", async () => {
     adminToken = await loginDemoUser("academy_admin");
     expect(adminToken).not.toBeNull();
 
-    const sa = await provisionTestSuperAdmin(adminToken, "suggSa");
-    superAdminToken = sa.token;
-    superAdminUserId = sa.userId;
+    superAdminToken = await loginDemoUser("super_admin");
+    expect(superAdminToken).not.toBeNull();
   });
 
   test("authorized admin gets all suggestions with metrics", async () => {
-    const data = await authenticatedRequest(adminToken, "query", adminSuggestionsQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", adminSuggestionsQueryDocument, {
       filter: DEFAULT_FILTER,
     });
 
@@ -92,12 +88,6 @@ describe("GraphQL: adminSuggestions query", () => {
 
     expect(data.adminSuggestions).toBeDefined();
     expect(Array.isArray(data.adminSuggestions?.rows)).toBeTrue();
-  });
-
-  afterAll(async () => {
-    if (superAdminToken && superAdminUserId) {
-      await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
-    }
   });
 });
 
@@ -145,7 +135,7 @@ describe("GraphQL: submitSuggestion mutation", () => {
   });
 
   test("submitted suggestion appears in admin listing", async () => {
-    const adminToken = await loginDemoUser("academy_admin");
+    const adminToken = await loginDemoUser("super_admin");
 
     const suggestionId = await submitTestSuggestion(parentToken, "Visible in admin listing test");
 
@@ -162,19 +152,19 @@ describe("GraphQL: submitSuggestion mutation", () => {
 describe("GraphQL: markSuggestionReviewed mutation", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let suggestionToReviewId = "";
 
-  test("login as academy_admin and create a suggestion to review", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
+  test("login as super_admin and create a suggestion to review", async () => {
+    superAdminToken = await loginDemoUser("super_admin");
+    expect(superAdminToken).not.toBeNull();
 
     const parentToken = await loginDemoUser("parent_default");
     suggestionToReviewId = await submitTestSuggestion(parentToken, "Suggestion awaiting review");
   });
 
   test("authorized admin marks suggestion as reviewed", async () => {
-    const data = await authenticatedRequest(adminToken, "mutate", markSuggestionReviewedMutationDocument, {
+    const data = await authenticatedRequest(superAdminToken, "mutate", markSuggestionReviewedMutationDocument, {
       suggestionId: suggestionToReviewId,
     });
 
@@ -183,7 +173,7 @@ describe("GraphQL: markSuggestionReviewed mutation", () => {
   });
 
   test("reviewed suggestion is reflected in admin listing", async () => {
-    const listData = await authenticatedRequest(adminToken, "query", adminSuggestionsQueryDocument, {
+    const listData = await authenticatedRequest(superAdminToken, "query", adminSuggestionsQueryDocument, {
       filter: DEFAULT_FILTER,
     });
 
@@ -205,7 +195,7 @@ describe("GraphQL: markSuggestionReviewed mutation", () => {
   });
 
   test("marking non-existent suggestion returns error", async () => {
-    await expectMutationError(adminToken, markSuggestionReviewedMutationDocument, {
+    await expectMutationError(superAdminToken, markSuggestionReviewedMutationDocument, {
       suggestionId: NIL_UUID,
     });
   });

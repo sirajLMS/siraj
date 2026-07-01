@@ -306,7 +306,7 @@ export async function provisionTestManager(
       input: {
         name: `${prefix}-manager`,
         email: `${prefix}-manager@test.com`,
-        password: "password",
+        password: "Test_Pass1!",
         accountType,
         phone: null,
         skypeId: null,

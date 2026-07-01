@@ -2,8 +2,27 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import type { ClassInstanceDetailReturnType, ClassInstancePerformanceSelectType } from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/lib/enum";
+import { ClassExecutionState as ExecState } from "@/shared/lib/enum";
 
 type ClassInstanceWithRelations = NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>;
+
+/**
+ * Maps the execution state and outcome to a valid ClassExecutionState value
+ * for the GraphQL `status` field. The old logic `(outcome || executionState)`
+ * leaked "PENDING" (a ClassOutcome value) into the ClassExecutionState-typed
+ * status field, which GraphQL rejected during serialization.
+ */
+function resolveClassInstanceStatus(
+  executionState: ClassExecutionState | null | undefined,
+  _outcome: ClassOutcome | null | undefined
+): ClassExecutionState {
+  const state = (executionState ?? ExecState.NOT_ACTIVATED) as ClassExecutionState;
+
+  if (state === ExecState.COMPLETED) return ExecState.COMPLETED;
+  if (state === ExecState.ACTIVATED) return ExecState.ACTIVATED;
+  if (state === ExecState.RUNNING) return ExecState.RUNNING;
+  return ExecState.NOT_ACTIVATED;
+}
 
 function truncateQualifications(value: string | null | undefined, maxLength = 80): string | null {
   if (!value?.trim()) {
@@ -43,7 +62,7 @@ export async function buildClassInstanceDetail(
     startTime: start.toISOString(),
     endTime: end.toISOString(),
     durationMinutes: instance.durationMinutes,
-    status: (instance.outcome || instance.executionState) as ClassExecutionState,
+    status: resolveClassInstanceStatus(instance.executionState as ClassExecutionState, instance.outcome as ClassOutcome),
     remarks: instance.remarks ?? null,
     hasTimezoneMismatch,
     studentTimezone,

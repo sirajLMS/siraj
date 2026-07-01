@@ -51,7 +51,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     parentUserId = r.parentUserId;
     parentId = r.parentId;
 
-    const sa = await provisionTestSuperAdmin(adminToken, "MgrDirTestSA");
+    const sa = await provisionTestSuperAdmin(r.superAdminToken, "MgrDirTestSA");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
 

@@ -12,7 +12,6 @@ import {
   authenticatedRequest,
   expectMutationError,
   loginDemoUser,
-  provisionTestSuperAdmin,
 } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
@@ -20,12 +19,12 @@ const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
 const DEFAULT_FILTER = { search: null, status: null };
 
-async function submitTestComplaint(token: string, body: string, studentId?: string): Promise<string> {
+async function submitTestComplaint(token: string, body: string, studentId?: string | null): Promise<string> {
   const data = await authenticatedRequest(token, "mutate", submitComplaintMutationDocument, {
     input: {
       category: ComplaintCategory.Other,
       body,
-      studentId: studentId ?? NIL_UUID,
+      studentId: studentId ?? null,
       submitterEmail: "parent@siraj.local",
       files: null,
     },
@@ -99,15 +98,11 @@ describe("GraphQL: parentComplaints query", () => {
 describe("GraphQL: adminComplaintQueue query", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
   let superAdminToken = "";
 
-  test("login as academy_admin and provision superAdmin", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
-
-    const sa = await provisionTestSuperAdmin(adminToken, "compSa");
-    superAdminToken = sa.token;
+  test("login as super_admin to provision and query", async () => {
+    superAdminToken = await loginDemoUser("super_admin");
+    expect(superAdminToken).not.toBeNull();
   });
 
   test("authorized admin gets all complaints with metrics", async () => {
@@ -180,7 +175,7 @@ describe("GraphQL: adminComplaintQueue query", () => {
     const searchTerm = firstName.split(" ")[0];
     if (!searchTerm) return;
 
-    const filteredData = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
+    const filteredData = await authenticatedRequest(superAdminToken, "query", adminComplaintQueueQueryDocument, {
       filter: { ...DEFAULT_FILTER, search: searchTerm },
       paginationArgs: null,
     });
@@ -211,7 +206,7 @@ describe("GraphQL: submitComplaint mutation", () => {
       input: {
         category: ComplaintCategory.Other,
         body: "Integration test complaint from parent",
-        studentId: NIL_UUID,
+        studentId: null,
         submitterEmail: "parent@siraj.local",
         files: null,
       },
@@ -230,7 +225,7 @@ describe("GraphQL: submitComplaint mutation", () => {
       input: {
         category: ComplaintCategory.Other,
         body: "Should be denied",
-        studentId: NIL_UUID,
+        studentId: null,
         submitterEmail: "teacher@siraj.local",
         files: null,
       },
@@ -242,7 +237,7 @@ describe("GraphQL: submitComplaint mutation", () => {
       input: {
         category: ComplaintCategory.Other,
         body: "",
-        studentId: NIL_UUID,
+        studentId: null,
         submitterEmail: "parent@siraj.local",
         files: null,
       },
@@ -255,7 +250,7 @@ describe("GraphQL: submitComplaint mutation", () => {
       input: {
         category: ComplaintCategory.RegardingSystem,
         body: "IDOR test — should link to own parent",
-        studentId: NIL_UUID,
+        studentId: null,
         submitterEmail: "parent@siraj.local",
         files: null,
       },
@@ -276,19 +271,19 @@ describe("GraphQL: submitComplaint mutation", () => {
 describe("GraphQL: respondToComplaint mutation", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let complaintId = "";
 
-  test("login as academy_admin and create a complaint to respond to", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
+  test("login as super_admin and create a complaint to respond to", async () => {
+    superAdminToken = await loginDemoUser("super_admin");
+    expect(superAdminToken).not.toBeNull();
 
     const parentToken = await loginDemoUser("parent_default");
     complaintId = await submitTestComplaint(parentToken, "Complaint awaiting response");
   });
 
   test("authorized admin responds to complaint successfully", async () => {
-    const data = await authenticatedRequest(adminToken, "mutate", respondToComplaintMutationDocument, {
+    const data = await authenticatedRequest(superAdminToken, "mutate", respondToComplaintMutationDocument, {
       input: {
         complaintId,
         body: "We have reviewed your complaint",
@@ -303,7 +298,7 @@ describe("GraphQL: respondToComplaint mutation", () => {
   });
 
   test("complaint status updated to ANSWERED after response", async () => {
-    const queueData = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
+    const queueData = await authenticatedRequest(superAdminToken, "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
       paginationArgs: null,
     });
@@ -332,7 +327,7 @@ describe("GraphQL: respondToComplaint mutation", () => {
   });
 
   test("responding to non-existent complaint returns error", async () => {
-    await expectMutationError(adminToken, respondToComplaintMutationDocument, {
+    await expectMutationError(superAdminToken, respondToComplaintMutationDocument, {
       input: {
         complaintId: NIL_UUID,
         body: "Should fail",
@@ -344,13 +339,13 @@ describe("GraphQL: respondToComplaint mutation", () => {
 describe("GraphQL: deleteComplaint mutation", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let complaintToDeleteId = "";
   let alreadyDeletedId = "";
 
-  test("login as academy_admin and create complaints for deletion tests", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
+  test("login as super_admin and create complaints for deletion tests", async () => {
+    superAdminToken = await loginDemoUser("super_admin");
+    expect(superAdminToken).not.toBeNull();
 
     const parentToken = await loginDemoUser("parent_default");
     complaintToDeleteId = await submitTestComplaint(parentToken, "Complaint to delete");
@@ -358,7 +353,7 @@ describe("GraphQL: deleteComplaint mutation", () => {
   });
 
   test("authorized admin soft-deletes a complaint", async () => {
-    const data = await authenticatedRequest(adminToken, "mutate", deleteComplaintMutationDocument, {
+    const data = await authenticatedRequest(superAdminToken, "mutate", deleteComplaintMutationDocument, {
       complaintId: complaintToDeleteId,
     });
 
@@ -366,7 +361,7 @@ describe("GraphQL: deleteComplaint mutation", () => {
   });
 
   test("deleted complaint no longer appears in admin queue", async () => {
-    const queueData = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
+    const queueData = await authenticatedRequest(superAdminToken, "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
       paginationArgs: null,
     });
@@ -388,17 +383,17 @@ describe("GraphQL: deleteComplaint mutation", () => {
   });
 
   test("deleting already-deleted complaint returns error (Threat 4)", async () => {
-    await authenticatedRequest(adminToken, "mutate", deleteComplaintMutationDocument, {
+    await authenticatedRequest(superAdminToken, "mutate", deleteComplaintMutationDocument, {
       complaintId: alreadyDeletedId,
     });
 
-    await expectMutationError(adminToken, deleteComplaintMutationDocument, {
+    await expectMutationError(superAdminToken, deleteComplaintMutationDocument, {
       complaintId: alreadyDeletedId,
     });
   });
 
   test("deleting non-existent complaint returns error", async () => {
-    await expectMutationError(adminToken, deleteComplaintMutationDocument, {
+    await expectMutationError(superAdminToken, deleteComplaintMutationDocument, {
       complaintId: NIL_UUID,
     });
   });
@@ -428,6 +423,7 @@ describe("GraphQL: Complaint security tests (Section 4)", () => {
   test("Threat 2 — Parent cannot submit complaint with another parent's student", async () => {
     const parentToken = await loginDemoUser("parent_default");
 
+    // Submitting with a non-existent studentId should fail
     await expectMutationError(parentToken, submitComplaintMutationDocument, {
       input: {
         category: ComplaintCategory.Other,

@@ -24,7 +24,7 @@ describe("GraphQL Class Instance Detail Query", () => {
 
     if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
     if (!r.parentUserEmail) throw new Error("Parent email not returned");
-    parentToken = await loginUser(r.parentUserEmail, "password");
+    parentToken = await loginUser(r.parentUserEmail, "Test_Pass1!");
 
     const createRes = await authenticatedRequest(
       teacherToken,
