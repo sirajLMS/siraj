@@ -32,8 +32,9 @@ describe("Manager Onboarding GraphQL API", () => {
   let superAdminUserId = "";
 
   test("provision super admin for onboarding tests", async () => {
-    const adminToken = await loginDemoUser("academy_admin");
-    const sa = await provisionTestSuperAdmin(adminToken, "mgrOnboard");
+    // createTestSuperAdmin requires superAdmin scope, so use demoLogin("super_admin")
+    const existingSaToken = await loginDemoUser("super_admin");
+    const sa = await provisionTestSuperAdmin(existingSaToken, "mgrOnboard");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
   });

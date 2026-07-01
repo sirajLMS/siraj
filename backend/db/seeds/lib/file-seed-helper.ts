@@ -3,19 +3,10 @@ import { StorageDbRepository } from "@/backend/db/repo";
 import logger from "@/backend/lib/logger";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
+import type { ValidReferenceTable } from "@/backend/types";
 import type { SeedConfig } from "./seed-config";
 
-export type FileReferenceTable =
-  | "users"
-  | "teachers"
-  | "students"
-  | "parents"
-  | "invoices"
-  | "complaints"
-  | "learning_resources"
-  | "staff_profiles"
-  | "recurring_schedules"
-  | "class_instances";
+export type FileReferenceTable = ValidReferenceTable;
 
 export interface SeedEntityFileInput {
   assetRelativePath: string;

@@ -7,14 +7,7 @@ import {
   updateTeacherProfileMutationDocument,
 } from "../sharedDocuments/staff-profile.documents";
 import { teachersQueryDocument } from "../sharedDocuments/teacher.documents";
-import {
-  assertOperationDenied,
-  authenticatedRequest,
-  cleanupTestEntities,
-  cleanupTestSuperAdmin,
-  loginAndProvision,
-  provisionTestSuperAdmin,
-} from "./helpers";
+import { assertOperationDenied, authenticatedRequest, cleanupTestEntities, loginAndProvision } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -70,29 +63,23 @@ async function queryTeacherDirectory(
 describe("GraphQL Teacher Integration Tests", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let teacherId = "";
   let studentId = "";
   let studentUserId = "";
   let teacherUserId = "";
   let parentUserId = "";
   let parentId = "";
-  let superAdminToken = "";
-  let superAdminUserId = "";
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("TeacherTest");
-    adminToken = r.adminToken;
+    superAdminToken = r.superAdminToken;
     teacherId = r.teacherId;
     studentId = r.studentId;
     studentUserId = r.studentUserId;
     teacherUserId = r.teacherUserId;
     parentUserId = r.parentUserId;
     parentId = r.parentId;
-
-    const sa = await provisionTestSuperAdmin(adminToken, "TeacherTestSA");
-    superAdminToken = sa.token;
-    superAdminUserId = sa.userId;
   });
 
   test("returns error on teachers query when unauthenticated", async () => {
@@ -281,7 +268,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   });
 
   test("cleanup provisioned entities", async () => {
-    await cleanupTestEntities(adminToken, {
+    await cleanupTestEntities(superAdminToken, {
       studentUserId,
       teacherUserId,
       parentUserId,
@@ -289,6 +276,5 @@ describe("GraphQL Teacher Integration Tests", () => {
       teacherId,
       parentId,
     });
-    await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
   });
 });

@@ -8,7 +8,7 @@ import { testClient } from "./testClient";
 describe("GraphQL Student History Integration Tests", () => {
   setupTestServerLifecycle();
 
-  let adminToken: string | null = null;
+  let superAdminToken: string | null = null;
   let teacherToken: string | null = null;
   let studentId: string | null = null;
   let teacherId: string | null = null;
@@ -21,9 +21,9 @@ describe("GraphQL Student History Integration Tests", () => {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1; // 1-indexed (1-12)
 
-  test("login as academy_admin and teacher", async () => {
+  test("login as super_admin and teacher", async () => {
     const r = await loginAndProvision("HistTest");
-    adminToken = r.adminToken;
+    superAdminToken = r.superAdminToken;
     teacherToken = r.teacherToken;
     studentId = r.studentId;
     teacherId = r.teacherId;
@@ -34,7 +34,7 @@ describe("GraphQL Student History Integration Tests", () => {
   });
 
   test("academy admin studentClassHistory returns sessions successfully", async () => {
-    if (!adminToken || !studentId) throw new Error("Missing test context");
+    if (!superAdminToken || !studentId) throw new Error("Missing test context");
 
     const result = await testClient.query({
       query: studentClassHistoryQueryDocument,
@@ -45,7 +45,7 @@ describe("GraphQL Student History Integration Tests", () => {
       },
       context: {
         headers: {
-          Authorization: `Bearer ${adminToken}`,
+          Authorization: `Bearer ${superAdminToken}`,
         },
       },
     });
@@ -81,8 +81,8 @@ describe("GraphQL Student History Integration Tests", () => {
   });
 
   afterAll(async () => {
-    if (adminToken && studentUserId && teacherUserId && parentUserId) {
-      await authenticatedRequest(adminToken, "mutate", cleanupTestEntitiesMutationDocument, {
+    if (superAdminToken && studentUserId && teacherUserId && parentUserId) {
+      await authenticatedRequest(superAdminToken, "mutate", cleanupTestEntitiesMutationDocument, {
         studentUserId,
         teacherUserId,
         parentUserId,

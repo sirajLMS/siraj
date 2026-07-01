@@ -108,6 +108,72 @@ export namespace CacheDbRepository {
   };
 
   /**
+   * Update expiration for all entries matching a key prefix
+   * Used by PostgresCacheAdapter.expire in pipeline context
+   */
+  export const updateExpiryByPrefix = async (prefix: string, seconds: number): Promise<number> => {
+    try {
+      const table = getTable(prefix);
+      const newExpiresAt = new Date(Date.now() + seconds * 1000);
+      const result = await db
+        .update(table)
+        .set({ expiresAt: newExpiresAt })
+        .where(sql`${table.key} LIKE ${prefix + "%"}`)
+        .returning();
+      return result.length;
+    } catch (error) {
+      logger.error(`Failed to update expiry for prefix ${prefix}:`, error);
+      throw error;
+    }
+  };
+
+  /**
+   * Delete cache entries by key prefix whose value (timestamp) is <= maxScore
+   * Used by PostgresCacheAdapter.zremrangebyscore to purge stale rate-limit entries
+   */
+  export const deleteByPrefixAndScore = async (prefix: string, maxScore: number): Promise<number> => {
+    try {
+      const table = getTable(prefix);
+      const now = new Date();
+      const result = await db
+        .delete(table)
+        .where(
+          and(
+            sql`${table.key} LIKE ${prefix + "%"}`,
+            sql`${table.value}::bigint <= ${BigInt(maxScore)}`,
+            gt(table.expiresAt, now)
+          )
+        )
+        .returning();
+      return result.length;
+    } catch (error) {
+      logger.error(`Failed to delete cache entries for prefix ${prefix}:`, error);
+      throw error;
+    }
+  };
+
+  /**
+   * Count cache entries by key prefix
+   * Used by PostgresCacheAdapter.zcard to count rate-limit entries
+   * Only counts non-expired entries
+   */
+  export const countByKeyPrefix = async (prefix: string): Promise<number> => {
+    try {
+      const table = getTable(prefix);
+      const now = new Date();
+      const result = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(table)
+        .where(sql`${table.key} LIKE ${prefix + "%"} AND ${table.expiresAt} > ${now}`);
+
+      return result[0]?.count ?? 0;
+    } catch (error) {
+      logger.error(`Failed to count cache entries for prefix ${prefix}:`, error);
+      throw error;
+    }
+  };
+
+  /**
    * Delete cache entry
    */
   export const del = async (key: string): Promise<boolean> => {

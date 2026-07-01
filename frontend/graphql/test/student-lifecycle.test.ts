@@ -22,34 +22,34 @@ async function expectMutationError<TData, TVars extends OperationVariables>(
   expect(result.error).toBeDefined();
 }
 
-async function loginAndProvision(prefix: string) {
-  const token = await loginDemoUser("academy_admin");
-  expect(token).not.toBeNull();
-  const entities = await provisionTestEntities(token, prefix);
+async function loginAndProvisionAsSuperAdmin(prefix: string) {
+  const superAdminToken = await loginDemoUser("super_admin");
+  expect(superAdminToken).not.toBeNull();
+  const entities = await provisionTestEntities(superAdminToken, prefix);
   if (!entities.studentId) throw new Error("No studentId provisioned");
   if (!entities.teacherId) throw new Error("No teacherId provisioned");
-  return { token, studentId: entities.studentId, teacherId: entities.teacherId };
+  return { superAdminToken, studentId: entities.studentId, teacherId: entities.teacherId };
 }
 
 describe("GraphQL: reassignStudentTeacher mutation", () => {
   setupTestServerLifecycle();
 
-  let token = "";
+  let superAdminToken = "";
   let studentId = "";
   let newTeacherId = "";
 
   test("login and provision two teacher sets", async () => {
-    const first = await loginAndProvision("s9reassign");
-    token = first.token;
+    const first = await loginAndProvisionAsSuperAdmin("s9reassign");
+    superAdminToken = first.superAdminToken;
     studentId = first.studentId;
 
-    const second = await provisionTestEntities(token, "s9reassign2");
+    const second = await provisionTestEntities(superAdminToken, "s9reassign2");
     if (!second.teacherId) throw new Error("No second teacherId provisioned");
     newTeacherId = second.teacherId;
   });
 
-  test("admin reassigns student to a different teacher", async () => {
-    const data = await authenticatedRequest(token, "mutate", reassignStudentTeacherMutationDocument, {
+  test("super admin reassigns student to a different teacher", async () => {
+    const data = await authenticatedRequest(superAdminToken, "mutate", reassignStudentTeacherMutationDocument, {
       studentId,
       newTeacherId,
       expectedVersion: null,
@@ -75,8 +75,17 @@ describe("GraphQL: reassignStudentTeacher mutation", () => {
     });
   });
 
+  test("academy admin (non-superAdmin) is denied", async () => {
+    const academyAdminToken = await loginDemoUser("academy_admin");
+    await expectMutationError(academyAdminToken, reassignStudentTeacherMutationDocument, {
+      studentId: studentId || NIL_UUID,
+      newTeacherId: newTeacherId || NIL_UUID,
+      expectedVersion: null,
+    });
+  });
+
   test("Threat 4 — non-existent teacher returns teacherNotFound", async () => {
-    await expectMutationError(token, reassignStudentTeacherMutationDocument, {
+    await expectMutationError(superAdminToken, reassignStudentTeacherMutationDocument, {
       studentId,
       newTeacherId: NIL_UUID,
       expectedVersion: null,
@@ -84,7 +93,7 @@ describe("GraphQL: reassignStudentTeacher mutation", () => {
   });
 
   test("non-existent student returns studentNotFound", async () => {
-    await expectMutationError(token, reassignStudentTeacherMutationDocument, {
+    await expectMutationError(superAdminToken, reassignStudentTeacherMutationDocument, {
       studentId: "00000000-0000-0000-0000-000000000005",
       newTeacherId,
       expectedVersion: null,
@@ -95,17 +104,17 @@ describe("GraphQL: reassignStudentTeacher mutation", () => {
 describe("GraphQL: changeStudentStatus mutation", () => {
   setupTestServerLifecycle();
 
-  let token = "";
+  let superAdminToken = "";
   let studentId = "";
 
   test("login and provision test student", async () => {
-    const setup = await loginAndProvision("s9status");
-    token = setup.token;
+    const setup = await loginAndProvisionAsSuperAdmin("s9status");
+    superAdminToken = setup.superAdminToken;
     studentId = setup.studentId;
   });
 
-  test("admin changes status from REGULAR to SUSPENDED", async () => {
-    const data = await authenticatedRequest(token, "mutate", changeStudentStatusMutationDocument, {
+  test("super admin changes status from REGULAR to SUSPENDED", async () => {
+    const data = await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
       studentId,
       newStatus: StudentStatus.Suspended as StudentStatusType,
       expectedVersion: null,
@@ -115,8 +124,8 @@ describe("GraphQL: changeStudentStatus mutation", () => {
     expect(data.changeStudentStatus?.status).toBe(StudentStatus.Suspended);
   });
 
-  test("admin changes status from SUSPENDED back to REGULAR", async () => {
-    const data = await authenticatedRequest(token, "mutate", changeStudentStatusMutationDocument, {
+  test("super admin changes status from SUSPENDED back to REGULAR", async () => {
+    const data = await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
       studentId,
       newStatus: StudentStatus.Regular as StudentStatusType,
       expectedVersion: null,
@@ -125,8 +134,8 @@ describe("GraphQL: changeStudentStatus mutation", () => {
     expect(data.changeStudentStatus?.status).toBe(StudentStatus.Regular);
   });
 
-  test("admin changes status from REGULAR to ON_LEAVE", async () => {
-    const data = await authenticatedRequest(token, "mutate", changeStudentStatusMutationDocument, {
+  test("super admin changes status from REGULAR to ON_LEAVE", async () => {
+    const data = await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
       studentId,
       newStatus: StudentStatus.OnLeave as StudentStatusType,
       expectedVersion: null,
@@ -151,8 +160,17 @@ describe("GraphQL: changeStudentStatus mutation", () => {
     });
   });
 
+  test("academy admin (non-superAdmin) is denied", async () => {
+    const academyAdminToken = await loginDemoUser("academy_admin");
+    await expectMutationError(academyAdminToken, changeStudentStatusMutationDocument, {
+      studentId: studentId || NIL_UUID,
+      newStatus: StudentStatus.Suspended as StudentStatusType,
+      expectedVersion: null,
+    });
+  });
+
   test("non-existent student returns studentNotFound", async () => {
-    await expectMutationError(token, changeStudentStatusMutationDocument, {
+    await expectMutationError(superAdminToken, changeStudentStatusMutationDocument, {
       studentId: "00000000-0000-0000-0000-000000000006",
       newStatus: StudentStatus.Suspended as StudentStatusType,
       expectedVersion: null,

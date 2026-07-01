@@ -115,7 +115,7 @@ export type RedisSessionData = {
 export type PasswordResetTokenSelectType = typeof passwordResetTokens.$inferSelect;
 export type PasswordResetTokenInsertInput = typeof passwordResetTokens.$inferInsert;
 
-export type PasswordResetTokenReturnType = Omit<PasswordResetTokenSelectType, "hashedToken">;
+// PasswordResetTokenReturnType removed — was unused. Re-create from PasswordResetTokenSelectType if needed.
 
 export type LoginInput = {
   email: Email;

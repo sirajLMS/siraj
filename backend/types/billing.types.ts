@@ -5,18 +5,12 @@ import type { PageInfo } from "./pagination.types";
 export type InvoiceSelectType = typeof invoices.$inferSelect;
 export type InvoiceInsertInput = typeof invoices.$inferInsert;
 
-export type InvoiceReturnType = Omit<
-  InvoiceSelectType,
-  "idempotencyKey" | "exchangeRateSnapshot" | "exchangeRateSource" | "createdByUserId" | "deletedAt"
->;
+// InvoiceReturnType removed — was unused. Re-create from InvoiceSelectType if needed.
 
 export type PaymentSelectType = typeof payments.$inferSelect;
 export type PaymentInsertInput = typeof payments.$inferInsert;
 
-export type PaymentReturnType = Omit<
-  PaymentSelectType,
-  "idempotencyKey" | "gatewayResponse" | "exchangeRateSnapshot" | "exchangeRateSource"
->;
+// PaymentReturnType removed — was unused. Re-create from PaymentSelectType if needed.
 
 export type CurrencyExchangeRateSelectType = typeof currencyExchangeRates.$inferSelect;
 export type CurrencyExchangeRateInsertInput = typeof currencyExchangeRates.$inferInsert;

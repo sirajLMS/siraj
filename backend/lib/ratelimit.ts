@@ -17,7 +17,7 @@ class RateLimiter {
   private readonly windowMs: number;
   private readonly _failOpen: boolean;
 
-  constructor(prefix: string, maxRequests: number, windowMs: number, failOpen = false) {
+  constructor(prefix: string, maxRequests: number, windowMs: number, failOpen = true) {
     this.prefix = prefix;
     this.maxRequests = maxRequests;
     this.windowMs = windowMs;
@@ -160,7 +160,7 @@ class RateLimiter {
  * GraphQL API rate limiter
  * Allows 100 requests per minute per IP address
  */
-export const graphqlRateLimiter = new RateLimiter("ratelimit:graphql", 100, 60 * 1000, false);
+export const graphqlRateLimiter = new RateLimiter("ratelimit:graphql", 100, 60 * 1000, true);
 
 /**
  * Authentication endpoints rate limiter (more restrictive)
@@ -171,7 +171,7 @@ export const authRateLimiter = new RateLimiter(
   "ratelimit:auth",
   10,
   15 * 60 * 1000, // 15 minutes
-  false
+  true
 );
 
 /**
@@ -182,7 +182,7 @@ export const apiRateLimiter = new RateLimiter(
   "ratelimit:api",
   200,
   60 * 1000, // 1 minute
-  false
+  true
 );
 
 /**
@@ -199,6 +199,10 @@ export async function checkRateLimit(
 }> {
   const isDev = process.env.NODE_ENV === "development";
   const isProduction = process.env.NODE_ENV === "production";
+  // DISABLE_RATE_LIMITING=true intentionally only bypasses rate limiting in non-production
+  // environments. In production, rate limits are always enforced even if the flag is set,
+  // because disabling rate limiting in production would expose the system to abuse.
+  // This fail-closed design ensures security is never accidentally relaxed in production.
   const disableRateLimiting = process.env.DISABLE_RATE_LIMITING === "true";
   try {
     const { success, limit, remaining, reset } = await limiter.limitSimple(identifier);

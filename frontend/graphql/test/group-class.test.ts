@@ -12,7 +12,7 @@ import {
   cleanupTestGroupClassMutationDocument,
   createTestGroupClassMutationDocument,
 } from "../sharedDocuments/test-helper.documents";
-import { authenticatedRequest, loginAndProvision } from "./helpers";
+import { authenticatedRequest, cleanupTestSuperAdmin, loginAndProvision, provisionTestSuperAdmin } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -22,6 +22,8 @@ describe("GraphQL: Group Class integration tests", () => {
   setupTestServerLifecycle();
 
   let adminToken: string | null = null;
+  let superAdminToken: string | null = null;
+  let superAdminUserId: string | null = null;
   let teacherToken: string | null = null;
   let studentId: string | null = null;
   let teacherId: string | null = null;
@@ -42,6 +44,10 @@ describe("GraphQL: Group Class integration tests", () => {
     teacherUserId = r.teacherUserId;
     parentUserId = r.parentUserId;
     parentId = r.parentId;
+
+    const sa = await provisionTestSuperAdmin(r.adminToken, "GroupClassIntTestSA");
+    superAdminToken = sa.token;
+    superAdminUserId = sa.userId;
 
     if (!teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
 
@@ -68,7 +74,8 @@ describe("GraphQL: Group Class integration tests", () => {
 
     if (!adminToken || !classInstanceId) throw new Error("Missing admin token or classInstanceId");
 
-    const gcRes = await authenticatedRequest(adminToken, "mutate", createTestGroupClassMutationDocument, {
+    if (!superAdminToken) throw new Error("Missing super admin token");
+    const gcRes = await authenticatedRequest(superAdminToken, "mutate", createTestGroupClassMutationDocument, {
       classInstanceId,
       teacherName: "Test Teacher",
     });
@@ -77,12 +84,12 @@ describe("GraphQL: Group Class integration tests", () => {
   });
 
   test("admin can query groupClassAudit with valid classInstanceId", async () => {
-    if (!adminToken || !classInstanceId) throw new Error("Missing test context");
+    if (!superAdminToken || !classInstanceId) throw new Error("Missing test context");
 
     const result = await testClient.query({
       query: groupClassAuditQueryDocument,
       variables: { classInstanceId },
-      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+      context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
     });
 
     expect(result.error).toBeUndefined();
@@ -107,21 +114,21 @@ describe("GraphQL: Group Class integration tests", () => {
   });
 
   test("groupClassAudit: non-existent classInstanceId returns GraphQL error", async () => {
-    if (!adminToken) throw new Error("Missing test context");
+    if (!superAdminToken) throw new Error("Missing test context");
 
     const result = await testClient.query({
       query: groupClassAuditQueryDocument,
       variables: { classInstanceId: NIL_UUID },
-      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+      context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
     });
 
     expect(result.error).toBeDefined();
   });
 
   test("admin can update admin note via updateClassAdminNote", async () => {
-    if (!adminToken || !classInstanceId) throw new Error("Missing test context");
+    if (!superAdminToken || !classInstanceId) throw new Error("Missing test context");
 
-    const data = await authenticatedRequest(adminToken, "mutate", updateClassAdminNoteMutationDocument, {
+    const data = await authenticatedRequest(superAdminToken, "mutate", updateClassAdminNoteMutationDocument, {
       classInstanceId,
       content: "Updated by integration test",
     });
@@ -133,24 +140,24 @@ describe("GraphQL: Group Class integration tests", () => {
   });
 
   test("updateClassAdminNote: non-existent classInstanceId returns GraphQL error", async () => {
-    if (!adminToken) throw new Error("Missing test context");
+    if (!superAdminToken) throw new Error("Missing test context");
 
     const result = await testClient.mutate({
       mutation: updateClassAdminNoteMutationDocument,
       variables: { classInstanceId: NIL_UUID, content: "Should fail" },
-      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+      context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
     });
 
     expect(result.error).toBeDefined();
   });
 
   test("resendClassNotifications returns result or permission error for valid classInstanceId", async () => {
-    if (!adminToken || !classInstanceId) throw new Error("Missing test context");
+    if (!superAdminToken || !classInstanceId) throw new Error("Missing test context");
 
     const result = await testClient.mutate({
       mutation: resendClassNotificationsMutationDocument,
       variables: { classInstanceId },
-      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+      context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
     });
 
     const err = result.error as Error | undefined;
@@ -163,24 +170,24 @@ describe("GraphQL: Group Class integration tests", () => {
   });
 
   test("resendClassNotifications: non-existent classInstanceId returns GraphQL error", async () => {
-    if (!adminToken) throw new Error("Missing test context");
+    if (!superAdminToken) throw new Error("Missing test context");
 
     const result = await testClient.mutate({
       mutation: resendClassNotificationsMutationDocument,
       variables: { classInstanceId: NIL_UUID },
-      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+      context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
     });
 
     expect(result.error).toBeDefined();
   });
 
   afterAll(async () => {
-    if (!adminToken) return;
+    if (!adminToken || !superAdminToken) return;
 
     if (groupClassId) {
-      await authenticatedRequest(adminToken, "mutate", cleanupTestGroupClassMutationDocument, { groupClassId }).catch(
-        () => {}
-      );
+      await authenticatedRequest(superAdminToken, "mutate", cleanupTestGroupClassMutationDocument, {
+        groupClassId,
+      }).catch(() => {});
     }
     if (classInstanceId) {
       await testClient
@@ -201,6 +208,9 @@ describe("GraphQL: Group Class integration tests", () => {
         teacherId,
         parentId,
       }).catch(() => {});
+    }
+    if (superAdminUserId) {
+      await cleanupTestSuperAdmin(superAdminToken, superAdminUserId).catch(() => {});
     }
   });
 });

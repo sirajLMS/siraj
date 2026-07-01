@@ -3,13 +3,37 @@ import "./mutation";
 import "./pothos/schema.types";
 
 import { extendSchema, parse } from "graphql";
-import { constraintDirectiveTypeDefs } from "graphql-constraint-directive";
 import { DateResolver, DateTimeResolver } from "graphql-scalars";
 import { gqlSchemaBuilder } from "./gqlSchemaBuilder";
 import { EmailScalar } from "./scalars/emailScalar";
 import { JSONScalar } from "./scalars/jsonScalar";
 import { PhoneNumberScalar } from "./scalars/phoneNumberScalar";
 import { StringMapScalar } from "./scalars/stringMapScalar";
+
+// Inlined @constraint directive SDL to avoid importing the full
+// graphql-constraint-directive package here (which conditionally requires
+// apollo-server-errors at runtime and breaks Turbopack resolution).
+// The Apollo 4 validation plugin is imported separately in route.ts.
+const constraintDirectiveTypeDefs = `
+  directive @constraint(
+    minLength: Int
+    maxLength: Int
+    startsWith: String
+    endsWith: String
+    contains: String
+    notContains: String
+    pattern: String
+    format: String
+    min: Float
+    max: Float
+    exclusiveMin: Float
+    exclusiveMax: Float
+    multipleOf: Float
+    minItems: Int
+    maxItems: Int
+    uniqueTypeName: String
+  ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | ARGUMENT_DEFINITION
+`;
 
 gqlSchemaBuilder.addScalarType("Date", DateResolver, {});
 gqlSchemaBuilder.addScalarType("DateTime", DateTimeResolver, {});

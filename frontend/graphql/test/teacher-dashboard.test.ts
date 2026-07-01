@@ -49,7 +49,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   setupTestServerLifecycle();
 
   let teacherToken: string | null = null;
-  let adminToken: string | null = null;
+  let superAdminToken: string | null = null;
   let studentId: string | null = null;
   let teacherId: string | null = null;
   let studentUserId: string | null = null;
@@ -58,9 +58,9 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   let parentId: string | null = null;
   const testDate = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 
-  test("login as teacher and academy_admin", async () => {
+  test("login as teacher and super_admin", async () => {
     const r = await loginAndProvision("DashTest");
-    adminToken = r.adminToken;
+    superAdminToken = r.superAdminToken;
     teacherToken = r.teacherToken;
     studentId = r.studentId;
     teacherId = r.teacherId;
@@ -105,7 +105,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   });
 
   test("user without teacher.view_dashboard (academy admin) query returns unauthorized GraphQL error", async () => {
-    if (!adminToken) throw new Error("No admin token");
+    if (!superAdminToken) throw new Error("No admin token");
 
     const result = await testClient.query({
       query: teacherDashboardQueryDocument,
@@ -116,7 +116,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
       errorPolicy: "all",
       context: {
         headers: {
-          Authorization: `Bearer ${adminToken}`,
+          Authorization: `Bearer ${superAdminToken}`,
         },
       },
     });
@@ -125,7 +125,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   });
 
   test("createTeacherManualClassEntry creates a manual class instance successfully", async () => {
-    if (!teacherToken || !adminToken || !studentId || !teacherId) throw new Error("Missing test context");
+    if (!teacherToken || !superAdminToken || !studentId || !teacherId) throw new Error("Missing test context");
 
     const randomYear = 2030 + (Date.now() % 10);
     const dateStr = `${randomYear}-06-25`;
@@ -133,7 +133,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
     const endAt = `${dateStr}T11:00:00Z`;
 
     // Clear any existing classes on this date to prevent booking conflicts
-    await clearClassesOnDate(adminToken, dateStr);
+    await clearClassesOnDate(superAdminToken, dateStr);
 
     const result = await testClient.mutate({
       mutation: createTeacherManualClassEntryMutationDocument,
@@ -177,7 +177,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
       },
       context: {
         headers: {
-          Authorization: `Bearer ${adminToken}`,
+          Authorization: `Bearer ${superAdminToken}`,
         },
       },
     });
@@ -220,8 +220,8 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
     }
   });
 
-  test("teacherFutureSchedule — denied when user has no teacher record (academy admin)", async () => {
-    if (!adminToken) throw new Error("No admin token");
+  test("teacherFutureSchedule — denied when user has no teacher record (super admin)", async () => {
+    if (!superAdminToken) throw new Error("No admin token");
 
     const result = await testClient.query({
       query: teacherFutureScheduleQueryDocument,
@@ -229,7 +229,7 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
       errorPolicy: "all",
       context: {
         headers: {
-          Authorization: `Bearer ${adminToken}`,
+          Authorization: `Bearer ${superAdminToken}`,
         },
       },
     });
@@ -248,8 +248,8 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   });
 
   afterAll(async () => {
-    if (adminToken && studentUserId && teacherUserId && parentUserId) {
-      await authenticatedRequest(adminToken, "mutate", cleanupTestEntitiesMutationDocument, {
+    if (superAdminToken && studentUserId && teacherUserId && parentUserId) {
+      await authenticatedRequest(superAdminToken, "mutate", cleanupTestEntitiesMutationDocument, {
         studentUserId,
         teacherUserId,
         parentUserId,

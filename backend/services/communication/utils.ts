@@ -1,7 +1,8 @@
-/**
- * Type-safe delivery channel names for notification error messages.
- */
-export type DeliveryChannel = "email" | "push" | "sms";
+import type { NotificationChannel } from "@/shared/lib/enum";
+
+type LowercaseEnumValue<T extends string, ExcludeVal extends string> = Lowercase<Exclude<`${T}`, ExcludeVal>>;
+
+type DeliveryChannel = LowercaseEnumValue<NotificationChannel, "ON_APP">;
 
 const CHANNEL_LABELS: Record<DeliveryChannel, string> = {
   email: "Email",

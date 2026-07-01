@@ -177,32 +177,25 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     expect(result.error).toBeDefined();
   });
 
-  test("Academy Admin can update Staff profile", async () => {
-    const managerResult = await getManagers(adminToken);
+  test("Academy Admin denied from updating any manager profile (requires superAdmin auth scope)", async () => {
+    const managerResult = await getManagers(superAdminToken);
 
     if (!managerResult.rows) throw new Error("No rows returned");
 
     const staffMgr = managerResult.rows.find(m => m.name?.includes("MgrDirTest-Staff"));
-    if (!staffMgr?.staffProfileId) throw new Error("No staff manager found to update");
+    if (!staffMgr?.staffProfileId) throw new Error("No staff manager found to test denial");
 
-    const uniquePhone = `+1888${crypto.randomInt(1000000, 9999999)}`;
-    const uniqueSkype = `skype_academy_edit_${Date.now()}`;
-
-    const updateData = await authenticatedRequest(adminToken, "mutate", updateManagerProfileMutationDocument, {
-      staffProfileId: staffMgr.staffProfileId,
-      input: {
-        phone: uniquePhone,
-        skypeId: uniqueSkype,
-        status: null,
+    const result = await testClient.mutate({
+      mutation: updateManagerProfileMutationDocument,
+      variables: {
+        staffProfileId: staffMgr.staffProfileId,
+        input: { phone: "+15555555555", skypeId: "denied_skype", status: null },
       },
+      errorPolicy: "all",
+      context: { headers: { Authorization: `Bearer ${adminToken}` } },
     });
 
-    const updated = updateData?.updateManagerProfile;
-    if (!updated) throw new Error("Mutation did not return updated profile");
-
-    expect(updated.staffProfileId).toBe(staffMgr.staffProfileId);
-    expect(updated.phone).toBe(uniquePhone);
-    expect(updated.skypeId).toBe(uniqueSkype);
+    expect(result.error).toBeDefined();
   });
 
   test("Updating non-existent profile returns error", async () => {

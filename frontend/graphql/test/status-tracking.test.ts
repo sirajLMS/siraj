@@ -192,7 +192,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
   describe("security: T10-004 — SUSPENDED→REGULAR restores isFrozen = false", () => {
     test("after admin changes student from SUSPENDED back to REGULAR, isFrozen reflects unfrozen state", async () => {
       // Step 1: Change student to SUSPENDED (triggers bulkFreezeStudentClasses)
-      await authenticatedRequest(adminToken, "mutate", changeStudentStatusMutationDocument, {
+      await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
         studentId,
         newStatus: StudentStatus.Suspended,
         expectedVersion: null,
@@ -209,7 +209,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
       }
 
       // Step 3: Change student back to REGULAR (triggers bulkUnfreezeStudentClasses)
-      await authenticatedRequest(adminToken, "mutate", changeStudentStatusMutationDocument, {
+      await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
         studentId,
         newStatus: StudentStatus.Regular,
         expectedVersion: null,

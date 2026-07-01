@@ -34,10 +34,9 @@ export class PostgresCacheAdapter implements ICacheService {
    */
   async set(key: string, value: string, options?: { ex?: number; px?: number }): Promise<void> {
     try {
-      // Default to no expiry if no TTL is provided — callers must be explicit
-      const ttlSeconds = options?.ex ? options.ex : options?.px ? options.px / 1000 : 0;
-      // No expiry: far-future date (year 2100) so the entry never expires via TTL cleanup
-      const expiresAt = ttlSeconds > 0 ? new Date(Date.now() + ttlSeconds * 1000) : new Date("2100-01-01T00:00:00Z");
+      // Default to 1 hour TTL when no TTL is provided — prevents unbounded cache growth
+      const ttlSeconds = options?.ex ? options.ex : options?.px ? options.px / 1000 : 3600;
+      const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
 
       await CacheDbRepository.set(key, value, expiresAt);
     } catch (error) {
@@ -126,30 +125,38 @@ export class PostgresCacheAdapter implements ICacheService {
    */
   private async executePipelineCommand(cmd: { command: string; args: (string | number)[] }): Promise<unknown> {
     switch (cmd.command) {
-      case "zremrangebyscore":
-        // For rate limiting: remove old entries
-        // This is a no-op for PostgreSQL cache as we handle expiration differently
+      case "zremrangebyscore": {
+        // For rate limiting: remove old entries outside the sliding window
+        // Redis: ZREMRANGEBYSCORE key min max — removes members with score between min and max
+        // PostgreSQL: delete entries with key prefix match and value (timestamp) <= maxScore
+        const [remKey, , maxScore] = cmd.args as [string, number, number];
+        await CacheDbRepository.deleteByPrefixAndScore(remKey, maxScore);
         return 0;
+      }
 
       case "zadd": {
         // For rate limiting: add new entry using server-side timestamp
+        // Use composite key (key:member) so multiple entries accumulate per rate-limit key
         const [key, , member] = cmd.args as [string, number, string];
+        const compositeKey = `${key}:${member}`;
         const now = Date.now();
         const expiresAt = new Date(now + 3600000); // 1 hour from now
-        await CacheDbRepository.set(key, member, expiresAt);
+        await CacheDbRepository.set(compositeKey, String(now), expiresAt);
         return 1;
       }
 
       case "zcard": {
-        // For rate limiting: count entries
-        const entry = await CacheDbRepository.get(cmd.args[0] as string);
-        return entry ? 1 : 0;
+        // For rate limiting: count entries matching the key prefix
+        // Each zadd stores with composite key "{key}:{member}", so we count "{key}:%"
+        const prefix = cmd.args[0] as string;
+        return await CacheDbRepository.countByKeyPrefix(prefix);
       }
 
       case "expire": {
-        // Set expiration
+        // Set expiration on all entries matching the key prefix
+        // Since zadd uses composite keys, we update TTL for all "{key}:%" entries
         const [expKey, expSeconds] = cmd.args as [string, number];
-        await this.expire(expKey, expSeconds);
+        await CacheDbRepository.updateExpiryByPrefix(expKey, expSeconds);
         return 1;
       }
 

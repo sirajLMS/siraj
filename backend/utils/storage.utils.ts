@@ -13,6 +13,12 @@ export namespace StorageUtils {
     if (path.includes("..") || path.includes("//")) {
       return "Path contains invalid directory traversal patterns";
     }
+    if (/^[/\\]/.test(path)) {
+      return "Absolute paths are not allowed";
+    }
+    if (path.includes("\0")) {
+      return "Path contains null bytes";
+    }
     if (!PATH_PATTERN.test(path)) {
       return "Path contains invalid characters";
     }
@@ -86,7 +92,11 @@ export namespace StorageUtils {
   };
 
   export const sanitizePath = (path: string): string => {
-    return path.replace(/\/+/g, "/").replace(/(?:^\/|\/(?=$))/g, "");
+    return path
+      .replace(/\0/g, "")
+      .replace(/\\/g, "/")
+      .replace(/\/+/g, "/")
+      .replace(/(?:^\/|\/(?=$))/g, "");
   };
 
   export const blobToFileInfo = (blob: Types.BlobMetadata, baseUrl: string): Types.BucketFile => {

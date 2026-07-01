@@ -2,11 +2,19 @@ import { describe, expect, test } from "bun:test";
 import ar from "@/shared/messages/ar";
 import en from "@/shared/messages/en";
 import { translatedMessageQueryDocument, welcomeMessageQueryDocument } from "../sharedDocuments/translation.documents";
+import { loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
 describe("GraphQL Translation Integration Tests", () => {
   setupTestServerLifecycle();
+
+  let adminToken = "";
+
+  test("login as academy_admin for authenticated translation queries", async () => {
+    adminToken = await loginDemoUser("academy_admin");
+    expect(adminToken).toBeTruthy();
+  });
 
   test("returns welcomeMessage in Arabic by default", async () => {
     const result = await testClient.query({
@@ -73,6 +81,7 @@ describe("GraphQL Translation Integration Tests", () => {
       context: {
         headers: {
           "Accept-Language": "en",
+          Authorization: `Bearer ${adminToken}`,
         },
       },
     });
@@ -90,6 +99,7 @@ describe("GraphQL Translation Integration Tests", () => {
       context: {
         headers: {
           "Accept-Language": "ar",
+          Authorization: `Bearer ${adminToken}`,
         },
       },
     });

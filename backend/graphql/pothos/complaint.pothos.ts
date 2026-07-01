@@ -129,7 +129,7 @@ export const SubmitComplaintInputPothosObject = gqlSchemaBuilder
   .implement({
     description: "Input for submitting a new complaint.",
     fields: t => ({
-      studentId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      studentId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
       category: t.field({ type: ComplaintCategoryPothosEnum, required: true }),
       submitterEmail: t.string({ required: true, directives: { constraint: { maxLength: 254 } } }),
       body: t.string({ required: true, directives: { constraint: { maxLength: 5000 } } }),

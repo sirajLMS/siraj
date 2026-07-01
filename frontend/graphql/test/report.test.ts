@@ -56,8 +56,10 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     superAdminUserId = sa.userId;
   });
 
-  test("SECURITY: Returns full financial data for Admin with both permissions", async () => {
-    const data = await authenticatedRequest(adminToken, "query", generateAttendanceReportQueryDocument, { filters });
+  test("SECURITY: Returns full financial data for Super Admin", async () => {
+    const data = await authenticatedRequest(superAdminToken, "query", generateAttendanceReportQueryDocument, {
+      filters,
+    });
 
     const payload = data?.generateAttendanceReport;
     expect(payload).toBeDefined();
@@ -74,7 +76,7 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     }
   });
 
-  test("SECURITY: Masks financial data for user lacking report.view_financials", async () => {
+  test("SECURITY: Non-super-admin with report.generate_custom permission is denied at auth scope level", async () => {
     const meData = await authenticatedRequest(teacherToken, "query", meQueryDocument);
     const teacherIdFromMe = meData?.me?.id;
     if (typeof teacherIdFromMe !== "string") throw new Error("Could not fetch teacher userId");
@@ -86,7 +88,7 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     const groupRes = await authenticatedRequest(superAdminToken, "mutate", createPermissionGroupMutationDocument, {
       input: {
         name: `Temp Report Group ${Date.now()}`,
-        description: "Temporary group for testing report financial masking",
+        description: "Temporary group for testing report auth scope denial",
         permissionIds: [customPerm.id],
       },
     });
@@ -101,22 +103,9 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     });
 
     try {
-      const data = await authenticatedRequest(teacherToken, "query", generateAttendanceReportQueryDocument, {
-        filters,
-      });
-
-      const payload = data?.generateAttendanceReport;
-      expect(payload).toBeDefined();
-      if (!payload) throw new Error("generateAttendanceReport returned no data");
-
-      const rows = payload.rows ?? [];
-      expect(Array.isArray(rows)).toBeTrue();
-
-      for (const row of rows) {
-        expect(row.totalHours === 0 || row.totalHours === null).toBeTrue();
-        expect(row.paidEGP === 0 || row.paidEGP === null).toBeTrue();
-        expect(row.paidUSD === 0 || row.paidUSD === null).toBeTrue();
-      }
+      // Even with report.generate_custom permission, teacher is denied because
+      // the GraphQL authScopes require superAdmin: true
+      await assertOperationDenied("teacher_default", "query", generateAttendanceReportQueryDocument, { filters });
     } finally {
       await authenticatedRequest(superAdminToken, "mutate", revokePermissionGroupFromUserMutationDocument, {
         input: {

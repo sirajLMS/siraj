@@ -12,10 +12,8 @@ import {
   assertOperationDenied,
   authenticatedRequest,
   cleanupTestEntities,
-  cleanupTestSuperAdmin,
   type LoginAndProvisionResult,
   loginAndProvision,
-  provisionTestSuperAdmin,
 } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
@@ -23,29 +21,23 @@ import { testClient } from "./testClient";
 describe("GraphQL Parent Directory Tests", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let teacherId = "";
   let studentId = "";
   let studentUserId = "";
   let teacherUserId = "";
   let parentUserId = "";
   let parentId = "";
-  let superAdminToken = "";
-  let superAdminUserId = "";
 
   test("provision test entities and super admin", async () => {
     const r = await loginAndProvision("ParentDirTest");
-    adminToken = r.adminToken;
+    superAdminToken = r.superAdminToken;
     teacherId = r.teacherId;
     studentId = r.studentId;
     studentUserId = r.studentUserId;
     teacherUserId = r.teacherUserId;
     parentUserId = r.parentUserId;
     parentId = r.parentId;
-
-    const sa = await provisionTestSuperAdmin(adminToken, "ParentDirTestSA");
-    superAdminToken = sa.token;
-    superAdminUserId = sa.userId;
   });
 
   test("parentDirectory — admin sees data with metrics", async () => {
@@ -107,7 +99,7 @@ describe("GraphQL Parent Directory Tests", () => {
   });
 
   test("cleanup provisioned entities", async () => {
-    await cleanupTestEntities(adminToken, {
+    await cleanupTestEntities(superAdminToken, {
       studentUserId,
       teacherUserId,
       parentUserId,
@@ -115,26 +107,25 @@ describe("GraphQL Parent Directory Tests", () => {
       teacherId,
       parentId,
     });
-    await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
   });
 });
 
 describe("GraphQL Parent Profile Tests — parentProfile query", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let parentId = "";
   let _r: LoginAndProvisionResult | null = null;
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("ParentProfTest");
     _r = r;
-    adminToken = r.adminToken;
+    superAdminToken = r.superAdminToken;
     parentId = r.parentId;
   });
 
   test("parentProfile — admin with parent.view_profile sees full profile", async () => {
-    const data = await authenticatedRequest(adminToken, "query", parentProfileQueryDocument, { parentId });
+    const data = await authenticatedRequest(superAdminToken, "query", parentProfileQueryDocument, { parentId });
 
     expect(data.parentProfile).toBeDefined();
     expect(data.parentProfile?.id).toBe(parentId);
@@ -161,7 +152,7 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
     const result = await testClient.query({
       query: parentProfileQueryDocument,
       variables: { parentId: "00000000-0000-0000-0000-000000000000" },
-      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+      context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
     });
 
     expect(result.data?.parentProfile).toBeNull();
@@ -169,7 +160,7 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
 
   test("cleanup provisioned entities", async () => {
     if (!_r) return;
-    await cleanupTestEntities(adminToken, {
+    await cleanupTestEntities(superAdminToken, {
       studentUserId: _r.studentUserId,
       teacherUserId: _r.teacherUserId,
       parentUserId: _r.parentUserId,
@@ -183,19 +174,21 @@ describe("GraphQL Parent Profile Tests — parentProfile query", () => {
 describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let parentId = "";
   let _r: LoginAndProvisionResult | null = null;
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("ParentAssocTest");
     _r = r;
-    adminToken = r.adminToken;
+    superAdminToken = r.superAdminToken;
     parentId = r.parentId;
   });
 
   test("parentAssociatedStudents — admin sees student list with quota data", async () => {
-    const data = await authenticatedRequest(adminToken, "query", parentAssociatedStudentsQueryDocument, { parentId });
+    const data = await authenticatedRequest(superAdminToken, "query", parentAssociatedStudentsQueryDocument, {
+      parentId,
+    });
 
     expect(Array.isArray(data.parentAssociatedStudents)).toBeTrue();
 
@@ -218,7 +211,7 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
 
   test("cleanup provisioned entities", async () => {
     if (!_r) return;
-    await cleanupTestEntities(adminToken, {
+    await cleanupTestEntities(superAdminToken, {
       studentUserId: _r.studentUserId,
       teacherUserId: _r.teacherUserId,
       parentUserId: _r.parentUserId,
@@ -232,12 +225,12 @@ describe("GraphQL Parent Profile Tests — parentAssociatedStudents query", () =
 describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let parentId = "";
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("ParentDeactTest");
-    adminToken = r.adminToken;
+    superAdminToken = r.superAdminToken;
     parentId = r.parentId;
   });
 
@@ -251,14 +244,14 @@ describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
     const result = await testClient.mutate({
       mutation: deactivateParentMutationDocument,
       variables: { parentId: "00000000-0000-0000-0000-000000000000" },
-      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+      context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
     });
 
     expect(result.error).toBeDefined();
   });
 
-  test("deactivateParent — admin can deactivate a valid parent (status becomes DEACTIVATED)", async () => {
-    const data = await authenticatedRequest(adminToken, "mutate", deactivateParentMutationDocument, {
+  test("deactivateParent — super admin can deactivate a valid parent (status becomes DEACTIVATED)", async () => {
+    const data = await authenticatedRequest(superAdminToken, "mutate", deactivateParentMutationDocument, {
       parentId,
     });
 
@@ -271,13 +264,13 @@ describe("GraphQL Parent Profile Tests — deactivateParent mutation", () => {
 describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let _r: LoginAndProvisionResult | null = null;
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("ParentQuotaTest");
     _r = r;
-    adminToken = r.adminToken;
+    superAdminToken = r.superAdminToken;
   });
 
   test("updateStudentQuota — teacher role is denied", async () => {
@@ -296,7 +289,7 @@ describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
         newClassesRemaining: 5,
         expectedVersion: null,
       },
-      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+      context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
     });
 
     expect(result.error).toBeDefined();
@@ -304,7 +297,7 @@ describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
 
   test("cleanup provisioned entities", async () => {
     if (!_r) return;
-    await cleanupTestEntities(adminToken, {
+    await cleanupTestEntities(_r.superAdminToken, {
       studentUserId: _r.studentUserId,
       teacherUserId: _r.teacherUserId,
       parentUserId: _r.parentUserId,
@@ -318,17 +311,17 @@ describe("GraphQL Student Quota Tests — updateStudentQuota mutation", () => {
 describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let parentId = "";
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("ParentInvTest");
-    adminToken = r.adminToken;
+    superAdminToken = r.superAdminToken;
     parentId = r.parentId;
   });
 
   test("parentInvoiceHistory — admin sees invoice list", async () => {
-    const data = await authenticatedRequest(adminToken, "query", parentInvoiceHistoryQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", parentInvoiceHistoryQueryDocument, {
       parentId,
       userId: null,
       paginationArgs: null,
@@ -349,17 +342,17 @@ describe("GraphQL Billing History Tests — parentInvoiceHistory query", () => {
 describe("GraphQL Document Tests — parentDocuments query", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let parentId = "";
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("ParentDocsTest");
-    adminToken = r.adminToken;
+    superAdminToken = r.superAdminToken;
     parentId = r.parentId;
   });
 
   test("parentDocuments — admin sees document list (may be empty)", async () => {
-    const data = await authenticatedRequest(adminToken, "query", parentDocumentsQueryDocument, { parentId });
+    const data = await authenticatedRequest(superAdminToken, "query", parentDocumentsQueryDocument, { parentId });
 
     expect(Array.isArray(data.parentDocuments)).toBeTrue();
   });

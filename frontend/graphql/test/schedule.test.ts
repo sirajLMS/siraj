@@ -309,7 +309,7 @@ describe("GraphQL Schedule Integration Tests", () => {
 
   // Schedule deletion tests (including security/IDOR coverage)
   test("deleteRecurringClass — teacher denied (other's class)", async () => {
-    const classInstanceId = await fetchFirstClassInstanceId(adminToken, testDate);
+    const classInstanceId = await fetchFirstClassInstanceId(superAdminToken, testDate);
 
     const result = await testClient.mutate({
       mutation: deleteRecurringClassMutationDocument,
@@ -343,7 +343,7 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("deleteRecurringClass — admin succeeds (any class)", async () => {
-    const classInstanceId = await fetchFirstClassInstanceId(adminToken, testDate);
+    const classInstanceId = await fetchFirstClassInstanceId(superAdminToken, testDate);
 
     const deleteData = await authenticatedRequest(superAdminToken, "mutate", deleteRecurringClassMutationDocument, {
       classInstanceId,

@@ -414,6 +414,94 @@ export namespace SessionRepository {
     };
   };
 
+  /**
+   * Look up a session by its pre-computed HMAC hash.
+   * This is a primitive data-access method — callers compute the hash.
+   */
+  export const findByHmacHash = async (hmacHash: string): Promise<SessionEntity | null> => {
+    try {
+      if (redisSessionsEnabled()) {
+        const redisService = getSessionRedisService();
+        const redisSession = await redisService.getSession(hmacHash);
+        if (redisSession) {
+          return {
+            hashedId: redisSession.hashedId,
+            userId: redisSession.userId,
+            ipAddress: redisSession.ipAddress || null,
+            userAgent: redisSession.userAgent || null,
+            payload: redisSession.payload,
+            lastActivity: BigInt(Math.floor(new Date(redisSession.lastActivityAt).getTime() / 1000)),
+          };
+        }
+      }
+
+      return await db
+        .select()
+        .from(sessions)
+        .where(eq(sessions.hashedId, hmacHash))
+        .then(res => res[0] ?? null);
+    } catch (error) {
+      logger.error("Error finding session by HMAC hash:", error);
+      return null;
+    }
+  };
+
+  /**
+   * Look up a session by its pre-computed legacy SHA-256 hash.
+   * This is a primitive data-access method — callers compute the hash.
+   */
+  export const findByLegacyHash = async (legacyHash: string): Promise<SessionEntity | null> => {
+    try {
+      // Legacy sessions predate Redis migration — always check PostgreSQL.
+      // Redis keys use the HMAC hash, so a legacy-hash key will never exist in Redis.
+      return await db
+        .select()
+        .from(sessions)
+        .where(eq(sessions.hashedId, legacyHash))
+        .then(res => res[0] ?? null);
+    } catch (error) {
+      logger.error("Error finding session by legacy hash:", error);
+      return null;
+    }
+  };
+
+  /**
+   * Re-hash a session's stored identifier from a legacy SHA-256 hash to the current HMAC hash.
+   * This is a primitive data-access method — the service layer decides when to call it.
+   */
+  export const rehashSession = async (
+    legacyHash: string,
+    hmacHash: string,
+    userId: string,
+    tx?: DBTransaction
+  ): Promise<void> => {
+    const runner = async (t: DBTransaction) => {
+      await t.update(sessions).set({ hashedId: hmacHash }).where(eq(sessions.hashedId, legacyHash));
+
+      if (redisSessionsEnabled()) {
+        const redisService = getSessionRedisService();
+        // Migrate Redis session to new HMAC key
+        const redisSession = await redisService.getSession(legacyHash);
+        if (redisSession) {
+          await redisService.setSession({
+            sessionId: hmacHash,
+            data: { ...redisSession, hashedId: hmacHash },
+            ttlSeconds: DEFAULT_SESSION_TTL,
+          });
+          await redisService.deleteSession(legacyHash);
+        }
+      }
+
+      logger.info("Session hash migrated from legacy SHA-256 to HMAC", { userId });
+    };
+
+    if (tx) {
+      await runner(tx);
+    } else {
+      await db.transaction((t: DBTransaction) => runner(t));
+    }
+  };
+
   export const cleanupExpiredSessions = async (): Promise<number> => {
     const result = await db.delete(sessionMetadata).where(lte(sessionMetadata.expiresAt, new Date())).returning();
     logger.info(`Cleaned up ${result.length} expired session metadata records`);

@@ -1,12 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { GraphQLError } from "graphql";
-import { RateLimitRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
+import { RateLimitRepository, SessionRepository } from "@/backend/db/repo";
+import { UserRepository } from "@/backend/db/repo/user.repository";
 import { generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
 import { comparePassword } from "@/backend/lib/auth/password";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";
 import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
 import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
+import { SessionService } from "@/backend/services/auth/session.service";
 import type { SafeUser, SessionEntity, UserEntity } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 import type { BaseContext } from "../gqlContext";
@@ -36,7 +38,7 @@ function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: strin
 async function resolveUserFromSession(
   sessionId: string
 ): Promise<{ session: SessionEntity | null; user: UserEntity | null }> {
-  const session = await SessionRepository.validate(sessionId);
+  const session = await SessionService.validateSession(sessionId);
   if (!session?.userId) return { session: session ?? null, user: null };
 
   const user = (await UserRepository.findById(session.userId)) || null;

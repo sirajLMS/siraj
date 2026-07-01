@@ -7,19 +7,25 @@ import {
   respondToComplaintMutationDocument,
   submitComplaintMutationDocument,
 } from "../sharedDocuments";
-import { assertOperationDenied, authenticatedRequest, expectMutationError, loginDemoUser } from "./helpers";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  expectMutationError,
+  loginDemoUser,
+  provisionTestSuperAdmin,
+} from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
 const DEFAULT_FILTER = { search: null, status: null };
 
-async function submitTestComplaint(token: string, body: string): Promise<string> {
+async function submitTestComplaint(token: string, body: string, studentId?: string): Promise<string> {
   const data = await authenticatedRequest(token, "mutate", submitComplaintMutationDocument, {
     input: {
       category: ComplaintCategory.Other,
       body,
-      studentId: null,
+      studentId: studentId ?? NIL_UUID,
       submitterEmail: "parent@siraj.local",
       files: null,
     },
@@ -94,14 +100,18 @@ describe("GraphQL: adminComplaintQueue query", () => {
   setupTestServerLifecycle();
 
   let adminToken = "";
+  let superAdminToken = "";
 
-  test("login as academy_admin", async () => {
+  test("login as academy_admin and provision superAdmin", async () => {
     adminToken = await loginDemoUser("academy_admin");
     expect(adminToken).not.toBeNull();
+
+    const sa = await provisionTestSuperAdmin(adminToken, "compSa");
+    superAdminToken = sa.token;
   });
 
   test("authorized admin gets all complaints with metrics", async () => {
-    const data = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
       paginationArgs: null,
     });
@@ -143,7 +153,7 @@ describe("GraphQL: adminComplaintQueue query", () => {
   });
 
   test("status filter returns only matching complaints", async () => {
-    const data = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", adminComplaintQueueQueryDocument, {
       filter: { ...DEFAULT_FILTER, status: ComplaintStatus.Unanswered },
       paginationArgs: null,
     });
@@ -156,7 +166,7 @@ describe("GraphQL: adminComplaintQueue query", () => {
   });
 
   test("search filter narrows results", async () => {
-    const allData = await authenticatedRequest(adminToken, "query", adminComplaintQueueQueryDocument, {
+    const allData = await authenticatedRequest(superAdminToken, "query", adminComplaintQueueQueryDocument, {
       filter: DEFAULT_FILTER,
       paginationArgs: null,
     });
@@ -201,7 +211,7 @@ describe("GraphQL: submitComplaint mutation", () => {
       input: {
         category: ComplaintCategory.Other,
         body: "Integration test complaint from parent",
-        studentId: null,
+        studentId: NIL_UUID,
         submitterEmail: "parent@siraj.local",
         files: null,
       },
@@ -220,7 +230,7 @@ describe("GraphQL: submitComplaint mutation", () => {
       input: {
         category: ComplaintCategory.Other,
         body: "Should be denied",
-        studentId: null,
+        studentId: NIL_UUID,
         submitterEmail: "teacher@siraj.local",
         files: null,
       },
@@ -232,7 +242,7 @@ describe("GraphQL: submitComplaint mutation", () => {
       input: {
         category: ComplaintCategory.Other,
         body: "",
-        studentId: null,
+        studentId: NIL_UUID,
         submitterEmail: "parent@siraj.local",
         files: null,
       },
@@ -245,7 +255,7 @@ describe("GraphQL: submitComplaint mutation", () => {
       input: {
         category: ComplaintCategory.RegardingSystem,
         body: "IDOR test — should link to own parent",
-        studentId: null,
+        studentId: NIL_UUID,
         submitterEmail: "parent@siraj.local",
         files: null,
       },

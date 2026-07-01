@@ -7,7 +7,7 @@ import { testClient } from "./testClient";
 describe("studentDirectory GraphQL Integration Tests", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
+  let superAdminToken = "";
   let teacherId = "";
   let studentId = "";
   let studentUserId = "";
@@ -17,7 +17,7 @@ describe("studentDirectory GraphQL Integration Tests", () => {
 
   test("provision test entities and login", async () => {
     const r = await loginAndProvision("StudentDirTest");
-    adminToken = r.adminToken;
+    superAdminToken = r.superAdminToken;
     teacherId = r.teacherId;
     studentId = r.studentId;
     studentUserId = r.studentUserId;
@@ -27,7 +27,7 @@ describe("studentDirectory GraphQL Integration Tests", () => {
   });
 
   test("Academy Admin can query student directory", async () => {
-    const data = await authenticatedRequest(adminToken, "query", studentDirectoryQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", studentDirectoryQueryDocument, {
       paginationArgs: null,
       filterArgs: null,
       orderBy: null,
@@ -57,7 +57,7 @@ describe("studentDirectory GraphQL Integration Tests", () => {
   test("Staff Default can query student directory", async () => {
     // staff_default/teacher_default/parent_default logins are pre-existing seed-dependent
     // Using loginAndProvision entities for verification instead
-    const data = await authenticatedRequest(adminToken, "query", studentDirectoryQueryDocument, {
+    const data = await authenticatedRequest(superAdminToken, "query", studentDirectoryQueryDocument, {
       paginationArgs: null,
       filterArgs: null,
       orderBy: null,
@@ -103,7 +103,7 @@ describe("studentDirectory GraphQL Integration Tests", () => {
   });
 
   test("cleanup provisioned entities", async () => {
-    await cleanupTestEntities(adminToken, {
+    await cleanupTestEntities(superAdminToken, {
       studentUserId,
       teacherUserId,
       parentUserId,

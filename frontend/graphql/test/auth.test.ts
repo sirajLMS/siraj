@@ -8,7 +8,7 @@ import {
   userQueryDocument,
   usersQueryDocument,
 } from "../sharedDocuments/auth.documents";
-import { authenticatedRequest, cleanupTestSuperAdmin, loginDemoUser, provisionTestSuperAdmin } from "./helpers";
+import { authenticatedRequest, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { clearCookies, testClient } from "./testClient";
 
@@ -16,13 +16,23 @@ describe("GraphQL Auth Integration Tests", () => {
   setupTestServerLifecycle();
 
   let superAdminToken = "";
-  let superAdminUserId = "";
 
-  test("provision super admin for demo login tests", async () => {
-    const adminToken = await loginDemoUser("academy_admin");
-    const sa = await provisionTestSuperAdmin(adminToken, "authSa");
-    superAdminToken = sa.token;
-    superAdminUserId = sa.userId;
+  test("obtain super admin token for auth tests via demoLogin", async () => {
+    // Use demoLogin("super_admin") — DemoAuthService finds the existing super admin in DB
+    const result = await testClient.mutate({
+      mutation: demoLoginMutationDocument,
+      variables: {
+        input: {
+          groupSlug: "super_admin",
+        },
+      },
+    });
+
+    expect(result.data).toBeDefined();
+    expect(result.error).toBeUndefined();
+
+    if (!result.data?.demoLogin?.token) throw new Error("Failed to obtain super admin token");
+    superAdminToken = result.data.demoLogin.token;
   });
 
   test("returns token and user on demoLogin with academy_admin", async () => {
@@ -45,30 +55,23 @@ describe("GraphQL Auth Integration Tests", () => {
   });
 
   test("returns token and user on demoLogin with super_admin", async () => {
-    // Provision a super admin inline so demoLogin("super_admin") can find it in the DB
-    const adminToken = await loginDemoUser("academy_admin");
-    const sa = await provisionTestSuperAdmin(adminToken, "authDemoLoginSa");
-
-    try {
-      const result = await testClient.mutate({
-        mutation: demoLoginMutationDocument,
-        variables: {
-          input: {
-            groupSlug: "super_admin",
-          },
+    // demoLogin("super_admin") works directly — DemoAuthService finds existing super admin in DB
+    const result = await testClient.mutate({
+      mutation: demoLoginMutationDocument,
+      variables: {
+        input: {
+          groupSlug: "super_admin",
         },
-      });
+      },
+    });
 
-      expect(result.data).toBeDefined();
-      expect(result.error).toBeUndefined();
+    expect(result.data).toBeDefined();
+    expect(result.error).toBeUndefined();
 
-      if (!result.data?.demoLogin) throw new Error("No demoLogin data");
-      expect(result.data.demoLogin.token).toBeDefined();
-      expect(result.data.demoLogin.user).toBeDefined();
-      expect(result.data.demoLogin.user?.id).toBeDefined();
-    } finally {
-      await cleanupTestSuperAdmin(sa.token, sa.userId);
-    }
+    if (!result.data?.demoLogin) throw new Error("No demoLogin data");
+    expect(result.data.demoLogin.token).toBeDefined();
+    expect(result.data.demoLogin.user).toBeDefined();
+    expect(result.data.demoLogin.user?.id).toBeDefined();
   });
 
   test("returns current user via me query", async () => {
@@ -93,7 +96,10 @@ describe("GraphQL Auth Integration Tests", () => {
   });
 
   test("returns list of users via users query", async () => {
-    const token = await loginDemoUser("academy_admin");
+    // The users query requires STAFF_LIST permission; use super admin token
+    const token = superAdminToken;
+    if (!token) throw new Error("No super admin token from provision test");
+
     const data = await authenticatedRequest(token, "query", usersQueryDocument);
     expect(Array.isArray(data.users)).toBeTrue();
     if (data.users) {
@@ -154,9 +160,7 @@ describe("GraphQL Auth Integration Tests", () => {
     }
   });
 
-  afterAll(async () => {
-    if (superAdminToken && superAdminUserId) {
-      await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
-    }
+  afterAll(() => {
+    // No cleanup needed — super admin token was obtained via demoLogin, not provisioned
   });
 });

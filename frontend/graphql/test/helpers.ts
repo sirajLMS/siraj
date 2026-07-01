@@ -84,6 +84,7 @@ export interface TestEntitiesResult {
 
 export interface LoginAndProvisionResult {
   adminToken: string;
+  superAdminToken: string;
   teacherToken: string;
   studentId: string;
   teacherId: string;
@@ -102,11 +103,11 @@ export interface LoginAndProvisionResult {
  * created teacher. Returns all entity IDs plus the teacher's auth token.
  */
 export async function provisionTestEntities(
-  adminToken: string,
+  superAdminToken: string,
   prefix: string,
   classesRemaining = 10
 ): Promise<TestEntitiesResult> {
-  const setupRes = await authenticatedRequest(adminToken, "mutate", createTestEntitiesMutationDocument, {
+  const setupRes = await authenticatedRequest(superAdminToken, "mutate", createTestEntitiesMutationDocument, {
     prefix,
     classesRemaining,
   });
@@ -116,7 +117,7 @@ export async function provisionTestEntities(
   if (!entities.teacherUserEmail) throw new Error("Teacher email not returned");
   if (!entities.studentId) throw new Error("Student ID not returned");
   if (!entities.teacherId) throw new Error("Teacher ID not returned");
-  const teacherToken = await loginUser(entities.teacherUserEmail, "password");
+  const teacherToken = await loginUser(entities.teacherUserEmail, "Test_Pass1!");
 
   return {
     studentId: entities.studentId ?? "",
@@ -144,12 +145,15 @@ export async function provisionTestEntities(
  * @returns A promise resolving to the data returned by the GraphQL operation.
  */
 export async function loginAndProvision(prefix: string): Promise<LoginAndProvisionResult> {
+  const superAdminToken = await loginDemoUser("super_admin");
+  expect(superAdminToken).not.toBeNull();
+  const result = await provisionTestEntities(superAdminToken, prefix);
+  expect(result.teacherToken).not.toBeNull();
   const adminToken = await loginDemoUser("academy_admin");
   expect(adminToken).not.toBeNull();
-  const result = await provisionTestEntities(adminToken, prefix);
-  expect(result.teacherToken).not.toBeNull();
   return {
     adminToken,
+    superAdminToken,
     teacherToken: result.teacherToken,
     studentId: result.studentId,
     teacherId: result.teacherId,
@@ -195,14 +199,14 @@ export async function authenticatedRequest<TData, TVariables extends OperationVa
   return result.data as TData;
 }
 
-export async function fetchFirstClassInstanceId(adminToken: string, date: string): Promise<string> {
-  const entities = await provisionTestEntities(adminToken, "sched-del", 5);
+export async function fetchFirstClassInstanceId(token: string, date: string): Promise<string> {
+  const entities = await provisionTestEntities(token, "sched-del", 5);
 
   const d = new Date(date);
   const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
   const dayOfWeek = days[d.getUTCDay()] || "MONDAY";
 
-  await mutateCreateRecurringClass(adminToken, {
+  await mutateCreateRecurringClass(token, {
     studentId: entities.studentId,
     teacherId: entities.teacherId,
     durationMinutes: 60,
@@ -219,7 +223,7 @@ export async function fetchFirstClassInstanceId(adminToken: string, date: string
   const gridResult = await testClient.query({
     query: teacherWeeklyScheduleGridQueryDocument,
     variables: { teacherId: entities.teacherId, weekDate: date },
-    context: { headers: { Authorization: `Bearer ${adminToken}` } },
+    context: { headers: { Authorization: `Bearer ${token}` } },
   });
   const classItem = gridResult.data?.teacherWeeklyScheduleGrid?.classes?.[0];
   if (classItem?.id) return classItem.id;
@@ -330,7 +334,7 @@ export async function cleanupTestManager(superAdminToken: string, userId: string
 }
 
 export async function cleanupTestEntities(
-  adminToken: string,
+  superAdminToken: string,
   ids: {
     studentUserId: string;
     teacherUserId: string;
@@ -340,20 +344,20 @@ export async function cleanupTestEntities(
     parentId: string;
   }
 ): Promise<void> {
-  await authenticatedRequest(adminToken, "mutate", cleanupTestEntitiesMutationDocument, ids);
+  await authenticatedRequest(superAdminToken, "mutate", cleanupTestEntitiesMutationDocument, ids);
 }
 
 export async function provisionTestSuperAdmin(
-  adminToken: string,
+  superAdminToken: string,
   prefix: string
 ): Promise<{ token: string; userId: string }> {
-  const createRes = await authenticatedRequest(adminToken, "mutate", createTestSuperAdminMutationDocument, {
+  const createRes = await authenticatedRequest(superAdminToken, "mutate", createTestSuperAdminMutationDocument, {
     prefix,
   });
   const sa = createRes.createTestSuperAdmin;
   if (!sa?.email || !sa?.userId) throw new Error("Failed to create test super admin");
 
-  const token = await loginUser(sa.email, "password");
+  const token = await loginUser(sa.email, "Test_Pass1!");
   return { token, userId: sa.userId };
 }
 

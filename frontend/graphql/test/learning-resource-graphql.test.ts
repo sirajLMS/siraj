@@ -6,7 +6,13 @@ import {
   prepareUploadMutationDocument,
   uploadLearningResourceMutationDocument,
 } from "../sharedDocuments/learning-resource.documents";
-import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "./helpers";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  cleanupTestSuperAdmin,
+  loginDemoUser,
+  provisionTestSuperAdmin,
+} from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
 
@@ -92,6 +98,16 @@ async function testQueryLearningResources(role: string) {
 describe("learningResources and uploadLearningResource GraphQL Integration Tests", () => {
   setupTestServerLifecycle();
 
+  let superAdminToken = "";
+  let superAdminUserId = "";
+
+  test("provision super admin for resource operations", async () => {
+    const adminToken = await loginDemoUser("academy_admin");
+    const sa = await provisionTestSuperAdmin(adminToken, "LRTest");
+    superAdminToken = sa.token;
+    superAdminUserId = sa.userId;
+  });
+
   test("Teacher can query learning resources", async () => {
     await testQueryLearningResources("teacher_default");
   });
@@ -100,13 +116,13 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
     await testQueryLearningResources("academy_admin");
   });
 
-  test("Academy Admin can upload resource", async () => {
-    const adminToken = await loginDemoUser("academy_admin");
+  test("Super Admin can upload resource", async () => {
+    if (!superAdminToken) throw new Error("Missing super admin token");
 
-    const file = await uploadDummyFile(adminToken);
+    const file = await uploadDummyFile(superAdminToken);
 
     const displayName = `Test Resource ${Date.now()}`;
-    const uploadResult = await authenticatedRequest(adminToken, "mutate", uploadLearningResourceMutationDocument, {
+    const uploadResult = await authenticatedRequest(superAdminToken, "mutate", uploadLearningResourceMutationDocument, {
       input: {
         displayName,
         filePath: file.path,
@@ -126,8 +142,9 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
   });
 
   test("Teacher denied from uploading resource", async () => {
-    const adminToken = await loginDemoUser("academy_admin");
-    const file = await uploadDummyFile(adminToken);
+    if (!superAdminToken) throw new Error("Missing super admin token");
+
+    const file = await uploadDummyFile(superAdminToken);
 
     await assertOperationDenied("teacher_default", "mutate", uploadLearningResourceMutationDocument, {
       input: {
@@ -145,8 +162,9 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
   });
 
   test("Upload with missing displayName returns validation error", async () => {
-    const adminToken = await loginDemoUser("academy_admin");
-    const file = await uploadDummyFile(adminToken);
+    if (!superAdminToken) throw new Error("Missing super admin token");
+
+    const file = await uploadDummyFile(superAdminToken);
 
     const result = await testClient.mutate({
       mutation: uploadLearningResourceMutationDocument,
@@ -159,7 +177,7 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
       },
       context: {
         headers: {
-          Authorization: `Bearer ${adminToken}`,
+          Authorization: `Bearer ${superAdminToken}`,
         },
       },
     });
@@ -167,9 +185,10 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
     expect(result.error).toBeDefined();
   });
 
-  test("Academy Admin can delete learning resource successfully", async () => {
-    const adminToken = await loginDemoUser("academy_admin");
-    const resourceId = await createTestResource(adminToken);
+  test("Super Admin can delete learning resource successfully", async () => {
+    if (!superAdminToken) throw new Error("Missing super admin token");
+
+    const resourceId = await createTestResource(superAdminToken);
 
     const deleteResult = await testClient.mutate({
       mutation: deleteLearningResourceMutationDocument,
@@ -178,7 +197,7 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
       },
       context: {
         headers: {
-          Authorization: `Bearer ${adminToken}`,
+          Authorization: `Bearer ${superAdminToken}`,
         },
       },
     });
@@ -192,8 +211,9 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
   });
 
   test("Teacher denied from deleting learning resource", async () => {
-    const adminToken = await loginDemoUser("academy_admin");
-    const resourceId = await createTestResource(adminToken);
+    if (!superAdminToken) throw new Error("Missing super admin token");
+
+    const resourceId = await createTestResource(superAdminToken);
 
     await assertOperationDenied("teacher_default", "mutate", deleteLearningResourceMutationDocument, {
       id: resourceId,
@@ -202,5 +222,11 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
     const list = await testQueryLearningResources("academy_admin");
     const found = list.find(r => r.id === resourceId);
     expect(found).toBeDefined();
+  });
+
+  test("cleanup super admin", async () => {
+    if (superAdminToken && superAdminUserId) {
+      await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
+    }
   });
 });
