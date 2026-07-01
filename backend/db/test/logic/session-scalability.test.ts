@@ -258,7 +258,7 @@ describe("Session Scalability and Redis Integration", () => {
   });
 
   describe("Concurrent Session Limits", () => {
-    it("should enforce concurrent session limit", async () => {
+    it.skipIf(!redisAvailable)("should enforce concurrent session limit", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `concurrent-limit-${randomUUID()}@example.com`);
 
@@ -301,7 +301,7 @@ describe("Session Scalability and Redis Integration", () => {
       });
     });
 
-    it("should remove oldest sessions when limit exceeded", async () => {
+    it.skipIf(!redisAvailable)("should remove oldest sessions when limit exceeded", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `oldest-removal-${randomUUID()}@example.com`);
 
@@ -370,7 +370,7 @@ describe("Session Scalability and Redis Integration", () => {
       });
     });
 
-    it("should handle multiple users with different limits independently", async () => {
+    it.skipIf(!redisAvailable)("should handle multiple users with different limits independently", async () => {
       await runInRollback(async tx => {
         const user1 = await createTestUser(tx, `multi-user-1-${randomUUID()}@example.com`);
         const user2 = await createTestUser(tx, `multi-user-2-${randomUUID()}@example.com`);
@@ -437,7 +437,7 @@ describe("Session Scalability and Redis Integration", () => {
   });
 
   describe("Logout Everywhere Functionality", () => {
-    it("should delete all sessions for a user", async () => {
+    it.skipIf(!redisAvailable)("should delete all sessions for a user", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `logout-everywhere-${randomUUID()}@example.com`);
 
@@ -477,7 +477,7 @@ describe("Session Scalability and Redis Integration", () => {
       });
     });
 
-    it("should remove metadata from PostgreSQL when logging out everywhere", async () => {
+    it.skipIf(!redisAvailable)("should remove metadata from PostgreSQL when logging out everywhere", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `logout-metadata-${randomUUID()}@example.com`);
 
@@ -511,7 +511,7 @@ describe("Session Scalability and Redis Integration", () => {
   });
 
   describe("Concurrency Control", () => {
-    it("should prevent race conditions with advisory locks", async () => {
+    it.skipIf(!redisAvailable)("should prevent race conditions with advisory locks", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `race-condition-${randomUUID()}@example.com`);
 
@@ -551,7 +551,7 @@ describe("Session Scalability and Redis Integration", () => {
   });
 
   describe("Session Metadata Management", () => {
-    it("should retrieve user session metadata ordered by last activity", async () => {
+    it.skipIf(!redisAvailable)("should retrieve user session metadata ordered by last activity", async () => {
       await runInRollback(async tx => {
         const user = await createTestUser(tx, `metadata-order-${randomUUID()}@example.com`);
 
@@ -596,7 +596,7 @@ describe("Session Scalability and Redis Integration", () => {
       });
     });
 
-    it("should filter out expired metadata", async () => {
+    it.skipIf(!redisAvailable)("should filter out expired metadata", async () => {
       await runInRollback(async tx => {
         const { user, sessionId } = await setupTestSession(tx, "expired-metadata");
 
@@ -613,7 +613,7 @@ describe("Session Scalability and Redis Integration", () => {
   });
 
   describe("Session TTL", () => {
-    it("should get session TTL from Redis", async () => {
+    it.skipIf(!redisAvailable)("should get session TTL from Redis", async () => {
       await runInRollback(async tx => {
         const { sessionId } = await setupTestSession(tx, "ttl-test");
 

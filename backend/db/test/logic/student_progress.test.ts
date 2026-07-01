@@ -147,7 +147,7 @@ describe("Student Progress Tracking", () => {
     testLogger.info("Testing parent RLS for progress...");
     await runInRollback(async tx => {
       const now = new Date();
-      const { userP, student, classInst } = await setupTestEnvironment(tx, now);
+      const { userP, teacher, student, classInst } = await setupTestEnvironment(tx, now);
 
       await tx.insert(studentProgress).values({
         studentId: student.id,
