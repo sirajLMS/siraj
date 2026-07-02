@@ -115,18 +115,30 @@ function MainContent({
   readonly navbarHeight: string;
 }) {
   return (
-    <Box sx={{ display: "flex", flexGrow: 1, mt: navbarHeight, height: "100%", minWidth: 0 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flex: 1,
+        minHeight: 0,
+        minWidth: 0,
+        pt: navbarHeight,
+        boxSizing: "border-box",
+      }}
+    >
       {sidebar}
       <Box
         component="main"
         sx={theme => ({
           flexGrow: 1,
           minWidth: 0,
-          pb: 10,
-          minHeight: `calc(100vh - ${navbarHeight})`,
-          backgroundColor: theme.palette.background.default,
-          height: "100%",
+          minHeight: 0,
           overflowY: "auto",
+          overscrollBehavior: "contain",
+          backgroundColor: theme.palette.background.default,
+          pb: {
+            xs: `calc(${theme.layout.bottomNavHeight} + env(safe-area-inset-bottom, 0px) + ${theme.spacing(2)})`,
+            md: 0,
+          },
         })}
       >
         <Box sx={{ p: theme => theme.layout.pageMargin }}>{children}</Box>
@@ -135,7 +147,18 @@ function MainContent({
   );
 }
 
-function BottomNavItem({ item, isActive }: { readonly item: TranslatedNavItem; readonly isActive: boolean }) {
+const BOTTOM_NAV_SCROLL_THRESHOLD = 5;
+const BOTTOM_NAV_ITEM_MIN_WIDTH = 72;
+
+function BottomNavItem({
+  item,
+  isActive,
+  isScrollable,
+}: {
+  readonly item: TranslatedNavItem;
+  readonly isActive: boolean;
+  readonly isScrollable: boolean;
+}) {
   const IconComponent = item.icon;
 
   return (
@@ -143,23 +166,36 @@ function BottomNavItem({ item, isActive }: { readonly item: TranslatedNavItem; r
       key={item.key}
       component={Link}
       href={item.href}
+      aria-label={item.label}
+      aria-current={isActive ? "page" : undefined}
       sx={theme => ({
-        flex: 1,
+        flex: isScrollable ? `0 0 ${BOTTOM_NAV_ITEM_MIN_WIDTH}px` : 1,
+        minWidth: isScrollable ? BOTTOM_NAV_ITEM_MIN_WIDTH : 0,
+        maxWidth: isScrollable ? 80 : "none",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 0.5,
-        py: 1,
+        gap: 0.25,
+        px: 0.5,
+        py: 0.75,
         textDecoration: "none",
         color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
+        overflow: "hidden",
       })}
     >
-      <IconComponent fontSize="small" />
+      <IconComponent sx={{ fontSize: 20, flexShrink: 0 }} />
       <Typography
-        variant="labelMd"
+        variant="labelSm"
         sx={{
-          fontWeight: 500,
+          fontWeight: isActive ? 600 : 400,
+          width: "100%",
+          textAlign: "center",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          letterSpacing: 0,
+          lineHeight: 1.2,
         }}
       >
         {item.label}
@@ -175,6 +211,8 @@ function BottomNav({
   readonly bottomNavItems: readonly TranslatedNavItem[];
   readonly activeNavKey: string;
 }) {
+  const isScrollable = bottomNavItems.length > BOTTOM_NAV_SCROLL_THRESHOLD;
+
   return (
     <Box
       component="nav"
@@ -185,13 +223,25 @@ function BottomNav({
         right: 0,
         zIndex: theme.zIndex.appBar,
         display: { xs: "flex", md: "none" },
-        height: 64,
+        minHeight: theme.layout.bottomNavHeight,
+        boxSizing: "content-box",
         backgroundColor: theme.palette.background.paper,
         borderTop: `1px solid ${theme.palette.border.light}`,
+        overflowX: isScrollable ? "auto" : "hidden",
+        scrollbarWidth: "none",
+        pb: "env(safe-area-inset-bottom)",
+        "&::-webkit-scrollbar": {
+          display: "none",
+        },
       })}
     >
       {bottomNavItems.map(item => (
-        <BottomNavItem key={item.key} item={item} isActive={item.key === activeNavKey} />
+        <BottomNavItem
+          key={item.key}
+          item={item}
+          isActive={item.key === activeNavKey}
+          isScrollable={isScrollable}
+        />
       ))}
     </Box>
   );
@@ -210,7 +260,7 @@ export function DashboardLayoutPreview({
   navbarHeight = "64px",
 }: DashboardLayoutPreviewProps) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: "100vh" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
       <Navbar
         roleLabel={roleLabel}
         userName={userName}

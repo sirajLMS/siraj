@@ -10,9 +10,11 @@ const StyledFiltersContainer = styled(Box)(({ theme }) => ({
   flexDirection: "column",
   gap: theme.spacing(2),
   alignItems: "stretch",
-  [theme.breakpoints.up("sm")]: {
+  width: "100%",
+  [theme.breakpoints.up("md")]: {
     flexDirection: "row",
     alignItems: "flex-end",
+    width: "auto",
   },
 }));
 
@@ -53,18 +55,20 @@ export function ScheduleFilters({
 
   return (
     <StyledFiltersContainer>
-      <DateNavigator
-        dateValue={dateValue}
-        todayLabel={todayLabel}
-        previousDayLabel={previousDayLabel}
-        nextDayLabel={nextDayLabel}
-        dateLabel={dateLabel}
-        onDateChange={onDateChange}
-      />
+      <Box sx={{ width: "100%", minWidth: 0 }}>
+        <DateNavigator
+          dateValue={dateValue}
+          todayLabel={todayLabel}
+          previousDayLabel={previousDayLabel}
+          nextDayLabel={nextDayLabel}
+          dateLabel={dateLabel}
+          onDateChange={onDateChange}
+        />
+      </Box>
 
       <Autocomplete
         size="small"
-        sx={{ minWidth: 200 }}
+        sx={{ width: "100%", minWidth: { xs: 0, md: 200 } }}
         options={teachers}
         getOptionLabel={option => option.name}
         isOptionEqualToValue={(option, value) => option.id === value.id}

@@ -55,27 +55,28 @@ export function OnboardingMetricsOverview() {
   return (
     <StyledMetricsWrapper>
       <StyledMobileMetricsContainer>
-        {METRIC_ITEMS.map(item => (
+        {METRIC_ITEMS.map((item, index) => (
           <Box key={item.key} sx={{ flexShrink: 0, width: 192 }}>
             <MetricCard
               label={t(item.key)}
               value={getValue(metrics, item.key, loading)}
               icon={item.icon}
               variant="default"
+              animationIndex={index}
             />
           </Box>
         ))}
       </StyledMobileMetricsContainer>
 
       <Grid container spacing={3}>
-        {METRIC_ITEMS.map(item => (
+        {METRIC_ITEMS.map((item, index) => (
           <Grid key={item.key} size={{ xs: 12, lg: 4 }}>
             <MetricCard
               label={t(item.key)}
               value={getValue(metrics, item.key, loading)}
               icon={item.icon}
               variant="default"
-              animated
+              animationIndex={index}
             />
           </Grid>
         ))}

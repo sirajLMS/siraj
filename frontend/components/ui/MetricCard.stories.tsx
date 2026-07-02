@@ -61,6 +61,23 @@ export const ErrorState: Story = {
   },
 };
 
+export const Selected: Story = {
+  args: {
+    label: "Regular Classes",
+    value: 42,
+    variant: "highlight",
+    onClick: () => undefined,
+  },
+};
+
+export const Interactive: Story = {
+  args: {
+    label: "Regular Classes",
+    value: 42,
+    onClick: () => undefined,
+  },
+};
+
 export const Arabic: Story = {
   parameters: {
     locale: "ar",

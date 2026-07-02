@@ -54,7 +54,7 @@ export function DashboardView({
   onSubmit,
 }: AdminDashboardViewProps) {
   return (
-    <PageContainer>
+    <PageContainer sx={{ gap: { xs: 0, md: undefined } }}>
       {/* Today's Classes Section - metric cards with click-to-filter, requires DashboardViewMetrics permission */}
       <RequirePermission permissions={[AppPermission.DashboardViewMetrics]}>
         <TodayClassesSection

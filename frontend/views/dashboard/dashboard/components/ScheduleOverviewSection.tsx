@@ -1,7 +1,7 @@
 "use client";
 
 import { SearchOutlined } from "@mui/icons-material";
-import { Box, InputAdornment, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Box, InputAdornment, Paper, Stack, TextField, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PaginationControls, SectionPanel, StatusBadge } from "@/frontend/components/ui";
@@ -22,6 +22,13 @@ const StyledFilterContainer = styled(Box)(({ theme }) => ({
   paddingBlock: theme.spacing(2.5),
   backgroundColor: theme.palette.background.default,
   borderBottom: `1px solid ${theme.palette.border.light}`,
+}));
+
+const StyledMobileSectionBody = styled(Stack)(({ theme }) => ({
+  gap: theme.spacing(2),
+  paddingInline: theme.spacing(2),
+  paddingTop: theme.spacing(2.5),
+  paddingBottom: theme.spacing(2),
 }));
 
 const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
@@ -130,8 +137,7 @@ const DesktopLayout = ({
   onTeacherChange,
   onSubmit,
 }: ScheduleOverviewSectionProps) => (
-  <Box sx={{ display: { xs: "none", md: "block" } }}>
-    <StyledDesktopPanel elevation={0}>
+  <StyledDesktopPanel elevation={0}>
       <SectionPanel
         title={<ScheduleOverviewTitle title={title} selectedMetricLabel={selectedMetricLabel} />}
         actions={
@@ -191,8 +197,7 @@ const DesktopLayout = ({
           emptyMessage={emptyMessage}
         />
       </SectionPanel>
-    </StyledDesktopPanel>
-  </Box>
+  </StyledDesktopPanel>
 );
 
 const MobileLayout = ({
@@ -201,6 +206,7 @@ const MobileLayout = ({
   searchPlaceholder,
   searchValue,
   rows,
+  headers,
   statusLabels,
   detailsLabel,
   emptyMessage,
@@ -225,37 +231,29 @@ const MobileLayout = ({
   const pageCount = totalCount > 0 ? Math.ceil(totalCount / pageSize) : 0;
 
   return (
-    <Stack
-      direction="column"
-      sx={{
-        display: { xs: "flex", md: "none" },
-        gap: 2,
-      }}
-    >
-      <SectionPanel
-        title={title}
-        actions={
+    <Stack direction="column" sx={{ gap: { xs: 0, md: 2 } }}>
+      <SectionPanel title={title} edgeToEdge actions={
           selectedMetricLabel ? (
             <StatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
           ) : undefined
         }
       >
-        <ScheduleOverviewFilters
-          dateLabel={dateLabel}
-          dateValue={dateValue}
-          todayLabel={todayLabel}
-          previousDayLabel={previousDayLabel}
-          nextDayLabel={nextDayLabel}
-          teacherPlaceholder={teacherPlaceholder}
-          teacherValue={teacherValue}
-          submitLabel={submitLabel}
-          teachers={teachers}
-          onDateChange={onDateChange}
-          onTeacherChange={onTeacherChange}
-          onSubmit={onSubmit}
-        />
+        <StyledMobileSectionBody>
+          <ScheduleOverviewFilters
+            dateLabel={dateLabel}
+            dateValue={dateValue}
+            todayLabel={todayLabel}
+            previousDayLabel={previousDayLabel}
+            nextDayLabel={nextDayLabel}
+            teacherPlaceholder={teacherPlaceholder}
+            teacherValue={teacherValue}
+            submitLabel={submitLabel}
+            teachers={teachers}
+            onDateChange={onDateChange}
+            onTeacherChange={onTeacherChange}
+            onSubmit={onSubmit}
+          />
 
-        <Box sx={{ display: "flex", gap: 1.5 }}>
           <RequirePermission permissions={[AppPermission.DashboardSearch]}>
             <TextField
               placeholder={searchPlaceholder}
@@ -282,10 +280,12 @@ const MobileLayout = ({
               }}
             />
           </RequirePermission>
-        </Box>
+
+        </StyledMobileSectionBody>
 
         <ScheduleOverviewCardList
           rows={rows}
+          headers={headers}
           statusLabels={statusLabels}
           detailsLabel={detailsLabel}
           emptyMessage={emptyMessage}
@@ -304,10 +304,8 @@ const MobileLayout = ({
 };
 
 export function ScheduleOverviewSection(props: ScheduleOverviewSectionProps) {
-  return (
-    <>
-      <DesktopLayout {...props} />
-      <MobileLayout {...props} />
-    </>
-  );
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  return isMobile ? <MobileLayout {...props} /> : <DesktopLayout {...props} />;
 }

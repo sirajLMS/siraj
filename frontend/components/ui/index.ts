@@ -1,3 +1,4 @@
+export { ActionIconLink } from "./ActionIconLink";
 export { ExportButton, FilterButton, PrimaryPageAction } from "./ActionButtons";
 export { AppDataGrid, type AppDataGridProps } from "./AppDataGrid";
 export { AppDataGridLoadingOverlay } from "./AppDataGridLoadingOverlay";
@@ -5,7 +6,8 @@ export { AppDataGridNoRowsOverlay } from "./AppDataGridNoRowsOverlay";
 export { BaseCard } from "./BaseCard";
 export { DateNavigator, type DateNavigatorProps } from "./DateNavigator";
 export { FormSuccessSnackbar } from "./FormSuccessSnackbar";
-export { MetricCard, type MetricCardVariant } from "./MetricCard";
+export { HorizontalScrollRow } from "./HorizontalScrollRow";
+export { MetricCard, type MetricCardSize, type MetricCardVariant } from "./MetricCard";
 export { PageContainer } from "./PageContainer";
 export { PageHeader, type PageHeaderBreadcrumb } from "./PageHeader";
 export { GridPagination, PaginationControls, type PaginationControlsProps } from "./PaginationControls";

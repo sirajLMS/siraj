@@ -10,13 +10,20 @@ interface SectionPanelProps {
   readonly subTitle?: string;
   readonly actions?: ReactNode;
   readonly children?: ReactNode;
+  readonly edgeToEdge?: boolean;
   readonly sx?: SxProps<Theme>;
 }
+
+const edgeToEdgeSx: SxProps<Theme> = {
+  borderRadius: { xs: 0, md: undefined },
+  borderInlineStart: { xs: "none", md: undefined },
+  borderInlineEnd: { xs: "none", md: undefined },
+};
 
 /**
  * Standard section shell: bordered Paper with optional title bar + actions.
  */
-export function SectionPanel({ title, subTitle, actions, children, sx }: SectionPanelProps) {
+export function SectionPanel({ title, subTitle, actions, children, edgeToEdge = false, sx }: SectionPanelProps) {
   return (
     <Paper
       elevation={0}
@@ -27,13 +34,14 @@ export function SectionPanel({ title, subTitle, actions, children, sx }: Section
           border: theme => `1px solid ${theme.palette.outlineVariant}`,
           overflow: "hidden",
         },
+        edgeToEdge ? edgeToEdgeSx : undefined,
         sx
       )}
     >
       {(title || actions) && (
         <Box
           sx={{
-            px: 3,
+            px: { xs: 2, md: 3 },
             py: 2.5,
             display: "flex",
             alignItems: "center",

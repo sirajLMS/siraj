@@ -16,7 +16,7 @@ export function DstMigrationMetricsRow({ metrics }: Readonly<Props>) {
   return (
     <Grid container spacing={2} sx={{ mt: 4 }}>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <MetricCard label={t("totalAudited")} value={metrics.totalAudited} icon={AnalyticsOutlined} animated />
+        <MetricCard label={t("totalAudited")} value={metrics.totalAudited} icon={AnalyticsOutlined} />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <MetricCard
@@ -24,7 +24,6 @@ export function DstMigrationMetricsRow({ metrics }: Readonly<Props>) {
           value={metrics.successful}
           icon={VerifiedOutlined}
           variant="highlight"
-          animated
           animationIndex={1}
         />
       </Grid>
@@ -34,7 +33,6 @@ export function DstMigrationMetricsRow({ metrics }: Readonly<Props>) {
           value={metrics.conflicts}
           icon={ErrorOutlined}
           variant="error"
-          animated
           animationIndex={2}
         />
       </Grid>
@@ -43,7 +41,6 @@ export function DstMigrationMetricsRow({ metrics }: Readonly<Props>) {
           label={t("unchanged")}
           value={metrics.unchanged}
           icon={HistoryOutlined}
-          animated
           animationIndex={3}
         />
       </Grid>

@@ -94,6 +94,7 @@ declare module "@mui/material/styles" {
       authWidth: string;
       sidebarWidth: string;
       navbarHeight: string;
+      bottomNavHeight: string;
       cardPadding: string;
       inputGap: string;
       sectionGap: string;
@@ -113,6 +114,7 @@ declare module "@mui/material/styles" {
       authWidth?: string;
       sidebarWidth?: string;
       navbarHeight?: string;
+      bottomNavHeight?: string;
       cardPadding?: string;
       inputGap?: string;
       sectionGap?: string;

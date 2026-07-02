@@ -1,6 +1,8 @@
+import { ActionIconLink } from "@/frontend/components/ui";
 import { Box, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import { Link } from "@/shared/i18n/routing";
+
 export const StyledMonospaceLabel = styled(Typography)(({ theme }) => ({
   fontFamily: "monospace",
   color: theme.palette.text.secondary,
@@ -42,20 +44,9 @@ export const StyledActionsCellBox = styled(Box)(({ theme }) => ({
   height: "100%",
 }));
 
-export const StyledHistoryIconLink = styled(Link)(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: 32,
-  height: 32,
-  borderRadius: Number(theme.shape.borderRadius),
-  color: theme.palette.onSurfaceVariant,
-  textDecoration: "none",
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-    color: theme.palette.primary.main,
-  },
-}));
+export const StyledHistoryIconLink = ActionIconLink;
+
+export const StyledDetailsIconLink = ActionIconLink;
 
 export const StyledGridDetailsLink = styled(Link)(({ theme }) => ({
   display: "inline-flex",

@@ -7,7 +7,6 @@ import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { MetricCardGrid } from "@/frontend/components/reports/MetricCardGrid";
 import { SectionPanel } from "@/frontend/components/ui";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
-import { TodayClassesMobileScroll } from "./TodayClassesMobileScroll";
 
 interface TodayClassesSectionProps {
   readonly title: string;
@@ -28,9 +27,10 @@ export function TodayClassesSection({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   return (
-    <Box sx={{ mb: 4 }}>
+    <Box sx={{ mb: { xs: 0, md: 4 } }}>
       <SectionPanel
         title={title}
+        edgeToEdge={isMobile}
         actions={
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
             <AccessTimeOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />
@@ -42,15 +42,17 @@ export function TodayClassesSection({
       >
         <Box
           sx={{
-            px: { xs: 2, sm: 3 },
-            py: { xs: 2, sm: 2.5 },
+            px: { xs: 0, md: 3 },
+            py: { xs: 2, md: 2.5 },
           }}
         >
-          {isMobile ? (
-            <TodayClassesMobileScroll metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
-          ) : (
-            <MetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
-          )}
+          <MetricCardGrid
+            metrics={metrics}
+            onMetricClick={onMetricClick}
+            selectedKey={selectedMetricKey}
+            layout={isMobile ? "scroll" : "grid"}
+            size={{ sm: 4, md: 4, lg: 2 }}
+          />
         </Box>
       </SectionPanel>
     </Box>

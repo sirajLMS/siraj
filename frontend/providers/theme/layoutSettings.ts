@@ -5,6 +5,7 @@ export const layoutSettings = {
   authWidth: "420px",
   sidebarWidth: "260px",
   navbarHeight: "64px",
+  bottomNavHeight: "64px",
   cardPadding: "1.5rem",
   inputGap: "1rem",
   sectionGap: "1.5rem",

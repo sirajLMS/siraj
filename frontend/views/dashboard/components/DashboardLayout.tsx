@@ -1,8 +1,9 @@
 "use client";
 
 import { Box } from "@mui/material";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
+import { usePathname } from "@/shared/i18n/routing";
 import { BottomNavbar } from "./BottomNavbar";
 import { Sidebar } from "./Sidebar";
 import { TopNavbar } from "./TopNavbar";
@@ -22,6 +23,43 @@ interface DashboardLayoutProps {
   readonly navbarHeight?: string;
 }
 
+function MainScrollArea({ children }: { readonly children: ReactNode }) {
+  const mainRef = useRef<HTMLElement>(null);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0);
+  }, [pathname]);
+
+  return (
+    <Box
+      component="main"
+      ref={mainRef}
+      sx={theme => ({
+        flexGrow: 1,
+        minWidth: 0,
+        minHeight: 0,
+        overflowY: "auto",
+        overscrollBehavior: "contain",
+        backgroundColor: theme.palette.background.default,
+        pb: {
+          xs: `calc(${theme.layout.bottomNavHeight} + env(safe-area-inset-bottom, 0px) + ${theme.spacing(2)})`,
+          md: 0,
+        },
+      })}
+    >
+      <Box
+        sx={theme => ({
+          px: { xs: 0, md: theme.layout.pageMargin },
+          py: { xs: theme.spacing(2), md: theme.layout.pageMargin },
+        })}
+      >
+        {children}
+      </Box>
+    </Box>
+  );
+}
+
 export function DashboardLayout({
   children,
   sidebarItems,
@@ -37,7 +75,7 @@ export function DashboardLayout({
   navbarHeight = "64px",
 }: DashboardLayoutProps) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: "100vh" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
       <TopNavbar
         userName={userName}
         userEmail={userEmail}
@@ -47,23 +85,19 @@ export function DashboardLayout({
         notificationCount={notificationCount}
       />
 
-      <Box sx={{ display: "flex", flexGrow: 1, mt: navbarHeight, height: "100%", minWidth: 0 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flex: 1,
+          minHeight: 0,
+          minWidth: 0,
+          pt: navbarHeight,
+          boxSizing: "border-box",
+        }}
+      >
         <Sidebar navItems={sidebarItems} activeKey={activeNavKey} sidebarWidth={sidebarWidth} />
 
-        <Box
-          component="main"
-          sx={theme => ({
-            flexGrow: 1,
-            minWidth: 0,
-            pb: 10,
-            minHeight: `calc(100vh - ${navbarHeight})`,
-            backgroundColor: theme.palette.background.default,
-            height: "100%",
-            overflowY: "auto",
-          })}
-        >
-          <Box sx={{ p: theme => theme.layout.pageMargin }}>{children}</Box>
-        </Box>
+        <MainScrollArea>{children}</MainScrollArea>
       </Box>
 
       <BottomNavbar items={bottomNavItems} activeKey={activeNavKey} />

@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { alpha } from "@mui/material/styles";
-import { useEffect } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { useLayoutStore } from "@/frontend/stores/layoutStore";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 import { Link } from "@/shared/i18n/routing";
@@ -114,10 +114,12 @@ function SidebarContent({
   navItems,
   activeKey,
   isCollapsed,
+  navListRef,
 }: {
   readonly navItems: readonly TranslatedNavItem[];
   readonly activeKey: string;
   readonly isCollapsed: boolean;
+  readonly navListRef?: RefObject<HTMLUListElement | null>;
 }) {
   const mainItems = navItems.filter(item => item.section === "main");
   const footerItems = navItems.filter(item => item.section === "footer");
@@ -127,14 +129,19 @@ function SidebarContent({
       sx={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",
+        flex: 1,
+        minHeight: 0,
+        overflow: "hidden",
         py: 2,
       }}
     >
       <List
+        ref={navListRef}
         sx={theme => ({
           flex: 1,
+          minHeight: 0,
           overflow: "auto",
+          overscrollBehavior: "contain",
           px: 1.5,
           "&::-webkit-scrollbar": { width: 4 },
           "&::-webkit-scrollbar-thumb": {
@@ -174,29 +181,39 @@ function SidebarMobileDrawer({
 }) {
   const mobileDrawerOpen = useLayoutStore(state => state.mobileDrawerOpen);
   const closeMobileDrawer = useLayoutStore(state => state.closeMobileDrawer);
+  const navListRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     closeMobileDrawer();
   }, [closeMobileDrawer]);
+
+  useEffect(() => {
+    if (mobileDrawerOpen) {
+      navListRef.current?.scrollTo(0, 0);
+    }
+  }, [mobileDrawerOpen]);
 
   return (
     <Drawer
       variant="temporary"
       open={mobileDrawerOpen}
       onClose={closeMobileDrawer}
-      ModalProps={{ keepMounted: true }}
+      ModalProps={{ keepMounted: true, disableScrollLock: true }}
       sx={theme => ({
         display: { xs: "block", md: "none" },
         "& .MuiDrawer-paper": {
           width: sidebarWidth,
           boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
           backgroundColor: theme.palette.background.paper,
           color: theme.palette.onSurface,
           borderRight: `1px solid ${theme.palette.border.light}`,
         },
       })}
     >
-      <SidebarContent navItems={navItems} activeKey={activeKey} isCollapsed={false} />
+      <SidebarContent navItems={navItems} activeKey={activeKey} isCollapsed={false} navListRef={navListRef} />
     </Drawer>
   );
 }
@@ -224,7 +241,9 @@ function SidebarDesktop({
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.onSurface,
         borderRight: `1px solid ${theme.palette.border.light}`,
-        minHeight: "100%",
+        alignSelf: "stretch",
+        minHeight: 0,
+        overflow: "hidden",
         position: "relative",
         transition: "width 0.3s ease",
       })}
