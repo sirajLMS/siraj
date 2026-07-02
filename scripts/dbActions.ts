@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, rmSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { createInterface, type Interface } from "node:readline";
 
@@ -67,12 +67,7 @@ async function cleanGenerate(): Promise<number> {
   globalThis.console.log("Clearing existing migrations in backend/drizzle...");
   const drizzleDir = "./backend/drizzle";
   if (existsSync(drizzleDir)) {
-    const rm = spawn(
-      "powershell.exe",
-      ["-NoProfile", "-Command", `Remove-Item -Path "${drizzleDir}" -Recurse -Force`],
-      { stdio: "inherit" }
-    );
-    await new Promise(resolve => rm.on("close", resolve));
+    rmSync(drizzleDir, { recursive: true, force: true });
   }
 
   // 1. Reset Database (Attempted)

@@ -12,7 +12,7 @@ CREATE TYPE "day_of_week" AS ENUM('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 
 CREATE TYPE "device_platform" AS ENUM('IOS', 'ANDROID', 'WEB');--> statement-breakpoint
 CREATE TYPE "dst_migration_result" AS ENUM('UPDATED', 'CONFLICT', 'UNCHANGED');--> statement-breakpoint
 CREATE TYPE "gender" AS ENUM('MALE', 'FEMALE');--> statement-breakpoint
-CREATE TYPE "invoice_status" AS ENUM('UNPAID', 'PAID');--> statement-breakpoint
+CREATE TYPE "invoice_status" AS ENUM('UNPAID', 'PAID', 'CANCELLED');--> statement-breakpoint
 CREATE TYPE "invoice_type" AS ENUM('PER_CLASSES', 'MONTHLY', 'MANUAL');--> statement-breakpoint
 CREATE TYPE "leave_request_status" AS ENUM('PENDING', 'APPROVED', 'RESCHEDULED', 'CANCELLED');--> statement-breakpoint
 CREATE TYPE "leave_requester_type" AS ENUM('TEACHER', 'PARENT', 'ADMIN');--> statement-breakpoint

@@ -1662,6 +1662,10 @@ ON CONFLICT (key) DO UPDATE SET
   updated_at = NOW();
 
 
+-- Source: add_test_custom_alt_permission.sql
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'test.custom_alt';
+
+
 -- Source: audit_log_immutability_trigger.sql
 -- Trigger to prevent modifications to audit_logs table (immutability enforcement)
 -- This ensures audit logs cannot be tampered with for compliance requirements

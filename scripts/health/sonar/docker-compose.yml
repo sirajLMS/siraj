@@ -1,11 +1,35 @@
 services:
+  postgres:
+    image: postgres:latest
+    container_name: sonarqube-postgres-cad
+    environment:
+      - POSTGRES_USER=sonarqube
+      - POSTGRES_PASSWORD=sonarqube
+      - POSTGRES_DB=sonarqube
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - sonarnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonarqube -d sonarqube"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   sonarqube:
     image: sonarqube:community
     container_name: sonarqube-cad
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "9000:9000"
     environment:
       - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+      - SONAR_JDBC_URL=jdbc:postgresql://postgres:5432/sonarqube
+      - SONAR_JDBC_USERNAME=sonarqube
+      - SONAR_JDBC_PASSWORD=sonarqube
       # Tuning JVM for better performance within the 4GB limit
       # Current values were 512m, increasing to 1G for each component
       - SONAR_WEB_JAVAOPTS=-Xmx1G -Xms1G
@@ -37,6 +61,7 @@ volumes:
   sonarqube_data:
   sonarqube_extensions:
   sonarqube_logs:
+  postgres_data:
 
 networks:
   sonarnet:
