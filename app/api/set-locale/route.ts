@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
 const ALLOWED_ORIGINS = [process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"];

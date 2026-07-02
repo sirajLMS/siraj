@@ -33,8 +33,8 @@ export function SectionPanel({ title, subTitle, actions, children, edgeToEdge = 
           borderRadius: theme => theme.layout.radius.section,
           border: theme => `1px solid ${theme.palette.outlineVariant}`,
           overflow: "hidden",
-        },
-        edgeToEdge ? edgeToEdgeSx : undefined,
+        ...(edgeToEdge ? edgeToEdgeSx : {}),
+      },
         sx
       )}
     >

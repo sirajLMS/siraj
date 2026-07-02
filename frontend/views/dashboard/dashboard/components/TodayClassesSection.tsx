@@ -1,5 +1,3 @@
-// cspell:ignore: Hanken
-
 "use client";
 
 import { AccessTimeOutlined } from "@mui/icons-material";

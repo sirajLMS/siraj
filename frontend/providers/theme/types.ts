@@ -1,5 +1,5 @@
 import type { PaletteColor, PaletteColorOptions, TypeBackground } from "@mui/material/styles";
-
+import type {Property} from "csstype";
 export type TonalPalette = {
   0: string;
   5: string;
@@ -86,45 +86,34 @@ export type M3BaseSchemeOptions = Partial<Omit<M3BaseScheme, "background">> & {
   background?: Partial<TypeBackground>;
 };
 
+
+type MuiThemeBorderRadius = readonly (string | (string & {}))[] | Property.BorderRadius<string | number> | readonly NonNullable<Property.BorderRadius<string | number> | undefined>[] | undefined
+
+export type MuiThemeLayoutSettings =    {
+  pageMargin: string;
+  gutter: string;
+  authWidth: string;
+  sidebarWidth: string;
+  navbarHeight: string;
+  bottomNavHeight: string;
+  cardPadding: string;
+  inputGap: string;
+  sectionGap: string;
+  radius: {
+    card: MuiThemeBorderRadius;
+    button: MuiThemeBorderRadius;
+    badge: MuiThemeBorderRadius;
+    section: MuiThemeBorderRadius;
+  };
+};
+
 declare module "@mui/material/styles" {
   interface Theme {
-    layout: {
-      pageMargin: string;
-      gutter: string;
-      authWidth: string;
-      sidebarWidth: string;
-      navbarHeight: string;
-      bottomNavHeight: string;
-      cardPadding: string;
-      inputGap: string;
-      sectionGap: string;
-      radius: {
-        card: number;
-        button: number;
-        badge: number;
-        section: number;
-      };
-    };
+    layout: MuiThemeLayoutSettings;
   }
 
   interface ThemeOptions {
-    layout?: {
-      pageMargin?: string;
-      gutter?: string;
-      authWidth?: string;
-      sidebarWidth?: string;
-      navbarHeight?: string;
-      bottomNavHeight?: string;
-      cardPadding?: string;
-      inputGap?: string;
-      sectionGap?: string;
-      radius?: {
-        card?: number;
-        button?: number;
-        badge?: number;
-        section?: number;
-      };
-    };
+    layout?: MuiThemeLayoutSettings
   }
 
   interface Palette

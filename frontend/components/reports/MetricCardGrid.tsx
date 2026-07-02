@@ -52,7 +52,7 @@ function renderMetricCard({
             }
           : undefined
       }
-      sx={isScroll && onMetricClick ? { cursor: "pointer", height: "100%" } : undefined}
+      // sx={isScroll && onMetricClick ? { cursor: "pointer", height: "100%" } : undefined}
     />
   );
 }
@@ -77,6 +77,7 @@ export function MetricCardGrid({
               flex: "0 0 148px",
               minWidth: 148,
               scrollSnapAlign: "start",
+              borderRadius: 0,
             }}
           >
             {renderMetricCard({ metric, index, selectedKey, onMetricClick, isScroll, t })}

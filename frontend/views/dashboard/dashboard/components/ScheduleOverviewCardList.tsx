@@ -16,6 +16,7 @@ import {
 } from "@/frontend/views/dashboard/dashboard/utils/formatScheduleTime";
 import { Link } from "@/shared/i18n/routing";
 import { ScheduleInstanceStatusBadge } from "./ScheduleInstanceStatusBadge";
+import { StyledScheduleNameLink } from "./ScheduleOverviewDataGrid.styles";
 
 interface ScheduleOverviewCardListProps {
   readonly rows: readonly DailyScheduleRow[];
@@ -73,23 +74,40 @@ const StyledScheduleCard = styled(Paper, {
   borderRadius: 0,
   opacity: isAbsent ? 0.85 : 1,
   backgroundColor: theme.palette.surfaceContainerLowest,
-  border: "none",
-  borderBottom: `1px solid ${theme.palette.border.light}`,
   boxShadow: "none",
   overflow: "hidden",
   width: "100%",
-  "&:first-of-type": {
-    borderTop: `1px solid ${theme.palette.border.light}`,
-  },
+}));
+
+const StyledCardList = styled(Stack)(({ theme }) => ({
+  gap: theme.spacing(2),
+  backgroundColor: theme.palette.surfaceContainerHighest,
 }));
 
 const StyledCardHeader = styled(Box)(({ theme }) => ({
   display: "flex",
-  alignItems: "center",
+  alignItems: "flex-start",
   justifyContent: "space-between",
   gap: theme.spacing(1.5),
   marginBottom: theme.spacing(1.5),
 }));
+
+const StyledCardHeaderMain = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
+  gap: theme.spacing(0.75),
+  minWidth: 0,
+  flex: 1,
+}));
+
+const StyledStudentTitle = styled(Typography)({
+  minWidth: 0,
+  maxWidth: "100%",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+});
 
 const StyledCardActions = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -340,12 +358,28 @@ function ScheduleOverviewMobileCard({
   return (
     <StyledScheduleCard elevation={0} isAbsent={isAbsent}>
       <StyledCardHeader>
-        <ScheduleInstanceStatusBadge
-          outcome={row.outcome}
-          executionState={row.executionState}
-          statusLabels={statusLabels}
-          size="small"
-        />
+        <StyledCardHeaderMain>
+          {studentId ? (
+            <StyledScheduleNameLink
+              href={`/students/${studentId}`}
+              title={studentName}
+              sx={{ minWidth: 0, maxWidth: "100%", display: "block", overflow: "hidden", alignSelf: "stretch" }}
+            >
+              <StyledStudentTitle variant="titleLg">{studentName}</StyledStudentTitle>
+            </StyledScheduleNameLink>
+          ) : (
+            <StyledStudentTitle variant="titleLg" title={studentName}>
+              {studentName}
+            </StyledStudentTitle>
+          )}
+
+          <ScheduleInstanceStatusBadge
+            outcome={row.outcome}
+            executionState={row.executionState}
+            statusLabels={statusLabels}
+            size="small"
+          />
+        </StyledCardHeaderMain>
 
         <StyledCardActions>
           {studentId ? (
@@ -423,7 +457,7 @@ export function ScheduleOverviewCardList({
   }
 
   return (
-    <Stack spacing={0}>
+    <StyledCardList>
       {rows.map(row => (
         <ScheduleOverviewMobileCard
           key={row.id ?? undefined}
@@ -435,6 +469,6 @@ export function ScheduleOverviewCardList({
           locale={locale}
         />
       ))}
-    </Stack>
+    </StyledCardList>
   );
 }

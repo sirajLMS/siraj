@@ -122,7 +122,7 @@ const getMuiPaper = (): Components<Omit<Theme, "components">>["MuiPaper"] => ({
 const getMuiCard = (): Components<Omit<Theme, "components">>["MuiCard"] => ({
   styleOverrides: {
     root: ({ theme }) => ({
-      borderRadius: 16, // Data containers use modern rounded-xl (1rem/16px) standard
+      borderRadius: 8, // Data containers use modern rounded-xl (1rem/16px) standard
       boxShadow: theme.palette.shadow.card,
       border: `1px solid ${theme.palette.border.light}`,
       backgroundColor: theme.palette.background.paper,
