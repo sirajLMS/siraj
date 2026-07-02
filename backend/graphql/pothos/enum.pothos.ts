@@ -1,5 +1,6 @@
 import {
   AccountStatus,
+  AppPermission,
   AppLanguage,
   AttendanceStatus,
   AvailabilityStatus,
@@ -22,6 +23,10 @@ import {
   StudentStatus,
 } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+
+export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {
+  name: "AppPermission",
+});
 
 export const OrderSortDirectionPothosObject = gqlSchemaBuilder.enumType(OrderSortDirection, {
   name: "OrderSortDirection",

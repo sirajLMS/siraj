@@ -40,7 +40,12 @@ export function TodayClassesSection({
           </Box>
         }
       >
-        <Box sx={{ p: { xs: 2, lg: 0 } }}>
+        <Box
+          sx={{
+            px: { xs: 2, sm: 3 },
+            py: { xs: 2, sm: 2.5 },
+          }}
+        >
           {isMobile ? (
             <TodayClassesMobileScroll metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
           ) : (

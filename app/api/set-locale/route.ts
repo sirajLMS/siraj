@@ -11,12 +11,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
     }
 
-    // Verify session cookie exists (authenticated user)
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("session");
-    if (!sessionCookie?.value) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
-    }
+    // Security Note: This endpoint is intentionally public.
+    // Locale updates do not expose sensitive data or actions.
+    // CSRF protection via Origin header validation remains active.
+    // Session-independent cookie (NEXT_LOCALE) is used for locale preference.
 
     const body: unknown = await request.json();
 
@@ -34,13 +32,15 @@ export async function POST(request: NextRequest) {
     const locale = body.locale;
 
     // Set cookie on server side (works across all hostnames)
-    cookieStore.set("NEXT_LOCALE", locale, {
+    const response = NextResponse.json({ success: true, locale });
+    response.cookies.set("NEXT_LOCALE", locale, {
       path: "/",
       maxAge: 365 * 24 * 60 * 60, // 1 year
       sameSite: "lax",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
     });
+    return response;
 
     return NextResponse.json({ success: true, locale });
   } catch {

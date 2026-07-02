@@ -7,14 +7,10 @@ import type {
   RefreshTokenResponse,
   UserPothosDefinition,
 } from "@/backend/types";
-import { AppPermission } from "@/shared/lib/enum";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
+import { AppPermissionPothosEnum } from "./enum.pothos";
 
 const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserPothosDefinition>("User");
-
-export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {
-  name: "AppPermission",
-});
 
 // User type
 export const UserPothosObject = gqlSchemaBuilder.loadableObject<

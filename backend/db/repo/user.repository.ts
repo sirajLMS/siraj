@@ -3,7 +3,7 @@ import { count, eq, inArray, type SQL } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/soft-delete.repository";
 import { users } from "@/backend/db/schema";
-import { PaginationArgsDefault } from "@/backend/graphql/pothos";
+import { PaginationArgsDefault } from "@/backend/graphql/pothos/pagination.objects";
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import logger from "@/backend/lib/logger";

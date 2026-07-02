@@ -1,6 +1,6 @@
 "use client";
 
-import { Grid, styled } from "@mui/material";
+import { Box } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { MetricCard } from "@/frontend/components/ui";
 import type { MetricCardVariant } from "@/frontend/components/ui/MetricCard";
@@ -12,19 +12,10 @@ interface TodayClassesMobileScrollProps {
   readonly selectedKey?: string;
 }
 
-// Horizontally scrollable container for metric cards on mobile viewport
-const StyledScrollGrid = styled(Grid)(({ theme }) => ({
-  overflowX: "auto",
-  scrollbarWidth: "none",
-  "&::-webkit-scrollbar": { display: "none" },
-  border: `1px solid ${theme.palette.primary.main}`,
-  borderRadius: 16,
-}));
-
 function toMetricVariant(key: string, isSelected: boolean): MetricCardVariant {
   if (isSelected) return "highlight";
   if (key === "suspended" || key === "absent" || key === "leave") return "error";
-  return "default";
+  return "compact";
 }
 
 // Mobile scrollable list of metric cards for the Today's Classes section
@@ -32,14 +23,33 @@ function toMetricVariant(key: string, isSelected: boolean): MetricCardVariant {
 export function TodayClassesMobileScroll({ metrics, onMetricClick, selectedKey }: TodayClassesMobileScrollProps) {
   const t = useTranslations();
   return (
-    <StyledScrollGrid container columnSpacing={2}>
+    <Box
+      sx={{
+        display: "flex",
+        gap: 1.5,
+        overflowX: "auto",
+        overflowY: "hidden",
+        scrollSnapType: "x proximity",
+        pb: 0.5,
+        scrollbarWidth: "none",
+        "&::-webkit-scrollbar": { display: "none" },
+        pr: 0.25,
+      }}
+    >
       {metrics.map(metric => {
         const MetricIcon = metric.icon;
         const isSelected = selectedKey === metric.key;
         const variant = toMetricVariant(metric.key, isSelected);
 
         return (
-          <Grid key={metric.key} size={6} sx={{ flex: "0 0 auto" }}>
+          <Box
+            key={metric.key}
+            sx={{
+              flex: "0 0 calc((100% - 12px) / 2)",
+              minWidth: "calc((100% - 12px) / 2)",
+              scrollSnapAlign: "start",
+            }}
+          >
             <MetricCard
               icon={MetricIcon}
               label={metric.label ?? t(metric.labelKey)}
@@ -48,9 +58,9 @@ export function TodayClassesMobileScroll({ metrics, onMetricClick, selectedKey }
               onClick={onMetricClick ? () => onMetricClick(metric.key) : undefined}
               sx={{ cursor: "pointer" }}
             />
-          </Grid>
+          </Box>
         );
       })}
-    </StyledScrollGrid>
+    </Box>
   );
 }
