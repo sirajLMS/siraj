@@ -260,6 +260,25 @@ async function lintViaQueue(filePath: string): Promise<CheckResult | null> {
 }
 
 /**
+ * Check if a line mentions the target file.
+ */
+function lineMentionsFile(line: string, relPath: string, filePath: string): boolean {
+  return line.includes(relPath) || line.includes(filePath);
+}
+
+/**
+ * Collect an error block: the header line plus subsequent continuation lines.
+ */
+function collectErrorBlock(lines: string[], startIndex: number, errorBlockRegex: RegExp): string[] {
+  const block: string[] = [lines[startIndex]];
+  for (let j = startIndex + 1; j < lines.length; j++) {
+    if (lines[j].match(errorBlockRegex) || lines[j].trim() === "") break;
+    block.push(lines[j]);
+  }
+  return block;
+}
+
+/**
  * Filter tsgo output for lines mentioning the target file.
  * tsgo runs project-wide, so we need to extract only relevant errors.
  */
@@ -271,18 +290,11 @@ function filterTsgoForFile(tsgoOutput: string, filePath: string): string {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const match = line.match(errorBlockRegex);
-    if (match) {
-      // Check if this error block mentions our file (directly or via the error chain)
-      if (line.includes(relPath) || line.includes(filePath)) {
-        // Collect this line and subsequent indented/continuation lines
-        matchingLines.push(line);
-        for (let j = i + 1; j < lines.length; j++) {
-          if (lines[j].match(errorBlockRegex) || lines[j].trim() === "") break;
-          matchingLines.push(lines[j]);
-        }
-      }
-    } else if (line.includes(relPath) || line.includes(filePath)) {
+    const isErrorBlock = line.match(errorBlockRegex);
+
+    if (isErrorBlock && lineMentionsFile(line, relPath, filePath)) {
+      matchingLines.push(...collectErrorBlock(lines, i, errorBlockRegex));
+    } else if (!isErrorBlock && lineMentionsFile(line, relPath, filePath)) {
       matchingLines.push(line);
     }
   }

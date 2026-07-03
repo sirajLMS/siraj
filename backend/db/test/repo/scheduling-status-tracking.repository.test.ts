@@ -8,6 +8,31 @@ import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/shared/lib/e
 import { createMockClassInstance, setupTestEntities } from "../entity-setup";
 import { runInRollback } from "../test-utils";
 
+const NON_EXISTENT_ID = "00000000-0000-0000-0000-000000000000";
+
+/** Wrapper that creates a class instance with the common NOT_ACTIVATED/PENDING defaults. */
+async function createPendingClass(
+  tx: DBTransaction,
+  studentId: string,
+  teacherId: string,
+  overrides: Partial<typeof classInstances.$inferInsert> = {}
+) {
+  return createMockClassInstance(tx, studentId, teacherId, {
+    executionState: ClassExecutionState.NOT_ACTIVATED,
+    outcome: ClassOutcome.PENDING,
+    ...overrides,
+  });
+}
+
+/** Extract a single isFrozen flag for a given class instance id. */
+async function getIsFrozen(tx: DBTransaction, classId: string): Promise<boolean | undefined> {
+  const [row] = await tx
+    .select({ isFrozen: classInstances.isFrozen })
+    .from(classInstances)
+    .where(eq(classInstances.id, classId));
+  return row?.isFrozen;
+}
+
 describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 10)", () => {
   describe("getStatusTrackingRows", () => {
     const FUTURE_DATE = new Date("2031-06-15T10:00:00.000Z");
@@ -21,11 +46,9 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
       overrides: Partial<typeof classInstances.$inferInsert> = {}
     ) {
       const entities = await setupTestEntities(tx, prefix, { skipInstance: true });
-      const instance = await createMockClassInstance(tx, entities.student.id, entities.teacher.id, {
+      const instance = await createPendingClass(tx, entities.student.id, entities.teacher.id, {
         scheduledStartAt: FUTURE_DATE,
         scheduledEndAt: FUTURE_END,
-        executionState: ClassExecutionState.NOT_ACTIVATED,
-        outcome: ClassOutcome.PENDING,
         isFrozen: false,
         ...overrides,
       });
@@ -327,11 +350,9 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
     test("returns 0 when no classes are frozen", async () => {
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "Unf2", { skipInstance: true });
-        await createMockClassInstance(tx, student.id, teacher.id, {
+        await createPendingClass(tx, student.id, teacher.id, {
           scheduledStartAt: FUTURE_1,
           scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-          executionState: ClassExecutionState.NOT_ACTIVATED,
-          outcome: ClassOutcome.PENDING,
           isFrozen: false,
         });
 
@@ -351,21 +372,13 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
 
         await SchedulingRepository.bulkUnfreezeStudentClasses(sA.id, FROM_DATE, tx);
 
-        const [other] = await tx
-          .select({ isFrozen: classInstances.isFrozen })
-          .from(classInstances)
-          .where(eq(classInstances.id, otherId));
-        expect(other?.isFrozen).toBe(true);
+        expect(await getIsFrozen(tx, otherId)).toBe(true);
       });
     });
 
     test("returns 0 for non-existent studentId", async () => {
       await runInRollback(async tx => {
-        const result = await SchedulingRepository.bulkUnfreezeStudentClasses(
-          "00000000-0000-0000-0000-000000000000",
-          FROM_DATE,
-          tx
-        );
+        const result = await SchedulingRepository.bulkUnfreezeStudentClasses(NON_EXISTENT_ID, FROM_DATE, tx);
         expect(result).toBe(0);
       });
     });
@@ -374,36 +387,23 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "Unf4", { skipInstance: true });
         const classId = (
-          await createMockClassInstance(tx, student.id, teacher.id, {
+          await createPendingClass(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_1,
             scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-            executionState: ClassExecutionState.NOT_ACTIVATED,
-            outcome: ClassOutcome.PENDING,
             isFrozen: false,
           })
         ).id;
 
         await SchedulingRepository.bulkFreezeStudentClasses(student.id, FROM_DATE, tx);
-        const [afterFreeze] = await tx
-          .select({ isFrozen: classInstances.isFrozen })
-          .from(classInstances)
-          .where(eq(classInstances.id, classId));
-        expect(afterFreeze?.isFrozen).toBe(true);
+        expect(await getIsFrozen(tx, classId)).toBe(true);
 
         await SchedulingRepository.bulkUnfreezeStudentClasses(student.id, FROM_DATE, tx);
-        const [afterUnfreeze] = await tx
-          .select({ isFrozen: classInstances.isFrozen })
-          .from(classInstances)
-          .where(eq(classInstances.id, classId));
-        expect(afterUnfreeze?.isFrozen).toBe(false);
+        expect(await getIsFrozen(tx, classId)).toBe(false);
       });
     });
 
     test("works without tx context", async () => {
-      const result = await SchedulingRepository.bulkUnfreezeStudentClasses(
-        "00000000-0000-0000-0000-000000000000",
-        FROM_DATE
-      );
+      const result = await SchedulingRepository.bulkUnfreezeStudentClasses(NON_EXISTENT_ID, FROM_DATE);
       expect(result).toBe(0);
     });
   });
@@ -420,25 +420,22 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
         const { student, teacher } = await setupTestEntities(tx, "Fut1", { skipInstance: true });
 
         const naId = (
-          await createMockClassInstance(tx, student.id, teacher.id, {
+          await createPendingClass(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_1,
             scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-            executionState: ClassExecutionState.NOT_ACTIVATED,
-            outcome: ClassOutcome.PENDING,
           })
         ).id;
 
         const actId = (
-          await createMockClassInstance(tx, student.id, teacher.id, {
+          await createPendingClass(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_2,
             scheduledEndAt: new Date(FUTURE_2.getTime() + CLASS_END_OFFSET),
             executionState: ClassExecutionState.ACTIVATED,
-            outcome: ClassOutcome.PENDING,
           })
         ).id;
 
         const compId = (
-          await createMockClassInstance(tx, student.id, teacher.id, {
+          await createPendingClass(tx, student.id, teacher.id, {
             scheduledStartAt: PAST_DATE,
             scheduledEndAt: new Date(PAST_DATE.getTime() + CLASS_END_OFFSET),
             executionState: ClassExecutionState.COMPLETED,
@@ -467,11 +464,9 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
     test("returns minimal shape { id, executionState, scheduledStartAt }", async () => {
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "Fut3", { skipInstance: true });
-        await createMockClassInstance(tx, student.id, teacher.id, {
+        await createPendingClass(tx, student.id, teacher.id, {
           scheduledStartAt: FUTURE_1,
           scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-          executionState: ClassExecutionState.NOT_ACTIVATED,
-          outcome: ClassOutcome.PENDING,
         });
 
         const result = await SchedulingRepository.getStudentFutureClasses(student.id, FROM_DATE, tx);
@@ -487,19 +482,15 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
       await runInRollback(async tx => {
         const { student, teacher } = await setupTestEntities(tx, "Fut4", { skipInstance: true });
         const laterId = (
-          await createMockClassInstance(tx, student.id, teacher.id, {
+          await createPendingClass(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_2,
             scheduledEndAt: new Date(FUTURE_2.getTime() + CLASS_END_OFFSET),
-            executionState: ClassExecutionState.NOT_ACTIVATED,
-            outcome: ClassOutcome.PENDING,
           })
         ).id;
         const earlierId = (
-          await createMockClassInstance(tx, student.id, teacher.id, {
+          await createPendingClass(tx, student.id, teacher.id, {
             scheduledStartAt: FUTURE_1,
             scheduledEndAt: new Date(FUTURE_1.getTime() + CLASS_END_OFFSET),
-            executionState: ClassExecutionState.NOT_ACTIVATED,
-            outcome: ClassOutcome.PENDING,
           })
         ).id;
 
@@ -511,10 +502,7 @@ describe("Scheduling Repository — Status Tracking & Student Lifecycle (Story 1
     });
 
     test("works without tx context", async () => {
-      const result = await SchedulingRepository.getStudentFutureClasses(
-        "00000000-0000-0000-0000-000000000000",
-        FROM_DATE
-      );
+      const result = await SchedulingRepository.getStudentFutureClasses(NON_EXISTENT_ID, FROM_DATE);
       expect(Array.isArray(result)).toBe(true);
     });
   });
