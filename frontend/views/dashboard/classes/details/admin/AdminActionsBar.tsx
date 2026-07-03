@@ -105,14 +105,7 @@ function LeftAdminActions({
 }) {
   return (
     <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
-      <Typography
-        variant="labelUppercase"
-        sx={{
-          letterSpacing: "0.12em",
-        }}
-      >
-        {labels.administrativeActions}
-      </Typography>
+      <Typography variant="labelUppercase">{labels.administrativeActions}</Typography>
       <StyledActionsDivider />
       <Stack direction="row" sx={{ gap: 1 }}>
         <StyledForceActivateButton aria-label="force-activate" title={labels.forceActivate} onClick={onForceActivate}>

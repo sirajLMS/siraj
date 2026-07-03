@@ -125,10 +125,10 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
 
   return (
     <BaseCard sx={{ position: "relative", overflow: "hidden", height: "100%" }}>
-      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
+      <Stack direction="row" sx={(theme) => ({ justifyContent: "space-between", alignItems: "flex-start", mb: theme.spacing(4) })}>
         <Box>
-          <StyledLiveInstanceChip label={labels.liveInstance} size="small" sx={{ mb: 1.5 }} />
-          <StyledCourseNameHeading variant="h3" sx={{ mb: 0.5 }}>
+          <StyledLiveInstanceChip label={labels.liveInstance} size="small" sx={(theme) => ({ mb: theme.spacing(1.5) })} />
+          <StyledCourseNameHeading variant="h3" sx={(theme) => ({ mb: theme.spacing(0.5) })}>
             {courseName}
           </StyledCourseNameHeading>
           <StyledInstanceIdLabel variant="body2">
@@ -146,46 +146,47 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
           </StyledInstanceIdLabel>
         </Box>
         {isActive && (
-          <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
+          <Stack direction="row" sx={(theme) => ({ alignItems: "center", gap: theme.spacing(1) })}>
             <StyledActiveStatusDot />
             <StyledActiveConnectionCaption variant="caption">{labels.activeConnection}</StyledActiveConnectionCaption>
           </Stack>
         )}
       </Stack>
 
-      <Stack direction="row" sx={{ gap: 4, mt: 2 }}>
-        <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
-          <LinkedAvatar href={studentHref} name={student.name} avatarUrl={student.avatarUrl} variant="student" />
-          <Box>
-            <StyledPersonRoleCaption variant="caption">{labels.student}</StyledPersonRoleCaption>
-            {student.id ? (
-              <StudentEntityLink studentId={student.id} name={student.name} />
-            ) : (
-              <Typography variant="titleLg">{student.name}</Typography>
-            )}
-            {student.id ? (
-              <StyledPersonDetailCaption variant="caption">ID: {student.id}</StyledPersonDetailCaption>
-            ) : null}
-          </Box>
-        </Stack>
+<Stack direction="row" sx={(theme) => ({ gap: theme.spacing(4), mt: theme.spacing(2), alignItems: "center" })}
+>
+<Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
+  <LinkedAvatar href={studentHref} name={student.name} avatarUrl={student.avatarUrl} variant="student" />
+  <Box>
+    <StyledPersonRoleCaption variant="caption">{labels.student}</StyledPersonRoleCaption>
+    {student.id ? (
+      <StudentEntityLink studentId={student.id} name={student.name} />
+    ) : (
+      <Typography variant="titleLg" sx={{ fontWeight: 700 }}>{student.name}</Typography>
+    )}
+    {student.id ? (
+      <StyledPersonDetailCaption variant="caption">ID: {student.id}</StyledPersonDetailCaption>
+    ) : null}
+  </Box>
+</Stack>
 
-        <Divider orientation="vertical" flexItem />
+<Divider orientation="vertical" flexItem />
 
-        <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
-          <LinkedAvatar href={teacherHref} name={teacher.name} avatarUrl={teacher.avatarUrl} variant="teacher" />
-          <Box>
-            <StyledPersonRoleCaption variant="caption">{labels.moduleInstructor}</StyledPersonRoleCaption>
-            {teacher.id ? (
-              <TeacherEntityLink teacherId={teacher.id} name={teacher.name} />
-            ) : (
-              <Typography variant="titleLg">{teacher.name}</Typography>
-            )}
-            {teacher.title ? (
-              <StyledPersonDetailCaption variant="caption">{teacher.title}</StyledPersonDetailCaption>
-            ) : null}
-          </Box>
-        </Stack>
-      </Stack>
+<Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
+  <LinkedAvatar href={teacherHref} name={teacher.name} avatarUrl={teacher.avatarUrl} variant="teacher" />
+  <Box>
+    <StyledPersonRoleCaption variant="caption">{labels.moduleInstructor}</StyledPersonRoleCaption>
+    {teacher.id ? (
+      <TeacherEntityLink teacherId={teacher.id} name={teacher.name} />
+    ) : (
+      <Typography variant="titleLg">{teacher.name}</Typography>
+    )}
+    {teacher.title ? (
+      <StyledPersonDetailCaption variant="caption">{teacher.title}</StyledPersonDetailCaption>
+    ) : null}
+  </Box>
+</Stack>
+</Stack>
 
       <StyledDecorativeIconWrapper>
         <LanguageIcon sx={{ fontSize: 200 }} />
