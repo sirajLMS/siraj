@@ -28,6 +28,11 @@ const DEMO_STUDENTS = [
   },
 ] as const;
 
+interface UpsertStudentContext {
+  status: StudentStatus;
+  now: Date;
+}
+
 async function upsertStudent(
   parentId: string,
   teacherId: string,
@@ -35,9 +40,9 @@ async function upsertStudent(
   timezoneOverride: string | null,
   idempotencyKey: string,
   avatarUrl: string | null,
-  status: StudentStatus,
-  now: Date
+  context: UpsertStudentContext
 ) {
+  const { status, now } = context;
   const [result] = await db
     .insert(students)
     .values({
@@ -172,16 +177,10 @@ export async function seedOrGet(parentsList: ParentEntity[], teachersList: Teach
 
     const status = i === 0 ? StudentStatus.REGULAR : cycleAtIndex(ALL_STUDENT_STATUSES, i);
 
-    const student = await upsertStudent(
-      parent.id,
-      teacher.id,
-      name,
-      timezoneOverride,
-      idempotencyKey,
-      avatarUrl,
+    const student = await upsertStudent(parent.id, teacher.id, name, timezoneOverride, idempotencyKey, avatarUrl, {
       status,
-      now
-    );
+      now,
+    });
     results.push(student);
 
     await ensureTeacherAssignment(student.id, teacher.id, assignmentDate);

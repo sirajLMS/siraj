@@ -84,22 +84,31 @@ export namespace StaffProfileRepository {
     roleName: permissionGroups.name,
   } as const;
 
+  function resolveRoleCondition(filters?: ManagerDirectoryFilters) {
+    if (filters?.roleFilter === "admin") {
+      return ilike(permissionGroups.slug, "%admin%");
+    }
+    if (filters?.roleFilter === "staff") {
+      return or(
+        isNull(permissionGroups.slug),
+        and(notIlike(permissionGroups.slug, "%admin%"), ilike(permissionGroups.slug, "%staff%"))
+      );
+    }
+    return undefined;
+  }
+
+  function resolveStatusCondition(filters?: ManagerDirectoryFilters) {
+    if (filters?.statusFilter === "active") {
+      return eq(staffProfiles.status, "ACTIVATED");
+    }
+    if (filters?.statusFilter === "offline") {
+      return eq(staffProfiles.status, "DEACTIVATED");
+    }
+    return undefined;
+  }
+
   function buildManagerDirectoryWhere(filters?: ManagerDirectoryFilters) {
-    const conditions: ReturnType<typeof and> = and(
-      filters?.roleFilter === "admin"
-        ? ilike(permissionGroups.slug, "%admin%")
-        : filters?.roleFilter === "staff"
-          ? or(
-              isNull(permissionGroups.slug),
-              and(notIlike(permissionGroups.slug, "%admin%"), ilike(permissionGroups.slug, "%staff%"))
-            )
-          : undefined,
-      filters?.statusFilter === "active"
-        ? eq(staffProfiles.status, "ACTIVATED")
-        : filters?.statusFilter === "offline"
-          ? eq(staffProfiles.status, "DEACTIVATED")
-          : undefined
-    );
+    const conditions: ReturnType<typeof and> = and(resolveRoleCondition(filters), resolveStatusCondition(filters));
     return conditions ?? undefined;
   }
 

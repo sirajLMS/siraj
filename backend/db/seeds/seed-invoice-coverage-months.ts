@@ -15,7 +15,7 @@ export async function seedOrGet(invoicesList: InvoiceSelectType[], config?: Seed
   const results = [];
 
   for (const invoice of invoicesList) {
-    const match = invoice.idempotencyKey.match(/_(\d{4})-(\d{2})$/);
+    const match = /_(\d{4})-(\d{2})$/.exec(invoice.idempotencyKey);
     if (!match) continue;
 
     const year = Number(match[1]);

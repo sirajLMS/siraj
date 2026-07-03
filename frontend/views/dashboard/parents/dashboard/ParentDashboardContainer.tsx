@@ -63,7 +63,7 @@ function useScheduleRows(
       studentInitials: r.studentInitials ?? "",
       studentAvatarUrl: r.studentAvatarUrl ?? undefined,
       teacherName: r.teacherName ?? "",
-      bookingStatus: (r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed") as "confirmed" | "rescheduled",
+      bookingStatus: r.bookingStatus === "rescheduled" ? "rescheduled" : "confirmed",
       liveClassStatus: mapExecutionStateToLiveClassStatus(r.executionState ?? "", r.outcome ?? ""),
       videoEnabled: !!r.zoomMeetingUrl,
     }));

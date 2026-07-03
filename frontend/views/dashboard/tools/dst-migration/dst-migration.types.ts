@@ -1,5 +1,3 @@
-import type { MigrationStatus } from "@/shared/lib/enum";
-
 export interface UpdatedSession {
   readonly id: string;
   readonly studentName: string;
@@ -33,4 +31,4 @@ export interface DstMigrationMetrics {
   readonly unchanged: number;
 }
 
-export type { MigrationStatus };
+export type { MigrationStatus } from "@/shared/lib/enum";

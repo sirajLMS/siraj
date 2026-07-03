@@ -125,15 +125,15 @@ export function MetadataCard({
               icon={<RouterIcon sx={{ fontSize: 18 }} />}
               label={labels.latency}
               value={
-                latencyMs != null ? (
+                latencyMs == null ? (
+                  formatValue(null, labels.unavailable)
+                ) : (
                   <StyledActiveValueText
                     variant="caption"
                     sx={theme => ({ color: theme.palette.status.active, fontWeight: theme.typography.fontWeightBold })}
                   >
                     {latencyMs}ms
                   </StyledActiveValueText>
-                ) : (
-                  formatValue(null, labels.unavailable)
                 )
               }
             />

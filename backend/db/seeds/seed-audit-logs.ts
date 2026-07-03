@@ -27,8 +27,12 @@ export async function seedOrGet(usersList: UserEntity[], invoicesList: InvoiceSe
   for (let i = 0; i < targetCount; i++) {
     const entityType = AUDIT_ENTITY_TYPES[i % AUDIT_ENTITY_TYPES.length];
     const invoice = invoicesList[i % Math.max(invoicesList.length, 1)];
-    const entityId =
-      entityType === "INVOICE" && invoice ? invoice.id : entityType === "PAYMENT" && invoice ? invoice.id : `seed-${i}`;
+    let entityId: string;
+    if ((entityType === "INVOICE" || entityType === "PAYMENT") && invoice) {
+      entityId = invoice.id;
+    } else {
+      entityId = `seed-${i}`;
+    }
 
     const [inserted] = await db
       .insert(auditLogs)

@@ -6,8 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type * as Types from "@/frontend/graphql/generated/gql/graphql-types";
-import { AppPermission, type ClassType } from "@/frontend/graphql/generated/gql/graphql-types";
+import * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import { useRouter } from "@/shared/i18n/routing";
 
@@ -248,7 +247,7 @@ function ActiveDashboardWrapper({
 interface StandardDashboardWrapperProps {
   readonly standardData: Operations.TeacherDashboardQuery | undefined;
   readonly filterDate: string;
-  readonly permissions: readonly AppPermission[];
+  readonly permissions: readonly Types.AppPermission[];
   readonly labels: TeacherDashboardLabels;
   readonly handleActivate: (id: string) => Promise<void>;
   readonly handleDownloadHandbook: () => Promise<void>;
@@ -305,8 +304,8 @@ function StandardDashboardWrapper({
       missedAlert={missedAlert}
       scheduleDateLabel={filterDate}
       labels={labels}
-      canActivate={permissions.includes(AppPermission.SessionActivateClass)}
-      canManualEntry={permissions.includes(AppPermission.SessionActivateClass)}
+      canActivate={permissions.includes(Types.AppPermission.SessionActivateClass)}
+      canManualEntry={permissions.includes(Types.AppPermission.SessionActivateClass)}
       canPrintSchedule={true}
       onPrintSchedule={() => {
         globalThis.print();
@@ -407,7 +406,7 @@ export function TeacherDashboardContainer() {
   }
 
   const labels = buildTeacherDashboardLabels(t);
-  const canControl = permissions.includes(AppPermission.SessionActivateClass);
+  const canControl = permissions.includes(Types.AppPermission.SessionActivateClass);
 
   const dashboardId = standardData?.teacherDashboard?.id || activeData?.teacherActiveDashboard?.id || "";
   const teacherId = dashboardId.split("-")[2] || "";
@@ -450,7 +449,7 @@ export function TeacherDashboardContainer() {
           scheduledStartAt: data.scheduledStartAt,
           scheduledEndAt: data.scheduledEndAt,
           durationMinutes: data.durationMinutes,
-          classType: data.classType as ClassType,
+          classType: data.classType as Types.ClassType,
         },
       },
     });
@@ -493,11 +492,11 @@ export function TeacherDashboardContainer() {
   };
 
   return (
-    <RequirePermission permissions={[AppPermission.TeacherViewDashboard]}>
+    <RequirePermission permissions={[Types.AppPermission.TeacherViewDashboard]}>
       {mode === "active" && canControl ? (
         <ActiveDashboardWrapper
           userName={userName}
-          activeData={activeData as Operations.TeacherActiveDashboardQuery | undefined}
+          activeData={activeData}
           filterDate={filterDate}
           labels={labels}
           activationError={activationError}
@@ -516,7 +515,7 @@ export function TeacherDashboardContainer() {
         />
       ) : (
         <StandardDashboardWrapper
-          standardData={standardData as Operations.TeacherDashboardQuery | undefined}
+          standardData={standardData}
           filterDate={filterDate}
           permissions={permissions}
           labels={labels}

@@ -12,6 +12,25 @@ import { authenticatedRequest, loginDemoUser } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { clearCookies, testClient } from "./testClient";
 
+async function expectDemoLoginSucceeds(groupSlug: string): Promise<void> {
+  const result = await testClient.mutate({
+    mutation: demoLoginMutationDocument,
+    variables: {
+      input: {
+        groupSlug,
+      },
+    },
+  });
+
+  expect(result.data).toBeDefined();
+  expect(result.error).toBeUndefined();
+
+  if (!result.data?.demoLogin) throw new Error("No demoLogin data");
+  expect(result.data.demoLogin.token).toBeDefined();
+  expect(result.data.demoLogin.user).toBeDefined();
+  expect(result.data.demoLogin.user?.id).toBeDefined();
+}
+
 describe("GraphQL Auth Integration Tests", () => {
   setupTestServerLifecycle();
 
@@ -34,25 +53,6 @@ describe("GraphQL Auth Integration Tests", () => {
     if (!result.data?.demoLogin?.token) throw new Error("Failed to obtain super admin token");
     superAdminToken = result.data.demoLogin.token;
   });
-
-  async function expectDemoLoginSucceeds(groupSlug: string): Promise<void> {
-    const result = await testClient.mutate({
-      mutation: demoLoginMutationDocument,
-      variables: {
-        input: {
-          groupSlug,
-        },
-      },
-    });
-
-    expect(result.data).toBeDefined();
-    expect(result.error).toBeUndefined();
-
-    if (!result.data?.demoLogin) throw new Error("No demoLogin data");
-    expect(result.data.demoLogin.token).toBeDefined();
-    expect(result.data.demoLogin.user).toBeDefined();
-    expect(result.data.demoLogin.user?.id).toBeDefined();
-  }
 
   test("returns token and user on demoLogin with academy_admin", async () => {
     await expectDemoLoginSucceeds("academy_admin");

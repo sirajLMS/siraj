@@ -11,14 +11,18 @@ import { mapStatusForBadge, statusLabelKey } from "../utils/suggestionStatusMap"
 
 function actionButtons(
   row: AdminSuggestionRow,
-  canManage: boolean,
-  canDelete: boolean,
-  labels: SuggestionsDataGridProps["labels"],
-  onMarkReviewed: (id: string) => void,
-  onRespond: (id: string) => void,
-  onMarkDuplicate: (id: string) => void,
-  onDelete: (id: string) => void
+  handlers: {
+    canManage: boolean;
+    canDelete: boolean;
+    labels: SuggestionsDataGridProps["labels"];
+    onMarkReviewed: (id: string) => void;
+    onRespond: (id: string) => void;
+    onMarkDuplicate: (id: string) => void;
+    onDelete: (id: string) => void;
+  }
 ) {
+  const { canManage, canDelete, labels, onMarkReviewed, onRespond, onMarkDuplicate, onDelete } = handlers;
+
   if (row.status === SuggestionStatus.Reviewed) {
     return null;
   }
@@ -143,7 +147,15 @@ export function SuggestionsDataGrid({
         align: "right",
         headerAlign: "right",
         renderCell: ({ row }) =>
-          actionButtons(row, canManage, canDelete, labels, onMarkReviewed, onRespond, onMarkDuplicate, onDelete),
+          actionButtons(row, {
+            canManage,
+            canDelete,
+            labels,
+            onMarkReviewed,
+            onRespond,
+            onMarkDuplicate,
+            onDelete,
+          }),
       },
     ],
     [canManage, canDelete, labels, onMarkReviewed, onRespond, onMarkDuplicate, onDelete]

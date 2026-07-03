@@ -264,7 +264,7 @@ export namespace TeacherRepository {
     const { timezone: tzInput, ...restInput } = input;
     const setInput = {
       ...restInput,
-      ...(tzInput != null ? { timezone: tzInput } : {}),
+      ...(tzInput == null ? {} : { timezone: tzInput }),
       updatedAt: now,
     };
     const [updated] = await queryDb

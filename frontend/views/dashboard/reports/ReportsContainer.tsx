@@ -362,7 +362,7 @@ function useReportHandlers({
   }, [rows, summary, fromDate, toDate, showFinancials]);
 
   const handlePrintReport = useCallback(() => {
-    window.print();
+    globalThis.print();
   }, []);
 
   const handleRowClick = useCallback(
@@ -429,7 +429,7 @@ export function ReportsContainer() {
         onSubmit={handleSubmit}
         onExportCsv={handleExportCsv}
         onPrintReport={handlePrintReport}
-        onRowClick={reportType !== "by_date" ? handleRowClick : undefined}
+        onRowClick={reportType === "by_date" ? undefined : handleRowClick}
       />
     </RequirePermission>
   );

@@ -12,9 +12,7 @@ async function upsertVacationRequest(
   startAt: Date,
   endAt: Date,
   tz: TimezoneEntity | undefined,
-  status: VacationRequestStatus,
-  adminUserId: string | undefined,
-  now: Date
+  processing: { status: VacationRequestStatus; adminUserId: string | undefined; now: Date }
 ) {
   const [existing] = await db
     .select()
@@ -25,6 +23,9 @@ async function upsertVacationRequest(
   if (existing) {
     return existing;
   }
+
+  const { status, adminUserId, now } = processing;
+  const isPending = status === VacationRequestStatus.PENDING;
 
   const [inserted] = await db
     .insert(teacherVacationRequests)
@@ -37,8 +38,8 @@ async function upsertVacationRequest(
       timezoneId: tz?.id ?? null,
       reason: "Seed vacation request",
       status,
-      processedAt: status !== VacationRequestStatus.PENDING ? now : null,
-      processedByUserId: status !== VacationRequestStatus.PENDING ? (adminUserId ?? null) : null,
+      processedAt: isPending ? null : now,
+      processedByUserId: isPending ? null : (adminUserId ?? null),
       createdAt: now,
       updatedAt: now,
     })
@@ -111,16 +112,11 @@ export async function seedOrGet(
     endAt.setDate(endAt.getDate() + spec.durationDays);
     const tz = timezones.find(t => t.ianaId === teacher.timezone) ?? timezones[0];
 
-    const inserted = await upsertVacationRequest(
-      teacher,
-      requestedByUserId,
-      startAt,
-      endAt,
-      tz,
-      spec.status,
-      adminUser?.id,
-      now
-    );
+    const inserted = await upsertVacationRequest(teacher, requestedByUserId, startAt, endAt, tz, {
+      status: spec.status,
+      adminUserId: adminUser?.id,
+      now,
+    });
     results.push(inserted);
   }
 

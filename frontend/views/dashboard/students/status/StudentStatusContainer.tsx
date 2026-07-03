@@ -75,7 +75,7 @@ export function StudentStatusContainer() {
       scheduledStartAt: cls?.scheduledStartAt ?? "",
       scheduledEndAt: cls?.scheduledEndAt ?? "",
       durationMinutes: cls?.durationMinutes ?? 0,
-      executionState: (cls?.executionState ?? GqlClassExecutionState.NotActivated) as string,
+      executionState: cls?.executionState ?? GqlClassExecutionState.NotActivated,
       isFrozen: cls?.isFrozen ?? false,
     }));
 

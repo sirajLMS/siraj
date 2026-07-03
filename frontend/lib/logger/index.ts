@@ -102,7 +102,7 @@ class ClientLogger {
         if (typeof arg === "string") return arg;
         if (arg instanceof Error) return `${arg.name}: [REDACTED]`;
         try {
-          const parsed = JSON.parse(JSON.stringify(arg));
+          const parsed = structuredClone(arg);
           if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
             return JSON.stringify(this.sanitizeObject(parsed as Record<string, unknown>));
           }

@@ -5,6 +5,16 @@ import type { ParentEntity, UserEntity } from "@/backend/types";
 import { SuggestionStatus } from "@/shared/lib/enum";
 import { buildSuggestionBody, findAdminUser, loadSeedConfig, pickSuggestionStatus, type SeedConfig } from "./lib";
 
+function resolveAdminResponse(status: SuggestionStatus): string | null {
+  if (status === SuggestionStatus.REVIEWED) {
+    return "Thank you for your feedback.";
+  }
+  if (status === SuggestionStatus.DUPLICATE) {
+    return "Marked as duplicate of an existing suggestion.";
+  }
+  return null;
+}
+
 export async function seedOrGet(parentsList: ParentEntity[], usersList: UserEntity[], config?: SeedConfig) {
   logger.info("Seeding suggestions...");
   const now = new Date();
@@ -30,12 +40,7 @@ export async function seedOrGet(parentsList: ParentEntity[], usersList: UserEnti
         submitterName: parentUser?.name ?? `Parent ${i + 1}`,
         body: buildSuggestionBody(seedConfig, i),
         status,
-        adminResponse:
-          status === SuggestionStatus.REVIEWED
-            ? "Thank you for your feedback."
-            : status === SuggestionStatus.DUPLICATE
-              ? "Marked as duplicate of an existing suggestion."
-              : null,
+        adminResponse: resolveAdminResponse(status),
         reviewedByUserId:
           status === SuggestionStatus.REVIEWED || status === SuggestionStatus.DUPLICATE ? adminUser?.id : null,
         reviewedAt: status === SuggestionStatus.REVIEWED || status === SuggestionStatus.DUPLICATE ? now : null,

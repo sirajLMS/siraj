@@ -43,7 +43,7 @@ function getValue(
   if (key === "activeStaff") return metrics.activeStaff ?? 0;
   if (key === "pendingApproval") return metrics.pendingApproval ?? 0;
   if (key === "avgOnboarding")
-    return metrics.avgOnboardingDays != null ? `${metrics.avgOnboardingDays.toFixed(1)} d` : "0 d";
+    return metrics.avgOnboardingDays == null ? "0 d" : `${metrics.avgOnboardingDays.toFixed(1)} d`;
   return 0;
 }
 

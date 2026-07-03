@@ -213,7 +213,7 @@ export function CreateRecurringClassDialog({ teacherId, onRefetch }: Readonly<Cr
                   id="class-type-select"
                   value={classType}
                   label={t("fields.classType")}
-                  onChange={e => setClassType(e.target.value as ClassTypeEnum)}
+                  onChange={e => setClassType(e.target.value)}
                   disabled={mutationLoading}
                 >
                   {CLASS_TYPE_OPTIONS.map(opt => (

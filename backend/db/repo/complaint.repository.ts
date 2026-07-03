@@ -242,7 +242,7 @@ export namespace ComplaintRepository {
 
     const total = countResult[0]?.total ?? 0;
 
-    const typedRows: ComplaintReturnType[] = (rows as Awaited<typeof rows>).map(mapComplaintQueueRow);
+    const typedRows: ComplaintReturnType[] = rows.map(mapComplaintQueueRow);
     const pageInfo = PaginationUtils.buildPageInfoFromArgs(paginationArgs, typedRows.length, total);
 
     return {

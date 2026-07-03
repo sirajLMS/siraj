@@ -5,12 +5,12 @@ import type {
   ClassOutcome,
   DailyScheduleList,
 } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { DashboardFilters, MetricItem, Pagination, TeacherFilterItem } from "@/frontend/types/shared.types";
+import type { TeacherFilterItem } from "@/frontend/types/shared.types";
 import type { DashboardNavigationLabels } from "@/shared/messages/types/message";
 
-export type { DailyScheduleList as DailyScheduleRow, DashboardFilters, MetricItem, Pagination, TeacherFilterItem };
+export type { DashboardFilters, MetricItem, Pagination, TeacherFilterItem } from "@/frontend/types/shared.types";
 
-type DailyScheduleRow = DailyScheduleList;
+export type DailyScheduleRow = DailyScheduleList;
 
 export interface NavItem {
   readonly key: string;

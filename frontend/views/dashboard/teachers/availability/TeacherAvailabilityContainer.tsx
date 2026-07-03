@@ -58,11 +58,9 @@ function addGapToGrid(grid: Record<string, Partial<Record<DayOfWeek, Availabilit
 
   const timeSlot = grid[timeKey];
   if (timeSlot) {
-    const day = gap.dayOfWeek as DayOfWeek;
-    if (!timeSlot[day]) {
-      timeSlot[day] = [];
-    }
-    (timeSlot[day] as AvailabilityEntry[]).push(entry);
+    const day = gap.dayOfWeek;
+    timeSlot[day] ??= [];
+    timeSlot[day].push(entry);
   }
 }
 
@@ -78,7 +76,7 @@ function transformToWeeklyAvailability(data: AvailabilitySearchData | null | und
     }
   }
 
-  return grid as WeeklyAvailability;
+  return grid;
 }
 
 function computeInsights(data: AvailabilitySearchData | null | undefined): TeacherAvailabilityInsights {

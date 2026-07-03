@@ -7,7 +7,6 @@ import { useEffect, useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import type { StudentFilterArgs } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { StudentDirectoryQuery } from "@/frontend/graphql/generated/gql/operations";
 import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
 import { useStudentDirectoryStore } from "@/frontend/stores/studentDirectoryStore";
 import { useRouter } from "@/shared/i18n/routing";
@@ -105,8 +104,8 @@ export function StudentsContainer() {
     }
   }, [error, notifications, t]);
 
-  const rows = useMemo(() => buildStudentRows(data as StudentDirectoryQuery | undefined), [data]);
-  const totalCount = (data as StudentDirectoryQuery | undefined)?.studentDirectory?.totalCount ?? 0;
+  const rows = useMemo(() => buildStudentRows(data), [data]);
+  const totalCount = data?.studentDirectory?.totalCount ?? 0;
   const counts = useMemo(() => buildStatusCounts(rows), [rows]);
   const viewMetrics = useMemo(() => buildViewMetrics(counts, t), [counts, t]);
   const mobileMetrics = useMemo(() => buildMobileMetrics(counts, t), [counts, t]);

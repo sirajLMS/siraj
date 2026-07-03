@@ -4,10 +4,6 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslations } from "next-intl";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import type {
-  ClassExecutionState as GqlClassExecutionState,
-  ClassOutcome as GqlClassOutcome,
-} from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
   clearWeeklyScheduleMutationDocument,
@@ -112,8 +108,8 @@ export default function TeacherWeeklyScheduleContainer({ teacherId }: Readonly<T
             duration: c.duration || 0,
             startTime: c.startTime || "",
             day: c.day || "",
-            executionState: c.executionState as GqlClassExecutionState | null,
-            outcome: c.outcome as GqlClassOutcome | null,
+            executionState: c.executionState,
+            outcome: c.outcome,
             subjectName: c.subjectName ?? null,
             classType: c.classType ?? null,
           })),

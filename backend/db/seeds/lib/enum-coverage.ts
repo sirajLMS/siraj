@@ -21,7 +21,7 @@ export function cycleAtIndex<T>(values: readonly T[], index: number): T {
   if (values.length === 0) {
     throw new Error("cycleAtIndex requires a non-empty values array");
   }
-  return values[index % values.length] as T;
+  return values[index % values.length];
 }
 
 export const ALL_STUDENT_STATUSES = [

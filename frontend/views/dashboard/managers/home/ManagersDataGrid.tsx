@@ -67,7 +67,7 @@ export function ManagersDataGrid({
         renderCell: params => (
           <Stack direction="row" spacing={2} sx={{ alignItems: "center", height: "100%" }}>
             <StyledManagerAvatar src={params.row.avatarUrl || undefined} alt={params.row.name}>
-              {!params.row.avatarUrl ? params.row.name.charAt(0).toUpperCase() : undefined}
+              {params.row.avatarUrl ? undefined : params.row.name.charAt(0).toUpperCase()}
             </StyledManagerAvatar>
             <Box
               sx={{

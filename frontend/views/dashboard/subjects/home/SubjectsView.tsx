@@ -73,40 +73,48 @@ export function SubjectsView({
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab label={t("allCategories")} value={false as unknown as string} />
+          <Tab label={t("allCategories")} value={false} />
           {categories.map(cat => (
             <Tab key={cat.id} label={cat.name ?? ""} value={cat.id ?? ""} />
           ))}
         </Tabs>
       </Box>
 
-      {isLoading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-            {t("loading")}
-          </Typography>
-        </Box>
-      ) : filteredSubjects.length === 0 ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-            {t("noSubjects")}
-          </Typography>
-        </Box>
-      ) : (
-        <Grid container spacing={2}>
-          {filteredSubjects.map(subject => (
-            <Grid key={subject.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <SubjectCard
-                subject={subject}
-                onEdit={() => onEditSubject(subject.id ?? "")}
-                onDelete={() => onDeleteSubject(subject.id ?? "")}
-                onClick={() => onSubjectClick(subject.id ?? "")}
-                canManage={canManageSubjects}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      )}
+      {(() => {
+        if (isLoading) {
+          return (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+              <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
+                {t("loading")}
+              </Typography>
+            </Box>
+          );
+        }
+        if (filteredSubjects.length === 0) {
+          return (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+              <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
+                {t("noSubjects")}
+              </Typography>
+            </Box>
+          );
+        }
+        return (
+          <Grid container spacing={2}>
+            {filteredSubjects.map(subject => (
+              <Grid key={subject.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                <SubjectCard
+                  subject={subject}
+                  onEdit={() => onEditSubject(subject.id ?? "")}
+                  onDelete={() => onDeleteSubject(subject.id ?? "")}
+                  onClick={() => onSubjectClick(subject.id ?? "")}
+                  canManage={canManageSubjects}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        );
+      })()}
     </PageContainer>
   );
 }

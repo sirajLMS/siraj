@@ -87,16 +87,7 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
       </StyledHeatmapHeader>
 
       <Box sx={{ px: 4, pb: 4, pt: 2, height: 300, position: "relative" }}>
-        {!hasData ? (
-          <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
-            <StyledEmptyState
-              variant="body2"
-              sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center" })}
-            >
-              {labels.noData}
-            </StyledEmptyState>
-          </Stack>
-        ) : (
+        {hasData ? (
           <>
             <Box
               sx={{
@@ -141,6 +132,15 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
               ))}
             </Stack>
           </>
+        ) : (
+          <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
+            <StyledEmptyState
+              variant="body2"
+              sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center" })}
+            >
+              {labels.noData}
+            </StyledEmptyState>
+          </Stack>
         )}
       </Box>
     </BaseCard>

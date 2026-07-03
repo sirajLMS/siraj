@@ -21,7 +21,12 @@ export function EngagementRateCard({
   increaseLabel,
   compact = false,
 }: Readonly<EngagementRateCardProps>) {
-  const growthDisplay = growth !== null ? `${growth > 0 ? "+" : ""}${growth}%` : "—";
+  let growthDisplay: string;
+  if (growth === null) {
+    growthDisplay = "—";
+  } else {
+    growthDisplay = `${growth > 0 ? "+" : ""}${growth}%`;
+  }
 
   return (
     <BaseCard

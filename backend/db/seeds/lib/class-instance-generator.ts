@@ -36,7 +36,7 @@ export interface ResolvedInstanceState {
 function resolvePastState(config: SeedConfig, scheduleIndex: number, dateKey: string): ResolvedInstanceState {
   const faker = getFakerForIndex(config.fakerSeed, scheduleIndex + dateKey.length);
   const roll = faker.number.int({ min: 1, max: 100 });
-  const classType = cycleAtIndex(ALL_CLASS_TYPES, scheduleIndex + dateKey.charCodeAt(0));
+  const classType = cycleAtIndex(ALL_CLASS_TYPES, scheduleIndex + (dateKey.codePointAt(0) ?? 0));
 
   if (roll <= 85) {
     return {

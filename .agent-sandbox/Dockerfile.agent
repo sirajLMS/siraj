@@ -24,9 +24,8 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV BUN_INSTALL=/usr/local
-RUN curl -fsSL https://bun.sh/install | bash
-
-RUN groupadd --gid 1001 agent \
+RUN curl -fsSL https://bun.sh/install | bash \
+    && groupadd --gid 1001 agent \
     && useradd --uid 1001 --gid agent --shell /bin/bash --create-home agent \
     && mkdir -p /workspaces/siraj \
     && chown -R agent:agent /workspaces
