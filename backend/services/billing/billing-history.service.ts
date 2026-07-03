@@ -11,6 +11,23 @@ import type {
 import { AppPermission } from "@/shared/lib/enum";
 
 export namespace BillingHistoryService {
+  async function assertBillingViewPermission(actorUserId: string, locale?: string): Promise<void> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_VIEW_HISTORY);
+    if (hasPermission) return;
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc("insufficientPermissions"));
+  }
+
+  async function resolveParentId(parentId: string | null, fallbackUserId: string, locale?: string): Promise<string> {
+    if (parentId) return parentId;
+    const parent = await ParentRepository.findByUserId(fallbackUserId);
+    if (!parent) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("parentNotFound"));
+    }
+    return parent.id;
+  }
+
   export async function getParentInvoiceHistory(
     actorUserId: string,
     parentId: string | null,
@@ -18,22 +35,8 @@ export namespace BillingHistoryService {
     pagination: PaginationArgs | null = null,
     locale?: string
   ): Promise<InvoiceHistoryPaginatedResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_VIEW_HISTORY);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
-
-    let resolvedParentId = parentId;
-    if (!resolvedParentId) {
-      const lookupUserId = userId || actorUserId;
-      const parent = await ParentRepository.findByUserId(lookupUserId);
-      if (!parent) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("parentNotFound"));
-      }
-      resolvedParentId = parent.id;
-    }
+    await assertBillingViewPermission(actorUserId, locale);
+    const resolvedParentId = await resolveParentId(parentId, userId || actorUserId, locale);
 
     const result = await BillingRepository.getInvoicesForParent(resolvedParentId, pagination);
 
@@ -50,12 +53,7 @@ export namespace BillingHistoryService {
     pagination: PaginationArgs | null = null,
     locale?: string
   ): Promise<InvoiceHistoryPaginatedResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_VIEW_HISTORY);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
-
+    await assertBillingViewPermission(actorUserId, locale);
     return BillingRepository.getAllInvoices(pagination);
   }
 
@@ -63,22 +61,12 @@ export namespace BillingHistoryService {
     actorUserId: string,
     locale?: string
   ): Promise<AdminBillingSummaryResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_VIEW_HISTORY);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
-
+    await assertBillingViewPermission(actorUserId, locale);
     return BillingRepository.getAdminBillingSummary();
   }
 
   export async function getStudentCreditStatus(actorUserId: string, locale?: string): Promise<StudentCreditRow[]> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_VIEW_HISTORY);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
-
+    await assertBillingViewPermission(actorUserId, locale);
     return BillingRepository.getStudentsWithCreditStatus();
   }
 
@@ -88,23 +76,8 @@ export namespace BillingHistoryService {
     userId: string | null | undefined,
     locale?: string
   ): Promise<ParentBillingSummaryResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_VIEW_HISTORY);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
-
-    let resolvedParentId = parentId;
-    if (!resolvedParentId) {
-      const lookupUserId = userId || actorUserId;
-      const parent = await ParentRepository.findByUserId(lookupUserId);
-      if (!parent) {
-        const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-        throw new Error(tFunc("parentNotFound"));
-      }
-      resolvedParentId = parent.id;
-    }
-
+    await assertBillingViewPermission(actorUserId, locale);
+    const resolvedParentId = await resolveParentId(parentId, userId || actorUserId, locale);
     return BillingRepository.getParentBillingSummary(resolvedParentId);
   }
 }

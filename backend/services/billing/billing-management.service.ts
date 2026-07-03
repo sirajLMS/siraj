@@ -75,45 +75,86 @@ function deriveIdempotencyKey(input: {
   return createHash("sha256").update(parts.join(":")).digest("hex");
 }
 
+async function requirePermission(actorUserId: string, permission: AppPermission, locale?: string): Promise<void> {
+  const hasPermission = await PermissionsService.hasPermission(actorUserId, permission);
+  if (!hasPermission) {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc("insufficientPermissions"));
+  }
+}
+
+async function validateManualInvoiceInput(input: CreateManualInvoiceInput, locale?: string): Promise<void> {
+  if (!input.parentId || input.parentId.trim().length === 0) {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc("invalidParentId"));
+  }
+
+  const amountNum = Number.parseFloat(input.amount);
+  if (!Number.isFinite(amountNum) || amountNum <= 0) {
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+    throw new Error(tFunc("invalidInvoiceAmount"));
+  }
+}
+
+function buildInvoiceInsertPayload(actorUserId: string, input: CreateManualInvoiceInput) {
+  return {
+    parentId: input.parentId,
+    studentId: input.studentId ?? null,
+    amount: input.amount,
+    currency: input.currency,
+    status: "UNPAID" as const,
+    invoiceType: input.invoiceType,
+    issueDate: input.issueDate,
+    dueDate: input.dueDate,
+    exchangeRateSnapshot: input.exchangeRateSnapshot ?? null,
+    exchangeRateSource: input.exchangeRateSource ?? null,
+    createdByUserId: actorUserId,
+    idempotencyKey: input.idempotencyKey ?? deriveIdempotencyKey(input),
+  };
+}
+
+function mapToManualInvoiceResult(created: Types.InvoiceSelectType): ManualInvoiceResult {
+  return {
+    id: created.id,
+    parentId: created.parentId,
+    studentId: created.studentId ?? null,
+    amount: created.amount,
+    currency: created.currency,
+    status: created.status as InvoiceStatus,
+    invoiceType: created.invoiceType as InvoiceType,
+    issueDate: created.issueDate,
+    dueDate: created.dueDate,
+    paidDate: created.paidDate ?? null,
+    version: created.version,
+    createdAt: created.createdAt,
+  };
+}
+
+async function syncNotificationAfterCreate(
+  invoiceId: string,
+  sendEmail: boolean | null | undefined,
+  locale?: string
+): Promise<void> {
+  if (!sendEmail) return;
+  try {
+    await NotificationSyncService.syncUnpaidNotifications(locale);
+  } catch (err) {
+    logger.error("Failed to send invoice email notification", { invoiceId, err });
+  }
+}
+
 export namespace BillingManagementService {
   export async function createManualInvoice(
     actorUserId: string,
     input: CreateManualInvoiceInput,
     locale?: string
   ): Promise<ManualInvoiceResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_CREATE_INVOICE);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
-
-    if (!input.parentId || input.parentId.trim().length === 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invalidParentId"));
-    }
-
-    const amountNum = Number.parseFloat(input.amount);
-    if (!Number.isFinite(amountNum) || amountNum <= 0) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("invalidInvoiceAmount"));
-    }
+    await requirePermission(actorUserId, AppPermission.BILLING_CREATE_INVOICE, locale);
+    await validateManualInvoiceInput(input, locale);
 
     try {
       const created = await BillingRepository.createInvoice(
-        {
-          parentId: input.parentId,
-          studentId: input.studentId ?? null,
-          amount: input.amount,
-          currency: input.currency,
-          status: "UNPAID",
-          invoiceType: input.invoiceType,
-          issueDate: input.issueDate,
-          dueDate: input.dueDate,
-          exchangeRateSnapshot: input.exchangeRateSnapshot ?? null,
-          exchangeRateSource: input.exchangeRateSource ?? null,
-          createdByUserId: actorUserId,
-          idempotencyKey: input.idempotencyKey ?? deriveIdempotencyKey(input),
-        },
+        buildInvoiceInsertPayload(actorUserId, input),
         undefined,
         locale
       );
@@ -122,33 +163,11 @@ export namespace BillingManagementService {
         await BillingRepository.createInvoiceCoverageMonths(created.id, input.billingMonths);
       }
 
-      if (input.sendEmail) {
-        try {
-          await NotificationSyncService.syncUnpaidNotifications(locale);
-        } catch (err) {
-          logger.error("Failed to send invoice email notification", {
-            invoiceId: created.id,
-            err,
-          });
-        }
-      }
+      await syncNotificationAfterCreate(created.id, input.sendEmail, locale);
 
       logger.info("Manual invoice created", { actorUserId, invoiceId: created.id });
 
-      return {
-        id: created.id,
-        parentId: created.parentId,
-        studentId: created.studentId ?? null,
-        amount: created.amount,
-        currency: created.currency,
-        status: created.status as InvoiceStatus,
-        invoiceType: created.invoiceType as InvoiceType,
-        issueDate: created.issueDate,
-        dueDate: created.dueDate,
-        paidDate: created.paidDate ?? null,
-        version: created.version,
-        createdAt: created.createdAt,
-      };
+      return mapToManualInvoiceResult(created);
     } catch (error) {
       logger.error("Failed to create manual invoice", { actorUserId, error });
       throw error;

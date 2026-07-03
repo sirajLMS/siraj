@@ -590,26 +590,19 @@ export namespace TeacherAvailabilityRepository {
     );
   };
 
-  export const searchCrossStaffAvailability = async (
-    input: Types.CrossStaffSearchInput,
-    tx?: DBTransaction
-  ): Promise<Types.AvailabilitySearchResult> => {
-    const t = tx ?? db;
-
-    const fromMinutes = timeToMinutes(input.fromTime);
-    const toMinutes = timeToMinutes(input.toTime);
-
-    if (fromMinutes >= toMinutes) {
-      const tFunc = await getBackendTranslations({ locale: undefined, namespace: "errors" });
-      throw new Error(tFunc("startTimeBeforeEndTime"));
+  function buildTeacherQueryConditions(gender: Gender | null | undefined) {
+    const conditions = [eq(teachers.status, "ACTIVATED")];
+    if (gender) {
+      conditions.push(eq(teachers.gender, gender));
     }
+    return conditions;
+  }
 
-    const teacherConditions = [eq(teachers.status, "ACTIVATED")];
-    if (input.gender) {
-      teacherConditions.push(eq(teachers.gender, input.gender));
-    }
-
-    const allTeachers = await t
+  async function fetchAllActiveTeachers(
+    t: DBTransaction | typeof db,
+    gender: Gender | null | undefined
+  ): Promise<TeacherShortInfo[]> {
+    return t
       .select({
         teacherId: teachers.id,
         teacherName: users.name,
@@ -618,43 +611,42 @@ export namespace TeacherAvailabilityRepository {
       })
       .from(teachers)
       .leftJoin(users, eq(teachers.userId, users.id))
-      .where(and(...teacherConditions))
+      .where(and(...buildTeacherQueryConditions(gender)))
       .limit(100);
+  }
 
-    if (allTeachers.length === 0) {
-      return {
-        id: `availability-search-${input.fromTime}-${input.toTime}`,
-        teachers: [],
-        totalGaps: 0,
-      };
+  function groupByTeacherId<T extends { teacherId: string }>(rows: T[]): Map<string, T[]> {
+    const grouped = new Map<string, T[]>();
+    for (const row of rows) {
+      const list = grouped.get(row.teacherId) ?? [];
+      list.push(row);
+      grouped.set(row.teacherId, list);
     }
+    return grouped;
+  }
 
-    const teacherIds = allTeachers.map(teacher => teacher.teacherId);
+  async function fetchTeacherAvailabilityData(t: DBTransaction | typeof db, teacherIds: string[]) {
+    const [allWindows, allUnavailabilities] = await Promise.all([
+      t.select().from(teacherAvailabilityWindows).where(inArray(teacherAvailabilityWindows.teacherId, teacherIds)),
+      t
+        .select()
+        .from(teacherRecurringUnavailability)
+        .where(inArray(teacherRecurringUnavailability.teacherId, teacherIds)),
+    ]);
 
-    const allWindows = await t
-      .select()
-      .from(teacherAvailabilityWindows)
-      .where(inArray(teacherAvailabilityWindows.teacherId, teacherIds));
+    return {
+      windowsByTeacher: groupByTeacherId(allWindows),
+      unavailabilitiesByTeacher: groupByTeacherId(allUnavailabilities),
+    };
+  }
 
-    const allUnavailabilities = await t
-      .select()
-      .from(teacherRecurringUnavailability)
-      .where(inArray(teacherRecurringUnavailability.teacherId, teacherIds));
-
-    const windowsByTeacher = new Map<string, Types.TeacherAvailabilityWindowSelectType[]>();
-    for (const w of allWindows) {
-      const list = windowsByTeacher.get(w.teacherId) ?? [];
-      list.push(w);
-      windowsByTeacher.set(w.teacherId, list);
-    }
-
-    const unavailabilitiesByTeacher = new Map<string, Types.TeacherRecurringUnavailabilitySelectType[]>();
-    for (const u of allUnavailabilities) {
-      const list = unavailabilitiesByTeacher.get(u.teacherId) ?? [];
-      list.push(u);
-      unavailabilitiesByTeacher.set(u.teacherId, list);
-    }
-
+  function aggregateTeacherGaps(
+    allTeachers: TeacherShortInfo[],
+    windowsByTeacher: Map<string, Types.TeacherAvailabilityWindowSelectType[]>,
+    unavailabilitiesByTeacher: Map<string, Types.TeacherRecurringUnavailabilitySelectType[]>,
+    fromMinutes: number,
+    toMinutes: number
+  ): { result: Types.AvailabilitySearchResult["teachers"]; totalGaps: number } {
     const daysOfWeek = Object.values(DayOfWeek);
     const result: Types.AvailabilitySearchResult["teachers"] = [];
     let totalGaps = 0;
@@ -676,6 +668,44 @@ export namespace TeacherAvailabilityRepository {
         totalGaps += gaps.length;
       }
     }
+
+    return { result, totalGaps };
+  }
+
+  export const searchCrossStaffAvailability = async (
+    input: Types.CrossStaffSearchInput,
+    tx?: DBTransaction
+  ): Promise<Types.AvailabilitySearchResult> => {
+    const t = tx ?? db;
+
+    const fromMinutes = timeToMinutes(input.fromTime);
+    const toMinutes = timeToMinutes(input.toTime);
+
+    if (fromMinutes >= toMinutes) {
+      const tFunc = await getBackendTranslations({ locale: undefined, namespace: "errors" });
+      throw new Error(tFunc("startTimeBeforeEndTime"));
+    }
+
+    const allTeachers = await fetchAllActiveTeachers(t, input.gender);
+
+    if (allTeachers.length === 0) {
+      return {
+        id: `availability-search-${input.fromTime}-${input.toTime}`,
+        teachers: [],
+        totalGaps: 0,
+      };
+    }
+
+    const teacherIds = allTeachers.map(teacher => teacher.teacherId);
+    const { windowsByTeacher, unavailabilitiesByTeacher } = await fetchTeacherAvailabilityData(t, teacherIds);
+
+    const { result, totalGaps } = aggregateTeacherGaps(
+      allTeachers,
+      windowsByTeacher,
+      unavailabilitiesByTeacher,
+      fromMinutes,
+      toMinutes
+    );
 
     return {
       id: `availability-search-${input.fromTime}-${input.toTime}`,

@@ -7,14 +7,21 @@ import type { ClassCategorySelectType, ClassCategorySubmitInput, ClassCategoryUp
 import type { DBTransaction } from "../db.types";
 
 export namespace ClassCategoryRepository {
+  /**
+   * Shared base query builder for non-deleted class categories.
+   * Appends additional conditions to the existing `deletedAt IS NULL` filter.
+   */
+  function selectActiveCategories(client: DBTransaction | typeof db, extraCondition?: ReturnType<typeof and>) {
+    const condition = extraCondition
+      ? and(extraCondition, isNull(classCategories.deletedAt))
+      : isNull(classCategories.deletedAt);
+    return client.select().from(classCategories).where(condition);
+  }
+
   export async function listCategories(tx?: DBTransaction): Promise<ClassCategorySelectType[]> {
     try {
       const client = tx ?? db;
-      return await client
-        .select()
-        .from(classCategories)
-        .where(isNull(classCategories.deletedAt))
-        .orderBy(asc(classCategories.sortOrder));
+      return await selectActiveCategories(client).orderBy(asc(classCategories.sortOrder));
     } catch (error) {
       logger.error("Error listing class categories:", error);
       throw error;
@@ -25,10 +32,7 @@ export namespace ClassCategoryRepository {
     try {
       if (ids.length === 0) return [];
       const client = tx ?? db;
-      return await client
-        .select()
-        .from(classCategories)
-        .where(and(inArray(classCategories.id, ids), isNull(classCategories.deletedAt)));
+      return await selectActiveCategories(client, inArray(classCategories.id, ids));
     } catch (error) {
       logger.error("Error loading class categories by IDs:", error);
       throw error;

@@ -25,26 +25,35 @@ export namespace ClassSubjectRepository {
     }
   }
 
+  async function fetchSubjectByField(
+    field: "id" | "slug",
+    value: string,
+    locale: string | undefined,
+    tx: DBTransaction | undefined
+  ): Promise<ClassSubjectSelectType> {
+    const client = tx ?? db;
+    const [result] = await client
+      .select()
+      .from(classSubjects)
+      .where(and(eq(classSubjects[field], value), isNull(classSubjects.deletedAt)))
+      .limit(1);
+
+    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+
+    if (!result) {
+      throw new Error(tFunc("subjectNotFound", { [field]: value }));
+    }
+
+    return result;
+  }
+
   export async function getSubjectById(
     id: string,
     locale?: string,
     tx?: DBTransaction
   ): Promise<ClassSubjectSelectType> {
     try {
-      const client = tx ?? db;
-      const [result] = await client
-        .select()
-        .from(classSubjects)
-        .where(and(eq(classSubjects.id, id), isNull(classSubjects.deletedAt)))
-        .limit(1);
-
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-
-      if (!result) {
-        throw new Error(tFunc("subjectNotFound", { id }));
-      }
-
-      return result;
+      return await fetchSubjectByField("id", id, locale, tx);
     } catch (error) {
       logger.error(`Error fetching class subject by ID ${id}:`, error);
       throw error;
@@ -57,20 +66,7 @@ export namespace ClassSubjectRepository {
     tx?: DBTransaction
   ): Promise<ClassSubjectSelectType> {
     try {
-      const client = tx ?? db;
-      const [result] = await client
-        .select()
-        .from(classSubjects)
-        .where(and(eq(classSubjects.slug, slug), isNull(classSubjects.deletedAt)))
-        .limit(1);
-
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-
-      if (!result) {
-        throw new Error(tFunc("subjectNotFound", { slug }));
-      }
-
-      return result;
+      return await fetchSubjectByField("slug", slug, locale, tx);
     } catch (error) {
       logger.error(`Error fetching class subject by slug ${slug}:`, error);
       throw error;

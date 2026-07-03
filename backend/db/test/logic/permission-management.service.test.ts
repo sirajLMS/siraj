@@ -20,6 +20,12 @@ async function assertThrows(fn: () => Promise<unknown>, message: string) {
   expect(getErrorMessage(err)).toContain(message);
 }
 
+async function getSystemGroup() {
+  const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
+  expect(sysGroup).toBeDefined();
+  return sysGroup;
+}
+
 describe("PermissionManagementService Business Logic", () => {
   let adminUser: typeof users.$inferSelect;
   let regularUser: typeof users.$inferSelect;
@@ -61,6 +67,19 @@ describe("PermissionManagementService Business Logic", () => {
     isSuperAdmin: true,
     role: UserRole.SUPER_ADMIN,
   });
+
+  function testSystemGroupGuard(
+    name: string,
+    contextFn: () => UserPermissionContext,
+    action: (groupId: string) => Promise<unknown>,
+    expectedError: string
+  ) {
+    test(name, async () => {
+      mockContext = contextFn();
+      const sysGroup = await getSystemGroup();
+      await assertThrows(() => action(sysGroup.id), expectedError);
+    });
+  }
 
   beforeAll(async () => {
     // Override PermissionsService.getUserContext to return mock context if set
@@ -256,33 +275,19 @@ describe("PermissionManagementService Business Logic", () => {
       expect(updated.description).toBe("Updated description");
     });
 
-    test("updateGroup on system group should throw cannotModifySystemPermissionGroup", async () => {
-      mockContext = manageContext();
+    testSystemGroupGuard(
+      "updateGroup on system group should throw cannotModifySystemPermissionGroup",
+      manageContext,
+      groupId => PermissionManagementService.updateGroup(adminUser.id, { groupId, name: "New System Name" }),
+      "Cannot modify core properties of system permission groups"
+    );
 
-      // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
-      // Justified seed query: system groups are immutable seed data always present in the database
-      const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
-      expect(sysGroup).toBeDefined();
-
-      await assertThrows(
-        () => PermissionManagementService.updateGroup(adminUser.id, { groupId: sysGroup.id, name: "New System Name" }),
-        "Cannot modify core properties of system permission groups"
-      );
-    });
-
-    test("deleteGroup on system group should throw cannotDeleteSystemPermissionGroup", async () => {
-      mockContext = manageContext();
-
-      // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
-      // Justified seed query: system groups are immutable seed data always present in the database
-      const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
-      expect(sysGroup).toBeDefined();
-
-      await assertThrows(
-        () => PermissionManagementService.deleteGroup(adminUser.id, sysGroup.id),
-        "Cannot delete a system permission or group"
-      );
-    });
+    testSystemGroupGuard(
+      "deleteGroup on system group should throw cannotDeleteSystemPermissionGroup",
+      manageContext,
+      groupId => PermissionManagementService.deleteGroup(adminUser.id, groupId),
+      "Cannot delete a system permission or group"
+    );
   });
 
   describe("User Assignment Logic", () => {
@@ -327,23 +332,16 @@ describe("PermissionManagementService Business Logic", () => {
       expect(userGroups).not.toContain(group.id);
     });
 
-    test("revokeGroupFromUser on SuperAdmin should throw cannotModifySuperAdmin", async () => {
-      mockContext = assignContext();
-
-      // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
-      // Justified seed query: system groups are immutable seed data always present in the database
-      const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
-      expect(sysGroup).toBeDefined();
-
-      await assertThrows(
-        () =>
-          PermissionManagementService.revokeGroupFromUser(adminUser.id, {
-            userId: superAdminUser.id,
-            groupId: sysGroup.id,
-          }),
-        "Cannot modify permissions of a SuperAdmin user"
-      );
-    });
+    testSystemGroupGuard(
+      "revokeGroupFromUser on SuperAdmin should throw cannotModifySuperAdmin",
+      assignContext,
+      groupId =>
+        PermissionManagementService.revokeGroupFromUser(adminUser.id, {
+          userId: superAdminUser.id,
+          groupId,
+        }),
+      "Cannot modify permissions of a SuperAdmin user"
+    );
   });
 
   describe("System Permission Database Constraints", () => {

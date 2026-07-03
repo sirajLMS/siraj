@@ -122,13 +122,7 @@ export namespace ParentRepository {
     pageInfo: import("@/backend/types").PageInfo | null;
   };
 
-  export const getParentDirectory = async (
-    options: { search?: string | null; pagination?: PaginationArgs | null; accountStatus?: ParentStatus | null },
-    tx?: DBTransaction
-  ): Promise<ParentDirectoryResult> => {
-    const queryDb = tx ?? db;
-
-    // Calculate metrics
+  async function fetchDirectoryMetrics(queryDb: typeof db | DBTransaction): Promise<ParentDirectoryMetrics> {
     const metricsResult = await queryDb
       .select({
         status: parents.status,
@@ -137,7 +131,7 @@ export namespace ParentRepository {
       .from(parents)
       .groupBy(parents.status);
 
-    const metrics: ParentDirectoryMetrics = {
+    return {
       activated: metricsResult.find(m => m.status === "ACTIVATED")?.count ?? 0,
       deactivated: metricsResult.find(m => m.status === "DEACTIVATED")?.count ?? 0,
       regular: metricsResult.find(m => m.status === "REGULAR")?.count ?? 0,
@@ -145,14 +139,48 @@ export namespace ParentRepository {
       suspended: metricsResult.find(m => m.status === "SUSPENDED")?.count ?? 0,
       onTrial: metricsResult.find(m => m.status === "ON_TRIAL")?.count ?? 0,
     };
+  }
 
-    const conditions = [];
+  function buildDirectoryConditions(options: {
+    search?: string | null;
+    accountStatus?: ParentStatus | null;
+  }): (SQL | undefined)[] {
+    const conditions: (SQL | undefined)[] = [];
     if (options.search) {
       conditions.push(or(ilike(users.name, `%${options.search}%`), ilike(users.email, `%${options.search}%`)));
     }
     if (options.accountStatus) {
       conditions.push(eq(parents.status, options.accountStatus));
     }
+    return conditions;
+  }
+
+  async function fetchUnpaidInvoiceCounts(
+    queryDb: typeof db | DBTransaction,
+    parentIds: string[]
+  ): Promise<Map<string, number>> {
+    if (parentIds.length === 0) return new Map();
+
+    const unpaidCounts = await queryDb
+      .select({
+        parentId: invoices.parentId,
+        cnt: sql<number>`COUNT(*)::int`.mapWith(Number),
+      })
+      .from(invoices)
+      .where(and(inArray(invoices.parentId, parentIds), eq(invoices.status, "UNPAID")))
+      .groupBy(invoices.parentId);
+
+    return new Map(unpaidCounts.map(r => [r.parentId, r.cnt]));
+  }
+
+  export const getParentDirectory = async (
+    options: { search?: string | null; pagination?: PaginationArgs | null; accountStatus?: ParentStatus | null },
+    tx?: DBTransaction
+  ): Promise<ParentDirectoryResult> => {
+    const queryDb = tx ?? db;
+
+    const metrics = await fetchDirectoryMetrics(queryDb);
+    const conditions = buildDirectoryConditions(options);
 
     let rowsQuery = queryDb
       .select({
@@ -175,33 +203,17 @@ export namespace ParentRepository {
 
     const rows = await rowsQuery;
 
-    const [totalCount, unpaidCounts] = await Promise.all([
+    const [totalCount, unpaidMap] = await Promise.all([
       queryDb
         .select({ count: count() })
         .from(parents)
         .innerJoin(users, eq(parents.userId, users.id))
         .where(conditions.length > 0 ? and(...conditions) : undefined),
-      rows.length > 0
-        ? queryDb
-            .select({
-              parentId: invoices.parentId,
-              cnt: sql<number>`COUNT(*)::int`.mapWith(Number),
-            })
-            .from(invoices)
-            .where(
-              and(
-                inArray(
-                  invoices.parentId,
-                  rows.map(r => r.id)
-                ),
-                eq(invoices.status, "UNPAID")
-              )
-            )
-            .groupBy(invoices.parentId)
-        : [],
-    ] as const);
-
-    const unpaidMap = new Map(unpaidCounts.map(r => [r.parentId, r.cnt]));
+      fetchUnpaidInvoiceCounts(
+        queryDb,
+        rows.map(r => r.id)
+      ),
+    ]);
 
     const rowsWithUnpaid = rows.map(r => ({
       ...r,

@@ -6,31 +6,32 @@ import type {
   ClassSubjectReturnType,
   ClassSubjectSubmitInput,
   ClassSubjectUpdateInput,
+  SubjectResourceAttachInput,
   SubjectResourceReturnType,
 } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
 export namespace ClassSubjectService {
+  async function assertPermission(userId: string, permission: AppPermission, locale?: string): Promise<void> {
+    const hasPermission = await PermissionsService.hasPermission(userId, permission);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("unauthorizedAction"));
+    }
+  }
+
   export async function listSubjects(
     userId: string,
     categoryId?: string,
     locale?: string
   ): Promise<ClassSubjectReturnType[]> {
-    const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_LIST);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
-    }
+    await assertPermission(userId, AppPermission.SUBJECTS_LIST, locale);
 
     return await ClassSubjectRepository.listSubjects(categoryId);
   }
 
   export async function getSubjectById(userId: string, id: string, locale?: string): Promise<ClassSubjectReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_LIST);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
-    }
+    await assertPermission(userId, AppPermission.SUBJECTS_LIST, locale);
 
     return await ClassSubjectRepository.getSubjectById(id, locale);
   }
@@ -40,11 +41,7 @@ export namespace ClassSubjectService {
     input: ClassSubjectSubmitInput,
     locale?: string
   ): Promise<ClassSubjectReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_CREATE);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
-    }
+    await assertPermission(userId, AppPermission.SUBJECTS_CREATE, locale);
 
     return await ClassSubjectRepository.createSubject(input, locale);
   }
@@ -55,21 +52,13 @@ export namespace ClassSubjectService {
     input: ClassSubjectUpdateInput,
     locale?: string
   ): Promise<ClassSubjectReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_UPDATE);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
-    }
+    await assertPermission(userId, AppPermission.SUBJECTS_UPDATE, locale);
 
     return await ClassSubjectRepository.updateSubject(id, input, locale);
   }
 
   export async function deleteSubject(userId: string, id: string, locale?: string): Promise<{ id: string }> {
-    const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_DELETE);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
-    }
+    await assertPermission(userId, AppPermission.SUBJECTS_DELETE, locale);
 
     return await ClassSubjectRepository.deleteSubject(id, locale);
   }
@@ -79,25 +68,17 @@ export namespace ClassSubjectService {
     subjectId: string,
     locale?: string
   ): Promise<SubjectResourceReturnType[]> {
-    const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_VIEW_RESOURCES);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
-    }
+    await assertPermission(userId, AppPermission.SUBJECTS_VIEW_RESOURCES, locale);
 
     return await SubjectResourceRepository.listResourcesForSubject(subjectId);
   }
 
   export async function attachResource(
     userId: string,
-    input: import("@/backend/types").SubjectResourceAttachInput,
+    input: SubjectResourceAttachInput,
     locale?: string
   ): Promise<SubjectResourceReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_MANAGE_RESOURCES);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
-    }
+    await assertPermission(userId, AppPermission.SUBJECTS_MANAGE_RESOURCES, locale);
 
     return await SubjectResourceRepository.attachResource(input, locale);
   }
@@ -108,11 +89,7 @@ export namespace ClassSubjectService {
     learningResourceId: string,
     locale?: string
   ): Promise<{ id: string }> {
-    const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_MANAGE_RESOURCES);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("unauthorizedAction"));
-    }
+    await assertPermission(userId, AppPermission.SUBJECTS_MANAGE_RESOURCES, locale);
 
     return await SubjectResourceRepository.detachResource(subjectId, learningResourceId, locale);
   }

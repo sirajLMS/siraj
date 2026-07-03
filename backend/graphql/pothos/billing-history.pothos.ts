@@ -11,6 +11,31 @@ import { requireAuth } from "../utils/requireAuth";
 import { InvoiceStatusPothosObject, InvoiceTypePothosObject, StudentStatusPothosObject } from "./enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
+type PaginationArgsInput = {
+  first?: number | null;
+  skip?: number | null;
+  after?: string | null;
+  before?: string | null;
+  last?: number | null;
+  page?: number | null;
+  maxCount?: number | null;
+};
+
+function parsePaginationArgs(input: PaginationArgsInput | null | undefined): PaginationArgs | null {
+  if (!input) {
+    return null;
+  }
+  return new PaginationArgs({
+    first: input.first ?? null,
+    skip: input.skip ?? null,
+    after: input.after ?? null,
+    before: input.before ?? null,
+    last: input.last ?? null,
+    page: input.page ?? null,
+    maxCount: input.maxCount ?? null,
+  });
+}
+
 const ParentInvoiceRowRef = gqlSchemaBuilder.objectRef<InvoiceHistoryRow>("ParentInvoiceRow");
 
 export const ParentInvoiceRowPothosObject = ParentInvoiceRowRef.implement({
@@ -116,18 +141,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      let pagination: PaginationArgs | null = null;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      }
+      const pagination = parsePaginationArgs(args.paginationArgs);
 
       return BillingHistoryService.getParentInvoiceHistory(
         userId,
@@ -149,18 +163,7 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      let pagination: PaginationArgs | null = null;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      }
+      const pagination = parsePaginationArgs(args.paginationArgs);
 
       return BillingHistoryService.getAdminInvoices(userId, pagination, ctx.locale);
     },
