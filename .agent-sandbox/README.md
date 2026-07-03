@@ -92,9 +92,14 @@ bun run dev
 # Type checking (isolated to this container's files)
 bun tsgo
 
-# Linting (isolated)
+# Linting (isolated, via lint queue server — NEVER run `bun run lint` directly)
 bun biome:check
-bun run lint
+# Start the lint queue server first (if not running):
+~/.bun/bin/bun run scripts/lint-queue-server.ts &
+# Then submit lint requests via the queue:
+curl -s -X POST http://localhost:4777/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"sandbox","files":["<files>"]}'
 
 # Run tests
 bun test

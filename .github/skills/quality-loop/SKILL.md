@@ -26,28 +26,36 @@ bun biome:check
 
 Fix formatting and lint issues. `biome:check` is safe to run concurrently.
 
-### Step 3: Lint
+### Step 3: Lint (via lint queue client — NEVER run `bun lint` directly)
 
-**Do NOT run `bun run lint` directly if other lint processes may be running.**
+**NEVER run `bun run lint` directly.** Always use the lint queue server/client.
 
-Check if the lint queue server is available:
+First, check if the lint queue server is running:
 
 ```powershell
 Invoke-RestMethod -Uri http://localhost:4777/status
 ```
 
-If the server is running, submit via the queue:
+If the server is NOT running, start it first:
 
+```bash
+~/.bun/bin/bun run scripts/lint-queue-server.ts &
+```
+
+Then submit via the queue:
+
+**PowerShell:**
 ```powershell
 $files = @("file1.ts","file2.ts")
 $body = @{ id = "quality-loop"; files = $files } | ConvertTo-Json
 Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body
 ```
 
-If the server is NOT running and no other agents are active, run directly:
-
+**Bash / curl:**
 ```bash
-bun run lint
+curl -s -X POST http://localhost:4777/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"quality-loop","files":["file1.ts","file2.ts"]}'
 ```
 
 ### Loop

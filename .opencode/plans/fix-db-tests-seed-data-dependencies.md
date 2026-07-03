@@ -228,7 +228,10 @@ After all test changes:
 ```bash
 bun tsgo                    # Type checking
 bun biome:check             # Formatting/lint
-bun run lint                # ESLint
+# Lint via queue client (NEVER run `bun run lint` directly):
+curl -s -X POST http://localhost:4777/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"fix-db-tests","files":["<files>"]}'
 ```
 
 ---

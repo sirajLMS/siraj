@@ -476,14 +476,14 @@ I need to first understand the story planning guidelines and the story content b
 442: **Quality Gate — Per-File Validation:**
 443: - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after creating/modifying a single file
 444: - [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
-445: - [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
+445: - [ ] lint via queue client on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
 446: - [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
 447: - [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after creating/modifying a single file
 448: 
 449: **Quality Gate — Task Completion Validation:**
 450: - [ ] `bun tsgo` on working files passes with 0 TypeScript errors & 0 warnings, after completing all steps
 451: - [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after completing all steps
-452: - [ ] `bun lint` on working files passes with 0 errors & 0 warnings, after completing all steps
+452: - [ ] lint via queue client on working files passes with 0 errors & 0 warnings, after completing all steps
 453: - [ ] `bun codescene` on working files passes with 0 errors & 0 warnings, after completing all steps
 454: - [ ] `loop over tsgo, biome:check, lint, codescene` on working files till no issues at all, after completing all steps
 455: ```

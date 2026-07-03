@@ -45,7 +45,7 @@ You are sandboxed. Work only inside the container.
 | Dev server | `docker exec -it siraj-agent-AGENT_NUMBER bash -c "bun run dev"` |
 | Type check | `docker exec siraj-agent-AGENT_NUMBER bash -c "bun tsgo"` |
 | Format + lint | `docker exec siraj-agent-AGENT_NUMBER bash -c "bun biome:check"` |
-| ESLint | `docker exec siraj-agent-AGENT_NUMBER bash -c "bun run lint"` |
+| ESLint | `docker exec siraj-agent-AGENT_NUMBER bash -c "curl -s -X POST http://localhost:4777/lint -H 'Content-Type: application/json' -d '{\"id\":\"sandbox\",\"files\":[\"<files>\"]}'"` (via lint queue client, NEVER run `bun run lint` directly) |
 | All tests | `docker exec siraj-agent-AGENT_NUMBER bash -c "bun test"` |
 | DB tests | `docker exec siraj-agent-AGENT_NUMBER bash -c "bun run test:db"` |
 | GraphQL tests | `docker exec siraj-agent-AGENT_NUMBER bash -c "bun run test:graphql"` |
@@ -84,7 +84,7 @@ Your container is completely isolated from other agents:
 - Your `node_modules/`, caches, and build artifacts are container-private
 - Your database is `siraj_agent_AGENT_NUMBER` — safe to migrate, seed, modify
 - Your processes (tsgo, biome, lint, dev server) do not interfere with other agents
-- You can safely run `bun tsgo`, `bun biome:check`, `bun run lint` at any time — errors are yours alone
+- You can safely run `bun tsgo`, `bun biome:check` at any time — errors are yours alone. For lint, use the lint queue client (NEVER run `bun run lint` directly).
 
 ### When You're Done
 

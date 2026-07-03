@@ -7,8 +7,13 @@ description: Use when you have lint errors, formatting issues, or before committ
 
 ## Instructions
 
-1. Run `bun  bimoe:check` to fix formatting and lint issues
-2. Run `bun  lint` to check for remaining lint issues
+1. Run `bun biome:check` to fix formatting and lint issues
+2. Run lint via the lint queue client (NEVER run `bun lint` directly):
+   ```bash
+   curl -s -X POST http://localhost:4777/lint \
+     -H "Content-Type: application/json" \
+     -d '{"id":"fix-skill","files":["<file-path>"]}'
+   ```
 3. Report any remaining manual fixes needed
 
 ## Common Mistakes
