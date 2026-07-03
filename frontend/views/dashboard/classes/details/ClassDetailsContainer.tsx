@@ -1,6 +1,8 @@
 "use client";
 
-import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
+
 import {
   Alert,
   Box,
@@ -18,27 +20,17 @@ import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { PageContainer } from "@/frontend/components/ui";
-import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
-import {
-  activateClassMutationDocument,
-  activateOverrideClassMutationDocument,
-  classInstanceQueryDocument,
-  classStatusEventsQueryDocument,
-  deleteClassInstanceMutationDocument,
-  resetClassMutationDocument,
-  stopClassMutationDocument,
-  updateSessionStatusAbsentMutationDocument,
-  updateSessionStatusLeaveMutationDocument,
-  updateSessionStatusStartMutationDocument,
-} from "@/frontend/graphql/sharedDocuments";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ClassInstanceDetailReturnType as ClassInstanceDetail } from "@/backend/types/class-instance-detail.types";
+import { classInstanceQueryDocument, classStatusEventsQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/dashboard/utils/formatScheduleTime";
 import { useRouter } from "@/shared/i18n/routing";
-import { getErrorMessage } from "@/shared/utils/error";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
 import { ClassDetailsHeader } from "./ClassDetailsHeader";
 import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
+import { useClassMutations } from "./hooks/useClassMutations";
 import { type ClassDetailsViewMode, formatClassDetailDate } from "./types";
 import { useAdminViewLabels, useTeacherViewLabels } from "./useClassDetailsLabels";
 
@@ -90,7 +82,6 @@ export function ClassDetailsContainer() {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("dashboard.classDetails");
-  const client = useApolloClient();
 
   const params = useParams();
   const rawId = params?.id;
@@ -126,14 +117,15 @@ export function ClassDetailsContainer() {
         link.click();
         link.remove();
         URL.revokeObjectURL(url);
+        setErrorState(t("actions.generateLogSuccess"));
       } catch (err) {
         logger.error("Error generating log:", err);
-        setErrorState(getErrorMessage(err));
+        setErrorState(t("actions.generateLogError"));
       } finally {
         setShouldLoadEvents(false);
       }
     }
-  }, [eventsData, shouldLoadEvents, id]);
+  }, [eventsData, shouldLoadEvents, id, t]);
 
   useEffect(() => {
     if (shouldLoadEvents && eventsError) {
@@ -141,111 +133,39 @@ export function ClassDetailsContainer() {
       setErrorState(t("loadError"));
       setShouldLoadEvents(false);
     }
-  }, [eventsError, shouldLoadEvents, t]);
+    }, [eventsError, shouldLoadEvents, t]);
 
-  const [activateClass] = useMutation(activateClassMutationDocument, {
-    onCompleted: () => {
-      setErrorState(null);
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      logger.error("Activate class failed:", { err });
-      setErrorState(t("loadError"));
-    },
-  });
-
-  const [activateOverrideClass] = useMutation(activateOverrideClassMutationDocument, {
-    onCompleted: () => {
-      setErrorState(null);
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      logger.error("Activate override class failed:", { err });
-      setErrorState(t("loadError"));
-    },
-  });
-
-  const [stopClass] = useMutation(stopClassMutationDocument, {
-    onCompleted: () => {
-      setErrorState(null);
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      logger.error("Stop class failed:", { err });
-      setErrorState(t("loadError"));
-    },
-  });
-
-  const [deleteClass] = useMutation(deleteClassInstanceMutationDocument, {
-    onCompleted: () => {
-      setErrorState(null);
-      setDeleteDialogOpen(false);
-    },
-    onError: err => {
-      logger.error("Delete class failed:", { err });
-      setErrorState(t("loadError"));
-    },
-  });
-
-  const [startSession, { loading: isStarting }] = useMutation(updateSessionStatusStartMutationDocument, {
-    onCompleted: () => {
-      setErrorState(null);
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      logger.error("Start session failed:", { err });
-      setErrorState(t("loadError"));
-    },
-  });
-
-  const [markAbsent, { loading: isMarkingAbsent }] = useMutation(updateSessionStatusAbsentMutationDocument, {
-    onCompleted: () => {
-      setErrorState(null);
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      logger.error("Mark absent failed:", { err });
-      setErrorState(t("loadError"));
-    },
-  });
-
-  const [processLeave, { loading: isProcessingLeave }] = useMutation(updateSessionStatusLeaveMutationDocument, {
-    onCompleted: () => {
-      setErrorState(null);
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      logger.error("Process leave failed:", { err });
-      setErrorState(t("loadError"));
-    },
-  });
-
-  const [resetSession, { loading: isResetting }] = useMutation(resetClassMutationDocument, {
-    onCompleted: () => {
-      setErrorState(null);
-      client.refetchQueries({ include: [classInstanceQueryDocument] });
-    },
-    onError: err => {
-      logger.error("Reset session failed:", { err });
-      setErrorState(t("loadError"));
-    },
+    const {
+    forceActivate,
+    activate,
+    stopClass: stopClassMutation,
+    deleteClass: deleteClassMutation,
+    startSession: startSessionMutation,
+    markAbsent: markAbsentMutation,
+    processLeave: processLeaveMutation,
+    resetSession: resetSessionMutation,
+    isStarting,
+    isMarkingAbsent,
+    isProcessingLeave,
+    isResetting,
+  } = useClassMutations({
+    id,
+    onError: (error) => setErrorState(error),
   });
 
   const canOverride = hasPermission(AppPermission.SessionOverrideActions);
-  const canView = hasPermission(AppPermission.SessionViewDetails);
   const canActivate = hasPermission(AppPermission.SessionActivateClass);
   const isParentView = hasPermission(AppPermission.ScheduleViewFamily) && !canActivate && !canOverride;
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <CircularProgress />
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>          <CircularProgress sx={(theme) => ({ color: theme.palette.primary.main })} />
       </Box>
     );
   }
 
   if (!id) {
-    return <Box sx={{ p: 3, textAlign: "center" }}>{t("invalidClassId")}</Box>;
+    return     <Box sx={(theme) => ({ p: 3, textAlign: "center", color: theme.palette.onSurfaceVariant })}>{t("invalidClassId")}</Box>;
   }
 
   if (error || !data?.classInstance) {
@@ -264,38 +184,41 @@ export function ClassDetailsContainer() {
 
   const handleForceActivate = async () => {
     try {
-      await activateOverrideClass({ variables: { classInstanceId: id } });
-      logger.info("Admin force-activated session:", id);
+      await forceActivate();
+      setErrorState(null);
     } catch (err) {
-      logger.error("Error in activateOverrideClass:", err);
+      logger.error("Error in forceActivate:", err);
+      setErrorState(t("actions.forceActivateError"));
     }
   };
 
   const handleStop = async () => {
     try {
-      await stopClass({ variables: { classInstanceId: id } });
-      logger.info("Stopped session:", id);
+      await stopClassMutation();
+      setErrorState(null);
     } catch (err) {
       logger.error("Error in stopClass:", err);
+      setErrorState(t("actions.stopError"));
     }
   };
 
   const handleActivate = async () => {
     try {
-      await activateClass({ variables: { classInstanceId: id } });
-      logger.info("Teacher activated session:", id);
+      await activate();
+      setErrorState(null);
     } catch (err) {
-      logger.error("Error in activateClass:", err);
+      logger.error("Error in activate:", err);
+      setErrorState(t("actions.activateError"));
     }
   };
 
   const handleDeleteConfirm = async () => {
     try {
-      await deleteClass({ variables: { classInstanceId: id } });
-      logger.warn("Deleted class instance:", id);
+      await deleteClassMutation();
       router.push("/dashboard");
     } catch (err) {
       logger.error("Error in deleteClass:", err);
+      setErrorState(t("actions.delete.error"));
     }
   };
 
@@ -315,18 +238,16 @@ export function ClassDetailsContainer() {
     router.push(`/classes/${id}/audit`);
   };
 
-  const pageHeader = (
-    <ClassDetailsHeader instance={instance as ClassInstanceDetail} canOverride={canOverride} isMobile={isMobile} />
-  );
+  const pageHeader = <ClassDetailsHeader instance={instance as ClassInstanceDetail} canOverride={canOverride} isMobile={isMobile} />;
 
   const sessionActionProps = {
     formattedScheduledDate,
     formattedStartTime,
     formattedEndTime,
-    onStart: () => startSession({ variables: { classInstanceId: id } }),
-    onAbsent: () => markAbsent({ variables: { classInstanceId: id } }),
-    onLeave: (reason: string) => processLeave({ variables: { classInstanceId: id, leaveReason: reason } }),
-    onReset: () => resetSession({ variables: { classInstanceId: id } }),
+    onStart: () => startSessionMutation(),
+    onAbsent: () => markAbsentMutation(),
+    onLeave: (reason: string) => processLeaveMutation(reason),
+    onReset: () => resetSessionMutation(),
     isStarting,
     isMarkingAbsent,
     isProcessingLeave,
@@ -349,12 +270,12 @@ export function ClassDetailsContainer() {
     </Dialog>
   );
 
-  if (canOverride) {
-    return (
-      <PageContainer>
-        {pageHeader}
+  return (
+    <PageContainer>
+      {pageHeader}
+      <RequirePermission permissions={AppPermission.SessionOverrideActions}>
         <AdminView
-          instance={instance as ClassInstanceDetail}
+          instance={instance}
           isWarningDismissed={isWarningDismissed}
           onDismissWarning={() => setIsWarningDismissed(true)}
           onForceActivate={handleForceActivate}
@@ -364,17 +285,10 @@ export function ClassDetailsContainer() {
           onDelete={handleDeleteRequest}
           {...sessionActionProps}
         />
-        {deleteDialog}
-      </PageContainer>
-    );
-  }
-
-  if (canView) {
-    return (
-      <PageContainer>
-        {pageHeader}
+      </RequirePermission>
+      <RequirePermission permissions={AppPermission.SessionViewDetails}>
         <TeacherView
-          instance={instance as ClassInstanceDetail}
+          instance={instance}
           viewMode={isParentView ? "parent" : "teacher"}
           isWarningDismissed={isWarningDismissed}
           onDismissWarning={() => setIsWarningDismissed(true)}
@@ -384,10 +298,8 @@ export function ClassDetailsContainer() {
           onDelete={handleDeleteRequest}
           {...sessionActionProps}
         />
-        {deleteDialog}
-      </PageContainer>
-    );
-  }
-
-  return null;
+      </RequirePermission>
+      {deleteDialog}
+    </PageContainer>
+  );
 }

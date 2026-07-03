@@ -25,28 +25,25 @@ interface StatBoxProps {
 }
 
 // Rounded default-background container for a single performance stat
-const StyledStatBox = styled(Box)(({ theme }) => ({
+const StyledStatBox = styled(Box)(({ theme }) => ({  
   padding: theme.spacing(2),
   backgroundColor: theme.palette.background.default,
-  borderRadius: 2,
+  borderRadius: theme.shape.borderRadius,
   textAlign: "center",
 }));
 
-// Block-display secondary caption used above the stat value
 const StyledStatLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
+  color: theme.palette.onSurfaceVariant,
   display: "block",
 }));
 
-// Primary-colored headline used as the stat value
 const StyledStatValue = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-// Primary-colored section title above the stat grid
-const StyledSectionTitle = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.primary,
-}));
+const StyledSectionTitle = styled(Typography)(({ theme }) => ({})) as typeof Typography;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const unused = theme;
 
 function StatBox({ label, value }: StatBoxProps) {
   return (
@@ -68,7 +65,7 @@ export function PerformanceOverviewCard({
 }: PerformanceOverviewCardProps) {
   return (
     <BaseCard>
-      <StyledSectionTitle variant="titleLg" sx={{ mb: 2.5 }}>
+      <StyledSectionTitle variant="titleLg" sx={(theme) => ({ mb: 2.5, color: theme.palette.text.primary })}>
         {labels.previousPerformanceOverview}
       </StyledSectionTitle>
       {hasData ? (
@@ -86,7 +83,7 @@ export function PerformanceOverviewCard({
       ) : (
         <Typography
           variant="body2"
-          sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center", py: 2 })}
+          sx={{ textAlign: "center", py: 2 }}
         >
           {labels.noData}
         </Typography>

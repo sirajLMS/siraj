@@ -26,68 +26,29 @@ interface AdminActionsBarProps {
   };
 }
 
-// Thin outlineVariant vertical divider between the label and the action buttons
-const StyledActionsDivider = styled(Box)(({ theme }) => ({
-  width: 1,
-  height: 16,
-  backgroundColor: theme.palette.outlineVariant,
-}));
+const StyledActionsDivider = styled(Box)(() => ({}))
 
-// Active-tinted icon button used for the force-activate action
-const StyledForceActivateButton = styled(IconButton)(({ theme }) => ({
-  backgroundColor: theme.palette.status.activeContainer,
-  color: theme.palette.status.onActiveContainer,
+const StyledForceActivateButton = styled(IconButton)(() => ({
   borderRadius: 1.5,
-  "&:hover": {
-    backgroundColor: theme.palette.status.active,
-    filter: "brightness(1.1)",
-  },
-  "&:active": {
-    transform: "scale(0.95)",
-  },
   transition: "all 0.15s ease",
+}))
+
+const StyledStopPauseButton = styled(IconButton)(() => ({
+  borderRadius: 1.5,
 }));
 
-// Canceled-tinted icon button used for the stop/pause action
-const StyledStopPauseButton = styled(IconButton)(({ theme }) => ({
-  backgroundColor: theme.palette.status.cancelledContainer,
-  color: theme.palette.status.onCancelledContainer,
+const StyledDeleteIconButton = styled(IconButton)(() => ({
   borderRadius: 1.5,
-  "&:hover": {
-    backgroundColor: theme.palette.status.cancelled,
-    filter: "brightness(1.1)",
-  },
-  "&:active": {
-    transform: "scale(0.95)",
-  },
-}));
-
-// Blocked-tinted icon button used for the delete action
-const StyledDeleteIconButton = styled(IconButton)(({ theme }) => ({
-  backgroundColor: theme.palette.status.blockedContainer,
-  color: theme.palette.status.onBlockedContainer,
-  borderRadius: 1.5,
-  "&:hover": {
-    backgroundColor: theme.palette.status.blocked,
-    filter: "brightness(1.1)",
-  },
-  "&:active": {
-    transform: "scale(0.95)",
-  },
   transition: "all 0.15s ease",
-}));
+}))
 
-// Header/onHeader horizontal bar that wraps the left and right admin actions
-const StyledAdminActionsBar = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.headerContainer,
-  color: theme.palette.onHeaderContainer,
-  paddingInline: theme.spacing(2),
-  paddingBlock: theme.spacing(1.5),
+const StyledAdminActionsBar = styled(Box)(() => ({
+  paddingInline: 2,
+  paddingBlock: 1.5,
   borderRadius: 2,
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  boxShadow: theme.palette.shadow.card,
 }));
 
 function LeftAdminActions({
@@ -106,12 +67,42 @@ function LeftAdminActions({
   return (
     <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
       <Typography variant="labelUppercase">{labels.administrativeActions}</Typography>
-      <StyledActionsDivider />
+      <StyledActionsDivider sx={(theme) => ({ width: 1, height: 16, backgroundColor: theme.palette.outlineVariant })} />
       <Stack direction="row" sx={{ gap: 1 }}>
-        <StyledForceActivateButton aria-label="force-activate" title={labels.forceActivate} onClick={onForceActivate}>
+        <StyledForceActivateButton 
+          aria-label="force-activate" 
+          title={labels.forceActivate} 
+          onClick={onForceActivate} 
+          sx={(theme) => ({
+            backgroundColor: theme.palette.status.activeContainer,
+            color: theme.palette.status.onActiveContainer,
+            "&:hover": {
+              backgroundColor: theme.palette.status.active,
+              filter: "brightness(1.1)",
+            },
+            "&:active": {
+              transform: "scale(0.95)",
+            },
+          })}
+        >
           <PowerSettingsNewIcon />
         </StyledForceActivateButton>
-        <StyledStopPauseButton aria-label="stop-pause" title={labels.stopPause} onClick={onStop}>
+        <StyledStopPauseButton 
+          aria-label="stop-pause" 
+          title={labels.stopPause} 
+          onClick={onStop} 
+          sx={(theme) => ({
+            backgroundColor: theme.palette.status.cancelledContainer,
+            color: theme.palette.status.onCancelledContainer,
+            "&:hover": {
+              backgroundColor: theme.palette.status.cancelled,
+              filter: "brightness(1.1)",
+            },
+            "&:active": {
+              transform: "scale(0.95)",
+            },
+          })}
+        >
           <PauseIcon />
         </StyledStopPauseButton>
       </Stack>
@@ -178,7 +169,22 @@ function RightAdminActions({
         <ArticleIcon sx={{ fontSize: 16 }} />
         {labels.generateLog}
       </Box>
-      <StyledDeleteIconButton aria-label="delete-instance" title={labels.deleteInstance} onClick={onDelete}>
+      <StyledDeleteIconButton 
+        aria-label="delete-instance" 
+        title={labels.deleteInstance} 
+        onClick={onDelete} 
+        sx={(theme) => ({
+          backgroundColor: theme.palette.status.blockedContainer,
+          color: theme.palette.status.onBlockedContainer,
+          "&:hover": {
+            backgroundColor: theme.palette.status.blocked,
+            filter: "brightness(1.1)",
+          },
+          "&:active": {
+            transform: "scale(0.95)",
+          },
+        })}
+      >
         <DeleteIcon />
       </StyledDeleteIconButton>
     </Stack>
@@ -194,7 +200,16 @@ export function AdminActionsBar({
   labels,
 }: AdminActionsBarProps) {
   return (
-    <StyledAdminActionsBar sx={{ mb: 3 }}>
+    <StyledAdminActionsBar 
+      sx={(theme) => ({
+        mb: 3,
+        backgroundColor: theme.palette.headerContainer,
+        color: theme.palette.onHeaderContainer,
+        paddingInline: theme.spacing(2),
+        paddingBlock: theme.spacing(1.5),
+        boxShadow: theme.palette.shadow.card,
+      })}
+    >
       <LeftAdminActions labels={labels} onForceActivate={onForceActivate} onStop={onStop} />
       <RightAdminActions
         labels={labels}

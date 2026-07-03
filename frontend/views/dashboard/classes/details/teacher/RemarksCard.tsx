@@ -11,33 +11,33 @@ interface RemarksCardProps {
   };
 }
 
-// Uppercase header-colored block caption used as the remarks title
-const StyledRemarksTitle = styled(Typography)(({ theme }) => ({
-  color: theme.palette.header,
+const StyledRemarksTitle = styled(Typography)(() => ({
   fontWeight: 700,
   textTransform: "uppercase",
   letterSpacing: "0.08em",
   display: "block",
-}));
+}))
 
-// Default-background italic quote block with a header-colored left accent border
-const StyledRemarksQuoteBlock = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.background.default,
-  padding: theme.spacing(2),
+const StyledRemarksQuoteBlock = styled(Box)(() => ({
+  padding: 2,
   borderRadius: 1.5,
   borderLeft: 4,
-  borderColor: theme.palette.header,
   fontStyle: "italic",
-  color: theme.palette.text.secondary,
-}));
+}))
 
 export function RemarksCard({ remarks, labels }: RemarksCardProps) {
   return (
     <BaseCard>
-      <StyledRemarksTitle variant="caption" sx={{ mb: 1.5 }}>
+      <StyledRemarksTitle variant="caption" sx={(theme) => ({ mb: 1.5, color: theme.palette.header })}
+      >
         {labels.remarksTitle}
       </StyledRemarksTitle>
-      <StyledRemarksQuoteBlock>
+      <StyledRemarksQuoteBlock sx={(theme) => ({
+        backgroundColor: theme.palette.background.default,
+        borderColor: theme.palette.header,
+        color: theme.palette.text.secondary,
+      })}
+      >
         <Typography variant="body2">&ldquo;{remarks}&rdquo;</Typography>
       </StyledRemarksQuoteBlock>
     </BaseCard>

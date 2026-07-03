@@ -187,6 +187,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "File path is required" }, { status: 400 });
     }
 
+    // Allow unauthenticated access to files in public/ directory
+    if (relativePath.startsWith("public/")) {
+      const subPath = relativePath.substring("public/".length);
+      const absolutePath = path.join(storagePath, "public", subPath);
+
+      try {
+          await fs.access(absolutePath);
+          return buildFileResponse(absolutePath, relativePath, request.headers.get("range"));
+      } catch {
+          logger.warn("Public file not found", { path: relativePath, absolutePath });
+          return NextResponse.json({ error: "File not found" }, { status: 404 });
+      }
+    }
+
+    // Require authentication for non-public files
     const authResult = await authenticateRequest(request);
     if (authResult instanceof NextResponse) return authResult;
 

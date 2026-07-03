@@ -24,15 +24,10 @@ interface ClassInfoCardProps {
   };
 }
 
-const StyledLiveInstanceChip = styled(Chip)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.onPrimary,
+const StyledLiveInstanceChip = styled(Chip)(() => ({
   typography: "labelUppercase",
   opacity: 0.8,
-  "& .MuiChip-label": {
-    paddingInline: theme.spacing(1.5),
-  },
-}));
+}))
 
 const StyledCourseNameHeading = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
@@ -99,11 +94,25 @@ function LinkedAvatar({
 }) {
   const avatar =
     variant === "student" ? (
-      <StyledStudentAvatar src={avatarUrl} alt={name}>
+      <StyledStudentAvatar 
+        src={avatarUrl} 
+        alt={name} 
+        sx={(theme) => ({
+          backgroundColor: theme.palette.background.default,
+          color: theme.palette.primary.main,
+        })}
+      >
         {avatarInitials(name)}
       </StyledStudentAvatar>
     ) : (
-      <StyledTeacherAvatar alt={name} src={avatarUrl}>
+      <StyledTeacherAvatar 
+        alt={name} 
+        src={avatarUrl} 
+        sx={(theme) => ({
+          backgroundColor: theme.palette.primaryContainer,
+          color: theme.palette.onPrimaryContainer,
+        })}
+      >
         {avatarInitials(name)}
       </StyledTeacherAvatar>
     );
@@ -127,17 +136,30 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
     <BaseCard sx={{ position: "relative", overflow: "hidden", height: "100%" }}>
       <Stack direction="row" sx={(theme) => ({ justifyContent: "space-between", alignItems: "flex-start", mb: theme.spacing(4) })}>
         <Box>
-          <StyledLiveInstanceChip label={labels.liveInstance} size="small" sx={(theme) => ({ mb: theme.spacing(1.5) })} />
-          <StyledCourseNameHeading variant="h3" sx={(theme) => ({ mb: theme.spacing(0.5) })}>
+          <StyledLiveInstanceChip 
+          label={labels.liveInstance} 
+          size="small" 
+          sx={(theme) => ({
+            mb: theme.spacing(1.5),
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.onPrimary,
+            "& .MuiChip-label": {
+              paddingInline: theme.spacing(1.5),
+            },
+          })}
+        />
+          <StyledCourseNameHeading variant="h3" sx={(theme) => ({ mb: theme.spacing(0.5), color: theme.palette.primary.main })}
+          >
             {courseName}
           </StyledCourseNameHeading>
-          <StyledInstanceIdLabel variant="body2">
+          <StyledInstanceIdLabel variant="body2" sx={(theme) => ({ color: theme.palette.text.secondary })}
+          >
             Instance ID:{" "}
             <Box
               component="span"
-              sx={theme => ({
+              sx={(theme) => ({
                 fontFamily: "monospace",
-                fontWeight: 700,
+                fontWeight: theme.typography.fontWeightBold,
                 color: theme.palette.primary.main,
               })}
             >
@@ -147,8 +169,8 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
         </Box>
         {isActive && (
           <Stack direction="row" sx={(theme) => ({ alignItems: "center", gap: theme.spacing(1) })}>
-            <StyledActiveStatusDot />
-            <StyledActiveConnectionCaption variant="caption">{labels.activeConnection}</StyledActiveConnectionCaption>
+            <StyledActiveStatusDot sx={(theme) => ({ color: theme.palette.status.active })} />
+            <StyledActiveConnectionCaption variant="caption" sx={(theme) => ({ color: theme.palette.text.secondary })}>{labels.activeConnection}</StyledActiveConnectionCaption>
           </Stack>
         )}
       </Stack>
@@ -158,14 +180,14 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
 <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
   <LinkedAvatar href={studentHref} name={student.name} avatarUrl={student.avatarUrl} variant="student" />
   <Box>
-    <StyledPersonRoleCaption variant="caption">{labels.student}</StyledPersonRoleCaption>
+    <StyledPersonRoleCaption variant="caption" sx={(theme) => ({ color: theme.palette.text.secondary })}>{labels.student}</StyledPersonRoleCaption>
     {student.id ? (
       <StudentEntityLink studentId={student.id} name={student.name} />
     ) : (
       <Typography variant="titleLg" sx={{ fontWeight: 700 }}>{student.name}</Typography>
     )}
     {student.id ? (
-      <StyledPersonDetailCaption variant="caption">ID: {student.id}</StyledPersonDetailCaption>
+      <StyledPersonDetailCaption variant="caption" sx={(theme) => ({ color: theme.palette.text.secondary })}>ID: {student.id}</StyledPersonDetailCaption>
     ) : null}
   </Box>
 </Stack>
@@ -175,20 +197,21 @@ export function ClassInfoCard({ courseName, instanceId, student, teacher, isActi
 <Stack direction="row" sx={{ alignItems: "center", gap: 2, flex: 1 }}>
   <LinkedAvatar href={teacherHref} name={teacher.name} avatarUrl={teacher.avatarUrl} variant="teacher" />
   <Box>
-    <StyledPersonRoleCaption variant="caption">{labels.moduleInstructor}</StyledPersonRoleCaption>
+    <StyledPersonRoleCaption variant="caption" sx={(theme) => ({ color: theme.palette.text.secondary })}>{labels.moduleInstructor}</StyledPersonRoleCaption>
     {teacher.id ? (
       <TeacherEntityLink teacherId={teacher.id} name={teacher.name} />
     ) : (
       <Typography variant="titleLg">{teacher.name}</Typography>
     )}
     {teacher.title ? (
-      <StyledPersonDetailCaption variant="caption">{teacher.title}</StyledPersonDetailCaption>
+      <StyledPersonDetailCaption variant="caption" sx={(theme) => ({ color: theme.palette.text.secondary })}>{teacher.title}</StyledPersonDetailCaption>
     ) : null}
   </Box>
 </Stack>
 </Stack>
 
-      <StyledDecorativeIconWrapper>
+      <StyledDecorativeIconWrapper sx={(theme) => ({ color: theme.palette.primary.main })}
+      >
         <LanguageIcon sx={{ fontSize: 200 }} />
       </StyledDecorativeIconWrapper>
     </BaseCard>

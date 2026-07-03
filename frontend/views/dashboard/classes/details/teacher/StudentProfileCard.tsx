@@ -14,33 +14,26 @@ interface StudentProfileCardProps {
   };
 }
 
-const StyledTopAccentBar = styled(Box)(({ theme }) => ({
+const StyledTopAccentBar = styled(Box)(() => ({
   height: 4,
-  backgroundColor: theme.palette.header,
   position: "absolute",
   top: 0,
   left: 0,
   right: 0,
-}));
+}))
 
-const StyledViewProfileButton = styled(Link)(({ theme }) => ({
+const StyledViewProfileButton = styled(Link)(() => ({
   display: "block",
   width: "100%",
   textAlign: "center",
   borderRadius: 6,
-  border: `1px solid ${theme.palette.header}`,
-  color: theme.palette.header,
   fontWeight: 700,
   letterSpacing: "0.08em",
-  paddingBlock: theme.spacing(1.25),
+  paddingBlock: 1.25,
   textDecoration: "none",
   typography: "labelUppercase",
-  "&:hover": {
-    backgroundColor: theme.palette.header,
-    color: theme.palette.onHeader,
-  },
   transition: "all 0.2s ease",
-}));
+}))
 
 export function StudentProfileCard({ student, labels }: StudentProfileCardProps) {
   if (!student.id) {
@@ -61,7 +54,19 @@ export function StudentProfileCard({ student, labels }: StudentProfileCardProps)
         <StudentEntityLink studentId={student.id} name={student.name} avatarUrl={student.avatarUrl} showAvatar />
       </Box>
 
-      <StyledViewProfileButton href={profileHref} id="view-student-profile-btn">
+      <StyledViewProfileButton 
+        href={profileHref} 
+        id="view-student-profile-btn" 
+        sx={(theme) => ({
+          border: `1px solid ${theme.palette.header}`,
+          color: theme.palette.header,
+          paddingBlock: theme.spacing(1.25),
+          "&:hover": {
+            backgroundColor: theme.palette.header,
+            color: theme.palette.onHeader,
+          },
+        })}
+      >
         {labels.viewFullProfile}
       </StyledViewProfileButton>
     </BaseCard>

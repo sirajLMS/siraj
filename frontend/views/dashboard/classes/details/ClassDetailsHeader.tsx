@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@/frontend/components/ui";
-import type { ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ClassInstanceDetailReturnType as ClassInstanceDetail } from "@/backend/types/class-instance-detail.types";
 
 interface ClassDetailsHeaderProps {
   readonly instance: ClassInstanceDetail;

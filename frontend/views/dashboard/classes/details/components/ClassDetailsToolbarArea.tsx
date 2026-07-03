@@ -67,7 +67,7 @@ export function ClassDetailsToolbarArea({
       )}
 
       {zoomMeetingUrl ? (
-        <Stack direction="row" sx={{ mb: 2 }}>
+        <Stack direction="row" sx={(theme) => ({ mb: theme.spacing(2) })}>
           <PrimaryPageAction startIcon={<VideocamOutlined />} onClick={handleJoinZoom} id={`join-zoom-${instance.id}`}>
             {t("joinZoom")}
           </PrimaryPageAction>

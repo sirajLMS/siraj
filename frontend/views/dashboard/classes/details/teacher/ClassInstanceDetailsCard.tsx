@@ -41,30 +41,18 @@ interface DetailFieldProps {
   readonly value: React.ReactNode;
 }
 
-// Uppercase header-colored label used for detail field captions
-const StyledDetailFieldLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.header,
-}));
+const StyledDetailFieldLabel = styled(Typography)(() => ({}));
 
-// Card heading: primary-colored headline text with flex row alignment
-const StyledCardHeading = styled(Typography)(({ theme }) => ({
-  color: theme.palette.primary.main,
+const StyledCardHeading = styled(Typography)(() => ({
   display: "flex",
   alignItems: "center",
-  gap: theme.spacing(1),
-}));
+}))
 
-// Header-colored info icon used inside the card heading
-const StyledHeadingInfoIcon = styled(InfoOutlined)(({ theme }) => ({
-  color: theme.palette.header,
-}));
+const StyledHeadingInfoIcon = styled(InfoOutlined)(() => ({}))
 
-// Instance ID chip with secondaryContainer background
-const StyledInstanceIdChip = styled(Chip)(({ theme }) => ({
-  backgroundColor: theme.palette.secondaryContainer,
-  color: theme.palette.onSecondaryContainer,
+const StyledInstanceIdChip = styled(Chip)(() => ({
   typography: "labelUppercase",
-}));
+}))
 
 // Small status dot; bg color is set per-call via sx based on status key
 const StyledStatusDot = styled(Box)({
@@ -76,7 +64,7 @@ const StyledStatusDot = styled(Box)({
 function DetailField({ label, value }: DetailFieldProps) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-      <StyledDetailFieldLabel variant="labelUppercase">{label}</StyledDetailFieldLabel>
+      <StyledDetailFieldLabel variant="labelUppercase" sx={(theme) => ({ color: theme.palette.header })}>{label}</StyledDetailFieldLabel>
       <Box>{value}</Box>
     </Box>
   );
@@ -99,11 +87,19 @@ export function ClassInstanceDetailsCard({
   return (
     <BaseCard>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }}>
-        <StyledCardHeading variant="headlineMd">
-          <StyledHeadingInfoIcon />
+        <StyledCardHeading variant="headlineMd" sx={(theme) => ({ color: theme.palette.primary.main, gap: theme.spacing(1) })}
+        >
+          <StyledHeadingInfoIcon sx={(theme) => ({ color: theme.palette.header })} />
           {labels.classInstanceDetails}
         </StyledCardHeading>
-        <StyledInstanceIdChip label={`ID: #${instanceId}`} size="small" />
+        <StyledInstanceIdChip 
+          label={`ID: #${instanceId}`} 
+          size="small" 
+          sx={(theme) => ({
+            backgroundColor: theme.palette.secondaryContainer, 
+            color: theme.palette.onSecondaryContainer,
+          })}
+        />
       </Stack>
 
       <Grid container spacing={3} sx={theme => ({ pb: 4, borderBottom: 1, borderColor: theme.palette.border.light })}>
@@ -114,7 +110,7 @@ export function ClassInstanceDetailsCard({
               studentId ? (
                 <StudentEntityLink studentId={studentId} name={studentName} variant="bodyLg" />
               ) : (
-                <Typography variant="bodyLg" sx={{ fontWeight: 600 }}>
+                <Typography variant="bodyLg" sx={(theme) => ({ fontWeight: theme.typography.fontWeightBold })}>
                   {studentName}
                 </Typography>
               )
@@ -146,7 +142,8 @@ export function ClassInstanceDetailsCard({
             value={
               <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
                 <StyledStatusDot sx={theme => ({ backgroundColor: theme.palette.status[statusKey] })} />
-                <Typography variant="bodyLg" sx={{ fontWeight: 600 }}>
+                <Typography variant="bodyLg" sx={(theme) => ({ fontWeight: theme.typography.fontWeightBold })}
+                >
                   {statusLabel}
                 </Typography>
               </Stack>

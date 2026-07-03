@@ -5,7 +5,7 @@ import { PageContainer } from "@/frontend/components/ui";
 import {
   AppPermission,
   ClassExecutionState,
-  type ClassInstanceDetail,
+  
   ClassOutcome,
   ClassType,
 } from "@/frontend/graphql/generated/gql/graphql-types";
@@ -98,7 +98,7 @@ function MockAdminViewWrapper({ pageHeader, instance, isWarningDismissed, dismis
     <PageContainer>
       {pageHeader}
       <ClassDetailsAdminView
-        instance={instance}
+        instance={instance as unknown as ClassInstanceDetailReturnType}
         formattedScheduledDate={instance.scheduledDate ?? ""}
         isWarningDismissed={isWarningDismissed}
         onDismissWarning={dismissWarning}
@@ -142,7 +142,7 @@ function MockTeacherViewWrapper({ pageHeader, instance, isWarningDismissed, dism
     <PageContainer>
       {pageHeader}
       <ClassDetailsTeacherView
-        instance={instance}
+        instance={instance as unknown as ClassInstanceDetailReturnType}
         viewMode="teacher"
         formattedStartTime={instance.startTime ?? ""}
         formattedEndTime={instance.endTime ?? ""}

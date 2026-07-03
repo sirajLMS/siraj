@@ -33,13 +33,13 @@ export type ClassInstanceTeacherReturnType = {
 export type ClassInstanceDetailReturnType = {
   id: string;
   courseName: string;
-  classType: ClassType;
+  classType: ClassType | null;
   instanceId: string;
   scheduledDate: string;
   startTime: string;
   endTime: string;
   durationMinutes: number;
-  status: ClassExecutionState;
+  status: ClassExecutionState | null;
   remarks: string | null;
   hasTimezoneMismatch: boolean;
   studentTimezone: string | null;
@@ -47,8 +47,8 @@ export type ClassInstanceDetailReturnType = {
   zoomMeetingUrl: string | null;
   payrollCredited: boolean;
   isRescheduled: boolean;
-  executionState: ClassExecutionState;
-  outcome: ClassOutcome;
+  executionState: ClassExecutionState | null;
+  outcome: ClassOutcome | null;
   student: ClassInstanceStudentReturnType;
   teacher: ClassInstanceTeacherReturnType;
   performance: ClassInstancePerformanceReturnType | null;

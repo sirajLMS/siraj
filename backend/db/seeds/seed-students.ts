@@ -99,15 +99,30 @@ async function seedAvatarAssets(): Promise<Map<string, string | null>> {
     for (let i = 1; i <= 8; i++) {
       const fileName = `${String(i).padStart(2, "0")}.png`;
       const bucketPath = `public/avatars/students/${fileName}`;
-      const localFilePath = path.join(__dirname, "assets", "avatars", "students", fileName);
-      await fileSeeder.seedFile({ bucketPath, localFilePath });
-      const fileInfo = await storageService.fileInfoByPath(bucketPath);
-      avatarUrls.set(fileName, fileInfo?.url ?? null);
+      const localFilePath = path.join(__dirname, "..", "assets", "avatars", "students", fileName);
+            
+      // Check if the file exists locally before seeding
+      try {
+          await fileSeeder.seedFile({ bucketPath, localFilePath });
+          const fileInfo = await storageService.fileInfoByPath(bucketPath);
+          if (!fileInfo?.url) {
+              throw new Error(`File info URL is missing for ${bucketPath}`);
+          }
+          avatarUrls.set(fileName, fileInfo.url);
+      } catch (fileError) {
+          logger.error(`Failed to seed avatar ${fileName}:`, fileError);
+          avatarUrls.set(fileName, null);
+      }
+    }
+
+    if (avatarUrls.size === 0 || Array.from(avatarUrls.values()).every(url => url === null)) {
+      throw new Error("No student avatars were successfully seeded.");
     }
 
     logger.info("Student avatar assets seeded successfully.");
   } catch (error) {
     logger.error("Failed to seed student avatars:", error);
+    throw error; // Re-throw to ensure seeding fails visibly
   }
 
   return avatarUrls;

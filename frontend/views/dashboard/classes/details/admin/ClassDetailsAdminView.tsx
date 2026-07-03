@@ -2,11 +2,8 @@
 
 import { Box, Grid } from "@mui/material";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-import {
-  AppPermission,
-  ClassExecutionState,
-  type ClassInstanceDetail,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
+import { ClassExecutionState } from "@/shared/lib/enum";
 import type { AdminViewLabels } from "@/shared/messages/types/message";
 import { ClassDetailsToolbarArea } from "../components/ClassDetailsToolbarArea";
 import { ActivityHeatmap } from "./ActivityHeatmap";
@@ -16,7 +13,7 @@ import { LivePerformanceGrid } from "./LivePerformanceGrid";
 import { MetadataCard } from "./MetadataCard";
 
 interface ClassDetailsAdminViewProps {
-  readonly instance: ClassInstanceDetail;
+  readonly instance: any;
   readonly formattedScheduledDate: string;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;
@@ -133,7 +130,7 @@ export function ClassDetailsAdminView({
               title: instance.teacher?.title ?? "",
               avatarUrl: instance.teacher?.avatarUrl ?? "",
             }}
-            isActive={instance.status === ClassExecutionState.Activated}
+            isActive={instance.status === ClassExecutionState.ACTIVATED}
             labels={labels.classInfo}
           />
         </Grid>

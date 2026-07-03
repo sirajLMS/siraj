@@ -52,7 +52,6 @@ function renderMetricCard({
             }
           : undefined
       }
-      // sx={isScroll && onMetricClick ? { cursor: "pointer", height: "100%" } : undefined}
     />
   );
 }
