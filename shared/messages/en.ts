@@ -968,7 +968,7 @@ const en: MessageSchema = {
         confirm: "Delete",
         cancel: "Cancel",
       },
-      actions: {
+      actionFeedback: {
         forceActivateSuccess: "Class has been force-activated successfully.",
         forceActivateError: "Failed to force-activate the class. Please try again.",
         activateSuccess: "Class has been activated successfully.",

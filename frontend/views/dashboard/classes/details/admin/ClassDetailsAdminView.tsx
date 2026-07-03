@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Grid } from "@mui/material";
+import type { ClassInstanceDetailReturnType } from "@/backend/types/class-instance-detail.types";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ClassExecutionState } from "@/shared/lib/enum";
@@ -13,7 +14,7 @@ import { LivePerformanceGrid } from "./LivePerformanceGrid";
 import { MetadataCard } from "./MetadataCard";
 
 interface ClassDetailsAdminViewProps {
-  readonly instance: any;
+  readonly instance: ClassInstanceDetailReturnType;
   readonly formattedScheduledDate: string;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;

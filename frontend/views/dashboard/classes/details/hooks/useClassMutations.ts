@@ -5,13 +5,13 @@ import { useTranslations } from "next-intl";
 import {
   activateClassMutationDocument,
   activateOverrideClassMutationDocument,
+  classInstanceQueryDocument,
   deleteClassInstanceMutationDocument,
   resetClassMutationDocument,
   stopClassMutationDocument,
   updateSessionStatusAbsentMutationDocument,
   updateSessionStatusLeaveMutationDocument,
   updateSessionStatusStartMutationDocument,
-  classInstanceQueryDocument,
 } from "@/frontend/graphql/sharedDocuments";
 import { logger } from "@/frontend/utils/logger";
 
@@ -35,10 +35,7 @@ interface UseClassMutationsReturn {
   isResetting: boolean;
 }
 
-export function useClassMutations({
-  id,
-  onError,
-}: UseClassMutationsOptions): UseClassMutationsReturn {
+export function useClassMutations({ id, onError }: UseClassMutationsOptions): UseClassMutationsReturn {
   const t = useTranslations("dashboard.classDetails");
   const client = useApolloClient();
 
@@ -46,7 +43,7 @@ export function useClassMutations({
     onCompleted: () => {
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
-    onError: (err) => {
+    onError: err => {
       logger.error("Activate class failed:", { err });
       onError?.(t("loadError"));
     },
@@ -56,7 +53,7 @@ export function useClassMutations({
     onCompleted: () => {
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
-    onError: (err) => {
+    onError: err => {
       logger.error("Activate override class failed:", { err });
       onError?.(t("loadError"));
     },
@@ -66,70 +63,58 @@ export function useClassMutations({
     onCompleted: () => {
       client.refetchQueries({ include: [classInstanceQueryDocument] });
     },
-    onError: (err) => {
+    onError: err => {
       logger.error("Stop class failed:", { err });
       onError?.(t("loadError"));
     },
   });
 
   const [deleteClassMutation] = useMutation(deleteClassInstanceMutationDocument, {
-    onError: (err) => {
+    onError: err => {
       logger.error("Delete class failed:", { err });
       onError?.(t("loadError"));
     },
   });
 
-  const [startSessionMutation, { loading: isStarting }] = useMutation(
-    updateSessionStatusStartMutationDocument,
-    {
-      onCompleted: () => {
-        client.refetchQueries({ include: [classInstanceQueryDocument] });
-      },
-      onError: (err) => {
-        logger.error("Start session failed:", { err });
-        onError?.(t("loadError"));
-      },
-    }
-  );
+  const [startSessionMutation, { loading: isStarting }] = useMutation(updateSessionStatusStartMutationDocument, {
+    onCompleted: () => {
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => {
+      logger.error("Start session failed:", { err });
+      onError?.(t("loadError"));
+    },
+  });
 
-  const [markAbsentMutation, { loading: isMarkingAbsent }] = useMutation(
-    updateSessionStatusAbsentMutationDocument,
-    {
-      onCompleted: () => {
-        client.refetchQueries({ include: [classInstanceQueryDocument] });
-      },
-      onError: (err) => {
-        logger.error("Mark absent failed:", { err });
-        onError?.(t("loadError"));
-      },
-    }
-  );
+  const [markAbsentMutation, { loading: isMarkingAbsent }] = useMutation(updateSessionStatusAbsentMutationDocument, {
+    onCompleted: () => {
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => {
+      logger.error("Mark absent failed:", { err });
+      onError?.(t("loadError"));
+    },
+  });
 
-  const [processLeaveMutation, { loading: isProcessingLeave }] = useMutation(
-    updateSessionStatusLeaveMutationDocument,
-    {
-      onCompleted: () => {
-        client.refetchQueries({ include: [classInstanceQueryDocument] });
-      },
-      onError: (err) => {
-        logger.error("Process leave failed:", { err });
-        onError?.(t("loadError"));
-      },
-    }
-  );
+  const [processLeaveMutation, { loading: isProcessingLeave }] = useMutation(updateSessionStatusLeaveMutationDocument, {
+    onCompleted: () => {
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => {
+      logger.error("Process leave failed:", { err });
+      onError?.(t("loadError"));
+    },
+  });
 
-  const [resetSessionMutation, { loading: isResetting }] = useMutation(
-    resetClassMutationDocument,
-    {
-      onCompleted: () => {
-        client.refetchQueries({ include: [classInstanceQueryDocument] });
-      },
-      onError: (err) => {
-        logger.error("Reset session failed:", { err });
-        onError?.(t("loadError"));
-      },
-    }
-  );
+  const [resetSessionMutation, { loading: isResetting }] = useMutation(resetClassMutationDocument, {
+    onCompleted: () => {
+      client.refetchQueries({ include: [classInstanceQueryDocument] });
+    },
+    onError: err => {
+      logger.error("Reset session failed:", { err });
+      onError?.(t("loadError"));
+    },
+  });
 
   const forceActivate = async () => {
     try {

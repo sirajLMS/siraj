@@ -1,8 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
-
 import {
   Alert,
   Box,
@@ -19,9 +17,10 @@ import {
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import type { ClassInstanceDetailReturnType as ClassInstanceDetail } from "@/backend/types/class-instance-detail.types";
+import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { ClassInstanceDetailReturnType as ClassInstanceDetail } from "@/backend/types/class-instance-detail.types";
 import { classInstanceQueryDocument, classStatusEventsQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
@@ -29,8 +28,8 @@ import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/dashboard/uti
 import { useRouter } from "@/shared/i18n/routing";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
 import { ClassDetailsHeader } from "./ClassDetailsHeader";
-import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
 import { useClassMutations } from "./hooks/useClassMutations";
+import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
 import { type ClassDetailsViewMode, formatClassDetailDate } from "./types";
 import { useAdminViewLabels, useTeacherViewLabels } from "./useClassDetailsLabels";
 
@@ -117,10 +116,10 @@ export function ClassDetailsContainer() {
         link.click();
         link.remove();
         URL.revokeObjectURL(url);
-        setErrorState(t("actions.generateLogSuccess"));
+        setErrorState(t("actionFeedback.generateLogSuccess"));
       } catch (err) {
         logger.error("Error generating log:", err);
-        setErrorState(t("actions.generateLogError"));
+        setErrorState(t("actionFeedback.generateLogError"));
       } finally {
         setShouldLoadEvents(false);
       }
@@ -133,9 +132,9 @@ export function ClassDetailsContainer() {
       setErrorState(t("loadError"));
       setShouldLoadEvents(false);
     }
-    }, [eventsError, shouldLoadEvents, t]);
+  }, [eventsError, shouldLoadEvents, t]);
 
-    const {
+  const {
     forceActivate,
     activate,
     stopClass: stopClassMutation,
@@ -150,7 +149,7 @@ export function ClassDetailsContainer() {
     isResetting,
   } = useClassMutations({
     id,
-    onError: (error) => setErrorState(error),
+    onError: error => setErrorState(error),
   });
 
   const canOverride = hasPermission(AppPermission.SessionOverrideActions);
@@ -159,13 +158,19 @@ export function ClassDetailsContainer() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>          <CircularProgress sx={(theme) => ({ color: theme.palette.primary.main })} />
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+        {" "}
+        <CircularProgress sx={theme => ({ color: theme.palette.primary.main })} />
       </Box>
     );
   }
 
   if (!id) {
-    return     <Box sx={(theme) => ({ p: 3, textAlign: "center", color: theme.palette.onSurfaceVariant })}>{t("invalidClassId")}</Box>;
+    return (
+      <Box sx={theme => ({ p: 3, textAlign: "center", color: theme.palette.onSurfaceVariant })}>
+        {t("invalidClassId")}
+      </Box>
+    );
   }
 
   if (error || !data?.classInstance) {
@@ -177,7 +182,7 @@ export function ClassDetailsContainer() {
     );
   }
 
-  const instance = data.classInstance;
+  const instance = data.classInstance as ClassInstanceDetail;
   const formattedScheduledDate = formatClassDetailDate(instance.scheduledDate, locale);
   const formattedStartTime = formatScheduleTimeOnly(instance.startTime, locale);
   const formattedEndTime = formatScheduleTimeOnly(instance.endTime, locale);
@@ -188,7 +193,7 @@ export function ClassDetailsContainer() {
       setErrorState(null);
     } catch (err) {
       logger.error("Error in forceActivate:", err);
-      setErrorState(t("actions.forceActivateError"));
+      setErrorState(t("actionFeedback.forceActivateError"));
     }
   };
 
@@ -198,7 +203,7 @@ export function ClassDetailsContainer() {
       setErrorState(null);
     } catch (err) {
       logger.error("Error in stopClass:", err);
-      setErrorState(t("actions.stopError"));
+      setErrorState(t("actionFeedback.stopError"));
     }
   };
 
@@ -208,7 +213,7 @@ export function ClassDetailsContainer() {
       setErrorState(null);
     } catch (err) {
       logger.error("Error in activate:", err);
-      setErrorState(t("actions.activateError"));
+      setErrorState(t("actionFeedback.activateError"));
     }
   };
 
@@ -218,7 +223,7 @@ export function ClassDetailsContainer() {
       router.push("/dashboard");
     } catch (err) {
       logger.error("Error in deleteClass:", err);
-      setErrorState(t("actions.delete.error"));
+      setErrorState(t("actionFeedback.deleteError"));
     }
   };
 
@@ -238,7 +243,7 @@ export function ClassDetailsContainer() {
     router.push(`/classes/${id}/audit`);
   };
 
-  const pageHeader = <ClassDetailsHeader instance={instance as ClassInstanceDetail} canOverride={canOverride} isMobile={isMobile} />;
+  const pageHeader = <ClassDetailsHeader instance={instance} canOverride={canOverride} isMobile={isMobile} />;
 
   const sessionActionProps = {
     formattedScheduledDate,

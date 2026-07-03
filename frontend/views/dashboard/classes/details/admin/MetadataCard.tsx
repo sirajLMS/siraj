@@ -36,7 +36,7 @@ const StyledLabelRow = styled(Stack)(({ theme }) => ({
   gap: theme.spacing(1),
 }));
 
-const StyledRowDivider = styled(Divider)(() => ({}))
+const StyledRowDivider = styled(Divider)(() => ({}));
 
 const StyledMetadataHeader = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
@@ -68,14 +68,21 @@ function MetadataRow({ icon, label, value }: MetadataRowProps) {
         </StyledLabelRow>
         {value}
       </Stack>
-      <StyledRowDivider sx={(theme) => ({ borderColor: theme.palette.outlineVariant })} />
+      <StyledRowDivider sx={theme => ({ borderColor: theme.palette.outlineVariant })} />
     </>
   );
 }
 
 function formatValue(value: string | number | null | undefined, fallback: string): React.ReactNode {
   if (value === null || value === undefined || value === "") {
-    return     <StyledUnavailableText variant="caption" sx={(theme) => ({ color: theme.palette.onSurfaceVariant, fontWeight: theme.typography.fontWeightBold })}>{fallback}</StyledUnavailableText>;
+    return (
+      <StyledUnavailableText
+        variant="caption"
+        sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: theme.typography.fontWeightBold })}
+      >
+        {fallback}
+      </StyledUnavailableText>
+    );
   }
   return <StyledPrimaryValueText variant="caption">{value}</StyledPrimaryValueText>;
 }
@@ -90,8 +97,7 @@ export function MetadataCard({
 }: MetadataCardProps) {
   return (
     <BaseCard sx={{ height: "100%" }}>
-      <StyledMetadataHeader variant="labelUppercase" sx={(theme) => ({ mb: 2, color: theme.palette.onSurfaceVariant })}
-      >
+      <StyledMetadataHeader variant="labelUppercase" sx={theme => ({ mb: 2, color: theme.palette.onSurfaceVariant })}>
         {labels.metadata}
       </StyledMetadataHeader>
 
@@ -105,7 +111,9 @@ export function MetadataCard({
           icon={<ScheduleIcon sx={{ fontSize: 18 }} />}
           label={labels.duration}
           value={
-            <StyledPrimaryValueText variant="caption" sx={(theme) => ({ color: theme.palette.primary.main, fontWeight: theme.typography.fontWeightBold })}
+            <StyledPrimaryValueText
+              variant="caption"
+              sx={theme => ({ color: theme.palette.primary.main, fontWeight: theme.typography.fontWeightBold })}
             >
               {durationMinutes} {labels.minutes}
             </StyledPrimaryValueText>
@@ -118,7 +126,12 @@ export function MetadataCard({
               label={labels.latency}
               value={
                 latencyMs != null ? (
-                  <StyledActiveValueText variant="caption" sx={(theme) => ({ color: theme.palette.status.active, fontWeight: theme.typography.fontWeightBold })}>{latencyMs}ms</StyledActiveValueText>
+                  <StyledActiveValueText
+                    variant="caption"
+                    sx={theme => ({ color: theme.palette.status.active, fontWeight: theme.typography.fontWeightBold })}
+                  >
+                    {latencyMs}ms
+                  </StyledActiveValueText>
                 ) : (
                   formatValue(null, labels.unavailable)
                 )

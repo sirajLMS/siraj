@@ -40,8 +40,6 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
     });
     return response;
-
-    return NextResponse.json({ success: true, locale });
   } catch {
     return NextResponse.json({ error: "Failed to set locale" }, { status: 500 });
   }

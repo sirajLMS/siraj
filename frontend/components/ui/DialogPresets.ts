@@ -5,7 +5,7 @@ import type { DialogProps } from "@mui/material/Dialog";
 /**
  * Shared dialog presets for consistent styling and behavior.
  * Apply these to Dialog components using the spread operator:
- * 
+ *
  * ```tsx
  * <Dialog {...DialogPresets.confirm}>
  *   <DialogTitle>Confirm Action</DialogTitle>

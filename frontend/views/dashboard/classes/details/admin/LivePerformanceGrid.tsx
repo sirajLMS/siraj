@@ -31,11 +31,11 @@ interface LivePerformanceGridProps {
   };
 }
 
-const StyledSectionTitle = styled(Typography)(() => ({}))
+const StyledSectionTitle = styled(Typography)(() => ({}));
 
-const StyledTimeRangeChip = styled(Box)(() => ({}))
+const StyledTimeRangeChip = styled(Box)(() => ({}));
 
-const StyledTimeRangeCaption = styled(Typography)(() => ({}))
+const StyledTimeRangeCaption = styled(Typography)(() => ({}));
 
 export function LivePerformanceGrid({ metrics, hasData, labels }: LivePerformanceGridProps) {
   const labelMap: Record<string, string> = {
@@ -57,18 +57,23 @@ export function LivePerformanceGrid({ metrics, hasData, labels }: LivePerformanc
   return (
     <Box>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <StyledSectionTitle variant="headlineMd" sx={(theme) => ({ color: theme.palette.primary.main })}>{labels.livePerformanceOverview}</StyledSectionTitle>
+        <StyledSectionTitle variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
+          {labels.livePerformanceOverview}
+        </StyledSectionTitle>
         {hasData ? (
-          <StyledTimeRangeChip sx={(theme) => ({
-            paddingInline: theme.spacing(2),
-            paddingBlock: theme.spacing(0.75),
-            border: 1,
-            borderColor: theme.palette.border.light,
-            borderRadius: 2,
-            backgroundColor: theme.palette.background.paper,
-          })}
+          <StyledTimeRangeChip
+            sx={theme => ({
+              paddingInline: theme.spacing(2),
+              paddingBlock: theme.spacing(0.75),
+              border: 1,
+              borderColor: theme.palette.border.light,
+              borderRadius: 2,
+              backgroundColor: theme.palette.background.paper,
+            })}
           >
-            <StyledTimeRangeCaption variant="caption" sx={(theme) => ({ color: theme.palette.text.secondary })}>{labels.last30Mins}</StyledTimeRangeCaption>
+            <StyledTimeRangeCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {labels.last30Mins}
+            </StyledTimeRangeCaption>
           </StyledTimeRangeChip>
         ) : null}
       </Stack>
@@ -78,7 +83,7 @@ export function LivePerformanceGrid({ metrics, hasData, labels }: LivePerformanc
       ) : (
         <Typography
           variant="body2"
-          sx={(theme) => ({ color: theme.palette.onSurfaceVariant, py: 4, textAlign: "center" })}
+          sx={theme => ({ color: theme.palette.onSurfaceVariant, py: 4, textAlign: "center" })}
         >
           {labels.noData}
         </Typography>

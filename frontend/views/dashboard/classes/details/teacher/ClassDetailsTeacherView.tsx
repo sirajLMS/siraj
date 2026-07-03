@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Grid } from "@mui/material";
+import type { ClassInstanceDetailReturnType } from "@/backend/types/class-instance-detail.types";
 import type { ClassInstanceStatus } from "@/frontend/views/dashboard/types/dashboard";
 import { ClassDetailsToolbarArea } from "../components/ClassDetailsToolbarArea";
 import type { ClassDetailsViewMode } from "../types";
@@ -19,7 +20,7 @@ const EXECUTION_STATE_TO_STATUS: Record<string, ClassInstanceStatus> = {
 };
 
 interface ClassDetailsTeacherViewProps {
-  readonly instance: any;
+  readonly instance: ClassInstanceDetailReturnType;
   readonly viewMode: ClassDetailsViewMode;
   readonly formattedStartTime: string;
   readonly formattedEndTime: string;

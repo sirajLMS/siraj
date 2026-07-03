@@ -1,17 +1,13 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/react";
 import { create } from "zustand";
+import type { ClassInstanceDetailReturnType } from "@/backend/types/class-instance-detail.types";
 import { PageContainer } from "@/frontend/components/ui";
-import {
-  AppPermission,
-  ClassExecutionState,
-  
-  ClassOutcome,
-  ClassType,
-} from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import type { ClassInstance } from "@/frontend/views/dashboard/types/dashboard";
+import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/lib/enum";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
 import { ClassDetailsHeader } from "./ClassDetailsHeader";
 import { ClassDetailsTeacherView } from "./teacher/ClassDetailsTeacherView";
@@ -73,7 +69,7 @@ const useMockClassDetailsStore = create<MockClassDetailsState>(set => ({
 
 interface MockViewProps {
   readonly pageHeader: React.ReactNode;
-  readonly instance: ClassInstanceDetail;
+  readonly instance: ClassInstanceDetailReturnType;
   readonly isWarningDismissed: boolean;
   readonly dismissWarning: () => void;
 }
@@ -98,7 +94,7 @@ function MockAdminViewWrapper({ pageHeader, instance, isWarningDismissed, dismis
     <PageContainer>
       {pageHeader}
       <ClassDetailsAdminView
-        instance={instance as unknown as ClassInstanceDetailReturnType}
+        instance={instance}
         formattedScheduledDate={instance.scheduledDate ?? ""}
         isWarningDismissed={isWarningDismissed}
         onDismissWarning={dismissWarning}
@@ -142,7 +138,7 @@ function MockTeacherViewWrapper({ pageHeader, instance, isWarningDismissed, dism
     <PageContainer>
       {pageHeader}
       <ClassDetailsTeacherView
-        instance={instance as unknown as ClassInstanceDetailReturnType}
+        instance={instance}
         viewMode="teacher"
         formattedStartTime={instance.startTime ?? ""}
         formattedEndTime={instance.endTime ?? ""}
@@ -167,29 +163,27 @@ function MockTeacherViewWrapper({ pageHeader, instance, isWarningDismissed, dism
   );
 }
 
-function mapMockToReal(mock: ClassInstance): ClassInstanceDetail {
+function mapMockToReal(mock: ClassInstance): ClassInstanceDetailReturnType {
   return {
-    __typename: "ClassInstanceDetail",
     id: mock.id,
     instanceId: mock.instanceId,
     courseName: mock.courseName,
-    classType: ClassType.Regular,
+    classType: ClassType.REGULAR,
     scheduledDate: mock.scheduledDate,
     startTime: mock.startTime,
     endTime: mock.endTime,
     durationMinutes: mock.durationMinutes,
-    status: ClassExecutionState.NotActivated,
+    status: ClassExecutionState.NOT_ACTIVATED,
     remarks: mock.remarks,
     hasTimezoneMismatch: mock.hasTimezoneMismatch,
     studentTimezone: mock.studentTimezone,
     teacherTimezone: null,
     zoomMeetingUrl: "",
-    executionState: ClassExecutionState.NotActivated,
+    executionState: ClassExecutionState.NOT_ACTIVATED,
     isRescheduled: false,
-    outcome: ClassOutcome.Pending,
+    outcome: ClassOutcome.PENDING,
     payrollCredited: false,
     student: {
-      __typename: "ClassInstanceStudentInfo",
       id: mock.student.id,
       name: mock.student.name,
       grade: mock.student.grade,
@@ -197,14 +191,12 @@ function mapMockToReal(mock: ClassInstance): ClassInstanceDetail {
       avatarUrl: mock.student.avatarUrl,
     },
     teacher: {
-      __typename: "ClassInstanceTeacherInfo",
       id: "teacher-id",
       name: mock.teacher.name,
       title: mock.teacher.title,
       avatarUrl: mock.teacher.avatarUrl,
     },
     performance: {
-      __typename: "ClassInstancePerformance",
       id: "perf-1",
       engagementScore: 92,
       assessmentProgress: 14,

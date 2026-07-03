@@ -26,12 +26,12 @@ interface AdminActionsBarProps {
   };
 }
 
-const StyledActionsDivider = styled(Box)(() => ({}))
+const StyledActionsDivider = styled(Box)(() => ({}));
 
 const StyledForceActivateButton = styled(IconButton)(() => ({
   borderRadius: 1.5,
   transition: "all 0.15s ease",
-}))
+}));
 
 const StyledStopPauseButton = styled(IconButton)(() => ({
   borderRadius: 1.5,
@@ -40,7 +40,7 @@ const StyledStopPauseButton = styled(IconButton)(() => ({
 const StyledDeleteIconButton = styled(IconButton)(() => ({
   borderRadius: 1.5,
   transition: "all 0.15s ease",
-}))
+}));
 
 const StyledAdminActionsBar = styled(Box)(() => ({
   paddingInline: 2,
@@ -67,13 +67,13 @@ function LeftAdminActions({
   return (
     <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
       <Typography variant="labelUppercase">{labels.administrativeActions}</Typography>
-      <StyledActionsDivider sx={(theme) => ({ width: 1, height: 16, backgroundColor: theme.palette.outlineVariant })} />
+      <StyledActionsDivider sx={theme => ({ width: 1, height: 16, backgroundColor: theme.palette.outlineVariant })} />
       <Stack direction="row" sx={{ gap: 1 }}>
-        <StyledForceActivateButton 
-          aria-label="force-activate" 
-          title={labels.forceActivate} 
-          onClick={onForceActivate} 
-          sx={(theme) => ({
+        <StyledForceActivateButton
+          aria-label="force-activate"
+          title={labels.forceActivate}
+          onClick={onForceActivate}
+          sx={theme => ({
             backgroundColor: theme.palette.status.activeContainer,
             color: theme.palette.status.onActiveContainer,
             "&:hover": {
@@ -87,11 +87,11 @@ function LeftAdminActions({
         >
           <PowerSettingsNewIcon />
         </StyledForceActivateButton>
-        <StyledStopPauseButton 
-          aria-label="stop-pause" 
-          title={labels.stopPause} 
-          onClick={onStop} 
-          sx={(theme) => ({
+        <StyledStopPauseButton
+          aria-label="stop-pause"
+          title={labels.stopPause}
+          onClick={onStop}
+          sx={theme => ({
             backgroundColor: theme.palette.status.cancelledContainer,
             color: theme.palette.status.onCancelledContainer,
             "&:hover": {
@@ -169,11 +169,11 @@ function RightAdminActions({
         <ArticleIcon sx={{ fontSize: 16 }} />
         {labels.generateLog}
       </Box>
-      <StyledDeleteIconButton 
-        aria-label="delete-instance" 
-        title={labels.deleteInstance} 
-        onClick={onDelete} 
-        sx={(theme) => ({
+      <StyledDeleteIconButton
+        aria-label="delete-instance"
+        title={labels.deleteInstance}
+        onClick={onDelete}
+        sx={theme => ({
           backgroundColor: theme.palette.status.blockedContainer,
           color: theme.palette.status.onBlockedContainer,
           "&:hover": {
@@ -200,8 +200,8 @@ export function AdminActionsBar({
   labels,
 }: AdminActionsBarProps) {
   return (
-    <StyledAdminActionsBar 
-      sx={(theme) => ({
+    <StyledAdminActionsBar
+      sx={theme => ({
         mb: 3,
         backgroundColor: theme.palette.headerContainer,
         color: theme.palette.onHeaderContainer,

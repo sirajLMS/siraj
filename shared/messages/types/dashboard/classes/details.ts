@@ -65,6 +65,25 @@ export interface ClassDetailsLabels {
     readonly confirm: string;
     readonly cancel: string;
   };
+  readonly actionFeedback: {
+    readonly forceActivateSuccess: string;
+    readonly forceActivateError: string;
+    readonly activateSuccess: string;
+    readonly activateError: string;
+    readonly stopSuccess: string;
+    readonly stopError: string;
+    readonly deleteError: string;
+    readonly generateLogSuccess: string;
+    readonly generateLogError: string;
+    readonly startSuccess: string;
+    readonly startError: string;
+    readonly resetSuccess: string;
+    readonly resetError: string;
+    readonly markAbsentSuccess: string;
+    readonly markAbsentError: string;
+    readonly leaveSuccess: string;
+    readonly leaveError: string;
+  };
   readonly loadError: string;
   readonly status: {
     readonly active: string;

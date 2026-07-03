@@ -25,7 +25,7 @@ interface StatBoxProps {
 }
 
 // Rounded default-background container for a single performance stat
-const StyledStatBox = styled(Box)(({ theme }) => ({  
+const StyledStatBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
   backgroundColor: theme.palette.background.default,
   borderRadius: theme.shape.borderRadius,
@@ -40,10 +40,6 @@ const StyledStatLabel = styled(Typography)(({ theme }) => ({
 const StyledStatValue = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
-
-const StyledSectionTitle = styled(Typography)(({ theme }) => ({})) as typeof Typography;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const unused = theme;
 
 function StatBox({ label, value }: StatBoxProps) {
   return (
@@ -65,9 +61,9 @@ export function PerformanceOverviewCard({
 }: PerformanceOverviewCardProps) {
   return (
     <BaseCard>
-      <StyledSectionTitle variant="titleLg" sx={(theme) => ({ mb: 2.5, color: theme.palette.text.primary })}>
+      <Typography variant="titleLg" sx={theme => ({ mb: 2.5, color: theme.palette.text.primary })}>
         {labels.previousPerformanceOverview}
-      </StyledSectionTitle>
+      </Typography>
       {hasData ? (
         <Grid container spacing={2}>
           <Grid size={{ xs: 4 }}>
@@ -81,10 +77,7 @@ export function PerformanceOverviewCard({
           </Grid>
         </Grid>
       ) : (
-        <Typography
-          variant="body2"
-          sx={{ textAlign: "center", py: 2 }}
-        >
+        <Typography variant="body2" sx={{ textAlign: "center", py: 2 }}>
           {labels.noData}
         </Typography>
       )}

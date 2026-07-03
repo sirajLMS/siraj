@@ -52,7 +52,7 @@ const StyledLegendCaption = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
 }));
 
-const StyledGridDivider = styled(Divider)(() => ({}))
+const StyledGridDivider = styled(Divider)(() => ({}));
 
 const StyledEmptyState = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
@@ -71,14 +71,16 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
   return (
     <BaseCard sx={{ p: 0, overflow: "hidden", mt: 3 }}>
       <StyledHeatmapHeader direction="row">
-        <StyledSectionTitle variant="titleLg" sx={(theme) => ({ color: theme.palette.primary.main })}>{labels.activityHeatmap}</StyledSectionTitle>
+        <StyledSectionTitle variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
+          {labels.activityHeatmap}
+        </StyledSectionTitle>
         <Stack direction="row" sx={{ gap: 3 }}>
           <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-            <StyledStudentInputSwatch sx={(theme) => ({ backgroundColor: theme.palette.primary.main })} />
+            <StyledStudentInputSwatch sx={theme => ({ backgroundColor: theme.palette.primary.main })} />
             <StyledLegendCaption variant="caption">{labels.studentInput}</StyledLegendCaption>
           </Stack>
           <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-            <StyledTeacherResponseSwatch sx={(theme) => ({ backgroundColor: theme.palette.secondary.main })} />
+            <StyledTeacherResponseSwatch sx={theme => ({ backgroundColor: theme.palette.secondary.main })} />
             <StyledLegendCaption variant="caption">{labels.teacherResponse}</StyledLegendCaption>
           </Stack>
         </Stack>
@@ -87,7 +89,12 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
       <Box sx={{ px: 4, pb: 4, pt: 2, height: 300, position: "relative" }}>
         {!hasData ? (
           <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
-            <StyledEmptyState variant="body2" sx={(theme) => ({ color: theme.palette.onSurfaceVariant, textAlign: "center" })}>{labels.noData}</StyledEmptyState>
+            <StyledEmptyState
+              variant="body2"
+              sx={theme => ({ color: theme.palette.onSurfaceVariant, textAlign: "center" })}
+            >
+              {labels.noData}
+            </StyledEmptyState>
           </Stack>
         ) : (
           <>
@@ -102,7 +109,10 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
               }}
             >
               {[0, 1, 2].map(i => (
-                <StyledGridDivider key={i} sx={(theme) => ({ borderColor: theme.palette.outlineVariant, opacity: 0.4 })} />
+                <StyledGridDivider
+                  key={i}
+                  sx={theme => ({ borderColor: theme.palette.outlineVariant, opacity: 0.4 })}
+                />
               ))}
             </Box>
 
@@ -117,18 +127,16 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
               {bars.map((bar, i) => (
                 <Box
                   key={bar.id}
-                  sx={
-                    (theme) => ({
-                      flex: 1,
-                      height: `${bar.height}%`,
-                      borderRadius: "4px 4px 0 0",
-                      backgroundColor: i % 2 === 0 ? theme.palette.primary.main : theme.palette.secondary.main,
-                      opacity: i % 2 === 0 ? 0.85 : 0.5,
-                      transition: "height 0.6s ease",
-                      "&:hover": { opacity: 1, filter: "brightness(1.15)" },
-                      cursor: "pointer",
-                    })
-                  }
+                  sx={theme => ({
+                    flex: 1,
+                    height: `${bar.height}%`,
+                    borderRadius: "4px 4px 0 0",
+                    backgroundColor: i % 2 === 0 ? theme.palette.primary.main : theme.palette.secondary.main,
+                    opacity: i % 2 === 0 ? 0.85 : 0.5,
+                    transition: "height 0.6s ease",
+                    "&:hover": { opacity: 1, filter: "brightness(1.15)" },
+                    cursor: "pointer",
+                  })}
                 />
               ))}
             </Stack>

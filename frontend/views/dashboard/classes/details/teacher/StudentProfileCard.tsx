@@ -20,7 +20,7 @@ const StyledTopAccentBar = styled(Box)(() => ({
   top: 0,
   left: 0,
   right: 0,
-}))
+}));
 
 const StyledViewProfileButton = styled(Link)(() => ({
   display: "block",
@@ -33,7 +33,7 @@ const StyledViewProfileButton = styled(Link)(() => ({
   textDecoration: "none",
   typography: "labelUppercase",
   transition: "all 0.2s ease",
-}))
+}));
 
 export function StudentProfileCard({ student, labels }: StudentProfileCardProps) {
   if (!student.id) {
@@ -54,10 +54,10 @@ export function StudentProfileCard({ student, labels }: StudentProfileCardProps)
         <StudentEntityLink studentId={student.id} name={student.name} avatarUrl={student.avatarUrl} showAvatar />
       </Box>
 
-      <StyledViewProfileButton 
-        href={profileHref} 
-        id="view-student-profile-btn" 
-        sx={(theme) => ({
+      <StyledViewProfileButton
+        href={profileHref}
+        id="view-student-profile-btn"
+        sx={theme => ({
           border: `1px solid ${theme.palette.header}`,
           color: theme.palette.header,
           paddingBlock: theme.spacing(1.25),

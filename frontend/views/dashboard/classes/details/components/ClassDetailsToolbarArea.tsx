@@ -3,14 +3,15 @@
 import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
 import { Stack } from "@mui/material";
 import { useTranslations } from "next-intl";
+import type { ClassInstanceDetailReturnType } from "@/backend/types/class-instance-detail.types";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { PrimaryPageAction } from "@/frontend/components/ui";
-import { AppPermission, type ClassInstanceDetail } from "@/frontend/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { TimezoneWarningBanner } from "../teacher/TimezoneWarningBanner";
 import { LiveSessionToolbar } from "./LiveSessionToolbar";
 
 export interface ClassDetailsToolbarAreaProps {
-  readonly instance: ClassInstanceDetail;
+  readonly instance: ClassInstanceDetailReturnType;
   readonly isWarningDismissed: boolean;
   readonly onDismissWarning: () => void;
   readonly labels: {
@@ -67,7 +68,7 @@ export function ClassDetailsToolbarArea({
       )}
 
       {zoomMeetingUrl ? (
-        <Stack direction="row" sx={(theme) => ({ mb: theme.spacing(2) })}>
+        <Stack direction="row" sx={theme => ({ mb: theme.spacing(2) })}>
           <PrimaryPageAction startIcon={<VideocamOutlined />} onClick={handleJoinZoom} id={`join-zoom-${instance.id}`}>
             {t("joinZoom")}
           </PrimaryPageAction>

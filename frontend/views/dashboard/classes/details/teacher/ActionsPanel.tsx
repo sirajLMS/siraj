@@ -127,7 +127,7 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
                 component="button"
                 id={`action-btn-${config.key}`}
                 onClick={handlers[config.key]}
-                sx={(theme) => {
+                sx={theme => {
                   const status = theme.palette.status;
                   const mainColor = status[statusKey];
                   const borderColor = status[`${statusKey}Container`];

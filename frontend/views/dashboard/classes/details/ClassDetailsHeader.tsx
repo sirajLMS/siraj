@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { PageHeader } from "@/frontend/components/ui";
 import type { ClassInstanceDetailReturnType as ClassInstanceDetail } from "@/backend/types/class-instance-detail.types";
+import { PageHeader } from "@/frontend/components/ui";
 
 interface ClassDetailsHeaderProps {
   readonly instance: ClassInstanceDetail;
