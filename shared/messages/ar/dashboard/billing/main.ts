@@ -14,6 +14,7 @@ export const billing: BillingLabels = {
   invalidUserId: "معرف المستخدم غير صالح",
   billingProfileTitle: "الملف المالي للمستخدم",
   profileForUser: "تفاصيل الملف المالي للمستخدم {userId}",
+  reminderSent: "تم إرسال تذكير الدفع",
   adminMetrics: {
     totalOutstanding: "إجمالي المستحقات",
     pendingInvoices: "الفواتير المعلقة",

@@ -57,13 +57,7 @@ function renderMetricCard({
   );
 }
 
-export function MetricCardGrid({
-  metrics,
-  onMetricClick,
-  selectedKey,
-  size,
-  layout = "grid",
-}: MetricCardGridProps) {
+export function MetricCardGrid({ metrics, onMetricClick, selectedKey, size, layout = "grid" }: MetricCardGridProps) {
   const t = useTranslations();
   const isScroll = layout === "scroll";
 

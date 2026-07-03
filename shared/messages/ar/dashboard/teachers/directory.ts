@@ -24,6 +24,10 @@ export const directory: TeachersDirectoryLabels = {
     showingOf: "عرض {count} من أصل {total} معلم",
     linkPending: "الرابط قيد الانتظار",
   },
+  fields: {
+    phone: "الهاتف",
+    skypeId: "معرف سكايب",
+  },
   status: {
     active: "نشط",
     offline: "غير متصل",

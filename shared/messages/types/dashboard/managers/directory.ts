@@ -25,9 +25,21 @@ export interface ManagersDirectoryLabels {
     readonly roleType: string;
     readonly options: string;
   };
+  readonly fields: {
+    readonly phone: string;
+    readonly skypeId: string;
+  };
   readonly actions: {
     readonly addManager: string;
     readonly options: string;
+    readonly editProfile: string;
+    readonly deactivate: string;
+    readonly activate: string;
+    readonly cancel: string;
+    readonly processing: string;
+    readonly save: string;
+    readonly deactivateConfirmation: string;
+    readonly activateConfirmation: string;
   };
   readonly status: {
     readonly active: string;

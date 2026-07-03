@@ -82,4 +82,7 @@ export const permissions: PermissionsLabels = {
   assignedBy: "عُين بواسطة",
   assignedBySystem: "النظام",
   removeUser: "إزالة",
+  errors: {
+    operationFailed: "فشلت العملية. يرجى المحاولة مرة أخرى.",
+  },
 };

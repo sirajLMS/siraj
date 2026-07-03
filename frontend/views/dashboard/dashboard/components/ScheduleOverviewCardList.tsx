@@ -1,12 +1,11 @@
 "use client";
 
 import { AccessTimeOutlined, HistoryOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Avatar, Box, Paper, Stack, Tooltip, type Theme, Typography } from "@mui/material";
+import { Avatar, Box, Paper, Stack, type Theme, Tooltip, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import { useLocale } from "next-intl";
-import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { ActionIconLink } from "@/frontend/components/ui";
+import { AppPermission, type ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
 import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
 import {
@@ -312,12 +311,14 @@ function PersonCell({ name, label, tone, href }: PersonCellProps) {
             title={name}
             tone={tone}
             {...(href ? { component: Link, href } : {})}
-            sx={href
-              ? {
-                  textDecoration: "none",
-                  "&:hover": { textDecoration: "underline" },
-                }
-              : undefined}
+            sx={
+              href
+                ? {
+                    textDecoration: "none",
+                    "&:hover": { textDecoration: "underline" },
+                  }
+                : undefined
+            }
           >
             {name}
           </StyledPersonName>

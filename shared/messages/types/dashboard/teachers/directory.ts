@@ -22,6 +22,10 @@ export interface TeachersDirectoryLabels {
     readonly showingOf: string;
     readonly linkPending: string;
   };
+  readonly fields: {
+    readonly phone: string;
+    readonly skypeId: string;
+  };
   readonly status: {
     readonly active: string;
     readonly offline: string;

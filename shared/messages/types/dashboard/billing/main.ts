@@ -18,6 +18,7 @@ export interface BillingLabels {
   readonly invalidUserId: string;
   readonly billingProfileTitle: string;
   readonly profileForUser: string;
+  readonly reminderSent: string;
   readonly adminMetrics: {
     readonly totalOutstanding: string;
     readonly pendingInvoices: string;

@@ -1,7 +1,7 @@
 import {
   AccountStatus,
-  AppPermission,
   AppLanguage,
+  AppPermission,
   AttendanceStatus,
   AvailabilityStatus,
   BookingStatus,

@@ -78,4 +78,7 @@ export interface PermissionsLabels {
   assignedBy: string;
   assignedBySystem: string;
   removeUser: string;
+  readonly errors: {
+    readonly operationFailed: string;
+  };
 }

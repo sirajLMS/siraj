@@ -50,9 +50,13 @@ export const history: StudentHistoryLabels = {
       RUNNING: "جارٍ",
       COMPLETED: "مكتمل",
     },
+    noSessions: "لا توجد حصص مجدولة لهذا التاريخ.",
   },
   performanceStreak: {
     title: "سلسلة الأداء",
     description: "لقد حضرت 100% من الحصص هذا الأسبوع. واصل هذا الزخم!",
+  },
+  errors: {
+    loadFailed: "فشل في تحميل سجل الطالب.",
   },
 };

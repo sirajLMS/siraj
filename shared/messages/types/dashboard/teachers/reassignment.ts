@@ -42,4 +42,7 @@ export interface TeacherReassignmentLabels {
     readonly reassignSuccess: string;
     readonly statusChangeSuccess: string;
   };
+  readonly errors: {
+    readonly invalidId: string;
+  };
 }

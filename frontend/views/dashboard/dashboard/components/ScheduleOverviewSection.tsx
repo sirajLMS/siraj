@@ -138,65 +138,65 @@ const DesktopLayout = ({
   onSubmit,
 }: ScheduleOverviewSectionProps) => (
   <StyledDesktopPanel elevation={0}>
-      <SectionPanel
-        title={<ScheduleOverviewTitle title={title} selectedMetricLabel={selectedMetricLabel} />}
-        actions={
-          <RequirePermission permissions={[AppPermission.DashboardSearch]}>
-            <TextField
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={event => {
-                onSearchChange(event.target.value);
-              }}
-              size="small"
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <StyledSearchIcon />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{
-                maxWidth: { md: 280 },
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                },
-              }}
-            />
-          </RequirePermission>
-        }
-      >
-        <StyledFilterContainer>
-          <ScheduleOverviewFilters
-            dateLabel={dateLabel}
-            dateValue={dateValue}
-            todayLabel={todayLabel}
-            previousDayLabel={previousDayLabel}
-            nextDayLabel={nextDayLabel}
-            teacherPlaceholder={teacherPlaceholder}
-            teacherValue={teacherValue}
-            submitLabel={submitLabel}
-            teachers={teachers}
-            onDateChange={onDateChange}
-            onTeacherChange={onTeacherChange}
-            onSubmit={onSubmit}
+    <SectionPanel
+      title={<ScheduleOverviewTitle title={title} selectedMetricLabel={selectedMetricLabel} />}
+      actions={
+        <RequirePermission permissions={[AppPermission.DashboardSearch]}>
+          <TextField
+            placeholder={searchPlaceholder}
+            value={searchValue}
+            onChange={event => {
+              onSearchChange(event.target.value);
+            }}
+            size="small"
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <StyledSearchIcon />
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={{
+              maxWidth: { md: 280 },
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+              },
+            }}
           />
-        </StyledFilterContainer>
-
-        <ScheduleOverviewDataGrid
-          rows={rows}
-          page={page}
-          pageSize={pageSize}
-          totalCount={totalCount}
-          onPageChange={onPageChange}
-          headers={headers}
-          statusLabels={statusLabels}
-          detailsLabel={detailsLabel}
-          emptyMessage={emptyMessage}
+        </RequirePermission>
+      }
+    >
+      <StyledFilterContainer>
+        <ScheduleOverviewFilters
+          dateLabel={dateLabel}
+          dateValue={dateValue}
+          todayLabel={todayLabel}
+          previousDayLabel={previousDayLabel}
+          nextDayLabel={nextDayLabel}
+          teacherPlaceholder={teacherPlaceholder}
+          teacherValue={teacherValue}
+          submitLabel={submitLabel}
+          teachers={teachers}
+          onDateChange={onDateChange}
+          onTeacherChange={onTeacherChange}
+          onSubmit={onSubmit}
         />
-      </SectionPanel>
+      </StyledFilterContainer>
+
+      <ScheduleOverviewDataGrid
+        rows={rows}
+        page={page}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        onPageChange={onPageChange}
+        headers={headers}
+        statusLabels={statusLabels}
+        detailsLabel={detailsLabel}
+        emptyMessage={emptyMessage}
+      />
+    </SectionPanel>
   </StyledDesktopPanel>
 );
 
@@ -232,7 +232,10 @@ const MobileLayout = ({
 
   return (
     <Stack direction="column" sx={{ gap: { xs: 0, md: 2 } }}>
-      <SectionPanel title={title} edgeToEdge actions={
+      <SectionPanel
+        title={title}
+        edgeToEdge
+        actions={
           selectedMetricLabel ? (
             <StatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
           ) : undefined
@@ -280,7 +283,6 @@ const MobileLayout = ({
               }}
             />
           </RequirePermission>
-
         </StyledMobileSectionBody>
 
         <ScheduleOverviewCardList

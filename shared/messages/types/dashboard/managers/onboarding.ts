@@ -12,6 +12,7 @@ export interface ManagerOnboardingLabels {
     readonly skypeId: string;
     readonly accountType: string;
     readonly department: string;
+    readonly password: string;
   };
   readonly placeholders: {
     readonly fullName: string;
@@ -19,6 +20,7 @@ export interface ManagerOnboardingLabels {
     readonly phone: string;
     readonly skypeId: string;
     readonly department: string;
+    readonly password: string;
   };
   readonly options: {
     readonly accountType: {

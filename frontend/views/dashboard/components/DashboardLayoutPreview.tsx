@@ -74,11 +74,12 @@ function Navbar({
           >
             <SchoolOutlined sx={{ fontSize: 24 }} />
           </Box>
-          <Box sx={{ display: { xs: "none", md: "block" } }}>
+          <Box sx={{ display: { xs: "none", md: "flex" }, flexDirection: "column" }}>
             <Typography
               variant="titleLg"
               sx={{
                 color: theme => theme.palette.onHeaderContainer,
+                lineHeight: 1.2,
               }}
             >
               {t("layout.appTitle")}
@@ -87,6 +88,7 @@ function Navbar({
               variant="labelMd"
               sx={{
                 color: theme => alpha(theme.palette.onHeaderContainer, 0.7),
+                lineHeight: 1.2,
               }}
             >
               {roleLabel}
@@ -236,12 +238,7 @@ function BottomNav({
       })}
     >
       {bottomNavItems.map(item => (
-        <BottomNavItem
-          key={item.key}
-          item={item}
-          isActive={item.key === activeNavKey}
-          isScrollable={isScrollable}
-        />
+        <BottomNavItem key={item.key} item={item} isActive={item.key === activeNavKey} isScrollable={isScrollable} />
       ))}
     </Box>
   );

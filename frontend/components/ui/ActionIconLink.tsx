@@ -1,7 +1,6 @@
 "use client";
 
-import { styled } from "@mui/material/styles";
-import { alpha } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
 import { Link } from "@/shared/i18n/routing";
 
 export const ActionIconLink = styled(Link)(({ theme }) => ({

@@ -44,4 +44,7 @@ export const reassignment: TeacherReassignmentLabels = {
     reassignSuccess: "تم إعادة تعيين المعلم بنجاح",
     statusChangeSuccess: "تم تغيير حالة الطالب بنجاح",
   },
+  errors: {
+    invalidId: "معرف الطالب غير صالح.",
+  },
 };

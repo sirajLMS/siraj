@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { useEffect, useRef, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import type { NavItem } from "@/frontend/views/dashboard/types/dashboard";
 import { usePathname } from "@/shared/i18n/routing";
 import { BottomNavbar } from "./BottomNavbar";
@@ -25,11 +25,11 @@ interface DashboardLayoutProps {
 
 function MainScrollArea({ children }: { readonly children: ReactNode }) {
   const mainRef = useRef<HTMLElement>(null);
-  const pathname = usePathname();
+  const _pathname = usePathname();
 
   useEffect(() => {
     mainRef.current?.scrollTo(0, 0);
-  }, [pathname]);
+  }, []);
 
   return (
     <Box

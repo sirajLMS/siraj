@@ -1,6 +1,6 @@
-import { ActionIconLink } from "@/frontend/components/ui";
 import { Box, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
+import { ActionIconLink } from "@/frontend/components/ui";
 import { Link } from "@/shared/i18n/routing";
 
 export const StyledMonospaceLabel = styled(Typography)(({ theme }) => ({

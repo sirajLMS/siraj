@@ -18,6 +18,7 @@ function buildPageLabels(t: BillingTranslator) {
     invalidUserId: t("invalidUserId"),
     billingProfileTitle: t("billingProfileTitle"),
     profileForUser: t.raw("profileForUser") as string,
+    reminderSent: t("reminderSent"),
   };
 }
 

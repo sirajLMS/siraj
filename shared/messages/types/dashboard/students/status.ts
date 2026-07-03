@@ -57,4 +57,7 @@ export interface StudentStatusLabels {
     readonly description: string;
   };
   readonly successMessage: string;
+  readonly errors: {
+    readonly invalidId: string;
+  };
 }

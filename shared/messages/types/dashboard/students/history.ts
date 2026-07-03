@@ -48,9 +48,13 @@ export interface StudentHistoryLabels {
       readonly RUNNING: string;
       readonly COMPLETED: string;
     };
+    readonly noSessions: string;
   };
   readonly performanceStreak: {
     readonly title: string;
     readonly description: string;
+  };
+  readonly errors: {
+    readonly loadFailed: string;
   };
 }

@@ -37,12 +37,7 @@ export function DstMigrationMetricsRow({ metrics }: Readonly<Props>) {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <MetricCard
-          label={t("unchanged")}
-          value={metrics.unchanged}
-          icon={HistoryOutlined}
-          animationIndex={3}
-        />
+        <MetricCard label={t("unchanged")} value={metrics.unchanged} icon={HistoryOutlined} animationIndex={3} />
       </Grid>
     </Grid>
   );

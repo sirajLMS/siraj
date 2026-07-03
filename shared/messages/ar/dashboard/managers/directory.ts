@@ -27,9 +27,21 @@ export const managersDirectory: ManagersDirectoryLabels = {
     roleType: "نوع الدور",
     options: "خيارات",
   },
+  fields: {
+    phone: "الهاتف",
+    skypeId: "معرف سكايب",
+  },
   actions: {
     addManager: "إضافة مدير جديد",
     options: "خيارات",
+    editProfile: "تعديل الملف الشخصي",
+    deactivate: "تعطيل",
+    activate: "تفعيل",
+    cancel: "إلغاء",
+    processing: "جاري المعالجة...",
+    save: "حفظ",
+    deactivateConfirmation: "هل أنت متأكد من أنك تريد تعطيل {name}؟",
+    activateConfirmation: "هل أنت متأكد من أنك تريد تفعيل {name}؟",
   },
   status: {
     active: "نشط",

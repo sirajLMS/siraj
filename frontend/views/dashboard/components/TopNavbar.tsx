@@ -57,11 +57,12 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
             <SchoolOutlined sx={{ fontSize: 24 }} />
           </Box>
 
-          <Box sx={{ display: { xs: "none", md: "block" } }}>
+          <Box sx={{ display: { xs: "none", md: "flex" }, flexDirection: "column" }}>
             <Typography
               variant="titleLg"
               sx={{
                 color: theme => theme.palette.onHeaderContainer,
+                lineHeight: 1.2,
               }}
             >
               {t("layout.appTitle")}
@@ -70,6 +71,7 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
               variant="labelMd"
               sx={{
                 color: theme => alpha(theme.palette.onHeaderContainer, 0.7),
+                lineHeight: 1.2,
               }}
             >
               {roleLabel}
@@ -90,12 +92,19 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
               pl: { xs: 0, md: 3 },
             }}
           >
-            <Box sx={{ textAlign: "end", display: { xs: "none", sm: "block" } }}>
+            <Box
+              sx={{
+                textAlign: "end",
+                display: { xs: "none", sm: "flex" },
+                flexDirection: "column",
+                alignItems: "flex-end",
+              }}
+            >
               <Typography
                 variant="labelMd"
                 sx={{
                   fontWeight: 500,
-                  lineHeight: 1,
+                  lineHeight: 1.2,
                 }}
               >
                 {userName}
@@ -105,6 +114,7 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
                 sx={{
                   color: theme => alpha(theme.palette.onHeaderContainer, 0.7),
                   mt: 0.5,
+                  lineHeight: 1.2,
                 }}
               >
                 {userRole}

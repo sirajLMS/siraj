@@ -14,6 +14,7 @@ export const managerOnboarding: ManagerOnboardingLabels = {
     skypeId: "معرف سكايب",
     accountType: "نوع الحساب",
     department: "القسم الرئيسي",
+    password: "كلمة المرور",
   },
   placeholders: {
     fullName: "مثال: د. سلمان الفارسي",
@@ -21,6 +22,7 @@ export const managerOnboarding: ManagerOnboardingLabels = {
     phone: "+966 50 000 0000",
     skypeId: "live:.cid.987654321",
     department: "اختر القسم",
+    password: "أدخل كلمة المرور",
   },
   options: {
     accountType: {

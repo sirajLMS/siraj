@@ -461,6 +461,10 @@ const en: MessageSchema = {
         showingOf: "Showing {count} of {total} Teachers",
         linkPending: "Link Pending",
       },
+      fields: {
+        phone: "Phone",
+        skypeId: "Skype ID",
+      },
       status: {
         active: "Active",
         offline: "Offline",
@@ -526,6 +530,9 @@ const en: MessageSchema = {
           "Changing status to 'Suspended' will trigger an immediate system-wide lock. All upcoming classes will be frozen, preventing teachers from starting sessions. The billing engine will be paused for this student ID until manual reactivation.",
       },
       successMessage: "Student status successfully updated.",
+      errors: {
+        invalidId: "Invalid student ID.",
+      },
     },
     studentQuota: {
       pageTitle: "Edit Student Profile",
@@ -637,10 +644,14 @@ const en: MessageSchema = {
           RUNNING: "RUNNING",
           COMPLETED: "COMPLETED",
         },
+        noSessions: "No sessions scheduled for this date.",
       },
       performanceStreak: {
         title: "Performance Streak",
         description: "You've attended 100% of classes this week. Keep up the momentum!",
+      },
+      errors: {
+        loadFailed: "Failed to load student history.",
       },
     },
     studentDirectory: {
@@ -1320,6 +1331,9 @@ const en: MessageSchema = {
         reassignSuccess: "Teacher reassigned successfully.",
         statusChangeSuccess: "Student status updated successfully.",
       },
+      errors: {
+        invalidId: "Invalid student ID.",
+      },
     },
     teacherOnboarding: {
       bannerJoinFaculty: "Join our faculty",
@@ -1554,9 +1568,21 @@ const en: MessageSchema = {
         roleType: "Role Type",
         options: "Options",
       },
+      fields: {
+        phone: "Phone",
+        skypeId: "Skype ID",
+      },
       actions: {
         addManager: "ADD NEW MANAGER",
         options: "Options",
+        editProfile: "Edit Profile",
+        deactivate: "Deactivate",
+        activate: "Activate",
+        cancel: "Cancel",
+        processing: "Processing...",
+        save: "Save",
+        deactivateConfirmation: "Are you sure you want to deactivate {name}?",
+        activateConfirmation: "Are you sure you want to activate {name}?",
       },
       status: {
         active: "Active",
@@ -1664,6 +1690,7 @@ const en: MessageSchema = {
         skypeId: "Skype ID",
         accountType: "Account Type",
         department: "Primary Department",
+        password: "Password",
       },
       placeholders: {
         fullName: "e.g. Dr. Salman Al-Farsi",
@@ -1671,6 +1698,7 @@ const en: MessageSchema = {
         phone: "+966 50 000 0000",
         skypeId: "live:.cid.987654321",
         department: "Select department",
+        password: "Enter password",
       },
       options: {
         accountType: {
@@ -2021,6 +2049,7 @@ const en: MessageSchema = {
       invalidUserId: "Invalid User ID",
       billingProfileTitle: "User Billing Profile",
       profileForUser: "Billing profile details for user {userId}",
+      reminderSent: "Payment reminder sent",
       adminMetrics: {
         totalOutstanding: "Total Outstanding",
         pendingInvoices: "Pending Invoices",
@@ -2520,6 +2549,9 @@ const en: MessageSchema = {
       assignedBy: "Assigned By",
       assignedBySystem: "System",
       removeUser: "Remove",
+      errors: {
+        operationFailed: "Operation failed. Please try again.",
+      },
     },
   },
   session: {

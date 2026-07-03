@@ -1,5 +1,5 @@
 import type { PaletteColor, PaletteColorOptions, TypeBackground } from "@mui/material/styles";
-import type {Property} from "csstype";
+import type { Property } from "csstype";
 export type TonalPalette = {
   0: string;
   5: string;
@@ -86,10 +86,13 @@ export type M3BaseSchemeOptions = Partial<Omit<M3BaseScheme, "background">> & {
   background?: Partial<TypeBackground>;
 };
 
+type MuiThemeBorderRadius =
+  | readonly (string | (string & {}))[]
+  | Property.BorderRadius<string | number>
+  | readonly NonNullable<Property.BorderRadius<string | number> | undefined>[]
+  | undefined;
 
-type MuiThemeBorderRadius = readonly (string | (string & {}))[] | Property.BorderRadius<string | number> | readonly NonNullable<Property.BorderRadius<string | number> | undefined>[] | undefined
-
-export type MuiThemeLayoutSettings =    {
+export type MuiThemeLayoutSettings = {
   pageMargin: string;
   gutter: string;
   authWidth: string;
@@ -113,7 +116,7 @@ declare module "@mui/material/styles" {
   }
 
   interface ThemeOptions {
-    layout?: MuiThemeLayoutSettings
+    layout?: MuiThemeLayoutSettings;
   }
 
   interface Palette
