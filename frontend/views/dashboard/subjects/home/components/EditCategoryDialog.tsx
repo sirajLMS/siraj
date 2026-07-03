@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import type { EditCategoryDialogProps } from "../types";
@@ -37,6 +37,142 @@ const editCategorySchema = z.object({
 });
 
 type EditCategoryFormValues = z.infer<typeof editCategorySchema>;
+
+function TextFieldController({
+  name,
+  control,
+  label,
+  required,
+  error,
+  disabled,
+  multiline,
+  rows,
+}: Readonly<{
+  name: keyof EditCategoryFormValues & ("name" | "slug" | "description");
+  control: Control<EditCategoryFormValues>;
+  label: string;
+  required?: boolean;
+  error?: string;
+  disabled?: boolean;
+  multiline?: boolean;
+  rows?: number;
+}>) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => (
+        <FieldWrapper label={label} required={required} error={error}>
+          <TextField
+            {...field}
+            fullWidth
+            variant="standard"
+            error={!!error}
+            multiline={multiline}
+            rows={rows}
+            disabled={disabled}
+            sx={standardInputSx}
+          />
+        </FieldWrapper>
+      )}
+    />
+  );
+}
+
+function CategoryFormFields({
+  control,
+  errors,
+  disabled,
+}: Readonly<{
+  control: Control<EditCategoryFormValues>;
+  errors: FieldErrors<EditCategoryFormValues>;
+  disabled: boolean;
+}>) {
+  const t = useTranslations("dashboard.subjects");
+
+  return (
+    <>
+      <TextFieldController
+        name="name"
+        control={control}
+        label={t("nameLabel")}
+        required
+        error={errors.name ? t("nameRequired") : undefined}
+        disabled={disabled}
+      />
+      <TextFieldController
+        name="slug"
+        control={control}
+        label={t("slugLabel")}
+        required
+        error={errors.slug ? t("slugRequired") : undefined}
+        disabled={disabled}
+      />
+      <TextFieldController
+        name="description"
+        control={control}
+        label={t("descriptionLabel")}
+        disabled={disabled}
+        multiline
+        rows={3}
+      />
+      <Controller
+        name="isActive"
+        control={control}
+        render={({ field }) => (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Switch checked={field.value ?? true} onChange={field.onChange} disabled={disabled} />
+            <Typography variant="bodyMd">{t("activeLabel")}</Typography>
+          </Box>
+        )}
+      />
+    </>
+  );
+}
+
+function EditCategoryDialogActions({
+  isLoading,
+  onClose,
+  saveLabel,
+  cancelLabel,
+}: Readonly<{
+  isLoading: boolean;
+  onClose: () => void;
+  saveLabel: string;
+  cancelLabel: string;
+}>) {
+  return (
+    <DialogActions sx={{ px: 3, pb: 3 }}>
+      <Button
+        onClick={onClose}
+        disabled={isLoading}
+        variant="text"
+        sx={theme => ({
+          color: theme.palette.text.secondary,
+          fontWeight: 700,
+          borderRadius: 1.5,
+        })}
+      >
+        {cancelLabel}
+      </Button>
+      <Button
+        type="submit"
+        form="edit-category-form"
+        disabled={isLoading}
+        variant="contained"
+        sx={theme => ({
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.onPrimary,
+          fontWeight: 700,
+          borderRadius: 1.5,
+          "&:hover": { backgroundColor: theme.palette.primary.dark },
+        })}
+      >
+        {isLoading ? "..." : saveLabel}
+      </Button>
+    </DialogActions>
+  );
+}
 
 export function EditCategoryDialog({
   open,
@@ -111,99 +247,15 @@ export function EditCategoryDialog({
           onSubmit={handleSubmit(handleFormSubmit)}
           sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 3 }}
         >
-          <Controller
-            name="name"
-            control={control}
-            render={({ field }) => (
-              <FieldWrapper label={t("nameLabel")} required error={errors.name ? t("nameRequired") : undefined}>
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="standard"
-                  error={!!errors.name}
-                  disabled={isLoading}
-                  sx={standardInputSx}
-                />
-              </FieldWrapper>
-            )}
-          />
-
-          <Controller
-            name="slug"
-            control={control}
-            render={({ field }) => (
-              <FieldWrapper label={t("slugLabel")} required error={errors.slug ? t("slugRequired") : undefined}>
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="standard"
-                  error={!!errors.slug}
-                  disabled={isLoading}
-                  sx={standardInputSx}
-                />
-              </FieldWrapper>
-            )}
-          />
-
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }) => (
-              <FieldWrapper label={t("descriptionLabel")}>
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="standard"
-                  multiline
-                  rows={3}
-                  disabled={isLoading}
-                  sx={standardInputSx}
-                />
-              </FieldWrapper>
-            )}
-          />
-
-          <Controller
-            name="isActive"
-            control={control}
-            render={({ field }) => (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Switch checked={field.value ?? true} onChange={field.onChange} disabled={isLoading} />
-                <Typography variant="bodyMd">{t("activeLabel")}</Typography>
-              </Box>
-            )}
-          />
+          <CategoryFormFields control={control} errors={errors} disabled={isLoading} />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button
-          onClick={onClose}
-          disabled={isLoading}
-          variant="text"
-          sx={theme => ({
-            color: theme.palette.text.secondary,
-            fontWeight: 700,
-            borderRadius: 1.5,
-          })}
-        >
-          {t("cancel")}
-        </Button>
-        <Button
-          type="submit"
-          form="edit-category-form"
-          disabled={isLoading}
-          variant="contained"
-          sx={theme => ({
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            fontWeight: 700,
-            borderRadius: 1.5,
-            "&:hover": { backgroundColor: theme.palette.primary.dark },
-          })}
-        >
-          {isLoading ? "..." : t("saveChanges")}
-        </Button>
-      </DialogActions>
+      <EditCategoryDialogActions
+        isLoading={isLoading}
+        onClose={onClose}
+        saveLabel={t("saveChanges")}
+        cancelLabel={t("cancel")}
+      />
     </Dialog>
   );
 }

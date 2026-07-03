@@ -616,40 +616,31 @@ export namespace ParentRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const getParentDashboardMetrics = async (
-    parentId: string,
-    tx?: DBTransaction
-  ): Promise<ParentDashboardMetricsType> => {
-    const queryDb = tx ?? db;
-
-    const parentStudents = await queryDb
-      .select({ id: students.id })
-      .from(students)
-      .where(eq(students.parentId, parentId));
-    const totalStudents = parentStudents.length;
+  async function fetchTodaysClassCount(queryDb: typeof db | DBTransaction, studentIds: string[]): Promise<number> {
+    if (studentIds.length === 0) return 0;
 
     const today = new Date();
     const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
 
-    const studentIds = parentStudents.map(s => s.id);
+    const [classCountRow] = await queryDb
+      .select({ count: count() })
+      .from(classInstances)
+      .where(
+        and(
+          inArray(classInstances.studentId, studentIds),
+          isNull(classInstances.deletedAt),
+          gte(classInstances.scheduledStartAt, todayStart),
+          lt(classInstances.scheduledStartAt, todayEnd)
+        )
+      );
+    return classCountRow?.count ?? 0;
+  }
 
-    let todaysClasses = 0;
-    if (studentIds.length > 0) {
-      const [classCountRow] = await queryDb
-        .select({ count: count() })
-        .from(classInstances)
-        .where(
-          and(
-            inArray(classInstances.studentId, studentIds),
-            isNull(classInstances.deletedAt),
-            gte(classInstances.scheduledStartAt, todayStart),
-            lt(classInstances.scheduledStartAt, todayEnd)
-          )
-        );
-      todaysClasses = classCountRow?.count ?? 0;
-    }
-
+  async function fetchPendingInvoiceSummary(
+    queryDb: typeof db | DBTransaction,
+    parentId: string
+  ): Promise<{ count: number; totalAmount: string }> {
     const [invoiceRow] = await queryDb
       .select({
         count: count(),
@@ -658,9 +649,13 @@ export namespace ParentRepository {
       .from(invoices)
       .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
 
-    const pendingInvoicesCount = invoiceRow?.count ?? 0;
-    const pendingInvoicesAmount = invoiceRow?.totalAmount ?? "0";
+    return {
+      count: invoiceRow?.count ?? 0,
+      totalAmount: invoiceRow?.totalAmount ?? "0",
+    };
+  }
 
+  async function fetchUnreadMessageCount(queryDb: typeof db | DBTransaction, parentId: string): Promise<number> {
     const [unreadRow] = await queryDb
       .select({ count: count() })
       .from(notificationDeliveries)
@@ -673,37 +668,56 @@ export namespace ParentRepository {
           sql`${notificationDeliveries.openedAt} IS NULL`
         )
       );
+    return unreadRow?.count ?? 0;
+  }
 
-    const pendingMessages = unreadRow?.count ?? 0;
+  async function fetchPerformanceAvg(queryDb: typeof db | DBTransaction, studentIds: string[]): Promise<number> {
+    if (studentIds.length === 0) return 0;
 
-    const avgResult =
-      studentIds.length > 0
-        ? await queryDb
-            .select({
-              avgScore: sql<number>`COALESCE(AVG(${classInstancePerformance.engagementScore}), 0)`,
-            })
-            .from(classInstancePerformance)
-            .innerJoin(classInstances, eq(classInstancePerformance.classInstanceId, classInstances.id))
-            .where(
-              and(
-                inArray(classInstances.studentId, studentIds),
-                isNull(classInstances.deletedAt),
-                sql`${classInstancePerformance.engagementScore} IS NOT NULL`
-              )
-            )
-        : [{ avgScore: 0 }];
+    const [avgRow] = await queryDb
+      .select({
+        avgScore: sql<number>`COALESCE(AVG(${classInstancePerformance.engagementScore}), 0)`,
+      })
+      .from(classInstancePerformance)
+      .innerJoin(classInstances, eq(classInstancePerformance.classInstanceId, classInstances.id))
+      .where(
+        and(
+          inArray(classInstances.studentId, studentIds),
+          isNull(classInstances.deletedAt),
+          sql`${classInstancePerformance.engagementScore} IS NOT NULL`
+        )
+      );
+    return avgRow?.avgScore ?? 0;
+  }
 
-    const performanceAvg = Math.round(avgResult[0]?.avgScore ?? 0);
-    const performanceAvgMobile = Math.round((avgResult[0]?.avgScore ?? 0) / 10);
+  export const getParentDashboardMetrics = async (
+    parentId: string,
+    tx?: DBTransaction
+  ): Promise<ParentDashboardMetricsType> => {
+    const queryDb = tx ?? db;
+
+    const parentStudents = await queryDb
+      .select({ id: students.id })
+      .from(students)
+      .where(eq(students.parentId, parentId));
+    const studentIds = parentStudents.map(s => s.id);
+    const totalStudents = parentStudents.length;
+
+    const [todaysClasses, invoiceSummary, pendingMessages, avgScore] = await Promise.all([
+      fetchTodaysClassCount(queryDb, studentIds),
+      fetchPendingInvoiceSummary(queryDb, parentId),
+      fetchUnreadMessageCount(queryDb, parentId),
+      fetchPerformanceAvg(queryDb, studentIds),
+    ]);
 
     return {
       id: `parent-metrics-${parentId}`,
       totalStudents,
       todaysClasses,
-      pendingInvoicesCount,
-      pendingInvoicesAmount,
-      performanceAvg,
-      performanceAvgMobile,
+      pendingInvoicesCount: invoiceSummary.count,
+      pendingInvoicesAmount: invoiceSummary.totalAmount,
+      performanceAvg: Math.round(avgScore),
+      performanceAvgMobile: Math.round(avgScore / 10),
       pendingMessages,
     };
   };

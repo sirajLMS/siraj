@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, type StudentStatus as GqlStudentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/graphql/generated/gql/operations";
 import { studentByIdQueryDocument } from "@/frontend/graphql/sharedDocuments/student.documents";
 import {
   changeStudentStatusMutationDocument,
@@ -25,6 +26,51 @@ import type {
   ReassignmentTeacherOption,
   StatusChangeInput,
 } from "./types";
+
+type StudentQueryData = Operations.StudentByIdQuery;
+type TeachersQueryData = Operations.TeachersQuery;
+
+function mapStudentData(studentData: StudentQueryData | undefined): ReassignmentStudentData | null {
+  const s = studentData?.studentById;
+  if (!s?.id || !s.name || !s.status) return null;
+  const status = s.status as StudentStatus;
+  return {
+    id: s.id,
+    name: s.name,
+    avatarUrl: null,
+    accountStatus: STUDENT_STATUS_TO_ACCOUNT_STATUS[status],
+    status,
+    primaryTeacherId: s.primaryTeacherId ?? null,
+    teacherName: s.teacherName ?? null,
+    version: s.version ?? null,
+    updatedAt: s.updatedAt ?? null,
+  };
+}
+
+function mapTeacherOptions(teachersData: TeachersQueryData | undefined): readonly ReassignmentTeacherOption[] {
+  return (teachersData?.teachers ?? [])
+    .filter(
+      (t): t is { readonly id: string; readonly name: string } => typeof t.id === "string" && typeof t.name === "string"
+    )
+    .map(t => ({
+      id: t.id,
+      name: t.name,
+      avatarUrl: "",
+      status: "active" as const,
+    }));
+}
+
+function ReassignmentLoadingState() {
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <CircularProgress />
+    </Box>
+  );
+}
+
+function ReassignmentErrorState({ message }: { readonly message: string }) {
+  return <Typography sx={{ color: theme => theme.palette.error.main }}>{message}</Typography>;
+}
 
 export function TeacherReassignmentContainer() {
   const t = useTranslations("dashboard.teacherReassignment");
@@ -73,38 +119,9 @@ export function TeacherReassignmentContainer() {
     refetchQueries: [{ query: studentByIdQueryDocument, variables: { studentId } }],
   });
 
-  const student: ReassignmentStudentData | null = useMemo(() => {
-    const s = studentData?.studentById;
-    if (!s?.id || !s.name || !s.status) return null;
-    const status = s.status as StudentStatus;
-    return {
-      id: s.id,
-      name: s.name,
-      avatarUrl: null,
-      accountStatus: STUDENT_STATUS_TO_ACCOUNT_STATUS[status],
-      status,
-      primaryTeacherId: s.primaryTeacherId ?? null,
-      teacherName: s.teacherName ?? null,
-      version: s.version ?? null,
-      updatedAt: s.updatedAt ?? null,
-    };
-  }, [studentData]);
+  const student: ReassignmentStudentData | null = useMemo(() => mapStudentData(studentData), [studentData]);
 
-  const teachers: readonly ReassignmentTeacherOption[] = useMemo(
-    () =>
-      (teachersData?.teachers ?? [])
-        .filter(
-          (t): t is { readonly id: string; readonly name: string } =>
-            typeof t.id === "string" && typeof t.name === "string"
-        )
-        .map(t => ({
-          id: t.id,
-          name: t.name,
-          avatarUrl: "",
-          status: "active" as const,
-        })),
-    [teachersData]
-  );
+  const teachers: readonly ReassignmentTeacherOption[] = useMemo(() => mapTeacherOptions(teachersData), [teachersData]);
 
   const versionRef = useRef(student?.version ?? null);
   useEffect(() => {
@@ -142,24 +159,20 @@ export function TeacherReassignmentContainer() {
   }, [router]);
 
   if (!studentId) {
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidId")}</Typography>;
+    return <ReassignmentErrorState message={t("errors.invalidId")} />;
   }
 
   if (studentLoading || teachersLoading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <ReassignmentLoadingState />;
   }
 
   if (studentError || teachersError) {
     logger.error("Error loading teacher reassignment data:", { studentError, teachersError });
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{tc("loadFailed")}</Typography>;
+    return <ReassignmentErrorState message={tc("loadFailed")} />;
   }
 
   if (!student) {
-    return <Typography sx={{ color: theme => theme.palette.error.main }}>{t("errors.invalidId")}</Typography>;
+    return <ReassignmentErrorState message={t("errors.invalidId")} />;
   }
 
   return (

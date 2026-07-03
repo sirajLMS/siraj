@@ -31,46 +31,33 @@ export namespace ClassSubjectRepository {
     locale: string | undefined,
     tx: DBTransaction | undefined
   ): Promise<ClassSubjectSelectType> {
-    const client = tx ?? db;
-    const [result] = await client
-      .select()
-      .from(classSubjects)
-      .where(and(eq(classSubjects[field], value), isNull(classSubjects.deletedAt)))
-      .limit(1);
-
-    const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-
-    if (!result) {
-      throw new Error(tFunc("subjectNotFound", { [field]: value }));
-    }
-
-    return result;
-  }
-
-  export async function getSubjectById(
-    id: string,
-    locale?: string,
-    tx?: DBTransaction
-  ): Promise<ClassSubjectSelectType> {
     try {
-      return await fetchSubjectByField("id", id, locale, tx);
+      const client = tx ?? db;
+      const [result] = await client
+        .select()
+        .from(classSubjects)
+        .where(and(eq(classSubjects[field], value), isNull(classSubjects.deletedAt)))
+        .limit(1);
+
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+
+      if (!result) {
+        throw new Error(tFunc("subjectNotFound", { [field]: value }));
+      }
+
+      return result;
     } catch (error) {
-      logger.error(`Error fetching class subject by ID ${id}:`, error);
+      logger.error(`Error fetching class subject by ${field} ${value}:`, error);
       throw error;
     }
   }
 
-  export async function getSubjectBySlug(
-    slug: string,
-    locale?: string,
-    tx?: DBTransaction
-  ): Promise<ClassSubjectSelectType> {
-    try {
-      return await fetchSubjectByField("slug", slug, locale, tx);
-    } catch (error) {
-      logger.error(`Error fetching class subject by slug ${slug}:`, error);
-      throw error;
-    }
+  export function getSubjectById(id: string, locale?: string, tx?: DBTransaction): Promise<ClassSubjectSelectType> {
+    return fetchSubjectByField("id", id, locale, tx);
+  }
+
+  export function getSubjectBySlug(slug: string, locale?: string, tx?: DBTransaction): Promise<ClassSubjectSelectType> {
+    return fetchSubjectByField("slug", slug, locale, tx);
   }
 
   export async function createSubject(

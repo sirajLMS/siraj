@@ -11,17 +11,103 @@ import type {
 import { AppPermission, DstMigrationResult, type MigrationStatus } from "@/shared/lib/enum";
 
 export namespace DstMigrationService {
+  async function ensurePermission(actorUserId: string, locale?: string): Promise<void> {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SYSTEM_BULK_UPDATE_DST);
+    if (!hasPermission) {
+      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
+      throw new Error(tFunc("insufficientPermissions"));
+    }
+  }
+
+  function computeNewStartTime(defaultStartTime: string, offsetMinutes: number): string {
+    const [hoursStr, minutesStr] = defaultStartTime.split(":");
+    const hours = Number(hoursStr);
+    const minutes = Number(minutesStr);
+    const totalMinutes = hours * 60 + minutes + offsetMinutes;
+    const newHours = ((Math.floor(totalMinutes / 60) % 24) + 24) % 24;
+    const newMinutes = ((totalMinutes % 60) + 60) % 60;
+    return `${String(newHours).padStart(2, "0")}:${String(newMinutes).padStart(2, "0")}:00`;
+  }
+
+  async function processSchedule(
+    schedule: Awaited<ReturnType<typeof DstMigrationRepository.getActiveRecurringSchedules>>[number],
+    runId: string,
+    offsetMinutes: number,
+    tx: Parameters<Parameters<typeof DstMigrationRepository.runTransaction>[0]>[0]
+  ): Promise<
+    | { kind: "unchanged"; item: DstCheckedEmptyItemReturnType }
+    | { kind: "conflict"; teacherName: string; item: DstConflictItemReturnType; detail: string }
+    | { kind: "updated"; session: DstUpdatedSessionReturnType }
+  > {
+    if (schedule.utcOffsetSnapshot === null) {
+      await DstMigrationRepository.recordMigrationEntry(runId, schedule.id, DstMigrationResult.UNCHANGED, null, tx);
+      return {
+        kind: "unchanged",
+        item: {
+          id: schedule.id,
+          studentName: schedule.studentName,
+          reason: `No DST offset configured for timezone ${schedule.timezone}`,
+        },
+      };
+    }
+
+    const newOffset = schedule.utcOffsetSnapshot + offsetMinutes;
+    const newStartTime = computeNewStartTime(schedule.defaultStartTime, offsetMinutes);
+
+    const conflictingSchedules = await DstMigrationRepository.checkConflictingSchedules(
+      schedule.teacherId,
+      newStartTime,
+      tx
+    );
+
+    if (conflictingSchedules.length > 0 && conflictingSchedules[0].id !== schedule.id) {
+      const conflictDetail = `Conflict with schedule ${conflictingSchedules[0].id} at ${newStartTime}`;
+      const conflictItem: DstConflictItemReturnType = {
+        id: schedule.id,
+        studentName: schedule.studentName,
+        message: conflictDetail,
+      };
+      await DstMigrationRepository.recordMigrationEntry(
+        runId,
+        schedule.id,
+        DstMigrationResult.CONFLICT,
+        conflictDetail,
+        tx
+      );
+      return { kind: "conflict", teacherName: schedule.teacherName, item: conflictItem, detail: conflictDetail };
+    }
+
+    await DstMigrationRepository.updateRecurringScheduleTime(schedule.id, newStartTime, newOffset, tx);
+    await DstMigrationRepository.recordMigrationEntry(runId, schedule.id, DstMigrationResult.UPDATED, null, tx);
+    return {
+      kind: "updated",
+      session: {
+        id: schedule.id,
+        studentName: schedule.studentName,
+        teacherName: schedule.teacherName,
+        fromTime: schedule.defaultStartTime,
+        toTime: newStartTime,
+      },
+    };
+  }
+
+  function buildConflictGroups(
+    conflictByTeacher: Map<string, DstConflictItemReturnType[]>
+  ): DstConflictGroupReturnType[] {
+    return Array.from(conflictByTeacher.entries()).map(([teacherName, conflicts], index) => ({
+      id: `conflict-group-${index}`,
+      teacherName,
+      conflicts,
+    }));
+  }
+
   export async function executeBulkDstUpdate(
     actorUserId: string,
     offsetMinutes: number,
     description: string,
     locale?: string
   ): Promise<DstMigrationReportReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SYSTEM_BULK_UPDATE_DST);
-    if (!hasPermission) {
-      const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
-      throw new Error(tFunc("insufficientPermissions"));
-    }
+    await ensurePermission(actorUserId, locale);
 
     return DstMigrationRepository.runTransaction(async tx => {
       const run = await DstMigrationRepository.createMigrationRun(actorUserId, offsetMinutes, description, tx);
@@ -34,86 +120,26 @@ export namespace DstMigrationService {
 
       const updatedSessions: DstUpdatedSessionReturnType[] = [];
       const checkedEmptyItems: DstCheckedEmptyItemReturnType[] = [];
-
       const conflictByTeacher = new Map<string, DstConflictItemReturnType[]>();
 
       for (const schedule of schedules) {
-        if (schedule.utcOffsetSnapshot === null) {
+        const result = await processSchedule(schedule, run.id, offsetMinutes, tx);
+
+        if (result.kind === "unchanged") {
           unchangedCount++;
-          checkedEmptyItems.push({
-            id: schedule.id,
-            studentName: schedule.studentName,
-            reason: `No DST offset configured for timezone ${schedule.timezone}`,
-          });
-          await DstMigrationRepository.recordMigrationEntry(
-            run.id,
-            schedule.id,
-            DstMigrationResult.UNCHANGED,
-            null,
-            tx
-          );
-          continue;
-        }
-
-        const currentOffset = schedule.utcOffsetSnapshot;
-        const newOffset = currentOffset + offsetMinutes;
-
-        const [hoursStr, minutesStr] = schedule.defaultStartTime.split(":");
-        const hours = Number(hoursStr);
-        const minutes = Number(minutesStr);
-        const totalMinutes = hours * 60 + minutes + offsetMinutes;
-        const newHours = ((Math.floor(totalMinutes / 60) % 24) + 24) % 24;
-        const newMinutes = ((totalMinutes % 60) + 60) % 60;
-        const newStartTime = `${String(newHours).padStart(2, "0")}:${String(newMinutes).padStart(2, "0")}:00`;
-
-        const conflictingSchedules = await DstMigrationRepository.checkConflictingSchedules(
-          schedule.teacherId,
-          newStartTime,
-          tx
-        );
-
-        if (conflictingSchedules.length > 0 && conflictingSchedules[0].id !== schedule.id) {
+          checkedEmptyItems.push(result.item);
+        } else if (result.kind === "conflict") {
           conflictCount++;
-          const conflictDetail = `Conflict with schedule ${conflictingSchedules[0].id} at ${newStartTime}`;
-          const conflictItem: DstConflictItemReturnType = {
-            id: schedule.id,
-            studentName: schedule.studentName,
-            message: conflictDetail,
-          };
-
-          const existing = conflictByTeacher.get(schedule.teacherName) ?? [];
-          existing.push(conflictItem);
-          conflictByTeacher.set(schedule.teacherName, existing);
-
-          await DstMigrationRepository.recordMigrationEntry(
-            run.id,
-            schedule.id,
-            DstMigrationResult.CONFLICT,
-            conflictDetail,
-            tx
-          );
+          const existing = conflictByTeacher.get(result.teacherName) ?? [];
+          existing.push(result.item);
+          conflictByTeacher.set(result.teacherName, existing);
         } else {
-          await DstMigrationRepository.updateRecurringScheduleTime(schedule.id, newStartTime, newOffset, tx);
-
           updatedCount++;
-          updatedSessions.push({
-            id: schedule.id,
-            studentName: schedule.studentName,
-            teacherName: schedule.teacherName,
-            fromTime: schedule.defaultStartTime,
-            toTime: newStartTime,
-          });
-          await DstMigrationRepository.recordMigrationEntry(run.id, schedule.id, DstMigrationResult.UPDATED, null, tx);
+          updatedSessions.push(result.session);
         }
       }
 
-      const conflictGroups: DstConflictGroupReturnType[] = Array.from(conflictByTeacher.entries()).map(
-        ([teacherName, conflicts], index) => ({
-          id: `conflict-group-${index}`,
-          teacherName,
-          conflicts,
-        })
-      );
+      const conflictGroups = buildConflictGroups(conflictByTeacher);
 
       return {
         id: run.id,

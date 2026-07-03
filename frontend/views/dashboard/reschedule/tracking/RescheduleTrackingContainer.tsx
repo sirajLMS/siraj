@@ -88,16 +88,7 @@ function buildExportLabels(t: ReturnType<typeof useTranslations>) {
   };
 }
 
-export function RescheduleTrackingContainer() {
-  const t = useTranslations("dashboard.rescheduleTracking");
-  const locale = useLocale();
-  const router = useRouter();
-  const { page, pageSize, setPage, statusFilter, setStatusFilter } = useRescheduleTrackingStore();
-
-  const notifications = useNotifications();
-
-  const [approveLeave] = useMutation(updateSessionStatusLeaveMutationDocument);
-
+function useTrackingQueries(statusFilter: LeaveRequestStatus | null, pageSize: number, page: number, locale: string) {
   const {
     data: rowsData,
     loading: rowsLoading,
@@ -137,7 +128,30 @@ export function RescheduleTrackingContainer() {
     [rowsData?.rescheduleTrackingRows?.rows, locale]
   );
 
-  const labels = useMemo(() => buildViewLabels(t), [t]);
+  const totalCount = rowsData?.rescheduleTrackingRows?.totalCount ?? 0;
+
+  return {
+    rows,
+    metrics,
+    totalCount,
+    rowsLoading,
+    metricsLoading,
+    rowsError,
+    metricsError,
+    refetchRows,
+    refetchMetrics,
+  };
+}
+
+function useTrackingHandlers(
+  rows: readonly ReturnType<typeof buildTrackingRows>[number][],
+  t: ReturnType<typeof useTranslations>,
+  router: ReturnType<typeof useRouter>,
+  notifications: ReturnType<typeof useNotifications>,
+  refetchRows: () => unknown,
+  refetchMetrics: () => unknown
+) {
+  const [approveLeave] = useMutation(updateSessionStatusLeaveMutationDocument);
 
   const handleApprove = useCallback(
     async (id: string) => {
@@ -188,6 +202,39 @@ export function RescheduleTrackingContainer() {
     });
   }, [rows, t]);
 
+  return { handleApprove, handleReject, handleView, handleExport };
+}
+
+export function RescheduleTrackingContainer() {
+  const t = useTranslations("dashboard.rescheduleTracking");
+  const locale = useLocale();
+  const router = useRouter();
+  const { page, pageSize, setPage, statusFilter, setStatusFilter } = useRescheduleTrackingStore();
+
+  const notifications = useNotifications();
+  const labels = useMemo(() => buildViewLabels(t), [t]);
+
+  const {
+    rows,
+    metrics,
+    totalCount,
+    rowsLoading,
+    metricsLoading,
+    rowsError,
+    metricsError,
+    refetchRows,
+    refetchMetrics,
+  } = useTrackingQueries(statusFilter, pageSize, page, locale);
+
+  const { handleApprove, handleReject, handleView, handleExport } = useTrackingHandlers(
+    rows,
+    t,
+    router,
+    notifications,
+    refetchRows,
+    refetchMetrics
+  );
+
   const handleFilterChange = useCallback(
     (status: LeaveRequestStatus | null) => {
       setStatusFilter(status);
@@ -203,8 +250,6 @@ export function RescheduleTrackingContainer() {
     logger.error("Error fetching reschedule tracking data:", rowsError || metricsError);
     return <TrackingErrorState message={t("loadFailed")} />;
   }
-
-  const totalCount = rowsData?.rescheduleTrackingRows?.totalCount ?? 0;
 
   return (
     <RequirePermission permissions={[AppPermission.SessionReschedule]}>

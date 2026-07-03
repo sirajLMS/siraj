@@ -68,6 +68,95 @@ function buildActionLabels(t: TeacherDashboardTranslator): TeacherDashboardLabel
   };
 }
 
+function buildActiveWelcomeLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels["activeWelcome"] {
+  return {
+    title: t.raw("activeWelcome.title") as string,
+    subtitle: t.raw("activeWelcome.subtitle") as string,
+    overviewLabel: t("activeWelcome.overviewLabel"),
+    mobileSummary: t.raw("activeWelcome.mobileSummary") as string,
+  };
+}
+
+function buildActiveControlsLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels["activeControls"] {
+  return {
+    liveNow: t("activeControls.liveNow"),
+    sessionControls: t("activeControls.sessionControls"),
+    startSession: t("activeControls.startSession"),
+    markAbsent: t("activeControls.markAbsent"),
+    requestLeave: t("activeControls.requestLeave"),
+  };
+}
+
+function buildProgressFeedLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels["progressFeed"] {
+  return {
+    title: t("progressFeed.title"),
+  };
+}
+
+function buildAlertLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels["alert"] {
+  return {
+    title: t("alert.title"),
+    description: t.raw("alert.description") as string,
+  };
+}
+
+function buildPolicyLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels["policy"] {
+  return {
+    title: t("policy.title"),
+    description: t("policy.description"),
+    descriptionMobile: t("policy.descriptionMobile"),
+  };
+}
+
+function buildDateFilterLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels["dateFilter"] {
+  return {
+    today: t("dateFilter.today"),
+    previousDay: t("dateFilter.previousDay"),
+    nextDay: t("dateFilter.nextDay"),
+    dateLabel: t("dateFilter.dateLabel"),
+  };
+}
+
+function buildSupportLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels["support"] {
+  return {
+    liveSupport: t("support.liveSupport"),
+  };
+}
+
+function buildErrorLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels["errors"] {
+  return {
+    meetingUrlNotAvailable: t("errors.meetingUrlNotAvailable"),
+    handbookUrlNotFound: t("errors.handbookUrlNotFound"),
+    missedClassTime: t("errors.missedClassTime"),
+    activationFailed: t("errors.activationFailed"),
+  };
+}
+
+function buildManualClassEntryLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels["manualClassEntry"] {
+  return {
+    titleCreate: t("manualClassEntry.titleCreate"),
+    titleCreateActive: t("manualClassEntry.titleCreateActive"),
+    cancel: t("manualClassEntry.cancel"),
+    create: t("manualClassEntry.create"),
+    creating: t("manualClassEntry.creating"),
+    studentLabel: t("manualClassEntry.studentLabel"),
+    studentLoading: t("manualClassEntry.studentLoading"),
+    noStudentsAssigned: t("manualClassEntry.noStudentsAssigned"),
+    scheduledDate: t("manualClassEntry.scheduledDate"),
+    startTime: t("manualClassEntry.startTime"),
+    durationMinutes: t("manualClassEntry.durationMinutes"),
+    classType: t("manualClassEntry.classType"),
+    classTypeRegular: t("manualClassEntry.classTypeRegular"),
+    classTypeTrial: t("manualClassEntry.classTypeTrial"),
+    classTypePromotion: t("manualClassEntry.classTypePromotion"),
+    selectStudent: t("manualClassEntry.selectStudent"),
+    selectDate: t("manualClassEntry.selectDate"),
+    selectTime: t("manualClassEntry.selectTime"),
+    createFailed: t("manualClassEntry.createFailed"),
+    teacherIdNotFound: t("manualClassEntry.teacherIdNotFound"),
+  };
+}
+
 export function buildTeacherDashboardLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels {
   return {
     pageTitle: t("pageTitle"),
@@ -76,71 +165,18 @@ export function buildTeacherDashboardLabels(t: TeacherDashboardTranslator): Teac
     todayChip: t("todayChip"),
     metrics: buildMetricsLabels(t),
     activeMetrics: buildActiveMetricsLabels(t),
-    activeWelcome: {
-      title: t.raw("activeWelcome.title") as string,
-      subtitle: t.raw("activeWelcome.subtitle") as string,
-      overviewLabel: t("activeWelcome.overviewLabel"),
-      mobileSummary: t.raw("activeWelcome.mobileSummary") as string,
-    },
+    activeWelcome: buildActiveWelcomeLabels(t),
     schedule: buildScheduleLabels(t),
     status: buildStatusLabels(t),
     actions: buildActionLabels(t),
-    activeControls: {
-      liveNow: t("activeControls.liveNow"),
-      sessionControls: t("activeControls.sessionControls"),
-      startSession: t("activeControls.startSession"),
-      markAbsent: t("activeControls.markAbsent"),
-      requestLeave: t("activeControls.requestLeave"),
-    },
-    progressFeed: {
-      title: t("progressFeed.title"),
-    },
-    alert: {
-      title: t("alert.title"),
-      description: t.raw("alert.description") as string,
-    },
-    policy: {
-      title: t("policy.title"),
-      description: t("policy.description"),
-      descriptionMobile: t("policy.descriptionMobile"),
-    },
-    dateFilter: {
-      today: t("dateFilter.today"),
-      previousDay: t("dateFilter.previousDay"),
-      nextDay: t("dateFilter.nextDay"),
-      dateLabel: t("dateFilter.dateLabel"),
-    },
-    support: {
-      liveSupport: t("support.liveSupport"),
-    },
-    errors: {
-      meetingUrlNotAvailable: t("errors.meetingUrlNotAvailable"),
-      handbookUrlNotFound: t("errors.handbookUrlNotFound"),
-      missedClassTime: t("errors.missedClassTime"),
-      activationFailed: t("errors.activationFailed"),
-    },
-    manualClassEntry: {
-      titleCreate: t("manualClassEntry.titleCreate"),
-      titleCreateActive: t("manualClassEntry.titleCreateActive"),
-      cancel: t("manualClassEntry.cancel"),
-      create: t("manualClassEntry.create"),
-      creating: t("manualClassEntry.creating"),
-      studentLabel: t("manualClassEntry.studentLabel"),
-      studentLoading: t("manualClassEntry.studentLoading"),
-      noStudentsAssigned: t("manualClassEntry.noStudentsAssigned"),
-      scheduledDate: t("manualClassEntry.scheduledDate"),
-      startTime: t("manualClassEntry.startTime"),
-      durationMinutes: t("manualClassEntry.durationMinutes"),
-      classType: t("manualClassEntry.classType"),
-      classTypeRegular: t("manualClassEntry.classTypeRegular"),
-      classTypeTrial: t("manualClassEntry.classTypeTrial"),
-      classTypePromotion: t("manualClassEntry.classTypePromotion"),
-      selectStudent: t("manualClassEntry.selectStudent"),
-      selectDate: t("manualClassEntry.selectDate"),
-      selectTime: t("manualClassEntry.selectTime"),
-      createFailed: t("manualClassEntry.createFailed"),
-      teacherIdNotFound: t("manualClassEntry.teacherIdNotFound"),
-    },
+    activeControls: buildActiveControlsLabels(t),
+    progressFeed: buildProgressFeedLabels(t),
+    alert: buildAlertLabels(t),
+    policy: buildPolicyLabels(t),
+    dateFilter: buildDateFilterLabels(t),
+    support: buildSupportLabels(t),
+    errors: buildErrorLabels(t),
+    manualClassEntry: buildManualClassEntryLabels(t),
     supportRequestSubmitted: t.raw("supportRequestSubmitted") as string,
   };
 }

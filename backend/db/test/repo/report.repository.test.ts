@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { DBTransaction } from "@/backend/db/db.types";
+import type { AttendanceReportRow } from "@/backend/db/repo";
 import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo";
 import { createMockClassInstance, setupTestEntities } from "../entity-setup";
 import { runInRollback } from "../test-utils";
@@ -8,6 +9,26 @@ function reportRepoTest(name: string, fn: (tx: DBTransaction) => Promise<void>) 
   test(name, async () => {
     await runInRollback(fn);
   });
+}
+
+/** Date range covering all mock class instances created in setupTestData (May 2026). */
+const MAYFromDate = new Date("2026-05-01T00:00:00Z");
+const MAYToDate = new Date("2026-05-31T23:59:59Z");
+
+/** Builds standard attendance-report filters for the May 2026 date range with the given grouping. */
+function buildMayFilters(teacherId: string, groupBy: ReportGroupingMode) {
+  return { fromDate: MAYFromDate, toDate: MAYToDate, teacherId, groupBy };
+}
+
+/** Asserts the common aggregate totals expected when all four mock class instances are present. */
+function expectAllInstancesAggregated(row: AttendanceReportRow) {
+  expect(row.takenClasses).toBe(1);
+  expect(row.absentClasses).toBe(1);
+  expect(row.leaveClasses).toBe(1);
+  expect(row.pendingClasses).toBe(1);
+  expect(row.totalHours).toBe(5.5); // 1.0 + 1.5 + 2.0 + 1.0
+  expect(row.paidEGP).toBe(250); // 100 + 150
+  expect(row.paidUSD).toBe(50);
 }
 
 async function setupTestData(tx: DBTransaction) {
@@ -75,12 +96,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
     // Arrange
     const { teacher } = await setupTestData(tx);
 
-    const filters = {
-      fromDate: new Date("2026-05-01T00:00:00Z"),
-      toDate: new Date("2026-05-31T23:59:59Z"),
-      teacherId: teacher.id,
-      groupBy: ReportGroupingMode.DATE,
-    };
+    const filters = buildMayFilters(teacher.id, ReportGroupingMode.DATE);
 
     // Act
     const results = await ReportRepository.generateAttendanceReport(filters, tx);
@@ -125,12 +141,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
     // Arrange
     const { teacher, teacherUser } = await setupTestData(tx);
 
-    const filters = {
-      fromDate: new Date("2026-05-01T00:00:00Z"),
-      toDate: new Date("2026-05-31T23:59:59Z"),
-      teacherId: teacher.id,
-      groupBy: ReportGroupingMode.TEACHER,
-    };
+    const filters = buildMayFilters(teacher.id, ReportGroupingMode.TEACHER);
 
     // Act
     const results = await ReportRepository.generateAttendanceReport(filters, tx);
@@ -142,13 +153,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
     const row = results[0];
     expect(row.groupKey).toBe(teacher.id);
     expect(row.groupLabel).toBe(teacherUser.name);
-    expect(row.takenClasses).toBe(1);
-    expect(row.absentClasses).toBe(1);
-    expect(row.leaveClasses).toBe(1);
-    expect(row.pendingClasses).toBe(1);
-    expect(row.totalHours).toBe(5.5); // 1.0 + 1.5 + 2.0 + 1.0
-    expect(row.paidEGP).toBe(250); // 100 + 150
-    expect(row.paidUSD).toBe(50);
+    expectAllInstancesAggregated(row);
   });
 
   reportRepoTest("filters by teacherId correctly", async tx => {
@@ -172,12 +177,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
       rateCurrency: "EGP",
     });
 
-    const filters = {
-      fromDate: new Date("2026-05-01T00:00:00Z"),
-      toDate: new Date("2026-05-31T23:59:59Z"),
-      teacherId: teacher.id,
-      groupBy: ReportGroupingMode.TEACHER,
-    };
+    const filters = buildMayFilters(teacher.id, ReportGroupingMode.TEACHER);
 
     // Act
     const results = await ReportRepository.generateAttendanceReport(filters, tx);
@@ -210,12 +210,7 @@ describe("ReportRepository — generateAttendanceReport", () => {
   reportRepoTest("aggregates and groups correctly by STUDENT", async tx => {
     const { student, teacher } = await setupTestData(tx);
 
-    const filters = {
-      fromDate: new Date("2026-05-01T00:00:00Z"),
-      toDate: new Date("2026-05-31T23:59:59Z"),
-      teacherId: teacher.id,
-      groupBy: ReportGroupingMode.STUDENT,
-    };
+    const filters = buildMayFilters(teacher.id, ReportGroupingMode.STUDENT);
 
     const results = await ReportRepository.generateAttendanceReport(filters, tx);
 
@@ -225,25 +220,14 @@ describe("ReportRepository — generateAttendanceReport", () => {
     const row = results[0];
     expect(row.groupKey).toBe(student.id);
     expect(row.groupLabel).toBe(student.name);
-    expect(row.takenClasses).toBe(1);
-    expect(row.absentClasses).toBe(1);
-    expect(row.leaveClasses).toBe(1);
-    expect(row.pendingClasses).toBe(1);
-    expect(row.totalHours).toBe(5.5);
-    expect(row.paidEGP).toBe(250);
-    expect(row.paidUSD).toBe(50);
+    expectAllInstancesAggregated(row);
     expect(row.engagementGrowth).toBeNull();
   });
 
   reportRepoTest("returns null engagementGrowth when no prior period data", async tx => {
     const { teacher } = await setupTestData(tx);
 
-    const filters = {
-      fromDate: new Date("2026-05-01T00:00:00Z"),
-      toDate: new Date("2026-05-31T23:59:59Z"),
-      teacherId: teacher.id,
-      groupBy: ReportGroupingMode.DATE,
-    };
+    const filters = buildMayFilters(teacher.id, ReportGroupingMode.DATE);
 
     const growth = await ReportRepository.calculateEngagementGrowth(filters, tx);
 

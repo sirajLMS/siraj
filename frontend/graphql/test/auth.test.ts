@@ -35,12 +35,12 @@ describe("GraphQL Auth Integration Tests", () => {
     superAdminToken = result.data.demoLogin.token;
   });
 
-  test("returns token and user on demoLogin with academy_admin", async () => {
+  async function expectDemoLoginSucceeds(groupSlug: string): Promise<void> {
     const result = await testClient.mutate({
       mutation: demoLoginMutationDocument,
       variables: {
         input: {
-          groupSlug: "academy_admin",
+          groupSlug,
         },
       },
     });
@@ -52,26 +52,15 @@ describe("GraphQL Auth Integration Tests", () => {
     expect(result.data.demoLogin.token).toBeDefined();
     expect(result.data.demoLogin.user).toBeDefined();
     expect(result.data.demoLogin.user?.id).toBeDefined();
+  }
+
+  test("returns token and user on demoLogin with academy_admin", async () => {
+    await expectDemoLoginSucceeds("academy_admin");
   });
 
   test("returns token and user on demoLogin with super_admin", async () => {
     // demoLogin("super_admin") works directly — DemoAuthService finds existing super admin in DB
-    const result = await testClient.mutate({
-      mutation: demoLoginMutationDocument,
-      variables: {
-        input: {
-          groupSlug: "super_admin",
-        },
-      },
-    });
-
-    expect(result.data).toBeDefined();
-    expect(result.error).toBeUndefined();
-
-    if (!result.data?.demoLogin) throw new Error("No demoLogin data");
-    expect(result.data.demoLogin.token).toBeDefined();
-    expect(result.data.demoLogin.user).toBeDefined();
-    expect(result.data.demoLogin.user?.id).toBeDefined();
+    await expectDemoLoginSucceeds("super_admin");
   });
 
   test("returns current user via me query", async () => {

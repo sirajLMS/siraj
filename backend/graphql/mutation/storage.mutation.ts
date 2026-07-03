@@ -6,6 +6,45 @@ import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import * as StoragePothos from "../pothos";
 import { requireAuth } from "../utils/requireAuth";
 
+/** Maximum number of items allowed in a single bulk operation. */
+const BULK_ITEM_LIMIT = 100;
+
+/**
+ * Sanitize and validate an array of storage paths.
+ * @param rawPaths - Array of raw path strings from the GraphQL input.
+ * @returns Array of sanitized and validated paths.
+ */
+function sanitizeAndValidatePaths(rawPaths: string[]): string[] {
+  return rawPaths.map(p => {
+    const sanitized = sanitizeStoragePath(p);
+    validateStoragePath(sanitized);
+    return sanitized;
+  });
+}
+
+/**
+ * Ensure the user has storage manage or owner permission on every sanitised path.
+ * @param userId - Authenticated user ID.
+ * @param itemPaths - Already-sanitised paths to authorise.
+ * @param locale - Request locale for localized error messages.
+ */
+async function authorizeBulkPaths(userId: string, itemPaths: string[], locale: string): Promise<void> {
+  for (const itemPath of itemPaths) {
+    await StorageAuthService.requireStorageManageOrOwner(userId, itemPath, locale);
+  }
+}
+
+/**
+ * Enforce the bulk-item limit and throw an error when exceeded.
+ * @param count - Actual number of items in the request.
+ * @param operation - Human-readable label (e.g. "move", "copy") for the error message.
+ */
+function enforceBulkLimit(count: number, operation: string): void {
+  if (count > BULK_ITEM_LIMIT) {
+    throw new Error(`Bulk ${operation} operation limited to ${BULK_ITEM_LIMIT} items maximum`);
+  }
+}
+
 gqlSchemaBuilder.mutationFields(t => ({
   renameFile: t.field({
     authScopes: { loggedIn: true },
@@ -95,19 +134,11 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      const sanitizedSourcePaths = input.sourcePaths.map(p => {
-        const sanitized = sanitizeStoragePath(p);
-        validateStoragePath(sanitized);
-        return sanitized;
-      });
+      const sanitizedSourcePaths = sanitizeAndValidatePaths(input.sourcePaths);
       const sanitizedDestPath = sanitizeStoragePath(input.destinationPath);
       validateStoragePath(sanitizedDestPath);
-      if (sanitizedSourcePaths.length > 100) {
-        throw new Error("Bulk move operation limited to 100 items maximum");
-      }
-      for (const itemPath of sanitizedSourcePaths) {
-        await StorageAuthService.requireStorageManageOrOwner(userId, itemPath, ctx.locale);
-      }
+      enforceBulkLimit(sanitizedSourcePaths.length, "move");
+      await authorizeBulkPaths(userId, sanitizedSourcePaths, ctx.locale);
       const storageService = await getStorageService();
       return await storageService.moveItems({
         ...input,
@@ -128,19 +159,11 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      const sanitizedSourcePaths = input.sourcePaths.map(p => {
-        const sanitized = sanitizeStoragePath(p);
-        validateStoragePath(sanitized);
-        return sanitized;
-      });
+      const sanitizedSourcePaths = sanitizeAndValidatePaths(input.sourcePaths);
       const sanitizedDestPath = sanitizeStoragePath(input.destinationPath);
       validateStoragePath(sanitizedDestPath);
-      if (sanitizedSourcePaths.length > 100) {
-        throw new Error("Bulk copy operation limited to 100 items maximum");
-      }
-      for (const itemPath of sanitizedSourcePaths) {
-        await StorageAuthService.requireStorageManageOrOwner(userId, itemPath, ctx.locale);
-      }
+      enforceBulkLimit(sanitizedSourcePaths.length, "copy");
+      await authorizeBulkPaths(userId, sanitizedSourcePaths, ctx.locale);
       const storageService = await getStorageService();
       return await storageService.copyItems({
         ...input,
@@ -161,17 +184,9 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
-      const sanitizedPaths = input.paths.map(p => {
-        const sanitized = sanitizeStoragePath(p);
-        validateStoragePath(sanitized);
-        return sanitized;
-      });
-      if (sanitizedPaths.length > 100) {
-        throw new Error("Bulk delete operation limited to 100 items maximum");
-      }
-      for (const itemPath of sanitizedPaths) {
-        await StorageAuthService.requireStorageManageOrOwner(userId, itemPath, ctx.locale);
-      }
+      const sanitizedPaths = sanitizeAndValidatePaths(input.paths);
+      enforceBulkLimit(sanitizedPaths.length, "delete");
+      await authorizeBulkPaths(userId, sanitizedPaths, ctx.locale);
       const storageService = await getStorageService();
       return await storageService.deleteItems({ ...input, paths: sanitizedPaths });
     },

@@ -72,6 +72,209 @@ const STATUS_FILTER_OPTIONS: readonly ParentStatus[] = [
   ParentStatus.OnTrial,
 ];
 
+interface ParentSearchFieldProps {
+  readonly placeholder: string;
+  readonly onSearch: (query: string) => void;
+}
+
+function ParentSearchField({ placeholder, onSearch }: Readonly<ParentSearchFieldProps>) {
+  return (
+    <TextField
+      size="small"
+      placeholder={placeholder}
+      onChange={e => {
+        onSearch(e.target.value);
+      }}
+      sx={{
+        width: 300,
+        "& .MuiOutlinedInput-root": {
+          borderRadius: 10,
+          backgroundColor: theme => theme.palette.background.paper,
+        },
+      }}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchOutlined fontSize="small" />
+            </InputAdornment>
+          ),
+        },
+      }}
+    />
+  );
+}
+
+interface ParentMobileSearchFieldProps {
+  readonly placeholder: string;
+  readonly onSearch: (query: string) => void;
+}
+
+function ParentMobileSearchField({ placeholder, onSearch }: Readonly<ParentMobileSearchFieldProps>) {
+  return (
+    <TextField
+      fullWidth
+      size="medium"
+      placeholder={placeholder}
+      onChange={e => {
+        onSearch(e.target.value);
+      }}
+      sx={{
+        mb: 3,
+        "& .MuiOutlinedInput-root": {
+          borderRadius: 3,
+          backgroundColor: theme => theme.palette.background.paper,
+        },
+      }}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchOutlined />
+            </InputAdornment>
+          ),
+        },
+      }}
+    />
+  );
+}
+
+interface ParentFilterPanelProps {
+  readonly open: boolean;
+  readonly statusFilter: ParentStatus | null;
+  readonly filterLabel: string;
+  readonly clearFiltersLabel: string;
+  readonly statusLabels: Record<ParentAccountStatus, string>;
+  readonly onStatusFilterChange: (status: ParentStatus | null) => void;
+  readonly onResetFilters: () => void;
+}
+
+function ParentFilterPanel({
+  open,
+  statusFilter,
+  filterLabel,
+  clearFiltersLabel,
+  statusLabels,
+  onStatusFilterChange,
+  onResetFilters,
+}: Readonly<ParentFilterPanelProps>) {
+  return (
+    <Collapse in={open}>
+      <Stack direction="row" spacing={1} sx={{ px: 3, pt: 2, pb: 1, flexWrap: "wrap", gap: 1, alignItems: "center" }}>
+        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mr: 1 })}>
+          {filterLabel}:
+        </Typography>
+        {STATUS_FILTER_OPTIONS.map(status => {
+          const displayStatus = toParentAccountStatus(status);
+          const isActive = statusFilter === status;
+          return (
+            <Chip
+              key={status}
+              label={statusLabels[displayStatus]}
+              size="small"
+              variant={isActive ? "filled" : "outlined"}
+              color={isActive ? "primary" : "default"}
+              onClick={() => {
+                onStatusFilterChange(statusFilter === status ? null : status);
+              }}
+            />
+          );
+        })}
+        {statusFilter && (
+          <FilterButton
+            size="small"
+            onClick={onResetFilters}
+            sx={theme => ({ color: theme.palette.error.main, borderColor: theme.palette.error.main })}
+          >
+            {clearFiltersLabel}
+          </FilterButton>
+        )}
+      </Stack>
+    </Collapse>
+  );
+}
+
+interface ParentRecordsSectionProps {
+  readonly isMobile: boolean;
+  readonly rows: readonly ParentDirectoryRow[];
+  readonly labels: ParentsViewLabels;
+  readonly page?: number;
+  readonly pageSize?: number;
+  readonly totalCount?: number;
+  readonly onOpenSettings: (id: string) => void;
+  readonly onPageChange?: (page: number) => void;
+  readonly filterLabel: string;
+  readonly onFilter: () => void;
+  readonly onExport: () => void;
+  readonly filterPanelOpen: boolean;
+  readonly statusFilter: ParentStatus | null;
+  readonly onStatusFilterChange: (status: ParentStatus | null) => void;
+  readonly onResetFilters: () => void;
+}
+
+function ParentRecordsSection({
+  isMobile,
+  rows,
+  labels,
+  page,
+  pageSize,
+  totalCount,
+  onOpenSettings,
+  onPageChange,
+  filterLabel,
+  onFilter,
+  onExport,
+  filterPanelOpen,
+  statusFilter,
+  onStatusFilterChange,
+  onResetFilters,
+}: Readonly<ParentRecordsSectionProps>) {
+  return (
+    <SectionPanel
+      title={labels.records}
+      actions={
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <FilterButton startIcon={<FilterListOutlined />} onClick={onFilter}>
+            {filterLabel}
+          </FilterButton>
+          <ExportButton onClick={onExport} />
+        </Box>
+      }
+    >
+      <ParentFilterPanel
+        open={filterPanelOpen}
+        statusFilter={statusFilter}
+        filterLabel={filterLabel}
+        clearFiltersLabel={labels.clearFilters}
+        statusLabels={labels.statusLabels}
+        onStatusFilterChange={onStatusFilterChange}
+        onResetFilters={onResetFilters}
+      />
+      {isMobile ? (
+        <ParentCardList
+          rows={rows}
+          labels={labels.card}
+          onOpenSettings={onOpenSettings}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
+        />
+      ) : (
+        <ParentsDataGrid
+          rows={rows}
+          labels={labels.table}
+          onOpenSettings={onOpenSettings}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={onPageChange}
+        />
+      )}
+    </SectionPanel>
+  );
+}
+
 export function ParentsView({
   metrics,
   rows,
@@ -99,31 +302,7 @@ export function ParentsView({
         subtitle={labels.pageSubtitle}
         actions={
           <>
-            {!isMobile && (
-              <TextField
-                size="small"
-                placeholder={labels.searchPlaceholder}
-                onChange={e => {
-                  onSearch(e.target.value);
-                }}
-                sx={{
-                  width: 300,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 10,
-                    backgroundColor: theme => theme.palette.background.paper,
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchOutlined fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-            )}
+            {!isMobile && <ParentSearchField placeholder={labels.searchPlaceholder} onSearch={onSearch} />}
             <PrimaryPageAction onClick={onAddParent}>{labels.addParent}</PrimaryPageAction>
           </>
         }
@@ -131,103 +310,25 @@ export function ParentsView({
 
       <ParentsMetricGrid metrics={metrics} />
 
-      {isMobile && (
-        <TextField
-          fullWidth
-          size="medium"
-          placeholder={labels.searchPlaceholder}
-          onChange={e => {
-            onSearch(e.target.value);
-          }}
-          sx={{
-            mb: 3,
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 3,
-              backgroundColor: theme => theme.palette.background.paper,
-            },
-          }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchOutlined />
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
-      )}
+      {isMobile && <ParentMobileSearchField placeholder={labels.searchPlaceholder} onSearch={onSearch} />}
 
-      <SectionPanel
-        title={labels.records}
-        actions={
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <FilterButton startIcon={<FilterListOutlined />} onClick={onFilter}>
-              {labels.filterLabel}
-            </FilterButton>
-            <ExportButton onClick={onExport} />
-          </Box>
-        }
-      >
-        <Collapse in={filterPanelOpen}>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{ px: 3, pt: 2, pb: 1, flexWrap: "wrap", gap: 1, alignItems: "center" }}
-          >
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mr: 1 })}>
-              {labels.filterLabel}:
-            </Typography>
-            {STATUS_FILTER_OPTIONS.map(status => {
-              const displayStatus = toParentAccountStatus(status);
-              const isActive = statusFilter === status;
-              return (
-                <Chip
-                  key={status}
-                  label={labels.statusLabels[displayStatus]}
-                  size="small"
-                  variant={isActive ? "filled" : "outlined"}
-                  color={isActive ? "primary" : "default"}
-                  onClick={() => {
-                    onStatusFilterChange(statusFilter === status ? null : status);
-                  }}
-                />
-              );
-            })}
-            {statusFilter && (
-              <FilterButton
-                size="small"
-                onClick={onResetFilters}
-                sx={theme => ({ color: theme.palette.error.main, borderColor: theme.palette.error.main })}
-              >
-                {labels.clearFilters}
-              </FilterButton>
-            )}
-          </Stack>
-        </Collapse>
-
-        {isMobile ? (
-          <ParentCardList
-            rows={rows}
-            labels={labels.card}
-            onOpenSettings={onOpenSettings}
-            page={page}
-            pageSize={pageSize}
-            totalCount={totalCount}
-            onPageChange={onPageChange}
-          />
-        ) : (
-          <ParentsDataGrid
-            rows={rows}
-            labels={labels.table}
-            onOpenSettings={onOpenSettings}
-            page={page}
-            pageSize={pageSize}
-            totalCount={totalCount}
-            onPageChange={onPageChange}
-          />
-        )}
-      </SectionPanel>
+      <ParentRecordsSection
+        isMobile={isMobile}
+        rows={rows}
+        labels={labels}
+        page={page}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        onOpenSettings={onOpenSettings}
+        onPageChange={onPageChange}
+        filterLabel={labels.filterLabel}
+        onFilter={onFilter}
+        onExport={onExport}
+        filterPanelOpen={filterPanelOpen}
+        statusFilter={statusFilter}
+        onStatusFilterChange={onStatusFilterChange}
+        onResetFilters={onResetFilters}
+      />
     </PageContainer>
   );
 }

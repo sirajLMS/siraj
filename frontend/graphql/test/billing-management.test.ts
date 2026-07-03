@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import type { InvoiceType as InvoiceTypeEnumType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { InvoiceStatus, InvoiceType as InvoiceTypeEnum } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
@@ -12,11 +11,11 @@ import {
   authenticatedRequest,
   cleanupTestEntities,
   cleanupTestSuperAdmin,
+  expectMutationError,
   loginAndProvision,
   provisionTestSuperAdmin,
 } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
-import { testClient } from "./testClient";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -49,56 +48,76 @@ async function createInvoice(token: string, parentId: string, amount: string): P
   return id;
 }
 
-async function expectMutationError<TData, TVars extends OperationVariables>(
-  token: string,
-  mutation: TypedDocumentNode<TData, TVars>,
-  variables: TVars
-): Promise<void> {
-  const result = await testClient.mutate({
-    mutation,
-    variables,
-    context: { headers: { Authorization: `Bearer ${token}` } },
-  } as Parameters<typeof testClient.mutate>[0]);
-  expect(result.error).toBeDefined();
+/** Mutable test state shared between provision, test body, and cleanup phases. */
+interface BillingTestState {
+  adminToken: string;
+  superAdminToken: string;
+  superAdminUserId: string;
+  parentId: string;
+  teacherId: string;
+  studentId: string;
+  studentUserId: string;
+  teacherUserId: string;
+  parentUserId: string;
+}
+
+/** Provisions test entities, logs in, and populates the shared state object. */
+async function provisionAndLogin(state: BillingTestState, prefix: string): Promise<void> {
+  const r = await loginAndProvision(prefix);
+  state.adminToken = r.adminToken;
+  state.teacherId = r.teacherId;
+  state.studentId = r.studentId;
+  state.studentUserId = r.studentUserId;
+  state.teacherUserId = r.teacherUserId;
+  state.parentUserId = r.parentUserId;
+  state.parentId = r.parentId;
+
+  const sa = await provisionTestSuperAdmin(state.adminToken, `${prefix}SA`);
+  state.superAdminToken = sa.token;
+  state.superAdminUserId = sa.userId;
+}
+
+/** Cleans up all provisioned entities and the super admin created during setup. */
+async function cleanupAll(state: BillingTestState): Promise<void> {
+  await cleanupTestEntities(state.adminToken, {
+    studentUserId: state.studentUserId,
+    teacherUserId: state.teacherUserId,
+    parentUserId: state.parentUserId,
+    studentId: state.studentId,
+    teacherId: state.teacherId,
+    parentId: state.parentId,
+  });
+  await cleanupTestSuperAdmin(state.superAdminToken, state.superAdminUserId);
 }
 
 describe("GraphQL: createManualInvoice mutation", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
-  let superAdminToken = "";
-  let superAdminUserId = "";
-  let parentId = "";
-  let teacherId = "";
-  let studentId = "";
-  let studentUserId = "";
-  let teacherUserId = "";
-  let parentUserId = "";
+  const state: BillingTestState = {
+    adminToken: "",
+    superAdminToken: "",
+    superAdminUserId: "",
+    parentId: "",
+    teacherId: "",
+    studentId: "",
+    studentUserId: "",
+    teacherUserId: "",
+    parentUserId: "",
+  };
 
   test("provision test entities and login", async () => {
-    const r = await loginAndProvision("BillTest");
-    adminToken = r.adminToken;
-    teacherId = r.teacherId;
-    studentId = r.studentId;
-    studentUserId = r.studentUserId;
-    teacherUserId = r.teacherUserId;
-    parentUserId = r.parentUserId;
-    parentId = r.parentId;
-
-    const sa = await provisionTestSuperAdmin(adminToken, "BillTestSA");
-    superAdminToken = sa.token;
-    superAdminUserId = sa.userId;
+    await provisionAndLogin(state, "BillTest");
   });
 
   test("admin creates a manual invoice with UNPAID status", async () => {
     const data = await authenticatedRequest(
-      superAdminToken,
+      state.superAdminToken,
       "mutate",
       createManualInvoiceMutationDocument,
-      invoiceVars(parentId, "200.00")
+      invoiceVars(state.parentId, "200.00")
     );
 
-    expect(data.createManualInvoice?.parentId).toBe(parentId);
+    expect(data.createManualInvoice?.parentId).toBe(state.parentId);
     expect(data.createManualInvoice?.status).toBe(InvoiceStatus.Unpaid);
     expect(data.createManualInvoice?.amount).toBe("200.00");
     expect(data.createManualInvoice?.currency).toBe("USD");
@@ -123,58 +142,45 @@ describe("GraphQL: createManualInvoice mutation", () => {
   });
 
   test("invalid negative amount returns validation error", async () => {
-    await expectMutationError(superAdminToken, createManualInvoiceMutationDocument, invoiceVars(parentId, "-50.00"));
+    await expectMutationError(
+      state.superAdminToken,
+      createManualInvoiceMutationDocument,
+      invoiceVars(state.parentId, "-50.00")
+    );
   });
 
   test("cleanup provisioned entities", async () => {
-    await cleanupTestEntities(adminToken, {
-      studentUserId,
-      teacherUserId,
-      parentUserId,
-      studentId,
-      teacherId,
-      parentId,
-    });
-    await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
+    await cleanupAll(state);
   });
 });
 
 describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   setupTestServerLifecycle();
 
-  let adminToken = "";
-  let superAdminToken = "";
-  let superAdminUserId = "";
-  let parentId = "";
+  const state: BillingTestState = {
+    adminToken: "",
+    superAdminToken: "",
+    superAdminUserId: "",
+    parentId: "",
+    teacherId: "",
+    studentId: "",
+    studentUserId: "",
+    teacherUserId: "",
+    parentUserId: "",
+  };
   let unpaidInvoiceId = "";
   let deleteInvoiceId = "";
-  let teacherId = "";
-  let studentId = "";
-  let studentUserId = "";
-  let teacherUserId = "";
-  let parentUserId = "";
 
   test("provision test entities and login", async () => {
-    const r = await loginAndProvision("BillPaidTest");
-    adminToken = r.adminToken;
-    teacherId = r.teacherId;
-    studentId = r.studentId;
-    studentUserId = r.studentUserId;
-    teacherUserId = r.teacherUserId;
-    parentUserId = r.parentUserId;
-    parentId = r.parentId;
-
-    const sa = await provisionTestSuperAdmin(adminToken, "BillPaidTestSA");
-    superAdminToken = sa.token;
-    superAdminUserId = sa.userId;
+    await provisionAndLogin(state, "BillPaidTest");
   });
 
   test("create an UNPAID invoice for mark-paid tests", async () => {
-    unpaidInvoiceId = await createInvoice(superAdminToken, parentId, "300.00");
+    unpaidInvoiceId = await createInvoice(state.superAdminToken, state.parentId, "300.00");
   });
 
   test("admin marks UNPAID invoice as PAID", async () => {
-    const data = await authenticatedRequest(superAdminToken, "mutate", markInvoicePaidMutationDocument, {
+    const data = await authenticatedRequest(state.superAdminToken, "mutate", markInvoicePaidMutationDocument, {
       invoiceId: unpaidInvoiceId,
       expectedVersion: null,
     });
@@ -185,7 +191,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   });
 
   test("Threat 1 — double settlement: second markInvoicePaid returns error", async () => {
-    await expectMutationError(superAdminToken, markInvoicePaidMutationDocument, {
+    await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
       invoiceId: unpaidInvoiceId,
       expectedVersion: null,
     });
@@ -199,18 +205,18 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   });
 
   test("Threat 2 — non-existent invoice ID returns error", async () => {
-    await expectMutationError(superAdminToken, markInvoicePaidMutationDocument, {
+    await expectMutationError(state.superAdminToken, markInvoicePaidMutationDocument, {
       invoiceId: NIL_UUID,
       expectedVersion: null,
     });
   });
 
   test("create a second UNPAID invoice for delete tests", async () => {
-    deleteInvoiceId = await createInvoice(superAdminToken, parentId, "150.00");
+    deleteInvoiceId = await createInvoice(state.superAdminToken, state.parentId, "150.00");
   });
 
   test("admin soft-deletes an invoice", async () => {
-    const data = await authenticatedRequest(superAdminToken, "mutate", deleteInvoiceMutationDocument, {
+    const data = await authenticatedRequest(state.superAdminToken, "mutate", deleteInvoiceMutationDocument, {
       invoiceId: deleteInvoiceId,
     });
 
@@ -219,7 +225,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   });
 
   test("Threat 2 — double deletion: second deleteInvoice returns error", async () => {
-    await expectMutationError(superAdminToken, deleteInvoiceMutationDocument, { invoiceId: deleteInvoiceId });
+    await expectMutationError(state.superAdminToken, deleteInvoiceMutationDocument, { invoiceId: deleteInvoiceId });
   });
 
   test("teacher role is denied deleteInvoice", async () => {
@@ -227,14 +233,6 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
   });
 
   test("cleanup provisioned entities", async () => {
-    await cleanupTestEntities(adminToken, {
-      studentUserId,
-      teacherUserId,
-      parentUserId,
-      studentId,
-      teacherId,
-      parentId,
-    });
-    await cleanupTestSuperAdmin(superAdminToken, superAdminUserId);
+    await cleanupAll(state);
   });
 });

@@ -223,19 +223,25 @@ export namespace StaffProfileRepository {
     };
   }
 
-  export async function findByUserId(userId: string, tx?: DBTransaction): Promise<ManagerDirectoryRow | null> {
-    const queryDb = tx ?? db;
-
+  async function findManagerDirectoryRow(
+    whereCondition: ReturnType<typeof eq>,
+    queryDb: typeof db | DBTransaction
+  ): Promise<ManagerDirectoryRow | null> {
     const results = await queryDb
       .select(MANAGER_DIRECTORY_SELECT)
       .from(staffProfiles)
       .innerJoin(users, eq(staffProfiles.userId, users.id))
       .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
       .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
-      .where(eq(users.id, userId))
+      .where(whereCondition)
       .limit(1);
 
     return (results[0] ? { ...results[0], status: results[0].status as AccountStatus } : null) ?? null;
+  }
+
+  export async function findByUserId(userId: string, tx?: DBTransaction): Promise<ManagerDirectoryRow | null> {
+    const queryDb = tx ?? db;
+    return findManagerDirectoryRow(eq(users.id, userId), queryDb);
   }
 
   export async function findByStaffProfileId(
@@ -243,17 +249,7 @@ export namespace StaffProfileRepository {
     tx?: DBTransaction
   ): Promise<ManagerDirectoryRow | null> {
     const queryDb = tx ?? db;
-
-    const results = await queryDb
-      .select(MANAGER_DIRECTORY_SELECT)
-      .from(staffProfiles)
-      .innerJoin(users, eq(staffProfiles.userId, users.id))
-      .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
-      .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
-      .where(eq(staffProfiles.id, staffProfileId))
-      .limit(1);
-
-    return (results[0] ? { ...results[0], status: results[0].status as AccountStatus } : null) ?? null;
+    return findManagerDirectoryRow(eq(staffProfiles.id, staffProfileId), queryDb);
   }
 
   export async function updateManagerProfile(

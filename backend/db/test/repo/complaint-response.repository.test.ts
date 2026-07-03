@@ -50,6 +50,26 @@ async function setupComplaintForResponse(tx: DBTransaction, namePrefix: string) 
   return { user, parent, complaint };
 }
 
+type CreateResponseInput = Parameters<typeof ComplaintResponseRepository.createResponse>[0];
+
+async function setupAndCreateResponse(
+  tx: DBTransaction,
+  namePrefix: string,
+  overrides: Partial<CreateResponseInput> & { body: string; emailSent: boolean }
+) {
+  const { complaint, user } = await setupComplaintForResponse(tx, namePrefix);
+  const result = await ComplaintResponseRepository.createResponse(
+    {
+      complaintId: complaint.id,
+      body: overrides.body,
+      emailSent: overrides.emailSent,
+      responderUserId: overrides.responderUserId ?? user.id,
+    } as CreateResponseInput,
+    tx
+  );
+  return { complaint, user, result };
+}
+
 describe("ComplaintResponseRepository — createResponse", () => {
   responseTest("creates a response and updates complaint status to ANSWERED", async tx => {
     const { complaint, user } = await setupComplaintForResponse(tx, "CreateResp");
@@ -82,34 +102,19 @@ describe("ComplaintResponseRepository — createResponse", () => {
   });
 
   responseTest("persists emailSent flag as true", async tx => {
-    const { complaint, user } = await setupComplaintForResponse(tx, "EmailSent");
-
-    const result = await ComplaintResponseRepository.createResponse(
-      {
-        complaintId: complaint.id,
-        responderUserId: user.id,
-        body: "Response with email",
-        emailSent: true,
-      },
-      tx
-    );
-
+    const { result } = await setupAndCreateResponse(tx, "EmailSent", {
+      body: "Response with email",
+      emailSent: true,
+    });
     expect(result.emailSent).toBe(true);
   });
 
   responseTest("creates response with null responderUserId", async tx => {
-    const { complaint } = await setupComplaintForResponse(tx, "NullResp");
-
-    const result = await ComplaintResponseRepository.createResponse(
-      {
-        complaintId: complaint.id,
-        responderUserId: null,
-        body: "Anonymous response",
-        emailSent: false,
-      },
-      tx
-    );
-
+    const { result } = await setupAndCreateResponse(tx, "NullResp", {
+      body: "Anonymous response",
+      emailSent: false,
+      responderUserId: null,
+    });
     expect(result).toBeDefined();
   });
 

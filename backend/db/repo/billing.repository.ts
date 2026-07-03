@@ -276,10 +276,33 @@ export namespace BillingRepository {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
-  export const getUnpaidInvoicesSummary = async (tx?: DBTransaction): Promise<Types.UnpaidInvoicesSummaryResult> => {
-    const t = tx ?? db;
+  // Drizzle's $inferSelect gives the runtime types for columns (string, nullable, etc.)
+  type OverdueInvoiceRow = {
+    invoiceId: string;
+    parentId: string;
+    amount: string;
+    currency: string;
+    dueDate: string;
+  };
 
-    const unpaidInvoices = await t
+  type ParentUserRow = {
+    parentId: string;
+    userId: string | null;
+    userName: string | null;
+    userEmail: string | null;
+  };
+
+  function createEmptySummary(totalOverdueInvoices: number): Types.UnpaidInvoicesSummaryResult {
+    return {
+      id: "unpaid-invoices-summary",
+      totalOverdueInvoices,
+      totalOverdueAmount: "0.00",
+      items: [],
+    };
+  }
+
+  async function fetchOverdueInvoices(t: DBTransaction | typeof db): Promise<OverdueInvoiceRow[]> {
+    return t
       .select({
         invoiceId: invoices.id,
         parentId: invoices.parentId,
@@ -291,28 +314,12 @@ export namespace BillingRepository {
       .where(and(eq(invoices.status, "UNPAID"), sql`${invoices.dueDate} < CURRENT_DATE`))
       .orderBy(invoices.dueDate)
       .limit(500);
+  }
 
-    if (unpaidInvoices.length === 0) {
-      return {
-        id: "unpaid-invoices-summary",
-        totalOverdueInvoices: 0,
-        totalOverdueAmount: "0.00",
-        items: [],
-      };
-    }
-
-    const parentIds = [...new Set(unpaidInvoices.map(inv => inv.parentId))];
-
-    // Guard against empty array in manual IN clause
-    if (parentIds.length === 0) {
-      return {
-        id: "unpaid-invoices-summary",
-        totalOverdueInvoices: unpaidInvoices.length,
-        totalOverdueAmount: "0.00",
-        items: [],
-      };
-    }
-
+  async function fetchParentUsers(
+    t: DBTransaction | typeof db,
+    parentIds: string[]
+  ): Promise<Map<string, ParentUserRow>> {
     const parentUsers = await t
       .select({
         parentId: parents.id,
@@ -324,15 +331,23 @@ export namespace BillingRepository {
       .leftJoin(users, eq(parents.userId, users.id))
       .where(inArray(parents.id, parentIds));
 
-    const parentMap = new Map(parentUsers.map(p => [p.parentId, p]));
+    return new Map(parentUsers.map(p => [p.parentId as string, p as ParentUserRow]));
+  }
 
-    const groupedByParent = new Map<string, typeof unpaidInvoices>();
-    for (const inv of unpaidInvoices) {
-      const existing = groupedByParent.get(inv.parentId) ?? [];
+  function groupInvoicesByParent(overdueInvoices: OverdueInvoiceRow[]): Map<string, OverdueInvoiceRow[]> {
+    const grouped = new Map<string, OverdueInvoiceRow[]>();
+    for (const inv of overdueInvoices) {
+      const existing = grouped.get(inv.parentId) ?? [];
       existing.push(inv);
-      groupedByParent.set(inv.parentId, existing);
+      grouped.set(inv.parentId, existing);
     }
+    return grouped;
+  }
 
+  function buildSummaryItems(
+    groupedByParent: Map<string, OverdueInvoiceRow[]>,
+    parentMap: Map<string, ParentUserRow>
+  ): { items: Types.UnpaidInvoiceSummaryItem[]; totalAmount: number } {
     const items: Types.UnpaidInvoiceSummaryItem[] = [];
     let totalAmount = 0;
 
@@ -355,9 +370,30 @@ export namespace BillingRepository {
       });
     }
 
+    return { items, totalAmount };
+  }
+
+  export const getUnpaidInvoicesSummary = async (tx?: DBTransaction): Promise<Types.UnpaidInvoicesSummaryResult> => {
+    const t = tx ?? db;
+
+    const overdueInvoices = await fetchOverdueInvoices(t);
+
+    if (overdueInvoices.length === 0) {
+      return createEmptySummary(0);
+    }
+
+    const parentIds = [...new Set(overdueInvoices.map(inv => inv.parentId))];
+    if (parentIds.length === 0) {
+      return createEmptySummary(overdueInvoices.length);
+    }
+
+    const parentMap = await fetchParentUsers(t, parentIds);
+    const groupedByParent = groupInvoicesByParent(overdueInvoices);
+    const { items, totalAmount } = buildSummaryItems(groupedByParent, parentMap);
+
     return {
       id: "unpaid-invoices-summary",
-      totalOverdueInvoices: unpaidInvoices.length,
+      totalOverdueInvoices: overdueInvoices.length,
       totalOverdueAmount: totalAmount.toFixed(2),
       items,
     };

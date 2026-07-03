@@ -186,13 +186,14 @@ export namespace StorageDbRepository {
     const fId = file.id;
     const fPath = file.path;
 
-    const [users, teachers, students_res, parents, invoices, complaints, resources, staff, schedules, instances] =
-      await fetchAllUsages(fId);
+    const [users, teachers, studentsRes, parents] = await fetchPersonUsages(fId);
+    const [invoices, complaints, resources] = await fetchContentUsages(fId);
+    const [staff, schedules, instances] = await fetchSystemUsages(fId);
 
     return [
       ...users.map(r => mapRowToUsage(r, fPath, r.userId, "users")),
       ...teachers.map(r => mapRowToUsage(r, fPath, r.teacherId, "teachers")),
-      ...students_res.map(r => mapRowToUsage(r, fPath, r.studentId, "students")),
+      ...studentsRes.map(r => mapRowToUsage(r, fPath, r.studentId, "students")),
       ...parents.map(r => mapRowToUsage(r, fPath, r.parentId, "parents")),
       ...invoices.map(r => mapRowToUsage(r, fPath, r.invoiceId, "invoices")),
       ...complaints.map(r => mapRowToUsage(r, fPath, r.complaintId, "complaints")),
@@ -203,12 +204,11 @@ export namespace StorageDbRepository {
     ];
   };
 
-  async function fetchAllUsages(fId: string) {
+  async function fetchPersonUsages(fId: string) {
     return Promise.all([
       db
         .select({
           id: userFiles.id,
-          fileId: userFiles.fileId,
           userId: userFiles.userId,
           usageType: userFiles.usageType,
           createdAt: userFiles.createdAt,
@@ -218,7 +218,6 @@ export namespace StorageDbRepository {
       db
         .select({
           id: teacherFiles.id,
-          fileId: teacherFiles.fileId,
           teacherId: teacherFiles.teacherId,
           usageType: teacherFiles.usageType,
           createdAt: teacherFiles.createdAt,
@@ -228,7 +227,6 @@ export namespace StorageDbRepository {
       db
         .select({
           id: studentFiles.id,
-          fileId: studentFiles.fileId,
           studentId: studentFiles.studentId,
           usageType: studentFiles.usageType,
           createdAt: studentFiles.createdAt,
@@ -238,17 +236,20 @@ export namespace StorageDbRepository {
       db
         .select({
           id: parentFiles.id,
-          fileId: parentFiles.fileId,
           parentId: parentFiles.parentId,
           usageType: parentFiles.usageType,
           createdAt: parentFiles.createdAt,
         })
         .from(parentFiles)
         .where(eq(parentFiles.fileId, fId)),
+    ]);
+  }
+
+  async function fetchContentUsages(fId: string) {
+    return Promise.all([
       db
         .select({
           id: invoiceFiles.id,
-          fileId: invoiceFiles.fileId,
           invoiceId: invoiceFiles.invoiceId,
           usageType: invoiceFiles.usageType,
           createdAt: invoiceFiles.createdAt,
@@ -258,7 +259,6 @@ export namespace StorageDbRepository {
       db
         .select({
           id: complaintFiles.id,
-          fileId: complaintFiles.fileId,
           complaintId: complaintFiles.complaintId,
           usageType: complaintFiles.usageType,
           createdAt: complaintFiles.createdAt,
@@ -268,17 +268,20 @@ export namespace StorageDbRepository {
       db
         .select({
           id: learningResourceFiles.id,
-          fileId: learningResourceFiles.fileId,
           learningResourceId: learningResourceFiles.learningResourceId,
           usageType: learningResourceFiles.usageType,
           createdAt: learningResourceFiles.createdAt,
         })
         .from(learningResourceFiles)
         .where(eq(learningResourceFiles.fileId, fId)),
+    ]);
+  }
+
+  async function fetchSystemUsages(fId: string) {
+    return Promise.all([
       db
         .select({
           id: staffProfileFiles.id,
-          fileId: staffProfileFiles.fileId,
           staffProfileId: staffProfileFiles.staffProfileId,
           usageType: staffProfileFiles.usageType,
           createdAt: staffProfileFiles.createdAt,
@@ -288,7 +291,6 @@ export namespace StorageDbRepository {
       db
         .select({
           id: recurringScheduleFiles.id,
-          fileId: recurringScheduleFiles.fileId,
           recurringScheduleId: recurringScheduleFiles.recurringScheduleId,
           usageType: recurringScheduleFiles.usageType,
           createdAt: recurringScheduleFiles.createdAt,
@@ -298,7 +300,6 @@ export namespace StorageDbRepository {
       db
         .select({
           id: classInstanceFiles.id,
-          fileId: classInstanceFiles.fileId,
           classInstanceId: classInstanceFiles.classInstanceId,
           usageType: classInstanceFiles.usageType,
           createdAt: classInstanceFiles.createdAt,

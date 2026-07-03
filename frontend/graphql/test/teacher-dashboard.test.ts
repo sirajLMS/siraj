@@ -1,4 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
+import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import { ClassType } from "@/frontend/graphql/generated/gql/graphql-types";
 import { deleteClassInstanceMutationDocument } from "../sharedDocuments/class-session.documents";
 import { dailyScheduleListQueryDocument } from "../sharedDocuments/schedule.documents";
@@ -11,6 +12,30 @@ import { cleanupTestEntitiesMutationDocument } from "../sharedDocuments/test-hel
 import { authenticatedRequest, loginAndProvision } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 import { testClient } from "./testClient";
+
+/**
+ * Performs an authenticated GraphQL query with errorPolicy "all" and asserts
+ * that the operation is denied (result.error is defined).
+ * Centralizes the common denial-test pattern for queries using provisioned tokens.
+ */
+async function assertQueryDeniedWithToken<TData, TVars extends OperationVariables = OperationVariables>(
+  token: string,
+  document: TypedDocumentNode<TData, TVars>,
+  variables: TVars
+): Promise<void> {
+  const result = await testClient.query({
+    query: document,
+    variables,
+    errorPolicy: "all",
+    context: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  } as Parameters<typeof testClient.query>[0]);
+
+  expect(result.error).toBeDefined();
+}
 
 async function clearClassesOnDate(token: string, dateVal: string) {
   const result = await testClient.query({
@@ -107,21 +132,10 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   test("user without teacher.view_dashboard (academy admin) query returns unauthorized GraphQL error", async () => {
     if (!superAdminToken) throw new Error("No admin token");
 
-    const result = await testClient.query({
-      query: teacherDashboardQueryDocument,
-      variables: {
-        date: testDate,
-        pagination: null,
-      },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${superAdminToken}`,
-        },
-      },
+    await assertQueryDeniedWithToken(superAdminToken, teacherDashboardQueryDocument, {
+      date: testDate,
+      pagination: null,
     });
-
-    expect(result.error).toBeDefined();
   });
 
   test("createTeacherManualClassEntry creates a manual class instance successfully", async () => {
@@ -223,18 +237,9 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
   test("teacherFutureSchedule — denied when user has no teacher record (super admin)", async () => {
     if (!superAdminToken) throw new Error("No admin token");
 
-    const result = await testClient.query({
-      query: teacherFutureScheduleQueryDocument,
-      variables: { teacherId: null },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${superAdminToken}`,
-        },
-      },
+    await assertQueryDeniedWithToken(superAdminToken, teacherFutureScheduleQueryDocument, {
+      teacherId: null,
     });
-
-    expect(result.error).toBeDefined();
   });
 
   test("teacherFutureSchedule — denied when unauthenticated", async () => {

@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { type Control, Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { FieldWrapper, standardInputSx } from "@/frontend/components/ui/form";
 import type { CreateSubjectDialogProps } from "../types";
@@ -40,6 +40,158 @@ const createSubjectSchema = z.object({
 });
 
 type CreateSubjectFormValues = z.infer<typeof createSubjectSchema>;
+
+type FormErrors = Partial<Record<keyof CreateSubjectFormValues, string>>;
+
+interface SubjectFormFieldsProps {
+  readonly control: Control<CreateSubjectFormValues>;
+  readonly errors: FormErrors;
+  readonly isLoading: boolean;
+  readonly categories: CreateSubjectDialogProps["categories"];
+}
+
+function SubjectFormFields({ control, errors, isLoading, categories }: Readonly<SubjectFormFieldsProps>) {
+  const t = useTranslations("dashboard.subjects");
+
+  return (
+    <>
+      <Controller
+        name="name"
+        control={control}
+        render={({ field }) => (
+          <FieldWrapper label={t("nameLabel")} required error={errors.name ? t("nameRequired") : undefined}>
+            <TextField
+              {...field}
+              fullWidth
+              variant="standard"
+              error={!!errors.name}
+              disabled={isLoading}
+              sx={standardInputSx}
+            />
+          </FieldWrapper>
+        )}
+      />
+
+      <Controller
+        name="slug"
+        control={control}
+        render={({ field }) => (
+          <FieldWrapper label={t("slugLabel")} required error={errors.slug ? t("slugRequired") : undefined}>
+            <TextField
+              {...field}
+              fullWidth
+              variant="standard"
+              error={!!errors.slug}
+              disabled={isLoading}
+              sx={standardInputSx}
+            />
+          </FieldWrapper>
+        )}
+      />
+
+      <Controller
+        name="categoryId"
+        control={control}
+        render={({ field }) => (
+          <FieldWrapper
+            label={t("categoryLabel")}
+            required
+            error={errors.categoryId ? t("categoryRequired") : undefined}
+          >
+            <Select
+              {...field}
+              fullWidth
+              variant="standard"
+              error={!!errors.categoryId}
+              disabled={isLoading}
+              sx={standardInputSx}
+              displayEmpty
+            >
+              <MenuItem value="" disabled>
+                {t("selectCategory")}
+              </MenuItem>
+              {categories.map(cat => (
+                <MenuItem key={cat.id} value={cat.id ?? ""}>
+                  {cat.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FieldWrapper>
+        )}
+      />
+
+      <Controller
+        name="description"
+        control={control}
+        render={({ field }) => (
+          <FieldWrapper label={t("descriptionLabel")}>
+            <TextField
+              {...field}
+              fullWidth
+              variant="standard"
+              multiline
+              rows={3}
+              disabled={isLoading}
+              sx={standardInputSx}
+            />
+          </FieldWrapper>
+        )}
+      />
+
+      <Controller
+        name="isActive"
+        control={control}
+        render={({ field }) => (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Switch checked={field.value ?? true} onChange={field.onChange} disabled={isLoading} />
+            <Typography variant="bodyMd">{t("activeLabel")}</Typography>
+          </Box>
+        )}
+      />
+    </>
+  );
+}
+
+interface SubjectDialogActionsProps {
+  readonly onClose: () => void;
+  readonly isLoading: boolean;
+}
+
+function SubjectDialogActions({ onClose, isLoading }: Readonly<SubjectDialogActionsProps>) {
+  const t = useTranslations("dashboard.subjects");
+
+  return (
+    <DialogActions sx={{ px: 3, pb: 3 }}>
+      <Button
+        onClick={onClose}
+        disabled={isLoading}
+        variant="text"
+        sx={theme => ({
+          color: theme.palette.text.secondary,
+          fontWeight: 700,
+          borderRadius: 1.5,
+        })}
+      >
+        {t("cancel")}
+      </Button>
+      <Button
+        type="submit"
+        form="create-subject-form"
+        disabled={isLoading}
+        variant="contained"
+        sx={theme => ({
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.onPrimary,
+          fontWeight: 700,
+          borderRadius: 1.5,
+          "&:hover": { backgroundColor: theme.palette.primary.dark },
+        })}
+      >
+        {isLoading ? "..." : t("createSubject")}
+      </Button>
+    </DialogActions>
+  );
+}
 
 export function CreateSubjectDialog({
   open,
@@ -106,130 +258,15 @@ export function CreateSubjectDialog({
           onSubmit={handleSubmit(handleFormSubmit)}
           sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 3 }}
         >
-          <Controller
-            name="name"
+          <SubjectFormFields
             control={control}
-            render={({ field }) => (
-              <FieldWrapper label={t("nameLabel")} required error={errors.name ? t("nameRequired") : undefined}>
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="standard"
-                  error={!!errors.name}
-                  disabled={isLoading}
-                  sx={standardInputSx}
-                />
-              </FieldWrapper>
-            )}
-          />
-
-          <Controller
-            name="slug"
-            control={control}
-            render={({ field }) => (
-              <FieldWrapper label={t("slugLabel")} required error={errors.slug ? t("slugRequired") : undefined}>
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="standard"
-                  error={!!errors.slug}
-                  disabled={isLoading}
-                  sx={standardInputSx}
-                />
-              </FieldWrapper>
-            )}
-          />
-
-          <Controller
-            name="categoryId"
-            control={control}
-            render={({ field }) => (
-              <FieldWrapper
-                label={t("categoryLabel")}
-                required
-                error={errors.categoryId ? t("categoryRequired") : undefined}
-              >
-                <Select
-                  {...field}
-                  fullWidth
-                  variant="standard"
-                  error={!!errors.categoryId}
-                  disabled={isLoading}
-                  sx={standardInputSx}
-                  displayEmpty
-                >
-                  <MenuItem value="" disabled>
-                    {t("selectCategory")}
-                  </MenuItem>
-                  {categories.map(cat => (
-                    <MenuItem key={cat.id} value={cat.id ?? ""}>
-                      {cat.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FieldWrapper>
-            )}
-          />
-
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }) => (
-              <FieldWrapper label={t("descriptionLabel")}>
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="standard"
-                  multiline
-                  rows={3}
-                  disabled={isLoading}
-                  sx={standardInputSx}
-                />
-              </FieldWrapper>
-            )}
-          />
-
-          <Controller
-            name="isActive"
-            control={control}
-            render={({ field }) => (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Switch checked={field.value ?? true} onChange={field.onChange} disabled={isLoading} />
-                <Typography variant="bodyMd">{t("activeLabel")}</Typography>
-              </Box>
-            )}
+            errors={errors as FormErrors}
+            isLoading={isLoading}
+            categories={categories}
           />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button
-          onClick={onClose}
-          disabled={isLoading}
-          variant="text"
-          sx={theme => ({
-            color: theme.palette.text.secondary,
-            fontWeight: 700,
-            borderRadius: 1.5,
-          })}
-        >
-          {t("cancel")}
-        </Button>
-        <Button
-          type="submit"
-          form="create-subject-form"
-          disabled={isLoading}
-          variant="contained"
-          sx={theme => ({
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            fontWeight: 700,
-            borderRadius: 1.5,
-            "&:hover": { backgroundColor: theme.palette.primary.dark },
-          })}
-        >
-          {isLoading ? "..." : t("createSubject")}
-        </Button>
-      </DialogActions>
+      <SubjectDialogActions onClose={onClose} isLoading={isLoading} />
     </Dialog>
   );
 }

@@ -35,6 +35,28 @@ export interface TestEntitiesResult {
 export namespace TestHelperService {
   type TxType = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
+  function assertNotProduction(): void {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Test helper service is not allowed in production environment.");
+    }
+  }
+
+  async function cleanupStaffUser(userId: string, label: string): Promise<boolean> {
+    try {
+      await db.transaction(async tx => {
+        await tx.delete(userPermissionGroups).where(eq(userPermissionGroups.userId, userId));
+        await tx.delete(staffProfiles).where(eq(staffProfiles.userId, userId));
+        await tx.delete(users).where(eq(users.id, userId));
+      });
+
+      logger.info(`Test ${label} cleaned up successfully via helper service`, { userId });
+      return true;
+    } catch (error) {
+      logger.error(`Failed to clean up test ${label} via helper service`, { error });
+      return false;
+    }
+  }
+
   async function createTestUsers(tx: TxType, prefix: string, hashedPassword: string, now: Date) {
     const studentEmail = `${prefix}-stu-${randomUUID().slice(0, 8)}@example.com`;
     const parentEmail = `${prefix}-par-${randomUUID().slice(0, 8)}@example.com`;
@@ -174,9 +196,7 @@ export namespace TestHelperService {
   }
 
   export async function createTestEntities(prefix: string, classesRemaining: number = 10): Promise<TestEntitiesResult> {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Test helper service is not allowed in production environment.");
-    }
+    assertNotProduction();
 
     const now = new Date();
     // eslint-disable-next-line sonarjs/no-hardcoded-passwords
@@ -225,9 +245,7 @@ export namespace TestHelperService {
     teacherId: string;
     parentId: string;
   }): Promise<boolean> {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Test helper service is not allowed in production environment.");
-    }
+    assertNotProduction();
     const { studentUserId, teacherUserId, parentUserId, studentId, teacherId, parentId } = args;
 
     try {
@@ -271,9 +289,7 @@ export namespace TestHelperService {
     classInstanceId: string,
     teacherName: string
   ): Promise<{ groupClassId: string }> {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Test helper service is not allowed in production environment.");
-    }
+    assertNotProduction();
 
     const now = new Date();
     const [classInstance] = await db
@@ -311,9 +327,7 @@ export namespace TestHelperService {
   }
 
   export async function cleanupTestGroupClass(groupClassId: string): Promise<boolean> {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Test helper service is not allowed in production environment.");
-    }
+    assertNotProduction();
 
     try {
       await db.delete(groupClassEnrollments).where(eq(groupClassEnrollments.groupClassId, groupClassId));
@@ -327,9 +341,7 @@ export namespace TestHelperService {
   }
 
   export async function createTestSuperAdmin(prefix: string): Promise<{ userId: string; email: string }> {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Test helper service is not allowed in production environment.");
-    }
+    assertNotProduction();
 
     const now = new Date();
     const email = `${prefix}-sa-${randomUUID().slice(0, 8)}@example.com`;
@@ -384,42 +396,12 @@ export namespace TestHelperService {
   }
 
   export async function cleanupTestSuperAdmin(userId: string): Promise<boolean> {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Test helper service is not allowed in production environment.");
-    }
-
-    try {
-      await db.transaction(async tx => {
-        await tx.delete(userPermissionGroups).where(eq(userPermissionGroups.userId, userId));
-        await tx.delete(staffProfiles).where(eq(staffProfiles.userId, userId));
-        await tx.delete(users).where(eq(users.id, userId));
-      });
-
-      logger.info("Test super admin cleaned up successfully via helper service", { userId });
-      return true;
-    } catch (error) {
-      logger.error("Failed to clean up test super admin via helper service", { error });
-      return false;
-    }
+    assertNotProduction();
+    return cleanupStaffUser(userId, "super admin");
   }
 
   export async function cleanupTestManager(userId: string): Promise<boolean> {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Test helper service is not allowed in production environment.");
-    }
-
-    try {
-      await db.transaction(async tx => {
-        await tx.delete(userPermissionGroups).where(eq(userPermissionGroups.userId, userId));
-        await tx.delete(staffProfiles).where(eq(staffProfiles.userId, userId));
-        await tx.delete(users).where(eq(users.id, userId));
-      });
-
-      logger.info("Test manager cleaned up successfully via helper service", { userId });
-      return true;
-    } catch (error) {
-      logger.error("Failed to clean up test manager via helper service", { error });
-      return false;
-    }
+    assertNotProduction();
+    return cleanupStaffUser(userId, "manager");
   }
 }

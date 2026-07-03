@@ -59,6 +59,101 @@ export interface PermissionManagementViewProps {
   ) => Promise<void>;
 }
 
+function PermissionErrorAlert({
+  error,
+  t,
+}: {
+  readonly error: string | null;
+  readonly t: ReturnType<typeof useTranslations>;
+}) {
+  if (!error) return null;
+  return (
+    <Alert severity="error" sx={{ mb: 2 }}>
+      {error === "operationFailed"
+        ? t("errors.operationFailed", { defaultValue: "Operation failed. Please try again." })
+        : error}
+    </Alert>
+  );
+}
+
+interface PermissionListContentProps {
+  readonly t: ReturnType<typeof useTranslations>;
+  readonly activeTab: TabKey;
+  readonly setActiveTab: (tab: TabKey) => void;
+  readonly isMobile: boolean;
+  readonly isLoading: boolean;
+  readonly error: string | null;
+  readonly permissions: readonly Permission[];
+  readonly groups: readonly PermissionGroup[];
+  readonly users: readonly User[];
+  readonly setSelectedGroupId: (id: string | null) => void;
+  readonly openCreateDialog: () => void;
+  readonly openEditDialog: (id: string) => void;
+  readonly openDeleteDialog: (id: string) => void;
+  readonly openAssignDialog: (id: string) => void;
+  readonly openManageOverrides: () => void;
+  readonly setSelectedUserIdForOverrides: (id: string | null) => void;
+}
+
+function PermissionListContent({
+  t,
+  activeTab,
+  setActiveTab,
+  isMobile,
+  isLoading,
+  error,
+  permissions,
+  groups,
+  users,
+  setSelectedGroupId,
+  openCreateDialog,
+  openEditDialog,
+  openDeleteDialog,
+  openAssignDialog,
+  openManageOverrides,
+  setSelectedUserIdForOverrides,
+}: Readonly<PermissionListContentProps>) {
+  const tabs = [
+    { key: "groups" as const, label: t("groupsTab") },
+    { key: "catalog" as const, label: t("catalogTab") },
+    { key: "overrides" as const, label: t("overridesTab") },
+  ];
+
+  const headerActions =
+    activeTab === "groups" ? (
+      <PrimaryPageAction id="create-group-btn" onClick={openCreateDialog}>
+        {t("addPermissions")}
+      </PrimaryPageAction>
+    ) : null;
+
+  return (
+    <>
+      <PageHeader title={t("title")} subtitle={t("subtitle")} actions={headerActions} />
+
+      <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3 }}>
+        <PermissionErrorAlert error={error} t={t} />
+
+        <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={(tab: TabKey) => setActiveTab(tab)} />
+
+        <PermissionTabContent
+          activeTab={activeTab}
+          isLoading={isLoading}
+          isMobile={isMobile}
+          permissions={permissions}
+          groups={groups}
+          users={users}
+          setSelectedGroupId={setSelectedGroupId}
+          openEditDialog={openEditDialog}
+          openDeleteDialog={openDeleteDialog}
+          openAssignDialog={openAssignDialog}
+          openManageOverrides={openManageOverrides}
+          setSelectedUserIdForOverrides={setSelectedUserIdForOverrides}
+        />
+      </Box>
+    </>
+  );
+}
+
 export function PermissionManagementView({
   permissions,
   groups,
@@ -97,19 +192,6 @@ export function PermissionManagementView({
   const [activeTab, setActiveTab] = useState<TabKey>("groups");
   const [selectedUserIdForOverrides, setSelectedUserIdForOverrides] = useState<string | null>(null);
 
-  const tabs = [
-    { key: "groups" as const, label: t("groupsTab") },
-    { key: "catalog" as const, label: t("catalogTab") },
-    { key: "overrides" as const, label: t("overridesTab") },
-  ];
-
-  const headerActions =
-    activeTab === "groups" ? (
-      <PrimaryPageAction id="create-group-btn" onClick={openCreateDialog}>
-        {t("addPermissions")}
-      </PrimaryPageAction>
-    ) : null;
-
   const activeGroup = groups.find(g => g.id === selectedGroupId) || null;
 
   return (
@@ -128,36 +210,24 @@ export function PermissionManagementView({
           onUpdateGroup={onUpdateGroup}
         />
       ) : (
-        <>
-          <PageHeader title={t("title")} subtitle={t("subtitle")} actions={headerActions} />
-
-          <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 3 }}>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error === "operationFailed"
-                  ? t("errors.operationFailed", { defaultValue: "Operation failed. Please try again." })
-                  : error}
-              </Alert>
-            )}
-
-            <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={(tab: TabKey) => setActiveTab(tab)} />
-
-            <PermissionTabContent
-              activeTab={activeTab}
-              isLoading={isLoading}
-              isMobile={isMobile}
-              permissions={permissions}
-              groups={groups}
-              users={users}
-              setSelectedGroupId={setSelectedGroupId}
-              openEditDialog={openEditDialog}
-              openDeleteDialog={openDeleteDialog}
-              openAssignDialog={openAssignDialog}
-              openManageOverrides={openManageOverrides}
-              setSelectedUserIdForOverrides={setSelectedUserIdForOverrides}
-            />
-          </Box>
-        </>
+        <PermissionListContent
+          t={t}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isMobile={isMobile}
+          isLoading={isLoading}
+          error={error}
+          permissions={permissions}
+          groups={groups}
+          users={users}
+          setSelectedGroupId={setSelectedGroupId}
+          openCreateDialog={openCreateDialog}
+          openEditDialog={openEditDialog}
+          openDeleteDialog={openDeleteDialog}
+          openAssignDialog={openAssignDialog}
+          openManageOverrides={openManageOverrides}
+          setSelectedUserIdForOverrides={setSelectedUserIdForOverrides}
+        />
       )}
 
       <PermissionManagementDialogs
