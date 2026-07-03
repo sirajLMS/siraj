@@ -323,8 +323,8 @@ describe("UserBillingProfileView", () => {
     expect(onSearchChange).toHaveBeenCalledWith("INV-001");
   });
 
-  test("renders desktop view on large screens", () => {
-    mockMediaQuery(false);
+  function renderInvoiceView(isMobile: boolean) {
+    mockMediaQuery(isMobile);
 
     const propsWithInvoices: UserBillingProfileViewProps = {
       ...baseProps,
@@ -347,35 +347,17 @@ describe("UserBillingProfileView", () => {
       locale: "en",
       permissions: [AppPermission.BillingViewHistory],
     });
+  }
+
+  test("renders desktop view on large screens", () => {
+    renderInvoiceView(false);
 
     expect(screen.getByText("Invoice History")).toBeVisible();
     expect(screen.getByRole("grid")).toBeVisible();
   });
 
   test("renders mobile view on small screens", () => {
-    mockMediaQuery(true);
-
-    const propsWithInvoices: UserBillingProfileViewProps = {
-      ...baseProps,
-      invoices: [
-        {
-          id: "inv-1",
-          invoiceNumber: "INV-100",
-          month: "June",
-          issueDate: "2026-06-01",
-          dueDate: "2026-06-30",
-          paidDate: "—",
-          fee: "USD 300.00",
-          status: InvoiceStatus.UNPAID,
-        },
-      ],
-      totalCount: 1,
-    };
-
-    renderWithWrapper(<UserBillingProfileView {...propsWithInvoices} />, {
-      locale: "en",
-      permissions: [AppPermission.BillingViewHistory],
-    });
+    renderInvoiceView(true);
 
     expect(screen.getByText("Invoice History")).toBeVisible();
     expect(screen.getByText("INV-100")).toBeVisible();

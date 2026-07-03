@@ -4,7 +4,7 @@ Tools for tracking and fixing TypeScript/ESLint errors across the frontend codeb
 
 ## Files
 
-- **`generate_tasks.py`** — Runs `bun run tsgo` and `bun run lint`, parses all errors, and writes them to `all_errors.txt` as a trackable task list.
+- **`generate_tasks.py`** — Runs `bun run tsgo` and lint via the lint queue client, parses all errors, and writes them to `all_errors.txt` as a trackable task list.
 - **`claim_file.ts`** — Used by agents to atomically claim, lock, and complete files from `all_errors.txt`.
 - **`fixing_patterns.md`** — Catalogue of known breaking changes and their fixes. Check here before investigating `node_modules`.
 
@@ -34,7 +34,10 @@ Use the agent prompt in `prompt.md` to instruct one or more AI agents to claim a
 ```bash
 cd /workspace/frontend
 bun run tsgo
-bun run lint
+# Lint via queue client (NEVER run `bun run lint` directly):
+curl -s -X POST http://localhost:4777/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"health-verify","files":["all_files_in_all_errors.txt"]}'
 ```
 
 ## Adding New Patterns

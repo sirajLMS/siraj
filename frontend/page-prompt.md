@@ -357,7 +357,7 @@ Handle promises correctly to avoid ESLint errors:
 After implementation, run:
 
 1. `~/.bun/bin/bun tsgo` - TypeScript type checking
-2. `~/.bun/bin/bun lint` - ESLint validation
+2. Lint via lint queue client - ESLint validation (NEVER run `bun lint` directly)
 3. Fix all errors before completion
 
 ### 9. Styling Guidelines

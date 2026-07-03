@@ -116,6 +116,8 @@ function getBodyStyles(rowIndex: number, isFinancial: boolean): CellStyle {
   return isAlt ? bodyAltStyle : bodyStyle;
 }
 
+type XLSXModule = typeof import("xlsx-js-style");
+
 export async function exportAttendanceReport(data: ReportExportData): Promise<void> {
   const XLSX = await import("xlsx-js-style");
 
@@ -123,6 +125,24 @@ export async function exportAttendanceReport(data: ReportExportData): Promise<vo
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([[]]);
 
+  const headers = buildHeaders(labels, showFinancials);
+  const financialColStart = 6;
+  const totalCols = headers.length;
+
+  writeTitleAndSubtitle(XLSX, ws, labels.pageTitle, fromDate, toDate, totalCols);
+  writeHeaderRow(XLSX, ws, headers);
+  writeDataRows(XLSX, ws, rows, showFinancials, financialColStart);
+  writeTotalsRow(XLSX, ws, rows, summary, labels.totalsLabel, showFinancials);
+  applyColumnWidths(ws, headers, rows, showFinancials);
+  applyRowHeights(ws);
+
+  XLSX.utils.book_append_sheet(wb, ws, "Attendance Report");
+
+  const filename = `attendance-report-${fromDate}-to-${toDate}.xlsx`;
+  XLSX.writeFile(wb, filename);
+}
+
+function buildHeaders(labels: ReportExportLabels, showFinancials: boolean): string[] {
   const headers = [
     labels.tableLabels.name,
     labels.tableLabels.taken,
@@ -136,13 +156,21 @@ export async function exportAttendanceReport(data: ReportExportData): Promise<vo
     headers.push(labels.tableLabels.paidEgp, labels.tableLabels.paidUsd);
   }
 
-  const financialColStart = 6;
-  const totalCols = headers.length;
+  return headers;
+}
 
+function writeTitleAndSubtitle(
+  XLSX: XLSXModule,
+  ws: import("xlsx-js-style").WorkSheet,
+  pageTitle: string,
+  fromDate: string,
+  toDate: string,
+  totalCols: number
+): void {
   ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } }];
 
   const titleCell = XLSX.utils.encode_cell({ r: 0, c: 0 });
-  ws[titleCell] = { v: labels.pageTitle, t: "s", s: titleStyle };
+  ws[titleCell] = { v: pageTitle, t: "s", s: titleStyle };
 
   const subtitleCell = XLSX.utils.encode_cell({ r: 1, c: 0 });
   ws[subtitleCell] = {
@@ -151,42 +179,78 @@ export async function exportAttendanceReport(data: ReportExportData): Promise<vo
     s: subtitleStyle,
   };
   ws["!merges"].push({ s: { r: 1, c: 0 }, e: { r: 1, c: totalCols - 1 } });
+}
 
+function writeHeaderRow(XLSX: XLSXModule, ws: import("xlsx-js-style").WorkSheet, headers: readonly string[]): void {
   const headerRow = 3;
   headers.forEach((header, col) => {
     const cell = XLSX.utils.encode_cell({ r: headerRow, c: col });
     ws[cell] = { v: header, t: "s", s: headerStyle };
   });
+}
 
+function writeDataRows(
+  XLSX: XLSXModule,
+  ws: import("xlsx-js-style").WorkSheet,
+  rows: readonly ReportLedgerRow[],
+  showFinancials: boolean,
+  financialColStart: number
+): void {
   const dataStartRow = 4;
   rows.forEach((row, idx) => {
     const r = dataStartRow + idx;
-    const values: (string | number)[] = [row.name, row.taken, row.absent, row.leave, row.pending, row.hours];
-
-    if (showFinancials) {
-      values.push(row.paidEgp, row.paidUsd);
-    }
-
-    values.forEach((val, col) => {
-      const cell = XLSX.utils.encode_cell({ r, c: col });
-      const isFinancial = showFinancials && col >= financialColStart;
-      const isName = col === 0;
-
-      let style: CellStyle;
-      if (isName) style = idx % 2 === 1 ? nameAltStyle : nameStyle;
-      else style = getBodyStyles(idx, isFinancial);
-
-      ws[cell] = {
-        v: typeof val === "number" ? val : (val as string),
-        t: typeof val === "number" ? "n" : "s",
-        s: style,
-      };
-    });
+    const values = buildRowValues(row, showFinancials);
+    writeRowCells(XLSX, ws, r, idx, values, showFinancials, financialColStart);
   });
+}
 
+function buildRowValues(row: ReportLedgerRow, showFinancials: boolean): (string | number)[] {
+  const values: (string | number)[] = [row.name, row.taken, row.absent, row.leave, row.pending, row.hours];
+  if (showFinancials) {
+    values.push(row.paidEgp, row.paidUsd);
+  }
+  return values;
+}
+
+function writeRowCells(
+  XLSX: XLSXModule,
+  ws: import("xlsx-js-style").WorkSheet,
+  rowIndex: number,
+  dataIdx: number,
+  values: readonly (string | number)[],
+  showFinancials: boolean,
+  financialColStart: number
+): void {
+  values.forEach((val, col) => {
+    const cell = XLSX.utils.encode_cell({ r: rowIndex, c: col });
+    const isFinancial = showFinancials && col >= financialColStart;
+    const isName = col === 0;
+
+    let style: CellStyle;
+    if (isName) style = dataIdx % 2 === 1 ? nameAltStyle : nameStyle;
+    else style = getBodyStyles(dataIdx, isFinancial);
+
+    ws[cell] = {
+      v: typeof val === "number" ? val : (val as string),
+      t: typeof val === "number" ? "n" : "s",
+      s: style,
+    };
+  });
+}
+
+function writeTotalsRow(
+  XLSX: XLSXModule,
+  ws: import("xlsx-js-style").WorkSheet,
+  rows: readonly ReportLedgerRow[],
+  summary: ReportsSummary,
+  totalsLabel: string,
+  showFinancials: boolean
+): void {
+  const dataStartRow = 4;
   const totalsRow = dataStartRow + rows.length;
+
   const totalsValues: (string | number)[] = [
-    labels.totalsLabel,
+    totalsLabel,
     rows.reduce((sum, r) => sum + r.taken, 0),
     rows.reduce((sum, r) => sum + r.absent, 0),
     rows.reduce((sum, r) => sum + r.leave, 0),
@@ -206,11 +270,18 @@ export async function exportAttendanceReport(data: ReportExportData): Promise<vo
       s: totalsStyle,
     };
   });
+}
 
+function applyColumnWidths(
+  ws: import("xlsx-js-style").WorkSheet,
+  headers: readonly string[],
+  rows: readonly ReportLedgerRow[],
+  showFinancials: boolean
+): void {
   const colWidths = headers.map((h, i) => {
     if (i === 0) return { wch: 25 };
     const maxDataLen = rows.reduce((max, row) => {
-      const vals = [
+      const vals: (string | number)[] = [
         row.name,
         row.taken,
         row.absent,
@@ -224,11 +295,8 @@ export async function exportAttendanceReport(data: ReportExportData): Promise<vo
     return { wch: Math.max(h.length + 4, maxDataLen + 2, 10) };
   });
   ws["!cols"] = colWidths;
+}
 
+function applyRowHeights(ws: import("xlsx-js-style").WorkSheet): void {
   ws["!rows"] = [{ hpt: 30 }, { hpt: 20 }, {}, { hpt: 22 }];
-
-  XLSX.utils.book_append_sheet(wb, ws, "Attendance Report");
-
-  const filename = `attendance-report-${fromDate}-to-${toDate}.xlsx`;
-  XLSX.writeFile(wb, filename);
 }

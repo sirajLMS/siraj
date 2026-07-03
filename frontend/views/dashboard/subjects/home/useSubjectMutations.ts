@@ -45,79 +45,69 @@ export function useSubjectMutations(opts: UseSubjectMutationsOptions) {
   const [updateCategoryMut, { loading: isUpdatingCategory }] = useMutation(updateClassCategoryMutationDocument);
   const [deleteCategoryMut, { loading: isDeletingCategory }] = useMutation(deleteClassCategoryMutationDocument);
 
-  const handleCreateSubject = async (input: ClassSubjectCreateInput) => {
+  const runMutation = async <V>(
+    mutationFn: (opts: { variables: V }) => Promise<unknown>,
+    variables: V,
+    successMsg: string,
+    errorMsg: string,
+    actions: { close?: () => void; afterSuccess?: () => Promise<unknown> }
+  ) => {
     try {
-      await createSubjectMut({ variables: { input } });
-      showSuccess(t("subjectCreated"));
-      closeCreateDialog();
-      await opts.refetchSubjects();
+      await mutationFn({ variables });
+      showSuccess(successMsg);
+      actions.close?.();
+      await actions.afterSuccess?.();
     } catch (err) {
-      logger.error("Failed to create subject", err);
+      logger.error(errorMsg, err);
       showError(getErrorMessage(err));
     }
   };
 
+  const handleCreateSubject = async (input: ClassSubjectCreateInput) => {
+    await runMutation(createSubjectMut, { input }, t("subjectCreated"), "Failed to create subject", {
+      close: closeCreateDialog,
+      afterSuccess: opts.refetchSubjects,
+    });
+  };
+
   const handleUpdateSubject = async (id: string, input: ClassSubjectUpdateInput) => {
-    try {
-      await updateSubjectMut({ variables: { id, input } });
-      showSuccess(t("subjectUpdated"));
-      closeEditDialog();
-      await opts.refetchSubjects();
-    } catch (err) {
-      logger.error("Failed to update subject", err);
-      showError(getErrorMessage(err));
-    }
+    await runMutation(updateSubjectMut, { id, input }, t("subjectUpdated"), "Failed to update subject", {
+      close: closeEditDialog,
+      afterSuccess: opts.refetchSubjects,
+    });
   };
 
   const handleDeleteSubject = async () => {
     if (!pendingDeleteId) return;
-    try {
-      await deleteSubjectMut({ variables: { id: pendingDeleteId } });
-      showSuccess(t("subjectDeleted"));
-      closeDeleteDialog();
-      await opts.refetchSubjects();
-    } catch (err) {
-      logger.error("Failed to delete subject", err);
-      showError(getErrorMessage(err));
-    }
+    await runMutation(deleteSubjectMut, { id: pendingDeleteId }, t("subjectDeleted"), "Failed to delete subject", {
+      close: closeDeleteDialog,
+      afterSuccess: opts.refetchSubjects,
+    });
   };
 
   const handleCreateCategory = async (input: ClassCategoryCreateInput) => {
-    try {
-      await createCategoryMut({ variables: { input } });
-      showSuccess(t("categoryCreated"));
-      closeCreateDialog();
-    } catch (err) {
-      logger.error("Failed to create category", err);
-      showError(getErrorMessage(err));
-    }
+    await runMutation(createCategoryMut, { input }, t("categoryCreated"), "Failed to create category", {
+      close: closeCreateDialog,
+    });
   };
 
   const handleUpdateCategory = async (id: string, input: ClassCategoryUpdateInput) => {
-    try {
-      await updateCategoryMut({ variables: { id, input } });
-      showSuccess(t("categoryUpdated"));
-      closeEditDialog();
-    } catch (err) {
-      logger.error("Failed to update category", err);
-      showError(getErrorMessage(err));
-    }
+    await runMutation(updateCategoryMut, { id, input }, t("categoryUpdated"), "Failed to update category", {
+      close: closeEditDialog,
+    });
   };
 
   const handleDeleteCategory = async () => {
     if (!pendingDeleteId) return;
-    try {
-      await deleteCategoryMut({ variables: { id: pendingDeleteId } });
-      showSuccess(t("categoryDeleted"));
-      closeDeleteDialog();
-      if (opts.activeCategoryId === pendingDeleteId) {
-        opts.onCategoryReset();
-      }
-      await opts.refetchSubjects();
-    } catch (err) {
-      logger.error("Failed to delete category", err);
-      showError(getErrorMessage(err));
-    }
+    await runMutation(deleteCategoryMut, { id: pendingDeleteId }, t("categoryDeleted"), "Failed to delete category", {
+      close: closeDeleteDialog,
+      afterSuccess: async () => {
+        if (opts.activeCategoryId === pendingDeleteId) {
+          opts.onCategoryReset();
+        }
+        await opts.refetchSubjects();
+      },
+    });
   };
 
   return {

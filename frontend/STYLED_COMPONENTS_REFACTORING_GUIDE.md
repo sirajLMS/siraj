@@ -184,8 +184,10 @@ bun tsgo
 # 2. Biome formatting and linting
 bun biome:check <file-path>
 
-# 3. ESLint
-bun lint
+# 3. ESLint (via lint queue client — NEVER run `bun lint` directly)
+curl -s -X POST http://localhost:4777/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"refactor","files":["<file-path>"]}'
 ```
 
 **Process:**
@@ -200,12 +202,12 @@ bun lint
 # Round 1
 bun tsgo                    # ❌ Found error
 bun biome:check file.tsx    # ✅ Passed
-bun lint                    # ✅ Passed
+# lint via queue client     # ✅ Passed
 
 # Fix TypeScript error, then Round 2
 bun tsgo                    # ✅ Passed
 bun biome:check file.tsx    # ✅ Passed
-bun lint                    # ✅ Passed
+# lint via queue client     # ✅ Passed
 # ✅ All passed - done!
 ```
 
@@ -357,7 +359,7 @@ Before marking a file as refactored:
 - [ ] Layout props (margins, gaps) kept in `sx` at usage
 - [ ] `bun tsgo` passes
 - [ ] `bun biome:check` passes
-- [ ] `bun lint` passes
+- [ ] lint via queue client passes (NEVER run `bun lint` directly)
 - [ ] All three checks pass in a complete round
 
 ## Reference

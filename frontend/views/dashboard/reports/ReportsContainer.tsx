@@ -183,12 +183,7 @@ function mapReportTypeToGroupingMode(reportType: ReportType): ReportGroupingMode
   return ReportGroupingMode.Teacher;
 }
 
-export function ReportsContainer() {
-  const { hasPermission } = useUserStore();
-  const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
-  const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
-  const router = useRouter();
-
+function useReportFilters() {
   const [fromDate, setFromDate] = useState("2023-08-01");
   const [toDate, setToDate] = useState("2023-08-31");
   const [teacherId, setTeacherId] = useState("");
@@ -206,6 +201,26 @@ export function ReportsContainer() {
     groupBy: ReportGroupingMode.Teacher,
   });
 
+  return {
+    fromDate,
+    toDate,
+    teacherId,
+    reportType,
+    activeFilters,
+    setActiveFilters,
+    setFromDate,
+    setToDate,
+    setTeacherId,
+    setReportType,
+  };
+}
+
+function useReportData(activeFilters: {
+  readonly fromDate: string;
+  readonly toDate: string;
+  readonly teacherId: string | null;
+  readonly groupBy: ReportGroupingMode;
+}) {
   const { data: teachersData } = useQuery(teachersQueryDocument, {
     variables: { search: "", limit: 100 },
   });
@@ -271,6 +286,35 @@ export function ReportsContainer() {
     };
   }, [rows, reportData]);
 
+  return { reportData, teachers, rows, summary };
+}
+
+function useReportHandlers({
+  fromDate,
+  toDate,
+  teacherId,
+  reportType,
+  rows,
+  summary,
+  showFinancials,
+  setActiveFilters,
+}: {
+  readonly fromDate: string;
+  readonly toDate: string;
+  readonly teacherId: string;
+  readonly reportType: ReportType;
+  readonly rows: readonly ReportLedgerRow[];
+  readonly summary: ReportsSummary;
+  readonly showFinancials: boolean;
+  readonly setActiveFilters: (filters: {
+    readonly fromDate: string;
+    readonly toDate: string;
+    readonly teacherId: string | null;
+    readonly groupBy: ReportGroupingMode;
+  }) => void;
+}) {
+  const router = useRouter();
+
   const handleSubmit = useCallback(() => {
     if (fromDate > toDate) {
       logger.warn("From date must be before or equal to To date");
@@ -283,7 +327,7 @@ export function ReportsContainer() {
       teacherId: teacherId || null,
       groupBy: mapReportTypeToGroupingMode(reportType),
     });
-  }, [fromDate, toDate, teacherId, reportType]);
+  }, [fromDate, toDate, teacherId, reportType, setActiveFilters]);
 
   const handleExportCsv = useCallback(() => {
     exportAttendanceReport({
@@ -332,6 +376,40 @@ export function ReportsContainer() {
     },
     [reportType, router]
   );
+
+  return { handleSubmit, handleExportCsv, handlePrintReport, handleRowClick };
+}
+
+export function ReportsContainer() {
+  const { hasPermission } = useUserStore();
+  const canGenerate = hasPermission(AppPermission.ReportGenerateCustom);
+  const showFinancials = hasPermission(AppPermission.ReportViewFinancials);
+
+  const {
+    fromDate,
+    toDate,
+    teacherId,
+    reportType,
+    activeFilters,
+    setActiveFilters,
+    setFromDate,
+    setToDate,
+    setTeacherId,
+    setReportType,
+  } = useReportFilters();
+
+  const { reportData, teachers, rows, summary } = useReportData(activeFilters);
+
+  const { handleSubmit, handleExportCsv, handlePrintReport, handleRowClick } = useReportHandlers({
+    fromDate,
+    toDate,
+    teacherId,
+    reportType,
+    rows,
+    summary,
+    showFinancials,
+    setActiveFilters,
+  });
 
   return (
     <RequirePermission permissions={[AppPermission.ReportGenerateCustom]}>

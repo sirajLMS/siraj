@@ -24,8 +24,8 @@ bun run dev:safe               # Safe dev mode via scripts/safe-dev.ts
 bun run build                  # Next.js production build
 bun run tsgo                   # Fast TypeScript checking (tsgo, not tsc)
 
-# Linting & Formatting
-bun run lint                   # ESLint with auto-fix and caching
+# Linting & Formatting (via lint queue client — NEVER run `bun lint` directly)
+bun run lint                   # ESLint with auto-fix (MUST go through lint queue server/client — see "Lint Queue Server" section below)
 bun run format                 # Biome formatter
 bun run biome:check            # Biome lint + format + unsafe fixes
 
@@ -153,7 +153,7 @@ After making changes:
 
 ## Lint Queue Server (REQUIRED for parallel sub-agents)
 
-`bun run lint` is heavyweight and **MUST NOT be run concurrently** by multiple sub-agents — it causes resource contention and intermittent failures. Instead, use the **lint queue server** which serializes all lint requests through a single process.
+`bun run lint` is heavyweight and **MUST NOT be run concurrently** by multiple sub-agents — it causes resource contention and intermittent failures. Instead, use the **lint queue server/client** which serializes all lint requests through a single process. **NEVER run `bun lint` or `bun run lint` directly** — always go through the queue.
 
 ### Starting the server
 
@@ -176,6 +176,13 @@ $body = @{ id = "phase8"; files = $files } | ConvertTo-Json
 Invoke-RestMethod -Uri http://localhost:4777/lint -Method POST -ContentType 'application/json' -Body $body
 ```
 
+**Bash / curl (also works):**
+```bash
+curl -s -X POST http://localhost:4777/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"phase8","files":["backend/types/foo.types.ts","frontend/stores/barStore.ts"]}'
+```
+
 **Response:** `{ success: boolean, output: string, exitCode: number }`
 
 The request **blocks** until the lint run completes (the server processes requests one at a time).
@@ -192,7 +199,143 @@ Invoke-RestMethod -Uri http://localhost:4777/status
 - `bun tsgo` — Safe to run concurrently (read-only type checker)
 - `bun biome:check` — Safe to run concurrently (lightweight formatter/linter)
 - `bun run test:*` — Safe to run concurrently (isolated test runners)
-- **`bun run lint`** — **ALWAYS use the queue server instead**
+- **`bun run lint`** — **ALWAYS use the lint queue server/client instead, NEVER run directly**
+
+## Verification Loop (Per-File Level)
+
+When refactoring or creating code, run a per-file verification loop **BEFORE** using the result elsewhere:
+
+1. **After extracting a function** from one file to another: run tsgo + biome + lint-queue-client on the **new file containing the extracted function** BEFORE importing or using it elsewhere.
+2. **After creating a new file**: run tsgo + biome + lint-queue-client on the new file BEFORE importing it anywhere.
+
+```bash
+bun tsgo                          # Type check (safe to run concurrently)
+bun biome:check                   # Biome (safe to run concurrently)
+# Lint via queue client for the specific file:
+curl -s -X POST http://localhost:4777/lint \
+  -H "Content-Type: application/json" \
+  -d '{"id":"verify","files":["<the-file>"]}'
+```
+
+This catches issues early at the file level before they propagate to the full quality gate.
+
+## Test Runner for Refactoring
+
+When refactoring or fixing a **test file**, use the run-test script instead of raw `bun test`:
+
+```bash
+bun run scripts/run-test/run-test.ts <test-path>                       # Run with log capture
+bun run scripts/run-test/run-test.ts --last <test-path>               # View last result (AI-optimized)
+bun run scripts/run-test/run-test.ts --last --focus "<pattern>" <test-path>  # Filtered view
+```
+
+The run-test script captures output to log files for easier debugging and is mandatory for database tests
+(to capture deadlocks and transaction issues that raw `bun test` may swallow).
+
+## Parallel Subagent Quality Gate Workflow
+
+When running `bun quality-gate`, the orchestrator dispatches **parallel subagents** to fix files
+within each lifecycle stage. Key rules:
+
+### Lifecycle Isolation (No Cross-Stage Interleaving)
+
+- Subagents are dispatched **per lifecycle stage only** — no mixing stages in the same wave
+- Each stage must fully complete before advancing to the next
+- Stage order: `tsgo` → `biome:check` → `lint` → `codescene` → `sonar-results`
+
+### Subagent Dispatch Model
+
+- **One subagent per file** — maximum parallelism
+- **tsgo uses grouped parallel**: bundle related files (same import chain, same directory, same type
+  dependency) into batches. Fix a batch in parallel, verify, then move to the next batch
+- **biome/lint/codescene/sonar-results**: full parallel — all files at once
+
+### Per-File Verification via `scripts/health/sub-loop.ts`
+
+Each subagent calls the automation script to verify its file:
+
+```bash
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle <stage>
+```
+
+The script runs a **progressive loop** (tsgo → biome → lint-queue-client → codescene) and
+**short-circuits at the first failing check**. The subagent fixes the errors and re-runs until
+the script exits 0. The `--lifecycle` arg controls the target stage:
+
+| `--lifecycle` | Checks run (in order) |
+|---------------|----------------------|
+| `tsgo` | tsgo only |
+| `biome` | tsgo → biome |
+| `lint` | tsgo → biome → lint (via queue client) |
+| `codescene` | tsgo → biome → lint → codescene --file |
+| `sonar-results` | same as `codescene` (no sonar-scan) |
+
+**Progressive enforcement**: no skipping ahead. If tsgo fails, only fix tsgo — don't run
+biome/lint/codescene until tsgo passes.
+
+### Instruction File & AGENTS.md Discovery (Per-File)
+
+The `scripts/health/sub-loop.ts` script automatically discovers and prints which instruction
+files and AGENTS.md files apply to the target file. Subagents MUST read ALL listed files before
+fixing. The mapping is:
+
+**Instruction files** (`.github/instructions/*.instructions.md`):
+
+| File Path Pattern | Instruction File |
+|---|---|
+| `frontend/**/*.ts(x)`, `app/**/*.ts(x)` | `frontend.instructions.md` |
+| `backend/**/*.ts` | `backend.instructions.md` |
+| `**/*.test.ts(x)`, `**/*.spec.ts(x)`, `scripts/run-test/**/*.ts` | `tests.instructions.md` |
+
+A file may match **multiple** instruction files (e.g., `backend/db/test/*.test.ts` matches
+both `backend.instructions.md` and `tests.instructions.md`). Read ALL matching files.
+
+**AGENTS.md files** (in addition to root `AGENTS.md` which is always applicable):
+
+| File Path Prefix | Additional AGENTS.md Files |
+|---|---|
+| `app/` | `app/AGENTS.md` |
+| `frontend/views/` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
+| `frontend/stores/` | `frontend/stores/AGENTS.md`, `frontend/AGENTS.md` |
+| `frontend/graphql/sharedDocuments/` | `frontend/graphql/sharedDocuments/AGENTS.md`, `frontend/graphql/AGENTS.md`, `frontend/AGENTS.md` |
+| `frontend/graphql/` | `frontend/graphql/AGENTS.md`, `frontend/AGENTS.md` |
+| `backend/services/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` |
+| `backend/graphql/` | `backend/graphql/AGENTS.md`, `backend/AGENTS.md` |
+| `backend/db/repo/` | `backend/db/repo/AGENTS.md`, `backend/AGENTS.md` |
+| `backend/db/seeds/` | `backend/db/seeds/AGENTS.md`, `backend/AGENTS.md` |
+| `backend/db/test/` | `backend/db/test/AGENTS.md`, `backend/AGENTS.md` |
+| `backend/types/` | `backend/types/AGENTS.md`, `backend/AGENTS.md` |
+| `scripts/run-test/` | `scripts/run-test/AGENTS.md` |
+
+### Fix-Or-Report Rule for Cross-File Violations
+
+After reading the applicable instruction files and AGENTS.md, subagents check for rule violations:
+- **Fix within the SAME file**: if the violation can be fixed in the assigned file, fix it directly.
+- **Report cross-file dependencies**: if fixing requires modifying ANOTHER file, do NOT modify it.
+  Report to the orchestrator using:
+  ```
+  CROSS-FILE DEPENDENCY:
+    Target file: <this file>
+    Blocked by: <other file that needs changes>
+    Rule violated: <which rule from instruction file or AGENTS.md>
+    Required fix: <description of what the other file needs>
+  ```
+- **Never modify a file you were not assigned to.** The orchestrator coordinates multi-file changes
+  by dispatching a follow-up subagent wave for the dependency files.
+
+## Sonar-Scan Prohibition (IMPORTANT)
+
+**SonarQube scan is VERY COSTLY to run. Subagents must NEVER run it.**
+
+- Subagents must **NEVER** run `bun sonar-scan` or `bun scripts/sonar-manager.ts`
+- Only the **quality-gate orchestrator** handles sonar stages (SONAR_SCAN, SONAR_RESULTS)
+- Subagents work with **existing results** in `.scannerwork/sonar-result.json` — they never
+  trigger a new scan
+- The `scripts/health/sub-loop.ts` script **hardcodes exclusion** of sonar-scan and
+  sonar-manager — there is no flag to enable them
+- If a subagent needs sonar duplication/issue data, it queries the existing results via
+  `bun scripts/sonar-manager.ts list-duplicates` and `list-files` (read-only operations,
+  no scan trigger)
 
 ## AI Agent Communication Rules
 

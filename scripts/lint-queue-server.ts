@@ -58,7 +58,7 @@ async function runLint(files: string[]): Promise<LintResult> {
       cmd,
       {
         cwd: process.cwd(),
-        shell: "powershell.exe",
+        shell: "bash",
         timeout: 300000,
         maxBuffer: 10 * 1024 * 1024,
       },

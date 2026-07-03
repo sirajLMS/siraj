@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import { AppPermission, ComplaintStatus } from "@/frontend/graphql/generated/gql/graphql-types";
+import type { ParentAssociatedStudentsQuery, ParentComplaintsQuery } from "@/frontend/graphql/generated/gql/operations";
 import {
   parentComplaintsQueryDocument,
   submitComplaintMutationDocument,
@@ -25,6 +26,69 @@ const StyledErrorTypography = styled(Typography)(({ theme }) => ({
 
 export interface ParentComplaintsContainerProps {
   readonly parentId?: string;
+}
+
+function mapStudentOptions(
+  students: ParentAssociatedStudentsQuery["parentAssociatedStudents"] | null | undefined
+): ParentStudentOption[] {
+  if (!students) return [];
+  return students.map(student => ({
+    id: student.id ?? "",
+    label: student.name ?? "",
+  }));
+}
+
+function mapComplaintRecords(
+  complaints: ParentComplaintsQuery["parentComplaints"] | null | undefined
+): ParentComplaintRecord[] {
+  if (!complaints?.complaints) return [];
+  return complaints.complaints.map(record => ({
+    id: record.id ?? "",
+    regarding: record.studentName ? `Regarding: ${record.studentName}` : "General",
+    summary: record.body ?? "",
+    status: record.status ?? ComplaintStatus.Unanswered,
+    adminResponse:
+      record.responses && record.responses.length > 0
+        ? {
+            text: record.responses[0].body ?? "",
+            answeredAt: record.responses[0].createdAt ?? "",
+          }
+        : undefined,
+  }));
+}
+
+function buildComplaintInput(formData: ComplaintFormData) {
+  return {
+    input: {
+      studentId: formData.studentId,
+      submitterEmail: formData.contactEmail,
+      body: formData.complaintDetails,
+      category: formData.category,
+      files: null,
+    },
+  };
+}
+
+function LoadingView() {
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+      <CircularProgress />
+    </Box>
+  );
+}
+
+function ErrorView({ message }: { readonly message: string }) {
+  return <StyledErrorTypography>{message}</StyledErrorTypography>;
+}
+
+function AccessDeniedView() {
+  return (
+    <Box sx={{ p: 4 }}>
+      <StyledErrorTypography>
+        Access Denied: You must be logged in as an associated parent to view complaints.
+      </StyledErrorTypography>
+    </Box>
+  );
 }
 
 export function ParentComplaintsContainer({ parentId }: ParentComplaintsContainerProps) {
@@ -72,71 +136,26 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
     },
   });
 
-  const studentOptions: readonly ParentStudentOption[] = useMemo(() => {
-    if (!studentsData?.parentAssociatedStudents) return [];
-    return studentsData.parentAssociatedStudents.map(student => ({
-      id: student.id ?? "",
-      label: student.name ?? "",
-    }));
-  }, [studentsData?.parentAssociatedStudents]);
+  const studentOptions = useMemo(
+    () => mapStudentOptions(studentsData?.parentAssociatedStudents),
+    [studentsData?.parentAssociatedStudents]
+  );
 
-  const totalCount = data?.parentComplaints?.totalCount ?? 0;
+  const records = useMemo(() => mapComplaintRecords(data?.parentComplaints), [data?.parentComplaints]);
 
-  const records: readonly ParentComplaintRecord[] = useMemo(() => {
-    if (!data?.parentComplaints?.complaints) return [];
-    return data.parentComplaints.complaints.map(record => ({
-      id: record.id ?? "",
-      regarding: record.studentName ? `Regarding: ${record.studentName}` : "General",
-      summary: record.body ?? "",
-      status: record.status ?? ComplaintStatus.Unanswered,
-      adminResponse:
-        record.responses && record.responses.length > 0
-          ? {
-              text: record.responses[0].body ?? "",
-              answeredAt: record.responses[0].createdAt ?? "",
-            }
-          : undefined,
-    }));
-  }, [data?.parentComplaints]);
+  if (!parentId) return <AccessDeniedView />;
+  if (loading) return <LoadingView />;
 
-  if (!parentId) {
-    return (
-      <Box sx={{ p: 4 }}>
-        <StyledErrorTypography>
-          Access Denied: You must be logged in as an associated parent to view complaints.
-        </StyledErrorTypography>
-      </Box>
-    );
+  if (error) {
+    logger.error("Error loading parent complaints:", { error });
+    return <ErrorView message={tc("loadFailed")} />;
   }
 
   const handleSubmit = (formData: ComplaintFormData) => {
     setSubmitting(true);
     resetSuccess();
-    void submitComplaint({
-      variables: {
-        input: {
-          studentId: formData.studentId,
-          submitterEmail: formData.contactEmail,
-          body: formData.complaintDetails,
-          category: formData.category,
-          files: null,
-        },
-      },
-    });
+    void submitComplaint({ variables: buildComplaintInput(formData) });
   };
-
-  if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    logger.error("Error loading parent complaints:", { error });
-    return <StyledErrorTypography>{tc("loadFailed")}</StyledErrorTypography>;
-  }
 
   return (
     <RequirePermission permissions={[AppPermission.SupportSubmitComplaint]}>
@@ -153,7 +172,7 @@ export function ParentComplaintsContainer({ parentId }: ParentComplaintsContaine
         onLoadOlderRecords={() => void refetch()}
         page={page}
         pageSize={pageSize}
-        totalCount={totalCount}
+        totalCount={data?.parentComplaints?.totalCount ?? 0}
         onPageChange={setPage}
       />
     </RequirePermission>

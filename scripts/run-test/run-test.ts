@@ -353,6 +353,18 @@ function parseTestLog(logContent: string, logFilePath: string, focusStr: string 
   return result;
 }
 
+function appendFailedTestLines(lines: string[], result: ParsedResult): void {
+  for (const name of result.failedTests) {
+    lines.push(`  - ${name} [FAIL]`);
+    const details = result.errorDetails.get(name);
+    if (details && details.length > 0) {
+      for (const detailLine of details) {
+        lines.push(`    ${detailLine}`);
+      }
+    }
+  }
+}
+
 function showLastResult(testPath: string, focusStr: string | null): void {
   const logFile = findLatestLog(testPath);
 
@@ -377,15 +389,7 @@ function showLastResult(testPath: string, focusStr: string | null): void {
   if (result.failedTests.length > 0) {
     lines.push("");
     lines.push("Failed Tests:");
-    for (const name of result.failedTests) {
-      lines.push(`  - ${name} [FAIL]`);
-      const details = result.errorDetails.get(name);
-      if (details && details.length > 0) {
-        for (const detailLine of details) {
-          lines.push(`    ${detailLine}`);
-        }
-      }
-    }
+    appendFailedTestLines(lines, result);
   } else if (result.exitCode === 0) {
     lines.push("");
     lines.push("Status: ALL PASSED");
