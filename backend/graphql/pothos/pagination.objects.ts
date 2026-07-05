@@ -1,4 +1,4 @@
-import type { PageInfo } from "@/backend/types";
+import type { PageInfo, PaginationInput } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 const PageInfoRef = gqlSchemaBuilder.objectRef<PageInfo>("PageInfo");
@@ -23,17 +23,7 @@ export const PaginationArgsDefault = {
   maxCount: 100,
 };
 
-type PaginationArgs = {
-  first: number | null;
-  skip: number | null;
-  after: string | null;
-  before: string | null;
-  last: number | null;
-  page: number | null;
-  maxCount: number | null;
-};
-
-const PaginationArgsRef = gqlSchemaBuilder.inputRef<PaginationArgs>("PaginationArgs");
+const PaginationArgsRef = gqlSchemaBuilder.inputRef<PaginationInput>("PaginationArgs");
 
 export const PaginationArgsObject = PaginationArgsRef.implement({
   fields: t => ({

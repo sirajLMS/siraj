@@ -1,20 +1,9 @@
-import type { ParentStatus } from "@/shared/lib/enum";
+import type { ParentDirectoryMetrics, ParentDirectoryResult, ParentDirectoryRow } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { ParentStatusPothosEnum } from "./enum.pothos";
 import { PageInfoObject } from "./pagination.objects";
 
-export type ParentDirectoryMetricsDefinition = {
-  id: string;
-  activated: number;
-  deactivated: number;
-  regular: number;
-  onLeave: number;
-  suspended: number;
-  onTrial: number;
-};
-
-const ParentDirectoryMetricsRef =
-  gqlSchemaBuilder.objectRef<ParentDirectoryMetricsDefinition>("ParentDirectoryMetrics");
+const ParentDirectoryMetricsRef = gqlSchemaBuilder.objectRef<ParentDirectoryMetrics>("ParentDirectoryMetrics");
 
 export const ParentDirectoryMetricsPothosObject = ParentDirectoryMetricsRef.implement({
   fields: t => ({
@@ -28,19 +17,7 @@ export const ParentDirectoryMetricsPothosObject = ParentDirectoryMetricsRef.impl
   }),
 });
 
-export type ParentDirectoryRowDefinition = {
-  id: string;
-  index: number;
-  name: string;
-  email: string;
-  avatarUrl: string | null;
-  guardianOf: string;
-  time: string;
-  accountStatus: ParentStatus;
-  unpaidInvoices: number;
-};
-
-const ParentDirectoryRowRef = gqlSchemaBuilder.objectRef<ParentDirectoryRowDefinition>("ParentDirectoryRow");
+const ParentDirectoryRowRef = gqlSchemaBuilder.objectRef<ParentDirectoryRow>("ParentDirectoryRow");
 
 export const ParentDirectoryRowPothosObject = ParentDirectoryRowRef.implement({
   fields: t => ({
@@ -56,15 +33,7 @@ export const ParentDirectoryRowPothosObject = ParentDirectoryRowRef.implement({
   }),
 });
 
-export type ParentDirectoryDefinition = {
-  id: string;
-  metrics: ParentDirectoryMetricsDefinition;
-  rows: ParentDirectoryRowDefinition[];
-  totalCount: number;
-  pageInfo: import("@/backend/types").PageInfo | null;
-};
-
-const ParentDirectoryRef = gqlSchemaBuilder.objectRef<ParentDirectoryDefinition>("ParentDirectory");
+const ParentDirectoryRef = gqlSchemaBuilder.objectRef<ParentDirectoryResult>("ParentDirectory");
 
 export const ParentDirectoryPothosObject = ParentDirectoryRef.implement({
   fields: t => ({

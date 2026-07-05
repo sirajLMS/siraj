@@ -68,3 +68,19 @@ export class PaginationArgs {
     return this.skip ?? (this.currentPage - 1) * this.perPage;
   }
 }
+
+/**
+ * GraphQL-facing pagination input shape. Per the backend/graphql AGENTS.md
+ * exception policy, input/wrapper types are allowed as separate definitions,
+ * but they should import base types from `@/backend/types` rather than
+ * redefining fields inline across Pothos files.
+ */
+export type PaginationInput = {
+  first?: number | null;
+  skip?: number | null;
+  after?: string | null;
+  before?: string | null;
+  last?: number | null;
+  page?: number | null;
+  maxCount?: number | null;
+};

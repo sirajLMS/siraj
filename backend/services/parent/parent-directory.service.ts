@@ -1,38 +1,14 @@
 import { ParentRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { PaginationArgs } from "@/backend/types";
+import type { PaginationArgs, ParentDirectoryResult, ParentDirectoryRow } from "@/backend/types";
 import { AppPermission, type ParentStatus } from "@/shared/lib/enum";
 
-export interface ParentDirectoryMetrics {
-  readonly id: string;
-  readonly activated: number;
-  readonly deactivated: number;
-  readonly regular: number;
-  readonly onLeave: number;
-  readonly suspended: number;
-  readonly onTrial: number;
-}
-
-export interface ParentDirectoryRow {
-  readonly id: string;
-  readonly index: number;
-  readonly name: string;
-  readonly email: string;
-  readonly avatarUrl: string | null;
-  readonly guardianOf: string;
-  readonly time: string;
-  readonly accountStatus: ParentStatus;
-  readonly unpaidInvoices: number;
-}
-
-export interface ParentDirectoryResult {
-  readonly id: string;
-  readonly metrics: ParentDirectoryMetrics;
-  readonly rows: ParentDirectoryRow[];
-  readonly totalCount: number;
-  readonly pageInfo: import("@/backend/types").PageInfo | null;
-}
+export type {
+  ParentDirectoryMetrics,
+  ParentDirectoryResult,
+  ParentDirectoryRow,
+} from "@/backend/types";
 
 export namespace ParentDirectoryService {
   /**

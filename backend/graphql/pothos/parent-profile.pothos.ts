@@ -1,33 +1,12 @@
-import { type AssociatedStudentResult, ParentProfileService } from "@/backend/services/parent/parent-profile.service";
+import { ParentProfileService } from "@/backend/services/parent/parent-profile.service";
+import type { EditQuotaResult } from "@/backend/services/student/student-management.service";
 import { StudentManagementService } from "@/backend/services/student/student-management.service";
+import type { AssociatedStudentResult, DeactivateParentResult, ParentProfileResult } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
 // ─── ParentProfile Object ───────────────────────────────────────────────────
 
-export type ParentProfileDefinition = {
-  id: string;
-  name: string;
-  email: string;
-  avatarUrl: string | null;
-  status: string;
-  phone: string | null;
-  nationality: string | null;
-  address: string | null;
-  facebook: string | null;
-  whatsapp: string | null;
-  twitter: string | null;
-  skype: string | null;
-  defaultZoomLink: string | null;
-  invoiceType: string | null;
-  feeAmount: string | null;
-  paymentMethod: string | null;
-  currency: string | null;
-  timezone: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-const ParentProfileRef = gqlSchemaBuilder.objectRef<ParentProfileDefinition>("ParentProfile");
+const ParentProfileRef = gqlSchemaBuilder.objectRef<ParentProfileResult>("ParentProfile");
 
 export const ParentProfilePothosObject = ParentProfileRef.implement({
   fields: t => ({
@@ -56,9 +35,7 @@ export const ParentProfilePothosObject = ParentProfileRef.implement({
 
 // ─── AssociatedStudent Object ────────────────────────────────────────────────
 
-export type AssociatedStudentDefinition = AssociatedStudentResult;
-
-const AssociatedStudentRef = gqlSchemaBuilder.objectRef<AssociatedStudentDefinition>("AssociatedStudent");
+const AssociatedStudentRef = gqlSchemaBuilder.objectRef<AssociatedStudentResult>("AssociatedStudent");
 
 export const AssociatedStudentPothosObject = AssociatedStudentRef.implement({
   fields: t => ({
@@ -79,13 +56,7 @@ export const AssociatedStudentPothosObject = AssociatedStudentRef.implement({
 
 // ─── DeactivateParentResult Object ──────────────────────────────────────────
 
-export type DeactivateParentResultDefinition = {
-  id: string;
-  status: string;
-};
-
-const DeactivateParentResultRef =
-  gqlSchemaBuilder.objectRef<DeactivateParentResultDefinition>("DeactivateParentResult");
+const DeactivateParentResultRef = gqlSchemaBuilder.objectRef<DeactivateParentResult>("DeactivateParentResult");
 
 export const DeactivateParentResultPothosObject = DeactivateParentResultRef.implement({
   fields: t => ({
@@ -96,14 +67,7 @@ export const DeactivateParentResultPothosObject = DeactivateParentResultRef.impl
 
 // ─── EditQuotaResult Object ──────────────────────────────────────────────────
 
-export type EditQuotaResultDefinition = {
-  id: string;
-  classesRemaining: number;
-  classesTotal: number;
-  version: number;
-};
-
-const EditQuotaResultRef = gqlSchemaBuilder.objectRef<EditQuotaResultDefinition>("EditQuotaResult");
+const EditQuotaResultRef = gqlSchemaBuilder.objectRef<EditQuotaResult>("EditQuotaResult");
 
 export const EditQuotaResultPothosObject = EditQuotaResultRef.implement({
   fields: t => ({

@@ -78,3 +78,59 @@ export interface ParentBillingSummaryResult {
   readonly nextDueDate: string | null;
   readonly activeStudents: number;
 }
+
+export interface ManualInvoiceResult {
+  readonly id: string;
+  readonly parentId: string;
+  readonly studentId: string | null;
+  readonly amount: string;
+  readonly currency: string;
+  readonly status: InvoiceStatus;
+  readonly invoiceType: InvoiceType;
+  readonly issueDate: string;
+  readonly dueDate: string;
+  readonly paidDate: string | null;
+  readonly version: number;
+  readonly createdAt: Date;
+}
+
+export interface MarkInvoicePaidResult {
+  readonly invoice: {
+    readonly id: string;
+    readonly parentId: string;
+    readonly status: InvoiceStatus;
+    readonly paidDate: string | null;
+    readonly version: number;
+  };
+  readonly notificationSummaryUpdated: boolean;
+}
+
+export interface DeleteInvoiceResult {
+  readonly invoice: {
+    readonly id: string;
+    readonly parentId: string;
+    readonly deletedAt: string | null;
+    readonly version: number;
+  };
+  readonly notificationSummaryUpdated: boolean;
+}
+
+export interface SendPaymentReminderResult {
+  readonly id: string;
+  readonly success: boolean;
+}
+
+export interface CreateManualInvoiceInput {
+  readonly parentId: string;
+  readonly studentId?: string | null;
+  readonly amount: string;
+  readonly currency: string;
+  readonly invoiceType: string;
+  readonly issueDate: string;
+  readonly dueDate: string;
+  readonly exchangeRateSnapshot?: string | null;
+  readonly exchangeRateSource?: string | null;
+  readonly billingMonths?: readonly { readonly year: number; readonly month: number }[] | null;
+  readonly sendEmail?: boolean | null;
+  readonly idempotencyKey?: string;
+}

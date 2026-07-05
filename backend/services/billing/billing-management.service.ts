@@ -6,63 +6,16 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { NotificationSyncService } from "@/backend/services/system/notification-sync.service";
 import type * as Types from "@/backend/types";
+import type {
+  CreateManualInvoiceInput,
+  DeleteInvoiceResult,
+  ManualInvoiceResult,
+  MarkInvoicePaidResult,
+  SendPaymentReminderResult,
+} from "@/backend/types";
 import { AppPermission, type InvoiceStatus, type InvoiceType } from "@/shared/lib/enum";
 
-export interface CreateManualInvoiceInput {
-  readonly parentId: string;
-  readonly studentId?: string | null;
-  readonly amount: string;
-  readonly currency: string;
-  readonly invoiceType: string;
-  readonly issueDate: string;
-  readonly dueDate: string;
-  readonly exchangeRateSnapshot?: string | null;
-  readonly exchangeRateSource?: string | null;
-  readonly billingMonths?: readonly { readonly year: number; readonly month: number }[] | null;
-  readonly sendEmail?: boolean | null;
-  readonly idempotencyKey?: string;
-}
-
-export interface ManualInvoiceResult {
-  readonly id: string;
-  readonly parentId: string;
-  readonly studentId: string | null;
-  readonly amount: string;
-  readonly currency: string;
-  readonly status: InvoiceStatus;
-  readonly invoiceType: InvoiceType;
-  readonly issueDate: string;
-  readonly dueDate: string;
-  readonly paidDate: string | null;
-  readonly version: number;
-  readonly createdAt: Date;
-}
-
-export interface MarkInvoicePaidResult {
-  readonly invoice: {
-    readonly id: string;
-    readonly parentId: string;
-    readonly status: InvoiceStatus;
-    readonly paidDate: string | null;
-    readonly version: number;
-  };
-  readonly notificationSummaryUpdated: boolean;
-}
-
-export interface DeleteInvoiceResult {
-  readonly invoice: {
-    readonly id: string;
-    readonly parentId: string;
-    readonly deletedAt: string | null;
-    readonly version: number;
-  };
-  readonly notificationSummaryUpdated: boolean;
-}
-
-export interface SendPaymentReminderResult {
-  readonly id: string;
-  readonly success: boolean;
-}
+export type { CreateManualInvoiceInput } from "@/backend/types";
 
 function deriveIdempotencyKey(input: {
   parentId: string;

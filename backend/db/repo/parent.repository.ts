@@ -18,6 +18,8 @@ import type {
   ParentCreateResult,
   ParentDashboardMetricsType,
   ParentDashboardScheduleRow,
+  ParentDirectoryRawMetrics,
+  ParentDirectoryRawRow,
   ParentEntityInput,
   StudentProgressReturnType,
   WorkshopPromoReturnType,
@@ -96,24 +98,9 @@ export namespace ParentRepository {
     };
   }
 
-  export type ParentDirectoryMetrics = {
-    activated: number;
-    deactivated: number;
-    regular: number;
-    onLeave: number;
-    suspended: number;
-    onTrial: number;
-  };
+  export type ParentDirectoryMetrics = ParentDirectoryRawMetrics;
 
-  export type ParentDirectoryRow = {
-    id: string;
-    name: string;
-    email: string;
-    avatarUrl: string | null;
-    status: string;
-    updatedAt: Date;
-    unpaidInvoices: number;
-  };
+  export type ParentDirectoryRow = ParentDirectoryRawRow;
 
   export type ParentDirectoryResult = {
     metrics: ParentDirectoryMetrics;

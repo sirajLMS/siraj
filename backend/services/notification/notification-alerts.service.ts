@@ -4,23 +4,10 @@ import { complaints, notificationDeliveries } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { NotificationAlertsResult, SystemAlert } from "@/backend/types";
 import { AppPermission, ComplaintStatus, NotificationDeliveryStatus } from "@/shared/lib/enum";
 
-export interface SystemAlert {
-  id: string;
-  type: "complaint" | "notification" | "system";
-  title: string;
-  body: string | null;
-  createdAt: Date;
-  severity: "info" | "warning" | "error";
-}
-
-export interface NotificationAlertsResult {
-  id: string;
-  alerts: SystemAlert[];
-  totalCount: number;
-  unreadCount: number;
-}
+export type { NotificationAlertsResult, SystemAlert } from "@/backend/types";
 
 export namespace NotificationAlertsService {
   export async function getAlerts(userId: string, locale?: string): Promise<NotificationAlertsResult> {

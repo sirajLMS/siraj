@@ -1,15 +1,7 @@
+import type { NotificationAlertsResult, SystemAlert } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 
-export type SystemAlertDefinition = {
-  id: string;
-  type: string;
-  title: string;
-  body: string | null;
-  createdAt: Date;
-  severity: string;
-};
-
-const SystemAlertRef = gqlSchemaBuilder.objectRef<SystemAlertDefinition>("SystemAlert");
+const SystemAlertRef = gqlSchemaBuilder.objectRef<SystemAlert>("SystemAlert");
 
 export const SystemAlertPothosObject = SystemAlertRef.implement({
   fields: t => ({
@@ -22,15 +14,7 @@ export const SystemAlertPothosObject = SystemAlertRef.implement({
   }),
 });
 
-export type NotificationAlertsResultDefinition = {
-  id: string;
-  alerts: SystemAlertDefinition[];
-  totalCount: number;
-  unreadCount: number;
-};
-
-const NotificationAlertsResultRef =
-  gqlSchemaBuilder.objectRef<NotificationAlertsResultDefinition>("NotificationAlertsResult");
+const NotificationAlertsResultRef = gqlSchemaBuilder.objectRef<NotificationAlertsResult>("NotificationAlertsResult");
 
 export const NotificationAlertsResultPothosObject = NotificationAlertsResultRef.implement({
   fields: t => ({

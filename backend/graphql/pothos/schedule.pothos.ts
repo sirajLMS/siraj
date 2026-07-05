@@ -1,5 +1,5 @@
 import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
-import type { ClassSessionMetrics, PageInfo } from "@/backend/types";
+import type { ClassSessionMetrics, PageInfo, PaginationInput } from "@/backend/types";
 import type {
   ClassExecutionState,
   ClassOutcome,
@@ -85,15 +85,7 @@ export type AdminDashboardScheduleInputDefinition = {
   teacherId?: string | null;
   search?: string | null;
   metricFilter?: string | null;
-  paginationArgs?: {
-    first: number | null;
-    skip: number | null;
-    after: string | null;
-    before: string | null;
-    last: number | null;
-    page: number | null;
-    maxCount: number | null;
-  } | null;
+  paginationArgs?: PaginationInput | null;
 };
 
 export const AdminDashboardScheduleInputPothosObject = gqlSchemaBuilder

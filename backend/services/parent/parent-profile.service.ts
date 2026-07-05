@@ -2,52 +2,14 @@ import { ParentRepository, SessionRepository } from "@/backend/db/repo";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { AssociatedStudentResult, DeactivateParentResult, ParentProfileResult } from "@/backend/types";
 import { AppPermission } from "@/shared/lib/enum";
 
-export interface ParentProfileResult {
-  readonly id: string;
-  readonly userId: string;
-  readonly name: string;
-  readonly email: string;
-  readonly avatarUrl: string | null;
-  readonly status: string;
-  readonly phone: string | null;
-  readonly nationality: string | null;
-  readonly address: string | null;
-  readonly facebook: string | null;
-  readonly whatsapp: string | null;
-  readonly twitter: string | null;
-  readonly skype: string | null;
-  readonly defaultZoomLink: string | null;
-  readonly invoiceType: string | null;
-  readonly feeAmount: string | null;
-  readonly paymentMethod: string | null;
-  readonly currency: string | null;
-  readonly timezone: string;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
-}
-
-export interface AssociatedStudentResult {
-  readonly id: string;
-  readonly name: string;
-  readonly status: string;
-  readonly primaryTeacherId: string | null;
-  readonly teacherName: string | null;
-  readonly hoursPerWeek: string;
-  readonly classesRemaining: number;
-  readonly classesTotal: number;
-  readonly language: string | null;
-  readonly gender: string | null;
-  readonly version: number;
-  readonly updatedAt: Date;
-}
-
-export interface DeactivateParentResult {
-  readonly id: string;
-  readonly userId: string;
-  readonly status: string;
-}
+export type {
+  AssociatedStudentResult,
+  DeactivateParentResult,
+  ParentProfileResult,
+} from "@/backend/types";
 
 export namespace ParentProfileService {
   /**

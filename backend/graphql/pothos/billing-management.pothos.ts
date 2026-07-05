@@ -1,8 +1,10 @@
-import {
-  BillingManagementService,
-  type SendPaymentReminderResult,
-} from "@/backend/services/billing/billing-management.service";
-import type { InvoiceStatus, InvoiceType } from "@/shared/lib/enum";
+import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
+import type {
+  DeleteInvoiceResult,
+  ManualInvoiceResult,
+  MarkInvoicePaidResult,
+  SendPaymentReminderResult,
+} from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { requireAuth } from "../utils/requireAuth";
 import { BillingMonthInputRef } from "./billing-history.pothos";
@@ -10,22 +12,9 @@ import { InvoiceStatusPothosObject, InvoiceTypePothosObject } from "./enum.potho
 
 // ─── ManualInvoiceResult Object ──────────────────────────────────────────────
 
-export type ManualInvoiceResultDefinition = {
-  id: string;
-  parentId: string;
-  studentId: string | null;
-  amount: string;
-  currency: string;
-  status: InvoiceStatus;
-  invoiceType: InvoiceType;
-  issueDate: string;
-  dueDate: string;
-  paidDate: string | null;
-  version: number;
-  createdAt: Date;
-};
+type ManualInvoiceResultGraphQLType = ManualInvoiceResult;
 
-const ManualInvoiceResultRef = gqlSchemaBuilder.objectRef<ManualInvoiceResultDefinition>("ManualInvoiceResult");
+const ManualInvoiceResultRef = gqlSchemaBuilder.objectRef<ManualInvoiceResultGraphQLType>("ManualInvoiceResult");
 
 export const ManualInvoiceResultPothosObject = ManualInvoiceResultRef.implement({
   fields: t => ({
@@ -45,17 +34,13 @@ export const ManualInvoiceResultPothosObject = ManualInvoiceResultRef.implement(
 });
 
 // ─── MarkInvoicePaidResult Object ────────────────────────────────────────────
+// GraphQL flattens service's nested { invoice: {...} } shape to top-level fields.
 
-export type MarkInvoicePaidResultDefinition = {
-  id: string;
-  parentId: string;
-  status: InvoiceStatus;
-  paidDate: string | null;
-  version: number;
+type MarkInvoicePaidGraphQLType = Omit<MarkInvoicePaidResult["invoice"], "deletedAt"> & {
   notificationSummaryUpdated: boolean;
 };
 
-const MarkInvoicePaidResultRef = gqlSchemaBuilder.objectRef<MarkInvoicePaidResultDefinition>("MarkInvoicePaidResult");
+const MarkInvoicePaidResultRef = gqlSchemaBuilder.objectRef<MarkInvoicePaidGraphQLType>("MarkInvoicePaidResult");
 
 export const MarkInvoicePaidResultPothosObject = MarkInvoicePaidResultRef.implement({
   fields: t => ({
@@ -69,15 +54,13 @@ export const MarkInvoicePaidResultPothosObject = MarkInvoicePaidResultRef.implem
 });
 
 // ─── DeleteInvoiceResult Object ──────────────────────────────────────────────
+// GraphQL flattens service's nested { invoice: {...} } shape to top-level fields.
 
-export type DeleteInvoiceResultDefinition = {
-  id: string;
-  parentId: string;
-  version: number;
+type DeleteInvoiceGraphQLType = Omit<DeleteInvoiceResult["invoice"], "deletedAt"> & {
   notificationSummaryUpdated: boolean;
 };
 
-const DeleteInvoiceResultRef = gqlSchemaBuilder.objectRef<DeleteInvoiceResultDefinition>("DeleteInvoiceResult");
+const DeleteInvoiceResultRef = gqlSchemaBuilder.objectRef<DeleteInvoiceGraphQLType>("DeleteInvoiceResult");
 
 export const DeleteInvoiceResultPothosObject = DeleteInvoiceResultRef.implement({
   fields: t => ({

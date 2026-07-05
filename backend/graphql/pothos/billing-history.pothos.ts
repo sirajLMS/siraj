@@ -2,6 +2,7 @@ import { BillingHistoryService } from "@/backend/services/billing/billing-histor
 import type {
   AdminBillingSummaryResult,
   InvoiceHistoryRow,
+  PaginationInput,
   ParentBillingSummaryResult,
   StudentCreditRow,
 } from "@/backend/types";
@@ -11,17 +12,7 @@ import { requireAuth } from "../utils/requireAuth";
 import { InvoiceStatusPothosObject, InvoiceTypePothosObject, StudentStatusPothosObject } from "./enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "./pagination.objects";
 
-type PaginationArgsInput = {
-  first?: number | null;
-  skip?: number | null;
-  after?: string | null;
-  before?: string | null;
-  last?: number | null;
-  page?: number | null;
-  maxCount?: number | null;
-};
-
-function parsePaginationArgs(input: PaginationArgsInput | null | undefined): PaginationArgs | null {
+function parsePaginationArgs(input: PaginationInput | null | undefined): PaginationArgs | null {
   if (!input) {
     return null;
   }

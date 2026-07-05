@@ -20,6 +20,7 @@ export * from "./complaint.types";
 export * from "./complaintResponses.types";
 export * from "./dst-migration.types";
 export * from "./group-class.types";
+export * from "./notification-alerts.types";
 export * from "./notificationDeliveries.types";
 export * from "./pagination.types";
 export * from "./parent.types";

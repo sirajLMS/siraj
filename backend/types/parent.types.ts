@@ -11,6 +11,35 @@ export type ParentCreateResult = Pick<
 >;
 
 export type ParentDirectoryMetrics = {
+  id: string;
+  activated: number;
+  deactivated: number;
+  regular: number;
+  onLeave: number;
+  suspended: number;
+  onTrial: number;
+};
+
+/**
+ * Raw row from the database (used by the repository layer).
+ * `status` and `updatedAt` are the DB column names; the service layer
+ * transforms these into the enriched {@link ParentDirectoryRow}.
+ */
+export type ParentDirectoryRawRow = {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  status: string;
+  updatedAt: Date;
+  unpaidInvoices: number;
+};
+
+/**
+ * Raw metrics from the database (used by the repository layer).
+ * Does not include the synthetic `id` field that the service layer adds.
+ */
+export type ParentDirectoryRawMetrics = {
   activated: number;
   deactivated: number;
   regular: number;
@@ -21,15 +50,18 @@ export type ParentDirectoryMetrics = {
 
 export type ParentDirectoryRow = {
   id: string;
+  index: number;
   name: string;
   email: string;
   avatarUrl: string | null;
-  status: ParentStatus;
-  updatedAt: Date;
+  guardianOf: string;
+  time: string;
+  accountStatus: ParentStatus;
   unpaidInvoices: number;
 };
 
 export type ParentDirectoryResult = {
+  id: string;
   metrics: ParentDirectoryMetrics;
   rows: ParentDirectoryRow[];
   totalCount: number;
@@ -95,3 +127,48 @@ export type ParentDashboardMetricsReturnType = {
   studentProgress: StudentProgressReturnType[];
   workshopPromo: WorkshopPromoReturnType | null;
 };
+
+export interface AssociatedStudentResult {
+  readonly id: string;
+  readonly name: string;
+  readonly status: string;
+  readonly primaryTeacherId: string | null;
+  readonly teacherName: string | null;
+  readonly hoursPerWeek: string;
+  readonly classesRemaining: number;
+  readonly classesTotal: number;
+  readonly language: string | null;
+  readonly gender: string | null;
+  readonly version: number;
+  readonly updatedAt: Date;
+}
+
+export interface ParentProfileResult {
+  readonly id: string;
+  readonly userId: string;
+  readonly name: string;
+  readonly email: string;
+  readonly avatarUrl: string | null;
+  readonly status: string;
+  readonly phone: string | null;
+  readonly nationality: string | null;
+  readonly address: string | null;
+  readonly facebook: string | null;
+  readonly whatsapp: string | null;
+  readonly twitter: string | null;
+  readonly skype: string | null;
+  readonly defaultZoomLink: string | null;
+  readonly invoiceType: string | null;
+  readonly feeAmount: string | null;
+  readonly paymentMethod: string | null;
+  readonly currency: string | null;
+  readonly timezone: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+export interface DeactivateParentResult {
+  readonly id: string;
+  readonly userId: string;
+  readonly status: string;
+}
