@@ -2,7 +2,7 @@
 
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import { resolveScheduleInstanceDisplayStatus } from "@/frontend/views/dashboard/dashboard/utils/scheduleInstanceStatus";
+import { resolveScheduleInstanceDisplayStatus } from "@/frontend/views/dashboard/admin/dashboard/utils/scheduleInstanceStatus";
 
 interface ScheduleInstanceStatusBadgeProps {
   readonly outcome: ClassOutcome | null | undefined;

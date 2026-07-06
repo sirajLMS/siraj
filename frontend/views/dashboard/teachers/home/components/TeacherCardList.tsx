@@ -139,11 +139,7 @@ function TeacherCardActions({
   return (
     <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
       {row.userId ? (
-        <ViewAsUserButton
-          variant="link"
-          targetUserId={row.userId}
-          targetUserName={row.name ?? row.email ?? ""}
-        />
+        <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name ?? row.email ?? ""} />
       ) : null}
       <IconButton
         sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}

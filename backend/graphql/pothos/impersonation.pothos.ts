@@ -39,9 +39,8 @@ export const ImpersonationStatusPothosObject = ImpersonationStatusPothosObjectRe
   }),
 });
 
-const StartImpersonationResponsePothosObjectRef = gqlSchemaBuilder.objectRef<StartImpersonationResponsePothosDefinition>(
-  "StartImpersonationResponse"
-);
+const StartImpersonationResponsePothosObjectRef =
+  gqlSchemaBuilder.objectRef<StartImpersonationResponsePothosDefinition>("StartImpersonationResponse");
 
 export const StartImpersonationResponsePothosObject = StartImpersonationResponsePothosObjectRef.implement({
   fields: t => ({
@@ -134,12 +133,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         });
       }
 
-      const result = await ImpersonationService.endImpersonation(
-        actorUserId,
-        ctx.sessionId,
-        ctx.locale,
-        ctx.ipAddress
-      );
+      const result = await ImpersonationService.endImpersonation(actorUserId, ctx.sessionId, ctx.locale, ctx.ipAddress);
 
       if (ctx.refreshToken) {
         setAuthCookies(ctx.cookies, ctx.sessionId, ctx.refreshToken, result.token);

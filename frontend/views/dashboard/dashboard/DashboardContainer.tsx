@@ -10,7 +10,7 @@ import { useUserStore } from "@/frontend/stores/userStore";
 import { ParentDashboardContainer } from "@/frontend/views/dashboard/parents/dashboard/ParentDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
 import { shouldRenderTeacherDashboard } from "@/frontend/views/dashboard/teachers/dashboard/utils/teacherDashboardMode";
-import { AdminDashboardContainer } from "./AdminDashboardContainer";
+import { AdminDashboardContainer } from "../admin/dashboard/AdminDashboardContainer";
 
 function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
   return (

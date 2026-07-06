@@ -8,11 +8,11 @@ import { adminDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDo
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
-import { DashboardView } from "./DashboardView";
-import { useAdminDashboardLabels } from "./utils";
-import { buildAdminDashboardMetrics } from "./utils/adminDashboardMetrics";
-import { resolveDailyScheduleMetricFilter } from "./utils/dailyScheduleMetricFilter";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
+import { DashboardView } from "../dashboard/DashboardView";
+import { useAdminDashboardLabels } from "./dashboard/utils";
+import { buildAdminDashboardMetrics } from "./dashboard/utils/adminDashboardMetrics";
+import { resolveDailyScheduleMetricFilter } from "./dashboard/utils/dailyScheduleMetricFilter";
 
 // Admin Dashboard Container - orchestrates data fetching and state for the admin dashboard view
 // This container component handles all GraphQL queries, filter state, and metric/row transformations

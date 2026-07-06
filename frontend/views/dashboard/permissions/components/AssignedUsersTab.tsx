@@ -6,8 +6,8 @@ import { alpha, styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
 import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
+import { AppDataGrid, SectionPanel } from "@/frontend/components/ui";
 import type { GroupUser, PermissionGroup } from "@/frontend/graphql/generated/gql/graphql-types";
 
 const StyledTabContainer = styled(Box)(({ theme }) => ({

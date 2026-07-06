@@ -198,12 +198,7 @@ export function UserMenuButton({
       return filtered.filter(group => group.slug !== simulationStatus.groupSlug);
     }
     return filtered;
-  }, [
-    groupsData?.simulatablePermissionGroups,
-    canSwitchRoles,
-    isSimulatingGroup,
-    simulationStatus?.groupSlug,
-  ]);
+  }, [groupsData?.simulatablePermissionGroups, canSwitchRoles, isSimulatingGroup, simulationStatus?.groupSlug]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -407,7 +402,7 @@ export function UserMenuButton({
             <Typography variant="bodyMd">{tCommon("loading")}</Typography>
           </MenuItem>
         ) : (
-          (simulatableGroups).map(group => (
+          simulatableGroups.map(group => (
             <MenuItem
               key={group.slug}
               disabled={simulationLoading}

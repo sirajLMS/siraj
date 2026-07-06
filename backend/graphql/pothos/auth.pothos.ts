@@ -1,9 +1,4 @@
-import type {
-  DemoLoginInput,
-  LoginInput,
-  LoginResponse,
-  RefreshTokenResponse,
-} from "@/backend/types";
+import type { DemoLoginInput, LoginInput, LoginResponse, RefreshTokenResponse } from "@/backend/types";
 import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { UserPothosObject } from "./user.pothos";
 

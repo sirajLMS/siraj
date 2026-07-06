@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/react";
+import type { ReactNode } from "react";
 import {
   impersonationStatusQueryDocument,
   permissionGroupSimulationStatusQueryDocument,
@@ -95,10 +95,7 @@ const simulatingMocks = [
   },
 ];
 
-function StoryShell({
-  mocks,
-  children,
-}: Readonly<{ mocks: Array<Record<string, unknown>>; children: ReactNode }>) {
+function StoryShell({ mocks, children }: Readonly<{ mocks: Array<Record<string, unknown>>; children: ReactNode }>) {
   useUserStore.setState({
     user: {
       id: "actor-id",

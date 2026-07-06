@@ -11,6 +11,7 @@ import {
   SectionPanel,
   StatusBadge,
 } from "@/frontend/components/ui";
+import { mergeSx } from "@/frontend/components/ui/mergeSx";
 import type {
   MissedClassAlert,
   TeacherDashboardMetrics,
@@ -20,9 +21,15 @@ import { ParentSupportFab } from "@/frontend/views/dashboard/parents/dashboard/c
 import { ActivationPolicyPanel } from "./components/ActivationPolicyPanel";
 import { MissedClassAlertBanner } from "./components/MissedClassAlertBanner";
 import { TeacherDashboardMetricsRow } from "./components/TeacherDashboardMetricsRow";
+import { TeacherDashboardMetricsSection } from "./components/TeacherDashboardMetricsSection";
 import { TeacherScheduleCardList } from "./components/TeacherScheduleCardList";
 import { TeacherScheduleDataGrid } from "./components/TeacherScheduleDataGrid";
 import type { TeacherDashboardLabels } from "./types/teacherDashboardLabels";
+import { buildTeacherStandardMetricItems } from "./utils/buildTeacherDashboardMetrics";
+import {
+  teacherDashboardContentPaddingSx,
+  teacherDashboardPageContainerSx,
+} from "./utils/teacherDashboardMobileLayout";
 
 interface TeacherDashboardViewProps {
   readonly metrics: TeacherDashboardMetrics;
@@ -30,6 +37,7 @@ interface TeacherDashboardViewProps {
   readonly missedAlert: MissedClassAlert | null;
   readonly scheduleDateLabel: string;
   readonly labels: TeacherDashboardLabels;
+  readonly lastUpdated: string;
   readonly canActivate: boolean;
   readonly canManualEntry: boolean;
   readonly canPrintSchedule: boolean;
@@ -96,6 +104,7 @@ export function TeacherDashboardView({
   missedAlert,
   scheduleDateLabel,
   labels,
+  lastUpdated,
   canActivate,
   canManualEntry,
   canPrintSchedule,
@@ -127,16 +136,22 @@ export function TeacherDashboardView({
     <>
       {missedAlert && !isMobile && <MissedClassAlertBanner alert={missedAlert} labels={labels.alert} fixed />}
 
-      <PageContainer sx={missedAlert && !isMobile ? { pt: 10 } : undefined}>
-        {missedAlert && isMobile && <MissedClassAlertBanner alert={missedAlert} labels={labels.alert} />}
+      <PageContainer sx={mergeSx(teacherDashboardPageContainerSx, missedAlert && !isMobile ? { pt: 10 } : undefined)}>
+        {missedAlert && isMobile && (
+          <Box sx={teacherDashboardContentPaddingSx}>
+            <MissedClassAlertBanner alert={missedAlert} labels={labels.alert} />
+          </Box>
+        )}
 
         {isMobile ? (
-          <PageHeader title={labels.overviewTitle} titleVariant="titleLg" />
+          <Box sx={teacherDashboardContentPaddingSx}>
+            <PageHeader title={labels.overviewTitle} titleVariant="titleLg" />
+          </Box>
         ) : (
           <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} actions={headerActions} />
         )}
 
-        <Box sx={{ mb: 3 }}>
+        <Box sx={mergeSx(isMobile ? teacherDashboardContentPaddingSx : undefined, { mb: 3 })}>
           <DateNavigator
             dateValue={dateValue}
             todayLabel={labels.dateFilter.today}
@@ -147,9 +162,17 @@ export function TeacherDashboardView({
           />
         </Box>
 
-        <Box sx={{ mb: 4 }}>
-          <TeacherDashboardMetricsRow metrics={metrics} labels={labels.metrics} isMobile={isMobile} />
-        </Box>
+        {isMobile ? (
+          <TeacherDashboardMetricsSection
+            title={labels.pageTitle}
+            lastUpdated={lastUpdated}
+            metrics={buildTeacherStandardMetricItems(metrics, labels.metrics)}
+          />
+        ) : (
+          <Box sx={{ mb: 4 }}>
+            <TeacherDashboardMetricsRow metrics={metrics} labels={labels.metrics} isMobile={false} />
+          </Box>
+        )}
 
         {isMobile ? (
           <Box sx={{ mb: 4 }}>
@@ -187,13 +210,15 @@ export function TeacherDashboardView({
           </SectionPanel>
         )}
 
-        <ActivationPolicyPanel
-          labels={labels.policy}
-          compact={isMobile}
-          onDownloadHandbook={onDownloadHandbook}
-          onContactCoordinator={onContactCoordinator}
-          actionLabels={labels.actions}
-        />
+        <Box sx={isMobile ? teacherDashboardContentPaddingSx : undefined}>
+          <ActivationPolicyPanel
+            labels={labels.policy}
+            compact={isMobile}
+            onDownloadHandbook={onDownloadHandbook}
+            onContactCoordinator={onContactCoordinator}
+            actionLabels={labels.actions}
+          />
+        </Box>
 
         {!isMobile && <ParentSupportFab label={labels.support.liveSupport} onClick={onSupport} />}
       </PageContainer>

@@ -23,16 +23,12 @@ export function DashboardErrorView({ errorMessage }: DashboardErrorViewProps) {
   };
 
   const handleLoginRedirect = () => {
-    logger.info(
-      { caller: "DashboardErrorView" },
-      "[AuthRedirect] User clicked login button on dashboard error view",
-      {
-        reason: "unauthenticated dashboard error — user initiated",
-        from: `${globalThis.location.pathname}${globalThis.location.search}`,
-        to: "/login",
-        errorMessage,
-      }
-    );
+    logger.info({ caller: "DashboardErrorView" }, "[AuthRedirect] User clicked login button on dashboard error view", {
+      reason: "unauthenticated dashboard error — user initiated",
+      from: `${globalThis.location.pathname}${globalThis.location.search}`,
+      to: "/login",
+      errorMessage,
+    });
     router.push("/login");
   };
 

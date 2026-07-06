@@ -30,9 +30,7 @@ gqlSchemaBuilder.queryFields(t => ({
       return PermissionGroupSimulationService.getStatusForSession(
         ctx.sessionId,
         actorUserId,
-        ctx.isSimulatingGroup && ctx.simulatedGroupSlug
-          ? { groupSlug: ctx.simulatedGroupSlug }
-          : undefined
+        ctx.isSimulatingGroup && ctx.simulatedGroupSlug ? { groupSlug: ctx.simulatedGroupSlug } : undefined
       );
     },
   }),

@@ -5,6 +5,8 @@ export const dashboard: TeacherDashboardLabels = {
   pageSubtitle: "نظرة عامة على جدول التدريس اليومي وتفعيل الحصص.",
   overviewTitle: "نظرة عامة",
   todayChip: "اليوم",
+  updatedJustNow: "تم التحديث الآن",
+  updatedMinutesAgo: "تم التحديث منذ {minutes, plural, =1 {دقيقة} other {# دقائق}}",
   metrics: {
     totalClasses: "إجمالي الحصص",
     missedSlots: "الحصص الفائتة",

@@ -1,12 +1,6 @@
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import {
-  groupPermissions,
-  permissionGroups,
-  permissions,
-  userPermissionGroups,
-  users,
-} from "@/backend/db/schema";
+import { groupPermissions, permissionGroups, permissions, userPermissionGroups, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
 import { type AppPermission, SystemPermissionGroupSlug, UserRole } from "@/shared/lib/enum";
@@ -88,26 +82,17 @@ export namespace PermissionsService {
   function resolveRoleFromGroupSlugs(groupSlugs: string[]): UserRole {
     if (groupSlugs.includes(SystemPermissionGroupSlug.SUPER_ADMIN)) return UserRole.SUPER_ADMIN;
     if (groupSlugs.includes(SystemPermissionGroupSlug.ACADEMY_ADMIN)) return UserRole.ACADEMY_ADMIN;
-    if (
-      groupSlugs.some(
-        slug => slug === SystemPermissionGroupSlug.TEACHER_DEFAULT || slug === "teacher"
-      )
-    ) {
+    if (groupSlugs.some(slug => slug === SystemPermissionGroupSlug.TEACHER_DEFAULT || slug === "teacher")) {
       return UserRole.TEACHER;
     }
-    if (
-      groupSlugs.some(slug => slug === SystemPermissionGroupSlug.PARENT_DEFAULT || slug === "parent")
-    ) {
+    if (groupSlugs.some(slug => slug === SystemPermissionGroupSlug.PARENT_DEFAULT || slug === "parent")) {
       return UserRole.PARENT;
     }
     if (groupSlugs.includes(SystemPermissionGroupSlug.STAFF_DEFAULT)) return UserRole.STAFF;
     return UserRole.USER;
   }
 
-  export async function getPermissionGroupContext(
-    groupSlug: string,
-    locale?: string
-  ): Promise<UserPermissionContext> {
+  export async function getPermissionGroupContext(groupSlug: string, locale?: string): Promise<UserPermissionContext> {
     try {
       const normalizedSlug = groupSlug.trim();
       const [group] = await db
@@ -130,10 +115,7 @@ export namespace PermissionsService {
       const permissionRows =
         permissionIds.length === 0
           ? []
-          : await db
-              .select({ key: permissions.key })
-              .from(permissions)
-              .where(inArray(permissions.id, permissionIds));
+          : await db.select({ key: permissions.key }).from(permissions).where(inArray(permissions.id, permissionIds));
 
       const permissionSet = new Set<AppPermission>();
       for (const permission of permissionRows) {

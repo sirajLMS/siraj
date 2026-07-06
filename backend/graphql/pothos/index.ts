@@ -1,4 +1,3 @@
-export * from "./user.pothos";
 export * from "./auth.pothos";
 export * from "./availability-search.pothos";
 export * from "./billing-alerts.pothos";
@@ -39,4 +38,5 @@ export * from "./suggestion.pothos";
 export * from "./teacher.pothos";
 export * from "./teacher-dashboard.pothos";
 export * from "./teacher-onboarding.pothos";
+export * from "./user.pothos";
 export * from "./weekly-schedule.pothos";

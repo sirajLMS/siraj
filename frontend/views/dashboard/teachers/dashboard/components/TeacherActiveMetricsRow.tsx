@@ -16,42 +16,7 @@ export function TeacherActiveMetricsRow({ metrics, labels, isMobile }: Readonly<
   const activeSessions = metrics.activeSessions ?? 0;
 
   if (isMobile) {
-    return (
-      <Grid container spacing={2}>
-        <Grid size={6}>
-          <MetricCard
-            icon={CalendarTodayOutlined}
-            label={labels.totalClasses}
-            value={String(metrics.totalClasses)}
-            variant="compact"
-          />
-        </Grid>
-        <Grid size={6}>
-          <MetricCard
-            icon={SensorsOutlined}
-            label={labels.activeSessions}
-            value={String(activeSessions)}
-            variant="compact"
-          />
-        </Grid>
-        <Grid size={6}>
-          <MetricCard
-            icon={EventBusyOutlined}
-            label={labels.missedSlots}
-            value={String(metrics.missedSlots)}
-            variant="error"
-          />
-        </Grid>
-        <Grid size={6}>
-          <MetricCard
-            icon={VerifiedOutlined}
-            label={labels.completed}
-            value={String(metrics.completed)}
-            variant="compact"
-          />
-        </Grid>
-      </Grid>
-    );
+    return null;
   }
 
   return (

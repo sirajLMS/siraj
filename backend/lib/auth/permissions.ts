@@ -1,12 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import {
-  groupPermissions,
-  permissionGroups,
-  permissions,
-  userPermissionGroups,
-  users,
-} from "@/backend/db/schema";
+import { groupPermissions, permissionGroups, permissions, userPermissionGroups, users } from "@/backend/db/schema";
 import type { AppPermission } from "@/shared/lib/enum";
 
 export type UserPermissionContext = {

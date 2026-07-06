@@ -3,7 +3,7 @@ import {
   formatDurationMinutes,
   formatScheduleTimeOnly,
   formatScheduleYourTime,
-} from "@/frontend/views/dashboard/dashboard/utils/formatScheduleTime";
+} from "@/frontend/views/dashboard/admin/dashboard/utils/formatScheduleTime";
 
 describe("formatScheduleTimeOnly", () => {
   test("formats ISO timestamps as hh:mm AM/PM", () => {

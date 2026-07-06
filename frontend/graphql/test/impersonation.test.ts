@@ -219,14 +219,7 @@ describe("GraphQL Impersonation Integration Tests", () => {
       // Best-effort cleanup — session may already be ended
     }
 
-    if (
-      studentUserId &&
-      teacherUserIdForCleanup &&
-      parentUserId &&
-      studentId &&
-      teacherId &&
-      parentId
-    ) {
+    if (studentUserId && teacherUserIdForCleanup && parentUserId && studentId && teacherId && parentId) {
       await cleanupTestEntities(seedSuperAdminToken, {
         studentUserId,
         teacherUserId: teacherUserIdForCleanup,

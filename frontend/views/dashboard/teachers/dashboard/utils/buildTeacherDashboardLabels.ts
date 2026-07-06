@@ -167,6 +167,8 @@ export function buildTeacherDashboardLabels(t: TeacherDashboardTranslator): Teac
     pageSubtitle: t("pageSubtitle"),
     overviewTitle: t("overviewTitle"),
     todayChip: t("todayChip"),
+    updatedJustNow: t("updatedJustNow"),
+    updatedMinutesAgo: t("updatedMinutesAgo"),
     metrics: buildMetricsLabels(t),
     activeMetrics: buildActiveMetricsLabels(t),
     activeWelcome: buildActiveWelcomeLabels(t),

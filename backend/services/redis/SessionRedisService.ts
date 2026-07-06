@@ -110,15 +110,15 @@ export class SessionRedisService {
       }
     }
     if (obj.groupSimulation !== undefined) {
-      if (typeof obj.groupSimulation !== "object" || obj.groupSimulation === null || Array.isArray(obj.groupSimulation)) {
+      if (
+        typeof obj.groupSimulation !== "object" ||
+        obj.groupSimulation === null ||
+        Array.isArray(obj.groupSimulation)
+      ) {
         return false;
       }
       const sim = obj.groupSimulation as Record<string, unknown>;
-      if (
-        typeof sim.groupSlug !== "string" ||
-        typeof sim.startedAt !== "string" ||
-        typeof sim.expiresAt !== "string"
-      ) {
+      if (typeof sim.groupSlug !== "string" || typeof sim.startedAt !== "string" || typeof sim.expiresAt !== "string") {
         return false;
       }
     }

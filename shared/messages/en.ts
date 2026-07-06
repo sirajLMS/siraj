@@ -256,7 +256,8 @@ const en: MessageSchema = {
       administration: "Administration",
       viewAsUser: "Log in as",
       confirmTitle: "Log in as {name}?",
-      confirmMessage: "You will browse the site as this user. Your administrator session remains active in the background.",
+      confirmMessage:
+        "You will browse the site as this user. Your administrator session remains active in the background.",
       reasonLabel: "Reason (optional)",
       reasonPlaceholder: "Support ticket, debugging, etc.",
       confirm: "Log in as",
@@ -1943,6 +1944,8 @@ const en: MessageSchema = {
       pageSubtitle: "Overview of your daily teaching schedule and session activations.",
       overviewTitle: "Overview",
       todayChip: "Today",
+      updatedJustNow: "Updated just now",
+      updatedMinutesAgo: "Updated {minutes, plural, =1 {1 minute} other {# minutes}} ago",
       metrics: {
         totalClasses: "Total Classes",
         missedSlots: "Missed Slots",

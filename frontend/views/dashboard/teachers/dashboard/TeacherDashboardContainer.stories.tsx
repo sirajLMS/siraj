@@ -238,6 +238,7 @@ export function MockTeacherDashboardContainer({ mode = "standard" }: MockTeacher
         welcomeDateSummary={activeStore.welcomeDateSummary}
         sessionsScheduledToday={activeStore.sessionsScheduledToday}
         labels={labels}
+        lastUpdated="Updated just now"
         onActivate={id => alert(`Activated session ${id}`)}
         onNewSession={() => alert("New session clicked")}
         onStartSession={id => alert(`Start session ${id}`)}
@@ -256,6 +257,7 @@ export function MockTeacherDashboardContainer({ mode = "standard" }: MockTeacher
       missedAlert={standardStore.missedAlert}
       scheduleDateLabel={standardStore.scheduleDateLabel}
       labels={labels}
+      lastUpdated="Updated just now"
       canActivate={true}
       canManualEntry={true}
       canPrintSchedule={true}

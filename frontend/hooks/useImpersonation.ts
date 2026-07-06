@@ -71,4 +71,4 @@ export function useImpersonation() {
     endImpersonation,
     refetchStatus: refetch,
   };
-};
+}

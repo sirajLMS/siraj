@@ -3,13 +3,16 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useDashboardStore } from "@/frontend/stores/dashboardStore";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
 import type { TeacherFilterItem } from "@/frontend/views/dashboard/types/dashboard";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule-instance-dashboard-status";
-import { DashboardView } from "./DashboardView";
-import { useAdminDashboardLabels } from "./utils";
-import { buildAdminDashboardMetrics } from "./utils/adminDashboardMetrics";
-import { matchesDailyScheduleMetricFilter, resolveDailyScheduleMetricFilter } from "./utils/dailyScheduleMetricFilter";
+import { DashboardView } from "../dashboard/DashboardView";
+import { useAdminDashboardLabels } from "./dashboard/utils";
+import { buildAdminDashboardMetrics } from "./dashboard/utils/adminDashboardMetrics";
+import {
+  matchesDailyScheduleMetricFilter,
+  resolveDailyScheduleMetricFilter,
+} from "./dashboard/utils/dailyScheduleMetricFilter";
 
 const MOCK_TEACHERS: TeacherFilterItem[] = [
   { id: "teacher-ahmed", name: "Ahmed Mohammed" },

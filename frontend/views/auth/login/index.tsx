@@ -34,16 +34,12 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
     redirectedRef.current = true;
     const redirectUrl = searchParams.get("redirect");
     const targetUrl = isSafeRedirect(redirectUrl);
-    logger.info(
-      { caller: "LoginContainer" },
-      "[AuthRedirect] Hard-redirecting authenticated user away from login",
-      {
-        reason: "isAuthenticated is true after refreshToken — using full navigation so server reads new cookies",
-        from: `${globalThis.location.pathname}${globalThis.location.search}`,
-        redirectParam: redirectUrl,
-        to: targetUrl,
-      }
-    );
+    logger.info({ caller: "LoginContainer" }, "[AuthRedirect] Hard-redirecting authenticated user away from login", {
+      reason: "isAuthenticated is true after refreshToken — using full navigation so server reads new cookies",
+      from: `${globalThis.location.pathname}${globalThis.location.search}`,
+      redirectParam: redirectUrl,
+      to: targetUrl,
+    });
     // Hard navigation (not router.replace) so the server layout re-runs with Set-Cookie headers applied.
     globalThis.location.replace(targetUrl);
   }, [isAuthenticated, searchParams]);
@@ -80,17 +76,13 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
       if (data?.demoLogin?.token && data.demoLogin.user) {
         updateAuthToken(data.demoLogin.token);
         const targetUrl = isSafeRedirect(redirectUrl);
-        logger.info(
-          { caller: "LoginContainer.handleFastLogin" },
-          "[AuthRedirect] Redirecting after demo login",
-          {
-            reason: "demoLogin mutation succeeded",
-            from: `${globalThis.location.pathname}${globalThis.location.search}`,
-            redirectParam: redirectUrl,
-            groupSlug,
-            to: targetUrl,
-          }
-        );
+        logger.info({ caller: "LoginContainer.handleFastLogin" }, "[AuthRedirect] Redirecting after demo login", {
+          reason: "demoLogin mutation succeeded",
+          from: `${globalThis.location.pathname}${globalThis.location.search}`,
+          redirectParam: redirectUrl,
+          groupSlug,
+          to: targetUrl,
+        });
         globalThis.location.href = targetUrl;
       } else {
         setLoginResult({ type: "error", message: t("invalidCredentials") });

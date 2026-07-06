@@ -601,9 +601,7 @@ export namespace SessionRepository {
     }
   }
 
-  function readGroupSimulationFromPayload(
-    payload: string | null | undefined
-  ): RedisGroupSimulationSessionData | null {
+  function readGroupSimulationFromPayload(payload: string | null | undefined): RedisGroupSimulationSessionData | null {
     const groupSimulation = parseSessionPayload(payload).groupSimulation;
     if (!groupSimulation || typeof groupSimulation !== "object" || Array.isArray(groupSimulation)) {
       return null;

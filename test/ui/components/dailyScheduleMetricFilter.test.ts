@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
 import {
   matchesDailyScheduleMetricFilter,
   resolveDailyScheduleMetricFilter,
-} from "@/frontend/views/dashboard/dashboard/utils/dailyScheduleMetricFilter";
+} from "@/frontend/views/dashboard/admin/dashboard/utils/dailyScheduleMetricFilter";
 
 const sampleRow = (overrides: Partial<DailyScheduleRow>): DailyScheduleRow => ({
   id: "1",

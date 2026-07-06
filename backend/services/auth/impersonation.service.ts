@@ -1,12 +1,12 @@
 import { db } from "@/backend/db/drizzleDb";
 import { ImpersonationRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
-import { clearOptionalRedisGroupSimulation } from "@/backend/services/auth/permission-group-simulation.service";
 import { adminAuditLogs } from "@/backend/db/schema";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { generateAccessToken, generateImpersonationAccessToken } from "@/backend/lib/auth/jwt";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import { logger } from "@/backend/lib/logger";
+import { clearOptionalRedisGroupSimulation } from "@/backend/services/auth/permission-group-simulation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
 
@@ -305,10 +305,7 @@ export namespace ImpersonationService {
     };
   }
 
-  export async function issueAccessTokenForSession(
-    actorUserId: string,
-    rawSessionId: string
-  ): Promise<string | null> {
+  export async function issueAccessTokenForSession(actorUserId: string, rawSessionId: string): Promise<string | null> {
     const session = await SessionRepository.findSessionById(rawSessionId);
     if (!session?.userId || session.userId !== actorUserId) {
       return null;

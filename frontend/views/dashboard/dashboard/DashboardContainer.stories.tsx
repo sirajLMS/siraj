@@ -5,7 +5,7 @@ import { useUserStore } from "@/frontend/stores/userStore";
 import { ParentDashboardContainer } from "@/frontend/views/dashboard/parents/dashboard/ParentDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
 import { shouldRenderTeacherDashboard } from "@/frontend/views/dashboard/teachers/dashboard/utils/teacherDashboardMode";
-import { MockAdminDashboardContainer } from "./AdminDashboardContainer.stories";
+import { MockAdminDashboardContainer } from "../admin/dashboard/AdminDashboardContainer.stories";
 
 function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
   return (

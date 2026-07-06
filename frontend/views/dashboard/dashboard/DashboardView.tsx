@@ -4,8 +4,8 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { PageContainer } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { MetricItem, ScheduleOverviewData } from "@/frontend/views/dashboard/types/dashboard";
-import { ScheduleOverviewSection } from "./components/ScheduleOverviewSection";
-import { TodayClassesSection } from "./components/TodayClassesSection";
+import { ScheduleOverviewSection } from "../admin/dashboard/components/ScheduleOverviewSection";
+import { TodayClassesSection } from "../admin/dashboard/components/TodayClassesSection";
 
 interface AdminDashboardViewProps extends ScheduleOverviewData {
   readonly todayClassesTitle: string;

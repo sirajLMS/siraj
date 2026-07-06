@@ -1,7 +1,7 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import { UserRepository } from "@/backend/db/repo";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { UserRole } from "@/shared/lib/enum";
 
 const ACTOR_ID = "11111111-1111-1111-1111-111111111111";
@@ -61,18 +61,14 @@ describe("ImpersonationService.assertCanImpersonate", () => {
 
   test("rejects self-impersonation", async () => {
     const actorSpy = mockSuperAdminActor();
-    const error = await expectRejection(() =>
-      ImpersonationService.assertCanImpersonate(ACTOR_ID, ACTOR_ID, locale)
-    );
+    const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, ACTOR_ID, locale));
     expect(error.message).toContain("yourself");
     actorSpy.mockRestore();
   });
 
   test("rejects non-super-admin actor", async () => {
     const actorSpy = mockNonSuperAdminActor();
-    const error = await expectRejection(() =>
-      ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, locale)
-    );
+    const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, locale));
     expect(error.message).toContain("not allowed");
     actorSpy.mockRestore();
   });
@@ -91,9 +87,7 @@ describe("ImpersonationService.assertCanImpersonate", () => {
   test("rejects inactive target", async () => {
     const actorSpy = mockSuperAdminActor();
     const targetSpy = mockTargetUser({ isActive: false });
-    const error = await expectRejection(() =>
-      ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, locale)
-    );
+    const error = await expectRejection(() => ImpersonationService.assertCanImpersonate(ACTOR_ID, TARGET_ID, locale));
     expect(error.message).toContain("inactive");
     actorSpy.mockRestore();
     targetSpy.mockRestore();

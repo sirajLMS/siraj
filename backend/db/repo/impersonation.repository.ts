@@ -54,10 +54,7 @@ export namespace ImpersonationRepository {
     });
   }
 
-  export async function endById(
-    id: string,
-    tx?: DBTransaction
-  ): Promise<Types.ImpersonationSessionReturnType | null> {
+  export async function endById(id: string, tx?: DBTransaction): Promise<Types.ImpersonationSessionReturnType | null> {
     return runInTransaction(tx, async t => {
       const [ended] = await t
         .update(impersonationSessions)

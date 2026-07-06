@@ -21,42 +21,7 @@ function formatCount(value: number, pad: boolean): string {
 
 export function TeacherDashboardMetricsRow({ metrics, labels, isMobile }: Readonly<TeacherDashboardMetricsRowProps>) {
   if (isMobile) {
-    return (
-      <Grid container spacing={2}>
-        <Grid size={6}>
-          <MetricCard
-            icon={EventOutlined}
-            label={labels.totalClasses}
-            value={formatCount(metrics.totalClasses, false)}
-            variant="compact"
-          />
-        </Grid>
-        <Grid size={6}>
-          <MetricCard
-            icon={EventBusyOutlined}
-            label={labels.missedSlots}
-            value={formatCount(metrics.missedSlots, false)}
-            variant="error"
-          />
-        </Grid>
-        <Grid size={6}>
-          <MetricCard
-            icon={CheckCircleOutlined}
-            label={labels.completed}
-            value={formatCount(metrics.completed, false)}
-            variant="compact"
-          />
-        </Grid>
-        <Grid size={6}>
-          <MetricCard
-            icon={GroupsOutlined}
-            label={labels.studentsToday}
-            value={formatCount(metrics.studentsToday, false)}
-            variant="compact"
-          />
-        </Grid>
-      </Grid>
-    );
+    return null;
   }
 
   return (

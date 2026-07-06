@@ -171,8 +171,7 @@ export const endImpersonationMutationDocument: TypedDocumentNode<Operations.EndI
   }
 `;
 
-export const permissionGroupSimulationStatusQueryDocument: TypedDocumentNode<Operations.PermissionGroupSimulationStatusQuery> =
-  gql`
+export const permissionGroupSimulationStatusQueryDocument: TypedDocumentNode<Operations.PermissionGroupSimulationStatusQuery> = gql`
   query permissionGroupSimulationStatus {
     permissionGroupSimulationStatus {
       isActive
@@ -184,8 +183,7 @@ export const permissionGroupSimulationStatusQueryDocument: TypedDocumentNode<Ope
   }
 `;
 
-export const simulatablePermissionGroupsQueryDocument: TypedDocumentNode<Operations.SimulatablePermissionGroupsQuery> =
-  gql`
+export const simulatablePermissionGroupsQueryDocument: TypedDocumentNode<Operations.SimulatablePermissionGroupsQuery> = gql`
   query simulatablePermissionGroups {
     simulatablePermissionGroups {
       slug
@@ -208,8 +206,7 @@ export const startPermissionGroupSimulationMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const endPermissionGroupSimulationMutationDocument: TypedDocumentNode<Operations.EndPermissionGroupSimulationMutation> =
-  gql`
+export const endPermissionGroupSimulationMutationDocument: TypedDocumentNode<Operations.EndPermissionGroupSimulationMutation> = gql`
   mutation endPermissionGroupSimulation {
     endPermissionGroupSimulation {
       token

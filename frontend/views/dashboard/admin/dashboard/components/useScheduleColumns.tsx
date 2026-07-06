@@ -6,12 +6,12 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
 import {
   formatDurationMinutes,
   formatScheduleTimeOnly,
   formatScheduleYourTime,
-} from "@/frontend/views/dashboard/dashboard/utils/formatScheduleTime";
+} from "@/frontend/views/dashboard/admin/dashboard/utils/formatScheduleTime";
 import { ScheduleInstanceStatusBadge } from "./ScheduleInstanceStatusBadge";
 import {
   StyledActionsCellBox,

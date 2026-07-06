@@ -8,8 +8,8 @@ import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MutationLoginArgs, User } from "@/frontend/graphql/generated/gql/graphql-types";
 import * as Document from "@/frontend/graphql/sharedDocuments";
-import { isSafeRedirect } from "@/frontend/lib/safeRedirect";
 import { dedupedRefreshToken } from "@/frontend/lib/dedupedRefreshToken";
+import { isSafeRedirect } from "@/frontend/lib/safeRedirect";
 import { AuthContext } from "../../context/AuthContext";
 import { useAuthToken } from "../../hooks/useAuthToken";
 import logger from "../../lib/logger";
@@ -84,45 +84,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         updateAuthToken(data.refreshToken.token);
         setUser(data.refreshToken.user);
         setIsAuthenticated(true);
-        logger.info(
-          { caller: "AuthProvider.checkAuth" },
-          "[AuthRedirect] Session restored via refreshToken",
-          {
-            reason: "refreshToken returned token and user",
-            currentUrl,
-            userId: data.refreshToken.user.id,
-          }
-        );
+        logger.info({ caller: "AuthProvider.checkAuth" }, "[AuthRedirect] Session restored via refreshToken", {
+          reason: "refreshToken returned token and user",
+          currentUrl,
+          userId: data.refreshToken.user.id,
+        });
       } else {
         setIsAuthenticated(false);
         setUser(null);
         clearAuthData();
-        logger.info(
-          { caller: "AuthProvider.checkAuth" },
-          "[AuthRedirect] No active session after refreshToken",
-          {
-            reason: "refreshToken response missing token or user",
-            currentUrl,
-            hasRefreshTokenPayload: Boolean(data?.refreshToken),
-            hasToken: Boolean(data?.refreshToken?.token),
-            hasUser: Boolean(data?.refreshToken?.user),
-          }
-        );
+        logger.info({ caller: "AuthProvider.checkAuth" }, "[AuthRedirect] No active session after refreshToken", {
+          reason: "refreshToken response missing token or user",
+          currentUrl,
+          hasRefreshTokenPayload: Boolean(data?.refreshToken),
+          hasToken: Boolean(data?.refreshToken?.token),
+          hasUser: Boolean(data?.refreshToken?.user),
+        });
       }
     } catch (error) {
       setIsAuthenticated(false);
       setUser(null);
       clearAuthData();
-      logger.info(
-        { caller: "AuthProvider.checkAuth" },
-        "[AuthRedirect] refreshToken mutation failed",
-        {
-          reason: "refreshToken threw an error",
-          currentUrl,
-          errorName: error instanceof Error ? error.name : "unknown",
-          errorMessage: error instanceof Error ? error.message : String(error),
-        }
-      );
+      logger.info({ caller: "AuthProvider.checkAuth" }, "[AuthRedirect] refreshToken mutation failed", {
+        reason: "refreshToken threw an error",
+        currentUrl,
+        errorName: error instanceof Error ? error.name : "unknown",
+        errorMessage: error instanceof Error ? error.message : String(error),
+      });
     }
   }, [refreshTokenMutation, updateAuthToken, clearAuthData]);
 
@@ -132,15 +120,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       clearAuthData();
       await client.clearStore();
-      logger.info(
-        { caller: "AuthProvider.logout" },
-        "[AuthRedirect] Redirecting to login after logout",
-        {
-          reason: "user initiated logout",
-          from: `${globalThis.location.pathname}${globalThis.location.search}`,
-          to: "/login",
-        }
-      );
+      logger.info({ caller: "AuthProvider.logout" }, "[AuthRedirect] Redirecting to login after logout", {
+        reason: "user initiated logout",
+        from: `${globalThis.location.pathname}${globalThis.location.search}`,
+        to: "/login",
+      });
       // Perform a hard redirect to ensure all state is cleared.
       globalThis.location.href = "/login";
     }
@@ -163,16 +147,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // for security reasons (prevents XSS attacks).
 
           const targetUrl = isSafeRedirect(redirectUrl);
-          logger.info(
-            { caller: "AuthProvider.login" },
-            "[AuthRedirect] Redirecting after successful login",
-            {
-              reason: "login mutation returned token and user",
-              from: `${globalThis.location.pathname}${globalThis.location.search}`,
-              redirectParam: redirectUrl,
-              to: targetUrl,
-            }
-          );
+          logger.info({ caller: "AuthProvider.login" }, "[AuthRedirect] Redirecting after successful login", {
+            reason: "login mutation returned token and user",
+            from: `${globalThis.location.pathname}${globalThis.location.search}`,
+            redirectParam: redirectUrl,
+            to: targetUrl,
+          });
           // Perform a hard redirect to break any race conditions and ensure a clean state.
           globalThis.location.href = targetUrl;
           return true;

@@ -20,16 +20,15 @@ export const SimulatablePermissionGroupPothosObject = SimulatablePermissionGroup
 const PermissionGroupSimulationStatusPothosObjectRef =
   gqlSchemaBuilder.objectRef<PermissionGroupSimulationStatusReturnType>("PermissionGroupSimulationStatus");
 
-export const PermissionGroupSimulationStatusPothosObject =
-  PermissionGroupSimulationStatusPothosObjectRef.implement({
-    fields: t => ({
-      isActive: t.exposeBoolean("isActive"),
-      groupSlug: t.exposeString("groupSlug", { nullable: true }),
-      groupName: t.exposeString("groupName", { nullable: true }),
-      startedAt: t.expose("startedAt", { type: "DateTime", nullable: true }),
-      expiresAt: t.expose("expiresAt", { type: "DateTime", nullable: true }),
-    }),
-  });
+export const PermissionGroupSimulationStatusPothosObject = PermissionGroupSimulationStatusPothosObjectRef.implement({
+  fields: t => ({
+    isActive: t.exposeBoolean("isActive"),
+    groupSlug: t.exposeString("groupSlug", { nullable: true }),
+    groupName: t.exposeString("groupName", { nullable: true }),
+    startedAt: t.expose("startedAt", { type: "DateTime", nullable: true }),
+    expiresAt: t.expose("expiresAt", { type: "DateTime", nullable: true }),
+  }),
+});
 
 const StartPermissionGroupSimulationResponsePothosObjectRef =
   gqlSchemaBuilder.objectRef<StartPermissionGroupSimulationReturnType>("StartPermissionGroupSimulationResponse");

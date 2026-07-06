@@ -2,10 +2,10 @@
 
 import { PriorityHighOutlined as AlertIcon, SettingsOutlined as SettingsIcon } from "@mui/icons-material";
 import { Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
+import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { PaginationControls } from "@/frontend/components/ui";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import type { ParentAccountStatus, ParentDirectoryRow } from "@/frontend/views/dashboard/parents/types/directory";
 
 export interface ParentCardListLabels {
@@ -52,9 +52,7 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
           </Stack>
         </Box>
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
-          {row.userId ? (
-            <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name} />
-          ) : null}
+          {row.userId ? <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name} /> : null}
           <IconButton
             size="small"
             onClick={e => {

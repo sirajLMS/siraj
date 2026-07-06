@@ -36,6 +36,7 @@ import { TeacherDashboardView } from "./TeacherDashboardView";
 import type { TeacherDashboardLabels } from "./types/teacherDashboardLabels";
 import { buildTeacherDashboardLabels } from "./utils/buildTeacherDashboardLabels";
 import { resolveTeacherDashboardMode, shouldRenderTeacherDashboard } from "./utils/teacherDashboardMode";
+import { useTeacherDashboardLastUpdated } from "./utils/useTeacherDashboardLastUpdated";
 
 interface RawRow {
   readonly id?: string | null;
@@ -140,6 +141,7 @@ interface ActiveDashboardWrapperProps {
   readonly page: number;
   readonly pageSize: number;
   readonly onPageChange: (page: number) => void;
+  readonly lastUpdated: string;
 }
 
 function ActiveDashboardWrapper({
@@ -160,6 +162,7 @@ function ActiveDashboardWrapper({
   page,
   pageSize,
   onPageChange,
+  lastUpdated,
 }: Readonly<ActiveDashboardWrapperProps>) {
   const activeMetrics = activeData?.teacherActiveDashboard?.metrics;
   const scheduleRows = mapRows(activeData?.teacherActiveDashboard?.scheduleRows, filterDate, "active");
@@ -201,6 +204,7 @@ function ActiveDashboardWrapper({
       welcomeDateSummary={filterDate}
       sessionsScheduledToday={scheduleRows.length}
       labels={labels}
+      lastUpdated={lastUpdated}
       onActivate={handleActivate}
       dateValue={filterDate}
       onDateChange={onDateChange}
@@ -260,6 +264,7 @@ interface StandardDashboardWrapperProps {
   readonly page: number;
   readonly pageSize: number;
   readonly onPageChange: (page: number) => void;
+  readonly lastUpdated: string;
 }
 
 function StandardDashboardWrapper({
@@ -278,6 +283,7 @@ function StandardDashboardWrapper({
   page,
   pageSize,
   onPageChange,
+  lastUpdated,
 }: Readonly<StandardDashboardWrapperProps>) {
   const standardMetrics = standardData?.teacherDashboard?.metrics;
   const scheduleRows = mapRows(standardData?.teacherDashboard?.scheduleRows, filterDate, "standard");
@@ -304,6 +310,7 @@ function StandardDashboardWrapper({
       missedAlert={missedAlert}
       scheduleDateLabel={filterDate}
       labels={labels}
+      lastUpdated={lastUpdated}
       canActivate={permissions.includes(Types.AppPermission.SessionActivateClass)}
       canManualEntry={permissions.includes(Types.AppPermission.SessionActivateClass)}
       canPrintSchedule={true}
@@ -375,6 +382,17 @@ export function TeacherDashboardContainer() {
     skip: mode !== "active",
     fetchPolicy: "cache-and-network",
   });
+
+  const [dataArrivedAt, setDataArrivedAt] = useState<number | null>(null);
+
+  useEffect(() => {
+    const hasData = mode === "active" ? activeData?.teacherActiveDashboard : standardData?.teacherDashboard;
+    if (hasData) {
+      setDataArrivedAt(Date.now());
+    }
+  }, [activeData, standardData, mode]);
+
+  const lastUpdated = useTeacherDashboardLastUpdated(dataArrivedAt);
 
   const [handbookRequested, setHandbookRequested] = useState(false);
   const { data: handbookData, loading: handbookLoading } = useQuery(teacherHandbookUrlQueryDocument, {
@@ -512,6 +530,7 @@ export function TeacherDashboardContainer() {
           page={page}
           pageSize={pageSize}
           onPageChange={setPage}
+          lastUpdated={lastUpdated}
         />
       ) : (
         <StandardDashboardWrapper
@@ -530,6 +549,7 @@ export function TeacherDashboardContainer() {
           page={page}
           pageSize={pageSize}
           onPageChange={setPage}
+          lastUpdated={lastUpdated}
         />
       )}
       <ManualClassEntryDialog

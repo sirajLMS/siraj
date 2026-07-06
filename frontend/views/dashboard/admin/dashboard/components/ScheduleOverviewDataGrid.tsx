@@ -5,7 +5,7 @@ import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
 import { useScheduleColumns } from "./useScheduleColumns";
 
 interface ScheduleOverviewDataGridProps {

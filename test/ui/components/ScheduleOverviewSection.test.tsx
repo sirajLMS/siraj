@@ -21,8 +21,8 @@ expect.extend(matchers);
 
 import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { ScheduleOverviewSectionProps } from "@/frontend/views/dashboard/dashboard/components/ScheduleOverviewSection";
-import { ScheduleOverviewSection } from "@/frontend/views/dashboard/dashboard/components/ScheduleOverviewSection";
+import type { ScheduleOverviewSectionProps } from "@/frontend/views/dashboard/admin/dashboard/components/ScheduleOverviewSection";
+import { ScheduleOverviewSection } from "@/frontend/views/dashboard/admin/dashboard/components/ScheduleOverviewSection";
 import { renderWithWrapper } from "./TestWrapper";
 
 afterEach(() => {

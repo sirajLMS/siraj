@@ -120,9 +120,7 @@ export function TopNavbar({ userName, userEmail, userRole, roleLabel, avatarUrl,
                 variant={isSimulatingGroup ? "labelMd" : "labelSm"}
                 sx={{
                   color: theme =>
-                    isSimulatingGroup
-                      ? theme.palette.onHeaderContainer
-                      : alpha(theme.palette.onHeaderContainer, 0.7),
+                    isSimulatingGroup ? theme.palette.onHeaderContainer : alpha(theme.palette.onHeaderContainer, 0.7),
                   mt: 0.25,
                   lineHeight: 1.2,
                   fontWeight: isSimulatingGroup ? 600 : 400,

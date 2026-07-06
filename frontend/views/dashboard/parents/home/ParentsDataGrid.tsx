@@ -162,11 +162,7 @@ export function ParentsDataGrid({
         renderCell: ({ row }) => (
           <Box sx={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center", gap: 1 }}>
             {row.userId ? (
-              <ViewAsUserButton
-                variant="link"
-                targetUserId={row.userId}
-                targetUserName={row.name}
-              />
+              <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name} />
             ) : null}
             <IconButton
               size="small"

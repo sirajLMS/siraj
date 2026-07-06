@@ -6,12 +6,7 @@ import {
   simulatablePermissionGroupsQueryDocument,
   startPermissionGroupSimulationMutationDocument,
 } from "../sharedDocuments/auth.documents";
-import {
-  authenticatedRequest,
-  cleanupTestSuperAdmin,
-  loginAndProvision,
-  provisionTestSuperAdmin,
-} from "./helpers";
+import { authenticatedRequest, cleanupTestSuperAdmin, loginAndProvision, provisionTestSuperAdmin } from "./helpers";
 import { setupTestServerLifecycle } from "./lifecycle";
 
 describe("GraphQL Permission Group Simulation Integration Tests", () => {
@@ -62,16 +57,25 @@ describe("GraphQL Permission Group Simulation Integration Tests", () => {
   });
 
   test("me query keeps admin identity while simulating teacher group", async () => {
-    const startData = await authenticatedRequest(superAdminToken, "mutate", startPermissionGroupSimulationMutationDocument, {
-      groupSlug: teacherGroupSlug || "teacher_default",
-    });
+    const startData = await authenticatedRequest(
+      superAdminToken,
+      "mutate",
+      startPermissionGroupSimulationMutationDocument,
+      {
+        groupSlug: teacherGroupSlug || "teacher_default",
+      }
+    );
     const simulationToken = startData.startPermissionGroupSimulation?.token;
     expect(simulationToken).toBeDefined();
 
     const meData = await authenticatedRequest(simulationToken!, "query", meQueryDocument);
     expect(meData.me?.id).toBe(superAdminUserId);
 
-    const statusData = await authenticatedRequest(simulationToken!, "query", permissionGroupSimulationStatusQueryDocument);
+    const statusData = await authenticatedRequest(
+      simulationToken!,
+      "query",
+      permissionGroupSimulationStatusQueryDocument
+    );
     expect(statusData.permissionGroupSimulationStatus?.isActive).toBe(true);
     expect(statusData.permissionGroupSimulationStatus?.groupSlug).toBe(teacherGroupSlug || "teacher_default");
 
@@ -79,13 +83,22 @@ describe("GraphQL Permission Group Simulation Integration Tests", () => {
   });
 
   test("super admin can end permission group simulation", async () => {
-    const startData = await authenticatedRequest(superAdminToken, "mutate", startPermissionGroupSimulationMutationDocument, {
-      groupSlug: teacherGroupSlug || "teacher_default",
-    });
+    const startData = await authenticatedRequest(
+      superAdminToken,
+      "mutate",
+      startPermissionGroupSimulationMutationDocument,
+      {
+        groupSlug: teacherGroupSlug || "teacher_default",
+      }
+    );
     const simulationToken = startData.startPermissionGroupSimulation?.token;
     expect(simulationToken).toBeDefined();
 
-    const endData = await authenticatedRequest(simulationToken!, "mutate", endPermissionGroupSimulationMutationDocument);
+    const endData = await authenticatedRequest(
+      simulationToken!,
+      "mutate",
+      endPermissionGroupSimulationMutationDocument
+    );
     expect(endData.endPermissionGroupSimulation?.token).toBeDefined();
 
     const restoredToken = endData.endPermissionGroupSimulation?.token as string;

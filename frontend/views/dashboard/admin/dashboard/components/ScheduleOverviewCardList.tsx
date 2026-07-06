@@ -7,12 +7,12 @@ import { useLocale } from "next-intl";
 import { ActionIconLink } from "@/frontend/components/ui";
 import { AppPermission, type ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import type { DailyScheduleRow } from "@/frontend/views/dashboard/dashboard/types/schedule";
+import type { DailyScheduleRow } from "@/frontend/views/dashboard/admin/dashboard/types/schedule";
 import {
   formatDurationMinutes,
   formatScheduleTimeOnly,
   formatScheduleYourTime,
-} from "@/frontend/views/dashboard/dashboard/utils/formatScheduleTime";
+} from "@/frontend/views/dashboard/admin/dashboard/utils/formatScheduleTime";
 import { Link } from "@/shared/i18n/routing";
 import { ScheduleInstanceStatusBadge } from "./ScheduleInstanceStatusBadge";
 import { StyledScheduleNameLink } from "./ScheduleOverviewDataGrid.styles";

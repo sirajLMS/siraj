@@ -24,7 +24,7 @@ import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { classInstanceQueryDocument, classStatusEventsQueryDocument } from "@/frontend/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
-import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/dashboard/utils/formatScheduleTime";
+import { formatScheduleTimeOnly } from "@/frontend/views/dashboard/admin/dashboard/utils/formatScheduleTime";
 import { useRouter } from "@/shared/i18n/routing";
 import { ClassDetailsAdminView } from "./admin/ClassDetailsAdminView";
 import { ClassDetailsHeader } from "./ClassDetailsHeader";

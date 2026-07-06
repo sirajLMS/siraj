@@ -3,6 +3,8 @@ export interface TeacherDashboardLabels {
   readonly pageSubtitle: string;
   readonly overviewTitle: string;
   readonly todayChip: string;
+  readonly updatedJustNow: string;
+  readonly updatedMinutesAgo: string;
   readonly metrics: {
     readonly totalClasses: string;
     readonly missedSlots: string;

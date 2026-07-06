@@ -87,4 +87,4 @@ export function usePermissionGroupSimulation() {
     endSimulation,
     refetchStatus: refetch,
   };
-};
+}

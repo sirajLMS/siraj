@@ -10,6 +10,7 @@ import {
   PrimaryPageAction,
   SectionPanel,
 } from "@/frontend/components/ui";
+import { mergeSx } from "@/frontend/components/ui/mergeSx";
 import type {
   StudentProgressFeedItem,
   TeacherDashboardMetrics,
@@ -19,7 +20,13 @@ import { ActiveMobileScheduleCard } from "./components/ActiveMobileScheduleCard"
 import { StudentProgressFeed } from "./components/StudentProgressFeed";
 import { TeacherActiveMetricsRow } from "./components/TeacherActiveMetricsRow";
 import { TeacherActiveScheduleDataGrid } from "./components/TeacherActiveScheduleDataGrid";
+import { TeacherDashboardMetricsSection } from "./components/TeacherDashboardMetricsSection";
 import type { TeacherDashboardLabels } from "./types/teacherDashboardLabels";
+import { buildTeacherActiveMetricItems } from "./utils/buildTeacherDashboardMetrics";
+import {
+  teacherDashboardContentPaddingSx,
+  teacherDashboardPageContainerSx,
+} from "./utils/teacherDashboardMobileLayout";
 
 interface TeacherDashboardActiveViewProps {
   readonly userName: string;
@@ -29,6 +36,7 @@ interface TeacherDashboardActiveViewProps {
   readonly welcomeDateSummary: string;
   readonly sessionsScheduledToday: number;
   readonly labels: TeacherDashboardLabels;
+  readonly lastUpdated: string;
   readonly onActivate?: (id: string) => void;
   readonly onNewSession: () => void;
   readonly onStartSession?: (id: string) => void;
@@ -79,7 +87,7 @@ function MobileScheduleSection({
 }) {
   return (
     <Box sx={{ mb: 4 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+      <Box sx={mergeSx(teacherDashboardContentPaddingSx, { display: "flex", justifyContent: "space-between", mb: 2 })}>
         <Typography sx={{ typography: "titleLg", color: theme => theme.palette.primary.main }}>
           {labels.schedule.titleToday}
         </Typography>
@@ -123,6 +131,7 @@ function DashboardMobileView({
   metrics,
   dateValue,
   onDateChange,
+  lastUpdated,
   scheduleRows,
   onActivate,
   onStartSession,
@@ -136,13 +145,13 @@ function DashboardMobileView({
   onPageChange,
 }: Readonly<TeacherDashboardActiveViewProps>) {
   return (
-    <PageContainer>
+    <PageContainer sx={teacherDashboardPageContainerSx}>
       {activationError && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <Alert severity="error" sx={mergeSx(teacherDashboardContentPaddingSx, { mb: 3 })}>
           {activationError}
         </Alert>
       )}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={mergeSx(teacherDashboardContentPaddingSx, { mb: 3 })}>
         <Typography sx={{ typography: "labelUppercase", color: theme => theme.palette.text.secondary }}>
           {labels.activeWelcome.overviewLabel}
         </Typography>
@@ -163,7 +172,7 @@ function DashboardMobileView({
         </Box>
       </Box>
 
-      <Box sx={{ mb: 3 }}>
+      <Box sx={mergeSx(teacherDashboardContentPaddingSx, { mb: 3 })}>
         <DateNavigator
           dateValue={dateValue}
           todayLabel={labels.dateFilter.today}
@@ -174,9 +183,11 @@ function DashboardMobileView({
         />
       </Box>
 
-      <Box sx={{ mb: 4 }}>
-        <TeacherActiveMetricsRow metrics={metrics} labels={labels.activeMetrics} isMobile={true} />
-      </Box>
+      <TeacherDashboardMetricsSection
+        title={labels.pageTitle}
+        lastUpdated={lastUpdated}
+        metrics={buildTeacherActiveMetricItems(metrics, labels.activeMetrics)}
+      />
 
       <MobileScheduleSection
         scheduleRows={scheduleRows}
@@ -192,7 +203,9 @@ function DashboardMobileView({
         onPageChange={onPageChange}
       />
 
-      <StudentProgressFeed items={progressFeed} title={labels.progressFeed.title} />
+      <Box sx={teacherDashboardContentPaddingSx}>
+        <StudentProgressFeed items={progressFeed} title={labels.progressFeed.title} />
+      </Box>
     </PageContainer>
   );
 }
