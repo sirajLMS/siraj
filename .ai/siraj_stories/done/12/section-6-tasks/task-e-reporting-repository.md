@@ -214,7 +214,7 @@ bun run test:db
 To satisfy the stringent security requirements established in Section 4, this task implementation undergoes a rigorous threat modeling review:
 - **Threat Vector: IDOR (Insecure Direct Object Reference)**
   - *Risk:* A malicious user manually modifies API request parameters to delete or view records belonging to another user.
-  - *Mitigation strategy applied:* The Service layer enforces RBAC using `PermissionsService.hasPermission`. Only users with explicit grants (such as Academy Admins) can bypass ownership checks. Lower-level users are physically gated from executing the repository command.
+  - *Mitigation strategy applied:* The Service layer enforces RBAC using `PermissionsService.hasPermission`. Only users with explicit grants (such as Admins) can bypass ownership checks. Lower-level users are physically gated from executing the repository command.
 - **Threat Vector: Memory Exhaustion / DoS**
   - *Risk:* Queries fetching thousands of Class Instances could overload the Node.js V8 engine memory limits.
   - *Mitigation strategy applied:* Drizzle ORM is utilized strictly for database-level `SUM()` and `GROUP BY` aggregations. The resulting network payload from Postgres to Node.js is reduced from potentially 10,000+ rows down to a maximum of 365 rows (when grouped by Date).
@@ -257,7 +257,7 @@ The logic implemented in this task anticipates and natively handles the followin
 Upon completing this task and merging into the mainline branch, the following manual QA steps must be executed on the staging environment:
 1. Log in as a standard Teacher. Attempt to delete a learning resource. Verify the UI button is hidden.
 2. Execute the GraphQL mutation directly via the Apollo Sandbox using the Teacher's authorization token. Verify the backend explicitly returns `"unauthorized"`.
-3. Log in as an Academy Admin. Delete a learning resource. Verify the UI updates optimistically or via refetch.
+3. Log in as an Admin. Delete a learning resource. Verify the UI updates optimistically or via refetch.
 4. Access the AWS S3 (or local) storage bucket. Verify the physical file was actively destroyed alongside the database row.
 
 #### 5. Additional Compliance & Logging Standards

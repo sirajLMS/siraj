@@ -299,9 +299,9 @@ rg "from.*test/ui/components" test/ui/e2e/
 1. Create directory `test/manual/scenario/notifications/`
 2. Create the scenario file with:
    - **Feature summary**: Notification bell dropdown with system alerts and unpaid invoices billing section
-   - **Roles tested**: Academy Admin (full access), Teacher (no access), Student (no access)
+   - **Roles tested**: Admin (full access), Teacher (no access), Student (no access)
    - **Desktop test cases** with step/action/expected tables:
-     - TC-1: Academy Admin sees bell icon with badge
+     - TC-1: Admin sees bell icon with badge
      - TC-2: Click bell opens popover with alerts list
      - TC-3: Billing section shows unpaid invoices count
      - TC-4: Click user row navigates to billing profile
@@ -343,9 +343,9 @@ rg "from.*test/ui/components" test/ui/e2e/
 
 1. Create the scenario file with:
    - **Feature summary**: Cross-staff availability search with weekly calendar grid results
-   - **Roles tested**: Academy Admin (access), Teacher (no access)
+   - **Roles tested**: Admin (access), Teacher (no access)
    - **Desktop test cases**:
-     - TC-1: Nav item "Schedule Search" visible in sidebar for Academy Admin
+     - TC-1: Nav item "Schedule Search" visible in sidebar for Admin
      - TC-2: Search form renders with From/To time inputs and Gender filter
      - TC-3: Form submission triggers query and shows loading spinner
      - TC-4: Results render per-teacher weekly grids with highlighted gap slots
@@ -387,7 +387,7 @@ rg "from.*test/ui/components" test/ui/e2e/
 2. Create the scenario file with:
    - **Feature summary**: User billing profile page accessed from unpaid invoices alert
    - **Desktop test cases**:
-     - TC-1: Academy Admin can access `/users/[id]/billing-profile` route
+     - TC-1: Admin can access `/users/[id]/billing-profile` route
      - TC-2: Page renders with billing profile title
      - TC-3: Invalid user ID shows error message
      - TC-4: Teacher role sees access denied
@@ -624,9 +624,9 @@ Expected: 8 tests pass, 0 failures.
 2. Call `setupBrowserLifecycle()` at describe root
 3. Write test cases:
 
-   - **"Academy Admin sees notification bell icon"**: Login as academyAdmin, goto dashboard, assert bell icon element is visible
+   - **"Admin sees notification bell icon"**: Login as academyAdmin, goto dashboard, assert bell icon element is visible
    - **"Clicking bell opens popover with notifications section"**: Login, goto dashboard, click bell icon, assert popover content with "Notifications" heading is visible
-   - **"Billing section appears in popover for Academy Admin"**: Login, click bell, assert "Unpaid Invoices" text is visible within popover
+   - **"Billing section appears in popover for Admin"**: Login, click bell, assert "Unpaid Invoices" text is visible within popover
    - **"Clicking user row in billing section navigates to billing profile"**: Login, click bell, click first user row in billing section, assert URL contains `/users/` and `/billing-profile`
    - **"Teacher does NOT see notification bell icon"**: Login as teacher, goto dashboard, assert bell icon is NOT visible (permission gate)
    - **"Mobile: bell icon visible and popover renders full-width"**: Login as academyAdmin in mobile context, goto dashboard, assert bell visible, click it, assert popover fills screen width
@@ -675,7 +675,7 @@ Expected: 6 tests pass (5 desktop + 1 mobile), 0 failures. Component tests still
 2. Call `setupBrowserLifecycle()` at describe root
 3. Write test cases:
 
-   - **"Academy Admin sees 'Schedule Search' nav item in sidebar"**: Login as academyAdmin, goto dashboard, assert sidebar contains nav item with "Schedule Search" text
+   - **"Admin sees 'Schedule Search' nav item in sidebar"**: Login as academyAdmin, goto dashboard, assert sidebar contains nav item with "Schedule Search" text
    - **"Clicking nav item navigates to search-schedule page"**: Login, click nav item, assert URL ends with `/search-schedule` and form is visible
    - **"Search form renders with From/To time inputs and Gender dropdown"**: Login, goto `/search-schedule`, assert time inputs and gender select are visible
    - **"Submitting form shows loading then results"**: Login, goto page, fill From=08:00, To=17:00, click Search, wait for loading to disappear, assert teacher results section or "no results" message appears

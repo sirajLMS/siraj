@@ -1,6 +1,5 @@
 import type { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
-
-export type ParentAccountStatus = Lowercase<ParentStatus>;
+import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
 
 export function toParentAccountStatus(status: ParentStatus): ParentAccountStatus {
   return status.toLowerCase() as ParentAccountStatus;

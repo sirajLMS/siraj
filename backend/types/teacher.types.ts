@@ -55,10 +55,23 @@ export type TeacherDashboardScheduleRow = {
   yourTimeFormatted: string | null;
 };
 
+export type TeacherProgressFeedEventKind =
+  | "auto_missed"
+  | "marked_absent"
+  | "activated"
+  | "started"
+  | "completed"
+  | "leave"
+  | "other";
+
 export type TeacherProgressFeedItem = {
   id: string;
-  title: string;
-  type: string;
+  studentId: string;
+  studentName: string;
+  scheduledTimeFormatted: string | null;
+  durationMinutes: number | null;
+  eventKind: TeacherProgressFeedEventKind;
+  occurredAt: Date;
 };
 
 export type TeacherDashboardPaginatedResult = {

@@ -171,7 +171,7 @@ const MOCK_MANAGER_ROWS = [
     skypeId: "staff.skype",
     status: "ACTIVE",
     roleSlug: "staff_default",
-    roleName: "Staff Default",
+    roleName: "Staff",
   },
 ];
 

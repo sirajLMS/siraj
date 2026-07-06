@@ -2032,6 +2032,16 @@ const en: MessageSchema = {
       },
       progressFeed: {
         title: "Student Progress Feed",
+        autoMissedTooltip: "Class automatically marked as missed after the activation grace period.",
+        events: {
+          auto_missed: "Missed class",
+          marked_absent: "Marked absent",
+          activated: "Session activated",
+          started: "Session started",
+          completed: "Session completed",
+          leave: "Leave recorded",
+          other: "Status updated",
+        },
       },
       alert: {
         title: "YOU MISSED THE CLASS TIME",

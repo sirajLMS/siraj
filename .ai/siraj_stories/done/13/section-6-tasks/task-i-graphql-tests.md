@@ -33,7 +33,7 @@ import { createTeacherMutationDocument } from "@/frontend/graphql/sharedDocument
 describe("Teacher Onboarding GraphQL API", () => {
   setupTestServerLifecycle();
 
-  test("Academy Admin can create teacher", async () => {
+  test("Admin can create teacher", async () => {
     const token = await loginDemoUser("academy_admin");
     
     const data = await authenticatedRequest(
@@ -149,7 +149,7 @@ import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments
 describe("Parent Onboarding GraphQL API", () => {
   setupTestServerLifecycle();
 
-  test("Academy Admin can create parent with billing", async () => {
+  test("Admin can create parent with billing", async () => {
     const token = await loginDemoUser("academy_admin");
     
     const data = await authenticatedRequest(
@@ -289,7 +289,7 @@ describe("Manager Onboarding GraphQL API", () => {
     expect(data.createManager.assignedGroupSlug).toBe("staff_default");
   });
 
-  test("Academy Admin denied creating manager", async () => {
+  test("Admin denied creating manager", async () => {
     await assertOperationDenied(
       "academy_admin",
       "mutate",
@@ -365,9 +365,9 @@ All tests must pass. Verify:
   ```
 
 **Success Criteria / Check Progress Points:**
-- [ ] Teacher onboarding tests pass (Academy Admin success, Super Admin success, Teacher denied, Parent denied, Unauthenticated denied)
-- [ ] Parent onboarding tests pass (Academy Admin success, Super Admin success, Teacher denied, Unauthenticated denied)
-- [ ] Manager onboarding tests pass (Super Admin admin-type success, Super Admin manager-type success, Academy Admin denied, Teacher denied, Unauthenticated denied)
+- [ ] Teacher onboarding tests pass (Admin success, Super Admin success, Teacher denied, Parent denied, Unauthenticated denied)
+- [ ] Parent onboarding tests pass (Admin success, Super Admin success, Teacher denied, Unauthenticated denied)
+- [ ] Manager onboarding tests pass (Super Admin admin-type success, Super Admin manager-type success, Admin denied, Teacher denied, Unauthenticated denied)
 - [ ] All tests use `TypedDocumentNode` from shared documents
 - [ ] All tests use `setupTestServerLifecycle()` for server management
 - [ ] All tests use `loginDemoUser()` for authentication

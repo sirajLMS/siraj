@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { ParentRulesContainer } from "@/frontend/views/dashboard/parents/rules/ParentRulesContainer";
+import { ParentRulesContainer } from "@/frontend/views/dashboard/parent/rules/ParentRulesContainer";
 import { redirect } from "@/shared/i18n/routing";
 
 export const metadata: Metadata = {

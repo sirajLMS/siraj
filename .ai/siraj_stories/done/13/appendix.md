@@ -84,8 +84,8 @@ Task A (Migration + Enum)
 
 | **Permission** | **Enum Key** | **Group** | **Service Method** | **GraphQL Mutation** | **Container** |
 |---|---|---|---|---|---|
-| `teachers.create` | `TEACHERS_CREATE` | Academy Admin, Super Admin | `TeacherOnboardingService.createTeacher()` | `createTeacher` | `TeacherOnboardingContainer` |
-| `parents.create` | `PARENTS_CREATE` | Academy Admin, Super Admin | `ParentOnboardingService.createParent()` | `createParent` | `ParentOnboardingContainer` |
+| `teachers.create` | `TEACHERS_CREATE` | Admin, Super Admin | `TeacherOnboardingService.createTeacher()` | `createTeacher` | `TeacherOnboardingContainer` |
+| `parents.create` | `PARENTS_CREATE` | Admin, Super Admin | `ParentOnboardingService.createParent()` | `createParent` | `ParentOnboardingContainer` |
 | `staff.create` | `STAFF_CREATE` | Super Admin only | `ManagerOnboardingService.createManager()` | `createManager` | `ManagerOnboardingContainer` |
 
 ### A.4 Architecture Compliance Checklist

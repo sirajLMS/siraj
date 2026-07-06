@@ -3,7 +3,7 @@ import type { ParentOnboardingInput, ParentOnboardingResult } from "@/frontend/g
 import { createParentMutationDocument } from "@/frontend/graphql/sharedDocuments";
 import { useParentOnboardingStore } from "@/frontend/stores/parentOnboardingStore";
 import { logger } from "@/frontend/utils/logger";
-import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/parents/onboarding/types";
+import type { ParentOnboardingFormData } from "@/frontend/views/dashboard/admin/parents/onboarding/types";
 
 export function useCreateParentOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createParentMutationDocument);

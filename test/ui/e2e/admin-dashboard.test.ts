@@ -18,7 +18,7 @@ afterEach(async () => {
 });
 
 describe("Admin Dashboard E2E", () => {
-  test("Academy Admin sees search input", async () => {
+  test("Admin sees search input", async () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
@@ -26,7 +26,7 @@ describe("Admin Dashboard E2E", () => {
     expect(page.getByRole("textbox")).toBeVisible();
   });
 
-  test("Academy Admin sees timezone columns", async () => {
+  test("Admin sees timezone columns", async () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);

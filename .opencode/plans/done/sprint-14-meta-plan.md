@@ -32,21 +32,21 @@
 
 ## Permission Strategy (Pre-Confirmed)
 
-### Existing Permissions (Keep As-Is — Already in Migration + Assigned to Academy Admin)
+### Existing Permissions (Keep As-Is — Already in Migration + Assigned to Admin)
 
 | Permission Key | Purpose | Group Assignment |
 |---|---|---|
-| `complaints.list` | Admin view complaint queue | Super Admin, Academy Admin |
-| `complaints.delete` | Admin delete complaint | Super Admin, Academy Admin |
-| `complaints.respond` | Admin answer/respond to complaint | Super Admin, Academy Admin |
+| `complaints.list` | Admin view complaint queue | Super Admin, Admin |
+| `complaints.delete` | Admin delete complaint | Super Admin, Admin |
+| `complaints.respond` | Admin answer/respond to complaint | Super Admin, Admin |
 
 ### New Permissions (Add to Enum + Migration + Group Assignments)
 
 | Permission Key | Purpose | Group Assignment |
 |---|---|---|
-| `support.submit_complaint` | Parent submit formal complaint (tracked) | Parent Default |
-| `support.view_history` | Parent view own complaint history | Parent Default |
-| `communication.submit_suggestion` | Parent submit untracked suggestion | Parent Default |
+| `support.submit_complaint` | Parent submit formal complaint (tracked) | Parent |
+| `support.view_history` | Parent view own complaint history | Parent |
+| `communication.submit_suggestion` | Parent submit untracked suggestion | Parent |
 | `system.dispatch_email` | System automated email dispatch trigger | System Automated |
 
 ---
@@ -78,7 +78,7 @@
 
 **Actions**:
 1. Verify existing `complaints.list`, `complaints.delete`, `complaints.respond` are in `shared/lib/enum.ts` and migration SQL
-2. Verify group assignments in migration SQL (Super Admin, Academy Admin)
+2. Verify group assignments in migration SQL (Super Admin, Admin)
 3. Confirm 4 new permissions don't conflict with any existing keys
 4. Determine exact enum values, migration INSERT statements, and group permission assignments
 

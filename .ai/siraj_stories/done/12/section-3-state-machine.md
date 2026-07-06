@@ -6,7 +6,7 @@ Story 12 does not introduce a classic entity-state transition graph (like the St
 
 ### 3.1 Hard Deletion Lifecycle (Learning Resources)
 
-When an Academy Admin executes a deletion, the system must navigate a distributed deletion workflow. Since physical files live outside the transactional boundaries of PostgreSQL (e.g. AWS S3 or Local FS), the order of operations dictates the risk of data corruption.
+When an Admin executes a deletion, the system must navigate a distributed deletion workflow. Since physical files live outside the transactional boundaries of PostgreSQL (e.g. AWS S3 or Local FS), the order of operations dictates the risk of data corruption.
 
 ```mermaid
 stateDiagram-v2

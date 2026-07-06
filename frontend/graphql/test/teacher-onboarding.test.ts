@@ -57,7 +57,7 @@ describe("Teacher Onboarding GraphQL API", () => {
     superAdminUserId = sa.userId;
   });
 
-  test("Academy Admin can create teacher", async () => {
+  test("Admin can create teacher", async () => {
     const token = await loginDemoUser("academy_admin");
 
     const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, {

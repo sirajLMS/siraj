@@ -11,7 +11,7 @@ Before any database operations, call `PermissionsService.hasPermission(actorUser
 The service MUST NOT allow the form to specify arbitrary permission group slugs. Only these two mappings are permitted.
 
 **Test Requirements:**
-- Academy Admin attempts to create manager → `unauthorized` error (permission denied due to missing `staff.create` permission from group assignment)
+- Admin attempts to create manager → `unauthorized` error (permission denied due to missing `staff.create` permission from group assignment)
 - System Admin creates manager with `accountType: "admin"` → succeeds, new user assigned to `academy_admin` group
 - System Admin creates manager with `accountType: "manager"` → succeeds, new user assigned to `staff_default` group
 - Unauthenticated user attempts to create manager → `unauthorized` error

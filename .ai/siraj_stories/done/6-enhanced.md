@@ -17,7 +17,7 @@
   2. **Weekly Schedule Visualization** — Teacher-specific weekly calendar grid (Monday–Sunday) with colored time-blocks showing student name and duration against daily time slots.
   3. **Workload Metrics** — Aggregated "Weekly hours worked" metric badge displayed at the top of the schedule grid.
   4. **Class Creation & Assignment** — "Add Class" workflow with inputs for Students, Time, Duration, and recurring Days, including per-day time override capability.
-- **Target roles:** Academy Admin (full authority: manage staff, view any teacher schedule, view workload, create classes), Teacher (restricted: view own weekly schedule, view own workload only)
+- **Target roles:** Admin (full authority: manage staff, view any teacher schedule, view workload, create classes), Teacher (restricted: view own weekly schedule, view own workload only)
 - **Status:** Planning phase - awaiting approval for execution
 
 ### 0.1 Business Objectives
@@ -137,10 +137,10 @@ The story defines four functional permission keys. These must be added to the `A
 
 | **Permission Key** | **Enum Value** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Operation** |
 |---|---|---|---|---|---|
-| `staff.view_directory` | `STAFF_VIEW_DIRECTORY` | Academy Admin | Teachers Directory page visibility | `StaffDirectoryService.getDirectory()` | `query teacherDirectory` |
-| `schedule.view_weekly` | `SCHEDULE_VIEW_WEEKLY` | Academy Admin + Teacher (self) | Weekly schedule grid visibility | `WeeklyScheduleService.getWeeklySchedule()` | `query teacherWeeklyScheduleGrid` |
-| `schedule.view_workload` | `SCHEDULE_VIEW_WORKLOAD` | Academy Admin + Teacher (self) | "Weekly hours worked" metric badge | `WeeklyScheduleService.getWorkloadMetrics()` | `query teacherWorkloadMetrics` |
-| `schedule.create_class` | `SCHEDULE_CREATE_CLASS` | Academy Admin only | "Add Class" button + dialog | `RecurringClassService.createRecurringClass()` | `mutation createRecurringClass` |
+| `staff.view_directory` | `STAFF_VIEW_DIRECTORY` | Admin | Teachers Directory page visibility | `StaffDirectoryService.getDirectory()` | `query teacherDirectory` |
+| `schedule.view_weekly` | `SCHEDULE_VIEW_WEEKLY` | Admin + Teacher (self) | Weekly schedule grid visibility | `WeeklyScheduleService.getWeeklySchedule()` | `query teacherWeeklyScheduleGrid` |
+| `schedule.view_workload` | `SCHEDULE_VIEW_WORKLOAD` | Admin + Teacher (self) | "Weekly hours worked" metric badge | `WeeklyScheduleService.getWorkloadMetrics()` | `query teacherWorkloadMetrics` |
+| `schedule.create_class` | `SCHEDULE_CREATE_CLASS` | Admin only | "Add Class" button + dialog | `RecurringClassService.createRecurringClass()` | `mutation createRecurringClass` |
 
 ### 2.2 Permission Mapping to Existing Permissions
 
@@ -156,8 +156,8 @@ The story defines four functional permission keys. These must be added to the `A
 | **Permission Group** | **Slug** | **New Permissions Assigned** |
 |---|---|---|
 | Super Admin | `super_admin` | `staff.view_directory`, `schedule.view_weekly`, `schedule.view_workload`, `schedule.create_class` |
-| Academy Admin | `academy_admin` | `staff.view_directory`, `schedule.view_weekly`, `schedule.view_workload`, `schedule.create_class` |
-| Teacher Default | `teacher_default` | `schedule.view_weekly` (self-scoped), `schedule.view_workload` (self-scoped) |
+| Admin | `academy_admin` | `staff.view_directory`, `schedule.view_weekly`, `schedule.view_workload`, `schedule.create_class` |
+| Teacher | `teacher_default` | `schedule.view_weekly` (self-scoped), `schedule.view_workload` (self-scoped) |
 
 ### 2.4 Self-Scoping vs Any-Scoping
 
@@ -293,7 +293,7 @@ export async function getWeeklySchedule(
 **Test Requirements:**
 - Teacher A cannot query Teacher B's weekly schedule → `unauthorizedAction`
 - Teacher A can query their own weekly schedule → succeeds
-- Academy Admin can query any teacher's weekly schedule → succeeds
+- Admin can query any teacher's weekly schedule → succeeds
 - Unauthenticated user → `unauthorized`
 
 ### Threat 2: IDOR — Workload Metrics Privacy
@@ -340,11 +340,11 @@ export async function getWorkloadMetrics(
 **Test Requirements:**
 - Teacher A cannot view Teacher B's workload → `unauthorizedViewMetrics`
 - Teacher A can view their own workload → succeeds with correct hours
-- Academy Admin can view any teacher's workload → succeeds
+- Admin can view any teacher's workload → succeeds
 
 ### Threat 3: Unauthorized Class Creation (Separation of Duties)
 
-**Current Gap:** The "Add Class" workflow must be strictly gated to Academy Admin only. Teachers must not be able to create recurring schedules or assign students to themselves.
+**Current Gap:** The "Add Class" workflow must be strictly gated to Admin only. Teachers must not be able to create recurring schedules or assign students to themselves.
 
 **Required Fix (Task D — RecurringClassService):**
 
@@ -370,7 +370,7 @@ export async function createRecurringClass(
 
 **Test Requirements:**
 - Teacher cannot create recurring class → `unauthorizedAction`
-- Academy Admin can create recurring class → succeeds
+- Admin can create recurring class → succeeds
 - Parent cannot create recurring class → `unauthorizedAction`
 
 ### Threat 4: Time Override Abuse
@@ -603,7 +603,7 @@ WHERE
         'schedule.create_class'
     );
 
--- Step 3: Assign new permissions to Academy Admin group
+-- Step 3: Assign new permissions to Admin group
 INSERT INTO
     group_permissions (group_id, permission_id)
 SELECT g.id, p.id
@@ -619,7 +619,7 @@ WHERE
         'schedule.create_class'
     );
 
--- Step 4: Assign self-scoped permissions to Teacher Default group
+-- Step 4: Assign self-scoped permissions to Teacher group
 INSERT INTO
     group_permissions (group_id, permission_id)
 SELECT g.id, p.id

@@ -1,5 +1,5 @@
 import { getMessages } from "next-intl/server";
-import ParentProfileEditContainer from "@/frontend/views/dashboard/parents/profile/edit/ParentProfileEditContainer";
+import ParentProfileEditContainer from "@/frontend/views/dashboard/parent/profile/edit/ParentProfileEditContainer";
 import type { MessageSchema } from "@/shared/messages/types/message";
 
 interface PageProps {

@@ -3,7 +3,7 @@
 - **Source story:** `.ai/siraj_stories/12.md` (Part 13: 00:00 - 01:56 - Permissions & Permission Groups)  
 - **Security baseline:** Existing RBAC implementation via `permissions` and `permission_groups`.
 - **Story scope:** Introduces resource deletion (`resources.delete`) and dynamic reporting aggregation (`report.generate_custom`, `report.view_financials`). This involves extending the resource management lifecycle to handle destructive deletions (both physical file storage and DB records) and building a new ephemeral query engine to aggregate class instances and output operational and financial data.
-- **Target roles:** Academy Admin (full access). Teachers, Students, and Parents have no access to these destructive or reporting features.
+- **Target roles:** Admin (full access). Teachers, Students, and Parents have no access to these destructive or reporting features.
 - **Status:** Planning phase - execution approved.
 
 ---

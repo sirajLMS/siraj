@@ -8,12 +8,12 @@ All six permissions are **new** — confirmed NOT present in:
 
 | **Permission Key** | **Resource.Action** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Operation** |
 |---|---|---|---|---|---|
-| `parent.view_profile` | `parent` / `view_profile` | Academy Admin | `ParentProfileContainer` visibility | `ParentProfileService.getProfile()` | `parentProfile` query |
-| `parent.manage_status` | `parent` / `manage_status` | Academy Admin | "Deactivate Account" button in `ParentProfileActions` | `ParentProfileService.deactivateAccount()` | `deactivateParent` mutation |
-| `student.view_associated` | `student` / `view_associated` | Academy Admin | `ParentStudentsDataGrid` section in profile | `StudentManagementService.getAssociatedStudents()` | `parentAssociatedStudents` query |
-| `student.edit_quota` | `student` / `edit_quota` | Academy Admin | `StudentQuotaContainer` form save button | `StudentManagementService.editQuota()` | `updateStudentQuota` mutation |
-| `billing.view_history` | `billing` / `view_history` | Academy Admin | `ParentBillingContainer` invoice table | `BillingHistoryService.getParentInvoiceHistory()` | `parentInvoiceHistory` query |
-| `document.manage_parent_docs` | `document` / `manage_parent_docs` | Academy Admin | "Upload Docs" tab in `ParentProfileActions` | `ParentDocumentService.getParentDocuments()` | `parentDocuments` query |
+| `parent.view_profile` | `parent` / `view_profile` | Admin | `ParentProfileContainer` visibility | `ParentProfileService.getProfile()` | `parentProfile` query |
+| `parent.manage_status` | `parent` / `manage_status` | Admin | "Deactivate Account" button in `ParentProfileActions` | `ParentProfileService.deactivateAccount()` | `deactivateParent` mutation |
+| `student.view_associated` | `student` / `view_associated` | Admin | `ParentStudentsDataGrid` section in profile | `StudentManagementService.getAssociatedStudents()` | `parentAssociatedStudents` query |
+| `student.edit_quota` | `student` / `edit_quota` | Admin | `StudentQuotaContainer` form save button | `StudentManagementService.editQuota()` | `updateStudentQuota` mutation |
+| `billing.view_history` | `billing` / `view_history` | Admin | `ParentBillingContainer` invoice table | `BillingHistoryService.getParentInvoiceHistory()` | `parentInvoiceHistory` query |
+| `document.manage_parent_docs` | `document` / `manage_parent_docs` | Admin | "Upload Docs" tab in `ParentProfileActions` | `ParentDocumentService.getParentDocuments()` | `parentDocuments` query |
 
 ---
 
@@ -50,9 +50,9 @@ DOCUMENT_MANAGE_PARENT_DOCS = "document.manage_parent_docs",
 
 | **Permission Group** | **Slug** | **New Permissions Assigned** |
 |---|---|---|
-| Academy Admin | `academy_admin` | All 6: `parent.view_profile`, `parent.manage_status`, `student.view_associated`, `student.edit_quota`, `billing.view_history`, `document.manage_parent_docs` |
-| Parent Default | `parent_default` | None — parents cannot access any of these permissions |
-| Teacher Default | `teacher_default` | None — teachers cannot access any of these permissions |
+| Admin | `academy_admin` | All 6: `parent.view_profile`, `parent.manage_status`, `student.view_associated`, `student.edit_quota`, `billing.view_history`, `document.manage_parent_docs` |
+| Parent | `parent_default` | None — parents cannot access any of these permissions |
+| Teacher | `teacher_default` | None — teachers cannot access any of these permissions |
 | Super Admin | `super_admin` | Inherits all (existing behavior — super_admin receives all system permissions) |
 
 ---
@@ -61,5 +61,5 @@ DOCUMENT_MANAGE_PARENT_DOCS = "document.manage_parent_docs",
 
 These permissions are all **any-scoped** (admin accessing data about any parent/student). There is no self-scoped variant — parents use entirely separate, portal-specific endpoints that are not implemented in this story.
 
-- **Academy Admin (any-scoped):** The service layer passes any `parentId` / `studentId` without ownership checks.
+- **Admin (any-scoped):** The service layer passes any `parentId` / `studentId` without ownership checks.
 - **IDOR protection:** The service validates that the actor holds the required permission before querying any parent or student data.

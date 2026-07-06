@@ -2,7 +2,7 @@
 
 **Route:** `/search-schedule`
 **Permission:** `schedule.search_availability`
-**Role:** Academy Admin (access), Teacher (no access)
+**Role:** Admin (access), Teacher (no access)
 
 ---
 
@@ -34,11 +34,11 @@ flowchart TD
 
 ## Desktop Scenarios
 
-### D1: Nav item visible for Academy Admin
+### D1: Nav item visible for Admin
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin | Dashboard loads |
+| 1 | Login as Admin | Dashboard loads |
 | 2 | Observe sidebar navigation | "Schedule Search" nav item visible with `SearchOutlined` icon |
 | 3 | Click nav item | Navigate to `/search-schedule` page |
 
@@ -46,7 +46,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, navigate to `/search-schedule` | Page loads |
+| 1 | Login as Admin, navigate to `/search-schedule` | Page loads |
 | 2 | Observe page title | "Schedule Availability Search" heading visible |
 | 3 | Observe form | Three inputs visible: "From" (time), "To" (time), "Gender" (select) |
 | 4 | Check defaults | From defaults to 08:00, To defaults to 17:00, Gender defaults to "All" |
@@ -56,7 +56,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/search-schedule` | Form visible |
+| 1 | Login as Admin, go to `/search-schedule` | Form visible |
 | 2 | Leave defaults (08:00 - 17:00, All genders) | Form populated |
 | 3 | Click "Search" button | Loading spinner appears briefly |
 | 4 | Wait for results | Results count text: "{count} teachers with {gaps} available slots" |
@@ -67,7 +67,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/search-schedule` | Form visible |
+| 1 | Login as Admin, go to `/search-schedule` | Form visible |
 | 2 | Select "Female" from Gender dropdown | Dropdown shows "Female" selected |
 | 3 | Click "Search" | Query fires with gender: "FEMALE" |
 | 4 | Observe results | Only female teachers appear in results |
@@ -76,7 +76,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/search-schedule` | Form visible |
+| 1 | Login as Admin, go to `/search-schedule` | Form visible |
 | 2 | Set time range with no availability (e.g., 02:00 - 03:00) | Form populated |
 | 3 | Click "Search" | Query fires |
 | 4 | Observe results area | "No available time slots found for the selected criteria." message |
@@ -93,7 +93,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/search-schedule` | Page loads |
+| 1 | Login as Admin, go to `/search-schedule` | Page loads |
 | 2 | Observe page | Form visible, no loading spinner, no results section |
 | 3 | Verify network | No `searchTeacherAvailability` GraphQL query was sent (skip: !searchInput) |
 
@@ -105,7 +105,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin on mobile viewport, go to `/search-schedule` | Page loads in mobile layout |
+| 1 | Login as Admin on mobile viewport, go to `/search-schedule` | Page loads in mobile layout |
 | 2 | Observe form | Inputs stack vertically (flexWrap: "wrap"), not side-by-side |
 | 3 | Observe button | "Search" button spans full width or is at bottom of form |
 
@@ -113,6 +113,6 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin on mobile, search with defaults | Results render |
+| 1 | Login as Admin on mobile, search with defaults | Results render |
 | 2 | Observe teacher grid | Grid uses single column on mobile (`gridTemplateColumns: { xs: "1fr", md: "repeat(7, 1fr)" }`) |
 | 3 | Each day card | Stacks vertically, readable on narrow screen |

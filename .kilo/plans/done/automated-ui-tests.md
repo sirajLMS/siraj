@@ -427,7 +427,7 @@ graph LR
 5. Export `createMobileContext(browser)`:
    - Creates a mobile browser context with iPhone 14 dimensions and touch support
 
-6. Verify: Write a trivial test that logs in as Academy Admin and asserts the dashboard page loads.
+6. Verify: Write a trivial test that logs in as Admin and asserts the dashboard page loads.
 
 **Completion criteria:**
 - [x] `test/ui/e2e/helpers.ts` exists with all exports
@@ -648,8 +648,8 @@ graph LR
 4. Call `setupBrowserLifecycle()` at describe root.
 
 5. Write test cases:
-   - **"Academy Admin sees search input"**: Login as academyAdmin, goto `/ar/dashboard`, assert `page.getByRole("textbox")` is visible
-   - **"Academy Admin sees timezone columns"**: Login, goto dashboard, assert `page.getByText("Your Time")` is visible
+   - **"Admin sees search input"**: Login as academyAdmin, goto `/ar/dashboard`, assert `page.getByRole("textbox")` is visible
+   - **"Admin sees timezone columns"**: Login, goto dashboard, assert `page.getByText("Your Time")` is visible
    - **"Search filters schedule grid"**: Login, goto dashboard, type "Ahmed" in search, wait for grid to update, assert row count changes
    - **"Click details navigates to class page"**: Login, goto dashboard, click details icon on first row, assert URL contains `/classes/`
    - **"Teacher does not see search input"**: Login as teacher, goto dashboard, assert `page.getByRole("textbox")` is NOT visible
@@ -770,12 +770,12 @@ graph LR
 2. Call `setupBrowserLifecycle()` at describe root.
 
 3. Write test cases:
-   - **"Academy Admin sees all dashboard features"**: Login as academyAdmin, goto dashboard, assert search input, timezone columns, and schedule grid are all visible
+   - **"Admin sees all dashboard features"**: Login as academyAdmin, goto dashboard, assert search input, timezone columns, and schedule grid are all visible
    - **"Teacher sees limited dashboard features"**: Login as teacher, goto dashboard, assert search input is NOT visible, timezone columns are NOT visible
    - **"Parent sees minimal features"**: Login as parent, goto dashboard, assert search and timezone are NOT visible
    - **"Permission-gated elements are absent from DOM"**: Login as teacher, goto dashboard, use `page.locator(selector).count()` to verify admin-only elements have count 0 (not just hidden via CSS)
    - **"Teacher dashboard requires TeacherViewDashboard permission"**: Login as teacher, goto `/teachers/dashboard`, assert page renders. Login as parent, goto same URL, assert redirect or access denied
-   - **"Admin actions only visible to Academy Admin"**: Login as academyAdmin, navigate to class details, assert AdminActionsBar visible. Login as teacher, navigate to same page, assert AdminActionsBar NOT visible
+   - **"Admin actions only visible to Admin"**: Login as academyAdmin, navigate to class details, assert AdminActionsBar visible. Login as teacher, navigate to same page, assert AdminActionsBar NOT visible
 
 4. Verify: `bun run test:ui:e2e` passes all tests.
 

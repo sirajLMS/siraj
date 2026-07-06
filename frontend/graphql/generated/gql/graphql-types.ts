@@ -3499,11 +3499,25 @@ export type TeacherProfileUpdateInput = {
   zoomUsername: InputMaybe<Scalars['String']['input']>;
 };
 
+export enum TeacherProgressFeedEventKind {
+  Activated = 'activated',
+  AutoMissed = 'auto_missed',
+  Completed = 'completed',
+  Leave = 'leave',
+  MarkedAbsent = 'marked_absent',
+  Other = 'other',
+  Started = 'started'
+}
+
 export type TeacherProgressFeedItem = {
   __typename?: 'TeacherProgressFeedItem';
+  durationMinutes: Maybe<Scalars['Int']['output']>;
+  eventKind: Maybe<TeacherProgressFeedEventKind>;
   id: Maybe<Scalars['String']['output']>;
-  title: Maybe<Scalars['String']['output']>;
-  type: Maybe<Scalars['String']['output']>;
+  occurredAt: Maybe<Scalars['DateTime']['output']>;
+  scheduledTimeFormatted: Maybe<Scalars['String']['output']>;
+  studentId: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
 };
 
 export type TeacherSimple = {

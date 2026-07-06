@@ -9,9 +9,15 @@ import type { StudentFilterArgs } from "@/frontend/graphql/generated/gql/graphql
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { studentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/student-directory.documents";
 import { useStudentDirectoryStore } from "@/frontend/stores/studentDirectoryStore";
+import { StudentsView } from "@/frontend/views/dashboard/admin/parents/students/StudentsView";
+import {
+  buildLabels,
+  buildMobileMetrics,
+  buildStatusCounts,
+  buildStudentRows,
+  buildViewMetrics,
+} from "@/frontend/views/dashboard/admin/parents/students/utils";
 import { useRouter } from "@/shared/i18n/routing";
-import { StudentsView } from "./StudentsView";
-import { buildLabels, buildMobileMetrics, buildStatusCounts, buildStudentRows, buildViewMetrics } from "./utils";
 
 const EMPTY_FILTER_ARGS: StudentFilterArgs = {
   birthDate: null,

@@ -2,7 +2,7 @@
 
 **Route:** `/classes/[id]`, `/teachers/dashboard/active`
 **Permission:** `system.enforce_time_window` (system-level), `session.activate_class` (user-level)
-**Role:** Teacher, Academy Admin
+**Role:** Teacher, Admin
 
 ---
 
@@ -73,7 +73,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin (has `session.force_activate`), find a class outside the time window | Navigate to `/classes/[id]` |
+| 1 | Login as Admin (has `session.force_activate`), find a class outside the time window | Navigate to `/classes/[id]` |
 | 2 | Click **Force Activate** in AdminActionsBar | Activation succeeds regardless of time window |
 | 3 | Observe status | Class status changes to "activated" |
 

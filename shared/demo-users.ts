@@ -28,7 +28,7 @@ const _superAdmins: InternalDemoUser[] = [
 
 const _academyAdmins: InternalDemoUser[] = [
   {
-    name: "Academy Admin",
+    name: "Admin",
     email: "academy@siraj.local",
     plainPassword: PWD,
     isSuperAdmin: false,

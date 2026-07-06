@@ -3,7 +3,7 @@
 - **Source story:** `.ai/siraj_stories/15.md` (Communication Infrastructure & Suggestion Management)
 - **Prerequisite story:** `.ai/siraj_stories/14.md` (must be executed first — provides base permissions, complaint/suggestion schema, CommunicationService interface)
 - **Story scope:** Implement real multi-channel communication delivery (Email via Resend, SMS via Twilio, Push via Firebase Cloud Messaging) using the provider/adapter/factory pattern, add complaint file attachments with configurable limits, and build full admin suggestion management (review, respond, duplicate tracking, soft-delete).
-- **Target roles:** Academy Admin (suggestion management), Super Admin (suggestion deletion), Parent (file attachments, suggestion history), System Automated (multi-channel dispatch).
+- **Target roles:** Admin (suggestion management), Super Admin (suggestion deletion), Parent (file attachments, suggestion history), System Automated (multi-channel dispatch).
 - **Status:** Planning phase — awaiting approval for execution.
 
 ---

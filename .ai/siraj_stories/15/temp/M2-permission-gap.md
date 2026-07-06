@@ -191,9 +191,9 @@ A new migration file must:
 
 ---
 
-## Academy Admin Complaint Access Gap
+## Admin Complaint Access Gap
 
-**Finding:** The `academy_admin` group does NOT currently have any complaint permissions. The story spec says Academy Admin should have suggestion access, but the existing complaint permissions are only on `super_admin`. This needs to be addressed:
+**Finding:** The `academy_admin` group does NOT currently have any complaint permissions. The story spec says Admin should have suggestion access, but the existing complaint permissions are only on `super_admin`. This needs to be addressed:
 
 - Add `complaints.list` to `academy_admin`
 - Add `complaints.respond` to `academy_admin`

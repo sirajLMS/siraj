@@ -122,13 +122,27 @@ export interface TeacherDashboardMetrics {
   readonly activeSessions?: number;
 }
 
+export type TeacherProgressFeedEventKind =
+  | "auto_missed"
+  | "marked_absent"
+  | "activated"
+  | "started"
+  | "completed"
+  | "leave"
+  | "other";
+
 export interface StudentProgressFeedItem {
   readonly id: string;
+  readonly studentId: string;
   readonly studentName: string;
   readonly studentInitials: string;
   readonly summary: string;
+  readonly scheduledTime: string | null;
+  readonly durationMinutes: number | null;
+  readonly eventKind: TeacherProgressFeedEventKind;
+  readonly occurredAt: string | Date;
   readonly timeAgo: string;
-  readonly icon: "description" | "grade" | "login";
+  readonly infoTooltip: string | null;
 }
 
 export interface MissedClassAlert {

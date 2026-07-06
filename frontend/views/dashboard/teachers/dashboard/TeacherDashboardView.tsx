@@ -17,8 +17,8 @@ import type {
   TeacherScheduleRow,
 } from "@/frontend/stores/teacherDashboardTypes";
 import { DashboardMetricsSection } from "@/frontend/views/dashboard/components/DashboardMetricsSection";
-import { ParentSupportFab } from "@/frontend/views/dashboard/parents/dashboard/components/ParentSupportFab";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import { ParentSupportFab } from "../../parent/dashboard/components/ParentSupportFab";
 import { ActivationPolicyPanel } from "./components/ActivationPolicyPanel";
 import { MissedClassAlertBanner } from "./components/MissedClassAlertBanner";
 import { StudentProgressFeed } from "./components/StudentProgressFeed";
@@ -222,7 +222,7 @@ export function TeacherDashboardView({
         )}
 
         <Box sx={teacherDashboardContentPaddingSx}>
-          <StudentProgressFeed items={progressFeed} title={labels.progressFeed.title} />
+          <StudentProgressFeed items={progressFeed} title={labels.progressFeed.title} labels={labels.progressFeed} />
         </Box>
 
         <Box sx={isMobile ? teacherDashboardContentPaddingSx : undefined}>

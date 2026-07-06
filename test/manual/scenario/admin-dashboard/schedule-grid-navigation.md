@@ -2,7 +2,7 @@
 
 **Route:** `/dashboard` → `/classes/[id]`
 **Permission:** `schedule.view_list`
-**Role:** Academy Admin
+**Role:** Admin
 
 ---
 
@@ -28,7 +28,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Schedule grid renders with rows |
+| 1 | Login as Admin, go to `/dashboard` | Schedule grid renders with rows |
 | 2 | Click the details `IconButton` on any schedule row | Browser navigates to `/classes/[id]` where `[id]` is the row's UUID |
 | 3 | Observe the URL | URL contains the locale prefix and the class instance ID |
 | 4 | Observe the page | `ClassDetailsContainer` loads and renders class details |
@@ -37,14 +37,14 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Schedule grid renders |
+| 1 | Login as Admin, go to `/dashboard` | Schedule grid renders |
 | 2 | Inspect a row's details link or hover over the button | The link/href contains a valid UUID (not a display ID like `#CLS-123`) |
 
 ### D3: Schedule filters persist during navigation
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Grid shown |
+| 1 | Login as Admin, go to `/dashboard` | Grid shown |
 | 2 | Apply a teacher filter and search term | Grid narrows |
 | 3 | Click details on a filtered row | Navigates to class details |
 | 4 | Navigate back to `/dashboard` | Filters are reset (or preserved based on implementation) |
@@ -57,7 +57,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin on mobile, go to `/dashboard` | Schedule card list renders |
+| 1 | Login as Admin on mobile, go to `/dashboard` | Schedule card list renders |
 | 2 | Tap on a schedule card or its action button | Navigates to `/classes/[id]` |
 | 3 | Observe the page | Class details page loads in mobile layout |
 

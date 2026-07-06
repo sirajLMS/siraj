@@ -13,7 +13,8 @@ import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { GridPagination } from "@/frontend/components/ui";
 import { AppDataGrid } from "@/frontend/components/ui/AppDataGrid";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { ParentAccountStatus, ParentDirectoryRow } from "@/frontend/views/dashboard/parents/types/directory";
+import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
+import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
 
 export interface ParentsDataGridLabels {
   readonly index: string;

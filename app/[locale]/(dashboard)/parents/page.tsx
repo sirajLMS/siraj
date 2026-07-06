@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ParentsContainer } from "@/frontend/views/dashboard/parents/home/ParentsContainer";
+import { ParentsContainer } from "@/frontend/views/dashboard/admin/parents/home/ParentsContainer";
 
 export const metadata: Metadata = {
   title: "Parents Directory | Siraj LMS",

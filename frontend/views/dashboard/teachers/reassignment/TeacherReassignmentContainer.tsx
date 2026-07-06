@@ -16,9 +16,9 @@ import {
 } from "@/frontend/graphql/sharedDocuments/student-lifecycle.documents";
 import { teachersQueryDocument } from "@/frontend/graphql/sharedDocuments/teacher.documents";
 import { logger } from "@/frontend/utils/logger";
-import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/views/dashboard/students/home/types";
 import { useRouter } from "@/shared/i18n/routing";
 import type { StudentStatus } from "@/shared/lib/enum";
+import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "../../admin/parents/students/types";
 import { TeacherReassignmentView } from "./TeacherReassignmentView";
 import type {
   ReassignmentStudentData,

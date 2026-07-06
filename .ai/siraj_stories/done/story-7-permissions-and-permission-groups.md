@@ -5,7 +5,7 @@
 - **Source story:** `.ai/siraj_stories/7.md` (Part 8 - Permissions & Permission Groups, timestamps 00:00 - 02:02)
 - **Planning guidelines:** `.ai/siraj_stories/AGENTS.md`
 - **Story scope:** Implement 4 new permission groups with granular permissions for schedule deletion, staff profile management, global system operations (DST bulk update), and parent directory viewing.
-- **Target roles:** System Administrator (bulk DST update), Academy Admin (schedule deletion, staff edit, parent directory), Teacher/Parent (excluded from these permissions).
+- **Target roles:** System Administrator (bulk DST update), Admin (schedule deletion, staff edit, parent directory), Teacher/Parent (excluded from these permissions).
 - **Status:** Planning phase - awaiting approval for execution.
 
 ### Business Objectives
@@ -22,7 +22,7 @@ This story introduces 4 distinct permission groups controlling destructive and s
 | Permission Group | Role | Permissions |
 |---|---|---|
 | System Administrator | `super_admin` | `system.bulk_update_dst` |
-| Academy Admin | `academy_admin` | `schedule.delete_class`, `schedule.clear_weekly`, `staff.edit_profile`, `parent.view_directory` |
+| Admin | `academy_admin` | `schedule.delete_class`, `schedule.clear_weekly`, `staff.edit_profile`, `parent.view_directory` |
 | Teacher / Parent | `teacher_default`, `parent_default` | None (excluded) |
 
 ---
@@ -159,7 +159,7 @@ Update `3-system_permissions_and_groups.sql` group assignments:
 'parent.view_directory'
 ```
 
-**Academy Admin** — gets schedule deletion, staff edit, parent view:
+**Admin** — gets schedule deletion, staff edit, parent view:
 ```sql
 'schedule.delete_class',
 'schedule.clear_weekly',
@@ -167,21 +167,21 @@ Update `3-system_permissions_and_groups.sql` group assignments:
 'parent.view_directory'
 ```
 
-**Teacher Default** — gets NONE of these permissions.
+**Teacher** — gets NONE of these permissions.
 
-**Parent Default** — gets NONE of these permissions.
+**Parent** — gets NONE of these permissions.
 
-**Staff Default** — gets NONE of these permissions.
+**Staff** — gets NONE of these permissions.
 
 ### 2.4 Permission Traceability Matrix
 
 | **Permission Key** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Mutation/Query** |
 |---|---|---|---|---|
-| `schedule.delete_class` | Academy Admin | Delete button on weekly grid class slot | `ScheduleDeletionService.deleteClass()` | `deleteRecurringClass` (mutation) |
-| `schedule.clear_weekly` | Academy Admin | "Clear Schedule" button on weekly view header | `ScheduleDeletionService.clearWeeklySchedule()` | `clearWeeklySchedule` (mutation) |
-| `staff.edit_profile` | Academy Admin | "Edit Profile" button on teacher directory row | `StaffProfileService.updateTeacherProfile()` | `updateTeacherProfile` (mutation) |
+| `schedule.delete_class` | Admin | Delete button on weekly grid class slot | `ScheduleDeletionService.deleteClass()` | `deleteRecurringClass` (mutation) |
+| `schedule.clear_weekly` | Admin | "Clear Schedule" button on weekly view header | `ScheduleDeletionService.clearWeeklySchedule()` | `clearWeeklySchedule` (mutation) |
+| `staff.edit_profile` | Admin | "Edit Profile" button on teacher directory row | `StaffProfileService.updateTeacherProfile()` | `updateTeacherProfile` (mutation) |
 | `system.bulk_update_dst` | System Admin | "Update Schedules" button on DST migration page | `DstMigrationService.executeBulkDstUpdate()` | `executeDstBulkUpdate` (mutation) |
-| `parent.view_directory` | Academy Admin | `/parents` route access, metrics cards, data table | `ParentDirectoryService.getParentDirectory()` | `parentDirectory` (query) |
+| `parent.view_directory` | Admin | `/parents` route access, metrics cards, data table | `ParentDirectoryService.getParentDirectory()` | `parentDirectory` (query) |
 
 ---
 
@@ -1735,9 +1735,9 @@ In the Super Admin `group_permissions` INSERT block, add:
 'parent.view_directory'
 ```
 
-*Step 4: Update Academy Admin group permissions*
+*Step 4: Update Admin group permissions*
 
-In the Academy Admin `group_permissions` INSERT block, add:
+In the Admin `group_permissions` INSERT block, add:
 
 ```sql
 'schedule.delete_class',
@@ -1746,7 +1746,7 @@ In the Academy Admin `group_permissions` INSERT block, add:
 'parent.view_directory'
 ```
 
-Do NOT add `system.bulk_update_dst` to Academy Admin (reserved for System Admin).
+Do NOT add `system.bulk_update_dst` to Admin (reserved for System Admin).
 
 *Step 5: Run migration*
 
@@ -1764,8 +1764,8 @@ bun run test:db
 - [ ] New enum values added to `AppPermission` in `shared/lib/enum.ts`.
 - [ ] New permissions inserted into migration SQL with correct metadata.
 - [ ] Super Admin group assigned all 5 new permissions.
-- [ ] Academy Admin group assigned 4 permissions (excluding `system.bulk_update_dst`).
-- [ ] Teacher Default and Parent Default groups have NONE of these permissions.
+- [ ] Admin group assigned 4 permissions (excluding `system.bulk_update_dst`).
+- [ ] Teacher and Parent groups have NONE of these permissions.
 - [ ] Migration runs successfully without conflicts.
 - [ ] `bun tsgo` on working files passes with 0 TypeScript errors  & 0 warnings, after creating/modifying a single file
 - [ ] `bun biome:check` on working files passes with 0 errors & 0 warnings, after creating/modifying a single file
@@ -2928,7 +2928,7 @@ Both commands must return empty results.
 
 ### Permission Summary
 
-| Permission | Enum Value | Super Admin | Academy Admin | Teacher | Parent |
+| Permission | Enum Value | Super Admin | Admin | Teacher | Parent |
 |---|---|---|---|---|---|
 | Delete Class | `SCHEDULE_DELETE_CLASS` | ✅ | ✅ | ❌ | ❌ |
 | Clear Weekly | `SCHEDULE_CLEAR_WEEKLY` | ✅ | ✅ | ❌ | ❌ |

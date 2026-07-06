@@ -6,20 +6,20 @@ These permissions MUST already exist from Story 14 execution:
 
 | **Permission Key** | **Enum Value** | **Group** |
 |---|---|---|
-| `complaints.list` | `COMPLAINTS_LIST` | Super Admin, Academy Admin |
-| `complaints.delete` | `COMPLAINTS_DELETE` | Super Admin, Academy Admin |
-| `complaints.respond` | `COMPLAINTS_RESPOND` | Super Admin, Academy Admin |
-| `support.submit_complaint` | `SUPPORT_SUBMIT_COMPLAINT` | Parent Default |
-| `support.view_history` | `SUPPORT_VIEW_HISTORY` | Parent Default |
-| `communication.submit_suggestion` | `COMMUNICATION_SUBMIT_SUGGESTION` | Parent Default |
+| `complaints.list` | `COMPLAINTS_LIST` | Super Admin, Admin |
+| `complaints.delete` | `COMPLAINTS_DELETE` | Super Admin, Admin |
+| `complaints.respond` | `COMPLAINTS_RESPOND` | Super Admin, Admin |
+| `support.submit_complaint` | `SUPPORT_SUBMIT_COMPLAINT` | Parent |
+| `support.view_history` | `SUPPORT_VIEW_HISTORY` | Parent |
+| `communication.submit_suggestion` | `COMMUNICATION_SUBMIT_SUGGESTION` | Parent |
 | `system.dispatch_email` | `SYSTEM_DISPATCH_EMAIL` | System Automated |
 
 ### 2.2 New Permissions (Story 15)
 
 | **Permission Key** | **Enum Value** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Operation** |
 |---|---|---|---|---|---|
-| `suggestions.list` | `SUGGESTIONS_LIST` | Super Admin, Academy Admin | `AdminSuggestionsContainer` visibility | `SuggestionService.getAdminSuggestions()` | `adminSuggestions` query |
-| `suggestions.review` | `SUGGESTIONS_REVIEW` | Super Admin, Academy Admin | Review/Respond/Duplicate buttons | `SuggestionService.markSuggestionReviewed()`, `respondToSuggestion()`, `markAsDuplicate()` | `markSuggestionReviewed`, `respondToSuggestion`, `markSuggestionDuplicate` mutations |
+| `suggestions.list` | `SUGGESTIONS_LIST` | Super Admin, Admin | `AdminSuggestionsContainer` visibility | `SuggestionService.getAdminSuggestions()` | `adminSuggestions` query |
+| `suggestions.review` | `SUGGESTIONS_REVIEW` | Super Admin, Admin | Review/Respond/Duplicate buttons | `SuggestionService.markSuggestionReviewed()`, `respondToSuggestion()`, `markAsDuplicate()` | `markSuggestionReviewed`, `respondToSuggestion`, `markSuggestionDuplicate` mutations |
 | `suggestions.delete` | `SUGGESTIONS_DELETE` | Super Admin only | Delete button in suggestion detail | `SuggestionService.deleteSuggestion()` | `deleteSuggestion` mutation |
 
 ### 2.3 Permission Migration from Story 14 Tech Debt
@@ -36,8 +36,8 @@ Story 14's `SuggestionService` reused `COMPLAINTS_LIST` for admin suggestion acc
 | **Permission Group** | **Slug** | **New Permissions Assigned** |
 |---|---|---|
 | Super Admin | `super_admin` | `suggestions.list`, `suggestions.review`, `suggestions.delete` |
-| Academy Admin | `academy_admin` | `suggestions.list`, `suggestions.review` |
-| Parent Default | `parent_default` | None (parent accesses suggestions via `communication.submit_suggestion` from Story 14) |
+| Admin | `academy_admin` | `suggestions.list`, `suggestions.review` |
+| Parent | `parent_default` | None (parent accesses suggestions via `communication.submit_suggestion` from Story 14) |
 
 ### 2.5 Self-Scoping vs Any-Scoping
 

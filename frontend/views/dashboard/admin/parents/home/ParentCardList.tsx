@@ -6,7 +6,8 @@ import { ViewAsUserButton } from "@/frontend/components/auth/ViewAsUserButton";
 import { PaginationControls } from "@/frontend/components/ui";
 import { BaseCard } from "@/frontend/components/ui/BaseCard";
 import { StatusBadge } from "@/frontend/components/ui/StatusBadge";
-import type { ParentAccountStatus, ParentDirectoryRow } from "@/frontend/views/dashboard/parents/types/directory";
+import type { ParentDirectoryRow } from "@/frontend/views/dashboard/admin/parents/home/directory";
+import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
 
 export interface ParentCardListLabels {
   readonly guardianOf: (name: string) => string;

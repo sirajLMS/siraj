@@ -119,7 +119,7 @@ function SidebarContent({
   readonly navItems: readonly TranslatedNavItem[];
   readonly activeKey: string;
   readonly isCollapsed: boolean;
-  readonly navListRef?: RefObject<HTMLUListElement | null>;
+  readonly navListRef?: RefObject<HTMLElement | null>;
 }) {
   const mainItems = navItems.filter(item => item.section === "main");
   const footerItems = navItems.filter(item => item.section === "footer");
@@ -133,6 +133,7 @@ function SidebarContent({
         minHeight: 0,
         overflow: "hidden",
         py: 2,
+        overscrollBehavior: "contain",
       }}
     >
       <List
@@ -140,6 +141,7 @@ function SidebarContent({
         sx={theme => ({
           flex: 1,
           minHeight: 0,
+          flexBasis: 0,
           overflow: "auto",
           overscrollBehavior: "contain",
           px: 1.5,
@@ -159,7 +161,7 @@ function SidebarContent({
       {footerItems.length > 0 && (
         <>
           <Divider sx={theme => ({ borderColor: theme.palette.outlineVariant, mx: 1.5 })} />
-          <List sx={{ px: 1.5, pt: 1 }} component="nav">
+          <List sx={{ px: 1.5, pt: 1, flexShrink: 0 }} component="nav">
             {footerItems.map(item => (
               <SidebarNavItem key={item.key} item={item} isCollapsed={isCollapsed} isFooter />
             ))}
@@ -167,6 +169,38 @@ function SidebarContent({
         </>
       )}
     </Box>
+  );
+}
+
+function SidebarMobileNav({
+  navItems,
+  activeKey,
+}: {
+  readonly navItems: readonly TranslatedNavItem[];
+  readonly activeKey: string;
+}) {
+  const mainItems = navItems.filter(item => item.section === "main");
+  const footerItems = navItems.filter(item => item.section === "footer");
+
+  return (
+    <>
+      <List sx={{ px: 1.5 }} component="nav">
+        {mainItems.map(item => (
+          <SidebarNavItem key={item.key} item={item} isActive={item.key === activeKey} isCollapsed={false} />
+        ))}
+      </List>
+
+      {footerItems.length > 0 && (
+        <>
+          <Divider sx={theme => ({ borderColor: theme.palette.outlineVariant, mx: 1.5 })} />
+          <List sx={{ px: 1.5, pt: 1 }} component="nav">
+            {footerItems.map(item => (
+              <SidebarNavItem key={item.key} item={item} isCollapsed={false} isFooter />
+            ))}
+          </List>
+        </>
+      )}
+    </>
   );
 }
 
@@ -181,7 +215,7 @@ function SidebarMobileDrawer({
 }) {
   const mobileDrawerOpen = useLayoutStore(state => state.mobileDrawerOpen);
   const closeMobileDrawer = useLayoutStore(state => state.closeMobileDrawer);
-  const navListRef = useRef<HTMLUListElement>(null);
+  const navListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     closeMobileDrawer();
@@ -203,6 +237,7 @@ function SidebarMobileDrawer({
         display: { xs: "block", md: "none" },
         "& .MuiDrawer-paper": {
           width: sidebarWidth,
+          height: "100dvh",
           boxSizing: "border-box",
           display: "flex",
           flexDirection: "column",
@@ -214,7 +249,25 @@ function SidebarMobileDrawer({
         },
       })}
     >
-      <SidebarContent navItems={navItems} activeKey={activeKey} isCollapsed={false} navListRef={navListRef} />
+      <Box
+        ref={navListRef}
+        sx={theme => ({
+          flex: 1,
+          minHeight: 0,
+          flexBasis: 0,
+          overflow: "auto",
+          overscrollBehavior: "contain",
+          WebkitOverflowScrolling: "touch",
+          py: 2,
+          "&::-webkit-scrollbar": { width: 4 },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: theme.palette.outlineVariant,
+            borderRadius: 10,
+          },
+        })}
+      >
+        <SidebarMobileNav navItems={navItems} activeKey={activeKey} />
+      </Box>
     </Drawer>
   );
 }

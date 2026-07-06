@@ -32,9 +32,9 @@ describe("getActiveNavKey", () => {
     expect(getActiveNavKey("/dashboard", items)).toBe("today-classes");
   });
 
-  test("highlights your-students on /teachers/me/students", () => {
+  test("highlights your-students on /students", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, TEACHER_PERMISSIONS);
-    expect(getActiveNavKey("/teachers/me/students", items)).toBe("your-students");
+    expect(getActiveNavKey("/students", items)).toBe("your-students");
   });
 
   test("highlights regular-schedule on /teachers/me/schedule/future", () => {
@@ -49,7 +49,6 @@ describe("getActiveNavKey", () => {
 
   test("prefers longest matching href when multiple items match", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, [...ADMIN_PERMISSIONS, ...TEACHER_PERMISSIONS]);
-    expect(getActiveNavKey("/teachers/me/students", items)).toBe("your-students");
     expect(getActiveNavKey("/teachers", items)).toBe("teachers");
   });
 
@@ -60,6 +59,6 @@ describe("getActiveNavKey", () => {
 
   test("strips locale prefix before matching", () => {
     const items = getNavItemsForPermissions(SIDEBAR_NAV_ITEMS, TEACHER_PERMISSIONS);
-    expect(getActiveNavKey("/ar/teachers/me/students", items)).toBe("your-students");
+    expect(getActiveNavKey("/ar/students", items)).toBe("your-students");
   });
 });

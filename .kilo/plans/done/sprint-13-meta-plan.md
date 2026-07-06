@@ -1,7 +1,7 @@
 # Meta Plan for Sprint 13 Implementation
 
 ## Overview
-This meta plan defines the exact structure and content requirements for creating the implementation plan for sprint 13, which implements user provisioning permissions across four permission groups: System Administrator, Academy Admin, and Unauthenticated User.
+This meta plan defines the exact structure and content requirements for creating the implementation plan for sprint 13, which implements user provisioning permissions across four permission groups: System Administrator, Admin, and Unauthenticated User.
 
 ## Required Permissions to Implement
 - `staff.create_teacher` - Create teaching staff with comprehensive profiles

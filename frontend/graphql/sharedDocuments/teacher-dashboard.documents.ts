@@ -37,8 +37,12 @@ export const teacherDashboardQueryDocument: TypedDocumentNode<
       }
       progressFeed {
         id
-        title
-        type
+        studentId
+        studentName
+        scheduledTimeFormatted
+        durationMinutes
+        eventKind
+        occurredAt
       }
       totalCount
       pageInfo {

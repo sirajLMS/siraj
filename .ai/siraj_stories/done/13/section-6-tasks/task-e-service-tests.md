@@ -108,7 +108,7 @@ test("teacher onboarding rolls back on banking failure", async () => {
 
 *Step 6: Add permission escalation prevention tests*
 
-Add tests that verify Academy Admins cannot create managers:
+Add tests that verify Admins cannot create managers:
 
 ```typescript
 test("academy admin cannot create manager", async () => {
@@ -117,7 +117,7 @@ test("academy admin cannot create manager", async () => {
     permissions: [AppPermission.STAFF_CREATE_TEACHER, AppPermission.PARENT_CREATE_ACCOUNT],
     permissionGroups: [SystemPermissionGroupSlug.ACADEMY_ADMIN],
     isSuperAdmin: false,
-    role: "Academy Admin",
+    role: "Admin",
   });
 
   let error: unknown = null;

@@ -26,11 +26,11 @@ See [Section 3](./section-3-state-machine.md) for state machine diagrams and [Se
 
 ### Threat 2: IDOR on Invoice Operations (Cross-Parent Access)
 
-**Risk:** An admin could theoretically pass any `invoiceId` to `markInvoicePaid` or `deleteInvoice`, including an invoice belonging to a parent they should not access. Although all Academy Admins have full access, the system must not expose raw DB IDs in a way that enables enumeration attacks.
+**Risk:** An admin could theoretically pass any `invoiceId` to `markInvoicePaid` or `deleteInvoice`, including an invoice belonging to a parent they should not access. Although all Admins have full access, the system must not expose raw DB IDs in a way that enables enumeration attacks.
 
 **Current State:** Invoice IDs are UUIDs (v4 via `gen_random_uuid()`), making enumeration infeasible. Service layer verifies permission via `PermissionsService.hasPermission()` before any data access.
 
-**Fix:** Service methods verify `BILLING_UPDATE_STATUS_PAID` / `BILLING_DELETE_INVOICE` before fetching the invoice. No further ownership check is required — Academy Admins have any-scoped access to billing operations. The UUID format prevents guessable enumeration.
+**Fix:** Service methods verify `BILLING_UPDATE_STATUS_PAID` / `BILLING_DELETE_INVOICE` before fetching the invoice. No further ownership check is required — Admins have any-scoped access to billing operations. The UUID format prevents guessable enumeration.
 
 **Test Requirements:**
 - Unauthorized user (no `billing.update_status_paid`) calling `markInvoicePaid` → `insufficientPermissions` error ✅

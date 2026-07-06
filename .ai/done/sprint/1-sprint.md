@@ -5,16 +5,16 @@
 - **Source story:** `.ai/siraj_stories/1.md` (Part 2 — Permissions, Search, Timezones, History & Session Control, builds on `.ai/siraj_stories/0.md`)
 - **Security baseline:** `.ai/done/sprint/0-sprint.md` (Part 1 — mandatory prerequisite for RBAC foundation)
 - **Story scope:** Introduces multi-timezone schedule display, server-side admin search, student class history calendar with modal drill-down, teacher dashboard with real Apollo data, session activation with time-window enforcement, admin override toolbar, and a complete `classes.*` → `session.*` permission namespace migration.
-- **Target roles:** Academy Admin (full search, timezone, history, override access), Teacher (dashboard, activate, self-scoped schedule), System Automated (time-window enforcement).
+- **Target roles:** Admin (full search, timezone, history, override access), Teacher (dashboard, activate, self-scoped schedule), System Automated (time-window enforcement).
 - **Status:** Implementation complete — plan document patched for AGENTS_STORY_PLANNING.md compliance.
 - **Last updated:** 2026-06-21 (patch — AGENTS_STORY_PLANNING.md compliance)
 
 ### 0.1 Business Objectives
 
-1. **Separation of Duties**: The `session.override_actions` permission is strictly reserved for Academy Admins — teachers cannot access the admin override toolbar (force activate, stop, delete), ensuring accountability and preventing unauthorized session manipulation.
+1. **Separation of Duties**: The `session.override_actions` permission is strictly reserved for Admins — teachers cannot access the admin override toolbar (force activate, stop, delete), ensuring accountability and preventing unauthorized session manipulation.
 2. **Data Privacy**: `teacher.view_dashboard` combined with service-layer `schedule.view_assigned` scoping ensures teachers see only their own assigned classes, never other teachers' schedules.
 3. **Time-Window Safety**: `system.enforce_time_window` prevents premature or stale class activations — the system automatically rejects activation attempts outside the configured window (5 minutes before start through end of duration), eliminating manual oversight.
-4. **Audit Trail Integrity**: Student history with calendar drill-down (`history.view_calendar` + `history.view_details`) provides Academy Admins with a complete audit trail of past sessions, enabling accountability for attendance and performance.
+4. **Audit Trail Integrity**: Student history with calendar drill-down (`history.view_calendar` + `history.view_details`) provides Admins with a complete audit trail of past sessions, enabling accountability for attendance and performance.
 5. **Permission Namespace Clarity**: The full `classes.*` → `session.*` migration eliminates namespace confusion — all session-related permissions live under a single `session.*` prefix, making the permission catalog self-documenting.
 
 ### 0.2 Scope Boundaries
@@ -145,11 +145,11 @@ The following patterns are **strictly prohibited**:
 
 | **Permission Key** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Operation** |
 |---|---|---|---|---|
-| `dashboard.search` | Academy Admin | `ScheduleOverviewSection` search `TextField` | `ScheduleService.getDailySchedule()` (search param) | `dailyScheduleList(search: String)` query |
-| `schedule.view_timezones` | Academy Admin | `ScheduleOverviewDataGrid` timezone columns, `TimezoneWarningBanner` | `ScheduleService.getDailySchedule()` (timezone fields) | `dailyScheduleList` (yourTime, teacherTime, studentTime fields) |
-| `history.view_calendar` | Academy Admin | `StudentHistoryDesktop`/`StudentHistoryMobile` calendar grid | `StudentHistoryService.getMonthlyCalendar()` | `studentClassHistory` query |
-| `history.view_details` | Academy Admin | `ClassDetailsModal` on `/students/[id]/history` | `StudentHistoryService.getSessionDetail()` | `studentClassSessionDetail` query |
-| `session.override_actions` | Academy Admin | `AdminActionsBar` on `/classes/[id]` | `ClassSessionService.activateOverride()`, `.stop()`, `.deleteInstance()` | `forceActivateClass`, `stopClass`, `deleteClassInstance` mutations |
+| `dashboard.search` | Admin | `ScheduleOverviewSection` search `TextField` | `ScheduleService.getDailySchedule()` (search param) | `dailyScheduleList(search: String)` query |
+| `schedule.view_timezones` | Admin | `ScheduleOverviewDataGrid` timezone columns, `TimezoneWarningBanner` | `ScheduleService.getDailySchedule()` (timezone fields) | `dailyScheduleList` (yourTime, teacherTime, studentTime fields) |
+| `history.view_calendar` | Admin | `StudentHistoryDesktop`/`StudentHistoryMobile` calendar grid | `StudentHistoryService.getMonthlyCalendar()` | `studentClassHistory` query |
+| `history.view_details` | Admin | `ClassDetailsModal` on `/students/[id]/history` | `StudentHistoryService.getSessionDetail()` | `studentClassSessionDetail` query |
+| `session.override_actions` | Admin | `AdminActionsBar` on `/classes/[id]` | `ClassSessionService.activateOverride()`, `.stop()`, `.deleteInstance()` | `forceActivateClass`, `stopClass`, `deleteClassInstance` mutations |
 | `teacher.view_dashboard` | Teacher | `TeacherDashboardContainer` render gate | `TeacherDashboardService.getDashboard()` | `teacherDashboard` query |
 | `session.activate_class` | Teacher | `SessionActivateButton`, `ActionsPanel` activate | `ClassSessionService.activate()` | `activateClass` mutation |
 | `system.enforce_time_window` | System Automated | API-only gate (no UI) | `ClassSessionService.activate()` → `SystemRulesService.assertActivationTimeWindow()` | Internal check within `activateClass` mutation |
@@ -168,7 +168,7 @@ The following patterns are **strictly prohibited**:
 
 | **Permission Group** | **Slug** | **Story 1 Permissions Assigned** |
 |---|---|---|
-| Academy Admin | `academy_admin` | `dashboard.search`, `schedule.view_timezones`, `history.view_calendar`, `history.view_details`, `session.override_actions`, `session.view_details`, `session.activate_override`, `session.reschedule`, `session.reset`, `session.update_status.start`, `session.update_status.absent`, `session.update_status.leave` |
+| Admin | `academy_admin` | `dashboard.search`, `schedule.view_timezones`, `history.view_calendar`, `history.view_details`, `session.override_actions`, `session.view_details`, `session.activate_override`, `session.reschedule`, `session.reset`, `session.update_status.start`, `session.update_status.absent`, `session.update_status.leave` |
 | Teacher | `teacher` | `teacher.view_dashboard`, `session.activate_class`, `session.view_details`, `session.update_status.start`, `session.update_status.absent`, `session.update_status.leave` |
 | Parent | `parent` | `session.view_details`, `session.update_status.leave` (request leave only) |
 | Staff | `staff` | `session.view_details` |
@@ -178,11 +178,11 @@ The following patterns are **strictly prohibited**:
 
 | **Permission** | **Lower Role (Self-Scoped)** | **Admin (Any-Scoped)** |
 |---|---|---|
-| `session.activate_class` | Teacher can only activate their own assigned classes | Academy Admin can activate any class via override toolbar |
-| `session.view_details` | Teacher sees only their own class details | Academy Admin sees any class instance details |
+| `session.activate_class` | Teacher can only activate their own assigned classes | Admin can activate any class via override toolbar |
+| `session.view_details` | Teacher sees only their own class details | Admin sees any class instance details |
 | `teacher.view_dashboard` | Teacher sees only their own dashboard data (service filters by `teacherId`) | N/A — admin has their own dashboard |
-| `history.view_calendar` | N/A — history is admin-only | Academy Admin can view any student's history |
-| `session.override_actions` | N/A — override is admin-only | Academy Admin can override any class instance state |
+| `history.view_calendar` | N/A — history is admin-only | Admin can view any student's history |
+| `session.override_actions` | N/A — override is admin-only | Admin can override any class instance state |
 
 ### 2.5 Permission Rename Map (Option C — full `classes.*` → `session.*` migration)
 
@@ -211,7 +211,7 @@ The following patterns are **strictly prohibited**:
 | `session.activate_class` | Teacher activate button + standard activation mutation |
 | `session.reschedule` | Admin layout branch in `ClassDetailsContainer` |
 
-### 2.6 Part 1 Permissions Retained (merged into Academy Admin group)
+### 2.6 Part 1 Permissions Retained (merged into Admin group)
 
 From `.ai/siraj_stories/0.md`:
 - `auth.login`, `auth.view_own_profile`
@@ -394,8 +394,8 @@ stateDiagram-v2
 **Current Gap:** Without permission gating, any authenticated user could view any student's class history calendar and session details.
 
 **Fix in `StudentHistoryService`:**
-- `getMonthlyCalendar()` gates on `history.view_calendar` — only Academy Admins hold this permission.
-- `getSessionDetail()` gates on `history.view_details` — only Academy Admins hold this permission.
+- `getMonthlyCalendar()` gates on `history.view_calendar` — only Admins hold this permission.
+- `getSessionDetail()` gates on `history.view_details` — only Admins hold this permission.
 - Service does NOT accept a `viewerId` parameter for self-scoping — history is admin-only.
 
 **Test Requirements:**

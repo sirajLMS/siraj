@@ -66,7 +66,7 @@ describe("Manager Onboarding GraphQL API", () => {
     expect(result.createManager.assignedGroupSlug).toBe("staff_default");
   });
 
-  test("Academy Admin denied creating manager", async () => {
+  test("Admin denied creating manager", async () => {
     await assertOperationDenied("academy_admin", "mutate", createManagerMutationDocument, {
       input: createMinimalManagerInput(),
     });

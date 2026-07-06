@@ -154,8 +154,8 @@ export interface ManagerProfileUpdateResult {
 
 /**
  * Updates a manager's profile fields (phone, skypeId).
- * Enforces strict hierarchical privilege checks: Academy Admin cannot edit other Admin profiles.
- * Only Super Admin can edit Super Admin or Academy Admin profiles.
+ * Enforces strict hierarchical privilege checks: Admin cannot edit other Admin profiles.
+ * Only Super Admin can edit Super Admin or Admin profiles.
  */
 export async function updateManagerProfile(
   actorUserId: string,
@@ -366,7 +366,7 @@ export async function checkAccess(
 **Success Criteria / Check Progress Points:**
 - [ ] `StudentDirectoryService.getStudentDirectory()` gates on `students.list` permission.
 - [ ] `ManagerDirectoryService.getManagerDirectory()` gates on `staff.view_directory` permission.
-- [ ] `ManagerProfileService.updateManagerProfile()` enforces hierarchical privilege checks (Super Admin vs Academy Admin).
+- [ ] `ManagerProfileService.updateManagerProfile()` enforces hierarchical privilege checks (Super Admin vs Admin).
 - [ ] `LearningResourceService.listResources()` gates on `resources.list` permission.
 - [ ] `LearningResourceService.createResource()` gates on `resources.upload` permission and verifies file existence.
 - [ ] `LearningResourceService.checkAccess()` returns true only when actor has `resources.list` permission.

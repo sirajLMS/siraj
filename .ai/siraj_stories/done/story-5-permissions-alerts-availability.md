@@ -3,12 +3,12 @@
 ## Section 0: Story Metadata & Context
 
 - **Source story:** `.ai/siraj_stories/5.md` (Part 6 — Permissions & Permission Groups, timestamps 00:00 - 01:57)
-- **Story scope:** Implement 4 Academy Admin-gated features: (1) Global Notifications UI with bell-icon dropdown, (2) Unpaid Invoices financial alerts, (3) User billing profile drill-down, (4) Cross-staff Schedule Availability Search.
-- **Target roles:** Academy Admin (full access to all 4 features), Teacher/Student (explicitly excluded).
+- **Story scope:** Implement 4 Admin-gated features: (1) Global Notifications UI with bell-icon dropdown, (2) Unpaid Invoices financial alerts, (3) User billing profile drill-down, (4) Cross-staff Schedule Availability Search.
+- **Target roles:** Admin (full access to all 4 features), Teacher/Student (explicitly excluded).
 - **Status:** Planning phase — awaiting approval for execution.
 
 ### Business Objectives
-1. **Financial Oversight:** Academy Admins must see outstanding balances at a glance and drill into specific user billing profiles.
+1. **Financial Oversight:** Admins must see outstanding balances at a glance and drill into specific user billing profiles.
 2. **Operational Awareness:** System-wide alerts (complaints, system statuses) surfaced via the notification bell.
 3. **Staffing Efficiency:** Cross-staff availability search to find open time slots across all teachers for scheduling optimization.
 4. **Security Boundary:** All 4 features are strictly gated behind new/existing permissions, invisible to Teachers and Students.
@@ -37,7 +37,7 @@
 ### 1.4 Permission Integrity
 - [ ] New permissions MUST be added to `shared/lib/enum.ts` `AppPermission` enum.
 - [ ] New permissions MUST be seeded via a new Drizzle migration (NOT the existing `3-system_permissions_and_groups.sql`).
-- [ ] Academy Admin group MUST receive all 4 new permissions in the migration.
+- [ ] Admin group MUST receive all 4 new permissions in the migration.
 - [ ] Super Admin group MUST also receive the 3 new permissions (it already has `schedule.search_availability`).
 
 ### 1.5 Localization
@@ -53,15 +53,15 @@
 
 | **Permission Key** | **Enum Value** | **Group** | **Category** | **Description** |
 |---|---|---|---|---|
-| `notification.view_alerts` | `NOTIFICATION_VIEW_ALERTS` | Academy Admin, Super Admin | Notifications | Access the global notifications dropdown with system alerts |
-| `billing.view_unpaid_invoices` | `BILLING_VIEW_UNPAID_INVOICES` | Academy Admin, Super Admin | Billing | View accounts with pending/overdue financial balances |
-| `user.view_profile` | `USER_VIEW_PROFILE` | Academy Admin, Super Admin | Users | View specific user billing/account details from alerts |
+| `notification.view_alerts` | `NOTIFICATION_VIEW_ALERTS` | Admin, Super Admin | Notifications | Access the global notifications dropdown with system alerts |
+| `billing.view_unpaid_invoices` | `BILLING_VIEW_UNPAID_INVOICES` | Admin, Super Admin | Billing | View accounts with pending/overdue financial balances |
+| `user.view_profile` | `USER_VIEW_PROFILE` | Admin, Super Admin | Users | View specific user billing/account details from alerts |
 
 ### 2.2 Existing Permission (Already Seeded)
 
 | **Permission Key** | **Enum Value** | **Group** | **Category** | **Description** |
 |---|---|---|---|---|
-| `schedule.search_availability` | `SCHEDULE_SEARCH_AVAILABILITY` | Academy Admin, Super Admin | Scheduling | Cross-staff availability search engine |
+| `schedule.search_availability` | `SCHEDULE_SEARCH_AVAILABILITY` | Admin, Super Admin | Scheduling | Cross-staff availability search engine |
 
 ### 2.3 Permission-to-Feature Mapping
 
@@ -75,7 +75,7 @@
 ### 2.4 Migration Group Assignments
 
 **Super Admin** — add: `notification.view_alerts`, `billing.view_unpaid_invoices`, `user.view_profile`
-**Academy Admin** — add: `notification.view_alerts`, `billing.view_unpaid_invoices`, `user.view_profile`, `schedule.search_availability`
+**Admin** — add: `notification.view_alerts`, `billing.view_unpaid_invoices`, `user.view_profile`, `schedule.search_availability`
 
 ---
 
@@ -186,7 +186,7 @@ Before starting story work, verify:
 
 ### Task A — Database: New Permissions Enum, Migration, and Seed
 
-**Objective:** Add 3 new permission values to the `AppPermission` enum, create a Drizzle migration to seed them, and assign them to the Academy Admin and Super Admin groups. Also assign `schedule.search_availability` to Academy Admin.
+**Objective:** Add 3 new permission values to the `AppPermission` enum, create a Drizzle migration to seed them, and assign them to the Admin and Super Admin groups. Also assign `schedule.search_availability` to Admin.
 
 **Layer-Specific Rules (Database — Flattened from backend/db/repo/AGENTS.md):**
 - Permissions are seeded via Drizzle migrations, NOT manual SQL files in `backend/db/migration/`.
@@ -305,7 +305,7 @@ update migration file at `backend\db\migration\3-system_permissions_and_groups.s
 
 ```sql
 -- Migration: Story 5 — Add notification, billing, and user permissions
--- Seeds new permissions and assigns them to Academy Admin and Super Admin groups
+-- Seeds new permissions and assigns them to Admin and Super Admin groups
 
 INSERT INTO permissions (id, key, resource, action, description, category, is_system) VALUES
   (gen_random_uuid(), 'notification.view_alerts', 'notification', 'view_alerts', 'Access global notifications UI with system alerts', 'Notifications', true),
@@ -324,7 +324,7 @@ SELECT g.id, p.id
 FROM permission_groups g, permissions p
 WHERE g.slug = 'super_admin' AND p.key IN ('notification.view_alerts', 'billing.view_unpaid_invoices', 'user.view_profile');
 
--- Assign new permissions + schedule.search_availability to Academy Admin
+-- Assign new permissions + schedule.search_availability to Admin
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p
@@ -2319,7 +2319,7 @@ Execute the following commands in order to guarantee system stability and preven
 | `notification.view_alerts` NOT in enum | ✅ | Missing — needs creation |
 | `billing.view_unpaid_invoices` NOT in enum | ✅ | Missing — needs creation |
 | `user.view_profile` NOT in enum | ✅ | Missing — needs creation |
-| Academy Admin does NOT have `schedule.search_availability` | ✅ | `3-system_permissions_and_groups.sql:94` |
+| Admin does NOT have `schedule.search_availability` | ✅ | `3-system_permissions_and_groups.sql:94` |
 | `invoices` table has `status`, `dueDate`, `parentId` | ✅ | `backend/db/schema/billing.ts` |
 | `notificationDeliveries` table exists | ✅ | `backend/db/schema/communications.ts` |
 | `teacherAvailabilityWindows` table exists | ✅ | `backend/db/schema/teacher-availability.ts` |

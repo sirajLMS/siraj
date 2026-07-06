@@ -164,7 +164,7 @@ The current example tasks (lines 231-258 for component test, lines 260-292 for E
 
 **Status:** Pending
 
-**Objective:** Verify the Academy Admin dashboard experience end-to-end: search visibility, timezone columns, grid filtering, navigation to class details, role-based access differences, and mobile responsive layout.
+**Objective:** Verify the Admin dashboard experience end-to-end: search visibility, timezone columns, grid filtering, navigation to class details, role-based access differences, and mobile responsive layout.
 
 **Layer-Specific Rules (E2E Tests — Flattened from Section 4.B):**
 - Browser: `playwright` library, `chromium.launch({ headless: true })`.
@@ -196,8 +196,8 @@ The current example tasks (lines 231-258 for component test, lines 260-292 for E
 4. Call `setupBrowserLifecycle()` at describe root.
 
 5. Write test cases:
-   - **"Academy Admin sees search input"**: Login as academyAdmin, goto `/ar/dashboard`, assert `page.getByRole("textbox")` is visible
-   - **"Academy Admin sees timezone columns"**: Login, goto dashboard, assert `page.getByText("Your Time")` is visible
+   - **"Admin sees search input"**: Login as academyAdmin, goto `/ar/dashboard`, assert `page.getByRole("textbox")` is visible
+   - **"Admin sees timezone columns"**: Login, goto dashboard, assert `page.getByText("Your Time")` is visible
    - **"Search filters schedule grid"**: Login, goto dashboard, type "Ahmed" in search, wait for grid to update, assert row count changes
    - **"Click details navigates to class page"**: Login, goto dashboard, click details icon on first row, assert URL contains `/classes/`
    - **"Teacher does not see search input"**: Login as teacher, goto dashboard, assert `page.getByRole("textbox")` is NOT visible

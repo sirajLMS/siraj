@@ -32,7 +32,7 @@ function getBellButton(p: Page): Locator {
 }
 
 describe("Notifications & Billing E2E", () => {
-  test("Academy Admin sees notification bell icon", async () => {
+  test("Admin sees notification bell icon", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     expect(getBellButton(p)).toBeVisible();
   });
@@ -43,7 +43,7 @@ describe("Notifications & Billing E2E", () => {
     expect(p.getByText("Notifications").first()).toBeVisible();
   });
 
-  test("Billing section appears in popover for Academy Admin", async () => {
+  test("Billing section appears in popover for Admin", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     await getBellButton(p).click();
     expect(p.getByText("Unpaid Invoices").first()).toBeVisible();

@@ -864,6 +864,15 @@ export type TeacherProfileUpdateInput = {
   zoomUsername: string | null | undefined;
 };
 
+export type TeacherProgressFeedEventKind =
+  | 'activated'
+  | 'auto_missed'
+  | 'completed'
+  | 'leave'
+  | 'marked_absent'
+  | 'other'
+  | 'started';
+
 export type UpdateManagerProfileInput = {
   phone: string | null | undefined;
   skypeId: string | null | undefined;
@@ -2518,7 +2527,7 @@ export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_Teac
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, zoomMeetingUrl: string | null, yourTimeFormatted: string | null };
 
-export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem = { id: string | null, title: string | null, type: string | null };
+export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem = { id: string | null, studentId: string | null, studentName: string | null, scheduledTimeFormatted: string | null, durationMinutes: number | null, eventKind: Types.TeacherProgressFeedEventKind | null, occurredAt: string | null };
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, lastItem: number | null, hasMorePages: boolean, lastPage: number, perPage: number, total: number };
 

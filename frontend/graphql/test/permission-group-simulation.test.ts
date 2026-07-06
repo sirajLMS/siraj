@@ -67,19 +67,22 @@ describe("GraphQL Permission Group Simulation Integration Tests", () => {
     );
     const simulationToken = startData.startPermissionGroupSimulation?.token;
     expect(simulationToken).toBeDefined();
+    if (!simulationToken) {
+      throw new Error("simulation token was not defined");
+    }
 
-    const meData = await authenticatedRequest(simulationToken!, "query", meQueryDocument);
+    const meData = await authenticatedRequest(simulationToken, "query", meQueryDocument);
     expect(meData.me?.id).toBe(superAdminUserId);
 
     const statusData = await authenticatedRequest(
-      simulationToken!,
+      simulationToken,
       "query",
       permissionGroupSimulationStatusQueryDocument
     );
     expect(statusData.permissionGroupSimulationStatus?.isActive).toBe(true);
     expect(statusData.permissionGroupSimulationStatus?.groupSlug).toBe(teacherGroupSlug || "teacher_default");
 
-    await authenticatedRequest(simulationToken!, "mutate", endPermissionGroupSimulationMutationDocument);
+    await authenticatedRequest(simulationToken, "mutate", endPermissionGroupSimulationMutationDocument);
   });
 
   test("super admin can end permission group simulation", async () => {
@@ -93,12 +96,11 @@ describe("GraphQL Permission Group Simulation Integration Tests", () => {
     );
     const simulationToken = startData.startPermissionGroupSimulation?.token;
     expect(simulationToken).toBeDefined();
+    if (!simulationToken) {
+      throw new Error("simulation token was not defined");
+    }
 
-    const endData = await authenticatedRequest(
-      simulationToken!,
-      "mutate",
-      endPermissionGroupSimulationMutationDocument
-    );
+    const endData = await authenticatedRequest(simulationToken, "mutate", endPermissionGroupSimulationMutationDocument);
     expect(endData.endPermissionGroupSimulation?.token).toBeDefined();
 
     const restoredToken = endData.endPermissionGroupSimulation?.token as string;

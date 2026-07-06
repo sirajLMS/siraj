@@ -8,12 +8,12 @@ Story 12 introduces three critical permission keys. These permissions govern hig
 
 | **Permission Key** | **Category** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Context** |
 |---|---|---|---|---|---|
-| `resources.delete` | Destructive | Academy Admin | Delete Action Button | `LearningResourceService.deleteResource()` | `deleteLearningResource` (Mutation) |
-| `report.generate_custom` | Operational | Academy Admin | Custom Report Form | `ReportService.generateAttendanceReport()` | `generateAttendanceReport` (Query) |
-| `report.view_financials` | Financial | Academy Admin | Payroll Column Rendering | `ReportService.generateAttendanceReport()` (Internal branch masking) | Masked explicitly if absent |
+| `resources.delete` | Destructive | Admin | Delete Action Button | `LearningResourceService.deleteResource()` | `deleteLearningResource` (Mutation) |
+| `report.generate_custom` | Operational | Admin | Custom Report Form | `ReportService.generateAttendanceReport()` | `generateAttendanceReport` (Query) |
+| `report.view_financials` | Financial | Admin | Payroll Column Rendering | `ReportService.generateAttendanceReport()` (Internal branch masking) | Masked explicitly if absent |
 
 **Key characteristics of these permissions:**
-- They are **held exclusively by Academy Admin user roles** (and Super Admins). Teachers, Parents, and Students do not receive these keys.
+- They are **held exclusively by Admin user roles** (and Super Admins). Teachers, Parents, and Students do not receive these keys.
 - The `report.view_financials` permission acts as a **sub-permission or modifier** to `report.generate_custom`. A user must have the generation permission to execute the query, but without the financial permission, the system intercepts the database payload and masks the outputs.
 - They are **seeded in the migration** (`backend/db/migration/4-story-12-permissions.sql`) to be formally registered in the permissions catalog, enabling UI context evaluation.
 - They are **documented as `AppPermission` enum values** to prevent magic string usage across both the backend logic and the frontend components.
@@ -54,7 +54,7 @@ Story 12 introduces three critical permission keys. These permissions govern hig
 
 | **Permission Group** | **Slug** | **Current State** | **New Permissions Added (Story 12)** |
 |---|---|---|---|
-| Academy Admin | `academy_admin` | Has global management rights | `resources.delete`, `report.generate_custom`, `report.view_financials` |
+| Admin | `academy_admin` | Has global management rights | `resources.delete`, `report.generate_custom`, `report.view_financials` |
 
 **Migration SQL addition:**
 ```sql

@@ -2,7 +2,7 @@
 
 **Route:** `/dashboard`
 **Permission:** `schedule.view_timezones`
-**Role:** Academy Admin
+**Role:** Admin
 
 ---
 
@@ -32,7 +32,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin (has `schedule.view_timezones`) | Dashboard loads |
+| 1 | Login as Admin (has `schedule.view_timezones`) | Dashboard loads |
 | 2 | Navigate to `/dashboard` | Schedule overview data grid renders |
 | 3 | Observe column headers | Three time columns visible: **Your Time**, **Teacher Time**, **Student Time** |
 
@@ -48,7 +48,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Grid with timezone columns shown |
+| 1 | Login as Admin, go to `/dashboard` | Grid with timezone columns shown |
 | 2 | Find a row where student has `timezoneOverride: "Europe/London"` and teacher is in `Africa/Cairo` | |
 | 3 | Compare the three time columns | **Your Time** = viewer's local time, **Teacher Time** = Africa/Cairo formatted, **Student Time** = Europe/London formatted |
 
@@ -56,7 +56,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Grid shown |
+| 1 | Login as Admin, go to `/dashboard` | Grid shown |
 | 2 | Find a row for a student with `timezoneOverride: null` | |
 | 3 | Observe Student Time column | Time formatted using parent's timezone (e.g., `Africa/Cairo`) |
 | 4 | Find a row for a student whose parent also has default timezone | |
@@ -66,7 +66,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Grid shown |
+| 1 | Login as Admin, go to `/dashboard` | Grid shown |
 | 2 | Find a row where teacher and student are in different timezones | |
 | 3 | Observe the three time values | The times differ numerically, reflecting the actual timezone offset |
 
@@ -78,7 +78,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin on mobile viewport | Dashboard in mobile layout |
+| 1 | Login as Admin on mobile viewport | Dashboard in mobile layout |
 | 2 | Navigate to `/dashboard` | Schedule card list renders |
 | 3 | Observe a schedule card | Card shows timezone information (your time, teacher time, student time) if permission is granted |
 
@@ -94,5 +94,5 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin on mobile, go to `/dashboard` | Schedule cards shown |
+| 1 | Login as Admin on mobile, go to `/dashboard` | Schedule cards shown |
 | 2 | Observe timezone labels on a card | All three times are legible, not truncated, and clearly labeled |

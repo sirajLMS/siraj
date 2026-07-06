@@ -103,6 +103,16 @@ function buildActiveControlsLabels(t: TeacherDashboardTranslator): TeacherDashbo
 function buildProgressFeedLabels(t: TeacherDashboardTranslator): TeacherDashboardLabels["progressFeed"] {
   return {
     title: t("progressFeed.title"),
+    autoMissedTooltip: t("progressFeed.autoMissedTooltip"),
+    events: {
+      auto_missed: t("progressFeed.events.auto_missed"),
+      marked_absent: t("progressFeed.events.marked_absent"),
+      activated: t("progressFeed.events.activated"),
+      started: t("progressFeed.events.started"),
+      completed: t("progressFeed.events.completed"),
+      leave: t("progressFeed.events.leave"),
+      other: t("progressFeed.events.other"),
+    },
   };
 }
 

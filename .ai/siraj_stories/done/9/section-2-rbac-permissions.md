@@ -8,11 +8,11 @@ See [Section 0](./section-0-metadata.md) for story scope.
 
 | **Permission Key** | **Category** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Mutation** |
 |---|---|---|---|---|---|
-| `billing.create_invoice` | Billing | Academy Admin, Super Admin | Manual Invoice Form (`ManualInvoiceContainer`) | `BillingManagementService.createManualInvoice()` | `createManualInvoice` |
-| `billing.update_status_paid` | Billing | Academy Admin, Super Admin | "Mark as Paid" action (green checkmark in invoice row) | `BillingManagementService.markInvoicePaid()` | `markInvoicePaid` |
-| `billing.delete_invoice` | Billing | Academy Admin, Super Admin | "Delete" action (red trash icon in invoice row) | `BillingManagementService.deleteInvoice()` | `deleteInvoice` |
-| `student.reassign_teacher` | Students | Academy Admin, Super Admin | "Change" link in Teacher column of `ParentStudentsDataGrid` | `StudentLifecycleService.reassignTeacher()` | `reassignStudentTeacher` |
-| `student.manage_status` | Students | Academy Admin, Super Admin | Status badge click in `ParentStudentsDataGrid` | `StudentLifecycleService.changeStudentStatus()` | `changeStudentStatus` |
+| `billing.create_invoice` | Billing | Admin, Super Admin | Manual Invoice Form (`ManualInvoiceContainer`) | `BillingManagementService.createManualInvoice()` | `createManualInvoice` |
+| `billing.update_status_paid` | Billing | Admin, Super Admin | "Mark as Paid" action (green checkmark in invoice row) | `BillingManagementService.markInvoicePaid()` | `markInvoicePaid` |
+| `billing.delete_invoice` | Billing | Admin, Super Admin | "Delete" action (red trash icon in invoice row) | `BillingManagementService.deleteInvoice()` | `deleteInvoice` |
+| `student.reassign_teacher` | Students | Admin, Super Admin | "Change" link in Teacher column of `ParentStudentsDataGrid` | `StudentLifecycleService.reassignTeacher()` | `reassignStudentTeacher` |
+| `student.manage_status` | Students | Admin, Super Admin | Status badge click in `ParentStudentsDataGrid` | `StudentLifecycleService.changeStudentStatus()` | `changeStudentStatus` |
 | `system.sync_notifications` | System | System Automated | Not user-facing — internal background rule | `NotificationSyncService.syncUnpaidNotifications()` | Called internally by billing mutations (no direct GraphQL exposure) |
 
 ---
@@ -32,7 +32,7 @@ See [Section 0](./section-0-metadata.md) for story scope.
 | `student.manage_status` | `students.change_status` (legacy) | Complements — `students.change_status` targets the Students Directory; `student.manage_status` targets the Parent Profile context |
 | `system.sync_notifications` | `notification.view_alerts` | Complementary — view_alerts shows the tray; sync_notifications gates the internal update of the tray data |
 
-> **Note on legacy vs. new permissions:** The `invoices.*` and `students.*` (plural) permissions in the existing catalog were seeded in earlier sprints for the global billing and student directories. Story 9 introduces `billing.*` and `student.*` (singular) permissions scoped to the parent profile context. Both sets coexist — the Academy Admin group receives both.
+> **Note on legacy vs. new permissions:** The `invoices.*` and `students.*` (plural) permissions in the existing catalog were seeded in earlier sprints for the global billing and student directories. Story 9 introduces `billing.*` and `student.*` (singular) permissions scoped to the parent profile context. Both sets coexist — the Admin group receives both.
 
 ---
 
@@ -41,10 +41,10 @@ See [Section 0](./section-0-metadata.md) for story scope.
 | **Permission Group** | **Slug** | **New Permissions Assigned** |
 |---|---|---|
 | Super Admin | `super_admin` | `billing.create_invoice`, `billing.update_status_paid`, `billing.delete_invoice`, `student.reassign_teacher`, `student.manage_status`, `system.sync_notifications` |
-| Academy Admin | `academy_admin` | `billing.create_invoice`, `billing.update_status_paid`, `billing.delete_invoice`, `student.reassign_teacher`, `student.manage_status` |
-| Teacher Default | `teacher_default` | *(none — explicitly excluded)* |
-| Parent Default | `parent_default` | *(none — explicitly excluded)* |
-| Staff Default | `staff_default` | *(none — explicitly excluded)* |
+| Admin | `academy_admin` | `billing.create_invoice`, `billing.update_status_paid`, `billing.delete_invoice`, `student.reassign_teacher`, `student.manage_status` |
+| Teacher | `teacher_default` | *(none — explicitly excluded)* |
+| Parent | `parent_default` | *(none — explicitly excluded)* |
+| Staff | `staff_default` | *(none — explicitly excluded)* |
 | System Automated | `system_automated` | `system.sync_notifications` |
 
 ---

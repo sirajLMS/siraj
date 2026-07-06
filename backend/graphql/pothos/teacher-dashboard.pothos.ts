@@ -9,6 +9,10 @@ import { gqlSchemaBuilder } from "../gqlSchemaBuilder";
 import { PageInfoObject } from "../pothos/pagination.objects";
 import { ClassExecutionStatePothosObject, ClassOutcomePothosObject, ClassTypePothosObject } from "./enum.pothos";
 
+const TeacherProgressFeedEventKindRef = gqlSchemaBuilder.enumType("TeacherProgressFeedEventKind", {
+  values: ["auto_missed", "marked_absent", "activated", "started", "completed", "leave", "other"] as const,
+});
+
 const TeacherDashboardScheduleRowRef =
   gqlSchemaBuilder.objectRef<TeacherDashboardScheduleRow>("TeacherDashboardScheduleRow");
 
@@ -32,8 +36,12 @@ const TeacherProgressFeedItemRef = gqlSchemaBuilder.objectRef<TeacherProgressFee
 export const TeacherProgressFeedItemPothosObject = TeacherProgressFeedItemRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
-    title: t.exposeString("title"),
-    type: t.exposeString("type"),
+    studentId: t.exposeString("studentId"),
+    studentName: t.exposeString("studentName"),
+    scheduledTimeFormatted: t.exposeString("scheduledTimeFormatted", { nullable: true }),
+    durationMinutes: t.exposeInt("durationMinutes", { nullable: true }),
+    eventKind: t.expose("eventKind", { type: TeacherProgressFeedEventKindRef }),
+    occurredAt: t.expose("occurredAt", { type: "DateTime" }),
   }),
 });
 

@@ -8,8 +8,8 @@
 
 **Test Requirements:**
 - User without `students.list` permission → `unauthorized` error
-- User with `students.list` (Academy Admin) → returns all students
-- User with `students.list` (Staff Default) → returns all students
+- User with `students.list` (Admin) → returns all students
+- User with `students.list` (Staff) → returns all students
 - Parent user (no `students.list`) → `unauthorized` error
 - Unauthenticated user → `unauthorized`
 
@@ -17,17 +17,17 @@
 
 ### Threat 2: Privilege Escalation via Manager Profile Editing
 
-**Current Gap:** `staff.edit_profile` is assigned to both `super_admin` and `academy_admin` groups. The story requires that editing OTHER administrators' profiles is strictly reserved for System Administrators to prevent privilege escalation. An Academy Admin editing a fellow admin's profile could potentially modify system privileges or inject unauthorized permission overrides.
+**Current Gap:** `staff.edit_profile` is assigned to both `super_admin` and `academy_admin` groups. The story requires that editing OTHER administrators' profiles is strictly reserved for System Administrators to prevent privilege escalation. An Admin editing a fellow admin's profile could potentially modify system privileges or inject unauthorized permission overrides.
 
 **Fix in `ManagerProfileService.updateManagerProfile()`:** The service performs a dual-check:
 1. Verify `staff.edit_profile` permission via `PermissionsService.hasPermission()`.
-2. Verify the target staff member's permission group — if the target user holds `super_admin` or `academy_admin` group membership, the actor MUST hold a higher or equal privilege level. Specifically: an Academy Admin cannot edit a Super Admin's profile. Only Super Admin can edit other Super Admin profiles.
+2. Verify the target staff member's permission group — if the target user holds `super_admin` or `academy_admin` group membership, the actor MUST hold a higher or equal privilege level. Specifically: an Admin cannot edit a Super Admin's profile. Only Super Admin can edit other Super Admin profiles.
 
 This is enforced in the service layer, not via a separate permission key, because the same `staff.edit_profile` permission applies but with a hierarchical constraint.
 
 **Test Requirements:**
-- Academy Admin editing Teacher staff profile → succeeds
-- Academy Admin editing Super Admin profile → `unauthorized` error (hierarchical constraint)
+- Admin editing Teacher staff profile → succeeds
+- Admin editing Super Admin profile → `unauthorized` error (hierarchical constraint)
 - Super Admin editing any admin profile → succeeds
 - User without `staff.edit_profile` → `unauthorized` error
 - Editing non-existent staff profile → `not_found` error
@@ -42,7 +42,7 @@ This is enforced in the service layer, not via a separate permission key, becaus
 
 **Test Requirements:**
 - Teacher (holds `resources.list` only, NOT `resources.upload`) → `unauthorized` error
-- Academy Admin (holds `resources.upload`) → upload succeeds
+- Admin (holds `resources.upload`) → upload succeeds
 - Super Admin (holds `resources.upload`) → upload succeeds
 - Parent/Student (no resource permissions) → `unauthorized` error
 - Upload with missing file → `validation_error`
@@ -60,7 +60,7 @@ The `StorageService.fileInfoByDbFileId()` method is wrapped by `LearningResource
 
 **Test Requirements:**
 - Teacher (holds `resources.list`) → file URL returned successfully
-- Academy Admin (holds `resources.list`) → file URL returned successfully
+- Admin (holds `resources.list`) → file URL returned successfully
 - Student (no `resources.list`) → `unauthorized` error, no URL returned
 - Parent (no `resources.list`) → `unauthorized` error, no URL returned
 - Accessing deleted resource → `not_found` error

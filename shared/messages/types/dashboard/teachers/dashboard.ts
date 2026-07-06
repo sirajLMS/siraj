@@ -81,6 +81,16 @@ export interface TeacherDashboardLabels {
   };
   readonly progressFeed: {
     readonly title: string;
+    readonly autoMissedTooltip: string;
+    readonly events: {
+      readonly auto_missed: string;
+      readonly marked_absent: string;
+      readonly activated: string;
+      readonly started: string;
+      readonly completed: string;
+      readonly leave: string;
+      readonly other: string;
+    };
   };
   readonly alert: {
     readonly title: string;

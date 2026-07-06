@@ -133,9 +133,11 @@ export function AppApolloProvider({ children }: { readonly children: React.React
   );
 
   if (!apolloClient) {
-    return <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-    <CircularProgress />
-    </Box>
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (!initialCheckDone || !isConnected) {

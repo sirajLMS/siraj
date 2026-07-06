@@ -178,7 +178,7 @@ grep -n "SuspendedLockService\|StudentLeaveProcessingService" backend/services/s
 
 ### 7.16 Frozen Class Verification (Manual Test)
 
-**Prerequisites:** Development environment running with Academy Admin session.
+**Prerequisites:** Development environment running with Admin session.
 
 **Test Scenario 1: Suspension Lock**
 1. Navigate to Parent Profile → Students section
@@ -224,7 +224,7 @@ grep -n "SuspendedLockService\|StudentLeaveProcessingService" backend/services/s
    - Response contains `"errors": [{ "message": "Unauthorized" ... }]`
    - OR component displays empty state (graceful error handling)
 
-5. Log in as Academy Admin (has `DASHBOARD_VIEW_METRICS` permission)
+5. Log in as Admin (has `DASHBOARD_VIEW_METRICS` permission)
 6. Navigate to Status Tracking dashboard
 7. Verify the query succeeds and returns data
 
@@ -250,7 +250,7 @@ Any method below 100% coverage is BLOCKING.
 
 ### 7.19 Functional Verification Checklist
 
-**Status Tracking Dashboard (requires Academy Admin session in development environment):**
+**Status Tracking Dashboard (requires Admin session in development environment):**
 - [ ] Navigate to Status Tracking dashboard → Page loads without errors
 - [ ] Class sessions appear in the table with correct student/teacher names
 - [ ] Time ranges are formatted correctly (e.g., "09:00 AM - 10:00 AM")
@@ -276,7 +276,7 @@ Any method below 100% coverage is BLOCKING.
 
 **Permission Enforcement:**
 - [ ] Teacher (no permission) cannot fetch statusTrackingSchedule data
-- [ ] Academy Admin (has permission) can fetch statusTrackingSchedule data
+- [ ] Admin (has permission) can fetch statusTrackingSchedule data
 - [ ] Unauthorized actors cannot trigger side-effects via changeStudentStatus
 
 **i18n (verify in both English and Arabic locales):**

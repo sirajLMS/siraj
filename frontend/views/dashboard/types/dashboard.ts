@@ -12,6 +12,8 @@ export type { DashboardFilters, MetricItem, Pagination, TeacherFilterItem } from
 
 export type DailyScheduleRow = DailyScheduleList;
 
+export type NavAudience = "teacher" | "parent";
+
 export interface NavItem {
   readonly key: string;
   readonly labelKey: `dashboard.nav.${keyof DashboardNavigationLabels}`;
@@ -19,6 +21,7 @@ export interface NavItem {
   readonly href: string;
   readonly section: "main" | "footer";
   readonly permission?: AppPermission | readonly AppPermission[];
+  readonly audience?: NavAudience;
 }
 
 export type ClassInstanceStatus = "active" | "scheduled" | "pending" | "completed" | "cancelled";

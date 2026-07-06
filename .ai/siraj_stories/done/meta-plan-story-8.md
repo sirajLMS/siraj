@@ -14,7 +14,7 @@ This meta-plan outlines the step-by-step sequence we will follow to generate the
 **Output Target:** ~300-400 lines of markdown.
 - **Section 0:** Metadata, Business Objectives (Separation of duties for quota editing, destructive actions).
 - **Section 1:** Core Principles (No monolithic services, no DB imports in services, zero incomplete implementation).
-- **Section 2:** RBAC Permissions (Mapping `parent.manage_status`, `student.edit_quota`, etc. to Academy Admin).
+- **Section 2:** RBAC Permissions (Mapping `parent.manage_status`, `student.edit_quota`, etc. to Admin).
 - **Section 3:** State Machine & Threat Alignment (Mermaid diagram for Parent Deactivation flow and Student Quota lifecycle).
 - **Section 4:** Security Threat Remediation (IDOR scoping for parent viewing, Admin-only quota overrides).
 - **Section 5:** Prerequisites Verification (Fact-checking the current codebase state we analyzed).
@@ -33,7 +33,7 @@ This meta-plan outlines the step-by-step sequence we will follow to generate the
 **Goal:** Generate Task B (300-600 lines) ensuring STRICT architectural compliance (NO Drizzle imports).
 **Target Files to plan:**
 - `backend/services/parent/parent-profile.service.ts` (Deactivate account logic, permission gated)
-- `backend/services/student/student-quota.service.ts` (Edit quota logic, gated to Academy Admin)
+- `backend/services/student/student-quota.service.ts` (Edit quota logic, gated to Admin)
 - `backend/services/storage/parent-document.service.ts` (Document linking)
 - `backend/db/test/logic/*` (Service layer integration tests)
 - **Protocol:** Include Quality Gate checklists.

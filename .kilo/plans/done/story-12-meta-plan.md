@@ -27,10 +27,10 @@ Story 12 introduces two distinct feature domains:
 ### 1.2 Permission Breakdown
 | Permission Key | Domain | Action | Target Role |
 |---|---|---|---|
-| `resource.upload` | resource | upload | Academy Admin (execution) |
-| `resource.delete` | resource | delete | Academy Admin (NEW) |
-| `report.generate_custom` | report | generate_custom | Academy Admin (NEW) |
-| `report.view_financials` | report | view_financials | Academy Admin (NEW) |
+| `resource.upload` | resource | upload | Admin (execution) |
+| `resource.delete` | resource | delete | Admin (NEW) |
+| `report.generate_custom` | report | generate_custom | Admin (NEW) |
+| `report.view_financials` | report | view_financials | Admin (NEW) |
 
 **Note:** Only 3 NEW permissions need to be added to the system (resource.delete, report.generate_custom, report.view_financials). The `resource.upload` permission already exists from Part 12 — this story implements its **execution**.
 

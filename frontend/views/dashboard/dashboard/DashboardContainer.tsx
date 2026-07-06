@@ -6,9 +6,9 @@ import { useEffect } from "react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { meQueryDocument } from "@/frontend/graphql/sharedDocuments/auth.documents";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { ParentDashboardContainer } from "@/frontend/views/dashboard/parents/dashboard/ParentDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
 import { AdminDashboardContainer } from "../admin/dashboard/AdminDashboardContainer";
+import { ParentDashboardContainer } from "../parent/dashboard/ParentDashboardContainer";
 
 function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
   return (

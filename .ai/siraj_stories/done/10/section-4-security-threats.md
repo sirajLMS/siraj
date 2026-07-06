@@ -38,7 +38,7 @@ if (newStatus === "SUSPENDED") {
 
 **Test Requirements:**
 1. **GraphQL test — unauthorized actor:** An actor with a Teacher role (no `student.manage_status`) calls the `changeStudentStatus` mutation → receives `insufficientPermissions` error. No bulk freeze or leave processing occurs. (Task G)
-2. **GraphQL test — authorized actor:** An Academy Admin calls `changeStudentStatus` with `SUSPENDED` → mutation succeeds AND class instances for that student have `isFrozen = true`. (Task G)
+2. **GraphQL test — authorized actor:** An Admin calls `changeStudentStatus` with `SUSPENDED` → mutation succeeds AND class instances for that student have `isFrozen = true`. (Task G)
 3. **Service unit test:** Calling `SuspendedLockService.enforceSuspendedLock()` directly without going through `StudentLifecycleService` is possible only for the system (not user-facing). No external GraphQL entry point reaches this service directly. (Code review + architecture test)
 
 ---
@@ -56,7 +56,7 @@ The `studentId` passed to `bulkFreezeStudentClasses()` flows through the call ch
 3. → `SuspendedLockService.enforceSuspendedLock(studentId)`
 4. → `SchedulingRepository.bulkFreezeStudentClasses(studentId)`
 
-The `StudentRepository.findById(studentId)` call at step 2 already confirms the student exists BEFORE any side effects run. However, the repo method itself does not validate that the student belongs to any particular academy — it operates across all students. This is intentional: Academy Admins can only manage their own academy's students via `student.manage_status` scoping (enforced in Story 9).
+The `StudentRepository.findById(studentId)` call at step 2 already confirms the student exists BEFORE any side effects run. However, the repo method itself does not validate that the student belongs to any particular academy — it operates across all students. This is intentional: Admins can only manage their own academy's students via `student.manage_status` scoping (enforced in Story 9).
 
 **Fix:**
 `SuspendedLockService.enforceSuspendedLock()` does NOT need to call `StudentRepository.findById()` itself — the caller (`StudentLifecycleService`) already did this. The repo method `bulkFreezeStudentClasses()` uses Drizzle's `eq(classInstances.studentId, studentId)` filter, ensuring only classes for the exact `studentId` are frozen.

@@ -26,7 +26,7 @@ describe("studentDirectory GraphQL Integration Tests", () => {
     parentId = r.parentId;
   });
 
-  test("Academy Admin can query student directory", async () => {
+  test("Admin can query student directory", async () => {
     const data = await authenticatedRequest(superAdminToken, "query", studentDirectoryQueryDocument, {
       paginationArgs: null,
       filterArgs: null,
@@ -54,7 +54,7 @@ describe("studentDirectory GraphQL Integration Tests", () => {
     }
   });
 
-  test("Staff Default can query student directory", async () => {
+  test("Staff can query student directory", async () => {
     // staff_default/teacher_default/parent_default logins are pre-existing seed-dependent
     // Using loginAndProvision entities for verification instead
     const data = await authenticatedRequest(superAdminToken, "query", studentDirectoryQueryDocument, {

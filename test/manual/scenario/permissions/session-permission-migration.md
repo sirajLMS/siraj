@@ -26,11 +26,11 @@ flowchart TD
 
 ## Desktop Scenarios
 
-### D1: Academy Admin permissions work after migration
+### D1: Admin permissions work after migration
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin | Dashboard loads without errors |
+| 1 | Login as Admin | Dashboard loads without errors |
 | 2 | Use search on `/dashboard` | Search works (gated by `dashboard.search`) |
 | 3 | View timezone columns | Columns render (gated by `schedule.view_timezones`) |
 | 4 | Access `/classes/[id]` and use AdminActionsBar | All override actions work (gated by `session.override_actions`) |
@@ -61,9 +61,9 @@ flowchart TD
 | Step | Action | Expected |
 |------|--------|----------|
 | 1 | Login as Teacher, activate a class | Network tab shows `activateClass` mutation succeeds |
-| 2 | Login as Academy Admin, force activate | Network tab shows `forceActivateClass` mutation succeeds |
-| 3 | Login as Academy Admin, stop a class | Network tab shows `stopClass` mutation succeeds |
-| 4 | Login as Academy Admin, delete a class | Network tab shows `deleteClassInstance` mutation succeeds |
+| 2 | Login as Admin, force activate | Network tab shows `forceActivateClass` mutation succeeds |
+| 3 | Login as Admin, stop a class | Network tab shows `stopClass` mutation succeeds |
+| 4 | Login as Admin, delete a class | Network tab shows `deleteClassInstance` mutation succeeds |
 
 ---
 
@@ -73,7 +73,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin on mobile | Mobile dashboard loads |
+| 1 | Login as Admin on mobile | Mobile dashboard loads |
 | 2 | Navigate through all available pages | No permission errors, all features accessible |
 | 3 | Login as Teacher on mobile | Teacher dashboard accessible |
 | 4 | Activate a class on mobile | Activation works with new `session.activate_class` permission |

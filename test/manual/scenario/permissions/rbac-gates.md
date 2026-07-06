@@ -1,7 +1,7 @@
 # RBAC Permission Gates
 
 **Routes:** All dashboard routes
-**Role:** All roles (Academy Admin, Teacher, Parent, Staff)
+**Role:** All roles (Admin, Teacher, Parent, Staff)
 
 ---
 
@@ -15,7 +15,7 @@ flowchart TD
     D -->|Has permission| E[Component renders]
     D -->|Missing permission| F[Component hidden or access denied]
     
-    subgraph "Academy Admin Permissions"
+    subgraph "Admin Permissions"
         AA[dashboard.search]
         AB[schedule.view_timezones]
         AC[history.view_calendar]
@@ -39,7 +39,7 @@ flowchart TD
 
 ## Permission Matrix
 
-| Permission | Academy Admin | Teacher | Parent | Staff |
+| Permission | Admin | Teacher | Parent | Staff |
 |---|---|---|---|---|
 | `dashboard.search` | Yes | No | No | No |
 | `schedule.view_timezones` | Yes | No | No | No |
@@ -61,11 +61,11 @@ flowchart TD
 
 ## Desktop Scenarios
 
-### D1: Academy Admin full access
+### D1: Admin full access
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin | Dashboard loads |
+| 1 | Login as Admin | Dashboard loads |
 | 2 | Navigate to `/dashboard` | Search input visible, timezone columns visible |
 | 3 | Navigate to `/students/[id]/history` | Calendar grid renders |
 | 4 | Click a session in history | ClassDetailsModal opens |
@@ -95,7 +95,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Search input visible |
+| 1 | Login as Admin, go to `/dashboard` | Search input visible |
 | 2 | Login as Teacher, go to `/dashboard` | Search input **not** rendered |
 | 3 | Login as Parent, go to `/dashboard` | Search input **not** rendered |
 
@@ -103,21 +103,21 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Three timezone columns in grid |
+| 1 | Login as Admin, go to `/dashboard` | Three timezone columns in grid |
 | 2 | Login as Teacher, go to `/dashboard` | Single time column only |
 
 ### D6: Admin override toolbar permission gate
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/classes/[id]` | AdminActionsBar visible |
+| 1 | Login as Admin, go to `/classes/[id]` | AdminActionsBar visible |
 | 2 | Login as Teacher, go to `/classes/[id]` | AdminActionsBar **not** rendered, ActionsPanel shown instead |
 
 ### D7: History calendar permission gate
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/students/[id]/history` | Calendar grid renders |
+| 1 | Login as Admin, go to `/students/[id]/history` | Calendar grid renders |
 | 2 | Login as Teacher, go to `/students/[id]/history` | Calendar **not** rendered |
 
 ### D8: Session activate permission gate
@@ -131,11 +131,11 @@ flowchart TD
 
 ## Mobile Scenarios
 
-### M1: Academy Admin mobile full access
+### M1: Admin mobile full access
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin on mobile | Mobile dashboard |
+| 1 | Login as Admin on mobile | Mobile dashboard |
 | 2 | Navigate to `/dashboard` | Search visible, timezone info in cards |
 | 3 | Navigate to `/students/[id]/history` | Mobile weekly scroller renders |
 | 4 | Navigate to `/classes/[id]` | Admin actions accessible |

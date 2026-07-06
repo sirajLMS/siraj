@@ -15,7 +15,7 @@ Story 3 formalizes the leave/reschedule workflow after Story 2 session status co
 
 - Teachers can request/process leave for an activated or running class through `session.request_leave` semantics from the story.
 - The current codebase already represents that executable backend permission as `AppPermission.SESSION_UPDATE_STATUS_LEAVE = "session.update_status.leave"`.
-- Academy Admins can manually reschedule classes through `AppPermission.SESSION_RESCHEDULE = "session.reschedule"`.
+- Admins can manually reschedule classes through `AppPermission.SESSION_RESCHEDULE = "session.reschedule"`.
 - Admins verify rescheduled future sessions through existing `schedule.filter_advanced` and `dashboard.filter_metrics` capabilities.
 - Leave must update the original class to `COMPLETED` / `LEAVE`, mark it as rescheduled, preserve an audit trail in `remarks`, and create a successor `class_instances` row.
 - Manual reschedule must move the class to a new date/time, preserve rate and quota rules, and expose the result through GraphQL and real frontend views.
@@ -127,7 +127,7 @@ Story 3 text names these permission strings:
 | Story Permission String | Current Backend Enum | Current Frontend Generated Enum | Purpose |
 |---|---|---|---|
 | `session.request_leave` | Map to existing `AppPermission.SESSION_UPDATE_STATUS_LEAVE` unless product explicitly adds a new enum | `AppPermission.SessionUpdateStatusLeave` | Teacher/parent leave request processing |
-| `session.reschedule` | `AppPermission.SESSION_RESCHEDULE` | `AppPermission.SessionReschedule` | Academy Admin manual class reschedule |
+| `session.reschedule` | `AppPermission.SESSION_RESCHEDULE` | `AppPermission.SessionReschedule` | Admin manual class reschedule |
 | `schedule.filter_advanced` | `AppPermission.SCHEDULE_FILTER_ADVANCED` | `AppPermission.ScheduleFilterAdvanced` | Future date and status filters |
 | `dashboard.filter_metrics` | `AppPermission.DASHBOARD_FILTER_METRICS` | `AppPermission.DashboardFilterMetrics` | Metric/status filtering |
 
@@ -145,10 +145,10 @@ Implementation rule:
 
 | **Permission Key** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Mutation** |
 |---|---|---|---|---|
-| `session.update_status.leave` | Teacher Default | Leave Action Button | `ClassSessionService.updateStatusLeave()` | `updateSessionStatusLeave` |
-| `session.reschedule` | Academy Admin | Reschedule Button | `ClassSessionService.reschedule()` | `rescheduleClass` |
-| `schedule.filter_advanced` | Academy Admin | Reschedule Tracking UI | `ScheduleService.getRescheduleTracking()` | `rescheduleTrackingRows` |
-| `dashboard.filter_metrics` | Academy Admin | Schedule Overview Metrics | `ScheduleService.getDailyMetrics()` | `rescheduleTrackingMetrics` |
+| `session.update_status.leave` | Teacher | Leave Action Button | `ClassSessionService.updateStatusLeave()` | `updateSessionStatusLeave` |
+| `session.reschedule` | Admin | Reschedule Button | `ClassSessionService.reschedule()` | `rescheduleClass` |
+| `schedule.filter_advanced` | Admin | Reschedule Tracking UI | `ScheduleService.getRescheduleTracking()` | `rescheduleTrackingRows` |
+| `dashboard.filter_metrics` | Admin | Schedule Overview Metrics | `ScheduleService.getDailyMetrics()` | `rescheduleTrackingMetrics` |
 
 ### 2.2 Permission Mapping to Existing Permissions
 All permissions are complementary and govern different aspects of class instance lifecycle management and schedule visibility.
@@ -158,8 +158,8 @@ All permissions are complementary and govern different aspects of class instance
 
 | **Permission Group** | **Slug** | **Permissions Assigned** |
 |---|---|---|
-| Teacher Default | `teacher_default` | `session.update_status.leave` |
-| Academy Admin | `academy_admin` | `session.reschedule`, `schedule.filter_advanced`, `dashboard.filter_metrics`, `session.update_status.leave` |
+| Teacher | `teacher_default` | `session.update_status.leave` |
+| Admin | `academy_admin` | `session.reschedule`, `schedule.filter_advanced`, `dashboard.filter_metrics`, `session.update_status.leave` |
 
 ---
 
@@ -640,7 +640,7 @@ stateDiagram-v2
 6. Replace `confirm()` reset with a MUI confirmation dialog:
    - translated title/body/cancel/confirm
    - destructive confirm button using theme tokens only
-7. Add a manual reschedule button for Academy Admin:
+7. Add a manual reschedule button for Admin:
    - Gate with `<RequirePermission permissions={[AppPermission.SessionReschedule]}>`.
    - Navigate to `/${locale}/reschedule?classInstanceId=${id}` or another existing locale-safe route pattern.
    - Do not expose to teachers unless product changes permissions.
@@ -1170,7 +1170,7 @@ Expected result:
 Story 3 is complete only when all of these are true:
 
 - Teacher leave processing uses the current executable permission `session.update_status.leave` unless a new `session.request_leave` permission was explicitly approved and fully seeded/generated.
-- Academy Admin manual reschedule uses `session.reschedule`.
+- Admin manual reschedule uses `session.reschedule`.
 - Future verification uses `schedule.filter_advanced` and `dashboard.filter_metrics`.
 - Leave processing is transactional, audited, localized, and creates exactly one successor.
 - Manual reschedule creates a successor with a unique idempotency key and does not reuse the original key.

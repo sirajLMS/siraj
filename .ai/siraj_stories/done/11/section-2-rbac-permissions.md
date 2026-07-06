@@ -28,7 +28,7 @@ Only one new permission is created in this story:
 | `system.restrict_resource_access` | System | System Automated | Not user-facing — service-layer gate on file download/access | `ResourceAccessGuardService.checkAccess()` | None — called internally by `LearningResourceService` methods |
 
 **Key characteristics of `system.restrict_resource_access`:**
-- It is **not held by human user roles** — no Academy Admin, Teacher, Parent, or Staff gets this key directly.
+- It is **not held by human user roles** — no Admin, Teacher, Parent, or Staff gets this key directly.
 - It is a **documentation/audit permission** that formally registers the system's resource access restriction behavior in the permissions catalog.
 - The actual enforcement is in `LearningResourceService` methods and the `StorageService` integration layer, which check `resources.list` permission before allowing file access.
 - It is **seeded in the migration** to be formally registered, enabling future audit logging and permission introspection.
@@ -41,26 +41,26 @@ Only one new permission is created in this story:
 | **Permission Group** | **Slug** | **Relevant Permissions Currently Assigned** |
 |---|---|---|
 | Super Admin | `super_admin` | `students.list`, `staff.view_directory`, `staff.edit_profile`, `resources.list`, `resources.upload` |
-| Academy Admin | `academy_admin` | `staff.view_directory`, `staff.edit_profile` |
-| Teacher Default | `teacher_default` | `resources.list` |
-| Staff Default | `staff_default` | `students.list` |
+| Admin | `academy_admin` | `staff.view_directory`, `staff.edit_profile` |
+| Teacher | `teacher_default` | `resources.list` |
+| Staff | `staff_default` | `students.list` |
 | System Automated | `system_automated` | `system.enforce_time_window`, `system.enforce_leave_limit`, `system.sync_notifications`, `system.enforce_suspended_lock`, `system.process_student_leave` |
 
 #### Required Changes (Story 11):
 
 | **Group** | **Slug** | **Permission to ADD** | **Reason** |
 |---|---|---|---|
-| Academy Admin | `academy_admin` | `students.list` | Story requires Academy Admin to access the global Student Directory |
-| Academy Admin | `academy_admin` | `resources.upload` | Story requires Academy Admin to upload learning resources |
+| Admin | `academy_admin` | `students.list` | Story requires Admin to access the global Student Directory |
+| Admin | `academy_admin` | `resources.upload` | Story requires Admin to upload learning resources |
 | System Automated | `system_automated` | `system.restrict_resource_access` | New system permission for resource access gate |
 #### Target State (After Story 11):
 
 | **Permission Group** | **Slug** | **Relevant Permissions** |
 |---|---|---|
 | Super Admin | `super_admin` | `students.list`, `staff.view_directory`, `staff.edit_profile`, `resources.list`, `resources.upload` (unchanged) |
-| Academy Admin | `academy_admin` | `staff.view_directory`, `staff.edit_profile`, **`students.list`** (NEW), **`resources.upload`** (NEW) |
-| Teacher Default | `teacher_default` | `resources.list` (unchanged) |
-| Staff Default | `staff_default` | `students.list` (unchanged) |
+| Admin | `academy_admin` | `staff.view_directory`, `staff.edit_profile`, **`students.list`** (NEW), **`resources.upload`** (NEW) |
+| Teacher | `teacher_default` | `resources.list` (unchanged) |
+| Staff | `staff_default` | `students.list` (unchanged) |
 | System Automated | `system_automated` | (existing) + **`system.restrict_resource_access`** (NEW) |
 ---
 
@@ -126,12 +126,12 @@ Only one new permission is created in this story:
 
 | **Permission** | **Scope** | **Details** |
 |---|---|---|
-| `students.list` | Any-scoped | Academy Admin and Staff Default see ALL students in the directory. No per-user filtering at the permission level — the query returns all students. |
+| `students.list` | Any-scoped | Admin and Staff see ALL students in the directory. No per-user filtering at the permission level — the query returns all students. |
 | `history.view_calendar` | Any-scoped | Admin can view any student's class history. The `studentId` parameter determines which student, and admins can pass any valid ID. |
 | `staff.view_directory` | Any-scoped | System Administrator sees ALL staff members with admin access. No self-scoping. |
 | `staff.edit_profile` | Any-scoped | System Administrator can edit ANY fellow admin's profile. This is highly privileged — only Super Admin and System Administrator roles hold this. |
 | `resources.list` | Any-scoped | Teachers and Admins see the same global resource library. No per-user filtering. |
-| `resources.upload` | Any-scoped | Academy Admin uploads resources to the shared repository. All authorized viewers see the uploaded resource. |
+| `resources.upload` | Any-scoped | Admin uploads resources to the shared repository. All authorized viewers see the uploaded resource. |
 | `system.restrict_resource_access` | N/A | System-internal permission. Not user-facing. No self/any scoping distinction. |
 ---
 

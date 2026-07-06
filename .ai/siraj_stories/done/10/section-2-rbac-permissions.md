@@ -12,7 +12,7 @@ Story 10 adds two system-automated permission keys. These permissions are not us
 | `system.process_student_leave` | System | System Automated | Not user-facing — triggered internally when admin sets student to ON_LEAVE | `StudentLeaveProcessingService.processStudentLeave()` | None — called internally by `StudentLifecycleService.changeStudentStatus()` |
 
 **Key characteristics of these permissions:**
-- They are **not held by human user roles** — no Academy Admin, Super Admin, Teacher, Parent, or Staff gets these keys directly.
+- They are **not held by human user roles** — no Admin, Super Admin, Teacher, Parent, or Staff gets these keys directly.
 - They are **not checked at the resolver level** — the GraphQL mutation for `changeStudentStatus` (from Story 9) already gates on `student.manage_status`. The new system permissions are checked implicitly by the existence of the service methods.
 - They are **seeded in the migration** to be formally registered in the permissions catalog, enabling future audit logging and permission introspection.
 - They are **documented as `AppPermission` enum values** to prevent magic string usage in the codebase.

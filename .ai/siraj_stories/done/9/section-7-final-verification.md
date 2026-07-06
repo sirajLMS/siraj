@@ -142,7 +142,7 @@ grep -n "BillingCreateInvoice\|BillingUpdateStatusPaid\|BillingDeleteInvoice\|St
 
 ### 7.13 Functional Verification Checklist
 
-**Billing Management (requires Academy Admin session in development environment):**
+**Billing Management (requires Admin session in development environment):**
 - [ ] Open Parent Profile → Billing section → Click "Create Invoice" → Fill form → Submit → Invoice appears in list with `UNPAID` status
 - [ ] On an UNPAID invoice row → Click "Mark as Paid" → Invoice status changes to `PAID` → Mark as Paid button disappears → Notification tray updates
 - [ ] Attempt "Mark as Paid" on already-PAID invoice → Error snackbar appears: "Invoice already paid"
@@ -150,7 +150,7 @@ grep -n "BillingCreateInvoice\|BillingUpdateStatusPaid\|BillingDeleteInvoice\|St
 - [ ] Attempt to delete same invoice again → Error snackbar appears: "Invoice not found"
 - [ ] Log in as Teacher → Billing page actions are hidden (no "Create Invoice", no "Mark as Paid", no "Delete" buttons visible)
 
-**Student Management (requires Academy Admin session in development environment):**
+**Student Management (requires Admin session in development environment):**
 - [ ] Open Parent Profile → Students section → Click SettingsOutlined icon on any student row → Reassign Teacher dialog opens
 - [ ] Select new teacher in Reassign dialog → Click Confirm → Student's teacher column updates → Success snackbar
 - [ ] Click StatusBadge on REGULAR student → Change Status dialog opens with `suspended` and `on_leave` options

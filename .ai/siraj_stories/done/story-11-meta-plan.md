@@ -93,7 +93,7 @@ mkdir -p .ai/siraj_stories/11/section-6-tasks
 - Source story reference: `.ai/siraj_stories/11.md` (Part 12)
 - Security baseline: `.ai/siraj_stories/10/` (Story 10 must be fully deployed)
 - Story scope: Permission-gated access to Students Directory, Student Class History, Managers Directory, Manager Profile Editing, Learning Resources (view/upload), and a system-level resource access security gate
-- Target roles: System Administrator (manager.*), Academy Admin (student.*, resource.*), Teacher (resource.view), System Automated (system.restrict_resource_access)
+- Target roles: System Administrator (manager.*), Admin (student.*, resource.*), Teacher (resource.view), System Automated (system.restrict_resource_access)
 - Business objectives (3-4 items explaining WHY for each permission group)
 - Scope boundaries: IN scope vs OUT of scope
 
@@ -115,8 +115,8 @@ mkdir -p .ai/siraj_stories/11/section-6-tasks
 **Content scope (~180 lines):**
 - New permissions table (7 permissions with key, category, group, UI gate, service method, GraphQL operation)
 - Permission mapping to existing permissions (relationship table)
-- Permission group assignments (System Administrator, Academy Admin, Teacher, System Automated)
-- Self-scoping vs any-scoping analysis (e.g., `student.view_directory` is any-scoped for Academy Admin, `resource.view` is shared)
+- Permission group assignments (System Administrator, Admin, Teacher, System Automated)
+- Self-scoping vs any-scoping analysis (e.g., `student.view_directory` is any-scoped for Admin, `resource.view` is shared)
 - New AppPermission enum entries (exact code to add)
 - Migration SQL changes (exact INSERT statements)
 - Verification commands
@@ -128,7 +128,7 @@ mkdir -p .ai/siraj_stories/11/section-6-tasks
 **Content scope (~120 lines):**
 - **Threat 1: IDOR on student directory** — Users must not see students they're not authorized to view
 - **Threat 2: IDOR on manager profile editing** — Only System Administrators can edit other admin profiles; prevent privilege escalation
-- **Threat 3: Unauthorized resource upload** — Only Academy Admin can upload; Teachers are read-only
+- **Threat 3: Unauthorized resource upload** — Only Admin can upload; Teachers are read-only
 - **Threat 4: Direct URL access to resources** — `system.restrict_resource_access` blocks unauthenticated/unauthorized file downloads
 - **Threat 5: Student history cross-access** — Viewing history of students not in viewer's scope
 - Each threat includes: Current Gap, Fix approach, Test Requirements
@@ -225,11 +225,11 @@ mkdir -p .ai/siraj_stories/11/section-6-tasks
 - **Objective:** GraphQL integration tests for all new operations
 - **Dependencies:** Task F (documents created)
 - **Detailed steps:**
-  1. Test `studentDirectory` query — authorized (Academy Admin) + unauthorized (Teacher/Parent)
+  1. Test `studentDirectory` query — authorized (Admin) + unauthorized (Teacher/Parent)
   2. Test `managerDirectory` query — authorized (System Admin) + unauthorized (Teacher/Parent)
-  3. Test `updateManagerProfile` mutation — authorized (System Admin) + unauthorized (Academy Admin)
-  4. Test `learningResources` query — authorized (Teacher/Academy Admin) + unauthorized (Parent/Student)
-  5. Test `uploadLearningResource` mutation — authorized (Academy Admin) + unauthorized (Teacher)
+  3. Test `updateManagerProfile` mutation — authorized (System Admin) + unauthorized (Admin)
+  4. Test `learningResources` query — authorized (Teacher/Admin) + unauthorized (Parent/Student)
+  5. Test `uploadLearningResource` mutation — authorized (Admin) + unauthorized (Teacher)
   6. Security threat coverage from Section 4
 - **Target files:** test files in `frontend/graphql/test/`
 

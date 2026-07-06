@@ -6,6 +6,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { SignedUrlRepository } from "@/backend/db/repo";
 import { StorageDbRepository } from "@/backend/db/repo/storage.repository";
 import logger from "@/backend/lib/logger";
+import { resolveLocalStoragePath } from "@/backend/lib/storage/local-storage-path";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
 
 interface SignedUrlData {
@@ -44,23 +45,6 @@ function validateHeaders(request: NextRequest, signedUrl: SignedUrlData): NextRe
   }
 
   return null;
-}
-
-const storagePath = process.env.LOCAL_STORAGE_PATH || "./storage/";
-
-/**
- * Convert relative user path to secure absolute filesystem path
- */
-function getAbsolutePath(relativePath: string): string {
-  const basePath = path.resolve(process.cwd(), storagePath);
-  const resolvedPath = path.resolve(basePath, relativePath);
-  const relativeToBase = path.relative(basePath, resolvedPath);
-
-  if (relativeToBase.startsWith("..") || path.isAbsolute(relativeToBase)) {
-    throw new Error("Path traversal detected");
-  }
-
-  return resolvedPath;
 }
 
 /**
@@ -160,7 +144,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 async function processUpload(body: ReadableStream<Uint8Array> | null, signedUrl: SignedUrlData, tokenId: string) {
   let absolutePath: string;
   try {
-    absolutePath = getAbsolutePath(signedUrl.filePath);
+    absolutePath = resolveLocalStoragePath(signedUrl.filePath);
   } catch (error) {
     logger.error("Path traversal attempt detected", { tokenId, path: signedUrl.filePath, error });
     return NextResponse.json({ error: "Invalid file path" }, { status: 400 });

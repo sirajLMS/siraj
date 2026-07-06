@@ -43,7 +43,12 @@ export namespace TeacherDashboardService {
 
     const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacher.id);
 
-    const progressFeed = await SchedulingRepository.getTeacherProgressFeed(teacher.id, targetDate);
+    const progressFeed = await SchedulingRepository.getTeacherProgressFeed(
+      teacher.id,
+      targetDate,
+      teacher.timezone,
+      locale
+    );
 
     const mappedScheduleRows = result.rows.map(r => ({
       ...r,

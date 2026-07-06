@@ -45,7 +45,7 @@ This implementation plan details the resolutions for identified service-layer vu
 * In the `runStateChange` helper, verify the relationship of the `actorUserId` to the class instance:
   - Check if `actorUserId` is a teacher. If yes, assert that the resolved `teacher.id` matches `existing.teacherId`.
   - Check if `actorUserId` is a parent. If yes, assert that the resolved parent record is linked to `existing.studentId`.
-  - Allow Super Admin / Academy Admin / Staff user roles to bypass relationship checking.
+  - Allow Super Admin / Admin / Staff user roles to bypass relationship checking.
   - Reject unauthorised requests with a localized error using `getBackendTranslations({ locale, namespace: "errors" })("unauthorizedAction")`.
 * Document these repository checks and RLS enforcement in comments at the top of `SchedulingRepository`.
 

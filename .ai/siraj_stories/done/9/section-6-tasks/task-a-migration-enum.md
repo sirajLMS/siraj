@@ -267,7 +267,7 @@ WHERE
     );
 ```
 
-**3b. Academy Admin block** — append 5 operational permissions (excludes `system.sync_notifications`):
+**3b. Admin block** — append 5 operational permissions (excludes `system.sync_notifications`):
 
 ```sql
 INSERT INTO
@@ -401,9 +401,9 @@ All database tests must pass with 0 failures.
 - [ ] `shared/lib/enum.ts` contains all 6 new `AppPermission` entries with correct PascalCase key names and string values
 - [ ] `backend/db/migration/3-system_permissions_and_groups.sql` contains all 6 new `INSERT INTO permissions` entries with `is_system = true`
 - [ ] Super Admin group receives all 6 new permissions in `group_permissions` assignment
-- [ ] Academy Admin group receives 5 new operational permissions (excludes `system.sync_notifications`)
+- [ ] Admin group receives 5 new operational permissions (excludes `system.sync_notifications`)
 - [ ] System Automated group receives `system.sync_notifications`
-- [ ] Teacher Default, Parent Default, Staff Default groups receive NONE of the new permissions
+- [ ] Teacher, Parent, Staff groups receive NONE of the new permissions
 - [ ] `bun db cleanGenerate` passes with 0 errors
 - [ ] `bun db reset` passes with 0 errors
 - [ ] `bun db seed` passes with 0 errors

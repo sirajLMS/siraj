@@ -80,7 +80,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     }
   });
 
-  test("Academy Admin can query manager directory", async () => {
+  test("Admin can query manager directory", async () => {
     const managerResult = await getManagers(adminToken);
 
     expect(Array.isArray(managerResult.rows)).toBeTrue();
@@ -135,7 +135,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     expect(updated.skypeId).toBe(uniqueSkype);
   });
 
-  test("Academy Admin denied from updating Super Admin profile", async () => {
+  test("Admin denied from updating Super Admin profile", async () => {
     const managerResult = await getManagers(adminToken);
 
     if (!managerResult.rows) throw new Error("No rows returned");
@@ -177,7 +177,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     expect(result.error).toBeDefined();
   });
 
-  test("Academy Admin denied from updating any manager profile (requires superAdmin auth scope)", async () => {
+  test("Admin denied from updating any manager profile (requires superAdmin auth scope)", async () => {
     const managerResult = await getManagers(superAdminToken);
 
     if (!managerResult.rows) throw new Error("No rows returned");

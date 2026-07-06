@@ -5,10 +5,10 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { useTranslations } from "next-intl";
 import type { FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { PageContainer, PageHeader } from "@/frontend/components/ui";
-import { FeesContractSection } from "../../onboarding/FeesContractSection";
-import { ParentInfoSection } from "../../onboarding/ParentInfoSection";
-import { SocialCommsSection } from "../../onboarding/SocialCommsSection";
-import type { ParentOnboardingFormData } from "../../onboarding/schemas/parentOnboardingSchema";
+import { FeesContractSection } from "../../../admin/parents/onboarding/FeesContractSection";
+import { ParentInfoSection } from "../../../admin/parents/onboarding/ParentInfoSection";
+import { SocialCommsSection } from "../../../admin/parents/onboarding/SocialCommsSection";
+import type { ParentOnboardingFormData } from "../../../admin/parents/onboarding/schemas/parentOnboardingSchema";
 import type { ParentProfileEditFormData } from "./parentProfileEditSchema";
 
 interface Props {

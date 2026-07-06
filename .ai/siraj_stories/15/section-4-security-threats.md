@@ -40,7 +40,7 @@
 
 **Test Requirements:**
 - [ ] Super Admin deletes a suggestion → succeeds (soft-delete)
-- [ ] Academy Admin without `suggestions.delete` attempts to delete → `unauthorized` error
+- [ ] Admin without `suggestions.delete` attempts to delete → `unauthorized` error
 - [ ] Parent → `unauthorized`
 
 ---

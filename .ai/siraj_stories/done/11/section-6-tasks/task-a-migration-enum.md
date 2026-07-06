@@ -135,8 +135,8 @@ Add `'students.list'` and `'resources.upload'` to the `IN` clause. The exact pos
 **After (add `resources.upload` — and `students.list` only if not already present):**
 ```sql
         'student.reassign_teacher',
-        'students.list',        -- Story 11: Academy Admin gains student directory access
-        'resources.upload'      -- Story 11: Academy Admin gains resource upload capability
+        'students.list',        -- Story 11: Admin gains student directory access
+        'resources.upload'      -- Story 11: Admin gains resource upload capability
     );
 ```
 

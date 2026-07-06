@@ -137,7 +137,7 @@ The `DashboardClientBridge.tsx` and `UserStoreInitializer.tsx` already map backe
    - **Teacher**: sees home, teacher-dashboard, teacher-dashboard-active, resources, books-and-bags
    - **Parent**: sees home, complaints-submit, suggestions-submit
    - **Staff**: sees home, students, complaints-manage (via ComplaintsList), schedule status-tracking
-   - **Academy Admin**: sees billing-admin, suggestions-manage, reports, schedule-tracking, etc.
+   - **Admin**: sees billing-admin, suggestions-manage, reports, schedule-tracking, etc.
    - **Super Admin**: sees everything
 
 ---
@@ -158,21 +158,21 @@ The `DashboardClientBridge.tsx` and `UserStoreInitializer.tsx` already map backe
 
 ## Impact Summary by User Group
 
-### Teacher Default Group
+### Teacher Group
 - **Before**: Could see home, teacher-dashboard, resources, books-and-bags. Schedule alerts hidden but accessible via URL.
 - **After**: Same visible items. Schedule alerts now properly gated (same visibility, but page is secured).
 
-### Parent Default Group
+### Parent Group
 - **Before**: Could NOT see "Submit Complaint" or "Submit Suggestion" despite having the permissions. Critical bug.
 - **After**: Parents CAN now see both sidebar links. Fixes the primary usability blocker.
 
-### Staff Default Group
+### Staff Group
 - **Before**: Saw "Teachers", "Parents" links leading to blank pages. Could not see "Manage Complaints" despite having `ComplaintsList`. Saw "Submit Suggestion/Complaint" links leading to blank pages.
 - **After**: No longer sees directory links they can't access. CAN now see "Manage Complaints" (via `ComplaintsList`). No longer sees submit forms they can't access.
 
-### Academy Admin Group
+### Admin Group
 - **Before**: Could NOT see billing-admin, billing-manual, suggestions-manage, reports, schedule-tracking despite having the corresponding page permissions.
-- **After**: All these sidebar items are now visible to Academy Admin.
+- **After**: All these sidebar items are now visible to Admin.
 
 ---
 

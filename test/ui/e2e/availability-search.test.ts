@@ -18,7 +18,7 @@ afterEach(async () => {
 });
 
 describe("Availability Search E2E", () => {
-  test("Academy Admin sees Schedule Search nav item in sidebar", async () => {
+  test("Admin sees Schedule Search nav item in sidebar", async () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);

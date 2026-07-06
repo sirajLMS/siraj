@@ -706,7 +706,7 @@ Each task in Phase 3 creates one `.test.ts` file in `test/ui/e2e/`. All tasks us
 
 **Status:** Pending
 
-**Objective:** Verify the Academy Admin dashboard experience end-to-end: search visibility, timezone columns, grid filtering, navigation to class details, role-based access differences, and mobile responsive layout.
+**Objective:** Verify the Admin dashboard experience end-to-end: search visibility, timezone columns, grid filtering, navigation to class details, role-based access differences, and mobile responsive layout.
 
 **Layer-Specific Rules (E2E Tests — Flattened from Section 4.B):**
 - Browser: `playwright` library, `chromium.launch({ headless: true })`.
@@ -749,8 +749,8 @@ Each task in Phase 3 creates one `.test.ts` file in `test/ui/e2e/`. All tasks us
    ```
 
 7. Write test cases inside `describe("Admin Dashboard E2E", () => { ... })`:
-   - **"Academy Admin sees search input"**: `context = await createContext()`, `const page = await context.newPage()`, `await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin)`, `await page.goto("/ar/dashboard")`, assert `expect(page.getByRole("textbox")).toBeVisible()`
-   - **"Academy Admin sees timezone columns"**: Login as academyAdmin, goto `/ar/dashboard`, assert `expect(page.getByText("Your Time")).toBeVisible()`
+   - **"Admin sees search input"**: `context = await createContext()`, `const page = await context.newPage()`, `await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin)`, `await page.goto("/ar/dashboard")`, assert `expect(page.getByRole("textbox")).toBeVisible()`
+   - **"Admin sees timezone columns"**: Login as academyAdmin, goto `/ar/dashboard`, assert `expect(page.getByText("Your Time")).toBeVisible()`
    - **"Search filters schedule grid"**: Login as academyAdmin, goto `/ar/dashboard`, type "Ahmed" in search textbox, wait for grid to update (use `expect(page.locator("[data-testid='schedule-row']")).toHaveCount(...)` or wait for text change), assert row count changes or filtered results appear
    - **"Click details navigates to class page"**: Login as academyAdmin, goto `/ar/dashboard`, click details icon on first row, assert `expect(page).toHaveURL(/\/classes\//)`
    - **"Teacher does not see search input"**: `context = await createContext()`, login as teacher, goto `/ar/dashboard`, assert `expect(page.getByRole("textbox")).not.toBeVisible()` or `await expect(page.locator("input[type='text']")).toHaveCount(0)`
@@ -1006,7 +1006,7 @@ Each task in Phase 3 creates one `.test.ts` file in `test/ui/e2e/`. All tasks us
 
 **Status:** Pending
 
-**Objective:** Verify cross-role RBAC enforcement end-to-end: Academy Admin sees all features, Teacher sees limited features, Parent sees minimal features, and permission-gated elements are absent from DOM (not just hidden via CSS).
+**Objective:** Verify cross-role RBAC enforcement end-to-end: Admin sees all features, Teacher sees limited features, Parent sees minimal features, and permission-gated elements are absent from DOM (not just hidden via CSS).
 
 **Layer-Specific Rules (E2E Tests — Flattened from Section 4.B):**
 - Browser: `playwright` library, `chromium.launch({ headless: true })`.
@@ -1045,12 +1045,12 @@ Each task in Phase 3 creates one `.test.ts` file in `test/ui/e2e/`. All tasks us
 6. Declare `let context: BrowserContext` and add `afterEach` cleanup.
 
 7. Write test cases inside `describe("Permissions & RBAC E2E", () => { ... })`:
-   - **"Academy Admin sees all dashboard features"**: Login as academyAdmin, goto `/ar/dashboard`, assert search input (`page.getByRole("textbox")`), timezone columns (`page.getByText("Your Time")`), and schedule grid are all visible
+   - **"Admin sees all dashboard features"**: Login as academyAdmin, goto `/ar/dashboard`, assert search input (`page.getByRole("textbox")`), timezone columns (`page.getByText("Your Time")`), and schedule grid are all visible
    - **"Teacher sees limited dashboard features"**: Login as teacher, goto `/ar/dashboard`, assert search input is NOT visible (`expect(page.locator("input[type='text']")).toHaveCount(0)`), timezone columns are NOT visible
    - **"Parent sees minimal features"**: Login as parent, goto `/ar/dashboard`, assert search and timezone are NOT visible
    - **"Permission-gated elements are absent from DOM"**: Login as teacher, goto `/ar/dashboard`, use `page.locator(selector).count()` to verify admin-only elements have count 0 (not just hidden via CSS `display: none`)
    - **"Teacher dashboard requires TeacherViewDashboard permission"**: Login as teacher, goto `/ar/teachers/dashboard`, assert page renders. Login as parent, goto same URL, assert redirect or access denied message
-   - **"Admin actions only visible to Academy Admin"**: Login as academyAdmin, navigate to class details, assert AdminActionsBar visible. Login as teacher, navigate to same page, assert AdminActionsBar NOT visible
+   - **"Admin actions only visible to Admin"**: Login as academyAdmin, navigate to class details, assert AdminActionsBar visible. Login as teacher, navigate to same page, assert AdminActionsBar NOT visible
 
 **Test Execution Requirements:**
 - **Run the E2E test suite** to verify all 6 tests pass:

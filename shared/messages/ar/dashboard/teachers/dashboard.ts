@@ -83,6 +83,16 @@ export const dashboard: TeacherDashboardLabels = {
   },
   progressFeed: {
     title: "موجز تقدم الطلاب",
+    autoMissedTooltip: "تم تسجيل الحصة كفائتة تلقائياً بعد انتهاء فترة السماح للتفعيل.",
+    events: {
+      auto_missed: "حصة فائتة",
+      marked_absent: "تم تسجيل الغياب",
+      activated: "تم تفعيل الحصة",
+      started: "بدأت الحصة",
+      completed: "اكتملت الحصة",
+      leave: "تم تسجيل الإجازة",
+      other: "تم تحديث الحالة",
+    },
   },
   alert: {
     title: "فاتتك وقت الحصة",

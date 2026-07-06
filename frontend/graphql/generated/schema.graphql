@@ -2701,10 +2701,24 @@ input TeacherProfileUpdateInput {
   zoomUsername: String
 }
 
+enum TeacherProgressFeedEventKind {
+  activated
+  auto_missed
+  completed
+  leave
+  marked_absent
+  other
+  started
+}
+
 type TeacherProgressFeedItem {
+  durationMinutes: Int
+  eventKind: TeacherProgressFeedEventKind
   id: String
-  title: String
-  type: String
+  occurredAt: DateTime
+  scheduledTimeFormatted: String
+  studentId: String
+  studentName: String
 }
 
 type TeacherSimple {

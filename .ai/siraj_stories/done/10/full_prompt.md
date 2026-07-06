@@ -55,7 +55,7 @@ Content:
 - **Source story:** `.ai/siraj_stories/10.md` (Part 11 - Permissions & Permission Groups, timestamps 00:00 - 01:57)
 - **Security baseline:** `.ai/siraj_stories/9/` (mandatory prerequisite — Invoice Generation & Student Lifecycle sprint must be fully deployed)
 - **Story scope:** Implements two system-automated permissions that enforce cascading rules on student status changes to `SUSPENDED` or `ON_LEAVE`. `system.enforce_suspended_lock` backs automated UI control revocation on the teacher's class schedule (class stays visible but action buttons are hidden). `system.process_student_leave` backs the automated future-class protection workflow (upcoming classes marked as excused, queued for rescheduling so no paid classes are lost). Both permissions are system-internal — triggered by the existing `student.manage_status` flow from Story 9. Key deliverables: permission seeds, service-layer enforcement hooks in `StudentLifecycleService.changeStudentStatus()`, new `statusTrackingSchedule` GraphQL query, and migration of `StatusTrackingContainer` from `mockStatusTrackingStore` to real Apollo `useQuery`.
-- **Target roles:** System Automated (enforcement permissions). Academy Admin / Super Admin already hold `student.manage_status` (Story 9) which triggers enforcement. Teacher role is read-only observer of the UI lock.
+- **Target roles:** System Automated (enforcement permissions). Admin / Super Admin already hold `student.manage_status` (Story 9) which triggers enforcement. Teacher role is read-only observer of the UI lock.
 - **Status:** Planning phase — awaiting approval for execution.
 
 ---

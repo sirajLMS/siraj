@@ -10,24 +10,8 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { UserRepository } from "@/backend/db/repo";
 import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
 import logger from "@/backend/lib/logger";
+import { resolveLocalStoragePath, resolvePublicStoragePath } from "@/backend/lib/storage/local-storage-path";
 import { extToMime } from "@/shared/utils/storage.utils";
-
-const storagePath = process.env.LOCAL_STORAGE_PATH || "./storage/";
-
-/**
- * Convert relative user path to secure absolute filesystem path
- */
-function getAbsolutePath(relativePath: string): string {
-  const basePath = path.resolve(process.cwd(), storagePath);
-  const resolvedPath = path.resolve(basePath, relativePath);
-  const relativeToBase = path.relative(basePath, resolvedPath);
-
-  if (relativeToBase.startsWith("..") || path.isAbsolute(relativeToBase)) {
-    throw new Error("Path traversal detected");
-  }
-
-  return resolvedPath;
-}
 
 /**
  * Detect content type from file extension
@@ -190,7 +174,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Allow unauthenticated access to files in public/ directory
     if (relativePath.startsWith("public/")) {
       const subPath = relativePath.substring("public/".length);
-      const absolutePath = path.join(storagePath, "public", subPath);
+      const absolutePath = resolvePublicStoragePath(subPath);
 
       try {
           await fs.access(absolutePath);
@@ -211,7 +195,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     let absolutePath: string;
     try {
-      absolutePath = getAbsolutePath(relativePath);
+      absolutePath = resolveLocalStoragePath(relativePath);
     } catch (error) {
       logger.warn("Path traversal attempt detected", { path: relativePath, error });
       return NextResponse.json({ error: "Invalid file path" }, { status: 400 });

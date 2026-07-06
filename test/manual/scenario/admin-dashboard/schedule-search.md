@@ -2,7 +2,7 @@
 
 **Route:** `/dashboard`
 **Permission:** `dashboard.search`
-**Role:** Academy Admin
+**Role:** Admin
 
 ---
 
@@ -30,7 +30,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin | Dashboard loads |
+| 1 | Login as Admin | Dashboard loads |
 | 2 | Navigate to `/dashboard` | Schedule overview section renders |
 | 3 | Observe the schedule header area | Search `TextField` is visible above the data grid |
 
@@ -46,7 +46,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Schedule grid shows all rows for selected date |
+| 1 | Login as Admin, go to `/dashboard` | Schedule grid shows all rows for selected date |
 | 2 | Type a student name (e.g., "Ahmed") in search | After debounce, grid updates |
 | 3 | Observe grid rows | Only rows where student name matches "Ahmed" are shown |
 | 4 | Clear search input | All rows for the date reappear |
@@ -55,7 +55,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Schedule grid shows all rows |
+| 1 | Login as Admin, go to `/dashboard` | Schedule grid shows all rows |
 | 2 | Type a teacher name in search | After debounce, grid updates |
 | 3 | Observe grid rows | Only rows where teacher name matches are shown |
 
@@ -63,7 +63,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Schedule grid populated |
+| 1 | Login as Admin, go to `/dashboard` | Schedule grid populated |
 | 2 | Type a non-existent name (e.g., "XYZNONAME") | After debounce, grid updates |
 | 3 | Observe grid | Empty state or "no results" message displayed |
 
@@ -71,7 +71,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Today's schedule shown |
+| 1 | Login as Admin, go to `/dashboard` | Today's schedule shown |
 | 2 | Change date filter to a different day | Grid updates to that day's schedule |
 | 3 | Type a search term | Grid filters within the selected date only |
 
@@ -79,7 +79,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin, go to `/dashboard` | Schedule grid shown |
+| 1 | Login as Admin, go to `/dashboard` | Schedule grid shown |
 | 2 | Select a teacher from the teacher filter dropdown | Grid shows only that teacher's classes |
 | 3 | Type a student name in search | Grid narrows to matching student within selected teacher's classes |
 
@@ -91,7 +91,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin on mobile viewport | Dashboard loads in mobile layout |
+| 1 | Login as Admin on mobile viewport | Dashboard loads in mobile layout |
 | 2 | Navigate to `/dashboard` | Schedule card list renders |
 | 3 | Observe the header area | Search input is visible (may be collapsible or in a search bar) |
 
@@ -99,7 +99,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin on mobile, go to `/dashboard` | Schedule cards shown |
+| 1 | Login as Admin on mobile, go to `/dashboard` | Schedule cards shown |
 | 2 | Tap search and type a student name | Card list filters to matching results |
 | 3 | Clear search | All cards reappear |
 
@@ -107,5 +107,5 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin on mobile, go to `/dashboard` | Schedule cards shown |
+| 1 | Login as Admin on mobile, go to `/dashboard` | Schedule cards shown |
 | 2 | Type a non-existent name | Empty state displayed in mobile-friendly layout |

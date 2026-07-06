@@ -22,11 +22,11 @@ import {
 } from "@/frontend/components/ui";
 import { ParentStatus } from "@/frontend/graphql/generated/gql/graphql-types";
 import {
-  type ParentAccountStatus,
   type ParentDirectoryRow,
   toParentAccountStatus,
-} from "@/frontend/views/dashboard/parents/types/directory";
+} from "@/frontend/views/dashboard/admin/parents/home/directory";
 import type { MetricItem } from "@/frontend/views/dashboard/types/dashboard";
+import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
 import { ParentCardList, type ParentCardListLabels } from "./ParentCardList";
 import { ParentsDataGrid, type ParentsDataGridLabels } from "./ParentsDataGrid";
 import { ParentsMetricGrid } from "./ParentsMetricGrid";

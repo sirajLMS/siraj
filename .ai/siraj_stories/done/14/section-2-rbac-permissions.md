@@ -1,22 +1,22 @@
 ## Section 2: RBAC Permissions (Canonical)
 
-### 2.1 Existing Permissions (Reused — Add to Academy Admin Group)
+### 2.1 Existing Permissions (Reused — Add to Admin Group)
 
-These permissions already exist in `shared/lib/enum.ts` and the migration SQL. They need to be **assigned to the Academy Admin group** in the migration.
+These permissions already exist in `shared/lib/enum.ts` and the migration SQL. They need to be **assigned to the Admin group** in the migration.
 
 | **Permission Key** | **Enum Value** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Operation** |
 |---|---|---|---|---|---|
-| `complaints.list` | `COMPLAINTS_LIST` | Academy Admin | `AdminComplaintsContainer` visibility | `ComplaintService.getAdminQueue()` | `adminComplaintQueue` query |
-| `complaints.delete` | `COMPLAINTS_DELETE` | Academy Admin | Delete button in `ComplaintQueueCard` | `ComplaintService.deleteComplaint()` | `deleteComplaint` mutation |
-| `complaints.respond` | `COMPLAINTS_RESPOND` | Academy Admin | Response form in `ComplaintQueueCard` | `ComplaintService.respondToComplaint()` | `respondToComplaint` mutation |
+| `complaints.list` | `COMPLAINTS_LIST` | Admin | `AdminComplaintsContainer` visibility | `ComplaintService.getAdminQueue()` | `adminComplaintQueue` query |
+| `complaints.delete` | `COMPLAINTS_DELETE` | Admin | Delete button in `ComplaintQueueCard` | `ComplaintService.deleteComplaint()` | `deleteComplaint` mutation |
+| `complaints.respond` | `COMPLAINTS_RESPOND` | Admin | Response form in `ComplaintQueueCard` | `ComplaintService.respondToComplaint()` | `respondToComplaint` mutation |
 
 ### 2.2 New Permissions (Add to Enum + Migration + Group Assignments)
 
 | **Permission Key** | **Enum Value** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Operation** |
 |---|---|---|---|---|---|
-| `support.submit_complaint` | `SUPPORT_SUBMIT_COMPLAINT` | Parent Default | `ParentComplaintsContainer` visibility | `ComplaintService.submitComplaint()` | `submitComplaint` mutation |
-| `support.view_history` | `SUPPORT_VIEW_HISTORY` | Parent Default | Complaint record cards in parent view | `ComplaintService.getParentComplaints()` | `parentComplaints` query |
-| `communication.submit_suggestion` | `COMMUNICATION_SUBMIT_SUGGESTION` | Parent Default | `ParentSuggestionsContainer` visibility | `SuggestionService.submitSuggestion()` | `submitSuggestion` mutation |
+| `support.submit_complaint` | `SUPPORT_SUBMIT_COMPLAINT` | Parent | `ParentComplaintsContainer` visibility | `ComplaintService.submitComplaint()` | `submitComplaint` mutation |
+| `support.view_history` | `SUPPORT_VIEW_HISTORY` | Parent | Complaint record cards in parent view | `ComplaintService.getParentComplaints()` | `parentComplaints` query |
+| `communication.submit_suggestion` | `COMMUNICATION_SUBMIT_SUGGESTION` | Parent | `ParentSuggestionsContainer` visibility | `SuggestionService.submitSuggestion()` | `submitSuggestion` mutation |
 | `system.dispatch_email` | `SYSTEM_DISPATCH_EMAIL` | System Automated | N/A (background process) | `CommunicationService.send()` via `EmailChannel` | N/A (internal) |
 
 ### 2.3 Permission Mapping to Existing Permissions
@@ -33,8 +33,8 @@ These permissions already exist in `shared/lib/enum.ts` and the migration SQL. T
 | **Permission Group** | **Slug** | **New Permissions Assigned** | **Existing Permissions Added** |
 |---|---|---|---|
 | Super Admin | `super_admin` | `support.submit_complaint`, `support.view_history`, `communication.submit_suggestion`, `system.dispatch_email` | `complaints.list`, `complaints.delete`, `complaints.respond` (already assigned) |
-| Academy Admin | `academy_admin` | None | `complaints.list`, `complaints.delete`, `complaints.respond` (add to group) |
-| Parent Default | `parent_default` | `support.submit_complaint`, `support.view_history`, `communication.submit_suggestion` | None |
+| Admin | `academy_admin` | None | `complaints.list`, `complaints.delete`, `complaints.respond` (add to group) |
+| Parent | `parent_default` | `support.submit_complaint`, `support.view_history`, `communication.submit_suggestion` | None |
 | System Automated | `system_automated` | `system.dispatch_email` | None |
 
 ### 2.5 Self-Scoping vs Any-Scoping
@@ -60,7 +60,7 @@ Add to `backend/db/migration/3-system_permissions_and_groups.sql`:
 2. **Permission INSERTs** (4 new rows in `permissions` table)
 
 3. **Group assignment INSERTs**:
-   - Academy Admin: add `complaints.list`, `complaints.delete`, `complaints.respond`
-   - Parent Default: add `support.submit_complaint`, `support.view_history`, `communication.submit_suggestion`
+   - Admin: add `complaints.list`, `complaints.delete`, `complaints.respond`
+   - Parent: add `support.submit_complaint`, `support.view_history`, `communication.submit_suggestion`
    - System Automated: add `system.dispatch_email`
    - Super Admin: add all 4 new permissions (if not already covered by superset)

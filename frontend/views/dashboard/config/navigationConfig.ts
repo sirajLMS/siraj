@@ -48,6 +48,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherDashboard,
+    audience: "teacher",
   },
   {
     key: "regular-schedule",
@@ -56,6 +57,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/schedule",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
+    audience: "teacher",
   },
   {
     key: "your-students",
@@ -64,6 +66,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherStudents,
+    audience: "teacher",
   },
   {
     key: "teacher-salary",
@@ -72,6 +75,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherOwnProfile,
+    audience: "teacher",
   },
   // {
   //   key: "teacher-class-details",
@@ -88,6 +92,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/teachers/rules",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherRules,
+    audience: "teacher",
   },
   {
     key: "parent-today-classes",
@@ -96,14 +101,16 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.parentDashboard,
+    audience: "parent",
   },
   {
     key: "parent-your-students",
     labelKey: "dashboard.nav.yourStudents",
     icon: GroupOutlined,
-    href: "/parents/me/students",
+    href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.parentStudents,
+    audience: "parent",
   },
   {
     key: "parent-suggest",
@@ -112,6 +119,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/suggestions",
     section: "main",
     permission: PAGE_PERMISSIONS.parentSuggest,
+    audience: "parent",
   },
   {
     key: "parent-rules",
@@ -120,14 +128,16 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/parents/rules",
     section: "main",
     permission: PAGE_PERMISSIONS.parentRules,
+    audience: "parent",
   },
   {
     key: "parent-social",
     labelKey: "dashboard.nav.socialMedia",
     icon: ShareOutlined,
-    href: "/parents/me/social",
+    href: "/social",
     section: "footer",
     permission: PAGE_PERMISSIONS.parentOwnProfile,
+    audience: "parent",
   },
   {
     key: "search-schedule",
@@ -240,6 +250,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/billing/invoices",
     section: "main",
     permission: PAGE_PERMISSIONS.billingParent,
+    audience: "parent",
   },
   {
     key: "suggestions-manage",
@@ -256,6 +267,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/suggestions",
     section: "main",
     permission: PAGE_PERMISSIONS.suggestionsSubmit,
+    audience: "parent",
   },
   {
     key: "complaints-manage",
@@ -272,6 +284,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/complaints",
     section: "main",
     permission: PAGE_PERMISSIONS.complaintsSubmit,
+    audience: "parent",
   },
   {
     key: "dst-migration",
@@ -309,6 +322,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherDashboard,
+    audience: "teacher",
   },
   {
     key: "regular-schedule",
@@ -317,6 +331,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/schedule",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
+    audience: "teacher",
   },
   {
     key: "your-students",
@@ -325,6 +340,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherStudents,
+    audience: "teacher",
   },
   {
     key: "home",
@@ -357,6 +373,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/profile",
     section: "main",
     permission: PAGE_PERMISSIONS.teacherOwnProfile,
+    audience: "teacher",
   },
   {
     key: "teachers",
@@ -413,6 +430,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/billing/invoices",
     section: "main",
     permission: PAGE_PERMISSIONS.billingParent,
+    audience: "parent",
   },
   {
     key: "parent-today-classes",
@@ -421,14 +439,16 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.parentDashboard,
+    audience: "parent",
   },
   {
     key: "parent-your-students",
     labelKey: "dashboard.nav.yourStudents",
     icon: GroupOutlined,
-    href: "/parents/me/students",
+    href: "/students",
     section: "main",
     permission: PAGE_PERMISSIONS.parentStudents,
+    audience: "parent",
   },
   {
     key: "parent-suggest",
@@ -437,6 +457,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/suggestions",
     section: "main",
     permission: PAGE_PERMISSIONS.parentSuggest,
+    audience: "parent",
   },
   {
     key: "complaints-submit",
@@ -445,6 +466,23 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/complaints",
     section: "main",
     permission: PAGE_PERMISSIONS.complaintsSubmit,
+    audience: "parent",
+  },
+  {
+    key: "suggestions-manage",
+    labelKey: "dashboard.nav.suggestionsManage",
+    icon: LightbulbOutlined,
+    href: "/suggestions/manage",
+    section: "main",
+    permission: PAGE_PERMISSIONS.suggestionsManage,
+  },
+  {
+    key: "complaints-manage",
+    labelKey: "dashboard.nav.complaintsManage",
+    icon: ReportProblemOutlined,
+    href: "/complaints/manage",
+    section: "main",
+    permission: PAGE_PERMISSIONS.complaintsManage,
   },
 ] as const;
 
@@ -453,6 +491,8 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
  */
 export function getNavItemsForPermissions(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
   const filtered = items.filter(item => {
+    if (item.audience === "teacher" && !isTeacherPortalUser(permissions)) return false;
+    if (item.audience === "parent" && !isParentPortalUser(permissions)) return false;
     if (!item.permission) return true;
     if (typeof item.permission === "string") {
       return permissions.includes(item.permission);

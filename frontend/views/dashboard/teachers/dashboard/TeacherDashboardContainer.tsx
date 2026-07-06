@@ -2,8 +2,8 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Alert, Snackbar } from "@mui/material";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useFormatter, useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 import { RequirePermission } from "@/frontend/components/auth/RequirePermission";
 import * as Types from "@/frontend/graphql/generated/gql/graphql-types";
 import {
@@ -26,6 +26,7 @@ import { useRouter } from "@/shared/i18n/routing";
 import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule-instance-dashboard-status";
 import { ManualClassEntryDialog } from "./components/ManualClassEntryDialog";
 import { TeacherDashboardView } from "./TeacherDashboardView";
+import { buildStudentProgressFeedItems } from "./utils/buildStudentProgressFeedItems";
 import { buildTeacherDashboardLabels } from "./utils/buildTeacherDashboardLabels";
 import { buildTeacherActiveMetricItems } from "./utils/buildTeacherDashboardMetrics";
 import { useTeacherDashboardLastUpdated } from "./utils/useTeacherDashboardLastUpdated";
@@ -51,8 +52,12 @@ interface RawRow {
 
 interface RawFeedItem {
   readonly id?: string | null;
-  readonly title?: string | null;
-  readonly type?: string | null;
+  readonly studentId?: string | null;
+  readonly studentName?: string | null;
+  readonly scheduledTimeFormatted?: string | null;
+  readonly durationMinutes?: number | null;
+  readonly eventKind?: string | null;
+  readonly occurredAt?: string | Date | null;
 }
 
 function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: string): TeacherScheduleRow[] {
@@ -129,30 +134,19 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
   });
 }
 
-function mapProgressFeed(feed: readonly RawFeedItem[] | null | undefined) {
-  return (feed || []).map((f: RawFeedItem) => {
-    let icon: "grade" | "login" | "description" = "description";
-    const fType = f.type?.toLowerCase();
-    if (fType === "quiz") {
-      icon = "grade";
-    } else if (fType === "login") {
-      icon = "login";
-    }
-
-    return {
-      id: f.id || "",
-      studentName: f.title ? f.title.split(" ")[0] : "Student",
-      studentInitials: f.title ? f.title.slice(0, 2).toUpperCase() : "ST",
-      summary: f.title || "",
-      timeAgo: "1m ago",
-      icon,
-    };
-  });
+function mapProgressFeed(
+  feed: readonly RawFeedItem[] | null | undefined,
+  labels: ReturnType<typeof buildTeacherDashboardLabels>["progressFeed"],
+  durationTemplate: string,
+  formatRelativeTime: (value: Date) => string
+) {
+  return buildStudentProgressFeedItems(feed, labels, durationTemplate, formatRelativeTime);
 }
 
 export function TeacherDashboardContainer() {
   const t = useTranslations("dashboard.teacherDashboard");
   const dashboardT = useTranslations("dashboard");
+  const formatter = useFormatter();
   const router = useRouter();
   const permissions = useUserStore(state => state.permissions);
   const userName = useUserStore(state => state.name);
@@ -235,7 +229,16 @@ export function TeacherDashboardContainer() {
       }
     : null;
 
-  const progressFeed = mapProgressFeed(dashboardData?.teacherDashboard?.progressFeed);
+  const progressFeed = useMemo(
+    () =>
+      mapProgressFeed(
+        dashboardData?.teacherDashboard?.progressFeed,
+        labels.progressFeed,
+        labels.schedule.durationValue,
+        value => formatter.relativeTime(value, { now: Date.now() })
+      ),
+    [dashboardData?.teacherDashboard?.progressFeed, formatter, labels.progressFeed, labels.schedule.durationValue]
+  );
 
   const handleDateChange = (date: string) => {
     setFilterDate(date);

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { ParentDashboardContainer } from "@/frontend/views/dashboard/parents/dashboard/ParentDashboardContainer";
 import { TeacherDashboardContainer } from "@/frontend/views/dashboard/teachers/dashboard/TeacherDashboardContainer";
 import { MockAdminDashboardContainer } from "../admin/dashboard/AdminDashboardContainer.stories";
+import { ParentDashboardContainer } from "../parent/dashboard/ParentDashboardContainer";
 
 function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
   return (

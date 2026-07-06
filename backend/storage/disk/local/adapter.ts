@@ -1,4 +1,4 @@
-import path from "node:path";
+import { getLocalStorageBasePath } from "@/backend/lib/storage/local-storage-path";
 import logger from "@/backend/lib/logger";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
 import { BaseAdapter } from "../base.adapter";
@@ -7,8 +7,7 @@ import type { LocalContext } from "./types";
 
 export class LocalAdapter extends BaseAdapter<LocalContext> {
   constructor() {
-    const storagePath = process.env.LOCAL_STORAGE_PATH || "./storage/";
-    const basePath = path.resolve(process.cwd(), storagePath);
+    const basePath = getLocalStorageBasePath();
 
     const context: LocalContext = {
       basePath,

@@ -69,6 +69,7 @@ const meta: Meta<typeof ParentSuggestionsDesktopStoryRenderer> = {
         permissions: PARENT_PERMISSIONS,
         notificationCount: 0,
         teacherId: null,
+        parentId: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         emailVerifiedAt: new Date().toISOString(),

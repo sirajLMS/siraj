@@ -21,7 +21,7 @@ import {
   statusTracking,
 } from "./dashboard/core";
 import { managerOnboarding, managersDirectory } from "./dashboard/managers";
-import { directory, onboarding, profile } from "./dashboard/parents";
+import { directory, onboarding, parentRules, parentSocial, parentStudents, profile } from "./dashboard/parents";
 import { permissions as permissionsLabels } from "./dashboard/permissions";
 import { reports as reportsLabels } from "./dashboard/reports";
 import { booksAndBags as booksAndBagsLabels, resources as resourcesLabels } from "./dashboard/resources";
@@ -107,6 +107,9 @@ export const arTranslations = {
     parentProfile: profile,
     managersDirectory,
     parentOnboarding: onboarding,
+    parentStudents,
+    parentSocial,
+    parentRules,
     managerOnboarding,
     rescheduleForm,
     dstMigration,

@@ -3,7 +3,7 @@
 - **Source story:** `.ai/siraj_stories/14.md` (Part 15: Permissions & Permission Groups — Complaints, Suggestions, and Communication Channels, timestamps 00:00 - 01:38)
 - **Security baseline:** `.ai/done/service/13.md` (mandatory prerequisite)
 - **Story scope:** Establish formal, tracked communication pipelines between parents and administration — complaint submission/response workflow, untracked suggestion feedback, and multi-channel communication service (on-app + email stub).
-- **Target roles:** Academy Admin (complaint queue management), Parent (submit complaints + suggestions), System Automated (email dispatch stub).
+- **Target roles:** Admin (complaint queue management), Parent (submit complaints + suggestions), System Automated (email dispatch stub).
 - **Status:** Planning phase — awaiting approval for execution.
 
 ---
@@ -12,7 +12,7 @@
 
 1. **Formal Complaint Tracking**: Parents submit complaints linked to specific students. These create tracked database entities with `Un-answered`/`Answered` status, visible in both parent history and admin queue.
 2. **Untracked Suggestion Feedback**: Parents submit open-ended suggestions that are committed to the database but do not create formal tickets on the parent's dashboard — a one-way feedback pipeline.
-3. **Administrative Triage**: Academy Admins access a centralized complaint resolution queue with operational metrics, search, tab filtering, and the ability to respond and delete.
+3. **Administrative Triage**: Admins access a centralized complaint resolution queue with operational metrics, search, tab filtering, and the ability to respond and delete.
 4. **Multi-Channel Communication**: A service interface supports on-app notifications (primary) and email dispatch (stubbed for future implementation), establishing the architecture for future communication channels.
 5. **Separation of Duties**: Admin permissions (`complaints.list/respond/delete`) are strictly reserved — parents cannot access the admin queue or delete complaints.
 

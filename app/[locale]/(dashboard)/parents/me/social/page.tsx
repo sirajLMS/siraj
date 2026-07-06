@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { ParentSocialContainer } from "@/frontend/views/dashboard/parents/social/ParentSocialContainer";
+import { ParentSocialContainer } from "@/frontend/views/dashboard/parent/social/ParentSocialContainer";
 import { redirect } from "@/shared/i18n/routing";
 
 export const metadata: Metadata = {

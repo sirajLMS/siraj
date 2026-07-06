@@ -85,7 +85,7 @@ describe("Parent Onboarding GraphQL API", () => {
     superAdminUserId = sa.userId;
   });
 
-  test("Academy Admin can create parent with billing", async () => {
+  test("Admin can create parent with billing", async () => {
     const token = await loginDemoUser("academy_admin");
 
     const result = await authenticatedRequest(token, "mutate", createParentMutationDocument, {

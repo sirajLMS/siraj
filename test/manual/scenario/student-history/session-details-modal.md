@@ -2,7 +2,7 @@
 
 **Route:** `/students/[id]/history` (modal overlay, no navigation)
 **Permission:** `history.view_details`
-**Role:** Academy Admin
+**Role:** Admin
 
 ---
 
@@ -37,7 +37,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin (has `history.view_details`), navigate to `/students/[id]/history` | Calendar and session list shown |
+| 1 | Login as Admin (has `history.view_details`), navigate to `/students/[id]/history` | Calendar and session list shown |
 | 2 | Select a day with sessions | Session list updates |
 | 3 | Click on a session entry | `ClassDetailsModal` opens as an overlay (no URL change) |
 
@@ -93,7 +93,7 @@ flowchart TD
 
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Login as Academy Admin on mobile, navigate to student history | Mobile weekly scroller + session list |
+| 1 | Login as Admin on mobile, navigate to student history | Mobile weekly scroller + session list |
 | 2 | Tap on a session in the ClassSessionList | `ClassDetailsModal` opens (full-screen overlay or bottom sheet on mobile) |
 
 ### M2: Modal content readable on mobile

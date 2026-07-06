@@ -8,8 +8,8 @@ import { useState } from "react";
 import { BaseCard, StatusBadge } from "@/frontend/components/ui";
 import { labelSx, outlinedInputSx } from "@/frontend/components/ui/form";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/utils/student-status-transitions";
-import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/views/dashboard/students/home/types";
 import type { StudentStatus } from "@/shared/lib/enum";
+import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "../../../admin/parents/students/types";
 import type { ManagementControlsCardProps, ReassignmentSubmitInput, StatusChangeInput } from "../types";
 
 function TeacherSelection({

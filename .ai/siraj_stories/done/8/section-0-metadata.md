@@ -1,8 +1,8 @@
 # Section 0: Story Metadata & Context
 
 - **Source story:** `.ai/siraj_stories/8.md` — Part 9: Permissions & Permission Groups (00:00 - 01:57)
-- **Story scope:** Implement six new RBAC-gated permissions covering Parent Profile viewing, account deactivation, associated-student listing, student quota editing, billing history viewing, and parent document management. All six are Admin-only (Academy Admin). The existing `ParentProfileContainer`, `ParentBillingContainer`, and `StudentQuotaContainer` are currently wired to **mock stores** — this story replaces them with real Apollo `useQuery`/`useMutation` hooks backed by new backend GraphQL operations.
-- **Target roles:** Academy Admin (full access to all six permissions), Parent (none applicable).
+- **Story scope:** Implement six new RBAC-gated permissions covering Parent Profile viewing, account deactivation, associated-student listing, student quota editing, billing history viewing, and parent document management. All six are Admin-only (Admin). The existing `ParentProfileContainer`, `ParentBillingContainer`, and `StudentQuotaContainer` are currently wired to **mock stores** — this story replaces them with real Apollo `useQuery`/`useMutation` hooks backed by new backend GraphQL operations.
+- **Target roles:** Admin (full access to all six permissions), Parent (none applicable).
 - **Status:** Planning phase — awaiting approval for execution.
 
 ---

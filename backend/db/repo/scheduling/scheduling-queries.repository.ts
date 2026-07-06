@@ -289,7 +289,13 @@ export const getClassStatusEvents = async (classInstanceId: string, tx?: DBTrans
     .orderBy(sql`${classStatusEvents.createdAt} DESC`);
 };
 
-export const getTeacherProgressFeed = async (teacherId: string, date: Date, tx?: DBTransaction) => {
+export const getTeacherProgressFeed = async (
+  teacherId: string,
+  date: Date,
+  viewerTimezone = "UTC",
+  locale?: string,
+  tx?: DBTransaction
+): Promise<Types.TeacherProgressFeedItem[]> => {
   const queryDb = tx ?? db;
   const startOfDay = new Date(date);
   startOfDay.setUTCHours(0, 0, 0, 0);
@@ -299,11 +305,18 @@ export const getTeacherProgressFeed = async (teacherId: string, date: Date, tx?:
   const rows = await queryDb
     .select({
       id: classStatusEvents.id,
-      description: classStatusEvents.description,
-      eventType: classStatusEvents.eventType,
+      actorUserId: classStatusEvents.actorUserId,
+      fromState: classStatusEvents.fromState,
+      toState: classStatusEvents.toState,
+      createdAt: classStatusEvents.createdAt,
+      studentId: classInstances.studentId,
+      studentName: students.name,
+      scheduledStartAt: classInstances.scheduledStartAt,
+      durationMinutes: classInstances.durationMinutes,
     })
     .from(classStatusEvents)
     .innerJoin(classInstances, eq(classStatusEvents.classInstanceId, classInstances.id))
+    .innerJoin(students, eq(classInstances.studentId, students.id))
     .where(
       and(
         eq(classInstances.teacherId, teacherId),
@@ -314,12 +327,52 @@ export const getTeacherProgressFeed = async (teacherId: string, date: Date, tx?:
     .orderBy(sql`${classStatusEvents.createdAt} DESC`)
     .limit(10);
 
-  return rows.map(r => ({
-    id: r.id,
-    title: r.description || "Status Updated",
-    type: r.eventType === "STATE_CHANGE" ? "SUCCESS" : "UPDATE",
+  const { formatInstantInTimezone } = await import("@/backend/lib/timezone");
+
+  return rows.map(row => ({
+    id: row.id,
+    studentId: row.studentId,
+    studentName: row.studentName,
+    scheduledTimeFormatted: formatInstantInTimezone(row.scheduledStartAt, viewerTimezone, locale),
+    durationMinutes: row.durationMinutes,
+    eventKind: resolveTeacherProgressFeedEventKind(row.fromState, row.toState, row.actorUserId),
+    occurredAt: row.createdAt,
   }));
 };
+
+type ClassStatusEventState = {
+  executionState?: string;
+  outcome?: string;
+};
+
+function resolveTeacherProgressFeedEventKind(
+  fromState: unknown,
+  toState: unknown,
+  actorUserId: string | null
+): Types.TeacherProgressFeedEventKind {
+  const from = (fromState ?? {}) as ClassStatusEventState;
+  const to = (toState ?? {}) as ClassStatusEventState;
+
+  if (to.executionState === "COMPLETED" && to.outcome === "ABSENT") {
+    if (from.executionState === "NOT_ACTIVATED" && actorUserId === null) {
+      return "auto_missed";
+    }
+    return "marked_absent";
+  }
+  if (to.executionState === "ACTIVATED") {
+    return "activated";
+  }
+  if (to.executionState === "RUNNING") {
+    return "started";
+  }
+  if (to.executionState === "COMPLETED" && to.outcome === "TAKEN") {
+    return "completed";
+  }
+  if (to.executionState === "COMPLETED" && to.outcome === "LEAVE") {
+    return "leave";
+  }
+  return "other";
+}
 
 function buildRescheduleConditions(
   input: Types.RescheduleTrackingInput,

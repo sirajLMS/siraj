@@ -40,12 +40,12 @@ Task A (Migration/Permissions)
 
 | Permission Key | Enum Value | Group | Type |
 |---|---|---|---|
-| `complaints.list` | `COMPLAINTS_LIST` | Super Admin, Academy Admin, Staff Default | Existing (reused) |
-| `complaints.delete` | `COMPLAINTS_DELETE` | Super Admin, Academy Admin | Existing (reused) |
-| `complaints.respond` | `COMPLAINTS_RESPOND` | Super Admin, Academy Admin | Existing (reused) |
-| `support.submit_complaint` | `SUPPORT_SUBMIT_COMPLAINT` | Super Admin, Parent Default | New |
-| `support.view_history` | `SUPPORT_VIEW_HISTORY` | Super Admin, Parent Default | New |
-| `communication.submit_suggestion` | `COMMUNICATION_SUBMIT_SUGGESTION` | Super Admin, Parent Default | New |
+| `complaints.list` | `COMPLAINTS_LIST` | Super Admin, Admin, Staff | Existing (reused) |
+| `complaints.delete` | `COMPLAINTS_DELETE` | Super Admin, Admin | Existing (reused) |
+| `complaints.respond` | `COMPLAINTS_RESPOND` | Super Admin, Admin | Existing (reused) |
+| `support.submit_complaint` | `SUPPORT_SUBMIT_COMPLAINT` | Super Admin, Parent | New |
+| `support.view_history` | `SUPPORT_VIEW_HISTORY` | Super Admin, Parent | New |
+| `communication.submit_suggestion` | `COMMUNICATION_SUBMIT_SUGGESTION` | Super Admin, Parent | New |
 | `system.dispatch_email` | `SYSTEM_DISPATCH_EMAIL` | Super Admin, System Automated | New |
 
 ### D. Temp File Index

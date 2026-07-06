@@ -2,15 +2,15 @@
 
 - **Source story:** `.ai/siraj_stories/9.md` (Part 10 - Permissions & Permission Groups, timestamps 00:00 - 02:01)
 - **Security baseline:** `.ai/siraj_stories/8/` (mandatory prerequisite — Parent Profile & Account Lifecycle sprint must be fully deployed)
-- **Story scope:** Implements six new granular permissions enabling: manual invoice generation, payment settlement, invoice deletion, student teacher reassignment, student status management, and automated notification tray synchronization. All operations are restricted to Academy Admin / Super Admin roles. No new database tables are required — only new permission seeds and new service/repo methods wired to existing schema.
-- **Target roles:** Academy Admin (full access to all 5 new operational permissions), System Automated (internal `system.sync_notifications` rule only). Teacher/Parent roles are explicitly excluded.
+- **Story scope:** Implements six new granular permissions enabling: manual invoice generation, payment settlement, invoice deletion, student teacher reassignment, student status management, and automated notification tray synchronization. All operations are restricted to Admin / Super Admin roles. No new database tables are required — only new permission seeds and new service/repo methods wired to existing schema.
+- **Target roles:** Admin (full access to all 5 new operational permissions), System Automated (internal `system.sync_notifications` rule only). Teacher/Parent roles are explicitly excluded.
 - **Status:** Planning phase — awaiting approval for execution.
 
 ---
 
 ### 0.1 Business Objectives
 
-1. **Separation of Duties — Financial Ledger Control:** The `billing.create_invoice`, `billing.update_status_paid`, and `billing.delete_invoice` permissions are strictly reserved for Academy Admin and Super Admin. No teacher or parent can touch a financial record — ensuring an auditable, tamper-resistant billing ledger.
+1. **Separation of Duties — Financial Ledger Control:** The `billing.create_invoice`, `billing.update_status_paid`, and `billing.delete_invoice` permissions are strictly reserved for Admin and Super Admin. No teacher or parent can touch a financial record — ensuring an auditable, tamper-resistant billing ledger.
 
 2. **Immutable Paid Records:** Once `billing.update_status_paid` is executed, the UI removes further edit/pay actions for that invoice row. Paid invoices become read-only; any error correction requires explicit admin action (`billing.delete_invoice` then re-issue).
 

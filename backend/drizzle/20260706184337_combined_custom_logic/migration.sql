@@ -983,7 +983,7 @@ VALUES (
     ),
     (
         gen_random_uuid (),
-        'Academy Admin',
+        'Admin',
         'Full operational oversight for the sprint',
         true,
         'academy_admin',
@@ -992,7 +992,7 @@ VALUES (
     ),
     (
         gen_random_uuid (),
-        'Teacher Default',
+        'Teacher',
         'Default permissions for teacher accounts',
         true,
         'teacher_default',
@@ -1001,7 +1001,7 @@ VALUES (
     ),
     (
         gen_random_uuid (),
-        'Parent Default',
+        'Parent',
         'Default permissions for parent accounts',
         true,
         'parent_default',
@@ -1010,7 +1010,7 @@ VALUES (
     ),
     (
         gen_random_uuid (),
-        'Staff Default',
+        'Staff',
         'Default permissions for staff accounts',
         true,
         'staff_default',
@@ -1286,8 +1286,6 @@ WHERE
         'staff.edit_profile',
         'parent.view_directory',
         'parent.view_profile',
-        'parent.view_students',
-        'parent.view_own_profile',
         'parent.manage_status',
         'student.view_associated',
         'student.edit_quota',

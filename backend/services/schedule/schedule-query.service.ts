@@ -13,7 +13,7 @@ import { AppPermission } from "@/shared/lib/enum";
  *
  * Permission requirements:
  * - getStatusTrackingSchedule: requires SCHEDULE_VIEW_ALL OR DASHBOARD_VIEW_METRICS
- *   (either permission grants access — Academy Admin and Super Admin hold these)
+ *   (either permission grants access — Admin and Super Admin hold these)
  *
  * Architecture note:
  * - This service does NOT import from Drizzle or DB schema directly.

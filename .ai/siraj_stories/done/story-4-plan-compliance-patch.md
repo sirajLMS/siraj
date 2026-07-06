@@ -66,7 +66,7 @@
 
 **Out of scope:**
 - Student-initiated leave quota enforcement (mirror of teacher flow — separate story)
-- Leave quota UI for Academy Admins to view per-teacher monthly usage across all teachers (display only in Future Schedule for self)
+- Leave quota UI for Admins to view per-teacher monthly usage across all teachers (display only in Future Schedule for self)
 - Leave quota adjustment / override by Admin (admins use `session.reschedule` which is not quota-gated)
 - Notification system alerting teachers when they approach the quota threshold (separate story — notifications)
 - Leave history report / analytics dashboard (separate story)
@@ -158,7 +158,7 @@ Every task's Success Criteria section **MUST** include the following quality gat
 
 `schedule.filter_advanced` has **dual scoping**:
 - **Teacher (self-scoped):** The `teacherFutureSchedule` GraphQL query resolves the teacher ID from `ctx.teacherId` (the authenticated user's teacher record). The service layer `ScheduleService.getTeacherFutureSchedule(teacherId, locale)` only accepts the actor's own teacher ID — a teacher cannot query another teacher's future schedule through this resolver.
-- **Admin (any-scoped):** Academy Admins with `schedule.filter_advanced` view the future schedule via the admin dashboard's per-teacher drill-down (separate admin query path). The admin can pass any `teacherId` parameter.
+- **Admin (any-scoped):** Admins with `schedule.filter_advanced` view the future schedule via the admin dashboard's per-teacher drill-down (separate admin query path). The admin can pass any `teacherId` parameter.
 
 `system.enforce_leave_limit` has **no scoping** — it is a system-automated check invoked internally by `SystemRulesService.assertLeaveQuotaAvailable`. No user-facing permission grant exists; the permission is purely a catalog marker for auditability.
 

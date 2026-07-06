@@ -14,11 +14,11 @@ Story 12 introduces destructive database operations (`DELETE` queries) and the e
 If the GraphQL resolver or repository simply executes `DELETE FROM learning_resources WHERE id = ?` without validating the actor's permission boundary, an Insecure Direct Object Reference vulnerability exists.
 
 **Fix:**
-The service method `LearningResourceService.deleteResource(resourceId, actorUserId)` performs a strict `PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_DELETE)` check before executing any logic. Because `resources.delete` is ONLY granted to the `academy_admin` group, and Academy Admins are isolated by tenant boundaries (already handled by the core permission framework), a Teacher or unprivileged actor will receive an instant `unauthorized` throw.
+The service method `LearningResourceService.deleteResource(resourceId, actorUserId)` performs a strict `PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_DELETE)` check before executing any logic. Because `resources.delete` is ONLY granted to the `academy_admin` group, and Admins are isolated by tenant boundaries (already handled by the core permission framework), a Teacher or unprivileged actor will receive an instant `unauthorized` throw.
 
 **Test Requirements:**
 1. **GraphQL test — unauthorized actor:** An actor with a Teacher role calls the mutation → receives `insufficientPermissions` error. No file is deleted.
-2. **GraphQL test — authorized actor:** Academy Admin calls mutation → succeeds.
+2. **GraphQL test — authorized actor:** Admin calls mutation → succeeds.
 3. **Service unit test:** Calling `LearningResourceService.deleteResource` explicitly throws `Unauthorized` if the permission mock returns false.
 
 ---

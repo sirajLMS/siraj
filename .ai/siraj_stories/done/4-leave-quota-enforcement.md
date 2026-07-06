@@ -4,7 +4,7 @@
 **Depends on:** `.ai/plan/3-enhanced.md` (Story 3: Leave, Absence, Rescheduling & Future Verification)  
 **Security baseline:** `.ai/done/service/1-sprint_1__db_repo_service_enhancments.md` (mandatory prerequisite)  
 **Story scope:** Implement automated leave quota enforcement (`system.enforce_leave_limit`), extend future schedule verification with "Re Scheduled" badge, and enable admin processing of subsequent leave requests with quota tracking awareness  
-**Target roles:** Academy Admin (audit future calendar, process reschedule up to limits), Teacher (view future personal schedules, leave requests gated by system limits), System Automated (validate operational constraints)  
+**Target roles:** Admin (audit future calendar, process reschedule up to limits), Teacher (view future personal schedules, leave requests gated by system limits), System Automated (validate operational constraints)  
 **Status:** In progress — Task A (Permission + Settings) complete, Task B (Service Layer Quota Enforcement) complete, Task C (Backend GraphQL Query) complete, Task D (Frontend GraphQL Document) complete, Task E (Frontend Views) complete, Task F (Admin Reschedule Quota Awareness) complete, Task G (Database Tests) complete, Task H (i18n Translations) complete  
 **Last updated:** 2026-06-20  
 
@@ -147,8 +147,8 @@ Output MUST be empty.
 
 | **Permission Key** | **Enum Member** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Layer** |
 |---|---|---|---|---|---|
-| `schedule.filter_advanced` | `SCHEDULE_FILTER_ADVANCED` | Academy Admin, Teacher | Future date navigation in calendar, "Re Scheduled" badge visibility | `SchedulingRepository.getDailySchedule()` with future date range | `teacherFutureSchedule` query (new) |
-| `session.reschedule` | `SESSION_RESCHEDULE` | Academy Admin | Reschedule form for subsequent leave requests | `ClassSessionService.reschedule()` | `rescheduleClass` mutation (extended with quota awareness) |
+| `schedule.filter_advanced` | `SCHEDULE_FILTER_ADVANCED` | Admin, Teacher | Future date navigation in calendar, "Re Scheduled" badge visibility | `SchedulingRepository.getDailySchedule()` with future date range | `teacherFutureSchedule` query (new) |
+| `session.reschedule` | `SESSION_RESCHEDULE` | Admin | Reschedule form for subsequent leave requests | `ClassSessionService.reschedule()` | `rescheduleClass` mutation (extended with quota awareness) |
 | `session.request_leave` | Maps to `SESSION_UPDATE_STATUS_LEAVE` | Teacher | Leave request button on future classes | `ClassSessionService.updateStatusLeave()` gated by `SystemRulesService.assertLeaveQuotaAvailable()` | `updateSessionStatusLeave` mutation |
 
 ### 2.3 Permission Group Assignments

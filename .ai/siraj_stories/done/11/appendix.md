@@ -110,12 +110,12 @@ Tasks H and I are both dependent on G but are independent of each other — they
 
 | **Permission Key** | **Enum Value** | **Category** | **Is New** | **Assigned Groups** |
 |---|---|---|---|---|
-| `students.list` | `STUDENTS_LIST` | Students | No (existing) | Super Admin, Staff Default, **Academy Admin** (NEW assignment) |
+| `students.list` | `STUDENTS_LIST` | Students | No (existing) | Super Admin, Staff, **Admin** (NEW assignment) |
 | `history.view_calendar` | `HISTORY_VIEW_CALENDAR` | History | No (existing) | (unchanged) |
-| `staff.view_directory` | `STAFF_VIEW_DIRECTORY` | Staff | No (existing) | Super Admin, Academy Admin (unchanged) |
-| `staff.edit_profile` | `STAFF_EDIT_PROFILE` | Staff | No (existing) | Super Admin, Academy Admin (unchanged) |
-| `resources.list` | `RESOURCES_LIST` | Resources | No (existing) | Super Admin, Teacher Default (unchanged) |
-| `resources.upload` | `RESOURCES_UPLOAD` | Resources | No (existing) | Super Admin, **Academy Admin** (NEW assignment) |
+| `staff.view_directory` | `STAFF_VIEW_DIRECTORY` | Staff | No (existing) | Super Admin, Admin (unchanged) |
+| `staff.edit_profile` | `STAFF_EDIT_PROFILE` | Staff | No (existing) | Super Admin, Admin (unchanged) |
+| `resources.list` | `RESOURCES_LIST` | Resources | No (existing) | Super Admin, Teacher (unchanged) |
+| `resources.upload` | `RESOURCES_UPLOAD` | Resources | No (existing) | Super Admin, **Admin** (NEW assignment) |
 | `system.restrict_resource_access` | `SYSTEM_RESTRICT_RESOURCE_ACCESS` | System | **YES** | System Automated (NEW) |
 
 ---
@@ -205,7 +205,7 @@ LearningResourceService.checkAccess()
 | **Threat** | **Section 4 Reference** | **Service Fix** | **Test Coverage** |
 |---|---|---|---|
 | IDOR on Student Directory | Section 4: Threat 1 | `StudentDirectoryService` checks `students.list` permission | Task H: unauthorized actor tests |
-| Privilege Escalation via Manager Profile Edit | Section 4: Threat 2 | `ManagerProfileService` hierarchical check (Super Admin vs Academy Admin) | Task H: Academy Admin denied editing Super Admin |
+| Privilege Escalation via Manager Profile Edit | Section 4: Threat 2 | `ManagerProfileService` hierarchical check (Super Admin vs Admin) | Task H: Admin denied editing Super Admin |
 | Unauthorized Resource Upload | Section 4: Threat 3 | `LearningResourceService.createResource()` checks `resources.upload` | Task H: Teacher denied upload test |
 | Direct URL Access to Resources | Section 4: Threat 4 | `LearningResourceService.checkAccess()` gates file URL access | Task H: Parent denied resource access |
 | Student History Cross-Access | Section 4: Threat 5 | `StudentHistoryService` (future — existing query already real) | Already covered by existing GraphQL tests |
@@ -216,7 +216,7 @@ LearningResourceService.checkAccess()
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Academy Admin UI                           │
+│                    Admin UI                           │
 │                                                              │
 │  StudentsContainer ─── useQuery(studentDirectory)            │
 │  Permission: students.list                                   │
@@ -259,8 +259,8 @@ LearningResourceService.checkAccess()
 |---|---|
 | Student Directory | The global, flattened view of all students with cross-relational data (parent name, teacher name, hours/week). Gated by `students.list`. |
 | Manager Directory | The list of all staff members with administrative backend access, showing their permission group roles. Gated by `staff.view_directory`. |
-| Hierarchical Privilege Check | A service-layer enforcement rule where an admin can only edit profiles of users at equal or lower privilege levels. Super Admin can edit anyone; Academy Admin cannot edit Super Admin. |
-| Learning Resource | A curriculum material (PDF, PPTX, etc.) stored in the academy's shared repository. Viewable by Teachers and Admins; uploadable only by Academy Admins. |
+| Hierarchical Privilege Check | A service-layer enforcement rule where an admin can only edit profiles of users at equal or lower privilege levels. Super Admin can edit anyone; Admin cannot edit Super Admin. |
+| Learning Resource | A curriculum material (PDF, PPTX, etc.) stored in the academy's shared repository. Viewable by Teachers and Admins; uploadable only by Admins. |
 | Resource Access Gate | A system-level enforcement that prevents unauthorized users from accessing resource files via direct URL. Documented by `system.restrict_resource_access`. |
 | Mock-to-Real Migration | The process of replacing mock Zustand stores (with hardcoded data) in production containers with real Apollo `useQuery` hooks backed by GraphQL queries. |
 | Type Extraction | Moving shared TypeScript interfaces/types from mock store files into dedicated `.types.ts` files. Generated GraphQL types are re-exported; UI-specific types are defined locally. |

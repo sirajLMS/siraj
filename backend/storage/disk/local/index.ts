@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import path from "node:path";
+import { getLocalStorageBasePath } from "@/backend/lib/storage/local-storage-path";
 import type { StorageService } from "../storage.service.interface";
 import { LocalAdapter } from "./adapter";
 
@@ -43,8 +43,7 @@ function ensureNotServerless(): void {
 export async function createLocalAdapter(): Promise<StorageService> {
   ensureNotServerless();
 
-  const storagePath = process.env.LOCAL_STORAGE_PATH || "./storage/";
-  const fullPath = path.resolve(process.cwd(), storagePath);
+  const fullPath = getLocalStorageBasePath();
 
   await fs.mkdir(fullPath, { recursive: true, mode: 0o755 });
 

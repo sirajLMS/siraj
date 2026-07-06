@@ -67,7 +67,7 @@ All tasks must execute in the dependency order shown. Tasks G and H are both dep
 | `system.enforce_suspended_lock` | `SYSTEM_ENFORCE_SUSPENDED_LOCK` | System | ✅ | Super Admin, System Automated |
 | `system.process_student_leave` | `SYSTEM_PROCESS_STUDENT_LEAVE` | System | ✅ | Super Admin, System Automated |
 
-**Note:** These are system-internal permissions. They are NOT directly exposed to UI actors. The enforcement logic is triggered as a side-effect of `student.manage_status` (Story 9), which is held by Academy Admin and Super Admin.
+**Note:** These are system-internal permissions. They are NOT directly exposed to UI actors. The enforcement logic is triggered as a side-effect of `student.manage_status` (Story 9), which is held by Admin and Super Admin.
 
 ---
 
@@ -139,7 +139,7 @@ StudentLifecycleService.changeStudentStatus()
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Academy Admin UI                         │
+│                     Admin UI                         │
 │  ParentProfile → StudentActions → ChangeStatusDialog        │
 │  Permission: student.manage_status                          │
 └─────────────────────────┬───────────────────────────────────┘

@@ -102,7 +102,7 @@ bun test:db
 
 ### 7.9 Functional Verification Checklist (Manual QA)
 
-**Resource Deletion (Requires Academy Admin session):**
+**Resource Deletion (Requires Admin session):**
 - [ ] Navigate to Learning Resources view.
 - [ ] Click Delete icon on a resource.
 - [ ] Verify the MUI Confirmation Dialog appears.
@@ -112,7 +112,7 @@ bun test:db
 - [ ] Resource disappears from the UI without requiring a hard refresh.
 - [ ] Verify S3/Local storage via AWS Console or local filesystem to ensure physical deletion.
 
-**Reporting Engine (Requires Academy Admin session):**
+**Reporting Engine (Requires Admin session):**
 - [ ] Navigate to Reporting / Analytics view.
 - [ ] Enter a valid From and To Date.
 - [ ] Click Generate Report -> Data Grid populates.

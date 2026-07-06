@@ -73,11 +73,11 @@ All tasks must execute in the dependency order shown. Tasks with no dependency b
 
 | **Permission Key** | **Enum Value** | **Category** | **Is System** | **Assigned Groups** |
 |---|---|---|---|---|
-| `billing.create_invoice` | `BILLING_CREATE_INVOICE` | Billing | ✅ | Super Admin, Academy Admin |
-| `billing.update_status_paid` | `BILLING_UPDATE_STATUS_PAID` | Billing | ✅ | Super Admin, Academy Admin |
-| `billing.delete_invoice` | `BILLING_DELETE_INVOICE` | Billing | ✅ | Super Admin, Academy Admin |
-| `student.reassign_teacher` | `STUDENT_REASSIGN_TEACHER` | Students | ✅ | Super Admin, Academy Admin |
-| `student.manage_status` | `STUDENT_MANAGE_STATUS` | Students | ✅ | Super Admin, Academy Admin |
+| `billing.create_invoice` | `BILLING_CREATE_INVOICE` | Billing | ✅ | Super Admin, Admin |
+| `billing.update_status_paid` | `BILLING_UPDATE_STATUS_PAID` | Billing | ✅ | Super Admin, Admin |
+| `billing.delete_invoice` | `BILLING_DELETE_INVOICE` | Billing | ✅ | Super Admin, Admin |
+| `student.reassign_teacher` | `STUDENT_REASSIGN_TEACHER` | Students | ✅ | Super Admin, Admin |
+| `student.manage_status` | `STUDENT_MANAGE_STATUS` | Students | ✅ | Super Admin, Admin |
 | `system.sync_notifications` | `SYSTEM_SYNC_NOTIFICATIONS` | System | ✅ | Super Admin, System Automated |
 
 ---

@@ -16,8 +16,9 @@ import { AppPermission, type ParentStatus } from "@/frontend/graphql/generated/g
 import { parentDirectoryQueryDocument } from "@/frontend/graphql/sharedDocuments/parent-directory.documents";
 import { useParentsStore } from "@/frontend/stores/parentsStore";
 import { exportParentDirectory } from "@/frontend/utils/excel-export/parent-directory-export";
-import { type ParentAccountStatus, toParentAccountStatus } from "@/frontend/views/dashboard/parents/types/directory";
+import type { ParentAccountStatus } from "@/frontend/views/dashboard/types/parent.types";
 import { useRouter } from "@/shared/i18n/routing";
+import { toParentAccountStatus } from "./directory";
 import { ParentsView } from "./ParentsView";
 
 function useDirectoryMetrics(

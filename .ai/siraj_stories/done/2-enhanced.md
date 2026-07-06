@@ -12,7 +12,7 @@
 **Source story:** `.ai/siraj_stories/2.md` (Part 3 - Live Session Lifecycle & Status Controls, timestamps 00:00 - 01:58)  
 **Security baseline:** `.ai/done/service/1-sprint_1__db_repo_service_enhancments.md` (mandatory prerequisite)  
 **Story scope:** Implement live session control toolbar with Start, Absent, Leave, and Reset actions for activated class sessions  
-**Target roles:** Academy Admin (full override + reset), Teacher (standard lifecycle management)  
+**Target roles:** Admin (full override + reset), Teacher (standard lifecycle management)  
 **Status:** Planning phase - awaiting approval for execution  
 
 ---
@@ -99,8 +99,8 @@ Output MUST be empty.
 
 | **Permission Key** | **Group** | **UI Gate** | **Backend Service Method** | **GraphQL Mutation** |
 |---|---|---|---|---|
-| `session.activate_override` | Academy Admin | Live toolbar visibility check | `ClassSessionService.activateOverride()` | `activateOverrideClass` |
-| `session.reset` | Academy Admin | Admin-only destructive reset | `ClassSessionService.reset()` | `resetClass` |
+| `session.activate_override` | Admin | Live toolbar visibility check | `ClassSessionService.activateOverride()` | `activateOverrideClass` |
+| `session.reset` | Admin | Admin-only destructive reset | `ClassSessionService.reset()` | `resetClass` |
 | `session.update_status.start` | Admin + Teacher | Start button in live toolbar | `ClassSessionService.updateStatus('start')` | `updateSessionStatusStart` |
 | `session.update_status.absent` | Admin + Teacher | Absent button (post-waiting period) | `ClassSessionService.updateStatus('absent')` | `updateSessionStatusAbsent` |
 | `session.update_status.leave` | Admin + Teacher | Leave button + reschedule flow | `ClassSessionService.updateStatus('leave')` | `updateSessionStatusLeave` |
@@ -294,7 +294,7 @@ async resetClassInstance(id: number, actorUserId: number, locale?: string) {
 ### Threat 5: Separation of Duties (Admin vs Teacher)
 
 **Controls:**
-- `session.reset` permission assigned ONLY to Academy Admin group
+- `session.reset` permission assigned ONLY to Admin group
 - Service layer `reset()` method rejects calls from actors lacking `SESSION_RESET`
 
 **Implementation (Task D):**
@@ -397,7 +397,7 @@ Before starting ANY Story 2 work, verify Story 1 security remediation:
 
 ### Task S0 — Security: Admin IDOR Bypass in Repository
 
-**Objective:** Implement privileged actor bypass in `runStateChange()` to allow Academy Admin users to mutate ANY class instance.
+**Objective:** Implement privileged actor bypass in `runStateChange()` to allow Admin users to mutate ANY class instance.
 
 **Layer-Specific Rules (Backend Repository - Flattened from backend/db/repo/AGENTS.md):**
 - **Drizzle ORM**: Use `.select().from().leftJoin()` patterns instead of `db.query.table.findMany({ with: ... })` if TypeScript encounters `SQL<unknown>` errors
@@ -901,7 +901,7 @@ export async function seedOrGet() {
   const groups = await db
     .insert(permissionGroups)
     .values([
-      { slug: "academy-admin", name: "Academy Admin" },
+      { slug: "academy-admin", name: "Admin" },
       { slug: "teacher", name: "Teacher" },
       // ... other groups
     ])
@@ -926,7 +926,7 @@ export async function seedOrGet() {
   const teacherGroup = groups.find(g => g.slug === "teacher")!;
 
   const groupPermissions = [
-    // Academy Admin - ALL session permissions
+    // Admin - ALL session permissions
     { groupId: adminGroup.id, permissionKey: AppPermission.SESSION_ACTIVATE_OVERRIDE },
     { groupId: adminGroup.id, permissionKey: AppPermission.SESSION_RESET },
     { groupId: adminGroup.id, permissionKey: AppPermission.SESSION_UPDATE_STATUS_START },
@@ -963,7 +963,7 @@ Output MUST be empty (all old permission strings removed).
 - [ ] Old permission enum values removed from `AppPermission`
 - [ ] New Story 2 permission keys added to enum
 - [ ] Permission catalog updated with Story 2 entries
-- [ ] Academy Admin group has ALL Story 2 permissions
+- [ ] Admin group has ALL Story 2 permissions
 - [ ] Teacher group has ONLY `update_status.*` permissions (NOT override/reset)
 - [ ] Grep for deprecated strings returns empty
 - [ ] Seed runs without errors
@@ -1341,7 +1341,7 @@ describe("processClassLeave", () => {
 
 /**
  * Activate a class session bypassing time window enforcement
- * Requires SESSION_ACTIVATE_OVERRIDE permission (Academy Admin only)
+ * Requires SESSION_ACTIVATE_OVERRIDE permission (Admin only)
  */
 async activateOverride(
   classInstanceId: number,
@@ -1377,7 +1377,7 @@ async activateOverride(
 ```typescript
 /**
  * Destructively reset a class instance to initial state
- * Requires SESSION_RESET permission (Academy Admin only)
+ * Requires SESSION_RESET permission (Admin only)
  * Restores student quota if it was deducted
  */
 async reset(

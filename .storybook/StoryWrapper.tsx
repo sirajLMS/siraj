@@ -114,12 +114,13 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
 
     const adminUser = {
       id: "mock-admin-id",
-      name: "Academy Admin",
-      role: "Academy Admin",
+      name: "Admin",
+      role: "Admin",
       avatarUrl: "",
       permissions: adminPermissions,
       notificationCount: 3,
       teacherId: null,
+      parentId: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       emailVerifiedAt: new Date().toISOString(),

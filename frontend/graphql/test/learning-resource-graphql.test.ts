@@ -112,7 +112,7 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
     await testQueryLearningResources("teacher_default");
   });
 
-  test("Academy Admin can query learning resources", async () => {
+  test("Admin can query learning resources", async () => {
     await testQueryLearningResources("academy_admin");
   });
 

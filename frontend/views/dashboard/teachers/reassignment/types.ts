@@ -1,5 +1,5 @@
-import type { StudentAccountStatus } from "@/frontend/views/dashboard/students/home/types";
 import type { StudentStatus } from "@/shared/lib/enum";
+import type { StudentAccountStatus } from "../../admin/parents/students/types";
 
 export interface TeacherReassignmentViewProps {
   readonly student: ReassignmentStudentData;

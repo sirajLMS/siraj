@@ -225,11 +225,13 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         const events = await SchedulingRepository.getClassStatusEvents(id, tx);
         expect(events.length).toBeGreaterThan(0);
 
-        const feed = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date(), tx);
+        const feed = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date(), "UTC", undefined, tx);
         expect(feed.length).toBeGreaterThan(0);
         expect(feed[0].id).toBe(events[0].id);
+        expect(feed[0].studentName).toBeDefined();
+        expect(feed[0].eventKind).toBe("activated");
 
-        const feedNoTx = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date(), tx);
+        const feedNoTx = await SchedulingRepository.getTeacherProgressFeed(teacher.id, new Date(), "UTC");
         expect(Array.isArray(feedNoTx)).toBe(true);
 
         const eventsNoTx = await SchedulingRepository.getClassStatusEvents(id, tx);

@@ -86,7 +86,7 @@ In the same migration file, verify the group_permissions assignments:
 - `parents.create`
 - `staff.create`
 
-**Academy Admin group** — Should already include:
+**Admin group** — Should already include:
 - `teachers.create`
 - `parents.create`
 - **NOT** `staff.create` (this is the security boundary)
@@ -177,7 +177,7 @@ Expected result:
 **Success Criteria / Check Progress Points:**
 - [ ] `AppPermission` enum contains `TEACHERS_CREATE`, `PARENTS_CREATE`, `STAFF_CREATE` with correct string mappings
 - [ ] SQL migration contains all 3 permission INSERT tuples
-- [ ] SQL migration contains correct group_permission assignments for Super Admin and Academy Admin
+- [ ] SQL migration contains correct group_permission assignments for Super Admin and Admin
 - [ ] `bun db cleanGenerate` passes with zero errors
 - [ ] `bun db reset` passes with zero errors
 - [ ] `bun db seed` passes with zero errors

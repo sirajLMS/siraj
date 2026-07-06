@@ -10,9 +10,9 @@ import { useCreateRecurringClassStore } from "@/frontend/stores/createRecurringC
 import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import { useRouter } from "@/shared/i18n/routing";
-import { mapFormDataToInput } from "./actions/createRecurringClass";
 import { CreateRecurringClassView } from "./CreateRecurringClassView";
 import type { RecurringClassFormData } from "./recurringClassSchema";
+import { mapFormDataToInput } from "./utils/mapRecurringClassFormData";
 
 export function CreateRecurringClassContainer() {
   const t = useTranslations("dashboard.createRecurringClass");
