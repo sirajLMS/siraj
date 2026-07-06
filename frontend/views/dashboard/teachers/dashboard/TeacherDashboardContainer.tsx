@@ -26,6 +26,7 @@ import { useRouter } from "@/shared/i18n/routing";
 import { ManualClassEntryDialog } from "./components/ManualClassEntryDialog";
 import { TeacherDashboardView } from "./TeacherDashboardView";
 import { buildTeacherDashboardLabels } from "./utils/buildTeacherDashboardLabels";
+import { buildTeacherActiveMetricItems } from "./utils/buildTeacherDashboardMetrics";
 import { useTeacherDashboardLastUpdated } from "./utils/useTeacherDashboardLastUpdated";
 
 type SupportRequestType = "COORDINATOR" | "SUPPORT";
@@ -213,6 +214,7 @@ export function TeacherDashboardContainer() {
   const scheduleRows = mapRows(dashboardData?.teacherDashboard?.scheduleRows, filterDate);
   const totalCount = dashboardData?.teacherDashboard?.totalCount ?? 0;
   const dashboardMetrics = dashboardData?.teacherDashboard?.metrics;
+  const metricItems = buildTeacherActiveMetricItems(dashboardMetrics, labels.activeMetrics);
 
   const missedRow = scheduleRows.find(r => r.status === "missed");
   const missedAlert = missedRow
@@ -222,15 +224,11 @@ export function TeacherDashboardContainer() {
       }
     : null;
 
-  const viewMetrics = {
-    totalClasses: dashboardMetrics?.total ?? 0,
-    activeSessions: dashboardMetrics?.running ?? 0,
-    missedSlots: dashboardMetrics?.absent ?? 0,
-    completed: dashboardMetrics?.taken ?? 0,
-    studentsToday: new Set(scheduleRows.map(r => r.studentId)).size,
-  };
-
   const progressFeed = mapProgressFeed(dashboardData?.teacherDashboard?.progressFeed);
+
+  const handleDateChange = (date: string) => {
+    setFilterDate(date);
+  };
 
   const handleActivate = async (id: string) => {
     setActivationError(null);
@@ -300,12 +298,12 @@ export function TeacherDashboardContainer() {
     <RequirePermission permissions={[Types.AppPermission.TeacherViewDashboard]}>
       <TeacherDashboardView
         userName={userName}
-        metrics={viewMetrics}
+        metricItems={metricItems}
         scheduleRows={scheduleRows}
         progressFeed={progressFeed}
         missedAlert={missedAlert}
-        scheduleDateLabel={filterDate}
         welcomeDateSummary={filterDate}
+        activeSessionsCount={dashboardMetrics?.running ?? 0}
         labels={labels}
         lastUpdated={lastUpdated}
         activationError={activationError}
@@ -367,7 +365,7 @@ export function TeacherDashboardContainer() {
         onContactCoordinator={() => handleSupportRequest("COORDINATOR")}
         onSupport={() => handleSupportRequest("SUPPORT")}
         dateValue={filterDate}
-        onDateChange={setFilterDate}
+        onDateChange={handleDateChange}
         page={page}
         pageSize={pageSize}
         totalCount={totalCount}

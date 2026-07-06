@@ -26,7 +26,7 @@ export const dashboard: TeacherDashboardLabels = {
     mobileSummary: "{date} • {count} حصة نشطة",
   },
   schedule: {
-    title: "الحصص الحالية",
+    title: "الحصص اليومية",
     titleToday: "جدول حصص اليوم",
     rowNumber: "#",
     classId: "رقم الحصة",

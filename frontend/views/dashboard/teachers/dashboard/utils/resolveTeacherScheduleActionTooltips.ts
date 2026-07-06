@@ -28,8 +28,7 @@ export function resolveTeacherScheduleActionTooltips(
 
   const joinVideo = row.videoEnabled ? actions.joinVideo : disabled.joinVideoUnavailable;
 
-  const markAbsent =
-    row.markAbsentEnabled === false ? disabled.markAbsentWaitingPeriod : controls.markAbsent;
+  const markAbsent = row.markAbsentEnabled === false ? disabled.markAbsentWaitingPeriod : controls.markAbsent;
 
   return {
     activate,

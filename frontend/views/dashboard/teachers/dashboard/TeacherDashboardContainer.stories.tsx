@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useTranslations } from "next-intl";
 import { create } from "zustand";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type {
   StudentProgressFeedItem,
   TeacherDashboardState,
@@ -11,6 +11,7 @@ import { useUserStore } from "@/frontend/stores/userStore";
 import { getTodayScheduleFilterDate } from "@/frontend/utils/scheduleFilterDate";
 import { TeacherDashboardView } from "./TeacherDashboardView";
 import { buildTeacherDashboardLabels } from "./utils/buildTeacherDashboardLabels";
+import { buildTeacherActiveMetricItems } from "./utils/buildTeacherDashboardMetrics";
 
 const INITIAL_ROWS: TeacherScheduleRow[] = [
   {
@@ -104,6 +105,21 @@ const PROGRESS_FEED: StudentProgressFeedItem[] = [
   },
 ];
 
+const MOCK_RAW_METRICS = {
+  total: 8,
+  running: 1,
+  absent: 1,
+  taken: 1,
+  regular: null,
+  trial: null,
+  advance: null,
+  rescheduled: null,
+  suspended: null,
+  pending: null,
+  activated: null,
+  leave: null,
+};
+
 function applyConnectingState(rows: readonly TeacherScheduleRow[], id: string): TeacherScheduleRow[] {
   return rows.map(row => {
     if (row.id === id && row.status === "pending") {
@@ -171,16 +187,17 @@ export function MockTeacherDashboardContainer() {
   const userName = useUserStore(state => state.name);
   const store = useTeacherDashboardStore();
   const labels = buildTeacherDashboardLabels(t, dashboardT);
+  const metricItems = buildTeacherActiveMetricItems(MOCK_RAW_METRICS, labels.activeMetrics);
 
   return (
     <TeacherDashboardView
       userName={userName}
-      metrics={store.metrics}
+      metricItems={metricItems}
       scheduleRows={store.scheduleRows}
       progressFeed={store.progressFeed}
       missedAlert={store.missedAlert}
-      scheduleDateLabel={store.scheduleDateLabel}
       welcomeDateSummary={store.welcomeDateSummary}
+      activeSessionsCount={MOCK_RAW_METRICS.running ?? 0}
       labels={labels}
       lastUpdated="Updated just now"
       activationError={null}

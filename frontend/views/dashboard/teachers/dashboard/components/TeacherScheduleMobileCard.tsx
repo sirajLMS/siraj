@@ -6,9 +6,9 @@ import { styled } from "@mui/material/styles";
 import { ActionIconLink, StatusBadge } from "@/frontend/components/ui";
 import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
-import { resolveTeacherScheduleSessionActions } from "@/shared/lib/teacher-schedule-session-actions";
 import { formatDurationMinutes } from "@/frontend/views/dashboard/admin/dashboard/utils/formatScheduleTime";
 import { Link } from "@/shared/i18n/routing";
+import { resolveTeacherScheduleSessionActions } from "@/shared/lib/teacher-schedule-session-actions";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
 import { resolveTeacherScheduleActionTooltips } from "../utils/resolveTeacherScheduleActionTooltips";
 import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
@@ -77,7 +77,10 @@ function renderFooterAction(
     isConnecting: row.status === "connecting",
   });
 
-  if (row.status === "completed" || (!actions.activate && !actions.start && !actions.markAbsent && !actions.requestLeave)) {
+  if (
+    row.status === "completed" ||
+    (!actions.activate && !actions.start && !actions.markAbsent && !actions.requestLeave)
+  ) {
     if (row.status === "completed") {
       return (
         <Button fullWidth disabled variant="outlined" sx={{ typography: "labelUppercase" }}>
@@ -272,13 +275,13 @@ export function TeacherScheduleMobileCard({
                   }
                 }}
                 aria-label={labels.actions.joinVideo}
-            sx={theme => ({
-              border: `1px solid ${theme.palette.border.light}`,
-              borderRadius: 1,
-              flexShrink: 0,
-            })}
-          >
-            {row.videoEnabled ? <VideocamOutlined /> : <VideocamOffOutlined />}
+                sx={theme => ({
+                  border: `1px solid ${theme.palette.border.light}`,
+                  borderRadius: 1,
+                  flexShrink: 0,
+                })}
+              >
+                {row.videoEnabled ? <VideocamOutlined /> : <VideocamOffOutlined />}
               </IconButton>
             </span>
           </Tooltip>

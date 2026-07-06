@@ -5,8 +5,8 @@ import { StatusBadge } from "@/frontend/components/ui";
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
-import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
 import { resolveTeacherScheduleActionTooltips } from "../utils/resolveTeacherScheduleActionTooltips";
+import { getStatusLabel, resolveTeacherStatusBadge } from "../utils/sessionStatusUtils";
 import { SessionActivateButton } from "./SessionActivateButton";
 
 export function TeacherScheduleStatusContent({

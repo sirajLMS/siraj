@@ -2,14 +2,14 @@
 
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import { useMemo } from "react";
 import { AppDataGrid, GridPagination } from "@/frontend/components/ui";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/stores/teacherDashboardTypes";
 import { ScheduleInstanceStatusBadge } from "@/frontend/views/dashboard/admin/dashboard/components/ScheduleInstanceStatusBadge";
 import type { TeacherDashboardLabels } from "../types/teacherDashboardLabels";
-import { TeacherScheduleStudentCell } from "./TeacherScheduleStudentCell";
 import { TeacherScheduleSessionActionsCell } from "./TeacherScheduleSessionActionsCell";
+import { TeacherScheduleStudentCell } from "./TeacherScheduleStudentCell";
 
 interface TeacherScheduleDataGridProps {
   readonly rows: readonly TeacherScheduleRow[];
@@ -129,7 +129,16 @@ export function TeacherScheduleDataGrid({
         ),
       },
     ];
-  }, [canActivate, instanceStatusLabels, labels, onActivate, onJoinVideo, onMarkAbsent, onRequestLeave, onStartSession]);
+  }, [
+    canActivate,
+    instanceStatusLabels,
+    labels,
+    onActivate,
+    onJoinVideo,
+    onMarkAbsent,
+    onRequestLeave,
+    onStartSession,
+  ]);
 
   const isServerPagination = totalCount !== undefined && onPageChange !== undefined;
 

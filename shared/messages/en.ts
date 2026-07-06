@@ -1965,7 +1965,7 @@ const en: MessageSchema = {
         mobileSummary: "{date} • {count} Active Sessions",
       },
       schedule: {
-        title: "Current Sessions",
+        title: "Daily Sessions",
         titleToday: "Today's Class Schedule",
         rowNumber: "#",
         classId: "Class ID",
@@ -2006,8 +2006,7 @@ const en: MessageSchema = {
           activateAfterWindow: "The activation window for this class has passed",
           activateConnecting: "Activation is in progress",
           joinVideoUnavailable: "No meeting link is available for this class",
-          markAbsentWaitingPeriod:
-            "You can mark a student absent 30 minutes after the scheduled start time",
+          markAbsentWaitingPeriod: "You can mark a student absent 30 minutes after the scheduled start time",
         },
       },
       activeControls: {
