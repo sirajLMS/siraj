@@ -28,7 +28,7 @@ debug-eslint.js
 debug-storybook.log
 
 # storage & local uploads
-storage/
+/storage/
 /storage
 
 # tests & documentation (not needed for deployment)

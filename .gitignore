@@ -88,6 +88,8 @@ storybook-static
 .stakpak/session*
 .stakpak
 
+# local uploads only (not backend/storage or backend/services/storage)
+/storage/
 /storage
 .aider*
 ai/.archive
