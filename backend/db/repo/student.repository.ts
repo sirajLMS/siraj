@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { and, eq, gt, inArray, lt, or, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
-import { parents, students, teachers, users } from "@/backend/db/schema";
+import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { getBackendTranslations } from "@/backend/lib/intl";
 import * as Types from "@/backend/types";
 import { ALLOWED_STATUS_TRANSITIONS } from "@/backend/types";
@@ -460,6 +460,43 @@ export namespace StudentRepository {
           }) as Types.StudentDirectory
       ),
       totalCount,
+    };
+  };
+
+  export const getAssignedToTeacher = async (
+    teacherId: string,
+    tx?: DBTransaction
+  ): Promise<Types.TeacherAssignedStudentsResult> => {
+    const queryDb = tx ?? db;
+
+    const assignedStudentIds = queryDb
+      .select({ studentId: teacherAssignments.studentId })
+      .from(teacherAssignments)
+      .where(and(eq(teacherAssignments.teacherId, teacherId), isNull(teacherAssignments.endedAt)));
+
+    const rows = await queryDb
+      .select({
+        id: students.id,
+        name: students.name,
+        status: students.status,
+        hoursPerWeek: students.hoursPerWeek,
+        classesRemaining: students.classesRemaining,
+        classesTotal: students.classesTotal,
+      })
+      .from(students)
+      .where(or(eq(students.primaryTeacherId, teacherId), inArray(students.id, assignedStudentIds)))
+      .orderBy(students.name);
+
+    return {
+      rows: rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        status: row.status as StudentStatus,
+        hoursPerWeek: row.hoursPerWeek ? Number.parseFloat(row.hoursPerWeek) : 0,
+        classesRemaining: row.classesRemaining,
+        classesTotal: row.classesTotal,
+      })),
+      totalCount: rows.length,
     };
   };
 }

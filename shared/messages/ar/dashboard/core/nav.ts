@@ -41,6 +41,11 @@ export const nav: DashboardNavigationLabels = {
   complaintsManage: "معالجة الشكاوى",
   teacherDashboard: "لوحة المعلم",
   teacherDashboardActive: "التحكم بالحصص",
+  todayClasses: "حصص اليوم",
+  regularSchedule: "الجدول الدائم",
+  yourStudents: "طلابك",
+  salaryDetails: "تفاصيل الراتب",
+  teacherRules: "القواعد",
   permissions: "الصلاحيات",
   booksAndBags: "الكتب والحقائب",
 };

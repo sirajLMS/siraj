@@ -3,6 +3,7 @@ import { UserRepository } from "@/backend/db/repo/user.repository";
 import { computeSessionHashes, verifyAndMigrateSessionHash } from "@/backend/lib/auth/session-hash";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 import type { CurrentUserProfile, SessionEntity } from "@/backend/types";
 
 export namespace SessionService {
@@ -48,9 +49,10 @@ export namespace SessionService {
   }
 
   export async function getCurrentUserProfile(userId: string): Promise<CurrentUserProfile> {
-    const [safeUser, permContext] = await Promise.all([
+    const [safeUser, permContext, teacherId] = await Promise.all([
       UserRepository.findSafeById(userId),
       PermissionsService.getUserContext(userId),
+      TeacherPortalService.resolveTeacherIdForUser(userId),
     ]);
 
     if (!safeUser) {
@@ -62,6 +64,7 @@ export namespace SessionService {
       permissions: permContext.permissions,
       notificationCount: 0,
       role: permContext.role,
+      teacherId,
     };
   }
 }

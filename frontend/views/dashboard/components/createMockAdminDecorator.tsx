@@ -12,6 +12,7 @@ export function createMockAdminDecorator(permissions: readonly AppPermission[]):
         avatarUrl: "",
         permissions: [...permissions],
         notificationCount: 0,
+        teacherId: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         emailVerifiedAt: new Date().toISOString(),

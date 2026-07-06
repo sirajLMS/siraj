@@ -28,6 +28,7 @@ export const teacherDashboardQueryDocument: TypedDocumentNode<
         studentId
         studentName
         scheduledStartAt
+        scheduledEndAt
         durationMinutes
         executionState
         outcome

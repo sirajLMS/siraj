@@ -308,6 +308,24 @@ VALUES (
     ),
     (
         gen_random_uuid (),
+        'teacher.view_students',
+        'teacher',
+        'view_students',
+        'View students assigned to the logged-in teacher',
+        'Teacher',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'teacher.view_own_profile',
+        'teacher',
+        'view_own_profile',
+        'View own teacher profile and salary (read-only)',
+        'Teacher',
+        true
+    ),
+    (
+        gen_random_uuid (),
         'system.enforce_time_window',
         'system',
         'enforce_time_window',
@@ -1034,6 +1052,8 @@ AND permission_id IN (
         'history.view_calendar',
         'history.view_details',
         'teacher.view_dashboard',
+        'teacher.view_students',
+        'teacher.view_own_profile',
         'system.enforce_time_window',
         'system.enforce_leave_limit',
         'system.bulk_update_dst',
@@ -1136,6 +1156,8 @@ WHERE
         'history.view_calendar',
         'history.view_details',
         'teacher.view_dashboard',
+        'teacher.view_students',
+        'teacher.view_own_profile',
         'system.enforce_time_window',
         'system.enforce_leave_limit',
         'teachers.list',
@@ -1284,6 +1306,8 @@ WHERE
         'session.update_status.absent',
         'session.update_status.leave',
         'teacher.view_dashboard',
+        'teacher.view_students',
+        'teacher.view_own_profile',
         'resources.list',
         'schedule.view_weekly',
         'schedule.view_workload'
@@ -1398,6 +1422,132 @@ DROP TRIGGER IF EXISTS trg_protect_system_permission_groups ON permission_groups
 CREATE TRIGGER trg_protect_system_permission_groups
 BEFORE UPDATE OR DELETE ON permission_groups
 FOR EACH ROW EXECUTE FUNCTION protect_system_permissions();
+
+-- Source: 30-a-class_instances_rls_policies.sql
+-- Class Instance RLS policies for scoping access based on current_user_id()
+
+ALTER TABLE "class_instances" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "class_instances" FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS class_instances_access_select_policy ON "class_instances";
+CREATE POLICY class_instances_access_select_policy ON "class_instances"
+AS RESTRICTIVE FOR SELECT
+USING (
+  deleted_at IS NULL
+  AND (
+    (NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()))
+    OR
+    (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id()))
+    OR
+    (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))
+  )
+);
+
+DROP POLICY IF EXISTS class_instances_access_update_policy ON "class_instances";
+CREATE POLICY class_instances_access_update_policy ON "class_instances"
+AS RESTRICTIVE FOR UPDATE
+USING (
+  deleted_at IS NULL
+  AND (
+    (NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()))
+    OR
+    (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id()))
+    OR
+    (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))
+  )
+)
+WITH CHECK (
+  (deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true'))
+  AND (
+    (NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()))
+    OR
+    (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id()))
+    OR
+    (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))
+  )
+);
+
+
+-- Source: 30-b-class_instances_state_transition_trigger.sql
+-- State Machine transition triggers for class_instances
+
+CREATE OR REPLACE FUNCTION fn_enforce_class_instance_transition()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.execution_state IS DISTINCT FROM NEW.execution_state THEN
+        -- COMPLETED can only transition to NOT_ACTIVATED (revert) or remain COMPLETED
+        IF OLD.execution_state = 'COMPLETED' AND NEW.execution_state IN ('ACTIVATED', 'RUNNING') THEN
+            RAISE EXCEPTION 'Invalid transition: Cannot reactivate a COMPLETED class instance.';
+        END IF;
+
+        -- COMPLETED+TAKEN cannot be reset to NOT_ACTIVATED (financial integrity)
+        IF OLD.execution_state = 'COMPLETED' AND NEW.execution_state = 'NOT_ACTIVATED' AND OLD.outcome = 'TAKEN' THEN
+            RAISE EXCEPTION 'Invalid transition: Cannot reset a COMPLETED instance with TAKEN outcome.';
+        END IF;
+
+        -- RUNNING cannot transition to ACTIVATED
+        IF OLD.execution_state = 'RUNNING' AND NEW.execution_state = 'ACTIVATED' THEN
+            RAISE EXCEPTION 'Invalid transition: Cannot move a RUNNING class instance back to ACTIVATED.';
+        END IF;
+
+        -- ACTIVATED can only transition to COMPLETED if outcome is ABSENT or LEAVE
+        IF OLD.execution_state = 'ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('ABSENT', 'LEAVE') THEN
+            RAISE EXCEPTION 'Invalid transition: ACTIVATED instance can only complete with ABSENT or LEAVE outcome.';
+        END IF;
+
+        -- NOT_ACTIVATED can only transition to COMPLETED with LEAVE or ABSENT (system auto-miss) outcome
+        IF OLD.execution_state = 'NOT_ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('LEAVE', 'ABSENT') THEN
+            RAISE EXCEPTION 'Invalid transition: NOT_ACTIVATED instance can only complete with LEAVE or ABSENT outcome.';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+DROP TRIGGER IF EXISTS trg_enforce_class_instance_transition ON class_instances;
+CREATE TRIGGER trg_enforce_class_instance_transition
+BEFORE UPDATE ON class_instances
+FOR EACH ROW EXECUTE FUNCTION fn_enforce_class_instance_transition();
+
+
+-- Source: 30-c-class_instances_auto_miss_transition.sql
+-- Allow NOT_ACTIVATED instances to complete as ABSENT when the system auto-marks missed classes.
+
+CREATE OR REPLACE FUNCTION fn_enforce_class_instance_transition()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.execution_state IS DISTINCT FROM NEW.execution_state THEN
+        -- COMPLETED can only transition to NOT_ACTIVATED (revert) or remain COMPLETED
+        IF OLD.execution_state = 'COMPLETED' AND NEW.execution_state IN ('ACTIVATED', 'RUNNING') THEN
+            RAISE EXCEPTION 'Invalid transition: Cannot reactivate a COMPLETED class instance.';
+        END IF;
+
+        -- COMPLETED+TAKEN cannot be reset to NOT_ACTIVATED (financial integrity)
+        IF OLD.execution_state = 'COMPLETED' AND NEW.execution_state = 'NOT_ACTIVATED' AND OLD.outcome = 'TAKEN' THEN
+            RAISE EXCEPTION 'Invalid transition: Cannot reset a COMPLETED instance with TAKEN outcome.';
+        END IF;
+
+        -- RUNNING cannot transition to ACTIVATED
+        IF OLD.execution_state = 'RUNNING' AND NEW.execution_state = 'ACTIVATED' THEN
+            RAISE EXCEPTION 'Invalid transition: Cannot move a RUNNING class instance back to ACTIVATED.';
+        END IF;
+
+        -- ACTIVATED can only transition to COMPLETED if outcome is ABSENT or LEAVE
+        IF OLD.execution_state = 'ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('ABSENT', 'LEAVE') THEN
+            RAISE EXCEPTION 'Invalid transition: ACTIVATED instance can only complete with ABSENT or LEAVE outcome.';
+        END IF;
+
+        -- NOT_ACTIVATED can only transition to COMPLETED with LEAVE or ABSENT (system auto-miss) outcome
+        IF OLD.execution_state = 'NOT_ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('LEAVE', 'ABSENT') THEN
+            RAISE EXCEPTION 'Invalid transition: NOT_ACTIVATED instance can only complete with LEAVE or ABSENT outcome.';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
 
 -- Source: 4-class_categories_and_subjects.sql
 -- Migration 4: Class Categories, Subjects, Subject Resources, Teacher Important Notes
@@ -1823,94 +1973,6 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
-
-
--- Source: class_instances_rls_policies.sql
--- Class Instance RLS policies for scoping access based on current_user_id()
-
-ALTER TABLE "class_instances" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "class_instances" FORCE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS class_instances_access_select_policy ON "class_instances";
-CREATE POLICY class_instances_access_select_policy ON "class_instances"
-AS RESTRICTIVE FOR SELECT
-USING (
-  deleted_at IS NULL
-  AND (
-    (NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()))
-    OR
-    (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id()))
-    OR
-    (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))
-  )
-);
-
-DROP POLICY IF EXISTS class_instances_access_update_policy ON "class_instances";
-CREATE POLICY class_instances_access_update_policy ON "class_instances"
-AS RESTRICTIVE FOR UPDATE
-USING (
-  deleted_at IS NULL
-  AND (
-    (NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()))
-    OR
-    (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id()))
-    OR
-    (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))
-  )
-)
-WITH CHECK (
-  (deleted_at IS NULL OR (deleted_at IS NOT NULL AND current_setting('app.soft_delete', true) = 'true'))
-  AND (
-    (NOT EXISTS (SELECT 1 FROM teachers WHERE user_id = current_user_id()) AND NOT EXISTS (SELECT 1 FROM parents WHERE user_id = current_user_id()))
-    OR
-    (teacher_id = (SELECT id FROM teachers WHERE user_id = current_user_id()))
-    OR
-    (student_id IN (SELECT id FROM students WHERE parent_id = (SELECT id FROM parents WHERE user_id = current_user_id())))
-  )
-);
-
-
--- Source: class_instances_state_transition_trigger.sql
--- State Machine transition triggers for class_instances
-
-CREATE OR REPLACE FUNCTION fn_enforce_class_instance_transition()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF OLD.execution_state IS DISTINCT FROM NEW.execution_state THEN
-        -- COMPLETED can only transition to NOT_ACTIVATED (revert) or remain COMPLETED
-        IF OLD.execution_state = 'COMPLETED' AND NEW.execution_state IN ('ACTIVATED', 'RUNNING') THEN
-            RAISE EXCEPTION 'Invalid transition: Cannot reactivate a COMPLETED class instance.';
-        END IF;
-
-        -- COMPLETED+TAKEN cannot be reset to NOT_ACTIVATED (financial integrity)
-        IF OLD.execution_state = 'COMPLETED' AND NEW.execution_state = 'NOT_ACTIVATED' AND OLD.outcome = 'TAKEN' THEN
-            RAISE EXCEPTION 'Invalid transition: Cannot reset a COMPLETED instance with TAKEN outcome.';
-        END IF;
-
-        -- RUNNING cannot transition to ACTIVATED
-        IF OLD.execution_state = 'RUNNING' AND NEW.execution_state = 'ACTIVATED' THEN
-            RAISE EXCEPTION 'Invalid transition: Cannot move a RUNNING class instance back to ACTIVATED.';
-        END IF;
-
-        -- ACTIVATED can only transition to COMPLETED if outcome is ABSENT or LEAVE
-        IF OLD.execution_state = 'ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('ABSENT', 'LEAVE') THEN
-            RAISE EXCEPTION 'Invalid transition: ACTIVATED instance can only complete with ABSENT or LEAVE outcome.';
-        END IF;
-
-        -- NOT_ACTIVATED can only transition to COMPLETED with LEAVE outcome
-        IF OLD.execution_state = 'NOT_ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('LEAVE') THEN
-            RAISE EXCEPTION 'Invalid transition: NOT_ACTIVATED instance can only complete with LEAVE outcome.';
-        END IF;
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql STABLE;
-
-DROP TRIGGER IF EXISTS trg_enforce_class_instance_transition ON class_instances;
-CREATE TRIGGER trg_enforce_class_instance_transition
-BEFORE UPDATE ON class_instances
-FOR EACH ROW EXECUTE FUNCTION fn_enforce_class_instance_transition();
 
 
 -- Source: hours_per_week_recalculation.sql

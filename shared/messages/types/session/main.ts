@@ -4,6 +4,7 @@ export interface SessionLabels {
   readonly leaveRescheduledRemark: string;
   readonly resetDescription: string;
   readonly absentEventDescription: string;
+  readonly autoMissedEventDescription: string;
   readonly manualRescheduleDescription: string;
   readonly manualRescheduleRemark: string;
   readonly activateDescription: string;

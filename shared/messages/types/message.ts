@@ -122,6 +122,9 @@ export type MessageSchema = {
     readonly teacherReassignment: TeacherReassignmentLabels;
     readonly teacherOnboarding: TeacherOnboardingLabels;
     readonly teacherDashboard: TeacherDashboardLabels;
+    readonly teacherStudents: import("./dashboard/teachers/students").TeacherStudentsLabels;
+    readonly teacherOwnProfile: import("./dashboard/teachers/own-profile").TeacherOwnProfileLabels;
+    readonly teacherClassList: import("./dashboard/teachers/class-list").TeacherClassListLabels;
     readonly parentsDirectory: ParentsDirectoryLabels;
     readonly parentProfile: ParentProfileLabels;
     readonly managersDirectory: ManagersDirectoryLabels;

@@ -33,5 +33,12 @@ export const UserPothosObject = gqlSchemaBuilder.loadableObject<
     role: t.string({
       resolve: async user => PermissionsService.getUserContext(user.id).then(c => c.role),
     }),
+    teacherId: t.string({
+      nullable: true,
+      resolve: async user => {
+        const { TeacherPortalService } = await import("@/backend/services/teacher/teacher-portal.service");
+        return TeacherPortalService.resolveTeacherIdForUser(user.id);
+      },
+    }),
   }),
 });

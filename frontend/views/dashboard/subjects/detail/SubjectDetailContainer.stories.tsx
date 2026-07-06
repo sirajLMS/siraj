@@ -78,6 +78,7 @@ const mockPermsDecorator = (Story: React.ComponentType) => {
       avatarUrl: "",
       permissions: perms,
       notificationCount: 0,
+      teacherId: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       emailVerifiedAt: new Date().toISOString(),

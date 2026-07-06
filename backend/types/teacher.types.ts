@@ -1,5 +1,5 @@
 import type { teacherBankingDetailsHistory, teacherPayments, teachers } from "@/backend/db/schema";
-import type { AccountStatus, ClassExecutionState, ClassOutcome, Gender, PaymentMethod } from "@/shared/lib/enum";
+import type { AccountStatus, ClassExecutionState, ClassOutcome, Gender, PaymentMethod, StudentStatus } from "@/shared/lib/enum";
 import type { PageInfo } from "./pagination.types";
 import type { ClassSessionMetrics } from "./schedule.types";
 
@@ -40,6 +40,7 @@ export type TeacherDashboardScheduleRow = {
   studentId: string;
   studentName: string;
   scheduledStartAt: Date | string;
+  scheduledEndAt: Date | string;
   durationMinutes: number;
   executionState: ClassExecutionState;
   outcome: ClassOutcome | null;
@@ -123,4 +124,45 @@ export type TeacherDirectoryMetrics = {
   id: string;
   activated: number;
   deactivated: number;
+};
+
+export type TeacherAssignedStudentReturnType = {
+  id: string;
+  name: string;
+  status: StudentStatus;
+  hoursPerWeek: number;
+  classesRemaining: number;
+  classesTotal: number;
+};
+
+export type TeacherAssignedStudentsResult = {
+  rows: TeacherAssignedStudentReturnType[];
+  totalCount: number;
+};
+
+export type TeacherOwnProfileReturnType = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  timezone: string;
+  hourlyRate: string | null;
+  rateCurrency: string | null;
+  paymentMethod: PaymentMethod | null;
+  zoomLink: string | null;
+};
+
+export type TeacherAssignedClassReturnType = {
+  id: string;
+  studentName: string;
+  scheduledStartAt: string;
+  scheduledEndAt: string;
+  durationMinutes: number;
+  executionState: ClassExecutionState;
+  outcome: ClassOutcome | null;
+};
+
+export type TeacherAssignedClassesResult = {
+  rows: TeacherAssignedClassReturnType[];
+  totalCount: number;
 };

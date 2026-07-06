@@ -6,6 +6,7 @@ export type {
   StatusTrackingRow,
   UpcomingClassRow,
   WeeklyScheduleGridRow,
+  TeacherAssignedClassRow,
 } from "./scheduling-queries.repository";
 export {
   bulkFreezeStudentClasses,
@@ -18,10 +19,12 @@ export {
   getRescheduleTrackingRows,
   getStatusTrackingRows,
   getStudentFutureClasses,
+  getTeacherAssignedClasses,
   getTeacherByUserId,
   getTeacherFutureClasses,
   getTeacherLeaveQuotaUsage,
   getTeacherProgressFeed,
+  findExpiredPendingInstances,
   getUpcomingClassesForStudent,
   getWeeklyScheduleGrid,
   getWeeklyWorkloadMetrics,

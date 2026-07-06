@@ -311,6 +311,11 @@ const en: MessageSchema = {
       complaintsManage: "Complaints Resolution",
       teacherDashboard: "Teacher Dashboard",
       teacherDashboardActive: "Session Controls",
+      todayClasses: "Today Classes",
+      regularSchedule: "Regular Schedule",
+      yourStudents: "Your Students",
+      salaryDetails: "Salary Details",
+      teacherRules: "Rules",
       permissions: "Permissions",
       booksAndBags: "Books & Bags",
     },
@@ -2031,9 +2036,9 @@ const en: MessageSchema = {
       policy: {
         title: "Activation Policy",
         description:
-          'Please ensure you activate your classes at least 5 minutes before the scheduled start time. Early activation provides students with the necessary notifications to join promptly. Failure to activate within 10 minutes of the start time will result in a "Missed" status.',
+          'Please ensure you activate your classes at least 5 minutes before the scheduled start time. Early activation provides students with the necessary notifications to join promptly. If you miss the activation window, the slot will be marked as "Missed" 15 minutes after the scheduled end time.',
         descriptionMobile:
-          'Classes can only be activated 5 minutes before the scheduled start time. If you miss the activation window by more than 15 minutes, the slot will be marked as "Missed".',
+          'Classes can only be activated 5 minutes before the scheduled start time. If you miss the activation window, the slot will be marked as "Missed" 15 minutes after the scheduled end time.',
       },
       dateFilter: {
         today: "Today",
@@ -2073,6 +2078,44 @@ const en: MessageSchema = {
         teacherIdNotFound: "Teacher ID not found.",
       },
       supportRequestSubmitted: "Support request submitted to {type}.",
+      rules: {
+        pageTitle: "Rules & Policies",
+        pageSubtitle: "Activation policy and teacher handbook resources.",
+      },
+    },
+    teacherStudents: {
+      pageTitle: "Your Students",
+      pageSubtitle: "Students currently assigned to your teaching schedule.",
+      noStudents: "No students are assigned to you yet.",
+      statusLabel: "Status: {status}",
+      quotaLabel: "Classes remaining: {remaining} / {total}",
+      hoursLabel: "Hours per week: {hours}",
+      errors: {
+        failedToLoad: "Failed to load your students.",
+      },
+    },
+    teacherOwnProfile: {
+      pageTitle: "Salary Details",
+      pageSubtitle: "View your official profile and compensation details.",
+      notSet: "Not set",
+      sections: {
+        contact: "Contact Information",
+        salary: "Salary Details",
+      },
+      baseSalary: "Base salary: {amount} {currency}",
+      paymentMethod: "Payment method: {method}",
+      errors: {
+        failedToLoad: "Failed to load your profile.",
+      },
+    },
+    teacherClassList: {
+      pageTitle: "Class Details",
+      pageSubtitle: "Review your recent and upcoming class sessions.",
+      noClasses: "No class sessions found for the selected period.",
+      viewDetails: "View Details",
+      errors: {
+        failedToLoad: "Failed to load class sessions.",
+      },
     },
     reports: {
       pageTitle: "Master Reporting Engine",
@@ -2646,6 +2689,7 @@ const en: MessageSchema = {
     leaveRescheduledRemark: "Leave approved - session rescheduled.",
     resetDescription: "Session reset by administrator.",
     absentEventDescription: "Student marked as absent after waiting period.",
+    autoMissedEventDescription: "Class automatically marked as missed after the activation grace period.",
     manualRescheduleDescription: "Class manually rescheduled to {newStart} by administrator.",
     manualRescheduleRemark: "Rescheduled: Moved from {oldStart} to {newStart}.",
     activateDescription: "Activated",

@@ -7,6 +7,9 @@ import { resolveScheduleInstanceDisplayStatus } from "@/frontend/views/dashboard
 interface ScheduleInstanceStatusBadgeProps {
   readonly outcome: ClassOutcome | null | undefined;
   readonly executionState: ClassExecutionState | null | undefined;
+  readonly scheduledEndAt?: Date | string | null;
+  readonly scheduledStartAt?: Date | string | null;
+  readonly durationMinutes?: number | null;
   readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly size?: "small" | "medium";
 }
@@ -14,10 +17,17 @@ interface ScheduleInstanceStatusBadgeProps {
 export function ScheduleInstanceStatusBadge({
   outcome,
   executionState,
+  scheduledEndAt,
+  scheduledStartAt,
+  durationMinutes,
   statusLabels,
   size = "small",
 }: ScheduleInstanceStatusBadgeProps) {
-  const displayStatus = resolveScheduleInstanceDisplayStatus(outcome, executionState);
+  const displayStatus = resolveScheduleInstanceDisplayStatus(outcome, executionState, undefined, undefined, {
+    scheduledEndAt,
+    scheduledStartAt,
+    durationMinutes,
+  });
 
   return (
     <StatusBadge category="classInstance" status={displayStatus} label={statusLabels[displayStatus]} size={size} />

@@ -31,6 +31,8 @@ export const adminDashboardScheduleQueryDocument: TypedDocumentNode<
         teacherTime
         studentTime
         duration
+        scheduledStartAt
+        scheduledEndAt
         outcome
         executionState
         student {

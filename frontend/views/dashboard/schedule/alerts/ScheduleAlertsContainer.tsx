@@ -6,6 +6,8 @@ import { RequirePermission } from "@/frontend/components/auth/RequirePermission"
 import { AppPermission } from "@/frontend/graphql/generated/gql/graphql-types";
 import { adminDashboardScheduleQueryDocument } from "@/frontend/graphql/sharedDocuments/schedule.documents";
 import { useScheduleAlertsStore } from "@/frontend/stores/scheduleAlertsStore";
+import { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
+import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule-instance-dashboard-status";
 import { ScheduleAlertsView } from "./ScheduleAlertsView";
 import type { AcademicClassRow, AlertsMetric, ClassSessionAction, ClassSessionStatus, ScheduleAlert } from "./types";
 
@@ -17,11 +19,21 @@ function getTodayString() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-function mapExecutionStateToStatus(executionState: string | null | undefined): ClassSessionStatus {
-  if (!executionState) return "upcoming";
-  const state = executionState.toLowerCase();
-  if (state === "running" || state === "activated") return "active";
-  if (state === "missed" || state === "absent") return "missed";
+function mapRowToSessionStatus(
+  outcome: string | null | undefined,
+  executionState: string | null | undefined,
+  scheduledEndAt?: string | null
+): ClassSessionStatus {
+  const displayStatus = resolveClassInstanceDashboardStatus(outcome, executionState, undefined, undefined, {
+    scheduledEndAt: scheduledEndAt ?? undefined,
+  });
+
+  if (displayStatus === ClassExecutionState.RUNNING || displayStatus === ClassExecutionState.ACTIVATED) {
+    return "active";
+  }
+  if (displayStatus === ClassOutcome.ABSENT || displayStatus === ClassOutcome.LEAVE) {
+    return "missed";
+  }
   return "upcoming";
 }
 
@@ -62,7 +74,7 @@ export function ScheduleAlertsContainer() {
   const scheduleResult = data?.adminDashboardSchedule;
   const metricsList: AlertsMetric[] = [];
   const classes: AcademicClassRow[] = (scheduleResult?.rows ?? []).map(row => {
-    const status = mapExecutionStateToStatus(row?.executionState);
+    const status = mapRowToSessionStatus(row?.outcome, row?.executionState, row?.scheduledEndAt);
     return {
       id: row?.id ?? "",
       className: row?.student?.name ?? "",

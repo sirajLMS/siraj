@@ -104,6 +104,8 @@ export interface TeacherScheduleRow {
   readonly activateDisabledReason?: "before_window" | "after_window" | null;
   readonly markAbsentEnabled?: boolean;
   readonly durationMinutes?: number;
+  readonly scheduledStartAt?: Date;
+  readonly scheduledEndAt?: Date;
   readonly courseTitle?: string;
   readonly locationLabel?: string;
   readonly isLive?: boolean;

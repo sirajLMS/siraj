@@ -56,6 +56,8 @@ export type DailyScheduleListDefinition = {
   teacherTime: string;
   yourTime: string;
   duration: number;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
   status: ClassExecutionState;
   outcome: ClassOutcome;
   executionState: ClassExecutionState;
@@ -72,6 +74,8 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
     teacherTime: t.exposeString("teacherTime"),
     yourTime: t.exposeString("yourTime"),
     duration: t.exposeInt("duration"),
+    scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
+    scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
     status: t.expose("status", { type: ClassExecutionStatePothosObject }),
     outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
     executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),

@@ -7,6 +7,7 @@ export const session: SessionLabels = {
   leaveRescheduledRemark: "Leave approved - session rescheduled.",
   resetDescription: "Session reset by admin.",
   absentEventDescription: "Student absence marked after waiting period.",
+  autoMissedEventDescription: "Class automatically marked as missed after the activation grace period.",
   manualRescheduleDescription: "Class manually rescheduled to {newStart} by admin.",
   manualRescheduleRemark: "Reschedule: moved from {oldStart} to {newStart}.",
   activateDescription: "Activated",

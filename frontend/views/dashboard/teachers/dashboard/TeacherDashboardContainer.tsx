@@ -23,6 +23,7 @@ import { useUserStore } from "@/frontend/stores/userStore";
 import { logger } from "@/frontend/utils/logger";
 import type { TeacherScheduleRow } from "@/frontend/views/dashboard/types/dashboard";
 import { useRouter } from "@/shared/i18n/routing";
+import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule-instance-dashboard-status";
 import { ManualClassEntryDialog } from "./components/ManualClassEntryDialog";
 import { TeacherDashboardView } from "./TeacherDashboardView";
 import { buildTeacherDashboardLabels } from "./utils/buildTeacherDashboardLabels";
@@ -40,6 +41,7 @@ interface RawRow {
   readonly studentId?: string | null;
   readonly studentName?: string | null;
   readonly scheduledStartAt?: string | Date | null;
+  readonly scheduledEndAt?: string | Date | null;
   readonly durationMinutes?: number | null;
   readonly executionState?: string | null;
   readonly outcome?: string | null;
@@ -57,7 +59,9 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
   if (!rows) return [];
   return rows.map((row, idx) => {
     const startAt = new Date(row.scheduledStartAt || todayDateStr);
-    const endAt = new Date(startAt.getTime() + (row.durationMinutes || 60) * 60000);
+    const endAt = row.scheduledEndAt
+      ? new Date(row.scheduledEndAt)
+      : new Date(startAt.getTime() + (row.durationMinutes || 60) * 60000);
     const startWindow = new Date(startAt.getTime() - ACTIVATION_WINDOW_BEFORE_MINUTES * 60000);
     const now = new Date();
 
@@ -85,7 +89,12 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
     } else if (executionState === "RUNNING") {
       status = "active";
     } else if (executionState === "NOT_ACTIVATED" && outcome === "PENDING") {
-      status = activateEnabled ? "pending" : "upcoming";
+      const missedDeadline = new Date(endAt.getTime() + DEFAULT_MISSED_GRACE_MINUTES * 60000);
+      if (now > missedDeadline) {
+        status = "missed";
+      } else {
+        status = activateEnabled ? "pending" : "upcoming";
+      }
     }
 
     return {
@@ -111,6 +120,8 @@ function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: strin
       activateDisabledReason,
       markAbsentEnabled,
       durationMinutes: row.durationMinutes ?? undefined,
+      scheduledStartAt: row.scheduledStartAt ? new Date(row.scheduledStartAt) : undefined,
+      scheduledEndAt: row.scheduledEndAt ? new Date(row.scheduledEndAt) : endAt,
       zoomMeetingUrl: row.zoomMeetingUrl ?? null,
       isLive: isLiveSession,
       isCurrent: isLiveSession,

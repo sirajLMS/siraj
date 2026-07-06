@@ -3,7 +3,9 @@ import {
   BadgeOutlined,
   CalendarTodayOutlined,
   CategoryOutlined,
+  ClassOutlined,
   DashboardOutlined,
+  DescriptionOutlined,
   Diversity1Outlined,
   EventRepeatOutlined,
   FolderOpenOutlined,
@@ -38,6 +40,54 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/dashboard",
     section: "main",
     permission: PAGE_PERMISSIONS.dashboard,
+  },
+  {
+    key: "today-classes",
+    labelKey: "dashboard.nav.todayClasses",
+    icon: CalendarTodayOutlined,
+    href: "/dashboard",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherDashboard,
+  },
+  {
+    key: "regular-schedule",
+    labelKey: "dashboard.nav.regularSchedule",
+    icon: EventRepeatOutlined,
+    href: "/teachers/me/schedule/weekly",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
+  },
+  {
+    key: "your-students",
+    labelKey: "dashboard.nav.yourStudents",
+    icon: GroupOutlined,
+    href: "/teachers/me/students",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherStudents,
+  },
+  {
+    key: "teacher-salary",
+    labelKey: "dashboard.nav.salaryDetails",
+    icon: PaymentsOutlined,
+    href: "/teachers/me/profile",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherOwnProfile,
+  },
+  {
+    key: "teacher-class-details",
+    labelKey: "dashboard.nav.classDetails",
+    icon: ClassOutlined,
+    href: "/teachers/me/classes",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherClassDetails,
+  },
+  {
+    key: "teacher-rules",
+    labelKey: "dashboard.nav.teacherRules",
+    icon: DescriptionOutlined,
+    href: "/teachers/rules",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherRules,
   },
   {
     key: "search-schedule",
@@ -213,6 +263,30 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
  */
 export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
   {
+    key: "today-classes",
+    labelKey: "dashboard.nav.todayClasses",
+    icon: CalendarTodayOutlined,
+    href: "/dashboard",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherDashboard,
+  },
+  {
+    key: "regular-schedule",
+    labelKey: "dashboard.nav.regularSchedule",
+    icon: EventRepeatOutlined,
+    href: "/teachers/me/schedule/weekly",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
+  },
+  {
+    key: "your-students",
+    labelKey: "dashboard.nav.yourStudents",
+    icon: GroupOutlined,
+    href: "/teachers/me/students",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherStudents,
+  },
+  {
     key: "home",
     labelKey: "dashboard.nav.home",
     icon: DashboardOutlined,
@@ -229,12 +303,20 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     permission: AppPermission.DashboardView,
   },
   {
-    key: "teacher-dashboard",
-    labelKey: "dashboard.nav.teacherDashboard",
-    icon: DashboardOutlined,
-    href: "/teachers/dashboard",
+    key: "resources",
+    labelKey: "dashboard.nav.resources",
+    icon: FolderOpenOutlined,
+    href: "/resources",
     section: "main",
-    permission: AppPermission.TeacherViewDashboard,
+    permission: PAGE_PERMISSIONS.resources,
+  },
+  {
+    key: "teacher-salary",
+    labelKey: "dashboard.nav.salaryDetails",
+    icon: PaymentsOutlined,
+    href: "/teachers/me/profile",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherOwnProfile,
   },
   {
     key: "teachers",
@@ -314,11 +396,29 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
  * Filter navigation items based on real user permissions array.
  */
 export function getNavItemsForPermissions(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
-  return items.filter(item => {
+  const filtered = items.filter(item => {
     if (!item.permission) return true;
     if (typeof item.permission === "string") {
       return permissions.includes(item.permission);
     }
     return item.permission.some(p => permissions.includes(p));
   });
+
+  return applyTeacherNavOverrides(filtered, permissions);
+}
+
+function isTeacherPortalUser(permissions: readonly AppPermission[]): boolean {
+  return (
+    permissions.includes(AppPermission.TeacherViewDashboard) &&
+    !permissions.includes(AppPermission.DashboardViewMetrics)
+  );
+}
+
+export function applyTeacherNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
+  if (!isTeacherPortalUser(permissions)) {
+    return [...items];
+  }
+
+  const hiddenKeys = new Set(["home", "books-and-bags"]);
+  return items.filter(item => !hiddenKeys.has(item.key));
 }

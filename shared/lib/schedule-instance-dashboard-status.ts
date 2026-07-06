@@ -1,5 +1,7 @@
 import { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 
+export const DEFAULT_MISSED_GRACE_MINUTES = 15;
+
 export type DailyScheduleMetricFilterKey =
   | "total"
   | "regular"
@@ -25,12 +27,18 @@ export interface ClassInstanceDashboardStatusInput {
   readonly executionState: ExecutionStateLike;
   readonly actualStartAt?: DateLike;
   readonly actualEndAt?: DateLike;
+  readonly scheduledEndAt?: DateLike;
 }
 
 export interface ClassInstanceMetricRow extends ClassInstanceDashboardStatusInput {
   readonly classType?: string | null;
   readonly isRescheduled?: boolean | null;
   readonly isFrozen?: boolean | null;
+}
+
+export interface ClassInstanceStatusResolveOptions {
+  readonly missedGraceMinutes?: number;
+  readonly now?: Date;
 }
 
 function toDate(value: DateLike | undefined): Date | null {
@@ -40,11 +48,35 @@ function toDate(value: DateLike | undefined): Date | null {
   return value instanceof Date ? value : new Date(value);
 }
 
+export function isClassInstancePastMissedGrace(
+  row: ClassInstanceDashboardStatusInput,
+  options?: ClassInstanceStatusResolveOptions
+): boolean {
+  const normalizedOutcome = (row.outcome ?? ClassOutcome.PENDING) as ClassOutcome;
+  const normalizedExecutionState = (row.executionState ?? ClassExecutionState.NOT_ACTIVATED) as ClassExecutionState;
+
+  if (normalizedExecutionState !== ClassExecutionState.NOT_ACTIVATED || normalizedOutcome !== ClassOutcome.PENDING) {
+    return false;
+  }
+
+  const endAt = toDate(row.scheduledEndAt);
+  if (!endAt) {
+    return false;
+  }
+
+  const graceMinutes = options?.missedGraceMinutes ?? DEFAULT_MISSED_GRACE_MINUTES;
+  const now = options?.now ?? new Date();
+  const missedDeadline = endAt.getTime() + graceMinutes * 60_000;
+
+  return now.getTime() > missedDeadline;
+}
+
 export function resolveClassInstanceDashboardStatus(
   outcome: OutcomeLike,
   executionState: ExecutionStateLike,
   actualStartAt?: DateLike,
-  actualEndAt?: DateLike
+  actualEndAt?: DateLike,
+  options?: ClassInstanceStatusResolveOptions & { scheduledEndAt?: DateLike }
 ): ClassInstanceDashboardStatus {
   const normalizedOutcome = (outcome ?? ClassOutcome.PENDING) as ClassOutcome;
   const normalizedExecutionState = (executionState ?? ClassExecutionState.NOT_ACTIVATED) as ClassExecutionState;
@@ -66,13 +98,29 @@ export function resolveClassInstanceDashboardStatus(
     return ClassExecutionState.ACTIVATED;
   }
 
+  if (
+    isClassInstancePastMissedGrace(
+      { outcome: normalizedOutcome, executionState: normalizedExecutionState, scheduledEndAt: options?.scheduledEndAt },
+      options
+    )
+  ) {
+    return ClassOutcome.ABSENT;
+  }
+
   return normalizedOutcome;
 }
 
 export function resolveClassInstanceDashboardStatusFromRow(
-  row: ClassInstanceDashboardStatusInput
+  row: ClassInstanceDashboardStatusInput,
+  options?: ClassInstanceStatusResolveOptions
 ): ClassInstanceDashboardStatus {
-  return resolveClassInstanceDashboardStatus(row.outcome, row.executionState, row.actualStartAt, row.actualEndAt);
+  return resolveClassInstanceDashboardStatus(
+    row.outcome,
+    row.executionState,
+    row.actualStartAt,
+    row.actualEndAt,
+    { scheduledEndAt: row.scheduledEndAt, ...options }
+  );
 }
 
 function dashboardStatusMatchesMetric(
@@ -99,7 +147,8 @@ function dashboardStatusMatchesMetric(
 
 export function matchesDashboardMetricFilter(
   row: ClassInstanceMetricRow,
-  metricFilter: string | null | undefined
+  metricFilter: string | null | undefined,
+  options?: ClassInstanceStatusResolveOptions
 ): boolean {
   if (!metricFilter || metricFilter === "total") {
     return true;
@@ -124,7 +173,7 @@ export function matchesDashboardMetricFilter(
     case "leave":
     case "activated":
     case "running":
-      return dashboardStatusMatchesMetric(resolveClassInstanceDashboardStatusFromRow(row), key);
+      return dashboardStatusMatchesMetric(resolveClassInstanceDashboardStatusFromRow(row, options), key);
     default:
       return true;
   }
@@ -161,7 +210,8 @@ const METRIC_KEYS: readonly DailyScheduleMetricFilterKey[] = [
 ];
 
 export function computeDailyScheduleMetricsFromRows(
-  rows: readonly ClassInstanceMetricRow[]
+  rows: readonly ClassInstanceMetricRow[],
+  options?: ClassInstanceStatusResolveOptions
 ): DailyScheduleMetricsCounts {
   const counts: DailyScheduleMetricsCounts = {
     total: rows.length,
@@ -183,7 +233,7 @@ export function computeDailyScheduleMetricsFromRows(
       if (key === "total") {
         continue;
       }
-      if (matchesDashboardMetricFilter(row, key)) {
+      if (matchesDashboardMetricFilter(row, key, options)) {
         counts[key] += 1;
       }
     }

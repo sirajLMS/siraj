@@ -39,6 +39,12 @@ const SYSTEM_SETTINGS_DATA = [
     "scheduling"
   ),
   createSetting(
+    "session_missed_grace_minutes",
+    "15",
+    "Minutes after scheduled end time before an unactivated class is auto-marked as missed",
+    "scheduling"
+  ),
+  createSetting(
     "session_leave_reschedule_offset_days",
     "7",
     "Days offset to reschedule when leave is processed",

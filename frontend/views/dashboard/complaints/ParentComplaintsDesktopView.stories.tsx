@@ -123,6 +123,7 @@ const meta: Meta<typeof ParentComplaintsDesktopStoryRenderer> = {
         avatarUrl: "",
         permissions: PARENT_PERMISSIONS,
         notificationCount: 0,
+        teacherId: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         emailVerifiedAt: new Date().toISOString(),

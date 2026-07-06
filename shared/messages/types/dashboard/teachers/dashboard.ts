@@ -129,4 +129,8 @@ export interface TeacherDashboardLabels {
     readonly teacherIdNotFound: string;
   };
   readonly supportRequestSubmitted: string;
+  readonly rules: {
+    readonly pageTitle: string;
+    readonly pageSubtitle: string;
+  };
 }

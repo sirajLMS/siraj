@@ -1,4 +1,4 @@
--- State Machine transition triggers for class_instances
+-- Allow NOT_ACTIVATED instances to complete as ABSENT when the system auto-marks missed classes.
 
 CREATE OR REPLACE FUNCTION fn_enforce_class_instance_transition()
 RETURNS TRIGGER AS $$
@@ -24,17 +24,12 @@ BEGIN
             RAISE EXCEPTION 'Invalid transition: ACTIVATED instance can only complete with ABSENT or LEAVE outcome.';
         END IF;
 
-        -- NOT_ACTIVATED can only transition to COMPLETED with LEAVE outcome
-        IF OLD.execution_state = 'NOT_ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('LEAVE') THEN
-            RAISE EXCEPTION 'Invalid transition: NOT_ACTIVATED instance can only complete with LEAVE outcome.';
+        -- NOT_ACTIVATED can only transition to COMPLETED with LEAVE or ABSENT (system auto-miss) outcome
+        IF OLD.execution_state = 'NOT_ACTIVATED' AND NEW.execution_state = 'COMPLETED' AND NEW.outcome NOT IN ('LEAVE', 'ABSENT') THEN
+            RAISE EXCEPTION 'Invalid transition: NOT_ACTIVATED instance can only complete with LEAVE or ABSENT outcome.';
         END IF;
     END IF;
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql STABLE;
-
-DROP TRIGGER IF EXISTS trg_enforce_class_instance_transition ON class_instances;
-CREATE TRIGGER trg_enforce_class_instance_transition
-BEFORE UPDATE ON class_instances
-FOR EACH ROW EXECUTE FUNCTION fn_enforce_class_instance_transition();

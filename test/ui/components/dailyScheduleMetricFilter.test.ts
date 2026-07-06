@@ -12,6 +12,8 @@ const sampleRow = (overrides: Partial<DailyScheduleRow>): DailyScheduleRow => ({
   teacherTime: null,
   studentTime: null,
   duration: 60,
+  scheduledStartAt: "2028-01-01T10:00:00.000Z",
+  scheduledEndAt: "2028-01-01T11:00:00.000Z",
   status: null,
   outcome: ClassOutcome.Pending,
   executionState: ClassExecutionState.NotActivated,

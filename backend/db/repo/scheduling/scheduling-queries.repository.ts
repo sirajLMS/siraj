@@ -165,11 +165,47 @@ async function applyViewerTimezoneFormatting(
   }));
 }
 
+export const findExpiredPendingInstances = async (
+  graceMinutes: number,
+  limit: number,
+  now: Date,
+  tx?: DBTransaction
+): Promise<Types.ClassInstanceEntity[]> => {
+  const queryDb = tx ?? db;
+  const missedDeadline = new Date(now.getTime() - graceMinutes * 60_000);
+
+  return queryDb
+    .select()
+    .from(classInstances)
+    .where(
+      and(
+        isNull(classInstances.deletedAt),
+        eq(classInstances.executionState, "NOT_ACTIVATED"),
+        eq(classInstances.outcome, "PENDING"),
+        lt(classInstances.scheduledEndAt, missedDeadline)
+      )
+    )
+    .limit(limit);
+};
+
 export const getAdminDashboardSchedule = async (
   input: AdminDashboardScheduleInput,
   tx?: DBTransaction
 ): Promise<AdminDashboardScheduleResult> => {
+  if (!tx) {
+    const { ClassInstanceExpiryService } = await import("@/backend/services/session/class-instance-expiry.service");
+    await ClassInstanceExpiryService.processExpiredInstances({ locale: input.locale });
+  }
+
   const runner = async (t: DBTransaction): Promise<AdminDashboardScheduleResult> => {
+    const { SystemSettingsRepository } = await import("@/backend/db/repo/system-settings.repository");
+    const { DEFAULT_MISSED_GRACE_MINUTES } = await import("@/shared/lib/schedule-instance-dashboard-status");
+    const missedGraceMinutes = await SystemSettingsRepository.getIntValue(
+      "session_missed_grace_minutes",
+      DEFAULT_MISSED_GRACE_MINUTES,
+      t
+    );
+
     const baseRows = await fetchDailyScheduleBaseRows(
       t,
       input.date,
@@ -178,10 +214,11 @@ export const getAdminDashboardSchedule = async (
       input.search
     );
 
-    const metrics = computeDailyScheduleMetricsFromRows(baseRows);
+    const metricsOptions = { missedGraceMinutes };
+    const metrics = computeDailyScheduleMetricsFromRows(baseRows, metricsOptions);
 
     const filteredRows = input.metricFilter
-      ? baseRows.filter(row => matchesDashboardMetricFilter(row, input.metricFilter))
+      ? baseRows.filter(row => matchesDashboardMetricFilter(row, input.metricFilter, metricsOptions))
       : baseRows;
 
     const totalCount = filteredRows.length;
@@ -886,5 +923,48 @@ export const getUpcomingClassesForStudent = async (
     )
     .orderBy(classInstances.scheduledStartAt)
     .limit(100);
+  return rows;
+};
+
+export type TeacherAssignedClassRow = {
+  id: string;
+  studentName: string;
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  durationMinutes: number;
+  executionState: string;
+  outcome: string | null;
+};
+
+export const getTeacherAssignedClasses = async (
+  teacherId: string,
+  tx?: DBTransaction
+): Promise<TeacherAssignedClassRow[]> => {
+  const queryDb = tx ?? db;
+  const fromDate = new Date();
+  fromDate.setDate(fromDate.getDate() - 7);
+
+  const rows = await queryDb
+    .select({
+      id: classInstances.id,
+      studentName: students.name,
+      scheduledStartAt: classInstances.scheduledStartAt,
+      scheduledEndAt: classInstances.scheduledEndAt,
+      durationMinutes: classInstances.durationMinutes,
+      executionState: classInstances.executionState,
+      outcome: classInstances.outcome,
+    })
+    .from(classInstances)
+    .innerJoin(students, eq(classInstances.studentId, students.id))
+    .where(
+      and(
+        eq(classInstances.teacherId, teacherId),
+        isNull(classInstances.deletedAt),
+        gte(classInstances.scheduledStartAt, fromDate)
+      )
+    )
+    .orderBy(classInstances.scheduledStartAt)
+    .limit(200);
+
   return rows;
 };

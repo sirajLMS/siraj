@@ -24,6 +24,7 @@ async function resolveTeacherDashboard(
       studentId: r.studentId,
       studentName: r.student?.name || "Unknown",
       scheduledStartAt: r.scheduledStartAt,
+      scheduledEndAt: r.scheduledEndAt,
       durationMinutes: r.durationMinutes,
       executionState: r.executionState,
       outcome: r.outcome ?? null,

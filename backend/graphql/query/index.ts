@@ -8,6 +8,7 @@ import "./class-session.query";
 import "./student-history.query";
 import "./student-status.query";
 import "./teacher-dashboard.query";
+import "./teacher-portal.query";
 import "./notification-alerts.query";
 import "./billing-alerts.query";
 import "./availability-search.query";

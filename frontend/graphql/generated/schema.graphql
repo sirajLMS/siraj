@@ -164,6 +164,8 @@ enum AppPermission {
   TEACHERS_LIST
   TEACHERS_MANAGE_SCHEDULE
   TEACHER_VIEW_DASHBOARD
+  TEACHER_VIEW_OWN_PROFILE
+  TEACHER_VIEW_STUDENTS
   TEST_CUSTOM_ALT
   TEST_CUSTOM_ONLY
   TEST_SYSTEM_ONLY
@@ -845,6 +847,8 @@ type DailyScheduleList {
   executionState: ClassExecutionState
   id: String
   outcome: ClassOutcome
+  scheduledEndAt: DateTime
+  scheduledStartAt: DateTime
   status: ClassExecutionState
   student: DailyScheduleListUserItem
   studentTime: String
@@ -1865,10 +1869,13 @@ type Query {
   Returns contributor statistics for the suggestion social proof display.
   """
   suggestionContributorStats(days: Int!): SuggestionContributorStats
+  teacherAssignedClasses: TeacherAssignedClassesResult
+  teacherAssignedStudents: TeacherAssignedStudentsResult
   teacherDashboard(date: String!, pagination: PaginationArgs): TeacherDashboard
   teacherDirectory(paginationArgs: PaginationArgs, search: String): TeacherDirectory
   teacherFutureSchedule(teacherId: String): TeacherFutureSchedule
   teacherHandbookUrl: TeacherHandbookUrl
+  teacherOwnProfile: TeacherOwnProfile
   teacherProfileForEdit(teacherId: ID!): TeacherProfileResult
   teacherWeeklyScheduleGrid(teacherId: String, weekDate: String!): WeeklyScheduleGrid
   teacherWorkloadMetrics(teacherId: String, weekDate: String!): WeeklyWorkloadMetrics
@@ -2377,6 +2384,37 @@ type SystemAlert {
   type: String
 }
 
+type TeacherAssignedClass {
+  durationMinutes: Int
+  executionState: ClassExecutionState
+  id: String
+  outcome: ClassOutcome
+  scheduledEndAt: String
+  scheduledStartAt: String
+  studentName: String
+}
+
+type TeacherAssignedClassesResult {
+  id: String
+  rows: [TeacherAssignedClass!]
+  totalCount: Int
+}
+
+type TeacherAssignedStudent {
+  classesRemaining: Int
+  classesTotal: Int
+  hoursPerWeek: Float
+  id: String
+  name: String
+  status: StudentStatus
+}
+
+type TeacherAssignedStudentsResult {
+  id: String
+  rows: [TeacherAssignedStudent!]
+  totalCount: Int
+}
+
 type TeacherAvailabilityGap {
   dayOfWeek: DayOfWeek
   gapEndTime: String
@@ -2417,6 +2455,7 @@ type TeacherDashboardScheduleRow {
   executionState: ClassExecutionState
   id: String
   outcome: ClassOutcome
+  scheduledEndAt: DateTime
   scheduledStartAt: DateTime
   studentId: String
   studentName: String
@@ -2571,6 +2610,18 @@ type TeacherOnboardingResult {
   userId: String
 }
 
+type TeacherOwnProfile {
+  email: String
+  hourlyRate: String
+  id: String
+  name: String
+  paymentMethod: PaymentMethod
+  phone: String
+  rateCurrency: String
+  timezone: String
+  zoomLink: String
+}
+
 type TeacherProfileResult {
   address: String
   avgEngagementScore: Float
@@ -2715,6 +2766,7 @@ type User {
   notificationCount: Int
   permissions: [AppPermission!]
   role: String
+  teacherId: String
   updatedAt: DateTime
 }
 

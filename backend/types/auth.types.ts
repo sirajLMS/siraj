@@ -26,6 +26,7 @@ export type CurrentUserProfile = SafeUser & {
   permissions: AppPermission[];
   notificationCount: number;
   role: UserRole;
+  teacherId: string | null;
 };
 
 export type UserPothosDefinition = SafeUser & {

@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { ClassExecutionState, ClassOutcome } from "@/shared/lib/enum";
 import {
   computeDailyScheduleMetricsFromRows,
+  DEFAULT_MISSED_GRACE_MINUTES,
+  isClassInstancePastMissedGrace,
   matchesDashboardMetricFilter,
   resolveClassInstanceDashboardStatus,
 } from "@/shared/lib/schedule-instance-dashboard-status";
@@ -52,6 +54,42 @@ describe("schedule-instance-dashboard-status", () => {
     ).toBe(ClassExecutionState.RUNNING);
   });
 
+  test("NOT_ACTIVATED + PENDING past missed grace maps to ABSENT", () => {
+    const scheduledEndAt = new Date("2028-01-01T10:00:00Z");
+    const now = new Date(scheduledEndAt.getTime() + (DEFAULT_MISSED_GRACE_MINUTES + 1) * 60_000);
+
+    expect(
+      resolveClassInstanceDashboardStatus(ClassOutcome.PENDING, ClassExecutionState.NOT_ACTIVATED, undefined, undefined, {
+        scheduledEndAt,
+        now,
+      })
+    ).toBe(ClassOutcome.ABSENT);
+
+    expect(
+      isClassInstancePastMissedGrace(
+        {
+          outcome: ClassOutcome.PENDING,
+          executionState: ClassExecutionState.NOT_ACTIVATED,
+          scheduledEndAt,
+        },
+        { now }
+      )
+    ).toBeTrue();
+  });
+
+  test("NOT_ACTIVATED + PENDING within missed grace stays PENDING", () => {
+    const scheduledEndAt = new Date("2028-01-01T10:00:00Z");
+    const now = new Date(scheduledEndAt.getTime() + 5 * 60_000);
+
+    expect(
+      resolveClassInstanceDashboardStatus(ClassOutcome.PENDING, ClassExecutionState.NOT_ACTIVATED, undefined, undefined, {
+        scheduledEndAt,
+        now,
+        missedGraceMinutes: DEFAULT_MISSED_GRACE_MINUTES,
+      })
+    ).toBe(ClassOutcome.PENDING);
+  });
+
   test("computeDailyScheduleMetricsFromRows aligns status counts", () => {
     const metrics = computeDailyScheduleMetricsFromRows([
       {
@@ -83,5 +121,25 @@ describe("schedule-instance-dashboard-status", () => {
     expect(metrics.absent).toBe(1);
     expect(metrics.regular).toBe(3);
     expect(metrics.trial).toBe(1);
+  });
+
+  test("computeDailyScheduleMetricsFromRows counts past-due pending rows as absent", () => {
+    const scheduledEndAt = new Date("2028-01-01T10:00:00Z");
+    const now = new Date(scheduledEndAt.getTime() + (DEFAULT_MISSED_GRACE_MINUTES + 1) * 60_000);
+
+    const metrics = computeDailyScheduleMetricsFromRows(
+      [
+        {
+          outcome: ClassOutcome.PENDING,
+          executionState: ClassExecutionState.NOT_ACTIVATED,
+          scheduledEndAt,
+          classType: "REGULAR",
+        },
+      ],
+      { now }
+    );
+
+    expect(metrics.pending).toBe(0);
+    expect(metrics.absent).toBe(1);
   });
 });

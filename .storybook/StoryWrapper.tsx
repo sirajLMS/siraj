@@ -119,6 +119,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
       avatarUrl: "",
       permissions: adminPermissions,
       notificationCount: 3,
+      teacherId: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       emailVerifiedAt: new Date().toISOString(),

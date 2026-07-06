@@ -377,6 +377,9 @@ function ScheduleOverviewMobileCard({
           <ScheduleInstanceStatusBadge
             outcome={row.outcome}
             executionState={row.executionState}
+            scheduledEndAt={row.scheduledEndAt}
+            scheduledStartAt={row.scheduledStartAt}
+            durationMinutes={row.duration}
             statusLabels={statusLabels}
             size="small"
           />

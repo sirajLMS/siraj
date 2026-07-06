@@ -12,7 +12,7 @@ import { createRescheduledSuccessor, type DBTransaction, performRescheduleValida
 export async function updateInstanceState(
   t: DBTransaction,
   id: string,
-  actorUserId: string,
+  actorUserId: string | null,
   state: Partial<Types.ClassInstanceInsertInput>,
   event: {
     fromState: Record<string, unknown>;
@@ -104,7 +104,8 @@ async function validateStateTransition(
     const isValidEarly =
       existing.executionState === "ACTIVATED" && (state.outcome === "ABSENT" || state.outcome === "LEAVE");
     const isValidAutomatedLeave = existing.executionState === "NOT_ACTIVATED" && state.outcome === "LEAVE";
-    if (!isValidStandard && !isValidEarly && !isValidAutomatedLeave) {
+    const isValidAutomatedAbsent = existing.executionState === "NOT_ACTIVATED" && state.outcome === "ABSENT";
+    if (!isValidStandard && !isValidEarly && !isValidAutomatedLeave && !isValidAutomatedAbsent) {
       const tFunc = await getBackendTranslations({ locale, namespace: "errors" });
       throw new Error(tFunc("invalidTransition"));
     }
@@ -438,6 +439,40 @@ export const markClassAbsent = async (id: string, actorUserId: string, tx?: DBTr
       },
     };
   });
+};
+
+export const markClassMissedBySystem = async (
+  id: string,
+  tx?: DBTransaction,
+  locale?: string
+): Promise<Types.ClassInstanceEntity | null> => {
+  const runner = async (t: DBTransaction) => {
+    const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
+    if (!existing) {
+      return null;
+    }
+
+    const tFuncSession = await getBackendTranslations({ locale, namespace: "session" });
+    const now = new Date();
+    const state = {
+      executionState: "COMPLETED" as const,
+      outcome: "ABSENT" as const,
+      actualStartAt: existing.actualStartAt ?? now,
+      actualEndAt: now,
+      payrollCredited: true,
+      remarks: existing.remarks ?? tFuncSession("autoMissedEventDescription"),
+    };
+
+    await validateStateTransition(existing, state, locale);
+
+    return updateInstanceState(t, id, null, state, {
+      fromState: { executionState: existing.executionState, outcome: existing.outcome },
+      toState: { executionState: "COMPLETED", outcome: "ABSENT" },
+      description: tFuncSession("autoMissedEventDescription"),
+    });
+  };
+
+  return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
 
 export const processClassLeave = async (

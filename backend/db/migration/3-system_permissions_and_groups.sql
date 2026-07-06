@@ -295,6 +295,24 @@ VALUES (
     ),
     (
         gen_random_uuid (),
+        'teacher.view_students',
+        'teacher',
+        'view_students',
+        'View students assigned to the logged-in teacher',
+        'Teacher',
+        true
+    ),
+    (
+        gen_random_uuid (),
+        'teacher.view_own_profile',
+        'teacher',
+        'view_own_profile',
+        'View own teacher profile and salary (read-only)',
+        'Teacher',
+        true
+    ),
+    (
+        gen_random_uuid (),
         'system.enforce_time_window',
         'system',
         'enforce_time_window',
@@ -1021,6 +1039,8 @@ AND permission_id IN (
         'history.view_calendar',
         'history.view_details',
         'teacher.view_dashboard',
+        'teacher.view_students',
+        'teacher.view_own_profile',
         'system.enforce_time_window',
         'system.enforce_leave_limit',
         'system.bulk_update_dst',
@@ -1123,6 +1143,8 @@ WHERE
         'history.view_calendar',
         'history.view_details',
         'teacher.view_dashboard',
+        'teacher.view_students',
+        'teacher.view_own_profile',
         'system.enforce_time_window',
         'system.enforce_leave_limit',
         'teachers.list',
@@ -1271,6 +1293,8 @@ WHERE
         'session.update_status.absent',
         'session.update_status.leave',
         'teacher.view_dashboard',
+        'teacher.view_students',
+        'teacher.view_own_profile',
         'resources.list',
         'schedule.view_weekly',
         'schedule.view_workload'

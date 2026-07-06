@@ -38,6 +38,8 @@ export namespace ScheduleService {
       teacherTime: item.scheduledStartAt.toISOString(),
       yourTime: item.yourTimeFormatted || item.scheduledStartAt.toISOString(),
       duration: item.durationMinutes,
+      scheduledStartAt: item.scheduledStartAt,
+      scheduledEndAt: item.scheduledEndAt,
       status: (item.outcome || item.executionState) as ClassExecutionState,
       outcome: item.outcome as ClassOutcome,
       executionState: item.executionState as ClassExecutionState,

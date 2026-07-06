@@ -103,6 +103,9 @@ export function TeacherScheduleDataGrid({
           <ScheduleInstanceStatusBadge
             outcome={row.outcome as ClassOutcome | undefined}
             executionState={row.executionState as ClassExecutionState | undefined}
+            scheduledEndAt={row.scheduledEndAt}
+            scheduledStartAt={row.scheduledStartAt}
+            durationMinutes={row.durationMinutes}
             statusLabels={instanceStatusLabels}
           />
         ),

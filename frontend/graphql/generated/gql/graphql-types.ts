@@ -190,6 +190,8 @@ export enum AppPermission {
   TeachersList = 'TEACHERS_LIST',
   TeachersManageSchedule = 'TEACHERS_MANAGE_SCHEDULE',
   TeacherViewDashboard = 'TEACHER_VIEW_DASHBOARD',
+  TeacherViewOwnProfile = 'TEACHER_VIEW_OWN_PROFILE',
+  TeacherViewStudents = 'TEACHER_VIEW_STUDENTS',
   TestCustomAlt = 'TEST_CUSTOM_ALT',
   TestCustomOnly = 'TEST_CUSTOM_ONLY',
   TestSystemOnly = 'TEST_SYSTEM_ONLY',
@@ -891,6 +893,8 @@ export type DailyScheduleList = {
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
+  scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
+  scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
   status: Maybe<ClassExecutionState>;
   student: Maybe<DailyScheduleListUserItem>;
   studentTime: Maybe<Scalars['String']['output']>;
@@ -2330,10 +2334,13 @@ export type Query = {
   students: StudentsWithFiltersResponse;
   /** Returns contributor statistics for the suggestion social proof display. */
   suggestionContributorStats: Maybe<SuggestionContributorStats>;
+  teacherAssignedClasses: Maybe<TeacherAssignedClassesResult>;
+  teacherAssignedStudents: Maybe<TeacherAssignedStudentsResult>;
   teacherDashboard: Maybe<TeacherDashboard>;
   teacherDirectory: Maybe<TeacherDirectory>;
   teacherFutureSchedule: Maybe<TeacherFutureSchedule>;
   teacherHandbookUrl: Maybe<TeacherHandbookUrl>;
+  teacherOwnProfile: Maybe<TeacherOwnProfile>;
   teacherProfileForEdit: Maybe<TeacherProfileResult>;
   teacherWeeklyScheduleGrid: Maybe<WeeklyScheduleGrid>;
   teacherWorkloadMetrics: Maybe<WeeklyWorkloadMetrics>;
@@ -3182,6 +3189,41 @@ export type SystemAlert = {
   type: Maybe<Scalars['String']['output']>;
 };
 
+export type TeacherAssignedClass = {
+  __typename?: 'TeacherAssignedClass';
+  durationMinutes: Maybe<Scalars['Int']['output']>;
+  executionState: Maybe<ClassExecutionState>;
+  id: Maybe<Scalars['String']['output']>;
+  outcome: Maybe<ClassOutcome>;
+  scheduledEndAt: Maybe<Scalars['String']['output']>;
+  scheduledStartAt: Maybe<Scalars['String']['output']>;
+  studentName: Maybe<Scalars['String']['output']>;
+};
+
+export type TeacherAssignedClassesResult = {
+  __typename?: 'TeacherAssignedClassesResult';
+  id: Maybe<Scalars['String']['output']>;
+  rows: Maybe<Array<TeacherAssignedClass>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
+export type TeacherAssignedStudent = {
+  __typename?: 'TeacherAssignedStudent';
+  classesRemaining: Maybe<Scalars['Int']['output']>;
+  classesTotal: Maybe<Scalars['Int']['output']>;
+  hoursPerWeek: Maybe<Scalars['Float']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  status: Maybe<StudentStatus>;
+};
+
+export type TeacherAssignedStudentsResult = {
+  __typename?: 'TeacherAssignedStudentsResult';
+  id: Maybe<Scalars['String']['output']>;
+  rows: Maybe<Array<TeacherAssignedStudent>>;
+  totalCount: Maybe<Scalars['Int']['output']>;
+};
+
 export type TeacherAvailabilityGap = {
   __typename?: 'TeacherAvailabilityGap';
   dayOfWeek: Maybe<DayOfWeek>;
@@ -3226,6 +3268,7 @@ export type TeacherDashboardScheduleRow = {
   executionState: Maybe<ClassExecutionState>;
   id: Maybe<Scalars['String']['output']>;
   outcome: Maybe<ClassOutcome>;
+  scheduledEndAt: Maybe<Scalars['DateTime']['output']>;
   scheduledStartAt: Maybe<Scalars['DateTime']['output']>;
   studentId: Maybe<Scalars['String']['output']>;
   studentName: Maybe<Scalars['String']['output']>;
@@ -3357,6 +3400,19 @@ export type TeacherOnboardingResult = {
   teacherId: Maybe<Scalars['String']['output']>;
   /** Created user ID */
   userId: Maybe<Scalars['String']['output']>;
+};
+
+export type TeacherOwnProfile = {
+  __typename?: 'TeacherOwnProfile';
+  email: Maybe<Scalars['String']['output']>;
+  hourlyRate: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  name: Maybe<Scalars['String']['output']>;
+  paymentMethod: Maybe<PaymentMethod>;
+  phone: Maybe<Scalars['String']['output']>;
+  rateCurrency: Maybe<Scalars['String']['output']>;
+  timezone: Maybe<Scalars['String']['output']>;
+  zoomLink: Maybe<Scalars['String']['output']>;
 };
 
 export type TeacherProfileResult = {
@@ -3513,6 +3569,7 @@ export type User = {
   notificationCount: Maybe<Scalars['Int']['output']>;
   permissions: Maybe<Array<AppPermission>>;
   role: Maybe<Scalars['String']['output']>;
+  teacherId: Maybe<Scalars['String']['output']>;
   updatedAt: Maybe<Scalars['DateTime']['output']>;
 };
 

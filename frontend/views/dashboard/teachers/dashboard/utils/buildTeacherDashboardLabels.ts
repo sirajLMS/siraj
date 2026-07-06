@@ -196,6 +196,10 @@ export function buildTeacherDashboardLabels(
     errors: buildErrorLabels(t),
     manualClassEntry: buildManualClassEntryLabels(t),
     supportRequestSubmitted: t.raw("supportRequestSubmitted") as string,
+    rules: {
+      pageTitle: t("rules.pageTitle"),
+      pageSubtitle: t("rules.pageSubtitle"),
+    },
     instanceStatusLabels,
   };
 }

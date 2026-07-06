@@ -98,7 +98,7 @@ export function FutureScheduleContainer({ teacherId }: Readonly<FutureScheduleCo
     : null;
 
   return (
-    <RequirePermission permissions={[AppPermission.ScheduleFilterAdvanced]}>
+    <RequirePermission permissions={[AppPermission.ScheduleViewAssigned]}>
       <FutureScheduleView
         classes={classes}
         leaveQuotaUsed={schedule.leaveQuotaUsed ?? 0}

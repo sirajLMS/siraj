@@ -130,6 +130,8 @@ export type AppPermission =
   | 'TEACHERS_LIST'
   | 'TEACHERS_MANAGE_SCHEDULE'
   | 'TEACHER_VIEW_DASHBOARD'
+  | 'TEACHER_VIEW_OWN_PROFILE'
+  | 'TEACHER_VIEW_STUDENTS'
   | 'TEST_CUSTOM_ALT'
   | 'TEST_CUSTOM_ONLY'
   | 'TEST_SYSTEM_ONLY'
@@ -898,7 +900,7 @@ export type UserOverrideInput = {
   state: OverrideState;
 };
 
-export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
+export type MeQuery_me_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
 
 export type MeQuery_Query = { me: MeQuery_me_User | null };
 
@@ -908,7 +910,7 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = MeQuery_Query;
 
-export type UserQuery_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
+export type UserQuery_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
 
 export type UserQuery_Query = { user: UserQuery_user_User | null };
 
@@ -920,7 +922,7 @@ export type UserQueryVariables = Exact<{
 
 export type UserQuery = UserQuery_Query;
 
-export type UsersQuery_users_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
+export type UsersQuery_users_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
 
 export type UsersQuery_Query = { users: Array<UsersQuery_users_User> | null };
 
@@ -930,7 +932,7 @@ export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type UsersQuery = UsersQuery_Query;
 
-export type LoginMutation_login_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
+export type LoginMutation_login_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
 
 export type LoginMutation_login_LoginResponse = { token: string | null, user: LoginMutation_login_LoginResponse_user_User | null };
 
@@ -944,7 +946,7 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = LoginMutation_Mutation;
 
-export type DemoLoginMutation_demoLogin_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
+export type DemoLoginMutation_demoLogin_LoginResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
 
 export type DemoLoginMutation_demoLogin_LoginResponse = { token: string | null, user: DemoLoginMutation_demoLogin_LoginResponse_user_User | null };
 
@@ -966,7 +968,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type LogoutMutation = LogoutMutation_Mutation;
 
-export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
+export type RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User = { createdAt: string | null, email: string | null, emailVerifiedAt: string | null, id: string | null, name: string | null, updatedAt: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
 
 export type RefreshTokenMutation_refreshToken_RefreshTokenResponse = { token: string | null, user: RefreshTokenMutation_refreshToken_RefreshTokenResponse_user_User | null };
 
@@ -992,7 +994,7 @@ export type ImpersonationStatusQueryVariables = Exact<{ [key: string]: never; }>
 
 export type ImpersonationStatusQuery = ImpersonationStatusQuery_Query;
 
-export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User = { id: string | null, name: string | null, email: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null };
+export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User = { id: string | null, name: string | null, email: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null };
 
 export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse = { token: string | null, expiresAt: string | null, impersonationSessionId: string | null, targetUser: StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User | null };
 
@@ -2076,7 +2078,7 @@ export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardSch
 
 export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_teacher_DailyScheduleListUserItem = { id: string | null, name: string | null };
 
-export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, student: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, duration: number | null, scheduledStartAt: string | null, scheduledEndAt: string | null, outcome: Types.ClassOutcome | null, executionState: Types.ClassExecutionState | null, student: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_student_DailyScheduleListUserItem | null, teacher: AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList_teacher_DailyScheduleListUserItem | null };
 
 export type AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -2480,7 +2482,7 @@ export type SuggestionContributorStatsQuery = SuggestionContributorStatsQuery_Qu
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics = { total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 
-export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, zoomMeetingUrl: string | null, yourTimeFormatted: string | null };
+export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, zoomMeetingUrl: string | null, yourTimeFormatted: string | null };
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem = { id: string | null, title: string | null, type: string | null };
 
@@ -2599,6 +2601,40 @@ export type CreateTeacherMutationVariables = Exact<{
 
 
 export type CreateTeacherMutation = CreateTeacherMutation_Mutation;
+
+export type TeacherAssignedStudentsQuery_teacherAssignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent = { id: string | null, name: string | null, status: Types.StudentStatus | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null };
+
+export type TeacherAssignedStudentsQuery_teacherAssignedStudents_TeacherAssignedStudentsResult = { id: string | null, totalCount: number | null, rows: Array<TeacherAssignedStudentsQuery_teacherAssignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent> | null };
+
+export type TeacherAssignedStudentsQuery_Query = { teacherAssignedStudents: TeacherAssignedStudentsQuery_teacherAssignedStudents_TeacherAssignedStudentsResult | null };
+
+
+export type TeacherAssignedStudentsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TeacherAssignedStudentsQuery = TeacherAssignedStudentsQuery_Query;
+
+export type TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: string | null, paymentMethod: Types.PaymentMethod | null, zoomLink: string | null };
+
+export type TeacherOwnProfileQuery_Query = { teacherOwnProfile: TeacherOwnProfileQuery_teacherOwnProfile_TeacherOwnProfile | null };
+
+
+export type TeacherOwnProfileQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TeacherOwnProfileQuery = TeacherOwnProfileQuery_Query;
+
+export type TeacherAssignedClassesQuery_teacherAssignedClasses_TeacherAssignedClassesResult_rows_TeacherAssignedClass = { id: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null };
+
+export type TeacherAssignedClassesQuery_teacherAssignedClasses_TeacherAssignedClassesResult = { id: string | null, totalCount: number | null, rows: Array<TeacherAssignedClassesQuery_teacherAssignedClasses_TeacherAssignedClassesResult_rows_TeacherAssignedClass> | null };
+
+export type TeacherAssignedClassesQuery_Query = { teacherAssignedClasses: TeacherAssignedClassesQuery_teacherAssignedClasses_TeacherAssignedClassesResult | null };
+
+
+export type TeacherAssignedClassesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TeacherAssignedClassesQuery = TeacherAssignedClassesQuery_Query;
 
 export type TeachersQuery_teachers_TeacherSimple = { id: string | null, name: string | null };
 
