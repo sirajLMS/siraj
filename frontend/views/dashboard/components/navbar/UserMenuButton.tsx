@@ -11,7 +11,6 @@ import { useAuth } from "@/frontend/hooks/useAuth";
 import { useImpersonation } from "@/frontend/hooks/useImpersonation";
 import { usePermissionGroupSimulation } from "@/frontend/hooks/usePermissionGroupSimulation";
 import { useUserStore } from "@/frontend/stores/userStore";
-import { SystemPermissionGroupSlug, UserRole } from "@/shared/lib/enum";
 
 export interface UserInfoSlotProps {
   readonly name: string;
@@ -160,7 +159,7 @@ export function UserMenuButton({
   const tCommon = useTranslations("common");
   const tImpersonation = useTranslations("auth.impersonation");
   const tGroupSimulation = useTranslations("auth.groupSimulation");
-  const currentUser = useUserStore(state => state.user);
+  const actorIsSuperAdmin = useUserStore(state => state.actorIsSuperAdmin);
   const {
     isImpersonating,
     status: impersonationStatus,
@@ -180,8 +179,7 @@ export function UserMenuButton({
   const open = Boolean(anchorEl);
   const groupMenuOpen = Boolean(groupMenuAnchor);
 
-  const isSuperAdmin = currentUser?.role === UserRole.SUPER_ADMIN;
-  const canSwitchRoles = !isImpersonating && (isSimulatingGroup || isSuperAdmin);
+  const canSwitchRoles = !isImpersonating && (isSimulatingGroup || actorIsSuperAdmin);
   const showGroupSimulationEntry = canSwitchRoles;
 
   const { data: groupsData, loading: groupsLoading } = useQuery(simulatablePermissionGroupsQueryDocument, {
@@ -191,14 +189,11 @@ export function UserMenuButton({
 
   const simulatableGroups = useMemo(() => {
     const groups = groupsData?.simulatablePermissionGroups ?? [];
-    const filtered = canSwitchRoles
-      ? groups.filter(group => group.slug !== SystemPermissionGroupSlug.SUPER_ADMIN)
-      : groups;
     if (isSimulatingGroup && simulationStatus?.groupSlug) {
-      return filtered.filter(group => group.slug !== simulationStatus.groupSlug);
+      return groups.filter(group => group.slug !== simulationStatus.groupSlug);
     }
-    return filtered;
-  }, [groupsData?.simulatablePermissionGroups, canSwitchRoles, isSimulatingGroup, simulationStatus?.groupSlug]);
+    return groups;
+  }, [groupsData?.simulatablePermissionGroups, isSimulatingGroup, simulationStatus?.groupSlug]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

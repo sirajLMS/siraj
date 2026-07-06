@@ -115,6 +115,7 @@ function StoryShell({ mocks, children }: Readonly<{ mocks: Array<Record<string, 
     avatarUrl: "",
     permissions: [],
     notificationCount: 0,
+    actorIsSuperAdmin: true,
   });
 
   return <MockedProvider mocks={mocks as never}>{children}</MockedProvider>;

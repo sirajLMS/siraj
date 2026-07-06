@@ -16,6 +16,7 @@ function isFrontendPermission(key: string): key is AppPermission {
 
 export function UserStoreInitializer({ userProfile }: UserStoreInitializerProps) {
   const setUser = useUserStore(state => state.setUser);
+  const setActorIsSuperAdmin = useUserStore(state => state.setActorIsSuperAdmin);
   const permissions = userProfile.permissions
     .map(p => {
       const entry = Object.entries(BackendAppPermission).find(([_, val]) => val === p);
@@ -24,6 +25,7 @@ export function UserStoreInitializer({ userProfile }: UserStoreInitializerProps)
     .filter(isFrontendPermission);
 
   useEffect(() => {
+    setActorIsSuperAdmin(userProfile.isSuperAdmin);
     setUser({
       id: userProfile.id,
       name: userProfile.name,
@@ -38,7 +40,7 @@ export function UserStoreInitializer({ userProfile }: UserStoreInitializerProps)
       teacherId: userProfile.teacherId,
       parentId: userProfile.parentId,
     });
-  }, [userProfile, setUser, permissions]);
+  }, [userProfile, setUser, setActorIsSuperAdmin, permissions]);
 
   return null;
 }

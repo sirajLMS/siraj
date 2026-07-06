@@ -8,7 +8,10 @@ export interface UserState {
   avatarUrl: string;
   permissions: readonly AppPermission[];
   notificationCount: number;
+  /** Real account flag — stays true while simulating another role. */
+  actorIsSuperAdmin: boolean;
   setUser: (user: User | null) => void;
+  setActorIsSuperAdmin: (actorIsSuperAdmin: boolean) => void;
   hasPermission: (permission: AppPermission) => boolean;
 }
 
@@ -19,6 +22,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   avatarUrl: "",
   permissions: [],
   notificationCount: 0,
+  actorIsSuperAdmin: false,
   setUser: user =>
     set({
       user,
@@ -28,6 +32,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       permissions: user?.permissions ?? [],
       notificationCount: user?.notificationCount || 0,
     }),
+  setActorIsSuperAdmin: actorIsSuperAdmin => set({ actorIsSuperAdmin }),
   hasPermission: permission => {
     const permissions = get().user?.permissions || get().permissions || [];
     return permissions.includes(permission);

@@ -13,6 +13,8 @@ import { SystemPermissionGroupSlug } from "@/shared/lib/enum";
 
 export const GROUP_SIMULATION_TTL_MS = 30 * 60 * 1000;
 
+const NON_SIMULATABLE_GROUP_SLUGS = new Set<string>(["system_automated"]);
+
 const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
 
 function sanitizeIpAddress(ip: string | null | undefined): string | null {
@@ -83,17 +85,16 @@ export async function clearOptionalRedisGroupSimulation(rawSessionId: string): P
 export namespace PermissionGroupSimulationService {
   async function getOwnedGroupSlugs(actorUserId: string): Promise<Set<string>> {
     const actorContext = await PermissionsService.getUserContext(actorUserId);
-    const ownedSlugs = new Set(actorContext.permissionGroups);
     if (actorContext.isSuperAdmin) {
-      ownedSlugs.add(SystemPermissionGroupSlug.SUPER_ADMIN);
+      return new Set([SystemPermissionGroupSlug.SUPER_ADMIN]);
     }
-    return ownedSlugs;
+    return new Set(actorContext.permissionGroups);
   }
 
   export async function listSimulatableGroups(
     actorUserId: string
   ): Promise<Types.SimulatablePermissionGroupReturnType[]> {
-    const ownedSlugs = await getOwnedGroupSlugs(actorUserId);
+    const actorContext = await PermissionsService.getUserContext(actorUserId);
 
     const groups = await db
       .select({
@@ -104,8 +105,17 @@ export namespace PermissionGroupSimulationService {
       .from(permissionGroups)
       .orderBy(asc(permissionGroups.name));
 
+    const excludedSlugs = new Set(NON_SIMULATABLE_GROUP_SLUGS);
+    if (actorContext.isSuperAdmin) {
+      excludedSlugs.add(SystemPermissionGroupSlug.SUPER_ADMIN);
+    } else {
+      for (const slug of actorContext.permissionGroups) {
+        excludedSlugs.add(slug);
+      }
+    }
+
     return groups
-      .filter(group => !ownedSlugs.has(group.slug))
+      .filter(group => !excludedSlugs.has(group.slug))
       .map(group => ({
         slug: group.slug,
         name: group.name,
